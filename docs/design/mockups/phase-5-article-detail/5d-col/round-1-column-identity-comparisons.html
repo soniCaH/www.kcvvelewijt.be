@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-col · Announcement variant identity</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-cream-deep: #ddd4ba;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --color-tape-warm: rgba(217, 184, 90, 0.85);
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --container-page: 1120px;
+        --filter-photo-newsprint: sepia(0.06) saturate(0.94) hue-rotate(-4deg)
+          contrast(1.02) brightness(1.01);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: var(--container-page);
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 16px 22px 14px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        max-width: 52ch;
+        font-size: 12px;
+        line-height: 1.55;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        max-width: 32ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 36px 0;
+      }
+
+      /* ============================================================
+         Hero — Phase 3-b EditorialHeroShell (60/40 grid)
+         ============================================================ */
+      .hero {
+        max-width: var(--container-page);
+        margin: 0 auto 28px;
+        padding: 0 28px;
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 28px;
+        align-items: start;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .hero .editorial {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+      }
+      .hero .kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .hero .kicker .pill {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero .kicker .dot {
+        opacity: 0.45;
+      }
+      .hero h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 44px;
+        line-height: 1.05;
+        letter-spacing: -0.018em;
+        margin: 12px 0 8px;
+        color: var(--color-ink);
+        hyphens: auto;
+      }
+      .hero h1 .accent {
+        color: var(--color-jersey-deep);
+      }
+      .hero .lead {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 18px;
+        line-height: 1.5;
+        max-width: 50ch;
+        opacity: 0.92;
+        margin: 0;
+      }
+      .hero .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .hero .cover {
+        position: relative;
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 8px;
+        transform: rotate(-1.4deg);
+      }
+      .hero .cover .tape {
+        position: absolute;
+        top: -10px;
+        left: 14px;
+        width: 70px;
+        height: 16px;
+        background: var(--color-tape-warm);
+        transform: rotate(-3deg);
+      }
+      .hero .cover .photo {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(
+          135deg,
+          #2a4d3a 0%,
+          #547a5e 50%,
+          #c1a04a 100%
+        );
+        overflow: hidden;
+      }
+      .hero .cover .photo::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        filter: var(--filter-photo-newsprint);
+        mix-blend-mode: multiply;
+        opacity: 0.4;
+        background: inherit;
+      }
+      .hero .cover .photo::after {
+        content: "cover · announcement";
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: rgba(26, 26, 26, 0.85);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* ============================================================
+         Body — prose width
+         ============================================================ */
+      .article-body {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+        position: relative;
+      }
+      .article-body p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.65;
+        margin: 0 0 18px;
+        color: var(--color-ink);
+      }
+      .article-body p:last-child {
+        margin-bottom: 0;
+      }
+      .article-body p.dropcap-paragraph::first-letter {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 0.85;
+        float: left;
+        margin: 4px 8px 0 0;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         OPTION A — Monogram author chip beside byline
+         ============================================================ */
+      .byline-mono {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      /* ============================================================
+         OPTION B — Jersey-deep accent rule beside body
+         ============================================================ */
+      .article-body-side-rule {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+        position: relative;
+      }
+      .article-body-side-rule::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8px;
+        width: 4px;
+        background: var(--color-jersey-deep);
+      }
+      .article-body-side-rule .article-body {
+        padding-left: 20px;
+      }
+      @media (max-width: 720px) {
+        .article-body-side-rule::before {
+          left: 16px;
+        }
+        .article-body-side-rule .article-body {
+          padding-left: 28px;
+        }
+      }
+
+      /* ============================================================
+         End-of-article fixture: EndMark + ArticleCredits
+         ============================================================ */
+      .endmark {
+        text-align: center;
+        font-size: 26px;
+        color: var(--color-jersey-deep);
+        margin: 28px 0 0;
+        line-height: 1;
+      }
+      .article-credits {
+        max-width: var(--container-prose);
+        margin: 32px auto 0;
+        padding: 22px 28px;
+        text-align: center;
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .article-credits .row {
+        display: block;
+        padding: 3px 0;
+      }
+      .article-credits .credits-key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-right: 10px;
+      }
+      .article-credits .credits-name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--color-ink);
+      }
+      .article-credits .credits-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-col · Round 1 · #1788</p>
+      <h1>
+        Announcement variant identity — author chip / accent rule / default
+      </h1>
+      <p>
+        Drill resolves the visual identity for the
+        <code>announcement</code> articleType.
+        <strong>Path 2 locked 2026-05-18:</strong> all announcements (news +
+        columns) render the same; no column-vs-announcement discriminator in the
+        schema, so the lock applies uniformly. The original 4-option set has
+        been narrowed to 3 (Option B from the issue body, "<code
+          >&lt;MonoLabel&gt;</code
+        >
+        COLUMN kicker", required a data signal we don't have — dropped per the
+        data-audit principle).
+      </p>
+      <p>
+        Same article fixture (3-paragraph piece about training schedule changes)
+        rendered across the 3 treatments. Phase 3-b hero shell + ArticleCredits
+        footer identical across options; only the body identity treatment
+        varies.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option A · Monogram author chip beside byline</div>
+            <div class="name">
+              Reuses 5.d2 monogram primitive — zero new data
+            </div>
+            <div class="desc">
+              Small monogram disc (24px) inline with the byline meta row in the
+              hero, derived from
+              <code>article.author[0]</code> — same vocabulary as the locked
+              Q&amp;A row avatars. Personalises every announcement with whoever
+              wrote it. Drops gracefully when <code>author</code> is blank (no
+              chip rendered).
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ 5.d2 monogram primitive<br />
+            ✓ <code>article.author</code> (5.d-int addition)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            inline placement (current locked usage: QARow + PullQuote)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="hero">
+            <div class="editorial">
+              <p class="kicker">
+                <span class="pill">Announcement</span><span class="dot">·</span
+                ><span>4 min</span>
+              </p>
+              <h1>Het rooster, <span class="accent">opnieuw.</span></h1>
+              <p class="lead">
+                Het voorseizoen schuift twee weken naar voren. De jeugd start
+                eerder, de fanionploeg twee weken later. Hier het hoe en waarom.
+              </p>
+              <p class="byline">
+                <span class="byline-mono">T</span> Door Tom De Smet · 17 mei
+                2026
+              </p>
+            </div>
+            <figure class="cover">
+              <span class="tape"></span>
+              <div class="photo"></div>
+            </figure>
+          </div>
+          <div class="article-body">
+            <p class="dropcap-paragraph">
+              Eens om de zoveel seizoenen zetten we het rooster opnieuw. Niet
+              omdat het oude niet werkte — het werkte goed — maar omdat de jeugd
+              groeit, de fanionploeg ouder wordt, en de velden op zaterdag op
+              twee plaatsen tegelijk gevraagd worden.
+            </p>
+            <p>
+              Wat verandert: het voorseizoen begint op 15 juli voor de jeugd, op
+              1 augustus voor de fanionploeg. De vriendschappelijke wedstrijden
+              verschuiven mee. Het programma voor augustus staat klaar op de
+              teams-pagina.
+            </p>
+            <p>Vragen? Bij Wim. Hij weet het.</p>
+            <p class="endmark">★</p>
+          </div>
+          <div class="article-credits">
+            <div class="row">
+              <span class="credits-key">Door</span
+              ><span class="credits-name">Tom De Smet</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Gepubliceerd</span
+              ><span class="credits-meta">17 mei 2026</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">
+              Option B · Jersey-deep accent rule beside body
+            </div>
+            <div class="name">
+              4px vertical jersey-deep rule along the left edge of the prose
+              container
+            </div>
+            <div class="desc">
+              Continuous 4px vertical bar in
+              <code>--color-jersey-deep</code> runs alongside the body column
+              for its full height. Reads as a quiet "branded marker" — no
+              typography changes. Renders on every announcement.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>--color-jersey-deep</code><br />
+            ✓ Prose width unchanged<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            "side-rule" treatment — first article surface with an asymmetric
+            vertical marker on the body
+          </div>
+        </header>
+        <div class="surface">
+          <div class="hero">
+            <div class="editorial">
+              <p class="kicker">
+                <span class="pill">Announcement</span><span class="dot">·</span
+                ><span>4 min</span>
+              </p>
+              <h1>Het rooster, <span class="accent">opnieuw.</span></h1>
+              <p class="lead">
+                Het voorseizoen schuift twee weken naar voren. De jeugd start
+                eerder, de fanionploeg twee weken later. Hier het hoe en waarom.
+              </p>
+              <p class="byline">Door Tom De Smet · 17 mei 2026</p>
+            </div>
+            <figure class="cover">
+              <span class="tape"></span>
+              <div class="photo"></div>
+            </figure>
+          </div>
+          <div class="article-body-side-rule">
+            <div class="article-body" style="margin: 0; padding: 0">
+              <p class="dropcap-paragraph">
+                Eens om de zoveel seizoenen zetten we het rooster opnieuw. Niet
+                omdat het oude niet werkte — het werkte goed — maar omdat de
+                jeugd groeit, de fanionploeg ouder wordt, en de velden op
+                zaterdag op twee plaatsen tegelijk gevraagd worden.
+              </p>
+              <p>
+                Wat verandert: het voorseizoen begint op 15 juli voor de jeugd,
+                op 1 augustus voor de fanionploeg. De vriendschappelijke
+                wedstrijden verschuiven mee. Het programma voor augustus staat
+                klaar op de teams-pagina.
+              </p>
+              <p>Vragen? Bij Wim. Hij weet het.</p>
+              <p class="endmark">★</p>
+            </div>
+          </div>
+          <div class="article-credits">
+            <div class="row">
+              <span class="credits-key">Door</span
+              ><span class="credits-name">Tom De Smet</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Gepubliceerd</span
+              ><span class="credits-meta">17 mei 2026</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">
+              Option C · Default — no variant-specific touch
+            </div>
+            <div class="name">Renders identically to the shared shell</div>
+            <div class="desc">
+              No additional chrome. Announcement just consumes the locked Phase
+              3-b hero + Phase 1 DropCap + ArticleCredits footer. Lowest cost;
+              consistent with the "announcement is the catch-all variant"
+              reading of the schema.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Phase 3-b hero shell<br />
+            ✓ Phase 1 DropCap (single size)<br />
+            ✓ ArticleCredits (5.d-int B lock)<br />
+            ✓ Zero new chrome
+          </div>
+        </header>
+        <div class="surface">
+          <div class="hero">
+            <div class="editorial">
+              <p class="kicker">
+                <span class="pill">Announcement</span><span class="dot">·</span
+                ><span>4 min</span>
+              </p>
+              <h1>Het rooster, <span class="accent">opnieuw.</span></h1>
+              <p class="lead">
+                Het voorseizoen schuift twee weken naar voren. De jeugd start
+                eerder, de fanionploeg twee weken later. Hier het hoe en waarom.
+              </p>
+              <p class="byline">Door Tom De Smet · 17 mei 2026</p>
+            </div>
+            <figure class="cover">
+              <span class="tape"></span>
+              <div class="photo"></div>
+            </figure>
+          </div>
+          <div class="article-body">
+            <p class="dropcap-paragraph">
+              Eens om de zoveel seizoenen zetten we het rooster opnieuw. Niet
+              omdat het oude niet werkte — het werkte goed — maar omdat de jeugd
+              groeit, de fanionploeg ouder wordt, en de velden op zaterdag op
+              twee plaatsen tegelijk gevraagd worden.
+            </p>
+            <p>
+              Wat verandert: het voorseizoen begint op 15 juli voor de jeugd, op
+              1 augustus voor de fanionploeg. De vriendschappelijke wedstrijden
+              verschuiven mee. Het programma voor augustus staat klaar op de
+              teams-pagina.
+            </p>
+            <p>Vragen? Bij Wim. Hij weet het.</p>
+            <p class="endmark">★</p>
+          </div>
+          <div class="article-credits">
+            <div class="row">
+              <span class="credits-key">Door</span
+              ><span class="credits-name">Tom De Smet</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Gepubliceerd</span
+              ><span class="credits-meta">17 mei 2026</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
