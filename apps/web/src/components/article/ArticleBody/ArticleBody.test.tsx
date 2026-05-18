@@ -431,6 +431,19 @@ describe("<ArticleBody>", () => {
       );
     });
 
+    it("skips empty-playerName transferFact blocks (no hollow card shell)", () => {
+      const content = [
+        paragraph("Lead-in."),
+        transferFactBlock({ _key: "tf-empty", playerName: "" }),
+        paragraph("Closing."),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(container.querySelector("[data-transfer-fact-group]")).toBeNull();
+      expect(
+        container.querySelector('[data-transfer-fact-card="true"]'),
+      ).toBeNull();
+    });
+
     it("renders <EndMark> for a body that contains only a non-empty transferFact", () => {
       const content = [transferFactBlock({ playerName: "Solo transfer" })];
       const { container } = render(<ArticleBody content={content} />);

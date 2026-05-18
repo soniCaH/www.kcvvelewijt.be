@@ -333,6 +333,69 @@ const SINGLE_TRANSFER_FACT_CONTENT: PortableTextBlock[] = [
   ),
 ];
 
+// Two-consecutive transferFacts — even-count branch of the segmenter.
+// Both cards render at single-column width inside a 2-up grid (no
+// trailing-odd full-width).
+const TWO_CONSECUTIVE_TRANSFER_FACTS_CONTENT: PortableTextBlock[] = [
+  paragraph("Twee nieuwe gezichten op de Driesstraat.", "p-two-lead"),
+  transferFactBlock({
+    _key: "tf-two-1",
+    direction: "incoming",
+    playerName: "Lars Janssens",
+    position: "Vleugelaanvaller",
+    age: 20,
+    otherClubName: "Wespelaar",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-bleu.svg",
+    kcvvContext: "#7",
+  }),
+  transferFactBlock({
+    _key: "tf-two-2",
+    direction: "incoming",
+    playerName: "Tom Verhaegen",
+    position: "Doelman",
+    age: 25,
+    otherClubName: "Tienen",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-vert.svg",
+    kcvvContext: "#1",
+  }),
+];
+
+// Three-consecutive transferFacts — odd-count branch. First two cards
+// occupy the 2-up grid; the third (trailing odd) spans both columns and
+// reads as a centered 1-up block beneath the grid.
+const THREE_CONSECUTIVE_TRANSFER_FACTS_CONTENT: PortableTextBlock[] = [
+  paragraph("Drie aanwinsten ronden de winterperiode af.", "p-three-lead"),
+  transferFactBlock({
+    _key: "tf-three-1",
+    direction: "incoming",
+    playerName: "Sam De Coninck",
+    position: "Linksback",
+    age: 21,
+    otherClubName: "Aarschot",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-rouge.svg",
+    kcvvContext: "#3",
+  }),
+  transferFactBlock({
+    _key: "tf-three-2",
+    direction: "incoming",
+    playerName: "Jelle Maes",
+    position: "Spits",
+    age: 23,
+    otherClubName: "Boortmeerbeek",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-bleu.svg",
+    kcvvContext: "#10",
+  }),
+  transferFactBlock({
+    _key: "tf-three-3",
+    direction: "extension",
+    playerName: "Niels Geukens",
+    position: "Aanvoerder",
+    age: 26,
+    kcvvContext: "#11",
+    until: "juni 2028",
+  }),
+];
+
 export const Short: Story = {
   args: {
     content: SHORT_CONTENT,
@@ -430,6 +493,37 @@ export const WithSingleTransferFact: Story = {
       description: {
         story:
           "Isolated `transferFact` between paragraphs → single 1-up card. The segmenter doesn't promote a lone fact into the grid layout.",
+      },
+    },
+  },
+};
+
+// Two consecutive transferFacts — even-count branch of the segmenter.
+export const WithTwoConsecutiveTransferFacts: Story = {
+  args: {
+    content: TWO_CONSECUTIVE_TRANSFER_FACTS_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Two consecutive `transferFact` blocks → 2-up grid with both cards at single-column width. Verifies the even-count branch of the adjacency rule (no trailing-odd full-width).",
+      },
+    },
+  },
+};
+
+// Three consecutive transferFacts — odd-count branch. The trailing card
+// spans both columns to read as a centered 1-up block beneath the grid.
+export const WithThreeConsecutiveTransferFacts: Story = {
+  args: {
+    content: THREE_CONSECUTIVE_TRANSFER_FACTS_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Three consecutive `transferFact` blocks → 2-up grid with the first two cards in a row and the third card spanning both columns (trailing-odd full-width). Exercises the `md:col-span-2` branch of `<TransferFactGroup>`.",
       },
     },
   },

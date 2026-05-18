@@ -181,8 +181,13 @@ function buildSegments(blocks: PortableTextBlock[]): ArticleBodySegment[] {
 
   for (const block of blocks) {
     if (block._type === "transferFact") {
+      const fact = block as TransferFactValue;
+      // Skip empty facts so an unfinished editor draft doesn't render a
+      // hollow card shell. Matches the `blockHasRenderableOutput` guard
+      // that already controls EndMark.
+      if (!fact.playerName?.trim()) continue;
       flushPt();
-      tfBuffer.push(block as TransferFactValue);
+      tfBuffer.push(fact);
       continue;
     }
     flushTf();

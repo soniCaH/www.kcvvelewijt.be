@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Compact body-level renderer for additional `transferFact` PT blocks (per 5.d-tra lock). The FIRST transferFact in a transfer-type article powers the hero via `<TransferFactStrip>` (Phase 3-b R1.5) — this card renders every subsequent transferFact. Adjacency-aware grouping (consecutive → 2-up grid, isolated → 1-up) is owned by `<ArticleBody>`'s segmenter; the card itself is layout-agnostic. When `otherClubLogoUrl` is present, the route line prefixes the other-club name with a 16px inline crest.",
+          "Compact body-level renderer for additional `transferFact` PT blocks (per 5.d-tra lock). The FIRST transferFact in a transfer-type article powers the hero via `<TransferFactStrip>` (Phase 3-b R1.5) — this card renders every subsequent transferFact. Adjacency-aware grouping (consecutive → 2-up grid, isolated → 1-up) is owned by `<ArticleBody>`'s segmenter; the card itself is layout-agnostic. When `otherClubLogoUrl` is present, the route line prefixes the other-club name with a 12px inline crest.",
       },
     },
   },
