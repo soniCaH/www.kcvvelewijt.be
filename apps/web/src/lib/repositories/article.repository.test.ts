@@ -413,6 +413,28 @@ describe("ArticleRepository", () => {
         "https://cdn.sanity.io/cover-portrait.webp",
       );
       expect(a.body).toEqual(row.body);
+      // 5.B.int (#1795) — author + photographer are GROQ-coalesced to ""
+      // on the row; the repository passes them through unchanged.
+      expect(a.author).toBe("");
+      expect(a.photographer).toBe("");
+    });
+
+    it("maps populated author + photographer fields through findBySlug", async () => {
+      const row = makeArticleDetailRow({
+        author: "Tom De Smet",
+        photographer: "An Verheyden",
+      });
+      mockFetch.mockResolvedValueOnce(row);
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test-article-detail");
+        }),
+      );
+
+      expect(result?.author).toBe("Tom De Smet");
+      expect(result?.photographer).toBe("An Verheyden");
     });
 
     it("round-trips a populated player subject unchanged inside subjects[]", async () => {

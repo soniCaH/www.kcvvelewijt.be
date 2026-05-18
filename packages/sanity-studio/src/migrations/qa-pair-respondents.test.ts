@@ -97,7 +97,7 @@ describe('migrateQaPairRespondents', () => {
     ])
   })
 
-  it('omits respondentKey from the new entry + unset list when the legacy pair had none', () => {
+  it('omits respondentKey from the new entry when the legacy pair had none, but still unsets the legacy field', () => {
     const doc: ArticleWithQaDoc = {
       _id: 'needs-migration-no-key',
       body: [
@@ -128,6 +128,45 @@ describe('migrateQaPairRespondents', () => {
         ]),
       ),
       at('body[_key=="qb-1"].pairs[_key=="p-1"].answer', unset()),
+      // Always unset the legacy respondentKey even when the source had
+      // none (might be stored as `""`, which Sanity treats as a real value).
+      at('body[_key=="qb-1"].pairs[_key=="p-1"].respondentKey', unset()),
+    ])
+  })
+
+  it('treats an empty-string respondentKey like a missing one — omits from new entry, unsets the legacy field', () => {
+    const doc: ArticleWithQaDoc = {
+      _id: 'empty-respondent-key',
+      body: [
+        {
+          _type: 'qaBlock',
+          _key: 'qb-1',
+          pairs: [
+            {
+              _key: 'p-1',
+              question: 'Q?',
+              answer: SAMPLE_ANSWER,
+              respondentKey: '',
+              tag: 'standard',
+            },
+          ],
+        },
+      ],
+    }
+    const patches = migrateQaPairRespondents(doc, stableKey)
+    expect(patches).toEqual([
+      at(
+        'body[_key=="qb-1"].pairs[_key=="p-1"].respondents',
+        set([
+          {
+            _type: 'qaPairRespondent',
+            _key: 'fixed-key',
+            answer: SAMPLE_ANSWER,
+          },
+        ]),
+      ),
+      at('body[_key=="qb-1"].pairs[_key=="p-1"].answer', unset()),
+      at('body[_key=="qb-1"].pairs[_key=="p-1"].respondentKey', unset()),
     ])
   })
 

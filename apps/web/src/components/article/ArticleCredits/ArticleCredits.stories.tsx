@@ -40,7 +40,7 @@ const TWO_SUBJECTS: IndexedSubject[] = [
   },
 ];
 
-const ONE_SUBJECT: IndexedSubject[] = [TWO_SUBJECTS[0]!];
+const ONE_SUBJECT: IndexedSubject[] = TWO_SUBJECTS.slice(0, 1);
 
 const ISO_DATE = "2026-05-17T12:00:00Z";
 

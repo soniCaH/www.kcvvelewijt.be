@@ -123,9 +123,12 @@ export function migrateQaPairRespondents(
       const pathRoot = `body[_key=="${blockKey}"].pairs[_key=="${pair._key}"]`
       patches.push(at(`${pathRoot}.respondents`, set([newEntry])))
       patches.push(at(`${pathRoot}.answer`, unset()))
-      if (respondentKey) {
-        patches.push(at(`${pathRoot}.respondentKey`, unset()))
-      }
+      // Always unset the legacy `respondentKey` field, even when it was
+      // missing/empty on the source doc. Sanity stores `""` as a real
+      // string value distinct from "not set", so a conditional unset
+      // (gated on `respondentKey` being non-empty) would leave the
+      // empty-string variant lingering in the document.
+      patches.push(at(`${pathRoot}.respondentKey`, unset()))
     }
   }
 
