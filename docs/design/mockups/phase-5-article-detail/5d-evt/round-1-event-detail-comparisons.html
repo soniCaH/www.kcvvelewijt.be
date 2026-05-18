@@ -1,0 +1,1319 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Phase 5 · Drill 5.d-evt · Event BODY detail block (hero+strip locked)
+    </title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-cream-deep: #ddd4ba;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --color-tape-warm: rgba(217, 184, 90, 0.85);
+        --color-tape-jersey: rgba(31, 95, 63, 0.82);
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --container-page: 1120px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: var(--container-page);
+        margin: 0 auto 24px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      /* Scope banner */
+      .scope-banner {
+        max-width: var(--container-page);
+        margin: 0 auto 28px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 18px 22px;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+      }
+      .scope-banner .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin: 0 0 4px;
+        opacity: 0.95;
+      }
+      .scope-banner h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 24px;
+        margin: 0 0 10px;
+      }
+      .scope-banner ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .scope-banner ul li {
+        padding: 2px 0;
+      }
+      .scope-banner ul li::before {
+        content: "→ ";
+        opacity: 0.7;
+      }
+      .scope-banner .check::before {
+        content: "✓ ";
+        color: #f0d36b;
+        opacity: 1;
+      }
+      .scope-banner .skip::before {
+        content: "✗ ";
+        color: #f0d36b;
+        opacity: 1;
+      }
+      .scope-banner code {
+        background: rgba(245, 239, 225, 0.18);
+        padding: 1px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+      }
+
+      .container {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 16px 22px 14px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        max-width: 52ch;
+        font-size: 12px;
+        line-height: 1.55;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        max-width: 32ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+      }
+
+      .region-label {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        padding: 14px 28px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .region-label.locked {
+        color: var(--color-ink-muted);
+      }
+      .region-label.review {
+        color: var(--color-jersey-deep);
+      }
+      .region-label .badge {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+      }
+      .region-label.locked .badge {
+        background: var(--color-cream-deep);
+        color: var(--color-ink-muted);
+        padding: 2px 6px;
+        border: 1px solid var(--color-ink-muted);
+      }
+      .region-label.review .badge {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 6px;
+      }
+      .region-locked-wrap {
+        opacity: 0.55;
+        filter: saturate(0.7);
+        padding-bottom: 16px;
+      }
+      .region-review-wrap {
+        padding: 4px 0 32px;
+        background: linear-gradient(
+          180deg,
+          rgba(31, 95, 63, 0.06) 0,
+          rgba(31, 95, 63, 0) 80px
+        );
+        border-top: 1px solid var(--color-jersey-deep);
+        position: relative;
+      }
+
+      /* Hero (typographic — locked Phase 3-b R1.5 event variant) */
+      .hero {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        padding: 8px 28px 16px;
+      }
+      .hero .kicker {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .hero .kicker .pill {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero .kicker .tag {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero .kicker .dot {
+        opacity: 0.45;
+      }
+      .hero h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 44px;
+        line-height: 1.05;
+        letter-spacing: -0.018em;
+        margin: 10px 0 4px;
+        color: var(--color-ink);
+      }
+      .hero h1 .accent {
+        color: var(--color-jersey-deep);
+      }
+      .hero .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .hero .byline-mono {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 11px;
+        line-height: 1;
+      }
+
+      /* EventStrip (locked Phase 3-b R1.5 — first eventFact compressed) */
+      .event-strip {
+        max-width: var(--container-page);
+        margin: 12px auto 0;
+        padding: 16px 28px;
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+        display: grid;
+        grid-template-columns: 92px 1fr auto;
+        gap: 22px;
+        align-items: center;
+      }
+      .date-block {
+        text-align: center;
+        font-family: ui-serif, Georgia, serif;
+        line-height: 1;
+      }
+      .date-block .month {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .date-block .day {
+        font-style: italic;
+        font-weight: 900;
+        font-size: 52px;
+        color: var(--color-jersey-deep);
+        margin: 2px 0;
+      }
+      .date-block .weekday {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .event-strip .meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+      .event-strip .meta .title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 22px;
+        line-height: 1.15;
+      }
+      .event-strip .meta .where {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .event-strip .meta .note {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.4;
+        color: var(--color-ink-soft);
+        margin-top: 2px;
+      }
+      .event-strip .cta {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 10px 16px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        text-decoration: none;
+      }
+
+      /* Body */
+      .article-body {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .article-body p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.65;
+        margin: 0 0 18px;
+      }
+      .article-body p.dropcap-paragraph::first-letter {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 0.85;
+        float: left;
+        margin: 4px 8px 0 0;
+        color: var(--color-ink);
+      }
+      .article-body h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 26px;
+        margin: 24px 0 12px;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         <EventDetailBlock> — full event detail card
+         Used by Options A / C / D (different placements)
+         ============================================================ */
+      .event-detail-block {
+        max-width: var(--container-prose);
+        margin: 0 auto 16px;
+        padding: 20px 22px;
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        position: relative;
+      }
+      .event-detail-block .tape {
+        position: absolute;
+        top: -8px;
+        left: 18px;
+        width: 70px;
+        height: 14px;
+        background: var(--color-tape-jersey);
+        transform: rotate(-3deg);
+      }
+      .event-detail-block .head {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .event-detail-block .head .date-block {
+        text-align: center;
+      }
+      .event-detail-block .head .date-block .day {
+        font-size: 36px;
+        margin: 0;
+      }
+      .event-detail-block .head .date-block .month,
+      .event-detail-block .head .date-block .weekday {
+        font-size: 9px;
+      }
+      .event-detail-block .head .title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 22px;
+        line-height: 1.15;
+      }
+      .event-detail-block .head .tag {
+        display: inline-block;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 6px;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .event-detail-block .sessions {
+        display: grid;
+        grid-template-columns: 80px auto 1fr;
+        gap: 6px 14px;
+        margin-bottom: 14px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+      }
+      .event-detail-block .sessions .day-key {
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .event-detail-block .sessions .day-val {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .event-detail-block .sessions .day-hours {
+        color: var(--color-ink-soft);
+      }
+      .event-detail-block .meta-row {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 4px 14px;
+        margin-bottom: 12px;
+      }
+      .event-detail-block .meta-row dt {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .event-detail-block .meta-row dd {
+        margin: 0;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 14px;
+      }
+      .event-detail-block .note {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 15px;
+        line-height: 1.5;
+        margin: 8px 0 14px;
+        color: var(--color-ink-soft);
+      }
+      .event-detail-block .cta {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 12px 22px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      /* Layout note callouts */
+      .layout-note {
+        max-width: var(--container-prose);
+        margin: 8px auto 14px;
+        padding: 6px 12px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+        background: var(--color-cream-deep);
+        border-left: 3px solid var(--color-jersey-deep);
+      }
+
+      /* Sticky CTA bar (Option B) */
+      .sticky-cta {
+        position: relative;
+        margin: 24px auto 16px;
+        max-width: var(--container-page);
+        padding: 14px 22px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 18px;
+        align-items: center;
+      }
+      .sticky-cta::before {
+        content: "↑ Mock: would be position: fixed bottom-of-viewport in production. Rendered inline here for the compare.";
+        position: absolute;
+        top: -20px;
+        left: 22px;
+        right: 22px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        color: var(--color-ink-muted);
+      }
+      .sticky-cta .left {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .sticky-cta .left .title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+      }
+      .sticky-cta .left .when {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+      .sticky-cta .cta {
+        background: var(--color-cream);
+        color: var(--color-jersey-deep);
+        padding: 10px 18px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        border: 2px solid var(--color-ink);
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      /* Option D sidebar layout */
+      .sidebar-shell {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: minmax(0, var(--container-prose)) 1fr;
+        gap: 36px;
+        padding: 0 28px;
+        align-items: start;
+      }
+      .sidebar-shell .body-col {
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar-shell .body-col .article-body {
+        padding: 0;
+        max-width: none;
+        margin: 0;
+      }
+      .sidebar-shell .sidebar {
+        position: sticky;
+        top: 24px;
+      }
+      .sidebar-shell .sidebar .event-detail-block {
+        max-width: none;
+        margin: 0;
+      }
+      @media (max-width: 880px) {
+        .sidebar-shell {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .sidebar-shell .sidebar {
+          position: static;
+        }
+      }
+
+      /* End-of-article fixture */
+      .endmark {
+        text-align: center;
+        font-size: 24px;
+        color: var(--color-jersey-deep);
+        margin: 24px 0 0;
+        line-height: 1;
+      }
+      .article-credits {
+        max-width: var(--container-prose);
+        margin: 28px auto 0;
+        padding: 20px 28px;
+        text-align: center;
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .article-credits .row {
+        display: block;
+        padding: 2px 0;
+      }
+      .article-credits .credits-key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-right: 10px;
+      }
+      .article-credits .credits-name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .article-credits .credits-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-evt · Round 1 · #1790</p>
+      <h1>Event body — full detail card placement (hero+strip locked)</h1>
+    </header>
+
+    <div class="scope-banner">
+      <p class="key">Reviewing</p>
+      <h2>Article body only — full event detail card placement</h2>
+      <ul>
+        <li class="check">
+          <strong>Body region:</strong> where the full event detail (sessions /
+          address / capacity / note / large CTA) lives — beyond the hero's
+          compressed EventStrip.
+        </li>
+        <li class="skip">
+          <strong>Hero region:</strong> typographic kicker + title (locked Phase
+          3-b R1.5 #1749). Identical across options.
+        </li>
+        <li class="skip">
+          <strong>EventStrip below hero:</strong> compressed date-block + title
+          + small CTA (locked Phase 3-b R1.5). Identical across options.
+        </li>
+        <li class="skip">
+          <strong>ArticleCredits footer:</strong> locked 5.d-int B. Identical
+          across options.
+        </li>
+      </ul>
+    </div>
+
+    <header class="page" style="margin-top: 0">
+      <p>
+        Fixture: <strong>Steakfestijn 2026</strong> — 3-day clubfeest event with
+        per-day sessions, address, capacity, ticket CTA, and note. Picked
+        because the sessions schedule (vrijdag 18:00–22:00 / zaterdag
+        17:00–23:00 / zondag 11:30–15:00) doesn't fit in the hero strip — it's
+        the kind of detail that justifies a body-level block. Simple single-day
+        events with no <code>sessions[]</code> may not need the detail block at
+        all (single-day + single time range is already in the strip).
+      </p>
+      <p>
+        <strong>Past-vs-upcoming behaviour</strong> is noted at the end of the
+        page — not a per-option variation but a sub-decision (overlay / badge /
+        full hide) for the locked option.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option A · After EndMark</div>
+            <div class="name">
+              <code>&lt;EventDetailBlock&gt;</code> at article end, between
+              EndMark and VerderLezenRow
+            </div>
+            <div class="desc">
+              Full detail block lives at the end of the body, just before the
+              Verder-lezen row. Reader finishes the prose, sees the closing
+              star, then gets the full event card with sessions, address,
+              capacity, and a large re-engagement CTA. Reads as "now act".
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing eventFact fields<br />
+            ✓ Mono caps key/value rows<br />
+            ✓ Italic serif title<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            <code>&lt;EventDetailBlock&gt;</code> component
+          </div>
+        </header>
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <p class="kicker">
+                <span class="pill">Event</span><span class="dot">·</span
+                ><span class="tag">Clubfeest</span>
+              </p>
+              <h1>
+                Steakfestijn 2026 — <span class="accent">drie dagen</span>, twee
+                dagen vlees.
+              </h1>
+              <p class="byline">
+                <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+              </p>
+            </div>
+            <div class="event-strip">
+              <div class="date-block">
+                <span class="month">SEP</span>
+                <span class="day">25</span>
+                <span class="weekday">VR–ZO</span>
+              </div>
+              <div class="meta">
+                <span class="title">Steakfestijn 2026</span>
+                <span class="where"
+                  >Sportpark Elewijt · vrijdag 18u → zondag 15u</span
+                >
+                <span class="note"
+                  >Drie dagen feest, twee dagen vlees, één goede zaak.</span
+                >
+              </div>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option A</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Drie dagen feest, twee dagen vlees, één goede zaak. Op 25, 26 en
+                27 september pakt KCVV Elewijt uit met de jaarlijkse
+                Steakfestijn — vrijdag voor de spelers, zaterdag voor de buurt,
+                zondag voor wie er nog niet bij was.
+              </p>
+              <p>
+                Net als vorig jaar werken we samen met slagerij Verbeeck.
+                Voorinschrijven moet — de tafels gingen vorig jaar op 4 dagen
+                weg.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <p class="layout-note">
+              ↘ Full event detail block · placed after EndMark
+            </p>
+            <div class="event-detail-block">
+              <span class="tape"></span>
+              <div class="head">
+                <div class="date-block">
+                  <span class="month">SEP</span>
+                  <span class="day">25</span>
+                  <span class="weekday">VR–ZO</span>
+                </div>
+                <div>
+                  <span class="tag">Clubfeest</span>
+                  <p class="title">Steakfestijn 2026</p>
+                </div>
+              </div>
+              <div class="sessions">
+                <span class="day-key">VR · 25</span
+                ><span class="day-val">Vrijdag</span
+                ><span class="day-hours">18:00 – 22:00</span>
+                <span class="day-key">ZA · 26</span
+                ><span class="day-val">Zaterdag</span
+                ><span class="day-hours">17:00 – 23:00</span>
+                <span class="day-key">ZO · 27</span
+                ><span class="day-val">Zondag</span
+                ><span class="day-hours">11:30 – 15:00</span>
+              </div>
+              <dl class="meta-row">
+                <dt>Locatie</dt>
+                <dd>Sportpark Elewijt</dd>
+                <dt>Adres</dt>
+                <dd>Driesstraat 14, Elewijt</dd>
+                <dt>Capaciteit</dt>
+                <dd>Max 250 plaatsen</dd>
+              </dl>
+              <p class="note">
+                Drie dagen feest, twee dagen vlees, één goede zaak.
+              </p>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option B · Sticky CTA bar (no full block)</div>
+            <div class="name">
+              Fixed-bottom CTA bar appears on scroll; no full detail card in
+              body
+            </div>
+            <div class="desc">
+              Assumes the hero EventStrip already covers the essentials (date /
+              title / small CTA). On scroll past the strip, a sticky CTA bar
+              pins to the viewport bottom with just title + when + CTA. No full
+              EventDetailBlock — sessions / address / capacity are NOT rendered
+              anywhere. Lightest body footprint; loses sessions schedule
+              entirely.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing ticketUrl / ticketLabel<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            fixed-position JS behaviour<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Drops
+            sessions / address / capacity — unfit for multi-day events
+          </div>
+        </header>
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <p class="kicker">
+                <span class="pill">Event</span><span class="dot">·</span
+                ><span class="tag">Clubfeest</span>
+              </p>
+              <h1>
+                Steakfestijn 2026 — <span class="accent">drie dagen</span>, twee
+                dagen vlees.
+              </h1>
+              <p class="byline">
+                <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+              </p>
+            </div>
+            <div class="event-strip">
+              <div class="date-block">
+                <span class="month">SEP</span><span class="day">25</span
+                ><span class="weekday">VR–ZO</span>
+              </div>
+              <div class="meta">
+                <span class="title">Steakfestijn 2026</span>
+                <span class="where"
+                  >Sportpark Elewijt · vrijdag 18u → zondag 15u</span
+                >
+                <span class="note"
+                  >Drie dagen feest, twee dagen vlees, één goede zaak.</span
+                >
+              </div>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option B</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Drie dagen feest, twee dagen vlees, één goede zaak. Op 25, 26 en
+                27 september pakt KCVV Elewijt uit met de jaarlijkse
+                Steakfestijn — vrijdag voor de spelers, zaterdag voor de buurt,
+                zondag voor wie er nog niet bij was.
+              </p>
+              <p>
+                Net als vorig jaar werken we samen met slagerij Verbeeck.
+                Voorinschrijven moet — de tafels gingen vorig jaar op 4 dagen
+                weg.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <p class="layout-note">
+              ↘ Sticky CTA bar · would be position:fixed bottom-of-viewport in
+              production; shown inline here
+            </p>
+            <div class="sticky-cta">
+              <div class="left">
+                <span class="title">Steakfestijn 2026</span>
+                <span class="when">VR–ZO 25–27 sep · vanaf 18u</span>
+              </div>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option C · Inline at first <code>h2</code></div>
+            <div class="name">
+              Full detail block injected at the first body
+              <code>&lt;h2&gt;</code> boundary
+            </div>
+            <div class="desc">
+              Renderer walks the body PT and injects the EventDetailBlock at the
+              first <code>&lt;h2&gt;</code>
+              heading. Effect: detail card sits mid-body, just after the
+              dropcap-paragraph intro and the first section heading. Editor
+              controls placement implicitly by where they put the first h2.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing eventFact fields<br />
+            ✓ Same <code>&lt;EventDetailBlock&gt;</code> as Option A<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Renderer-side
+            h2 detection + injection<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Editor's
+            first h2 choice surprises them with a card
+          </div>
+        </header>
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <p class="kicker">
+                <span class="pill">Event</span><span class="dot">·</span
+                ><span class="tag">Clubfeest</span>
+              </p>
+              <h1>
+                Steakfestijn 2026 — <span class="accent">drie dagen</span>, twee
+                dagen vlees.
+              </h1>
+              <p class="byline">
+                <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+              </p>
+            </div>
+            <div class="event-strip">
+              <div class="date-block">
+                <span class="month">SEP</span><span class="day">25</span
+                ><span class="weekday">VR–ZO</span>
+              </div>
+              <div class="meta">
+                <span class="title">Steakfestijn 2026</span>
+                <span class="where"
+                  >Sportpark Elewijt · vrijdag 18u → zondag 15u</span
+                >
+                <span class="note"
+                  >Drie dagen feest, twee dagen vlees, één goede zaak.</span
+                >
+              </div>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option C</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Drie dagen feest, twee dagen vlees, één goede zaak. Op 25, 26 en
+                27 september pakt KCVV Elewijt uit met de jaarlijkse
+                Steakfestijn.
+              </p>
+              <h2>Wat staat er op het menu?</h2>
+            </div>
+            <p class="layout-note">↘ Renderer-injected at first h2 boundary</p>
+            <div class="event-detail-block">
+              <span class="tape"></span>
+              <div class="head">
+                <div class="date-block">
+                  <span class="month">SEP</span>
+                  <span class="day">25</span>
+                  <span class="weekday">VR–ZO</span>
+                </div>
+                <div>
+                  <span class="tag">Clubfeest</span>
+                  <p class="title">Steakfestijn 2026</p>
+                </div>
+              </div>
+              <div class="sessions">
+                <span class="day-key">VR · 25</span
+                ><span class="day-val">Vrijdag</span
+                ><span class="day-hours">18:00 – 22:00</span>
+                <span class="day-key">ZA · 26</span
+                ><span class="day-val">Zaterdag</span
+                ><span class="day-hours">17:00 – 23:00</span>
+                <span class="day-key">ZO · 27</span
+                ><span class="day-val">Zondag</span
+                ><span class="day-hours">11:30 – 15:00</span>
+              </div>
+              <dl class="meta-row">
+                <dt>Locatie</dt>
+                <dd>Sportpark Elewijt</dd>
+                <dt>Adres</dt>
+                <dd>Driesstraat 14, Elewijt</dd>
+                <dt>Capaciteit</dt>
+                <dd>Max 250 plaatsen</dd>
+              </dl>
+              <p class="note">
+                Drie dagen feest, twee dagen vlees, één goede zaak.
+              </p>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+            <div class="article-body">
+              <p>
+                Naast de klassieke biefstuk en het kookstuk komt er dit jaar ook
+                een vegetarische optie op de kaart — voor wie het vraagt.
+              </p>
+              <p>
+                Net als vorig jaar werken we samen met slagerij Verbeeck.
+                Voorinschrijven moet — de tafels gingen vorig jaar op 4 dagen
+                weg.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">
+              Option D · Sidebar on desktop, inline on mobile
+            </div>
+            <div class="name">
+              60/40 split — body in left column, sticky detail card in right
+              column
+            </div>
+            <div class="desc">
+              Article body keeps prose width on the left; the full
+              EventDetailBlock lives in a sticky right column at page width.
+              Mobile collapses to A-style (inline after EndMark). Lets the
+              detail card stay visible while the reader scrolls the body.
+              Structural delta: article body steps outside
+              <code>--container-prose</code>.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Same <code>&lt;EventDetailBlock&gt;</code> as A/C<br />
+            ✓ <code>position: sticky</code> for desktop pin<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Article body
+            steps outside prose width (60/40 grid)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Sticky-pin
+            needs scroll testing across viewports
+          </div>
+        </header>
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <p class="kicker">
+                <span class="pill">Event</span><span class="dot">·</span
+                ><span class="tag">Clubfeest</span>
+              </p>
+              <h1>
+                Steakfestijn 2026 — <span class="accent">drie dagen</span>, twee
+                dagen vlees.
+              </h1>
+              <p class="byline">
+                <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+              </p>
+            </div>
+            <div class="event-strip">
+              <div class="date-block">
+                <span class="month">SEP</span><span class="day">25</span
+                ><span class="weekday">VR–ZO</span>
+              </div>
+              <div class="meta">
+                <span class="title">Steakfestijn 2026</span>
+                <span class="where"
+                  >Sportpark Elewijt · vrijdag 18u → zondag 15u</span
+                >
+                <span class="note"
+                  >Drie dagen feest, twee dagen vlees, één goede zaak.</span
+                >
+              </div>
+              <a class="cta" href="#">Bestel je tafel</a>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option D</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="sidebar-shell">
+              <div class="body-col">
+                <div class="article-body">
+                  <p class="dropcap-paragraph">
+                    Drie dagen feest, twee dagen vlees, één goede zaak. Op 25,
+                    26 en 27 september pakt KCVV Elewijt uit met de jaarlijkse
+                    Steakfestijn — vrijdag voor de spelers, zaterdag voor de
+                    buurt, zondag voor wie er nog niet bij was.
+                  </p>
+                  <p>
+                    Net als vorig jaar werken we samen met slagerij Verbeeck.
+                    Voorinschrijven moet — de tafels gingen vorig jaar op 4
+                    dagen weg.
+                  </p>
+                  <p>
+                    Naast de klassieke biefstuk en het kookstuk komt er dit jaar
+                    ook een vegetarische optie op de kaart — voor wie het
+                    vraagt.
+                  </p>
+                  <p class="endmark">★</p>
+                </div>
+              </div>
+              <aside class="sidebar">
+                <p class="layout-note" style="margin: 0 0 8px">
+                  ↘ Sidebar on desktop · sticky-pinned to top while body scrolls
+                </p>
+                <div class="event-detail-block">
+                  <span class="tape"></span>
+                  <div class="head">
+                    <div class="date-block">
+                      <span class="month">SEP</span>
+                      <span class="day">25</span>
+                      <span class="weekday">VR–ZO</span>
+                    </div>
+                    <div>
+                      <span class="tag">Clubfeest</span>
+                      <p class="title">Steakfestijn 2026</p>
+                    </div>
+                  </div>
+                  <div class="sessions">
+                    <span class="day-key">VR · 25</span
+                    ><span class="day-val">Vrijdag</span
+                    ><span class="day-hours">18:00 – 22:00</span>
+                    <span class="day-key">ZA · 26</span
+                    ><span class="day-val">Zaterdag</span
+                    ><span class="day-hours">17:00 – 23:00</span>
+                    <span class="day-key">ZO · 27</span
+                    ><span class="day-val">Zondag</span
+                    ><span class="day-hours">11:30 – 15:00</span>
+                  </div>
+                  <dl class="meta-row">
+                    <dt>Locatie</dt>
+                    <dd>Sportpark Elewijt</dd>
+                    <dt>Adres</dt>
+                    <dd>Driesstraat 14, Elewijt</dd>
+                    <dt>Capaciteit</dt>
+                    <dd>Max 250 plaatsen</dd>
+                  </dl>
+                  <a class="cta" href="#">Bestel je tafel</a>
+                </div>
+              </aside>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== PAST-VS-UPCOMING NOTE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Sub-decision · Past-vs-upcoming behaviour</div>
+            <div class="name">
+              What happens to the detail card / CTA after
+              <code>endDate &lt; today</code>?
+            </div>
+            <div class="desc">
+              Separate from the placement choice (A/B/C/D), the locked option
+              needs a rule for past events. The three candidates:
+              <strong>overlay</strong> ("AFGELOPEN" stamp + greyed detail card,
+              no CTA); <strong>badge</strong> (small "afgelopen" pill in the
+              card head, CTA hidden); <strong>full hide</strong>
+              (don't render the detail card at all once the event has passed —
+              the article body stays as historical record).
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Sub-options</strong>
+            <span style="color: var(--color-jersey-deep)">A</span> Overlay
+            (greyed + AFGELOPEN stamp)<br />
+            <span style="color: var(--color-jersey-deep)">B</span> Badge in card
+            head, CTA hidden<br />
+            <span style="color: var(--color-jersey-deep)">C</span> Full hide of
+            the detail card
+          </div>
+        </header>
+        <div class="surface" style="padding: 28px 28px 36px">
+          <p
+            style="
+              max-width: 80ch;
+              margin: 0;
+              font-family: ui-serif, Georgia, serif;
+              font-size: 15px;
+              line-height: 1.55;
+              color: var(--color-ink-soft);
+            "
+          >
+            Pick a body placement first (A/B/C/D); the past-event behaviour is a
+            follow-up sub-decision on the locked option. The lock document will
+            record the chosen past-event rule alongside the placement.
+          </p>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
