@@ -1,0 +1,1399 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Phase 5 · Drill 5.d-tra · Transfer BODY treatment (hero locked)
+    </title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-cream-deep: #ddd4ba;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --color-tape-warm: rgba(217, 184, 90, 0.85);
+        --color-tape-jersey: rgba(31, 95, 63, 0.82);
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --container-page: 1120px;
+        --filter-photo-newsprint: sepia(0.06) saturate(0.94) hue-rotate(-4deg)
+          contrast(1.02) brightness(1.01);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: var(--container-page);
+        margin: 0 auto 24px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      /* ============================================================
+         SCOPE BANNER — explicit about what's under review
+         ============================================================ */
+      .scope-banner {
+        max-width: var(--container-page);
+        margin: 0 auto 28px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 18px 22px;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+      }
+      .scope-banner .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin: 0 0 4px;
+        opacity: 0.95;
+      }
+      .scope-banner h2 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 24px;
+        margin: 0 0 10px;
+      }
+      .scope-banner ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .scope-banner ul li {
+        padding: 2px 0;
+      }
+      .scope-banner ul li::before {
+        content: "→ ";
+        opacity: 0.7;
+      }
+      .scope-banner .check::before {
+        content: "✓ ";
+        color: #f0d36b;
+        opacity: 1;
+      }
+      .scope-banner .skip::before {
+        content: "✗ ";
+        color: #f0d36b;
+        opacity: 1;
+      }
+      .scope-banner code {
+        background: rgba(245, 239, 225, 0.18);
+        padding: 1px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+      }
+
+      .container {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 16px 22px 14px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        max-width: 52ch;
+        font-size: 12px;
+        line-height: 1.55;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        max-width: 32ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+      }
+
+      /* ============================================================
+         REGION LABELS — make scope visible per surface
+         ============================================================ */
+      .region-label {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        padding: 14px 28px 4px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .region-label.locked {
+        color: var(--color-ink-muted);
+      }
+      .region-label.review {
+        color: var(--color-jersey-deep);
+      }
+      .region-label .badge {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+      }
+      .region-label.locked .badge {
+        background: var(--color-cream-deep);
+        color: var(--color-ink-muted);
+        padding: 2px 6px;
+        border: 1px solid var(--color-ink-muted);
+      }
+      .region-label.review .badge {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 6px;
+      }
+      .region-locked-wrap {
+        opacity: 0.55;
+        filter: saturate(0.7);
+        padding-bottom: 16px;
+      }
+      .region-review-wrap {
+        padding: 4px 0 32px;
+        background: linear-gradient(
+          180deg,
+          rgba(31, 95, 63, 0.06) 0,
+          rgba(31, 95, 63, 0) 80px
+        );
+        border-top: 1px solid var(--color-jersey-deep);
+      }
+
+      /* ============================================================
+         Hero — transfer variant (Phase 3-b R1.5 lock) — shown for
+         context but NOT under review
+         ============================================================ */
+      .hero {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        padding: 8px 28px 0;
+        display: grid;
+        grid-template-columns: 60fr 40fr;
+        gap: 28px;
+        align-items: start;
+      }
+      .hero .editorial {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      .hero .kicker {
+        display: inline-flex;
+        gap: 10px;
+        align-items: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .hero .kicker .pill {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero .kicker .dir-chip {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        line-height: 1;
+      }
+      .hero h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 38px;
+        line-height: 1.05;
+        letter-spacing: -0.018em;
+        margin: 10px 0 6px;
+        color: var(--color-ink);
+      }
+      .hero h1 .accent {
+        color: var(--color-jersey-deep);
+      }
+      .hero .meta-line,
+      .hero .byline {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .hero .byline {
+        margin-top: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .hero .byline-mono {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 11px;
+        line-height: 1;
+      }
+      .hero .pull-quote {
+        margin-top: 10px;
+        padding: 8px 14px;
+        border-left: 4px solid var(--color-jersey-deep);
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 15px;
+        line-height: 1.4;
+        color: var(--color-ink);
+      }
+      .hero .pull-quote-attrib {
+        display: block;
+        margin-top: 6px;
+        font-style: normal;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .hero .cover {
+        position: relative;
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 6px;
+        transform: rotate(-1.4deg);
+      }
+      .hero .cover .tape {
+        position: absolute;
+        top: -8px;
+        left: 14px;
+        width: 60px;
+        height: 14px;
+        background: var(--color-tape-warm);
+        transform: rotate(-3deg);
+      }
+      .hero .cover .photo {
+        position: relative;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(
+          135deg,
+          #2a4d3a 0%,
+          #547a5e 50%,
+          #c1a04a 100%
+        );
+        overflow: hidden;
+      }
+      .hero .cover .photo::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        filter: var(--filter-photo-newsprint);
+        mix-blend-mode: multiply;
+        opacity: 0.4;
+        background: inherit;
+      }
+      .hero .cover .photo::after {
+        content: "cover · transfer";
+        position: absolute;
+        bottom: 6px;
+        left: 6px;
+        background: rgba(26, 26, 26, 0.85);
+        color: var(--color-cream);
+        padding: 2px 6px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      /* ============================================================
+         <TransferFactStrip> — Phase 3-b R1.5 lock (3 TapedCards
+         + direction-aware arrows). Card 1 = other-club shield,
+         card 2 = player ★, card 3 = KCVV crest.
+         ============================================================ */
+      .tf-strip {
+        max-width: var(--container-page);
+        margin: 22px auto 0;
+        padding: 24px 28px 28px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr;
+        gap: 18px;
+        align-items: center;
+      }
+      .tf-card {
+        position: relative;
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 16px 12px 14px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+        min-width: 0;
+      }
+      .tf-card.rot-a {
+        transform: rotate(-1.4deg);
+      }
+      .tf-card.rot-b {
+        transform: rotate(0.8deg);
+      }
+      .tf-card.rot-c {
+        transform: rotate(-0.6deg);
+      }
+      .tf-card .tape {
+        position: absolute;
+        top: -8px;
+        width: 60px;
+        height: 14px;
+        background: var(--color-tape-warm);
+        transform: rotate(-3deg);
+      }
+      .tf-card.rot-a .tape {
+        left: 14px;
+      }
+      .tf-card.rot-b .tape {
+        left: 50%;
+        margin-left: -30px;
+        background: var(--color-tape-jersey);
+        transform: rotate(2deg);
+      }
+      .tf-card.rot-c .tape {
+        right: 14px;
+        transform: rotate(3deg);
+      }
+      .tf-card .shield {
+        width: 56px;
+        height: 56px;
+        border: 1px solid var(--color-ink);
+        background: linear-gradient(135deg, #5a3d4a, #b89244);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-cream);
+        line-height: 1.1;
+        clip-path: polygon(
+          50% 0%,
+          100% 18%,
+          100% 70%,
+          50% 100%,
+          0% 70%,
+          0% 18%
+        );
+      }
+      .tf-card .shield.kcvv {
+        background: var(--color-jersey-deep);
+      }
+      .tf-card .star {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+      .tf-card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        line-height: 1.15;
+        margin: 0;
+      }
+      .tf-card .ctx {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+      }
+      .tf-strip > .arrow {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 28px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+      @media (max-width: 880px) {
+        .tf-strip {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+        .tf-strip > .arrow {
+          display: none;
+        }
+      }
+
+      /* ============================================================
+         Body — prose width
+         ============================================================ */
+      .article-body {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .article-body p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.65;
+        margin: 0 0 18px;
+        color: var(--color-ink);
+      }
+      .article-body p.dropcap-paragraph::first-letter {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 0.85;
+        float: left;
+        margin: 4px 8px 0 0;
+        color: var(--color-ink);
+      }
+      .article-body h2.editor-heading {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 22px;
+        margin: 24px 0 10px;
+        text-align: center;
+      }
+      .article-body h2.editor-heading::before,
+      .article-body h2.editor-heading::after {
+        content: "─";
+        opacity: 0.55;
+        margin: 0 12px;
+        font-style: normal;
+        font-weight: normal;
+      }
+
+      /* ============================================================
+         OPTION A — No body-specific block
+         Additional transferFacts fall through; show editor's "raw"
+         markdown notation as a placeholder so the gap is visible.
+         ============================================================ */
+      .fallthrough-note {
+        max-width: var(--container-prose);
+        margin: 0 auto 18px;
+        padding: 14px 18px;
+        background: var(--color-cream-deep);
+        border: 1px dashed var(--color-ink-muted);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        color: var(--color-ink-muted);
+        line-height: 1.55;
+      }
+      .fallthrough-note strong {
+        display: block;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 10px;
+        color: var(--color-jersey-deep);
+        margin-bottom: 4px;
+      }
+
+      /* ============================================================
+         OPTION B — Compact mini van/naar strip per transferFact
+         ============================================================ */
+      .additional-mini-strip {
+        max-width: var(--container-prose);
+        margin: 0 auto 16px;
+        padding: 12px 22px;
+        display: grid;
+        grid-template-columns: 80px 1fr auto 1fr;
+        gap: 16px;
+        align-items: center;
+        border: 1px solid var(--color-ink);
+        background: #fff;
+      }
+      .additional-mini-strip .dir-chip {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 8px;
+        line-height: 1.4;
+        justify-self: start;
+      }
+      .additional-mini-strip .side {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .additional-mini-strip .side.kcvv {
+        align-items: flex-end;
+        text-align: right;
+      }
+      .additional-mini-strip .side .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 14px;
+      }
+      .additional-mini-strip .side .ctx {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .additional-mini-strip .arrow {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        color: var(--color-jersey-deep);
+      }
+
+      /* ============================================================
+         OPTION C — Single-line mono list per transferFact
+         ============================================================ */
+      .additional-list {
+        max-width: var(--container-prose);
+        margin: 0 auto 16px;
+        padding: 0 28px;
+      }
+      .additional-list .row {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 14px;
+        padding: 10px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .additional-list .row:last-child {
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .additional-list .dir-icon {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        color: var(--color-jersey-deep);
+        font-size: 18px;
+      }
+      .additional-list .row .line {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .additional-list .row .name {
+        font-style: italic;
+        font-weight: 900;
+      }
+      .additional-list .row .ctx {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-left: 6px;
+      }
+
+      /* ============================================================
+         OPTION D — TapedCardGrid (compact taped cards per transferFact)
+         ============================================================ */
+      .additional-grid {
+        max-width: var(--container-prose);
+        margin: 0 auto 16px;
+        padding: 0 28px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px 20px;
+      }
+      .additional-grid .card {
+        position: relative;
+        background: #fff;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 12px 14px 14px;
+      }
+      .additional-grid .card.rot-a {
+        transform: rotate(-0.7deg);
+      }
+      .additional-grid .card.rot-b {
+        transform: rotate(0.5deg);
+      }
+      .additional-grid .card .tape {
+        position: absolute;
+        top: -8px;
+        left: 12px;
+        width: 50px;
+        height: 12px;
+        background: var(--color-tape-jersey);
+        transform: rotate(-3deg);
+      }
+      .additional-grid .card .dir {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 6px;
+        line-height: 1;
+        display: inline-block;
+        margin-bottom: 6px;
+      }
+      .additional-grid .card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        line-height: 1.15;
+        margin-bottom: 4px;
+      }
+      .additional-grid .card .ctx {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .additional-grid .card .from-to {
+        margin-top: 6px;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 13px;
+        font-style: italic;
+        line-height: 1.3;
+        color: var(--color-ink-soft);
+      }
+      .additional-grid .card .from-to .arrow {
+        color: var(--color-jersey-deep);
+        margin: 0 4px;
+      }
+
+      /* End-of-article fixture */
+      .endmark {
+        text-align: center;
+        font-size: 24px;
+        color: var(--color-jersey-deep);
+        margin: 20px 0 0;
+        line-height: 1;
+      }
+      .article-credits {
+        max-width: var(--container-prose);
+        margin: 28px auto 0;
+        padding: 20px 28px;
+        text-align: center;
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .article-credits .row {
+        display: block;
+        padding: 2px 0;
+      }
+      .article-credits .credits-key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-right: 10px;
+      }
+      .article-credits .credits-name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 15px;
+      }
+      .article-credits .credits-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-tra · Round 1 (redrawn) · #1789</p>
+      <h1>Transfer body — additional <code>transferFact</code> rendering</h1>
+    </header>
+
+    <div class="scope-banner">
+      <p class="key">Reviewing</p>
+      <h2>Article body only — additional transferFact rendering</h2>
+      <ul>
+        <li class="check">
+          The <strong>body</strong> region: how multi-transfer articles render
+          the 2nd / 3rd / Nth transferFact in <code>body[]</code> after the
+          first one powers the hero.
+        </li>
+        <li class="skip">
+          The <strong>hero</strong> region:
+          <strong>LOCKED at Phase 3-b R1.5 (#1749)</strong> — identical across
+          all 4 options. Not under review here.
+        </li>
+        <li class="skip">
+          The <strong>van/naar strip</strong> below the hero: also locked R1.5 —
+          identical across options.
+        </li>
+        <li class="skip">
+          The <strong>ArticleCredits</strong> footer: locked 5.d-int. Identical
+          across options.
+        </li>
+      </ul>
+    </div>
+
+    <header class="page" style="margin-top: 0">
+      <p>
+        Per the audit clarification: every transferFact field is already
+        consumed by the locked hero (direction / playerName / position / age /
+        otherClub* / kcvvContext / until / note / noteAttribution). The only
+        body-specific rendering that's both data-real AND not in the hero is the
+        schema's promise that
+        <em
+          >"every subsequent transferFact renders as a compact overview row"</em
+        >
+        — what that row should look like is exactly what this drill resolves.
+      </p>
+      <p>
+        Fixture: <strong>multi-transfer announcement</strong> (Drie nieuwe
+        gezichten…). First transferFact (Niels Geukens) powers the hero. Two
+        more transferFacts (Joren Vermeulen incoming, Daan Mostmans extension)
+        sit in the body and are the BODY-treatment subject. Editor authors a
+        "Ander transfernieuws" heading per the schema's recommendation.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option A · No body-specific block</div>
+            <div class="name">
+              Additional transferFacts not rendered; only editor prose
+            </div>
+            <div class="desc">
+              The current/default state. Subsequent
+              <code>transferFact</code> blocks in body don't get a special
+              renderer — they either fall through (showing nothing in the PT
+              pipeline) or render as empty space. Editor would have to manually
+              rewrite each additional transfer as prose. Doesn't honor the
+              schema's "compact overview row" promise.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Phase 1 DropCap<br />
+            ✓ Editor prose only<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Schema
+            promise unmet
+          </div>
+        </header>
+
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <div class="editorial">
+                <p class="kicker">
+                  <span class="pill">Transfer</span
+                  ><span class="dir-chip">IN ↓</span>
+                </p>
+                <h1>
+                  Drie nieuwe gezichten
+                  <span class="accent">voor het komende seizoen.</span>
+                </h1>
+                <p class="meta-line">Verdediger · 23 jaar · #2 rechtsachter</p>
+                <p class="byline">
+                  <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+                </p>
+                <blockquote class="pull-quote">
+                  Een rust bij de selectie.<span class="pull-quote-attrib"
+                    >Wim Peeters · trainer</span
+                  >
+                </blockquote>
+              </div>
+              <figure class="cover">
+                <span class="tape"></span>
+                <div class="photo"></div>
+              </figure>
+            </div>
+            <div class="tf-strip">
+              <figure class="tf-card rot-a">
+                <span class="tape"></span>
+                <div class="shield">LK</div>
+                <p class="name">KFC Liedekerke</p>
+                <p class="ctx">Tweede Provinciale · A-kern</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-b">
+                <span class="tape"></span>
+                <p class="star">★</p>
+                <p class="name">Niels Geukens</p>
+                <p class="ctx">Verdediger · 23 jaar</p>
+                <p class="star">★</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-c">
+                <span class="tape"></span>
+                <div class="shield kcvv">KCVV</div>
+                <p class="name">KCVV Elewijt</p>
+                <p class="ctx">Eerste Provinciale · A-kern · #2</p>
+              </figure>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW (this is the option)</span
+            ><span class="badge">option A</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Niels Geukens (23) is de meest bekende inkomende transfer, maar
+                hij is niet de enige. Voor het komende seizoen versterkt KCVV
+                Elewijt zich met drie nieuwe gezichten.
+              </p>
+              <h2 class="editor-heading">Ander transfernieuws</h2>
+              <div class="fallthrough-note">
+                <strong>Δ Schema-promise gap</strong>
+                Body contains 2 additional <code>transferFact</code> blocks
+                (Joren Vermeulen, Daan Mostmans) that Option A doesn't render.
+                Editor would need to manually rewrite each as a paragraph below
+                the heading.
+              </div>
+              <p>
+                Met de jeugdaanwinsten erbij — een verlenging en een externe —
+                is de kern voor 2026–27 zo goed als rond.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">
+              Option B · Compact mini van/naar strip per transferFact
+            </div>
+            <div class="name">
+              Each additional transferFact = small inline strip with direction
+              chip + van/naar names
+            </div>
+            <div class="desc">
+              Echoes the hero's van/naar strip vocabulary in a smaller,
+              prose-width form. Direction chip (IN/OUT/VERLENGING) on the left +
+              van and naar columns. One row per additional transferFact.
+              Vocabulary-faithful: same primitive shape as the hero, just
+              compact.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing transferFact fields<br />
+            ✓ Echoes hero's van/naar primitive<br />
+            ✓ Direction chip reused<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            compact-strip variant
+          </div>
+        </header>
+
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <div class="editorial">
+                <p class="kicker">
+                  <span class="pill">Transfer</span
+                  ><span class="dir-chip">IN ↓</span>
+                </p>
+                <h1>
+                  Drie nieuwe gezichten
+                  <span class="accent">voor het komende seizoen.</span>
+                </h1>
+                <p class="meta-line">Verdediger · 23 jaar · #2 rechtsachter</p>
+                <p class="byline">
+                  <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+                </p>
+                <blockquote class="pull-quote">
+                  Een rust bij de selectie.<span class="pull-quote-attrib"
+                    >Wim Peeters · trainer</span
+                  >
+                </blockquote>
+              </div>
+              <figure class="cover">
+                <span class="tape"></span>
+                <div class="photo"></div>
+              </figure>
+            </div>
+            <div class="tf-strip">
+              <figure class="tf-card rot-a">
+                <span class="tape"></span>
+                <div class="shield">LK</div>
+                <p class="name">KFC Liedekerke</p>
+                <p class="ctx">Tweede Provinciale · A-kern</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-b">
+                <span class="tape"></span>
+                <p class="star">★</p>
+                <p class="name">Niels Geukens</p>
+                <p class="ctx">Verdediger · 23 jaar</p>
+                <p class="star">★</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-c">
+                <span class="tape"></span>
+                <div class="shield kcvv">KCVV</div>
+                <p class="name">KCVV Elewijt</p>
+                <p class="ctx">Eerste Provinciale · A-kern · #2</p>
+              </figure>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option B</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Niels Geukens (23) is de meest bekende inkomende transfer, maar
+                hij is niet de enige. Voor het komende seizoen versterkt KCVV
+                Elewijt zich met drie nieuwe gezichten.
+              </p>
+              <h2 class="editor-heading">Ander transfernieuws</h2>
+            </div>
+            <div class="additional-mini-strip">
+              <span class="dir-chip">IN ↓</span>
+              <div class="side">
+                <span class="name">KVK Tienen U21</span
+                ><span class="ctx">U21 · Middenvelder</span>
+              </div>
+              <span class="arrow">→</span>
+              <div class="side kcvv">
+                <span class="name">KCVV Elewijt</span
+                ><span class="ctx">Joren Vermeulen · 21 · A-kern</span>
+              </div>
+            </div>
+            <div class="additional-mini-strip">
+              <span class="dir-chip">VERLENGING ↻</span>
+              <div class="side">
+                <span class="name">Daan Mostmans</span
+                ><span class="ctx">Aanvaller · 19 · doorgeschoven uit U23</span>
+              </div>
+              <span class="arrow">tot</span>
+              <div class="side kcvv">
+                <span class="name">2028</span
+                ><span class="ctx">A-kern · #11</span>
+              </div>
+            </div>
+            <div class="article-body">
+              <p>
+                Met de jeugdaanwinsten erbij — een verlenging en een externe —
+                is de kern voor 2026–27 zo goed als rond.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">
+              Option C · Single-line mono list per transferFact
+            </div>
+            <div class="name">
+              Each additional transferFact = one-line entry with direction icon
+              + name + context
+            </div>
+            <div class="desc">
+              Quietest of the three active options. Each additional transferFact
+              is a single line with a direction icon (↓ / ↑ / ↻), italic player
+              name, and a short mono-caps context tail. Reads like a transcript
+              / index. Best when the article has many transfers (5+) to
+              summarise.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing transferFact fields<br />
+            ✓ Mono caps + italic display<br />
+            ✓ Dotted ink-muted dividers<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            prose-width list layout
+          </div>
+        </header>
+
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <div class="editorial">
+                <p class="kicker">
+                  <span class="pill">Transfer</span
+                  ><span class="dir-chip">IN ↓</span>
+                </p>
+                <h1>
+                  Drie nieuwe gezichten
+                  <span class="accent">voor het komende seizoen.</span>
+                </h1>
+                <p class="meta-line">Verdediger · 23 jaar · #2 rechtsachter</p>
+                <p class="byline">
+                  <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+                </p>
+                <blockquote class="pull-quote">
+                  Een rust bij de selectie.<span class="pull-quote-attrib"
+                    >Wim Peeters · trainer</span
+                  >
+                </blockquote>
+              </div>
+              <figure class="cover">
+                <span class="tape"></span>
+                <div class="photo"></div>
+              </figure>
+            </div>
+            <div class="tf-strip">
+              <figure class="tf-card rot-a">
+                <span class="tape"></span>
+                <div class="shield">LK</div>
+                <p class="name">KFC Liedekerke</p>
+                <p class="ctx">Tweede Provinciale · A-kern</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-b">
+                <span class="tape"></span>
+                <p class="star">★</p>
+                <p class="name">Niels Geukens</p>
+                <p class="ctx">Verdediger · 23 jaar</p>
+                <p class="star">★</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-c">
+                <span class="tape"></span>
+                <div class="shield kcvv">KCVV</div>
+                <p class="name">KCVV Elewijt</p>
+                <p class="ctx">Eerste Provinciale · A-kern · #2</p>
+              </figure>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option C</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Niels Geukens (23) is de meest bekende inkomende transfer, maar
+                hij is niet de enige. Voor het komende seizoen versterkt KCVV
+                Elewijt zich met drie nieuwe gezichten.
+              </p>
+              <h2 class="editor-heading">Ander transfernieuws</h2>
+            </div>
+            <div class="additional-list">
+              <div class="row">
+                <span class="dir-icon">↓</span>
+                <span class="line">
+                  <span class="name">Joren Vermeulen</span
+                  ><span class="ctx"
+                    >Middenvelder · 21 · van KVK Tienen U21 · #6</span
+                  >
+                </span>
+              </div>
+              <div class="row">
+                <span class="dir-icon">↻</span>
+                <span class="line">
+                  <span class="name">Daan Mostmans</span
+                  ><span class="ctx"
+                    >Aanvaller · 19 · verlengd tot 2028 · uit U23 · #11</span
+                  >
+                </span>
+              </div>
+            </div>
+            <div class="article-body">
+              <p>
+                Met de jeugdaanwinsten erbij — een verlenging en een externe —
+                is de kern voor 2026–27 zo goed als rond.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">
+              Option D · TapedCardGrid (compact taped cards)
+            </div>
+            <div class="name">
+              Each additional transferFact = small taped card; 2-up grid
+            </div>
+            <div class="desc">
+              Full taped vocabulary at miniature scale. Each transferFact gets
+              its own card with a tape strip, slight rotation, ink border +
+              offset shadow. Direction chip top-left, player name, context,
+              from→to line. Most decorated of the three; highest visual energy.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>&lt;TapedCard&gt;</code> + <code>&lt;TapeStrip&gt;</code
+            ><br />
+            ✓ Existing transferFact fields<br />
+            ✓ <code>&lt;TapedCardGrid&gt;</code> columns=2<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Highest
+            visual weight for body block<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> May compete
+            with hero
+          </div>
+        </header>
+
+        <div class="surface">
+          <p class="region-label locked">
+            <span>Hero · locked (R1.5)</span
+            ><span class="badge">not under review</span>
+          </p>
+          <div class="region-locked-wrap">
+            <div class="hero">
+              <div class="editorial">
+                <p class="kicker">
+                  <span class="pill">Transfer</span
+                  ><span class="dir-chip">IN ↓</span>
+                </p>
+                <h1>
+                  Drie nieuwe gezichten
+                  <span class="accent">voor het komende seizoen.</span>
+                </h1>
+                <p class="meta-line">Verdediger · 23 jaar · #2 rechtsachter</p>
+                <p class="byline">
+                  <span class="byline-mono">R</span> Door redactie · 17 mei 2026
+                </p>
+                <blockquote class="pull-quote">
+                  Een rust bij de selectie.<span class="pull-quote-attrib"
+                    >Wim Peeters · trainer</span
+                  >
+                </blockquote>
+              </div>
+              <figure class="cover">
+                <span class="tape"></span>
+                <div class="photo"></div>
+              </figure>
+            </div>
+            <div class="tf-strip">
+              <figure class="tf-card rot-a">
+                <span class="tape"></span>
+                <div class="shield">LK</div>
+                <p class="name">KFC Liedekerke</p>
+                <p class="ctx">Tweede Provinciale · A-kern</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-b">
+                <span class="tape"></span>
+                <p class="star">★</p>
+                <p class="name">Niels Geukens</p>
+                <p class="ctx">Verdediger · 23 jaar</p>
+                <p class="star">★</p>
+              </figure>
+              <span class="arrow">→</span>
+              <figure class="tf-card rot-c">
+                <span class="tape"></span>
+                <div class="shield kcvv">KCVV</div>
+                <p class="name">KCVV Elewijt</p>
+                <p class="ctx">Eerste Provinciale · A-kern · #2</p>
+              </figure>
+            </div>
+          </div>
+
+          <p class="region-label review">
+            <span>Body · UNDER REVIEW</span><span class="badge">option D</span>
+          </p>
+          <div class="region-review-wrap">
+            <div class="article-body">
+              <p class="dropcap-paragraph">
+                Niels Geukens (23) is de meest bekende inkomende transfer, maar
+                hij is niet de enige. Voor het komende seizoen versterkt KCVV
+                Elewijt zich met drie nieuwe gezichten.
+              </p>
+              <h2 class="editor-heading">Ander transfernieuws</h2>
+            </div>
+            <div class="additional-grid">
+              <div class="card rot-a">
+                <span class="tape"></span>
+                <span class="dir">IN ↓</span>
+                <p class="name">Joren Vermeulen</p>
+                <p class="ctx">Middenvelder · 21 jaar</p>
+                <p class="from-to">
+                  KVK Tienen U21 <span class="arrow">→</span> KCVV · #6
+                </p>
+              </div>
+              <div class="card rot-b">
+                <span class="tape"></span>
+                <span class="dir">VERLENGING ↻</span>
+                <p class="name">Daan Mostmans</p>
+                <p class="ctx">Aanvaller · 19 jaar · uit U23</p>
+                <p class="from-to">A-kern · #11 · tot 2028</p>
+              </div>
+            </div>
+            <div class="article-body">
+              <p>
+                Met de jeugdaanwinsten erbij — een verlenging en een externe —
+                is de kern voor 2026–27 zo goed als rond.
+              </p>
+              <p class="endmark">★</p>
+            </div>
+            <div class="article-credits">
+              <div class="row">
+                <span class="credits-key">Door</span
+                ><span class="credits-name">redactie</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Gepubliceerd</span
+                ><span class="credits-meta">17 mei 2026</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
