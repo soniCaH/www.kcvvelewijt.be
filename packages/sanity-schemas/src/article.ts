@@ -95,6 +95,20 @@ export const article = defineType({
       validation: (r) => r.max(280),
     }),
     defineField({
+      name: "author",
+      title: "Auteur (Door)",
+      type: "string",
+      description:
+        "Naam van de schrijver. Wordt getoond in de byline boven het artikel en in het ArticleCredits-blok onderaan. Optioneel — bij interviews en lange stukken aanbevolen.",
+    }),
+    defineField({
+      name: "photographer",
+      title: "Fotograaf (Beeld)",
+      type: "string",
+      description:
+        "Naam van de fotograaf. Wordt getoond in het ArticleCredits-blok onderaan. Optioneel — bij interviews, evenementenverslagen en toekomstige fotogalerijen vermelden.",
+    }),
+    defineField({
       name: "slug",
       title: "Slug",
       type: "slug",

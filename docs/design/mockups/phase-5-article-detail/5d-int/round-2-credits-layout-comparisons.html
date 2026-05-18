@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-int Round 2 · InterviewCredits layout</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --container-page: 1120px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: var(--container-page);
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        max-width: 50ch;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        max-width: 32ch;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 36px 0 36px;
+      }
+
+      /* ============================================================
+         End-of-article body stub — last paragraph before EndMark.
+         ============================================================ */
+      .article-body-stub {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .article-body-stub p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.65;
+        margin: 0 0 14px;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         <EndMark flourish="star"> — Phase 1 primitive
+         ============================================================ */
+      .endmark {
+        font-size: 28px;
+        color: var(--color-jersey-deep);
+        text-align: center;
+        margin: 28px 0 0;
+        line-height: 1;
+      }
+      .endmark--left {
+        text-align: left;
+      }
+      .endmark--inline {
+        display: inline-block;
+        margin: 0;
+        vertical-align: middle;
+      }
+
+      /* ============================================================
+         InterviewCredits — typography vocabulary, shared across all
+         four layouts. Differs only in arrangement.
+         ============================================================ */
+      .credits-key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .credits-name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 17px;
+        line-height: 1.3;
+        color: var(--color-ink);
+      }
+      .credits-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         OPTION A — Left-aligned list (current §5.2 spec)
+         Rows of "KEY · Name" stacked left-aligned.
+         ============================================================ */
+      .credits-a {
+        max-width: var(--container-prose);
+        margin: 32px auto 0;
+        padding: 0 28px;
+      }
+      .credits-a .row {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        gap: 16px;
+        align-items: baseline;
+        padding: 6px 0;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .credits-a .row:last-child {
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         OPTION B — Centered block
+         Same rows, but centered, single column "KEY → Name" inline.
+         ============================================================ */
+      .credits-b {
+        max-width: var(--container-prose);
+        margin: 32px auto 0;
+        padding: 24px 28px;
+        text-align: center;
+        border-top: 1px solid var(--color-ink);
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .credits-b .row {
+        display: block;
+        padding: 4px 0;
+      }
+      .credits-b .row .credits-key {
+        margin-right: 10px;
+      }
+      .credits-b .row .credits-name {
+        display: inline;
+      }
+
+      /* ============================================================
+         OPTION C — Sidebar on desktop, stacked on mobile
+         Article body keeps its prose width; credits live in a parallel
+         column on the right at page width (1120px). Steps outside the
+         prose container — STRUCTURAL DELTA.
+         ============================================================ */
+      .credits-c-shell {
+        max-width: var(--container-page);
+        margin: 0 auto;
+        display: grid;
+        /* `minmax(0, var(--container-prose))` lets the body column shrink
+           between the collapse breakpoint and the prose-width cap so the
+           sidebar never overflows the page padding. */
+        grid-template-columns: minmax(0, var(--container-prose)) 1fr;
+        gap: 48px;
+        align-items: start;
+        padding: 0 28px;
+      }
+      .credits-c-shell .body-col .article-body-stub,
+      .credits-c-shell .body-col .endmark {
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0;
+      }
+      .credits-c-shell .body-col .endmark {
+        text-align: left;
+      }
+      .credits-c-shell .sidebar {
+        padding: 16px 0 0 24px;
+        border-left: 1px solid var(--color-ink);
+      }
+      .credits-c-shell .sidebar .row {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .credits-c-shell .sidebar .row:last-child {
+        border-bottom: 0;
+      }
+      @media (max-width: 880px) {
+        .credits-c-shell {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .credits-c-shell .sidebar {
+          border-left: 0;
+          border-top: 1px solid var(--color-ink);
+          padding: 16px 0 0;
+        }
+      }
+
+      /* ============================================================
+         OPTION D — Inline with EndMark
+         EndMark star sits at the end of an italic single-line credits
+         summary. Tightest of the four.
+         ============================================================ */
+      .credits-d {
+        max-width: var(--container-prose);
+        margin: 32px auto 0;
+        padding: 0 28px;
+        text-align: center;
+      }
+      .credits-d .line {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 15px;
+        line-height: 1.5;
+        color: var(--color-ink-soft);
+        margin: 0;
+      }
+      .credits-d .line .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-style: normal;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .credits-d .line .name {
+        font-weight: 700;
+        color: var(--color-ink);
+      }
+      .credits-d .line .sep {
+        opacity: 0.4;
+        margin: 0 4px;
+      }
+      .credits-d .star-line {
+        margin-top: 8px;
+        font-size: 28px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-int · Round 2 · #1787</p>
+      <h1>
+        InterviewCredits block layout — list / centered / sidebar / inline
+      </h1>
+      <p>
+        Drill 5.d-int Round 2 of 2. Round 1 locked Q&amp;A row marker to
+        <strong>D (no number)</strong>. This round decides the closing
+        <code>&lt;InterviewCredits&gt;</code> block — placed after
+        <code>&lt;EndMark&gt;</code> and before
+        <code>&lt;VerderLezenRow&gt;</code>.
+      </p>
+      <p>
+        Each option renders the same 4-line credits sample at the natural
+        article-end position. Typography is identical across options (mono caps
+        key + italic display name); only the arrangement differs.
+      </p>
+      <p>
+        Sample fixture: Tekst · Tom De Smet · Met · Lars Janssens, Wim Peeters ·
+        Foto's · An Verheyden · 17 mei 2026 · kantine 1909.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option A · Left-aligned list</div>
+            <div class="name">Rows of "KEY · Name" stacked, prose width</div>
+            <div class="desc">
+              Master-plan §5.2 baseline. Two-column grid (mono key left, italic
+              name right) with dotted dividers between rows. Lives inside
+              <code>--container-prose</code> like the rest of the body.
+              Quietest, most transcript-like.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>MonoLabel</code> for keys<br />
+            ✓ Italic Freight Display for names<br />
+            ✓ Dotted ink-muted dividers<br />
+            ✓ Lives at prose width
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body-stub">
+            <p>
+              … en zo eindigde een gesprek dat eigenlijk niet over voetbal ging.
+              Het laatste woord was van Wim — droog, alsof hij het al jaren
+              wilde zeggen.
+            </p>
+          </div>
+          <p class="endmark">★</p>
+          <div class="credits-a">
+            <div class="row">
+              <span class="credits-key">Tekst</span>
+              <span class="credits-name">Tom De Smet</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Met</span>
+              <span class="credits-name">Lars Janssens, Wim Peeters</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Foto's</span>
+              <span class="credits-name">An Verheyden</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Wanneer</span>
+              <span class="credits-meta">17 mei 2026 · kantine 1909</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option B · Centered block</div>
+            <div class="name">Single column, centered, ink-rule framed</div>
+            <div class="desc">
+              Same rows but centered, with a 1px ink rule above + below the
+              block. Reads as a formal end-credit panel. Each row is "KEY →
+              Name" inline; no left-column anchor.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Same typography as A<br />
+            ✓ 1px ink rules top + bottom<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Loses the
+            two-column "key / value" alignment grid<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            framed block at prose width
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body-stub">
+            <p>
+              … en zo eindigde een gesprek dat eigenlijk niet over voetbal ging.
+              Het laatste woord was van Wim — droog, alsof hij het al jaren
+              wilde zeggen.
+            </p>
+          </div>
+          <p class="endmark">★</p>
+          <div class="credits-b">
+            <div class="row">
+              <span class="credits-key">Tekst</span
+              ><span class="credits-name">Tom De Smet</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Met</span
+              ><span class="credits-name">Lars Janssens, Wim Peeters</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Foto's</span
+              ><span class="credits-name">An Verheyden</span>
+            </div>
+            <div class="row">
+              <span class="credits-key">Wanneer</span
+              ><span class="credits-meta" style="display: inline"
+                >17 mei 2026 · kantine 1909</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option C · Sidebar on desktop</div>
+            <div class="name">
+              60/40 split — body keeps prose width, credits live on the right at
+              page width
+            </div>
+            <div class="desc">
+              Article body keeps <code>--container-prose</code>. Credits column
+              slides in alongside at page width (1120px). Mobile collapses to
+              A-style stacked. Structural delta: the article-body container
+              would have to step outside its prose width to host the right
+              column.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Same typography as A<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Body
+            container steps outside <code>--container-prose</code> (only at
+            end-of-article)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            article-end 60/40 grid (no prior precedent in article body)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Mobile
+            collapse needed
+          </div>
+        </header>
+        <div class="surface">
+          <div class="credits-c-shell">
+            <div class="body-col">
+              <div class="article-body-stub">
+                <p>
+                  … en zo eindigde een gesprek dat eigenlijk niet over voetbal
+                  ging. Het laatste woord was van Wim — droog, alsof hij het al
+                  jaren wilde zeggen.
+                </p>
+              </div>
+              <p class="endmark endmark--left">★</p>
+            </div>
+            <aside class="sidebar">
+              <div class="row">
+                <span class="credits-key">Tekst</span>
+                <span class="credits-name">Tom De Smet</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Met</span>
+                <span class="credits-name">Lars Janssens, Wim Peeters</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Foto's</span>
+                <span class="credits-name">An Verheyden</span>
+              </div>
+              <div class="row">
+                <span class="credits-key">Wanneer</span>
+                <span class="credits-meta">17 mei 2026 · kantine 1909</span>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div>
+            <div class="key">Option D · Inline with EndMark</div>
+            <div class="name">
+              Single italic credit line + closing star — tightest composition
+            </div>
+            <div class="desc">
+              EndMark and credits merge. One italic line carries author /
+              interviewees / photographer / date as a comma-separated run; the
+              star sits centered beneath. Like a film closing card. Lowest
+              visual weight, most cinematic.
+            </div>
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>EndMark</code> + inline italic line<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Each credit
+            field becomes inline-run instead of "KEY · Name" row<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Long credit
+            lists (5+ interviewees) wrap and read messy<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Loses
+            key/value contrast — readers have to parse "Tom De Smet · Tekst" as
+            a unit
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body-stub">
+            <p>
+              … en zo eindigde een gesprek dat eigenlijk niet over voetbal ging.
+              Het laatste woord was van Wim — droog, alsof hij het al jaren
+              wilde zeggen.
+            </p>
+          </div>
+          <div class="credits-d">
+            <p class="line">
+              <span class="key">Tekst</span>
+              <span class="name">Tom De Smet</span>
+              <span class="sep">·</span>
+              <span class="key">Met</span>
+              <span class="name">Lars Janssens, Wim Peeters</span>
+              <span class="sep">·</span>
+              <span class="key">Foto's</span>
+              <span class="name">An Verheyden</span>
+              <span class="sep">·</span>
+              <span class="name">17 mei 2026, kantine 1909</span>
+            </p>
+            <p class="star-line">★</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
