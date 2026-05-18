@@ -13,6 +13,13 @@ Reference locks consumed:
 - `feedback_visual_preferences` — prefer typographic glyphs over Lucide equivalents
 - `feedback_border_spec_triple` — every divider/seam line ships `{weight, color-token, opacity}`
 
+## Baseline vs. alternatives
+
+This drill compares four alternatives against an existing baseline:
+
+- **E0 — Phase 3-b treatment** (the baseline): `<QASectionDivider title>` italic centered subtitle + flanking 1px ink rules at 0.55 opacity. Already locked in `interview-locked.md`; carried forward into the body section-break role. The final lock recorded in `section-break-locked.md` keeps E0 unchanged.
+- **Alternatives A–D** (in `round-1-section-break-comparisons.html`): diamond glyph (A) / `<StripedSeam height="sm">` mid-article (B) / dotted divider alone (C) / no break (D). Each was evaluated against E0 to see whether it adds enough to justify net-new vocabulary or a register shift.
+
 ## Use sites consuming this vocabulary
 
 - `<QASection>` interview body — major Q&A section break with a section subtitle.

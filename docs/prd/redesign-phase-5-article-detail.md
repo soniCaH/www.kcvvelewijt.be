@@ -137,16 +137,16 @@ All sub-issues spawn from this PRD via `/prd-to-issues`. No PRD update needed pe
 
 ### New components
 
-| Component               | Phase   | Role                                                                                                                                         |
-| ----------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<QASection>`           | 5.B.int | `<MonoLabel>Q&A</MonoLabel>` heading + alternating `<QARow>` + `<QASectionDivider>`. Width pinned at `--container-prose`. Interview-only.    |
-| `<QARow>`               | 5.B.int | Freight Display 900 number left · mono speaker tag · `text-display-sm` 600 question · `text-body-md` answer. Avatar slot per drill 5.d2.     |
-| `<QASectionDivider>`    | 5.B.int | Dotted divider between Q&A rows. `flourish?: "diamond"` variant for major section breaks per drill 5.d3.                                     |
-| `<InterviewCredits>`    | 5.B.int | Closing credits block (author / interviewees / photographer / publish date). Per drill 5.d-int.                                              |
-| `<VerderLezenRow>`      | 5.A.2   | 3-up `<NewsCard>` row at article footer. Inherits R3 per-`articleType` backgrounds.                                                          |
-| `<MatchRecapStats>`     | 5.B.mat | Inline match-stats block (composition per drill 5.d-mat). Spans both `matchPreview` (lineup/H2H) and `matchRecap` (final stats/goalscorers). |
-| `<EventDetailBlock>`    | 5.B.evt | Full event detail card for the article body (composition per drill 5.d-evt). Companion to the existing hero day-block + compressed strip.    |
-| `<TransferDetailBlock>` | 5.B.tra | Optional transfer body block (career history, fees if disclosed, etc — per drill 5.d-tra outcome; could be no-op).                           |
+| Component               | Phase   | Role                                                                                                                                                                                                                                                                                     |
+| ----------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<QASection>`           | 5.B.int | `<MonoLabel>Q&A</MonoLabel>` heading + alternating `<QARow>` + `<QASectionDivider>`. Width pinned at `--container-prose`. Interview-only.                                                                                                                                                |
+| `<QARow>`               | 5.B.int | Freight Display 900 number left · mono speaker tag · `text-display-sm` 600 question · `text-body-md` answer. Avatar slot per drill 5.d2.                                                                                                                                                 |
+| `<QASectionDivider>`    | 5.B.int | Dotted divider between Q&A rows; `title` variant (italic centered + flanking 1px ink rules at 0.55 opacity) for major section breaks per drill 5.d3. **Drill 5.d3 LOCKED 2026-05-18 → no `flourish="diamond"` variant added; existing `flourish="em-dash" \| "star"` API is unchanged.** |
+| `<InterviewCredits>`    | 5.B.int | Closing credits block (author / interviewees / photographer / publish date). Per drill 5.d-int.                                                                                                                                                                                          |
+| `<VerderLezenRow>`      | 5.A.2   | 3-up `<NewsCard>` row at article footer. Inherits R3 per-`articleType` backgrounds.                                                                                                                                                                                                      |
+| `<MatchRecapStats>`     | 5.B.mat | Inline match-stats block (composition per drill 5.d-mat). Spans both `matchPreview` (lineup/H2H) and `matchRecap` (final stats/goalscorers).                                                                                                                                             |
+| `<EventDetailBlock>`    | 5.B.evt | Full event detail card for the article body (composition per drill 5.d-evt). Companion to the existing hero day-block + compressed strip.                                                                                                                                                |
+| `<TransferDetailBlock>` | 5.B.tra | Optional transfer body block (career history, fees if disclosed, etc — per drill 5.d-tra outcome; could be no-op).                                                                                                                                                                       |
 
 ### Reused components
 
