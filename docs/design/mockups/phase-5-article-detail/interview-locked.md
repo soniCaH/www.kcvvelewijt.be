@@ -102,12 +102,12 @@ This is a **deliberate exception** to the PRD's "0 schema migrations" guarantee.
 
 ### Labels (locked Dutch vocabulary)
 
-| Source field   | Label            | Notes                                                                                                                             |
-| -------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `author`       | **Door**         | "Door redactie" remains the fallback in `<EditorialByline>` only; `<ArticleCredits>` omits the row when blank.                    |
-| `subjects[]`   | **Met**          | Names joined with `, `. For N=2 we considered italic display "&" but kept the comma to match the multi-line credit-list register. |
-| `photographer` | **Beeld**        | "Beeld" reads more inclusive than "Foto's" — works for static photos AND any future moving-image credit.                          |
-| `publishedAt`  | **Gepubliceerd** | Date formatted as `d MMMM yyyy` per the rest of the site (`17 mei 2026`).                                                         |
+| Source field   | Label            | Notes                                                                                                                                                  |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `author`       | **Door**         | "Door redactie" remains the fallback in `<EditorialByline>` only; `<ArticleCredits>` omits the row when blank.                                         |
+| `subjects[]`   | **Met**          | Names joined with `,` (followed by a space). For N=2 we considered italic display "&" but kept the comma to match the multi-line credit-list register. |
+| `photographer` | **Beeld**        | "Beeld" reads more inclusive than "Foto's" — works for static photos AND any future moving-image credit.                                               |
+| `publishedAt`  | **Gepubliceerd** | Date formatted as `d MMMM yyyy` per the rest of the site (`17 mei 2026`).                                                                              |
 
 ### Placement in the article shell
 

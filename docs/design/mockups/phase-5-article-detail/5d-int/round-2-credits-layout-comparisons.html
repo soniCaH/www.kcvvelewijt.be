@@ -236,7 +236,10 @@
         max-width: var(--container-page);
         margin: 0 auto;
         display: grid;
-        grid-template-columns: var(--container-prose) 1fr;
+        /* `minmax(0, var(--container-prose))` lets the body column shrink
+           between the collapse breakpoint and the prose-width cap so the
+           sidebar never overflows the page padding. */
+        grid-template-columns: minmax(0, var(--container-prose)) 1fr;
         gap: 48px;
         align-items: start;
         padding: 0 28px;
@@ -559,7 +562,7 @@
               <span class="key">Foto's</span>
               <span class="name">An Verheyden</span>
               <span class="sep">·</span>
-              <span class="key">17 mei 2026, kantine 1909</span>
+              <span class="name">17 mei 2026, kantine 1909</span>
             </p>
             <p class="star-line">★</p>
           </div>
