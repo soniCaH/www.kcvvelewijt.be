@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fixtureImage } from "@test-fixtures/images";
 import { SubjectAvatar } from "./SubjectAvatar";
 
 const meta = {
@@ -43,7 +44,7 @@ export const AttributionPhoto: Story = {
   args: {
     firstName: "Wim",
     fullName: "Wim Govaerts",
-    photoUrl: "https://picsum.photos/seed/wim-govaerts/128/128",
+    photoUrl: fixtureImage("staff-portrait", 0),
     scale: "attribution",
   },
 };
@@ -74,7 +75,7 @@ export const ScaleComparison: Story = {
         <SubjectAvatar
           firstName="Wim"
           fullName="Wim Govaerts"
-          photoUrl="https://picsum.photos/seed/wim-govaerts/128/128"
+          photoUrl={fixtureImage("staff-portrait", 0)}
           scale="attribution"
         />
         <span className="font-mono text-[10px] tracking-[0.18em] uppercase">

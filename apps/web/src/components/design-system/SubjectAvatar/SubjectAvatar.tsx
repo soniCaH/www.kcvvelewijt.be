@@ -82,10 +82,12 @@ export function SubjectAvatar({
   className,
 }: SubjectAvatarProps) {
   const tokens = SCALE[scale];
-  const hasPhoto =
-    scale === "attribution" &&
-    typeof photoUrl === "string" &&
-    photoUrl.length > 0;
+  // Trim before length-checking so whitespace-only photoUrl values
+  // (e.g. `"   "` from a poorly-sanitised Sanity field) fall through to
+  // the monogram path rather than feeding an invalid <img src>.
+  const normalizedPhotoUrl =
+    typeof photoUrl === "string" ? photoUrl.trim() : "";
+  const hasPhoto = scale === "attribution" && normalizedPhotoUrl.length > 0;
   const accessibleName = (fullName ?? firstName).trim() || "Subject";
 
   if (hasPhoto) {
@@ -100,7 +102,7 @@ export function SubjectAvatar({
         )}
       >
         <Image
-          src={photoUrl!}
+          src={normalizedPhotoUrl}
           alt={accessibleName}
           fill
           sizes={tokens.sizes}

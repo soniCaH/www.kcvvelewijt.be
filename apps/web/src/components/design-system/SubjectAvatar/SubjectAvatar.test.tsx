@@ -62,6 +62,17 @@ describe("<SubjectAvatar>", () => {
         container.firstElementChild?.getAttribute("data-subject-avatar"),
       ).toBe("monogram");
     });
+
+    it("falls back to monogram when photoUrl is whitespace-only", () => {
+      // Defensive: a poorly-sanitised Sanity field shouldn't feed an
+      // invalid <img src> — the component trims before length-checking.
+      const { container } = render(
+        <SubjectAvatar firstName="Wim" photoUrl="   " scale="attribution" />,
+      );
+      expect(
+        container.firstElementChild?.getAttribute("data-subject-avatar"),
+      ).toBe("monogram");
+    });
   });
 
   describe("accessibility", () => {

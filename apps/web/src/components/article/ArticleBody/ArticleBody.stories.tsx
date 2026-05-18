@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
+import { fixtureImage } from "@test-fixtures/images";
 import { ArticleBody } from "./ArticleBody";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 
@@ -224,7 +225,7 @@ const WITH_PULL_QUOTE_SUBJECTS = [
       firstName: "Wim",
       lastName: "Govaerts",
       functionTitle: "TRAINER",
-      photoUrl: "https://picsum.photos/seed/wim-coach/128/128",
+      photoUrl: fixtureImage("staff-portrait", 0),
     },
   },
 ];
@@ -314,7 +315,7 @@ export const BodyComposition: Story = {
           {
             title: "Maxim Breugelmans versterkt Elewijt",
             href: "/nieuws/maxim-breugelmans-transfer",
-            imageUrl: "https://picsum.photos/seed/composition-transfer/800/450",
+            imageUrl: fixtureImage("article-hero-transfer", 0),
             badge: "TRANSFER",
             date: "18 mei 2026",
             articleType: "transfer",
@@ -322,8 +323,7 @@ export const BodyComposition: Story = {
           {
             title: "Algemene vergadering op 12 juni",
             href: "/nieuws/algemene-vergadering-juni",
-            imageUrl:
-              "https://picsum.photos/seed/composition-announcement/800/450",
+            imageUrl: fixtureImage("article-hero-generic", 0),
             badge: "MEDEDELING",
             date: "15 mei 2026",
             articleType: "announcement",
@@ -331,7 +331,7 @@ export const BodyComposition: Story = {
           {
             title: "Lentetornooi U13",
             href: "/nieuws/lentetornooi-u13",
-            imageUrl: "https://picsum.photos/seed/composition-event/800/450",
+            imageUrl: fixtureImage("article-hero-evenement", 0),
             badge: "EVENEMENT",
             date: "10 mei 2026",
             articleType: "event",

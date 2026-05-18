@@ -109,6 +109,27 @@ function extractBlockText(block: PortableTextBlock): string {
     .trim();
 }
 
+/**
+ * Does the block actually render something? Used to decide whether
+ * `<EndMark />` should appear at the bottom of the body — an article
+ * whose `content` is non-empty but contains only empty paragraphs or an
+ * empty `pullQuote` block shouldn't get an orphan closer below blank
+ * space.
+ *
+ * Known block types: `block` (paragraph / heading — empty = no text),
+ * `pullQuote` (empty = no `body`). Unknown types are assumed to render
+ * (forward-compat for future serializers like qaBlock / transferFact).
+ */
+function blockHasRenderableOutput(block: PortableTextBlock): boolean {
+  if (block._type === "block") {
+    return extractBlockText(block).length > 0;
+  }
+  if (block._type === "pullQuote") {
+    return ((block as PullQuoteBlock).body ?? "").trim().length > 0;
+  }
+  return true;
+}
+
 function renderPullQuote(
   value: PullQuoteBlock,
   subjects: IndexedSubject[] | null,
@@ -240,7 +261,10 @@ export function ArticleBody({
   const afterDropCap = hasDropCap ? content.slice(dropCapIdx + 1) : [];
 
   const components = buildComponents(subjects);
-  const hasContent = content.length > 0;
+  // EndMark closes the body — only when at least one block in `content`
+  // actually emits output. An article with only empty paragraphs or an
+  // empty pullQuote block should NOT get an orphan closer at the bottom.
+  const hasRenderableBody = content.some(blockHasRenderableOutput);
 
   return (
     <div
@@ -260,7 +284,7 @@ export function ArticleBody({
         {afterDropCap.length > 0 ? (
           <PortableText value={afterDropCap} components={components} />
         ) : null}
-        {hasContent ? <EndMark /> : null}
+        {hasRenderableBody ? <EndMark /> : null}
       </div>
     </div>
   );

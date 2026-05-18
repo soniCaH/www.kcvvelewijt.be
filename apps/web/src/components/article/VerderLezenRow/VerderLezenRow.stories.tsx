@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fixtureImage } from "@test-fixtures/images";
 import { VerderLezenRow, type VerderLezenItem } from "./VerderLezenRow";
 
 const meta = {
@@ -19,15 +20,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Stable seeded image URLs so VR baselines don't churn run-to-run.
-function img(seed: string): string {
-  return `https://picsum.photos/seed/${seed}/800/450`;
-}
+// Deterministic local fixtures per `feedback_design_data_audit` and the
+// fixture pool's own warning ("remote placeholder services produce
+// non-deterministic VR baselines"). Pool indices are 0-fixed so VR
+// snapshots stay byte-stable across runs.
 
 const INTERVIEW: VerderLezenItem = {
   title: "Wim Govaerts over de wakker-mentaliteit",
   href: "/nieuws/wim-govaerts-interview",
-  imageUrl: img("verderlezen-interview"),
+  imageUrl: fixtureImage("article-hero-interview", 0),
   imageAlt: "Wim Govaerts in de dug-out",
   badge: "INTERVIEW",
   date: "23 mei 2026",
@@ -37,7 +38,7 @@ const INTERVIEW: VerderLezenItem = {
 const TRANSFER: VerderLezenItem = {
   title: "Maxim Breugelmans versterkt Elewijt",
   href: "/nieuws/maxim-breugelmans-transfer",
-  imageUrl: img("verderlezen-transfer"),
+  imageUrl: fixtureImage("article-hero-transfer", 0),
   imageAlt: "Maxim Breugelmans bij zijn aankomst",
   badge: "TRANSFER",
   date: "18 mei 2026",
@@ -47,7 +48,7 @@ const TRANSFER: VerderLezenItem = {
 const ANNOUNCEMENT: VerderLezenItem = {
   title: "Algemene vergadering op 12 juni",
   href: "/nieuws/algemene-vergadering-juni",
-  imageUrl: img("verderlezen-announcement"),
+  imageUrl: fixtureImage("article-hero-generic", 0),
   imageAlt: "Driesstraat 32, hoofdingang",
   badge: "MEDEDELING",
   date: "15 mei 2026",
@@ -57,7 +58,7 @@ const ANNOUNCEMENT: VerderLezenItem = {
 const EVENT: VerderLezenItem = {
   title: "Lentetornooi U13",
   href: "/nieuws/lentetornooi-u13",
-  imageUrl: img("verderlezen-event"),
+  imageUrl: fixtureImage("article-hero-evenement", 0),
   imageAlt: "Jeugdspelers tijdens een wedstrijd",
   badge: "EVENEMENT",
   date: "10 mei 2026",
@@ -134,14 +135,14 @@ export const AllTransfer: Story = {
         title: "Niels verlengt voor twee seizoenen",
         href: "/nieuws/niels-verlenging",
         badge: "VERLENGD",
-        imageUrl: img("verderlezen-transfer-2"),
+        imageUrl: fixtureImage("article-hero-transfer", 1),
       },
       {
         ...TRANSFER,
         title: "Joris vertrekt naar Diest",
         href: "/nieuws/joris-uitgaand",
         badge: "UITGAAND",
-        imageUrl: img("verderlezen-transfer-3"),
+        imageUrl: fixtureImage("article-hero-transfer", 2),
       },
     ],
   },

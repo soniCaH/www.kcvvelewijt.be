@@ -182,7 +182,10 @@ function PullQuoteAttributionRow({
           {attribution.name}
         </span>
         {meta.map((value, i) => (
-          <span key={value} className="flex items-center gap-x-2">
+          // Index-qualified key — role and source can legitimately match
+          // (e.g. both authored as the same uppercased token) and we
+          // can't rely on `value` alone to be unique.
+          <span key={`${i}-${value}`} className="flex items-center gap-x-2">
             <span
               aria-hidden="true"
               className={cn(
@@ -223,7 +226,9 @@ function PullQuoteAttributionRow({
         {meta.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             {meta.map((value, i) => (
-              <span key={value} className="flex items-center gap-x-2">
+              // Index-qualified key — role and source can legitimately
+              // match (e.g. both authored as the same uppercased token).
+              <span key={`${i}-${value}`} className="flex items-center gap-x-2">
                 {i > 0 && (
                   <span
                     aria-hidden="true"

@@ -193,6 +193,24 @@ describe("<ArticleBody>", () => {
       expect(container.querySelector('[data-endmark="star"]')).toBeNull();
     });
 
+    it("does not render <EndMark> when content contains only empty paragraphs", () => {
+      // Defensive: a non-empty `content` array whose blocks all render
+      // nothing must not orphan the closer above blank space.
+      const emptyParagraph = paragraph("");
+      const { container } = render(<ArticleBody content={[emptyParagraph]} />);
+      expect(container.querySelector('[data-endmark="star"]')).toBeNull();
+    });
+
+    it("does not render <EndMark> when content contains only an empty pullQuote", () => {
+      const emptyPullQuote = {
+        _type: "pullQuote",
+        _key: "empty-pq",
+        body: "",
+      } as unknown as PortableTextBlock;
+      const { container } = render(<ArticleBody content={[emptyPullQuote]} />);
+      expect(container.querySelector('[data-endmark="star"]')).toBeNull();
+    });
+
     it("places <EndMark> after the DropCap paragraph in DOM order", () => {
       const content = [paragraph("First."), paragraph("Second.")];
       const { container } = render(<ArticleBody content={content} />);
