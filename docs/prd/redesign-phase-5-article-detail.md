@@ -174,7 +174,7 @@ The query already returns `titleRich`, `subjects[]`, `firstTransferFact`, `first
 
 Known projection extensions to investigate during 5.0:
 
-- Q&A speakers + photographer credit on `subjects[]` or as dedicated fields. **Gate on drill 5.d2** — avatar source determines schema needs. If illustrated avatars win, no schema work; if photo crops win, projection extension only.
+- Q&A speakers + photographer credit on `subjects[]` or as dedicated fields. **5.d2 LOCKED → D (monogram at row, photo at attribution).** Photo sources (`playerRef.psdImage` / `staffRef.photo` / `customPhoto`) already ship through `subjects[]` per the 5.0 tracer audit (§5.0 below) — no projection extension required.
 - Section-break markers in body PT — explicit PT block type vs renderer-side heading-boundary insertion. Decide at 5.A.1.
 - Match data on the article — only needed if `5.d-mat` decides the body block surfaces match-level data not already on Sanity (e.g. lineups). Most likely fetched via BFF (PSD) rather than added to Sanity.
 

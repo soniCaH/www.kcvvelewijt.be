@@ -25,8 +25,8 @@ kinds (`player` / `staff` / `custom`).
 
 | Kind     | Photo source          | Has photo?                                               |
 | -------- | --------------------- | -------------------------------------------------------- |
-| `player` | `player.psdImage`     | ~90% yes (rectangular); ~10% no                          |
-| `staff`  | `staffMember.photo`   | usually yes                                              |
+| `player` | `playerRef.psdImage`  | ~90% yes (rectangular); ~10% no                          |
+| `staff`  | `staffRef.photo`      | usually yes                                              |
 | `custom` | `subject.customPhoto` | required by schema validator (per `interview-locked.md`) |
 
 So a real interview's Q&A speakers and a real pull-quote subject
@@ -34,20 +34,20 @@ _usually_ have a photo — but not always.
 
 ## Option-by-option vocabulary map
 
-| Element                        | A — photo                                              | B — monogram                                            | C — illustration                                               | D — mixed (mono at 32px, photo at 64px)               |
-| ------------------------------ | ------------------------------------------------------ | ------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
-| Primary primitive              | Circular photo crop (CSS `border-radius: 50%` + photo) | Initial in jersey-deep disc                             | 4 line-art SVG portraits, two-pass print                       | Photo + monogram, scale-conditional                   |
-| Image source                   | `player.psdImage` / `staff.photo` / `customPhoto`      | n/a (initial derived from `firstName[0]`)               | n/a (slot derived from a hash of subject key)                  | photo at ≥48px, monogram below                        |
-| Photo filter                   | `--filter-photo-newsprint`                             | n/a                                                     | n/a                                                            | newsprint when photo path active                      |
-| Paper grain                    | Same as `<TapedFigure>` (4% radial multiply)           | n/a                                                     | n/a                                                            | when photo path active                                |
-| Background colour              | Source image                                           | `--color-jersey-deep`                                   | Cream (illustration sits on the surface)                       | hybrid                                                |
-| Foreground colour              | n/a                                                    | `--color-cream` full opacity                            | `--color-jersey-deep` (underprint) + `--color-ink` (overprint) | hybrid                                                |
-| Border                         | 1px ink                                                | none (silhouette is the disc)                           | none (line-art owns the silhouette)                            | both                                                  |
-| Subject-photo-missing fallback | Defer to B monogram (~10% of player subjects)          | n/a (B has no photo dep)                                | n/a (illustration is decoupled from photo)                     | Q&A row already monogram; pull-quote needs a fallback |
-| Subject identity preserved?    | ✅ photo = the person                                  | ⚠️ collision on shared initials (An ↔ Anouk → both "A") | ❌ illustration is a slot index, not the person                | ✅ at pull-quote, ⚠️ at Q&A                           |
-| Scales tested                  | 32px + 64px                                            | 32px + 64px                                             | 32px + 64px                                                    | 32px (mono) + 64px (photo)                            |
-| Recognisability @ 32px         | Marginal (face too small)                              | Good (one letter is readable)                           | Glyph-level only (detail collapses)                            | Good (uses mono at this scale)                        |
-| Recognisability @ 64px         | Good (face readable)                                   | Good but generic                                        | Decorative, not identifying                                    | Good (uses photo at this scale)                       |
+| Element                        | A — photo                                               | B — monogram                                            | C — illustration                                               | D — mixed (mono at 32px, photo at 64px)               |
+| ------------------------------ | ------------------------------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------- |
+| Primary primitive              | Circular photo crop (CSS `border-radius: 50%` + photo)  | Initial in jersey-deep disc                             | 4 line-art SVG portraits, two-pass print                       | Photo + monogram, scale-conditional                   |
+| Image source                   | `playerRef.psdImage` / `staffRef.photo` / `customPhoto` | n/a (initial derived from `firstName[0]`)               | n/a (slot derived from a hash of subject key)                  | photo at ≥48px, monogram below                        |
+| Photo filter                   | `--filter-photo-newsprint`                              | n/a                                                     | n/a                                                            | newsprint when photo path active                      |
+| Paper grain                    | Same as `<TapedFigure>` (4% radial multiply)            | n/a                                                     | n/a                                                            | when photo path active                                |
+| Background colour              | Source image                                            | `--color-jersey-deep`                                   | Cream (illustration sits on the surface)                       | hybrid                                                |
+| Foreground colour              | n/a                                                     | `--color-cream` full opacity                            | `--color-jersey-deep` (underprint) + `--color-ink` (overprint) | hybrid                                                |
+| Border                         | 1px ink                                                 | none (silhouette is the disc)                           | none (line-art owns the silhouette)                            | both                                                  |
+| Subject-photo-missing fallback | Defer to B monogram (~10% of player subjects)           | n/a (B has no photo dep)                                | n/a (illustration is decoupled from photo)                     | Q&A row already monogram; pull-quote needs a fallback |
+| Subject identity preserved?    | ✅ photo = the person                                   | ⚠️ collision on shared initials (An ↔ Anouk → both "A") | ❌ illustration is a slot index, not the person                | ✅ at pull-quote, ⚠️ at Q&A                           |
+| Scales tested                  | 32px + 64px                                             | 32px + 64px                                             | 32px + 64px                                                    | 32px (mono) + 64px (photo)                            |
+| Recognisability @ 32px         | Marginal (face too small)                               | Good (one letter is readable)                           | Glyph-level only (detail collapses)                            | Good (uses mono at this scale)                        |
+| Recognisability @ 64px         | Good (face readable)                                    | Good but generic                                        | Decorative, not identifying                                    | Good (uses photo at this scale)                       |
 
 ## Vocabulary deltas summary
 
