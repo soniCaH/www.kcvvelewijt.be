@@ -177,6 +177,34 @@ describe("<EventDetailBlock>", () => {
     expect(cta).not.toBeNull();
     expect(cta?.textContent).toContain("Bestel je tafel");
     expect(cta?.getAttribute("href")).toBe("https://example.com/tickets");
+    // External link safety: must open in a new tab without leaking the
+    // current window via window.opener.
+    expect(cta?.getAttribute("target")).toBe("_blank");
+    expect(cta?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("drops the CTA when ticketUrl uses a non-http(s) scheme", () => {
+    const { container } = render(
+      <EventDetailBlock
+        value={eventFact({ ticketUrl: "javascript:alert(1)" })}
+        isPast={false}
+      />,
+    );
+    expect(
+      container.querySelector('[data-event-detail-cta="true"]'),
+    ).toBeNull();
+  });
+
+  it("drops the CTA when ticketUrl is malformed (URL constructor throws)", () => {
+    const { container } = render(
+      <EventDetailBlock
+        value={eventFact({ ticketUrl: "not a url" })}
+        isPast={false}
+      />,
+    );
+    expect(
+      container.querySelector('[data-event-detail-cta="true"]'),
+    ).toBeNull();
   });
 
   it("falls back to DEFAULT_TICKET_LABEL when ticketLabel is empty", () => {

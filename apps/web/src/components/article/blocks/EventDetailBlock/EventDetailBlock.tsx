@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { DateTime } from "luxon";
 import { PortableText, type PortableTextBlock } from "@portabletext/react";
 import { TapedCard } from "@/components/design-system";
@@ -66,6 +65,25 @@ export function deriveIsPast(
 function weekdayAbbrev(date: ResolvedEvent): string {
   if (!date.hasDate) return "";
   return date.weekday.slice(0, 2).toUpperCase();
+}
+
+/**
+ * Whitelist http(s) for the editor-authored ticket URL — Sanity's `url`
+ * type already validates at write time, but runtime defense in depth
+ * keeps `javascript:` / `data:` payloads out of the CTA href even if
+ * draft content sneaks through.
+ */
+function safeExternalHref(raw: string | undefined | null): string | null {
+  const trimmed = raw?.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "http:" || parsed.protocol === "https:"
+      ? trimmed
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 interface HeadDateParts {
@@ -287,7 +305,7 @@ export function EventDetailBlock({
   const title = value.title?.trim();
   const tag = value.competitionTag?.trim();
   const pillLabel = isPast ? "Afgelopen" : tag;
-  const ticketUrl = !isPast ? value.ticketUrl?.trim() : undefined;
+  const ticketUrl = !isPast ? safeExternalHref(value.ticketUrl) : null;
   const ticketLabel = value.ticketLabel?.trim() || DEFAULT_TICKET_LABEL;
   const metaRows = buildMetaRows(value);
   const note =
@@ -320,8 +338,10 @@ export function EventDetailBlock({
           {metaRows.length > 0 ? <MetaList rows={metaRows} /> : null}
           {note ? <Note blocks={note} /> : null}
           {ticketUrl ? (
-            <Link
+            <a
               href={ticketUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               data-event-detail-cta="true"
               className={cn(
                 getButtonClasses({ variant: "primary", size: "md" }),
@@ -332,7 +352,7 @@ export function EventDetailBlock({
               <span aria-hidden="true" className="ml-1">
                 →
               </span>
-            </Link>
+            </a>
           ) : null}
         </section>
       </TapedCard>
