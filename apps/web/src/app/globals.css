@@ -447,6 +447,7 @@
   /* ===== Redesign / Layout & Motion (Phase 0) ===== */
 
   --container-prose:    680px;
+  --container-page:     1120px;
   --container-default:  1200px;
   /* --max-width-outer (1440px) already exists — reuse for full-bleed */
 

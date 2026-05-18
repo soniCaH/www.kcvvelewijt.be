@@ -1,5 +1,19 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { PullQuote } from "./PullQuote";
+import { fixtureImage } from "@test-fixtures/images";
+import { PullQuote, type PullQuoteProps } from "./PullQuote";
+import { SubjectAvatar } from "../SubjectAvatar";
+
+// Story-only args used for the avatar-layout variants. Serializable so
+// the Storybook controls panel can introspect every field — `avatarSlot`
+// itself is a `ReactNode` on `PullQuoteProps` and would otherwise be
+// uneditable through Controls. The render function below maps these
+// flat fields into a `<SubjectAvatar />` and forwards everything else
+// to `<PullQuote>`.
+interface AvatarStoryArgs extends Omit<PullQuoteProps, "avatarSlot"> {
+  avatarFirstName: string;
+  avatarFullName?: string;
+  avatarPhotoUrl?: string;
+}
 
 const meta = {
   title: "UI/PullQuote",
@@ -17,6 +31,28 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+type AvatarStory = StoryObj<AvatarStoryArgs>;
+
+function renderWithAvatar({
+  avatarFirstName,
+  avatarFullName,
+  avatarPhotoUrl,
+  ...pullQuoteProps
+}: AvatarStoryArgs) {
+  return (
+    <PullQuote
+      {...pullQuoteProps}
+      avatarSlot={
+        <SubjectAvatar
+          firstName={avatarFirstName}
+          fullName={avatarFullName}
+          photoUrl={avatarPhotoUrl}
+          scale="attribution"
+        />
+      }
+    />
+  );
+}
 
 export const Playground: Story = {
   args: {
@@ -77,4 +113,54 @@ export const WithEmphasis: Story = {
     emphasis: { text: "tribune die zingt" },
     children: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
   },
+};
+
+// 5.d2-locked attribution layout: 64px photo + italic display name +
+// mono caps role/source line beneath. The avatar slot is opt-in — the
+// caller supplies <SubjectAvatar scale="attribution" /> with the
+// subject's photo and first name. Args are flat + serializable so the
+// Controls panel can edit each field; `renderWithAvatar` composes them.
+export const WithSubjectAvatar: AvatarStory = {
+  args: {
+    attribution: { name: "Maxim Breugelmans", role: "A-PLOEG" },
+    children: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+    avatarFirstName: "Maxim",
+    avatarFullName: "Maxim Breugelmans",
+    avatarPhotoUrl: fixtureImage("player-portrait", 0),
+  },
+  render: renderWithAvatar,
+};
+
+// Avatar slot when the subject has no photo — the monogram fallback
+// fills the 64px disc. Same layout, just the photo path falls through
+// to the monogram path.
+export const WithSubjectAvatarMonogramFallback: AvatarStory = {
+  args: {
+    attribution: { name: "Anouk De Wit", role: "BESTUUR" },
+    children:
+      "We bouwen geen succesverhaal in één seizoen — we bouwen een club voor de volgende vijftig jaar.",
+    avatarFirstName: "Anouk",
+    avatarFullName: "Anouk De Wit",
+  },
+  render: renderWithAvatar,
+};
+
+// Avatar slot on the ink tone — confirms the cream typography on the
+// dark card still reads correctly inside the new two-line attribution
+// stack.
+export const WithSubjectAvatarToneInk: AvatarStory = {
+  args: {
+    tone: "ink",
+    attribution: {
+      name: "Wim Govaerts",
+      role: "TRAINER",
+      source: "SEIZOEN 25-26",
+    },
+    children:
+      "We hebben de kleedkamer in de derde minuut weer wakker gekregen.",
+    avatarFirstName: "Wim",
+    avatarFullName: "Wim Govaerts",
+    avatarPhotoUrl: fixtureImage("staff-portrait", 0),
+  },
+  render: renderWithAvatar,
 };
