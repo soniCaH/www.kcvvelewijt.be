@@ -80,6 +80,13 @@ export const ARTICLE_BY_SLUG_QUERY =
   "titleRich": title,
   "lead": coalesce(lead, ""),
   "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  // 5.B.int (#1795) — author + photographer drive <EditorialByline>'s
+  // "Door {author}" line (fallback "Door redactie") and the
+  // <ArticleCredits> Door / Beeld rows. Both fields are optional on
+  // the schema; coalesce to empty string so downstream consumers can
+  // trim-and-check without nullable guards.
+  "author": coalesce(author, ""),
+  "photographer": coalesce(photographer, ""),
   metaDescription,
   "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",

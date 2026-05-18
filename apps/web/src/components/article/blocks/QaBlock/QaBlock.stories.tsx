@@ -68,18 +68,26 @@ export const TwoStandardPairs: Story = {
           _key: "pair-1",
           tag: "standard",
           question: "Wat is je eerste herinnering aan KCVV?",
-          answer: answer(
-            "Als U9 spelen op het A-terrein, nog met mijn grote broer in de dug-out. Ik weet nog dat het regende en dat ik dacht: ik wil hier nooit meer weg.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "Als U9 spelen op het A-terrein, nog met mijn grote broer in de dug-out. Ik weet nog dat het regende en dat ik dacht: ik wil hier nooit meer weg.",
+              ),
+            },
+          ],
         },
         {
           _key: "pair-2",
           tag: "standard",
           question:
             "En wat maakt KCVV anders dan de andere clubs waar je speelde?",
-          answer: answer(
-            "De mensen. Je speelt niet voor de voorzitter of de sponsor — je speelt voor de cafébaas die na de match weet dat je een mislukte pass gaf. Dat is de plezante compagnie.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "De mensen. Je speelt niet voor de voorzitter of de sponsor — je speelt voor de cafébaas die na de match weet dat je een mislukte pass gaf. Dat is de plezante compagnie.",
+              ),
+            },
+          ],
         },
       ],
     },
@@ -94,9 +102,13 @@ export const SinglePair: Story = {
           _key: "pair-1",
           tag: "standard",
           question: "Eén vraag, één antwoord — zonder rule eronder.",
-          answer: answer(
-            "Precies. Het 1 px `kcvv-gray-light` lijntje valt weg na de laatste pair.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "Precies. Het 1 px `kcvv-gray-light` lijntje valt weg na de laatste pair.",
+              ),
+            },
+          ],
         },
       ],
     },
@@ -112,57 +124,79 @@ export const MixedTagSuite: Story = {
           _key: "p1",
           tag: "standard",
           question: "Wat is je eerste herinnering aan KCVV?",
-          answer: answer("Als U9 spelen op het A-terrein, met de dug-out vol."),
+          respondents: [
+            {
+              answer: answer(
+                "Als U9 spelen op het A-terrein, met de dug-out vol.",
+              ),
+            },
+          ],
         },
         {
           _key: "p2",
           tag: "standard",
           question: "Welke coach heeft je het meest gevormd?",
-          answer: answer(
-            "De Presi. Niet omdat hij tactisch briljant was, maar omdat hij eerlijk was.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "De Presi. Niet omdat hij tactisch briljant was, maar omdat hij eerlijk was.",
+              ),
+            },
+          ],
         },
         {
           _key: "p3",
           tag: "key",
           question: "Je moment van de voorbije vijf jaar",
-          answer: answer(
-            "Eindrondewinst tegen Kraainem: thuis 3-0, met een waanzinnig promotiefeest.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "Eindrondewinst tegen Kraainem: thuis 3-0, met een waanzinnig promotiefeest.",
+              ),
+            },
+          ],
         },
         {
           _key: "p4",
           tag: "rapid-fire",
           question: "Koffie of thee?",
-          answer: answer("Koffie. Zwart."),
+          respondents: [{ answer: answer("Koffie. Zwart.") }],
         },
         {
           _key: "p5",
           tag: "rapid-fire",
           question: "Regen of sneeuw?",
-          answer: answer("Regen. Sneeuw verpest de bal."),
+          respondents: [{ answer: answer("Regen. Sneeuw verpest de bal.") }],
         },
         {
           _key: "p6",
           tag: "rapid-fire",
           question: "Rechter- of linkervoet?",
-          answer: answer("Rechts schot, links sturen."),
+          respondents: [{ answer: answer("Rechts schot, links sturen.") }],
         },
         {
           _key: "p7",
           tag: "quote",
           question: "(verborgen voor quote)",
-          answer: answer(
-            "Ik voetbal nog altijd met schrik in de buik — dat is het enige wat mij scherp houdt.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "Ik voetbal nog altijd met schrik in de buik — dat is het enige wat mij scherp houdt.",
+              ),
+            },
+          ],
         },
         {
           _key: "p8",
           tag: "standard",
           question: "Eén boodschap voor de supporters?",
-          answer: answer(
-            "Een club is maar zo sterk als haar supporters. Merci voor alles.",
-          ),
+          respondents: [
+            {
+              answer: answer(
+                "Een club is maar zo sterk als haar supporters. Merci voor alles.",
+              ),
+            },
+          ],
         },
       ],
     },

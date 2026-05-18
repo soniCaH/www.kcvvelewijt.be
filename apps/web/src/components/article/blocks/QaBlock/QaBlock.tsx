@@ -10,11 +10,8 @@ import { QaPairKey } from "./QaPairKey";
 import { QaPairQuote } from "./QaPairQuote";
 import { QaGroupRapidFire } from "./QaGroupRapidFire";
 
-export interface QaPairValue {
+export interface QaPairRespondentValue {
   _key?: string;
-  question?: string;
-  answer?: PortableTextBlock[];
-  tag?: string;
   /**
    * Points at the `_key` of one of `article.subjects[]`. Required on
    * multi-subject interviews' `key`/`quote` pairs; auto-resolved to
@@ -22,6 +19,23 @@ export interface QaPairValue {
    * `RespondentPicker` custom Studio input.
    */
   respondentKey?: string;
+  answer?: PortableTextBlock[];
+}
+
+export interface QaPairValue {
+  _key?: string;
+  question?: string;
+  tag?: string;
+  /**
+   * 5.B.int data shape — one question + one-or-more respondents, each
+   * carrying their own answer. The legacy single-respondent shape
+   * (top-level `answer` + `respondentKey`) was migrated into a
+   * 1-element array; see `qa-pair-respondents.ts`. The legacy renderer
+   * here flattens `respondents[0]` for the existing `standard` / `key`
+   * / `quote` / `rapid-fire` visual variants — multi-respondent
+   * rendering is handled by the new `<QARow>` in 5.A.2 territory.
+   */
+  respondents?: QaPairRespondentValue[];
 }
 
 export interface QaBlockValue {
@@ -121,6 +135,10 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
           i > 0 && prev?.kind === "standard" && unit.kind === "standard";
 
         if (unit.kind === "standard") {
+          // Legacy single-respondent path: flatten respondents[0] for
+          // the existing standard variant. Multi-respondent qaPairs are
+          // rendered via the new <QARow> in ArticleBody (5.A.2+).
+          const first = unit.pair.respondents?.[0];
           return (
             <Fragment key={unit.pair._key ?? `std-${i}`}>
               {needsRule && (
@@ -132,36 +150,38 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
               <QaPairStandard
                 index={unit.standardIdx}
                 question={unit.pair.question ?? ""}
-                answer={unit.pair.answer ?? []}
+                answer={first?.answer ?? []}
               />
             </Fragment>
           );
         }
 
         if (unit.kind === "key") {
+          const first = unit.pair.respondents?.[0];
           const respondent = resolvePairRespondent(
-            unit.pair.respondentKey,
+            first?.respondentKey,
             subjects,
           );
           return (
             <QaPairKey
               key={unit.pair._key ?? `key-${i}`}
               question={unit.pair.question ?? ""}
-              answer={unit.pair.answer ?? []}
+              answer={first?.answer ?? []}
               subject={respondent}
             />
           );
         }
 
         if (unit.kind === "quote") {
+          const first = unit.pair.respondents?.[0];
           const respondent = resolvePairRespondent(
-            unit.pair.respondentKey,
+            first?.respondentKey,
             subjects,
           );
           return (
             <QaPairQuote
               key={unit.pair._key ?? `quote-${i}`}
-              answer={unit.pair.answer ?? []}
+              answer={first?.answer ?? []}
               subject={respondent}
             />
           );

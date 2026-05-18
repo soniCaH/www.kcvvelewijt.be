@@ -3,11 +3,24 @@ import type { PortableTextBlock } from "@portabletext/react";
 /**
  * <QASectionDivider> — interview act-divider primitive.
  *
- * Composition:
- *   [1px ink rule]  ✦  {italic display title}  ✦  [1px ink rule]
- *                          AKTE 02 · DE OVERSTAP   (optional kicker)
+ * Two variants:
  *
- * Three-centerline alignment contract — must hold to within 1px:
+ *   - `variant="title"` (default) — major section break with title + rules +
+ *     `✦` glyphs (Phase 3-b lock). Composition:
+ *
+ *     [1px ink rule]  ✦  {italic display title}  ✦  [1px ink rule]
+ *                            AKTE 02 · DE OVERSTAP   (optional kicker)
+ *
+ *   - `variant="dotted"` (5.A.2 / 5.B.int) — thin dotted rule used as a
+ *     between-row separator inside `<QASection>`. No title, no glyph, no
+ *     kicker; just a centered ink-muted dotted line. Renders the same
+ *     `<aside role="separator">` shell so AT picks it up as a structural
+ *     break, with an `aria-label` falling back to the literal "Volgende
+ *     vraag" Dutch convention so screen readers don't read a nameless
+ *     separator.
+ *
+ * Three-centerline alignment contract for the `title` variant — must hold to
+ * within 1px:
  *   1. centerline of the 1px ink rules
  *   2. optical centre of the ✦ glyphs
  *   3. cap-height midpoint of the italic Freight Display title
@@ -30,16 +43,21 @@ interface TitleSpan {
   marks?: string[];
 }
 
+export type QASectionDividerVariant = "title" | "dotted";
+
 export interface QASectionDividerProps {
+  variant?: QASectionDividerVariant;
   /**
-   * Title rendered as Portable Text. Single-block constrained PT — text spans
-   * may carry the `accent` decorator. Spans without `accent` render plain ink
-   * italic; spans with `accent` render jersey-deep + font-weight 900.
+   * Title rendered as Portable Text. Single-block constrained PT — text
+   * spans may carry the `accent` decorator. Spans without `accent` render
+   * plain ink italic; spans with `accent` render jersey-deep + weight 900.
+   * Required when `variant` defaults to or is `"title"`. Ignored on
+   * `variant="dotted"`.
    */
-  title: PortableTextBlock[];
+  title?: PortableTextBlock[];
   /**
    * Optional mono caps act label rendered under the rule. Omit to drop the
-   * second row entirely.
+   * second row entirely. Ignored on `variant="dotted"`.
    */
   kicker?: string;
 }
@@ -54,7 +72,34 @@ function flattenTitle(blocks: PortableTextBlock[]): string {
     .trim();
 }
 
-export function QASectionDivider({ title, kicker }: QASectionDividerProps) {
+export function QASectionDivider({
+  variant = "title",
+  title,
+  kicker,
+}: QASectionDividerProps) {
+  if (variant === "dotted") {
+    return (
+      <aside
+        role="separator"
+        aria-label="Volgende vraag"
+        data-divider-variant="dotted"
+        className="mx-auto my-6 w-full max-w-[580px]"
+      >
+        <hr
+          aria-hidden="true"
+          className="border-ink-muted m-0 border-0 border-t border-dotted"
+        />
+      </aside>
+    );
+  }
+
+  if (!title) {
+    // Title variant requires PT — defensive return-null rather than crash
+    // when an upstream caller forgets the prop. The Studio's qaSectionDivider
+    // PT block validator ensures `title` is non-empty in production data.
+    return null;
+  }
+
   const block = title[0] as { children?: TitleSpan[] } | undefined;
   const spans = Array.isArray(block?.children) ? block.children : [];
   const plain = flattenTitle(title);
@@ -63,6 +108,7 @@ export function QASectionDivider({ title, kicker }: QASectionDividerProps) {
     <aside
       role="separator"
       aria-label={plain}
+      data-divider-variant="title"
       className="mx-auto my-10 w-full max-w-[580px]"
     >
       <div className="flex items-center leading-none">

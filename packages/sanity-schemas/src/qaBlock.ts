@@ -1,6 +1,54 @@
 import {defineField, defineType} from 'sanity'
 import {validateRespondentKey} from './validation/respondent-key'
 
+/**
+ * One respondent's answer inside a qaPair. The 5.B.int data model
+ * treats a qaPair as one question + one-or-more `respondents`, each
+ * carrying their own respondent key + Portable Text answer.
+ *
+ * Validation on `respondentKey` is intentionally light here — the
+ * outer qaPair's validator pulls `respondents[]` apart and reuses
+ * `validateRespondentKey` against the article-level `subjects[]`
+ * (where the `tag` lives) so we don't have to walk up the path here.
+ */
+export const qaPairRespondent = defineType({
+  name: 'qaPairRespondent',
+  title: 'Respondent',
+  type: 'object',
+  fields: [
+    defineField({
+      name: 'respondentKey',
+      title: 'Respondent',
+      description: 'Kies wie dit antwoord geeft (referentie naar article.subjects).',
+      type: 'string',
+    }),
+    defineField({
+      name: 'answer',
+      title: 'Answer',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          // Design §6.1: answer is flat prose — no headings, no lists,
+          // no images. Default marks (bold, italic, underline, code,
+          // link) are retained.
+          styles: [{title: 'Normal', value: 'normal'}],
+          lists: [],
+        },
+      ],
+      validation: (r) => r.required(),
+    }),
+  ],
+  preview: {
+    select: {respondentKey: 'respondentKey'},
+    prepare({respondentKey}) {
+      return {
+        title: respondentKey ? `Respondent: ${respondentKey}` : 'Respondent — geen',
+      }
+    },
+  },
+})
+
 export const qaPair = defineType({
   name: 'qaPair',
   title: 'Q&A pair',
@@ -13,20 +61,42 @@ export const qaPair = defineType({
       validation: (r) => r.required().max(240),
     }),
     defineField({
-      name: 'answer',
-      title: 'Answer',
+      name: 'respondents',
+      title: 'Respondents',
+      description:
+        'Eén of meerdere sprekers met elk hun eigen antwoord. Voor een gewoon Q&A: één respondent. Voor een duo-vraag: voeg meerdere toe.',
       type: 'array',
-      of: [
-        {
-          type: 'block',
-          // Design §6.1: answer is flat prose — no headings, no lists, no
-          // images. Default marks (bold, italic, underline, code, link) are
-          // retained to support emphasis and inline links.
-          styles: [{title: 'Normal', value: 'normal'}],
-          lists: [],
-        },
-      ],
-      validation: (r) => r.required(),
+      of: [{type: 'qaPairRespondent'}],
+      validation: (r) =>
+        r
+          .required()
+          .min(1)
+          .error('Minstens één respondent vereist.')
+          .custom((val, ctx) => {
+            // Re-run the legacy respondent-key validator per entry: the
+            // `key`/`quote` tags still gate the "respondent required"
+            // rule when the article has 2+ subjects.
+            if (!Array.isArray(val) || val.length === 0) return true
+            const document = ctx.document as
+              | {articleType?: string; subjects?: Array<{_key?: string}>}
+              | undefined
+            const parent = ctx.parent as {tag?: string} | undefined
+            const errors: Array<{message: string; path: [number, 'respondentKey']}> = []
+            for (const [i, entry] of val.entries()) {
+              const e = entry as {respondentKey?: unknown} | undefined
+              const result = validateRespondentKey(e?.respondentKey, {
+                parent,
+                document,
+              })
+              if (typeof result === 'string') {
+                errors.push({
+                  message: result,
+                  path: [i, 'respondentKey'],
+                })
+              }
+            }
+            return errors.length > 0 ? errors : true
+          }),
     }),
     defineField({
       name: 'tag',
@@ -41,34 +111,6 @@ export const qaPair = defineType({
         ],
       },
       initialValue: 'standard',
-    }),
-    defineField({
-      name: 'respondentKey',
-      title: 'Respondent',
-      description:
-        "Voor duo- en panel-interviews: kies wie dit gezegd heeft. Verplicht op key- en quote-pairs wanneer het artikel 2 of meer subjects heeft. Verborgen op standard en rapid-fire.",
-      // String storing the `_key` of one of `article.subjects[]`. Cannot be a
-      // Sanity reference — `subject` is an embedded object type, not a
-      // document, so references can't target it. Client-side resolution
-      // happens via `article.subjects.find(s => s._key === pair.respondentKey)`
-      // at the repository boundary. The custom Studio input (`RespondentPicker`
-      // in `@kcvv/sanity-studio`) reads document.subjects[] and renders a
-      // dropdown scoped to the article's subjects — editors never pick from
-      // the global player pool.
-      type: 'string',
-      hidden: ({parent}) => {
-        const tag = (parent as {tag?: string} | undefined)?.tag ?? 'standard'
-        return !['key', 'quote'].includes(tag)
-      },
-      validation: (r) =>
-        r.custom((val, ctx) =>
-          validateRespondentKey(val, {
-            parent: ctx.parent as {tag?: string} | undefined,
-            document: ctx.document as
-              | {articleType?: string; subjects?: Array<{_key?: string}>}
-              | undefined,
-          }),
-        ),
     }),
   ],
   preview: {

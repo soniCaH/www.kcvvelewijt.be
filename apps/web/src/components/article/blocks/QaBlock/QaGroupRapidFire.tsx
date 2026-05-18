@@ -42,7 +42,13 @@ export const QaGroupRapidFire = ({ pairs }: QaGroupRapidFireProps) => {
                 {pair.question ?? ""}
               </p>
               <div className="font-body text-kcvv-gray-dark text-base font-normal [&>p+p]:mt-3">
-                <PortableText value={pair.answer ?? []} />
+                {/*
+                  Rapid-fire is intentionally single-respondent — flatten
+                  respondents[0] to keep the legacy layout. Multi-
+                  respondent rapid-fire would need its own visual
+                  treatment that doesn't exist yet.
+                */}
+                <PortableText value={pair.respondents?.[0]?.answer ?? []} />
               </div>
             </div>
           </Fragment>

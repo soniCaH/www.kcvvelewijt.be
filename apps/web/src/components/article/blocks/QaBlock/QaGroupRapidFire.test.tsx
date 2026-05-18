@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import type { PortableTextBlock } from "@portabletext/react";
 import { QaGroupRapidFire } from "./QaGroupRapidFire";
 
-const answer = (text: string): PortableTextBlock[] => [
+const answerBlocks = (text: string): PortableTextBlock[] => [
   {
     _type: "block",
     _key: `b-${text}`,
@@ -11,6 +11,14 @@ const answer = (text: string): PortableTextBlock[] => [
     markDefs: [],
     children: [{ _type: "span", _key: `s-${text}`, text, marks: [] }],
   },
+];
+
+// 5.B.int respondents[] shape — one entry per pair for the legacy
+// rapid-fire renderer (which is single-respondent by design).
+const respondents = (
+  text: string,
+): { _key: string; answer: PortableTextBlock[] }[] => [
+  { _key: `r-${text}`, answer: answerBlocks(text) },
 ];
 
 describe("QaGroupRapidFire", () => {
@@ -22,19 +30,19 @@ describe("QaGroupRapidFire", () => {
             _key: "rf-1",
             tag: "rapid-fire",
             question: "Koffie of thee?",
-            answer: answer("Koffie. Zwart."),
+            respondents: respondents("Koffie. Zwart."),
           },
           {
             _key: "rf-2",
             tag: "rapid-fire",
             question: "Messi of Ronaldo?",
-            answer: answer("Messi."),
+            respondents: respondents("Messi."),
           },
           {
             _key: "rf-3",
             tag: "rapid-fire",
             question: "Regen of sneeuw?",
-            answer: answer("Regen."),
+            respondents: respondents("Regen."),
           },
         ]}
       />,
@@ -76,25 +84,25 @@ describe("QaGroupRapidFire", () => {
             _key: "rf-1",
             tag: "rapid-fire",
             question: "Q1",
-            answer: answer("A1"),
+            respondents: respondents("A1"),
           },
           {
             _key: "rf-2",
             tag: "rapid-fire",
             question: "Q2",
-            answer: answer("A2"),
+            respondents: respondents("A2"),
           },
           {
             _key: "rf-3",
             tag: "rapid-fire",
             question: "Q3",
-            answer: answer("A3"),
+            respondents: respondents("A3"),
           },
           {
             _key: "rf-4",
             tag: "rapid-fire",
             question: "Q4",
-            answer: answer("A4"),
+            respondents: respondents("A4"),
           },
         ]}
       />,

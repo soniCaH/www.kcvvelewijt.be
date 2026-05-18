@@ -14,7 +14,7 @@ export type {RespondentKeyContext} from './validation/respondent-key'
 export {article} from './article'
 export {articleImage} from './articleImage'
 export {videoBlock} from './videoBlock'
-export {qaBlock, qaPair} from './qaBlock'
+export {qaBlock, qaPair, qaPairRespondent} from './qaBlock'
 export {qaSectionDivider} from './blocks/qaSectionDivider'
 export {transferFact} from './transferFact'
 export {eventFact} from './eventFact'
@@ -38,7 +38,7 @@ import {responsibility} from './responsibility'
 import {article} from './article'
 import {articleImage} from './articleImage'
 import {videoBlock} from './videoBlock'
-import {qaBlock, qaPair} from './qaBlock'
+import {qaBlock, qaPair, qaPairRespondent} from './qaBlock'
 import {qaSectionDivider} from './blocks/qaSectionDivider'
 import {transferFact} from './transferFact'
 import {eventFact} from './eventFact'
@@ -66,6 +66,7 @@ export const schemaTypes = [
   videoBlock,
   qaBlock,
   qaPair,
+  qaPairRespondent,
   qaSectionDivider,
   transferFact,
   eventFact,
