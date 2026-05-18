@@ -66,21 +66,11 @@ export const ColorVariants: Story = {
   ),
 };
 
-// Multi-line wrapping is a known limitation deferred to Phase 1+ — the CSS
-// background-image approach lays a single horizontal stroke across the
-// highlighted span's bounding box and does not repeat per visual line.
-// Story renders without crashing but the visual is intentionally not
-// VR-baselined (parameters.vr.disable).
-export const MultiLineUnsupported: Story = {
-  parameters: {
-    // vr.disable: known-broken visual (multi-line wrapping unsupported);
-    // story renders without crashing so vr-skip doesn't apply.
-    // Repro: render <HighlighterStroke> over wrapped text; stroke fails to
-    // repeat per visual line.
-    // Approved by: PR #1519 code review 2026-04-28
-    // Re-evaluate: 2026-10-01 (or earlier when #1543 multi-line support ships)
-    vr: { disable: true },
-  },
+// Multi-line wrapping support (#1543). The implementation uses CSS
+// `box-decoration-break: clone` so the stroke clones per visual line
+// without JavaScript. VR baseline captures the multi-line render at
+// max-w-md to lock the wrap geometry.
+export const MultiLineWrapping: Story = {
   // children is required by the Story type but the render() supplies its own.
   args: { children: "" },
   render: () => (
@@ -90,7 +80,7 @@ export const MultiLineUnsupported: Story = {
         <HighlighterStroke>
           erg lang gemarkeerd stuk dat over meerdere regels breekt
         </HighlighterStroke>{" "}
-        ziet er nu nog niet correct uit.
+        wordt nu correct gemarkeerd per regel.
       </h2>
     </div>
   ),

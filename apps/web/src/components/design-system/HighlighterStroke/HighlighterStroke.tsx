@@ -27,6 +27,11 @@ export function HighlighterStroke({
         backgroundPosition: "0 88%",
         backgroundSize: "100% 0.4em",
         paddingBottom: "0.1em",
+        // box-decoration-break: clone makes the browser repeat the
+        // background per visual line when the span wraps — see PRD §10 Q3
+        // ADR (closes #1543). Webkit prefix kept for older Safari.
+        WebkitBoxDecorationBreak: "clone",
+        boxDecorationBreak: "clone",
       }}
     >
       {children}
