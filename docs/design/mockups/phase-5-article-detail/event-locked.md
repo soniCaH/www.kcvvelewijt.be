@@ -30,7 +30,7 @@ This drill is **body-only**. The event hero (typographic kicker + title) and the
 
 **Badge in card head, CTA hidden.** When the event has passed (`endDate < today`, or `date < today` if no endDate), the EventDetailBlock:
 
-- Replaces the kicker `competitionTag` pill with a muted **`Afgelopen`** pill in the same slot. Same vocabulary as the upcoming-event pill — different label.
+- Replaces the head's **tag pill** (driven by `competitionTag` for upcoming events) with a muted **`Afgelopen`** pill in the same slot. Same vocabulary as the upcoming-event tag pill — different label.
 - **Hides the CTA button** entirely (no `Bestel je tafel` link rendered).
 - **Keeps sessions / location / address / capacity / note visible** — the card becomes a historical record of what the event was. The article body around it remains as written.
 
