@@ -17,6 +17,8 @@ import {
   resolveSubject,
   type IndexedSubject,
 } from "@/components/article/SubjectAttribution";
+import { TransferFactCard } from "@/components/article/blocks/TransferFactCard";
+import type { TransferFactValue } from "@/components/article/blocks/TransferFact/types";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -116,9 +118,13 @@ function extractBlockText(block: PortableTextBlock): string {
  * empty `pullQuote` block shouldn't get an orphan closer below blank
  * space.
  *
- * Known block types: `block` (paragraph / heading — empty = no text),
- * `pullQuote` (empty = no `body`). Unknown types are assumed to render
- * (forward-compat for future serializers like qaBlock / transferFact).
+ * Known block types:
+ *  - `block` (paragraph / heading — empty = no text),
+ *  - `pullQuote` (empty = no `body`),
+ *  - `transferFact` (empty = no `playerName`).
+ *
+ * Unknown types are assumed to render (forward-compat for future
+ * serializers like qaBlock, eventFact).
  */
 function blockHasRenderableOutput(block: PortableTextBlock): boolean {
   if (block._type === "block") {
@@ -127,7 +133,115 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
   if (block._type === "pullQuote") {
     return ((block as PullQuoteBlock).body ?? "").trim().length > 0;
   }
+  if (block._type === "transferFact") {
+    return ((block as TransferFactValue).playerName ?? "").trim().length > 0;
+  }
   return true;
+}
+
+/**
+ * Segment the body content into PT-block runs and consecutive-
+ * transferFact groups, per the 5.d-tra adjacency rule:
+ *
+ *   - One transferFact alone → renders as a 1-up `<TransferFactCard>` at
+ *     prose width.
+ *   - Two-or-more consecutive transferFacts → renders as a 2-up grid
+ *     (trailing odd card spans both columns to read as 1-up below).
+ *   - Any non-transferFact block flushes the current group.
+ *
+ * Editor controls placement entirely; the renderer's only adjacency-
+ * aware behaviour is "consecutive transferFacts → grouped output".
+ */
+type ArticleBodySegment =
+  | { kind: "pt"; key: string; blocks: PortableTextBlock[] }
+  | { kind: "transfer-facts"; key: string; facts: TransferFactValue[] };
+
+function buildSegments(blocks: PortableTextBlock[]): ArticleBodySegment[] {
+  const segments: ArticleBodySegment[] = [];
+  let ptBuffer: PortableTextBlock[] = [];
+  let tfBuffer: TransferFactValue[] = [];
+  let idx = 0;
+
+  const flushPt = () => {
+    if (ptBuffer.length > 0) {
+      segments.push({ kind: "pt", key: `pt-${idx++}`, blocks: ptBuffer });
+      ptBuffer = [];
+    }
+  };
+  const flushTf = () => {
+    if (tfBuffer.length > 0) {
+      segments.push({
+        kind: "transfer-facts",
+        key: `tf-${idx++}`,
+        facts: tfBuffer,
+      });
+      tfBuffer = [];
+    }
+  };
+
+  for (const block of blocks) {
+    if (block._type === "transferFact") {
+      const fact = block as TransferFactValue;
+      // Skip empty facts so an unfinished editor draft doesn't render a
+      // hollow card shell. Matches the `blockHasRenderableOutput` guard
+      // that already controls EndMark.
+      if (!fact.playerName?.trim()) continue;
+      flushPt();
+      tfBuffer.push(fact);
+      continue;
+    }
+    flushTf();
+    ptBuffer.push(block);
+  }
+  flushPt();
+  flushTf();
+  return segments;
+}
+
+function TransferFactGroup({ facts }: { facts: TransferFactValue[] }) {
+  if (facts.length === 0) return null;
+  if (facts.length === 1) {
+    return (
+      <div data-transfer-fact-group="single" className="my-8 w-full">
+        <TransferFactCard fact={facts[0]!} />
+      </div>
+    );
+  }
+  // 2+ facts → 2-up grid. Trailing odd card spans both columns so it
+  // reads as a centered 1-up block beneath the grid (per 5.d-tra lock).
+  const isOddCount = facts.length % 2 === 1;
+  return (
+    <div
+      data-transfer-fact-group="grid"
+      data-transfer-fact-count={facts.length}
+      className="my-8 grid grid-cols-1 gap-4 md:grid-cols-2"
+    >
+      {facts.map((fact, i) => {
+        const isLast = i === facts.length - 1;
+        const fullWidth = isOddCount && isLast;
+        return (
+          <TransferFactCard
+            key={fact._key ?? `${i}-${fact.playerName ?? "fact"}`}
+            fact={fact}
+            className={cn(fullWidth ? "md:col-span-2" : "")}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+function renderSegments(
+  segments: ArticleBodySegment[],
+  components: PortableTextComponents,
+): ReactNode {
+  return segments.map((seg) =>
+    seg.kind === "pt" ? (
+      <PortableText key={seg.key} value={seg.blocks} components={components} />
+    ) : (
+      <TransferFactGroup key={seg.key} facts={seg.facts} />
+    ),
+  );
 }
 
 function renderPullQuote(
@@ -270,15 +384,15 @@ export function ArticleBody({
         className="mx-auto w-full"
         style={{ maxWidth: "var(--container-prose)" }}
       >
-        {beforeDropCap.length > 0 ? (
-          <PortableText value={beforeDropCap} components={components} />
-        ) : null}
+        {beforeDropCap.length > 0
+          ? renderSegments(buildSegments(beforeDropCap), components)
+          : null}
         {hasDropCap && dropCapText.length > 0 ? (
           <DropCapParagraph tone="ink">{dropCapText}</DropCapParagraph>
         ) : null}
-        {afterDropCap.length > 0 ? (
-          <PortableText value={afterDropCap} components={components} />
-        ) : null}
+        {afterDropCap.length > 0
+          ? renderSegments(buildSegments(afterDropCap), components)
+          : null}
         {hasRenderableBody ? <EndMark /> : null}
       </div>
     </div>

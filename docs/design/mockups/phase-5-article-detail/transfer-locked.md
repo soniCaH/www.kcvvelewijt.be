@@ -52,9 +52,16 @@ Each compact card composes:
 - **Player name:** italic Freight Display 900, 16px.
 - **Context line:** mono caps, 9px, ink-muted — concatenates `position` + `·` + `age + " jaar"` when both present.
 - **From → to line:** italic serif, 13px — direction-dependent:
-  - `incoming`: `otherClubName → KCVV · #{jersey}`
-  - `outgoing`: `KCVV · #{old jersey} → otherClubName`
+  - `incoming`: `{otherClubLogo 12px} otherClubName → KCVV · #{jersey}`
+  - `outgoing`: `KCVV · #{old jersey} → {otherClubLogo 12px} otherClubName`
   - `extension`: `A-kern · #{jersey} · tot {until}`
+- **Inline crest:** when `transferFact.otherClubLogo` is populated, a 12px
+  baseline-aligned crest (`vertical-align: -1px`) precedes the other-club
+  name in the route line — sized to match the italic serif cap-height.
+  Falls back to text-only when the field is empty. Decision taken during
+  #1797 implementation review (Variant A out of three) — distinguishes
+  body cards from each other at a glance without duplicating the hero
+  strip vocabulary (which uses a larger crest inside a from/to pill).
 
 Card is non-interactive (no link wrapper) — the transferFact block is content, not a navigation target.
 

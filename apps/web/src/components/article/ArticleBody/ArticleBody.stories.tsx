@@ -81,13 +81,38 @@ function paragraphWithAccent(
   } as PortableTextBlock;
 }
 
+// transferFact PT block fixture. The double cast through `unknown` is
+// required because the placeholder shape lacks the structural `children`
+// of a real PortableText block; PortableText still accepts the value at
+// runtime because it routes by `_type` before reading any block fields.
+function transferFactBlock(args: {
+  _key: string;
+  direction?: "incoming" | "outgoing" | "extension";
+  playerName: string;
+  position?: string;
+  age?: number;
+  otherClubName?: string;
+  otherClubLogoUrl?: string;
+  kcvvContext?: string;
+  until?: string;
+}): PortableTextBlock {
+  return {
+    _type: "transferFact",
+    _key: args._key,
+    direction: args.direction ?? "incoming",
+    playerName: args.playerName,
+    position: args.position,
+    age: args.age,
+    otherClubName: args.otherClubName,
+    otherClubLogoUrl: args.otherClubLogoUrl,
+    kcvvContext: args.kcvvContext,
+    until: args.until,
+  } as unknown as PortableTextBlock;
+}
+
 // pullQuote PT block fixture. The renderer consumes `body` plus either
 // `respondentKey` (when a KCVV subject is the speaker) or
-// `externalName`/`externalRole`/`externalSource` (for non-subject
-// quotes). The double cast through `unknown` is required because the
-// placeholder shape lacks the structural `children` of a real PortableText
-// block; PortableText still accepts the value at runtime because it routes
-// by `_type` before reading any block fields.
+// `externalName`/`externalRole`/`externalSource` (for non-subject quotes).
 function pullQuoteBlock(
   body: string,
   extras: {
@@ -230,6 +255,147 @@ const WITH_PULL_QUOTE_SUBJECTS = [
   },
 ];
 
+// Transfer-article body with 4 consecutive `transferFact` PT blocks
+// renders as a 2-up grid (adjacency rule). The lead paragraph and the
+// closing paragraph drop in around the group — verifies the segmenter
+// correctly splits PT runs from transferFact runs and flushes both.
+const WITH_TRANSFER_FACTS_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Vier nieuwe versterkingen voor de A-kern. Het clubbestuur sluit de wintermercato af met een mix van ervaring en jeugd.",
+    "p-lead-transfer",
+  ),
+  transferFactBlock({
+    _key: "tf-1",
+    direction: "incoming",
+    playerName: "Joren De Smet",
+    position: "Middenvelder",
+    age: 19,
+    otherClubName: "Diest",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-rouge.svg",
+    kcvvContext: "#14",
+  }),
+  transferFactBlock({
+    _key: "tf-2",
+    direction: "incoming",
+    playerName: "Maxim Breugelmans",
+    position: "Spits",
+    age: 21,
+    otherClubName: "Tienen",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-bleu.svg",
+    kcvvContext: "#9",
+  }),
+  transferFactBlock({
+    _key: "tf-3",
+    direction: "outgoing",
+    playerName: "Bram Vanhoutte",
+    position: "Centrale verdediger",
+    age: 28,
+    otherClubName: "Aarschot",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-vert.svg",
+    kcvvContext: "#5",
+  }),
+  transferFactBlock({
+    _key: "tf-4",
+    direction: "extension",
+    playerName: "Niels Geukens",
+    position: "Aanvoerder",
+    age: 26,
+    kcvvContext: "#11",
+    until: "juni 2028",
+  }),
+  paragraph(
+    "Met deze laatste handtekeningen is de kern definitief rond voor de terugronde. Trainer Govaerts spreekt van een evenwichtige selectie.",
+    "p-close-transfer",
+  ),
+];
+
+// Single transferFact in a transfer article — renders as a 1-up card at
+// prose width, isolated between paragraphs. Verifies the segmenter's
+// single-fact path.
+const SINGLE_TRANSFER_FACT_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Eén nieuwe handtekening kleurt de wintermercato van KCVV Elewijt.",
+    "p-single-lead",
+  ),
+  transferFactBlock({
+    _key: "tf-solo",
+    direction: "incoming",
+    playerName: "Daan Permentier",
+    position: "Linksachter",
+    age: 22,
+    otherClubName: "Boortmeerbeek",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-rouge.svg",
+    kcvvContext: "#3",
+  }),
+  paragraph(
+    "Permentier tekent voor anderhalf seizoen en sluit volgende week aan op de training.",
+    "p-single-close",
+  ),
+];
+
+// Two-consecutive transferFacts — even-count branch of the segmenter.
+// Both cards render at single-column width inside a 2-up grid (no
+// trailing-odd full-width).
+const TWO_CONSECUTIVE_TRANSFER_FACTS_CONTENT: PortableTextBlock[] = [
+  paragraph("Twee nieuwe gezichten op de Driesstraat.", "p-two-lead"),
+  transferFactBlock({
+    _key: "tf-two-1",
+    direction: "incoming",
+    playerName: "Lars Janssens",
+    position: "Vleugelaanvaller",
+    age: 20,
+    otherClubName: "Wespelaar",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-bleu.svg",
+    kcvvContext: "#7",
+  }),
+  transferFactBlock({
+    _key: "tf-two-2",
+    direction: "incoming",
+    playerName: "Tom Verhaegen",
+    position: "Doelman",
+    age: 25,
+    otherClubName: "Tienen",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-vert.svg",
+    kcvvContext: "#1",
+  }),
+];
+
+// Three-consecutive transferFacts — odd-count branch. First two cards
+// occupy the 2-up grid; the third (trailing odd) spans both columns and
+// reads as a centered 1-up block beneath the grid.
+const THREE_CONSECUTIVE_TRANSFER_FACTS_CONTENT: PortableTextBlock[] = [
+  paragraph("Drie aanwinsten ronden de winterperiode af.", "p-three-lead"),
+  transferFactBlock({
+    _key: "tf-three-1",
+    direction: "incoming",
+    playerName: "Sam De Coninck",
+    position: "Linksback",
+    age: 21,
+    otherClubName: "Aarschot",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-rouge.svg",
+    kcvvContext: "#3",
+  }),
+  transferFactBlock({
+    _key: "tf-three-2",
+    direction: "incoming",
+    playerName: "Jelle Maes",
+    position: "Spits",
+    age: 23,
+    otherClubName: "Boortmeerbeek",
+    otherClubLogoUrl: "/images/logos/clubs/dummy-bleu.svg",
+    kcvvContext: "#10",
+  }),
+  transferFactBlock({
+    _key: "tf-three-3",
+    direction: "extension",
+    playerName: "Niels Geukens",
+    position: "Aanvoerder",
+    age: 26,
+    kcvvContext: "#11",
+    until: "juni 2028",
+  }),
+];
+
 export const Short: Story = {
   args: {
     content: SHORT_CONTENT,
@@ -292,6 +458,72 @@ export const NoImages: Story = {
       description: {
         story:
           "Same fixture as Long, framed as the no-images edge case. The shell never emits image blocks in #1792; image-block serializers (articleImage, TapedFigure) wire in 5.A.2 / 5.B.*. This story confirms that an image-free body still reads as long-form editorial.",
+      },
+    },
+  },
+};
+
+// Transfer-article body with a 4-fact consecutive group → renders as a
+// 2-up grid (adjacency rule from the 5.d-tra lock). The first transferFact
+// in a real transfer article powers the hero via <TransferFactStrip>; this
+// story isolates the body-level grouping behaviour.
+export const WithTransferFacts: Story = {
+  args: {
+    content: WITH_TRANSFER_FACTS_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Transfer-article body composition. Four consecutive `transferFact` PT blocks render as a `<TransferFactGroup variant="grid">` (2-up grid). The first transferFact in a production transfer article is consumed by `<TransferFactStrip>` in the hero (Phase 3-b R1.5) and never reaches `<ArticleBody>`; this story exercises the body-level adjacency rule for additional facts beyond the first.',
+      },
+    },
+  },
+};
+
+// Single transferFact in the body → 1-up card at prose width. Verifies
+// that an isolated fact (no adjacent siblings) renders without the
+// 2-up grid layout.
+export const WithSingleTransferFact: Story = {
+  args: {
+    content: SINGLE_TRANSFER_FACT_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Isolated `transferFact` between paragraphs → single 1-up card. The segmenter doesn't promote a lone fact into the grid layout.",
+      },
+    },
+  },
+};
+
+// Two consecutive transferFacts — even-count branch of the segmenter.
+export const WithTwoConsecutiveTransferFacts: Story = {
+  args: {
+    content: TWO_CONSECUTIVE_TRANSFER_FACTS_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Two consecutive `transferFact` blocks → 2-up grid with both cards at single-column width. Verifies the even-count branch of the adjacency rule (no trailing-odd full-width).",
+      },
+    },
+  },
+};
+
+// Three consecutive transferFacts — odd-count branch. The trailing card
+// spans both columns to read as a centered 1-up block beneath the grid.
+export const WithThreeConsecutiveTransferFacts: Story = {
+  args: {
+    content: THREE_CONSECUTIVE_TRANSFER_FACTS_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Three consecutive `transferFact` blocks → 2-up grid with the first two cards in a row and the third card spanning both columns (trailing-odd full-width). Exercises the `md:col-span-2` branch of `<TransferFactGroup>`.",
       },
     },
   },

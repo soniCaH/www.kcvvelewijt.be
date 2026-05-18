@@ -23,6 +23,27 @@ function heading(text: string, level: "h2" | "h3" = "h2"): PortableTextBlock {
   } as PortableTextBlock;
 }
 
+function transferFactBlock(
+  overrides: {
+    _key?: string;
+    direction?: "incoming" | "outgoing" | "extension";
+    playerName?: string;
+    otherClubName?: string;
+    kcvvContext?: string;
+    until?: string;
+  } = {},
+): PortableTextBlock {
+  return {
+    _type: "transferFact",
+    _key: overrides._key ?? `tf-${overrides.playerName ?? "x"}`,
+    direction: overrides.direction ?? "incoming",
+    playerName: overrides.playerName ?? "Joren De Smet",
+    otherClubName: overrides.otherClubName ?? "Diest",
+    kcvvContext: overrides.kcvvContext ?? "#14",
+    until: overrides.until,
+  } as unknown as PortableTextBlock;
+}
+
 function paragraphWithAccent(
   plain: string,
   accented: string,
@@ -332,6 +353,107 @@ describe("<ArticleBody>", () => {
       expect(
         container.querySelector('[data-pull-quote-tone="ink"]'),
       ).not.toBeNull();
+    });
+  });
+
+  describe("transferFact adjacency grouping", () => {
+    it("renders an isolated transferFact as a 1-up single group", () => {
+      const content = [
+        paragraph("Lead-in paragraph."),
+        transferFactBlock({ playerName: "Joren De Smet" }),
+        paragraph("Closing paragraph."),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const groups = container.querySelectorAll("[data-transfer-fact-group]");
+      expect(groups.length).toBe(1);
+      expect(groups[0]?.getAttribute("data-transfer-fact-group")).toBe(
+        "single",
+      );
+      expect(
+        container.querySelectorAll('[data-transfer-fact-card="true"]').length,
+      ).toBe(1);
+    });
+
+    it("renders two consecutive transferFacts as a 2-up grid group", () => {
+      const content = [
+        paragraph("Lead-in paragraph."),
+        transferFactBlock({ _key: "tf-a", playerName: "Joren De Smet" }),
+        transferFactBlock({ _key: "tf-b", playerName: "Bram Vanhoutte" }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const groups = container.querySelectorAll("[data-transfer-fact-group]");
+      expect(groups.length).toBe(1);
+      expect(groups[0]?.getAttribute("data-transfer-fact-group")).toBe("grid");
+      expect(groups[0]?.getAttribute("data-transfer-fact-count")).toBe("2");
+      const cards = container.querySelectorAll(
+        '[data-transfer-fact-card="true"]',
+      );
+      expect(cards.length).toBe(2);
+      // Neither card should span both columns when the count is even.
+      const spans = container.querySelectorAll(".md\\:col-span-2");
+      expect(spans.length).toBe(0);
+    });
+
+    it("flags the trailing odd card with md:col-span-2 in a 3-up group", () => {
+      const content = [
+        paragraph("Lead-in."),
+        transferFactBlock({ _key: "tf-a", playerName: "A" }),
+        transferFactBlock({ _key: "tf-b", playerName: "B" }),
+        transferFactBlock({ _key: "tf-c", playerName: "C" }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const group = container.querySelector(
+        '[data-transfer-fact-group="grid"]',
+      );
+      expect(group?.getAttribute("data-transfer-fact-count")).toBe("3");
+      const children = Array.from(group?.children ?? []);
+      // First two siblings render at single-column width, last spans both.
+      expect(children[0]?.className).not.toContain("md:col-span-2");
+      expect(children[1]?.className).not.toContain("md:col-span-2");
+      expect(children[2]?.className).toContain("md:col-span-2");
+    });
+
+    it("splits a paragraph-separated transferFact pair into two isolated groups", () => {
+      const content = [
+        paragraph("Lead-in."),
+        transferFactBlock({ _key: "tf-a", playerName: "A" }),
+        paragraph("Mid-paragraph interrupts the run."),
+        transferFactBlock({ _key: "tf-b", playerName: "B" }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const groups = container.querySelectorAll("[data-transfer-fact-group]");
+      expect(groups.length).toBe(2);
+      expect(groups[0]?.getAttribute("data-transfer-fact-group")).toBe(
+        "single",
+      );
+      expect(groups[1]?.getAttribute("data-transfer-fact-group")).toBe(
+        "single",
+      );
+    });
+
+    it("skips empty-playerName transferFact blocks (no hollow card shell)", () => {
+      const content = [
+        paragraph("Lead-in."),
+        transferFactBlock({ _key: "tf-empty", playerName: "" }),
+        paragraph("Closing."),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(container.querySelector("[data-transfer-fact-group]")).toBeNull();
+      expect(
+        container.querySelector('[data-transfer-fact-card="true"]'),
+      ).toBeNull();
+    });
+
+    it("renders <EndMark> for a body that contains only a non-empty transferFact", () => {
+      const content = [transferFactBlock({ playerName: "Solo transfer" })];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(container.querySelector('[data-endmark="label"]')).not.toBeNull();
+    });
+
+    it("omits <EndMark> for an article whose only transferFact has no playerName", () => {
+      const content = [transferFactBlock({ playerName: "" })];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(container.querySelector('[data-endmark="label"]')).toBeNull();
     });
   });
 });
