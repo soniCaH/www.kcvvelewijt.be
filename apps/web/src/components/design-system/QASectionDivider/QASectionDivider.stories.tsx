@@ -71,6 +71,16 @@ export const WithAccentAndKicker: Story = {
 };
 
 /**
+ * Dotted variant — between-row separator inside `<QASection>` per the
+ * 5.A.2 / 5.B.int spec. No title, no `✦` glyphs. Used to break up
+ * consecutive `<QARow>`s without visually competing with the major
+ * section-break "act divider" treatment.
+ */
+export const Dotted: Story = {
+  args: { variant: "dotted" },
+};
+
+/**
  * Visual verification overlay — guide line through the rule row so a reviewer
  * can confirm the 1px rules, both ✦ glyphs, and the cap-height midpoint of
  * the italic title all touch the same horizontal line. The kicker is omitted

@@ -25,3 +25,14 @@ export {
   slugifyTitle,
 } from './backfill-event-slug'
 export type {EventDoc as BackfillEventSlugDoc} from './backfill-event-slug'
+
+export {
+  default as qaPairRespondentsMigration,
+  migrateQaPairRespondents,
+  defaultGenKey as defaultQaPairRespondentGenKey,
+} from './qa-pair-respondents'
+export type {
+  ArticleWithQaDoc as QaPairRespondentsArticleDoc,
+  QaBlockLike as QaPairRespondentsBlock,
+  QaPairLike as QaPairRespondentsPair,
+} from './qa-pair-respondents'

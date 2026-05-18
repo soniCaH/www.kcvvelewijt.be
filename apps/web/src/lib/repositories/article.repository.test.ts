@@ -76,6 +76,8 @@ function makeArticleDetailRow(
     featured: true,
     tags: ["Eerste ploeg"],
     articleType: "announcement",
+    author: "",
+    photographer: "",
     metaDescription: null,
     ogImageUrl: null,
     subjects: null,

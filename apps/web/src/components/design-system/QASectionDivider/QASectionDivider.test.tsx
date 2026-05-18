@@ -101,4 +101,29 @@ describe("QASectionDivider", () => {
     expect(children[3]).toHaveAttribute("data-divider", "glyph");
     expect(children[4]).toHaveAttribute("data-divider", "rule");
   });
+
+  describe("variant='dotted'", () => {
+    it("renders a single dotted <hr> with no title content", () => {
+      const { container } = render(<QASectionDivider variant="dotted" />);
+      const root = container.firstChild as HTMLElement;
+      expect(root.getAttribute("data-divider-variant")).toBe("dotted");
+      expect(root.querySelector("hr")).not.toBeNull();
+      expect(root.querySelector('[data-divider="title"]')).toBeNull();
+      expect(root.querySelector('[data-divider="glyph"]')).toBeNull();
+    });
+
+    it("uses border-dotted on the inner <hr>", () => {
+      const { container } = render(<QASectionDivider variant="dotted" />);
+      const rule = container.querySelector("hr");
+      expect(rule?.className).toContain("border-dotted");
+      expect(rule?.className).toContain("border-ink-muted");
+    });
+
+    it("uses a separator role with a labelled fallback name", () => {
+      const { container } = render(<QASectionDivider variant="dotted" />);
+      const aside = container.querySelector('aside[role="separator"]');
+      expect(aside).not.toBeNull();
+      expect(aside?.getAttribute("aria-label")).toBe("Volgende vraag");
+    });
+  });
 });

@@ -68,69 +68,57 @@ interface RenderTemplateArgs {
   shareUrl: string;
   body: PortableTextBlock[] | null;
   subjects: IndexedSubject[] | null;
+  /**
+   * `article.author` — drives the `★ Door {author}` byline in
+   * `<EditorialByline>` (`apps/web/src/components/design-system/EditorialByline/EditorialByline.tsx`).
+   * Empty/undefined falls back to "Door redactie" at the byline level.
+   * Threaded down through every template to `<EditorialHero>` (5.B.int
+   * wiring, #1795).
+   */
+  author?: string;
 }
 
 function renderTemplate(args: RenderTemplateArgs) {
-  const shareConfig = { url: args.shareUrl, title: args.title };
+  // Shared subset every template accepts. Each per-articleType branch
+  // only sets the props that vary (e.g. coverImageUrl projection +
+  // interview-only `subjects`, announcement-only `category`).
+  const common = {
+    title: args.title,
+    publishedDate: args.publishedDate,
+    readingTime: args.readingTime,
+    shareConfig: { url: args.shareUrl, title: args.title },
+    body: args.body,
+    articleId: args.articleId,
+    articleType: args.articleType,
+    articleSlug: args.articleSlug,
+    author: args.author,
+  };
   switch (args.articleType) {
     case "interview":
       return (
         <InterviewTemplate
-          title={args.title}
+          {...common}
           coverImageUrl={args.coverImagePortraitUrl}
-          publishedDate={args.publishedDate}
-          readingTime={args.readingTime}
-          shareConfig={shareConfig}
-          body={args.body}
           subjects={args.subjects}
-          articleId={args.articleId}
-          articleType={args.articleType}
-          articleSlug={args.articleSlug}
         />
       );
     case "transfer":
       return (
         <TransferTemplate
-          title={args.title}
+          {...common}
           coverImageUrl={args.coverImagePortraitUrl}
-          publishedDate={args.publishedDate}
-          readingTime={args.readingTime}
-          shareConfig={shareConfig}
-          body={args.body}
-          articleId={args.articleId}
-          articleType={args.articleType}
-          articleSlug={args.articleSlug}
         />
       );
     case "event":
-      return (
-        <EventTemplate
-          title={args.title}
-          coverImageUrl={args.coverImageUrl}
-          publishedDate={args.publishedDate}
-          readingTime={args.readingTime}
-          shareConfig={shareConfig}
-          body={args.body}
-          articleId={args.articleId}
-          articleType={args.articleType}
-          articleSlug={args.articleSlug}
-        />
-      );
+      return <EventTemplate {...common} coverImageUrl={args.coverImageUrl} />;
     // Missing or unknown articleType falls through to announcement —
     // matches the PRD §3 legacy-article fallback rule.
     default:
       return (
         <AnnouncementTemplate
-          title={args.title}
-          category={args.category}
+          {...common}
           coverImageUrl={args.coverImageUrl}
-          publishedDate={args.publishedDate}
-          readingTime={args.readingTime}
-          shareConfig={shareConfig}
-          body={args.body}
-          articleId={args.articleId}
-          articleType={args.articleType}
-          articleSlug={args.articleSlug}
+          category={args.category}
         />
       );
   }
@@ -335,6 +323,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         shareUrl: shareConfig.url,
         body: (article.body as PortableTextBlock[] | null) ?? null,
         subjects: article.subjects ?? null,
+        author: article.author?.trim() ? article.author.trim() : undefined,
       })}
 
       <RelatedContentSection
