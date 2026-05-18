@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Round 1 · Section-break flourish (5.d3)</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-cream-deep: #ddd4ba;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      /* ============================================================
+         Body surface — cream, prose width
+         ============================================================ */
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 24px;
+      }
+      .article-body {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .article-body p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.65;
+        margin: 0 0 14px;
+        color: var(--color-ink);
+      }
+      .article-body p:last-child {
+        margin-bottom: 0;
+      }
+      .article-body p strong {
+        font-weight: 700;
+      }
+
+      /* ============================================================
+         <QASectionDivider title> — italic centered subheading +
+         thin rules left/right. Already locked in Phase 3-b.
+         ============================================================ */
+      .qa-section-title {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 18px;
+        max-width: var(--container-prose);
+        margin: 28px auto;
+        padding: 0 28px;
+      }
+      .qa-section-title::before,
+      .qa-section-title::after {
+        content: "";
+        height: 1px;
+        background: var(--color-ink);
+        opacity: 0.55;
+      }
+      .qa-section-title .title-text {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        text-align: center;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         A — Diamond glyph between sections
+         ============================================================ */
+      .flourish-diamond {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin: 24px 0 24px;
+      }
+      .flourish-diamond .glyph {
+        font-size: 14px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+        letter-spacing: 0.6em;
+        padding-left: 0.6em; /* compensate trailing kerning */
+      }
+      .flourish-diamond .glyph-single {
+        font-size: 14px;
+        color: var(--color-jersey-deep);
+        line-height: 1;
+      }
+      .flourish-diamond .title-line {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 18px;
+        max-width: var(--container-prose);
+        width: 100%;
+        padding: 0 28px;
+      }
+      .flourish-diamond .title-line::before,
+      .flourish-diamond .title-line::after {
+        content: "";
+        height: 1px;
+        background: var(--color-ink);
+        opacity: 0.55;
+      }
+      .flourish-diamond .title-line .title-text {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        text-align: center;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         B — <StripedSeam height="sm"> mid-article (full-bleed)
+         ============================================================ */
+      .flourish-seam {
+        margin: 28px 0;
+        position: relative;
+      }
+      .flourish-seam .seam {
+        width: 100%;
+        height: 12px;
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--color-ink) 0 8px,
+          var(--color-cream) 8px 16px
+        );
+      }
+      .flourish-seam .seam-title {
+        max-width: var(--container-prose);
+        margin: 14px auto 0;
+        padding: 0 28px;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        text-align: center;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         C — Plain dotted divider (today's default)
+         ============================================================ */
+      .flourish-dotted {
+        max-width: var(--container-prose);
+        margin: 28px auto;
+        padding: 0 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+      }
+      .flourish-dotted hr {
+        width: 100%;
+        margin: 0;
+        border: 0;
+        border-top: 1px dotted var(--color-ink-muted);
+        opacity: 0.7;
+      }
+      .flourish-dotted .title-text {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        text-align: center;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         D — No break (paragraph spacing only)
+         ============================================================ */
+      .flourish-spacing {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+        height: 32px;
+      }
+      .flourish-spacing .title-text {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 18px;
+        text-align: center;
+        color: var(--color-ink);
+        margin: 32px auto 8px;
+        max-width: var(--container-prose);
+        padding: 0 28px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Round 1 · Drill #1785 · 5.d3</p>
+      <h1>Section-break flourish — diamond / seam / dotted / none</h1>
+      <p>
+        Drill resolves the mid-article section-break visual treatment used by
+        <code>&lt;QASectionDivider&gt;</code> (major Q&amp;A section breaks) and
+        any future article body <code>&lt;h2&gt;</code> renderer. The 5d3 lock
+        determines whether
+        <code>&lt;QASectionDivider flourish="diamond"&gt;</code> joins the
+        existing <code>flourish="em-dash" | "star"</code> API or another option
+        wins.
+      </p>
+      <p>
+        Each option renders the same article fixture (three sections, two
+        breaks) at <code>--container-prose</code>
+        width (680px) on cream — same scale, same copy, so the rhythm difference
+        is visible. Each break carries a section subtitle ("Het begin." / "Het
+        seizoen.") to test how the flourish composes with text. The first
+        paragraph after every break drops back to standard serif body — no
+        drop-cap (those only land at the article opener, locked elsewhere).
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Diamond glyph</div>
+          <div class="name">Single ◆ glyph + thin-rule subtitle</div>
+          <div class="desc">
+            Diamond glyph (◆, Unicode U+25C6) in <code>jersey-deep</code>,
+            centered above the section subtitle which keeps the existing
+            flanking-thin-rules treatment. Typographic flourish, no new asset.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Existing thin-rule subtitle (Phase 3-b locked)<br />
+            ✓ <code>--color-jersey-deep</code><br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Net-new
+            <code>flourish="diamond"</code> on
+            <code>&lt;QASectionDivider&gt;</code> API
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body">
+            <p>
+              "Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+              ik wist: hij snapt het. Pas dan wist ik dat dit ging lukken, dat
+              hij hier hoorde."
+            </p>
+            <p>
+              Lars knikt. "Wim heeft dat dan ook gezegd, achteraf. In de
+              kleedkamer. Niet hardop, gewoon zo'n knik. Dat is wel groot, hè."
+            </p>
+          </div>
+          <div class="flourish-diamond">
+            <div class="glyph-single">◆</div>
+            <div class="title-line">
+              <span class="title-text">Het seizoen.</span>
+            </div>
+          </div>
+          <div class="article-body">
+            <p>
+              Het seizoen begon nochtans niet zoals iedereen had verwacht.
+              <strong>Drie wedstrijden zonder zege</strong>, een keeperswissel,
+              en een vergadering die langer duurde dan het wedstrijdverslag.
+            </p>
+            <p>
+              "Dat was ook gewoon ongelukkig," zegt Lars achteraf. "We waren er
+              nog niet, en dat kon je ook zien."
+            </p>
+          </div>
+          <div class="flourish-diamond">
+            <div class="glyph-single">◆</div>
+            <div class="title-line">
+              <span class="title-text">Wat als je nu kon kiezen?</span>
+            </div>
+          </div>
+          <div class="article-body">
+            <p>
+              "Hetzelfde, denk ik," zegt Lars. "Misschien niet die warming-up
+              vóór Putte. Maar voor de rest? Hetzelfde."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · StripedSeam mid-article</div>
+          <div class="name">
+            Full-bleed <code>&lt;StripedSeam height="sm"&gt;</code> band
+          </div>
+          <div class="desc">
+            12px-tall full-bleed seam in <code>ink-cream</code>, the canonical
+            Phase 0 seam vocabulary, with the section subtitle below on cream.
+            Reads as a hard page-break — the article visually "turns the page".
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>&lt;StripedSeam height="sm"&gt;</code> (canonical Phase 0
+            seam)<br />
+            ✓ Existing subtitle typography<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> First
+            mid-prose use of StripedSeam (every other use is a section boundary,
+            not in-article)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body">
+            <p>
+              "Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+              ik wist: hij snapt het. Pas dan wist ik dat dit ging lukken, dat
+              hij hier hoorde."
+            </p>
+            <p>
+              Lars knikt. "Wim heeft dat dan ook gezegd, achteraf. In de
+              kleedkamer. Niet hardop, gewoon zo'n knik. Dat is wel groot, hè."
+            </p>
+          </div>
+          <div class="flourish-seam">
+            <div class="seam"></div>
+            <p class="seam-title">Het seizoen.</p>
+          </div>
+          <div class="article-body">
+            <p>
+              Het seizoen begon nochtans niet zoals iedereen had verwacht.
+              <strong>Drie wedstrijden zonder zege</strong>, een keeperswissel,
+              en een vergadering die langer duurde dan het wedstrijdverslag.
+            </p>
+            <p>
+              "Dat was ook gewoon ongelukkig," zegt Lars achteraf. "We waren er
+              nog niet, en dat kon je ook zien."
+            </p>
+          </div>
+          <div class="flourish-seam">
+            <div class="seam"></div>
+            <p class="seam-title">Wat als je nu kon kiezen?</p>
+          </div>
+          <div class="article-body">
+            <p>
+              "Hetzelfde, denk ik," zegt Lars. "Misschien niet die warming-up
+              vóór Putte. Maar voor de rest? Hetzelfde."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Dotted divider</div>
+          <div class="name">
+            Plain dotted <code>&lt;hr&gt;</code> + subtitle (today's default)
+          </div>
+          <div class="desc">
+            Single dotted divider above the subtitle. Quietest visual register —
+            close to what currently ships, without flanking rules. Reads as "the
+            conversation continues" rather than a page-break.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Today's divider style<br />
+            ✓ Existing subtitle typography (dropping the flanking rules)<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Subtle delta
+            from Phase 3-b — current spec keeps flanking-rules on each side;
+            this option swaps to one full-width dotted line
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body">
+            <p>
+              "Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+              ik wist: hij snapt het. Pas dan wist ik dat dit ging lukken, dat
+              hij hier hoorde."
+            </p>
+            <p>
+              Lars knikt. "Wim heeft dat dan ook gezegd, achteraf. In de
+              kleedkamer. Niet hardop, gewoon zo'n knik. Dat is wel groot, hè."
+            </p>
+          </div>
+          <div class="flourish-dotted">
+            <hr />
+            <p class="title-text">Het seizoen.</p>
+          </div>
+          <div class="article-body">
+            <p>
+              Het seizoen begon nochtans niet zoals iedereen had verwacht.
+              <strong>Drie wedstrijden zonder zege</strong>, een keeperswissel,
+              en een vergadering die langer duurde dan het wedstrijdverslag.
+            </p>
+            <p>
+              "Dat was ook gewoon ongelukkig," zegt Lars achteraf. "We waren er
+              nog niet, en dat kon je ook zien."
+            </p>
+          </div>
+          <div class="flourish-dotted">
+            <hr />
+            <p class="title-text">Wat als je nu kon kiezen?</p>
+          </div>
+          <div class="article-body">
+            <p>
+              "Hetzelfde, denk ik," zegt Lars. "Misschien niet die warming-up
+              vóór Putte. Maar voor de rest? Hetzelfde."
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · No break (spacing + subtitle only)</div>
+          <div class="name">
+            Extra vertical breathing + centered italic subtitle, no rule
+          </div>
+          <div class="desc">
+            32px of extra space before the next section subtitle. No divider
+            line, no glyph. Reads as one continuous transcript — closest to a
+            long-form Q&amp;A where each subhead just leans into the next.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ No new chrome<br />
+            ✓ Existing subtitle typography<br />
+            <span style="color: var(--color-jersey-deep)">Δ</span> Loses the
+            "section break" affordance — subtitle alone signals the transition
+          </div>
+        </header>
+        <div class="surface">
+          <div class="article-body">
+            <p>
+              "Halfweg de eerste helft, derde wedstrijd. Een loopactie waarvan
+              ik wist: hij snapt het. Pas dan wist ik dat dit ging lukken, dat
+              hij hier hoorde."
+            </p>
+            <p>
+              Lars knikt. "Wim heeft dat dan ook gezegd, achteraf. In de
+              kleedkamer. Niet hardop, gewoon zo'n knik. Dat is wel groot, hè."
+            </p>
+          </div>
+          <p
+            class="title-text"
+            style="
+              font-family: ui-serif, Georgia, serif;
+              font-style: italic;
+              font-weight: 900;
+              font-size: 18px;
+              text-align: center;
+              color: var(--color-ink);
+              margin: 48px auto 12px;
+              max-width: var(--container-prose);
+              padding: 0 28px;
+            "
+          >
+            Het seizoen.
+          </p>
+          <div class="article-body">
+            <p>
+              Het seizoen begon nochtans niet zoals iedereen had verwacht.
+              <strong>Drie wedstrijden zonder zege</strong>, een keeperswissel,
+              en een vergadering die langer duurde dan het wedstrijdverslag.
+            </p>
+            <p>
+              "Dat was ook gewoon ongelukkig," zegt Lars achteraf. "We waren er
+              nog niet, en dat kon je ook zien."
+            </p>
+          </div>
+          <p
+            class="title-text"
+            style="
+              font-family: ui-serif, Georgia, serif;
+              font-style: italic;
+              font-weight: 900;
+              font-size: 18px;
+              text-align: center;
+              color: var(--color-ink);
+              margin: 48px auto 12px;
+              max-width: var(--container-prose);
+              padding: 0 28px;
+            "
+          >
+            Wat als je nu kon kiezen?
+          </p>
+          <div class="article-body">
+            <p>
+              "Hetzelfde, denk ik," zegt Lars. "Misschien niet die warming-up
+              vóór Putte. Maar voor de rest? Hetzelfde."
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
