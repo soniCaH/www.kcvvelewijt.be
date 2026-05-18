@@ -139,15 +139,10 @@ function renderPullQuote(
 
   const respondent = resolvePairRespondent(value.respondentKey, subjects);
   const resolved = resolveSubject(respondent);
+  const emphasis = value.emphasis ? { text: value.emphasis } : undefined;
+  const tone = value.tone ?? "cream";
 
-  // Wrap every pull-quote in a vertical spacer so consecutive body
-  // paragraphs don't collide with the card edges. Matches the rhythm
-  // <QASectionDivider> (also `my-10`) establishes for body inserts.
-  const Wrapper = ({ children }: { children: ReactNode }) => (
-    <div data-pullquote-spacer="true" className="my-10">
-      {children}
-    </div>
-  );
+  let inner: ReactNode;
 
   if (resolved && respondent) {
     // KCVV subject path — render the avatar slot with the resolved
@@ -157,61 +152,61 @@ function renderPullQuote(
       (respondent.kind === "staff" && respondent.staffRef?.firstName) ||
       (respondent.kind === "custom" && respondent.customName) ||
       resolved.name;
-    return (
-      <Wrapper>
-        <PullQuote
-          tone={value.tone ?? "cream"}
-          attribution={{
-            name: resolved.name,
-            role: resolved.role || undefined,
-          }}
-          emphasis={value.emphasis ? { text: value.emphasis } : undefined}
-          avatarSlot={
-            <SubjectAvatar
-              firstName={firstNameFromRef || resolved.name}
-              fullName={resolved.name}
-              photoUrl={resolved.photoUrl}
-              scale="attribution"
-            />
-          }
-        >
-          {body}
-        </PullQuote>
-      </Wrapper>
-    );
-  }
-
-  // External-source path — no KCVV subject reference; render the inline
-  // mono-caps attribution row with whatever external fields the block
-  // carries. Skip the row entirely if no attribution was authored.
-  const externalName = value.externalName?.trim();
-  if (!externalName) {
-    return (
-      <Wrapper>
-        <PullQuote
-          tone={value.tone ?? "cream"}
-          attribution={{ name: "" }}
-          emphasis={value.emphasis ? { text: value.emphasis } : undefined}
-        >
-          {body}
-        </PullQuote>
-      </Wrapper>
-    );
-  }
-  return (
-    <Wrapper>
+    inner = (
       <PullQuote
-        tone={value.tone ?? "cream"}
+        tone={tone}
+        attribution={{
+          name: resolved.name,
+          role: resolved.role || undefined,
+        }}
+        emphasis={emphasis}
+        avatarSlot={
+          <SubjectAvatar
+            firstName={firstNameFromRef || resolved.name}
+            fullName={resolved.name}
+            photoUrl={resolved.photoUrl}
+            scale="attribution"
+          />
+        }
+      >
+        {body}
+      </PullQuote>
+    );
+  } else {
+    // External-source path — no KCVV subject reference; render the
+    // inline mono-caps attribution row with whatever external fields
+    // the block carries. Skip the row entirely if no attribution was
+    // authored.
+    const externalName = value.externalName?.trim();
+    inner = externalName ? (
+      <PullQuote
+        tone={tone}
         attribution={{
           name: externalName,
           role: value.externalRole?.trim() || undefined,
           source: value.externalSource?.trim() || undefined,
         }}
-        emphasis={value.emphasis ? { text: value.emphasis } : undefined}
+        emphasis={emphasis}
       >
         {body}
       </PullQuote>
-    </Wrapper>
+    ) : (
+      <PullQuote tone={tone} attribution={{ name: "" }} emphasis={emphasis}>
+        {body}
+      </PullQuote>
+    );
+  }
+
+  // Wrap every pull-quote in a vertical spacer so consecutive body
+  // paragraphs don't collide with the card edges. Matches the rhythm
+  // <QASectionDivider> (also `my-10`) establishes for body inserts.
+  // Inline <div> rather than a named component so React doesn't get a
+  // fresh component identity per render (which would force a
+  // remount of the PullQuote subtree).
+  return (
+    <div data-pullquote-spacer="true" className="my-10">
+      {inner}
+    </div>
   );
 }
 
