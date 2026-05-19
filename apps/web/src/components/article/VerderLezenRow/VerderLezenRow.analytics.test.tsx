@@ -1,10 +1,11 @@
 /**
  * Analytics regression for <VerderLezenRow>.
  *
- * Ports the contract previously held by <RelatedContentSection> (see
- * apps/web/src/components/related/RelatedContentSection/RelatedContentSection.analytics.test.tsx)
- * — same event names, same payload shapes, same dedup behaviour so the
- * existing GA4 reports + GTM tags continue to work untouched.
+ * Locks the GA4 event contract (event names + payload shapes + dedup
+ * behaviour) so the existing GA4 reports + GTM tags continue to work
+ * untouched. The contract was originally lifted from the now-deleted
+ * `<RelatedContentSection>` widget at #1832; this is the canonical
+ * regression surface going forward.
  *
  * Tests assert the policy, not the wire format of any one call, so an
  * accidental regression to per-type code paths or to a different dedup

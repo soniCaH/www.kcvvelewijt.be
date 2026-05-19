@@ -26,7 +26,7 @@ export interface ArticleViewTrackerProps {
  * and storybook-mockable without analytics side effects).
  *
  * Dedup guard mirrors the `related_content_shown` pattern in
- * `RelatedContentSection` — fast refresh / React.StrictMode double-invoke
+ * `<VerderLezenRow>` — fast refresh / React.StrictMode double-invoke
  * of effects must not cause a double event.
  */
 export const ArticleViewTracker = ({

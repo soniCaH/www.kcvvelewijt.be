@@ -576,7 +576,7 @@ export const BodyComposition: Story = {
     docs: {
       description: {
         story:
-          "5.A.2 composition story — `<ArticleBody>` (with inline pull-quote + EndMark closer) followed by `<VerderLezenRow>` (3-up related articles). Mirrors what `<InterviewTemplate>` / `<AnnouncementTemplate>` / etc. will render at 5.C (#1800) once `page.tsx` rewires.",
+          "5.A.2 composition story — `<ArticleBody>` (with inline pull-quote + EndMark closer) followed by `<VerderLezenRow>` (3-up related articles). Mirrors the per-variant shell `/nieuws/[slug]` ships post-5.C (#1800).",
       },
     },
   },

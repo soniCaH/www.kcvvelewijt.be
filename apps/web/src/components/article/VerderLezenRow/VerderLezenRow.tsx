@@ -35,10 +35,11 @@ import { cn } from "@/lib/utils/cn";
  *   - 1–N items → slider track; cards beyond the visible viewport are
  *     reachable via the slider arrows or horizontal scroll.
  *
- * ## Analytics (ported from `<RelatedContentSection>`, #1832)
+ * ## Analytics (event contract lifted at #1832)
  *
- * When `pageType` + `pageSlug` are supplied the row emits the same three
- * GA4 events the legacy widget shipped so GTM/GA4 stay untouched:
+ * When `pageType` + `pageSlug` are supplied the row emits the three GA4
+ * events the article surface has always shipped, so GTM/GA4 stay
+ * untouched:
  *
  *   - `related_content_shown` — once per mount when at least one item
  *     renders. Dedup via `useRef` so React StrictMode's double-effect
@@ -79,8 +80,8 @@ export interface VerderLezenItem {
   /**
    * Analytics payload — optional so demo / Storybook items can skip it.
    * When present, the row emits `related_content_click` / impression
-   * events with these fields (preserving the legacy
-   * `<RelatedContentSection>` shape).
+   * events with these fields (the GA4 contract is locked at #1832 to
+   * preserve existing report dimensions).
    */
   analyticsId?: string;
   analyticsSource?: RelatedContentSource;
@@ -175,9 +176,8 @@ export function VerderLezenRow({
     pageType !== undefined && pageSlug !== undefined && items.length > 0;
 
   // Impression event — fires once per mount when analytics is enabled
-  // and at least one item renders. Mirrors the legacy
-  // `<RelatedContentSection>` dedup pattern (single ref guard so
-  // StrictMode's double-invoke doesn't double-fire).
+  // and at least one item renders. Single-ref dedup so StrictMode's
+  // double-invoke doesn't double-fire (#1832).
   useEffect(() => {
     if (!analyticsEnabled) return;
     if (hasFired.current) return;
@@ -212,10 +212,9 @@ export function VerderLezenRow({
     // so the tape strip clears the slider's clip rect — see
     // VerderLezenRow.tsx top comment. That means clicks on the slot's
     // padding / whitespace also bubble through this handler. Guard so
-    // only clicks that resolve to the inner `<a>` count — keeps
-    // `related_content_click` parity with the legacy
-    // `<RelatedContentSection>` which used `display: contents` and
-    // had no off-anchor surface to begin with.
+    // only clicks that resolve to the inner `<a>` count — keeps the
+    // `related_content_click` GA4 contract honest (analytics review at
+    // #1832).
     if (!(event.target as Element).closest("a")) return;
     if (
       !item.analyticsSource ||

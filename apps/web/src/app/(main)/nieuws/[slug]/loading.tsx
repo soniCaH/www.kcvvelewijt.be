@@ -1,6 +1,6 @@
 /**
  * Article Detail Page — Loading Skeleton
- * Matches the ArticleHeader + metadata + body + related content layout
+ * Matches the EditorialHero + metadata + body + related-content layout
  */
 
 export default function ArticleDetailLoading() {

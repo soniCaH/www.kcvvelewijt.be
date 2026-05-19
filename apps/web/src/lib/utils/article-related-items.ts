@@ -320,8 +320,8 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
         analyticsId: item.id,
         analyticsSource: item.source,
         analyticsType: "player",
-        // Legacy parity: `getEntityTargetSlug` in RelatedContentSection
-        // returns `psdId` for players (the routing identifier).
+        // GA4 contract: players use `psdId` as the routing identifier
+        // (locked at #1832 to preserve report dimensions).
         analyticsTargetSlug: item.psdId,
       };
     }
