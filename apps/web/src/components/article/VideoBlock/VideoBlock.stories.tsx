@@ -102,20 +102,8 @@ export const UploadNoCaption: Story = {
 
 // ─── Embed stories ────────────────────────────────────────────────────────
 
-// `vr-skip` (discovery-time exclusion) replaces the previous
-// `parameters.vr.disable` (postVisit screenshot-skip) for the embed
-// stories. `vr.disable` only suppresses screenshot capture — the
-// runner still visits the page, which means the YouTube + Vimeo
-// iframes load network resources. The carry-over from those visits
-// kept pushing alphabetically-later VideoBlock stories
-// (Width — prose / wide / bleed / Mobile — narrow) past the 30s
-// smoke-test cap intermittently. `vr-skip` stops discovery at the
-// source: the runner never opens these pages, so no iframe loads,
-// no carry-over. Re-evaluate 2026-08-01 alongside the other embed
-// annotations.
 export const EmbedYoutube: Story = {
   name: "Embed — YouTube",
-  tags: ["vr-skip"],
   args: {
     value: {
       _type: "videoBlock",
@@ -124,27 +112,55 @@ export const EmbedYoutube: Story = {
         "Embed via youtube-nocookie.com — provider chrome inside iframe.",
     },
   },
+  parameters: {
+    // vr.disable: external iframe (youtube-nocookie.com) loads non-deterministic
+    // network resources, so pixel diffing on the iframe payload is not stable.
+    // Repro: VR runner waits for the iframe to finish loading and the captured
+    // frame varies run-to-run depending on YouTube's network response timing.
+    // Approved by: @climacon / #1849
+    // Re-evaluate: 2026-08-01
+    vr: { disable: true },
+  },
 };
 
 export const EmbedVimeo: Story = {
   name: "Embed — Vimeo",
-  tags: ["vr-skip"],
   args: {
     value: {
       _type: "videoBlock",
       embedUrl: "https://vimeo.com/824804225",
     },
   },
+  parameters: {
+    // vr.disable: external iframe (player.vimeo.com) loads non-deterministic
+    // network resources, so pixel diffing on the iframe payload is not stable.
+    // Repro: VR runner waits for the iframe to finish loading and the captured
+    // frame varies run-to-run depending on Vimeo's network response timing.
+    // Approved by: @climacon / #1849
+    // Re-evaluate: 2026-08-01
+    vr: { disable: true },
+  },
 };
 
 export const EmbedUnknownProvider: Story = {
   name: "Embed — unknown provider (fallback)",
-  tags: ["vr-skip"],
   args: {
     value: {
       _type: "videoBlock",
       embedUrl: "https://dailymotion.com/video/x1234abcd",
     },
+  },
+  parameters: {
+    // vr.disable: even though the unknown-provider path renders a static
+    // non-iframe fallback (no network), VR runs visit the preceding YouTube
+    // + Vimeo embed stories first; carry-over from those iframe loads
+    // pushed this story's smoke-test past the 30s cap on at least one run.
+    // Repro: full VR suite, alphabetical order — Embed YouTube → Vimeo →
+    // Unknown Provider; the third story's `smoke-test` exceeded 30s when
+    // the iframe loads on the prior two were still resolving.
+    // Approved by: @climacon / #1849
+    // Re-evaluate: 2026-08-01
+    vr: { disable: true },
   },
 };
 
