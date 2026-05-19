@@ -464,6 +464,15 @@
   --rotate-tape-c:      0.25deg;
   --rotate-tape-d:      0.5deg;
 
+  /* Polaroid-scale tape rotations — Phase 5 (#1853). Intentionally outside
+     the sub-degree pool above: the <EventFactInline> polaroid composition
+     (eventfact-inline-locked.md §Round 1) needs visibly tilted tape so the
+     card reads as "hand-pinned" rather than perfectly aligned. Scoped to
+     the polaroid composition only; the sub-degree pool stays canonical
+     for grid cards per feedback_visual_preferences + Phase 1 §11.5. */
+  --rotate-tape-polaroid-a:  -5deg;
+  --rotate-tape-polaroid-b:   4deg;
+
   /* Warm-yellow tape — Phase 4. Used on jersey-deep surfaces where the
      default jersey-green tape lacks contrast (e.g. <FeaturedEventBand>).
      Derives from `--color-warm` so the hue lives in exactly one place. */

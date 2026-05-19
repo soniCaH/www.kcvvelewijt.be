@@ -71,6 +71,53 @@ describe("TapeStrip", () => {
     expect(el.style.transform).not.toContain("var(--tape-rotation");
   });
 
+  it("defaults verticalEdge to 'top' and renders top-0 with translateY(-50%)", () => {
+    const { container } = render(<TapeStrip />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-vertical-edge", "top");
+    expect(el.className).toContain("top-0");
+    expect(el.className).not.toContain("bottom-0");
+    expect(el.style.transform).toContain("translateY(-50%)");
+  });
+
+  it("verticalEdge='bottom' swaps the anchor class to bottom-0 and lifts translateY to +50%", () => {
+    // EventFactInline polaroid uses this combination for the bottom-right
+    // tape strip per eventfact-inline-locked §Round 1.
+    const { container } = render(<TapeStrip verticalEdge="bottom" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-vertical-edge", "bottom");
+    expect(el.className).toContain("bottom-0");
+    expect(el.className).not.toContain("top-0");
+    expect(el.style.transform).toContain("translateY(50%)");
+  });
+
+  it("rotation='polaroid-a' maps to --rotate-tape-polaroid-a (steep polaroid tilt, scoped to EventFactInline)", () => {
+    const { container } = render(<TapeStrip rotation="polaroid-a" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-rotation", "polaroid-a");
+    expect(el.style.transform).toContain("var(--rotate-tape-polaroid-a)");
+    expect(el.style.transform).not.toContain("var(--tape-rotation");
+  });
+
+  it("rotation='polaroid-b' maps to --rotate-tape-polaroid-b", () => {
+    const { container } = render(<TapeStrip rotation="polaroid-b" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-rotation", "polaroid-b");
+    expect(el.style.transform).toContain("var(--rotate-tape-polaroid-b)");
+  });
+
+  it("verticalEdge='bottom' composes with an explicit rotation pick (translateY(50%) + token)", () => {
+    // Exercises the explicit-rotation branch of the transform builder —
+    // bottom edge must still flip translateY even when rotation token
+    // skips --tape-rotation.
+    const { container } = render(
+      <TapeStrip verticalEdge="bottom" rotation="polaroid-b" />,
+    );
+    const el = container.firstChild as HTMLElement;
+    expect(el.style.transform).toContain("translateY(50%)");
+    expect(el.style.transform).toContain("var(--rotate-tape-polaroid-b)");
+  });
+
   it("renders above absolutely-positioned siblings (z-20) and is non-interactive", () => {
     // Flush-edge NewsCard has the tape rendered before <Image fill>;
     // without a positive z-index + pointer-events override the image
