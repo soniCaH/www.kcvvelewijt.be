@@ -354,7 +354,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const subjectCount = hasSubject ? resolvedSubjects.length : 0;
 
   return (
-    <>
+    // Page-level `bg-cream` so inter-section margins between
+    // <ArticleBody>, <VerderLezenRow>, and the footer composition resolve
+    // to cream rather than the viewport's default white. Each section
+    // layers its own bg-cream on top — no visible diff inside sections,
+    // and the gaps no longer show as white bands.
+    <div className="bg-cream">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -487,7 +492,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         sourceArticleType={article.articleType}
       />
       <FooterSafeArea />
-    </>
+    </div>
   );
 }
 
