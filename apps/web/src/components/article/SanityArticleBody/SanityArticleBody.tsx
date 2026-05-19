@@ -54,14 +54,35 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
 interface ArticleImageValue {
   asset?: { url?: string };
   alt?: string;
-  width?: number;
+  /**
+   * Phase 5 width enum (#1843). Pre-#1843 articles ship as
+   * `width: undefined` + `fullBleed?: boolean`; migrated articles ship
+   * as `width: 'prose' | 'wide' | 'bleed'` + `fullBleed: undefined`.
+   * Tests historically passed a numeric `width` to override the
+   * Next.js `<Image>` width prop, but the GROQ projection has never
+   * actually populated it — the renderer falls through to 800/450
+   * regardless. Typed loosely so legacy numeric values still parse.
+   * Part C of the Phase 5 migration replaces this block with a
+   * TapedFigure-based renderer that properly honours the enum.
+   */
+  width?: "prose" | "wide" | "bleed" | number;
   height?: number;
+  /** Legacy boolean — replaced by `width` in #1843. */
   fullBleed?: boolean;
 }
 
 function ArticleImageBlock({ value }: { value: ArticleImageValue }) {
   if (!value.asset?.url) return null;
-  const isFullBleed = value.fullBleed === true;
+  // One-release fallback (#1843): prefer the new `width` enum, fall
+  // back to the legacy `fullBleed` boolean for un-migrated content.
+  // `width === 'wide'` currently renders identically to `prose` in this
+  // legacy renderer — Part C of the Phase 5 migration replaces this
+  // block with a TapedFigure-based renderer that properly honours
+  // `wide`.
+  const isFullBleed = value.width === "bleed" || value.fullBleed === true;
+  // Only numeric `width` values feed Next.js' Image `width` prop; the
+  // new string enum is purely a layout signal handled above.
+  const imagePixelWidth = typeof value.width === "number" ? value.width : 800;
   return (
     <figure
       className={cn(
@@ -72,7 +93,7 @@ function ArticleImageBlock({ value }: { value: ArticleImageValue }) {
       <Image
         src={value.asset.url}
         alt={value.alt ?? ""}
-        width={value.width ?? 800}
+        width={imagePixelWidth}
         height={value.height ?? 450}
         className="h-auto w-full transition-transform duration-300 ease-in-out hover:scale-105"
         sizes={isFullBleed ? "100vw" : "(max-width: 768px) 100vw, 720px"}

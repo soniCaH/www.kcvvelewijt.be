@@ -138,6 +138,14 @@ export const qaBlock = defineType({
       of: [{type: 'qaPair'}],
       validation: (r) => r.min(1).error('At least one Q&A pair required.'),
     }),
+    defineField({
+      name: 'groupAtTail',
+      title: 'Onderaan groeperen',
+      type: 'boolean',
+      description:
+        'Groepeer deze Q&A onderaan het artikel in plaats van in de tekstvloei.',
+      initialValue: false,
+    }),
   ],
   preview: {
     select: {pairs: 'pairs'},

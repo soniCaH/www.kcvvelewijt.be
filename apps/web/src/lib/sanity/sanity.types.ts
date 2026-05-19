@@ -373,6 +373,7 @@ export type QaBlock = {
       _key: string;
     } & QaPair
   >;
+  groupAtTail?: boolean;
 };
 
 export type VideoBlock = {
@@ -391,7 +392,7 @@ export type VideoBlock = {
     _type: "image";
   };
   caption?: string;
-  fullBleed?: boolean;
+  width?: "prose" | "wide" | "bleed";
 };
 
 export type ArticleImage = {
@@ -404,7 +405,7 @@ export type ArticleImage = {
     _type: "image";
   };
   alt?: string;
-  fullBleed?: boolean;
+  width?: "prose" | "wide" | "bleed";
 };
 
 export type TeamReference = {
@@ -1144,7 +1145,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
           _type: "image";
         };
         alt?: string;
-        fullBleed?: boolean;
+        width?: "bleed" | "prose" | "wide";
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
@@ -1310,6 +1311,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
             _key: string;
           } & QaPair
         >;
+        groupAtTail?: boolean;
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
@@ -1392,7 +1394,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
           _type: "image";
         };
         caption?: string;
-        fullBleed?: boolean;
+        width?: "bleed" | "prose" | "wide";
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
@@ -1516,7 +1518,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
           _type: "image";
         };
         alt?: string;
-        fullBleed?: boolean;
+        width?: "bleed" | "prose" | "wide";
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
@@ -1687,6 +1689,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
             _key: string;
           } & QaPair
         >;
+        groupAtTail?: boolean;
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;
@@ -1772,7 +1775,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
           _type: "image";
         };
         caption?: string;
-        fullBleed?: boolean;
+        width?: "bleed" | "prose" | "wide";
         fileUrl: null;
         fileSize: null;
         fileMimeType: null;

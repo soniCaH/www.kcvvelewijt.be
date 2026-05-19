@@ -43,8 +43,8 @@ const SOFT_MAX_VIDEO_BYTES = 150 * 1024 * 1024
  * the `embedUrl` escape hatch for YouTube/Vimeo links — exactly one of
  * the two must be set, enforced via a Rule.custom on the object. The
  * preview falls back to whichever is populated. Phase 3 (#1365) layers
- * on `poster`, `caption`, `fullBleed`, and a non-blocking size warning
- * on the upload.
+ * on `poster`, `caption`, a `width` enum (prose/wide/bleed), and a
+ * non-blocking size warning on the upload.
  */
 export const videoBlock = defineType({
   name: 'videoBlock',
@@ -121,12 +121,13 @@ export const videoBlock = defineType({
       description: 'Optioneel onderschrift dat onder de video verschijnt.',
     }),
     defineField({
-      name: 'fullBleed',
-      title: 'Full bleed',
-      type: 'boolean',
+      name: 'width',
+      title: 'Width',
+      type: 'string',
       description:
-        'Strek de video over de volle breedte van het scherm (geen afgeronde hoeken).',
-      initialValue: false,
+        'Breedte van de video in het artikel. `prose` = standaard tekstbreedte; `wide` = breder dan tekst (1040px); `bleed` = volledige schermbreedte.',
+      options: {list: ['prose', 'wide', 'bleed']},
+      initialValue: 'prose',
     }),
   ],
   // Object-level XOR: exactly one of uploadedFile / embedUrl must be set.

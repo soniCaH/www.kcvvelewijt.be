@@ -14,6 +14,16 @@ export interface VideoBlockValue {
   embedUrl?: string | null;
   videoPosterUrl?: string | null;
   caption?: string | null;
+  /**
+   * Phase 5 width enum (#1843). Pre-#1843 articles ship as
+   * `width: undefined` + `fullBleed?: boolean`; migrated articles ship
+   * as `width: 'prose' | 'wide' | 'bleed'` + `fullBleed: undefined`.
+   * This renderer reads both via a one-release fallback in
+   * `isFullBleed` — Part C of the Phase 5 migration rewires
+   * `<VideoBlock>` onto TapedFigure and honours `wide` properly.
+   */
+  width?: "prose" | "wide" | "bleed" | null;
+  /** Legacy boolean — replaced by `width` in #1843. */
   fullBleed?: boolean | null;
 }
 
@@ -53,8 +63,9 @@ function resolveAnalyticsContext(
  *  - poster image (upload path) so the browser doesn't fetch any video
  *    bytes until the reader presses play (`preload="none"`)
  *  - optional `<figcaption>` underneath the video
- *  - `fullBleed` opt-in that drops the rounded corners and breaks out
- *    of the prose column via `.full-bleed` (mirrors `articleImage`)
+ *  - `fullBleed` opt-in (#1843: superseded by `width: 'bleed'`) that
+ *    drops the rounded corners and breaks out of the prose column via
+ *    `.full-bleed` (mirrors `articleImage`)
  *
  * Phase 4 (#1366) wires `article_video_play` / `article_video_complete`
  * analytics. The upload path binds `onPlay` / `onEnded` directly. The
@@ -142,7 +153,9 @@ function renderUpload(
   const src = value.videoAsset?.url;
   if (typeof src !== "string" || src.length === 0) return null;
   const mimeType = value.videoAsset?.mimeType ?? undefined;
-  const fullBleed = value.fullBleed === true;
+  // One-release fallback (#1843): prefer the new `width` enum, fall
+  // back to the legacy `fullBleed` boolean for un-migrated content.
+  const fullBleed = value.width === "bleed" || value.fullBleed === true;
   const posterUrl =
     typeof value.videoPosterUrl === "string" && value.videoPosterUrl.length > 0
       ? value.videoPosterUrl
@@ -252,7 +265,9 @@ function renderEmbed(
   className: string | undefined,
   analyticsContext: AnalyticsContext | null,
 ) {
-  const fullBleed = value.fullBleed === true;
+  // One-release fallback (#1843): prefer the new `width` enum, fall
+  // back to the legacy `fullBleed` boolean for un-migrated content.
+  const fullBleed = value.width === "bleed" || value.fullBleed === true;
   const caption = trimmedCaption(value);
   const parsed = parseEmbedUrl(url);
   if (parsed === null) {
