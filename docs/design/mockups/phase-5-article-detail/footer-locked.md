@@ -11,9 +11,9 @@
 The article-detail footer is a single `<VerderLezenRow>` —
 `<HorizontalSlider>` of `<NewsCard>` at `--container-page` width on
 cream. The first ~3 cards sit in-frame at desktop; cards beyond reveal
-via paper-chrome scroll arrows + drag (slider variant ratified during
-#1800 implementation review — supersedes the original 3-up grid lock
-because related items include mentioned players / teams / staff /
+via paper-chrome scroll arrows + drag (slider variant ratified during the
+implementation review for issue #1800 — supersedes the original 3-up grid
+lock because related items include mentioned players / teams / staff /
 events and often exceed 3). **No `<EditieLabel>` component, no
 magazine-edition line.**
 

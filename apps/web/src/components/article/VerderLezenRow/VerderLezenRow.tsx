@@ -121,7 +121,7 @@ export function VerderLezenRow({
             <div
               key={item.href}
               data-slot="verder-lezen-card"
-              className="w-[280px] shrink-0 md:w-[320px] lg:w-[340px]"
+              className="w-72 shrink-0 md:w-80"
             >
               <NewsCard
                 title={item.title}
