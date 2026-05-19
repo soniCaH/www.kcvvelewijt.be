@@ -58,8 +58,9 @@ export function SectionStack({
         const prev = filtered[i - 1];
         const next = filtered[i + 1];
         const hasOverlap =
-          section.transition &&
-          section.transition.overlap &&
+          section.transition !== undefined &&
+          "overlap" in section.transition &&
+          section.transition.overlap !== undefined &&
           section.transition.overlap !== "none";
         const showTransition =
           next !== undefined &&
@@ -95,12 +96,16 @@ export function SectionStack({
         // lands the backdrop's edge at the transition top.
         const prevTransitionIsNonOverlap =
           prev?.transition !== undefined &&
-          (prev.transition.overlap === undefined ||
-            prev.transition.overlap === "none");
+          ("overlap" in prev.transition
+            ? prev.transition.overlap === undefined ||
+              prev.transition.overlap === "none"
+            : true);
         const transitionIsNonOverlap =
           section.transition !== undefined &&
-          (section.transition.overlap === undefined ||
-            section.transition.overlap === "none");
+          ("overlap" in section.transition
+            ? section.transition.overlap === undefined ||
+              section.transition.overlap === "none"
+            : true);
 
         return (
           // Fragment keeps the key while allowing the transition to sit
@@ -174,16 +179,9 @@ export function SectionStack({
                 consumers never set them manually (PRD §3.2, §8). */}
             {showTransition && (
               <SectionTransition
+                {...section.transition!}
                 from={section.bg}
                 to={next.bg}
-                type={section.transition!.type}
-                direction={section.transition!.direction}
-                via={
-                  "via" in section.transition!
-                    ? section.transition!.via
-                    : undefined
-                }
-                overlap={section.transition!.overlap}
                 revealFrom={hasBackdrop || undefined}
                 revealTo={hasNextBackdrop || undefined}
               />

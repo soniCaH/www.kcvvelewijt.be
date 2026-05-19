@@ -400,3 +400,85 @@ export const DoubleDiagonalBackgroundedTo: Story = {
     revealTo: true,
   },
 };
+
+// ─── Striped-seam variant (#1701) ───────────────────────────────────────────
+//
+// Option α extension — `<SectionTransition>` composes `<StripedSeam>`
+// when `type: "striped-seam"`. Per-consumer migrations of the 10
+// legacy diagonal call sites stay phase-bound (NOT in this PR).
+//
+
+export const StripedSeamDefault: Story = {
+  name: "Striped Seam — Default (horizontal · cream-jersey-deep · xl)",
+  decorators: [
+    (Story) => (
+      <div className="flex flex-col">
+        <div className="bg-cream h-32 w-full" />
+        <Story />
+        <div className="bg-jersey-deep h-32 w-full" />
+      </div>
+    ),
+  ],
+  args: {
+    from: "transparent",
+    to: "transparent",
+    type: "striped-seam",
+    height: "xl",
+    colorPair: "cream-jersey-deep",
+    direction: "horizontal",
+  },
+};
+
+export const StripedSeamBetweenBackdrops: Story = {
+  name: "Striped Seam — Between Backdrops",
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`<StripedSeam>` is transparent SVG so neighbour-section backdrops bleed through naturally — no polygon-fill juggling like the diagonal variant needs. `revealFrom` / `revealTo` are accepted on the striped-seam config for prop-shape parity but render as no-ops; the story omits them to confirm the bleed-through is geometry-driven, not flag-driven.",
+      },
+    },
+  },
+  decorators: [
+    (Story) => (
+      <div className="relative flex flex-col">
+        <div className="bg-cream relative h-40 w-full">
+          <MockBackdrop label="Backdrop A" />
+        </div>
+        <Story />
+        <div className="bg-jersey-deep relative h-40 w-full">
+          <MockBackdrop label="Backdrop B" />
+        </div>
+      </div>
+    ),
+  ],
+  args: {
+    from: "transparent",
+    to: "transparent",
+    type: "striped-seam",
+    height: "lg",
+    colorPair: "ink-cream",
+    direction: "horizontal",
+  },
+};
+
+export const StripedSeamVertical: Story = {
+  name: "Striped Seam — Vertical (column seam)",
+  decorators: [
+    (Story) => (
+      <div className="flex h-[200px] flex-row">
+        <div className="bg-cream h-full w-1/2" />
+        <Story />
+        <div className="bg-jersey-deep h-full w-1/2" />
+      </div>
+    ),
+  ],
+  args: {
+    from: "transparent",
+    to: "transparent",
+    type: "striped-seam",
+    height: "md",
+    colorPair: "jersey-cream",
+    direction: "vertical",
+  },
+};

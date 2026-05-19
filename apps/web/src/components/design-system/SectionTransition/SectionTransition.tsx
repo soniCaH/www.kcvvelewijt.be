@@ -1,3 +1,9 @@
+import {
+  StripedSeam,
+  type StripedSeamColorPair,
+  type StripedSeamDirection,
+  type StripedSeamHeight,
+} from "@/components/design-system/StripedSeam";
 import { cn } from "@/lib/utils/cn";
 
 export type SectionBg =
@@ -7,6 +13,7 @@ export type SectionBg =
   | "kcvv-green-dark"
   | "transparent";
 export type TransitionOverlap = "none" | "half" | "full";
+
 export type SectionTransitionConfig =
   | {
       type: "diagonal";
@@ -18,28 +25,50 @@ export type SectionTransitionConfig =
       direction: "left" | "right";
       via: SectionBg;
       overlap?: TransitionOverlap;
+    }
+  | {
+      type: "striped-seam";
+      height: StripedSeamHeight;
+      colorPair: StripedSeamColorPair;
+      /** Defaults to `"horizontal"` — vertical is reserved for column seams. */
+      direction?: StripedSeamDirection;
     };
 
+/**
+ * Component-level props. Intentionally flat (vs the discriminated
+ * `SectionTransitionConfig` consumers pass to `SectionStack`) so
+ * Storybook's `args` literal-inference quirk doesn't widen each story
+ * into a `never` branch. SectionStack already discriminates at the
+ * config boundary; this surface just renders.
+ */
 export interface SectionTransitionProps {
   from: SectionBg;
   to: SectionBg;
-  type: "diagonal" | "double-diagonal";
-  direction: "left" | "right";
+  type: "diagonal" | "double-diagonal" | "striped-seam";
+  /**
+   * `"left" | "right"` for the diagonal variants;
+   * `"horizontal" | "vertical"` for `striped-seam`. Mixing values
+   * across variants is silently ignored at render time.
+   */
+  direction?: "left" | "right" | StripedSeamDirection;
   via?: SectionBg;
   overlap?: TransitionOverlap;
+  /** Striped-seam — forwarded to `<StripedSeam>`. */
+  height?: StripedSeamHeight;
+  /** Striped-seam — forwarded to `<StripedSeam>`. */
+  colorPair?: StripedSeamColorPair;
   /**
-   * Make the FROM triangle transparent so the previous section's backdrop
-   * shows through. Auto-set by `SectionStack` when the FROM section has a
-   * backdrop. Do not set manually in consumer code. Typed `true | undefined`
-   * to enforce the auto-propagation contract (PRD §3.2, §8) — consumers
-   * cannot opt out of the existing overlap-transparent FROM behavior.
+   * Make the FROM half transparent so the previous section's backdrop
+   * shows through. Auto-set by `SectionStack` when the FROM section has
+   * a backdrop. Do not set manually. Typed `true | undefined` so
+   * consumers can't opt out of the auto-propagation contract (PRD §3.2,
+   * §8). For `striped-seam` the wrapper is already transparent so the
+   * flag is a no-op there — kept for prop-shape parity.
    */
   revealFrom?: true;
   /**
-   * Make the TO triangle transparent so the next section's backdrop shows
-   * through. Auto-set by `SectionStack` when the TO section has a backdrop.
-   * Do not set manually in consumer code. Typed `true | undefined` — see
-   * `revealFrom`.
+   * Make the TO half transparent so the next section's backdrop shows
+   * through. See `revealFrom`.
    */
   revealTo?: true;
   className?: string;
@@ -113,10 +142,54 @@ export function SectionTransition({
   direction,
   via,
   overlap = "none",
+  height,
+  colorPair,
   revealFrom,
   revealTo,
   className,
 }: SectionTransitionProps) {
+  // `<StripedSeam>` already ships as transparent SVG — backdrop bleed
+  // happens naturally without the polygon-fill / wrapper-bg juggling
+  // the diagonal branch needs. `revealFrom` / `revealTo` are accepted
+  // for prop-shape parity with the diagonal path but render as no-ops.
+  if (type === "striped-seam") {
+    // Equality narrow instead of a cast — keeps the runtime guarantee
+    // even when a caller mistakenly passes "left" / "right" into a
+    // striped-seam variant (config-boundary type safety lives on
+    // `SectionTransitionConfig`, but the flat `Props` allows the mix).
+    const seamDirection: StripedSeamDirection =
+      direction === "vertical" ? "vertical" : "horizontal";
+    const isVertical = seamDirection === "vertical";
+    return (
+      <div
+        aria-hidden="true"
+        data-testid="section-transition"
+        data-type="striped-seam"
+        className={cn(
+          "pointer-events-none relative",
+          // Width/height stretch + sub-pixel pull depends on orientation:
+          //   - horizontal seam stretches across the row and pulls 1px
+          //     into the next section to swallow sub-pixel gaps (same
+          //     idea as the diagonal variant's `marginBottom: -1px`).
+          //   - vertical seam stretches down the column instead.
+          isVertical ? "-mr-px h-full" : "-mb-px w-full",
+          className,
+        )}
+      >
+        <StripedSeam
+          height={height ?? "md"}
+          colorPair={colorPair ?? "ink-cream"}
+          direction={seamDirection}
+        />
+      </div>
+    );
+  }
+
+  // Diagonal / double-diagonal branch. `direction` has been
+  // pre-discriminated to the `"left" | "right"` half of the union by
+  // the `type` check above; we narrow at the use site rather than
+  // splitting into a sub-component.
+  const diagonalDirection = direction === "right" ? "right" : "left";
   const isDouble = type === "double-diagonal";
   const isOverlap = overlap !== "none";
   const isRevealing = Boolean(revealFrom || revealTo);
@@ -127,7 +200,9 @@ export function SectionTransition({
   // the left side of the page, where the TO color polygon starts at the very top
   // of the SVG). The extra pixel is invisible: it paints the FROM color into the
   // section's own background area.
-  let height = isDouble ? `calc(2 * ${DIAGONAL_HEIGHT})` : DIAGONAL_HEIGHT;
+  let wrapperHeight = isDouble
+    ? `calc(2 * ${DIAGONAL_HEIGHT})`
+    : DIAGONAL_HEIGHT;
   let marginTop = "0";
   // §5.1 — z-index discipline. Non-overlap transitions now need z-index: 1 so
   // that a neighbor section's backdrop (absolutely positioned with negative
@@ -139,13 +214,13 @@ export function SectionTransition({
     marginTop = isDouble
       ? `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`
       : `calc(-1 * ${DIAGONAL_HALF} - 1px)`;
-    height = isDouble
+    wrapperHeight = isDouble
       ? `calc(2 * ${DIAGONAL_HEIGHT} + 1px)`
       : `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
   } else if (overlap === "full") {
     marginTop = `calc(-1 * ${DIAGONAL_HEIGHT} - 1px)`;
-    height = isDouble
+    wrapperHeight = isDouble
       ? `calc(2 * ${DIAGONAL_HEIGHT} + 1px)`
       : `calc(${DIAGONAL_HEIGHT} + 1px)`;
     zIndex = "10";
@@ -175,7 +250,7 @@ export function SectionTransition({
   }
 
   const style: React.CSSProperties = {
-    height,
+    height: wrapperHeight,
     marginTop,
     marginBottom: "-1px",
     background,
@@ -203,13 +278,14 @@ export function SectionTransition({
   const toFill = revealTo ? "transparent" : BG_COLOR[to];
 
   if (isDouble) {
-    const opposite: "left" | "right" = direction === "left" ? "right" : "left";
+    const opposite: "left" | "right" =
+      diagonalDirection === "left" ? "right" : "left";
     const midColor = via ?? to;
     return (
       <div
         aria-hidden="true"
         data-testid="section-transition"
-        data-height={height}
+        data-height={wrapperHeight}
         data-margin-top={marginTop}
         className={cn("pointer-events-none relative w-full", className)}
         style={style}
@@ -224,13 +300,13 @@ export function SectionTransition({
               upper FROM polygon only; the via polygon stays opaque. */}
           <polygon
             data-testid="st-upper-from"
-            points={SVG_FROM[direction]}
+            points={SVG_FROM[diagonalDirection]}
             fill={fromFill}
             shapeRendering="crispEdges"
           />
           <polygon
             data-testid="st-upper-to"
-            points={SVG_TO[direction]}
+            points={SVG_TO[diagonalDirection]}
             fill={BG_COLOR[midColor]}
             shapeRendering="crispEdges"
           />
@@ -257,7 +333,7 @@ export function SectionTransition({
     <div
       aria-hidden="true"
       data-testid="section-transition"
-      data-height={height}
+      data-height={wrapperHeight}
       data-margin-top={marginTop}
       className={cn("pointer-events-none relative w-full", className)}
       style={style}
@@ -269,13 +345,13 @@ export function SectionTransition({
       >
         <polygon
           data-testid="st-from"
-          points={SVG_FROM[direction]}
+          points={SVG_FROM[diagonalDirection]}
           fill={fromFill}
           shapeRendering="crispEdges"
         />
         <polygon
           data-testid="st-to"
-          points={SVG_TO[direction]}
+          points={SVG_TO[diagonalDirection]}
           fill={toFill}
           shapeRendering="crispEdges"
         />
