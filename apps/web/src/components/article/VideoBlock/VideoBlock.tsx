@@ -177,12 +177,22 @@ function renderUpload(
   // Bleed suppresses the tape (locked width-rules table).
   const tape: TapeStripProps | undefined =
     width === "bleed" ? undefined : VIDEO_TAPE;
+  // Aspect strategy (#1856 + no-poster regression fix):
+  // - With a poster: the poster's intrinsic dimensions drive the figure
+  //   (aspect="auto"), so non-16:9 source videos no longer letterbox
+  //   inside a forced 16:9 frame.
+  // - Without a poster: fall back to forced 16:9. The `<video>` has
+  //   `preload="none"` so no metadata is available until the user
+  //   clicks play, and the poster `<img>` short-circuits when absent —
+  //   without a fallback aspect the figure collapses to zero height
+  //   and the card reads as empty. Editors who want exact aspect on a
+  //   poster-less block can upload a poster matching their video.
+  // Embed path keeps forced 16:9 — iframes can't size to content.
+  const figureAspect = posterUrl ? "auto" : "landscape-16-9";
   return (
     <WidthWrapper width={width} className={className}>
-      {/* aspect="auto" honors the source video's natural aspect (#1856).
-          Embed path keeps forced 16:9 — iframes can't size to content. */}
       <TapedFigure
-        aspect="auto"
+        aspect={figureAspect}
         bg="cream"
         tint="none"
         tape={tape}
@@ -249,8 +259,10 @@ function UploadFigureContent({
 
   return (
     // Flow layout (#1856): poster + video render as block elements so the
-    // container takes on the source media's natural aspect. Falls back to
-    // `min-h-12` only when neither is present, preventing a 0-height frame.
+    // container takes on the source media's natural aspect. The no-poster
+    // case is handled one level up — `<TapedFigure>` is forced to
+    // `landscape-16-9` when `posterUrl` is undefined so this div has a
+    // sized parent and the play pill sits over a non-zero frame.
     <div className="bg-ink relative w-full">
       {!isPlaying && posterUrl && (
         // Plain `<img>` (not next/image) — `<Image fill>` requires a sized

@@ -55,6 +55,13 @@ unset fullBleed in all videoBlock objects
 
 The upload path was relaxed from forced `landscape-16-9` to `auto` after live-preview review showed letterbox bars on non-16:9 source videos. The embed path (YouTube/Vimeo) keeps forced 16:9 — iframes can't size to content and providers serve 16:9 reliably. See #1856.
 
+**Poster-less fallback (same-PR fix):**
+
+The upload-path `<TapedFigure>` resolves `aspect` conditionally on poster presence:
+
+- `posterUrl` set → `aspect="auto"`, the poster's intrinsic dimensions drive the figure (and the source video typically matches the poster's aspect).
+- `posterUrl` absent → `aspect="landscape-16-9"`. The `<video>` carries `preload="none"` so no metadata is available until the user clicks play; with neither poster nor video metadata, an unconstrained figure collapses to zero height. Forced 16:9 is a sensible default; editors who care about exact aspect on a poster-less block can upload a poster matching their video.
+
 ### Render — upload path
 
 ```tsx
