@@ -126,6 +126,23 @@ const config: TestRunnerConfig = {
       );
     }
 
+    // Abort all external video network: YouTube / Vimeo iframes (embed stories
+    // are vr.disabled, but Storybook test-runner still mounts the iframe during
+    // the smoke-test, and the resulting load keeps the browser context's
+    // `networkidle` busy long enough that the *next* story in the same
+    // .stories.tsx file — typically an upload-path width/aspect story — runs
+    // out the 30s smoke-test budget on `waitForPageReady`. Same defence covers
+    // the Big Buck Bunny / Sintel MP4 hosts: `<video>` is rendered post-click
+    // only, but blocking the host means a future story that ever auto-plays
+    // (or a regression that does) can't take the suite down.
+    await browserContext.route(
+      (url) =>
+        /(?:^|\.)(?:youtube\.com|youtube-nocookie\.com|ytimg\.com|googlevideo\.com|vimeo\.com|vimeocdn\.com)$/.test(
+          url.hostname,
+        ) || url.hostname === "commondatastorage.googleapis.com",
+      (route) => route.abort(),
+    );
+
     const targetURL = process.env.TARGET_URL;
     if (!targetURL) {
       throw new Error(
