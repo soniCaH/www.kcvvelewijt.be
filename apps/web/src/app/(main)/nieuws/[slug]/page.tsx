@@ -422,7 +422,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         />
       ) : null}
 
-      <VerderLezenRow items={mapRelatedToVerderLezen(relatedItems)} />
+      <VerderLezenRow
+        items={mapRelatedToVerderLezen(relatedItems)}
+        pageType="article"
+        pageSlug={article.slug}
+        sourceArticleType={article.articleType}
+      />
       <FooterSafeArea />
     </>
   );

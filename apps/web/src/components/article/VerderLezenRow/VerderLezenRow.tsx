@@ -1,7 +1,17 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { PortableTextBlock } from "@portabletext/react";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { HorizontalSlider } from "@/components/design-system/HorizontalSlider";
 import { NewsCard, type NewsCardBg } from "@/components/article/NewsCard";
+import { trackEvent } from "@/lib/analytics/track-event";
+import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
+import type {
+  RelatedContentItem,
+  RelatedContentSource,
+  RelatedPageType,
+} from "@/components/related/types";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -25,9 +35,24 @@ import { cn } from "@/lib/utils/cn";
  *   - 1–N items → slider track; cards beyond the visible viewport are
  *     reachable via the slider arrows or horizontal scroll.
  *
- * Items are passed in pre-sorted; this component does not own ranking
- * or fetching (call-site is responsible — typically the article page
- * after `mergeRelatedItems`).
+ * ## Analytics (ported from `<RelatedContentSection>`, #1832)
+ *
+ * When `pageType` + `pageSlug` are supplied the row emits the same three
+ * GA4 events the legacy widget shipped so GTM/GA4 stay untouched:
+ *
+ *   - `related_content_shown` — once per mount when at least one item
+ *     renders. Dedup via `useRef` so React StrictMode's double-effect
+ *     doesn't double-fire.
+ *   - `related_content_click` — per click, payload-identical to the
+ *     legacy emit.
+ *   - `related_article_click` — when source page + target are both
+ *     articles, fires the typed article→article variant via
+ *     `useArticleAnalytics().trackRelatedArticleClick` (hashes the
+ *     related id).
+ *
+ * Storybook stories that don't set `pageType` / `pageSlug` get no
+ * analytics emissions — the row stays a pure display primitive in
+ * isolation.
  *
  * **Not VR-tagged.** This is a page-composition surface; Playwright e2e
  * (Pages/Article/* templates) owns the smoke test once 5.C wires it into
@@ -51,6 +76,22 @@ export interface VerderLezenItem {
    * cream. Match the strings the article schema validator allows.
    */
   articleType?: "interview" | "announcement" | "transfer" | "event" | null;
+  /**
+   * Analytics payload — optional so demo / Storybook items can skip it.
+   * When present, the row emits `related_content_click` / impression
+   * events with these fields (preserving the legacy
+   * `<RelatedContentSection>` shape).
+   */
+  analyticsId?: string;
+  analyticsSource?: RelatedContentSource;
+  analyticsType?: RelatedContentItem["type"];
+  /**
+   * `psdId` for players, `slug` for articles / events / teams / pages.
+   * Staff items are dropped by `mapRelatedToVerderLezen` (no /staf/[slug]
+   * route exists yet — see #1831), so the staff target-slug case isn't
+   * reachable in production today.
+   */
+  analyticsTargetSlug?: string;
 }
 
 export interface VerderLezenRowProps {
@@ -62,6 +103,21 @@ export interface VerderLezenRowProps {
    * because the heading's accent geometry depends on PT marks.
    */
   heading?: PortableTextBlock[];
+  /**
+   * Surfacing page context for analytics. When both `pageType` and
+   * `pageSlug` are set, the row emits `related_content_shown` on mount
+   * and `related_content_click` on each item click. Omit both on
+   * Storybook fixtures / demo views to suppress analytics.
+   */
+  pageType?: RelatedPageType;
+  pageSlug?: string;
+  /**
+   * `articleType` of the source page — only meaningful when `pageType
+   * === "article"`. When supplied, article→article clicks additionally
+   * emit the typed `related_article_click` event via
+   * `useArticleAnalytics().trackRelatedArticleClick`.
+   */
+  sourceArticleType?: string | null;
   className?: string;
 }
 
@@ -91,12 +147,93 @@ function bgForArticleType(type: VerderLezenItem["articleType"]): NewsCardBg {
 // is well off-screen so a repeat reads as fresh tilt rather than a twin.
 const ROTATION_CYCLE = ["a", "b", "c", "none"] as const;
 
+function deriveImpressionSource(
+  items: VerderLezenItem[],
+): RelatedContentSource | "mixed" {
+  const sources = new Set(
+    items
+      .map((i) => i.analyticsSource)
+      .filter((s): s is RelatedContentSource => s !== undefined),
+  );
+  if (sources.size === 0) return "mixed";
+  if (sources.size === 1) return [...sources][0]!;
+  return "mixed";
+}
+
 export function VerderLezenRow({
   items,
   heading = DEFAULT_HEADING,
+  pageType,
+  pageSlug,
+  sourceArticleType,
   className,
 }: VerderLezenRowProps) {
+  const hasFired = useRef(false);
+  const { trackRelatedArticleClick } = useArticleAnalytics();
+
+  const analyticsEnabled =
+    pageType !== undefined && pageSlug !== undefined && items.length > 0;
+
+  // Impression event — fires once per mount when analytics is enabled
+  // and at least one item renders. Mirrors the legacy
+  // `<RelatedContentSection>` dedup pattern (single ref guard so
+  // StrictMode's double-invoke doesn't double-fire).
+  useEffect(() => {
+    if (!analyticsEnabled) return;
+    if (hasFired.current) return;
+    hasFired.current = true;
+
+    const contentTypes = [
+      ...new Set(
+        items
+          .map((i) => i.analyticsType)
+          .filter((t): t is RelatedContentItem["type"] => t !== undefined),
+      ),
+    ].join(",");
+
+    trackEvent("related_content_shown", {
+      source: deriveImpressionSource(items),
+      count: items.length,
+      content_types: contentTypes,
+      page_type: pageType,
+      page_slug: pageSlug,
+    });
+  }, [analyticsEnabled, items, pageType, pageSlug]);
+
   if (items.length === 0) return null;
+
+  const handleItemClick = (item: VerderLezenItem, position: number) => {
+    if (!analyticsEnabled) return;
+    if (
+      !item.analyticsSource ||
+      !item.analyticsType ||
+      !item.analyticsTargetSlug
+    ) {
+      return;
+    }
+    trackEvent("related_content_click", {
+      source: item.analyticsSource,
+      target_type: item.analyticsType,
+      target_slug: item.analyticsTargetSlug,
+      position,
+      page_type: pageType,
+      page_slug: pageSlug,
+    });
+    // Article→article variant — fires only when both the source page
+    // and the clicked item are articles, mirroring the legacy guard.
+    if (
+      pageType === "article" &&
+      item.analyticsType === "article" &&
+      sourceArticleType !== undefined &&
+      item.analyticsId !== undefined
+    ) {
+      trackRelatedArticleClick({
+        articleType: sourceArticleType,
+        relatedArticleId: item.analyticsId,
+        position,
+      });
+    }
+  };
 
   return (
     <section
@@ -128,6 +265,11 @@ export function VerderLezenRow({
               // would otherwise clip (browsers force `overflow-y: auto`
               // alongside the explicit `overflow-x: auto`).
               className="w-72 shrink-0 pt-4 md:w-80"
+              // Click tracking relies on bubbling from the inner <Link>
+              // anchor inside NewsCard. Keyboard Enter on a focused
+              // link dispatches a native click so no extra role / tabIndex
+              // / onKeyDown is needed on this wrapper.
+              onClick={() => handleItemClick(item, i + 1)}
             >
               <NewsCard
                 title={item.title}
