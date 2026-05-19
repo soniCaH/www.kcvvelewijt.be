@@ -51,15 +51,19 @@ fullBleed !== true  → width: 'prose'
 unset fullBleed in all videoBlock objects
 ```
 
+**Revisited 2026-05-20:**
+
+The upload path was relaxed from forced `landscape-16-9` to `auto` after live-preview review showed letterbox bars on non-16:9 source videos. The embed path (YouTube/Vimeo) keeps forced 16:9 — iframes can't size to content and providers serve 16:9 reliably. See #1856.
+
 ### Render — upload path
 
 ```tsx
 <TapedFigure
-  aspect="landscape-16-9"   // forced 16:9 for video, never auto
-  tape={{ color: 'ochre', length: 'sm', position: 'top-center', rotation: -2 }}
+  aspect="auto" // honors source video's natural aspect — upload path only
+  tape={{ color: "ochre", length: "sm", position: "top-center", rotation: -2 }}
   caption={value.caption?.trim() || undefined}
   bg="cream"
-  tint="none"   // newsprint tint shifts video poster colors; "none" preserves them
+  tint="none" // newsprint tint shifts video poster colors; "none" preserves them
   // width behaviour inherited from articleImage R3 lock
 >
   <div className="relative">
@@ -69,7 +73,11 @@ unset fullBleed in all videoBlock objects
       // below). Without it, an absolutely-positioned poster sitting under
       // the pill in DOM order is harmless, but a future refactor that wraps
       // the Image (e.g. for a lightbox) would silently steal the click.
-      <Image src={value.poster.url} alt="" fill className="object-cover pointer-events-none" />
+      <img
+        src={value.poster.url}
+        alt=""
+        className="block h-auto w-full pointer-events-none"
+      />
     )}
     {!isPlaying && (
       <button
@@ -91,7 +99,7 @@ unset fullBleed in all videoBlock objects
         playsInline
         onPlay={handleAnalyticsPlay}
         onEnded={handleAnalyticsComplete}
-        className="block h-full w-full"
+        className="block h-auto w-full"
       />
     )}
   </div>
@@ -117,18 +125,18 @@ Provider chrome (YT/Vimeo play button + controls) sits inside the iframe. The Ta
 
 ### Width rules (inherited from articleImage R3 / R3b)
 
-| Width | Desktop ≥ 640px | Mobile &lt; 640px | Tape |
-| --- | --- | --- | --- |
-| `prose` (default) | 680px | viewport - padding | ✅ |
-| `wide` | ~1040px | collapses to prose | ✅ |
-| `bleed` | 100vw | 100vw | ❌ suppressed |
+| Width             | Desktop ≥ 640px | Mobile &lt; 640px  | Tape          |
+| ----------------- | --------------- | ------------------ | ------------- |
+| `prose` (default) | 680px           | viewport - padding | ✅            |
+| `wide`            | ~1040px         | collapses to prose | ✅            |
+| `bleed`           | 100vw           | 100vw              | ❌ suppressed |
 
 `tint="none"` on every video (unlike articleImage's `tint="newsprint"`) — the newsprint sepia would shift video poster colours wrongly.
 
 ### Play affordance contract
 
 - **Pill geometry:** 36px height · `px-4` padding · `h-3.5 w-3.5` triangle icon · 8px gap · `border-ink` 1px · `shadow-paper-press` offset shadow.
-- **Position:** `absolute bottom-4 left-4` inside the 16:9 video container.
+- **Position:** `absolute bottom-4 left-4` inside the upload video container (sized to the source video's natural aspect — see "Revisited 2026-05-20" callout above).
 - **Hover:** canonical press-down (per `feedback_canonical_press_down_hover`) — `hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all duration-300`.
 - **Label:** Dutch caps "Afspelen" — locked, not editor-authored.
 - **Triangle:** locked `M8 5v14l11-7z` 24×24 viewBox · `fill="currentColor"` (cream on jersey-deep).

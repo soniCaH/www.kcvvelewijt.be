@@ -8,7 +8,6 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { useVideoAnalytics } from "@/hooks/useVideoAnalytics";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
@@ -180,8 +179,10 @@ function renderUpload(
     width === "bleed" ? undefined : VIDEO_TAPE;
   return (
     <WidthWrapper width={width} className={className}>
+      {/* aspect="auto" honors the source video's natural aspect (#1856).
+          Embed path keeps forced 16:9 — iframes can't size to content. */}
       <TapedFigure
-        aspect="landscape-16-9"
+        aspect="auto"
         bg="cream"
         tint="none"
         tape={tape}
@@ -247,17 +248,24 @@ function UploadFigureContent({
   }, [analyticsContext, trackVideoComplete]);
 
   return (
-    <div className="bg-ink relative h-full w-full">
+    // Flow layout (#1856): poster + video render as block elements so the
+    // container takes on the source media's natural aspect. Falls back to
+    // `min-h-12` only when neither is present, preventing a 0-height frame.
+    <div className="bg-ink relative w-full">
       {!isPlaying && posterUrl && (
+        // Plain `<img>` (not next/image) — `<Image fill>` requires a sized
+        // parent, but TapedFigure aspect="auto" leaves the container
+        // unconstrained on purpose. The poster's intrinsic dimensions size
+        // the frame to match the upcoming video's aspect.
+        //
         // `pointer-events-none` keeps the poster non-interactive so that
         // the pill below is the only click target (per videoblock-locked
         // §"Visibility on first paint").
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element -- intentional: next/image fill requires a sized parent, but aspect="auto" leaves the container intentionally unconstrained (#1856).
+        <img
           src={posterUrl}
           alt=""
-          fill
-          sizes="(max-width: 640px) 100vw, 1040px"
-          className="pointer-events-none object-cover"
+          className="pointer-events-none block h-auto w-full"
           data-testid="video-block-poster"
         />
       )}
@@ -284,12 +292,14 @@ function UploadFigureContent({
         </button>
       )}
       {isPlaying && (
+        // `h-auto w-full` lets the video render at its intrinsic aspect
+        // (#1856) — no `aspect-video` lock, no `absolute inset-0` fill.
         <video
           autoPlay
           controls
           playsInline
           preload="metadata"
-          className="absolute inset-0 h-full w-full"
+          className="block h-auto w-full"
           data-testid="video-block-video"
           onPlay={handlePlay}
           onEnded={handleEnded}

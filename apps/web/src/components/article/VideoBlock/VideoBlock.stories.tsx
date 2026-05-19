@@ -221,6 +221,64 @@ export const WidthBleed: Story = {
   parameters: { layout: "fullscreen" },
 };
 
+// ─── Aspect coverage (#1856) ─────────────────────────────────────────────
+//
+// Upload path was relaxed from forced 16:9 to `aspect="auto"` after live
+// preview review showed letterbox bars on non-16:9 source videos. These
+// stories lock the visual behaviour for two off-16:9 sources.
+
+// Sintel trailer — 1280×546 (~2.35:1 cinematic) — Blender Foundation,
+// hosted on the same google-cdn bucket as BigBuckBunny so no new network
+// dependency is introduced. Same provenance, different aspect.
+const SAMPLE_MP4_CINEMATIC =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4";
+const SAMPLE_POSTER_CINEMATIC =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg";
+
+// VR captures run pre-play (no autoplay), so the visible aspect is driven
+// by the poster — the deliberately 1:1 local fixture exercises the auto
+// container in the "frame becomes a square" direction. The underlying
+// MP4 stays the 16:9 BigBuckBunny sample because no 1:1 sample exists in
+// the gtv-videos-bucket pool and we won't add a new network dependency.
+// Acceptable trade-off per the #1856 implementation notes.
+const SAMPLE_POSTER_SQUARE = fixtureImage("news-thumb-square", 0);
+
+export const UploadAspectCinematic: Story = {
+  name: "Upload — aspect 2.35:1 (cinematic)",
+  args: {
+    value: {
+      _type: "videoBlock",
+      videoAsset: {
+        url: SAMPLE_MP4_CINEMATIC,
+        size: 5_242_880,
+        mimeType: "video/mp4",
+        originalFilename: "cinematic-sample.mp4",
+      },
+      videoPosterUrl: SAMPLE_POSTER_CINEMATIC,
+      caption: "Cinematic 2.35:1 source — TapedFigure stretches to fit.",
+      width: "prose",
+    },
+  },
+};
+
+export const UploadAspectSquare: Story = {
+  name: "Upload — aspect 1:1 (square)",
+  args: {
+    value: {
+      _type: "videoBlock",
+      videoAsset: {
+        url: SAMPLE_MP4_URL,
+        size: 5_242_880,
+        mimeType: "video/mp4",
+        originalFilename: "square-sample.mp4",
+      },
+      videoPosterUrl: SAMPLE_POSTER_SQUARE,
+      caption: "Square 1:1 source — frame becomes a square.",
+      width: "prose",
+    },
+  },
+};
+
 export const MobileNarrow: Story = {
   name: "Mobile — narrow viewport (375px)",
   args: {
