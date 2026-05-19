@@ -8,10 +8,14 @@
 
 ## Decision
 
-The article-detail footer is a single `<VerderLezenRow>` (3-up
-`<NewsCard>` row) at `--container-page` width on cream, with the
-sparse-state behaviour locked by Phase 4.5 R10 ("cards drop, never
-pad"). **No `<EditieLabel>` component, no magazine-edition line.**
+The article-detail footer is a single `<VerderLezenRow>` —
+`<HorizontalSlider>` of `<NewsCard>` at `--container-page` width on
+cream. The first ~3 cards sit in-frame at desktop; cards beyond reveal
+via paper-chrome scroll arrows + drag (slider variant ratified during
+#1800 implementation review — supersedes the original 3-up grid lock
+because related items include mentioned players / teams / staff /
+events and often exceed 3). **No `<EditieLabel>` component, no
+magazine-edition line.**
 
 ## Why the drill was killed
 
@@ -42,9 +46,12 @@ baseline. The Sanity content audit revealed:
 The same principle applies as the no-newsletter rule:
 **don't fabricate publication surfaces we don't run.**
 
-## Verder-lezen composition (inherited)
+## Verder-lezen composition (slider variant — ratified #1800)
 
-`<VerderLezenRow>` — 3-up `<NewsCard>` row at `--container-page` width.
+`<VerderLezenRow>` — horizontal slider of `<NewsCard>` at
+`--container-page` width using the canonical `<HorizontalSlider>`
+primitive. Each card occupies a fixed slot width (`280–340px` per
+breakpoint), so ~3 cards sit in-frame at desktop and 1–2 at mobile.
 
 **Structure** (inherited from Phase 4.5 R10):
 
@@ -65,8 +72,13 @@ The same principle applies as the no-newsletter rule:
 **Sparse states** (inherited from Phase 4.5 R10):
 
 - 0 related: row does not render.
-- 1 or 2 related: cards drop; no padding to maintain 3-up.
-- 3 related: standard 3-up.
+- 1–3 related: slider renders without scroll arrows (no overflow).
+- 4+ related: slider arrows + edge fade activate; drag / arrow keys / scroll reveal the off-canvas cards.
+
+**Follow-ups noted during #1800 implementation review:**
+
+- Staff items have no `/staf/[slug]` route + the GROQ projection doesn't carry `slug`, so the page-level adapter drops them from the slider for now. Routing + projection work tracked alongside the analytics follow-up (#1832).
+- `<RelatedContentSection>`'s legacy analytics events (`related_content_click`, `related_article_click`, `related_content_impression`) are not yet emitted by `<VerderLezenRow>` — tracked at #1832. GA4 reports drift to zero on the article surface until that issue ships.
 
 **Heading** (Phase 5 convention, identical to homepage Uitgelicht):
 

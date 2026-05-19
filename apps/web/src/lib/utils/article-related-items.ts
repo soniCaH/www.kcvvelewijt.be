@@ -7,6 +7,8 @@ import type {
   RelatedEventItem,
   RelatedContentItem,
 } from "@/components/related/types";
+import type { VerderLezenItem } from "@/components/article/VerderLezenRow";
+import { formatArticleDate } from "@/lib/utils/dates";
 import type {
   RelatedArticleRef,
   ArticleDetailVM,
@@ -251,4 +253,88 @@ export function mergeRelatedItems(
 ): RelatedContentItem[] {
   const curatedIds = new Set(input.curated.map((c) => c.id));
   return [...input.curated, ...input.auto.filter((i) => !curatedIds.has(i.id))];
+}
+
+/**
+ * Adapt the discriminated `RelatedContentItem` union to the flat
+ * `<VerderLezenRow>` card shape. Each variant maps to a card with the
+ * appropriate badge, href, image, and (where applicable) display date.
+ *
+ * Items that can't yield a clickable card (e.g. player without a
+ * `psdId`, staff without a name) are silently dropped — the upstream
+ * mappers already null-guard the resolvable fields, this layer just
+ * picks the fallback labels and routes.
+ */
+export function mapRelatedToVerderLezen(
+  items: RelatedContentItem[],
+): VerderLezenItem[] {
+  const out: VerderLezenItem[] = [];
+  for (const item of items) {
+    const mapped = mapRelatedItem(item);
+    if (mapped) out.push(mapped);
+  }
+  return out;
+}
+
+function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
+  switch (item.type) {
+    case "article":
+      return {
+        title: item.title,
+        href: `/nieuws/${item.slug}`,
+        imageUrl: item.imageUrl ?? undefined,
+        imageAlt: item.title,
+        badge: "NIEUWS",
+        date: item.date ? formatArticleDate(item.date) : undefined,
+        // RelatedArticleItem doesn't currently carry the linked
+        // article's own articleType; the card defaults to cream bg.
+        // Plumbing articleType through is tracked alongside #1829.
+      };
+    case "page":
+      return {
+        title: item.title,
+        href: `/club/${item.slug}`,
+        imageUrl: item.imageUrl ?? undefined,
+        imageAlt: item.title,
+        badge: "PAGINA",
+      };
+    case "player": {
+      const name = [item.firstName, item.lastName]
+        .filter((n): n is string => typeof n === "string" && n.length > 0)
+        .join(" ");
+      if (!name) return null;
+      return {
+        title: name,
+        href: `/spelers/${item.psdId}`,
+        imageUrl: item.imageUrl ?? undefined,
+        imageAlt: name,
+        badge: item.position?.toUpperCase() ?? "SPELER",
+      };
+    }
+    case "team":
+      return {
+        title: item.name,
+        href: `/ploegen/${item.slug}`,
+        imageUrl: item.imageUrl ?? undefined,
+        imageAlt: item.name,
+        badge: "PLOEG",
+      };
+    case "staff":
+      // Staff has no resolvable detail-page route today (the GROQ
+      // projection at apps/web/src/lib/repositories/article.repository.ts
+      // doesn't select a `slug`, and there's no /staf/[slug] page).
+      // Dropping the card rather than rendering a broken `href: "#"`.
+      // Surfacing staff in the slider is tracked alongside the analytics
+      // follow-up (#1832) — needs both a route + the projection field.
+      return null;
+    case "event":
+      return {
+        title: item.title,
+        href: `/events/${item.slug}`,
+        imageUrl: item.imageUrl ?? undefined,
+        imageAlt: item.title,
+        badge: "EVENEMENT",
+        date: formatArticleDate(item.dateStart),
+      };
+  }
 }

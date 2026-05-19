@@ -18,6 +18,7 @@ import {
   mapMentionedStaff,
   mapCuratedRelatedContent,
   mergeRelatedItems,
+  mapRelatedToVerderLezen,
 } from "@/lib/utils/article-related-items";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -30,98 +31,158 @@ import {
   buildAboutFromSubject,
   buildEventJsonLdInput,
 } from "@/lib/seo/article-jsonld";
-import { AnnouncementTemplate } from "@/components/article/AnnouncementTemplate";
-import { InterviewTemplate } from "@/components/article/InterviewTemplate";
-import { TransferTemplate } from "@/components/article/TransferTemplate";
-import { EventTemplate } from "@/components/article/EventTemplate";
+import { EditorialHero } from "@/components/article/EditorialHero";
+import { ArticleMetadata } from "@/components/article/ArticleMetadata";
+import { ArticleBodyMotion } from "@/components/article/ArticleBodyMotion";
+import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import { ArticleCredits } from "@/components/article/ArticleCredits";
+import { VerderLezenRow } from "@/components/article/VerderLezenRow";
+import {
+  EventDetailBlock,
+  deriveIsPast,
+  shouldRenderEventDetailBlock,
+} from "@/components/article/blocks/EventDetailBlock";
 import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
-import { RelatedContentSection } from "@/components/related/RelatedContentSection/RelatedContentSection";
 import type { RelatedContentItem } from "@/components/related/types";
 import { FooterSafeArea } from "@/components/design-system";
 import type { PortableTextBlock } from "@portabletext/react";
-import {
-  resolveSubject,
-  type IndexedSubject,
-} from "@/components/article/SubjectAttribution";
+import { resolveSubject } from "@/components/article/SubjectAttribution";
+import type { ArticleDetailVM } from "@/lib/repositories/article.repository";
+import type { TransferFactValue } from "@/components/article/blocks/TransferFact";
+import type { EventFactValue } from "@/components/article/blocks/EventFact";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
 /**
- * Per-type template dispatch. Extracted out of the JSX so the nested
- * ternary (four branches, each with its own prop shape) doesn't bloat
- * the page body. Keyed on `articleType` with a default renderer for
- * missing/unknown types → `AnnouncementTemplate` (the fallback path
- * per PRD §3).
+ * Phase 5.C composition helpers. The page is composed as:
+ *
+ *   <EditorialHero variant={articleType} placement="detail" />
+ *   <ArticleMetadata />                       ← share + reading-time
+ *   <SanityArticleBody body />                ← legacy renderer; #1829 tracks migration
+ *   <EventDetailBlock isPast />               ← event variant only, when skip-condition passes
+ *   <ArticleCredits />                        ← interview always; others when author/photographer
+ *   <VerderLezenRow items />                  ← slider of related content
+ *   <FooterSafeArea />
+ *
+ * The single `switch (article.articleType)` lives in `renderArticleHero`
+ * so the data shape of `<EditorialHero>`'s per-variant prop unions stays
+ * inside one function. Variant-specific post-body blocks
+ * (EventDetailBlock today; later MatchRecapStats at #1799) live as
+ * straight conditional renders in the page body.
  */
-interface RenderTemplateArgs {
-  articleType: string | null | undefined;
-  articleId: string;
-  articleSlug: string;
+interface RenderArticleHeroArgs {
+  article: ArticleDetailVM;
   title: string;
-  category?: string;
-  coverImageUrl?: string;
-  coverImagePortraitUrl?: string | null;
+  primaryCategory?: string;
   publishedDate?: string;
-  readingTime?: string;
-  shareUrl: string;
-  body: PortableTextBlock[] | null;
-  subjects: IndexedSubject[] | null;
-  /**
-   * `article.author` — drives the `★ Door {author}` byline in
-   * `<EditorialByline>` (`apps/web/src/components/design-system/EditorialByline/EditorialByline.tsx`).
-   * Empty/undefined falls back to "Door redactie" at the byline level.
-   * Threaded down through every template to `<EditorialHero>` (5.B.int
-   * wiring, #1795).
-   */
-  author?: string;
+  firstTransferFact?: TransferFactValue | null;
+  firstEventFact?: EventFactValue | null;
 }
 
-function renderTemplate(args: RenderTemplateArgs) {
-  // Shared subset every template accepts. Each per-articleType branch
-  // only sets the props that vary (e.g. coverImageUrl projection +
-  // interview-only `subjects`, announcement-only `category`).
-  const common = {
-    title: args.title,
-    publishedDate: args.publishedDate,
-    readingTime: args.readingTime,
-    shareConfig: { url: args.shareUrl, title: args.title },
-    body: args.body,
-    articleId: args.articleId,
-    articleType: args.articleType,
-    articleSlug: args.articleSlug,
-    author: args.author,
-  };
-  switch (args.articleType) {
+function renderArticleHero({
+  article,
+  title,
+  primaryCategory,
+  publishedDate,
+  firstTransferFact,
+  firstEventFact,
+}: RenderArticleHeroArgs) {
+  // EditorialHero accepts string OR PortableTextBlock[] (accent-decorator
+  // PT title). The Sanity typegen for `titleRich` produces a shape that
+  // doesn't satisfy @portabletext/react's PortableTextBlock structurally;
+  // threading the rich-title through is tracked at #1830.
+  const titleProp = title;
+  const lead = article.lead?.trim() || undefined;
+  const author = article.author?.trim() || undefined;
+  // Cover-image projection picks differ per variant (portrait crop for
+  // interview + transfer; landscape crop for announcement + event).
+  // Empty URLs become `undefined` so the hero skips the figure rather
+  // than rendering a broken image.
+  const portrait = article.coverImagePortraitUrl?.trim() || undefined;
+  const landscape = article.coverImageUrl?.trim() || undefined;
+  const portraitCover = portrait ? { url: portrait, alt: title } : undefined;
+  const landscapeCover = landscape ? { url: landscape, alt: title } : undefined;
+
+  switch (article.articleType) {
     case "interview":
       return (
-        <InterviewTemplate
-          {...common}
-          coverImageUrl={args.coverImagePortraitUrl}
-          subjects={args.subjects}
+        <EditorialHero
+          variant="interview"
+          placement="detail"
+          title={titleProp}
+          lead={lead}
+          author={author}
+          date={publishedDate}
+          subjects={article.subjects ?? null}
+          coverImage={portraitCover}
         />
       );
     case "transfer":
       return (
-        <TransferTemplate
-          {...common}
-          coverImageUrl={args.coverImagePortraitUrl}
+        <EditorialHero
+          variant="transfer"
+          placement="detail"
+          title={titleProp}
+          lead={lead}
+          author={author}
+          date={publishedDate}
+          feature={firstTransferFact ?? null}
+          coverImage={portraitCover}
         />
       );
     case "event":
-      return <EventTemplate {...common} coverImageUrl={args.coverImageUrl} />;
-    // Missing or unknown articleType falls through to announcement —
-    // matches the PRD §3 legacy-article fallback rule.
-    default:
       return (
-        <AnnouncementTemplate
-          {...common}
-          coverImageUrl={args.coverImageUrl}
-          category={args.category}
+        <EditorialHero
+          variant="event"
+          placement="detail"
+          title={titleProp}
+          lead={lead}
+          author={author}
+          date={publishedDate}
+          feature={firstEventFact ?? null}
+          coverImage={landscapeCover}
+        />
+      );
+    default:
+      // Missing or unknown articleType falls through to announcement —
+      // matches the PRD §3 legacy-article fallback rule.
+      return (
+        <EditorialHero
+          variant="announcement"
+          placement="detail"
+          title={titleProp}
+          lead={lead}
+          author={author}
+          date={publishedDate}
+          category={primaryCategory}
+          coverImage={landscapeCover}
         />
       );
   }
+}
+
+/**
+ * Find the first transferFact / eventFact block in the article body.
+ * `ArticleVM` (homepage projection) carries these as top-level fields,
+ * but `ArticleDetailVM` (slug projection) inlines them in `body[]` — we
+ * scan once at the page level rather than touching the GROQ projection.
+ */
+function findFirstBlock<T>(
+  body: PortableTextBlock[] | null,
+  type: string,
+): T | null {
+  if (!body) return null;
+  const match = body.find((b) => (b as { _type?: string })._type === type);
+  return (match as T | undefined) ?? null;
+}
+
+function shouldRenderArticleCredits(article: ArticleDetailVM): boolean {
+  if (article.articleType === "interview") return true;
+  const hasAuthor = !!article.author?.trim();
+  const hasPhotographer = !!article.photographer?.trim();
+  return hasAuthor || hasPhotographer;
 }
 
 /**
@@ -219,6 +280,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   };
 
   const readingTime = computeReadingTime(article.body ?? null);
+  const body = (article.body as PortableTextBlock[] | null) ?? null;
+  const firstTransferFact = findFirstBlock<TransferFactValue>(
+    body,
+    "transferFact",
+  );
+  const firstEventFact = findFirstBlock<EventFactValue>(body, "eventFact");
+  const publishedDate = article.publishedAt
+    ? formatArticleDate(new Date(article.publishedAt))
+    : undefined;
 
   const hasEditorialArticles =
     article.relatedArticles && article.relatedArticles.length > 0;
@@ -303,35 +373,56 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         subjectKind={subjectKind}
         subjectCount={subjectCount}
       />
-      {renderTemplate({
-        articleType: article.articleType,
-        articleId: article.id,
-        articleSlug: article.slug,
+      {renderArticleHero({
+        article,
         title: article.title,
-        category: primaryCategory?.name,
-        // Pass both projections separately — each template picks the
-        // aspect it needs (Interview + Transfer take the 4:5 portrait,
-        // Announcement takes the 16:9 wide). No cross-fallback: if a
-        // template's preferred projection is null the template renders
-        // without an image rather than cropping the wrong aspect.
-        coverImageUrl: article.coverImageUrl ?? undefined,
-        coverImagePortraitUrl: article.coverImagePortraitUrl ?? undefined,
-        publishedDate: article.publishedAt
-          ? formatArticleDate(new Date(article.publishedAt))
-          : undefined,
-        readingTime,
-        shareUrl: shareConfig.url,
-        body: (article.body as PortableTextBlock[] | null) ?? null,
-        subjects: article.subjects ?? null,
-        author: article.author?.trim() ? article.author.trim() : undefined,
+        primaryCategory: primaryCategory?.name,
+        publishedDate,
+        firstTransferFact,
+        firstEventFact,
       })}
 
-      <RelatedContentSection
-        items={relatedItems}
-        pageType="article"
-        pageSlug={article.slug}
-        sourceArticleType={article.articleType}
+      <ArticleMetadata
+        date={publishedDate}
+        readingTime={readingTime}
+        shareConfig={shareConfig}
+        articleId={article.id}
+        articleType={article.articleType}
+        className="mt-10"
       />
+
+      {body && body.length > 0 ? (
+        <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+          <ArticleBodyMotion>
+            <SanityArticleBody
+              className="article-body"
+              content={body}
+              subjects={article.subjects ?? null}
+              articleSlug={article.slug}
+            />
+          </ArticleBodyMotion>
+        </div>
+      ) : null}
+
+      {article.articleType === "event" &&
+      firstEventFact &&
+      shouldRenderEventDetailBlock(firstEventFact) ? (
+        <EventDetailBlock
+          value={firstEventFact}
+          isPast={deriveIsPast(firstEventFact)}
+        />
+      ) : null}
+
+      {shouldRenderArticleCredits(article) ? (
+        <ArticleCredits
+          author={article.author}
+          photographer={article.photographer}
+          subjects={article.subjects}
+          publishedAt={article.publishedAt}
+        />
+      ) : null}
+
+      <VerderLezenRow items={mapRelatedToVerderLezen(relatedItems)} />
       <FooterSafeArea />
     </>
   );

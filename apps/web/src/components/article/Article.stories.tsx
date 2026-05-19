@@ -1,13 +1,36 @@
 /**
- * Article Page Stories
- * Complete article page combining all article components
+ * Pages / Article — composition stories per articleType.
+ *
+ * Mirrors the production composition shipped by
+ * `apps/web/src/app/(main)/nieuws/[slug]/page.tsx` (the 5.C rewire,
+ * #1800). Each story exercises one articleType through the locked
+ * Phase 5 shell:
+ *
+ *   <EditorialHero variant placement="detail" />
+ *   <ArticleMetadata />                       (share + reading-time)
+ *   <SanityArticleBody />                     (legacy body renderer; #1829 tracks migration)
+ *   <EventDetailBlock />                      (event variant when skip-condition passes)
+ *   <ArticleCredits />                        (interview always; others when author/photographer)
+ *   <VerderLezenRow items={...} />            (slider of related content)
+ *
+ * Not vr-tagged per the Phase 0.5 convention — these are page-level
+ * compositions covered by Playwright e2e (`tests/e2e/article-detail.spec.ts`)
+ * + component-level VR for each underlying primitive.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ArticleHeader, ArticleMetadata, ArticleFooter } from "./index";
-import { SanityArticleBody } from "./SanityArticleBody/SanityArticleBody";
 import type { PortableTextBlock } from "@portabletext/react";
 import { fixtureImage } from "@test-fixtures/images";
+import { EditorialHero } from "./EditorialHero";
+import { ArticleMetadata } from "./ArticleMetadata";
+import { ArticleBodyMotion } from "./ArticleBodyMotion";
+import { SanityArticleBody } from "./SanityArticleBody/SanityArticleBody";
+import { ArticleCredits } from "./ArticleCredits";
+import { VerderLezenRow, type VerderLezenItem } from "./VerderLezenRow";
+import { EventDetailBlock } from "./blocks/EventDetailBlock";
+import type { IndexedSubject } from "./SubjectAttribution";
+import type { EventFactValue } from "./blocks/EventFact";
+import type { TransferFactValue } from "./blocks/TransferFact";
 
 const meta = {
   title: "Pages/Article",
@@ -16,7 +39,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Complete article page combining ArticleHeader, ArticleMetadata, ArticleBody, and ArticleFooter components. This demonstrates the full article layout as it appears on the website.",
+          "Full /nieuws/[slug] page composition per articleType. Mirrors the 5.C page.tsx switch + sibling blocks. Underlying primitives each carry their own VR coverage; these page stories are autodocs + Playwright-tested, not vr-tagged.",
       },
     },
   },
@@ -26,280 +49,323 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const sampleArticleContent: PortableTextBlock[] = [
-  {
-    _type: "block",
-    _key: "1",
-    style: "normal",
-    children: [
-      {
-        _type: "span",
-        _key: "1a",
-        text: "KCVV Elewijt heeft afgelopen weekend een indrukwekkende overwinning behaald tegen hun rivalen met een score van 3-1. Het team toonde uitstekende teamwork en determinatie gedurende de hele wedstrijd.",
-        marks: [],
-      },
-    ],
-    markDefs: [],
-  },
-  {
-    _type: "block",
-    _key: "2",
-    style: "h2",
-    children: [
-      { _type: "span", _key: "2a", text: "Eerste Helft Dominantie", marks: [] },
-    ],
-    markDefs: [],
-  },
-  {
-    _type: "block",
-    _key: "3",
-    style: "normal",
-    children: [
-      {
-        _type: "span",
-        _key: "3a",
-        text: "Vanaf het eerste fluitsignaal nam KCVV Elewijt de controle over de wedstrijd. In de 23e minuut opende Jan Janssens de score met een prachtig schot van buiten de zestien.",
-        marks: [],
-      },
-    ],
-    markDefs: [],
-  },
-  {
-    _type: "block",
-    _key: "4",
-    style: "blockquote",
-    children: [
-      {
-        _type: "span",
-        _key: "4a",
-        text: "Dit was een van onze beste prestaties van het seizoen. Het team heeft hard gewerkt en het resultaat laat dat zien.",
-        marks: [],
-      },
-    ],
-    markDefs: [],
-  },
-  {
-    _type: "image",
-    _key: "img1",
-    asset: {
-      url: fixtureImage("match-action", 0),
+// ─── Shared body content ────────────────────────────────────────────────────
+
+const PROSE_LEAD: PortableTextBlock = {
+  _type: "block",
+  _key: "p-lead",
+  style: "normal",
+  children: [
+    {
+      _type: "span",
+      _key: "p-lead-c",
+      text: "KCVV Elewijt opende de wedstrijd met een vlot ritme en dwong al na een kwartier de eerste echte kans af. Het collectief lag goed in elkaar; trainer Wim Govaerts kreeg eindelijk waar hij maanden naar werkte — een ploeg die durft te voetballen onder druk.",
+      marks: [],
     },
-    alt: "Voetbalveld tijdens wedstrijd",
-    width: 800,
-    height: 450,
-  } as unknown as PortableTextBlock,
-  {
-    _type: "block",
-    _key: "5",
-    style: "normal",
-    children: [
-      {
-        _type: "span",
-        _key: "5a",
-        text: "Na de pauze bleef KCVV druk zetten. Het publiek genoot van het aanvallende voetbal.",
-        marks: [],
-      },
-    ],
-    markDefs: [],
-  },
-  {
-    _type: "articleImage",
-    _key: "img2",
-    asset: {
-      url: fixtureImage("stadium-hero", 0),
+  ],
+  markDefs: [],
+};
+
+const PROSE_BODY: PortableTextBlock = {
+  _type: "block",
+  _key: "p-body",
+  style: "normal",
+  children: [
+    {
+      _type: "span",
+      _key: "p-body-c",
+      text: "Na de pauze stokte het ritme even, maar het was vooral het verdedigende werk dat opviel: organisatie, kort kop-tegen-kop, en weinig ruimte voor de tegenpartij om gevaarlijk uit de counter te komen.",
+      marks: [],
     },
-    alt: "Panorama van het stadion",
-    width: 1600,
-    height: 600,
-    fullBleed: true,
-  } as unknown as PortableTextBlock,
+  ],
+  markDefs: [],
+};
+
+const SHARED_BODY: PortableTextBlock[] = [PROSE_LEAD, PROSE_BODY];
+
+// ─── Subjects + factual blocks ──────────────────────────────────────────────
+
+const COACH_SUBJECT: IndexedSubject = {
+  _key: "subj-coach",
+  kind: "staff",
+  staffRef: {
+    firstName: "Wim",
+    lastName: "Govaerts",
+    functionTitle: "TRAINER",
+    photoUrl: fixtureImage("staff-portrait", 0),
+  },
+};
+
+const EVENT_FACT: EventFactValue = {
+  _key: "evt-1",
+  _type: "eventFact",
+  title: "Steakfestijn 2026",
+  date: "2026-09-25",
+  endDate: "2026-09-27",
+  sessions: [
+    { _key: "s1", date: "2026-09-25", startTime: "18:00", endTime: "22:00" },
+    { _key: "s2", date: "2026-09-26", startTime: "17:00", endTime: "23:00" },
+    { _key: "s3", date: "2026-09-27", startTime: "11:30", endTime: "15:00" },
+  ],
+  location: "Sportpark Elewijt",
+  address: "Driesstraat 14, Elewijt",
+  capacity: 250,
+  competitionTag: "Clubfeest",
+  ticketUrl: "https://kcvvelewijt.be/tickets/steakfestijn",
+  ticketLabel: "Bestel je tafel",
+};
+
+const TRANSFER_FACT: TransferFactValue = {
+  _key: "tf-1",
+  _type: "transferFact",
+  direction: "incoming",
+  playerName: "Maxim Breugelmans",
+  position: "Spits",
+  age: 21,
+  otherClubName: "Tienen",
+  kcvvContext: "#9",
+};
+
+// ─── Related-content fixtures ───────────────────────────────────────────────
+
+const RELATED_ITEMS: VerderLezenItem[] = [
   {
-    _type: "block",
-    _key: "6",
-    style: "normal",
-    listItem: "bullet",
-    level: 1,
-    children: [{ _type: "span", _key: "6a", text: "Balbezit: 62%", marks: [] }],
-    markDefs: [],
+    title: "Wim Govaerts: 'De kleedkamer is wakker'",
+    href: "/nieuws/wim-govaerts-interview",
+    imageUrl: fixtureImage("article-hero-interview", 0),
+    imageAlt: "Wim Govaerts in de dug-out",
+    badge: "INTERVIEW",
+    date: "23 mei 2026",
+    articleType: "interview",
   },
   {
-    _type: "block",
-    _key: "7",
-    style: "normal",
-    listItem: "bullet",
-    level: 1,
-    children: [
-      { _type: "span", _key: "7a", text: "Schoten op doel: 8", marks: [] },
-    ],
-    markDefs: [],
+    title: "Maxim Breugelmans versterkt Elewijt",
+    href: "/nieuws/maxim-breugelmans-transfer",
+    imageUrl: fixtureImage("article-hero-transfer", 0),
+    imageAlt: "Maxim Breugelmans bij zijn aankomst",
+    badge: "TRANSFER",
+    date: "18 mei 2026",
+    articleType: "transfer",
+  },
+  {
+    title: "Algemene vergadering op 12 juni",
+    href: "/nieuws/algemene-vergadering-juni",
+    imageUrl: fixtureImage("article-hero-generic", 0),
+    imageAlt: "Driesstraat 32, hoofdingang",
+    badge: "MEDEDELING",
+    date: "15 mei 2026",
+    articleType: "announcement",
   },
 ];
 
-/**
- * Default article page with all components
- */
-export const Default: Story = {
-  render: () => (
-    <div className="min-h-screen bg-white">
-      <ArticleHeader
-        title="KCVV Elewijt wint met 3-1 in spannende derby"
-        imageUrl={fixtureImage("article-hero-matchverslag", 0)}
-        imageAlt="Voetbalwedstrijd KCVV Elewijt"
-      />
-
-      <ArticleMetadata
-        author="Tom Redactie"
-        date="15 januari 2025"
-        readingTime="4 min lezen"
-        shareConfig={{
-          url: "https://kcvvelewijt.be/nieuws/overwinning-derby",
-        }}
-      />
-
-      <main className="max-w-inner-lg mx-auto w-full px-6">
-        <SanityArticleBody content={sampleArticleContent} />
-      </main>
-
-      <ArticleFooter
-        relatedContent={[
-          {
-            title: "Volgende wedstrijd: KCVV Elewijt vs SK Wolvertem",
-            href: "/nieuws/volgende-wedstrijd",
-            type: "article",
-          },
-          {
-            title: "Jan Janssens - Speler van de Maand",
-            href: "/player/jan-janssens",
-            type: "player",
-          },
-          {
-            title: "A-Ploeg Teaminfo",
-            href: "/ploegen/a-ploeg",
-            type: "team",
-          },
-        ]}
-      />
-
-      <div className="bg-gray-100 pt-8 pb-16">
-        <div className="max-w-inner-lg mx-auto px-6">
-          <h2 className="mb-4 text-2xl font-bold">Andere Artikelen</h2>
-          <p className="text-gray-600">
-            Hier komen andere artikelen of widgets...
-          </p>
-        </div>
-      </div>
-    </div>
-  ),
+const SHARE_CONFIG = {
+  url: "https://www.kcvvelewijt.be/nieuws/sample",
+  title: "Sample article",
 };
 
-/**
- * Article without image — uses dark fallback header
- */
-export const WithoutImage: Story = {
-  render: () => (
-    <div className="min-h-screen bg-white">
-      <ArticleHeader title="Trainingsschema aangepast voor winterstop" />
+// ─── Per-articleType page stories ───────────────────────────────────────────
 
+export const Announcement: Story = {
+  render: () => (
+    <>
+      <EditorialHero
+        variant="announcement"
+        placement="detail"
+        title="Algemene vergadering op 12 juni"
+        lead="De jaarlijkse algemene vergadering vindt plaats in de kantine op 12 juni 2026. Stemrecht voor alle aangesloten leden."
+        author="Tom Janssens"
+        date="15 mei 2026"
+        category="Bestuur"
+        coverImage={{
+          url: fixtureImage("article-hero-generic", 0),
+          alt: "Hoofdingang Driesstraat",
+        }}
+      />
       <ArticleMetadata
-        author="Club Secretariaat"
-        date="20 december 2024"
+        date="15 mei 2026"
         readingTime="2 min lezen"
-        shareConfig={{
-          url: "https://kcvvelewijt.be/nieuws/trainingsschema",
-        }}
+        shareConfig={SHARE_CONFIG}
+        articleType="announcement"
+        className="mt-10"
       />
-
-      <main className="max-w-inner-lg mx-auto w-full px-6">
-        <SanityArticleBody content={sampleArticleContent} />
-      </main>
-
-      <ArticleFooter
-        relatedContent={[
-          {
-            title: "Winterstop: Wat je moet weten",
-            href: "/nieuws/winterstop-info",
-            type: "article",
-          },
-          {
-            title: "Hoofdtrainer John Doe",
-            href: "/staff/john-doe",
-            type: "staff",
-          },
-        ]}
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <ArticleBodyMotion>
+          <SanityArticleBody className="article-body" content={SHARED_BODY} />
+        </ArticleBodyMotion>
+      </div>
+      <ArticleCredits
+        author="Tom Janssens"
+        photographer="Karen De Smet"
+        publishedAt="2026-05-15T08:00:00.000Z"
       />
-    </div>
+      <VerderLezenRow items={RELATED_ITEMS} />
+    </>
   ),
 };
 
-/**
- * Long article with multiple sections
- */
-export const LongArticle: Story = {
+export const Interview: Story = {
   render: () => (
-    <div className="min-h-screen bg-white">
-      <ArticleHeader
-        title="Seizoensoverzicht 2024-2025: Een analyse van onze prestaties"
-        imageUrl={fixtureImage("article-hero-generic", 1)}
-        imageAlt="KCVV Elewijt seizoen analyse"
-      />
-
-      <ArticleMetadata
-        author="Marc Analyse"
-        date="18 december 2024"
-        readingTime="4 min lezen"
-        shareConfig={{
-          url: "https://kcvvelewijt.be/nieuws/seizoensoverzicht",
+    <>
+      <EditorialHero
+        variant="interview"
+        placement="detail"
+        title="'De kleedkamer is wakker'"
+        lead="Trainer Wim Govaerts blikt terug op een seizoen waarin hij vooral mentale slag wist te winnen."
+        author="Sofie Berthels"
+        date="23 mei 2026"
+        subjects={[COACH_SUBJECT]}
+        coverImage={{
+          url: fixtureImage("article-hero-interview", 0),
+          alt: "Wim Govaerts in de dug-out",
         }}
       />
-
-      <main className="max-w-inner-lg mx-auto w-full px-6">
-        <SanityArticleBody content={sampleArticleContent} />
-      </main>
-
-      <ArticleFooter
-        relatedContent={[
-          {
-            title: "Topscorer Jan Janssens: 18 doelpunten",
-            href: "/player/jan-janssens",
-            type: "player",
-          },
-          {
-            title: "Trainer reflecteert op eerste seizoenshelft",
-            href: "/nieuws/trainer-reflectie",
-            type: "article",
-          },
-          {
-            title: "A-Ploeg Selectie 2024-2025",
-            href: "/ploegen/a-ploeg",
-            type: "team",
-          },
-          {
-            title: "Jeugdwerking ook succesvol",
-            href: "/nieuws/jeugd-succes",
-            type: "article",
-          },
-        ]}
+      <ArticleMetadata
+        date="23 mei 2026"
+        readingTime="6 min lezen"
+        shareConfig={SHARE_CONFIG}
+        articleType="interview"
+        className="mt-10"
       />
-    </div>
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <ArticleBodyMotion>
+          <SanityArticleBody
+            className="article-body"
+            content={SHARED_BODY}
+            subjects={[COACH_SUBJECT]}
+          />
+        </ArticleBodyMotion>
+      </div>
+      <ArticleCredits
+        author="Sofie Berthels"
+        photographer="Karen De Smet"
+        subjects={[COACH_SUBJECT]}
+        publishedAt="2026-05-23T08:00:00.000Z"
+      />
+      <VerderLezenRow items={RELATED_ITEMS} />
+    </>
   ),
 };
 
-/**
- * Mobile viewport preview
- */
-export const MobileView: Story = {
-  ...Default,
-  globals: {
-    viewport: { value: "mobile1" },
-  },
+export const Transfer: Story = {
+  render: () => (
+    <>
+      <EditorialHero
+        variant="transfer"
+        placement="detail"
+        title="Maxim Breugelmans versterkt Elewijt"
+        lead="De 21-jarige spits ondertekent voor twee seizoenen en komt over van Tienen."
+        author="Tom Janssens"
+        date="18 mei 2026"
+        feature={TRANSFER_FACT}
+        coverImage={{
+          url: fixtureImage("article-hero-transfer", 0),
+          alt: "Maxim Breugelmans bij zijn aankomst",
+        }}
+      />
+      <ArticleMetadata
+        date="18 mei 2026"
+        readingTime="3 min lezen"
+        shareConfig={SHARE_CONFIG}
+        articleType="transfer"
+        className="mt-10"
+      />
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <ArticleBodyMotion>
+          <SanityArticleBody className="article-body" content={SHARED_BODY} />
+        </ArticleBodyMotion>
+      </div>
+      <ArticleCredits
+        author="Tom Janssens"
+        photographer="Karen De Smet"
+        publishedAt="2026-05-18T08:00:00.000Z"
+      />
+      <VerderLezenRow items={RELATED_ITEMS} />
+    </>
+  ),
 };
 
-/**
- * Tablet viewport preview
- */
-export const TabletView: Story = {
-  ...Default,
-  globals: {
-    viewport: { value: "tablet" },
+export const Event: Story = {
+  render: () => (
+    <>
+      <EditorialHero
+        variant="event"
+        placement="detail"
+        title="Steakfestijn 2026: drie dagen feest"
+        lead="Het Steakfestijn keert terug op 25, 26 en 27 september. Inschrijven kan vanaf morgen."
+        author="Tom Janssens"
+        date="10 mei 2026"
+        feature={EVENT_FACT}
+        coverImage={{
+          url: fixtureImage("article-hero-evenement", 0),
+          alt: "Sportpark Elewijt bij avond",
+        }}
+      />
+      <ArticleMetadata
+        date="10 mei 2026"
+        readingTime="2 min lezen"
+        shareConfig={SHARE_CONFIG}
+        articleType="event"
+        className="mt-10"
+      />
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <ArticleBodyMotion>
+          <SanityArticleBody className="article-body" content={SHARED_BODY} />
+        </ArticleBodyMotion>
+      </div>
+      <EventDetailBlock value={EVENT_FACT} isPast={false} />
+      <ArticleCredits
+        author="Tom Janssens"
+        photographer="Karen De Smet"
+        publishedAt="2026-05-10T08:00:00.000Z"
+      />
+      <VerderLezenRow items={RELATED_ITEMS} />
+    </>
+  ),
+};
+
+export const EventPast: Story = {
+  render: () => (
+    <>
+      <EditorialHero
+        variant="event"
+        placement="detail"
+        title="Steakfestijn 2026: drie dagen feest"
+        lead="Het Steakfestijn vond plaats op 25, 26 en 27 september 2026. Bedankt voor de geweldige opkomst."
+        author="Tom Janssens"
+        date="28 sep 2026"
+        feature={EVENT_FACT}
+        coverImage={{
+          url: fixtureImage("article-hero-evenement", 0),
+          alt: "Sportpark Elewijt bij avond",
+        }}
+      />
+      <ArticleMetadata
+        date="28 sep 2026"
+        readingTime="2 min lezen"
+        shareConfig={SHARE_CONFIG}
+        articleType="event"
+        className="mt-10"
+      />
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <ArticleBodyMotion>
+          <SanityArticleBody className="article-body" content={SHARED_BODY} />
+        </ArticleBodyMotion>
+      </div>
+      <EventDetailBlock value={EVENT_FACT} isPast={true} />
+      <ArticleCredits
+        author="Tom Janssens"
+        photographer="Karen De Smet"
+        publishedAt="2026-09-28T08:00:00.000Z"
+      />
+      <VerderLezenRow items={RELATED_ITEMS} />
+    </>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Same event article rendered after the event end-date. EventDetailBlock swaps the tag pill to 'Afgelopen' and hides the CTA; rest of the card stays readable as a historical record.",
+      },
+    },
   },
 };

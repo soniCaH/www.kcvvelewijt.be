@@ -1,30 +1,39 @@
 import type { PortableTextBlock } from "@portabletext/react";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { HorizontalSlider } from "@/components/design-system/HorizontalSlider";
 import { NewsCard, type NewsCardBg } from "@/components/article/NewsCard";
 import { cn } from "@/lib/utils/cn";
 
 /**
- * <VerderLezenRow> — net-new Phase 5 footer primitive (5.d4 lock).
+ * <VerderLezenRow> — net-new Phase 5 footer primitive (5.d4 lock, slider
+ * variant ratified during #1800 implementation review).
  *
- * Renders the "Verder lezen." row at the article footer: a 3-up grid of
- * `<NewsCard>` (Phase 4.5 R10 flush-edge) at `--container-page` width,
- * with per-`articleType` card backgrounds (Phase 4.5 R3 lookup) and the
- * sparse-state behaviour from R10 — "cards drop, never pad".
+ * Renders the "Verder lezen." row at the article footer as a horizontal
+ * scroller (using the canonical `<HorizontalSlider>` primitive) of
+ * `<NewsCard>` (Phase 4.5 R10 flush-edge) at `--container-page` width.
+ * At desktop the first ~3 cards sit in-frame; the rest reveal via
+ * paper-chrome scroll arrows + drag. At narrow viewports 1–1.5 cards
+ * show at a time. Per-`articleType` card backgrounds (Phase 4.5 R3
+ * lookup) tint each card.
+ *
+ * The slider replaces the locked 3-up grid because relations include
+ * not just articles but also mentioned players / teams / staff / events,
+ * which often produce > 3 items — capping discarded discoverability.
  *
  * Sparse states:
  *   - 0 items → row does not render (returns `null`).
- *   - 1 item   → 1-up at the left of a 3-column grid; cols 2 + 3 stay empty.
- *   - 2 items  → 2-up in cols 1 + 2; col 3 stays empty.
- *   - 3 items  → standard 3-up.
+ *   - 1–N items → slider track; cards beyond the visible viewport are
+ *     reachable via the slider arrows or horizontal scroll.
  *
- * Items are passed in pre-sorted; this component does not own ranking,
- * fetching, or capping (call-site is responsible — typically the article
- * page after `mergeRelatedItems`). It simply slices to a max of 3.
+ * Items are passed in pre-sorted; this component does not own ranking
+ * or fetching (call-site is responsible — typically the article page
+ * after `mergeRelatedItems`).
  *
  * **Not VR-tagged.** This is a page-composition surface; Playwright e2e
  * (Pages/Article/* templates) owns the smoke test once 5.C wires it into
  * `/nieuws/[slug]`. Component-level VR for the underlying primitives
- * (`<NewsCard>`, `<EditorialHeading>`) already exists.
+ * (`<NewsCard>`, `<EditorialHeading>`, `<HorizontalSlider>`) already
+ * exists.
  */
 export interface VerderLezenItem {
   title: string;
@@ -77,9 +86,9 @@ function bgForArticleType(type: VerderLezenItem["articleType"]): NewsCardBg {
   return "cream";
 }
 
-// Slot-deterministic rotation cycle so adjacent cards don't twin. Three
-// rotations covers the 3-up case without repeats; the `none` fallback
-// hits position 4+ which doesn't exist here, kept for safety only.
+// Slot-deterministic rotation cycle so adjacent cards don't twin. The
+// cycle wraps for >4 items — by the time the 5th card paints, the first
+// is well off-screen so a repeat reads as fresh tilt rather than a twin.
 const ROTATION_CYCLE = ["a", "b", "c", "none"] as const;
 
 export function VerderLezenRow({
@@ -87,25 +96,11 @@ export function VerderLezenRow({
   heading = DEFAULT_HEADING,
   className,
 }: VerderLezenRowProps) {
-  // Cap at 3 cards — the grid is 3-up and Phase 4.5 R10 doesn't pad.
-  // Anything beyond 3 is dropped; ranking belongs to the call-site
-  // (`mergeRelatedItems`). Warn in dev so a caller passing 5 items
-  // doesn't wonder why only 3 render.
-  if (process.env.NODE_ENV === "development" && items.length > 3) {
-    console.warn(
-      `[VerderLezenRow] ${items.length} items supplied; capped at 3. Rank + slice at the call site (e.g. mergeRelatedItems) so the drop is intentional.`,
-    );
-  }
-  const cards = items.slice(0, 3);
-
-  if (cards.length === 0) {
-    return null;
-  }
+  if (items.length === 0) return null;
 
   return (
     <section
       data-verder-lezen-row="true"
-      data-card-count={cards.length}
       aria-label="Verder lezen"
       className={cn("bg-cream w-full px-4 py-16 lg:py-24", className)}
     >
@@ -121,23 +116,28 @@ export function VerderLezenRow({
         >
           {heading}
         </EditorialHeading>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {cards.map((item, i) => (
-            <NewsCard
+        <HorizontalSlider>
+          {items.map((item, i) => (
+            <div
               key={item.href}
-              title={item.title}
-              href={item.href}
-              imageUrl={item.imageUrl}
-              imageAlt={item.imageAlt}
-              badge={item.badge}
-              date={item.date}
-              aspectRatio="landscape-16-9"
-              rotation={ROTATION_CYCLE[i] ?? "none"}
-              bg={bgForArticleType(item.articleType)}
-              as="h3"
-            />
+              data-slot="verder-lezen-card"
+              className="w-[280px] shrink-0 md:w-[320px] lg:w-[340px]"
+            >
+              <NewsCard
+                title={item.title}
+                href={item.href}
+                imageUrl={item.imageUrl}
+                imageAlt={item.imageAlt}
+                badge={item.badge}
+                date={item.date}
+                aspectRatio="landscape-16-9"
+                rotation={ROTATION_CYCLE[i % ROTATION_CYCLE.length] ?? "none"}
+                bg={bgForArticleType(item.articleType)}
+                as="h3"
+              />
+            </div>
           ))}
-        </div>
+        </HorizontalSlider>
       </div>
     </section>
   );
