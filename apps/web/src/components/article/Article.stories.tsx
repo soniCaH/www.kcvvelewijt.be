@@ -369,3 +369,80 @@ export const EventPast: Story = {
     },
   },
 };
+
+// Accent-decorator title — Sanity's constrained-PT `article.title`
+// emits an `accent` mark on one or more spans inside the H1, which
+// `<EditorialHeading>` renders italic + jersey-deep. #1830 wires
+// this through `page.tsx` via `toPortableTextBlocks(article.titleRich)`
+// — the page picks the PT shape when present, falling back to plain
+// `article.title` otherwise. This story exercises the rich path so
+// the visual treatment is reviewable end-to-end.
+const ACCENT_TITLE: PortableTextBlock[] = [
+  {
+    _type: "block",
+    _key: "accent-title-block",
+    style: "normal",
+    markDefs: [],
+    children: [
+      { _type: "span", _key: "a1", text: "De ", marks: [] },
+      {
+        _type: "span",
+        _key: "a2",
+        text: "wakker-roeper",
+        marks: ["accent"],
+      },
+      { _type: "span", _key: "a3", text: " staat klaar.", marks: [] },
+    ],
+  } as PortableTextBlock,
+];
+
+export const InterviewWithAccentTitle: Story = {
+  render: () => (
+    <>
+      <EditorialHero
+        variant="interview"
+        placement="detail"
+        title={ACCENT_TITLE}
+        lead="Trainer Wim Govaerts over de mentale switch die het seizoen kantelde."
+        author="Sofie Berthels"
+        date="23 mei 2026"
+        subjects={[COACH_SUBJECT]}
+        coverImage={{
+          url: fixtureImage("article-hero-interview", 0),
+          alt: "Wim Govaerts in de dug-out",
+        }}
+      />
+      <ArticleMetadata
+        date="23 mei 2026"
+        readingTime="6 min lezen"
+        shareConfig={SHARE_CONFIG}
+        articleType="interview"
+        className="mt-10"
+      />
+      <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+        <ArticleBodyMotion>
+          <SanityArticleBody
+            className="article-body"
+            content={SHARED_BODY}
+            subjects={[COACH_SUBJECT]}
+          />
+        </ArticleBodyMotion>
+      </div>
+      <ArticleCredits
+        author="Sofie Berthels"
+        photographer="Karen De Smet"
+        subjects={[COACH_SUBJECT]}
+        publishedAt="2026-05-23T08:00:00.000Z"
+      />
+      <VerderLezenRow items={RELATED_ITEMS} />
+    </>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Interview article whose H1 carries an `accent` decorator on the substring `wakker-roeper`. `<EditorialHeading>` renders the accented span italic + jersey-deep; the surrounding words stay in the regular H1 treatment. Exercises the `titleRich` → `<EditorialHero title={PT[]}>` path wired at #1830.",
+      },
+    },
+  },
+};
