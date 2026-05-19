@@ -65,6 +65,15 @@ test.describe("/nieuws/[slug] body renderer (Phase 5.C)", () => {
         page.locator('[data-article-body="true"]').first(),
         `${articleType} article-body container`,
       ).toBeVisible();
+
+      // EndMark — confirms the body actually rendered a closer (and not
+      // just an empty <ArticleBody> wrapper). Multiple `[data-endmark]`
+      // nodes ship per render (rule / star / label / star / rule), so
+      // assert on the first.
+      await expect(
+        page.locator("[data-endmark]").first(),
+        `${articleType} end mark`,
+      ).toBeVisible();
     });
   }
 });

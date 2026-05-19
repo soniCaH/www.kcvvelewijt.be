@@ -411,32 +411,48 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             const { inFlow, tailBlocks } = qaBlocksToTailSection(body);
             const hasTail = tailBlocks.length > 0;
             return (
-              <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+              // Phase 5.C cream-shell composition: <ArticleBody> ships its
+              // own `bg-cream w-full` outer wrapper that's meant to bleed
+              // edge-to-edge. Wrapping it in `max-w-inner-lg mx-auto px-6`
+              // (the legacy <SanityArticleBody> width gate) would box the
+              // cream into a narrow centered band. The prose container
+              // inside ArticleBody handles centering; the page just gets
+              // out of the way of the cream bleed.
+              <div className="mb-6 w-full lg:mb-10">
                 <ArticleBodyMotion>
                   <ArticleBody
                     className="article-body"
                     content={inFlow}
                     subjects={article.subjects ?? null}
                     articleSlug={article.slug}
+                    articleType={article.articleType}
                   />
                   {hasTail ? (
+                    // Tail section mirrors ArticleBody's shell pattern so
+                    // the cream continues edge-to-edge under the Q&A
+                    // group. Outer = `bg-cream w-full`, inner = prose
+                    // container at `--container-prose`.
                     <section
                       data-qa-tail-section="true"
                       aria-label="Q&A"
-                      className="bg-cream mx-auto w-full px-4 pb-12 lg:px-0 lg:pb-16"
-                      style={{ maxWidth: "var(--container-prose)" }}
+                      className="bg-cream w-full px-4 pb-12 lg:px-0 lg:pb-16"
                     >
-                      <header className="mb-8 flex justify-center">
-                        <MonoLabel tone="ink">Q&amp;A</MonoLabel>
-                      </header>
-                      <div className="flex flex-col gap-12">
-                        {tailBlocks.map((block) => (
-                          <QaBlock
-                            key={block._key}
-                            value={block}
-                            subjects={article.subjects ?? null}
-                          />
-                        ))}
+                      <div
+                        className="mx-auto w-full"
+                        style={{ maxWidth: "var(--container-prose)" }}
+                      >
+                        <header className="mb-8 flex justify-center">
+                          <MonoLabel tone="ink">Q&amp;A</MonoLabel>
+                        </header>
+                        <div className="flex flex-col gap-12">
+                          {tailBlocks.map((block) => (
+                            <QaBlock
+                              key={block._key}
+                              value={block}
+                              subjects={article.subjects ?? null}
+                            />
+                          ))}
+                        </div>
                       </div>
                     </section>
                   ) : null}

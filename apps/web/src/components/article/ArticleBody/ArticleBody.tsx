@@ -90,7 +90,20 @@ export interface ArticleBodyProps {
    * page); video analytics is suppressed in that case.
    */
   articleSlug?: string;
+  /**
+   * articleType drives the `<EndMark>` closer copy:
+   *   - `"interview"`     → `EINDE GESPREK` (preserves the interview lock)
+   *   - everything else   → `EINDE ARTIKEL` (generic neutral closer)
+   *
+   * Omit on non-article surfaces (staff bio, club page) — the body still
+   * renders, just with the neutral default label.
+   */
+  articleType?: string | null;
   className?: string;
+}
+
+function endMarkLabelFor(articleType: string | null | undefined): string {
+  return articleType === "interview" ? "EINDE GESPREK" : "EINDE ARTIKEL";
 }
 
 interface PullQuoteBlock {
@@ -531,7 +544,7 @@ function buildComponents({
         // typography tokens — no new design-system primitive.
         <blockquote
           data-article-blockquote="true"
-          className="border-ink-muted text-ink font-display my-8 border-l-2 pl-5 text-[19px] leading-[1.55] italic"
+          className="border-ink-muted text-ink font-display text-body-lg my-8 border-l-2 pl-5 italic"
         >
           {children}
         </blockquote>
@@ -610,7 +623,7 @@ function buildComponents({
             href={href}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noopener noreferrer" : undefined}
-            data-article-link="external"
+            data-article-link={isExternal ? "external" : "internal"}
             // Phase 5 cream-surface link styling — jersey-deep underline,
             // 2px offset, full-opacity on hover. Mirrors the locked
             // article-body link vocabulary from the cream redesign.
@@ -656,6 +669,7 @@ export function ArticleBody({
   content,
   subjects = null,
   articleSlug,
+  articleType,
   className,
 }: ArticleBodyProps) {
   const dropCapIdx = content.findIndex(isNormalParagraph);
@@ -691,7 +705,9 @@ export function ArticleBody({
         {afterDropCap.length > 0
           ? renderSegments(buildSegments(afterDropCap), components)
           : null}
-        {hasRenderableBody ? <EndMark /> : null}
+        {hasRenderableBody ? (
+          <EndMark label={endMarkLabelFor(articleType)} />
+        ) : null}
       </div>
     </div>
   );

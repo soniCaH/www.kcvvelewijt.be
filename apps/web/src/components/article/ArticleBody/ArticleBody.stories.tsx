@@ -619,16 +619,29 @@ function articleImageBlock(args: {
   } as unknown as PortableTextBlock;
 }
 
-function videoBlockEmbed(args: {
+// Upload-path video fixture — used by the mixed Phase-5 composition story
+// to keep VR diffs deterministic. External iframe embeds (YouTube/Vimeo)
+// load non-deterministic network resources that destabilise pixel diffs;
+// the public-domain Big Buck Bunny URL is the same fixture other VideoBlock
+// stories use (see `VideoBlock.stories.tsx`).
+const SAMPLE_VIDEO_UPLOAD_URL =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+function videoBlockUpload(args: {
   _key: string;
-  embedUrl: string;
   caption?: string;
+  posterUrl?: string;
   width?: "prose" | "wide" | "bleed";
 }): PortableTextBlock {
   return {
     _type: "videoBlock",
     _key: args._key,
-    embedUrl: args.embedUrl,
+    videoAsset: {
+      url: SAMPLE_VIDEO_UPLOAD_URL,
+      size: 5_242_880,
+      mimeType: "video/mp4",
+      originalFilename: "highlights.mp4",
+    },
+    videoPosterUrl: args.posterUrl,
     caption: args.caption,
     width: args.width ?? "prose",
   } as unknown as PortableTextBlock;
@@ -762,7 +775,7 @@ const MIXED_PHASE_5_CONTENT: PortableTextBlock[] = [
     _key: "img-1",
     alt: "De eerste ploeg viert een treffer in de slotfase",
     width: "prose",
-    url: "/images/news/feature-1.jpg",
+    url: fixtureImage("article-hero-generic", 0),
     description: "De ontlading bij de gelijkmaker in de slotminuut.",
     creditLine: "Foto: An Verheyden",
     dimensions: { width: 1600, height: 900 },
@@ -772,9 +785,8 @@ const MIXED_PHASE_5_CONTENT: PortableTextBlock[] = [
     "We hebben de kleedkamer in de derde minuut weer wakker gekregen.",
     "bq-1",
   ),
-  videoBlockEmbed({
+  videoBlockUpload({
     _key: "vid-1",
-    embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     caption: "Hoogtepunten — KCVV Elewijt 3-0 Diest.",
     width: "prose",
   }),
@@ -905,7 +917,7 @@ const WITH_ARTICLE_IMAGE_WIDTHS_CONTENT: PortableTextBlock[] = [
     _key: "img-prose",
     alt: "Prose-width landschap met onderschrift en credit",
     width: "prose",
-    url: "/images/news/feature-1.jpg",
+    url: fixtureImage("article-hero-generic", 0),
     description: "Standaard prose-breedte (680 px).",
     creditLine: "Foto: An Verheyden",
     dimensions: { width: 1600, height: 900 },
@@ -918,7 +930,7 @@ const WITH_ARTICLE_IMAGE_WIDTHS_CONTENT: PortableTextBlock[] = [
     _key: "img-wide",
     alt: "Wide-width landschap",
     width: "wide",
-    url: "/images/news/feature-1.jpg",
+    url: fixtureImage("article-hero-generic", 0),
     description: "Wide breedte (~1040 px) — collapsed naar prose op mobiel.",
     dimensions: { width: 1600, height: 900 },
   }),
@@ -930,7 +942,7 @@ const WITH_ARTICLE_IMAGE_WIDTHS_CONTENT: PortableTextBlock[] = [
     _key: "img-bleed",
     alt: "Bleed-width landschap",
     width: "bleed",
-    url: "/images/news/feature-1.jpg",
+    url: fixtureImage("article-hero-generic", 0),
     creditLine: "Foto: An Verheyden",
     dimensions: { width: 1600, height: 900 },
   }),
