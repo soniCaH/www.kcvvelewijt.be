@@ -337,6 +337,31 @@ describe("VerderLezenRow — analytics", () => {
 
       expect(trackEventMock).not.toHaveBeenCalled();
     });
+
+    it("does not fire when the click lands outside the inner anchor (slot padding)", () => {
+      const { container } = render(
+        <VerderLezenRow
+          items={[articleItem]}
+          pageType="article"
+          pageSlug="page-host"
+        />,
+      );
+
+      trackEventMock.mockClear();
+
+      // The slot wrapper carries `pt-4` so the tape strip clears the
+      // slider's clip rect. Without the closest('a') guard, clicking
+      // anywhere on that padding band would inflate `related_content_click`.
+      const slot = container.querySelector('[data-slot="verder-lezen-card"]');
+      expect(slot).not.toBeNull();
+      fireEvent.click(slot!);
+
+      expect(
+        trackEventMock.mock.calls.filter(
+          (c) => c[0] === "related_content_click",
+        ),
+      ).toHaveLength(0);
+    });
   });
 
   describe("related_article_click (typed article→article)", () => {

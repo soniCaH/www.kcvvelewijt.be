@@ -202,8 +202,21 @@ export function VerderLezenRow({
 
   if (items.length === 0) return null;
 
-  const handleItemClick = (item: VerderLezenItem, position: number) => {
+  const handleItemClick = (
+    event: React.MouseEvent<HTMLDivElement>,
+    item: VerderLezenItem,
+    position: number,
+  ) => {
     if (!analyticsEnabled) return;
+    // The slot wrapper carries a real layout box (`w-72 shrink-0 pt-4`)
+    // so the tape strip clears the slider's clip rect — see
+    // VerderLezenRow.tsx top comment. That means clicks on the slot's
+    // padding / whitespace also bubble through this handler. Guard so
+    // only clicks that resolve to the inner `<a>` count — keeps
+    // `related_content_click` parity with the legacy
+    // `<RelatedContentSection>` which used `display: contents` and
+    // had no off-anchor surface to begin with.
+    if (!(event.target as Element).closest("a")) return;
     if (
       !item.analyticsSource ||
       !item.analyticsType ||
@@ -269,7 +282,7 @@ export function VerderLezenRow({
               // anchor inside NewsCard. Keyboard Enter on a focused
               // link dispatches a native click so no extra role / tabIndex
               // / onKeyDown is needed on this wrapper.
-              onClick={() => handleItemClick(item, i + 1)}
+              onClick={(event) => handleItemClick(event, item, i + 1)}
             >
               <NewsCard
                 title={item.title}
