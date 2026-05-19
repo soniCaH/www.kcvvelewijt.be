@@ -66,6 +66,12 @@
         grid-template-columns: 1fr 1fr;
         gap: 32px;
       }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
       .candidate {
         background: #fff;
         border: 1px solid var(--color-ink);
@@ -684,14 +690,25 @@
           schema block (more code, more tests).
         </li>
       </ul>
-      <strong style="display: block; margin-top: 12px">Reset rule</strong>
+      <strong style="display: block; margin-top: 12px">Counter behaviour</strong>
       <ul>
         <li>
-          For Options A / B / C: rotation pattern resets every time a
-          non-eventFact block (paragraph, image, qaBlock) sits between
-          two eventFacts — the CSS sibling-selector approach
-          (<code>nth-of-type</code>) handles this naturally inside one
-          PortableText render.
+          For Options A / B / C: <code>:nth-of-type()</code> counts
+          sibling elements of the same tag, not the same class, and
+          does <strong>not</strong> reset across intervening
+          non-matching siblings. With the locked CSS, three eventFact
+          polaroids separated by <code>&lt;p&gt;</code> paragraphs are
+          still numbered 1 · 2 · 3 globally — they render -0.5° / +0.4°
+          / -0.3°. That's the desired visual: varied rotations across
+          the whole article.
+        </li>
+        <li>
+          If a future design needs a true per-run reset, the renderer
+          must (a) wrap each contiguous eventFact run in a dedicated
+          container, (b) pass a run-scoped index prop and set
+          <code>transform</code> directly from JS, or (c) restructure
+          the PT serializer to group consecutive eventFacts (same
+          pattern as the rapid-fire qaBlock collapse).
         </li>
         <li>
           For Option D: the "first polaroid" rule resets after any

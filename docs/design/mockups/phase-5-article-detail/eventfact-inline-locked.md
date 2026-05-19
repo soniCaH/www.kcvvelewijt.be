@@ -53,7 +53,17 @@ Consecutive polaroids tilt at small alternating angles. CSS-only via `nth-of-typ
 
 Reads as "hand-pinned at slightly different moments" without becoming a busy collage. Single tape color (ochre) across all cards — no per-card tape variation.
 
-**Reset rule:** the rotation pattern resets when any non-eventFact PT block (paragraph, image, qaBlock, …) sits between two eventFacts. The `nth-of-type` selector handles this naturally inside one PT render.
+**Counter behaviour (corrects an earlier draft of this doc):** `:nth-of-type()` counts sibling elements of the same **tag name** — not the same class. It does **not** reset across intervening non-matching elements. With the locked CSS above, three `eventFact` polaroids separated by `<p>` paragraphs are still numbered 1 · 2 · 3 globally, so they render at -0.5° · +0.4° · -0.3° (cycle continues across the prose).
+
+That's actually the desired visual: a varied 3-step rotation across all polaroids in the article, regardless of what's between them. The earlier "rotation pattern resets between eventFact runs" phrasing was inaccurate and is dropped.
+
+If a future design ever requires a *true* per-run reset (each contiguous block of eventFacts restarts at -0.5°), the renderer must either:
+
+1. Wrap each contiguous run of `eventFact` items in a dedicated container so `:nth-of-type` counts inside that scope only;
+2. Pass an explicit run-scoped `index` prop into each `<EventFactInline>` and set `style.transform` directly from JS (skip the CSS selector entirely); or
+3. Restructure the PT serializer to group consecutive `eventFact` blocks into a single grouping component before render (same pattern the qaBlock dispatcher uses for `rapid-fire` collapse — see drill 1.3 lock).
+
+None of those are required for the locked design; this note is purely a future-proofing reference.
 
 ## Polish defaults (locked alongside the visual rounds)
 
