@@ -111,11 +111,11 @@ function buildMetaParts(value: EventFactValue): string[] {
  * eventFact references (eventfact-inline-locked.md, drill 5.d-evt-inline).
  *
  * Composition: `<TapedCard>` cream-white frame + two ochre tape strips
- * (Phase-5-locked direction is top-left @ -5° + bottom-right @ +4°; the
- * `<TapeStrip>` primitive caps positions at top-left / top-right and
- * rotations at the sub-degree pool, so the visual ships with top-left +
- * top-right ochre strips inside the primitive's contract — see #1849 PR
- * notes for the divergence).
+ * at top-left @ -5° (`rotation="polaroid-a"`) and bottom-right @ +4°
+ * (`verticalEdge="bottom"` + `rotation="polaroid-b"`) per
+ * eventfact-inline-locked.md §Round 1. The `<TapeStrip>` primitive was
+ * extended in #1853 to support bottom-edge anchor + polaroid-scale
+ * rotations specifically for this composition.
  *
  * Past-event treatment mirrors `<EventDetailBlock>`: muted `Afgelopen`
  * pill in place of the competitionTag, CTA suppressed entirely.
@@ -148,13 +148,24 @@ export function EventFactInline({
     >
       <TapedCard
         bg="cream"
-        // Two ochre tape strips — top-left + top-right. Locked direction
-        // wants top-left @ -5° + bottom-right @ +4°; the TapeStrip primitive
-        // currently caps positions at top-edge + rotation at the sub-degree
-        // pool. Tracked as a future primitive extension in #1849 notes.
+        // Two ochre tape strips per eventfact-inline-locked §Round 1:
+        // top-left @ -5° (polaroid-a) + bottom-right @ +4° (polaroid-b).
+        // Both pool tokens scoped to this composition only — see
+        // `TapeStripRotation` JSDoc for the discipline rationale.
         tape={[
-          { color: "warm", length: "sm", position: "left", rotation: "a" },
-          { color: "warm", length: "sm", position: "right", rotation: "d" },
+          {
+            color: "warm",
+            length: "sm",
+            position: "left",
+            rotation: "polaroid-a",
+          },
+          {
+            color: "warm",
+            length: "sm",
+            position: "right",
+            verticalEdge: "bottom",
+            rotation: "polaroid-b",
+          },
         ]}
         padding="lg"
       >

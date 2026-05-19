@@ -120,6 +120,84 @@ export const CornerPair: Story = {
   ),
 };
 
+// Polaroid-scale rotations (#1853). Scoped to the <EventFactInline>
+// composition per eventfact-inline-locked §Round 1 — the steep tilts
+// exist because the polaroid aesthetic needs visibly hand-pinned tape.
+
+// Top-left polaroid-a — the upper-left strip of the EventFactInline
+// polaroid (warm ochre, sm length, -5°). verticalEdge defaults to "top".
+export const TopLeftPolaroidA: Story = {
+  args: {
+    color: "warm",
+    length: "sm",
+    position: "left",
+    rotation: "polaroid-a",
+  },
+  decorators: [panelDecorator],
+};
+
+// Bottom-right polaroid-b — the lower-right strip of the EventFactInline
+// polaroid (warm ochre, sm length, +4°, anchored to the bottom edge).
+// Exercises the new verticalEdge="bottom" code path.
+export const BottomRightPolaroidB: Story = {
+  args: {
+    color: "warm",
+    length: "sm",
+    position: "right",
+    verticalEdge: "bottom",
+    rotation: "polaroid-b",
+  },
+  decorators: [panelDecorator],
+};
+
+// All four position × verticalEdge corners on a single panel. Mixed
+// rotations exercise both the sub-degree pool (a/d) and the polaroid
+// pool (polaroid-a/polaroid-b) so a single screenshot covers the full
+// matrix of the extended API.
+export const AllFourCornersMixed: Story = {
+  render: () => (
+    <div
+      style={
+        {
+          "--tape-rotation": "var(--rotate-tape-a)",
+          "--tape-left": "8%",
+          "--tape-right": "8%",
+        } as CSSProperties
+      }
+      className="bg-cream-soft border-paper-edge relative h-48 w-72 border"
+    >
+      <TapeStrip
+        color="jersey"
+        length="md"
+        position="left"
+        verticalEdge="top"
+        rotation="a"
+      />
+      <TapeStrip
+        color="warm"
+        length="md"
+        position="right"
+        verticalEdge="top"
+        rotation="polaroid-a"
+      />
+      <TapeStrip
+        color="ink"
+        length="md"
+        position="left"
+        verticalEdge="bottom"
+        rotation="d"
+      />
+      <TapeStrip
+        color="cream"
+        length="md"
+        position="right"
+        verticalEdge="bottom"
+        rotation="polaroid-b"
+      />
+    </div>
+  ),
+};
+
 // Warm-yellow tape on a jersey-deep panel — the contrast pairing this
 // variant exists for. <FeaturedEventBand> (#1677) is the first consumer.
 // The `bg-jersey-deep` + `border-jersey-deep-dark` utilities double as the

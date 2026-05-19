@@ -113,9 +113,10 @@ export const EmbedYoutube: Story = {
     },
   },
   parameters: {
-    // vr.disable: external iframe (youtube-nocookie.com) loads network
-    // resources that aren't deterministic for pixel diffing.
-    // Repro: VR runner times out waiting for the iframe to finish loading.
+    // vr.disable: external iframe (youtube-nocookie.com) loads non-deterministic
+    // network resources, so pixel diffing on the iframe payload is not stable.
+    // Repro: VR runner waits for the iframe to finish loading and the captured
+    // frame varies run-to-run depending on YouTube's network response timing.
     // Approved by: @climacon / #1849
     // Re-evaluate: 2026-08-01
     vr: { disable: true },
@@ -131,9 +132,10 @@ export const EmbedVimeo: Story = {
     },
   },
   parameters: {
-    // vr.disable: external iframe (player.vimeo.com) loads network
-    // resources that aren't deterministic for pixel diffing.
-    // Repro: VR runner times out waiting for the iframe to finish loading.
+    // vr.disable: external iframe (player.vimeo.com) loads non-deterministic
+    // network resources, so pixel diffing on the iframe payload is not stable.
+    // Repro: VR runner waits for the iframe to finish loading and the captured
+    // frame varies run-to-run depending on Vimeo's network response timing.
     // Approved by: @climacon / #1849
     // Re-evaluate: 2026-08-01
     vr: { disable: true },
@@ -149,15 +151,13 @@ export const EmbedUnknownProvider: Story = {
     },
   },
   parameters: {
-    // vr.disable: the embed family of stories (YouTube + Vimeo + this
-    // unknown-provider fallback) trip the runner's 30s timeout in CI
-    // even though the fallback path renders a static neutral DOM with
-    // no iframe — the preceding Vimeo / YouTube iframes still load
-    // network resources during their own visits (vr.disable only
-    // skips screenshot capture, not the visit), and the carry-over
-    // delays this story's smoke-test past the cap.
-    // Repro: VR runner times out 30s into the "smoke-test" for this
-    // story after the YouTube + Vimeo embed stories run first.
+    // vr.disable: even though the unknown-provider path renders a static
+    // non-iframe fallback (no network), VR runs visit the preceding YouTube
+    // + Vimeo embed stories first; carry-over from those iframe loads
+    // pushed this story's smoke-test past the 30s cap on at least one run.
+    // Repro: full VR suite, alphabetical order — Embed YouTube → Vimeo →
+    // Unknown Provider; the third story's `smoke-test` exceeded 30s when
+    // the iframe loads on the prior two were still resolving.
     // Approved by: @climacon / #1849
     // Re-evaluate: 2026-08-01
     vr: { disable: true },
