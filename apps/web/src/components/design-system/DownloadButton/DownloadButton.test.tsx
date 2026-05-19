@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { DownloadButton } from "./DownloadButton";
 
 describe("DownloadButton", () => {
-  it("should render the provided label", () => {
+  it("renders the provided label", () => {
     render(
       <DownloadButton
         href="https://example.com/file.pdf"
@@ -13,14 +13,14 @@ describe("DownloadButton", () => {
     expect(screen.getByText("Aangifte Jeugd 2024-2025")).toBeInTheDocument();
   });
 
-  it("should fall back to filename from URL when no label provided", () => {
+  it("falls back to filename from URL when no label provided", () => {
     render(
       <DownloadButton href="https://cdn.sanity.io/files/abc/production/aangifte-jeugd-a1b2c3d4.pdf" />,
     );
     expect(screen.getByText("aangifte-jeugd")).toBeInTheDocument();
   });
 
-  it("should render formatted file size when provided", () => {
+  it("renders formatted file size when provided", () => {
     render(
       <DownloadButton
         href="https://example.com/file.pdf"
@@ -31,14 +31,12 @@ describe("DownloadButton", () => {
     expect(screen.getByText("240 KB")).toBeInTheDocument();
   });
 
-  it("should not render size badge when fileSize is omitted", () => {
-    const { container } = render(
-      <DownloadButton href="https://example.com/file.pdf" label="Test" />,
-    );
-    expect(container.querySelector("[data-testid='file-size']")).toBeNull();
+  it("does not render size badge when fileSize is omitted", () => {
+    render(<DownloadButton href="https://example.com/file.pdf" label="Test" />);
+    expect(screen.queryByTestId("file-size")).toBeNull();
   });
 
-  it("should set href and target='_blank' correctly", () => {
+  it("sets href and target='_blank' correctly", () => {
     render(
       <DownloadButton href="https://example.com/file.pdf" label="Download" />,
     );
@@ -48,43 +46,60 @@ describe("DownloadButton", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("should render correct icon per MIME type (PDF = red)", () => {
-    const { container } = render(
+  it("card variant: stamp colour reflects file type (PDF = red)", () => {
+    render(
       <DownloadButton
         href="https://example.com/file.pdf"
         label="Test"
         mimeType="application/pdf"
       />,
     );
-    const accentBar = container.querySelector("[data-testid='accent-bar']");
-    expect(accentBar).toHaveStyle({ backgroundColor: "#ef4444" });
+    const stamp = screen.getByTestId("file-type-stamp");
+    expect(stamp).toHaveStyle({ borderColor: "#c0392b" });
+    expect(stamp).toHaveStyle({ color: "#c0392b" });
+    expect(stamp.textContent).toContain("PDF");
   });
 
-  it("should fall back to URL extension when no mimeType provided", () => {
-    const { container } = render(
+  it("card variant: falls back to URL extension when no mimeType provided", () => {
+    render(
       <DownloadButton
         href="https://example.com/document.xlsx"
         label="Spreadsheet"
       />,
     );
-    const accentBar = container.querySelector("[data-testid='accent-bar']");
-    expect(accentBar).toHaveStyle({ backgroundColor: "#16a34a" });
+    const stamp = screen.getByTestId("file-type-stamp");
+    expect(stamp).toHaveStyle({ borderColor: "#15803d" });
+    expect(stamp.textContent).toContain("XLSX");
   });
 
-  it("should render inline variant without card chrome", () => {
-    const { container } = render(
+  it("inline variant: renders a file-type pill instead of the stamp + CTA", () => {
+    render(
       <DownloadButton
         href="https://example.com/file.pdf"
         label="Reglement"
         variant="inline"
       />,
     );
-    const link = screen.getByRole("link");
-    expect(link).toHaveClass("inline-flex");
-    expect(container.querySelector("[data-testid='accent-bar']")).toBeNull();
+    expect(screen.getByTestId("file-type-pill")).toBeInTheDocument();
+    expect(screen.queryByTestId("file-type-stamp")).toBeNull();
+    expect(screen.queryByTestId("download-cta")).toBeNull();
   });
 
-  it("should render description in card variant", () => {
+  it("inline variant: pill uses file-type colour for the background", () => {
+    render(
+      <DownloadButton
+        href="https://example.com/file.pdf"
+        label="Reglement"
+        mimeType="application/pdf"
+        variant="inline"
+      />,
+    );
+    const pill = screen.getByTestId("file-type-pill");
+    expect(pill).toHaveStyle({ backgroundColor: "#c0392b" });
+    expect(pill.textContent).toBe("PDF");
+  });
+
+  it("card variant: renders description below the label", () => {
     render(
       <DownloadButton
         href="https://example.com/file.pdf"
@@ -97,19 +112,20 @@ describe("DownloadButton", () => {
     ).toBeInTheDocument();
   });
 
-  it("should use fileName extension for type detection as fallback", () => {
-    const { container } = render(
+  it("uses fileName extension for type detection as fallback", () => {
+    render(
       <DownloadButton
         href="https://example.com/download?id=123"
         label="Test"
         fileName="report.docx"
       />,
     );
-    const accentBar = container.querySelector("[data-testid='accent-bar']");
-    expect(accentBar).toHaveStyle({ backgroundColor: "#3b82f6" });
+    const stamp = screen.getByTestId("file-type-stamp");
+    expect(stamp).toHaveStyle({ borderColor: "#2563b3" });
+    expect(stamp.textContent).toContain("DOCX");
   });
 
-  it("should show file type subtitle", () => {
+  it("card variant: renders the file type subtitle in the meta line", () => {
     render(
       <DownloadButton
         href="https://example.com/file.pdf"
@@ -120,17 +136,19 @@ describe("DownloadButton", () => {
     expect(screen.getByText("PDF-bestand")).toBeInTheDocument();
   });
 
-  it("should fall back to file type label when URL has no readable name", () => {
+  it("card variant: falls back to file type subtitle when URL has no readable name", () => {
     render(
       <DownloadButton
-        href="https://example.com/a1b2c3d4e5f6g7h8.pdf"
+        href="https://example.com/a1b2c3d4e5f6a7b8.pdf"
         mimeType="application/pdf"
       />,
     );
-    expect(screen.getByText("PDF-bestand")).toBeInTheDocument();
+    // Label slot falls through to the subtitle ("PDF-bestand"); the
+    // stamp + meta-row also carry the subtitle, so >= 1 instance is fine.
+    expect(screen.getAllByText("PDF-bestand").length).toBeGreaterThan(0);
   });
 
-  it("should format bytes correctly", () => {
+  it("formats bytes correctly", () => {
     const { rerender } = render(
       <DownloadButton
         href="https://example.com/f.pdf"
@@ -148,5 +166,27 @@ describe("DownloadButton", () => {
       />,
     );
     expect(screen.getByText("4.0 MB")).toBeInTheDocument();
+  });
+
+  it("detects MP3 audio via mime type", () => {
+    render(
+      <DownloadButton
+        href="https://example.com/cast.mp3"
+        label="Podcast"
+        mimeType="audio/mpeg"
+      />,
+    );
+    expect(screen.getByTestId("file-type-stamp").textContent).toContain("MP3");
+  });
+
+  it("detects MP4 video via mime type", () => {
+    render(
+      <DownloadButton
+        href="https://example.com/clip.mp4"
+        label="Clip"
+        mimeType="video/mp4"
+      />,
+    );
+    expect(screen.getByTestId("file-type-stamp").textContent).toContain("MP4");
   });
 });

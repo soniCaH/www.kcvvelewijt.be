@@ -3,12 +3,16 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { cn } from "@/lib/utils/cn";
 import {
   resolvePairRespondent,
+  resolveSubject,
   type IndexedSubject,
 } from "@/components/article/SubjectAttribution";
 import { QaPairStandard } from "./QaPairStandard";
 import { QaPairKey } from "./QaPairKey";
 import { QaPairQuote } from "./QaPairQuote";
-import { QaGroupRapidFire } from "./QaGroupRapidFire";
+import {
+  QaGroupRapidFire,
+  type QaGroupRapidFireRespondent,
+} from "./QaGroupRapidFire";
 
 export interface QaPairRespondentValue {
   _key?: string;
@@ -188,10 +192,41 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
         }
 
         if (unit.kind === "rapid-fire") {
+          // Rapid-fire is single-respondent by design. Resolve from the
+          // first authored respondentKey (if any) on the run, falling
+          // back to `subjects[0]` per the standard single-subject rule.
+          const firstWithKey = unit.pairs.find(
+            (p) => p.respondents?.[0]?.respondentKey,
+          );
+          const subject =
+            resolvePairRespondent(
+              firstWithKey?.respondents?.[0]?.respondentKey,
+              subjects,
+            ) ??
+            subjects?.[0] ??
+            null;
+          const resolved = resolveSubject(subject);
+          let respondent: QaGroupRapidFireRespondent | undefined;
+          if (resolved) {
+            // Derive firstName from the resolved name (first whitespace-
+            // separated token) so the speaker strip's monogram avatar
+            // matches the speaker tag's name. `resolveSubject` already
+            // trims its output for every subject kind, but we trim again
+            // here so the split never yields an empty leading token if
+            // that contract ever loosens.
+            const trimmed = resolved.name.trim();
+            const firstName = trimmed.split(/\s+/)[0] || trimmed;
+            respondent = {
+              firstName,
+              fullName: resolved.name,
+              role: resolved.role || undefined,
+            };
+          }
           return (
             <QaGroupRapidFire
               key={unit.pairs[0]?._key ?? `rf-${i}`}
               pairs={unit.pairs}
+              respondent={respondent}
             />
           );
         }

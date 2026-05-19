@@ -765,6 +765,23 @@
   width: 100vw;
 }
 
+/* ===== <EventFactInline> alternating polaroid rotations =====================
+ * Per eventfact-inline-locked.md §"Round 2 — Multi-card stacking: B".
+ * The :nth-of-type counter is global (counts sibling tag-name), not per
+ * class — three EventFactInline polaroids separated by intervening
+ * paragraphs still cycle -0.5° / +0.4° / -0.3°. The cycle continues
+ * across the article; this is the "hand-pinned" feel the lock targets.
+ */
+.eventfact-polaroid:nth-of-type(odd) {
+  transform: rotate(-0.5deg);
+}
+.eventfact-polaroid:nth-of-type(even) {
+  transform: rotate(0.4deg);
+}
+.eventfact-polaroid:nth-of-type(3n) {
+  transform: rotate(-0.3deg);
+}
+
 /* Utility Classes */
 .featured-border::before {
   content: '';

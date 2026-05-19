@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Download,
-  File,
-  FileText,
-  Table2,
-  type LucideIcon,
-} from "lucide-react";
+import { Download } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export interface DownloadButtonProps {
@@ -22,28 +16,42 @@ export interface DownloadButtonProps {
   fileName?: string;
   /** Optional description shown below the label (card variant only) */
   description?: string;
-  /** Visual variant: "card" (default) for standalone, "inline" for within prose */
+  /**
+   * Visual variant per fileattachment-htmltable-locked.md §5.1:
+   * - `card` (default): TapedCard + stenciled corner stamp + jersey-deep CTA.
+   * - `inline`: compact chip for in-prose references — file-type pill + label + size.
+   */
   variant?: "card" | "inline";
   className?: string;
 }
 
+/**
+ * Semantic file-type metadata. The `color` palette and `stampLabel`
+ * vocabulary stay editor-deterministic — only the visual presentation
+ * changes in the Phase 5 redesign.
+ */
 interface FileTypeInfo {
+  /** Stamp + extension-pill background colour (file-type accent). */
   color: string;
-  icon: LucideIcon;
+  /** Stencil label rendered inside the corner stamp / extension pill. */
+  stampLabel: string;
+  /** Dutch subtitle rendered under the file label in the card body. */
   subtitle: string;
 }
 
 const FILE_TYPES: Record<string, FileTypeInfo> = {
-  pdf: { color: "#ef4444", icon: FileText, subtitle: "PDF-bestand" },
-  word: { color: "#3b82f6", icon: FileText, subtitle: "Word-document" },
-  excel: { color: "#16a34a", icon: Table2, subtitle: "Excel-bestand" },
+  pdf: { color: "#c0392b", stampLabel: "PDF", subtitle: "PDF-bestand" },
+  word: { color: "#2563b3", stampLabel: "DOCX", subtitle: "Word-document" },
+  excel: { color: "#15803d", stampLabel: "XLSX", subtitle: "Excel-bestand" },
   powerpoint: {
     color: "#f97316",
-    icon: FileText,
+    stampLabel: "PPTX",
     subtitle: "Presentatie",
   },
-  zip: { color: "#d97706", icon: File, subtitle: "Archief" },
-  other: { color: "#6b7280", icon: File, subtitle: "Bijlage" },
+  audio: { color: "#7c3aed", stampLabel: "MP3", subtitle: "Audio" },
+  video: { color: "#0f766e", stampLabel: "MP4", subtitle: "Video" },
+  zip: { color: "#d97706", stampLabel: "ZIP", subtitle: "Archief" },
+  other: { color: "#6b7280", stampLabel: "FILE", subtitle: "Bijlage" },
 };
 
 const MIME_MAP: Record<string, string> = {
@@ -58,6 +66,12 @@ const MIME_MAP: Record<string, string> = {
     "powerpoint",
   "application/zip": "zip",
   "application/x-rar-compressed": "zip",
+  "audio/mpeg": "audio",
+  "audio/mp3": "audio",
+  "audio/wav": "audio",
+  "audio/x-wav": "audio",
+  "video/mp4": "video",
+  "video/quicktime": "video",
 };
 
 const EXT_MAP: Record<string, string> = {
@@ -70,6 +84,10 @@ const EXT_MAP: Record<string, string> = {
   pptx: "powerpoint",
   zip: "zip",
   rar: "zip",
+  mp3: "audio",
+  wav: "audio",
+  mp4: "video",
+  mov: "video",
 };
 
 function getExtension(str: string): string | undefined {
@@ -121,11 +139,8 @@ function extractLabelFromUrl(href: string): string | undefined {
     const url = new URL(href);
     const lastSegment = url.pathname.split("/").pop() ?? "";
     const decoded = decodeURIComponent(lastSegment);
-    // Strip extension
     const withoutExt = decoded.replace(/\.\w+$/, "");
-    // Strip Sanity content hash (-a1b2c3d4 or longer hex at end)
     const withoutHash = withoutExt.replace(/-[a-f0-9]{8,}$/, "");
-    // If result is empty or looks like just a hash, return undefined
     if (!withoutHash || /^[a-f0-9]+$/.test(withoutHash)) return undefined;
     return withoutHash;
   } catch {
@@ -139,6 +154,10 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// Canonical paper press-down (feedback_canonical_press_down_hover).
+const PRESS_DOWN_CLASSES =
+  "transition-all duration-300 hover:shadow-none hover:translate-x-1 hover:translate-y-1";
+
 export const DownloadButton = ({
   href,
   label,
@@ -150,7 +169,6 @@ export const DownloadButton = ({
   className,
 }: DownloadButtonProps) => {
   const fileType = detectFileType(mimeType, href, fileName);
-  const IconComponent = fileType.icon;
   const displayLabel = label ?? extractLabelFromUrl(href) ?? fileType.subtitle;
   const safeHref = isSafeHref(href) ? href : undefined;
 
@@ -160,78 +178,125 @@ export const DownloadButton = ({
         href={safeHref}
         target="_blank"
         rel="noopener noreferrer"
+        data-download-variant="inline"
         className={cn(
-          "group inline-flex items-baseline gap-1.5 no-underline",
+          "group inline-flex h-10 max-w-full items-center gap-2.5 align-baseline",
+          "border-ink bg-cream border px-2.5",
+          "shadow-paper-sm",
+          "no-underline",
+          PRESS_DOWN_CLASSES,
           className,
         )}
       >
-        <IconComponent
-          size={16}
-          style={{ color: fileType.color }}
-          className="relative top-[2px] shrink-0"
-        />
-        <span className="underline decoration-gray-300 underline-offset-2 group-hover:decoration-current">
+        <span
+          data-testid="file-type-pill"
+          aria-hidden="true"
+          className="text-cream inline-flex h-[22px] items-center px-[7px] font-mono text-[9px] leading-none font-medium tracking-[0.16em] uppercase"
+          style={{ backgroundColor: fileType.color }}
+        >
+          {fileType.stampLabel}
+        </span>
+        <span className="font-display text-ink max-w-[40ch] truncate text-[16px] italic">
           {displayLabel}
         </span>
         {fileSize != null && (
-          <>
-            <span className="text-gray-400">&mdash;</span>
-            <span className="text-sm text-gray-400" data-testid="file-size">
-              {formatFileSize(fileSize)}
-            </span>
-          </>
+          <span
+            data-testid="file-size"
+            className="text-ink-muted font-mono text-[11px] tracking-[0.1em] uppercase"
+          >
+            {formatFileSize(fileSize)}
+          </span>
         )}
         <Download
-          size={16}
-          className="relative top-[2px] shrink-0 text-gray-400"
+          size={14}
+          aria-hidden="true"
+          className="text-ink-muted shrink-0"
         />
       </a>
     );
   }
 
+  // Card variant — TapedCard + stenciled corner stamp + jersey-deep CTA.
+  // Composes its own paper frame so the press-down hover applies to the
+  // whole anchor (the locked spec keeps the offset shadow on the anchor,
+  // not the inner TapedCard).
   return (
     <a
       href={safeHref}
       target="_blank"
       rel="noopener noreferrer"
+      data-download-variant="card"
       className={cn(
-        "group border-foundation-gray-light flex items-center gap-4 rounded-lg border bg-white shadow-sm",
-        "transition-all duration-300 hover:scale-[1.02] hover:bg-gray-50 hover:shadow-lg",
-        "overflow-hidden no-underline",
+        "group relative block w-full no-underline",
+        "border-ink bg-cream border-2",
+        "shadow-paper-md",
+        PRESS_DOWN_CLASSES,
         className,
       )}
     >
-      <div
-        data-testid="accent-bar"
-        className="w-1 self-stretch rounded-l-lg"
-        style={{ backgroundColor: fileType.color }}
+      {/* Ochre tape strip — single, centered top, slight rotation. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-1/2 z-20 block h-4 w-16 -translate-x-1/2 -translate-y-1/2 opacity-90"
+        style={{
+          backgroundColor: "var(--color-tape-cream, rgba(232, 224, 200, 0.85))",
+          transform: "translate(-50%, -50%) rotate(-2deg)",
+        }}
       />
-      <div className="flex items-center py-3">
-        <IconComponent
-          size={24}
-          style={{ color: fileType.color }}
-          className="shrink-0"
-        />
-      </div>
-      <div className="flex min-w-0 flex-1 flex-col py-3">
-        <span className="truncate font-semibold text-gray-700">
-          {displayLabel}
-        </span>
-        <span className="text-sm text-gray-400">{fileType.subtitle}</span>
-        {description && (
-          <span className="text-sm text-gray-400">{description}</span>
-        )}
-      </div>
-      <div className="flex shrink-0 items-center gap-3 py-3 pr-4">
-        {fileSize != null && (
-          <span
-            data-testid="file-size"
-            className="rounded bg-gray-50 px-2 py-1 font-mono text-xs text-gray-400"
-          >
-            {formatFileSize(fileSize)}
+      <div className="flex items-center gap-4 p-4 sm:p-5">
+        <span
+          data-testid="file-type-stamp"
+          aria-hidden="true"
+          className="inline-flex h-16 w-16 shrink-0 items-center justify-center border-2 font-mono text-[16px] leading-none font-extrabold tracking-[0.04em] uppercase"
+          style={{
+            borderColor: fileType.color,
+            color: fileType.color,
+            backgroundColor: `color-mix(in srgb, ${fileType.color} 6%, transparent)`,
+            transform: "rotate(-3deg)",
+          }}
+        >
+          <span className="flex flex-col items-center gap-0.5">
+            <span>{fileType.stampLabel}</span>
+            <span className="text-[8px] font-medium tracking-[0.18em] opacity-80">
+              BESTAND
+            </span>
           </span>
-        )}
-        <Download size={20} className="text-gray-400" />
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <span className="font-display text-ink truncate text-[18px] font-bold italic">
+            {displayLabel}
+          </span>
+          <span className="text-ink-muted mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
+            {fileSize != null ? (
+              <>
+                <span data-testid="file-size">{formatFileSize(fileSize)}</span>
+                <span aria-hidden="true"> · </span>
+              </>
+            ) : null}
+            <span>{fileType.subtitle}</span>
+          </span>
+          {description && (
+            <span className="text-ink-soft mt-1 font-serif text-[14px] italic">
+              {description}
+            </span>
+          )}
+        </div>
+        <span
+          data-testid="download-cta"
+          aria-hidden="true"
+          className={cn(
+            "hidden h-9 shrink-0 items-center gap-1.5 sm:inline-flex",
+            "border-ink bg-jersey-deep border px-3.5",
+            "text-cream font-mono text-[11px] leading-none tracking-[0.14em] uppercase",
+            // Card-level press-down already collapses the outer shadow;
+            // give the inner pill the same offset so it reads as a stamped
+            // affordance even in the rest state.
+            "shadow-paper-sm",
+          )}
+        >
+          <Download size={12} aria-hidden="true" />
+          Download
+        </span>
       </div>
     </a>
   );
