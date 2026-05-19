@@ -8,7 +8,6 @@ import {
   useState,
   type CSSProperties,
 } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { useVideoAnalytics } from "@/hooks/useVideoAnalytics";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
@@ -178,10 +177,22 @@ function renderUpload(
   // Bleed suppresses the tape (locked width-rules table).
   const tape: TapeStripProps | undefined =
     width === "bleed" ? undefined : VIDEO_TAPE;
+  // Aspect strategy (#1856 + no-poster regression fix):
+  // - With a poster: the poster's intrinsic dimensions drive the figure
+  //   (aspect="auto"), so non-16:9 source videos no longer letterbox
+  //   inside a forced 16:9 frame.
+  // - Without a poster: fall back to forced 16:9. The `<video>` has
+  //   `preload="none"` so no metadata is available until the user
+  //   clicks play, and the poster `<img>` short-circuits when absent —
+  //   without a fallback aspect the figure collapses to zero height
+  //   and the card reads as empty. Editors who want exact aspect on a
+  //   poster-less block can upload a poster matching their video.
+  // Embed path keeps forced 16:9 — iframes can't size to content.
+  const figureAspect = posterUrl ? "auto" : "landscape-16-9";
   return (
     <WidthWrapper width={width} className={className}>
       <TapedFigure
-        aspect="landscape-16-9"
+        aspect={figureAspect}
         bg="cream"
         tint="none"
         tape={tape}
@@ -247,17 +258,34 @@ function UploadFigureContent({
   }, [analyticsContext, trackVideoComplete]);
 
   return (
-    <div className="bg-ink relative h-full w-full">
+    // Flow layout (#1856): poster + video render as block elements so the
+    // container takes on the source media's natural aspect. The no-poster
+    // case is handled one level up — `<TapedFigure>` is forced to
+    // `landscape-16-9` when `posterUrl` is undefined so this div has a
+    // sized parent. `min-h-12` while idle + poster-less guarantees the
+    // div itself has room for the absolutely-positioned play pill (h-9 +
+    // bottom-4 inset) when neither poster nor video supplies content
+    // height.
+    <div
+      className={cn(
+        "bg-ink relative w-full",
+        !isPlaying && !posterUrl && "min-h-12",
+      )}
+    >
       {!isPlaying && posterUrl && (
+        // Plain `<img>` (not next/image) — `<Image fill>` requires a sized
+        // parent, but TapedFigure aspect="auto" leaves the container
+        // unconstrained on purpose. The poster's intrinsic dimensions size
+        // the frame to match the upcoming video's aspect.
+        //
         // `pointer-events-none` keeps the poster non-interactive so that
         // the pill below is the only click target (per videoblock-locked
         // §"Visibility on first paint").
-        <Image
+        // eslint-disable-next-line @next/next/no-img-element -- intentional: next/image fill requires a sized parent, but aspect="auto" leaves the container intentionally unconstrained (#1856).
+        <img
           src={posterUrl}
           alt=""
-          fill
-          sizes="(max-width: 640px) 100vw, 1040px"
-          className="pointer-events-none object-cover"
+          className="pointer-events-none block h-auto w-full"
           data-testid="video-block-poster"
         />
       )}
@@ -284,12 +312,14 @@ function UploadFigureContent({
         </button>
       )}
       {isPlaying && (
+        // `h-auto w-full` lets the video render at its intrinsic aspect
+        // (#1856) — no `aspect-video` lock, no `absolute inset-0` fill.
         <video
           autoPlay
           controls
           playsInline
           preload="metadata"
-          className="absolute inset-0 h-full w-full"
+          className="block h-auto w-full"
           data-testid="video-block-video"
           onPlay={handlePlay}
           onEnded={handleEnded}
