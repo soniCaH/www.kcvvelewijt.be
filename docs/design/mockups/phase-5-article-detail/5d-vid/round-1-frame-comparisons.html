@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-vid · Round 1 · Frame</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      /* Video poster placeholder — 16:9 dark sport scene. */
+      .video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background:
+          radial-gradient(
+            ellipse at 40% 55%,
+            rgba(220, 190, 130, 0.85) 0%,
+            rgba(45, 122, 79, 0.6) 35%,
+            rgba(31, 95, 63, 0.85) 70%,
+            rgba(20, 60, 40, 0.95) 100%
+          );
+        position: relative;
+        overflow: hidden;
+      }
+      .video::after {
+        /* Silhouette of a player */
+        content: '';
+        position: absolute;
+        left: 38%;
+        top: 30%;
+        width: 18%;
+        height: 55%;
+        background: rgba(15, 25, 20, 0.6);
+        clip-path: polygon(
+          40% 0%, 60% 0%, 65% 15%, 70% 30%, 70% 55%, 90% 100%, 60% 100%,
+          55% 75%, 45% 75%, 40% 100%, 10% 100%, 30% 55%, 30% 30%, 35% 15%
+        );
+        filter: blur(0.5px);
+      }
+      .play-glyph {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        pointer-events: none;
+      }
+      .play-glyph svg {
+        width: 64px;
+        height: 64px;
+        fill: rgba(255, 255, 255, 0.92);
+        filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+      }
+
+      /* Common figcaption styling — videoBlock has caption on the block,
+         not asset-side. */
+      .figcap {
+        padding: 8px 4px 0;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+      }
+
+      /* ============================================================
+         OPTION A — Match articleImage (flat TapedFigure with tape)
+         ============================================================ */
+      .opt-a-figure {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        padding: 10px;
+        margin: 28px 0;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+      }
+      .opt-a-figure .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 92px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.8);
+        z-index: 2;
+      }
+
+      /* ============================================================
+         OPTION B — TapedFigure, NO tape (frame stays)
+         ============================================================ */
+      .opt-b-figure {
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        padding: 10px;
+        margin: 28px 0;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+      }
+
+      /* ============================================================
+         OPTION C — Plain bordered figure (no tape, no card padding)
+         ============================================================ */
+      .opt-c-figure {
+        margin: 28px 0;
+        border: 1px solid var(--color-ink);
+        box-shadow: 4px 4px 0 0 var(--color-ink);
+      }
+      .opt-c-figure .figcap {
+        padding: 8px 14px 12px;
+        background: var(--color-cream-soft);
+      }
+
+      /* ============================================================
+         OPTION D — No frame at all
+         ============================================================ */
+      .opt-d-figure {
+        margin: 28px 0;
+      }
+      .opt-d-figure .figcap {
+        margin-top: 8px;
+        padding-left: 4px;
+        padding-right: 4px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul { margin: 8px 0 0; padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-vid · Round 1 · #1840</p>
+      <h1>
+        videoBlock — frame (TapedFigure with tape / TapedFigure no tape /
+        plain bordered / no frame)
+      </h1>
+      <p>
+        Drill 4.1. Locks the frame around the video poster/player on the
+        cream surface. The locked
+        <code>&lt;ArticleImage&gt;</code> Round 1 used a flat TapedFigure
+        with a single tape strip — this round asks whether video should
+        match, soften the decoration, or drop the frame entirely.
+      </p>
+      <p>
+        Each option renders the same fixture: 16:9 video poster (with a
+        play-glyph overlay placeholder — the actual play affordance is
+        drilled in Round 2), <code>caption</code> string from the
+        videoBlock schema, embedded in body prose. <code>poster</code>
+        is shown in every option so the comparison is honest — when no
+        poster is set, the video element starts black and behaves
+        identically across all four.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — MATCH ARTICLEIMAGE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Match articleImage (TapedFigure + tape)</div>
+          <div class="name">Flat TapedFigure, single ochre tape top-center</div>
+          <div class="desc">
+            Identical vocabulary to the locked <code>articleImage</code>
+            R1: flat TapedFigure on cream-white, 1px subtle border, offset
+            shadow, single ochre tape strip top-center. Photo and video
+            read as the same body media family.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ matches articleImage R1 lock<br />
+            ✓ TapedFigure primitive (cream-white, single tape)<br />
+            ✓ one body media family
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              Bekijk hier de hoogtepunten van het derby tegen Diest —
+              gemaakt door An vanaf de tribune.
+            </p>
+            <figure class="opt-a-figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="video">
+                <span class="play-glyph" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </span>
+              </div>
+              <figcaption class="figcap">
+                Hoogtepunten KCVV–Diest · 3–1
+              </figcaption>
+            </figure>
+            <p>
+              De compilatie loopt drie minuten — handig om snel terug te
+              keren op de drie KCVV-doelpunten.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — TAPEDFIGURE NO TAPE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · TapedFigure without tape</div>
+          <div class="name">Same frame as articleImage, tape strip removed</div>
+          <div class="desc">
+            TapedFigure primitive with the tape suppressed. Same
+            cream-white frame, same border + shadow, no decorative tape.
+            Reads as "video is a slightly different type of media — less
+            stationary than a photograph, so the printed-tape metaphor
+            fits less well."
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedFigure primitive (tape=undefined)<br />
+            ✗ no decorative tape<br />
+            ⚠ breaks parity with articleImage R1
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              Bekijk hier de hoogtepunten van het derby tegen Diest —
+              gemaakt door An vanaf de tribune.
+            </p>
+            <figure class="opt-b-figure">
+              <div class="video">
+                <span class="play-glyph" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </span>
+              </div>
+              <figcaption class="figcap">
+                Hoogtepunten KCVV–Diest · 3–1
+              </figcaption>
+            </figure>
+            <p>
+              De compilatie loopt drie minuten — handig om snel terug te
+              keren op de drie KCVV-doelpunten.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — PLAIN BORDERED FIGURE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Plain bordered figure</div>
+          <div class="name">1px ink border + offset shadow, no card padding</div>
+          <div class="desc">
+            Drops the TapedFigure primitive entirely. Video sits flush
+            inside a 1px ink border with a hard offset shadow; caption
+            attaches to a cream-soft band at the bottom of the same frame
+            (no padding between video and caption band). Reads as a TV
+            screen / monitor — most "this is a screen" register.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✗ no TapedFigure primitive<br />
+            ✓ 1px ink border + offset shadow (matches TapedCard family)<br />
+            ✓ cream-soft caption band attached to bottom edge
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              Bekijk hier de hoogtepunten van het derby tegen Diest —
+              gemaakt door An vanaf de tribune.
+            </p>
+            <figure class="opt-c-figure">
+              <div class="video">
+                <span class="play-glyph" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </span>
+              </div>
+              <figcaption class="figcap">
+                Hoogtepunten KCVV–Diest · 3–1
+              </figcaption>
+            </figure>
+            <p>
+              De compilatie loopt drie minuten — handig om snel terug te
+              keren op de drie KCVV-doelpunten.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — NO FRAME ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · No frame</div>
+          <div class="name">Video sits flat on cream, caption below</div>
+          <div class="desc">
+            No card, no border, no tape. Video occupies the prose column
+            width with sharp corners; caption sits below in italic serif.
+            Tightest integration with body prose; weakest media-as-object
+            signal. Closest to the legacy renderer (minus the 4px rounded
+            corners).
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✗ no TapedFigure<br />
+            ✗ no border, no shadow<br />
+            ✓ caption matches articleImage figcap typography
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              Bekijk hier de hoogtepunten van het derby tegen Diest —
+              gemaakt door An vanaf de tribune.
+            </p>
+            <figure class="opt-d-figure">
+              <div class="video">
+                <span class="play-glyph" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                </span>
+              </div>
+              <figcaption class="figcap">
+                Hoogtepunten KCVV–Diest · 3–1
+              </figcaption>
+            </figure>
+            <p>
+              De compilatie loopt drie minuten — handig om snel terug te
+              keren op de drie KCVV-doelpunten.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Consistency signal</strong>
+      <ul>
+        <li>
+          Option A is the only one that achieves photo/video parity in
+          the body — readers see one "framed media" family across both
+          block types.
+        </li>
+        <li>
+          Options B–D each break parity in a different way: B keeps the
+          frame but drops the decoration; C swaps the frame; D drops the
+          frame entirely.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">
+        Out of scope this round
+      </strong>
+      <ul>
+        <li>
+          Play affordance (drilled in Round 2). The play glyph in every
+          option is a placeholder; the actual button design is decided
+          separately.
+        </li>
+        <li>
+          Width behavior (drilled in Round 3). Every option above is
+          shown at <code>--container-prose</code>; the width enum
+          decision is identical to the
+          <code>articleImage</code> R3 decision and may inherit it.
+        </li>
+        <li>
+          Embed iframe rendering (YouTube/Vimeo) — same frame applies to
+          both upload and embed paths. The play affordance differs (YT/Vimeo
+          render their own; uploads render ours).
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

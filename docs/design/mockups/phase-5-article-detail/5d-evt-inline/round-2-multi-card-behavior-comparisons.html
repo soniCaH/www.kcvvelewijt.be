@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-evt-inline · Round 2 · Multi-card behavior</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        height: 22px;
+        padding: 0 9px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .mono-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 16px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+
+      /* Polaroid base (locked Round 1 C). Variants tweak rotation and
+         margins. */
+      .polaroid {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+        padding: 22px 24px 26px;
+        margin: 30px 0 28px;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.6);
+      }
+      .polaroid .tape-tl {
+        position: absolute;
+        top: -10px;
+        left: 22px;
+        width: 70px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.78);
+        transform: rotate(-5deg);
+      }
+      .polaroid .tape-br {
+        position: absolute;
+        bottom: -10px;
+        right: 28px;
+        width: 56px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.78);
+        transform: rotate(4deg);
+      }
+      .polaroid .kicker {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .polaroid .title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 26px;
+        line-height: 1.15;
+        margin: 0 0 12px;
+        letter-spacing: -0.01em;
+      }
+      .polaroid .date {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 18px;
+        color: var(--color-ink);
+        margin: 0 0 4px;
+      }
+      .polaroid .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 14px;
+      }
+
+      /* ============================================================
+         OPTION A — Identical rotation (-0.4deg every card)
+         All cards rotate the same way. Mechanical but stable.
+         ============================================================ */
+      .opt-a .polaroid {
+        transform: rotate(-0.4deg);
+      }
+
+      /* ============================================================
+         OPTION B — Alternating subtle rotations
+         -0.5° / +0.4° / -0.3° — handpinned variety.
+         ============================================================ */
+      .opt-b .polaroid:nth-of-type(odd) {
+        transform: rotate(-0.5deg);
+      }
+      .opt-b .polaroid:nth-of-type(even) {
+        transform: rotate(0.4deg);
+      }
+      .opt-b .polaroid:nth-of-type(3n) {
+        transform: rotate(-0.3deg);
+      }
+
+      /* ============================================================
+         OPTION C — Stronger alternating rotations + variable tape
+         -1.2° / +0.9° / -0.7°, tape colors and positions vary.
+         More "pinned-on-corkboard" feel.
+         ============================================================ */
+      .opt-c .polaroid:nth-of-type(odd) {
+        transform: rotate(-1.2deg);
+      }
+      .opt-c .polaroid:nth-of-type(even) {
+        transform: rotate(0.9deg);
+      }
+      .opt-c .polaroid:nth-of-type(3n) {
+        transform: rotate(-0.7deg);
+      }
+      .opt-c .polaroid:nth-of-type(even) .tape-tl {
+        left: auto;
+        right: 30px;
+        transform: rotate(6deg);
+        background: rgba(120, 200, 180, 0.7);
+      }
+      .opt-c .polaroid:nth-of-type(even) .tape-br {
+        right: auto;
+        left: 28px;
+        transform: rotate(-3deg);
+        background: rgba(120, 200, 180, 0.7);
+      }
+
+      /* ============================================================
+         OPTION D — First polaroid retained, subsequent flatten
+         Card 1 keeps full polaroid rotation + tape. Cards 2+ flatten
+         to the locked Round 1 D "two-line strip" treatment so the
+         body doesn't accumulate decoration.
+         ============================================================ */
+      .opt-d .polaroid:first-of-type {
+        transform: rotate(-0.4deg);
+      }
+      .opt-d .flat {
+        margin: 22px 0 26px;
+        padding: 14px 0 16px;
+        border-top: 1px dotted var(--color-ink-muted);
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .opt-d .flat-row {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+      }
+      .opt-d .flat-date {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        font-weight: 600;
+      }
+      .opt-d .flat-title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 1.2;
+        margin: 0;
+      }
+      .opt-d .flat-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 4px;
+        display: flex;
+        gap: 14px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-evt-inline · Round 2 · #1840</p>
+      <h1>
+        In-body eventFact — multi-card stacking (identical / subtle alt /
+        stronger alt / flatten-after-first)
+      </h1>
+      <p>
+        Locked Round 1 · <strong>C (Taped polaroid).</strong> Round 2
+        decides what happens when 3 consecutive eventFact polaroids stack
+        in a single article body — e.g. a tournament weekend with three
+        days each as its own eventFact, or an announcement listing three
+        kennismakingsmomenten back to back.
+      </p>
+      <p>
+        Same fixture across all four — three eventFacts: Steakfestijn (13
+        juni), Open trainingsmoment (20 juni), Paastornooi (4 juli). Each
+        renders with the locked Round 1 polaroid card; only the stacking
+        rule changes.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — IDENTICAL ROTATION ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Identical rotation</div>
+          <div class="name">Every polaroid rotates -0.4°</div>
+          <div class="desc">
+            Every card uses the same transform. Predictable, stable. Reads
+            as "three event cards" rather than "three pinned polaroids."
+            Cleanest CSS (single rule); weakest fanzine character.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ identical transform: rotate(-0.4deg)<br />
+            ✓ no per-card variation
+          </div>
+        </header>
+        <div class="surface opt-a">
+          <div class="prose">
+            <p>
+              Vóór de zomerstop staan er nog drie open momenten op de
+              agenda. Inschrijven kan al voor twee ervan.
+            </p>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Clubfeest</span>
+                <span class="mono-label">Open inschrijving</span>
+              </div>
+              <h3 class="title">Steakfestijn 2026</h3>
+              <p class="date">Vrijdag 13 juni · 18:00–22:00</p>
+              <p class="meta">Sportpark Elewijt · Max 180 plaatsen</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Training</span>
+                <span class="mono-label">U7 t/m U13</span>
+              </div>
+              <h3 class="title">Open trainingsmoment</h3>
+              <p class="date">Zaterdag 20 juni · 10:00–12:00</p>
+              <p class="meta">Trainingsveld 2 · Geen inschrijving nodig</p>
+            </article>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Tornooi</span>
+                <span class="mono-label">Alle jeugd</span>
+              </div>
+              <h3 class="title">Paastornooi 2026</h3>
+              <p class="date">Zaterdag 4 juli · 09:00–17:00</p>
+              <p class="meta">Hoofdterrein · Inschrijving via team-leader</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <p>
+              Meer momenten volgen in de loop van het seizoen — houd de
+              kalender in de gaten.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — SUBTLE ALTERNATING ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Subtle alternating rotations</div>
+          <div class="name">-0.5° / +0.4° / -0.3° — gentle variety</div>
+          <div class="desc">
+            Subtle alternation: each card tilts a different small amount
+            in alternating directions. Same tape colors and positions
+            across all cards. Reads as "hand-pinned at slightly different
+            moments" without becoming a busy collage.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ nth-of-type(odd/even/3n) transform variants<br />
+            ✓ uniform tape style (ochre)<br />
+            ✓ range: -0.5° to +0.4°
+          </div>
+        </header>
+        <div class="surface opt-b">
+          <div class="prose">
+            <p>
+              Vóór de zomerstop staan er nog drie open momenten op de
+              agenda. Inschrijven kan al voor twee ervan.
+            </p>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Clubfeest</span>
+                <span class="mono-label">Open inschrijving</span>
+              </div>
+              <h3 class="title">Steakfestijn 2026</h3>
+              <p class="date">Vrijdag 13 juni · 18:00–22:00</p>
+              <p class="meta">Sportpark Elewijt · Max 180 plaatsen</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Training</span>
+                <span class="mono-label">U7 t/m U13</span>
+              </div>
+              <h3 class="title">Open trainingsmoment</h3>
+              <p class="date">Zaterdag 20 juni · 10:00–12:00</p>
+              <p class="meta">Trainingsveld 2 · Geen inschrijving nodig</p>
+            </article>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Tornooi</span>
+                <span class="mono-label">Alle jeugd</span>
+              </div>
+              <h3 class="title">Paastornooi 2026</h3>
+              <p class="date">Zaterdag 4 juli · 09:00–17:00</p>
+              <p class="meta">Hoofdterrein · Inschrijving via team-leader</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <p>
+              Meer momenten volgen in de loop van het seizoen — houd de
+              kalender in de gaten.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — STRONGER ALTERNATING + TAPE VARIATION ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Stronger alt + tape variation</div>
+          <div class="name">-1.2° / +0.9° / -0.7° + tape colors/positions alternate</div>
+          <div class="desc">
+            Stronger rotations and per-card tape variation (ochre on odd,
+            mint on even; positions flipped). Reads as "pinned on a
+            corkboard." Strongest fanzine character; risks looking
+            decorative or messy when the body context is straight-laced.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ rotation: -1.2° to +0.9°<br />
+            ✓ alternating tape color (ochre + mint) — NEW<br />
+            ✓ tape position flips per card — NEW
+          </div>
+        </header>
+        <div class="surface opt-c">
+          <div class="prose">
+            <p>
+              Vóór de zomerstop staan er nog drie open momenten op de
+              agenda. Inschrijven kan al voor twee ervan.
+            </p>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Clubfeest</span>
+                <span class="mono-label">Open inschrijving</span>
+              </div>
+              <h3 class="title">Steakfestijn 2026</h3>
+              <p class="date">Vrijdag 13 juni · 18:00–22:00</p>
+              <p class="meta">Sportpark Elewijt · Max 180 plaatsen</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Training</span>
+                <span class="mono-label">U7 t/m U13</span>
+              </div>
+              <h3 class="title">Open trainingsmoment</h3>
+              <p class="date">Zaterdag 20 juni · 10:00–12:00</p>
+              <p class="meta">Trainingsveld 2 · Geen inschrijving nodig</p>
+            </article>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Tornooi</span>
+                <span class="mono-label">Alle jeugd</span>
+              </div>
+              <h3 class="title">Paastornooi 2026</h3>
+              <p class="date">Zaterdag 4 juli · 09:00–17:00</p>
+              <p class="meta">Hoofdterrein · Inschrijving via team-leader</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <p>
+              Meer momenten volgen in de loop van het seizoen — houd de
+              kalender in de gaten.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — FIRST POLAROID, REST FLATTEN ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · First polaroid, rest flatten</div>
+          <div class="name">Card 1 = polaroid; card 2+ = flat two-line strip</div>
+          <div class="desc">
+            First eventFact in a run renders as the full polaroid (locked
+            Round 1 C). Subsequent consecutive eventFacts compress to a
+            flat two-line strip (italic title + mono caps date + meta
+            line, dotted rules above + below). The polaroid is "featured";
+            the rest are "list rows." Loses some unity but prevents
+            decoration accumulation.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ polaroid on first<br />
+            ✓ flat two-line strip on subsequent — NEW variant<br />
+            ✓ Phase 3-b dotted ink-muted dividers<br />
+            ⚠ introduces a second visual treatment for the same block
+          </div>
+        </header>
+        <div class="surface opt-d">
+          <div class="prose">
+            <p>
+              Vóór de zomerstop staan er nog drie open momenten op de
+              agenda. Inschrijven kan al voor twee ervan.
+            </p>
+            <article class="polaroid">
+              <span class="tape-tl" aria-hidden="true"></span>
+              <span class="tape-br" aria-hidden="true"></span>
+              <div class="kicker">
+                <span class="pill">Clubfeest</span>
+                <span class="mono-label">Open inschrijving</span>
+              </div>
+              <h3 class="title">Steakfestijn 2026</h3>
+              <p class="date">Vrijdag 13 juni · 18:00–22:00</p>
+              <p class="meta">Sportpark Elewijt · Max 180 plaatsen</p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <div class="flat">
+              <div class="flat-row">
+                <span class="flat-date">Za 20 jun</span>
+                <span class="pill">Training</span>
+                <h3 class="flat-title">Open trainingsmoment</h3>
+              </div>
+              <div class="flat-meta">
+                <span>Trainingsveld 2</span>
+                <span>10:00–12:00</span>
+                <span>U7 t/m U13</span>
+              </div>
+            </div>
+            <div class="flat">
+              <div class="flat-row">
+                <span class="flat-date">Za 4 jul</span>
+                <span class="pill">Tornooi</span>
+                <h3 class="flat-title">Paastornooi 2026</h3>
+              </div>
+              <div class="flat-meta">
+                <span>Hoofdterrein</span>
+                <span>09:00–17:00</span>
+                <span>Alle jeugd</span>
+              </div>
+              <div style="margin-top: 10px">
+                <a class="cta" href="#"
+                  >Inschrijven <span aria-hidden="true">→</span></a
+                >
+              </div>
+            </div>
+            <p>
+              Meer momenten volgen in de loop van het seizoen — houd de
+              kalender in de gaten.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Trade-offs</strong>
+      <ul>
+        <li>
+          <strong>A · Identical</strong> — simplest, most predictable.
+          Polaroid rhythm fades on repeat; reads as "the design language
+          stalled".
+        </li>
+        <li>
+          <strong>B · Subtle alt</strong> — gentle variety. Each card
+          feels hand-pinned without becoming busy. CSS-only
+          (<code>nth-of-type</code>). Recommended path of least new
+          vocabulary.
+        </li>
+        <li>
+          <strong>C · Stronger alt + tape variation</strong> — boldest
+          fanzine register. Adds a second tape color (mint) to the
+          vocabulary — used nowhere else yet. Could overpower body
+          context.
+        </li>
+        <li>
+          <strong>D · First polaroid, rest flatten</strong> — explicit
+          "featured + list" hierarchy. Solves decoration accumulation
+          cleanly, but introduces a second visual variant for the same
+          schema block (more code, more tests).
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">Counter behaviour</strong>
+      <ul>
+        <li>
+          For Options A / B / C: <code>:nth-of-type()</code> counts
+          sibling elements of the same tag, not the same class, and
+          does <strong>not</strong> reset across intervening
+          non-matching siblings. With the locked CSS, three eventFact
+          polaroids separated by <code>&lt;p&gt;</code> paragraphs are
+          still numbered 1 · 2 · 3 globally — they render -0.5° / +0.4°
+          / -0.3°. That's the desired visual: varied rotations across
+          the whole article.
+        </li>
+        <li>
+          If a future design needs a true per-run reset, the renderer
+          must (a) wrap each contiguous eventFact run in a dedicated
+          container, (b) pass a run-scoped index prop and set
+          <code>transform</code> directly from JS, or (c) restructure
+          the PT serializer to group consecutive eventFacts (same
+          pattern as the rapid-fire qaBlock collapse).
+        </li>
+        <li>
+          For Option D: the "first polaroid" rule resets after any
+          non-eventFact block too. A flat two-line eventFact only
+          renders when it immediately follows another eventFact in the
+          PT array.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

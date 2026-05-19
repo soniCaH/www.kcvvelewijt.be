@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-evt-inline · Round 1 · Card vocabulary</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --color-tape-jersey: #2d7a4f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-soft: 3px 3px 0 0 rgba(26, 26, 26, 0.85);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      /* ========== Shared atoms ========== */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        height: 22px;
+        padding: 0 9px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .mono-label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 16px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+      }
+
+      /* ========== OPTION A — Mini EventDetailBlock ========== */
+      .opt-a-card {
+        position: relative;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 24px 22px;
+        margin: 24px 0;
+      }
+      .opt-a-card .tape {
+        position: absolute;
+        top: -8px;
+        left: 36px;
+        width: 84px;
+        height: 18px;
+        background: var(--color-tape-jersey);
+        transform: rotate(-2deg);
+        opacity: 0.92;
+      }
+      .opt-a-head {
+        display: grid;
+        grid-template-columns: 76px 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .opt-a-dateblock {
+        width: 76px;
+        text-align: center;
+        font-family: ui-serif, Georgia, serif;
+        color: var(--color-ink);
+        line-height: 1;
+      }
+      .opt-a-dateblock .m {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-bottom: 2px;
+      }
+      .opt-a-dateblock .d {
+        font-style: italic;
+        font-weight: 900;
+        font-size: 42px;
+        letter-spacing: -0.04em;
+        color: var(--color-ink);
+        line-height: 0.95;
+      }
+      .opt-a-dateblock .w {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 3px;
+      }
+      .opt-a-titleblock {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .opt-a-title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 22px;
+        line-height: 1.2;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .opt-a-divider {
+        height: 0;
+        border-top: 1px dotted var(--color-ink-muted);
+        margin: 14px 0 12px;
+      }
+      .opt-a-meta {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 6px 16px;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        font-style: italic;
+        color: var(--color-ink);
+      }
+      .opt-a-meta dt {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        font-style: normal;
+        padding-top: 3px;
+      }
+      .opt-a-meta dd {
+        margin: 0;
+      }
+      .opt-a-cta {
+        margin-top: 16px;
+      }
+
+      /* ========== OPTION B — Ticket-stub strip ========== */
+      .opt-b-card {
+        display: grid;
+        grid-template-columns: 96px 1fr auto;
+        gap: 0;
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        margin: 24px 0;
+        align-items: stretch;
+      }
+      .opt-b-stub {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 14px 8px;
+        text-align: center;
+        border-right: 1px dashed var(--color-ink);
+        position: relative;
+      }
+      .opt-b-stub .m {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.85;
+      }
+      .opt-b-stub .d {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1;
+        margin-top: 2px;
+      }
+      .opt-b-stub .w {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.85;
+        margin-top: 4px;
+      }
+      .opt-b-body {
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+      }
+      .opt-b-pillrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .opt-b-title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 1.2;
+        margin: 0;
+      }
+      .opt-b-meta {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 13px;
+        font-style: italic;
+        color: var(--color-ink-muted);
+      }
+      .opt-b-cta-cell {
+        display: flex;
+        align-items: center;
+        padding: 0 16px 0 8px;
+        border-left: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+
+      /* ========== OPTION C — Taped polaroid figure ========== */
+      .opt-c-card {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+        padding: 22px 24px 26px;
+        margin: 30px 0 28px;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.6);
+        transform: rotate(-0.4deg);
+      }
+      .opt-c-tape-tl {
+        position: absolute;
+        top: -10px;
+        left: 22px;
+        width: 70px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.78);
+        transform: rotate(-5deg);
+      }
+      .opt-c-tape-br {
+        position: absolute;
+        bottom: -10px;
+        right: 28px;
+        width: 56px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.78);
+        transform: rotate(4deg);
+      }
+      .opt-c-kicker {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .opt-c-title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 26px;
+        line-height: 1.15;
+        margin: 0 0 12px;
+        letter-spacing: -0.01em;
+      }
+      .opt-c-date {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 18px;
+        color: var(--color-ink);
+        margin: 0 0 4px;
+      }
+      .opt-c-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 14px;
+      }
+
+      /* ========== OPTION D — Two-line strip (no card) ========== */
+      .opt-d-card {
+        margin: 22px 0 26px;
+        padding: 14px 0 16px;
+        border-top: 2px solid var(--color-ink);
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .opt-d-row1 {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 6px;
+      }
+      .opt-d-date {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        font-weight: 600;
+      }
+      .opt-d-title {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 22px;
+        line-height: 1.2;
+        margin: 0;
+      }
+      .opt-d-meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 4px;
+        display: flex;
+        gap: 14px;
+      }
+      .opt-d-cta {
+        margin-top: 10px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-evt-inline · Round 1 · #1840</p>
+      <h1>
+        In-body eventFact — card vocabulary (mini-detail / ticket-stub /
+        polaroid / two-line)
+      </h1>
+      <p>
+        Drill 2.1 sub-round 1. Locks the visual for an eventFact PT block
+        when it sits inline inside <code>&lt;ArticleBody&gt;</code>. Two
+        cases share this visual: (1) inline-in-announcement (one event
+        callout inside an announcement) and (2) multi-eventFact-in-event
+        (subsequent eventFacts after the first one is absorbed by
+        <code>&lt;EventDetailBlock&gt;</code>).
+      </p>
+      <p>
+        Every option renders the same fixture: <em>Steakfestijn 2026</em>,
+        13 juni, locatie + adres + capaciteit + competitionTag, ticket
+        CTA. Wrapped in body prose paragraphs to show the rhythm inside an
+        article. Fusing behaviour (consecutive cards) is held for Round 2.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — MINI EVENTDETAILBLOCK ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Mini EventDetailBlock</div>
+          <div class="name">TapedCard family, compressed (no sessions / no note)</div>
+          <div class="desc">
+            Same vocabulary as the locked <code>&lt;EventDetailBlock&gt;</code>:
+            cream-soft TapedCard, jersey tape strip top, 76px date-block
+            left, tag pill + italic display title right, dotted ink-muted
+            divider, meta <code>&lt;dl&gt;</code> below, CTA at the bottom.
+            Compressed by dropping the sessions block and the note section
+            (those stay exclusive to the page-end EventDetailBlock).
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedCard + jersey tape (matches EventDetailBlock)<br />
+            ✓ 76px date block (same as EventDetailBlock head)<br />
+            ✓ italic display-sm title + dotted divider<br />
+            ✓ mono caps meta dl<br />
+            ✗ no sessions, no note (compression rules)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking presenteert dit seizoen drie open
+              kennismakingsmomenten. Het volgende staat al op de agenda en
+              de inschrijvingen openen vrijdag.
+            </p>
+            <article class="opt-a-card">
+              <span class="tape" aria-hidden="true"></span>
+              <header class="opt-a-head">
+                <div class="opt-a-dateblock">
+                  <div class="m">Juni</div>
+                  <div class="d">13</div>
+                  <div class="w">Vrij</div>
+                </div>
+                <div class="opt-a-titleblock">
+                  <span class="pill">Clubfeest</span>
+                  <h3 class="opt-a-title">Steakfestijn 2026</h3>
+                </div>
+              </header>
+              <div class="opt-a-divider"></div>
+              <dl class="opt-a-meta">
+                <dt>Locatie</dt>
+                <dd>Sportpark Elewijt</dd>
+                <dt>Adres</dt>
+                <dd>Driesstraat 14, Elewijt</dd>
+                <dt>Capaciteit</dt>
+                <dd>Max 180 plaatsen</dd>
+              </dl>
+              <a class="cta opt-a-cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <p>
+              Naast het festijn werken we ook aan een nieuwe formule voor
+              het paastornooi — daar volgt later in het seizoen meer info
+              over.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — TICKET-STUB STRIP ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Ticket-stub strip</div>
+          <div class="name">Date stub (jersey-deep) left, body center, CTA cell right</div>
+          <div class="desc">
+            Three-column horizontal: ticket-stub left (jersey-deep
+            background, dashed perforation), body center (tag pill +
+            italic title + meta), CTA cell right (cream-soft, dashed
+            perforation). One row tall on desktop, collapses to stacked on
+            mobile. Reads as a "tear-off ticket" — strongest single-glance
+            wayfinding.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TicketStub family (jersey-deep stub, dashed perforations)<br />
+            ✓ pill (same as EventDetailBlock head)<br />
+            ✓ italic display title<br />
+            ✗ no taped card, no sessions, no note
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking presenteert dit seizoen drie open
+              kennismakingsmomenten. Het volgende staat al op de agenda en
+              de inschrijvingen openen vrijdag.
+            </p>
+            <article class="opt-b-card">
+              <div class="opt-b-stub">
+                <div class="m">Juni</div>
+                <div class="d">13</div>
+                <div class="w">Vrij</div>
+              </div>
+              <div class="opt-b-body">
+                <div class="opt-b-pillrow">
+                  <span class="pill">Clubfeest</span>
+                  <span class="opt-b-meta"
+                    >Sportpark Elewijt · 18:00–22:00</span
+                  >
+                </div>
+                <h3 class="opt-b-title">Steakfestijn 2026</h3>
+              </div>
+              <div class="opt-b-cta-cell">
+                <a class="cta" href="#"
+                  >Inschrijven <span aria-hidden="true">→</span></a
+                >
+              </div>
+            </article>
+            <p>
+              Naast het festijn werken we ook aan een nieuwe formule voor
+              het paastornooi — daar volgt later in het seizoen meer info
+              over.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — TAPED POLAROID ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Taped polaroid (invitation register)</div>
+          <div class="name">Slightly rotated card with corner tape strips</div>
+          <div class="desc">
+            Cream-white polaroid with a subtle rotation, ochre tape strips
+            top-left and bottom-right, no date block — date + meta sit
+            inline below the title. Reads as a clipped event invitation
+            pinned into the article. Most fanzine-register; weakest at
+            single-glance date wayfinding.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedCard family with rotation<br />
+            ✓ ochre tape (warmer than jersey tape)<br />
+            ✗ no date block (date inline)<br />
+            ✗ NEW visual register vs EventDetailBlock
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking presenteert dit seizoen drie open
+              kennismakingsmomenten. Het volgende staat al op de agenda en
+              de inschrijvingen openen vrijdag.
+            </p>
+            <article class="opt-c-card">
+              <span class="opt-c-tape-tl" aria-hidden="true"></span>
+              <span class="opt-c-tape-br" aria-hidden="true"></span>
+              <div class="opt-c-kicker">
+                <span class="pill">Clubfeest</span>
+                <span class="mono-label">Open inschrijving</span>
+              </div>
+              <h3 class="opt-c-title">Steakfestijn 2026</h3>
+              <p class="opt-c-date">Vrijdag 13 juni · 18:00–22:00</p>
+              <p class="opt-c-meta">
+                Sportpark Elewijt · Driesstraat 14 · Max 180 plaatsen
+              </p>
+              <a class="cta" href="#"
+                >Inschrijven <span aria-hidden="true">→</span></a
+              >
+            </article>
+            <p>
+              Naast het festijn werken we ook aan een nieuwe formule voor
+              het paastornooi — daar volgt later in het seizoen meer info
+              over.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — TWO-LINE STRIP ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Two-line strip (no card)</div>
+          <div class="name">Borderless: rule above, dotted rule below, content between</div>
+          <div class="desc">
+            No card chrome. A 2px ink rule above + dotted ink-muted below
+            bracket a two-line block: line 1 = mono caps date + pill +
+            italic title, line 2 = mono caps meta line. CTA inline below.
+            Lightest of the four; reads as a body-level callout, not a
+            distinct card.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ 2px ink rule (matches MissionBanner top rule)<br />
+            ✓ Phase 3-b dotted ink-muted divider<br />
+            ✓ italic display-sm title<br />
+            ✗ no card, no tape, no date block
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking presenteert dit seizoen drie open
+              kennismakingsmomenten. Het volgende staat al op de agenda en
+              de inschrijvingen openen vrijdag.
+            </p>
+            <article class="opt-d-card">
+              <div class="opt-d-row1">
+                <span class="opt-d-date">Vrij 13 jun</span>
+                <span class="pill">Clubfeest</span>
+                <h3 class="opt-d-title">Steakfestijn 2026</h3>
+              </div>
+              <div class="opt-d-meta">
+                <span>Sportpark Elewijt</span>
+                <span>18:00–22:00</span>
+                <span>Max 180</span>
+              </div>
+              <div class="opt-d-cta">
+                <a class="cta" href="#"
+                  >Inschrijven <span aria-hidden="true">→</span></a
+                >
+              </div>
+            </article>
+            <p>
+              Naast het festijn werken we ook aan een nieuwe formule voor
+              het paastornooi — daar volgt later in het seizoen meer info
+              over.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Family relation to <code>&lt;EventDetailBlock&gt;</code></strong>
+      <ul>
+        <li>
+          <strong>A · Mini-detail</strong> directly mirrors the locked
+          EventDetailBlock — same tape, same date block, same dotted
+          divider, same dl. Reader recognises "this is the same event
+          object as the one at the article tail."
+        </li>
+        <li>
+          <strong>B · Ticket-stub</strong> uses the TicketStub primitive
+          (already approved in design vocabulary). Strongest visual
+          difference from EventDetailBlock — easier to tell "primary"
+          from "secondary" event in a multi-eventFact event article.
+        </li>
+        <li>
+          <strong>C · Polaroid</strong> introduces a warmer ochre tape
+          and a rotation — most decorative but adds the most new vocabulary.
+        </li>
+        <li>
+          <strong>D · Two-line strip</strong> has the lightest footprint,
+          but weakest wayfinding when 3+ eventFacts stack consecutively.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">Fields rendered (all options)</strong>
+      <ul>
+        <li>
+          title (required), date, startTime/endTime, location, address,
+          ageGroup/competitionTag (pill), ticketUrl + ticketLabel (CTA),
+          capacity.
+        </li>
+        <li>
+          <strong>NOT rendered:</strong> sessions[] (exclusive to
+          EventDetailBlock), note PT (exclusive to EventDetailBlock).
+          These compression rules keep the inline card visually lighter
+          than the page-end one.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

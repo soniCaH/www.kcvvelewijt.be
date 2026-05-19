@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-img · Round 1 · Figure register</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      /* Photo placeholder — a 3:2 cream-soft block with a faux newsprint
+         tint. Stands in for a real Next.js <Image> so the comparison
+         stays portable. */
+      .photo {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(80, 60, 40, 0.45) 0%,
+            rgba(180, 150, 100, 0.55) 35%,
+            rgba(120, 100, 70, 0.5) 65%,
+            rgba(60, 50, 35, 0.45) 100%
+          ),
+          repeating-linear-gradient(
+            45deg,
+            rgba(0, 0, 0, 0.05) 0px,
+            rgba(0, 0, 0, 0.05) 1px,
+            transparent 1px,
+            transparent 4px
+          );
+        filter: sepia(0.2) contrast(1.05);
+      }
+
+      /* ============================================================
+         OPTION A — TapedFigure with rotation + tape
+         Single ochre tape strip top-left, sub-1° rotation. Same
+         vocabulary as the eventFact polaroid (locked drill 2.1).
+         ============================================================ */
+      .opt-a-figure {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+        padding: 10px;
+        margin: 30px 0 28px;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.6);
+        transform: rotate(-0.5deg);
+      }
+      .opt-a-figure .tape {
+        position: absolute;
+        top: -10px;
+        left: 36px;
+        width: 84px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.78);
+        transform: rotate(-4deg);
+      }
+
+      /* ============================================================
+         OPTION B — TapedFigure, no rotation, single tape strip
+         Squared up; same tape strip as A; lighter "pinned" feel.
+         ============================================================ */
+      .opt-b-figure {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        padding: 10px;
+        margin: 28px 0 26px;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+      }
+      .opt-b-figure .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 92px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.8);
+      }
+
+      /* ============================================================
+         OPTION C — TapedFigure, no rotation, no tape
+         Cream-soft frame, 1px ink border, no tape. "Clean editorial
+         figure" register.
+         ============================================================ */
+      .opt-c-figure {
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-ink);
+        padding: 10px;
+        margin: 24px 0;
+        box-shadow: 4px 4px 0 0 var(--color-ink);
+      }
+
+      /* ============================================================
+         OPTION D — Plain figure
+         No card chrome, just the photo + hairline below. Tightest
+         integration with body prose; reads as a flat in-line illustration.
+         ============================================================ */
+      .opt-d-figure {
+        margin: 22px 0 28px;
+        border-bottom: 1px solid var(--color-ink-muted);
+        padding-bottom: 10px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-img · Round 1 · #1840</p>
+      <h1>
+        articleImage — figure register (rotated polaroid / flat taped /
+        clean cream / plain)
+      </h1>
+      <p>
+        Drill 3.1 sub-round 1. Locks the visual treatment of a regular
+        in-body articleImage on the cream surface. Caption + credit
+        rendering, full-bleed flag, and aspect-ratio default are drilled
+        in subsequent rounds — all four options below render
+        caption-less.
+      </p>
+      <p>
+        Same fixture: a single landscape 3:2 photo placeholder wrapped in
+        body prose paragraphs. <code>&lt;TapedFigure&gt;</code> is the
+        existing design-system primitive (already used by NewsCard,
+        EditorialHero, FeaturedEventBand) — three of the four candidates
+        use it with different props.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — POLAROID (rotated + tape) ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Polaroid (rotated + tape)</div>
+          <div class="name">TapedFigure with rotation + single tape strip</div>
+          <div class="desc">
+            Direct sibling of the locked eventFact inline polaroid: sub-1°
+            rotation, single ochre tape strip top-left, cream-white frame
+            with subtle shadow. Strongest fanzine character; reads as
+            "snapshot pinned into the article."
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedFigure (rotation + tape)<br />
+            ✓ ochre tape (matches eventFact polaroid)<br />
+            ✓ same family as eventFact inline card
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen. Trainer
+              Vermeulen kwam dit jaar terug uit Diest om opnieuw bij de
+              U13 te staan.
+            </p>
+            <figure class="opt-a-figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img" aria-label="U13 training" ></div>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma. Aftrap om 14:00 op terrein 2; toegang gratis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — FLAT TAPED FIGURE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Flat taped figure</div>
+          <div class="name">TapedFigure, no rotation, single tape strip top-center</div>
+          <div class="desc">
+            Squared up — no rotation. One small ochre tape strip
+            centered on the top edge. Reads as "stuck flat into the
+            article" rather than "pinned at an angle." Quieter than A
+            but still in the taped family.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedFigure (no rotation, tape)<br />
+            ✓ ochre tape<br />
+            ✓ same TapedFigure primitive as NewsCard / hero<br />
+            ✓ no per-figure rotation overhead
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen. Trainer
+              Vermeulen kwam dit jaar terug uit Diest om opnieuw bij de
+              U13 te staan.
+            </p>
+            <figure class="opt-b-figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img" aria-label="U13 training"></div>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma. Aftrap om 14:00 op terrein 2; toegang gratis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — CLEAN CREAM FRAME ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Clean cream frame</div>
+          <div class="name">TapedFigure with no rotation, no tape</div>
+          <div class="desc">
+            The TapedFigure primitive stripped of its decorative props:
+            cream-soft frame with 1px ink border and offset shadow, no
+            tape, no rotation. "Editorial figure" register — reads as a
+            properly framed photograph in a long-form piece.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedFigure (no rotation, no tape)<br />
+            ✓ cream-soft bg (matches MissionBanner / ArticleCredits frame)<br />
+            ✓ 1px ink border + offset shadow<br />
+            ✗ no decorative tape
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen. Trainer
+              Vermeulen kwam dit jaar terug uit Diest om opnieuw bij de
+              U13 te staan.
+            </p>
+            <figure class="opt-c-figure">
+              <div class="photo" role="img" aria-label="U13 training"></div>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma. Aftrap om 14:00 op terrein 2; toegang gratis.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — PLAIN FIGURE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Plain figure</div>
+          <div class="name">No card chrome — photo on cream + ink hairline below</div>
+          <div class="desc">
+            Tightest body integration. The photo sits flat on cream with
+            a single 1px ink-muted hairline below it (where the caption
+            would attach). Reads as inline content rather than a
+            distinct card. Most newspaper-print register; weakest sense
+            of "this is a photograph."
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✗ no TapedFigure (no card, no tape, no frame)<br />
+            ✓ 1px ink-muted hairline below photo<br />
+            ⚠ doesn't reuse the design-system figure primitive
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen. Trainer
+              Vermeulen kwam dit jaar terug uit Diest om opnieuw bij de
+              U13 te staan.
+            </p>
+            <figure class="opt-d-figure">
+              <div class="photo" role="img" aria-label="U13 training"></div>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma. Aftrap om 14:00 op terrein 2; toegang gratis.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Existing TapedFigure usage</strong>
+      <ul>
+        <li>
+          NewsCard photos use TapedFigure with rotation + tape (fanzine
+          register for index surfaces).
+        </li>
+        <li>
+          EditorialHero photos use TapedFigure with rotation + tape (hero
+          register for article tops).
+        </li>
+        <li>
+          FeaturedEventBand poster uses TapedFigure with rotation + tape.
+        </li>
+        <li>
+          So: TapedFigure with rotation + tape is the "default" decorative
+          mode across the redesign. The question for in-body articleImage
+          is whether to continue that or pull back inside the prose flow.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">Trade-offs</strong>
+      <ul>
+        <li>
+          <strong>A</strong> matches the redesign's strongest fanzine
+          register and signals "this is a featured photo" — but every
+          articleImage in the body would carry the same decorative
+          weight, which can become busy in image-heavy articles.
+        </li>
+        <li>
+          <strong>B</strong> keeps the family tie to A (same tape,
+          TapedFigure primitive) but flattens the rotation — quieter on
+          repeat, still distinctly KCVV.
+        </li>
+        <li>
+          <strong>C</strong> reuses the TapedFigure primitive without its
+          decorative props — editorial-figure register, plays well with
+          long-form prose, but loses the family signal.
+        </li>
+        <li>
+          <strong>D</strong> breaks from TapedFigure entirely — would
+          need fresh CSS and tests. Cheapest visually but weakens the
+          design-system narrative.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px"
+        >Out of scope for this round</strong
+      >
+      <ul>
+        <li>
+          Caption + credit fields (drilled at Round 2; requires schema
+          migration).
+        </li>
+        <li>
+          Full-bleed flag retention (drilled at Round 3).
+        </li>
+        <li>
+          Default aspect ratio + crop behaviour (drilled at Round 4).
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

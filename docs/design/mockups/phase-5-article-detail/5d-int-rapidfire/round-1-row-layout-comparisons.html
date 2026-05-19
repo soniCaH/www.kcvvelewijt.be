@@ -1,0 +1,604 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-int Rapid-fire · Round 1 · Per-row layout</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 32px 0 36px;
+      }
+      .qa-section {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .qa-section-kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+        margin: 0 0 22px;
+      }
+      .qa-speaker-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        letter-spacing: -0.02em;
+        flex-shrink: 0;
+      }
+      .speaker-tag {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .speaker-tag .name-strong {
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         OPTION A — Vertical stack
+         Trimmed-down QARow: Q above A, no per-row avatar; group avatar
+         hoisted to a "speaker strip" once above the list. Dotted ink-
+         muted divider between pairs (Phase 3-b primitive).
+         ============================================================ */
+      .rf-vertical .pair {
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .rf-vertical .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-vertical .q {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 17px;
+        line-height: 1.3;
+        margin: 0 0 4px;
+        color: var(--color-ink);
+      }
+      .rf-vertical .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink-soft);
+      }
+
+      /* ============================================================
+         OPTION B — Inline (one line per pair)
+         Q · A on a single line — Q in italic display, separator dot,
+         A in body. Wraps gracefully on narrow viewports.
+         ============================================================ */
+      .rf-inline .pair {
+        padding: 11px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        line-height: 1.45;
+      }
+      .rf-inline .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-inline .q {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 16px;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .rf-inline .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        color: var(--color-ink-soft);
+        margin: 0;
+      }
+      .rf-inline .sep {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        color: var(--color-ink-muted);
+        margin: 0 8px;
+        font-size: 13px;
+        vertical-align: 1px;
+      }
+
+      /* ============================================================
+         OPTION C — 2-column grid (Q | A)
+         Two-column at >= 480px, collapses to vertical stack on narrow
+         viewports. Q in italic display, A in body. Matches the legacy
+         "Sneltrein" rhythm but in cream vocabulary.
+         ============================================================ */
+      .rf-grid .pair {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+        gap: 20px;
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .rf-grid .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-grid .q {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 1.3;
+        margin: 0;
+        color: var(--color-ink);
+      }
+      .rf-grid .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink-soft);
+      }
+
+      /* ============================================================
+         OPTION D — Hanging Q (Q as left-rail label, A flows wide)
+         Mono caps short prompts on a fixed 120px left rail; answer
+         takes the rest of the width. Best when the question can be
+         compressed to ≤ 3 words ("Favoriete goal?") — but the editor
+         is free to use sentence questions.
+         ============================================================ */
+      .rf-hanging .pair {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 22px;
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .rf-hanging .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-hanging .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.45;
+      }
+      .rf-hanging .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-int-rapidfire · Round 1 · #1840</p>
+      <h1>
+        Rapid-fire QARow — per-row layout (vertical / inline / grid / hanging)
+      </h1>
+      <p>
+        Drill 5.d-int-rapidfire Round 1 of ~4. Locks how a single rapid-fire
+        Q&amp;A pair lays out inside the row. Everything else — speaker scope,
+        row dividers, section opener — is held constant across all four
+        candidates and drilled in later rounds.
+      </p>
+      <p>
+        All four options share: a single hoisted speaker strip
+        (avatar + tag, top-left) so per-row chrome is minimal; dotted
+        ink-muted dividers between pairs; the prose container
+        (<code>--container-prose: 680px</code>) on the cream surface; and the
+        existing <code>Sneltrein</code> kicker placeholder at the top
+        (kicker treatment is locked separately in Round 4).
+      </p>
+      <p>
+        Fixture: 4 rapid-fire pairs with a single respondent (Lars Janssens,
+        aanvaller — <strong>L</strong>). Real prose so the rhythm difference
+        is honest.
+      </p>
+      <p>
+        Note: per the existing <code>QaGroupRapidFire</code> contract, rapid-fire
+        is intentionally single-respondent. Multi-respondent rapid-fire is
+        explicitly out of scope and will fall back to repeating standard QARows.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — VERTICAL STACK ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Vertical stack</div>
+          <div class="name">Q above A, single column, dotted dividers</div>
+          <div class="desc">
+            Trimmed-down standard QARow. Italic display-sm Q on top, body-md A
+            below, separated by a small gap. Hoisted speaker strip once at the
+            top. Reads as a transcript-lite — same vocabulary as standard QARow
+            but with avatar/tag chrome removed per row.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ italic Freight Display 600 question (matches QARow)<br />
+            ✓ Freight body answer<br />
+            ✓ Phase 3-b dotted ink-muted row divider<br />
+            ✓ Hoisted SubjectAvatar + speaker tag (5.d2 row scale)
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section rf-vertical">
+            <header class="qa-speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+
+            <div class="pair">
+              <p class="q">Favoriete goal van het seizoen?</p>
+              <p class="a">De volley tegen Diest in de slotminuut.</p>
+            </div>
+            <div class="pair">
+              <p class="q">Speler om naar te kijken?</p>
+              <p class="a">Wim. Hij maakt iedereen beter.</p>
+            </div>
+            <div class="pair">
+              <p class="q">Liedje in de bus voor de match?</p>
+              <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+            </div>
+            <div class="pair">
+              <p class="q">Eerste herinnering aan KCVV?</p>
+              <p class="a">Hand vasthouden van mijn pa, U7.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — INLINE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Inline (one line per pair)</div>
+          <div class="name">Q · A on one row, mono separator dot</div>
+          <div class="desc">
+            Maximum compression. Question and answer share a single line,
+            separated by a mono interpunct. Wraps gracefully when the answer
+            is too long — but only shines when answers stay short. Strongest
+            "rapid-fire" rhythm; weakest when answers run past one sentence.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ italic Freight Display 600 question (smaller — 16px)<br />
+            ✓ Freight body answer<br />
+            ✓ mono <code>·</code> separator (matches speaker-tag separator)<br />
+            ✓ Phase 3-b dotted ink-muted row divider
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section rf-inline">
+            <header class="qa-speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+
+            <div class="pair">
+              <span class="q">Favoriete goal van het seizoen?</span>
+              <span class="sep">·</span>
+              <span class="a">De volley tegen Diest in de slotminuut.</span>
+            </div>
+            <div class="pair">
+              <span class="q">Speler om naar te kijken?</span>
+              <span class="sep">·</span>
+              <span class="a">Wim. Hij maakt iedereen beter.</span>
+            </div>
+            <div class="pair">
+              <span class="q">Liedje in de bus voor de match?</span>
+              <span class="sep">·</span>
+              <span class="a"
+                >"Geen liedjes — koptelefoon op, ogen dicht."</span
+              >
+            </div>
+            <div class="pair">
+              <span class="q">Eerste herinnering aan KCVV?</span>
+              <span class="sep">·</span>
+              <span class="a">Hand vasthouden van mijn pa, U7.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — 2-COL GRID ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · 2-column grid (Q | A)</div>
+          <div class="name">Q left, A right — 1fr · 1.4fr</div>
+          <div class="desc">
+            Closest sibling to the legacy Phase 2 <code>QaGroupRapidFire</code>
+            (1fr · 1.3fr grid). Question on the left, answer on the right,
+            both baseline-aligned. Lets the eye scan a Q column or an A
+            column independently. Falls back to a vertical stack at narrow
+            viewports.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ italic Freight Display 600 question (16px)<br />
+            ✓ Freight body answer<br />
+            ✓ <code>grid-template-columns: 1fr 1.4fr</code><br />
+            ✓ Phase 3-b dotted ink-muted row divider
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section rf-grid">
+            <header class="qa-speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+
+            <div class="pair">
+              <p class="q">Favoriete goal van het seizoen?</p>
+              <p class="a">De volley tegen Diest in de slotminuut.</p>
+            </div>
+            <div class="pair">
+              <p class="q">Speler om naar te kijken?</p>
+              <p class="a">Wim. Hij maakt iedereen beter.</p>
+            </div>
+            <div class="pair">
+              <p class="q">Liedje in de bus voor de match?</p>
+              <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+            </div>
+            <div class="pair">
+              <p class="q">Eerste herinnering aan KCVV?</p>
+              <p class="a">Hand vasthouden van mijn pa, U7.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — HANGING Q ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Hanging Q (mono left rail)</div>
+          <div class="name">Q as mono caps label (132px rail), A flows wide</div>
+          <div class="desc">
+            Strongest visual contrast with the standard QARow above. Q becomes
+            a tiny mono caps label on a fixed 132px left rail; A reads as the
+            "real content" in serif body. Reads as a key/value list or
+            interview cheat-sheet. Demands short questions to shine.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ mono caps label (matches MonoLabel / speaker tag)<br />
+            ✓ Freight Display body answer (16px)<br />
+            ✓ Fixed 132px left rail<br />
+            ✓ Phase 3-b dotted ink-muted row divider
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section rf-hanging">
+            <header class="qa-speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+
+            <div class="pair">
+              <p class="q">Favoriete goal van het seizoen?</p>
+              <p class="a">De volley tegen Diest in de slotminuut.</p>
+            </div>
+            <div class="pair">
+              <p class="q">Speler om naar te kijken?</p>
+              <p class="a">Wim. Hij maakt iedereen beter.</p>
+            </div>
+            <div class="pair">
+              <p class="q">Liedje in de bus voor de match?</p>
+              <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+            </div>
+            <div class="pair">
+              <p class="q">Eerste herinnering aan KCVV?</p>
+              <p class="a">Hand vasthouden van mijn pa, U7.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>What this round decides</strong>
+      <ul>
+        <li>
+          The per-pair geometry: vertical stack, inline single-line, 2-col
+          baseline grid, or mono-rail key/value.
+        </li>
+        <li>
+          The question typography baseline (italic Freight Display vs. mono
+          caps).
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px"
+        >What this round does NOT decide</strong
+      >
+      <ul>
+        <li>
+          <strong>Speaker scope</strong> — drilled in Round 2 (hoist
+          once / per-row / none). All options here pin the avatar strip to a
+          single hoisted position purely for honest comparison.
+        </li>
+        <li>
+          <strong>Row divider</strong> — drilled in Round 3 (dotted /
+          rule-only / blank / em-dash). All options here use the Phase 3-b
+          dotted ink-muted rule for honest comparison.
+        </li>
+        <li>
+          <strong>Section opener</strong> — drilled in Round 4 (kicker text,
+          "Sneltrein" tag, three-bar mark). All options here use a placeholder
+          star kicker.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

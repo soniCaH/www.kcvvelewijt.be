@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-table · Round 1 · htmlTable</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 38px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      .scroll-region {
+        overflow-x: auto;
+        margin: 22px 0;
+      }
+
+      /* ============================================================
+         OPTION A — Jersey-deep header + alternating rows + ink borders
+         ============================================================ */
+      .opt-a table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+      }
+      .opt-a thead th {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-align: left;
+        padding: 10px 12px;
+        border: 1px solid var(--color-ink);
+      }
+      .opt-a tbody td {
+        padding: 9px 12px;
+        border: 1px solid var(--color-ink-muted);
+        color: var(--color-ink);
+      }
+      .opt-a tbody tr:nth-child(odd) td { background: var(--color-cream); }
+      .opt-a tbody tr:nth-child(even) td { background: var(--color-cream-soft); }
+      .opt-a tbody td:first-child {
+        font-weight: 600;
+      }
+
+      /* ============================================================
+         OPTION B — Newsprint hairlines, italic display cells
+         ============================================================ */
+      .opt-b table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        border-top: 2px solid var(--color-ink);
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .opt-b thead th {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--color-ink);
+        text-align: left;
+        padding: 10px 6px 8px;
+        border-bottom: 1px solid var(--color-ink);
+      }
+      .opt-b tbody td {
+        padding: 9px 6px;
+        color: var(--color-ink);
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .opt-b tbody tr:last-child td { border-bottom: 0; }
+      .opt-b tbody td:first-child {
+        font-style: italic;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      /* ============================================================
+         OPTION C — Card-wrapped with mono columns and zebra
+         ============================================================ */
+      .opt-c .card-wrap {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: 4px 4px 0 0 var(--color-ink);
+        margin: 22px 0;
+        overflow-x: auto;
+      }
+      .opt-c table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 13px;
+      }
+      .opt-c thead th {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 600;
+        text-align: left;
+        padding: 10px 12px;
+      }
+      .opt-c thead th:not(:first-child) {
+        border-left: 1px dotted color-mix(in srgb, var(--color-cream) 25%, transparent);
+      }
+      .opt-c tbody td {
+        padding: 8px 12px;
+        color: var(--color-ink);
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .opt-c tbody td:not(:first-child) {
+        border-left: 1px dotted var(--color-ink-muted);
+      }
+      .opt-c tbody tr:nth-child(even) td { background: rgba(0, 0, 0, 0.025); }
+      .opt-c tbody td:first-child {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        font-style: italic;
+        font-weight: 600;
+      }
+
+      /* ============================================================
+         OPTION D — Minimal newspaper table (typography only)
+         ============================================================ */
+      .opt-d table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+      }
+      .opt-d thead th {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--color-ink-muted);
+        text-align: left;
+        padding: 8px 4px 6px;
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .opt-d tbody td {
+        padding: 7px 4px;
+        color: var(--color-ink);
+      }
+      .opt-d tbody td:first-child {
+        font-weight: 600;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul { margin: 8px 0 0; padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-table · Round 1 · #1840</p>
+      <h1>
+        htmlTable — cream-surface restyle (jersey-band / newsprint / dark
+        card / minimal)
+      </h1>
+      <p>
+        Drill 5.2. The legacy <code>HtmlTableBlock</code> wraps sanitized
+        HTML in a scroll container with a gray header band, alternating
+        white/gray rows, and a sticky first column on scroll. None of
+        those colours sit on cream. Four cream-friendly restyles below.
+      </p>
+      <p>
+        Same fixture across all options: a 5-row schedule table
+        (datum / tegenstander / locatie / scheidsrechter / uitslag).
+        Wrapped in body prose. The horizontal-scroll affordance + sticky
+        first column behaviour are preserved in every option (CSS
+        omitted for brevity, identical to legacy).
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — JERSEY-BAND ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Jersey-band header + alternating rows</div>
+          <div class="name">Jersey-deep header band, cream/cream-soft zebra, 1px ink borders</div>
+          <div class="desc">
+            Closest to a "club programme" table. Jersey-deep header band
+            (cream text, mono caps), 1px ink borders on every cell,
+            alternating cream + cream-soft body rows. First column
+            bolded for row identification. Most "stadium signage"
+            register.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ jersey-deep header band<br />
+            ✓ MonoLabel header typography<br />
+            ✓ 1px ink-muted body borders<br />
+            ✓ alternating cream / cream-soft zebra
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De voorbereidingskalender is rond. Vijf oefenwedstrijden in
+              juli en augustus, telkens op zaterdag.
+            </p>
+            <div class="scroll-region opt-a">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Datum</th>
+                    <th>Tegenstander</th>
+                    <th>Locatie</th>
+                    <th>Uitslag</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Za 12 jul</td><td>VK Veltem</td><td>Uit</td><td>2–1</td></tr>
+                  <tr><td>Za 19 jul</td><td>SK Berg</td><td>Thuis</td><td>3–0</td></tr>
+                  <tr><td>Za 26 jul</td><td>FC Perk</td><td>Uit</td><td>1–1</td></tr>
+                  <tr><td>Za 2 aug</td><td>KV Steenokkerzeel</td><td>Thuis</td><td>—</td></tr>
+                  <tr><td>Za 9 aug</td><td>RSC Sterrebeek</td><td>Uit</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Aftrap telkens om 14:00. Voor de thuiswedstrijden is er
+              kantine open vanaf 13:00.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — NEWSPRINT HAIRLINES ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Newsprint hairlines</div>
+          <div class="name">2px ink top + bottom, 1px dotted row dividers, italic display first column</div>
+          <div class="desc">
+            "Sports section of a newspaper" register. No cell borders;
+            2px ink top + bottom bracket the whole table; rows separated
+            by dotted ink-muted (Phase 3-b primitive). First column in
+            italic display Freight — gives the row labels editorial
+            weight. No alternating row colours; relies on typography for
+            scannability.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ 2px ink top + bottom (matches MissionBanner rule)<br />
+            ✓ Phase 3-b dotted ink-muted row divider<br />
+            ✓ MonoLabel header typography<br />
+            ✓ italic Freight first column<br />
+            ✗ no zebra
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De voorbereidingskalender is rond. Vijf oefenwedstrijden in
+              juli en augustus, telkens op zaterdag.
+            </p>
+            <div class="scroll-region opt-b">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Datum</th>
+                    <th>Tegenstander</th>
+                    <th>Locatie</th>
+                    <th>Uitslag</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Za 12 jul</td><td>VK Veltem</td><td>Uit</td><td>2–1</td></tr>
+                  <tr><td>Za 19 jul</td><td>SK Berg</td><td>Thuis</td><td>3–0</td></tr>
+                  <tr><td>Za 26 jul</td><td>FC Perk</td><td>Uit</td><td>1–1</td></tr>
+                  <tr><td>Za 2 aug</td><td>KV Steenokkerzeel</td><td>Thuis</td><td>—</td></tr>
+                  <tr><td>Za 9 aug</td><td>RSC Sterrebeek</td><td>Uit</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Aftrap telkens om 14:00. Voor de thuiswedstrijden is er
+              kantine open vanaf 13:00.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — DARK CARD WITH MONO COLUMNS ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Dark card with mono columns</div>
+          <div class="name">Card wrapper + ink header band + mono body + zebra</div>
+          <div class="desc">
+            Most "data display" register. Whole table sits inside a 1px
+            ink border + offset shadow card (TapedCard family without
+            tape). Header band in solid ink, all body cells in
+            monospace (column alignment in fixed-width type), dotted
+            row + column dividers, subtle zebra on even rows. First
+            column in italic Freight to break the mono rhythm.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedCard-family wrapper (no tape)<br />
+            ✓ ink header band + cream text<br />
+            ✓ mono body cells + italic Freight first column<br />
+            ✓ dotted ink-muted row + column dividers
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De voorbereidingskalender is rond. Vijf oefenwedstrijden in
+              juli en augustus, telkens op zaterdag.
+            </p>
+            <div class="opt-c">
+              <div class="card-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Datum</th>
+                      <th>Tegenstander</th>
+                      <th>Locatie</th>
+                      <th>Uitslag</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Za 12 jul</td><td>VK Veltem</td><td>Uit</td><td>2–1</td></tr>
+                    <tr><td>Za 19 jul</td><td>SK Berg</td><td>Thuis</td><td>3–0</td></tr>
+                    <tr><td>Za 26 jul</td><td>FC Perk</td><td>Uit</td><td>1–1</td></tr>
+                    <tr><td>Za 2 aug</td><td>KV Steenokkerzeel</td><td>Thuis</td><td>—</td></tr>
+                    <tr><td>Za 9 aug</td><td>RSC Sterrebeek</td><td>Uit</td><td>—</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p>
+              Aftrap telkens om 14:00. Voor de thuiswedstrijden is er
+              kantine open vanaf 13:00.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — MINIMAL ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Minimal newspaper table</div>
+          <div class="name">Typography-only: mono caps headers + 2px under, no borders</div>
+          <div class="desc">
+            Quietest. Just typography: mono caps headers in ink-muted
+            with a 2px ink baseline below the header row, body cells in
+            Freight body, first column bolded. No cell borders, no row
+            zebra, no card. Tightest body integration — reads like a
+            classified ad table from a newspaper.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel header typography<br />
+            ✓ 2px ink header baseline<br />
+            ✗ no borders<br />
+            ✗ no zebra<br />
+            ✗ no card chrome
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De voorbereidingskalender is rond. Vijf oefenwedstrijden in
+              juli en augustus, telkens op zaterdag.
+            </p>
+            <div class="scroll-region opt-d">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Datum</th>
+                    <th>Tegenstander</th>
+                    <th>Locatie</th>
+                    <th>Uitslag</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Za 12 jul</td><td>VK Veltem</td><td>Uit</td><td>2–1</td></tr>
+                  <tr><td>Za 19 jul</td><td>SK Berg</td><td>Thuis</td><td>3–0</td></tr>
+                  <tr><td>Za 26 jul</td><td>FC Perk</td><td>Uit</td><td>1–1</td></tr>
+                  <tr><td>Za 2 aug</td><td>KV Steenokkerzeel</td><td>Thuis</td><td>—</td></tr>
+                  <tr><td>Za 9 aug</td><td>RSC Sterrebeek</td><td>Uit</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Aftrap telkens om 14:00. Voor de thuiswedstrijden is er
+              kantine open vanaf 13:00.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Preserved behaviour (all options)</strong>
+      <ul>
+        <li>
+          Horizontal scroll wrapper for tables wider than the prose
+          column (legacy <code>useScrollHint</code>).
+        </li>
+        <li>
+          Sticky first column on scroll (legacy behaviour).
+        </li>
+        <li>
+          HTML sanitization rules unchanged
+          (<code>TABLE_SANITIZE_OPTIONS</code>).
+        </li>
+        <li>
+          Editor authors raw HTML in the schema; no migration; styling
+          is pure CSS / Tailwind on the wrapper.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">Trade-offs</strong>
+      <ul>
+        <li>
+          <strong>A · Jersey-band</strong> — strongest brand;
+          jersey-deep header reads as "official club data."
+        </li>
+        <li>
+          <strong>B · Newsprint hairlines</strong> — quietest brand
+          presence; strongest editorial body fit; relies on typography
+          alone.
+        </li>
+        <li>
+          <strong>C · Dark card</strong> — best for dense numeric data
+          (rankings, statistics); mono body aligns columns visually.
+        </li>
+        <li>
+          <strong>D · Minimal</strong> — lightest footprint; weakest
+          column separation when content is text-heavy with wraps.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

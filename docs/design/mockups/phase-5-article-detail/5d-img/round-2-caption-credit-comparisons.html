@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-img · Round 2 · Caption + credit</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      .photo {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(80, 60, 40, 0.45) 0%,
+            rgba(180, 150, 100, 0.55) 35%,
+            rgba(120, 100, 70, 0.5) 65%,
+            rgba(60, 50, 35, 0.45) 100%
+          ),
+          repeating-linear-gradient(
+            45deg,
+            rgba(0, 0, 0, 0.05) 0px,
+            rgba(0, 0, 0, 0.05) 1px,
+            transparent 1px,
+            transparent 4px
+          );
+        filter: sepia(0.2) contrast(1.05);
+      }
+
+      /* Locked Round 1 B — flat TapedFigure, no rotation, single tape. */
+      .figure {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        padding: 10px;
+        margin: 28px 0;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+      }
+      .figure .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 92px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.8);
+      }
+
+      /* ============================================================
+         OPTION A — caption + credit (TapedFigure's existing API)
+         Single figcaption row: caption (italic serif body-sm, left) +
+         credit (mono caps ink-muted, right). Matches the existing
+         design-system primitive 1:1.
+         ============================================================ */
+      .opt-a-cap {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 8px 4px 0;
+      }
+      .opt-a-cap .caption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+        flex: 1 1 60%;
+      }
+      .opt-a-cap .credit {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      /* ============================================================
+         OPTION B — caption only (no credit)
+         Single field, italic serif below the figure.
+         ============================================================ */
+      .opt-b-cap {
+        padding: 8px 4px 0;
+      }
+      .opt-b-cap .caption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+      }
+
+      /* ============================================================
+         OPTION C — caption as PortableText + credit string
+         Caption supports inline links + accent decorator (jersey-deep
+         italic emphasis). Same render slot as A.
+         ============================================================ */
+      .opt-c-cap {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 8px 4px 0;
+      }
+      .opt-c-cap .caption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+        flex: 1 1 60%;
+      }
+      .opt-c-cap .caption a {
+        color: var(--color-ink);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+      }
+      .opt-c-cap .caption .accent {
+        color: var(--color-jersey-deep);
+        font-style: italic;
+        font-weight: 600;
+      }
+      .opt-c-cap .credit {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      /* ============================================================
+         OPTION D — no schema change; caption inline as paragraph
+         Author writes a paragraph after the image. Rendered as a
+         smaller-weight body paragraph with no special framing.
+         ============================================================ */
+      .opt-d-cap {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--color-ink-soft);
+        margin: 8px 0 24px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+      .footnote table {
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 12px;
+      }
+      .footnote th,
+      .footnote td {
+        border: 1px solid var(--color-ink-muted);
+        padding: 5px 9px;
+        text-align: left;
+      }
+      .footnote th {
+        background: rgba(0, 0, 0, 0.05);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-img · Round 2 · #1840</p>
+      <h1>
+        articleImage — caption + credit (full / caption-only / PT-caption /
+        none)
+      </h1>
+      <p>
+        Drill 3.1 sub-round 2. Locks whether captions and credits become
+        first-class schema fields, and how they render below the flat
+        TapedFigure from Round 1.
+      </p>
+      <p>
+        Current schema (<code>packages/sanity-schemas/src/articleImage.ts</code>)
+        has only <code>image</code> + <code>alt</code> + <code>fullBleed</code>.
+        TapedFigure supports <code>caption?: string</code> + <code>credit?: string</code> —
+        used today by NewsCard / EditorialHero / FeaturedEventBand. Three
+        of the four options below propose a schema migration to wire the
+        primitive's existing props.
+      </p>
+      <p>
+        Each option renders the same fixture: photo + a caption ("Trainer
+        Vermeulen geeft de U13 instructies vóór de eerste set partijen.")
+        + a credit ("Foto: An Verheyden") embedded in body prose.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — CAPTION + CREDIT (existing primitive) ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · caption + credit (string + string)</div>
+          <div class="name">Matches TapedFigure's existing API 1:1</div>
+          <div class="desc">
+            Adds two optional string fields to <code>articleImage</code>:
+            <code>caption</code> and <code>credit</code>. Renders inside
+            TapedFigure's existing <code>&lt;figcaption&gt;</code> — caption
+            italic serif body-sm on the left, credit mono caps ink-muted
+            on the right. Each row drops independently when its field is
+            blank.
+          </div>
+          <div class="vocab">
+            <strong>Schema migration</strong>
+            ✓ add <code>caption: string</code> (optional)<br />
+            ✓ add <code>credit: string</code> (optional)<br />
+            ✓ TapedFigure's existing figcaption API
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+            <figure class="figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img" aria-label="U13 training"></div>
+              <figcaption class="opt-a-cap">
+                <p class="caption">
+                  Trainer Vermeulen geeft de U13 instructies vóór de
+                  eerste set partijen.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — CAPTION ONLY ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · caption only (string)</div>
+          <div class="name">One field, italic serif below the figure</div>
+          <div class="desc">
+            Adds only <code>caption: string</code> (optional). No credit
+            field at the schema level — image credit can be folded into
+            the caption text if the author wants to attribute. Simplest
+            migration; weakest provenance signal.
+          </div>
+          <div class="vocab">
+            <strong>Schema migration</strong>
+            ✓ add <code>caption: string</code> (optional)<br />
+            ✗ no <code>credit</code> field<br />
+            ⚠ credit must be appended manually inside caption text
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+            <figure class="figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img" aria-label="U13 training"></div>
+              <figcaption class="opt-b-cap">
+                <p class="caption">
+                  Trainer Vermeulen geeft de U13 instructies vóór de
+                  eerste set partijen.
+                </p>
+              </figcaption>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — PT caption + string credit ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · PortableText caption + credit string</div>
+          <div class="name">Captions can carry inline links + accent decorator</div>
+          <div class="desc">
+            <code>caption</code> is a constrained Portable Text array
+            (paragraph block + <code>link</code> + <code>accent</code>
+            decorator). <code>credit</code> stays a plain string. Supports
+            captions like "Lars <em>Janssens</em>, <a>portretreeks</a>",
+            but requires TapedFigure to accept a PT renderer for caption
+            (small primitive change).
+          </div>
+          <div class="vocab">
+            <strong>Schema migration</strong>
+            ✓ add <code>caption: PortableText[]</code> (constrained marks)<br />
+            ✓ add <code>credit: string</code> (optional)<br />
+            ⚠ TapedFigure caption slot needs PT support (small refactor)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+            <figure class="figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img" aria-label="U13 training"></div>
+              <figcaption class="opt-c-cap">
+                <p class="caption">
+                  Trainer Vermeulen geeft de U13 instructies vóór
+                  <span class="accent">de eerste set partijen</span> —
+                  <a href="#">portretreeks jeugd</a>.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — NO SCHEMA CHANGE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · No schema change (caption stays inline)</div>
+          <div class="name">Author writes a paragraph after the figure</div>
+          <div class="desc">
+            Schema stays as it is. Captions live as regular paragraph PT
+            blocks after the image. The renderer detects the pattern
+            (image followed by italic paragraph?) and styles the
+            paragraph as a caption — OR the author manually flags
+            "italic" on the paragraph. Most editor-flexible; weakest
+            structural binding.
+          </div>
+          <div class="vocab">
+            <strong>Schema migration</strong>
+            ✗ no schema change<br />
+            ⚠ caption is a separate PT block, not structurally bound<br />
+            ⚠ editor must remember to italic-mark + style as caption
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+            <figure class="figure">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img" aria-label="U13 training"></div>
+            </figure>
+            <p class="opt-d-cap">
+              <em
+                >Trainer Vermeulen geeft de U13 instructies vóór de eerste
+                set partijen. Foto: An Verheyden.</em
+              >
+            </p>
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Schema migration burden</strong>
+      <ul>
+        <li>
+          Per <code>feedback_sanity_migrations</code>: A / B / C all
+          require a Sanity migration (staging + production). D is the
+          only option with zero schema impact.
+        </li>
+      </ul>
+
+      <strong style="display: block; margin-top: 12px">
+        Editor experience
+      </strong>
+      <table>
+        <tr>
+          <th>Option</th>
+          <th>Studio fields</th>
+          <th>Author burden</th>
+          <th>Rich text</th>
+        </tr>
+        <tr>
+          <td>A</td>
+          <td>caption + credit</td>
+          <td>two text boxes</td>
+          <td>plain strings only</td>
+        </tr>
+        <tr>
+          <td>B</td>
+          <td>caption only</td>
+          <td>one text box</td>
+          <td>plain string only</td>
+        </tr>
+        <tr>
+          <td>C</td>
+          <td>caption (PT) + credit</td>
+          <td>PT editor + text box</td>
+          <td>links + accent decorator</td>
+        </tr>
+        <tr>
+          <td>D</td>
+          <td>none</td>
+          <td>add paragraph, italic-mark it</td>
+          <td>full PT</td>
+        </tr>
+      </table>
+
+      <strong style="display: block; margin-top: 12px">
+        Existing photographer credit on article
+      </strong>
+      <ul>
+        <li>
+          Articles already have an <code>article.photographer</code> field
+          (locked in drill 5.d-int Round 2 — feeds <code>ArticleCredits</code> "Beeld" row).
+          That's an article-wide credit; per-figure credit overrides it
+          only when the figure has a different photographer.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

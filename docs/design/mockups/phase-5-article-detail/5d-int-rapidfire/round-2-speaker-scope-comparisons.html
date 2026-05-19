@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-int Rapid-fire · Round 2 · Speaker scope</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      @media (max-width: 900px) {
+        .container {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 32px 0 36px;
+      }
+      .qa-section {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .avatar-sm {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+      }
+      .speaker-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+      }
+      .speaker-tag {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .speaker-tag .name-strong {
+        color: var(--color-ink);
+      }
+
+      /* The locked Round 1 hanging-Q rhythm — used in every candidate. */
+      .rf-pairs .pair {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 22px;
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .rf-pairs .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-pairs .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.45;
+      }
+      .rf-pairs .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      /* Section-opener variants — these vary across the four candidates. */
+      .opener {
+        text-align: center;
+        margin: 0 0 22px;
+      }
+      .opener .kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* Centered "speaker-as-kicker" — Option C merges identity into the
+         opener line (no separate strip below). */
+      .opener-merged {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .opener-merged .name-strong {
+        color: var(--color-ink);
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-int-rapidfire · Round 2 · #1840</p>
+      <h1>
+        Rapid-fire — speaker scope (full strip / avatar only / merged / none)
+      </h1>
+      <p>
+        Locked so far · <strong>Round 1:</strong> hanging-Q rail (132px) ·
+        <strong>Round 1b:</strong> Q stacks above A below
+        <code>~640px</code>. Round 2 decides whether/where the respondent
+        identity surfaces inside the rapid-fire block, given that the
+        <code>QaGroupRapidFire</code> contract is single-respondent.
+      </p>
+      <p>
+        Same fixture as Round 1 (Lars Janssens, aanvaller, 4 pairs). The Q/A
+        rhythm is identical across all four options; only the section
+        opener varies. Row divider treatment is still drilled separately in
+        Round 3.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — FULL SPEAKER STRIP ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Full speaker strip</div>
+          <div class="name">Kicker + avatar + name + role line</div>
+          <div class="desc">
+            Two-line opener: centered <code>★ Sneltrein</code> kicker, then a
+            left-aligned strip with avatar + "LARS JANSSENS · AANVALLER".
+            Loudest speaker presence — equivalent to the strip used in the
+            Round 1 comparison page.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel kicker<br />
+            ✓ <code>SubjectAvatar</code> (row scale, 32px)<br />
+            ✓ Mono speaker tag (matches QARow)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="opener">
+            <span class="kicker">★ Sneltrein</span>
+          </div>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — AVATAR ONLY ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Avatar only</div>
+          <div class="name">Kicker line, then a small left-aligned avatar disc</div>
+          <div class="desc">
+            Speaker is implied by a small (22px) monogram disc on the left,
+            standing alone above the pairs. No name, no role — the article
+            hero already named the subject. Keeps visual anchoring without
+            redundant text chrome.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel kicker<br />
+            ✓ <code>SubjectAvatar</code> scaled small (22px)<br />
+            ✓ no speaker tag
+          </div>
+        </header>
+        <div class="surface">
+          <div class="opener">
+            <span class="kicker">★ Sneltrein</span>
+          </div>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar avatar-sm" aria-hidden="true">L</span>
+            </header>
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — SPEAKER MERGED INTO KICKER ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Speaker merged into kicker</div>
+          <div class="name">
+            One centered line · avatar + "LARS · AANVALLER · SNELTREIN"
+          </div>
+          <div class="desc">
+            Single opener line. Avatar disc plus the speaker tag becomes the
+            kicker itself — no separate strip below. Most compact; trades
+            speaker prominence for vertical economy. Strongest when the
+            rapid-fire block sits inside a longer article body.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ <code>SubjectAvatar</code> (row scale, 22px) inline with mono caps<br />
+            ✓ mono separator dots (matches QARow speaker tag)<br />
+            ✓ no separate strip
+          </div>
+        </header>
+        <div class="surface">
+          <div class="opener">
+            <span class="opener-merged">
+              <span class="avatar avatar-sm" aria-hidden="true">L</span>
+              <span><span class="name-strong">LARS JANSSENS</span> · AANVALLER · SNELTREIN</span>
+            </span>
+          </div>
+          <div class="qa-section">
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — NO SPEAKER CHROME ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · No speaker chrome</div>
+          <div class="name">Kicker only — speaker established by hero / subjects strip</div>
+          <div class="desc">
+            Just the <code>★ Sneltrein</code> kicker, then straight into the
+            Q/A list. Speaker identity lives in the article hero +
+            <code>SubjectsStrip</code> already on the page. Cleanest reading,
+            but the rapid-fire block stops being self-contained — moving it
+            mid-article without surrounding hero/subjects context would
+            leave the reader guessing who's talking.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel kicker only<br />
+            ✗ no avatar<br />
+            ✗ no speaker tag<br />
+            (Implicit: relies on hero/SubjectsStrip context.)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="opener">
+            <span class="kicker">★ Sneltrein</span>
+          </div>
+          <div class="qa-section">
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>What this round decides</strong>
+      <ul>
+        <li>
+          Where the respondent identity surfaces inside the rapid-fire
+          block: a full strip (A), an avatar disc only (B), merged with the
+          kicker (C), or omitted entirely (D).
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px"
+        >Single-respondent constraint</strong
+      >
+      <ul>
+        <li>
+          Per the existing <code>QaGroupRapidFire</code> contract:
+          rapid-fire is single-respondent only. Per-row avatar repetition
+          (the standard QARow vocabulary) is not on the table — that's
+          redundant noise for a block that never changes speakers mid-list.
+        </li>
+        <li>
+          If a multi-respondent rapid-fire is ever authored, the qaBlock
+          tag dispatcher will fall back to standard QARows (not this block).
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

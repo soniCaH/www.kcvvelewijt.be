@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-img · Round 3 · fullBleed flag</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --container-wide: 1040px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      .photo {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(80, 60, 40, 0.45) 0%,
+            rgba(180, 150, 100, 0.55) 35%,
+            rgba(120, 100, 70, 0.5) 65%,
+            rgba(60, 50, 35, 0.45) 100%
+          ),
+          repeating-linear-gradient(
+            45deg,
+            rgba(0, 0, 0, 0.05) 0px,
+            rgba(0, 0, 0, 0.05) 1px,
+            transparent 1px,
+            transparent 4px
+          );
+        filter: sepia(0.2) contrast(1.05);
+      }
+
+      /* Locked Round 1 B — flat TapedFigure (no rotation, single tape). */
+      .figure {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        padding: 10px;
+        margin: 28px auto;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+      }
+      .figure .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 92px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.8);
+      }
+
+      /* Locked Round 2 — caption + credit pulled from asset->description /
+         asset->creditLine. Drop each row when blank. */
+      .figcap {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 8px 4px 0;
+      }
+      .figcap .caption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+        flex: 1 1 60%;
+      }
+      .figcap .credit {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      /* ============================================================
+         WIDTH VARIANTS
+         ============================================================ */
+      .w-prose {
+        max-width: var(--container-prose);
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .w-wide {
+        max-width: var(--container-wide);
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .w-bleed {
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 0;
+      }
+
+      /* ============================================================
+         OPTION A — Keep fullBleed boolean
+         ============================================================ */
+      .opt-a-bleed {
+        margin: 32px calc(50% - 50vw);
+        max-width: 100vw;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+      .opt-a-bleed .tape {
+        display: none;
+      }
+      .opt-a-bleed .photo {
+        max-height: 70vh;
+      }
+
+      /* ============================================================
+         OPTION D — Replace with 3-position width enum
+         ============================================================ */
+      .opt-d-bleed {
+        margin: 32px calc(50% - 50vw);
+        max-width: 100vw;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+      }
+      .opt-d-bleed .tape {
+        display: none;
+      }
+      .opt-d-bleed .photo {
+        max-height: 70vh;
+      }
+
+      .surface .demo-label {
+        position: relative;
+        max-width: var(--container-prose);
+        margin: 0 auto 10px;
+        padding: 0 28px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--color-ink-muted);
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-img · Round 3 · #1840</p>
+      <h1>
+        articleImage — fullBleed flag (keep / drop / drop+migrate / replace
+        with width enum)
+      </h1>
+      <p>
+        Drill 3.2. Locks whether the existing
+        <code>articleImage.fullBleed</code> boolean stays in Phase 5, given
+        the cream-surface prose container is
+        <code>--container-prose: 680px</code>.
+      </p>
+      <p>
+        Locked so far · <strong>R1:</strong> flat TapedFigure (no rotation,
+        single tape) · <strong>R2:</strong> per-asset caption/credit from
+        <code>asset-&gt;description</code> + <code>asset-&gt;creditLine</code>.
+        Each option below renders the same fixture at the chosen width.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — KEEP fullBleed AS-IS ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Keep fullBleed (boolean)</div>
+          <div class="name">
+            Schema unchanged. `false` → prose-width; `true` → 100vw.
+          </div>
+          <div class="desc">
+            Phase 5 honours the existing
+            <code>fullBleed: boolean</code> field. When false (default),
+            the figure renders at <code>--container-prose</code> width
+            inside the body. When true, it breaks out of the prose
+            container and spans the full viewport — tape strip is
+            suppressed (a tape on a viewport-wide photo reads odd).
+            Captions stay at prose width even when the photo is bleed.
+          </div>
+          <div class="vocab">
+            <strong>Schema</strong>
+            ✓ no migration<br />
+            ✓ fullBleed: boolean (existing)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+          </div>
+          <p class="demo-label">— fullBleed: false (prose width 680px) —</p>
+          <figure class="figure w-prose">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="photo" role="img" aria-label="U13 training"></div>
+            <figcaption class="figcap">
+              <p class="caption">
+                Trainer Vermeulen geeft de U13 instructies vóór de
+                eerste set partijen.
+              </p>
+              <p class="credit">Foto: An Verheyden</p>
+            </figcaption>
+          </figure>
+          <div class="prose">
+            <p>
+              Tussen de regenbuien door wisselden de spelers in twee
+              ploegen — een eerste voorzichtige aftasting van wat de
+              ploeg dit jaar in huis heeft.
+            </p>
+          </div>
+          <p class="demo-label">— fullBleed: true (100vw) —</p>
+          <figure class="figure opt-a-bleed">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="photo" role="img" aria-label="U13 training"></div>
+          </figure>
+          <div class="prose">
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — DROP fullBleed (NO MIGRATION) ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Drop fullBleed (renderer ignores)</div>
+          <div class="name">
+            Schema keeps the field; renderer always renders prose-width.
+          </div>
+          <div class="desc">
+            Stop honouring <code>fullBleed</code> in the Phase 5 renderer.
+            All images render at <code>--container-prose</code> width.
+            Schema field stays (so old content doesn't error), but the
+            value is ignored. Studio could deprecate the field with a
+            <code>hidden: true</code> flag if desired. Zero migration;
+            existing fullBleed images degrade gracefully to prose width.
+          </div>
+          <div class="vocab">
+            <strong>Schema</strong>
+            ✓ no migration (field stays, ignored)<br />
+            ⚠ optional Studio hide
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+          </div>
+          <p class="demo-label">— fullBleed ignored (always prose) —</p>
+          <figure class="figure w-prose">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="photo" role="img" aria-label="U13 training"></div>
+            <figcaption class="figcap">
+              <p class="caption">
+                Trainer Vermeulen geeft de U13 instructies vóór de
+                eerste set partijen.
+              </p>
+              <p class="credit">Foto: An Verheyden</p>
+            </figcaption>
+          </figure>
+          <div class="prose">
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — DROP + MIGRATE (REMOVE FIELD) ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Drop + migrate (remove field)</div>
+          <div class="name">
+            Sanity migration removes <code>fullBleed</code> from existing docs.
+          </div>
+          <div class="desc">
+            Same render behaviour as B (always prose-width), but the
+            field is removed from the schema and a migration script
+            strips the property from existing documents. Cleanest schema;
+            costs one migration (staging + production). Reversible if we
+            ever want a width variant — re-add the field with a clearer
+            name.
+          </div>
+          <div class="vocab">
+            <strong>Schema</strong>
+            ✓ migration: remove fullBleed from existing docs<br />
+            ✓ schema field removed<br />
+            ✓ cleanest end state
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+          </div>
+          <p class="demo-label">— field removed, always prose —</p>
+          <figure class="figure w-prose">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="photo" role="img" aria-label="U13 training"></div>
+            <figcaption class="figcap">
+              <p class="caption">
+                Trainer Vermeulen geeft de U13 instructies vóór de
+                eerste set partijen.
+              </p>
+              <p class="credit">Foto: An Verheyden</p>
+            </figcaption>
+          </figure>
+          <div class="prose">
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — REPLACE WITH WIDTH ENUM ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Replace with 3-position width enum</div>
+          <div class="name">
+            <code>width: 'prose' | 'wide' | 'bleed'</code> (default `prose`)
+          </div>
+          <div class="desc">
+            Trades the boolean for a 3-position string field. `prose` =
+            680px (default), `wide` = ~1040px (breaks out of prose but
+            stays inside viewport gutters), `bleed` = 100vw. Gives
+            editors a middle option for "dramatic but still framed"
+            photos. Costs one migration to translate
+            <code>fullBleed: true</code> → <code>width: 'bleed'</code>
+            and absent → <code>width: 'prose'</code>.
+          </div>
+          <div class="vocab">
+            <strong>Schema</strong>
+            ✓ migration: fullBleed → width enum<br />
+            ✓ adds a "wide" middle ground<br />
+            ⚠ adds a third visual variant to test
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De jeugdwerking trainde vorige week op het hoofdterrein —
+              een seizoenstart met veel volk en zachte regen.
+            </p>
+          </div>
+          <p class="demo-label">— width: prose (680px) —</p>
+          <figure class="figure w-prose">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="photo" role="img" aria-label="U13 training"></div>
+            <figcaption class="figcap">
+              <p class="caption">
+                Trainer Vermeulen geeft de U13 instructies vóór de
+                eerste set partijen.
+              </p>
+              <p class="credit">Foto: An Verheyden</p>
+            </figcaption>
+          </figure>
+          <p class="demo-label">— width: wide (~1040px) —</p>
+          <figure class="figure w-wide">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="photo" role="img" aria-label="U13 training"></div>
+          </figure>
+          <p class="demo-label">— width: bleed (100vw) —</p>
+          <figure class="figure opt-d-bleed">
+            <div class="photo" role="img" aria-label="U13 training"></div>
+          </figure>
+          <div class="prose">
+            <p>
+              De eerste oefenwedstrijd staat al volgende zaterdag op het
+              programma.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Trade-off matrix</strong>
+      <ul>
+        <li>
+          <strong>A · Keep</strong> — zero work, but bleed photos
+          structurally break out of the prose surface. Reads dramatic;
+          tape on a viewport-wide photo would look wrong (suppressed).
+        </li>
+        <li>
+          <strong>B · Drop (ignore)</strong> — zero work, all photos
+          stay in prose. Old fullBleed authors lose the "dramatic"
+          escape hatch silently.
+        </li>
+        <li>
+          <strong>C · Drop + migrate</strong> — one migration, clean
+          schema. Same end-state as B but tidy.
+        </li>
+        <li>
+          <strong>D · Width enum</strong> — one migration, adds a "wide"
+          middle ground. Extra Storybook + VR per width variant. Most
+          design flexibility; most surface area.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px"
+        >Existing fullBleed usage</strong
+      >
+      <ul>
+        <li>
+          Sample query needed before locking C/D: count how many
+          published articles currently set <code>fullBleed: true</code>.
+          If &lt; 5, migration impact is trivial; if many, the visual
+          downgrade in B/C deserves a heads-up.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>
