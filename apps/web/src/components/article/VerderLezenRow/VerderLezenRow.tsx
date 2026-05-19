@@ -121,7 +121,13 @@ export function VerderLezenRow({
             <div
               key={item.href}
               data-slot="verder-lezen-card"
-              className="w-72 shrink-0 md:w-80"
+              // `pt-4` gives the NewsCard tape strip room inside the
+              // slider's clip rect — `<TapeStrip>` sits at `top: 0` with
+              // `translateY(-50%)` so half its height extends above the
+              // card, which `<HorizontalSlider>`'s `overflow-x: auto`
+              // would otherwise clip (browsers force `overflow-y: auto`
+              // alongside the explicit `overflow-x: auto`).
+              className="w-72 shrink-0 pt-4 md:w-80"
             >
               <NewsCard
                 title={item.title}
