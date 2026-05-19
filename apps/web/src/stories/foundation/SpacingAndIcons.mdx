@@ -267,13 +267,17 @@ typical interactions. All values are defined in `src/app/globals.css`.
 ### Container widths
 
 `--container-prose` (680px) caps long-form article text at a comfortable
-measure; `--container-default` (1200px) is the standard page-content width
-between the cream surface gutters. `--max-width-outer` (1440px) — already
-present from earlier work — remains the full-bleed cap.
+measure; `--container-wide` (1040px) widens editorial media (article images,
+video) beyond prose while staying clearly bounded; `--container-default`
+(1200px) is the standard page-content width between the cream surface
+gutters. `--max-width-outer` (1440px) — already present from earlier work
+— remains the full-bleed cap.
 
 <div style={{ marginBottom: '24px' }}>
   <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-prose · 680px (article body cap)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-wide)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-wide · 1040px (wide editorial media)</div>
   <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-default)', maxWidth: '100%', marginBottom: '4px' }} />
   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>--container-default · 1200px (standard page content)</div>
 </div>

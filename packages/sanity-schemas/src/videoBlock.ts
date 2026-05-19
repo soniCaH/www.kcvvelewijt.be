@@ -125,7 +125,7 @@ export const videoBlock = defineType({
       title: 'Width',
       type: 'string',
       description:
-        'Breedte van de afbeelding in het artikel. `prose` = standaard tekstbreedte; `wide` = breder dan tekst (1040px); `bleed` = volledige schermbreedte.',
+        'Breedte van de video in het artikel. `prose` = standaard tekstbreedte; `wide` = breder dan tekst (1040px); `bleed` = volledige schermbreedte.',
       options: {list: ['prose', 'wide', 'bleed']},
       initialValue: 'prose',
     }),
