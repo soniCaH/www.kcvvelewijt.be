@@ -99,7 +99,7 @@ None of those are required for the locked design; this note is purely a future-p
 ```
 
 - Component path: `apps/web/src/components/article/blocks/EventFactInline/EventFactInline.tsx` (sibling to `EventDetailBlock`).
-- Storybook stories required per `feedback_state_coverage_stories.md`: single upcoming · single past · 3 stacked (rotation pattern) · stacked broken by paragraph (rotation reset) · minimal (only required fields) · CTA-less (no `ticketUrl`) · mobile viewport.
+- Storybook stories required per `feedback_state_coverage_stories.md`: single upcoming · single past · 3 stacked (rotation pattern) · stacked broken by paragraph (no rotation reset — cycle continues globally, per the Counter behaviour note above) · minimal (only required fields) · CTA-less (no `ticketUrl`) · mobile viewport.
 - The `<SanityArticleBody>` legacy `eventFact: () => <EventFactOverview>` serializer stays untouched for now — Phase 5's `<ArticleBody>` wires `EventFactInline` directly. Legacy is removed when `<SanityArticleBody>` itself retires (post-#1829).
 
 ## Net new vocabulary / schema
