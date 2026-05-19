@@ -8,11 +8,9 @@ import type {
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import sanitizeHtml from "sanitize-html";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
-import { useScrollHint } from "@/components/design-system/ScrollHint/useScrollHint";
 import { useMemo } from "react";
 import {
   QaBlock,
@@ -30,26 +28,9 @@ import {
   VideoBlock,
   type VideoBlockValue,
 } from "@/components/article/VideoBlock";
+import { HtmlTableBlock } from "@/components/article/blocks/HtmlTableBlock";
 import { QASectionDivider } from "@/components/design-system/QASectionDivider";
 import type { IndexedSubject } from "@/components/article/SubjectAttribution";
-
-const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
-  allowedTags: [
-    "table",
-    "thead",
-    "tbody",
-    "tfoot",
-    "tr",
-    "th",
-    "td",
-    "caption",
-    "colgroup",
-    "col",
-  ],
-  allowedAttributes: {
-    "*": ["colspan", "rowspan", "scope"],
-  },
-};
 
 interface ArticleImageValue {
   asset?: { url?: string };
@@ -145,47 +126,6 @@ interface HtmlTableValue {
   html?: string;
 }
 
-function HtmlTableBlock({ value }: { value: HtmlTableValue }) {
-  const { scrollRef, canScrollRight } = useScrollHint<HTMLDivElement>();
-
-  if (!value.html) return null;
-
-  return (
-    <div className="relative my-4">
-      <div
-        ref={scrollRef}
-        role="region"
-        aria-label="Scrollable table"
-        tabIndex={0}
-        className={cn(
-          "overflow-x-auto",
-          "focus:outline-kcvv-green focus:outline-2 focus:outline-offset-2",
-          "[&>table]:w-full [&>table]:border-collapse [&>table]:text-sm",
-          "[&>table>thead]:bg-table-header-bg",
-          "[&>table_th]:border-table-border-header [&>table_th]:border [&>table_th]:p-2 [&>table_th]:text-left [&>table_th]:font-semibold",
-          "[&>table_td]:border-table-border [&>table_td]:border [&>table_td]:p-2 [&>table_td]:align-top",
-          "[&>table>tbody>tr:nth-child(odd)_td]:bg-white",
-          "[&>table>tbody>tr:nth-child(even)_td]:bg-table-row-even",
-          canScrollRight && [
-            "[&>table_td:first-child]:sticky [&>table_td:first-child]:left-0 [&>table_td:first-child]:z-10",
-            "[&>table>tbody>tr:nth-child(odd)>td:first-child]:bg-white",
-            "[&>table>tbody>tr:nth-child(even)>td:first-child]:bg-table-row-even",
-            "[&>table_th:first-child]:bg-table-header-bg [&>table_th:first-child]:sticky [&>table_th:first-child]:left-0 [&>table_th:first-child]:z-20",
-            "[&>table_td:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
-            "[&>table_th:first-child]:shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)]",
-          ],
-        )}
-        dangerouslySetInnerHTML={{
-          __html: sanitizeHtml(value.html, TABLE_SANITIZE_OPTIONS),
-        }}
-      />
-      {canScrollRight && (
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white/90 to-transparent" />
-      )}
-    </div>
-  );
-}
-
 export interface SanityArticleBodyProps {
   content: PortableTextBlock[];
   className?: string;
@@ -251,7 +191,10 @@ export const SanityArticleBody = ({
             </div>
           );
         },
-        htmlTable: HtmlTableBlock,
+        htmlTable: ({ value }: { value: HtmlTableValue }) => {
+          if (!value.html) return null;
+          return <HtmlTableBlock html={value.html} />;
+        },
         image: ArticleImageBlock,
         articleImage: ArticleImageBlock,
         qaBlock: ({ value }: { value: QaBlockValue }) => (

@@ -13,55 +13,58 @@ const answerBlocks = (text: string): PortableTextBlock[] => [
   },
 ];
 
-// 5.B.int respondents[] shape — one entry per pair for the legacy
-// rapid-fire renderer (which is single-respondent by design).
 const respondents = (
   text: string,
 ): { _key: string; answer: PortableTextBlock[] }[] => [
   { _key: `r-${text}`, answer: answerBlocks(text) },
 ];
 
-describe("QaGroupRapidFire", () => {
-  it("renders the Sneltrein header + every question/answer pair in order", () => {
+const LARS = {
+  firstName: "Lars",
+  fullName: "Lars Janssens",
+  role: "AANVALLER",
+};
+
+describe("QaGroupRapidFire (Phase 5 rewrite)", () => {
+  it("renders the Kort & Krachtig opener + every question/answer pair in order", () => {
     render(
       <QaGroupRapidFire
+        respondent={LARS}
         pairs={[
           {
             _key: "rf-1",
             tag: "rapid-fire",
-            question: "Koffie of thee?",
-            respondents: respondents("Koffie. Zwart."),
+            question: "Favoriete goal",
+            respondents: respondents("De volley tegen Diest."),
           },
           {
             _key: "rf-2",
             tag: "rapid-fire",
-            question: "Messi of Ronaldo?",
-            respondents: respondents("Messi."),
+            question: "Speler om te volgen",
+            respondents: respondents("Wim. Hij maakt iedereen beter."),
           },
           {
             _key: "rf-3",
             tag: "rapid-fire",
-            question: "Regen of sneeuw?",
-            respondents: respondents("Regen."),
+            question: "Bus-muziek",
+            respondents: respondents("Geen liedjes — koptelefoon op."),
           },
         ]}
       />,
     );
 
     expect(screen.getByTestId("qa-group-rapid-fire")).toBeInTheDocument();
-
-    // Assert document order by collapsing the rendered text and looking up
-    // each landmark index — guards against a future refactor that
-    // accidentally reverses or shuffles pairs.
     const flow = screen.getByTestId("qa-group-rapid-fire").textContent ?? "";
     const positions = [
-      "Sneltrein",
-      "Koffie of thee?",
-      "Koffie. Zwart.",
-      "Messi of Ronaldo?",
-      "Messi.",
-      "Regen of sneeuw?",
-      "Regen.",
+      "Kort & Krachtig",
+      "Lars Janssens",
+      "AANVALLER",
+      "Favoriete goal",
+      "De volley tegen Diest.",
+      "Speler om te volgen",
+      "Wim. Hij maakt iedereen beter.",
+      "Bus-muziek",
+      "Geen liedjes — koptelefoon op.",
     ].map((needle) => flow.indexOf(needle));
 
     positions.forEach((pos, i) => {
@@ -70,15 +73,15 @@ describe("QaGroupRapidFire", () => {
         `"${positions[i]}" must appear in the rendered flow`,
       ).toBeGreaterThanOrEqual(0);
     });
-    // Each landmark appears strictly after the previous one.
     for (let i = 1; i < positions.length; i++) {
       expect(positions[i]).toBeGreaterThan(positions[i - 1]);
     }
   });
 
-  it("renders exactly N-1 separators between N pairs", () => {
-    render(
+  it("renders exactly N-1 dotted dividers between N pairs", () => {
+    const { container } = render(
       <QaGroupRapidFire
+        respondent={LARS}
         pairs={[
           {
             _key: "rf-1",
@@ -107,7 +110,66 @@ describe("QaGroupRapidFire", () => {
         ]}
       />,
     );
-    expect(screen.getAllByRole("separator", { hidden: true })).toHaveLength(3);
+    expect(
+      container.querySelectorAll('[data-rapidfire="divider"]'),
+    ).toHaveLength(3);
+  });
+
+  it("renders an em-dash glyph for an empty answer", () => {
+    render(
+      <QaGroupRapidFire
+        respondent={LARS}
+        pairs={[
+          {
+            _key: "rf-1",
+            tag: "rapid-fire",
+            question: "Favoriete goal",
+            respondents: [{ answer: [] }],
+          },
+        ]}
+      />,
+    );
+    const answer = screen
+      .getByTestId("qa-group-rapid-fire")
+      .querySelector('[data-rapidfire="answer"]');
+    expect(answer?.textContent).toBe("—");
+  });
+
+  it("suppresses the speaker strip when no respondent is supplied", () => {
+    const { container } = render(
+      <QaGroupRapidFire
+        pairs={[
+          {
+            _key: "rf-1",
+            tag: "rapid-fire",
+            question: "Q1",
+            respondents: respondents("A1"),
+          },
+        ]}
+      />,
+    );
+    expect(container.querySelector('[data-rapidfire="speaker"]')).toBeNull();
+  });
+
+  it("renders the row-scale monogram avatar when a respondent is supplied", () => {
+    const { container } = render(
+      <QaGroupRapidFire
+        respondent={LARS}
+        pairs={[
+          {
+            _key: "rf-1",
+            tag: "rapid-fire",
+            question: "Q",
+            respondents: respondents("A"),
+          },
+        ]}
+      />,
+    );
+    expect(
+      container.querySelector(
+        '[data-subject-avatar="monogram"][data-scale="row"]',
+      ),
+    ).not.toBeNull();
   });
 
   it("renders nothing when pairs is empty", () => {

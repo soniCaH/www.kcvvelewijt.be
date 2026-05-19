@@ -23,11 +23,24 @@ const withAsset = (
   },
 });
 
-describe("VideoBlock", () => {
-  it("renders a <video> element with the resolved asset URL and MIME type", () => {
+// Click the locked `▶ Afspelen` pill so the native `<video>` element
+// mounts. The Phase 5 redesign holds the player behind a click affordance
+// so the browser never loads bytes on first paint.
+function clickPlayPill() {
+  fireEvent.click(screen.getByTestId("video-block-play-pill"));
+}
+
+describe("VideoBlock — upload path (Phase 5 #1849)", () => {
+  it("renders the Afspelen pill on first paint instead of a <video>", () => {
     render(<VideoBlock value={withAsset()} />);
+    expect(screen.getByTestId("video-block-play-pill")).toBeTruthy();
+    expect(screen.queryByTestId("video-block-video")).toBeNull();
+  });
+
+  it("mounts the <video> with the resolved asset URL + MIME type after pill click", () => {
+    render(<VideoBlock value={withAsset()} />);
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video") as HTMLVideoElement;
-    expect(video).toBeTruthy();
     const source = video.querySelector("source");
     expect(source?.getAttribute("src")).toBe(
       "https://cdn.sanity.io/files/vhb33jaz/staging/video-asset.mp4",
@@ -37,13 +50,14 @@ describe("VideoBlock", () => {
 
   it("falls back to video/mp4 when mimeType is missing", () => {
     render(<VideoBlock value={withAsset({ mimeType: null })} />);
+    clickPlayPill();
     const source = screen
       .getByTestId("video-block-video")
       .querySelector("source");
     expect(source?.getAttribute("type")).toBe("video/mp4");
   });
 
-  it("returns null when videoAsset is absent (e.g. block authored without upload)", () => {
+  it("returns null when videoAsset is absent", () => {
     const { container } = render(
       <VideoBlock value={{ _type: "videoBlock", videoAsset: null }} />,
     );
@@ -63,9 +77,6 @@ describe("VideoBlock", () => {
   });
 
   it("returns null when the asset URL key is absent entirely", () => {
-    // withAsset() defaults include a `url`. Strip it to simulate a
-    // GROQ projection that returned a videoAsset object without the
-    // `url` field — `typeof src !== "string"` must still catch it.
     const value: VideoBlockValue = {
       _type: "videoBlock",
       videoAsset: {
@@ -76,6 +87,34 @@ describe("VideoBlock", () => {
     };
     const { container } = render(<VideoBlock value={value} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it("renders the poster image before the pill is pressed", () => {
+    render(
+      <VideoBlock
+        value={{
+          ...withAsset(),
+          videoPosterUrl:
+            "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
+        }}
+      />,
+    );
+    expect(screen.getByTestId("video-block-poster")).toBeTruthy();
+  });
+
+  it("hides the poster + pill once playback starts", () => {
+    render(
+      <VideoBlock
+        value={{
+          ...withAsset(),
+          videoPosterUrl:
+            "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
+        }}
+      />,
+    );
+    clickPlayPill();
+    expect(screen.queryByTestId("video-block-poster")).toBeNull();
+    expect(screen.queryByTestId("video-block-play-pill")).toBeNull();
   });
 });
 
@@ -155,7 +194,7 @@ describe("VideoBlock — embed path (Phase 2)", () => {
     expect(warn).toHaveBeenCalledOnce();
   });
 
-  it("does NOT interpolate the raw URL into the DOM for an unsupported host (XSS guard)", () => {
+  it("does NOT interpolate the raw URL into the DOM for an unsupported host", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     const suspicious = "https://evil.example.com/watch?v=dQw4w9WgXcQ";
     const { container } = render(
@@ -165,9 +204,7 @@ describe("VideoBlock — embed path (Phase 2)", () => {
     expect(container.innerHTML).not.toContain("evil.example.com");
   });
 
-  it("prefers embedUrl over videoAsset when both are populated (defensive)", () => {
-    // Normally the Sanity XOR validator makes this state unreachable,
-    // but the runtime must still pick a single deterministic path.
+  it("prefers embedUrl over videoAsset when both are populated", () => {
     render(
       <VideoBlock
         value={{
@@ -187,37 +224,9 @@ describe("VideoBlock — embed path (Phase 2)", () => {
   });
 });
 
-describe("VideoBlock — Phase 3 polish (#1365)", () => {
-  it("upload path: <video> uses preload='none' so no MP4 bytes load until the reader presses play", () => {
-    render(<VideoBlock value={withAsset()} />);
-    const video = screen.getByTestId("video-block-video");
-    expect(video.getAttribute("preload")).toBe("none");
-  });
-
-  it("upload path: forwards videoPosterUrl to the <video poster> attribute", () => {
-    render(
-      <VideoBlock
-        value={{
-          ...withAsset(),
-          videoPosterUrl:
-            "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
-        }}
-      />,
-    );
-    const video = screen.getByTestId("video-block-video");
-    expect(video.getAttribute("poster")).toBe(
-      "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
-    );
-  });
-
-  it("upload path: omits the poster attribute when videoPosterUrl is empty/null", () => {
-    render(<VideoBlock value={{ ...withAsset(), videoPosterUrl: "" }} />);
-    const video = screen.getByTestId("video-block-video");
-    expect(video.getAttribute("poster")).toBeNull();
-  });
-
+describe("VideoBlock — caption + width (Phase 5)", () => {
   it("renders a <figcaption> when caption is non-empty (upload path)", () => {
-    render(
+    const { container } = render(
       <VideoBlock
         value={{
           ...withAsset(),
@@ -225,13 +234,12 @@ describe("VideoBlock — Phase 3 polish (#1365)", () => {
         }}
       />,
     );
-    const caption = screen.getByTestId("video-block-caption");
-    expect(caption.tagName).toBe("FIGCAPTION");
-    expect(caption.textContent).toBe("Match highlights — KCVV vs Boechout");
+    const cap = container.querySelector("figcaption");
+    expect(cap?.textContent).toContain("Match highlights — KCVV vs Boechout");
   });
 
   it("renders a <figcaption> when caption is non-empty (embed path)", () => {
-    render(
+    const { container } = render(
       <VideoBlock
         value={{
           _type: "videoBlock",
@@ -240,47 +248,51 @@ describe("VideoBlock — Phase 3 polish (#1365)", () => {
         }}
       />,
     );
-    const caption = screen.getByTestId("video-block-caption");
-    expect(caption.textContent).toBe("First-ever YouTube upload");
+    expect(container.querySelector("figcaption")?.textContent).toContain(
+      "First-ever YouTube upload",
+    );
   });
 
-  it("does not render a <figcaption> when caption is missing or whitespace-only", () => {
-    const { rerender } = render(<VideoBlock value={withAsset()} />);
-    expect(screen.queryByTestId("video-block-caption")).toBeNull();
+  it("does not render a <figcaption> when caption is missing or whitespace", () => {
+    const { container, rerender } = render(<VideoBlock value={withAsset()} />);
+    expect(container.querySelector("figcaption")).toBeNull();
 
     rerender(<VideoBlock value={{ ...withAsset(), caption: "   " }} />);
-    expect(screen.queryByTestId("video-block-caption")).toBeNull();
+    expect(container.querySelector("figcaption")).toBeNull();
   });
 
-  it("fullBleed=false (default): figure carries rounded-[4px] without full-bleed", () => {
+  it("width=prose (default): width wrapper carries data-video-width=prose", () => {
     render(<VideoBlock value={withAsset()} />);
-    const figure = screen.getByTestId("video-block");
-    expect(figure.className).toContain("rounded-[4px]");
-    expect(figure.className).not.toContain("full-bleed");
-    expect(figure.className).not.toContain("rounded-none");
+    const marker = screen.getByTestId("video-block");
+    expect(marker.dataset.videoWidth).toBe("prose");
   });
 
-  it("fullBleed=true: figure carries full-bleed + rounded-none, drops rounded-[4px]", () => {
+  it("width=wide: width wrapper carries data-video-width=wide", () => {
+    render(<VideoBlock value={{ ...withAsset(), width: "wide" }} />);
+    expect(screen.getByTestId("video-block").dataset.videoWidth).toBe("wide");
+  });
+
+  it("width=bleed: width wrapper carries data-video-width=bleed", () => {
+    render(<VideoBlock value={{ ...withAsset(), width: "bleed" }} />);
+    expect(screen.getByTestId("video-block").dataset.videoWidth).toBe("bleed");
+  });
+
+  it("legacy fullBleed=true maps to width=bleed (one-release fallback)", () => {
     render(<VideoBlock value={{ ...withAsset(), fullBleed: true }} />);
-    const figure = screen.getByTestId("video-block");
-    expect(figure.className).toContain("full-bleed");
-    expect(figure.className).toContain("rounded-none");
-    expect(figure.className).not.toContain("rounded-[4px]");
+    expect(screen.getByTestId("video-block").dataset.videoWidth).toBe("bleed");
   });
 
-  it("fullBleed applies on the embed path too", () => {
+  it("bleed applies on the embed path too", () => {
     render(
       <VideoBlock
         value={{
           _type: "videoBlock",
           embedUrl: "https://vimeo.com/123456789",
-          fullBleed: true,
+          width: "bleed",
         }}
       />,
     );
-    const figure = screen.getByTestId("video-block");
-    expect(figure.className).toContain("full-bleed");
-    expect(figure.className).toContain("rounded-none");
+    expect(screen.getByTestId("video-block").dataset.videoWidth).toBe("bleed");
   });
 });
 
@@ -297,6 +309,7 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
         videoPosition={1}
       />,
     );
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video");
     fireEvent.play(video);
     expect(mockTrackEvent).toHaveBeenCalledWith("article_video_play", {
@@ -316,6 +329,7 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
         videoPosition={2}
       />,
     );
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video");
     fireEvent.play(video);
     fireEvent.play(video);
@@ -334,6 +348,7 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
         videoPosition={1}
       />,
     );
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video");
     fireEvent.ended(video);
     expect(mockTrackEvent).toHaveBeenCalledWith("article_video_complete", {
@@ -345,9 +360,6 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
   });
 
   it("upload path: each `ended` event fires `article_video_complete` (no dedup)", () => {
-    // Pins the asymmetric design: `trackVideoPlay` dedups (one play per page
-    // view), `trackVideoComplete` does not (each natural completion / replay
-    // is a real, separate event).
     render(
       <VideoBlock
         value={withAsset()}
@@ -355,6 +367,7 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
         videoPosition={1}
       />,
     );
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video");
     fireEvent.ended(video);
     fireEvent.ended(video);
@@ -373,8 +386,9 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
     }
   });
 
-  it("does NOT fire any analytics when articleSlug is missing (non-article context, e.g. staff bio)", () => {
+  it("does NOT fire any analytics when articleSlug is missing", () => {
     render(<VideoBlock value={withAsset()} videoPosition={1} />);
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video");
     fireEvent.play(video);
     fireEvent.ended(video);
@@ -383,6 +397,7 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
 
   it("does NOT fire any analytics when videoPosition is missing", () => {
     render(<VideoBlock value={withAsset()} articleSlug="some-article" />);
+    clickPlayPill();
     const video = screen.getByTestId("video-block-video");
     fireEvent.play(video);
     fireEvent.ended(video);
@@ -401,9 +416,6 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
       />,
     );
     const iframe = screen.getByTestId("video-block-iframe");
-    // Simulate the user clicking the iframe: parent window blurs and the
-    // iframe becomes the active element. This is the documented heuristic
-    // for detecting embed engagement without provider postMessage wiring.
     iframe.focus();
     await act(async () => {
       window.dispatchEvent(new Event("blur"));
@@ -458,9 +470,6 @@ describe("VideoBlock — analytics (#1366 Phase 4)", () => {
         videoPosition={1}
       />,
     );
-    // No iframe focus — simulate generic window blur (e.g. user tabbing
-    // away from the browser). The heuristic must only fire when the iframe
-    // is the active element.
     await act(async () => {
       window.dispatchEvent(new Event("blur"));
     });

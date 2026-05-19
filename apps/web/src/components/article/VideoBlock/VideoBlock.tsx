@@ -1,6 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { useVideoAnalytics } from "@/hooks/useVideoAnalytics";
+import { TapedFigure } from "@/components/design-system/TapedFigure";
+import type { TapeStripProps } from "@/components/design-system/TapeStrip/TapeStrip";
 import { parseEmbedUrl, type VideoProvider } from "./parseEmbedUrl";
 
 export interface VideoBlockValue {
@@ -18,9 +30,7 @@ export interface VideoBlockValue {
    * Phase 5 width enum (#1843). Pre-#1843 articles ship as
    * `width: undefined` + `fullBleed?: boolean`; migrated articles ship
    * as `width: 'prose' | 'wide' | 'bleed'` + `fullBleed: undefined`.
-   * This renderer reads both via a one-release fallback in
-   * `isFullBleed` — Part C of the Phase 5 migration rewires
-   * `<VideoBlock>` onto TapedFigure and honours `wide` properly.
+   * This renderer reads both via a one-release fallback.
    */
   width?: "prose" | "wide" | "bleed" | null;
   /** Legacy boolean — replaced by `width` in #1843. */
@@ -55,30 +65,53 @@ function resolveAnalyticsContext(
   return { articleSlug, videoPosition };
 }
 
+type ResolvedWidth = "prose" | "wide" | "bleed";
+
+function resolveWidth(value: VideoBlockValue): ResolvedWidth {
+  // One-release fallback (#1843): prefer the new `width` enum, fall back
+  // to the legacy `fullBleed` boolean for un-migrated content.
+  if (value.width === "wide" || value.width === "bleed") return value.width;
+  if (value.fullBleed === true) return "bleed";
+  return "prose";
+}
+
+// Width → container styling. Mobile (< 640px) collapses `wide` → `prose`
+// per the articleImage R3b lock (inherited).
+const WIDTH_STYLE: Record<ResolvedWidth, CSSProperties> = {
+  prose: { maxWidth: "var(--container-prose)" },
+  wide: { maxWidth: "var(--container-wide)" },
+  bleed: {},
+};
+
+const WIDTH_WRAPPER_CLASS: Record<ResolvedWidth, string> = {
+  prose: "mx-auto w-full px-3 sm:px-0",
+  wide: "mx-auto w-full px-3 sm:px-0",
+  // `full-bleed` breaks out of the prose column to 100vw via globals.css.
+  bleed: "full-bleed",
+};
+
+// Per videoblock-locked R1, all video frames carry a single ochre tape
+// strip top-center. Bleed suppresses the tape (per width-rules table).
+const VIDEO_TAPE: TapeStripProps = {
+  color: "warm",
+  length: "sm",
+};
+
+function trimmedCaption(value: VideoBlockValue): string | null {
+  if (typeof value.caption !== "string") return null;
+  const trimmed = value.caption.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 /**
- * Phase 1 (#1363) shipped the upload path. Phase 2 (#1364) added the
- * embed path: YouTube and Vimeo URLs render in privacy-enhanced iframes
- * (`youtube-nocookie.com`, `player.vimeo.com`) inside a 16:9 container.
- * Phase 3 (#1365) layers on:
- *  - poster image (upload path) so the browser doesn't fetch any video
- *    bytes until the reader presses play (`preload="none"`)
- *  - optional `<figcaption>` underneath the video
- *  - `fullBleed` opt-in (#1843: superseded by `width: 'bleed'`) that
- *    drops the rounded corners and breaks out of the prose column via
- *    `.full-bleed` (mirrors `articleImage`)
- *
- * Phase 4 (#1366) wires `article_video_play` / `article_video_complete`
- * analytics. The upload path binds `onPlay` / `onEnded` directly. The
- * embed path uses a `window` blur + `document.activeElement === iframe`
- * heuristic — the standard fallback when provider postMessage APIs
- * (`YT.Player`, Vimeo Player SDK) are out of scope. Both paths require an
- * `articleSlug` + `videoPosition`; non-article surfaces (staff bio, club
- * page) omit them and emit no events.
+ * Phase 5 (#1849) re-frames the renderer around `<TapedFigure>` — same
+ * polaroid frame as `<articleImage>` plus a `▶ Afspelen` press-down pill
+ * on the upload path. The Phase 1-4 contract is preserved: upload path,
+ * embed allowlist, poster, caption, width enum, analytics.
  *
  * Exactly one of `videoAsset` / `embedUrl` is ever populated (enforced
- * by the Sanity XOR validator) — `embedUrl` takes precedence if both
- * happened to arrive somehow, since an explicit editor-authored link is
- * the most recent signal of intent.
+ * by the Sanity XOR validator). `embedUrl` takes precedence if both
+ * happened to arrive somehow.
  *
  * Unknown-host guard: `parseEmbedUrl` returns `null` for anything outside
  * the YouTube/Vimeo allowlist. We log a dev-only `console.warn` and
@@ -104,42 +137,25 @@ export function VideoBlock({
   return renderUpload(value, className, analyticsContext);
 }
 
-// ─── Shared figure helpers ──────────────────────────────────────────────
+// ─── Width wrapper ──────────────────────────────────────────────────────
 
-function figureClass(
-  fullBleed: boolean,
-  ...extra: Array<string | undefined>
-): string {
-  // Default rounded-[4px] corners match the announcement template hero
-  // (#1365 PRD §5 Phase 3). `full-bleed` mirrors the `articleImage`
-  // breakout, lifting the figure out of the prose column to 100vw and
-  // dropping the rounded corners.
-  return cn(
-    "my-8 overflow-hidden bg-black",
-    fullBleed ? "full-bleed rounded-none" : "rounded-[4px]",
-    ...extra,
-  );
-}
-
-function trimmedCaption(value: VideoBlockValue): string | null {
-  if (typeof value.caption !== "string") return null;
-  const trimmed = value.caption.trim();
-  return trimmed.length > 0 ? trimmed : null;
-}
-
-function VideoCaption({ caption }: { caption: string }) {
-  // Light, unobtrusive caption styling. articleImage carries no caption
-  // today, so there is no upstream pattern to mirror — kept restrained
-  // (mt-3, sm body type, kcvv-gray-blue) so the video stays the focal
-  // element. The caption sits inside the figure but visually below the
-  // black media frame; it does not inherit `bg-black`.
+function WidthWrapper({
+  width,
+  children,
+  className,
+}: {
+  width: ResolvedWidth;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <figcaption
-      data-testid="video-block-caption"
-      className="text-kcvv-gray-blue bg-white px-1 pt-3 text-sm leading-relaxed"
+    <div
+      data-video-width={width}
+      style={WIDTH_STYLE[width]}
+      className={cn("my-8", WIDTH_WRAPPER_CLASS[width], className)}
     >
-      {caption}
-    </figcaption>
+      {children}
+    </div>
   );
 }
 
@@ -153,45 +169,63 @@ function renderUpload(
   const src = value.videoAsset?.url;
   if (typeof src !== "string" || src.length === 0) return null;
   const mimeType = value.videoAsset?.mimeType ?? undefined;
-  // One-release fallback (#1843): prefer the new `width` enum, fall
-  // back to the legacy `fullBleed` boolean for un-migrated content.
-  const fullBleed = value.width === "bleed" || value.fullBleed === true;
+  const width = resolveWidth(value);
   const posterUrl =
     typeof value.videoPosterUrl === "string" && value.videoPosterUrl.length > 0
       ? value.videoPosterUrl
       : undefined;
   const caption = trimmedCaption(value);
+  // Bleed suppresses the tape (locked width-rules table).
+  const tape: TapeStripProps | undefined =
+    width === "bleed" ? undefined : VIDEO_TAPE;
   return (
-    <figure
-      className={figureClass(fullBleed, className)}
-      data-testid="video-block"
-      data-source="upload"
-    >
-      <UploadVideo
-        src={src}
-        mimeType={mimeType}
-        posterUrl={posterUrl}
-        analyticsContext={analyticsContext}
+    <WidthWrapper width={width} className={className}>
+      <TapedFigure
+        aspect="landscape-16-9"
+        bg="cream"
+        tint="none"
+        tape={tape}
+        caption={caption ?? undefined}
+      >
+        <UploadFigureContent
+          src={src}
+          mimeType={mimeType}
+          posterUrl={posterUrl}
+          analyticsContext={analyticsContext}
+        />
+      </TapedFigure>
+      {/* Hidden marker for tests/data-attrs — TapedFigure renders a
+          <figure> already, this lets callers query the source/path. */}
+      <span
+        hidden
+        data-testid="video-block"
+        data-source="upload"
+        data-video-width={width}
       />
-      {caption !== null && <VideoCaption caption={caption} />}
-    </figure>
+    </WidthWrapper>
   );
 }
 
-interface UploadVideoProps {
+interface UploadFigureContentProps {
   src: string;
   mimeType: string | undefined;
   posterUrl: string | undefined;
   analyticsContext: AnalyticsContext | null;
 }
 
-function UploadVideo({
+function UploadFigureContent({
   src,
   mimeType,
   posterUrl,
   analyticsContext,
-}: UploadVideoProps) {
+}: UploadFigureContentProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
   const { trackVideoPlay, trackVideoComplete } = useVideoAnalytics();
+
+  const handlePlayClick = useCallback(() => {
+    setIsPlaying(true);
+  }, []);
+
   const handlePlay = useCallback(() => {
     if (analyticsContext === null) return;
     trackVideoPlay({
@@ -201,6 +235,7 @@ function UploadVideo({
       videoPosition: analyticsContext.videoPosition,
     });
   }, [analyticsContext, trackVideoPlay]);
+
   const handleEnded = useCallback(() => {
     if (analyticsContext === null) return;
     trackVideoComplete({
@@ -210,22 +245,76 @@ function UploadVideo({
       videoPosition: analyticsContext.videoPosition,
     });
   }, [analyticsContext, trackVideoComplete]);
+
   return (
-    <video
-      controls
-      // Phase 3: poster is the only thing the browser fetches until
-      // the reader actually presses play. preload="none" + a poster
-      // image keeps the article weight tiny on first paint.
-      preload="none"
-      poster={posterUrl}
-      className="aspect-video h-auto w-full"
-      data-testid="video-block-video"
-      onPlay={handlePlay}
-      onEnded={handleEnded}
+    <div className="bg-ink relative h-full w-full">
+      {!isPlaying && posterUrl && (
+        // `pointer-events-none` keeps the poster non-interactive so that
+        // the pill below is the only click target (per videoblock-locked
+        // §"Visibility on first paint").
+        <Image
+          src={posterUrl}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 100vw, 1040px"
+          className="pointer-events-none object-cover"
+          data-testid="video-block-poster"
+        />
+      )}
+      {!isPlaying && (
+        <button
+          type="button"
+          onClick={handlePlayClick}
+          aria-label="Speel video af"
+          data-testid="video-block-play-pill"
+          // Canonical paper-stamped pill: jersey-deep + ink border +
+          // offset shadow + canonical press-down hover per
+          // `feedback_canonical_press_down_hover`.
+          className={cn(
+            "absolute bottom-4 left-4 z-10 inline-flex h-9 items-center gap-2",
+            "border-ink bg-jersey-deep border px-4",
+            "text-cream font-mono text-[11px] tracking-[0.14em] uppercase",
+            "shadow-paper-sm",
+            "transition-all duration-300",
+            "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+          )}
+        >
+          <PlayTriangleIcon className="h-3.5 w-3.5" />
+          Afspelen
+        </button>
+      )}
+      {isPlaying && (
+        <video
+          autoPlay
+          controls
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 h-full w-full"
+          data-testid="video-block-video"
+          onPlay={handlePlay}
+          onEnded={handleEnded}
+        >
+          <source src={src} type={mimeType ?? "video/mp4"} />
+          Je browser ondersteunt geen HTML5-video. Download het bestand via de
+          link.
+        </video>
+      )}
+    </div>
+  );
+}
+
+function PlayTriangleIcon({ className }: { className?: string }) {
+  // Locked glyph (videoblock-locked.md §"Play affordance contract"):
+  // M8 5v14l11-7z, 24×24 viewBox, fill="currentColor".
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={className}
+      focusable="false"
     >
-      <source src={src} type={mimeType ?? "video/mp4"} />
-      Je browser ondersteunt geen HTML5-video. Download het bestand via de link.
-    </video>
+      <path d="M8 5v14l11-7z" fill="currentColor" />
+    </svg>
   );
 }
 
@@ -238,8 +327,6 @@ const assertNever = (value: never): never => {
 function embedSrc(provider: VideoProvider, videoId: string): string {
   switch (provider) {
     case "youtube":
-      // Privacy-enhanced variant: doesn't set cookies until the reader
-      // actually plays the video.
       return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`;
     case "vimeo":
       return `https://player.vimeo.com/video/${encodeURIComponent(videoId)}`;
@@ -265,59 +352,58 @@ function renderEmbed(
   className: string | undefined,
   analyticsContext: AnalyticsContext | null,
 ) {
-  // One-release fallback (#1843): prefer the new `width` enum, fall
-  // back to the legacy `fullBleed` boolean for un-migrated content.
-  const fullBleed = value.width === "bleed" || value.fullBleed === true;
+  const width = resolveWidth(value);
   const caption = trimmedCaption(value);
   const parsed = parseEmbedUrl(url);
   if (parsed === null) {
-    // Log for editor visibility, render a neutral fallback. Crucially —
-    // we never interpolate `url` into an iframe/src or an anchor href
-    // without provider-matching, to avoid open-redirect / mixed-content
-    // / javascript: URL risks.
     if (process.env.NODE_ENV !== "production") {
       console.warn(
         "[VideoBlock] Unknown embed URL provider — refusing to render an iframe. Allowed: YouTube, Vimeo.",
       );
     }
     return (
-      <figure
-        className={cn(
-          "bg-kcvv-gray-light my-8 rounded-[4px] p-6 text-center",
-          className,
-        )}
-        data-testid="video-block"
-        data-source="embed-unknown"
-      >
-        <p className="text-kcvv-gray-dark text-sm">
-          Video-embed (provider niet ondersteund). Controleer of de link van
-          YouTube of Vimeo komt.
-        </p>
-      </figure>
+      <WidthWrapper width={width} className={className}>
+        <figure
+          className="border-ink bg-cream-soft border-2 p-6 text-center"
+          data-testid="video-block"
+          data-source="embed-unknown"
+        >
+          <p className="text-ink-soft text-sm">
+            Video-embed (provider niet ondersteund). Controleer of de link van
+            YouTube of Vimeo komt.
+          </p>
+        </figure>
+      </WidthWrapper>
     );
   }
 
   const src = embedSrc(parsed.provider, parsed.videoId);
+  const tape: TapeStripProps | undefined =
+    width === "bleed" ? undefined : VIDEO_TAPE;
   return (
-    <figure
-      className={figureClass(fullBleed, className)}
-      data-testid="video-block"
-      data-source="embed"
-      data-provider={parsed.provider}
-    >
-      {/* 16:9 responsive container — aspect-video + absolute-positioned
-          iframe covers the full box. allow="…" enables in-frame
-          fullscreen + picture-in-picture on providers that support it. */}
-      <div className="relative aspect-video w-full">
+    <WidthWrapper width={width} className={className}>
+      <TapedFigure
+        aspect="landscape-16-9"
+        bg="cream"
+        tint="none"
+        tape={tape}
+        caption={caption ?? undefined}
+      >
         <EmbedIframe
           src={src}
           title={embedTitle(parsed.provider)}
           provider={parsed.provider}
           analyticsContext={analyticsContext}
         />
-      </div>
-      {caption !== null && <VideoCaption caption={caption} />}
-    </figure>
+      </TapedFigure>
+      <span
+        hidden
+        data-testid="video-block"
+        data-source="embed"
+        data-provider={parsed.provider}
+        data-video-width={width}
+      />
+    </WidthWrapper>
   );
 }
 
@@ -340,11 +426,6 @@ function EmbedIframe({
   useEffect(() => {
     if (analyticsContext === null) return;
     const handleBlur = () => {
-      // Standard heuristic for detecting embed-iframe interaction without
-      // provider postMessage wiring: clicking the iframe blurs the parent
-      // window and makes the iframe the active element. The hook's own
-      // dedup ref guarantees we still fire `article_video_play` exactly
-      // once even if the user clicks the iframe several times.
       if (
         iframeRef.current !== null &&
         document.activeElement === iframeRef.current

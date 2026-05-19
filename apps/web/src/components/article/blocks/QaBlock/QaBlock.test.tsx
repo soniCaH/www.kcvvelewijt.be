@@ -176,7 +176,7 @@ describe("QaBlock", () => {
         />,
       );
       expect(screen.getAllByTestId("qa-group-rapid-fire")).toHaveLength(1);
-      expect(screen.getByText("Sneltrein")).toBeInTheDocument();
+      expect(screen.getByText("Kort & Krachtig")).toBeInTheDocument();
     });
 
     it("starts a new rapid-fire group whenever the run is broken by another tag", () => {
