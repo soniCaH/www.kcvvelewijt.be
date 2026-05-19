@@ -485,7 +485,17 @@ export function EditorialHero(props: EditorialHeroProps) {
       </Link>
     );
   }
-  return body;
+  // Detail placement — wrap in a marker span so the e2e fixture-discovery
+  // helper at `apps/web/test/e2e/helpers/fixtures.ts` can detect the
+  // articleType of a live article page. Inherits the legacy
+  // `data-testid="<type>-hero"` contract from the (now-superseded) per-
+  // variant Hero components so the discovery probe keeps working without
+  // touching the helper.
+  return (
+    <div data-testid={`${props.variant}-hero`} className="contents">
+      {body}
+    </div>
+  );
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

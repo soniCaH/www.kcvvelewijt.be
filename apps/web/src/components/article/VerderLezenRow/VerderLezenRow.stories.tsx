@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Net-new Phase 5 footer primitive (5.d4 lock). 3-up `<NewsCard>` row at `--container-page` (1120px) width, with Phase 4.5 R10 flush-edge cards and R3 per-`articleType` backgrounds. Sparse states inherit the R10 "cards drop, never pad" rule: 0 → row doesn\'t render, 1 → 1-up at left, 2 → 2-up in cols 1+2, 3 → standard 3-up.',
+          "Net-new Phase 5 footer primitive (5.d4 lock, slider variant ratified during #1800 implementation review). Horizontal scroller of `<NewsCard>` at `--container-page` (1120px) width. At desktop the first ~3 cards sit in-frame; the rest reveal via paper-chrome scroll arrows + drag. Per-`articleType` card backgrounds (R3 lookup) tint each card. Items include articles + mentioned players / teams / staff / events.",
       },
     },
   },
@@ -65,25 +65,26 @@ const EVENT: VerderLezenItem = {
   articleType: "event",
 };
 
-// Standard 3-up — the canonical Verder-lezen layout. Mixed articleTypes
-// confirm the R3 per-card background lookup: transfer card renders on
-// jersey-deep, the rest on cream.
-export const ThreeUp: Story = {
+// Canonical 3-card layout — the first three slots are visible at desktop
+// width; no scroll arrows render because there's no overflow. Mixed
+// articleTypes confirm the R3 per-card background lookup: transfer card
+// renders on jersey-deep, the rest on cream.
+export const ThreeCards: Story = {
   args: {
     items: [INTERVIEW, TRANSFER, ANNOUNCEMENT],
   },
 };
 
-// 2-up sparse state. Cards drop into cols 1 + 2 of the grid; col 3 stays
-// empty (no padding, no shifted centering). Verifies the R10 rule.
-export const TwoUp: Story = {
+// 2-card sparse state — cards take their fixed slot width; the slider
+// track simply shorter. No overflow, no arrows.
+export const TwoCards: Story = {
   args: {
     items: [INTERVIEW, TRANSFER],
   },
 };
 
-// 1-up sparse state. Card lands in col 1; cols 2 + 3 stay empty.
-export const OneUp: Story = {
+// 1-card sparse state — single slot, no slider arrows.
+export const OneCard: Story = {
   args: {
     items: [INTERVIEW],
   },
@@ -106,9 +107,8 @@ export const Empty: Story = {
 };
 
 // All 4 articleType variants in the same row (interview / transfer /
-// announcement / event). Capped at 3 cards by the component; the 4th
-// item (event) is silently dropped. Demonstrates the R3 lookup across
-// every supported `articleType`.
+// announcement / event) — slider track of 4 cards. The 4th card lives
+// just outside the desktop viewport; scroll arrows reveal it.
 export const MixedArticleTypes: Story = {
   args: {
     items: [INTERVIEW, TRANSFER, ANNOUNCEMENT, EVENT],
@@ -117,7 +117,51 @@ export const MixedArticleTypes: Story = {
     docs: {
       description: {
         story:
-          "Four items supplied, three rendered (interview / transfer / announcement); the fourth (event) is silently capped. Confirms the call-site is responsible for ranking before passing items to the row.",
+          "Four cards — three sit in-frame at desktop width, the fourth is reachable via the slider's right arrow / horizontal scroll. Confirms the R3 lookup across every supported `articleType` plus the slider overflow behaviour.",
+      },
+    },
+  },
+};
+
+// Slider overflow with 7 mixed items (articles + a mentioned player +
+// a mentioned team) — exercises the canonical case where mentioned
+// non-article references push the row well past the 3-visible viewport.
+export const SliderOverflow: Story = {
+  args: {
+    items: [
+      INTERVIEW,
+      TRANSFER,
+      ANNOUNCEMENT,
+      EVENT,
+      {
+        title: "Joren De Smet",
+        href: "/spelers/1234",
+        imageUrl: fixtureImage("player-portrait-square", 0),
+        imageAlt: "Joren De Smet — portret",
+        badge: "SPELER",
+      },
+      {
+        title: "KCVV Elewijt B",
+        href: "/ploegen/kcvv-b",
+        imageUrl: fixtureImage("team-group", 0),
+        imageAlt: "KCVV B ploegfoto",
+        badge: "PLOEG",
+      },
+      {
+        title: "Steakfestijn 2026",
+        href: "/events/steakfestijn-2026",
+        imageUrl: fixtureImage("event-cover", 0),
+        imageAlt: "Steakfestijn afbeelding",
+        badge: "EVENEMENT",
+        date: "25 sep 2026",
+      },
+    ],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Seven mixed items — articles, a player, a team, an event. The slider's right arrow is visible; drag / arrow / scroll reveals the cards past the viewport edge. Mirrors the real article-page output now that `<RelatedContentSection>` is replaced (#1800).",
       },
     },
   },

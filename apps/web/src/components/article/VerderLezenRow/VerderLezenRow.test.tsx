@@ -17,7 +17,7 @@ function item(
 }
 
 describe("<VerderLezenRow>", () => {
-  describe("sparse states (R10 cards-drop rule)", () => {
+  describe("slider behaviour (5.d4 slider variant)", () => {
     it("returns null when items is empty", () => {
       const { container } = render(<VerderLezenRow items={[]} />);
       expect(container.firstChild).toBeNull();
@@ -26,33 +26,30 @@ describe("<VerderLezenRow>", () => {
     it("renders 1 card when 1 item is supplied", () => {
       render(<VerderLezenRow items={[item(1)]} />);
       const row = screen.getByRole("region", { name: "Verder lezen" });
-      expect(row.getAttribute("data-card-count")).toBe("1");
       expect(within(row).getAllByRole("heading", { level: 3 })).toHaveLength(1);
     });
 
-    it("renders 2 cards when 2 items are supplied", () => {
-      render(<VerderLezenRow items={[item(1), item(2)]} />);
-      const row = screen.getByRole("region", { name: "Verder lezen" });
-      expect(row.getAttribute("data-card-count")).toBe("2");
-      expect(within(row).getAllByRole("heading", { level: 3 })).toHaveLength(2);
-    });
-
-    it("renders 3 cards when 3 items are supplied", () => {
-      render(<VerderLezenRow items={[item(1), item(2), item(3)]} />);
-      const row = screen.getByRole("region", { name: "Verder lezen" });
-      expect(row.getAttribute("data-card-count")).toBe("3");
-      expect(within(row).getAllByRole("heading", { level: 3 })).toHaveLength(3);
-    });
-
-    it("caps at 3 cards when more than 3 items are supplied", () => {
+    it("renders all 5 cards when 5 items are supplied (no 3-cap)", () => {
       render(
         <VerderLezenRow
           items={[item(1), item(2), item(3), item(4), item(5)]}
         />,
       );
       const row = screen.getByRole("region", { name: "Verder lezen" });
-      expect(row.getAttribute("data-card-count")).toBe("3");
-      expect(within(row).getAllByRole("heading", { level: 3 })).toHaveLength(3);
+      expect(within(row).getAllByRole("heading", { level: 3 })).toHaveLength(5);
+    });
+
+    it("renders each card inside a fixed-width scroll slot", () => {
+      const { container } = render(
+        <VerderLezenRow items={[item(1), item(2), item(3), item(4)]} />,
+      );
+      const slots = container.querySelectorAll(
+        '[data-slot="verder-lezen-card"]',
+      );
+      expect(slots.length).toBe(4);
+      // Each slot carries the shrink-0 lockdown so the slider's flex
+      // track doesn't squeeze cards as more are added.
+      expect(slots[0]?.className).toContain("shrink-0");
     });
   });
 
