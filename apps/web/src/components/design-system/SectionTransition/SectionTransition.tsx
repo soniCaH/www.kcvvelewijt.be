@@ -1,5 +1,6 @@
 import {
   StripedSeam,
+  STRIPED_SEAM_HEIGHT_PX,
   type StripedSeamColorPair,
   type StripedSeamDirection,
   type StripedSeamHeight,
@@ -134,6 +135,19 @@ function shiftY(points: string, dy: number): string {
 // not currently have a global CSS counterpart.
 export const DIAGONAL_HEIGHT = "var(--footer-diagonal)";
 const DIAGONAL_HALF = "clamp(1rem, 3vw, 2.5rem)";
+
+/**
+ * Resolve the transition's vertical bleed distance to a CSS length so
+ * `<SectionStack>` can extend a neighbour-section's backdrop into the
+ * transition area by the right amount. Diagonal / double-diagonal share
+ * `--footer-diagonal`; striped-seam varies per `height` token.
+ */
+export function getTransitionBleed(config: SectionTransitionConfig): string {
+  if (config.type === "striped-seam") {
+    return `${STRIPED_SEAM_HEIGHT_PX[config.height]}px`;
+  }
+  return DIAGONAL_HEIGHT;
+}
 
 export function SectionTransition({
   from,

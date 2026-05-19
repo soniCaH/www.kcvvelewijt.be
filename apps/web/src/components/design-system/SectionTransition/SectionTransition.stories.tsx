@@ -35,8 +35,17 @@ const meta = {
         "transparent",
       ],
     },
-    type: { control: "select", options: ["diagonal", "double-diagonal"] },
-    direction: { control: "select", options: ["left", "right"] },
+    type: {
+      control: "select",
+      options: ["diagonal", "double-diagonal", "striped-seam"],
+    },
+    // `direction` accepts diagonal's "left" | "right" AND striped-seam's
+    // "horizontal" | "vertical" — picker is union-wide; the renderer
+    // ignores irrelevant values per variant.
+    direction: {
+      control: "select",
+      options: ["left", "right", "horizontal", "vertical"],
+    },
     overlap: { control: "select", options: ["none", "half", "full"] },
     via: {
       control: "select",
@@ -47,6 +56,21 @@ const meta = {
         "kcvv-green-dark",
         "transparent",
       ],
+    },
+    height: {
+      control: "select",
+      options: ["sm", "md", "lg", "xl"],
+      description: "Striped-seam only — forwarded to <StripedSeam>.",
+    },
+    colorPair: {
+      control: "select",
+      options: [
+        "ink-cream",
+        "jersey-cream",
+        "jersey-tonal-dark",
+        "cream-jersey-deep",
+      ],
+      description: "Striped-seam only — forwarded to <StripedSeam>.",
     },
   },
   decorators: [

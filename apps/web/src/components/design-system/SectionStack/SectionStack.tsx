@@ -4,6 +4,7 @@ import {
   BG_CLASS,
   DIAGONAL_HEIGHT,
   SectionTransition,
+  getTransitionBleed,
 } from "@/components/design-system/SectionTransition/SectionTransition";
 import type {
   SectionBg,
@@ -131,15 +132,26 @@ export function SectionStack({
                   and the backdrop paints through. */}
               {hasBackdrop &&
                 (() => {
+                  // Per-transition bleed compensation — diagonal /
+                  // double-diagonal use `--footer-diagonal`, striped-seam
+                  // uses its own px height. `getTransitionBleed` picks
+                  // the right value per variant so the backdrop edge
+                  // lines up with the transition top regardless of type.
+                  const prevBleed = prev?.transition
+                    ? getTransitionBleed(prev.transition)
+                    : DIAGONAL_HEIGHT;
+                  const nextBleed = section.transition
+                    ? getTransitionBleed(section.transition)
+                    : DIAGONAL_HEIGHT;
                   const top = hasPrevTransition
                     ? prevTransitionIsNonOverlap
-                      ? `calc(-1 * ${DIAGONAL_HEIGHT} + 1px)`
-                      : `calc(-1 * ${DIAGONAL_HEIGHT})`
+                      ? `calc(-1 * ${prevBleed} + 1px)`
+                      : `calc(-1 * ${prevBleed})`
                     : "0";
                   const bottom = showTransition
                     ? transitionIsNonOverlap
-                      ? `calc(-1 * ${DIAGONAL_HEIGHT} + 1px)`
-                      : `calc(-1 * ${DIAGONAL_HEIGHT})`
+                      ? `calc(-1 * ${nextBleed} + 1px)`
+                      : `calc(-1 * ${nextBleed})`
                     : "0";
                   return (
                     <div
