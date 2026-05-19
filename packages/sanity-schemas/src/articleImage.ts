@@ -20,11 +20,13 @@ export const articleImage = defineType({
       validation: (r) => r.required().warning('Provide descriptive alt text for accessibility'),
     }),
     defineField({
-      name: 'fullBleed',
-      title: 'Full bleed',
-      type: 'boolean',
-      description: 'Stretch image to full viewport width',
-      initialValue: false,
+      name: 'width',
+      title: 'Width',
+      type: 'string',
+      description:
+        'Breedte van de afbeelding in het artikel. `prose` = standaard tekstbreedte; `wide` = breder dan tekst (1040px); `bleed` = volledige schermbreedte.',
+      options: {list: ['prose', 'wide', 'bleed']},
+      initialValue: 'prose',
     }),
   ],
   preview: {

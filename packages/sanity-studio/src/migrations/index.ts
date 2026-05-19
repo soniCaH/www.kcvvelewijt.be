@@ -36,3 +36,12 @@ export type {
   QaBlockLike as QaPairRespondentsBlock,
   QaPairLike as QaPairRespondentsPair,
 } from './qa-pair-respondents'
+
+export {
+  default as articleImageVideoBlockWidthMigration,
+  migrateArticleImageVideoBlockWidth,
+} from './articleimage-videoblock-width'
+export type {
+  ArticleWithWidthBlocksDoc as ArticleImageVideoBlockWidthDoc,
+  BlockWithWidthLike as ArticleImageVideoBlockWidthBlock,
+} from './articleimage-videoblock-width'
