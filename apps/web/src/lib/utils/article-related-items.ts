@@ -289,6 +289,10 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
         // RelatedArticleItem doesn't currently carry the linked
         // article's own articleType; the card defaults to cream bg.
         // Plumbing articleType through is tracked alongside #1829.
+        analyticsId: item.id,
+        analyticsSource: item.source,
+        analyticsType: "article",
+        analyticsTargetSlug: item.slug,
       };
     case "page":
       return {
@@ -297,6 +301,10 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
         imageUrl: item.imageUrl ?? undefined,
         imageAlt: item.title,
         badge: "PAGINA",
+        analyticsId: item.id,
+        analyticsSource: item.source,
+        analyticsType: "page",
+        analyticsTargetSlug: item.slug,
       };
     case "player": {
       const name = [item.firstName, item.lastName]
@@ -309,6 +317,12 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
         imageUrl: item.imageUrl ?? undefined,
         imageAlt: name,
         badge: item.position?.toUpperCase() ?? "SPELER",
+        analyticsId: item.id,
+        analyticsSource: item.source,
+        analyticsType: "player",
+        // Legacy parity: `getEntityTargetSlug` in RelatedContentSection
+        // returns `psdId` for players (the routing identifier).
+        analyticsTargetSlug: item.psdId,
       };
     }
     case "team":
@@ -318,14 +332,18 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
         imageUrl: item.imageUrl ?? undefined,
         imageAlt: item.name,
         badge: "PLOEG",
+        analyticsId: item.id,
+        analyticsSource: item.source,
+        analyticsType: "team",
+        analyticsTargetSlug: item.slug,
       };
     case "staff":
       // Staff has no resolvable detail-page route today (the GROQ
       // projection at apps/web/src/lib/repositories/article.repository.ts
       // doesn't select a `slug`, and there's no /staf/[slug] page).
       // Dropping the card rather than rendering a broken `href: "#"`.
-      // Surfacing staff in the slider is tracked alongside the analytics
-      // follow-up (#1832) — needs both a route + the projection field.
+      // Restoring staff in the slider (and its analytics) is tracked at
+      // #1831 — needs both a route + the projection field.
       return null;
     case "event":
       return {
@@ -335,6 +353,10 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
         imageAlt: item.title,
         badge: "EVENEMENT",
         date: formatArticleDate(item.dateStart),
+        analyticsId: item.id,
+        analyticsSource: item.source,
+        analyticsType: "event",
+        analyticsTargetSlug: item.slug,
       };
   }
 }
