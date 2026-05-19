@@ -262,8 +262,16 @@ function UploadFigureContent({
     // container takes on the source media's natural aspect. The no-poster
     // case is handled one level up — `<TapedFigure>` is forced to
     // `landscape-16-9` when `posterUrl` is undefined so this div has a
-    // sized parent and the play pill sits over a non-zero frame.
-    <div className="bg-ink relative w-full">
+    // sized parent. `min-h-12` while idle + poster-less guarantees the
+    // div itself has room for the absolutely-positioned play pill (h-9 +
+    // bottom-4 inset) when neither poster nor video supplies content
+    // height.
+    <div
+      className={cn(
+        "bg-ink relative w-full",
+        !isPlaying && !posterUrl && "min-h-12",
+      )}
+    >
       {!isPlaying && posterUrl && (
         // Plain `<img>` (not next/image) — `<Image fill>` requires a sized
         // parent, but TapedFigure aspect="auto" leaves the container
