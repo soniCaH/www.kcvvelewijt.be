@@ -29,7 +29,9 @@
 
 ## Locked field rendering
 
-### `articleImage` object (unchanged schema)
+### `articleImage` object (width enum added; caption/credit unchanged)
+
+R2 leaves the schema untouched for caption/credit (those come from the asset reference). R3 changes the schema by removing `fullBleed` and adding a `width` enum:
 
 ```typescript
 defineType({
@@ -37,8 +39,8 @@ defineType({
   fields: [
     {name: 'image', type: 'image', options: {hotspot: true}, validation: required()},
     {name: 'alt', type: 'string', validation: required().warning()},
-    {name: 'width', type: 'string', options: {list: ['prose', 'wide', 'bleed']}, initialValue: 'prose'},
-    // fullBleed: boolean — REMOVED in migration
+    {name: 'width', type: 'string', options: {list: ['prose', 'wide', 'bleed']}, initialValue: 'prose'},  // ADDED in R3 migration
+    // fullBleed: boolean — REMOVED in R3 migration
   ],
 })
 ```
@@ -79,7 +81,7 @@ The renderer reads these from `image.asset->`. All optional:
         asset->{
           _id,
           url,
-          metadata{dimensions, lqip},
+          metadata{dimensions{width, height}, lqip},
           title,
           description,
           creditLine

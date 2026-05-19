@@ -82,8 +82,8 @@ Reads as "hand-pinned at slightly different moments" without becoming a busy col
 
 ```tsx
 <EventFactInline
-  value={eventFactValue}          // EventFactValue from the body PT
-  isPast={deriveIsPast(value)}    // computed page-level, same helper as EventDetailBlock
+  value={eventFactValue}                    // EventFactValue from the body PT
+  isPast={deriveIsPast(eventFactValue)}     // computed page-level, same helper as EventDetailBlock
   className?={…}
 />
 ```

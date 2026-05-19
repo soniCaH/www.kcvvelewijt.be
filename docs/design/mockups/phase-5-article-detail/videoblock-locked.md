@@ -64,7 +64,12 @@ unset fullBleed in all videoBlock objects
 >
   <div className="relative">
     {!isPlaying && value.poster && (
-      <Image src={value.poster.url} alt="" fill className="object-cover" />
+      // `pointer-events-none` keeps the poster non-interactive so that the
+      // pill below is the ONLY click target (see "Visibility on first paint"
+      // below). Without it, an absolutely-positioned poster sitting under
+      // the pill in DOM order is harmless, but a future refactor that wraps
+      // the Image (e.g. for a lightbox) would silently steal the click.
+      <Image src={value.poster.url} alt="" fill className="object-cover pointer-events-none" />
     )}
     {!isPlaying && (
       <button
@@ -128,7 +133,7 @@ Provider chrome (YT/Vimeo play button + controls) sits inside the iframe. The Ta
 - **Label:** Dutch caps "Afspelen" — locked, not editor-authored.
 - **Triangle:** locked `M8 5v14l11-7z` 24×24 viewBox · `fill="currentColor"` (cream on jersey-deep).
 - **Click handler:** sets `isPlaying = true`, hides poster + pill, mounts `<video controls autoPlay>`. Native HTML5 controls take over from here.
-- **Visibility on first paint:** pill is the ONLY click target — clicking the poster image itself does nothing (the pill is what's interactive). This keeps the affordance honest.
+- **Visibility on first paint:** pill is the ONLY click target — the poster `<Image>` carries `pointer-events-none` so clicks pass through. Implementers MUST keep this rule when refactoring (e.g. don't wrap the Image in a lightbox anchor without restoring the click handoff). This keeps the affordance honest.
 
 ### Caption rendering
 
