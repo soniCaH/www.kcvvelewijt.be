@@ -547,6 +547,16 @@ The redesign rolls out over ~9 phases. Per the rollout decision, each phase is a
 
 **Total elapsed effort estimate:** ~25–40 weeks of focused work, depending on how many design rounds each gated phase needs. The wider range than before reflects design-checkpoint time, which can iterate (the owner may push back on mockup options once or twice before approval). Brownfield site stays live throughout; mixed-state visual is acceptable per rollout decision.
 
+### Diagonal → striped-seam migration (per-phase)
+
+`<SectionTransition>` ships a `type: "striped-seam"` variant from #1701 (Option α: composes `<StripedSeam>` internally, preserves `revealFrom` / `revealTo` propagation). Each phase migrates its own consumers — no big-bang refactor. The canonical per-phase consumer list lives in #1701; the section-transition extension itself is foundation-only.
+
+- **Phase 4 (homepage):** N/A — already striped via internal `<StripedSeam>` (Youth + Clubshop) or seam-less.
+- **Phase 6 (match / team detail / kalender / events):** migrate `apps/web/src/components/team/TeamDetail/TeamDetail.tsx` alongside the team-detail rebuild.
+- **Phase 7 (sponsors / jeugd / teams / club landings):** migrate the seven `getXxxSections.tsx` + `BestuurPage` / `HistoryContent` / `organigram` consumers alongside each landing's rebuild.
+- **Phase 8 (hulp / search / privacy / errors):** migrate the three `hulp` + `privacy` consumers alongside the remaining-surfaces rebuild.
+- **Phase 9 (cleanup, #1531):** retire the legacy `diagonal` / `double-diagonal` discriminants once consumer count = 0.
+
 ### VR baseline contract per phase
 
 Every PR in every phase that:

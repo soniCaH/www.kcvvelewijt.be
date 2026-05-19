@@ -29,12 +29,14 @@ export interface StripedSeamProps {
   flip?: boolean;
 }
 
-const HEIGHT_PX: Record<StripedSeamHeight, number> = {
+export const STRIPED_SEAM_HEIGHT_PX: Record<StripedSeamHeight, number> = {
   sm: 12,
   md: 18,
   lg: 24,
   xl: 28,
 };
+
+const HEIGHT_PX = STRIPED_SEAM_HEIGHT_PX;
 
 const COLOR_PAIR_STROKES: Record<
   StripedSeamColorPair,
