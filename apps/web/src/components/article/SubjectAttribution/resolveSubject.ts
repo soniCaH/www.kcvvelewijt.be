@@ -2,7 +2,7 @@ export interface SubjectPlayerRef {
   firstName?: string | null;
   lastName?: string | null;
   jerseyNumber?: number | null;
-  /** Field position (e.g. "Middenvelder"). Used by the InterviewHero kicker. */
+  /** Field position (e.g. "Middenvelder"). Used by the `<EditorialHero variant="interview">` kicker. */
   position?: string | null;
   transparentImageUrl?: string | null;
   psdImageUrl?: string | null;

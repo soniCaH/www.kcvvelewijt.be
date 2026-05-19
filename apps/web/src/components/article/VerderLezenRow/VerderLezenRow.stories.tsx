@@ -161,7 +161,7 @@ export const SliderOverflow: Story = {
     docs: {
       description: {
         story:
-          "Seven mixed items — articles, a player, a team, an event. The slider's right arrow is visible; drag / arrow / scroll reveals the cards past the viewport edge. Mirrors the real article-page output now that `<RelatedContentSection>` is replaced (#1800).",
+          "Seven mixed items — articles, a player, a team, an event. The slider's right arrow is visible; drag / arrow / scroll reveals the cards past the viewport edge. Mirrors the real article-page output on `/nieuws/[slug]` (#1800).",
       },
     },
   },
