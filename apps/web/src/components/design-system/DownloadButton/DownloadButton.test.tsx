@@ -139,7 +139,7 @@ describe("DownloadButton", () => {
   it("card variant: falls back to file type subtitle when URL has no readable name", () => {
     render(
       <DownloadButton
-        href="https://example.com/a1b2c3d4e5f6g7h8.pdf"
+        href="https://example.com/a1b2c3d4e5f6a7b8.pdf"
         mimeType="application/pdf"
       />,
     );

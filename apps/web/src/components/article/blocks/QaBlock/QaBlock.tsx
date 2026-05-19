@@ -210,8 +210,12 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
           if (resolved) {
             // Derive firstName from the resolved name (first whitespace-
             // separated token) so the speaker strip's monogram avatar
-            // matches the speaker tag's name.
-            const firstName = resolved.name.split(/\s+/)[0] ?? resolved.name;
+            // matches the speaker tag's name. `resolveSubject` already
+            // trims its output for every subject kind, but we trim again
+            // here so the split never yields an empty leading token if
+            // that contract ever loosens.
+            const trimmed = resolved.name.trim();
+            const firstName = trimmed.split(/\s+/)[0] || trimmed;
             respondent = {
               firstName,
               fullName: resolved.name,

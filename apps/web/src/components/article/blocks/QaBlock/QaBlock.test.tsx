@@ -148,7 +148,7 @@ describe("QaBlock", () => {
       expect(screen.getByTestId("qa-pair-quote")).toBeInTheDocument();
     });
 
-    it("collapses consecutive rapid-fire pairs into a single QaGroupRapidFire", () => {
+    it("collapses consecutive rapid-fire pairs into a single QaGroupRapidFire and threads the resolved respondent + answers", () => {
       render(
         <QaBlock
           value={{
@@ -173,10 +173,31 @@ describe("QaBlock", () => {
               },
             ],
           }}
+          subjects={[
+            {
+              _key: "subj-lars",
+              kind: "player",
+              playerRef: {
+                firstName: "Lars",
+                lastName: "Janssens",
+                jerseyNumber: 9,
+              },
+            },
+          ]}
         />,
       );
+      const group = screen.getByTestId("qa-group-rapid-fire");
+      expect(group).toBeInTheDocument();
       expect(screen.getAllByTestId("qa-group-rapid-fire")).toHaveLength(1);
       expect(screen.getByText("Kort & Krachtig")).toBeInTheDocument();
+      // Resolved respondent name + role flow through to the speaker tag.
+      expect(group.querySelector("[data-rapidfire='speaker']")).not.toBeNull();
+      expect(screen.getByText("Lars Janssens")).toBeInTheDocument();
+      expect(screen.getByText("#9")).toBeInTheDocument();
+      // Every pair's PortableText answer is rendered.
+      expect(screen.getByText("A1")).toBeInTheDocument();
+      expect(screen.getByText("A2")).toBeInTheDocument();
+      expect(screen.getByText("A3")).toBeInTheDocument();
     });
 
     it("starts a new rapid-fire group whenever the run is broken by another tag", () => {

@@ -148,6 +148,20 @@ export const EmbedUnknownProvider: Story = {
       embedUrl: "https://dailymotion.com/video/x1234abcd",
     },
   },
+  parameters: {
+    // vr.disable: the embed family of stories (YouTube + Vimeo + this
+    // unknown-provider fallback) trip the runner's 30s timeout in CI
+    // even though the fallback path renders a static neutral DOM with
+    // no iframe — the preceding Vimeo / YouTube iframes still load
+    // network resources during their own visits (vr.disable only
+    // skips screenshot capture, not the visit), and the carry-over
+    // delays this story's smoke-test past the cap.
+    // Repro: VR runner times out 30s into the "smoke-test" for this
+    // story after the YouTube + Vimeo embed stories run first.
+    // Approved by: @climacon / #1849
+    // Re-evaluate: 2026-08-01
+    vr: { disable: true },
+  },
 };
 
 // ─── Width variants ──────────────────────────────────────────────────────
