@@ -61,18 +61,21 @@ test.describe("/nieuws/[slug] body renderer (Phase 5.C)", () => {
 
       // ArticleBody container — confirms the new serializer (not the
       // legacy `<SanityArticleBody>`) is wired on this route.
+      const articleBody = page.locator('[data-article-body="true"]').first();
       await expect(
-        page.locator('[data-article-body="true"]').first(),
+        articleBody,
         `${articleType} article-body container`,
       ).toBeVisible();
 
       // EndMark — confirms the body actually rendered a closer (and not
       // just an empty <ArticleBody> wrapper). Multiple `[data-endmark]`
-      // nodes ship per render (rule / star / label / star / rule), so
-      // assert on the first.
+      // nodes ship per render (rule / star / label / star / rule). Scope
+      // the lookup to the article-body locator so unrelated EndMarks
+      // elsewhere on the page (none today, but cheap insurance) can't
+      // satisfy this assertion.
       await expect(
-        page.locator("[data-endmark]").first(),
-        `${articleType} end mark`,
+        articleBody.locator("[data-endmark]").first(),
+        `${articleType} end mark inside article body`,
       ).toBeVisible();
     });
   }
