@@ -102,8 +102,20 @@ export const UploadNoCaption: Story = {
 
 // ─── Embed stories ────────────────────────────────────────────────────────
 
+// `vr-skip` (discovery-time exclusion) replaces the previous
+// `parameters.vr.disable` (postVisit screenshot-skip) for the embed
+// stories. `vr.disable` only suppresses screenshot capture — the
+// runner still visits the page, which means the YouTube + Vimeo
+// iframes load network resources. The carry-over from those visits
+// kept pushing alphabetically-later VideoBlock stories
+// (Width — prose / wide / bleed / Mobile — narrow) past the 30s
+// smoke-test cap intermittently. `vr-skip` stops discovery at the
+// source: the runner never opens these pages, so no iframe loads,
+// no carry-over. Re-evaluate 2026-08-01 alongside the other embed
+// annotations.
 export const EmbedYoutube: Story = {
   name: "Embed — YouTube",
+  tags: ["vr-skip"],
   args: {
     value: {
       _type: "videoBlock",
@@ -112,55 +124,27 @@ export const EmbedYoutube: Story = {
         "Embed via youtube-nocookie.com — provider chrome inside iframe.",
     },
   },
-  parameters: {
-    // vr.disable: external iframe (youtube-nocookie.com) loads network
-    // resources that aren't deterministic for pixel diffing.
-    // Repro: VR runner times out waiting for the iframe to finish loading.
-    // Approved by: @climacon / #1849
-    // Re-evaluate: 2026-08-01
-    vr: { disable: true },
-  },
 };
 
 export const EmbedVimeo: Story = {
   name: "Embed — Vimeo",
+  tags: ["vr-skip"],
   args: {
     value: {
       _type: "videoBlock",
       embedUrl: "https://vimeo.com/824804225",
     },
   },
-  parameters: {
-    // vr.disable: external iframe (player.vimeo.com) loads network
-    // resources that aren't deterministic for pixel diffing.
-    // Repro: VR runner times out waiting for the iframe to finish loading.
-    // Approved by: @climacon / #1849
-    // Re-evaluate: 2026-08-01
-    vr: { disable: true },
-  },
 };
 
 export const EmbedUnknownProvider: Story = {
   name: "Embed — unknown provider (fallback)",
+  tags: ["vr-skip"],
   args: {
     value: {
       _type: "videoBlock",
       embedUrl: "https://dailymotion.com/video/x1234abcd",
     },
-  },
-  parameters: {
-    // vr.disable: the embed family of stories (YouTube + Vimeo + this
-    // unknown-provider fallback) trip the runner's 30s timeout in CI
-    // even though the fallback path renders a static neutral DOM with
-    // no iframe — the preceding Vimeo / YouTube iframes still load
-    // network resources during their own visits (vr.disable only
-    // skips screenshot capture, not the visit), and the carry-over
-    // delays this story's smoke-test past the cap.
-    // Repro: VR runner times out 30s into the "smoke-test" for this
-    // story after the YouTube + Vimeo embed stories run first.
-    // Approved by: @climacon / #1849
-    // Re-evaluate: 2026-08-01
-    vr: { disable: true },
   },
 };
 
