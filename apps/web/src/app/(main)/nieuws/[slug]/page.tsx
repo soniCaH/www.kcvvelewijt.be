@@ -34,7 +34,12 @@ import {
 import { EditorialHero } from "@/components/article/EditorialHero";
 import { ArticleMetadata } from "@/components/article/ArticleMetadata";
 import { ArticleBodyMotion } from "@/components/article/ArticleBodyMotion";
-import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import {
+  ArticleBody,
+  qaBlocksToTailSection,
+} from "@/components/article/ArticleBody";
+import { QaBlock } from "@/components/article/blocks/QaBlock";
+import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { ArticleCredits } from "@/components/article/ArticleCredits";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 import {
@@ -396,18 +401,50 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         className="mt-10"
       />
 
-      {body && body.length > 0 ? (
-        <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
-          <ArticleBodyMotion>
-            <SanityArticleBody
-              className="article-body"
-              content={body}
-              subjects={article.subjects ?? null}
-              articleSlug={article.slug}
-            />
-          </ArticleBodyMotion>
-        </div>
-      ) : null}
+      {body && body.length > 0
+        ? (() => {
+            // Phase 5.C: hoist `groupAtTail` qaBlocks out of the in-flow
+            // body before rendering through <ArticleBody>. Tail blocks
+            // render after <EndMark> under a MonoLabel-headed Q&A
+            // section per the locked composition in
+            // `docs/design/mockups/phase-5-article-detail/interview-locked.md`.
+            const { inFlow, tailBlocks } = qaBlocksToTailSection(body);
+            const hasTail = tailBlocks.length > 0;
+            return (
+              <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
+                <ArticleBodyMotion>
+                  <ArticleBody
+                    className="article-body"
+                    content={inFlow}
+                    subjects={article.subjects ?? null}
+                    articleSlug={article.slug}
+                  />
+                  {hasTail ? (
+                    <section
+                      data-qa-tail-section="true"
+                      aria-label="Q&A"
+                      className="bg-cream mx-auto w-full px-4 pb-12 lg:px-0 lg:pb-16"
+                      style={{ maxWidth: "var(--container-prose)" }}
+                    >
+                      <header className="mb-8 flex justify-center">
+                        <MonoLabel tone="ink">Q&amp;A</MonoLabel>
+                      </header>
+                      <div className="flex flex-col gap-12">
+                        {tailBlocks.map((block) => (
+                          <QaBlock
+                            key={block._key}
+                            value={block}
+                            subjects={article.subjects ?? null}
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  ) : null}
+                </ArticleBodyMotion>
+              </div>
+            );
+          })()
+        : null}
 
       {article.articleType === "event" &&
       firstEventFact &&
