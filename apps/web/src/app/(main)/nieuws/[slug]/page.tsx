@@ -50,6 +50,7 @@ import { resolveSubject } from "@/components/article/SubjectAttribution";
 import type { ArticleDetailVM } from "@/lib/repositories/article.repository";
 import type { TransferFactValue } from "@/components/article/blocks/TransferFact";
 import type { EventFactValue } from "@/components/article/blocks/EventFact";
+import { toPortableTextBlocks } from "@/lib/sanity/portable-text-bridge";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -89,11 +90,15 @@ function renderArticleHero({
   firstTransferFact,
   firstEventFact,
 }: RenderArticleHeroArgs) {
-  // EditorialHero accepts string OR PortableTextBlock[] (accent-decorator
-  // PT title). The Sanity typegen for `titleRich` produces a shape that
-  // doesn't satisfy @portabletext/react's PortableTextBlock structurally;
-  // threading the rich-title through is tracked at #1830.
-  const titleProp = title;
+  // EditorialHero accepts string OR PortableTextBlock[] — prefer the
+  // rich shape so editor-marked `accent` spans render italic +
+  // jersey-deep on the H1. The Sanity typegen's PT shape is
+  // structurally narrower than @portabletext/react's `PortableTextBlock`
+  // (optional `children` + `markDefs: null`); `toPortableTextBlocks`
+  // bridges the two at the consumption boundary so the library type
+  // is satisfied without a wholesale typegen rewrite (#1830).
+  const titleRich = toPortableTextBlocks(article.titleRich);
+  const titleProp = titleRich.length > 0 ? titleRich : title;
   const lead = article.lead?.trim() || undefined;
   const author = article.author?.trim() || undefined;
   // Cover-image projection picks differ per variant (portrait crop for
