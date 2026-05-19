@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-int Rapid-fire · Round 3 · Row divider</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 32px 0 36px;
+      }
+      .qa-section {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .qa-section-kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+        margin: 0 0 22px;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .speaker-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+      }
+      .speaker-tag {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .speaker-tag .name-strong {
+        color: var(--color-ink);
+      }
+
+      /* Locked Round 1 hanging-Q rhythm (132px rail). */
+      .rf-pairs .pair {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 22px;
+        align-items: baseline;
+      }
+      .rf-pairs .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.45;
+      }
+      .rf-pairs .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         OPTION A — Dotted ink-muted (Phase 3-b primitive)
+         The current placeholder. 1px dotted border-bottom.
+         ============================================================ */
+      .div-dotted .pair {
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .div-dotted .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      /* ============================================================
+         OPTION B — Solid hairline (ink-muted, 50% opacity)
+         Quieter than A. 1px solid line at low contrast.
+         ============================================================ */
+      .div-hairline .pair {
+        padding: 14px 0;
+        border-bottom: 1px solid color-mix(in srgb, var(--color-ink-muted) 50%, transparent);
+      }
+      .div-hairline .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+
+      /* ============================================================
+         OPTION C — Tight rows, no divider
+         Generous row padding gone; no line at all. Pure rhythm.
+         ============================================================ */
+      .div-none .pair {
+        padding: 8px 0;
+      }
+      .div-none .pair:first-child {
+        padding-top: 0;
+      }
+      .div-none .pair:last-child {
+        padding-bottom: 0;
+      }
+
+      /* ============================================================
+         OPTION D — Mono dot row (3 dots between pairs)
+         Three centered mono dots between pairs. Decorative, "fanzine"
+         register; reads as a typographic flourish.
+         ============================================================ */
+      .div-dotrow .pair {
+        padding: 12px 0;
+      }
+      .div-dotrow .pair:first-child {
+        padding-top: 0;
+      }
+      .div-dotrow .pair:last-child {
+        padding-bottom: 0;
+      }
+      .div-dotrow .dotrow {
+        text-align: center;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 14px;
+        color: var(--color-ink-muted);
+        letter-spacing: 0.4em;
+        padding: 2px 0;
+        line-height: 1;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-int-rapidfire · Round 3 · #1840</p>
+      <h1>
+        Rapid-fire — row divider (dotted / hairline / none / dot row)
+      </h1>
+      <p>
+        Locked so far · <strong>Round 1:</strong> hanging-Q rail (132px) ·
+        <strong>Round 1b:</strong> Q stacks above A below
+        <code>~640px</code> ·
+        <strong>Round 2:</strong> full speaker strip (kicker line + avatar +
+        name/role). Round 3 decides the row divider treatment between
+        pairs.
+      </p>
+      <p>
+        Same fixture as Rounds 1 &amp; 2. Q/A rhythm and speaker chrome are
+        identical across all four options; only the inter-pair separator
+        varies.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — DOTTED ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Dotted ink-muted</div>
+          <div class="name">1px dotted line (Phase 3-b primitive)</div>
+          <div class="desc">
+            The current placeholder. Matches the row divider used in the
+            standard <code>QARow</code> Phase 5 lock — explicit reuse of the
+            Phase 3-b dotted ink-muted vocabulary. Loudest of the four;
+            reads as a transcript or interview ruling.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Phase 3-b dotted ink-muted (locked)<br />
+            ✓ matches standard <code>QARow</code> row divider<br />
+            ✓ 14px padding above/below
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs div-dotted">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — HAIRLINE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Solid hairline (50% ink-muted)</div>
+          <div class="name">1px solid ink-muted at 50% opacity</div>
+          <div class="desc">
+            Quieter cousin of A. Solid line instead of dotted, knocked down
+            to 50% opacity. Same rhythm but the line recedes — reads more
+            like a list separator than a rule. Sits below A in vocabulary
+            register; doesn't add new tokens but breaks parity with
+            standard <code>QARow</code>.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ ink-muted at 50% (color-mix)<br />
+            ✗ does NOT match standard <code>QARow</code><br />
+            ✓ 14px padding above/below
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs div-hairline">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — NONE ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · No divider</div>
+          <div class="name">Tight rows, no line — pure rhythm</div>
+          <div class="desc">
+            No line at all. Rows tightened to 8px padding so the list reads
+            as a single rapid stream. Strongest "rapid-fire" pulse; weakest
+            row separation when the answer wraps to multiple lines (the
+            next Q-label can blend into the preceding A).
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✗ no border (rhythm only)<br />
+            ✓ 8px padding above/below<br />
+            ✗ does NOT match standard <code>QARow</code>
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs div-none">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — MONO DOT ROW ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Mono dot row</div>
+          <div class="name">3 centered mono dots between pairs (·  ·  ·)</div>
+          <div class="desc">
+            Typographic flourish. Three widely-spaced mono dots between
+            pairs (no line). Decorative fanzine register; reads as section
+            beats rather than ruling. Adds a new ornament to the
+            rapid-fire-only vocabulary — won't reappear elsewhere.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✗ no border<br />
+            ✓ mono · · · ornament (NEW — rapid-fire only)<br />
+            ⚠ adds vocabulary not used elsewhere
+          </div>
+        </header>
+        <div class="surface">
+          <p class="qa-section-kicker">★ Sneltrein</p>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs div-dotrow">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="dotrow" aria-hidden="true">· · ·</div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="dotrow" aria-hidden="true">· · ·</div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="dotrow" aria-hidden="true">· · ·</div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Reuse signal</strong>
+      <ul>
+        <li>
+          Option A (dotted ink-muted) is the only option that explicitly
+          reuses the locked standard <code>QARow</code> divider —
+          rapid-fire reads as the same family as standard, just compressed.
+          Per <code>feedback_reuse_approved_primitives</code>, this is the
+          path of least new vocabulary.
+        </li>
+        <li>
+          Options B and D introduce vocabulary that doesn't appear anywhere
+          else in the redesign (hairline solid, mono dot ornament). Worth
+          weighing the visual gain against that drift.
+        </li>
+        <li>
+          Option C goes the opposite direction: no chrome at all, banking
+          on pure rhythm. Cleanest if rapid-fire answers stay genuinely
+          short.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

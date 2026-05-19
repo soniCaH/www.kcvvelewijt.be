@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Phase 5 · Drill 5.d-int Rapid-fire · Round 1b · D mobile fallback
+    </title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --breakpoint-md: 640px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+      }
+      @media (max-width: 1100px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 20px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      /* Viewport simulator — each candidate shows BOTH a desktop and a
+         mobile rendering of the same layout. Mobile is a fixed-width
+         frame (360px content + 24px padding) to mimic an iPhone SE. */
+      .viewport-stack {
+        display: flex;
+        flex-direction: column;
+      }
+      .viewport-frame {
+        background: var(--color-cream);
+        padding: 18px 0 22px;
+        position: relative;
+      }
+      .viewport-frame + .viewport-frame {
+        border-top: 1px dashed var(--color-ink);
+      }
+      .viewport-label {
+        position: absolute;
+        top: 8px;
+        right: 14px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .qa-section {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 22px 28px 0;
+      }
+      .viewport-frame.is-mobile .qa-section {
+        max-width: 360px;
+        padding: 22px 20px 0;
+      }
+      .qa-section-kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+        margin: 0 0 18px;
+      }
+      .qa-speaker-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 16px;
+      }
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .speaker-tag {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .speaker-tag .name-strong {
+        color: var(--color-ink);
+      }
+
+      /* Desktop = locked hanging-Q (Option D from Round 1). */
+      .rf-hanging-desktop .pair {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 22px;
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .rf-hanging-desktop .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-hanging-desktop .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.45;
+      }
+      .rf-hanging-desktop .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         MOBILE OPTION 1 — Q stacks above A
+         Q stays the same mono caps label, drops above the answer.
+         Visually still reads as "label · value".
+         ============================================================ */
+      .rf-mobile-stack .pair {
+        padding: 12px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .rf-mobile-stack .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-mobile-stack .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0 0 5px;
+        line-height: 1.45;
+      }
+      .rf-mobile-stack .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         MOBILE OPTION 2 — Narrower rail (88px)
+         Keep the desktop rhythm but tighten the rail. Q can wrap to
+         2 lines if needed; A flows in the remaining ~225px.
+         ============================================================ */
+      .rf-mobile-rail .pair {
+        display: grid;
+        grid-template-columns: 88px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .rf-mobile-rail .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-mobile-rail .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.4;
+      }
+      .rf-mobile-rail .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 15px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         MOBILE OPTION 3 — Inline leader
+         Q becomes a mono caps leader inline with the answer's first
+         line, separated by a mono em-dash. Most compressed.
+         ============================================================ */
+      .rf-mobile-leader .pair {
+        padding: 12px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+      }
+      .rf-mobile-leader .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-mobile-leader .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+      }
+      .rf-mobile-leader .sep {
+        color: var(--color-ink-muted);
+        margin: 0 6px 0 4px;
+      }
+      .rf-mobile-leader .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        color: var(--color-ink);
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">
+        Phase 5 · Drill 5.d-int-rapidfire · Round 1b · #1840
+      </p>
+      <h1>
+        Hanging-Q rapid-fire — mobile fallback (stack / narrow rail / inline
+        leader)
+      </h1>
+      <p>
+        Round 1 chose <strong>Option D · Hanging Q (mono caps rail, 132px)</strong>.
+        Round 1b drills how that layout collapses below the
+        <code>--container-prose</code> breakpoint (≤ ~640px / iPhone-class
+        viewports), where a 132px rail would leave only ~190px for the
+        answer — too tight.
+      </p>
+      <p>
+        Each candidate shows the same content at desktop width (locked D) and
+        a 360px mobile frame (≈ iPhone SE) so the breakpoint shift is honest.
+        Fixture: same 4 rapid-fire pairs as Round 1. Speaker strip, dotted
+        dividers, kicker — all held constant.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== MOBILE OPTION 1 — Q STACKS ABOVE A ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Mobile 1 · Q stacks above A</div>
+          <div class="name">Mono caps Q on its own line, A below</div>
+          <div class="desc">
+            Drops the rail entirely below the breakpoint. Q stays as the same
+            mono caps label (10px, 0.16em tracking) but sits above the answer
+            with a 5px gap. Reads as a transcript-lite. Most legible for long
+            questions; weakest "rapid-fire" rhythm of the three.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ same MonoLabel typography as desktop<br />
+            ✓ no grid below <code>md</code><br />
+            ✓ Phase 3-b dotted ink-muted divider
+          </div>
+        </header>
+
+        <div class="viewport-stack">
+          <div class="viewport-frame">
+            <span class="viewport-label">Desktop ≥ 640px</span>
+            <div class="qa-section rf-hanging-desktop">
+              <header class="qa-speaker-strip">
+                <span class="avatar" aria-hidden="true">L</span>
+                <span class="speaker-tag"
+                  ><span class="name-strong">LARS JANSSENS</span> ·
+                  AANVALLER</span
+                >
+              </header>
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewport-frame is-mobile">
+            <span class="viewport-label">Mobile · 360px</span>
+            <div class="qa-section rf-mobile-stack">
+              <header class="qa-speaker-strip">
+                <span class="avatar" aria-hidden="true">L</span>
+                <span class="speaker-tag"
+                  ><span class="name-strong">LARS JANSSENS</span> ·
+                  AANVALLER</span
+                >
+              </header>
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== MOBILE OPTION 2 — NARROW RAIL ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Mobile 2 · Narrower rail (88px)</div>
+          <div class="name">Keep grid, tighten rail to 88px</div>
+          <div class="desc">
+            Preserves the desktop rhythm — Q on the left, A on the right —
+            but tightens the rail to 88px. Q tracks down a notch (9px,
+            0.14em) and can wrap to 2 lines. Best continuity desktop ↔ mobile;
+            weakest when questions need 3+ words to make sense.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ same grid pattern as desktop<br />
+            ✓ MonoLabel scales 10px → 9px<br />
+            ✓ Phase 3-b dotted ink-muted divider
+          </div>
+        </header>
+
+        <div class="viewport-stack">
+          <div class="viewport-frame">
+            <span class="viewport-label">Desktop ≥ 640px</span>
+            <div class="qa-section rf-hanging-desktop">
+              <header class="qa-speaker-strip">
+                <span class="avatar" aria-hidden="true">L</span>
+                <span class="speaker-tag"
+                  ><span class="name-strong">LARS JANSSENS</span> ·
+                  AANVALLER</span
+                >
+              </header>
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewport-frame is-mobile">
+            <span class="viewport-label">Mobile · 360px</span>
+            <div class="qa-section rf-mobile-rail">
+              <header class="qa-speaker-strip">
+                <span class="avatar" aria-hidden="true">L</span>
+                <span class="speaker-tag"
+                  ><span class="name-strong">LARS JANSSENS</span> ·
+                  AANVALLER</span
+                >
+              </header>
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== MOBILE OPTION 3 — INLINE LEADER ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Mobile 3 · Inline leader</div>
+          <div class="name">Q as inline mono caps leader, em-dash, A flows</div>
+          <div class="desc">
+            Maximum compression: Q sits inline with A on the first line,
+            joined by a mono em-dash. Reads as "LABEL — Answer." sentences.
+            Strongest rapid-fire pulse on mobile; demands very short Q labels
+            (1–2 words). Falls apart if Q wraps to a second line.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel inline with body text<br />
+            ✓ mono em-dash separator<br />
+            ✓ Phase 3-b dotted ink-muted divider
+          </div>
+        </header>
+
+        <div class="viewport-stack">
+          <div class="viewport-frame">
+            <span class="viewport-label">Desktop ≥ 640px</span>
+            <div class="qa-section rf-hanging-desktop">
+              <header class="qa-speaker-strip">
+                <span class="avatar" aria-hidden="true">L</span>
+                <span class="speaker-tag"
+                  ><span class="name-strong">LARS JANSSENS</span> ·
+                  AANVALLER</span
+                >
+              </header>
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="viewport-frame is-mobile">
+            <span class="viewport-label">Mobile · 360px</span>
+            <div class="qa-section rf-mobile-leader">
+              <header class="qa-speaker-strip">
+                <span class="avatar" aria-hidden="true">L</span>
+                <span class="speaker-tag"
+                  ><span class="name-strong">LARS JANSSENS</span> ·
+                  AANVALLER</span
+                >
+              </header>
+              <div class="pair">
+                <span class="q">Favoriete goal</span
+                ><span class="sep">—</span
+                ><span class="a">De volley tegen Diest in de slotminuut.</span>
+              </div>
+              <div class="pair">
+                <span class="q">Speler om te volgen</span
+                ><span class="sep">—</span
+                ><span class="a">Wim. Hij maakt iedereen beter.</span>
+              </div>
+              <div class="pair">
+                <span class="q">Bus-muziek</span
+                ><span class="sep">—</span
+                ><span class="a"
+                  >"Geen liedjes — koptelefoon op, ogen dicht."</span
+                >
+              </div>
+              <div class="pair">
+                <span class="q">Eerste KCVV-herinnering</span
+                ><span class="sep">—</span
+                ><span class="a">Hand vasthouden van mijn pa, U7.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Breakpoint</strong>
+      <ul>
+        <li>
+          Switch at <code>~640px</code> (the existing <code>md</code>
+          Tailwind breakpoint in <code>apps/web</code>). Below this the
+          132px rail compresses the answer column past comfortable reading;
+          above this the desktop hanging-Q layout stands.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px"
+        >Editorial note (relevant to mobile 2 and mobile 3)</strong
+      >
+      <ul>
+        <li>
+          Both rail-preserving options assume the editor authors short Q
+          labels ("Favoriete goal", "Bus-muziek") on rapid-fire pairs. This
+          will need to be called out in the Studio help text for the qaBlock
+          <code>tag: rapid-fire</code> branch — locked at Round 4 (kicker /
+          editorial guidance).
+        </li>
+        <li>
+          Mobile 1 (stack) is the only one that gracefully tolerates a long
+          editorial Q without breaking rhythm.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

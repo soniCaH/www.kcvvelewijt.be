@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-file · Round 1 · fileAttachment</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --color-pdf: #c0392b;
+        --color-word: #2563b3;
+        --color-excel: #15803d;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 38px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 17px;
+        line-height: 1.6;
+        color: var(--color-ink-soft);
+        margin: 0 0 18px;
+      }
+
+      /* ============================================================
+         OPTION A — Cream-soft restyle of legacy card layout
+         ============================================================ */
+      .opt-a {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        background: var(--color-cream-soft);
+        border: 1px solid var(--color-ink);
+        box-shadow: 4px 4px 0 0 var(--color-ink);
+        margin: 22px 0;
+        text-decoration: none;
+        color: inherit;
+      }
+      .opt-a .accent {
+        width: 6px;
+        background: var(--color-pdf);
+        align-self: stretch;
+      }
+      .opt-a .icon {
+        display: flex;
+        align-items: center;
+        padding: 16px 14px 16px 18px;
+      }
+      .opt-a .icon svg {
+        width: 28px;
+        height: 28px;
+        color: var(--color-pdf);
+      }
+      .opt-a .body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 14px 14px 14px 0;
+        flex: 1;
+        min-width: 0;
+      }
+      .opt-a .body .label {
+        font-family: ui-serif, Georgia, serif;
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.3;
+        color: var(--color-ink);
+      }
+      .opt-a .body .sub {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 4px;
+      }
+      .opt-a .meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px 0 8px;
+      }
+      .opt-a .size {
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink-muted);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        color: var(--color-ink-muted);
+      }
+      .opt-a .download {
+        color: var(--color-ink);
+      }
+      .opt-a .download svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      /* ============================================================
+         OPTION B — TapedCard "document" with corner stamp
+         ============================================================ */
+      .opt-b {
+        position: relative;
+        display: grid;
+        grid-template-columns: 88px 1fr auto;
+        gap: 0;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+        margin: 28px 0;
+        text-decoration: none;
+        color: inherit;
+        padding: 14px 16px 14px 0;
+      }
+      .opt-b .tape {
+        position: absolute;
+        top: -8px;
+        left: 38%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 92px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.8);
+      }
+      .opt-b .stamp {
+        align-self: center;
+        margin-left: 16px;
+        width: 64px;
+        height: 64px;
+        border: 2px solid var(--color-pdf);
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-pdf);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        transform: rotate(-3deg);
+        background: rgba(192, 57, 43, 0.06);
+      }
+      .opt-b .stamp .ext {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+      }
+      .opt-b .stamp .label {
+        font-size: 8px;
+        margin-top: 2px;
+      }
+      .opt-b .body {
+        align-self: center;
+        padding: 0 16px;
+        min-width: 0;
+      }
+      .opt-b .body .label {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.25;
+        color: var(--color-ink);
+      }
+      .opt-b .body .sub {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin-top: 4px;
+      }
+      .opt-b .cta {
+        align-self: center;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 14px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 600;
+        border: 1px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        text-decoration: none;
+        margin-right: 0;
+      }
+      .opt-b .cta svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* ============================================================
+         OPTION C — Inline-only (mono caps pill, no card)
+         ============================================================ */
+      .opt-c-block {
+        margin: 22px 0;
+      }
+      .opt-c {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        height: 40px;
+        padding: 0 16px 0 12px;
+        background: var(--color-cream);
+        border: 1px solid var(--color-ink);
+        box-shadow: 3px 3px 0 0 var(--color-ink);
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        color: var(--color-ink);
+        text-decoration: none;
+      }
+      .opt-c .ext-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 22px;
+        padding: 0 7px;
+        background: var(--color-pdf);
+        color: var(--color-cream);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .opt-c .size {
+        color: var(--color-ink-muted);
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+      }
+      .opt-c svg {
+        width: 14px;
+        height: 14px;
+        color: var(--color-ink-muted);
+      }
+
+      /* ============================================================
+         OPTION D — Receipt-strip (mono caps perforated card)
+         ============================================================ */
+      .opt-d {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0;
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: 4px 4px 0 0 var(--color-ink);
+        margin: 22px 0;
+        text-decoration: none;
+        color: inherit;
+      }
+      .opt-d::before {
+        content: '';
+        position: absolute;
+      }
+      .opt-d .body {
+        padding: 12px 16px;
+        border-right: 1px dashed var(--color-ink);
+        min-width: 0;
+      }
+      .opt-d .body .header {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        margin-bottom: 4px;
+      }
+      .opt-d .body .ext {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-pdf);
+        font-weight: 700;
+      }
+      .opt-d .body .size {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .opt-d .body .label {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--color-ink);
+        margin: 0;
+      }
+      .opt-d .cta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+      }
+      .opt-d .cta svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul { margin: 8px 0 0; padding-left: 20px; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-file · Round 1 · #1840</p>
+      <h1>
+        fileAttachment — cream-surface restyle (legacy / taped-document /
+        inline pill / receipt-strip)
+      </h1>
+      <p>
+        Drill 5.1. The legacy <code>&lt;DownloadButton&gt;</code> uses
+        white-on-gray with file-type colored accent bars and a hover
+        scale — visually disconnected from the cream surface. This round
+        decides the Phase 5 treatment.
+      </p>
+      <p>
+        Each option renders the same fixture: a PDF named "Trainingsschema
+        seizoen 2025-2026" (1.4 MB), wrapped in body prose. File-type
+        colour (PDF red) is preserved across options that keep type
+        indication; one option drops the file-type colour entirely.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION A — CREAM-SOFT LEGACY CARD ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option A · Cream-soft legacy card</div>
+          <div class="name">Same layout, swapped to cream-soft + ink border</div>
+          <div class="desc">
+            Minimal change. The existing <code>&lt;DownloadButton&gt;</code>
+            card layout stays — accent bar left, icon, label + subtitle,
+            file size badge, download glyph right — but colours move to
+            the Phase 5 palette: cream-soft background, 1px ink border,
+            offset shadow. File-type accent bar keeps its colour (PDF
+            red, Word blue, Excel green, etc.) for quick type wayfinding.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ existing DownloadButton layout<br />
+            ✓ cream-soft bg + ink border + offset shadow<br />
+            ✓ file-type colour accent bar (preserved)<br />
+            ✓ press-down hover (canonical)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De trainingsindeling voor het komende seizoen ligt vast. Je
+              vindt het volledige overzicht in de bijlage hieronder.
+            </p>
+            <a class="opt-a" href="#">
+              <span class="accent" aria-hidden="true"></span>
+              <span class="icon">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5" fill="none" />
+                  <path d="M14 2v6h6" stroke="currentColor" stroke-width="1.5" fill="none" />
+                </svg>
+              </span>
+              <span class="body">
+                <span class="label">Trainingsschema seizoen 2025–2026</span>
+                <span class="sub">PDF · 1,4 MB</span>
+              </span>
+              <span class="meta">
+                <span class="download">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                    <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+                  </svg>
+                </span>
+              </span>
+            </a>
+            <p>
+              Lees vooral de toelichting bij de wijzigingen rond de
+              U13/U15 voorbereiding.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION B — TAPED DOCUMENT WITH CORNER STAMP ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option B · Taped document with corner stamp</div>
+          <div class="name">TapedCard with tape strip + faux paper stamp + jersey-deep CTA</div>
+          <div class="desc">
+            Strongest fanzine character. Cream-white card with a single
+            ochre tape strip top, a stenciled-stamp "PDF" extension mark
+            on the left (jersey-stamp / ink stamp style, slight rotation),
+            italic display label in the center, and a jersey-deep CTA
+            pill on the right. Reads as "a paper document clipped to the
+            article."
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TapedCard family + ochre tape<br />
+            ✓ stenciled stamp glyph — NEW ornament (extension only)<br />
+            ✓ jersey-deep CTA pill (matches video play affordance)<br />
+            ⚠ stamp adds new ink vocabulary not used elsewhere
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De trainingsindeling voor het komende seizoen ligt vast. Je
+              vindt het volledige overzicht in de bijlage hieronder.
+            </p>
+            <a class="opt-b" href="#">
+              <span class="tape" aria-hidden="true"></span>
+              <span class="stamp" aria-hidden="true">
+                <span class="ext">PDF</span>
+                <span class="label">Bestand</span>
+              </span>
+              <span class="body">
+                <span class="label">Trainingsschema seizoen 2025–2026</span>
+                <span class="sub">1,4 MB · Bijgewerkt 12 mei</span>
+              </span>
+              <span class="cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+                </svg>
+                Download
+              </span>
+            </a>
+            <p>
+              Lees vooral de toelichting bij de wijzigingen rond de
+              U13/U15 voorbereiding.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION C — INLINE-ONLY PILL ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option C · Inline pill (no card)</div>
+          <div class="name">Compact extension pill + italic label, one row</div>
+          <div class="desc">
+            Lightest visual weight. A small jersey-deep / PDF-red type
+            pill ("PDF") on the left, italic serif label, mono caps file
+            size, ink border + offset shadow. Reads as a clickable
+            chip in the body — closest to a CTA. Loses the
+            "structural card" framing of A and B.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ Cream bg + ink border + offset shadow (CTA family)<br />
+            ✓ file-type pill (PDF red, etc.)<br />
+            ✓ italic serif label<br />
+            ✗ no per-file subtitle / description slot
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De trainingsindeling voor het komende seizoen ligt vast. Je
+              vindt het volledige overzicht in de bijlage hieronder.
+            </p>
+            <div class="opt-c-block">
+              <a class="opt-c" href="#">
+                <span class="ext-pill">PDF</span>
+                <span>Trainingsschema seizoen 2025–2026</span>
+                <span class="size">1,4 MB</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+                </svg>
+              </a>
+            </div>
+            <p>
+              Lees vooral de toelichting bij de wijzigingen rond de
+              U13/U15 voorbereiding.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION D — RECEIPT-STRIP ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Option D · Receipt-strip (perforated card)</div>
+          <div class="name">Two-cell card: body + tear-off download cell</div>
+          <div class="desc">
+            Receipt / ticket-stub register. Two cells separated by a
+            dashed perforation: body cell (mono caps extension + size on
+            top, italic display label below) on the left; download cell
+            (cream-soft bg, ink download glyph) on the right.
+            File-type colour limited to the extension text. Quieter than
+            B; carries less "stamp" decoration.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ TicketStub family (dashed perforation)<br />
+            ✓ mono caps + italic display split<br />
+            ✓ no decorative tape / stamp<br />
+            ✓ matches eventFact ticket-stub vocabulary (drill 2.1 R1 B was rejected, but the stub primitive still exists)
+          </div>
+        </header>
+        <div class="surface">
+          <div class="prose">
+            <p>
+              De trainingsindeling voor het komende seizoen ligt vast. Je
+              vindt het volledige overzicht in de bijlage hieronder.
+            </p>
+            <a class="opt-d" href="#">
+              <span class="body">
+                <span class="header">
+                  <span class="ext">PDF</span>
+                  <span class="size">1,4 MB</span>
+                </span>
+                <p class="label">Trainingsschema seizoen 2025–2026</p>
+              </span>
+              <span class="cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" />
+                </svg>
+              </span>
+            </a>
+            <p>
+              Lees vooral de toelichting bij de wijzigingen rond de
+              U13/U15 voorbereiding.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Variant question</strong>
+      <ul>
+        <li>
+          The legacy <code>&lt;DownloadButton&gt;</code> exposes a
+          <code>variant: "card" | "inline"</code> prop. Options A, B, D
+          are "card" variants; C is the "inline" variant. We could
+          keep both (pick one card option + Option C as the inline
+          variant), or drop the inline variant and use only one card
+          style.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">Reuse signal</strong>
+      <ul>
+        <li>
+          <strong>A</strong> = least new vocabulary; lowest brand
+          character. <strong>B</strong> = strongest brand; adds a
+          stencil-stamp vocabulary not used elsewhere.
+          <strong>C</strong> = lightest; great as the inline variant.
+          <strong>D</strong> = reuses ticket-stub vocabulary from the
+          design system.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

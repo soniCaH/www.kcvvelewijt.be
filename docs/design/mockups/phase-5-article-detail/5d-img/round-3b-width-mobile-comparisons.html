@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Phase 5 · Drill 5.d-img · Round 3b · Width enum mobile fallback
+    </title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+        --container-wide: 1040px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 36px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      /* Split panels — left = desktop sim (1280-ish), right = mobile sim (375). */
+      .split {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        background: var(--color-cream);
+      }
+      @media (max-width: 1100px) {
+        .split {
+          grid-template-columns: 1fr;
+        }
+      }
+      .pane {
+        position: relative;
+        padding: 18px 0 28px;
+        overflow: hidden;
+      }
+      .pane + .pane {
+        border-left: 1px dashed var(--color-ink);
+      }
+      @media (max-width: 1100px) {
+        .pane + .pane {
+          border-left: 0;
+          border-top: 1px dashed var(--color-ink);
+        }
+      }
+      .pane-label {
+        position: absolute;
+        top: 6px;
+        right: 12px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        z-index: 2;
+      }
+
+      /* Desktop pane is a real flex-fluid pane; mobile pane simulates
+         375px viewport width. */
+      .pane.is-mobile {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      .pane.is-mobile .prose {
+        padding: 0 18px;
+        max-width: 100%;
+      }
+
+      .prose {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .prose p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        color: var(--color-ink-soft);
+        margin: 0 0 16px;
+      }
+
+      .photo {
+        width: 100%;
+        aspect-ratio: 3 / 2;
+        background:
+          linear-gradient(
+            135deg,
+            rgba(80, 60, 40, 0.45) 0%,
+            rgba(180, 150, 100, 0.55) 35%,
+            rgba(120, 100, 70, 0.5) 65%,
+            rgba(60, 50, 35, 0.45) 100%
+          ),
+          repeating-linear-gradient(
+            45deg,
+            rgba(0, 0, 0, 0.05) 0px,
+            rgba(0, 0, 0, 0.05) 1px,
+            transparent 1px,
+            transparent 4px
+          );
+        filter: sepia(0.2) contrast(1.05);
+      }
+
+      /* Locked Round 1 B figure. */
+      .figure {
+        position: relative;
+        background: #fdfaf1;
+        border: 1px solid color-mix(in srgb, var(--color-ink) 30%, transparent);
+        padding: 10px;
+        margin: 22px auto;
+        box-shadow: 4px 4px 0 0 rgba(26, 26, 26, 0.7);
+      }
+      .figure .tape {
+        position: absolute;
+        top: -8px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-2deg);
+        width: 92px;
+        height: 16px;
+        background: rgba(255, 200, 110, 0.8);
+        z-index: 1;
+      }
+      .figcap {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 8px 4px 0;
+      }
+      .figcap .caption {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.45;
+        color: var(--color-ink-soft);
+        margin: 0;
+        flex: 1 1 55%;
+      }
+      .figcap .credit {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      /* Width variants — desktop pane (no media-query needed at this
+         scale; the desktop pane is wide enough for `wide` to differ
+         from `prose`). */
+      .w-prose {
+        max-width: var(--container-prose);
+      }
+      .w-wide {
+        max-width: var(--container-wide);
+      }
+      .w-bleed {
+        max-width: none;
+        margin: 22px 0;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+      }
+      .w-bleed .tape {
+        display: none;
+      }
+      .w-bleed .photo {
+        max-height: 70vh;
+      }
+
+      /* Mobile pane behaviour variants. Mobile pane width = 400px
+         simulated viewport. */
+      .pane.is-mobile .figure {
+        margin: 22px 18px;
+      }
+
+      /* OPT 1 — wide → prose on mobile (prose is already viewport-wide
+         minus padding; wide and prose render identically) */
+      .opt-1 .pane.is-mobile .w-wide,
+      .opt-1 .pane.is-mobile .w-prose {
+        max-width: 100%;
+      }
+      .opt-1 .pane.is-mobile .w-bleed {
+        max-width: 100%;
+        margin: 22px 0;
+      }
+      .opt-1 .pane.is-mobile .w-bleed .photo {
+        max-height: 60vh;
+      }
+
+      /* OPT 2 — wide → bleed on mobile (full-width photo, tape suppressed) */
+      .opt-2 .pane.is-mobile .w-prose {
+        max-width: 100%;
+      }
+      .opt-2 .pane.is-mobile .w-wide {
+        max-width: 100%;
+        margin: 22px 0;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        box-shadow: none;
+      }
+      .opt-2 .pane.is-mobile .w-wide .tape {
+        display: none;
+      }
+      .opt-2 .pane.is-mobile .w-wide .photo {
+        max-height: 60vh;
+      }
+      .opt-2 .pane.is-mobile .w-bleed {
+        max-width: 100%;
+        margin: 22px 0;
+      }
+      .opt-2 .pane.is-mobile .w-bleed .photo {
+        max-height: 60vh;
+      }
+
+      /* OPT 3 — wide stays "wide-ish" via 92vw with tiny gutter */
+      .opt-3 .pane.is-mobile .w-prose {
+        max-width: 100%;
+      }
+      .opt-3 .pane.is-mobile .w-wide {
+        max-width: 92%;
+        margin: 22px auto;
+      }
+      .opt-3 .pane.is-mobile .w-bleed {
+        max-width: 100%;
+        margin: 22px 0;
+      }
+      .opt-3 .pane.is-mobile .w-bleed .photo {
+        max-height: 60vh;
+      }
+
+      .demo-label {
+        max-width: var(--container-prose);
+        margin: 16px auto 4px;
+        padding: 0 28px;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--color-ink-muted);
+      }
+      .pane.is-mobile .demo-label {
+        padding: 0 18px;
+        font-size: 9px;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-img · Round 3b · #1840</p>
+      <h1>
+        articleImage · width enum — mobile fallback (collapse-to-prose /
+        collapse-to-bleed / stay-wide-ish)
+      </h1>
+      <p>
+        Round 3 locked the 3-position <code>width: 'prose' | 'wide' | 'bleed'</code> enum.
+        Round 3b decides how each width renders on narrow viewports
+        (&lt; ~640px) — specifically what happens to <code>wide</code>,
+        which would overflow a phone screen at its desktop ~1040px.
+      </p>
+      <p>
+        Each candidate shows desktop (left) and a 400px-wide mobile
+        simulator (right), with all three width values rendered in
+        sequence. Locked figure vocabulary (Round 1 B + Round 2
+        per-asset caption/credit) is held constant.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPTION 1 — WIDE COLLAPSES TO PROSE ====================== -->
+      <section class="candidate opt-1">
+        <header class="card">
+          <div class="key">Mobile 1 · wide → prose</div>
+          <div class="name">wide collapses to prose width on mobile (identical to prose)</div>
+          <div class="desc">
+            On mobile, the figure container width clamps to viewport
+            minus body padding for both <code>prose</code> and
+            <code>wide</code>. They render identically on phones —
+            the "wide" semantic only matters on desktop+. <code>bleed</code>
+            still breaks out to 100vw (tape suppressed). Simplest CSS;
+            the editor's "wide" intent is lost on mobile.
+          </div>
+          <div class="vocab">
+            <strong>Mobile behaviour</strong>
+            ✓ prose = wide = viewport - padding<br />
+            ✓ bleed = 100vw (no tape)<br />
+            ✗ no special handling for wide
+          </div>
+        </header>
+        <div class="split">
+          <div class="pane">
+            <span class="pane-label">Desktop</span>
+            <div class="prose">
+              <p>
+                De jeugdwerking trainde vorige week op het hoofdterrein —
+                een seizoenstart met veel volk en zachte regen.
+              </p>
+            </div>
+            <p class="demo-label">— width: prose (680px) —</p>
+            <figure class="figure w-prose">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+              <figcaption class="figcap">
+                <p class="caption">
+                  Trainer Vermeulen geeft instructies vóór de eerste set
+                  partijen.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p class="demo-label">— width: wide (~1040px) —</p>
+            <figure class="figure w-wide">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+            </figure>
+            <p class="demo-label">— width: bleed (100vw) —</p>
+            <figure class="figure w-bleed">
+              <div class="photo" role="img"></div>
+            </figure>
+            <div class="prose">
+              <p>De eerste oefenwedstrijd staat zaterdag op het programma.</p>
+            </div>
+          </div>
+          <div class="pane is-mobile">
+            <span class="pane-label">Mobile 400px</span>
+            <div class="prose">
+              <p>
+                De jeugdwerking trainde vorige week op het hoofdterrein.
+              </p>
+            </div>
+            <p class="demo-label">— prose —</p>
+            <figure class="figure w-prose">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+              <figcaption class="figcap">
+                <p class="caption">
+                  Trainer Vermeulen geeft instructies.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p class="demo-label">— wide → prose —</p>
+            <figure class="figure w-wide">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+            </figure>
+            <p class="demo-label">— bleed —</p>
+            <figure class="figure w-bleed">
+              <div class="photo" role="img"></div>
+            </figure>
+            <div class="prose">
+              <p>De oefenwedstrijd staat zaterdag op het programma.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION 2 — WIDE COLLAPSES TO BLEED ====================== -->
+      <section class="candidate opt-2">
+        <header class="card">
+          <div class="key">Mobile 2 · wide → bleed</div>
+          <div class="name">wide collapses to 100vw on mobile (no tape)</div>
+          <div class="desc">
+            On mobile, the editor's "wide" intent is preserved by
+            promoting it to full-bleed — the photo spans the full phone
+            viewport (no body padding, no tape, no figure chrome).
+            <code>prose</code> stays prose-width;
+            <code>bleed</code> stays 100vw. Two distinct visual modes on
+            mobile (framed vs. bleed) instead of one.
+          </div>
+          <div class="vocab">
+            <strong>Mobile behaviour</strong>
+            ✓ prose = viewport - padding (framed)<br />
+            ✓ wide = bleed = 100vw (no tape)<br />
+            ✓ preserves editor's "dramatic" intent
+          </div>
+        </header>
+        <div class="split">
+          <div class="pane">
+            <span class="pane-label">Desktop</span>
+            <div class="prose">
+              <p>
+                De jeugdwerking trainde vorige week op het hoofdterrein —
+                een seizoenstart met veel volk en zachte regen.
+              </p>
+            </div>
+            <p class="demo-label">— width: prose (680px) —</p>
+            <figure class="figure w-prose">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+              <figcaption class="figcap">
+                <p class="caption">
+                  Trainer Vermeulen geeft instructies vóór de eerste set
+                  partijen.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p class="demo-label">— width: wide (~1040px) —</p>
+            <figure class="figure w-wide">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+            </figure>
+            <p class="demo-label">— width: bleed (100vw) —</p>
+            <figure class="figure w-bleed">
+              <div class="photo" role="img"></div>
+            </figure>
+            <div class="prose">
+              <p>De eerste oefenwedstrijd staat zaterdag op het programma.</p>
+            </div>
+          </div>
+          <div class="pane is-mobile">
+            <span class="pane-label">Mobile 400px</span>
+            <div class="prose">
+              <p>
+                De jeugdwerking trainde vorige week op het hoofdterrein.
+              </p>
+            </div>
+            <p class="demo-label">— prose —</p>
+            <figure class="figure w-prose">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+              <figcaption class="figcap">
+                <p class="caption">
+                  Trainer Vermeulen geeft instructies.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p class="demo-label">— wide → bleed —</p>
+            <figure class="figure w-wide">
+              <div class="photo" role="img"></div>
+            </figure>
+            <p class="demo-label">— bleed —</p>
+            <figure class="figure w-bleed">
+              <div class="photo" role="img"></div>
+            </figure>
+            <div class="prose">
+              <p>De oefenwedstrijd staat zaterdag op het programma.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPTION 3 — WIDE STAYS WIDE-ISH ====================== -->
+      <section class="candidate opt-3">
+        <header class="card">
+          <div class="key">Mobile 3 · wide stays wide-ish (92vw)</div>
+          <div class="name">wide keeps a small inset (92vw, no prose padding)</div>
+          <div class="desc">
+            On mobile, <code>wide</code> renders at 92vw — bigger than
+            prose (which sits inside a 18–28px body padding) but with a
+            small gutter (4vw each side) that visually distinguishes
+            from full-bleed. Keeps the "wide but framed" semantic on
+            phones. <code>bleed</code> still 100vw.
+          </div>
+          <div class="vocab">
+            <strong>Mobile behaviour</strong>
+            ✓ prose = viewport - padding<br />
+            ✓ wide = 92vw (4vw gutters)<br />
+            ✓ bleed = 100vw (no tape)<br />
+            ✓ preserves three distinct modes on mobile
+          </div>
+        </header>
+        <div class="split">
+          <div class="pane">
+            <span class="pane-label">Desktop</span>
+            <div class="prose">
+              <p>
+                De jeugdwerking trainde vorige week op het hoofdterrein —
+                een seizoenstart met veel volk en zachte regen.
+              </p>
+            </div>
+            <p class="demo-label">— width: prose (680px) —</p>
+            <figure class="figure w-prose">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+              <figcaption class="figcap">
+                <p class="caption">
+                  Trainer Vermeulen geeft instructies vóór de eerste set
+                  partijen.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p class="demo-label">— width: wide (~1040px) —</p>
+            <figure class="figure w-wide">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+            </figure>
+            <p class="demo-label">— width: bleed (100vw) —</p>
+            <figure class="figure w-bleed">
+              <div class="photo" role="img"></div>
+            </figure>
+            <div class="prose">
+              <p>De eerste oefenwedstrijd staat zaterdag op het programma.</p>
+            </div>
+          </div>
+          <div class="pane is-mobile">
+            <span class="pane-label">Mobile 400px</span>
+            <div class="prose">
+              <p>
+                De jeugdwerking trainde vorige week op het hoofdterrein.
+              </p>
+            </div>
+            <p class="demo-label">— prose —</p>
+            <figure class="figure w-prose">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+              <figcaption class="figcap">
+                <p class="caption">
+                  Trainer Vermeulen geeft instructies.
+                </p>
+                <p class="credit">Foto: An Verheyden</p>
+              </figcaption>
+            </figure>
+            <p class="demo-label">— wide (92vw) —</p>
+            <figure class="figure w-wide">
+              <span class="tape" aria-hidden="true"></span>
+              <div class="photo" role="img"></div>
+            </figure>
+            <p class="demo-label">— bleed —</p>
+            <figure class="figure w-bleed">
+              <div class="photo" role="img"></div>
+            </figure>
+            <div class="prose">
+              <p>De oefenwedstrijd staat zaterdag op het programma.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Trade-offs</strong>
+      <ul>
+        <li>
+          <strong>Mobile 1 (collapse to prose)</strong> — simplest CSS,
+          but the editor's "wide" intent disappears on phones. Anyone
+          authoring "wide" implicitly means "let it stand out" — Mobile
+          1 silently downgrades.
+        </li>
+        <li>
+          <strong>Mobile 2 (collapse to bleed)</strong> — preserves
+          dramatic intent. Two modes on mobile (framed prose vs. 100vw)
+          — easy to test, easy to author. Possibly aggressive: a
+          three-position desktop control collapses to two on mobile.
+        </li>
+        <li>
+          <strong>Mobile 3 (wide-ish 92vw)</strong> — preserves all
+          three modes on mobile. A 4vw gutter visually distinguishes
+          wide from bleed. Most fidelity to the editor's intent;
+          slightly more CSS / more VR cases.
+        </li>
+      </ul>
+      <strong style="display: block; margin-top: 12px">
+        Constants across all options
+      </strong>
+      <ul>
+        <li>
+          <code>prose</code> on mobile = viewport minus 18–28px body
+          padding (already responsive — no change from drill 5.A.1).
+        </li>
+        <li>
+          <code>bleed</code> on mobile = 100vw, tape suppressed (same
+          as desktop).
+        </li>
+        <li>
+          Breakpoint = <code>~640px</code> (existing <code>md</code>
+          Tailwind breakpoint).
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>

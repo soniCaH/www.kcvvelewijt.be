@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Drill 5.d-int Rapid-fire · Round 4 · Section opener</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+      .surface {
+        background: var(--color-cream);
+        padding: 32px 0 36px;
+      }
+      .qa-section {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .speaker-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 18px;
+      }
+      .speaker-tag {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+      .speaker-tag .name-strong {
+        color: var(--color-ink);
+      }
+
+      /* Locked Round 1 hanging-Q rhythm + Round 3 dotted divider. */
+      .rf-pairs .pair {
+        display: grid;
+        grid-template-columns: 132px minmax(0, 1fr);
+        gap: 22px;
+        padding: 14px 0;
+        border-bottom: 1px dotted var(--color-ink-muted);
+        align-items: baseline;
+      }
+      .rf-pairs .pair:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .rf-pairs .q {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        margin: 0;
+        line-height: 1.45;
+      }
+      .rf-pairs .a {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.55;
+        margin: 0;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         OPENER A — Plain MonoLabel with star
+         ★ SNELTREIN — the placeholder used in all earlier rounds.
+         ============================================================ */
+      .opener-a {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+        text-align: center;
+        margin: 0 0 22px;
+      }
+
+      /* ============================================================
+         OPENER B — Display italic word
+         "Sneltrein." — mixed-case italic Freight Display, left-aligned
+         to match the speaker strip below it.
+         ============================================================ */
+      .opener-b {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 22px;
+        line-height: 1.1;
+        color: var(--color-ink);
+        margin: 0 0 14px;
+        letter-spacing: -0.015em;
+      }
+
+      /* ============================================================
+         OPENER C — Three-bar accent + MonoLabel (legacy homage)
+         Three jersey-deep bars + SNELTREIN mono caps. Carries forward
+         the legacy QaGroupRapidFire visual signature, adapted to cream
+         + jersey-deep (no kcvv-green-bright).
+         ============================================================ */
+      .opener-c {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+      }
+      .opener-c .bars {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .opener-c .bars span {
+        display: block;
+        width: 12px;
+        height: 2px;
+        background: var(--color-jersey-deep);
+      }
+      .opener-c .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--color-jersey-deep);
+        font-weight: 600;
+      }
+
+      /* ============================================================
+         OPENER D — MonoLabel between hairlines
+         ─── SNELTREIN ─── ink hairlines on both sides, centered.
+         "Editorial section break" register.
+         ============================================================ */
+      .opener-d {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 0 0 22px;
+      }
+      .opener-d .rule {
+        flex: 1;
+        height: 1px;
+        background: var(--color-ink);
+      }
+      .opener-d .label {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .footnote {
+        max-width: 1120px;
+        margin: 48px auto 0;
+        padding: 18px 22px;
+        border: 1px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+      .footnote strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+      }
+      .footnote ul {
+        margin: 8px 0 0;
+        padding-left: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Drill 5.d-int-rapidfire · Round 4 · #1840</p>
+      <h1>
+        Rapid-fire — section opener (mono / display / 3-bar / hairlines)
+      </h1>
+      <p>
+        Locked so far · <strong>R1:</strong> hanging-Q rail (132px) ·
+        <strong>R1b:</strong> Q stacks above A &lt; 640px ·
+        <strong>R2:</strong> full speaker strip ·
+        <strong>R3:</strong> dotted ink-muted divider. Round 4 is the
+        last: how the rapid-fire block introduces itself before the
+        speaker strip and pairs.
+      </p>
+      <p>
+        Label word is held constant ("Sneltrein") across all four options —
+        the visual treatment is what varies. Sneltrein is the legacy
+        editorial word from the Phase 2 <code>QaGroupRapidFire</code> and
+        carries forward unchanged.
+      </p>
+      <p>
+        Same fixture as Rounds 1–3.
+      </p>
+    </header>
+
+    <div class="container">
+      <!-- ====================== OPENER A — PLAIN MONO + STAR ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Opener A · Plain MonoLabel + star</div>
+          <div class="name">★ SNELTREIN — centered, mono caps, ink-muted</div>
+          <div class="desc">
+            The placeholder used through Rounds 1–3. Centered MonoLabel
+            (10px / 0.2em tracking) with a leading typographic star. Most
+            understated; reads as a quiet section beat.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel cream-surface (10px ink-muted)<br />
+            ✓ typographic star glyph (matches QASection kicker)<br />
+            ✗ no new tokens
+          </div>
+        </header>
+        <div class="surface">
+          <p class="opener-a">★ Sneltrein</p>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPENER B — DISPLAY ITALIC WORD ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Opener B · Display italic word</div>
+          <div class="name">Sneltrein. — italic Freight Display, left-aligned</div>
+          <div class="desc">
+            Larger, mixed-case italic Freight Display. Left-aligned so it
+            stacks naturally above the speaker strip. Reads as a section
+            title — gives rapid-fire the most editorial weight of the four.
+            Closest cousin to a chapter heading.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ italic Freight Display 600 (matches PullQuote / Q&amp;A)<br />
+            ✗ no MonoLabel<br />
+            ✗ no ornament
+          </div>
+        </header>
+        <div class="surface">
+          <h3 class="opener-b">Sneltrein.</h3>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPENER C — THREE-BAR ACCENT ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Opener C · Three-bar accent + MonoLabel</div>
+          <div class="name">▌▌▌ SNELTREIN — jersey-deep bars + mono caps</div>
+          <div class="desc">
+            Legacy homage. The original <code>QaGroupRapidFire</code> used
+            three small green bars + "Sneltrein" mono caps; this option
+            carries the visual signature forward, swapping the Phase 2
+            bright green for jersey-deep on cream. Strongest identity —
+            "this is rapid-fire" is unmistakable. Adds the three-bar
+            ornament to the vocabulary.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel jersey-deep (11px / 0.2em / 600)<br />
+            ✓ 3x jersey-deep bars (12px × 2px, 4px gap) — NEW<br />
+            ✓ legacy continuity from Phase 2
+          </div>
+        </header>
+        <div class="surface">
+          <header class="opener-c">
+            <span class="bars" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+            <span class="label">Sneltrein</span>
+          </header>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ====================== OPENER D — MONOLABEL BETWEEN HAIRLINES ====================== -->
+      <section class="candidate">
+        <header class="card">
+          <div class="key">Opener D · MonoLabel between hairlines</div>
+          <div class="name">─── SNELTREIN ─── ink hairlines flanking the label</div>
+          <div class="desc">
+            Editorial section-break register. 1px ink hairlines on both
+            sides of the centered MonoLabel. Strongest break from the
+            surrounding article body — reads as "a new self-contained
+            section starts here". Same visual family as the locked
+            <code>ArticleCredits</code> top/bottom rules.
+          </div>
+          <div class="vocab">
+            <strong>Vocabulary</strong>
+            ✓ MonoLabel cream-surface (10px ink, 600)<br />
+            ✓ 1px ink hairlines — same primitive as ArticleCredits<br />
+            ✗ no ornament beyond MonoLabel + rules
+          </div>
+        </header>
+        <div class="surface">
+          <header class="opener-d">
+            <span class="rule" aria-hidden="true"></span>
+            <span class="label">Sneltrein</span>
+            <span class="rule" aria-hidden="true"></span>
+          </header>
+          <div class="qa-section">
+            <header class="speaker-strip">
+              <span class="avatar" aria-hidden="true">L</span>
+              <span class="speaker-tag"
+                ><span class="name-strong">LARS JANSSENS</span> ·
+                AANVALLER</span
+              >
+            </header>
+            <div class="rf-pairs">
+              <div class="pair">
+                <p class="q">Favoriete goal</p>
+                <p class="a">De volley tegen Diest in de slotminuut.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Speler om te volgen</p>
+                <p class="a">Wim. Hij maakt iedereen beter.</p>
+              </div>
+              <div class="pair">
+                <p class="q">Bus-muziek</p>
+                <p class="a">"Geen liedjes — koptelefoon op, ogen dicht."</p>
+              </div>
+              <div class="pair">
+                <p class="q">Eerste KCVV-herinnering</p>
+                <p class="a">Hand vasthouden van mijn pa, U7.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="footnote">
+      <strong>Trade-offs</strong>
+      <ul>
+        <li>
+          <strong>A</strong> is most understated — fewest new pixels, but
+          may not signal "this is a different mode" strongly enough when
+          embedded mid-article.
+        </li>
+        <li>
+          <strong>B</strong> is most editorial — gives rapid-fire chapter-
+          heading weight. May overpower a 4-pair block; better suited to
+          long lists.
+        </li>
+        <li>
+          <strong>C</strong> carries forward the legacy Phase 2 signature
+          — readers who knew the old design will recognise rapid-fire
+          immediately. Adds a small new ornament to the vocabulary.
+        </li>
+        <li>
+          <strong>D</strong> reuses the locked <code>ArticleCredits</code>
+          hairline primitive — strongest "self-contained section" cue,
+          zero new vocabulary.
+        </li>
+      </ul>
+    </section>
+  </body>
+</html>
