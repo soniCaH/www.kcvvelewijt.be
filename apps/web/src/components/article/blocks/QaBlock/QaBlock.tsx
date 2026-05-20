@@ -175,7 +175,7 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
           {needsRule && (
             <hr
               aria-hidden="true"
-              className="border-kcvv-gray-light my-10 border-t"
+              className="border-kcvv-gray-light m-0 border-t"
             />
           )}
           <QARow
@@ -263,7 +263,18 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
   if (rendered.length === 0) return null;
 
   return (
-    <div className="not-prose my-12" data-testid="qa-block">
+    // `gap-10` provides consistent vertical breathing room between every
+    // pair of consecutive units — standard QARow → PullQuote, PullQuote →
+    // QARow, QARow → QaGroupRapidFire, etc. The pre-Phase-5 QaPair*
+    // components shipped their own `my-10`; PullQuote / QARow don't, so
+    // the wrapper has to own the rhythm. The HR separator between
+    // consecutive standards uses `m-0` so the gap-10 above + gap-10
+    // below give it ~80px total breathing room (same as the original
+    // `my-10 hr + my-10 hr` rhythm).
+    <div
+      className="not-prose my-12 flex flex-col gap-10"
+      data-testid="qa-block"
+    >
       {rendered}
     </div>
   );
