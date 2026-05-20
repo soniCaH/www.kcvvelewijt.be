@@ -259,17 +259,17 @@ function UploadFigureContent({
 
   return (
     // Flow layout (#1856): poster + video render as block elements so the
-    // container takes on the source media's natural aspect. The no-poster
-    // case is handled one level up — `<TapedFigure>` is forced to
-    // `landscape-16-9` when `posterUrl` is undefined so this div has a
-    // sized parent. `min-h-12` while idle + poster-less guarantees the
-    // div itself has room for the absolutely-positioned play pill (h-9 +
-    // bottom-4 inset) when neither poster nor video supplies content
-    // height.
+    // container takes on the source media's natural aspect. The
+    // poster-less idle case is handled one level up — `<TapedFigure>` is
+    // forced to `landscape-16-9` when `posterUrl` is undefined so the
+    // parent .taped-figure__photo div carries an explicit 16:9 box. We
+    // stretch this bg-ink layer to `h-full` so the ink fills the whole
+    // 16:9 frame and the play pill anchors at the actual bottom rather
+    // than the top of a min-h-12 strip floating above empty cream.
     <div
       className={cn(
         "bg-ink relative w-full",
-        !isPlaying && !posterUrl && "min-h-12",
+        !isPlaying && !posterUrl && "h-full",
       )}
     >
       {!isPlaying && posterUrl && (

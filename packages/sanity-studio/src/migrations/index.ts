@@ -45,3 +45,12 @@ export type {
   ArticleWithWidthBlocksDoc as ArticleImageVideoBlockWidthDoc,
   BlockWithWidthLike as ArticleImageVideoBlockWidthBlock,
 } from './articleimage-videoblock-width'
+
+export {
+  default as imageToArticleImageMigration,
+  migrateImageToArticleImage,
+} from './image-to-articleimage'
+export type {
+  ArticleWithImageBlocksDoc as ImageToArticleImageDoc,
+  LegacyImageBlock as ImageToArticleImageLegacyBlock,
+} from './image-to-articleimage'

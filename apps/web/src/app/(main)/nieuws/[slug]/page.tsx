@@ -34,7 +34,12 @@ import {
 import { EditorialHero } from "@/components/article/EditorialHero";
 import { ArticleMetadata } from "@/components/article/ArticleMetadata";
 import { ArticleBodyMotion } from "@/components/article/ArticleBodyMotion";
-import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import {
+  ArticleBody,
+  qaBlocksToTailSection,
+} from "@/components/article/ArticleBody";
+import { QaBlock } from "@/components/article/blocks/QaBlock";
+import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { ArticleCredits } from "@/components/article/ArticleCredits";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 import {
@@ -349,7 +354,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const subjectCount = hasSubject ? resolvedSubjects.length : 0;
 
   return (
-    <>
+    // Page-level `bg-cream` so inter-section margins between
+    // <ArticleBody>, <VerderLezenRow>, and the footer composition resolve
+    // to cream rather than the viewport's default white. Each section
+    // layers its own bg-cream on top — no visible diff inside sections,
+    // and the gaps no longer show as white bands.
+    <div className="bg-cream">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -396,18 +406,66 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         className="mt-10"
       />
 
-      {body && body.length > 0 ? (
-        <div className="max-w-inner-lg mx-auto mb-6 w-full px-6 lg:mb-10">
-          <ArticleBodyMotion>
-            <SanityArticleBody
-              className="article-body"
-              content={body}
-              subjects={article.subjects ?? null}
-              articleSlug={article.slug}
-            />
-          </ArticleBodyMotion>
-        </div>
-      ) : null}
+      {body && body.length > 0
+        ? (() => {
+            // Phase 5.C: hoist `groupAtTail` qaBlocks out of the in-flow
+            // body before rendering through <ArticleBody>. Tail blocks
+            // render after <EndMark> under a MonoLabel-headed Q&A
+            // section per the locked composition in
+            // `docs/design/mockups/phase-5-article-detail/interview-locked.md`.
+            const { inFlow, tailBlocks } = qaBlocksToTailSection(body);
+            const hasTail = tailBlocks.length > 0;
+            return (
+              // Phase 5.C cream-shell composition: <ArticleBody> ships its
+              // own `bg-cream w-full` outer wrapper that's meant to bleed
+              // edge-to-edge. Wrapping it in `max-w-inner-lg mx-auto px-6`
+              // (the legacy <SanityArticleBody> width gate) would box the
+              // cream into a narrow centered band. The prose container
+              // inside ArticleBody handles centering; the page just gets
+              // out of the way of the cream bleed.
+              <div className="mb-6 w-full lg:mb-10">
+                <ArticleBodyMotion>
+                  <ArticleBody
+                    className="article-body"
+                    content={inFlow}
+                    subjects={article.subjects ?? null}
+                    articleSlug={article.slug}
+                    articleType={article.articleType}
+                  />
+                  {hasTail ? (
+                    // Tail section mirrors ArticleBody's shell pattern so
+                    // the cream continues edge-to-edge under the Q&A
+                    // group. Outer = `bg-cream w-full`, inner = prose
+                    // container at `--container-prose`.
+                    <section
+                      data-qa-tail-section="true"
+                      aria-label="Q&A"
+                      className="bg-cream w-full px-4 pb-12 lg:px-0 lg:pb-16"
+                    >
+                      <div
+                        className="mx-auto w-full"
+                        style={{ maxWidth: "var(--container-prose)" }}
+                      >
+                        <header className="mb-8 flex justify-center">
+                          <MonoLabel tone="ink">Q&amp;A</MonoLabel>
+                        </header>
+                        <div className="flex flex-col gap-12">
+                          {tailBlocks.map((block) => (
+                            <QaBlock
+                              key={block._key}
+                              value={block}
+                              subjects={article.subjects ?? null}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </section>
+                  ) : null}
+                </ArticleBodyMotion>
+              </div>
+            );
+          })()
+        : null}
 
       {article.articleType === "event" &&
       firstEventFact &&
@@ -434,7 +492,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         sourceArticleType={article.articleType}
       />
       <FooterSafeArea />
-    </>
+    </div>
   );
 }
 

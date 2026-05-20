@@ -581,3 +581,387 @@ export const BodyComposition: Story = {
     },
   },
 };
+
+// ─── 5.C body-block serializer coverage (#1850) ──────────────────────────
+// Block fixtures wired below exercise the new serializers added in Part C:
+// articleImage, videoBlock (embed branch), fileAttachment, htmlTable,
+// blockquote, plus internal/external link marks. Together with the
+// in-flow/groupAtTail qaBlock story below, this gives Storybook + VR
+// coverage of every body-flow block type the page composition emits.
+
+function articleImageBlock(args: {
+  _key: string;
+  alt: string;
+  width?: "prose" | "wide" | "bleed";
+  url: string;
+  description?: string;
+  creditLine?: string;
+  dimensions?: { width: number; height: number };
+}): PortableTextBlock {
+  return {
+    _type: "articleImage",
+    _key: args._key,
+    alt: args.alt,
+    width: args.width ?? "prose",
+    asset: {
+      url: args.url,
+      description: args.description,
+      creditLine: args.creditLine,
+      metadata: args.dimensions
+        ? {
+            dimensions: {
+              ...args.dimensions,
+              aspectRatio: args.dimensions.width / args.dimensions.height,
+            },
+          }
+        : undefined,
+    },
+  } as unknown as PortableTextBlock;
+}
+
+// Upload-path video fixture — used by the mixed Phase-5 composition story
+// to keep VR diffs deterministic. External iframe embeds (YouTube/Vimeo)
+// load non-deterministic network resources that destabilise pixel diffs;
+// the public-domain Big Buck Bunny URL is the same fixture other VideoBlock
+// stories use (see `VideoBlock.stories.tsx`).
+const SAMPLE_VIDEO_UPLOAD_URL =
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
+function videoBlockUpload(args: {
+  _key: string;
+  caption?: string;
+  posterUrl?: string;
+  width?: "prose" | "wide" | "bleed";
+}): PortableTextBlock {
+  return {
+    _type: "videoBlock",
+    _key: args._key,
+    videoAsset: {
+      url: SAMPLE_VIDEO_UPLOAD_URL,
+      size: 5_242_880,
+      mimeType: "video/mp4",
+      originalFilename: "highlights.mp4",
+    },
+    videoPosterUrl: args.posterUrl,
+    caption: args.caption,
+    width: args.width ?? "prose",
+  } as unknown as PortableTextBlock;
+}
+
+function fileAttachmentBlock(args: {
+  _key: string;
+  label: string;
+  fileUrl: string;
+  fileMimeType?: string;
+  fileSize?: number;
+  fileOriginalFilename?: string;
+}): PortableTextBlock {
+  return {
+    _type: "fileAttachment",
+    _key: args._key,
+    label: args.label,
+    fileUrl: args.fileUrl,
+    fileMimeType: args.fileMimeType,
+    fileSize: args.fileSize,
+    fileOriginalFilename: args.fileOriginalFilename,
+  } as unknown as PortableTextBlock;
+}
+
+function htmlTableBlock(args: {
+  _key: string;
+  html: string;
+}): PortableTextBlock {
+  return {
+    _type: "htmlTable",
+    _key: args._key,
+    html: args.html,
+  } as unknown as PortableTextBlock;
+}
+
+function blockquoteParagraph(text: string, key: string): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: key,
+    style: "blockquote",
+    children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
+    markDefs: [],
+  } as PortableTextBlock;
+}
+
+function paragraphWithLinkMarks(key: string): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: key,
+    style: "normal",
+    children: [
+      { _type: "span", _key: `${key}-c1`, text: "Lees ook ", marks: [] },
+      {
+        _type: "span",
+        _key: `${key}-c2`,
+        text: "het clubreglement",
+        marks: ["int-link-1"],
+      },
+      { _type: "span", _key: `${key}-c3`, text: " of bekijk de ", marks: [] },
+      {
+        _type: "span",
+        _key: `${key}-c4`,
+        text: "externe federatiepagina",
+        marks: ["ext-link-1"],
+      },
+      { _type: "span", _key: `${key}-c5`, text: " voor meer info.", marks: [] },
+    ],
+    markDefs: [
+      {
+        _key: "int-link-1",
+        _type: "internalLink",
+        reference: {
+          _type: "page",
+          slug: "reglement",
+        },
+      },
+      {
+        _key: "ext-link-1",
+        _type: "link",
+        href: "https://www.voetbalvlaanderen.be",
+      },
+    ],
+  } as unknown as PortableTextBlock;
+}
+
+function qaBlockInline(
+  key: string,
+  opts?: { groupAtTail?: boolean },
+): PortableTextBlock {
+  return {
+    _type: "qaBlock",
+    _key: key,
+    pairs: [
+      {
+        _key: `${key}-p1`,
+        question: "Hoe begon dit seizoen voor jou?",
+        respondents: [
+          {
+            _key: `${key}-r1`,
+            respondentKey: "subj-coach",
+            answer: [
+              {
+                _type: "block",
+                _key: `${key}-ans-1`,
+                style: "normal",
+                children: [
+                  {
+                    _type: "span",
+                    _key: `${key}-ans-1-c`,
+                    text: "Met heel veel goesting. De groep was er klaar voor.",
+                    marks: [],
+                  },
+                ],
+                markDefs: [],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    ...(opts?.groupAtTail ? { groupAtTail: true } : {}),
+  } as unknown as PortableTextBlock;
+}
+
+const MIXED_PHASE_5_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Een doorgewinterd seizoen in beeld. De club blikt terug op de wedstrijden, de doelpunten en de momenten die de tribunes aan het zingen brachten.",
+    "p-mixed-lead",
+  ),
+  articleImageBlock({
+    _key: "img-1",
+    alt: "De eerste ploeg viert een treffer in de slotfase",
+    width: "prose",
+    url: fixtureImage("article-hero-generic", 0),
+    description: "De ontlading bij de gelijkmaker in de slotminuut.",
+    creditLine: "Foto: An Verheyden",
+    dimensions: { width: 1600, height: 900 },
+  }),
+  paragraphWithLinkMarks("p-links"),
+  blockquoteParagraph(
+    "We hebben de kleedkamer in de derde minuut weer wakker gekregen.",
+    "bq-1",
+  ),
+  videoBlockUpload({
+    _key: "vid-1",
+    caption: "Hoogtepunten — KCVV Elewijt 3-0 Diest.",
+    width: "prose",
+  }),
+  htmlTableBlock({
+    _key: "table-1",
+    html: `<table><thead><tr><th>Stand</th><th>Ploeg</th><th>Punten</th></tr></thead><tbody><tr><td>1</td><td>KCVV Elewijt</td><td>52</td></tr><tr><td>2</td><td>Diest</td><td>49</td></tr><tr><td>3</td><td>Aarschot</td><td>45</td></tr></tbody></table>`,
+  }),
+  fileAttachmentBlock({
+    _key: "file-1",
+    label: "Reglement 2026 (PDF)",
+    fileUrl: "/files/reglement-2026.pdf",
+    fileMimeType: "application/pdf",
+    fileSize: 421337,
+    fileOriginalFilename: "reglement-2026.pdf",
+  }),
+  paragraph(
+    "Een seizoen waarin elk detail telde. De spelers bedanken het thuispubliek voor de niet-aflatende steun.",
+    "p-mixed-close",
+  ),
+];
+
+const WITH_EVENT_FACT_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Komende zaterdag staat de jeugdacademie in het centrum van de aandacht. Het clubbestuur nodigt alle leden uit voor het lentetornooi.",
+    "p-event-lead",
+  ),
+  {
+    _type: "eventFact",
+    _key: "evt-1",
+    title: "Lentetornooi U13",
+    date: "2026-06-13",
+    startTime: "09:00",
+    endTime: "17:00",
+    location: "Driesstraat",
+    ageGroup: "U13",
+    competitionTag: "TORNOOI",
+    ticketUrl: "https://kcvvelewijt.be/inschrijven",
+    ticketLabel: "Schrijf je in",
+  } as unknown as PortableTextBlock,
+  paragraph(
+    "Alle ploegen uit de regio nemen deel. De cafetaria is doorlopend open en de jeugdwerking serveert pannenkoeken.",
+    "p-event-close",
+  ),
+];
+
+const WITH_QA_INFLOW_AND_TAIL_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Een uitvoerig gesprek met de trainer, voorafgegaan door enkele opwarmende vragen die in-flow blijven.",
+    "p-qa-lead",
+  ),
+  qaBlockInline("qa-inflow", { groupAtTail: false }),
+  paragraph(
+    "De zwaarte van de match zat in de details — een ingooi, een tweede bal, een net iets te laat ingreep.",
+    "p-qa-mid",
+  ),
+  // groupAtTail block — in production this would be hoisted by
+  // qaBlocksToTailSection before reaching <ArticleBody>. The story
+  // leaves it in flow on purpose so reviewers can verify the in-flow
+  // qaBlock serializer renders both flagged and unflagged blocks
+  // identically (the flag is a page-composition concern).
+  qaBlockInline("qa-tail", { groupAtTail: true }),
+];
+
+// Mixed serializer coverage — articleImage + videoBlock + fileAttachment +
+// htmlTable + inline link marks + blockquote in one body. Demonstrates
+// the cream-surface treatment end-to-end with the Phase 5 redesigned
+// block primitives wired in.
+export const WithMixedPhase5Blocks: Story = {
+  args: {
+    content: MIXED_PHASE_5_CONTENT,
+    articleSlug: "phase-5-storybook",
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Phase 5.C serializer coverage. Renders one articleImage (prose-width, with caption + credit), one external `videoBlock` (YouTube embed branch), one `fileAttachment` (PDF card), one `htmlTable`, a `blockquote`, plus internal + external link marks inside a paragraph. The cream surface stays consistent across all blocks per the locked composition.",
+      },
+    },
+  },
+};
+
+// Body-flow eventFact (not absorbed by hero). Mirrors the
+// announcement / interview / transfer variants where the eventFact
+// authored inside the body renders as a polaroid card.
+export const WithEventFactInBody: Story = {
+  args: {
+    content: WITH_EVENT_FACT_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`eventFact` body-block rendering. On `event`-articleType articles the FIRST eventFact is absorbed by `<EventDetailBlock>` at the hero (page composition concern); every other eventFact — and every eventFact on non-event articleTypes — renders here via `<EventFactInline>`.",
+      },
+    },
+  },
+};
+
+// qaBlock in-flow + tail mix. The page composition normally hoists
+// `groupAtTail: true` blocks out via `qaBlocksToTailSection()` before
+// they reach <ArticleBody>. This story keeps both in flow so reviewers
+// can verify the in-flow `qaBlock` serializer behaves identically
+// regardless of the tail flag.
+export const WithQaBlocksInFlowAndTail: Story = {
+  args: {
+    content: WITH_QA_INFLOW_AND_TAIL_CONTENT,
+    subjects: WITH_PULL_QUOTE_SUBJECTS,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Two `qaBlock` PT blocks in source order: one with `groupAtTail: false`, one with `groupAtTail: true`. The `<ArticleBody>` PT serializer treats both as in-flow content — the page composition is responsible for splitting tail blocks via `qaBlocksToTailSection()` before reaching this renderer.",
+      },
+    },
+  },
+};
+
+// articleImage width-enum coverage. Three figures at `prose`, `wide`,
+// and `bleed` widths between a lead and a closing paragraph.
+const WITH_ARTICLE_IMAGE_WIDTHS_CONTENT: PortableTextBlock[] = [
+  paragraph(
+    "Drie identieke foto's, drie verschillende breedtes. Editors kiezen de breedte per beeld via de Studio dropdown.",
+    "p-widths-lead",
+  ),
+  articleImageBlock({
+    _key: "img-prose",
+    alt: "Prose-width landschap met onderschrift en credit",
+    width: "prose",
+    url: fixtureImage("article-hero-generic", 0),
+    description: "Standaard prose-breedte (680 px).",
+    creditLine: "Foto: An Verheyden",
+    dimensions: { width: 1600, height: 900 },
+  }),
+  paragraph(
+    "Een breedte-variant dwingt de figuur buiten de leescolumn, terwijl het onderschrift binnen de prose-grid blijft staan.",
+    "p-widths-mid",
+  ),
+  articleImageBlock({
+    _key: "img-wide",
+    alt: "Wide-width landschap",
+    width: "wide",
+    url: fixtureImage("article-hero-generic", 0),
+    description: "Wide breedte (~1040 px) — collapsed naar prose op mobiel.",
+    dimensions: { width: 1600, height: 900 },
+  }),
+  paragraph(
+    "Bleed onderdrukt de tape strip en pin de foto aan de viewport-randen.",
+    "p-widths-mid-2",
+  ),
+  articleImageBlock({
+    _key: "img-bleed",
+    alt: "Bleed-width landschap",
+    width: "bleed",
+    url: fixtureImage("article-hero-generic", 0),
+    creditLine: "Foto: An Verheyden",
+    dimensions: { width: 1600, height: 900 },
+  }),
+  paragraph(
+    "Editors flippen elk beeld onafhankelijk; geen schema-bredte-hint, geen automatische resize.",
+    "p-widths-close",
+  ),
+];
+
+export const WithArticleImageWidths: Story = {
+  args: {
+    content: WITH_ARTICLE_IMAGE_WIDTHS_CONTENT,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Three identical photos at `width: 'prose'`, `'wide'`, and `'bleed'`. Verifies the locked R3 width enum from `articleimage-locked.md` (tape stays for prose + wide, suppressed for bleed; bleed pins to viewport edges while keeping the figcaption at prose width).",
+      },
+    },
+  },
+};

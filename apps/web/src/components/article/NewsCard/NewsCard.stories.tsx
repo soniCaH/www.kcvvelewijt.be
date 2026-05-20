@@ -212,12 +212,21 @@ export const PortraitAspect: Story = {
   tags: ["vr"],
 };
 
-// All four rotation slots in one story so VR captures the cycle as a unit.
-// Matches the `[a, b, c, d]` pool consumed by `<NewsGrid>` (#1672) per the
-// locked NewsGrid spec.
+// All four rotation slots in one story so reviewers can scan the cycle as a
+// unit in Storybook. Matches the `[a, b, c, d]` pool consumed by `<NewsGrid>`
+// (#1672) per the locked NewsGrid spec.
+//
+// Intentionally NOT tagged "vr": cards a (-0.5°) and d (+0.5°) both pull
+// `pool[i % 3] = fixture[0]` and carry the largest pool angles. At tablet
+// width the grid's `<Image fill sizes="33vw">` resolves to two srcset
+// candidates whose selection races between identical CI runs (the bot's
+// `vr:ci:update` and the verify `vr:ci` on the same SHA disagreed by ~1.36%,
+// concentrated on cards a + d in lockstep). Per-rotation coverage runs
+// through `Lead` / `BgCream` / etc. (rotation "a") and the
+// `deriveTapeRotations` unit tests (rotations b/c/d). Re-tag when this story
+// is split into per-rotation stories with fixed fixtures (#1858).
 export const RotationCycle: Story = {
   args: phase4SharedArgs,
-  tags: ["vr"],
   render: () => (
     <div className="grid max-w-5xl grid-cols-2 gap-12 p-12">
       {(["a", "b", "c", "d"] as const).map((r, i) => (
