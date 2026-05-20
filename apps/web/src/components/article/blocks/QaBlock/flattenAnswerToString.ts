@@ -30,6 +30,7 @@ export function flattenAnswerToString(
         })
         .join("");
     })
-    .filter((s) => s.length > 0)
-    .join(" ");
+    .filter((s) => s.trim().length > 0)
+    .join(" ")
+    .trim();
 }

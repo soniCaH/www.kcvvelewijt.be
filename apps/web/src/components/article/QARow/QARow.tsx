@@ -120,7 +120,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
   if (!isMulti) {
     const r = respondents[0]!;
     const hasSpeaker =
-      typeof r.firstName === "string" && r.firstName.length > 0;
+      typeof r.firstName === "string" && r.firstName.trim().length > 0;
     return (
       <article
         data-qa-row="true"
@@ -186,7 +186,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
       <div className="mt-5 flex flex-col gap-6">
         {respondents.map((r, i) => {
           const hasSpeaker =
-            typeof r.firstName === "string" && r.firstName.length > 0;
+            typeof r.firstName === "string" && r.firstName.trim().length > 0;
           return (
             <div
               key={r.respondentKey ?? `${r.firstName ?? "anon"}-${i}`}
