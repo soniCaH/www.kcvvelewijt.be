@@ -104,7 +104,7 @@ const KeyAttribution = ({
 );
 
 /**
- * Rectangular portrait frame for the subject photo — used by `QaPairKey`
+ * Rectangular portrait frame for the subject photo — used by `<QARow>`
  * and future templates. Intentionally a fixed aspect ratio + `object-cover`
  * so psdImage (90% case) renders as a portrait crop; transparent images
  * still compose against the parent surface colour. See

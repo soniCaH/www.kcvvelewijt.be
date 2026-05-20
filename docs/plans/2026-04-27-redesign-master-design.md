@@ -762,7 +762,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 - Multi-subject interview precedent: `docs/design/interview-multi-subject-review.md`.
 - Ubiquitous language (domain glossary): `docs/ubiquitous-language.md`.
 - Owner saved preferences (memory): see `feedback_visual_preferences.md`, `feedback_no_negative_margin_seam_fix.md`, `feedback_subject_photo_fallback.md`, `reference_sponsor_tiers.md`, `reference_design_inspiration_sites.md`.
-- Existing per-feature redesign PRDs (to be superseded as phases land): `docs/prd/article-detail-redesign.md`, `docs/prd/news-redesign.md`, `docs/prd/sponsors-redesign.md`, `docs/prd/jeugd-landing-page.md`, `docs/prd/teams-landing-page.md`, `docs/prd/club-landing-page.md`.
+- Existing per-feature redesign PRDs (to be superseded as phases land): `docs/prd/news-redesign.md`, `docs/prd/sponsors-redesign.md`, `docs/prd/jeugd-landing-page.md`, `docs/prd/teams-landing-page.md`, `docs/prd/club-landing-page.md`. (Phase 5 article-detail PRD was deleted on completion — see `docs/prd/redesign-phase-5-article-detail.md`.)
 
 ---
 

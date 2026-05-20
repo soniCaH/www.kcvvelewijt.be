@@ -6,6 +6,8 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 `/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/jeugd`, `/kalender`, `/wedstrijd/[matchId]`, `/events`, `/events/[slug]`, `/sponsors`, `/club/organigram`, `/club/geschiedenis`, `/hulp`, `/zoeken`, `/privacy`
 
+`/nieuws/[slug]` shipped its Phase 5 redesign (Phase 5: article detail) — see `docs/prd/redesign-phase-5-article-detail.md`.
+
 ### Feature → route map
 
 Audit/spec generators sometimes flag features as "missing" because no top-level URL matches the obvious name. Cross-check this map before opening an issue:
@@ -102,6 +104,20 @@ A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--p
 - `--shadow-photo-tape` (`2px 4px 0 0 ink`) + `--shadow-photo-tape-lift` (`4px 8px 0 0 ink`) — asymmetric offset shadows for the photo-card system.
 
 The R9-locked "layered hover Variant A" (photo `translateY(-2)` on parent `:hover`) was **retired in #1748** when R10 routed `<NewsCard>` hover through `<TapedCard interactive="press">` directly. The layered-lift idiom has no production consumers and the `--shadow-photo-tape-lift` token is intentionally orphaned for now in case a future surface re-introduces the model.
+
+**Phase 5 additions (article-detail redesign — `/nieuws/[slug]`):**
+
+- `<ArticleBody>` — Portable Text renderer for the new article body; wires the per-block serializers below and replaces the legacy `<SanityArticleBody>` on `/nieuws/[slug]`. `<SanityArticleBody>` still backs `/club/[slug]` and `/staf/[slug]` until Phases 6 and 7.
+- `<QARow>` — single Q&A row primitive (speaker avatar + question + answer body). Replaces the retired `<QaPairStandard>` / `<QaPairKey>` / `<QaPairQuote>` trio.
+- `<QASection>` + `qaBlocksToTailSection` — groups trailing `groupAtTail`-tagged Q&A blocks into a single rapid-fire section.
+- `<EventFactInline>` — inline factsheet for event-style facts inside article body.
+- `<TapedFigure>` — Phase 5 extends its consumer set: `<ArticleBody>`'s `articleImage` serializer + Phase 5 hero variants.
+- `<VideoBlock>` — responsive video (Vimeo / YouTube / uploaded) with width-aware framing.
+- `<HtmlTableBlock>` — sanitised HTML table renderer for legacy embedded tables.
+- Portable Text serializers — `qaBlock`, `eventFact`, `articleImage`, `videoBlock`, `fileAttachment`, `htmlTable`, `internalLink`, `link`, `blockquote`.
+- `<DownloadButton>` — file attachment primitive with `card` and `chip` variants.
+- `<EditorialHero>` — Phase 5 finalised the four `variant`s (`interview` / `announcement` / `transfer` / `event`); previously only stubbed.
+- Schema additions in `@kcvv/sanity-schemas`: `articleImage.width` enum, `videoBlock.width` enum, `qaBlock.groupAtTail`.
 
 ## Design Conventions
 
