@@ -18,6 +18,7 @@
 import {
   COVER_IMAGE_ASSET_REF,
   PUBLISHED_AT,
+  articleRefs,
   assertProductionGuard,
   blockquote,
   heading,
@@ -60,6 +61,13 @@ function buildTracerEventMatrix() {
     author: "Jeugdvoorzitter",
     lead: "Exhaustive sweep van elke eventFact-variant — feature, overview met CTA, zonder CTA, zonder datum, sessies[], en cross-month range.",
     coverImage: imageRef(COVER_IMAGE_ASSET_REF),
+    // Cross-links so <VerderLezenRow> renders on this tracer.
+    relatedContent: articleRefs([
+      "article-phase-5-event-matchday",
+      "article-phase-5-event-multiday",
+      "article-phase-5-event-past-recap",
+      "article-phase-5-announcement-short",
+    ]),
     body: [
       // Feature eventFact — sessions[] driving the strip.
       {

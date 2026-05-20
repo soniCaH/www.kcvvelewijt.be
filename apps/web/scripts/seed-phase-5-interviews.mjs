@@ -20,6 +20,7 @@
 import {
   COVER_IMAGE_ASSET_REF,
   PUBLISHED_AT,
+  articleRefs,
   assertProductionGuard,
   blockquote,
   heading,
@@ -101,6 +102,15 @@ function buildTracerInterviewMatrix() {
       customSubject(TRACER_SUBJECT_A_KEY, "Alex Tracer", "Aanvaller · A-ploeg"),
       customSubject(TRACER_SUBJECT_B_KEY, "Bram Variant", "Middenvelder · B-ploeg"),
     ],
+    // Cross-links so <VerderLezenRow> renders on this tracer. Three same-type
+    // interviews + one cross-type transfer exercise the related-content row's
+    // mixed-type rendering on the grilling bed.
+    relatedContent: articleRefs([
+      "article-phase-5-interview-duo",
+      "article-phase-5-interview-panel",
+      "article-phase-5-interview-rapid-fire",
+      "article-phase-5-transfer-multi",
+    ]),
     body: [
       paragraph(
         "tim-intro",

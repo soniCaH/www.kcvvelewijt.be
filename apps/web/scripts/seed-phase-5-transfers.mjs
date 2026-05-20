@@ -22,6 +22,7 @@ import {
   COVER_IMAGE_ASSET_REF,
   OPPONENT_LOGO_FILENAME,
   PUBLISHED_AT,
+  articleRefs,
   assertProductionGuard,
   heading,
   imageRef,
@@ -67,6 +68,13 @@ function buildTracerTransferMatrix(opponentLogoRef) {
     author: "Sportieve cel",
     lead: "Exhaustive sweep van elke transferFact-variant en de zijde-blokken die in transferartikels voorkomen.",
     coverImage: imageRef(COVER_IMAGE_ASSET_REF),
+    // Cross-links so <VerderLezenRow> renders on this tracer.
+    relatedContent: articleRefs([
+      "article-phase-5-transfer-incoming",
+      "article-phase-5-transfer-outgoing",
+      "article-phase-5-transfer-multi",
+      "article-phase-5-interview-duo",
+    ]),
     body: [
       // Hero transferFact — incoming with full note + attribution.
       {
@@ -154,7 +162,8 @@ function buildTracerTransferMatrix(opponentLogoRef) {
       },
 
       // eventFact side-mention — sometimes editors close transfer-windows
-      // with a "Presentatieavond" calendar item.
+      // with a "Presentatieavond" calendar item. The CTA path is exercised
+      // here so the tracer surfaces the "Aanmelden" button rendering.
       {
         _key: "ttm-ev",
         _type: "eventFact",
@@ -165,6 +174,8 @@ function buildTracerTransferMatrix(opponentLogoRef) {
         location: "Kantine KCVV",
         ageGroup: "Iedereen welkom",
         competitionTag: "Clubmoment",
+        ticketUrl: "https://kcvvelewijt.be/presentatieavond",
+        ticketLabel: "Aanmelden",
       },
 
       paragraph(
