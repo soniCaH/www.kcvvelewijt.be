@@ -22,6 +22,7 @@ import {
   COVER_IMAGE_ASSET_REF,
   FILE_ATTACHMENT_FILENAME,
   PUBLISHED_AT,
+  articleRefs,
   assertProductionGuard,
   blockquote,
   fileRef,
@@ -68,6 +69,13 @@ function buildTracerAnnouncementMatrix(fileAssetRef) {
     author: "Bestuur",
     lead: "Exhaustive sweep van alle body-blokken die in mededelingen voorkomen — koppen, afbeeldingen in drie breedtes, video, bijlage, tabel, en blockquote.",
     coverImage: imageRef(COVER_IMAGE_ASSET_REF),
+    // Cross-links so <VerderLezenRow> renders on this tracer.
+    relatedContent: articleRefs([
+      "article-phase-5-announcement-short",
+      "article-phase-5-announcement-long-form",
+      "article-phase-5-announcement-attachment-table",
+      "article-phase-5-event-matchday",
+    ]),
     body: [
       heading("tam-h-intro", "Inleiding", "h2"),
       paragraph(

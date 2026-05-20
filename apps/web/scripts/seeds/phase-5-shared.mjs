@@ -180,6 +180,19 @@ export function qaPair({ key, question, tag = "standard", respondents }) {
   };
 }
 
+/**
+ * Build a `relatedContent` array of article references. Each entry carries
+ * a stable `_key` derived from the target article's `_id` so re-runs of
+ * the seed don't churn the array order or produce duplicate keys.
+ */
+export function articleRefs(targetIds) {
+  return targetIds.map((id) => ({
+    _key: `rel-${id}`,
+    _type: "reference",
+    _ref: id,
+  }));
+}
+
 // ─── Asset upserts (idempotent) ──────────────────────────────────────────────
 
 export async function upsertImageAsset(client, filename, sourcePath) {
