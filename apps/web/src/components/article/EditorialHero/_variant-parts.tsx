@@ -146,12 +146,11 @@ export function HeroCompressedEventStrip({
   return (
     <div
       data-testid="hero-compressed-event-strip"
-      // The strip only ships `border-b` — `<EditorialHeroShell>`
-      // already paints a `border-b` on its `<section>` root, which
-      // serves as this strip's top edge. A `border-t` here would
-      // stack two hairlines and read as a double line.
+      // `border-y` so the strip owns both its top and bottom edges. The
+      // shell no longer paints a bottom rule (#1866 fix-1) so the strip
+      // can no longer borrow it as a top edge.
       className={cn(
-        "border-ink flex items-center gap-2 border-b py-2",
+        "border-ink flex items-center gap-2 border-y py-2",
         "text-mono-sm text-ink font-mono tracking-[0.06em] uppercase",
       )}
     >
