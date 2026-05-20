@@ -403,7 +403,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         shareConfig={shareConfig}
         articleId={article.id}
         articleType={article.articleType}
-        className="mt-10"
       />
 
       {body && body.length > 0
