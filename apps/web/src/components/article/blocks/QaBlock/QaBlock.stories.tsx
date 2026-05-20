@@ -29,13 +29,13 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 2 tag suite. `standard` pairs flow inside the 65 ch column; `key` and `quote` break out full-bleed; consecutive `rapid-fire` pairs collapse into a single `QaGroupRapidFire`.",
+          "Phase 5 dispatcher. `standard` pairs render through `<QARow>`; `key` and `quote` render through `<PullQuote>` (cream / ink tones); consecutive `rapid-fire` pairs collapse into a single `<QaGroupRapidFire>`. All paths resolve speakers from `article.subjects[]`.",
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   render: (args) => (
-    <div className="mx-auto max-w-[65ch]">
+    <div className="bg-cream mx-auto w-full max-w-[680px] p-8">
       <QaBlock {...args} />
     </div>
   ),
@@ -62,6 +62,7 @@ type Story = StoryObj<typeof meta>;
 
 export const TwoStandardPairs: Story = {
   args: {
+    subjects: singleSubject,
     value: {
       pairs: [
         {
@@ -96,6 +97,7 @@ export const TwoStandardPairs: Story = {
 
 export const SinglePair: Story = {
   args: {
+    subjects: singleSubject,
     value: {
       pairs: [
         {
