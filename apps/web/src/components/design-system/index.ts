@@ -95,6 +95,10 @@ export type { SectionCtaProps } from "./SectionCta";
 export { useScrollHint, ScrollArrowButton } from "./ScrollHint";
 export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";
 
+// BodyQuote
+export { BodyQuote } from "./BodyQuote";
+export type { BodyQuoteProps } from "./BodyQuote";
+
 // BrandedTabs
 export { BrandedTabs } from "./BrandedTabs";
 export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";

@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink as ExternalLinkIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { BodyQuote } from "@/components/design-system/BodyQuote";
 import { DropCapParagraph } from "@/components/design-system/DropCapParagraph";
 import { EndMark } from "@/components/design-system/EndMark";
 import {
@@ -539,16 +540,7 @@ function buildComponents({
         if (!value) return null;
         return <QASectionDivider title={[value]} />;
       },
-      blockquote: ({ children }) => (
-        // Italic Freight body, ink-muted left rule. Reuses the existing
-        // typography tokens — no new design-system primitive.
-        <blockquote
-          data-article-blockquote="true"
-          className="border-ink-muted text-ink font-display text-body-lg my-8 border-l-2 pl-5 italic"
-        >
-          {children}
-        </blockquote>
-      ),
+      blockquote: ({ children }) => <BodyQuote>{children}</BodyQuote>,
     },
     types: {
       pullQuote: ({ value }: { value: PullQuoteBlock }) =>
