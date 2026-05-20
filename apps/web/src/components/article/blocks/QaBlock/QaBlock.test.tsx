@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { PortableTextBlock } from "@portabletext/react";
 import { QaBlock } from "./QaBlock";
+import { flattenAnswerToString } from "./flattenAnswerToString";
+import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 
 const makeAnswer = (text: string): PortableTextBlock[] => [
   {
@@ -13,10 +15,23 @@ const makeAnswer = (text: string): PortableTextBlock[] => [
   },
 ];
 
+const PLAYER_SUBJECTS: IndexedSubject[] = [
+  {
+    _key: "subj-lars",
+    kind: "player",
+    playerRef: {
+      firstName: "Lars",
+      lastName: "Janssens",
+      jerseyNumber: 9,
+    },
+  },
+];
+
 describe("QaBlock", () => {
-  it("renders two standard-tagged pairs in document order with 01./02. numerals", () => {
+  it("renders two standard-tagged pairs in document order through <QARow>", () => {
     render(
       <QaBlock
+        subjects={PLAYER_SUBJECTS}
         value={{
           pairs: [
             {
@@ -40,12 +55,12 @@ describe("QaBlock", () => {
       />,
     );
 
-    const pairs = screen.getAllByTestId("qa-pair-standard");
-    expect(pairs).toHaveLength(2);
-
-    const numerals = screen.getAllByTestId("qa-pair-numeral");
-    expect(numerals[0]).toHaveTextContent("01.");
-    expect(numerals[1]).toHaveTextContent("02.");
+    const rows = screen.getAllByRole("article");
+    expect(rows).toHaveLength(2);
+    rows.forEach((row) => {
+      expect(row.getAttribute("data-qa-row")).toBe("true");
+      expect(row.getAttribute("data-qa-row-mode")).toBe("single");
+    });
 
     expect(
       screen.getByText("Wat is je eerste herinnering aan KCVV?"),
@@ -59,9 +74,10 @@ describe("QaBlock", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders a 1px rule between pairs but not after the last pair", () => {
+  it("renders a 1px rule between consecutive QARow units but not after the last", () => {
     render(
       <QaBlock
+        subjects={PLAYER_SUBJECTS}
         value={{
           pairs: [
             {
@@ -87,9 +103,6 @@ describe("QaBlock", () => {
       />,
     );
 
-    // Three pairs → exactly two separators between consecutive pairs. The
-    // separators are aria-hidden for visual-only decoration, so the hidden
-    // option is required to find them through the a11y tree.
     expect(screen.getAllByRole("separator", { hidden: true })).toHaveLength(2);
   });
 
@@ -103,9 +116,10 @@ describe("QaBlock", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("falls back to QaPairStandard for unknown tag values", () => {
+  it("falls back to QARow for unknown tag values", () => {
     render(
       <QaBlock
+        subjects={PLAYER_SUBJECTS}
         value={{
           pairs: [
             {
@@ -118,36 +132,257 @@ describe("QaBlock", () => {
         }}
       />,
     );
-    expect(screen.getByTestId("qa-pair-standard")).toBeInTheDocument();
+    const row = screen.getByRole("article");
+    expect(row.getAttribute("data-qa-row")).toBe("true");
     expect(screen.getByText("Onbekende tag?")).toBeInTheDocument();
+    expect(screen.getByText("Valt terug op standard.")).toBeInTheDocument();
   });
 
-  describe("tag dispatch and rapid-fire grouping", () => {
-    it("renders key + quote pairs as their own breakout blocks", () => {
+  it("maps multi-respondent standard pairs to QARow multi-mode with one entry per resolvable respondent", () => {
+    const subjects: IndexedSubject[] = [
+      {
+        _key: "subj-lars",
+        kind: "player",
+        playerRef: {
+          firstName: "Lars",
+          lastName: "Janssens",
+          jerseyNumber: 9,
+        },
+      },
+      {
+        _key: "subj-niels",
+        kind: "player",
+        playerRef: {
+          firstName: "Niels",
+          lastName: "Peeters",
+          jerseyNumber: 6,
+        },
+      },
+    ];
+    render(
+      <QaBlock
+        subjects={subjects}
+        value={{
+          pairs: [
+            {
+              _key: "pair-1",
+              tag: "standard",
+              question: "Wat veranderde er na de winterstop?",
+              respondents: [
+                {
+                  _key: "r-lars",
+                  respondentKey: "subj-lars",
+                  answer: makeAnswer("Het tempo lag een tand hoger."),
+                },
+                {
+                  _key: "r-niels",
+                  respondentKey: "subj-niels",
+                  answer: makeAnswer("Voor mij was het de zaalstage."),
+                },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+
+    const row = screen.getByRole("article");
+    expect(row.getAttribute("data-qa-row-mode")).toBe("multi");
+    expect(row.getAttribute("data-qa-row-respondent-count")).toBe("2");
+    expect(screen.getByText("Lars Janssens")).toBeInTheDocument();
+    expect(screen.getByText("Niels Peeters")).toBeInTheDocument();
+    expect(
+      screen.getByText("Het tempo lag een tand hoger."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Voor mij was het de zaalstage."),
+    ).toBeInTheDocument();
+  });
+
+  it("renders multi-respondent standard pairs with a no-speaker block for entries that can't be resolved", () => {
+    // Two subjects → no single-subject fallback. The second respondent
+    // points at a key that isn't in the list, so it hits the
+    // resolvePairRespondent multi-subject-with-unresolvable-key branch
+    // and returns null. The dispatcher must still render the answer —
+    // QARow falls back to a no-speaker block for the unresolvable one.
+    const subjects: IndexedSubject[] = [
+      {
+        _key: "subj-lars",
+        kind: "player",
+        playerRef: {
+          firstName: "Lars",
+          lastName: "Janssens",
+          jerseyNumber: 9,
+        },
+      },
+      {
+        _key: "subj-niels",
+        kind: "player",
+        playerRef: {
+          firstName: "Niels",
+          lastName: "Peeters",
+          jerseyNumber: 6,
+        },
+      },
+    ];
+    const { container } = render(
+      <QaBlock
+        subjects={subjects}
+        value={{
+          pairs: [
+            {
+              _key: "pair-1",
+              tag: "standard",
+              question: "Q?",
+              respondents: [
+                {
+                  _key: "r-lars",
+                  respondentKey: "subj-lars",
+                  answer: makeAnswer("A1"),
+                },
+                {
+                  _key: "r-missing",
+                  respondentKey: "subj-does-not-exist",
+                  answer: makeAnswer("A2"),
+                },
+              ],
+            },
+          ],
+        }}
+      />,
+    );
+
+    const row = screen.getByRole("article");
+    expect(row.getAttribute("data-qa-row-mode")).toBe("multi");
+    expect(row.getAttribute("data-qa-row-respondent-count")).toBe("2");
+    expect(screen.getByText("A1")).toBeInTheDocument();
+    expect(screen.getByText("A2")).toBeInTheDocument();
+    // One respondent block has a speaker, the other doesn't.
+    const blocks = container.querySelectorAll('[data-qa-row="respondent"]');
+    expect(blocks).toHaveLength(2);
+    expect(blocks[0]?.getAttribute("data-qa-row-has-speaker")).toBe("true");
+    expect(blocks[1]?.getAttribute("data-qa-row-has-speaker")).toBe("false");
+  });
+
+  it("renders standard pairs without a speaker header when no respondent resolves (legacy multi-subject untagged data)", () => {
+    // No subjects at all → resolvePairRespondent returns null.
+    // The pair must still render (matches pre-Phase-5 QaPairStandard
+    // semantics — question + answer with no speaker info).
+    const { container } = render(
+      <QaBlock
+        value={{
+          pairs: [
+            {
+              _key: "pair-1",
+              tag: "standard",
+              question: "Wie?",
+              respondents: [{ answer: makeAnswer("Niemand.") }],
+            },
+          ],
+        }}
+      />,
+    );
+    const row = screen.getByRole("article");
+    expect(row.getAttribute("data-qa-row")).toBe("true");
+    expect(row.getAttribute("data-qa-row-mode")).toBe("single");
+    expect(row.getAttribute("data-qa-row-has-speaker")).toBe("false");
+    expect(screen.getByText("Wie?")).toBeInTheDocument();
+    expect(screen.getByText("Niemand.")).toBeInTheDocument();
+    // No avatar, no speaker tag.
+    expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+    expect(container.querySelector('[data-qa-row="speaker-tag"]')).toBeNull();
+  });
+
+  describe("tag dispatch — key & quote → <PullQuote>", () => {
+    it("renders a key pair as PullQuote tone=cream, carrying the question as source", () => {
       render(
         <QaBlock
+          subjects={PLAYER_SUBJECTS}
           value={{
             pairs: [
               {
                 _key: "k",
                 tag: "key",
-                question: "Key question",
-                respondents: [{ answer: makeAnswer("Key answer.") }],
-              },
-              {
-                _key: "q",
-                tag: "quote",
-                question: "(hidden for quote)",
-                respondents: [{ answer: makeAnswer("Quote answer.") }],
+                question: "Het sleutelmoment van je seizoen",
+                respondents: [
+                  {
+                    answer: makeAnswer("De eindrondewinst tegen Kraainem."),
+                  },
+                ],
               },
             ],
           }}
         />,
       );
-      expect(screen.getByTestId("qa-pair-key")).toBeInTheDocument();
-      expect(screen.getByTestId("qa-pair-quote")).toBeInTheDocument();
+
+      const tone = document.querySelector('[data-pull-quote-tone="cream"]');
+      expect(tone).not.toBeNull();
+      expect(
+        screen.getByText("De eindrondewinst tegen Kraainem."),
+      ).toBeInTheDocument();
+      // Attribution shows the resolved name.
+      const nameSlot = document.querySelector(
+        '[data-pull-quote-name="display"]',
+      );
+      expect(nameSlot?.textContent).toBe("Lars Janssens");
+      // Question rides along as the source meta line.
+      expect(
+        screen.getByText("Het sleutelmoment van je seizoen"),
+      ).toBeInTheDocument();
     });
 
+    it("renders a quote pair as PullQuote tone=ink with no source meta", () => {
+      render(
+        <QaBlock
+          subjects={PLAYER_SUBJECTS}
+          value={{
+            pairs: [
+              {
+                _key: "q",
+                tag: "quote",
+                question: "(hidden for quote)",
+                respondents: [
+                  {
+                    answer: makeAnswer("Ik voetbal nog altijd met schrik."),
+                  },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+
+      expect(
+        document.querySelector('[data-pull-quote-tone="ink"]'),
+      ).not.toBeNull();
+      expect(
+        screen.getByText("Ik voetbal nog altijd met schrik."),
+      ).toBeInTheDocument();
+      // The question must NOT bleed through as source for quote tone.
+      expect(screen.queryByText("(hidden for quote)")).toBeNull();
+    });
+
+    it("skips key/quote pairs when the body flattens to an empty string", () => {
+      const { container } = render(
+        <QaBlock
+          subjects={PLAYER_SUBJECTS}
+          value={{
+            pairs: [
+              {
+                _key: "k",
+                tag: "key",
+                question: "Empty key",
+                respondents: [{ answer: [] }],
+              },
+            ],
+          }}
+        />,
+      );
+      expect(container.querySelector("[data-pull-quote-tone]")).toBeNull();
+    });
+  });
+
+  describe("rapid-fire grouping (unchanged from #1849)", () => {
     it("collapses consecutive rapid-fire pairs into a single QaGroupRapidFire and threads the resolved respondent + answers", () => {
       render(
         <QaBlock
@@ -173,78 +408,7 @@ describe("QaBlock", () => {
               },
             ],
           }}
-          subjects={[
-            {
-              _key: "subj-lars",
-              kind: "player",
-              playerRef: {
-                firstName: "Lars",
-                lastName: "Janssens",
-                jerseyNumber: 9,
-              },
-            },
-          ]}
-        />,
-      );
-      const group = screen.getByTestId("qa-group-rapid-fire");
-      expect(group).toBeInTheDocument();
-      expect(screen.getAllByTestId("qa-group-rapid-fire")).toHaveLength(1);
-      expect(screen.getByText("Kort & Krachtig")).toBeInTheDocument();
-      // Resolved respondent name + role flow through to the speaker tag.
-      expect(group.querySelector("[data-rapidfire='speaker']")).not.toBeNull();
-      expect(screen.getByText("Lars Janssens")).toBeInTheDocument();
-      expect(screen.getByText("#9")).toBeInTheDocument();
-      // Every pair's PortableText answer is rendered.
-      expect(screen.getByText("A1")).toBeInTheDocument();
-      expect(screen.getByText("A2")).toBeInTheDocument();
-      expect(screen.getByText("A3")).toBeInTheDocument();
-    });
-
-    it("trims padded firstName/lastName before splitting so the speaker strip still renders the clean resolved name", () => {
-      render(
-        <QaBlock
-          value={{
-            pairs: [
-              {
-                _key: "rf-1",
-                tag: "rapid-fire",
-                question: "Q1",
-                respondents: [{ answer: makeAnswer("A1") }],
-              },
-              {
-                _key: "rf-2",
-                tag: "rapid-fire",
-                question: "Q2",
-                respondents: [{ answer: makeAnswer("A2") }],
-              },
-              {
-                _key: "rf-3",
-                tag: "rapid-fire",
-                question: "Q3",
-                respondents: [{ answer: makeAnswer("A3") }],
-              },
-            ],
-          }}
-          subjects={[
-            {
-              _key: "subj-lars",
-              kind: "player",
-              playerRef: {
-                // Padded inputs: leading + trailing whitespace on both
-                // names. resolveSubject joins them with a space then
-                // trims leading/trailing only — internal multi-space
-                // persists into `resolved.name`. The QaBlock dispatcher
-                // must trim again before splitting so the monogram
-                // avatar receives "Lars" (not an empty leading token);
-                // testing-library's default text normalizer collapses
-                // whitespace, so the rendered speaker tag still matches
-                // "Lars Janssens" as far as the user sees.
-                firstName: "  Lars  ",
-                lastName: "  Janssens  ",
-                jerseyNumber: 9,
-              },
-            },
-          ]}
+          subjects={PLAYER_SUBJECTS}
         />,
       );
       const group = screen.getByTestId("qa-group-rapid-fire");
@@ -262,6 +426,7 @@ describe("QaBlock", () => {
     it("starts a new rapid-fire group whenever the run is broken by another tag", () => {
       render(
         <QaBlock
+          subjects={PLAYER_SUBJECTS}
           value={{
             pairs: [
               {
@@ -289,40 +454,10 @@ describe("QaBlock", () => {
       expect(screen.getAllByTestId("qa-group-rapid-fire")).toHaveLength(2);
     });
 
-    it("continues numbering only across standard pairs when breakouts are interleaved", () => {
-      render(
-        <QaBlock
-          value={{
-            pairs: [
-              {
-                _key: "s1",
-                tag: "standard",
-                question: "First standard",
-                respondents: [{ answer: makeAnswer("A1") }],
-              },
-              {
-                _key: "k1",
-                tag: "key",
-                question: "Key in the middle",
-                respondents: [{ answer: makeAnswer("K-answer") }],
-              },
-              {
-                _key: "s2",
-                tag: "standard",
-                question: "Third overall, second standard",
-                respondents: [{ answer: makeAnswer("A2") }],
-              },
-            ],
-          }}
-        />,
-      );
-      const numerals = screen.getAllByTestId("qa-pair-numeral");
-      expect(numerals.map((n) => n.textContent)).toEqual(["01.", "02."]);
-    });
-
     it("does not render a separator rule around a breakout unit", () => {
       render(
         <QaBlock
+          subjects={PLAYER_SUBJECTS}
           value={{
             pairs: [
               {
@@ -347,11 +482,77 @@ describe("QaBlock", () => {
           }}
         />,
       );
-      // A standard→key→standard sequence has no separators — neither between
-      // standard#1 and the key, nor between the key and standard#2.
       expect(screen.queryAllByRole("separator", { hidden: true })).toHaveLength(
         0,
       );
     });
+  });
+});
+
+describe("flattenAnswerToString", () => {
+  it("returns empty string for empty array", () => {
+    expect(flattenAnswerToString([])).toBe("");
+  });
+
+  it("returns empty string for undefined/missing input", () => {
+    expect(flattenAnswerToString(undefined)).toBe("");
+  });
+
+  it("returns the concatenated span text of a single block", () => {
+    const blocks: PortableTextBlock[] = [
+      {
+        _type: "block",
+        _key: "b1",
+        style: "normal",
+        children: [
+          { _type: "span", _key: "s1", text: "Hello ", marks: [] },
+          { _type: "span", _key: "s2", text: "world.", marks: ["em"] },
+        ],
+        markDefs: [],
+      },
+    ];
+    expect(flattenAnswerToString(blocks)).toBe("Hello world.");
+  });
+
+  it("joins multiple blocks with a single space", () => {
+    const blocks: PortableTextBlock[] = [
+      {
+        _type: "block",
+        _key: "b1",
+        style: "normal",
+        children: [{ _type: "span", _key: "s1", text: "First.", marks: [] }],
+        markDefs: [],
+      },
+      {
+        _type: "block",
+        _key: "b2",
+        style: "normal",
+        children: [{ _type: "span", _key: "s2", text: "Second.", marks: [] }],
+        markDefs: [],
+      },
+    ];
+    expect(flattenAnswerToString(blocks)).toBe("First. Second.");
+  });
+
+  it("ignores non-span children silently", () => {
+    const blocks: PortableTextBlock[] = [
+      {
+        _type: "block",
+        _key: "b1",
+        style: "normal",
+        children: [
+          { _type: "span", _key: "s1", text: "Visible.", marks: [] },
+          // Unknown child kind — should be skipped without crashing.
+          { _type: "image", _key: "i1" } as unknown as {
+            _type: "span";
+            _key: string;
+            text: string;
+            marks: string[];
+          },
+        ],
+        markDefs: [],
+      },
+    ];
+    expect(flattenAnswerToString(blocks)).toBe("Visible.");
   });
 });

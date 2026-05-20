@@ -1,1 +1,1 @@
-export { QARow, type QARowProps } from "./QARow";
+export { QARow, type QARowProps, type QARowRespondent } from "./QARow";
