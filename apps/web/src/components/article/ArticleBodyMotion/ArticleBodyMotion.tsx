@@ -32,8 +32,7 @@ const ENTERED_CLASS = "article-body-motion--entered";
  * fires next-frame for already-visible elements, so the visible flicker is
  * sub-perceptual in practice. Fixing this fully requires moving the initial
  * opacity to an SSR-applied class (couples this component to the PortableText
- * serializers in `SanityArticleBody`) — tracked as a follow-up. For now the
- * behaviour mirrors `QaPairQuote`'s pattern.
+ * serializers in `SanityArticleBody`) — tracked as a follow-up.
  */
 export const ArticleBodyMotion = ({
   children,

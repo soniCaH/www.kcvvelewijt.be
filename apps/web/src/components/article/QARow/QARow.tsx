@@ -37,8 +37,7 @@ export interface QARowRespondent {
    * player/staff subjects pass `firstName`. Omit (`undefined`) to render
    * the row without a speaker header — used for `standard` pairs in
    * multi-subject articles whose editors didn't tag `respondentKey`
-   * (legacy/optional-attribution path; matches the pre-Phase-5
-   * `<QaPairStandard>` semantics).
+   * (legacy/optional-attribution path).
    */
   firstName?: string;
   /**
@@ -139,9 +138,9 @@ export function QARow({ question, respondents, className }: QARowProps) {
           Body indent: 32px avatar + 12px header gap = `pl-11`. Keeps
           question + answer flush under the speaker name, not under the
           avatar disc. Drop the indent when there's no speaker header —
-          the row reads as a plain numbered-style Q&A in that case (the
-          legacy `<QaPairStandard>` fallback for multi-subject articles
-          with untagged respondents).
+          the row reads as a plain numbered-style Q&A in that case
+          (fallback for multi-subject articles with untagged
+          respondents).
         */}
         <div
           className={cn("flex flex-col gap-2", hasSpeaker ? "mt-3 pl-11" : "")}
