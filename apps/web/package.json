@@ -80,7 +80,7 @@
     "@types/jest-image-snapshot": "6.4.1",
     "@types/luxon": "3.7.1",
     "@types/node": "24.12.4",
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
     "@types/sanitize-html": "2.16.1",
     "@typescript/native-preview": "7.0.0-dev.20260519.1",
@@ -109,7 +109,7 @@
     "wait-on": "9.0.10"
   },
   "overrides": {
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
     "typescript": "6.0.3"
   },
