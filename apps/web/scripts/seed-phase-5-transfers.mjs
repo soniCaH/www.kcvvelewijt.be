@@ -154,7 +154,8 @@ function buildTracerTransferMatrix(opponentLogoRef) {
       },
 
       // eventFact side-mention — sometimes editors close transfer-windows
-      // with a "Presentatieavond" calendar item.
+      // with a "Presentatieavond" calendar item. The CTA path is exercised
+      // here so the tracer surfaces the "Aanmelden" button rendering.
       {
         _key: "ttm-ev",
         _type: "eventFact",
@@ -165,6 +166,8 @@ function buildTracerTransferMatrix(opponentLogoRef) {
         location: "Kantine KCVV",
         ageGroup: "Iedereen welkom",
         competitionTag: "Clubmoment",
+        ticketUrl: "https://kcvvelewijt.be/presentatieavond",
+        ticketLabel: "Aanmelden",
       },
 
       paragraph(
