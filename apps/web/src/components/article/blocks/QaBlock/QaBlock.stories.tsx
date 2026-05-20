@@ -57,6 +57,37 @@ const playerSubject: SubjectValue = {
 // article.subjects[] array, even when there's only one entry.
 const singleSubject = [{ _key: "maxim-k", ...playerSubject }];
 
+// Two-subject (duo) fixture — mirrors a duo interview like the
+// "Afscheid duo: Julien en Niels" article. Standard pairs in this shape
+// don't always carry a `respondentKey` on their respondents (the
+// Studio validator only forces it for `key`/`quote`), so QaBlock must
+// render them through QARow's no-speaker fallback instead of dropping
+// them.
+const duoSubjects = [
+  {
+    _key: "duo-niels",
+    kind: "player" as const,
+    playerRef: {
+      firstName: "Niels",
+      lastName: "Gosselin",
+      jerseyNumber: 1,
+      transparentImageUrl: null,
+      psdImageUrl: fixtureImage("player-portrait", 0),
+    },
+  },
+  {
+    _key: "duo-julien",
+    kind: "player" as const,
+    playerRef: {
+      firstName: "Julien",
+      lastName: "Gillade",
+      jerseyNumber: 9,
+      transparentImageUrl: null,
+      psdImageUrl: fixtureImage("player-portrait", 1),
+    },
+  },
+];
+
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -196,6 +227,71 @@ export const MixedTagSuite: Story = {
             {
               answer: answer(
                 "Een club is maar zo sterk als haar supporters. Merci voor alles.",
+              ),
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+// Duo interview — mirrors the real "Afscheid duo: Julien en Niels"
+// shape: two subjects, alternating standard + key pairs. The standard
+// pairs intentionally carry no `respondentKey` (matching legacy
+// authoring) so QARow's no-speaker fallback path renders. The `key`
+// pair carries an explicit `respondentKey` so the PullQuote attributes
+// correctly.
+export const DuoInterviewMixedTags: Story = {
+  args: {
+    subjects: duoSubjects,
+    value: {
+      pairs: [
+        {
+          _key: "duo-p1",
+          tag: "standard",
+          question: "In drie woorden: wie ben jij op het veld?",
+          respondents: [
+            {
+              answer: answer(
+                "Rustig, beslist, en op het einde altijd nog een woord over.",
+              ),
+            },
+          ],
+        },
+        {
+          _key: "duo-p2",
+          tag: "key",
+          question: "Wat is het sterkste punt van deze B-ploeg?",
+          respondents: [
+            {
+              respondentKey: "duo-niels",
+              answer: answer("De plezantste Compagnie."),
+            },
+          ],
+        },
+        {
+          _key: "duo-p3",
+          tag: "standard",
+          question: "Mooiste herinnering in zes seizoenen B-ploeg?",
+          respondents: [
+            {
+              answer: answer(
+                "De promotiematch van vorig seizoen — het hele dorp stond op de zijlijn.",
+              ),
+            },
+          ],
+        },
+        {
+          _key: "duo-p4",
+          tag: "key",
+          question:
+            "Wat valt je als eerste op aan Niels wanneer die de kleedkamer binnenwandelt?",
+          respondents: [
+            {
+              respondentKey: "duo-julien",
+              answer: answer(
+                "Nillie komt altijd binnen met zijn goede humeur en vol grapjes — ik zit dan meestal te lachen als hij binnenkomt.",
               ),
             },
           ],

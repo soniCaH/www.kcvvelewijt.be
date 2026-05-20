@@ -119,25 +119,31 @@ function mapStandardRespondents(
   subjects: IndexedSubject[] | null,
 ): QARowRespondent[] {
   const sources = pair.respondents ?? [];
-  const mapped: QARowRespondent[] = [];
-  sources.forEach((src, i) => {
+  return sources.map((src, i) => {
     const subject = resolvePairRespondent(src.respondentKey, subjects);
     const resolved = resolveSubject(subject);
-    if (!resolved) return;
-    const firstName = deriveFirstName(subject, resolved.name);
     const answer: ReactNode = src.answer ? (
       <PortableText value={src.answer} />
     ) : null;
-    mapped.push({
+    const respondentKey =
+      src._key ?? src.respondentKey ?? `${pair._key ?? "p"}-${i}`;
+    // No resolvable speaker (multi-subject article whose editors didn't
+    // tag `respondentKey` on standard pairs — the Studio validator
+    // only enforces respondentKey on `key`/`quote`). Render the pair
+    // through QARow's no-speaker mode so the question + answer stay
+    // visible — matches the pre-Phase-5 `<QaPairStandard>` semantics.
+    if (!resolved) {
+      return { answer, respondentKey };
+    }
+    const firstName = deriveFirstName(subject, resolved.name);
+    return {
       firstName,
       fullName: resolved.name,
       role: resolved.role || undefined,
       answer,
-      respondentKey:
-        src._key ?? src.respondentKey ?? `${pair._key ?? "p"}-${i}`,
-    });
+      respondentKey,
+    };
   });
-  return mapped;
 }
 
 /**

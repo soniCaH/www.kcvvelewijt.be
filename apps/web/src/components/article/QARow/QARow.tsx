@@ -34,9 +34,13 @@ export interface QARowRespondent {
   /**
    * First name — drives the monogram avatar (first letter, uppercased)
    * per the 5.d2 lock. For custom subjects pass `customName`; for
-   * player/staff subjects pass `firstName`.
+   * player/staff subjects pass `firstName`. Omit (`undefined`) to render
+   * the row without a speaker header — used for `standard` pairs in
+   * multi-subject articles whose editors didn't tag `respondentKey`
+   * (legacy/optional-attribution path; matches the pre-Phase-5
+   * `<QaPairStandard>` semantics).
    */
-  firstName: string;
+  firstName?: string;
   /**
    * Full display name for the speaker tag + avatar's accessible name.
    * Falls back to `firstName`.
@@ -115,23 +119,33 @@ export function QARow({ question, respondents, className }: QARowProps) {
 
   if (!isMulti) {
     const r = respondents[0]!;
+    const hasSpeaker =
+      typeof r.firstName === "string" && r.firstName.length > 0;
     return (
       <article
         data-qa-row="true"
         data-qa-row-mode="single"
+        data-qa-row-has-speaker={hasSpeaker ? "true" : "false"}
         className={cn("flex flex-col", className)}
       >
-        <SpeakerHeader
-          firstName={r.firstName}
-          fullName={r.fullName}
-          role={r.role}
-        />
+        {hasSpeaker && (
+          <SpeakerHeader
+            firstName={r.firstName!}
+            fullName={r.fullName}
+            role={r.role}
+          />
+        )}
         {/*
           Body indent: 32px avatar + 12px header gap = `pl-11`. Keeps
           question + answer flush under the speaker name, not under the
-          avatar disc.
+          avatar disc. Drop the indent when there's no speaker header —
+          the row reads as a plain numbered-style Q&A in that case (the
+          legacy `<QaPairStandard>` fallback for multi-subject articles
+          with untagged respondents).
         */}
-        <div className="mt-3 flex flex-col gap-2 pl-11">
+        <div
+          className={cn("flex flex-col gap-2", hasSpeaker ? "mt-3 pl-11" : "")}
+        >
           <h3
             data-qa-row="question"
             className="font-display text-[length:var(--text-display-sm)] leading-[var(--text-display-sm--lh)] font-semibold italic"
@@ -151,7 +165,11 @@ export function QARow({ question, respondents, className }: QARowProps) {
 
   // Multi-respondent — lift the question above the respondents (full
   // width) so it reads as a single prompt addressed to everyone, then
-  // stack each respondent's avatar + tag + answer below.
+  // stack each respondent's avatar + tag + answer below. Each
+  // respondent's speaker header is conditional on `firstName` so a
+  // duo pair with one untagged respondent renders the speaker for the
+  // resolvable side and falls back to a plain answer block for the
+  // other (still better than dropping the answer entirely).
   return (
     <article
       data-qa-row="true"
@@ -166,25 +184,35 @@ export function QARow({ question, respondents, className }: QARowProps) {
         {question}
       </h3>
       <div className="mt-5 flex flex-col gap-6">
-        {respondents.map((r, i) => (
-          <div
-            key={r.respondentKey ?? `${r.firstName}-${i}`}
-            data-qa-row="respondent"
-            data-qa-row-respondent-index={i}
-          >
-            <SpeakerHeader
-              firstName={r.firstName}
-              fullName={r.fullName}
-              role={r.role}
-            />
+        {respondents.map((r, i) => {
+          const hasSpeaker =
+            typeof r.firstName === "string" && r.firstName.length > 0;
+          return (
             <div
-              data-qa-row="answer"
-              className="text-body-md mt-2 pl-11 leading-[var(--text-body-md--lh)]"
+              key={r.respondentKey ?? `${r.firstName ?? "anon"}-${i}`}
+              data-qa-row="respondent"
+              data-qa-row-respondent-index={i}
+              data-qa-row-has-speaker={hasSpeaker ? "true" : "false"}
             >
-              {r.answer}
+              {hasSpeaker && (
+                <SpeakerHeader
+                  firstName={r.firstName!}
+                  fullName={r.fullName}
+                  role={r.role}
+                />
+              )}
+              <div
+                data-qa-row="answer"
+                className={cn(
+                  "text-body-md leading-[var(--text-body-md--lh)]",
+                  hasSpeaker ? "mt-2 pl-11" : "",
+                )}
+              >
+                {r.answer}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </article>
   );

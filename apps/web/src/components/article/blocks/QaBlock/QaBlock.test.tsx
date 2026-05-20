@@ -199,11 +199,12 @@ describe("QaBlock", () => {
     ).toBeInTheDocument();
   });
 
-  it("skips multi-respondent standard pair entries that can't be resolved (keeps the resolvable ones)", () => {
+  it("renders multi-respondent standard pairs with a no-speaker block for entries that can't be resolved", () => {
     // Two subjects → no single-subject fallback. The second respondent
     // points at a key that isn't in the list, so it hits the
-    // resolvePairRespondent multi-subject-with-unresolvable-key branch and
-    // returns null, which the dispatcher must skip.
+    // resolvePairRespondent multi-subject-with-unresolvable-key branch
+    // and returns null. The dispatcher must still render the answer —
+    // QARow falls back to a no-speaker block for the unresolvable one.
     const subjects: IndexedSubject[] = [
       {
         _key: "subj-lars",
@@ -224,7 +225,7 @@ describe("QaBlock", () => {
         },
       },
     ];
-    render(
+    const { container } = render(
       <QaBlock
         subjects={subjects}
         value={{
@@ -252,13 +253,21 @@ describe("QaBlock", () => {
     );
 
     const row = screen.getByRole("article");
-    // Only one resolvable respondent → single-mode, not multi.
-    expect(row.getAttribute("data-qa-row-mode")).toBe("single");
+    expect(row.getAttribute("data-qa-row-mode")).toBe("multi");
+    expect(row.getAttribute("data-qa-row-respondent-count")).toBe("2");
     expect(screen.getByText("A1")).toBeInTheDocument();
-    expect(screen.queryByText("A2")).toBeNull();
+    expect(screen.getByText("A2")).toBeInTheDocument();
+    // One respondent block has a speaker, the other doesn't.
+    const blocks = container.querySelectorAll('[data-qa-row="respondent"]');
+    expect(blocks).toHaveLength(2);
+    expect(blocks[0]?.getAttribute("data-qa-row-has-speaker")).toBe("true");
+    expect(blocks[1]?.getAttribute("data-qa-row-has-speaker")).toBe("false");
   });
 
-  it("skips standard pairs without resolvable respondents (no subjects authored)", () => {
+  it("renders standard pairs without a speaker header when no respondent resolves (legacy multi-subject untagged data)", () => {
+    // No subjects at all → resolvePairRespondent returns null.
+    // The pair must still render (matches pre-Phase-5 QaPairStandard
+    // semantics — question + answer with no speaker info).
     const { container } = render(
       <QaBlock
         value={{
@@ -273,9 +282,15 @@ describe("QaBlock", () => {
         }}
       />,
     );
-    // No QARow rendered — the wrapper exists but has no children.
-    expect(container.querySelector('[data-qa-row="true"]')).toBeNull();
-    expect(screen.queryByText("Wie?")).toBeNull();
+    const row = screen.getByRole("article");
+    expect(row.getAttribute("data-qa-row")).toBe("true");
+    expect(row.getAttribute("data-qa-row-mode")).toBe("single");
+    expect(row.getAttribute("data-qa-row-has-speaker")).toBe("false");
+    expect(screen.getByText("Wie?")).toBeInTheDocument();
+    expect(screen.getByText("Niemand.")).toBeInTheDocument();
+    // No avatar, no speaker tag.
+    expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+    expect(container.querySelector('[data-qa-row="speaker-tag"]')).toBeNull();
   });
 
   describe("tag dispatch — key & quote → <PullQuote>", () => {

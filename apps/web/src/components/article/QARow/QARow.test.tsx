@@ -117,6 +117,23 @@ describe("<QARow>", () => {
       const { container } = render(<QARow question="Q?" respondents={[]} />);
       expect(container.firstChild).toBeNull();
     });
+
+    it("renders without a speaker header when firstName is absent", () => {
+      const { container } = render(
+        <QARow question="Wie?" respondents={[{ answer: <p>Niemand.</p> }]} />,
+      );
+      const row = container.firstElementChild as HTMLElement;
+      expect(row.getAttribute("data-qa-row-has-speaker")).toBe("false");
+      expect(container.querySelector("header")).toBeNull();
+      expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+      expect(container.querySelector('[data-qa-row="speaker-tag"]')).toBeNull();
+      // Question + answer still render; the body block has no pl-11
+      // indent since there's no avatar to align under.
+      const question = container.querySelector('[data-qa-row="question"]');
+      expect(question?.textContent).toBe("Wie?");
+      const body = question?.parentElement;
+      expect(body?.className).not.toContain("pl-11");
+    });
   });
 
   describe("multi-respondent", () => {
