@@ -94,15 +94,17 @@ function rewriteChecklist(originalBody, results) {
       continue;
     }
     const url = stagingUrl(slug);
+    // Capture the checkbox token so a `[x]` entry stays checked across
+    // re-runs — grilling-session sign-offs survive subsequent seeds.
     const pattern = new RegExp(
-      `^- \\[[ x]\\] ${escapeRegExp(label)} — .*$`,
+      `^- \\[([ x])\\] ${escapeRegExp(label)} — .*$`,
       "m",
     );
     if (!pattern.test(body)) {
       missing.push(`no matching checklist line for label: ${label}`);
       continue;
     }
-    body = body.replace(pattern, `- [ ] ${label} — ${url}`);
+    body = body.replace(pattern, (_match, checkbox) => `- [${checkbox}] ${label} — ${url}`);
   }
   return { body, missing };
 }
