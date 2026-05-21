@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · BioBlock PullQuote (6.d5)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+        --font-body:
+          "Source Serif Pro", ui-serif, Georgia, "Times New Roman", serif;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--drop  { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; }
+      .state-label .who { font-size: 9px; opacity: 0.55; }
+
+      /* ───────── BioBlock layout ───────── */
+      .bio {
+        padding: 16px 16px 18px;
+        display: grid;
+        grid-template-columns: 1.25fr 1fr;
+        gap: 14px;
+      }
+      .bio__kicker {
+        grid-column: 1 / -1;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+        margin-bottom: 2px;
+      }
+      .bio__kicker::before { content: "* "; opacity: 0.7; }
+      .bio__heading {
+        grid-column: 1 / -1;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0 0 10px;
+      }
+      .bio__body {
+        font-family: var(--font-body);
+        font-size: 13px;
+        line-height: 1.55;
+        margin: 0;
+      }
+      .bio__body p + p { margin-top: 8px; }
+      .bio__body .deco-pullquote {
+        background: rgba(0, 135, 85, 0.14);
+        padding: 0 2px;
+        font-style: italic;
+        border-bottom: 1px solid var(--color-jersey-deep);
+      }
+
+      .pullquote {
+        position: relative;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 16px 14px 14px 30px;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-soft);
+        transform: rotate(-0.4deg);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        line-height: 1.4;
+        align-self: start;
+      }
+      .pullquote::before {
+        content: "“";
+        position: absolute;
+        top: 4px;
+        left: 8px;
+        font-size: 32px;
+        line-height: 1;
+        opacity: 0.95;
+        font-family: var(--font-display);
+        font-style: italic;
+      }
+      .pullquote .source {
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.85;
+        margin-top: 10px;
+        display: block;
+      }
+      .pullquote .source::before { content: "— "; }
+
+      /* No-pullquote variant — paragraph takes full width */
+      .bio--no-quote {
+        grid-template-columns: 1fr;
+      }
+
+      .collapsed-marker {
+        margin: 14px 14px;
+        padding: 16px 14px;
+        border: 1px dashed var(--color-ink-muted);
+        background: var(--color-cream-soft);
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--color-ink-muted);
+      }
+      .collapsed-marker strong { color: var(--color-jersey-deep); }
+      .collapsed-marker em {
+        display: block;
+        margin-top: 6px;
+        font-style: normal;
+        opacity: 0.65;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+      }
+
+      /* ───────── Callouts ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+      .callouts .danger { color: #c75230; font-weight: 700; }
+
+      /* ───────── Summary ───────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .summary .danger { color: #c75230; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d5 · 2026-05-21</div>
+      <h1>BioBlock PullQuote sourcing</h1>
+      <p>
+        The BioBlock pairs a paragraph (from <code>player.bio</code> Portable
+        Text) with an inline jersey-deep PullQuote on the right column. The
+        bio paragraph is already wired today. <strong>The quote source is
+        undecided</strong> — three live sourcing strategies plus drop-section.
+      </p>
+      <p>
+        Each column shows the A-team case (Maxim, full bio + a quote source)
+        and the bio-empty case (most youth + many B-team — entire BioBlock
+        hides). Privacy callout per <code>[[project_player_profile_all_ages]]</code>:
+        no interview quotes from minors.
+      </p>
+      <span class="scope-banner">Cross-age scope · BioBlock hides for empty bio</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Derived from related interviews ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Derive from related interview.</h2>
+          <p class="sub">
+            The page already calls <code>ArticleRepository.findRelated(player.id)</code> —
+            interview articles where the player is a <code>subject.playerRef</code>.
+            Surface the first <code>qaBlock</code> answer marked with a new
+            <em>pullquote</em> PT decorator. Zero schema additions to the
+            player document.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 player-schema work</span>
+            <span class="chip chip--delta">qaBlock decorator extension</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~30% have interviews</span></div>
+        <section class="bio">
+          <div class="bio__kicker">Even voorstellen</div>
+          <h2 class="bio__heading">Acht keer Elewijt.</h2>
+          <div class="bio__body">
+            <p>Sinds zijn debuut bij de jeugd is hij een vaste waarde aan de Driesstraat. Tussendoor passeerde hij langs Standard, Genk en Anderlecht — maar telkens keerde hij terug naar het vertrouwde kunstgras.</p>
+            <p>Linksvoorin is hij ondertussen onmisbaar in het aanvalsgeweld van trainer Cools.</p>
+          </div>
+          <div class="pullquote">
+            Hier is 't begonnen, hier zal 't eindigen. Zo simpel is 't.
+            <span class="source">Maxim · Interview Sportkring · apr 2026</span>
+          </div>
+        </section>
+
+        <div class="state-label"><span>No bio / no interview — U13 #6</span><span class="who">~60% across squad</span></div>
+        <div class="collapsed-marker">
+          BioBlock <strong>hidden entirely</strong>
+          <em>player.bio empty · no related interview articles</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li><span class="delta">Δ</span> Extend <code>qaBlock</code> Portable Text with a <code>pullquoteCandidate</code> decorator on answer marks</li>
+            <li>Query: <code>ArticleRepository.findRelated(player.id)</code> → pick first article → traverse <code>qaBlocks[]</code> → find answer with decorator</li>
+            <li>Empty fallback: no decorator → render paragraph alone (no PullQuote)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Quote and bio drift independently — quote is "what he said in a recent interview"</li>
+            <li><span class="danger">Privacy:</span> minor players have no interview articles by editorial policy → quote never appears for U18 profiles</li>
+            <li>Renders only when an interview happens; A-team coverage is partial (~30% of squad have a recent interview)</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Decorator inside bio ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Decorator in <code>player.bio</code>.</h2>
+          <p class="sub">
+            Add a custom <em>pullquote</em> decorator mark to the existing
+            <code>bio</code> Portable Text array. Editor selects a substring
+            when writing the bio; the decorator both marks it inline
+            (highlight) and surfaces it as the right-column PullQuote. Bio
+            and quote are guaranteed coherent.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">bio PT decorator</span>
+            <span class="chip chip--good">Editor-controlled</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">Editor opts-in per bio</span></div>
+        <section class="bio">
+          <div class="bio__kicker">Even voorstellen</div>
+          <h2 class="bio__heading">Acht keer Elewijt.</h2>
+          <div class="bio__body">
+            <p>Sinds zijn debuut bij de jeugd is hij een vaste waarde aan de Driesstraat. <span class="deco-pullquote">Hier is 't begonnen, hier zal 't eindigen.</span> Tussendoor passeerde hij langs Standard, Genk en Anderlecht — maar telkens keerde hij terug naar het vertrouwde kunstgras.</p>
+          </div>
+          <div class="pullquote">
+            Hier is 't begonnen, hier zal 't eindigen.
+            <span class="source">Uit zijn biografie</span>
+          </div>
+        </section>
+
+        <div class="state-label"><span>No bio — U13 #6</span><span class="who">~60% across squad</span></div>
+        <div class="collapsed-marker">
+          BioBlock <strong>hidden entirely</strong>
+          <em>player.bio empty</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li><span class="delta">Δ</span> Extend <code>bio</code> Portable Text block decorators: add <code>pullquote</code> alongside existing marks</li>
+            <li>Query: pull first <code>pullquote</code>-marked span from <code>player.bio</code></li>
+            <li>If no decorator present → paragraph renders alone, no PullQuote</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Bio and quote are always in sync — quote is the bio's strongest line</li>
+            <li>Editor controls the choice at write-time — predictable</li>
+            <li>Same content shown twice (inline AND in the pullquote card) — some viewers may read it as a double-print</li>
+            <li>No quote-as-spoken-by-the-player — it's the bio author's framing, not the player's voice</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Dedicated schema field ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Dedicated <code>featuredQuote</code> field.</h2>
+          <p class="sub">
+            New Sanity field on <code>player</code>:
+            <code>featuredQuote: { text, source }</code>. Independent of
+            bio; can exist without a bio and vice versa. Editorial workload
+            adds: write a quote for each A-team / B-team player.
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">New schema field</span>
+            <span class="chip chip--cost">+ editorial workload</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">Editor populates per player</span></div>
+        <section class="bio">
+          <div class="bio__kicker">Even voorstellen</div>
+          <h2 class="bio__heading">Acht keer Elewijt.</h2>
+          <div class="bio__body">
+            <p>Sinds zijn debuut bij de jeugd is hij een vaste waarde aan de Driesstraat. Tussendoor passeerde hij langs Standard, Genk en Anderlecht — maar telkens keerde hij terug naar het vertrouwde kunstgras.</p>
+            <p>Linksvoorin is hij ondertussen onmisbaar in het aanvalsgeweld van trainer Cools.</p>
+          </div>
+          <div class="pullquote">
+            Spelen op kunstgras voelt nog steeds als thuiskomen.
+            <span class="source">Maxim · spelersbevraging 2026</span>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Bio + no quote — Bas (B-team)</span><span class="who">Field optional</span></div>
+        <section class="bio bio--no-quote">
+          <div class="bio__kicker">Even voorstellen</div>
+          <h2 class="bio__heading">Vijf jaar terug.</h2>
+          <div class="bio__body">
+            <p>Bas keerde vorig seizoen terug naar het tweede team na een uitstap naar Berchem Sport. Hij is een solide flankverdediger met een neus voor de aanval.</p>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li><span class="delta">Δ</span> New Sanity object: <code>player.featuredQuote: { text: portableText, source: string }</code></li>
+            <li>Renders when populated; hides cleanly when absent</li>
+            <li>Bio and quote independent — either can exist without the other</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Maximum editorial flexibility — quote can be sourced from anywhere (interview, training-day chat, social post)</li>
+            <li>Editorial workload extends the per-player content backlog by one field × A-team + B-team count</li>
+            <li><span class="danger">Privacy:</span> field can be left empty for minors with no editorial cost — quietly hides without flagging</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Drop the PullQuote ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Drop the PullQuote.</h2>
+          <p class="sub">
+            BioBlock = kicker + heading + paragraph. No quote card on the
+            right. Quotes live entirely in the QuotesBlock further down the
+            page. BioBlock reads more as biography, less as poster spread.
+            Honors 6.d0 drop-section escape.
+          </p>
+          <div class="chips">
+            <span class="chip chip--drop">Drop-section</span>
+            <span class="chip chip--good">0 schema work</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~40% have bio</span></div>
+        <section class="bio bio--no-quote">
+          <div class="bio__kicker">Even voorstellen</div>
+          <h2 class="bio__heading">Acht keer Elewijt.</h2>
+          <div class="bio__body">
+            <p>Sinds zijn debuut bij de jeugd is hij een vaste waarde aan de Driesstraat. Tussendoor passeerde hij langs Standard, Genk en Anderlecht — maar telkens keerde hij terug naar het vertrouwde kunstgras.</p>
+            <p>Linksvoorin is hij ondertussen onmisbaar in het aanvalsgeweld van trainer Cools. Hij scoorde dit seizoen al zeven keer.</p>
+          </div>
+        </section>
+
+        <div class="state-label"><span>No bio — U13 #6</span><span class="who">~60% across squad</span></div>
+        <div class="collapsed-marker">
+          BioBlock <strong>hidden entirely</strong>
+          <em>player.bio empty</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>BioBlock = <code>player.bio</code> Portable Text only</li>
+            <li>QuotesBlock (6.d8) is the only quote-bearing surface on the page</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Cleanest scope — BioBlock has one responsibility (biographical paragraph)</li>
+            <li>Avoids the "two quote surfaces" composition (BioBlock + QuotesBlock) which can feel repetitive</li>
+            <li>Loses the canonical mockup's "story + voice" pairing in the bio</li>
+            <li>Layout collapses to single column — visually quieter</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary table ═════════════ -->
+    <section class="summary">
+      <h2>Sourcing ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Related interview</th>
+            <th>B — bio PT decorator</th>
+            <th>C — featuredQuote field</th>
+            <th>D — Drop PullQuote</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Schema delta</strong></td>
+            <td><code>qaBlock</code> decorator extension</td>
+            <td><code>bio</code> PT decorator extension</td>
+            <td>New <code>player.featuredQuote</code> object field</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Editorial workload</strong></td>
+            <td>None new — decorator added when interviews are written</td>
+            <td>~5 min per bio when authored</td>
+            <td>+1 field per player when authored</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Quote / bio coherence</strong></td>
+            <td>Independent — different content</td>
+            <td>Guaranteed — same text rendered twice</td>
+            <td>Independent — editorial choice</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Cross-age behaviour</strong></td>
+            <td>No interview → no quote (renders bio alone if bio present)</td>
+            <td>No decorator → no quote (renders bio alone)</td>
+            <td>Field empty → no quote (renders bio alone)</td>
+            <td>No PullQuote ever</td>
+          </tr>
+          <tr>
+            <td><strong>Privacy for minors</strong></td>
+            <td>✓ No interviews for U18 → no quote</td>
+            <td>~ Bio could quote a minor; editor must police</td>
+            <td>~ Field could quote a minor; editor must police</td>
+            <td>✓ N/A — no quote surface</td>
+          </tr>
+          <tr>
+            <td><strong>Dark-band repurpose candidate?</strong></td>
+            <td>Possible — pull quote to full-bleed ink band between bio paragraphs</td>
+            <td>Possible — same</td>
+            <td>Possible — same</td>
+            <td>No — drops the surface entirely</td>
+          </tr>
+          <tr>
+            <td><strong>Coverage at launch</strong></td>
+            <td>~30% of A-team (interview-dependent)</td>
+            <td>Depends on editor opt-in per bio</td>
+            <td>Depends on editor opt-in per player</td>
+            <td>N/A</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

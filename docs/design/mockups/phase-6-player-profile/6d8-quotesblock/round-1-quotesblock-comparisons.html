@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · QuotesBlock (6.d8)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--drop  { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; }
+      .state-label .who { font-size: 9px; opacity: 0.55; }
+
+      /* ───────── QuotesBlock layout ───────── */
+      .quotes {
+        padding: 18px 16px 22px;
+      }
+      .quotes__kicker {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+        margin-bottom: 2px;
+      }
+      .quotes__kicker::before { content: "* "; opacity: 0.7; }
+      .quotes__heading {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0 0 14px;
+      }
+      .quotes__heading .marker {
+        background:
+          linear-gradient(
+            to bottom,
+            transparent 65%,
+            var(--color-jersey-deep) 65%,
+            var(--color-jersey-deep) 88%,
+            transparent 88%
+          );
+        padding: 0 2px;
+      }
+      .quotes__pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .quotes__single {
+        max-width: 100%;
+      }
+      .quote-card {
+        position: relative;
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-soft);
+        padding: 16px 12px 12px 26px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+      .quote-card::before {
+        content: "“";
+        position: absolute;
+        top: 4px;
+        left: 6px;
+        font-size: 28px;
+        line-height: 1;
+        opacity: 0.85;
+        font-family: var(--font-display);
+      }
+      .quote-card--ink {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        transform: rotate(-0.3deg);
+      }
+      .quote-card--cream {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        transform: rotate(0.3deg);
+      }
+      .quote-card .source {
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.75;
+        margin-top: 8px;
+        display: block;
+      }
+      .quote-card .source::before { content: "— "; }
+
+      /* — Collapsed marker — */
+      .collapsed-marker {
+        margin: 14px 14px;
+        padding: 16px 14px;
+        border: 1px dashed var(--color-ink-muted);
+        background: var(--color-cream-soft);
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--color-ink-muted);
+      }
+      .collapsed-marker strong { color: var(--color-jersey-deep); }
+      .collapsed-marker em {
+        display: block;
+        margin-top: 6px;
+        font-style: normal;
+        opacity: 0.65;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+      }
+
+      /* ───────── Callouts ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+      .callouts .danger { color: #c75230; font-weight: 700; }
+
+      /* ───────── Summary ───────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d8 · 2026-05-21 · LAST PER-ELEMENT</div>
+      <h1>QuotesBlock — sourcing &amp; pairing</h1>
+      <p>
+        Last per-element drill. §5.3 specs a 2-card pair (ink + cream
+        PullQuote). With RecentMatchesGrid dropped at 6.d7, QuotesBlock is
+        the <strong>only remaining home for the parked 6.d4 dark-band
+        aesthetic</strong> — its <code>tone="ink"</code> card.
+      </p>
+      <p>
+        Sourcing options A/B extend the 6.d5 bio PT decorator pattern OR
+        introduce a new schema field. Variant A is "intuitive + least
+        invasive" (same rationale that won 6.d5). Variant C halves the pair
+        to a single quote. Variant D drops entirely and retires the dark
+        band along with it.
+      </p>
+      <span class="scope-banner">Cross-age · privacy: no quotes from minors</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Extend bio decorators ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Extend bio decorators.</h2>
+          <p class="sub">
+            Same <code>pullquote</code> PT decorator from 6.d5. Bio
+            paragraph can carry up to 3 marked spans: span #1 → BioBlock
+            inline; span #2 → QuotesBlock left (ink); span #3 → QuotesBlock
+            right (cream). Single source of truth. Zero new schema fields.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new schema</span>
+            <span class="chip chip--good">Extends 6.d5 pattern</span>
+            <span class="chip chip--delta">Bio must be ≥3 marked spans long</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim, bio has 3 marks</span><span class="who">~30% of A-team bios</span></div>
+        <section class="quotes">
+          <div class="quotes__kicker">In zijn eigen woorden</div>
+          <h2 class="quotes__heading">Drie keer Maxim, drie keer <span class="marker">Elewijt</span>.</h2>
+          <div class="quotes__pair">
+            <div class="quote-card quote-card--ink">
+              Trainer geeft me alle vrijheid om te improviseren in de zestien.
+              <span class="source">Uit zijn bio · marked span #2</span>
+            </div>
+            <div class="quote-card quote-card--cream">
+              Het mooiste moment? Die kopbal tegen Lummen in '24.
+              <span class="source">Uit zijn bio · marked span #3</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Bio has ≤ 2 marks</span><span class="who">~70% of A-team bios</span></div>
+        <div class="collapsed-marker">
+          QuotesBlock <strong>partially or fully hidden</strong>
+          <em>span #2 only → 1 card; span #1 only or no marks → section hides</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Reuses 6.d5 lock: <code>pullquote</code> PT decorator on <code>player.bio</code></li>
+            <li>Renderer: scan bio for decorator spans, index by position</li>
+            <li>BioBlock: first span (already locked)</li>
+            <li>QuotesBlock: next 2 spans (this lock)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Cleanest reuse — extends an existing decision rather than introducing new vocabulary</li>
+            <li><span class="delta">Δ</span> Requires the bio to be long enough + the editor to mark 3 spans. Short bios collapse the section gracefully.</li>
+            <li><span class="danger">Privacy:</span> minors don't get bios → no leakage</li>
+            <li>All quotes are "from the bio" — quotes feel narrational rather than spoken-in-interview</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — New featuredQuotes[] field ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>New <code>featuredQuotes[]</code> field.</h2>
+          <p class="sub">
+            New schema: <code>player.featuredQuotes: array&lt;{text, source}&gt;</code>
+            (length 0-2). Quotes independent of bio — can quote
+            interview, training-day chat, social post. Each entry has
+            its own attribution. Maximum editorial flexibility.
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">New schema field</span>
+            <span class="chip chip--cost">Per-player backlog</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim with 2 quotes</span><span class="who">Editor opts-in</span></div>
+        <section class="quotes">
+          <div class="quotes__kicker">In zijn eigen woorden</div>
+          <h2 class="quotes__heading">Drie keer Maxim, drie keer <span class="marker">Elewijt</span>.</h2>
+          <div class="quotes__pair">
+            <div class="quote-card quote-card--ink">
+              Hier is 't begonnen, hier zal 't eindigen.
+              <span class="source">Interview Sportkring · apr 2026</span>
+            </div>
+            <div class="quote-card quote-card--cream">
+              Het kunstgras voelt nog steeds als thuiskomen.
+              <span class="source">Spelersbevraging 2026</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Bio + 0 quotes — Bas (B-team)</span><span class="who">Field optional</span></div>
+        <div class="collapsed-marker">
+          QuotesBlock <strong>hidden</strong>
+          <em>featuredQuotes[] empty</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li><span class="delta">Δ</span> New: <code>player.featuredQuotes: array&lt;{text: portableText, source: string}&gt;</code></li>
+            <li>Length 0-2; renders ink + cream as available</li>
+            <li>Source string supports the "INTERVIEW · KCVV MAGAZINE · APR 2026" pattern</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Maximum editorial flexibility — quotes can be sourced from anywhere with attribution</li>
+            <li><strong>Per-player editorial backlog</strong> — same cost class as the dropped CareerLog (6.d6) — explicit ask for new field-fill work</li>
+            <li><span class="danger">Privacy:</span> editor must police; no schema-level guard</li>
+            <li>Quotes feel spoken-in-interview rather than narrational</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Single quote, not a pair ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Single quote (ink only).</h2>
+          <p class="sub">
+            Halve the pair. One quote, ink-toned, full width. Sourced from
+            bio decorator span #2 (extends 6.d5 pattern). Halves the
+            editorial requirement vs A. Naturally consumes the parked
+            dark band. Heading copy simplifies.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new schema</span>
+            <span class="chip chip--good">Dark band lives here</span>
+            <span class="chip chip--cost">Loses pair rhythm</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim, bio has 2 marks</span><span class="who">~50% of A-team bios</span></div>
+        <section class="quotes">
+          <div class="quotes__kicker">In zijn eigen woorden</div>
+          <h2 class="quotes__heading">Eén keer Maxim, vooral <span class="marker">Elewijt</span>.</h2>
+          <div class="quote-card quote-card--ink quotes__single">
+            Trainer geeft me alle vrijheid om te improviseren in de zestien. Linksvoorin voelt nog steeds als de juiste plek.
+            <span class="source">Uit zijn bio · marked span #2</span>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Bio has ≤ 1 mark — short bios + youth</span><span class="who">~50% across squad</span></div>
+        <div class="collapsed-marker">
+          QuotesBlock <strong>hidden</strong>
+          <em>no second pullquote decorator → section drops</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Reuses 6.d5 lock — same <code>pullquote</code> decorator</li>
+            <li>BioBlock: span #1 (inline)</li>
+            <li>QuotesBlock: span #2 (full-width ink card)</li>
+            <li>Spans #3+ ignored</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Lowest editorial bar (just 2 marked spans for full surface)</li>
+            <li>Full-width ink card naturally absorbs the parked 6.d4 dark band</li>
+            <li>Loses §5.3's "ink + cream pair" composition; weaker visual rhythm</li>
+            <li>Quote rises in importance — it's the one thing besides the bio</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Drop entirely ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Drop QuotesBlock.</h2>
+          <p class="sub">
+            No QuotesBlock. BioBlock's inline pullquote (6.d5) is the only
+            quote surface. Dark-band aesthetic is fully retired from the
+            player profile. Page composition reaches its minimum: Hero +
+            BioBlock + chrome. Cumulative drops: 5.
+          </p>
+          <div class="chips">
+            <span class="chip chip--drop">Drop-section</span>
+            <span class="chip chip--cost">Dark band retired</span>
+            <span class="chip chip--good">Minimum page</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">All profiles</span></div>
+        <div class="collapsed-marker">
+          QuotesBlock <strong>not rendered</strong>
+          <em>quotes live only in BioBlock inline pullquote</em>
+        </div>
+
+        <div class="state-label"><span>Youth / no bio — U13</span><span class="who">All profiles</span></div>
+        <div class="collapsed-marker">
+          QuotesBlock <strong>not rendered</strong>
+          <em>identical shape across the squad</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Scope reduction</h4>
+          <ul>
+            <li>No second quote surface</li>
+            <li>Dark band has no home → aesthetic retires from this page</li>
+            <li>Page composition: Hero → BioBlock → footer</li>
+            <li>Cumulative dropped sections in Phase 6.A: 5 (NIEUW, StatsStrip, CareerLog, RecentMatches, QuotesBlock)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Absolute minimum page; nothing extra to maintain</li>
+            <li><strong>Page is essentially Hero + Bio</strong> — "voice + identity" in its purest form</li>
+            <li>Dark band aesthetic (user-favoured) doesn't survive Phase 6.A</li>
+            <li>Mockup fidelity vs retro-terrace-fanzine drops to ~25%</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary ═════════════ -->
+    <section class="summary">
+      <h2>QuotesBlock ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Bio decorators (2 quotes)</th>
+            <th>B — featuredQuotes[] field</th>
+            <th>C — Single quote (bio decorator)</th>
+            <th>D — Drop</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Schema delta</strong></td>
+            <td>None (reuses 6.d5)</td>
+            <td>New <code>player.featuredQuotes: array&lt;{text, source}&gt;</code></td>
+            <td>None (reuses 6.d5)</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Editorial workload</strong></td>
+            <td>Mark 3 spans in bio (~3 min per bio)</td>
+            <td>Per-player backlog: write + attribute 0-2 quotes</td>
+            <td>Mark 2 spans in bio (~2 min per bio)</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Quote feel</strong></td>
+            <td>Narrational (from bio)</td>
+            <td>Spoken-in-interview (sourced separately)</td>
+            <td>Narrational (from bio)</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Dark-band home</strong></td>
+            <td>Yes — left card uses ink tone</td>
+            <td>Yes — left card uses ink tone</td>
+            <td>Yes — single card uses ink tone (full width)</td>
+            <td>No — dark band retired</td>
+          </tr>
+          <tr>
+            <td><strong>Coverage at launch</strong></td>
+            <td>~30% A-team (bios with ≥3 marks)</td>
+            <td>Whatever editor populates</td>
+            <td>~50% A-team (bios with ≥2 marks)</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Cross-age behaviour</strong></td>
+            <td>Hides for short bios and youth (no bio)</td>
+            <td>Hides when field empty (likely all youth)</td>
+            <td>Hides for short bios and youth</td>
+            <td>Never renders</td>
+          </tr>
+          <tr>
+            <td><strong>Privacy for minors</strong></td>
+            <td>✓ No bio → no quotes</td>
+            <td>~ Editor must police</td>
+            <td>✓ No bio → no quotes</td>
+            <td>✓ N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Continues drop-trend (NIEUW/Stats/Career/RecentMatches)</strong></td>
+            <td>No — keeps a section</td>
+            <td>No — keeps + adds schema</td>
+            <td>No — keeps minimally</td>
+            <td>Yes — 5th drop</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

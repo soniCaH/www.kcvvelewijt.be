@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · Hero photo fallback (6.d2)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; }
+      .state-label .pct {
+        font-size: 9px;
+        opacity: 0.55;
+      }
+
+      /* ───────── Hero block (shared layout) ─────────────────── */
+      .hero {
+        padding: 16px 16px 18px;
+        display: grid;
+        grid-template-columns: 1.05fr 0.85fr;
+        gap: 14px;
+        background: var(--color-cream);
+      }
+      .hero--no-figure {
+        grid-template-columns: 1fr;
+      }
+      .hero__top-bar {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .hero__number {
+        font-family: var(--font-display);
+        font-size: 60px;
+        line-height: 0.85;
+        letter-spacing: -0.04em;
+        font-style: italic;
+        color: var(--color-jersey-deep);
+        margin: 4px 0 8px;
+      }
+      .hero__name {
+        font-family: var(--font-display);
+        line-height: 0.92;
+        letter-spacing: -0.025em;
+        margin: 0 0 12px;
+        position: relative;
+        font-size: 26px;
+      }
+      .hero__name .first {
+        font-style: normal;
+        font-weight: 900;
+        display: block;
+      }
+      .hero__name .last {
+        font-style: italic;
+        font-weight: 400;
+        display: block;
+      }
+      .hero__name::after {
+        content: "";
+        display: block;
+        height: 3px;
+        width: 100%;
+        margin-top: 4px;
+        background: linear-gradient(
+          to right,
+          var(--color-ink) 0%,
+          var(--color-ink) 68%,
+          transparent 68%,
+          transparent 100%
+        );
+      }
+      .hero__meta {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        line-height: 1.7;
+      }
+      .hero__meta dt {
+        display: inline-block;
+        opacity: 0.55;
+        margin-right: 6px;
+        font-weight: 600;
+      }
+      .hero__meta dd { display: inline; margin: 0; font-weight: 700; }
+      .hero__meta > div + div {
+        border-top: 1px dashed var(--color-ink-muted);
+        padding-top: 3px;
+        margin-top: 3px;
+      }
+
+      /* ───────── Figure frame (shared) ──────────────────────── */
+      .figure {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-soft);
+        padding: 10px 10px 12px;
+        align-self: start;
+        transform: rotate(0.4deg);
+      }
+      .figure::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        right: 18%;
+        width: 46px;
+        height: 13px;
+        background: rgba(244, 230, 145, 0.85);
+        border: 1px solid var(--color-ink);
+        transform: rotate(-4deg);
+      }
+      .figure__inner {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        border: 1px solid var(--color-ink);
+        position: relative;
+        overflow: hidden;
+      }
+      .figure__caption {
+        margin-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .figure__nieuw {
+        position: absolute;
+        top: -12px;
+        left: -12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 5px 8px;
+        border: 2px solid var(--color-ink);
+        transform: rotate(-6deg);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+      }
+
+      /* ───────── Inner content treatments ──────────────────── */
+
+      /* — Present state (locked, same across all variants) — */
+      .figure__inner--photo {
+        background:
+          radial-gradient(
+            circle at 50% 28%,
+            #d6c8a4 0,
+            #d6c8a4 16%,
+            transparent 16%
+          ),
+          linear-gradient(
+            to bottom,
+            transparent 0%,
+            transparent 38%,
+            var(--color-jersey-deep) 38%,
+            var(--color-jersey-deep) 86%,
+            transparent 86%
+          ),
+          repeating-linear-gradient(
+            to right,
+            transparent 0,
+            transparent 18px,
+            rgba(0, 0, 0, 0.85) 18px,
+            rgba(0, 0, 0, 0.85) 22px
+          ),
+          #efe6cf;
+        background-blend-mode: normal, multiply, multiply, normal;
+        filter: sepia(0.18) saturate(0.95);
+      }
+      .figure__inner--photo::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(rgba(0,0,0,0.08) 0.5px, transparent 1px) 0 0/3px 3px;
+        mix-blend-mode: multiply;
+        pointer-events: none;
+        opacity: 0.4;
+      }
+
+      /* — A: Monogram placeholder — */
+      .figure__inner--mono {
+        background: var(--color-cream-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .figure__inner--mono .glyph {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 110px;
+        line-height: 0.85;
+        letter-spacing: -0.03em;
+      }
+      .figure__inner--mono::before {
+        content: "";
+        position: absolute;
+        inset: 12% 10%;
+        border: 1px dashed var(--color-ink-muted);
+        pointer-events: none;
+      }
+
+      /* — B: JerseyShirt illustration — */
+      .figure__inner--jersey {
+        background: var(--color-cream-soft);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 16px 12px 6px;
+      }
+      .jersey-svg {
+        width: 70%;
+        max-width: 150px;
+      }
+
+      /* — C: PlayerFigure polaroid (illustrated body) — */
+      .figure__inner--player {
+        background: var(--color-cream-soft);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding: 14px 0 0;
+        position: relative;
+      }
+      .player-svg {
+        width: 80%;
+        max-width: 170px;
+      }
+      .figure__inner--player::after {
+        content: "";
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 14%;
+        height: 8px;
+        border-top: 1px dashed var(--color-ink);
+        opacity: 0.35;
+      }
+
+      /* — D: dropped figure (no column) — */
+      .hero--D .hero__name {
+        font-size: 36px;
+      }
+      .hero--D .hero__number {
+        font-size: 96px;
+      }
+      .hero--D .dropped-marker {
+        display: inline-block;
+        margin-top: 12px;
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 4px 8px;
+        border: 1px dashed var(--color-ink);
+        opacity: 0.55;
+      }
+
+      /* ───────── Vocabulary callouts ─────────────────────────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+
+      /* ───────── Summary ─────────────────────────────────────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d2 · 2026-05-21</div>
+      <h1>Hero photo fallback treatment</h1>
+      <p>
+        Brief locks the <strong>present</strong> hero image as
+        <code>&lt;TapedFigure aspect="portrait-3-4"&gt;</code> with newsprint filter
+        + paper grain. What's open: what renders when
+        <code>player.psdImage</code> is missing — roughly 10% of any 24-man
+        squad per <code>[[feedback_subject_photo_fallback]]</code>.
+      </p>
+      <p>
+        Each column below shows the <strong>locked present state</strong> on top
+        (identical across variants) and the proposed <strong>fallback</strong>
+        below. The variants only diverge in the fallback row. Variant D drops
+        the photo column entirely — the 4th drop-section variant per the
+        6.d0 lock.
+      </p>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Monogram ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Monogram.</h2>
+          <p class="sub">
+            Missing image → display the player's initials in oversized italic
+            Black inside the same taped frame. Honors paper aesthetic; quiet;
+            zero net-new vocabulary. Reads as a placeholder, not a portrait.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Zero new primitives</span>
+            <span class="chip chip--good">Quiet</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>Present state — locked</span><span class="pct">~90%</span></div>
+        <section class="hero">
+          <div class="hero__top-bar"><span>* A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name">
+              <span class="first">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+            </dl>
+          </div>
+          <div class="figure">
+            <div class="figure__nieuw">NIEUW</div>
+            <div class="figure__inner figure__inner--photo"></div>
+            <div class="figure__caption"><span>A-Ploeg 26/27</span><span>#08</span></div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Fallback — no psdImage</span><span class="pct">~10%</span></div>
+        <section class="hero">
+          <div class="hero__top-bar"><span>* A-Ploeg</span><span>#17</span></div>
+          <div>
+            <div class="hero__number">#17</div>
+            <h2 class="hero__name">
+              <span class="first">Senne</span>
+              <span class="last">Janssens.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Lengte</dt><dd>1,78 m</dd></div>
+            </dl>
+          </div>
+          <div class="figure">
+            <div class="figure__inner figure__inner--mono">
+              <span class="glyph">SJ.</span>
+            </div>
+            <div class="figure__caption"><span>A-Ploeg 26/27</span><span>#17</span></div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Reuses <code>&lt;TapedFigure&gt;</code> frame — only inner content changes</li>
+            <li>Glyph: existing display italic Black (no new font weight beyond 6.d1 lock)</li>
+            <li>Initials: <code>player.firstName[0] + player.lastName[0]</code> + period</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Honest about missing data — reads as a placeholder</li>
+            <li>Loses the "player visible on hero" experience for ~10% of profiles</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — JerseyShirt ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>JerseyShirt.</h2>
+          <p class="sub">
+            Missing image → the locked <code>&lt;JerseyShirt&gt;</code> primitive
+            (Phase 4.5) renders the KCVV jersey illustration with the player's
+            number screen-printed on it. Object-of-identity rather than
+            face-of-identity.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Reuses locked primitive</span>
+            <span class="chip chip--delta">Number on shirt</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>Present state — locked</span><span class="pct">~90%</span></div>
+        <section class="hero">
+          <div class="hero__top-bar"><span>* A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name">
+              <span class="first">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+            </dl>
+          </div>
+          <div class="figure">
+            <div class="figure__nieuw">NIEUW</div>
+            <div class="figure__inner figure__inner--photo"></div>
+            <div class="figure__caption"><span>A-Ploeg 26/27</span><span>#08</span></div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Fallback — no psdImage</span><span class="pct">~10%</span></div>
+        <section class="hero">
+          <div class="hero__top-bar"><span>* A-Ploeg</span><span>#17</span></div>
+          <div>
+            <div class="hero__number">#17</div>
+            <h2 class="hero__name">
+              <span class="first">Senne</span>
+              <span class="last">Janssens.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Lengte</dt><dd>1,78 m</dd></div>
+            </dl>
+          </div>
+          <div class="figure">
+            <div class="figure__inner figure__inner--jersey">
+              <!-- Jersey illustration -->
+              <svg class="jersey-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+                <!-- jersey-deep underprint -->
+                <path d="M 40 50 L 70 30 L 90 40 Q 100 55 110 40 L 130 30 L 160 50 L 145 80 L 145 215 Q 100 225 55 215 L 55 80 Z"
+                      fill="#008755" />
+                <!-- ink overprint stripes -->
+                <g fill="#0a0a0a">
+                  <rect x="68" y="80" width="14" height="135" />
+                  <rect x="93" y="80" width="14" height="135" />
+                  <rect x="118" y="80" width="14" height="135" />
+                </g>
+                <!-- ink outline -->
+                <path d="M 40 50 L 70 30 L 90 40 Q 100 55 110 40 L 130 30 L 160 50 L 145 80 L 145 215 Q 100 225 55 215 L 55 80 Z"
+                      fill="none" stroke="#0a0a0a" stroke-width="2.5" />
+                <!-- collar / V-neck -->
+                <path d="M 88 42 Q 100 55 112 42" fill="none" stroke="#0a0a0a" stroke-width="2" />
+                <!-- number on back/front -->
+                <text x="100" y="160" font-family="Freight Display Pro, Playfair Display, serif"
+                      font-style="italic" font-weight="900" font-size="56"
+                      fill="#f5f1e6" text-anchor="middle">17</text>
+              </svg>
+            </div>
+            <div class="figure__caption"><span>A-Ploeg 26/27</span><span>#17</span></div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Reuses <code>&lt;JerseyShirt&gt;</code> (Phase 4.5 locked primitive)</li>
+            <li>Two-pass print: <code>jersey-deep</code> underprint + <code>ink</code> overprint + ink stripes (per <code>[[project_jersey_illustration_vocabulary]]</code>)</li>
+            <li>Extension: jersey number screen-printed onto the front — net-new prop <code>&lt;JerseyShirt number={17} /&gt;</code></li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Stays in the redesign's locked illustration language</li>
+            <li><span class="delta">Δ</span> Number-on-shirt is the only net-new vocabulary; trivial SVG text addition</li>
+            <li>Players without photos all read as "interchangeable jersey wearers" — loses individual identity</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — PlayerFigure illustration ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>PlayerFigure illustration.</h2>
+          <p class="sub">
+            Missing image → the canonical <code>&lt;PlayerFigure&gt;</code>
+            polaroid-with-drawn-figure (Phase 4.5 locked). Sketchy outline,
+            abstract head, green V-neck + ink stripes — same vocabulary used
+            in the <code>QuotesBlock</code> avatar fallback.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Reuses canonical fallback</span>
+            <span class="chip chip--delta">Brief said "not PlayerFigure"</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>Present state — locked</span><span class="pct">~90%</span></div>
+        <section class="hero">
+          <div class="hero__top-bar"><span>* A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name">
+              <span class="first">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+            </dl>
+          </div>
+          <div class="figure">
+            <div class="figure__nieuw">NIEUW</div>
+            <div class="figure__inner figure__inner--photo"></div>
+            <div class="figure__caption"><span>A-Ploeg 26/27</span><span>#08</span></div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Fallback — no psdImage</span><span class="pct">~10%</span></div>
+        <section class="hero">
+          <div class="hero__top-bar"><span>* A-Ploeg</span><span>#17</span></div>
+          <div>
+            <div class="hero__number">#17</div>
+            <h2 class="hero__name">
+              <span class="first">Senne</span>
+              <span class="last">Janssens.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Lengte</dt><dd>1,78 m</dd></div>
+            </dl>
+          </div>
+          <div class="figure">
+            <div class="figure__inner figure__inner--player">
+              <!-- PlayerFigure illustration -->
+              <svg class="player-svg" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+                <!-- head (abstract circle) -->
+                <ellipse cx="100" cy="50" rx="28" ry="32" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round" />
+                <!-- subtle hair line -->
+                <path d="M 76 38 Q 100 24 124 38" fill="none" stroke="#0a0a0a" stroke-width="2" />
+                <!-- neck -->
+                <path d="M 90 80 L 90 96 M 110 80 L 110 96" fill="none" stroke="#0a0a0a" stroke-width="2" />
+                <!-- jersey (deep underprint) -->
+                <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z"
+                      fill="#008755" />
+                <!-- jersey stripes (ink overprint) -->
+                <g fill="#0a0a0a">
+                  <rect x="80" y="130" width="10" height="70" />
+                  <rect x="95" y="130" width="10" height="70" />
+                  <rect x="110" y="130" width="10" height="70" />
+                </g>
+                <!-- jersey outline -->
+                <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z"
+                      fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round" />
+                <!-- V-neck -->
+                <path d="M 84 92 Q 100 110 116 92" fill="none" stroke="#0a0a0a" stroke-width="2" />
+                <!-- shorts -->
+                <path d="M 70 200 L 76 248 L 96 248 L 100 220 L 104 248 L 124 248 L 130 200" fill="#0a0a0a" />
+                <!-- socks/legs hint -->
+                <line x1="86" y1="248" x2="86" y2="265" stroke="#0a0a0a" stroke-width="2" />
+                <line x1="114" y1="248" x2="114" y2="265" stroke="#0a0a0a" stroke-width="2" />
+                <!-- sketchy ground line -->
+                <path d="M 50 268 Q 100 272 150 268" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-dasharray="3 4" />
+              </svg>
+            </div>
+            <div class="figure__caption"><span>A-Ploeg 26/27</span><span>#17</span></div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Inner = canonical <code>&lt;PlayerFigure&gt;</code> illustration (Phase 4.5 lock)</li>
+            <li>Outer frame stays <code>&lt;TapedFigure&gt;</code> — bigger than the avatar variant</li>
+            <li>Per <code>[[feedback_playerfigure_no_hybrid]]</code> — illustration only, never photo+drawing</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Strongest visual continuity with the rest of the redesign vocabulary</li>
+            <li><span class="delta">Δ</span> Phase 6 brief explicitly notes "hero portrait is rectangular <code>&lt;TapedFigure&gt;</code>, NOT <code>&lt;PlayerFigure&gt;</code>" — this variant reopens that distinction. Justifiable only because the brief assumed psdImage was always present.</li>
+            <li>The illustration is identity-less — all fallback players look identical</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Drop the figure ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Drop the figure.</h2>
+          <p class="sub">
+            Hero never shows a figure — neither photo nor fallback. The left
+            column expands to full width with a larger <code>#</code> numeral
+            and headline. Mockup-fidelity vs the retro-terrace-fanzine
+            baseline drops, but the page becomes uniform across all 24
+            players regardless of psdImage state.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Uniform across squad</span>
+            <span class="chip chip--cost">Loses poster feel</span>
+            <span class="chip chip--delta">Drop-section variant</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>Present state — column dropped</span><span class="pct">~90%</span></div>
+        <section class="hero hero--no-figure hero--D">
+          <div class="hero__top-bar"><span>* A-Ploeg · Speler</span><span>Profiel · #08</span></div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name">
+              <span class="first">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999 · 26 jr</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+              <div><dt>Nat</dt><dd>Belgisch</dd></div>
+            </dl>
+            <span class="dropped-marker">Figure column dropped · scope decision</span>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Fallback — same shape</span><span class="pct">~10%</span></div>
+        <section class="hero hero--no-figure hero--D">
+          <div class="hero__top-bar"><span>* A-Ploeg · Speler</span><span>Profiel · #17</span></div>
+          <div>
+            <div class="hero__number">#17</div>
+            <h2 class="hero__name">
+              <span class="first">Senne</span>
+              <span class="last">Janssens.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Geb</dt><dd>22·09·2001 · 24 jr</dd></div>
+              <div><dt>Lengte</dt><dd>1,78 m</dd></div>
+              <div><dt>Nat</dt><dd>Belgisch</dd></div>
+            </dl>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Hero composition: single column, no right-column figure</li>
+            <li>No new primitives; existing hero structure adapts via grid-template-columns</li>
+            <li>NIEUW badge needs a new home — likely inline next to the name or above the #</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Uniform across the squad — every player profile reads the same</li>
+            <li>Strongest break from the canonical Maxim mockup</li>
+            <li>Disengages from "season-opener spread" voice</li>
+            <li>Loses the photo-as-identity hook entirely</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary ═════════════ -->
+    <section class="summary">
+      <h2>Fallback ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Monogram</th>
+            <th>B — JerseyShirt</th>
+            <th>C — PlayerFigure</th>
+            <th>D — Drop column</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Honest about missing data?</strong></td>
+            <td>Yes — initials read as placeholder</td>
+            <td>Partial — looks designed, hides absence</td>
+            <td>Partial — looks designed, hides absence</td>
+            <td>Yes — no figure ever, no asymmetry</td>
+          </tr>
+          <tr>
+            <td><strong>Vocabulary delta</strong></td>
+            <td>0 — pure composition</td>
+            <td>1 prop — <code>&lt;JerseyShirt number={…} /&gt;</code></td>
+            <td>0 — reuses locked <code>&lt;PlayerFigure&gt;</code></td>
+            <td>0 — grid template only</td>
+          </tr>
+          <tr>
+            <td><strong>Individual identity preserved (fallback case)</strong></td>
+            <td>Yes — initials are unique</td>
+            <td>Partial — number is unique, jersey is not</td>
+            <td>No — all illustrations look identical</td>
+            <td>N/A — no figure shown</td>
+          </tr>
+          <tr>
+            <td><strong>Visual continuity with redesign vocabulary</strong></td>
+            <td>Medium — typographic only</td>
+            <td>Strong — reuses jersey illustration system</td>
+            <td>Strongest — canonical fallback already used elsewhere</td>
+            <td>Weakest — single-column hero is unique to this page</td>
+          </tr>
+          <tr>
+            <td><strong>Symmetry across the 24-player squad</strong></td>
+            <td>Asymmetric (90% photo, 10% monogram)</td>
+            <td>Asymmetric (90% photo, 10% jersey)</td>
+            <td>Asymmetric (90% photo, 10% illustration)</td>
+            <td>Symmetric (0% photo)</td>
+          </tr>
+          <tr>
+            <td><strong>NIEUW badge home</strong></td>
+            <td>Tape-frame corner (present state); fallback inherits</td>
+            <td>Tape-frame corner; jersey illustration accepts overlay</td>
+            <td>Tape-frame corner; canonical placement</td>
+            <td>Needs new placement (next to name? above #?)</td>
+          </tr>
+          <tr>
+            <td><strong>Mockup fidelity vs retro-terrace-fanzine</strong></td>
+            <td>~95% (present); fallback differs</td>
+            <td>~95% (present); fallback differs</td>
+            <td>~95% (present); fallback differs</td>
+            <td>~60% (radical departure)</td>
+          </tr>
+          <tr>
+            <td><strong>Memory guardrails honored</strong></td>
+            <td>✓ All</td>
+            <td>✓ <code>[[project_jersey_illustration_vocabulary]]</code></td>
+            <td>~ Reopens "not PlayerFigure" note in brief; justifiable</td>
+            <td>✓ All — also honors 6.d0 drop-section escape</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

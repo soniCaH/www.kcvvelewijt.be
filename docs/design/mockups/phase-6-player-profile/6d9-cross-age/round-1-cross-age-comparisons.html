@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · Cross-age availability + privacy (6.d9)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+        --font-body:
+          "Source Serif Pro", ui-serif, Georgia, "Times New Roman", serif;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      header.page .legend {
+        margin-top: 14px;
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 12px;
+      }
+      header.page .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      header.page .legend .age {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        background: var(--color-cream-deep);
+        padding: 2px 8px;
+        border: 1px solid var(--color-ink);
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--strict { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+
+      .case-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 4px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .case-label:first-of-type { border-top: none; }
+      .case-label .age {
+        font-size: 9px;
+        opacity: 0.55;
+      }
+
+      /* ───────── Mini hero ───────── */
+      .mini-hero {
+        padding: 10px 14px 14px;
+        display: grid;
+        grid-template-columns: 1.05fr 0.85fr;
+        gap: 10px;
+      }
+      .mini-hero--full { grid-template-columns: 1fr; }
+      .mini-hero__top {
+        grid-column: 1 / -1;
+        font-family: var(--font-mono);
+        font-size: 7.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+        margin-bottom: 2px;
+      }
+      .mini-hero__num {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 38px;
+        line-height: 0.85;
+        color: var(--color-jersey-deep);
+        margin: 2px 0 4px;
+      }
+      .mini-hero__name {
+        font-family: var(--font-display);
+        line-height: 0.92;
+        letter-spacing: -0.025em;
+        margin: 0 0 6px;
+        font-size: 16px;
+      }
+      .mini-hero__name .first {
+        font-style: normal;
+        font-weight: 900;
+        display: block;
+      }
+      .mini-hero__name .last {
+        font-style: italic;
+        font-weight: 400;
+        display: block;
+      }
+      .mini-hero__name::after {
+        content: "";
+        display: block;
+        height: 2px;
+        width: 88%;
+        margin-top: 4px;
+        background: var(--color-ink);
+        opacity: 0.85;
+      }
+      .mini-hero__meta {
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        line-height: 1.6;
+      }
+      .mini-hero__meta dt { display: inline-block; opacity: 0.55; margin-right: 4px; font-weight: 600; }
+      .mini-hero__meta dd { display: inline; margin: 0; font-weight: 700; }
+      .mini-hero__meta > div + div {
+        border-top: 1px dashed var(--color-ink-muted);
+        padding-top: 2px;
+        margin-top: 2px;
+      }
+
+      .mini-figure {
+        position: relative;
+        background: var(--color-cream);
+        border: 1.5px solid var(--color-ink);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+        padding: 6px 6px 8px;
+        align-self: start;
+        transform: rotate(0.4deg);
+      }
+      .mini-figure__inner {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream-soft);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+      }
+      .mini-figure__inner--photo {
+        background:
+          radial-gradient(circle at 50% 28%, #d6c8a4 0, #d6c8a4 18%, transparent 18%),
+          linear-gradient(to bottom,
+            transparent 0%, transparent 38%,
+            var(--color-jersey-deep) 38%, var(--color-jersey-deep) 86%,
+            transparent 86%),
+          repeating-linear-gradient(to right,
+            transparent 0, transparent 14px,
+            rgba(0, 0, 0, 0.85) 14px, rgba(0, 0, 0, 0.85) 18px),
+          #efe6cf;
+        background-blend-mode: normal, multiply, multiply, normal;
+        filter: sepia(0.18);
+      }
+      .mini-figure__inner--illust svg {
+        width: 75%;
+        max-width: 90px;
+      }
+      .mini-figure__inner--blur {
+        background:
+          radial-gradient(circle at 50% 28%, rgba(214,200,164,0.6) 0, rgba(214,200,164,0.6) 18%, transparent 18%),
+          linear-gradient(to bottom,
+            transparent 0%, transparent 38%,
+            rgba(0,135,85,0.55) 38%, rgba(0,135,85,0.55) 86%,
+            transparent 86%),
+          var(--color-cream-soft);
+        filter: blur(3px);
+        position: relative;
+      }
+      .mini-figure__inner--blur::after {
+        content: "PRIVAAT";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--color-ink);
+        background: rgba(245, 241, 230, 0.7);
+        filter: blur(0);
+      }
+      .mini-figure__cap {
+        margin-top: 4px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 7px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+
+      /* ───────── Mini section markers ───────── */
+      .mini-section {
+        padding: 8px 14px;
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        background: var(--color-cream-soft);
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+      }
+      .mini-section--hidden {
+        opacity: 0.4;
+        text-decoration: line-through;
+      }
+      .mini-section--present {
+        background: var(--color-cream-deep);
+      }
+
+      .mini-quote {
+        margin: 6px 14px 10px;
+        padding: 10px 10px 10px 22px;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 11px;
+        line-height: 1.35;
+        position: relative;
+        border: 1.5px solid var(--color-ink);
+        transform: rotate(-0.3deg);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+      }
+      .mini-quote::before {
+        content: "“";
+        position: absolute;
+        top: 0;
+        left: 5px;
+        font-size: 22px;
+        opacity: 0.85;
+      }
+
+      /* ───────── Callouts ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .danger { color: #c75230; font-weight: 700; }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+
+      /* ───────── Summary ───────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .summary .danger { color: #c75230; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d9 · 2026-05-21 · CROSS-AGE</div>
+      <h1>Cross-age section availability + privacy for minors</h1>
+      <p>
+        Last design-domain drill. Per <code>[[project_player_profile_all_ages]]</code>,
+        the player profile renders ALL players: A-team adults through U6 toddlers.
+        Sections auto-hide when data is absent (BioBlock, QuotesBlock) but the
+        <strong>hero</strong> ALWAYS renders something — what should it show, and
+        what's the privacy treatment for minors?
+      </p>
+      <p>
+        Three representative players rendered per variant — <strong>Maxim
+        (A-team, 26)</strong>, <strong>Senne (U17, 16)</strong>,
+        <strong>Lars (U8, 7)</strong> — to see how the variants treat the
+        full age range, not just the extremes.
+      </p>
+      <div class="legend">
+        <span><span class="age">A-team</span> Maxim, 26 — Aanvaller — bio + 2 marked spans</span>
+        <span><span class="age">U17</span> Senne, 16 — Middenvelder — no bio</span>
+        <span><span class="age">U8</span> Lars, 7 — minor — no bio</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Uniform across all ages ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Uniform — treat everyone the same.</h2>
+          <p class="sub">
+            Same shape, same fields, same photo treatment for every age.
+            Data-driven hide handles BioBlock + QuotesBlock. Hero always
+            shows full meta (DOB + height + weight + nationality) and
+            psdImage when present. No special minor handling.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Simplest implementation</span>
+            <span class="chip"><span class="danger">⚠</span> Minor-data exposure</span>
+          </div>
+        </header>
+
+        <div class="case-label"><span>A-team — Maxim</span><span class="age">26 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="mini-hero__num">#8</div>
+            <h3 class="mini-hero__name"><span class="first">Maxim</span><span class="last">Breugelmans.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+              <div><dt>L/G</dt><dd>1,82m · 78kg</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>A-Ploeg</span><span>#08</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--present">BioBlock · present</div>
+        <div class="mini-section mini-section--present">QuotesBlock · present (ink)</div>
+
+        <div class="case-label"><span>U17 — Senne</span><span class="age">16 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>U17</span><span>#17</span></div>
+          <div>
+            <div class="mini-hero__num">#17</div>
+            <h3 class="mini-hero__name"><span class="first">Senne</span><span class="last">Janssens.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Geb</dt><dd>22·09·2009</dd></div>
+              <div><dt>L/G</dt><dd>1,72m · 62kg</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>U17</span><span>#17</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden (no bio)</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden</div>
+
+        <div class="case-label"><span>U8 — Lars</span><span class="age">7 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>U8</span><span>#6</span></div>
+          <div>
+            <div class="mini-hero__num">#6</div>
+            <h3 class="mini-hero__name"><span class="first">Lars</span><span class="last">De Smet.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Verdediger</dd></div>
+              <div><dt>Geb</dt><dd>03·06·2018</dd></div>
+              <div><dt>L/G</dt><dd>1,28m · 24kg</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>U8</span><span>#6</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden</div>
+
+        <div class="callouts">
+          <h4>Treatment rules</h4>
+          <ul>
+            <li>Full DOB shown for everyone</li>
+            <li>Height + weight shown for everyone (where present)</li>
+            <li>psdImage rendered for everyone (where present)</li>
+            <li>Sections hide only on absent data</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Simplest possible implementation (one rendering path)</li>
+            <li><span class="danger">⚠</span> Renders a 7-year-old's full DOB + body metrics + face publicly. Federation-level consent is not website-level consent.</li>
+            <li>No editorial workflow for opting out an individual minor</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Privacy-graded ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Privacy-graded for minors.</h2>
+          <p class="sub">
+            Minors (under 18) get reduced metadata: <strong>age + year</strong>
+            instead of full DOB; <strong>no height / weight</strong> for U-divisions
+            under 13. Photo still renders when present. BioBlock + QuotesBlock
+            handled by editorial policy (don't write bios for minors → auto-hide).
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">Age-gated render rules</span>
+            <span class="chip chip--good">Photos still render</span>
+          </div>
+        </header>
+
+        <div class="case-label"><span>A-team — Maxim</span><span class="age">26 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="mini-hero__num">#8</div>
+            <h3 class="mini-hero__name"><span class="first">Maxim</span><span class="last">Breugelmans.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+              <div><dt>L/G</dt><dd>1,82m · 78kg</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>A-Ploeg</span><span>#08</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--present">BioBlock · present</div>
+        <div class="mini-section mini-section--present">QuotesBlock · present (ink)</div>
+
+        <div class="case-label"><span>U17 — Senne</span><span class="age">16 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>U17</span><span>#17</span></div>
+          <div>
+            <div class="mini-hero__num">#17</div>
+            <h3 class="mini-hero__name"><span class="first">Senne</span><span class="last">Janssens.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Lftd</dt><dd>16 jaar · '09</dd></div>
+              <div><dt>Lengte</dt><dd>1,72 m</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>U17</span><span>#17</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden (editorial)</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden (editorial)</div>
+
+        <div class="case-label"><span>U8 — Lars</span><span class="age">7 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>U8</span><span>#6</span></div>
+          <div>
+            <div class="mini-hero__num">#6</div>
+            <h3 class="mini-hero__name"><span class="first">Lars</span><span class="last">De Smet.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Verdediger</dd></div>
+              <div><dt>Lftd</dt><dd>7 jaar · '18</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>U8</span><span>#6</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden</div>
+
+        <div class="callouts">
+          <h4>Treatment rules</h4>
+          <ul>
+            <li>Adults (≥18): full DOB + height + weight</li>
+            <li>U13-U18 minors: <strong>age + year only</strong> ("16 jaar · '09"); height shown; weight hidden</li>
+            <li>U6-U12 minors: <strong>age + year only</strong>; no height / weight</li>
+            <li>Photo rendered when present (no opt-out gate)</li>
+            <li>BioBlock + QuotesBlock auto-hide for minors via editorial policy (don't author bios for minors)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Sane default privacy treatment without an explicit opt-out workflow</li>
+            <li><span class="delta">Δ</span> Requires age-derivation at render time + conditional meta-row rendering</li>
+            <li>Photo still public — relies on PSD's federation consent</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Strict — illustration for minors ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Strict — illustration for all minors.</h2>
+          <p class="sub">
+            Above B, plus: <strong>minors never see psdImage on the hero</strong>.
+            Default to <code>&lt;PlayerFigure&gt;</code> illustration fallback for
+            anyone under 18. Adults render photo as before. Federation-consent
+            doesn't carry to public website context for minors.
+          </p>
+          <div class="chips">
+            <span class="chip chip--strict">Photo gate</span>
+            <span class="chip chip--good">Privacy-first</span>
+          </div>
+        </header>
+
+        <div class="case-label"><span>A-team — Maxim</span><span class="age">26 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="mini-hero__num">#8</div>
+            <h3 class="mini-hero__name"><span class="first">Maxim</span><span class="last">Breugelmans.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+              <div><dt>L/G</dt><dd>1,82m · 78kg</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>A-Ploeg</span><span>#08</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--present">BioBlock · present</div>
+        <div class="mini-section mini-section--present">QuotesBlock · present (ink)</div>
+
+        <div class="case-label"><span>U17 — Senne</span><span class="age">16 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>U17</span><span>#17</span></div>
+          <div>
+            <div class="mini-hero__num">#17</div>
+            <h3 class="mini-hero__name"><span class="first">Senne</span><span class="last">Janssens.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Middenvelder</dd></div>
+              <div><dt>Lftd</dt><dd>16 jaar · '09</dd></div>
+              <div><dt>Lengte</dt><dd>1,72 m</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--illust">
+              <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="50" rx="28" ry="32" fill="none" stroke="#0a0a0a" stroke-width="2.5"/>
+                <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z" fill="#008755"/>
+                <g fill="#0a0a0a">
+                  <rect x="80" y="130" width="10" height="70"/>
+                  <rect x="95" y="130" width="10" height="70"/>
+                  <rect x="110" y="130" width="10" height="70"/>
+                </g>
+                <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z" fill="none" stroke="#0a0a0a" stroke-width="2.5"/>
+                <path d="M 84 92 Q 100 110 116 92" fill="none" stroke="#0a0a0a" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="mini-figure__cap"><span>U17</span><span>#17</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden (editorial)</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden (editorial)</div>
+
+        <div class="case-label"><span>U8 — Lars</span><span class="age">7 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>U8</span><span>#6</span></div>
+          <div>
+            <div class="mini-hero__num">#6</div>
+            <h3 class="mini-hero__name"><span class="first">Lars</span><span class="last">De Smet.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Verdediger</dd></div>
+              <div><dt>Lftd</dt><dd>7 jaar · '18</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--illust">
+              <svg viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+                <ellipse cx="100" cy="50" rx="28" ry="32" fill="none" stroke="#0a0a0a" stroke-width="2.5"/>
+                <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z" fill="#008755"/>
+                <g fill="#0a0a0a">
+                  <rect x="80" y="130" width="10" height="70"/>
+                  <rect x="95" y="130" width="10" height="70"/>
+                  <rect x="110" y="130" width="10" height="70"/>
+                </g>
+                <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z" fill="none" stroke="#0a0a0a" stroke-width="2.5"/>
+                <path d="M 84 92 Q 100 110 116 92" fill="none" stroke="#0a0a0a" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="mini-figure__cap"><span>U8</span><span>#6</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden</div>
+
+        <div class="callouts">
+          <h4>Treatment rules</h4>
+          <ul>
+            <li>Same age-gated meta as B</li>
+            <li>Minors: <strong>always render PlayerFigure illustration</strong> (the 6.d2 lock fallback) regardless of psdImage presence</li>
+            <li>Adults: psdImage as canonical, illustration only when missing</li>
+            <li>Photo gate driven by age &lt; 18 at render time</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Strongest privacy stance — no public-facing minor photos</li>
+            <li>All minor profiles render identical illustration → low individual identity</li>
+            <li>Closes a real risk (PSD photo + DOB on a public URL constitutes identifiable PII)</li>
+            <li>An opt-IN workflow (parent / coach explicitly approves photo) can be added later</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Minimal hero for minors ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Minimal — name + team for minors.</h2>
+          <p class="sub">
+            Strictest interpretation. Minors render hero with name + team
+            label + jersey number only. No DOB, no height, no weight, no
+            photo, no figure column at all. Single-column hero. Adults
+            unchanged. The page is essentially a directory entry for U-divisions.
+          </p>
+          <div class="chips">
+            <span class="chip chip--strict">Minimal-for-minors</span>
+            <span class="chip chip--cost">Lowest fidelity for youth</span>
+          </div>
+        </header>
+
+        <div class="case-label"><span>A-team — Maxim</span><span class="age">26 jr</span></div>
+        <section class="mini-hero">
+          <div class="mini-hero__top"><span>A-Ploeg</span><span>#08</span></div>
+          <div>
+            <div class="mini-hero__num">#8</div>
+            <h3 class="mini-hero__name"><span class="first">Maxim</span><span class="last">Breugelmans.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+              <div><dt>L/G</dt><dd>1,82m · 78kg</dd></div>
+            </dl>
+          </div>
+          <div class="mini-figure">
+            <div class="mini-figure__inner mini-figure__inner--photo"></div>
+            <div class="mini-figure__cap"><span>A-Ploeg</span><span>#08</span></div>
+          </div>
+        </section>
+        <div class="mini-section mini-section--present">BioBlock · present</div>
+        <div class="mini-section mini-section--present">QuotesBlock · present (ink)</div>
+
+        <div class="case-label"><span>U17 — Senne</span><span class="age">16 jr</span></div>
+        <section class="mini-hero mini-hero--full">
+          <div class="mini-hero__top"><span>U17 · Speler</span><span>#17</span></div>
+          <div>
+            <div class="mini-hero__num">#17</div>
+            <h3 class="mini-hero__name"><span class="first">Senne</span><span class="last">Janssens.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Ploeg</dt><dd>U17</dd></div>
+            </dl>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden</div>
+
+        <div class="case-label"><span>U8 — Lars</span><span class="age">7 jr</span></div>
+        <section class="mini-hero mini-hero--full">
+          <div class="mini-hero__top"><span>U8 · Speler</span><span>#6</span></div>
+          <div>
+            <div class="mini-hero__num">#6</div>
+            <h3 class="mini-hero__name"><span class="first">Lars</span><span class="last">De Smet.</span></h3>
+            <dl class="mini-hero__meta">
+              <div><dt>Ploeg</dt><dd>U8</dd></div>
+            </dl>
+          </div>
+        </section>
+        <div class="mini-section mini-section--hidden">BioBlock · hidden</div>
+        <div class="mini-section mini-section--hidden">QuotesBlock · hidden</div>
+
+        <div class="callouts">
+          <h4>Treatment rules</h4>
+          <ul>
+            <li>Adults (≥18): full hero unchanged</li>
+            <li>Minors (&lt;18): single-column hero with name + jersey number + team only. No DOB, no height/weight, no figure column</li>
+            <li>Equivalent to a public directory entry — exists to confirm membership, not to feature the player</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Smallest PII surface area possible while still having a page</li>
+            <li>Youth profiles read as placeholders — could feel disrespectful ("their page is empty")</li>
+            <li>Easiest to defend to a privacy regulator</li>
+            <li>Photo + DOB never exposed for any minor regardless of psdImage availability</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary ═════════════ -->
+    <section class="summary">
+      <h2>Cross-age ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Uniform</th>
+            <th>B — Privacy-graded meta</th>
+            <th>C — Privacy-graded + illustration</th>
+            <th>D — Minimal for minors</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Adult rendering</strong></td>
+            <td>Full hero + meta + photo</td>
+            <td>Same as A</td>
+            <td>Same as A</td>
+            <td>Same as A</td>
+          </tr>
+          <tr>
+            <td><strong>Minor DOB</strong></td>
+            <td>Full date</td>
+            <td>Age + year only</td>
+            <td>Age + year only</td>
+            <td>Hidden</td>
+          </tr>
+          <tr>
+            <td><strong>Minor height / weight</strong></td>
+            <td>Shown</td>
+            <td>Height yes (≥U13); weight hidden under 13</td>
+            <td>Same as B</td>
+            <td>Hidden</td>
+          </tr>
+          <tr>
+            <td><strong>Minor photo</strong></td>
+            <td>psdImage rendered</td>
+            <td>psdImage rendered</td>
+            <td><strong>Always illustration fallback</strong></td>
+            <td>Hidden (no figure column)</td>
+          </tr>
+          <tr>
+            <td><strong>PII exposure</strong></td>
+            <td><span class="danger">High — full DOB + body metrics + face of a 7-year-old</span></td>
+            <td>Reduced — age-shifted; photo still public</td>
+            <td>Lower — no photo for minors</td>
+            <td>Lowest — name + team only</td>
+          </tr>
+          <tr>
+            <td><strong>BioBlock / QuotesBlock for minors</strong></td>
+            <td>Auto-hides on absent data</td>
+            <td>Auto-hides via editorial policy + absent data</td>
+            <td>Same as B</td>
+            <td>Hidden</td>
+          </tr>
+          <tr>
+            <td><strong>Implementation</strong></td>
+            <td>Single render path</td>
+            <td>Age-derived branches in meta row</td>
+            <td>Above + photo gate</td>
+            <td>Branch on adult vs minor → two render paths</td>
+          </tr>
+          <tr>
+            <td><strong>Youth profile feel</strong></td>
+            <td>Same as adult</td>
+            <td>Same as adult, less metadata</td>
+            <td>Same shape, illustrated portrait</td>
+            <td>Directory entry / "this player exists at the club"</td>
+          </tr>
+          <tr>
+            <td><strong>Opt-in pathway later</strong></td>
+            <td>N/A (everything public by default)</td>
+            <td>Could promote opt-in adults to full meta</td>
+            <td>Could add "photo approved" flag per minor → enables psdImage</td>
+            <td>Could promote opt-in minors to B / C treatment</td>
+          </tr>
+          <tr>
+            <td><strong>Honors <code>[[project_player_profile_all_ages]]</code></strong></td>
+            <td>✗ Ignores minor-specific guidance</td>
+            <td>~ Partial — meta only</td>
+            <td>✓ Strongest balance</td>
+            <td>✓ Strictest interpretation</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

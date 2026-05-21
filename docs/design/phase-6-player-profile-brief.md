@@ -1,6 +1,43 @@
 # Phase 6 — Player Profile · Consolidated Design Brief
 
-**Status:** waiting. Consolidates the visual baseline + Phase 4.5 system inheritance + owner refinement prompts (2026-05-14) into a single input for the Phase 6 design drill. Not a locked decision — net-new vocabulary needs a drill round and owner sign-off per [[feedback_design_drill_pattern]] and [[feedback_guardrail_refinements_to_locked_primitives]].
+> **CLOSEOUT NOTE — 2026-05-21**
+>
+> This brief was the **input** to Phase 6.A's design drill series. The
+> drills ran 6.d0 → 6.d9 in a single session on 2026-05-21. **Per-element
+> lock docs in `docs/design/mockups/phase-6-player-profile/*-locked.md`
+> are now authoritative**; this brief is preserved as historical record
+> for traceability. Use the lock docs (not this brief) for PRD writing
+> or future reference.
+>
+> **Headline divergences from this brief:**
+>
+> - 5 sections dropped: NIEUW badge, StatsStrip, CareerLogTable,
+>   RecentMatchesGrid, QuotesBlock cream-half
+> - `<PlayerHero>` ships as a sibling component, not
+>   `<EditorialHero variant="player">` (6.d0)
+> - Player-name typography rhythm: first Black upright + last italic
+>   display (6.d1) — introduces upright display weight to the heading
+>   vocabulary for the first time
+> - Hero photo fallback: canonical `<PlayerFigure>` illustration inside
+>   the `<TapedFigure>` frame (6.d2; refinement at hero scale deferred
+>   to 6.d2.a)
+> - BioBlock pullquote sourcing: extend `player.bio` Portable Text with
+>   a `pullquote` decorator; "derive from related interviews" rejected
+>   as impossible (6.d5)
+> - QuotesBlock: single full-width ink card, not ink+cream pair (6.d8);
+>   hosts the dark-band aesthetic that StatsStrip surrendered (6.d4)
+> - Cross-age privacy: minors get `<age> jaar · '<YY>` instead of full
+>   DOB (6.d9); photo treatment unchanged across ages
+> - Schema deltas: 1 additive (`pullquote` decorator on bio) + 3 removals
+>   (`nationality`, `height`, `weight`)
+> - Final meta-row field list: `position · birthDate` (2 fields)
+>
+> Master plan §5.3 has been rewritten to reflect the locked composition;
+> §5.4's "one EditorialHero" thesis has been retracted in the same edit.
+
+---
+
+**Status:** historical (closed 2026-05-21). Consolidates the visual baseline + Phase 4.5 system inheritance + owner refinement prompts (2026-05-14) into a single input for the Phase 6 design drill. Not a locked decision — net-new vocabulary needs a drill round and owner sign-off per [[feedback_design_drill_pattern]] and [[feedback_guardrail_refinements_to_locked_primitives]].
 
 **Owner:** @climacon.
 **Predecessor:** Phase 4.5 homepage refinement (#1745, all R1–R10 locks).
