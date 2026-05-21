@@ -115,7 +115,12 @@ export function ArticleCredits(props: ArticleCreditsProps) {
       data-article-credits="true"
       aria-label="Credits"
       className={cn(
-        "border-ink mx-auto my-12 w-full border-t border-b px-7 py-6 text-center",
+        // Tight `my-6` (1.5rem) on each side — the tail-Q&A section
+        // above ships `pb-12 lg:pb-16` and <VerderLezenRow> below ships
+        // `py-16 lg:py-24`, so the surrounding sections own the bigger
+        // breathing room. The credits block only needs enough margin to
+        // sit visually inside its own framed boundary.
+        "border-ink mx-auto my-6 w-full border-t border-b px-7 py-6 text-center",
         props.className,
       )}
       style={{ maxWidth: "var(--container-prose)" }}

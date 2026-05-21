@@ -52,7 +52,7 @@ export const QaGroupRapidFire = ({
   if (pairs.length === 0) return null;
 
   return (
-    <section data-testid="qa-group-rapid-fire" className="not-prose my-12">
+    <section data-testid="qa-group-rapid-fire" className="not-prose">
       {/* Section opener — MonoLabel between two 1px ink hairlines. */}
       <header
         data-rapidfire="opener"
