@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · Round 1 · Tail Q&amp;A section header (5.d-tail-qa-header)</title>
+    <style>
+      :root {
+        --color-cream: #f5efe1;
+        --color-cream-soft: #ece5d3;
+        --color-cream-deep: #ddd4ba;
+        --color-ink: #1a1a1a;
+        --color-ink-soft: #2a2a2a;
+        --color-ink-muted: #6a655a;
+        --color-jersey: #2d7a4f;
+        --color-jersey-deep: #1f5f3f;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --container-prose: 680px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1120px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 80ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        background: var(--color-cream-soft);
+        padding: 1px 4px;
+      }
+      .container {
+        max-width: 1120px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+      .candidate {
+        background: #fff;
+        border: 1px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .candidate > header.card {
+        padding: 16px 22px 12px;
+        border-bottom: 1px dashed var(--color-ink);
+      }
+      .candidate > header.card .key {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+      }
+      .candidate > header.card .name {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1.15;
+        margin-top: 4px;
+      }
+      .candidate > header.card .desc {
+        font-size: 12px;
+        line-height: 1.5;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+      .candidate > header.card .vocab {
+        font-size: 11px;
+        line-height: 1.55;
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dotted var(--color-ink-muted);
+      }
+      .candidate > header.card .vocab strong {
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 10px;
+        display: block;
+        margin-bottom: 4px;
+        opacity: 0.7;
+      }
+
+      /* ============================================================
+         Body surface — cream, prose width
+         ============================================================ */
+      .surface {
+        background: var(--color-cream);
+        padding: 24px 0 32px;
+      }
+      .article-body {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+      }
+      .article-body p {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.65;
+        margin: 0 0 14px;
+        color: var(--color-ink);
+      }
+
+      /* ============================================================
+         Shared "context": EndMark above + first QaRow below the header
+         so each variant is judged against the actual rhythm it lives in.
+         ============================================================ */
+      .endmark {
+        max-width: var(--container-prose);
+        margin: 32px auto 0;
+        padding: 0 28px;
+        text-align: center;
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-size: 14px;
+        color: var(--color-ink-muted);
+        letter-spacing: 0.06em;
+      }
+      .endmark .stars {
+        color: var(--color-jersey-deep);
+        letter-spacing: 0.5em;
+        padding-left: 0.5em;
+      }
+      .qa-pair {
+        max-width: var(--container-prose);
+        margin: 0 auto;
+        padding: 0 28px;
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .qa-pair .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: ui-serif, Georgia, serif;
+        font-weight: 700;
+        font-size: 16px;
+        margin-top: 4px;
+      }
+      .qa-pair .speaker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        opacity: 0.7;
+        margin: 0 0 6px;
+      }
+      .qa-pair .question {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 600;
+        font-size: 22px;
+        line-height: 1.25;
+        margin: 0 0 8px;
+      }
+      .qa-pair .answer {
+        font-family: ui-serif, Georgia, serif;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0;
+      }
+
+      /* ============================================================
+         A — MonoLabelRow kicker + EditorialHeading display-md
+            Echo of the InterviewHero "* AFSCHEID DUBBEL *" kicker pattern.
+         ============================================================ */
+      .header-A {
+        max-width: var(--container-prose);
+        margin: 32px auto 28px;
+        padding: 0 28px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .header-A .kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--color-ink);
+        opacity: 0.85;
+      }
+      .header-A .kicker .star {
+        color: var(--color-jersey-deep);
+        padding: 0 0.6em;
+      }
+      .header-A .heading {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 1.05;
+        letter-spacing: -0.01em;
+        color: var(--color-ink);
+      }
+      .header-A .heading .period {
+        color: var(--color-jersey-deep);
+      }
+
+      /* ============================================================
+         B — EditorialHeading display-lg + flanking ink rules
+            Mirrors the locked 5.d3 / Phase 3-b QASectionDivider
+            (italic centered + thin rules), scaled UP from display-sm
+            to display-lg so it reads as a new section, not a subsection.
+         ============================================================ */
+      .header-B {
+        max-width: var(--container-prose);
+        margin: 32px auto 28px;
+        padding: 0 28px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 22px;
+      }
+      .header-B::before,
+      .header-B::after {
+        content: "";
+        height: 1px;
+        background: var(--color-ink);
+        opacity: 0.55;
+      }
+      .header-B .heading {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 44px;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        color: var(--color-ink);
+        text-align: center;
+        white-space: nowrap;
+      }
+      .header-B .heading .period {
+        color: var(--color-jersey-deep);
+      }
+
+      /* ============================================================
+         C — Full-bleed StripedSeam above + EditorialHeading display-lg
+            Register shift: "the page just turned, here's the bonus".
+            Same primitive used to separate page regions on the homepage,
+            now introducing the tail. Highest visual energy of the four.
+         ============================================================ */
+      .header-C-seam {
+        width: 100%;
+        height: 14px;
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--color-ink) 0 8px,
+          var(--color-cream) 8px 16px
+        );
+        margin: 28px 0 0;
+      }
+      .header-C-title {
+        max-width: var(--container-prose);
+        margin: 24px auto 28px;
+        padding: 0 28px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .header-C-title .kicker {
+        font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .header-C-title .heading {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 44px;
+        line-height: 1.05;
+        letter-spacing: -0.015em;
+        color: var(--color-ink);
+      }
+      .header-C-title .heading .period {
+        color: var(--color-jersey-deep);
+      }
+
+      /* ============================================================
+         D — EditorialHeading display-xl with HighlighterStroke marker
+            on "Q&A". Voice-led, marker decoration calls the section
+            out as a feature. Biggest typography of the four. No rules,
+            no kicker — heading carries the whole moment.
+         ============================================================ */
+      .header-D {
+        max-width: var(--container-prose);
+        margin: 40px auto 28px;
+        padding: 0 28px;
+        text-align: center;
+      }
+      .header-D .heading {
+        font-family: ui-serif, Georgia, serif;
+        font-style: italic;
+        font-weight: 900;
+        font-size: 56px;
+        line-height: 1.0;
+        letter-spacing: -0.02em;
+        color: var(--color-ink);
+        display: inline-block;
+      }
+      .header-D .heading .marker {
+        position: relative;
+        display: inline-block;
+        z-index: 0;
+      }
+      .header-D .heading .marker::after {
+        content: "";
+        position: absolute;
+        left: -4%;
+        right: -4%;
+        bottom: 8%;
+        height: 38%;
+        background: var(--color-jersey);
+        opacity: 0.55;
+        z-index: -1;
+        transform: rotate(-1deg);
+        border-radius: 2px;
+      }
+      .header-D .heading .period {
+        color: var(--color-jersey-deep);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <p class="meta">Phase 5 · Round 1 · Drill #1867 · 5.d-tail-qa-header</p>
+      <h1>Tail Q&amp;A section header — typography drill</h1>
+      <p>
+        Owner feedback from the Phase 5 grilling session (2026-05-20):
+        the tail-grouped Q&amp;A's centered <code>&lt;MonoLabel
+        tone="ink"&gt;Q&amp;A&lt;/MonoLabel&gt;</code> reads too quietly between
+        <code>&lt;EndMark&gt;</code> above and the first <code>&lt;QaPair&gt;</code>
+        below — <em>"should be other typography, bigger"</em>. Drill resolves which
+        typography variant becomes the locked header for the tail section.
+      </p>
+      <p>
+        Each option renders the same context — closing <code>&lt;EndMark&gt;</code>
+        from the in-flow body, header treatment, first tail <code>&lt;QaPair&gt;</code>
+        — at <code>--container-prose</code> width (680px) on cream, so rhythm and
+        scale are visible at a glance. The locked Phase 3-b Q&amp;A row shape is
+        reused as the after-header context (monogram avatar · mono speaker tag ·
+        italic display-sm question · body-md answer).
+      </p>
+      <p>
+        Every variant composes only from already-locked primitives — no net-new
+        vocabulary. See <code>compare.md</code> in this folder for the per-option
+        source-primitive map.
+      </p>
+    </header>
+
+    <main class="container">
+
+      <!-- =================================================================
+           A — MonoLabelRow kicker + EditorialHeading display-md
+           ================================================================= -->
+      <section class="candidate">
+        <header class="card">
+          <p class="key">A · kicker + heading</p>
+          <p class="name">Kicker + display-md heading</p>
+          <p class="desc">
+            Small <code>&lt;MonoLabelRow&gt;</code> "* Q&amp;A *" kicker above a
+            centered italic <code>&lt;EditorialHeading size="display-md"&gt;</code>.
+            Echoes the InterviewHero opening pattern ("* AFSCHEID DUBBEL *") and
+            the EndMark "* Einde gesprek *" rhythm above. Quietest of the four;
+            voice-driven, no rules, no seam.
+          </p>
+          <p class="vocab">
+            <strong>Source primitives</strong>
+            • <code>&lt;MonoLabelRow&gt;</code> (kicker)<br />
+            • <code>&lt;EditorialHeading size="display-md"&gt;</code> italic<br />
+            • Jersey-deep period (existing EditorialHeading convention)<br />
+            <strong>Vocabulary delta</strong>
+            None. Direct reuse of two locked primitives.
+          </p>
+        </header>
+        <div class="surface">
+          <div class="endmark">
+            <span class="stars">* * *</span>
+          </div>
+          <header class="header-A">
+            <p class="kicker">
+              <span class="star">*</span>Q&amp;A<span class="star">*</span>
+            </p>
+            <h2 class="heading">Nog kort nagezweefd<span class="period">.</span></h2>
+          </header>
+          <article class="qa-pair">
+            <div class="avatar">L</div>
+            <div>
+              <p class="speaker">Lars · Aanvaller</p>
+              <p class="question">Wat was het moment waarop je dacht: nu lukt het?</p>
+              <p class="answer">"Halfweg de eerste helft, toen die bal binnen viel. Dan voel je dat de ploeg meekomt."</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           B — EditorialHeading display-lg + flanking ink rules
+           ================================================================= -->
+      <section class="candidate">
+        <header class="card">
+          <p class="key">B · heading + rules</p>
+          <p class="name">Display-lg heading + flanking rules</p>
+          <p class="desc">
+            Italic centered <code>&lt;EditorialHeading size="display-lg"&gt;</code>
+            flanked by 1px ink rules at 0.55 opacity. Same vocabulary as the locked
+            Phase 3-b body section breaks (E0 in 5.d3), scaled up from display-sm
+            to display-lg so it reads as a NEW section rather than a subsection.
+            Strong consistency with the body's own break treatment.
+          </p>
+          <p class="vocab">
+            <strong>Source primitives</strong>
+            • <code>&lt;EditorialHeading size="display-lg"&gt;</code> italic<br />
+            • Flanking thin rules: <code>QASectionDivider</code> baseline (E0 from
+            5.d3)<br />
+            • Jersey-deep period (existing convention)<br />
+            <strong>Vocabulary delta</strong>
+            None. Same shape as <code>&lt;QASectionDivider title&gt;</code> at
+            a larger heading size. Could land as a new prop on
+            <code>&lt;QASectionDivider&gt;</code> (e.g.
+            <code>headingSize="lg"</code>) or compose directly.
+          </p>
+        </header>
+        <div class="surface">
+          <div class="endmark">
+            <span class="stars">* * *</span>
+          </div>
+          <header class="header-B">
+            <h2 class="heading">Q&amp;A<span class="period">.</span></h2>
+          </header>
+          <article class="qa-pair">
+            <div class="avatar">L</div>
+            <div>
+              <p class="speaker">Lars · Aanvaller</p>
+              <p class="question">Wat was het moment waarop je dacht: nu lukt het?</p>
+              <p class="answer">"Halfweg de eerste helft, toen die bal binnen viel. Dan voel je dat de ploeg meekomt."</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           C — Full-bleed StripedSeam above + EditorialHeading display-lg
+           ================================================================= -->
+      <section class="candidate">
+        <header class="card">
+          <p class="key">C · seam + heading</p>
+          <p class="name">StripedSeam + display-lg heading</p>
+          <p class="desc">
+            Full-bleed <code>&lt;StripedSeam height="sm" colorPair="ink-cream"&gt;</code>
+            above a centered italic <code>&lt;EditorialHeading size="display-lg"&gt;</code>
+            with a small mono kicker beneath the seam. The seam is the canonical
+            primitive for separating page <em>regions</em>; using it inside a single
+            article reads as a register shift — "the page just turned, here's the
+            bonus track". Highest visual energy.
+          </p>
+          <p class="vocab">
+            <strong>Source primitives</strong>
+            • <code>&lt;StripedSeam height="sm" colorPair="ink-cream"&gt;</code><br />
+            • <code>&lt;MonoLabel&gt;</code> kicker (optional)<br />
+            • <code>&lt;EditorialHeading size="display-lg"&gt;</code> italic<br />
+            <strong>Vocabulary delta</strong>
+            First in-article use of <code>&lt;StripedSeam&gt;</code>. Same
+            register-shift cost the 5.d3 drill flagged for option B. If accepted
+            here, sets precedent for "tail section" as a page-region-equivalent
+            boundary.
+          </p>
+        </header>
+        <div class="surface" style="padding-top: 0;">
+          <div class="endmark" style="margin-top: 0; padding-top: 24px;">
+            <span class="stars">* * *</span>
+          </div>
+          <div class="header-C-seam"></div>
+          <header class="header-C-title">
+            <p class="kicker">Bonus · Q&amp;A</p>
+            <h2 class="heading">Nog kort nagezweefd<span class="period">.</span></h2>
+          </header>
+          <article class="qa-pair">
+            <div class="avatar">L</div>
+            <div>
+              <p class="speaker">Lars · Aanvaller</p>
+              <p class="question">Wat was het moment waarop je dacht: nu lukt het?</p>
+              <p class="answer">"Halfweg de eerste helft, toen die bal binnen viel. Dan voel je dat de ploeg meekomt."</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           D — EditorialHeading display-xl with HighlighterStroke marker
+           ================================================================= -->
+      <section class="candidate">
+        <header class="card">
+          <p class="key">D · marker heading</p>
+          <p class="name">Display-xl heading + marker on "Q&amp;A"</p>
+          <p class="desc">
+            Italic centered <code>&lt;EditorialHeading size="display-xl"
+            emphasis=&#123;&#123; text:"Q&amp;A", highlight:true &#125;&#125;&gt;</code>.
+            <code>&lt;HighlighterStroke color="jersey"&gt;</code> marker through
+            the keyword. No flanking rules, no kicker — the heading carries the
+            whole moment. Biggest typography of the four; loudest voice.
+          </p>
+          <p class="vocab">
+            <strong>Source primitives</strong>
+            • <code>&lt;EditorialHeading size="display-xl"&gt;</code> italic<br />
+            • <code>&lt;HighlighterStroke color="jersey"&gt;</code> on "Q&amp;A"<br />
+            • Jersey-deep period (existing convention)<br />
+            <strong>Vocabulary delta</strong>
+            None. Direct reuse. Display-xl is the InterviewHero headline size
+            — using it for the tail header equates the tail with a hero moment.
+            Risk: may compete with the InterviewHero at the top of the page.
+          </p>
+        </header>
+        <div class="surface">
+          <div class="endmark">
+            <span class="stars">* * *</span>
+          </div>
+          <header class="header-D">
+            <h2 class="heading">
+              <span class="marker">Q&amp;A</span><span class="period">.</span>
+            </h2>
+          </header>
+          <article class="qa-pair">
+            <div class="avatar">L</div>
+            <div>
+              <p class="speaker">Lars · Aanvaller</p>
+              <p class="question">Wat was het moment waarop je dacht: nu lukt het?</p>
+              <p class="answer">"Halfweg de eerste helft, toen die bal binnen viel. Dan voel je dat de ploeg meekomt."</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+  </body>
+</html>
