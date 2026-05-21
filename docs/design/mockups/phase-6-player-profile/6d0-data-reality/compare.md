@@ -92,9 +92,9 @@ chrome) all map cleanly to existing data.
 ## Hand-off note for downstream drill rounds
 
 Whatever variant locks here determines which downstream drill rounds even
-exist. If Variant A wins, drills 6.d2 (CareerLogTable anchor row) and the
+exist. If Variant A wins, drills 6.d6 (CareerLogTable anchor row) and the
 not-yet-numbered RecentMatchesGrid drill both drop from the Phase 6.A
-queue. If Variant B wins, 6.d2 remains, the RecentMatches drill drops. If
+queue. If Variant B wins, 6.d6 remains, the RecentMatches drill drops. If
 Variant C wins, both stay.
 
 The locked scope also feeds:
