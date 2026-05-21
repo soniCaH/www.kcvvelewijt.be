@@ -95,7 +95,6 @@ describe("upsertPlayer", () => {
           firstName: "Jan",
           lastName: "Janssens",
           birthDate: "1995-03-15",
-          nationality: "Belgium",
           keeper: false,
           positionPsd: "MV",
         });
@@ -116,11 +115,13 @@ describe("upsertPlayer", () => {
         firstName: "Jan",
         lastName: "Janssens",
         birthDate: "1995-03-15",
-        nationality: "Belgium",
         keeper: false,
         positionPsd: "MV",
         archived: false,
       }),
+    );
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.not.objectContaining({ nationality: expect.anything() }),
     );
     expect(mockCommit).toHaveBeenCalled();
   });
@@ -137,7 +138,6 @@ describe("upsertPlayer", () => {
             firstName: "Jan",
             lastName: "Janssens",
             birthDate: null,
-            nationality: null,
             keeper: false,
             positionPsd: null,
           });

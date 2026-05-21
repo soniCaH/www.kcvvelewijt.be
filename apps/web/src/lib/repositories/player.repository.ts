@@ -12,7 +12,7 @@ import type { SanityPlayerBase } from "../sanity/types";
 export const PLAYERS_QUERY =
   defineQuery(`*[_type == "player" && archived != true] | order(lastName asc) {
   _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
-  birthDate, nationality, height, weight,
+  birthDate,
   "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
   "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
   "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
@@ -22,7 +22,7 @@ export const PLAYERS_QUERY =
 export const PLAYER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "player" && psdId == $psdId][0] {
   _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
-  birthDate, nationality, height, weight,
+  birthDate,
   "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
   "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
   "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
@@ -40,9 +40,6 @@ export interface PlayerVM {
   href?: string;
   bio?: PLAYERS_QUERY_RESULT[number]["bio"];
   birthDate?: string;
-  nationality?: string;
-  height?: number;
-  weight?: number;
 }
 
 /** A PlayerVM that has a valid href (i.e. has a psdId) */
@@ -53,9 +50,6 @@ export function toPlayerVM(
     celebrationImageUrl?: string | null;
     bio?: PLAYERS_QUERY_RESULT[number]["bio"] | null;
     birthDate?: string | null;
-    nationality?: string | null;
-    height?: number | null;
-    weight?: number | null;
   },
 ): PlayerVM {
   const position = row.keeper
@@ -73,9 +67,6 @@ export function toPlayerVM(
     href: row.psdId ? `/spelers/${row.psdId}` : undefined,
     bio: row.bio ?? undefined,
     birthDate: row.birthDate ?? undefined,
-    nationality: row.nationality ?? undefined,
-    height: row.height ?? undefined,
-    weight: row.weight ?? undefined,
   };
 }
 

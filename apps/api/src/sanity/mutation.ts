@@ -10,7 +10,6 @@ export interface SanityPlayerDoc {
   firstName: string | null;
   lastName: string | null;
   birthDate: string | null; // "YYYY-MM-DD" (time component stripped from PSD)
-  nationality: string | null;
   keeper: boolean;
   positionPsd: string | null; // from PSD bestPosition — null until KCVV populates
 }
@@ -150,7 +149,6 @@ export const SanityMutationLive = Layer.effect(
           firstName: doc.firstName,
           lastName: doc.lastName,
           birthDate: doc.birthDate,
-          nationality: doc.nationality,
           keeper: doc.keeper,
           positionPsd: doc.positionPsd,
           archived: false,

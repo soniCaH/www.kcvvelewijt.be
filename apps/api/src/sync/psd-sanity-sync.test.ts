@@ -33,6 +33,8 @@ describe("transformMember (player)", () => {
     expect(result.firstName).toBe("Alexander");
     expect(result.birthDate).toBe("1993-11-29"); // time stripped
     expect(result.keeper).toBe(false);
+    // nationality is no longer forwarded from PSD to Sanity (#1881)
+    expect(result).not.toHaveProperty("nationality");
     // profileAccessKey stripped (ephemeral), v= retained (photo version for dedup)
     expect(result._psdImageUrl).toBe(
       `${BASE_URL}/api/v2/members/profilepicture/6453?v=1`,
