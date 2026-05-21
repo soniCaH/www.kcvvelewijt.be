@@ -13,7 +13,7 @@ References:
 
 | Decision                              | Locked value                                                                                                                                                 |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Hero present-state                    | `<TapedFigure aspect="portrait-3-4">` with newsprint filter + paper grain + `<MonoLabel>NIEUW</MonoLabel>` corner badge (from brief, unchanged)              |
+| Hero present-state                    | `<TapedFigure aspect="portrait-3-4">` with newsprint filter + paper grain. NIEUW corner badge subsequently dropped at 6.d3 — see `nieuw-badge-locked.md`.    |
 | Hero fallback when `psdImage` missing | The canonical `<PlayerFigure>` illustration (head + torso + V-neck + 4 vertical stripes) rendered inside the same `<TapedFigure>` frame                      |
 | Identity hook (fallback case)         | None on the figure itself — identity carried by the `#` numeral + name in the left column. All fallback profiles render visually identical figures.          |
 | Vocabulary delta                      | Zero — reuses Phase 4.5 locked illustration paths from `_jersey-paths.ts`                                                                                    |

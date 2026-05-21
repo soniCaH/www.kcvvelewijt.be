@@ -2,8 +2,9 @@
 
 **Round 1, grand-overview pass.** This is the only Phase 6 drill round that
 compares full-page scope variants instead of per-element treatments. Subsequent
-rounds (6.d1 name typography, 6.d2 career-log anchor row, 6.d3 hero photo
-treatment, etc.) drill one element at a time at full design fidelity, per
+rounds (6.d1 name typography, 6.d2 hero PlayerFigure fallback, 6.d6 CareerLog
+anchor-row emphasis, etc. — full queue in `data-reality-locked.md`) drill one
+element at a time at full design fidelity, per
 `[[feedback_design_drill_pattern]]` and `[[feedback_drill_visual_then_ia]]`.
 
 Visual artifact: `round-1-data-reality-comparisons.html` — three side-by-side
@@ -74,9 +75,11 @@ chrome) all map cleanly to existing data.
 ## What this drill does NOT decide
 
 - **Per-element design choices** within the surviving sections — those drill
-  rounds open after scope locks here. Open drills already queued:
-  - 6.d1 — Player-name typography rhythm (uniform / split / italic-last)
-  - 6.d2 — `CareerLogTable` anchor-row emphasis (only relevant if Variant B or C)
+  rounds open after scope locks here. Open drills already queued (full ordered
+  list in `data-reality-locked.md`):
+  - 6.d1 — Player-name typography rhythm
+  - 6.d2 — Hero `<PlayerFigure>` treatment (illustrated fallback policy)
+  - 6.d6 — `<CareerLogTable>` anchor-row emphasis (only relevant if section survives its drill)
 - **Build-slice shape** — single PR vs. component-first vs. vertical slice
   vs. hero-spike (Q8 in the grill agenda; re-asked after this lock).
 - **Seed matrix** — minimum viable seeds for staging verification (Q6); shape

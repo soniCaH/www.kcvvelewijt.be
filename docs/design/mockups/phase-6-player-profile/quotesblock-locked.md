@@ -46,7 +46,7 @@ MatchStrip (chrome — top)
 PlayerHero
    ├── #N (NumberDisplay, jersey-deep)
    ├── name (first Black + last italic, per 6.d1)
-   ├── meta row (position · birthDate · height · weight · nationality)
+   ├── meta row (position · birthDate; age-graded per 6.d9 — height / weight / nationality removed from schema)
    ├── photo column: TapedFigure
    │     ├── present: psdImage with newsprint filter + paper grain
    │     └── fallback: <PlayerFigure> illustration (per 6.d2)

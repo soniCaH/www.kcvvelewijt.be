@@ -11,7 +11,7 @@ Two corrections to the round-1 mockup:
 1. **Height + weight are not populated.** The fields exist on `player` schema
    (per brief audit 2026-05-14), but the data is not authored in practice.
    Production `<PlayerProfile>` already renders without them. Meta row
-   drops to three fields: **position · birthDate · nationality**.
+   drops to two fields: **position · birthDate** (height + weight + nationality all removed from schema per cleanup sections below).
 
 2. **The complexity I implied was inflated.** Variant B is not "engineering
    work" — it's one render branch:
@@ -108,9 +108,9 @@ editor-cost-free.
 ## Cross-age behaviour summary (final)
 
 ```text
-Meta row by age:
-  Adult (≥18):   position · birthDate (DD·MM·YYYY) · nationality
-  Minor (<18):   position · "<age> jaar · '<YY>" · nationality
+Meta row by age (per locked field list above — nationality / height / weight all removed from schema):
+  Adult (≥18):   position · birthDate (DD·MM·YYYY)
+  Minor (<18):   position · "<age> jaar · '<YY>"
 
 Photo:
   All ages: psdImage when present; <PlayerFigure> illustration when missing
