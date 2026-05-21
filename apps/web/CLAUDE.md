@@ -122,6 +122,10 @@ The R9-locked "layered hover Variant A" (photo `translateY(-2)` on parent `:hove
 - `<EditorialHero>` — Phase 5 finalised the four `variant`s (`interview` / `announcement` / `transfer` / `event`); previously only stubbed.
 - Schema additions in `@kcvv/sanity-schemas`: `articleImage.width` enum, `videoBlock.width` enum, `qaBlock.groupAtTail`, `article.author`, `article.photographer`.
 
+**Phase 6.A additions (player-profile redesign — `/spelers/[slug]`):**
+
+- `<PlayerHero>` (`apps/web/src/components/player/PlayerHero/`) — Phase 6.A hero band. Composes `<TapedFigure aspect="portrait-3-4">` (photo state) OR the canonical `_jersey-paths.ts` illustration (fallback) per 6.d2; two-line name rhythm with the first name in upright Black display (`font-display-big font-black`) and the last name in italic display Regular with a period suffix per 6.d1; meta row age-graded per 6.d9 (adults render `DD·MM·YYYY`, minors render `<age> jaar · '<YY>`); `<NumberDisplay size="display-2xl" tone="jersey">` + inline ticket-stub composing `teamLabel · season`. No `<MonoLabel>NIEUW</MonoLabel>` — badge dropped at 6.d3. Page-level multi-team disambiguation: the consuming page resolves the active team and passes a single `teamLabel`; the component does not derive multi-team logic. The first-name span reuses the `font-display-big font-black` class set already shipped by `<EditorialHeading size="display-2xl">` — no font-subset re-cut required.
+
 ## Design Conventions
 
 **Storybook is the authoritative design system reference.** Check `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` stories for all design tokens (colors, spacing, border-radius, typography). Do not hardcode values not defined there.
