@@ -120,9 +120,10 @@ describe("upsertPlayer", () => {
         archived: false,
       }),
     );
-    expect(mockSet).toHaveBeenCalledWith(
-      expect.not.objectContaining({ nationality: expect.anything() }),
-    );
+    const payload = mockSet.mock.calls[0]![0] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty("nationality");
+    expect(payload).not.toHaveProperty("height");
+    expect(payload).not.toHaveProperty("weight");
     expect(mockCommit).toHaveBeenCalled();
   });
 
