@@ -10,6 +10,9 @@ export type { PlayerCardProps } from "./PlayerCard";
 export { PlayerBio } from "./PlayerBio";
 export type { PlayerBioProps } from "./PlayerBio";
 
+export { BioBlock } from "./BioBlock";
+export type { BioBlockProps } from "./BioBlock";
+
 export { PlayerHero } from "./PlayerHero";
 export type { PlayerHeroProps } from "./PlayerHero";
 
