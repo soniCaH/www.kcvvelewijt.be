@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · RecentMatchesGrid (6.d7)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--drop  { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+      .chip--blocker { background: #c75230; color: var(--color-cream); border-color: #c75230; }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; }
+      .state-label .who { font-size: 9px; opacity: 0.55; }
+
+      /* ───────── Recent matches — dark band (cards) ───────── */
+      .recent {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 18px 16px 22px;
+      }
+      .recent__kicker {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+        margin-bottom: 4px;
+      }
+      .recent__kicker::before { content: "* "; }
+      .recent__heading {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0 0 14px;
+      }
+      .recent__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .match-card {
+        background: var(--color-ink-soft);
+        border: 1px solid var(--color-cream);
+        padding: 10px 11px 12px;
+        position: relative;
+      }
+      .match-card__date {
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .match-card__score {
+        font-family: var(--font-mono);
+        font-size: 17px;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+      }
+      .match-card__tag {
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        padding: 2px 6px;
+        margin-top: 6px;
+        display: inline-block;
+      }
+      .match-card__venue {
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.55;
+        margin-top: 4px;
+      }
+
+      /* ───────── Compact inline list (variant C) ───────── */
+      .recent--list {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        padding: 16px 18px 20px;
+      }
+      .recent--list .recent__kicker { opacity: 0.65; }
+      .recent--list .recent__heading {
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+      .match-row {
+        display: grid;
+        grid-template-columns: 72px 1fr auto;
+        gap: 10px;
+        align-items: baseline;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .match-row__date {
+        font-weight: 700;
+        opacity: 0.7;
+      }
+      .match-row__score {
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+      }
+      .match-row__competition {
+        opacity: 0.6;
+        font-size: 9px;
+      }
+      .recent--list .recent__rows {
+        border-top: 1px dashed var(--color-ink);
+        margin-top: 10px;
+      }
+
+      /* — Collapsed marker — */
+      .collapsed-marker {
+        margin: 14px 14px;
+        padding: 16px 14px;
+        border: 1px dashed var(--color-ink-muted);
+        background: var(--color-cream-soft);
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--color-ink-muted);
+      }
+      .collapsed-marker strong { color: var(--color-jersey-deep); }
+      .collapsed-marker em {
+        display: block;
+        margin-top: 6px;
+        font-style: normal;
+        opacity: 0.65;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+      }
+
+      /* ───────── Callouts ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+      .callouts .blocker { color: #c75230; font-weight: 700; }
+
+      /* ───────── Summary ───────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .summary .blocker { color: #c75230; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d7 · 2026-05-21</div>
+      <h1>RecentMatchesGrid — per-player attribution vs team-result vs drop</h1>
+      <p>
+        Canonical mockup shows four ink cards: date · competition · scoreline ·
+        per-player <strong>goal / assist tag</strong> · venue. The
+        per-player attribution is what makes this the
+        <strong>most-expensive section in Phase 6.A</strong> — PSD's
+        <code>goalsScored</code> arrays are team-global event lists, not
+        keyed to a single player, so attribution requires either a new BFF
+        endpoint or a join across goal events + appearances.
+      </p>
+      <p>
+        Each column shows the A-team case and the U13 case (where the
+        section auto-hides because PSD likely doesn't publish per-player
+        youth match data). Variant D matches the cumulative trend across
+        6.d3 / 6.d4 / 6.d6 — scope discipline over mockup fidelity.
+      </p>
+      <span class="scope-banner">Cost class: NEW BFF work, not editorial</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Canonical with per-player attribution ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Canonical — per-player tags.</h2>
+          <p class="sub">
+            Four cards with date, competition, scoreline, the player's own
+            contribution (goal / assist / minutes), and venue. Matches the
+            retro-terrace-fanzine mockup exactly. Requires net-new BFF
+            endpoint and per-player goal/assist attribution logic.
+          </p>
+          <div class="chips">
+            <span class="chip chip--blocker">New BFF endpoint</span>
+            <span class="chip chip--blocker">Per-player attribution</span>
+            <span class="chip chip--good">100% fidelity</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~70% have matches</span></div>
+        <section class="recent">
+          <div class="recent__kicker">Nog vers in het geheugen</div>
+          <h2 class="recent__heading">Vier wedstrijden.</h2>
+          <div class="recent__grid">
+            <div class="match-card">
+              <div class="match-card__date"><span>19·04 · Reserve</span><span>U</span></div>
+              <div class="match-card__score">STD 2 – 1 GNK</div>
+              <span class="match-card__tag">⚽ Assist · 67'</span>
+              <div class="match-card__venue">@ Sclessin</div>
+            </div>
+            <div class="match-card">
+              <div class="match-card__date"><span>26·04 · Beker</span><span>T</span></div>
+              <div class="match-card__score">AND 1 – 1 STD</div>
+              <span class="match-card__tag">⚽ Goal · 67'</span>
+              <div class="match-card__venue">@ Driesstraat</div>
+            </div>
+            <div class="match-card">
+              <div class="match-card__date"><span>03·05 · Liga</span><span>T</span></div>
+              <div class="match-card__score">STD 3 – 2 KVM</div>
+              <span class="match-card__tag">⚽ 2 goals</span>
+              <div class="match-card__venue">@ Driesstraat</div>
+            </div>
+            <div class="match-card">
+              <div class="match-card__date"><span>10·05 · Liga</span><span>U</span></div>
+              <div class="match-card__score">STD 4 – 0 OHL</div>
+              <span class="match-card__tag">⚽ Assist · 81'</span>
+              <div class="match-card__venue">@ Den Dreef</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth / no data — U13 #6</span><span class="who">~30% across squad</span></div>
+        <div class="collapsed-marker">
+          Grid <strong>hidden entirely</strong>
+          <em>no per-player match data published for U13</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li><span class="blocker">⛔</span> New BFF endpoint: <code>/matches/player/{id}/recent</code></li>
+            <li>Per-player attribution: join PSD <code>goalsScored</code> event arrays with appearance data; today the arrays are team-global event lists, not keyed by player ID — needs audit</li>
+            <li>Top-4 selection: editorial-impact ordering (goals desc, assists desc, recency)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Strongest editorial voice — "what this player did, where, when"</li>
+            <li>Highest engineering cost in the whole Phase 6.A drill series</li>
+            <li>Naturally consumes the parked 6.d4 dark-band aesthetic</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Team-result only ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Team-result only.</h2>
+          <p class="sub">
+            Same 4 dark cards, but scoreline + competition + date only — no
+            per-player contribution tags. Shows the player's
+            <em>team's</em> recent results, not the player's individual
+            matches. Uses existing PSD <code>/games/team</code> endpoint.
+            Zero new BFF surface.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Existing endpoint</span>
+            <span class="chip chip--cost">Not personalised</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim's team</span><span class="who">~70% have matches</span></div>
+        <section class="recent">
+          <div class="recent__kicker">Onze laatste wedstrijden</div>
+          <h2 class="recent__heading">Vier wedstrijden.</h2>
+          <div class="recent__grid">
+            <div class="match-card">
+              <div class="match-card__date"><span>19·04 · Reserve</span><span>U</span></div>
+              <div class="match-card__score">STD 2 – 1 GNK</div>
+              <div class="match-card__venue">@ Sclessin</div>
+            </div>
+            <div class="match-card">
+              <div class="match-card__date"><span>26·04 · Beker</span><span>T</span></div>
+              <div class="match-card__score">AND 1 – 1 STD</div>
+              <div class="match-card__venue">@ Driesstraat</div>
+            </div>
+            <div class="match-card">
+              <div class="match-card__date"><span>03·05 · Liga</span><span>T</span></div>
+              <div class="match-card__score">STD 3 – 2 KVM</div>
+              <div class="match-card__venue">@ Driesstraat</div>
+            </div>
+            <div class="match-card">
+              <div class="match-card__date"><span>10·05 · Liga</span><span>U</span></div>
+              <div class="match-card__score">STD 4 – 0 OHL</div>
+              <div class="match-card__venue">@ Den Dreef</div>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth (if team data) — U13</span><span class="who">Depends on PSD</span></div>
+        <div class="collapsed-marker">
+          Grid <strong>hides if team has no published matches</strong>
+          <em>PSD per-division coverage TBD</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Existing BFF call: <code>/games/team/{teamId}/seasons/{seasonId}</code></li>
+            <li>Filter to last 4 played matches by the player's team(s)</li>
+            <li>No per-player attribution; renders team scoreline only</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Ships with existing infra; no engineering blocker</li>
+            <li>Less personal — same 4 cards show on every A-team player's profile (they all play for the same team)</li>
+            <li>For a multi-team player (e.g. plays both A-team and Beloften), needs disambiguation: which team's matches?</li>
+            <li>Hides "this player's role" entirely — reads as "team's matches" not "the player's recent matches"</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Compact inline list ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Compact list.</h2>
+          <p class="sub">
+            No cards. A small table of last 4 matches: date + competition +
+            scoreline. Lower visual weight than the dark grid. Uses the
+            same team-result-only data as B. Reads as a quick summary, not
+            an editorial feature.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Existing endpoint</span>
+            <span class="chip chip--cost">Visually quiet</span>
+            <span class="chip chip--cost">Doesn't consume dark-band aesthetic</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim's team</span><span class="who">~70%</span></div>
+        <section class="recent recent--list">
+          <div class="recent__kicker">Onze laatste wedstrijden</div>
+          <h2 class="recent__heading">Vier wedstrijden.</h2>
+          <div class="recent__rows">
+            <div class="match-row">
+              <span class="match-row__date">19·04</span>
+              <span>STD <span class="match-row__score">2 – 1</span> GNK</span>
+              <span class="match-row__competition">Liga</span>
+            </div>
+            <div class="match-row">
+              <span class="match-row__date">26·04</span>
+              <span>AND <span class="match-row__score">1 – 1</span> STD</span>
+              <span class="match-row__competition">Beker</span>
+            </div>
+            <div class="match-row">
+              <span class="match-row__date">03·05</span>
+              <span>STD <span class="match-row__score">3 – 2</span> KVM</span>
+              <span class="match-row__competition">Liga</span>
+            </div>
+            <div class="match-row">
+              <span class="match-row__date">10·05</span>
+              <span>STD <span class="match-row__score">4 – 0</span> OHL</span>
+              <span class="match-row__competition">Liga</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth (if team data) — U13</span><span class="who">Depends on PSD</span></div>
+        <div class="collapsed-marker">
+          List <strong>hides if team has no published matches</strong>
+          <em>same data dependency as B</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Same as B — existing <code>/games/team</code> endpoint</li>
+            <li>Visual treatment differs: no cards, dashed-divider rows</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Lowest visual weight of all keep-section options</li>
+            <li>Lighter footprint on the page; section can sit comfortably below BioBlock without pulling attention</li>
+            <li><span class="blocker">Doesn't naturally consume the parked dark-band aesthetic</span> — list is cream-on-cream</li>
+            <li>Could be promoted to dark variant ("compact ink list") if dark band finds its home here</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Drop the section ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Drop RecentMatches.</h2>
+          <p class="sub">
+            No recent-matches surface on the player profile. The player's
+            team-detail page already has match schedule + standings.
+            Linking to that page from the profile is enough. Honors 6.d0
+            drop-section escape. Cumulative drop-section count: 4.
+          </p>
+          <div class="chips">
+            <span class="chip chip--drop">Drop-section</span>
+            <span class="chip chip--good">0 BFF work</span>
+            <span class="chip chip--good">0 attribution</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">All profiles</span></div>
+        <div class="collapsed-marker">
+          Grid <strong>not rendered</strong>
+          <em>recent matches live on team-detail page</em>
+        </div>
+
+        <div class="state-label"><span>Youth — U13 #6</span><span class="who">All profiles</span></div>
+        <div class="collapsed-marker">
+          Grid <strong>not rendered</strong>
+          <em>identical shape across the squad</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Scope reduction</h4>
+          <ul>
+            <li>No new BFF endpoint</li>
+            <li>No per-player attribution logic</li>
+            <li>No multi-team disambiguation</li>
+            <li>Page composition: Hero → BioBlock → QuotesBlock → footer</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Largest BFF scope-cut in the drill series</li>
+            <li>Page becomes very lean — three content sections + chrome</li>
+            <li>The parked 6.d4 dark-band aesthetic now needs another home — QuotesBlock (6.d8) becomes the only ink-tone surface left, OR the dark band is dropped from the page entirely</li>
+            <li>Phase 6.A becomes "essentially a static page" with no new BFF or schema work — fastest possible ship</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary table ═════════════ -->
+    <section class="summary">
+      <h2>Recent matches ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Canonical (per-player)</th>
+            <th>B — Team-result cards</th>
+            <th>C — Compact list</th>
+            <th>D — Drop section</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>BFF work</strong></td>
+            <td class="blocker">New endpoint + attribution logic</td>
+            <td>None — existing <code>/games/team</code></td>
+            <td>None — same as B</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Per-player relevance</strong></td>
+            <td>High — own contributions visible</td>
+            <td>Low — same matches for every team-mate</td>
+            <td>Low — same as B</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Visual weight</strong></td>
+            <td>High — dark grid, 4 cards</td>
+            <td>High — dark grid, 4 cards</td>
+            <td>Low — light list</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Dark-band home (parked from 6.d4)</strong></td>
+            <td>Natural fit</td>
+            <td>Natural fit</td>
+            <td>Possible if promoted to ink variant</td>
+            <td>Dark band needs another home (only QuotesBlock left)</td>
+          </tr>
+          <tr>
+            <td><strong>Multi-team disambiguation</strong></td>
+            <td>Handled per-player</td>
+            <td>Needs PRD decision — which team's matches?</td>
+            <td>Same as B</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Cross-age behaviour</strong></td>
+            <td>Hides when player attribution unavailable</td>
+            <td>Hides when team has no published matches</td>
+            <td>Same as B</td>
+            <td>Never renders</td>
+          </tr>
+          <tr>
+            <td><strong>Mockup fidelity vs retro-terrace-fanzine</strong></td>
+            <td>100%</td>
+            <td>~75% (loses per-player story)</td>
+            <td>~50% (loses dark surface + cards)</td>
+            <td>~35%</td>
+          </tr>
+          <tr>
+            <td><strong>Continues drop-trend (NIEUW/StatsStrip/CareerLog)</strong></td>
+            <td>No — bucks the trend; biggest investment</td>
+            <td>~ Light ship; existing data only</td>
+            <td>~ Light ship</td>
+            <td>Yes — continues the trend</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

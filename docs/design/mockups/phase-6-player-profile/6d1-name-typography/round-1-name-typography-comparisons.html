@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · Player-name typography (6.d1)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+        --font-body:
+          "Source Serif Pro", ui-serif, Georgia, "Times New Roman", serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      header.page strong {
+        font-weight: 700;
+      }
+
+      /* ───────── Variant grid ─────────────────────────────── */
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .variant > header.card .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      /* ───────── Scale label ─────────────────────────────── */
+      .scale-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.55;
+        padding: 12px 18px 4px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .scale-label:first-of-type {
+        border-top: none;
+      }
+
+      /* ───────── Hero render (desktop) ───────────────────── */
+      .hero {
+        padding: 18px 16px 20px;
+        display: grid;
+        grid-template-columns: 1.05fr 0.85fr;
+        gap: 14px;
+        background: var(--color-cream);
+      }
+      .hero__top-bar {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2px;
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .hero__number {
+        font-family: var(--font-display);
+        font-size: 72px;
+        line-height: 0.85;
+        letter-spacing: -0.04em;
+        font-style: italic;
+        color: var(--color-jersey-deep);
+        margin: 4px 0 8px;
+      }
+
+      /* ─── Name treatment: shared base ─── */
+      .hero__name {
+        font-family: var(--font-display);
+        line-height: 0.92;
+        letter-spacing: -0.025em;
+        margin: 0 0 12px;
+        position: relative;
+      }
+      .hero__name::after {
+        content: "";
+        display: block;
+        height: 3px;
+        width: 100%;
+        margin-top: 4px;
+        background: linear-gradient(
+          to right,
+          var(--color-ink) 0%,
+          var(--color-ink) 68%,
+          transparent 68%,
+          transparent 100%
+        );
+      }
+
+      /* ─── Variant A — uniform Black weight ─── */
+      .name--A {
+        font-style: italic;
+        font-weight: 800;
+        font-size: 30px;
+      }
+
+      /* ─── Variant B — first regular + last Black ─── */
+      .name--B {
+        font-style: italic;
+        font-size: 30px;
+      }
+      .name--B .first {
+        font-weight: 400;
+        opacity: 0.85;
+      }
+      .name--B .last {
+        font-weight: 900;
+        display: block;
+        margin-top: 2px;
+      }
+
+      /* ─── Variant C — first Black + last italic display ─── */
+      .name--C {
+        font-size: 30px;
+      }
+      .name--C .first {
+        font-style: normal;
+        font-weight: 900;
+        display: block;
+      }
+      .name--C .last {
+        font-style: italic;
+        font-weight: 400;
+        display: block;
+        margin-top: 0;
+      }
+
+      /* ─── Variant D — stage-name (last only + first as kicker) ─── */
+      .name--D {
+        font-size: 38px;
+      }
+      .name--D .kicker {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-style: normal;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        opacity: 0.7;
+        margin-bottom: 6px;
+      }
+      .name--D .last {
+        font-style: italic;
+        font-weight: 800;
+        display: block;
+        line-height: 0.92;
+      }
+
+      .hero__meta {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        line-height: 1.7;
+      }
+      .hero__meta dt {
+        display: inline-block;
+        opacity: 0.55;
+        margin-right: 6px;
+        font-weight: 600;
+      }
+      .hero__meta dd {
+        display: inline;
+        margin: 0;
+        font-weight: 700;
+      }
+      .hero__meta > div + div {
+        border-top: 1px dashed var(--color-ink-muted);
+        padding-top: 3px;
+        margin-top: 3px;
+      }
+
+      .hero__figure {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-soft);
+        padding: 10px 10px 12px;
+        align-self: start;
+        transform: rotate(0.4deg);
+      }
+      .hero__figure::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        right: 18%;
+        width: 46px;
+        height: 13px;
+        background: rgba(244, 230, 145, 0.85);
+        border: 1px solid var(--color-ink);
+        transform: rotate(-4deg);
+      }
+      .hero__figure-art {
+        width: 100%;
+        aspect-ratio: 1 / 1.18;
+        background:
+          radial-gradient(
+            circle at 50% 30%,
+            #d6c8a4 0,
+            #d6c8a4 14%,
+            transparent 14%
+          ),
+          linear-gradient(
+            to bottom,
+            transparent 0%,
+            transparent 38%,
+            var(--color-jersey-deep) 38%,
+            var(--color-jersey-deep) 86%,
+            transparent 86%
+          ),
+          repeating-linear-gradient(
+            to right,
+            transparent 0,
+            transparent 18px,
+            rgba(0, 0, 0, 0.85) 18px,
+            rgba(0, 0, 0, 0.85) 22px
+          ),
+          #efe6cf;
+        background-blend-mode: normal, multiply, multiply, normal;
+        border: 1px solid var(--color-ink);
+      }
+      .hero__figure-caption {
+        margin-top: 8px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .hero__nieuw {
+        position: absolute;
+        top: -12px;
+        left: -12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 5px 8px;
+        border: 2px solid var(--color-ink);
+        transform: rotate(-6deg);
+        box-shadow: 2px 2px 0 0 var(--color-ink);
+      }
+
+      /* ───────── Hero render (mobile) ────────────────────── */
+      .hero--mobile {
+        display: block;
+        padding: 14px 14px 18px;
+        max-width: 260px;
+        margin: 0 auto 8px;
+        border: 1px solid var(--color-ink-muted);
+        background: var(--color-cream);
+      }
+      .hero--mobile .hero__top-bar {
+        display: flex;
+        margin-bottom: 4px;
+        font-size: 7.5px;
+      }
+      .hero--mobile .hero__figure {
+        margin: 8px 0 10px;
+        max-width: 180px;
+      }
+      .hero--mobile .hero__figure-art {
+        aspect-ratio: 1 / 1;
+      }
+      .hero--mobile .hero__number {
+        font-size: 56px;
+      }
+
+      /* Mobile name scales */
+      .hero--mobile .name--A { font-size: 22px; }
+      .hero--mobile .name--B { font-size: 22px; }
+      .hero--mobile .name--B .last { font-size: 24px; }
+      .hero--mobile .name--C { font-size: 22px; }
+      .hero--mobile .name--C .first { font-size: 20px; }
+      .hero--mobile .name--D { font-size: 28px; }
+      .hero--mobile .name--D .kicker { font-size: 8.5px; }
+
+      .hero--mobile .hero__meta {
+        font-size: 8.5px;
+      }
+
+      /* ───────── Vocabulary callouts (per variant) ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul {
+        margin: 0 0 10px;
+        padding-left: 18px;
+      }
+      .callouts ul:last-child {
+        margin-bottom: 0;
+      }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta {
+        color: var(--color-jersey-deep);
+        font-weight: 700;
+      }
+
+      /* ───────── Summary table ───────────────────────────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td {
+        border-bottom: none;
+      }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d1 · 2026-05-21</div>
+      <h1>Player-name typography rhythm</h1>
+      <p>
+        Brief Q1 — header identity. The hero stacks two lines:
+        <strong>first name</strong> + <strong>last name</strong>. Each variant
+        below shows the same Maxim Breugelmans hero (number, photo, meta) with
+        only the <em>name treatment</em> changed. Shown at desktop hero scale
+        and a 260px mobile strip — name rhythm reads differently as it shrinks.
+      </p>
+      <p>
+        Brief Q1's options A/B/C kept. Variant D opens new ground: a
+        "stage-name" treatment that promotes the last name and demotes the
+        first name to a mono kicker. Honors the "drop / radically reframe"
+        slot from the owner direction on the 6.d0 lock.
+      </p>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — UNIFORM ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Uniform Black.</h2>
+          <p class="sub">
+            Both names share the same display italic Black weight. Current
+            <code>&lt;EditorialHeading&gt;</code> default — no prop extension
+            needed. Quiet, refined, single voice.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">No new prop</span>
+            <span class="chip chip--good">Ships today</span>
+          </div>
+        </header>
+
+        <div class="scale-label">Desktop hero</div>
+        <section class="hero">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg · Speler</span>
+            <span>Profiel · #08</span>
+          </div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name name--A">Maxim<br/>Breugelmans.</h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999 · 26 jr</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+              <div><dt>Nat</dt><dd>Belgisch</dd></div>
+            </dl>
+          </div>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+            <div class="hero__figure-caption">
+              <span>A-Ploeg 26/27</span>
+              <span>#08</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="scale-label">Mobile</div>
+        <div class="hero--mobile">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg</span>
+            <span>#08</span>
+          </div>
+          <div class="hero__number">#8</div>
+          <h2 class="hero__name name--A">Maxim<br/>Breugelmans.</h2>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+          </div>
+          <dl class="hero__meta">
+            <div><dt>Pos</dt><dd>Aanvaller · 1,82 m</dd></div>
+            <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+          </dl>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Composition: <code>&lt;EditorialHeading size="display-xl"&gt;Maxim Breugelmans.&lt;/EditorialHeading&gt;</code></li>
+            <li>Weight: existing <code>font-display-black-italic</code></li>
+            <li>Line break: hard <code>&lt;br/&gt;</code> between first + last (or CSS <code>display: block</code> on the last)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Reads as one voice — calm. May feel less "poster".</li>
+            <li>Cheapest path. Zero primitive extension.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — first regular + last Black ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>First regular, last Black.</h2>
+          <p class="sub">
+            First name in light italic, last name in heavy italic Black. The
+            <em>family name dominates</em> — the headline reads "Breugelmans".
+            Closest to football-poster conventions.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">Prop extension</span>
+            <span class="chip chip--cost">Or consumer-level override</span>
+          </div>
+        </header>
+
+        <div class="scale-label">Desktop hero</div>
+        <section class="hero">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg · Speler</span>
+            <span>Profiel · #08</span>
+          </div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name name--B">
+              <span class="first">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999 · 26 jr</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+              <div><dt>Nat</dt><dd>Belgisch</dd></div>
+            </dl>
+          </div>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+            <div class="hero__figure-caption">
+              <span>A-Ploeg 26/27</span>
+              <span>#08</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="scale-label">Mobile</div>
+        <div class="hero--mobile">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg</span>
+            <span>#08</span>
+          </div>
+          <div class="hero__number">#8</div>
+          <h2 class="hero__name name--B">
+            <span class="first">Maxim</span>
+            <span class="last">Breugelmans.</span>
+          </h2>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+          </div>
+          <dl class="hero__meta">
+            <div><dt>Pos</dt><dd>Aanvaller · 1,82 m</dd></div>
+            <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+          </dl>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>New API: <code>&lt;EditorialHeading nameWeight="split" first="Maxim" last="Breugelmans." /&gt;</code></li>
+            <li>OR consumer override: two <code>&lt;span&gt;</code>s with explicit weight classes; no primitive change</li>
+            <li>Weights: first <code>font-display-regular-italic</code> · last <code>font-display-black-italic</code></li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Strongest "season-opener spread" feel of the four.</li>
+            <li><span class="delta">Δ</span> Forces a decision on whether <code>&lt;EditorialHeading&gt;</code> grows a <code>nameWeight</code> prop OR every consumer hardcodes the split.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — first Black + last italic ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>First Black, last italic.</h2>
+          <p class="sub">
+            First name in heavy upright, last name in light display italic.
+            Inverse rhythm — the <em>given name dominates</em>, the family name
+            is treated as a flourish. Reads more "matey" than B.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">Prop extension</span>
+            <span class="chip chip--cost">Or consumer-level override</span>
+          </div>
+        </header>
+
+        <div class="scale-label">Desktop hero</div>
+        <section class="hero">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg · Speler</span>
+            <span>Profiel · #08</span>
+          </div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name name--C">
+              <span class="first">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999 · 26 jr</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+              <div><dt>Nat</dt><dd>Belgisch</dd></div>
+            </dl>
+          </div>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+            <div class="hero__figure-caption">
+              <span>A-Ploeg 26/27</span>
+              <span>#08</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="scale-label">Mobile</div>
+        <div class="hero--mobile">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg</span>
+            <span>#08</span>
+          </div>
+          <div class="hero__number">#8</div>
+          <h2 class="hero__name name--C">
+            <span class="first">Maxim</span>
+            <span class="last">Breugelmans.</span>
+          </h2>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+          </div>
+          <dl class="hero__meta">
+            <div><dt>Pos</dt><dd>Aanvaller · 1,82 m</dd></div>
+            <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+          </dl>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>New API: <code>&lt;EditorialHeading nameWeight="inverse" first="Maxim" last="Breugelmans." /&gt;</code></li>
+            <li>Weights: first <code>font-display-black-regular</code> (upright!) · last <code>font-display-regular-italic</code></li>
+            <li>First time an editorial heading uses <em>upright</em> display in the redesign vocabulary</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>"Mate-on-a-first-name-basis" voice — fits a club site more than a magazine.</li>
+            <li><span class="delta">Δ</span> Introduces upright display weight to the heading vocabulary — every other editorial heading is italic. Audit blast radius.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — stage-name ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Stage name.</h2>
+          <p class="sub">
+            Last name only, oversized italic display. First name demoted to a
+            mono kicker above. Treats every player like a poster
+            <em>nom de guerre</em> — "Breugelmans" the way "Cantona" sells.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">New rhythm</span>
+            <span class="chip chip--cost">Awkward on common surnames</span>
+          </div>
+        </header>
+
+        <div class="scale-label">Desktop hero</div>
+        <section class="hero">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg · Speler</span>
+            <span>Profiel · #08</span>
+          </div>
+          <div>
+            <div class="hero__number">#8</div>
+            <h2 class="hero__name name--D">
+              <span class="kicker">Maxim</span>
+              <span class="last">Breugelmans.</span>
+            </h2>
+            <dl class="hero__meta">
+              <div><dt>Pos</dt><dd>Aanvaller</dd></div>
+              <div><dt>Geb</dt><dd>14·03·1999 · 26 jr</dd></div>
+              <div><dt>Lengte</dt><dd>1,82 m</dd></div>
+              <div><dt>Nat</dt><dd>Belgisch</dd></div>
+            </dl>
+          </div>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+            <div class="hero__figure-caption">
+              <span>A-Ploeg 26/27</span>
+              <span>#08</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="scale-label">Mobile</div>
+        <div class="hero--mobile">
+          <div class="hero__top-bar">
+            <span>* A-Ploeg</span>
+            <span>#08</span>
+          </div>
+          <div class="hero__number">#8</div>
+          <h2 class="hero__name name--D">
+            <span class="kicker">Maxim</span>
+            <span class="last">Breugelmans.</span>
+          </h2>
+          <div class="hero__figure">
+            <div class="hero__nieuw">NIEUW</div>
+            <div class="hero__figure-art"></div>
+          </div>
+          <dl class="hero__meta">
+            <div><dt>Pos</dt><dd>Aanvaller · 1,82 m</dd></div>
+            <div><dt>Geb</dt><dd>14·03·1999</dd></div>
+          </dl>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Composition: <code>&lt;MonoLabel&gt;Maxim&lt;/MonoLabel&gt; + &lt;EditorialHeading&gt;Breugelmans.&lt;/EditorialHeading&gt;</code></li>
+            <li>No new prop — reuses MonoLabel as the kicker</li>
+            <li>Heading scale bumps from <code>display-xl</code> → effective display-2xl</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Most poster-like; strongest editorial voice.</li>
+            <li><span class="delta">Δ</span> Awkward on common surnames (Janssens, Van den Broeck) — single-token visual gets long fast.</li>
+            <li>Loses given-name identity at-a-glance in lists / squad grids.</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary table ═════════════ -->
+    <section class="summary">
+      <h2>Treatment ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Uniform</th>
+            <th>B — First regular, last Black</th>
+            <th>C — First Black, last italic</th>
+            <th>D — Stage name</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Headline emphasis</strong></td>
+            <td>None — single voice</td>
+            <td>Last name dominates</td>
+            <td>First name dominates</td>
+            <td>Last name dominates; first name as kicker</td>
+          </tr>
+          <tr>
+            <td><strong>Primitive impact</strong></td>
+            <td>Existing <code>&lt;EditorialHeading&gt;</code></td>
+            <td>Add <code>nameWeight="split"</code> prop OR consumer-level spans</td>
+            <td>Add <code>nameWeight="inverse"</code> prop; introduces upright display weight</td>
+            <td>Compose <code>&lt;MonoLabel&gt;</code> + <code>&lt;EditorialHeading&gt;</code></td>
+          </tr>
+          <tr>
+            <td><strong>Vocabulary delta</strong></td>
+            <td>0</td>
+            <td>1 prop (or zero with consumer override)</td>
+            <td>1 prop + 1 new weight (upright display)</td>
+            <td>0 — pure composition</td>
+          </tr>
+          <tr>
+            <td><strong>Long-surname risk (Van den Broeck, Vanderstraeten)</strong></td>
+            <td>Low — both lines wrap predictably</td>
+            <td>Low — last name has room across two visual weights</td>
+            <td>Medium — heavy + italic mix gets noisy</td>
+            <td><strong>High</strong> — single oversized line wraps awkwardly</td>
+          </tr>
+          <tr>
+            <td><strong>Mobile readability (260px)</strong></td>
+            <td>Strong</td>
+            <td>Strong — weight contrast survives</td>
+            <td>Medium — first-name upright bold can crowd the #8 numeral</td>
+            <td>Medium — kicker can dwarf next to oversized last name</td>
+          </tr>
+          <tr>
+            <td><strong>Voice</strong></td>
+            <td>Calm magazine</td>
+            <td>Poster / programme</td>
+            <td>Friendly / mate-on-first-name-basis</td>
+            <td>Cult-of-personality / nom de guerre</td>
+          </tr>
+          <tr>
+            <td><strong>Squad-grid reuse</strong></td>
+            <td>Works as-is</td>
+            <td>Works — weight contrast scales down</td>
+            <td>Works</td>
+            <td>Awkward — kicker line eats vertical space in dense grids</td>
+          </tr>
+          <tr>
+            <td><strong>Honors <code>[[feedback_reuse_approved_primitives]]</code></strong></td>
+            <td>✓ Pure reuse</td>
+            <td>~ Adds one prop OR no primitive change</td>
+            <td>~ Adds one prop + introduces upright display</td>
+            <td>✓ Pure composition of MonoLabel + EditorialHeading</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,784 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · CareerLogTable (6.d6)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--drop  { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; }
+      .state-label .who { font-size: 9px; opacity: 0.55; }
+
+      /* ───────── CareerLogTable ───────── */
+      .career {
+        padding: 16px 18px 20px;
+      }
+      .career__kicker {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+        margin-bottom: 4px;
+      }
+      .career__kicker::before { content: "* "; opacity: 0.7; }
+      .career__heading {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        margin: 0 0 4px;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+      }
+      .career__counter {
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.65;
+      }
+      .career__rows {
+        border-top: 1px dashed var(--color-ink);
+        margin-top: 12px;
+      }
+      .career__row {
+        display: grid;
+        grid-template-columns: 70px 30px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 9px 6px;
+        border-bottom: 1px dashed var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .career__years {
+        font-weight: 700;
+        opacity: 0.85;
+      }
+      .career__crest {
+        width: 22px;
+        height: 22px;
+        border: 1.5px solid var(--color-ink);
+        background:
+          radial-gradient(
+            circle at 50% 60%,
+            var(--color-jersey-deep) 0,
+            var(--color-jersey-deep) 38%,
+            transparent 38%
+          ),
+          var(--color-cream);
+        border-radius: 50%;
+      }
+      .career__crest--std {
+        background:
+          radial-gradient(
+            circle at 50% 50%,
+            #cf2a2a 0,
+            #cf2a2a 40%,
+            transparent 40%
+          ),
+          var(--color-cream);
+      }
+      .career__crest--gnk {
+        background:
+          radial-gradient(
+            circle at 50% 50%,
+            #2255aa 0,
+            #2255aa 40%,
+            transparent 40%
+          ),
+          var(--color-cream);
+      }
+      .career__club {
+        font-family: var(--font-display);
+        font-style: normal;
+        font-size: 13px;
+        text-transform: none;
+        letter-spacing: 0;
+        font-weight: 500;
+      }
+      .career__club small {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.7;
+        margin-top: 2px;
+        font-weight: 500;
+      }
+      .ml-pill {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        font-weight: 700;
+        padding: 3px 6px 2px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .ml-pill--jersey {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        border-color: var(--color-jersey-deep);
+      }
+
+      /* — Variant B: anchor rows heavier club name — */
+      .row--anchor-B .career__club {
+        font-weight: 800;
+        font-size: 14px;
+      }
+
+      /* — Variant C: anchor rows tinted + heavier — */
+      .row--anchor-C {
+        background: var(--color-cream-deep);
+        margin: 0 -6px;
+        padding: 11px 12px;
+      }
+      .row--anchor-C .career__club {
+        font-weight: 800;
+        font-size: 14px;
+      }
+
+      /* — Collapsed marker — */
+      .collapsed-marker {
+        margin: 14px 14px;
+        padding: 16px 14px;
+        border: 1px dashed var(--color-ink-muted);
+        background: var(--color-cream-soft);
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--color-ink-muted);
+      }
+      .collapsed-marker strong { color: var(--color-jersey-deep); }
+      .collapsed-marker em {
+        display: block;
+        margin-top: 6px;
+        font-style: normal;
+        opacity: 0.65;
+        font-size: 9px;
+        letter-spacing: 0.14em;
+      }
+
+      /* ───────── Callouts ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+
+      /* ───────── Summary ───────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d6 · 2026-05-21</div>
+      <h1>CareerLogTable — anchor-row emphasis (+ keep / drop)</h1>
+      <p>
+        Brief Q2 originally framed this as three row-emphasis variants assuming
+        the section ships. Reframed: after 6.d3 / 6.d4 dropped two sections,
+        CareerLogTable is the heaviest remaining commitment from the 6.d0
+        Variant C lock — a new Sanity schema (<code>player.careerLog[]</code>),
+        ~12h editorial work for 24 A-team players, plus club-crest asset
+        gathering for non-KCVV clubs.
+      </p>
+      <p>
+        Variants A/B/C all <strong>ship</strong> the section with different
+        row-emphasis treatments (brief's original framing). Variant D
+        <strong>drops</strong> the section entirely, eliminating the schema,
+        editorial, and asset workload. Each column shows Maxim's 5-station log
+        and the U13 / no-career case (section hides).
+      </p>
+      <span class="scope-banner">Cross-age · CareerLog hides when careerLog[] empty</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Uniform rows ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Uniform rows.</h2>
+          <p class="sub">
+            All career rows render identically. Year range, crest, club,
+            optional badge. No special treatment for first / last stations.
+            Quietest. Reads as a flat ledger.
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">Schema + ~12h editorial</span>
+            <span class="chip chip--good">Quietest</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim (5 stations)</span><span class="who">~70% have career log</span></div>
+        <section class="career">
+          <div class="career__kicker">Een traject</div>
+          <h2 class="career__heading">
+            <span>Het logboek.</span>
+            <span class="career__counter">5 stations</span>
+          </h2>
+          <div class="career__rows">
+            <div class="career__row">
+              <span class="career__years">'15 – '17</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>Jeugd · U17</small></span>
+              <span></span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'17 – '19</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>Beloften · A-Ploeg debuut</small></span>
+              <span></span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'19 – '21</span>
+              <span class="career__crest career__crest--std"></span>
+              <span class="career__club">Standard Luik<small>U23 · op uitleenbasis</small></span>
+              <span class="ml-pill">Uitgeleend</span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'21 – '23</span>
+              <span class="career__crest career__crest--gnk"></span>
+              <span class="career__club">KRC Genk<small>Tweede team</small></span>
+              <span></span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'23 – Nu</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>A-Ploeg · #8</small></span>
+              <span></span>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth / no career — U13 #6</span><span class="who">~30% across squad</span></div>
+        <div class="collapsed-marker">
+          CareerLog <strong>hidden entirely</strong>
+          <em>player.careerLog[] empty</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Schema: <code>player.careerLog: array&lt;{yearRange, clubName, clubCrest?, role, badge?}&gt;</code></li>
+            <li>Each row composes <code>&lt;MonoLabel&gt;</code> + crest <code>&lt;img&gt;</code> + display <code>&lt;EditorialHeading&gt;</code> + optional <code>&lt;MonoLabel variant="pill-…"&gt;</code></li>
+            <li>Dotted dividers between rows reuse <code>&lt;DashedDivider&gt;</code></li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Easy to read at scale (12+ stations possible)</li>
+            <li>"5 stations" counter is the only emphasis — no row stands out</li>
+            <li>Trajectory shape (loops back to KCVV) doesn't read at a glance</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Anchor by typography ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Anchor by typography.</h2>
+          <p class="sub">
+            First + last rows (the start and current club) get heavier
+            club-name weight + slightly larger type. The career's frame
+            stands out — "where it began, where it is now". Mid-rows stay
+            light.
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">Schema + ~12h editorial</span>
+            <span class="chip chip--delta">+ row variant</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim (5 stations)</span><span class="who">~70% have career log</span></div>
+        <section class="career">
+          <div class="career__kicker">Een traject</div>
+          <h2 class="career__heading">
+            <span>Het logboek.</span>
+            <span class="career__counter">5 stations</span>
+          </h2>
+          <div class="career__rows">
+            <div class="career__row row--anchor-B">
+              <span class="career__years">'15 – '17</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>Jeugd · U17 · start</small></span>
+              <span class="ml-pill ml-pill--jersey">Start</span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'17 – '19</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>Beloften · A-Ploeg debuut</small></span>
+              <span></span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'19 – '21</span>
+              <span class="career__crest career__crest--std"></span>
+              <span class="career__club">Standard Luik<small>U23 · op uitleenbasis</small></span>
+              <span class="ml-pill">Uitgeleend</span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'21 – '23</span>
+              <span class="career__crest career__crest--gnk"></span>
+              <span class="career__club">KRC Genk<small>Tweede team</small></span>
+              <span></span>
+            </div>
+            <div class="career__row row--anchor-B">
+              <span class="career__years">'23 – Nu</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>A-Ploeg · #8</small></span>
+              <span class="ml-pill ml-pill--jersey">Thuis</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth / no career — U13 #6</span><span class="who">~30% across squad</span></div>
+        <div class="collapsed-marker">
+          CareerLog <strong>hidden entirely</strong>
+          <em>player.careerLog[] empty</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Same schema as A</li>
+            <li><span class="delta">Δ</span> <code>&lt;CareerLogRow variant="anchor"&gt;</code> renders heavier club-name (font-weight 800, +1 size step)</li>
+            <li>Anchor rows derived at render time: first row + last row of <code>careerLog[]</code></li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Story arc reads at-a-glance — "started here, came back here"</li>
+            <li>Mid-rows feel intentionally secondary; ledger reads less flat</li>
+            <li>Single-station logs (1 row only): "first + last" collapses to that one row → anchors render as just emphasis</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Anchor by surface ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Anchor by surface.</h2>
+          <p class="sub">
+            First + last rows get both heavier typography <em>and</em> a
+            cream-deep background tint. Anchor rows read as
+            "pinned-down stations" — pages of the logbook are dog-eared.
+            Strongest signal of the four.
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">Schema + ~12h editorial</span>
+            <span class="chip chip--delta">+ row variant + tint</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim (5 stations)</span><span class="who">~70% have career log</span></div>
+        <section class="career">
+          <div class="career__kicker">Een traject</div>
+          <h2 class="career__heading">
+            <span>Het logboek.</span>
+            <span class="career__counter">5 stations</span>
+          </h2>
+          <div class="career__rows">
+            <div class="career__row row--anchor-C">
+              <span class="career__years">'15 – '17</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>Jeugd · U17 · start</small></span>
+              <span class="ml-pill ml-pill--jersey">Start</span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'17 – '19</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>Beloften · A-Ploeg debuut</small></span>
+              <span></span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'19 – '21</span>
+              <span class="career__crest career__crest--std"></span>
+              <span class="career__club">Standard Luik<small>U23 · op uitleenbasis</small></span>
+              <span class="ml-pill">Uitgeleend</span>
+            </div>
+            <div class="career__row">
+              <span class="career__years">'21 – '23</span>
+              <span class="career__crest career__crest--gnk"></span>
+              <span class="career__club">KRC Genk<small>Tweede team</small></span>
+              <span></span>
+            </div>
+            <div class="career__row row--anchor-C">
+              <span class="career__years">'23 – Nu</span>
+              <span class="career__crest"></span>
+              <span class="career__club">KCVV Elewijt<small>A-Ploeg · #8</small></span>
+              <span class="ml-pill ml-pill--jersey">Thuis</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth / no career — U13 #6</span><span class="who">~30% across squad</span></div>
+        <div class="collapsed-marker">
+          CareerLog <strong>hidden entirely</strong>
+          <em>player.careerLog[] empty</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Vocabulary map</h4>
+          <ul>
+            <li>Same schema as A / B</li>
+            <li><span class="delta">Δ</span> <code>&lt;CareerLogRow variant="anchor"&gt;</code> renders heavier club-name + <code>bg-cream-deep</code> tint</li>
+            <li>Anchor rows extend slightly past their gutter so the surface reads as a "dog-eared page"</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Strongest "anchor station" reading; least ambiguous</li>
+            <li>Two-mode emphasis (weight + surface) can over-emphasise on short logs (3 rows: 2 anchored, 1 mid feels lopsided)</li>
+            <li>Tint introduces a third surface tone (cream + cream-soft + cream-deep) into one section</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Drop CareerLog ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Drop CareerLog.</h2>
+          <p class="sub">
+            No career log on the player profile. Zero schema migration.
+            Zero editorial backlog. Zero club-crest assets needed. Career
+            history goes wherever it belongs — interview articles, club
+            history page, social posts. The page becomes A-team-agnostic.
+          </p>
+          <div class="chips">
+            <span class="chip chip--drop">Drop-section</span>
+            <span class="chip chip--good">0 schema</span>
+            <span class="chip chip--good">0 editorial</span>
+            <span class="chip chip--good">0 assets</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">All profiles</span></div>
+        <div class="collapsed-marker">
+          CareerLog <strong>not rendered</strong>
+          <em>section out of scope · no schema migration · no editorial workload</em>
+        </div>
+
+        <div class="state-label"><span>Youth / no career — U13 #6</span><span class="who">All profiles</span></div>
+        <div class="collapsed-marker">
+          CareerLog <strong>not rendered</strong>
+          <em>identical shape across the squad</em>
+        </div>
+
+        <div class="callouts">
+          <h4>Scope reduction</h4>
+          <ul>
+            <li>Remove <code>player.careerLog[]</code> from 6.d0 schema scope</li>
+            <li>Remove ~12h editorial backlog for 24 A-team players</li>
+            <li>Remove club-crest asset gathering (Standard, Genk, Anderlecht, Berchem, etc.)</li>
+            <li>Page becomes: Hero → BioBlock → (RecentMatchesGrid?) → QuotesBlock</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Phase 6.A schema migrations drop to zero — biggest scope win yet</li>
+            <li>Cross-age symmetry improves — no A-team-specific narrative content</li>
+            <li>Loses "history of a player" entirely from the profile surface</li>
+            <li>Mockup fidelity vs retro-terrace-fanzine drops further (~40%)</li>
+            <li>"Logboek" framing dies — that section gave the page its name in the canonical mockup</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary table ═════════════ -->
+    <section class="summary">
+      <h2>CareerLog ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Uniform</th>
+            <th>B — Type anchor</th>
+            <th>C — Type + surface anchor</th>
+            <th>D — Drop section</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Schema migration</strong></td>
+            <td><code>player.careerLog[]</code></td>
+            <td><code>player.careerLog[]</code></td>
+            <td><code>player.careerLog[]</code></td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Editorial workload</strong></td>
+            <td>~12h (24 A-team players)</td>
+            <td>~12h (same)</td>
+            <td>~12h (same)</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>Club-crest assets</strong></td>
+            <td>10-15 non-KCVV crests to source</td>
+            <td>Same</td>
+            <td>Same</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Row-emphasis treatment</strong></td>
+            <td>None</td>
+            <td>Anchor rows: heavier club-name weight + larger type</td>
+            <td>Anchor rows: heavier weight + cream-deep surface tint</td>
+            <td>N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Vocabulary delta</strong></td>
+            <td>New <code>&lt;CareerLogTable&gt;</code> primitive</td>
+            <td>Above + <code>variant="anchor"</code> row prop</td>
+            <td>Above + cream-deep surface tone</td>
+            <td>No new primitives</td>
+          </tr>
+          <tr>
+            <td><strong>Cross-age behaviour</strong></td>
+            <td>Hides when <code>careerLog[]</code> empty</td>
+            <td>Same</td>
+            <td>Same</td>
+            <td>Never renders for anyone</td>
+          </tr>
+          <tr>
+            <td><strong>Dark-band repurpose candidate?</strong></td>
+            <td>Possible — header on ink, rows on cream</td>
+            <td>Possible</td>
+            <td>Possible — but C already adds a third surface; layered ink would be busy</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>Mockup fidelity vs retro-terrace-fanzine</strong></td>
+            <td>~90%</td>
+            <td>~95%</td>
+            <td>~95%</td>
+            <td>~40%</td>
+          </tr>
+          <tr>
+            <td><strong>Scope shift on Phase 6.A</strong></td>
+            <td>No change vs 6.d0 lock</td>
+            <td>No change vs 6.d0 lock</td>
+            <td>No change vs 6.d0 lock</td>
+            <td><strong>Phase 6.A becomes zero-schema, zero-editorial</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 1 · StatsStrip (6.d4)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--drop  { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; }
+      .state-label .who {
+        font-size: 9px;
+        opacity: 0.55;
+      }
+
+      /* ───────── StatsStrip — A-team case (rendered) ───────── */
+      .strip {
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 16px 14px 18px;
+        margin: 8px 14px 12px;
+        border: 2px solid var(--color-ink);
+        box-shadow: 4px 4px 0 0 rgba(0,0,0,0.4);
+        position: relative;
+      }
+      .strip::before,
+      .strip::after {
+        content: "";
+        position: absolute;
+        width: 32px;
+        height: 10px;
+        background: var(--color-jersey-deep);
+        border: 1px solid var(--color-cream);
+        opacity: 0.85;
+      }
+      .strip::before {
+        top: -6px;
+        left: 12%;
+        transform: rotate(-3deg);
+      }
+      .strip::after {
+        bottom: -6px;
+        right: 14%;
+        transform: rotate(2deg);
+      }
+      .strip__kicker {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+        margin-bottom: 12px;
+      }
+      .strip__kicker::before { content: "* "; }
+      .strip__row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        text-align: center;
+      }
+      .strip__row--four { grid-template-columns: repeat(4, 1fr); }
+      .stat__num {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 26px;
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      .stat__num--small { font-size: 18px; }
+      .stat__num .accent { color: #6affa1; }
+      .stat__label {
+        font-family: var(--font-mono);
+        font-size: 7.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.7;
+        margin-top: 5px;
+      }
+      .stat__sub {
+        font-family: var(--font-mono);
+        font-size: 7px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.45;
+        margin-top: 2px;
+      }
+      .stat__icon {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 2px;
+      }
+
+      /* ───────── Empty / collapsed state ───────── */
+      .strip--empty {
+        background: var(--color-cream-soft);
+        color: var(--color-ink-muted);
+        border: 1.5px dashed var(--color-ink-muted);
+        box-shadow: none;
+        padding: 14px 14px 14px;
+      }
+      .strip--empty::before,
+      .strip--empty::after { display: none; }
+      .strip--empty .ghost {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        text-align: center;
+        opacity: 0.75;
+      }
+
+      .collapsed-marker {
+        margin: 14px 14px 0;
+        padding: 12px 14px;
+        border: 1px dashed var(--color-ink-muted);
+        background: var(--color-cream);
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--color-ink-muted);
+      }
+      .collapsed-marker strong {
+        color: var(--color-jersey-deep);
+      }
+
+      /* ───────── Callouts ───────── */
+      .callouts {
+        padding: 14px 18px 18px;
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        font-size: 12px;
+        line-height: 1.55;
+      }
+      .callouts h4 {
+        margin: 0 0 6px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      .callouts ul { margin: 0 0 10px; padding-left: 18px; }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .callouts .delta { color: var(--color-jersey-deep); font-weight: 700; }
+
+      /* ───────── Summary ───────── */
+      .summary {
+        max-width: 1920px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 26px 26px;
+      }
+      .summary h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .summary table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+      }
+      .summary th,
+      .summary td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--color-ink-muted);
+        vertical-align: top;
+      }
+      .summary th {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        background: var(--color-cream-soft);
+      }
+      .summary tr:last-child td { border-bottom: none; }
+      .summary code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 1 · Drill 6.d4 · 2026-05-21</div>
+      <h1>StatsStrip — which 5 numbers + youth fallback</h1>
+      <p>
+        The hero is followed by a black scoreboard band with 5 numbers. Brief
+        proposes <strong>matches · goals · assists · minutes · cards</strong>;
+        canonical retro-terrace-fanzine shows
+        <strong>28 · 7 · 11 · 2374 · 4-0</strong> (last-match score).
+        BFF outfield contract today exposes
+        <code>matches / goals / assists / minutes</code> only — anything else
+        needs a BFF extension or derivation.
+      </p>
+      <p>
+        Every column renders both the <strong>A-team case</strong> (Maxim, data
+        present) and the <strong>youth case</strong> (U13 player, no published
+        match stats) per <code>[[project_player_profile_all_ages]]</code> —
+        page must gracefully degrade for U6-U21 profiles.
+      </p>
+      <span class="scope-banner">Cross-age scope · A-team + B + U6-U21</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Canonical 5 (matches/goals/assists/minutes/last-result) ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Canonical 5 — with last-result.</h2>
+          <p class="sub">
+            Matches/Goals/Assists/Minutes + the score of the player's last
+            appearance ("4-0"). Matches the retro-terrace-fanzine mockup
+            exactly. Requires BFF derivation: join PSD games endpoint with
+            per-player attendance + sort to find last appearance.
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">BFF derivation</span>
+            <span class="chip chip--good">100% mockup fidelity</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~70% of profiles</span></div>
+        <section class="strip">
+          <div class="strip__kicker">Seizoen 25/26 · Tussenstand</div>
+          <div class="strip__row">
+            <div><div class="stat__num">28</div><div class="stat__label">Matches</div></div>
+            <div><div class="stat__num">7</div><div class="stat__label">Goals</div></div>
+            <div><div class="stat__num">11</div><div class="stat__label">Assists</div></div>
+            <div><div class="stat__num stat__num--small">2374'</div><div class="stat__label">Minuten</div></div>
+            <div><div class="stat__num stat__num--small">4–0</div><div class="stat__label">Laatste</div><div class="stat__sub">vs OHL</div></div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth — U13 #6</span><span class="who">~30% of profiles</span></div>
+        <div class="collapsed-marker">Strip <strong>hidden</strong> — no published match data for U13</div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Matches/Goals/Assists/Minutes → BFF <code>getPlayerStats</code> (already wired)</li>
+            <li>Last-result → <span class="delta">Δ</span> new BFF logic: last PSD game where player appears, return scoreline + opponent</li>
+            <li>Youth fallback → strip drops when <code>stats === null</code> or <code>matches === 0</code></li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Strongest editorial voice — last result feels "live"</li>
+            <li>Adds BFF work beyond the existing endpoint; couples StatsStrip to games endpoint</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Brief 5 (with cards) ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Brief's 5 — with cards.</h2>
+          <p class="sub">
+            Matches/Goals/Assists/Minutes + yellow & red cards combined as a
+            5th stat. What the Phase 6 brief proposed. Requires BFF
+            extension — cards aren't in today's outfield contract. Cleanly
+            symmetric with goals/assists (disciplinary track record).
+          </p>
+          <div class="chips">
+            <span class="chip chip--cost">BFF extension</span>
+            <span class="chip chip--good">Editorially neutral</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~70% of profiles</span></div>
+        <section class="strip">
+          <div class="strip__kicker">Seizoen 25/26 · Tussenstand</div>
+          <div class="strip__row">
+            <div><div class="stat__num">28</div><div class="stat__label">Matches</div></div>
+            <div><div class="stat__num">7</div><div class="stat__label">Goals</div></div>
+            <div><div class="stat__num">11</div><div class="stat__label">Assists</div></div>
+            <div><div class="stat__num stat__num--small">2374'</div><div class="stat__label">Minuten</div></div>
+            <div><div class="stat__num"><span style="color:#f7c948;">3</span>/<span style="color:#e26a4e;">0</span></div><div class="stat__label">Kaarten</div><div class="stat__sub">Geel · Rood</div></div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth — U13 #6</span><span class="who">~30% of profiles</span></div>
+        <div class="collapsed-marker">Strip <strong>hidden</strong> — no published match data for U13</div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Matches/Goals/Assists/Minutes → BFF <code>getPlayerStats</code> (already wired)</li>
+            <li>Cards → <span class="delta">Δ</span> add <code>yellowCards</code> + <code>redCards</code> to the BFF outfield-stats contract; PSD <code>squadPlayerStatistics</code> already has these fields</li>
+            <li>Youth fallback → strip drops when stats absent</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Stays in "the player's own season"; no last-match coupling</li>
+            <li>Small palette deviation — yellow + red dots break the cream/ink/jersey-deep monochrome (per <code>[[feedback_no_bright_jersey]]</code> rationale, semantic outcome colours are restricted)</li>
+            <li>Could render cards as paired mono numbers <strong>3 / 0</strong> without colour to honor palette lock</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — BFF-shippable 4 ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>BFF-shippable 4.</h2>
+          <p class="sub">
+            Drop the 5th stat. Strip renders only what the BFF contract
+            exposes today: matches, goals, assists, minutes. 4-column grid
+            instead of 5. Ships immediately, zero BFF work, zero palette
+            risk. Visually quieter than the canonical mockup.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 BFF work</span>
+            <span class="chip chip--good">Ships today</span>
+            <span class="chip chip--cost">Mockup fidelity 80%</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~70% of profiles</span></div>
+        <section class="strip">
+          <div class="strip__kicker">Seizoen 25/26 · Tussenstand</div>
+          <div class="strip__row strip__row--four">
+            <div><div class="stat__num">28</div><div class="stat__label">Matches</div></div>
+            <div><div class="stat__num">7</div><div class="stat__label">Goals</div></div>
+            <div><div class="stat__num">11</div><div class="stat__label">Assists</div></div>
+            <div><div class="stat__num stat__num--small">2374'</div><div class="stat__label">Minuten</div></div>
+          </div>
+        </section>
+
+        <div class="state-label"><span>Youth — U13 #6</span><span class="who">~30% of profiles</span></div>
+        <div class="collapsed-marker">Strip <strong>hidden</strong> — no published match data for U13</div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>All 4 numbers → BFF <code>getPlayerStats</code> (already wired)</li>
+            <li>Zero new BFF surface area</li>
+            <li>Youth fallback → strip drops when stats absent</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Honest about what data we own; ships first</li>
+            <li>Loses the "scoreboard 5-up" rhythm — 4 wide reads slightly underweighted next to the 5-col hero meta</li>
+            <li>Path forward: ship 4 now, promote to 5 (cards or last-result) when BFF gains the field — no schema change</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ D — Drop the strip ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant D</div>
+          <h2>Drop the strip.</h2>
+          <p class="sub">
+            No StatsStrip on the player profile. Hero flows straight into
+            BioBlock. Stats live elsewhere (team-detail standings, match
+            recaps). Honors the 6.d0 drop-section escape. The page becomes
+            radically more uniform across age groups — A-team and U6 both
+            render identical shapes.
+          </p>
+          <div class="chips">
+            <span class="chip chip--drop">Drop-section</span>
+            <span class="chip chip--good">Symmetric across squad</span>
+          </div>
+        </header>
+
+        <div class="state-label"><span>A-team — Maxim #8</span><span class="who">~70% of profiles</span></div>
+        <div class="collapsed-marker">Strip <strong>not rendered</strong> — section out of scope</div>
+
+        <div class="state-label"><span>Youth — U13 #6</span><span class="who">~30% of profiles</span></div>
+        <div class="collapsed-marker">Strip <strong>not rendered</strong> — section out of scope</div>
+
+        <div class="callouts">
+          <h4>Data sourcing</h4>
+          <ul>
+            <li>Not rendered anywhere on the profile</li>
+            <li>BFF <code>getPlayerStats</code> can stay unwired from this page; team-detail page consumes it via its own composition</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Player profile becomes about identity + voice (bio, quotes), not numbers</li>
+            <li>Page is identical in shape from U6 to A-team — strong consistency</li>
+            <li>Loses immediate "how is this player doing this season" signal — viewer must click to team-detail</li>
+            <li>Mockup fidelity drops to ~50% — the canonical Maxim mockup leans heavily on the strip</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <!-- ═════════════ Summary table ═════════════ -->
+    <section class="summary">
+      <h2>StatsStrip ledger</h2>
+      <table>
+        <thead>
+          <tr>
+            <th></th>
+            <th>A — Canonical 5</th>
+            <th>B — Brief's 5 (cards)</th>
+            <th>C — Shippable 4</th>
+            <th>D — Drop strip</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Numbers shown (A-team)</strong></td>
+            <td>matches · goals · assists · minutes · last-result</td>
+            <td>matches · goals · assists · minutes · cards</td>
+            <td>matches · goals · assists · minutes</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>BFF work</strong></td>
+            <td>New derivation (last PSD game with player + scoreline)</td>
+            <td>Extend outfield contract with <code>yellowCards</code> / <code>redCards</code></td>
+            <td>None — already wired</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td><strong>Youth (U6-U21) rendering</strong></td>
+            <td>Strip hides when stats null</td>
+            <td>Strip hides when stats null</td>
+            <td>Strip hides when stats null</td>
+            <td>N/A — never renders</td>
+          </tr>
+          <tr>
+            <td><strong>Keeper variant (BFF outfield-only today)</strong></td>
+            <td>Renders outfield numbers + last-result; keeper-shape extension separate</td>
+            <td>Same as A — keeper-shape extension separate</td>
+            <td>Same as A — keeper-shape extension separate</td>
+            <td>N/A — no keeper-variant work needed</td>
+          </tr>
+          <tr>
+            <td><strong>Palette lock honored</strong></td>
+            <td>✓ Cream / ink / jersey-deep only</td>
+            <td>~ Yellow/red dots break palette; render as mono numbers <code>3/0</code> to comply</td>
+            <td>✓ Cream / ink / jersey-deep only</td>
+            <td>✓ N/A</td>
+          </tr>
+          <tr>
+            <td><strong>Mockup fidelity vs retro-terrace-fanzine</strong></td>
+            <td>100%</td>
+            <td>~90%</td>
+            <td>~80%</td>
+            <td>~50%</td>
+          </tr>
+          <tr>
+            <td><strong>Cross-age symmetry</strong></td>
+            <td>Asymmetric — A-team shows strip, youth doesn't</td>
+            <td>Asymmetric — A-team shows strip, youth doesn't</td>
+            <td>Asymmetric — A-team shows strip, youth doesn't</td>
+            <td>Symmetric — no strip anywhere</td>
+          </tr>
+          <tr>
+            <td><strong>Path to "more stats later"</strong></td>
+            <td>5 slots; swap last-result for cards if/when added</td>
+            <td>5 slots; static</td>
+            <td>4 slots; promote to 5 cleanly later — no schema change</td>
+            <td>Future work re-introduces the strip from scratch</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </body>
+</html>

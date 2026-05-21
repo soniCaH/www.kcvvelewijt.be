@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6 · Round 2 · B vs C zoom (6.d2)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+      header.page {
+        max-width: 1400px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+
+      .pair {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+      }
+
+      .side {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 28px 30px 30px;
+        display: flex;
+        flex-direction: column;
+      }
+      .side h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 32px;
+        margin: 0 0 6px;
+        letter-spacing: -0.015em;
+      }
+      .side h2 .v {
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.65;
+        margin-right: 12px;
+        vertical-align: 6px;
+      }
+      .side .one-line {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        opacity: 0.7;
+        margin-bottom: 22px;
+      }
+
+      /* ── Big figure frame (single per side) ── */
+      .frame {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-soft);
+        padding: 20px 22px 24px;
+        margin: 0 auto;
+        max-width: 380px;
+        width: 100%;
+        transform: rotate(0.4deg);
+      }
+      .frame::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        right: 22%;
+        width: 76px;
+        height: 18px;
+        background: rgba(244, 230, 145, 0.85);
+        border: 1px solid var(--color-ink);
+        transform: rotate(-4deg);
+      }
+      .frame__inner {
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        border: 1px solid var(--color-ink);
+        position: relative;
+        overflow: hidden;
+        background: var(--color-cream-soft);
+        display: flex;
+      }
+      .frame__inner--jersey {
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .frame__inner--player {
+        align-items: flex-end;
+        justify-content: center;
+        padding: 18px 0 0;
+      }
+      .frame__caption {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+
+      .jersey-svg-large { width: 80%; max-width: 280px; }
+      .player-svg-large { width: 92%; max-width: 320px; }
+
+      .frame__inner--player::after {
+        content: "";
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        bottom: 12%;
+        height: 8px;
+        border-top: 1px dashed var(--color-ink);
+        opacity: 0.35;
+      }
+
+      .key-points {
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 2px dashed var(--color-ink);
+      }
+      .key-points h3 {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 12px;
+      }
+      .key-points dl {
+        margin: 0;
+        display: grid;
+        grid-template-columns: 110px 1fr;
+        gap: 4px 14px;
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .key-points dt {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.65;
+        padding-top: 3px;
+      }
+      .key-points dd {
+        margin: 0;
+      }
+      .key-points dd strong {
+        background:
+          linear-gradient(
+            to bottom,
+            transparent 65%,
+            var(--color-jersey-deep) 65%,
+            var(--color-jersey-deep) 88%,
+            transparent 88%
+          );
+        padding: 0 2px;
+        color: var(--color-cream);
+      }
+      .key-points dd code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+
+      .takeaway {
+        max-width: 1400px;
+        margin: 36px auto 0;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        padding: 22px 28px 26px;
+      }
+      .takeaway h2 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 12px;
+      }
+      .takeaway p {
+        margin: 0 0 10px;
+        font-size: 14px;
+        line-height: 1.65;
+      }
+      .takeaway strong {
+        background:
+          linear-gradient(
+            to bottom,
+            transparent 65%,
+            var(--color-jersey-deep) 65%,
+            var(--color-jersey-deep) 88%,
+            transparent 88%
+          );
+        padding: 0 2px;
+        color: var(--color-cream);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6 · Round 2 · Drill 6.d2 · Zoom — B vs C</div>
+      <h1>JerseyShirt vs PlayerFigure — what they actually draw</h1>
+      <p>
+        Both variants render in the same <code>&lt;TapedFigure&gt;</code> frame
+        using the locked two-pass print vocabulary (jersey-deep underprint +
+        ink overprint + ink stripes). The drawing INSIDE the frame differs.
+      </p>
+      <p>
+        Same fallback player (Senne Janssens, #17) shown both ways below at
+        ~3× the round-1 scale, so the line-work reads clearly.
+      </p>
+    </header>
+
+    <div class="pair">
+      <!-- ═════════ B — JerseyShirt ═════════ -->
+      <div class="side">
+        <h2><span class="v">B</span>JerseyShirt.</h2>
+        <div class="one-line">The kit — no body.</div>
+
+        <div class="frame">
+          <div class="frame__inner frame__inner--jersey">
+            <svg class="jersey-svg-large" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+              <!-- jersey-deep underprint -->
+              <path d="M 40 50 L 70 30 L 90 40 Q 100 55 110 40 L 130 30 L 160 50 L 145 80 L 145 215 Q 100 225 55 215 L 55 80 Z"
+                    fill="#008755" />
+              <!-- ink overprint stripes -->
+              <g fill="#0a0a0a">
+                <rect x="68" y="80" width="14" height="135" />
+                <rect x="93" y="80" width="14" height="135" />
+                <rect x="118" y="80" width="14" height="135" />
+              </g>
+              <!-- ink outline -->
+              <path d="M 40 50 L 70 30 L 90 40 Q 100 55 110 40 L 130 30 L 160 50 L 145 80 L 145 215 Q 100 225 55 215 L 55 80 Z"
+                    fill="none" stroke="#0a0a0a" stroke-width="2.5" />
+              <!-- V-neck -->
+              <path d="M 88 42 Q 100 55 112 42" fill="none" stroke="#0a0a0a" stroke-width="2" />
+              <!-- number screen-print -->
+              <text x="100" y="160" font-family="Freight Display Pro, Playfair Display, serif"
+                    font-style="italic" font-weight="900" font-size="56"
+                    fill="#f5f1e6" text-anchor="middle">17</text>
+            </svg>
+          </div>
+          <div class="frame__caption"><span>A-Ploeg 26/27</span><span>#17</span></div>
+        </div>
+
+        <div class="key-points">
+          <h3>What you see</h3>
+          <dl>
+            <dt>Shape</dt><dd>Shoulders down to hem — <strong>no head, no arms, no legs</strong></dd>
+            <dt>Reading</dt><dd>"A kit on a hanger / on the wall"</dd>
+            <dt>Number</dt><dd>Screen-printed on the front in cream display italic</dd>
+            <dt>Identity</dt><dd><strong>Yes — number is unique per player</strong></dd>
+            <dt>Primitive</dt><dd><code>&lt;JerseyShirt number={17} /&gt;</code> — extends locked primitive with one new prop</dd>
+            <dt>Source</dt><dd>Phase 4.5 locked illustration (already in ClubshopBanner)</dd>
+          </dl>
+        </div>
+      </div>
+
+      <!-- ═════════ C — PlayerFigure ═════════ -->
+      <div class="side">
+        <h2><span class="v">C</span>PlayerFigure.</h2>
+        <div class="one-line">The person wearing the kit.</div>
+
+        <div class="frame">
+          <div class="frame__inner frame__inner--player">
+            <svg class="player-svg-large" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+              <!-- head -->
+              <ellipse cx="100" cy="50" rx="28" ry="32" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round" />
+              <!-- hair -->
+              <path d="M 76 38 Q 100 24 124 38" fill="none" stroke="#0a0a0a" stroke-width="2" />
+              <!-- neck -->
+              <path d="M 90 80 L 90 96 M 110 80 L 110 96" fill="none" stroke="#0a0a0a" stroke-width="2" />
+              <!-- jersey underprint -->
+              <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z"
+                    fill="#008755" />
+              <!-- stripes -->
+              <g fill="#0a0a0a">
+                <rect x="80" y="130" width="10" height="70" />
+                <rect x="95" y="130" width="10" height="70" />
+                <rect x="110" y="130" width="10" height="70" />
+              </g>
+              <!-- jersey outline -->
+              <path d="M 60 100 L 84 92 Q 100 110 116 92 L 140 100 L 130 130 L 130 200 L 70 200 L 70 130 Z"
+                    fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round" />
+              <!-- arm stubs (cap sleeves visible) -->
+              <line x1="60" y1="100" x2="50" y2="120" stroke="#0a0a0a" stroke-width="2.5" />
+              <line x1="140" y1="100" x2="150" y2="120" stroke="#0a0a0a" stroke-width="2.5" />
+              <line x1="50" y1="120" x2="56" y2="135" stroke="#0a0a0a" stroke-width="2.5" />
+              <line x1="150" y1="120" x2="144" y2="135" stroke="#0a0a0a" stroke-width="2.5" />
+              <!-- V-neck -->
+              <path d="M 84 92 Q 100 110 116 92" fill="none" stroke="#0a0a0a" stroke-width="2" />
+              <!-- shorts -->
+              <path d="M 70 200 L 76 248 L 96 248 L 100 220 L 104 248 L 124 248 L 130 200" fill="#0a0a0a" />
+              <!-- socks -->
+              <line x1="86" y1="248" x2="86" y2="265" stroke="#0a0a0a" stroke-width="2" />
+              <line x1="114" y1="248" x2="114" y2="265" stroke="#0a0a0a" stroke-width="2" />
+              <!-- ground hint -->
+              <path d="M 50 268 Q 100 272 150 268" fill="none" stroke="#0a0a0a" stroke-width="1.5" stroke-dasharray="3 4" />
+            </svg>
+          </div>
+          <div class="frame__caption"><span>A-Ploeg 26/27</span><span>#17</span></div>
+        </div>
+
+        <div class="key-points">
+          <h3>What you see</h3>
+          <dl>
+            <dt>Shape</dt><dd>Head, neck, shoulders, arm stubs, body, shorts, legs — <strong>full humanoid silhouette</strong></dd>
+            <dt>Reading</dt><dd>"A person on the pitch"</dd>
+            <dt>Number</dt><dd>Not on the figure — the #17 is already in the hero NumberDisplay</dd>
+            <dt>Identity</dt><dd><strong>No — every fallback player looks identical</strong></dd>
+            <dt>Primitive</dt><dd><code>&lt;PlayerFigure variant="illustration" /&gt;</code> — locked canonical from Phase 4.5</dd>
+            <dt>Source</dt><dd>Same illustration used as QuotesBlock avatar fallback; same vocabulary as the canonical retro-terrace-fanzine mockup</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <section class="takeaway">
+      <h2>The deciding question</h2>
+      <p>
+        For each missing-photo profile, do you want the page to whisper
+        <strong>"this is player #17"</strong> (Variant B — the number on the
+        shirt is the identity), or <strong>"this is a player at the club"</strong>
+        (Variant C — generic figure, identity carried by the #8 / name in the
+        left column only)?
+      </p>
+      <p>
+        Variant B keeps each profile feeling individual at the cost of a
+        slight vocabulary delta (JerseyShirt gains a <code>number</code> prop).
+        Variant C is zero-vocabulary-delta but produces an identical
+        illustration across all fallback profiles — a viewer paging through
+        the squad would see the same figure on profiles 3, 11, and 19.
+      </p>
+      <p>
+        Both variants share the same <code>&lt;TapedFigure&gt;</code> frame,
+        the same tape strip, the same jersey-deep + ink + stripes vocabulary.
+        The figure-vs-shirt is the only difference.
+      </p>
+    </section>
+  </body>
+</html>
