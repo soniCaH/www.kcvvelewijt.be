@@ -109,15 +109,18 @@ The R9-locked "layered hover Variant A" (photo `translateY(-2)` on parent `:hove
 
 - `<ArticleBody>` — Portable Text renderer for the new article body; wires the per-block serializers below and replaces the legacy `<SanityArticleBody>` on `/nieuws/[slug]`. `<SanityArticleBody>` still backs `/club/[slug]` and `/staf/[slug]` until Phases 6 and 7.
 - `<QARow>` — single Q&A row primitive (speaker avatar + question + answer body). Replaces the retired `<QaPairStandard>` / `<QaPairKey>` / `<QaPairQuote>` trio.
-- `<QASection>` + `qaBlocksToTailSection` — groups trailing `groupAtTail`-tagged Q&A blocks into a single rapid-fire section.
+- `<QASection>` + `qaBlocksToTailSection` — groups trailing `groupAtTail`-tagged Q&A blocks into a single rapid-fire section under a tail-section header. Header composition locked to `<EditorialHeading size="display-xl" emphasis={{ text: "Q&A", highlight: true }}>` per `docs/design/mockups/phase-5-article-detail/tail-qa-header-locked.md` (#1874, supersedes the original `<MonoLabel>` from `interview-locked.md`).
+- `<ArticleCredits>` — long-form credit panel (Door / Met / Beeld / Gepubliceerd) at article footer. Replaces the legacy `<InterviewCredits>`; cross-variant — renders whenever `author`, `photographer`, or `subjects[]` is populated. Schema additions: `article.author` + `article.photographer` (both optional strings).
 - `<EventFactInline>` — inline factsheet for event-style facts inside article body.
+- `<EventDetailBlock>` — event-variant hero-absorbed `eventFact`. On `event`-articleType articles, the FIRST `eventFact` in body is hoisted out and rendered as a polaroid card directly after `<ArticleBody>`; subsequent `eventFact`s render in-flow via `<EventFactInline>`.
+- `<TransferFactCard>` + 2-up adjacency grouping — transfer-variant fact cards. Adjacent `transferFact` blocks render as a 2-up grid; isolated blocks render single-column.
 - `<TapedFigure>` — Phase 5 extends its consumer set: `<ArticleBody>`'s `articleImage` serializer + Phase 5 hero variants.
 - `<VideoBlock>` — responsive video (Vimeo / YouTube / uploaded) with width-aware framing.
 - `<HtmlTableBlock>` — sanitised HTML table renderer for legacy embedded tables.
 - Portable Text serializers — `qaBlock`, `eventFact`, `articleImage`, `videoBlock`, `fileAttachment`, `htmlTable`, `internalLink`, `link`, `blockquote`.
 - `<DownloadButton>` — file attachment primitive with `card` and `chip` variants.
 - `<EditorialHero>` — Phase 5 finalised the four `variant`s (`interview` / `announcement` / `transfer` / `event`); previously only stubbed.
-- Schema additions in `@kcvv/sanity-schemas`: `articleImage.width` enum, `videoBlock.width` enum, `qaBlock.groupAtTail`.
+- Schema additions in `@kcvv/sanity-schemas`: `articleImage.width` enum, `videoBlock.width` enum, `qaBlock.groupAtTail`, `article.author`, `article.photographer`.
 
 ## Design Conventions
 
