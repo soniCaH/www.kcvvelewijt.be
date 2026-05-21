@@ -383,6 +383,8 @@ Stack, top-down:
 
 ### 5.2 Duo interview (`/nieuws/[slug]` for `articleType: "interview"` with multiple subjects)
 
+**Status: ✅ Complete** — Phase 5 shipped; closeout tracker #1860 closed 2026-05-21. Per-block design locks live under `docs/design/mockups/phase-5-article-detail/`; the implemented surface covers all four article variants (`interview` / `announcement` / `transfer` / `event`). `matchPreview` / `matchRecap` variants remain Phase-6 work behind #1470.
+
 This is the surface that should make the redesign feel viscerally different from the current site.
 
 Stack:
@@ -546,6 +548,8 @@ The redesign rolls out over ~9 phases. Per the rollout decision, each phase is a
 | **9** | Cleanup                                                         | None                                                                                                                                                                                                                                | (no new primitives)                                                                                                                                                        | Retire legacy tokens, retire Stenciletta + Montserrat, retire `<Badge>` consumers, retire `<PageHero>`                                                                                     | 1–2 weeks                          |
 
 **Total elapsed effort estimate:** ~25–40 weeks of focused work, depending on how many design rounds each gated phase needs. The wider range than before reflects design-checkpoint time, which can iterate (the owner may push back on mockup options once or twice before approval). Brownfield site stays live throughout; mixed-state visual is acceptable per rollout decision.
+
+**Completed phases:** Phase 0 (#1519), Phase 1, Phase 2, Phase 3, Phase 4 / 4.5 (homepage), Phase 5 (article detail — closed 2026-05-21 via #1860).
 
 ### Diagonal → striped-seam migration (per-phase)
 
