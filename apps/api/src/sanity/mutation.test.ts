@@ -95,7 +95,6 @@ describe("upsertPlayer", () => {
           firstName: "Jan",
           lastName: "Janssens",
           birthDate: "1995-03-15",
-          nationality: "Belgium",
           keeper: false,
           positionPsd: "MV",
         });
@@ -116,12 +115,15 @@ describe("upsertPlayer", () => {
         firstName: "Jan",
         lastName: "Janssens",
         birthDate: "1995-03-15",
-        nationality: "Belgium",
         keeper: false,
         positionPsd: "MV",
         archived: false,
       }),
     );
+    const payload = mockSet.mock.calls[0]![0] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty("nationality");
+    expect(payload).not.toHaveProperty("height");
+    expect(payload).not.toHaveProperty("weight");
     expect(mockCommit).toHaveBeenCalled();
   });
 
@@ -137,7 +139,6 @@ describe("upsertPlayer", () => {
             firstName: "Jan",
             lastName: "Janssens",
             birthDate: null,
-            nationality: null,
             keeper: false,
             positionPsd: null,
           });

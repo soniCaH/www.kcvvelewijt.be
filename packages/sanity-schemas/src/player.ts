@@ -31,12 +31,6 @@ export const player = defineType({
       readOnly: true,
     }),
     defineField({
-      name: 'nationality',
-      title: 'Nationality',
-      type: 'string',
-      readOnly: true,
-    }),
-    defineField({
       name: 'keeper',
       title: 'Keeper',
       type: 'boolean',
@@ -63,16 +57,6 @@ export const player = defineType({
     defineField({
       name: 'jerseyNumber',
       title: 'Jersey number',
-      type: 'number',
-    }),
-    defineField({
-      name: 'height',
-      title: 'Height (cm)',
-      type: 'number',
-    }),
-    defineField({
-      name: 'weight',
-      title: 'Weight (kg)',
       type: 'number',
     }),
     defineField({
@@ -118,7 +102,21 @@ export const player = defineType({
       name: 'bio',
       title: 'Bio',
       type: 'array',
-      of: [{type: 'block'}],
+      of: [
+        {
+          type: 'block',
+          marks: {
+            decorators: [
+              {title: 'Strong', value: 'strong'},
+              {title: 'Emphasis', value: 'em'},
+              {title: 'Code', value: 'code'},
+              {title: 'Underline', value: 'underline'},
+              {title: 'Strike', value: 'strike-through'},
+              {title: 'Pullquote', value: 'pullquote'},
+            ],
+          },
+        },
+      ],
     }),
   ],
   preview: {

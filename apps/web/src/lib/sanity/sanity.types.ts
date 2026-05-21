@@ -870,13 +870,10 @@ export type Player = {
   firstName?: string;
   lastName?: string;
   birthDate?: string;
-  nationality?: string;
   keeper?: boolean;
   positionPsd?: string;
   archived?: boolean;
   jerseyNumber?: number;
-  height?: number;
-  weight?: number;
   psdImageUrl?: string;
   psdImage?: {
     asset?: SanityImageAssetReference;
@@ -2142,7 +2139,7 @@ export type PAGE_BY_SLUG_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/player.repository.ts
 // Variable: PLAYERS_QUERY
-// Query: *[_type == "player" && archived != true] | order(lastName asc) {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate, nationality, height, weight,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
+// Query: *[_type == "player" && archived != true] | order(lastName asc) {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
 export type PLAYERS_QUERY_RESULT = Array<{
   _id: string;
   psdId: string | null;
@@ -2159,9 +2156,6 @@ export type PLAYERS_QUERY_RESULT = Array<{
     | "Verdediger"
     | null;
   birthDate: string | null;
-  nationality: string | null;
-  height: number | null;
-  weight: number | null;
   psdImageUrl: string | null;
   transparentImageUrl: string | null;
   celebrationImageUrl: string | null;
@@ -2187,7 +2181,7 @@ export type PLAYERS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/player.repository.ts
 // Variable: PLAYER_BY_PSD_ID_QUERY
-// Query: *[_type == "player" && psdId == $psdId][0] {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate, nationality, height, weight,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
+// Query: *[_type == "player" && psdId == $psdId][0] {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
 export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
   _id: string;
   psdId: string | null;
@@ -2204,9 +2198,6 @@ export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
     | "Verdediger"
     | null;
   birthDate: string | null;
-  nationality: string | null;
-  height: number | null;
-  weight: number | null;
   psdImageUrl: string | null;
   transparentImageUrl: string | null;
   celebrationImageUrl: string | null;
@@ -2560,8 +2551,8 @@ declare module "@sanity/client" {
     '*[_type == "homePage"][0] {\n    "matchesSliderPlaceholder": matchesSliderPlaceholder {\n      nextSeasonKickoff,\n      announcementText,\n      announcementHref,\n      "highlightImage": highlightImage {\n        alt,\n        "asset": asset->{\n          _id,\n          url,\n          "lqip": metadata.lqip,\n          "dimensions": metadata.dimensions\n        }\n      }\n    }\n  }': HOMEPAGE_PLACEHOLDER_QUERY_RESULT;
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  metaDescription,\n  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
-    '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
-    '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate, nationality, height, weight,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
+    '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    contactType,\n    teamRole,\n    teamRoleFallback,\n    "position": organigramNode->title,\n    "roleCode": organigramNode->roleCode,\n    "members": organigramNode->members[]->{\n      "id": _id,\n      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n      email, phone\n    },\n    "nodeId": organigramNode->_id,\n    "role": role,\n    "email": email,\n    "phone": phone,\n    "department": department\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      contactType,\n      teamRole,\n      teamRoleFallback,\n      "position": organigramNode->title,\n      "roleCode": organigramNode->roleCode,\n      "members": organigramNode->members[]->{\n        "id": _id,\n        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n        email, phone\n      },\n      "nodeId": organigramNode->_id,\n      "role": role,\n      "email": email,\n      "phone": phone,\n      "department": department\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,\n  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;

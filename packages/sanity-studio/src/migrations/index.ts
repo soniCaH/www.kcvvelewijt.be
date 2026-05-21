@@ -54,3 +54,9 @@ export type {
   ArticleWithImageBlocksDoc as ImageToArticleImageDoc,
   LegacyImageBlock as ImageToArticleImageLegacyBlock,
 } from './image-to-articleimage'
+
+export {
+  default as dropPlayerUnusedFieldsMigration,
+  migrateDropPlayerUnusedFields,
+} from './drop-player-unused-fields'
+export type {PlayerWithUnusedFieldsDoc as DropPlayerUnusedFieldsDoc} from './drop-player-unused-fields'

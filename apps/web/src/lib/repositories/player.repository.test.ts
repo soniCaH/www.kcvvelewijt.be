@@ -37,9 +37,6 @@ function makePlayerRow(
     positionPsd: "Middenvelder",
     position: "Aanvaller",
     birthDate: "1995-03-15",
-    nationality: "Belgisch",
-    height: 180,
-    weight: 75,
     psdImageUrl: "https://cdn.sanity.io/psd.webp",
     transparentImageUrl: "https://cdn.sanity.io/transparent.webp",
     celebrationImageUrl: "https://cdn.sanity.io/celebration.webp",
@@ -81,9 +78,6 @@ describe("PlayerRepository", () => {
         href: "/spelers/12345",
         bio: row.bio,
         birthDate: "1995-03-15",
-        nationality: "Belgisch",
-        height: 180,
-        weight: 75,
       });
     });
 
@@ -212,9 +206,6 @@ describe("PlayerRepository", () => {
         makePlayerRow({
           jerseyNumber: null,
           birthDate: null,
-          nationality: null,
-          height: null,
-          weight: null,
           bio: null,
         }),
       ]);
@@ -227,9 +218,6 @@ describe("PlayerRepository", () => {
       );
       expect(p.number).toBeUndefined();
       expect(p.birthDate).toBeUndefined();
-      expect(p.nationality).toBeUndefined();
-      expect(p.height).toBeUndefined();
-      expect(p.weight).toBeUndefined();
       expect(p.bio).toBeUndefined();
     });
 

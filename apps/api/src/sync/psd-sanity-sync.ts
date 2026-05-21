@@ -14,7 +14,7 @@ import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
 /**
  * Convert a PSD member record into a Sanity-compatible player document and include the PSD image URL when present.
  *
- * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, nationality, keeper, bestPosition, profilePictureURL)
+ * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, keeper, bestPosition, profilePictureURL)
  * @param baseUrl - Base URL to prepend to `profilePictureURL` to form an absolute `_psdImageUrl`
  * @returns A Sanity player document populated from the PSD member with an additional `_psdImageUrl` set to the absolute image URL or `null`
  */
@@ -31,7 +31,6 @@ export function transformMember(
     firstName: psd.firstName,
     lastName: psd.lastName,
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null, // strip time "HH:MM"
-    nationality: psd.nationality,
     keeper: psd.keeper,
     positionPsd:
       typeof psd.bestPosition === "string"
