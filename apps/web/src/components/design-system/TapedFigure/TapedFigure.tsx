@@ -13,6 +13,20 @@ export type TapedFigureAspect =
 export type TapedFigureBg = "cream" | "cream-soft";
 
 /**
+ * Internal padding between the TapedCard edge and the photo.
+ * - `"sm"` (default) — polaroid margin (cream/paper visible around the
+ *   photo). Right for editorial photography embedded in body content.
+ * - `"none"` — full-bleed photo flush to the TapedCard's `border-2
+ *   border-ink` outline. Right when the figure IS the surface (e.g.
+ *   `<PlayerHero>`) and a transparent-cutout image must not appear to
+ *   float on a cream backdrop.
+ *
+ * Other TapedCard padding values are intentionally not exposed — the
+ * polaroid / full-bleed split is the only meaningful contrast here.
+ */
+export type TapedFigurePadding = "sm" | "none";
+
+/**
  * Per-instance warm-tint control.
  * - `"newsprint"` (default) — applies `--filter-photo-newsprint` via the
  *   global `.taped-figure` rule. Right for editorial photography.
@@ -37,6 +51,7 @@ export interface TapedFigureProps {
   tape?: TapeStripProps;
   bg?: TapedFigureBg;
   tint?: TapedFigureTint;
+  padding?: TapedFigurePadding;
   className?: string;
 }
 
@@ -56,6 +71,7 @@ export function TapedFigure({
   tape,
   bg = "cream",
   tint = "newsprint",
+  padding = "sm",
   className,
 }: TapedFigureProps) {
   const aspectStyle: CSSProperties =
@@ -77,7 +93,7 @@ export function TapedFigure({
       rotation={rotation}
       tape={tape}
       bg={bg}
-      padding="sm"
+      padding={padding}
       className={cn("taped-figure block w-full", className)}
       dataAttrs={figureAttrs}
     >

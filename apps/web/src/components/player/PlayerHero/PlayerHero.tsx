@@ -97,9 +97,37 @@ function computeAge(birth: Date, now: Date): number {
   return age;
 }
 
+const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
+
 function formatAgeGradedBirthDate(iso: string, now: Date): string | undefined {
-  const birth = new Date(`${iso}T00:00:00Z`);
+  const match = ISO_DATE_PATTERN.exec(iso);
+  if (match === null) return undefined;
+  const year = Number.parseInt(match[1] ?? "", 10);
+  const month = Number.parseInt(match[2] ?? "", 10);
+  const day = Number.parseInt(match[3] ?? "", 10);
+  if (
+    Number.isNaN(year) ||
+    Number.isNaN(month) ||
+    Number.isNaN(day) ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    day > 31
+  ) {
+    return undefined;
+  }
+  const birth = new Date(Date.UTC(year, month - 1, day));
   if (Number.isNaN(birth.getTime())) return undefined;
+  // Reject roll-overs (e.g. 2024-02-31 → 2024-03-02) by re-checking parts.
+  if (
+    birth.getUTCFullYear() !== year ||
+    birth.getUTCMonth() !== month - 1 ||
+    birth.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+  // Reject future dates outright.
+  if (birth.getTime() > now.getTime()) return undefined;
   const age = computeAge(birth, now);
   if (age >= ADULT_AGE_THRESHOLD) {
     const dd = pad2(birth.getUTCDate());
@@ -263,6 +291,7 @@ export function PlayerHero({
           tape={{ color: "jersey", length: "md" }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
+          padding="none"
         >
           {hasPhoto ? (
             <Image

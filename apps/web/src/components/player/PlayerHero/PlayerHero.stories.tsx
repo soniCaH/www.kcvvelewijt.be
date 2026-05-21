@@ -12,10 +12,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PlayerHero } from "./PlayerHero";
 
+/**
+ * Deterministic VR fixtures — real `psdImage` JPGs pulled from the Sanity
+ * staging dataset (project `vhb33jaz`, dataset `staging`). Checked into
+ * `apps/web/public/player-fixtures/` so the VR-tagged stories don't depend
+ * on the legacy Drupal cutouts (transparent PNGs, ~10% of production
+ * players) — production reality is bounded-box opaque JPGs, see
+ * `[[feedback_subject_photo_fallback]]`.
+ */
 const REAL_PLAYER_PHOTOS = {
-  maxim:
-    "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
-  sem: "https://api.kcvvelewijt.be/sites/default/files/player-picture/jarne-front.png",
+  mendesMouro: "/player-fixtures/player-mendes-mouro.jpg",
+  schulz: "/player-fixtures/player-schulz.jpg",
+  vartolomaios: "/player-fixtures/player-vartolomaios.jpg",
 };
 
 const meta = {
@@ -55,7 +63,7 @@ export const AdultWithPhoto: Story = {
     firstName: "Maxim",
     lastName: "Breugelmans",
     position: "Middenvelder",
-    photoUrl: REAL_PLAYER_PHOTOS.maxim,
+    photoUrl: REAL_PLAYER_PHOTOS.mendesMouro,
     birthDate: "1999-03-14",
     jerseyNumber: 8,
     teamLabel: "A-Ploeg",
@@ -82,7 +90,7 @@ export const MinorU17WithPhoto: Story = {
     firstName: "Sem",
     lastName: "De Witte",
     position: "Aanvaller",
-    photoUrl: REAL_PLAYER_PHOTOS.sem,
+    photoUrl: REAL_PLAYER_PHOTOS.schulz,
     birthDate: "2009-09-12",
     jerseyNumber: 11,
     teamLabel: "U17",
@@ -109,7 +117,7 @@ export const LongSurname: Story = {
     firstName: "Joachim",
     lastName: "Van den Broeck",
     position: "Verdediger",
-    photoUrl: REAL_PLAYER_PHOTOS.maxim,
+    photoUrl: REAL_PLAYER_PHOTOS.vartolomaios,
     birthDate: "1998-07-22",
     jerseyNumber: 17,
     teamLabel: "A-Ploeg",
