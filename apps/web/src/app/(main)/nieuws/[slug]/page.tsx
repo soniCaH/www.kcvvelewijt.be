@@ -39,7 +39,7 @@ import {
   qaBlocksToTailSection,
 } from "@/components/article/ArticleBody";
 import { QaBlock } from "@/components/article/blocks/QaBlock";
-import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { ArticleCredits } from "@/components/article/ArticleCredits";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 import {
@@ -409,9 +409,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         ? (() => {
             // Phase 5.C: hoist `groupAtTail` qaBlocks out of the in-flow
             // body before rendering through <ArticleBody>. Tail blocks
-            // render after <EndMark> under a MonoLabel-headed Q&A
-            // section per the locked composition in
-            // `docs/design/mockups/phase-5-article-detail/interview-locked.md`.
+            // render after <EndMark> under an EditorialHeading-headed
+            // Q&A section per `tail-qa-header-locked.md` (5.d-tail-qa-header
+            // lock, supersedes the original MonoLabel header in
+            // `interview-locked.md`).
             const { inFlow, tailBlocks } = qaBlocksToTailSection(body);
             const hasTail = tailBlocks.length > 0;
             return (
@@ -445,8 +446,14 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                         className="mx-auto w-full"
                         style={{ maxWidth: "var(--container-prose)" }}
                       >
-                        <header className="mb-8 flex justify-center">
-                          <MonoLabel tone="ink">Q&amp;A</MonoLabel>
+                        <header className="mb-8 text-center">
+                          <EditorialHeading
+                            level={2}
+                            size="display-xl"
+                            emphasis={{ text: "Q&A", highlight: true }}
+                          >
+                            Q&amp;A.
+                          </EditorialHeading>
                         </header>
                         <div className="flex flex-col gap-12">
                           {tailBlocks.map((block) => (
