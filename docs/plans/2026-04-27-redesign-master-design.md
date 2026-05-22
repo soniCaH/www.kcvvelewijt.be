@@ -469,10 +469,9 @@ There is an existing `docs/prd/article-detail-redesign.md` which this work super
 
 ### 6.3 Match detail (`/wedstrijd/[matchId]`)
 
-Three hero states: upcoming (preview), live (in progress), finished (verslag).
+Two hero states: upcoming (preview) and finished (verslag). **No live state** — the BFF does not surface live match data, so the route never renders a match-in-progress view. Re-evaluate if/when a live data feed lands.
 
 - **Upcoming:** `<EditorialHero variant="match-preview">` — taped match-ticket artefact with date/venue, two club shields stacked, "VOORBESCHOUWING" mono kicker. Body: `<MatchPreviewBody>` composing tactical notes + recent form using `<TapedCardGrid>`.
-- **Live:** big mono score in the hero card, period clock in mono, possession/shots stats in `<NumberDisplay>` row, `<StatsStrip>` minute-by-minute event log with `<DashedDivider>` rows.
 - **Finished:** "MATCHVERSLAG" hero with 16:9 match photo (via `<TapedFigure aspect="landscape-16-9">`) paired with the score and final-whistle ephemera + key moments + `<PullQuote>` from coach reaction + `<RecentMatchesGrid>` of head-to-head history.
 
 Standings widget reuses the homepage's `<StandingsTable>` primitive.

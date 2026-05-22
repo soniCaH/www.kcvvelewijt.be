@@ -220,7 +220,7 @@ Still in scope and needs owner sign-off (visual drill rounds):
 The player profile primitives (StatsStrip, CareerLogTable, RecentMatchesGrid, QuotesBlock) also feed:
 
 - **Team detail** (§6) — `<TeamHero>` + `<SquadGrid>` of `<PlayerCard>` (mini PlayerHero) + `<StandingsTable>` + `<MatchScheduleTable>` + `<SponsorsBlock filtered>`.
-- **Match detail** (3 states: preview, live, recap — per §6) — uses similar dark-tone scoreline + contribution-badge vocabulary from RecentMatchesGrid cards. **Inherits the cream/warm/ink/jersey-deep palette only** — no outcome-red token available.
+- **Match detail** (2 states: preview, recap — per §6; no live state, BFF surfaces no live data) — uses similar dark-tone scoreline + contribution-badge vocabulary from RecentMatchesGrid cards. **Inherits the cream/warm/ink/jersey-deep palette only** — no outcome-red token available.
 - **Events list + detail** — different vocabulary (event-card with day-block overlay, venue strip).
 - **Calendar** — list/grid of match cards.
 
