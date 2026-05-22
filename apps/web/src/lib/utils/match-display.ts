@@ -40,6 +40,7 @@ export function getScoreDisplay(match: HasScoreMatch): ScoreDisplay {
 const statusColorMap: Record<MatchStatus, string> = {
   finished: "green",
   postponed: "orange",
+  cancelled: "orange",
   stopped: "orange",
   forfeited: "gray",
   scheduled: "blue",

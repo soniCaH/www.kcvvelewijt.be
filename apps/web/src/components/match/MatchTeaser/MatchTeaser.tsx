@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
+import type { MatchTeaserStatus } from "../types";
 import { MatchStatusBadge } from "../MatchStatusBadge";
 
 export interface MatchTeaserTeam {
@@ -41,7 +42,7 @@ export interface MatchTeaserProps {
   /** Score for live/finished matches */
   score?: { home: number; away: number };
   /** Match status */
-  status: "upcoming" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchTeaserStatus;
   /** Link to match detail page */
   href?: string;
   /** Team ID to highlight (must match team.id) */

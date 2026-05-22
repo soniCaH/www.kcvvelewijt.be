@@ -85,8 +85,9 @@ export function derivePsdTeamLabel(name: string, age: string): string {
  *   2 = AFG (afgelast)           → "postponed"  (may be rescheduled)
  *   3 = STOP (ended prematurely) → "stopped"    (may be rescheduled)
  *
- * The `cancelled` boolean takes full precedence — if true, status is always "postponed"
- * regardless of the numeric code.
+ * The `cancelled` boolean takes full precedence — if true, status is always "cancelled"
+ * regardless of the numeric code. "cancelled" is distinct from "postponed":
+ * cancelled matches will not be played, postponed matches (PSD code 2) may be rescheduled.
  * Any unknown code (when not cancelled) falls back to "scheduled" (safe default).
  * This is a pure function — callers that need to detect unknown codes for logging
  * can use {@link isUnknownGameStatus}.
@@ -97,7 +98,7 @@ export function mapGameStatus(
   goalsAway: number | null,
   cancelled?: boolean | null,
 ): Match["status"] {
-  if (cancelled) return "postponed";
+  if (cancelled) return "cancelled";
   if (status === 1) return "forfeited";
   if (status === 2) return "postponed";
   if (status === 3) return "stopped";

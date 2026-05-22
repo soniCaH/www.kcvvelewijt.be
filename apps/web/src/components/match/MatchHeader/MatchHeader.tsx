@@ -50,14 +50,14 @@ export interface MatchHeaderProps {
  *
  * Displays a loading skeleton when `isLoading` is true. Shows scores when `status` is "finished" or
  * "forfeited", and shows localized badges for "postponed" ("Uitgesteld"), "stopped" ("Gestopt"),
- * and "forfeited" ("FF"). Date and time are hidden when the match is postponed or stopped.
- * `className` is merged into the outer container.
+ * "cancelled" ("Geannuleerd"), and "forfeited" ("FF"). Date and time are hidden when the match is
+ * postponed, stopped, or cancelled. `className` is merged into the outer container.
  *
  * @param homeTeam - Home team data (name, optional `logo`, optional `score`)
  * @param awayTeam - Away team data (name, optional `logo`, optional `score`)
  * @param date - Match date
  * @param time - Optional time string (e.g., "HH:MM")
- * @param status - Match status; one of `"scheduled" | "finished" | "forfeited" | "postponed" | "stopped"`
+ * @param status - Match status; one of `"scheduled" | "finished" | "forfeited" | "postponed" | "cancelled" | "stopped"`
  * @param competition - Optional competition name displayed as a badge
  * @param isLoading - If `true`, render a placeholder skeleton instead of match content
  * @param className - Optional additional CSS classes applied to the root element
@@ -77,6 +77,7 @@ export function MatchHeader({
   const isForfeited = status === "forfeited";
   const isPostponed = status === "postponed";
   const isStopped = status === "stopped";
+  const isCancelled = status === "cancelled";
   // Only show score block if match is finished/forfeited AND at least one score is present
   const hasScore =
     (isFinished || isForfeited) &&
@@ -181,6 +182,13 @@ export function MatchHeader({
               </span>
             </div>
           )}
+          {isCancelled && (
+            <div className="inline-flex items-center rounded-md border border-orange-400/50 bg-orange-500/20 px-4 py-2">
+              <span className="text-sm font-semibold tracking-wide text-orange-100 uppercase">
+                Geannuleerd
+              </span>
+            </div>
+          )}
           {isForfeited && (
             <div className="inline-flex items-center rounded-md border border-gray-400/50 bg-gray-500/20 px-4 py-2">
               <span className="text-sm font-semibold tracking-wide text-gray-100 uppercase">
@@ -190,7 +198,7 @@ export function MatchHeader({
           )}
 
           {/* Date and Time */}
-          {!isPostponed && !isStopped && (
+          {!isPostponed && !isStopped && !isCancelled && (
             <div className="text-center text-white/90">
               <div className="font-semibold">{formatMatchDate(date)}</div>
               {time && <div className="text-sm text-white/70">{time}</div>}

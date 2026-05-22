@@ -8,6 +8,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MATCH_STATUS_VALUES } from "@kcvv/api-contract";
 import { MatchHeader } from "./MatchHeader";
 
 const KCVV_LOGO =
@@ -46,7 +47,7 @@ Used at the top of match detail pages (/wedstrijd/[matchId]).
     time: { control: "text", description: "Match time (HH:MM)" },
     status: {
       control: "select",
-      options: ["scheduled", "finished", "forfeited", "postponed", "stopped"],
+      options: [...MATCH_STATUS_VALUES],
       description: "Match status",
     },
     competition: { control: "text", description: "Competition name" },
@@ -157,6 +158,26 @@ export const Stopped: Story = {
     date: new Date("2025-12-07T15:00:00Z"),
     time: "15:00",
     status: "stopped",
+    competition: "3de Nationale",
+  },
+};
+
+/**
+ * Cancelled match (will not be played; PSD `cancelled` flag)
+ */
+export const Cancelled: Story = {
+  args: {
+    homeTeam: {
+      name: "KCVV Elewijt",
+      logo: KCVV_LOGO,
+    },
+    awayTeam: {
+      name: "KFC Turnhout",
+      logo: OPPONENT_LOGO,
+    },
+    date: new Date("2025-12-07T15:00:00Z"),
+    time: "15:00",
+    status: "cancelled",
     competition: "3de Nationale",
   },
 };

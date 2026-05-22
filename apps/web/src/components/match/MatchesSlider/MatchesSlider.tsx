@@ -9,7 +9,10 @@
 
 import { HorizontalSlider } from "@/components/design-system";
 import { MatchTeaser } from "../MatchTeaser/MatchTeaser";
-import type { UpcomingMatch } from "@/components/match/types";
+import type {
+  UpcomingMatch,
+  MatchTeaserStatus,
+} from "@/components/match/types";
 
 export interface MatchesSliderProps {
   /** Matches to display */
@@ -24,9 +27,7 @@ export interface MatchesSliderProps {
   className?: string;
 }
 
-function mapStatus(
-  status: UpcomingMatch["status"],
-): "upcoming" | "finished" | "forfeited" | "postponed" | "stopped" {
+function mapStatus(status: UpcomingMatch["status"]): MatchTeaserStatus {
   return status === "scheduled" ? "upcoming" : status;
 }
 

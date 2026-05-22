@@ -8,6 +8,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { MATCH_STATUS_VALUES } from "@kcvv/api-contract";
 import { MatchDetailView } from "./MatchDetailView";
 import type { LineupPlayer } from "../MatchLineup";
 import type { MatchEvent } from "../MatchEvents/MatchEvents";
@@ -224,7 +225,7 @@ Used as the main view component on match detail pages (/wedstrijd/[matchId]).
     time: { control: "text", description: "Match time (HH:MM)" },
     status: {
       control: "select",
-      options: ["scheduled", "finished", "forfeited", "postponed", "stopped"],
+      options: [...MATCH_STATUS_VALUES],
       description: "Match status",
     },
     competition: { control: "text", description: "Competition name" },

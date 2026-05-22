@@ -32,6 +32,11 @@ describe("MatchStatusBadge", () => {
     expect(container.innerHTML).toBe("");
   });
 
+  it("renders nothing for cancelled status (badge extension lands in Phase 6.B)", () => {
+    const { container } = render(<MatchStatusBadge status="cancelled" />);
+    expect(container.innerHTML).toBe("");
+  });
+
   it("renders nothing for unknown string status", () => {
     const { container } = render(<MatchStatusBadge status="toString" />);
     expect(container.innerHTML).toBe("");
