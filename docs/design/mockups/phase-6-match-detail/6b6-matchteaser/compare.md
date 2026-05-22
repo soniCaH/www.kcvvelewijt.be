@@ -84,6 +84,18 @@ Compact is therefore the **most-consumed surface** (homepage slider is the site'
 
 Visual artifact: `round-3-matchteaser-A2-italic.html` — three panels (default-light, compact-light, compact-dark) with same A2-italic chrome across all.
 
+## Scope slim-down (LOCKED at round 3 close)
+
+After round 3, a consumer-audit correction surfaces: **`<MatchesSlider>` was retired from the homepage by Phase 4.B.2** (replaced by `<UpcomingMatches>`, which doesn't use `<MatchTeaser>` at all). The actual non-legacy production consumer map for `<MatchTeaser>` is:
+
+| Consumer | Variant | Status |
+| --- | --- | --- |
+| `<CalendarMonth>` (day-detail list at `/kalender`) | default | ✅ Live |
+| `<MatchesSlider>` (orphan; no app route mounts it) | compact | 💀 Retire as dead code |
+| `<UpcomingMatches>` (new homepage block) | n/a | Renders its own primitives — doesn't use MatchTeaser |
+
+The `compact` variant has **zero active consumers**. Owner direction: slim d6 to the default variant only. Compact + `<MatchesSlider>` retire as dead code in Phase 6.B implementation. Full decision captured in `../matchteaser-locked.md`.
+
 ## Things this drill does NOT decide
 
 - Highlight treatment (round 2)
