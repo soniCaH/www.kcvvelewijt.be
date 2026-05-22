@@ -1,76 +1,45 @@
 /**
- * Player Detail Page — Loading Skeleton
- * Matches the PlayerProfile + share + related articles layout
+ * Player Detail Page — Loading Skeleton (Phase 6.A).
+ *
+ * Mirrors the new `/spelers/[slug]` composition at the chrome level —
+ * `<PlayerHero>` block, `<StripedSeam>`, and a bio paragraph footprint.
+ * Subject-specific surfaces (photo, name, bio text, ink quote card) are
+ * intentionally NOT skeletonised: their auto-hide branches mean a single
+ * skeleton can't accurately predict what will render.
  */
 
 export default function PlayerDetailLoading() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Player profile header */}
-      <div className="relative overflow-hidden bg-[#edeff4]">
-        {/* Background gradient — matches PlayerProfile hero */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            background:
-              "linear-gradient(135deg, #edeff4 0%, #e0e3eb 50%, #edeff4 100%)",
-          }}
-          aria-hidden="true"
-        />
-        <div className="relative z-10 mx-auto max-w-6xl px-4 py-8 lg:py-12">
-          <div className="flex animate-pulse flex-col items-center gap-8 lg:flex-row lg:items-end">
-            {/* Player photo */}
-            <div className="h-[350px] w-[280px] flex-shrink-0 rounded-sm bg-gray-300 lg:h-[440px] lg:w-[350px]" />
-            {/* Player info */}
-            <div className="flex-1 space-y-4 text-center lg:text-left">
-              <div className="mx-auto h-8 w-48 rounded bg-gray-300 lg:mx-0" />
-              <div className="mx-auto h-5 w-32 rounded bg-gray-200 lg:mx-0" />
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="space-y-1">
-                    <div className="h-3 w-16 rounded bg-gray-200" />
-                    <div className="h-5 w-24 rounded bg-gray-300" />
-                  </div>
-                ))}
-              </div>
+    <div className="min-h-screen">
+      <section
+        aria-hidden="true"
+        className="mx-auto w-full max-w-[var(--container-wide)] animate-pulse px-4 py-12 lg:px-8 lg:py-16"
+      >
+        <div className="grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[1fr_minmax(220px,320px)]">
+          <div className="flex flex-col gap-5">
+            <div className="bg-paper-edge h-4 w-24 rounded" />
+            <div className="bg-paper-edge h-24 w-32 rounded" />
+            <div className="space-y-2">
+              <div className="bg-paper-edge h-12 w-3/4 rounded" />
+              <div className="bg-paper-edge h-10 w-2/3 rounded" />
             </div>
+            <div className="bg-paper-edge h-3 w-48 rounded" />
+            <div className="bg-paper-edge h-7 w-40 rounded" />
           </div>
+          <div className="bg-paper-edge aspect-[3/4] w-full max-w-[320px] justify-self-start rounded sm:justify-self-end" />
         </div>
-      </div>
-
-      {/* Stats / season section */}
-      <div className="mx-auto max-w-4xl animate-pulse px-4 py-8">
-        <div className="mb-4 h-6 w-32 rounded bg-gray-200" />
-        <div className="grid grid-cols-3 gap-4 sm:grid-cols-5">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="space-y-2 text-center">
-              <div className="mx-auto h-10 w-10 rounded-full bg-gray-200" />
-              <div className="mx-auto h-3 w-16 rounded bg-gray-200" />
-            </div>
-          ))}
+      </section>
+      <div aria-hidden="true" className="bg-paper-edge h-[18px] w-full" />
+      <section
+        aria-hidden="true"
+        className="bg-cream mx-auto w-full max-w-[var(--container-wide)] animate-pulse px-4 py-12 lg:px-8 lg:py-16"
+      >
+        <div className="space-y-3">
+          <div className="bg-paper-edge h-4 w-full rounded" />
+          <div className="bg-paper-edge h-4 w-11/12 rounded" />
+          <div className="bg-paper-edge h-4 w-10/12 rounded" />
         </div>
-      </div>
-
-      {/* Related articles */}
-      <div className="border-t border-gray-200 bg-gray-50">
-        <div className="mx-auto max-w-5xl animate-pulse px-4 py-8">
-          <div className="mb-4 h-6 w-40 rounded bg-gray-200" />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="overflow-hidden rounded-sm border border-gray-200 bg-white shadow-sm"
-              >
-                <div className="aspect-[3/2] bg-gray-200" />
-                <div className="space-y-2 p-3">
-                  <div className="h-4 w-full rounded bg-gray-200" />
-                  <div className="h-3 w-1/2 rounded bg-gray-200" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

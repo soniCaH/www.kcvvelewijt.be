@@ -26,7 +26,10 @@ export const PLAYER_BY_PSD_ID_QUERY =
   "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
   "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
   "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
-  bio
+  bio,
+  "currentTeam": *[_type == "team" && archived != true && references(^._id)] | order(name asc)[0] {
+    name, season
+  }
 }`);
 
 export interface PlayerVM {
@@ -40,6 +43,14 @@ export interface PlayerVM {
   href?: string;
   bio?: PLAYERS_QUERY_RESULT[number]["bio"];
   birthDate?: string;
+  /**
+   * Active-team label resolved from the first non-archived team that
+   * references this player, ordered alphabetically by team name.
+   * Multi-team disambiguation (PRD §7) — see `findByPsdId` GROQ.
+   */
+  teamLabel?: string;
+  /** Active-team season label (e.g. "26/27"). */
+  season?: string;
 }
 
 /** A PlayerVM that has a valid href (i.e. has a psdId) */
@@ -50,6 +61,7 @@ export function toPlayerVM(
     celebrationImageUrl?: string | null;
     bio?: PLAYERS_QUERY_RESULT[number]["bio"] | null;
     birthDate?: string | null;
+    currentTeam?: { name?: string | null; season?: string | null } | null;
   },
 ): PlayerVM {
   const position = row.keeper
@@ -67,6 +79,8 @@ export function toPlayerVM(
     href: row.psdId ? `/spelers/${row.psdId}` : undefined,
     bio: row.bio ?? undefined,
     birthDate: row.birthDate ?? undefined,
+    teamLabel: row.currentTeam?.name ?? undefined,
+    season: row.currentTeam?.season ?? undefined,
   };
 }
 
