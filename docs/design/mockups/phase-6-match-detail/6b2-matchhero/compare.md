@@ -33,7 +33,7 @@ All three variants render meaningfully in both states. The score region is the o
 - **Upcoming:** "vs" (or the kickoff time, e.g. `14:30`)
 - **Finished:** numeric score (e.g. `3 — 1`) + a small status badge ("FT" / "FF" / "AFG" / "STOP")
 
-Editorial copy ("VOORBESCHOUWING" / "MATCHVERSLAG") rides as the kicker in all variants. State badge logic is the same across variants — only its placement varies (kicker vs corner stamp vs inline).
+Editorial copy ("VOORBESCHOUWING" / "MATCHVERSLAG") rides as the kicker in Variants A and C; **Variant B** uses a corner stamp instead (the full-bleed dark band leaves no natural kicker slot). Match-status badge logic is also variant-specific: A and C surface it as a small corner stamp on finished only, while B reuses the corner-stamp slot — placing the editorial kicker and the status badge in the same anchor.
 
 ## Round 2 — A+B hybrids
 

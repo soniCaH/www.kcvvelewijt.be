@@ -144,10 +144,10 @@ The events-first reading order has merit on mobile where vertical space is tight
 | 6.B.d1 | Page composition | ✅ LOCKED |
 | 6.B.d2 | `<MatchHero>` shape | ✅ LOCKED |
 | 6.B.d3 | `<MatchLineupSection>` + `<MatchEventsSection>` | ✅ **LOCKED (this doc — Variant A)** |
-| 6.B.d4 | `<MatchArticleLinkCard>` | next |
-| 6.B.d5 | `<MatchStatusBadge>` Direction-D audit | queued |
-| 6.B.d6 | `<MatchTeaser>` reskin (default + compact) | queued — cross-cutting per #1528 |
-| 6.B.d7 | `<MatchResultRow>` reskin | queued — cross-cutting per #1528 |
-| 6.B.d8 | `<MatchStripClient>` audit | queued — cross-cutting per #1528 |
+| 6.B.d4 | `<MatchArticleLinkCard>` | ✅ LOCKED (Variant B — build deferred to post-#1470) |
+| 6.B.d5 | `<MatchStatusBadge>` Direction-D audit | ✅ LOCKED (T3 paper-chrome + per-status tint; 5-status set; BFF schema delta) |
+| 6.B.d6 | `<MatchTeaser>` | ✅ LOCKED (A2-italic default; compact + `<MatchesSlider>` retired) |
+| 6.B.d7 | `<MatchResultRow>` | ✅ LOCKED (Variant A mini-teaser row) |
+| 6.B.d8 | `<MatchStrip>` audit | ✅ LOCKED (no-op — Phase 3.C lock authoritative) |
 | 6.B.d2 round 4 | MatchHero mobile collapse | deferred to implementation kickoff |
 | 6.B.d3 round 2 | Per-row visual refinements | deferred unless flagged |

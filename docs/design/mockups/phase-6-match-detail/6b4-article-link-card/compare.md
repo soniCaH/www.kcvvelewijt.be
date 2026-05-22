@@ -36,10 +36,20 @@ Visual artifact: `round-1-article-link-card-comparisons.html` — three variants
 
 ## Cross-state behaviour
 
-- **Finished match + `matchRecap` exists** → card renders linking to the recap (kicker: `LEES HET VERSLAG`)
-- **Upcoming match + `matchPreview` exists** → card renders linking to the preview (kicker: `LEES DE VOORBESCHOUWING`)
-- **No matching article** → component returns `null`. Per the 6.B.d1 auto-hide rule.
-- **Both `matchPreview` AND `matchRecap` exist on a finished match** → render recap only (preview is stale post-kickoff)
+Exhaustive truth table — every combination of match status × article presence. "Render X" picks the linked article; "hide" returns `null` per the 6.B.d1 auto-hide rule.
+
+| Match status | `matchRecap` exists? | `matchPreview` exists? | Behaviour | Kicker |
+| --- | --- | --- | --- | --- |
+| `finished` (or any edge state: `forfeited` / `postponed` / `cancelled` / `stopped`) | yes | yes | Render **recap** (preview is stale post-kickoff) | `LEES HET VERSLAG · MATCHVERSLAG` |
+| `finished` (or edge) | yes | no  | Render **recap** | `LEES HET VERSLAG · MATCHVERSLAG` |
+| `finished` (or edge) | no  | yes | Render **preview** as a fallback (rare but useful — e.g. recap unwritten, preview still on file) | `LEES DE VOORBESCHOUWING · MATCHPREVIEW` |
+| `finished` (or edge) | no  | no  | Hide (`null`) | — |
+| `scheduled` (upcoming) | yes | yes | Render **preview** (recap exists but is anomalous on an upcoming match — log a warning in dev) | `LEES DE VOORBESCHOUWING · MATCHPREVIEW` |
+| `scheduled` | yes | no  | Render **recap** as a fallback (rare; usually a data anomaly — log a warning in dev) | `LEES HET VERSLAG · MATCHVERSLAG` |
+| `scheduled` | no  | yes | Render **preview** | `LEES DE VOORBESCHOUWING · MATCHPREVIEW` |
+| `scheduled` | no  | no  | Hide (`null`) | — |
+
+Rule summary: **recap wins on finished/edge states; preview wins on scheduled**. Fallbacks ship for asymmetric data — if the dominant article is missing, render the other rather than hide outright. Anomalous combinations (recap on a scheduled match, etc.) render in dev-warning mode but ship live without error.
 
 ## Things this drill does NOT decide
 
