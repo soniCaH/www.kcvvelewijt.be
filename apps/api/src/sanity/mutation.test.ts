@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer } from "effect";
 import {
+  PSD_PLACEHOLDER_IMAGE_SHA1,
   SanityMutation,
   SanityMutationLive,
   SanityMutationError,
@@ -436,6 +437,106 @@ describe("uploadPlayerImage", () => {
       expect(result.left).toBeInstanceOf(SanityMutationError);
       expect(result.left.message).toContain("not allowed");
     }
+  });
+
+  it("skips upload and patch when bytes match the PSD placeholder SHA-1 (#1895)", async () => {
+    // Build a 20-byte buffer that hex-encodes to PSD_PLACEHOLDER_IMAGE_SHA1
+    // so the SHA-1 digest call returns the known placeholder hash.
+    const placeholderHashBytes = new Uint8Array(20);
+    for (let i = 0; i < 20; i++) {
+      placeholderHashBytes[i] = parseInt(
+        PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2),
+        16,
+      );
+    }
+    const digestSpy = vi
+      .spyOn(crypto.subtle, "digest")
+      .mockResolvedValueOnce(placeholderHashBytes.buffer);
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    // Only one fetch is expected (PSD); the Sanity upload must NOT fire.
+    fetchSpy.mockResolvedValueOnce(
+      new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+
+    const patchCallsBefore = mockClientPatch.mock.calls.length;
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage(
+          "42",
+          "https://kcvv.prosoccerdata.com/img/placeholder.jpg?profileAccessKey=abc",
+          "https://kcvv.prosoccerdata.com/img/placeholder.jpg?v=1",
+        );
+      }),
+    );
+
+    expect(digestSpy).toHaveBeenCalledTimes(1);
+    expect(digestSpy).toHaveBeenCalledWith("SHA-1", expect.any(ArrayBuffer));
+    // Exactly one fetch (PSD) — Sanity upload was never invoked
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // psdImage patch was NOT issued
+    expect(mockClientPatch.mock.calls.length).toBe(patchCallsBefore);
+
+    digestSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+
+  it("uploads + patches when bytes do NOT match the PSD placeholder SHA-1", async () => {
+    // Force the digest to return a non-placeholder hash (all zeros) so the
+    // skip branch does not fire and the upload path runs to completion.
+    const nonPlaceholderHashBytes = new Uint8Array(20);
+    const digestSpy = vi
+      .spyOn(crypto.subtle, "digest")
+      .mockResolvedValueOnce(nonPlaceholderHashBytes.buffer);
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockResolvedValueOnce(
+      new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ document: { _id: "image-real-bytes" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage(
+          "99",
+          "https://kcvv.prosoccerdata.com/img/real.jpg?profileAccessKey=xyz",
+          "https://kcvv.prosoccerdata.com/img/real.jpg?v=1",
+        );
+      }),
+    );
+
+    // PSD fetch + Sanity upload both happened
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    // psdImage patch fired with the new asset _id
+    expect(mockClientPatch).toHaveBeenCalledWith("player-psd-99");
+    const lastPatchResult =
+      mockClientPatch.mock.results[mockClientPatch.mock.results.length - 1]!
+        .value.set;
+    expect(lastPatchResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        psdImage: {
+          _type: "image",
+          asset: { _type: "reference", _ref: "image-real-bytes" },
+        },
+      }),
+    );
+
+    digestSpy.mockRestore();
+    fetchSpy.mockRestore();
   });
 
   it("rejects invalid URLs", async () => {
