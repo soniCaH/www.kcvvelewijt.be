@@ -1,55 +1,74 @@
-import {
-  MonoLabel,
-  type MonoLabelProps,
-} from "@/components/design-system/MonoLabel";
 import { cn } from "@/lib/utils/cn";
-import { getStatusColor } from "@/lib/utils/match-display";
 import type { MatchStatus } from "../types";
 
-type BadgeStatus = Extract<MatchStatus, "postponed" | "stopped" | "forfeited">;
+type BadgeStatus = Extract<
+  MatchStatus,
+  "finished" | "forfeited" | "postponed" | "cancelled" | "stopped"
+>;
+
+interface BadgeSpec {
+  abbreviation: string;
+  longForm: string;
+  tintClass: string;
+}
+
+const BADGE_SPECS: Record<BadgeStatus, BadgeSpec> = {
+  finished: {
+    abbreviation: "FT",
+    longForm: "Voltijd",
+    tintClass: "bg-cream text-ink",
+  },
+  forfeited: {
+    abbreviation: "FF",
+    longForm: "Forfait",
+    tintClass: "bg-cream-deep text-ink",
+  },
+  postponed: {
+    abbreviation: "PP",
+    longForm: "Uitgesteld",
+    tintClass: "bg-cream-deep text-ink",
+  },
+  stopped: {
+    abbreviation: "STOP",
+    longForm: "Gestopt",
+    tintClass: "bg-warm text-ink",
+  },
+  cancelled: {
+    abbreviation: "CANC",
+    longForm: "Geannuleerd",
+    tintClass: "bg-card-red text-cream",
+  },
+};
+
+// Direction-D paper-chrome base (Phase 2 lock — see redesign-phase-2.md §6.5).
+// Sharp corners, 2px ink border, 4px ink offset shadow, mono caps at the
+// canonical label size with widened tracking. Tint class is appended per status.
+const BASE_CLASS =
+  "inline-block border-2 border-ink shadow-paper-sm px-2 py-[5px] " +
+  "font-mono font-bold uppercase leading-none " +
+  "text-[10px] tracking-[0.16em]";
 
 export interface MatchStatusBadgeProps {
   status: MatchStatus | (string & {});
-  /**
-   * Dark background variant. Kept for call-site API compatibility but no
-   * longer drives custom dark-mode classes — MonoLabel pill variants are
-   * legible on both cream and ink surfaces.
-   */
-  isDark?: boolean;
-  /** Additional CSS classes */
   className?: string;
 }
 
-const statusLabels: Record<BadgeStatus, string> = {
-  postponed: "Uitgesteld",
-  stopped: "Gestopt",
-  forfeited: "FF",
-};
-
-// Phase 1 migration: map the legacy match-status colour names to the
-// redesign's MonoLabel pill variants. "orange" was used for warning-style
-// statuses (postponed/stopped) — rendered as the jersey-green brand
-// accent now. "gray" was the neutral fallback — rendered as a cream pill.
-const colorToVariant: Record<string, MonoLabelProps["variant"]> = {
-  orange: "pill-jersey",
-  gray: "pill-cream",
-};
-
 function isBadgeStatus(status: string): status is BadgeStatus {
-  return Object.hasOwn(statusLabels, status);
+  return Object.hasOwn(BADGE_SPECS, status);
 }
 
 export function MatchStatusBadge({ status, className }: MatchStatusBadgeProps) {
   if (!isBadgeStatus(status)) return null;
 
-  const color = getStatusColor(status);
-  const variant = colorToVariant[color] ?? "pill-cream";
+  const spec = BADGE_SPECS[status];
 
   return (
-    <span className={cn(className)}>
-      <MonoLabel variant={variant} size="sm">
-        {statusLabels[status]}
-      </MonoLabel>
+    <span
+      data-status={status}
+      title={spec.longForm}
+      className={cn(BASE_CLASS, spec.tintClass, className)}
+    >
+      {spec.abbreviation}
     </span>
   );
 }

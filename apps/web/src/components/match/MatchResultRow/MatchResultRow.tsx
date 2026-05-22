@@ -122,7 +122,7 @@ export function MatchResultRow({
               {match.time}
             </span>
           )}
-          <MatchStatusBadge status={match.status} isDark={isDark} />
+          <MatchStatusBadge status={match.status} />
           {isNext && (
             <span
               className={cn(
