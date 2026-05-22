@@ -35,6 +35,22 @@ All three variants render meaningfully in both states. The score region is the o
 
 Editorial copy ("VOORBESCHOUWING" / "MATCHVERSLAG") rides as the kicker in all variants. State badge logic is the same across variants — only its placement varies (kicker vs corner stamp vs inline).
 
+## Round 2 — A+B hybrids
+
+After round 1 owner direction: **C eliminated**, A and B both still on the table, with a request to explore hybrid concepts pulling B's ticket-stub identity into A's calmer paper-card chrome. Round 2 ships three hybrids in `round-2-matchhero-comparisons.html`:
+
+- **H1 — Ticket-card.** Single card split into two zones by a perforated dashed border. Left zone (~110px) is a "ticket stub" with big display date + venue. Right zone is the editorial body (kicker / teams + score / competition). Most matchday-flavored of the hybrids. **Δ: +1 small primitive** (perforated dashed line + punch-out circles).
+- **H2 — Card + matchday stamp.** A's card unchanged, with a tilted "matchday stamp" artefact in the upper-right corner carrying the big display date. Pure styled element, zero new primitive. Most A, least B. Lightest hybrid. **Δ: 0**.
+- **H3 — Card with ticket-footer.** A's body unchanged; the meta row at the bottom gets promoted to a ticket-stub footer (cream-soft tint, dashed top border, punch-out circles at the corners). Reads like the tear-strip of a printed ticket. **Δ: +1 small primitive** (perforated-edge wrapper + corner circles, narrower than H1's because it only applies to the footer).
+
+| Hybrid | Δ primitives | Where the ticket motif lives | Tradeoff vs pure A |
+| --- | --- | --- | --- |
+| **H1** | +1 (perforated line + circles) | Full left edge inside the card | Loses ~110px of horizontal space; mobile collapse non-trivial |
+| **H2** | 0 | Upper-right corner stamp | Smallest visual change; least matchday-flavored |
+| **H3** | +1 (footer perforated edge + circles) | Bottom footer of the card | Cream-on-cream tonal split is subtle; can be missed on some monitors |
+
+If none of the hybrids feel right, **fallback is pure A from round 1**.
+
 ## Things this drill does NOT decide
 
 - Lineup + events layout — 6.B.d3

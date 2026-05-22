@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 2 · MatchHero A+B hybrids (6.B.d2)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+      .scope-banner--note {
+        background: var(--color-warm);
+        margin-left: 8px;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; padding-top: 18px; }
+      .state-label .who { font-size: 9px; opacity: 0.55; }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts .danger { color: #c93f1c; font-weight: 700; }
+
+      /* shared chrome */
+      .shield {
+        width: 44px;
+        height: 50px;
+        background:
+          radial-gradient(circle at 30% 30%, var(--color-jersey) 0 60%, var(--color-jersey-deep) 60% 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-cream);
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .shield--opp {
+        background:
+          radial-gradient(circle at 70% 35%, #c34, #7a1f1f 65%);
+      }
+      .status-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        font-weight: 700;
+      }
+
+      /* ═══════════ H1 — Ticket-card (card with integrated stub) ═══════════ */
+      .hero-h1 {
+        margin: 6px 18px 18px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        display: grid;
+        grid-template-columns: 112px 1fr;
+        position: relative;
+      }
+      .hero-h1 .stub {
+        padding: 16px 14px;
+        border-right: 2px dashed var(--color-ink);
+        background: var(--color-cream-soft);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 9.5px;
+        position: relative;
+      }
+      .hero-h1 .stub::before,
+      .hero-h1 .stub::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        width: 18px;
+        height: 18px;
+        background: var(--color-cream-soft);
+        border-radius: 50%;
+        border-right: 2px solid var(--color-ink);
+      }
+      .hero-h1 .stub::before { top: -10px; }
+      .hero-h1 .stub::after  { bottom: -10px; }
+      .hero-h1 .stub .date {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 20px;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        margin-bottom: 6px;
+        text-transform: none;
+        font-style: normal;
+      }
+      .hero-h1 .stub .time {
+        font-size: 14px;
+        margin-bottom: 12px;
+        letter-spacing: 0.06em;
+      }
+      .hero-h1 .stub .venue {
+        opacity: 0.75;
+        line-height: 1.4;
+      }
+      .hero-h1 .body {
+        padding: 22px 22px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .hero-h1 .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+      }
+      .hero-h1 .kicker::before { content: "* "; opacity: 0.6; }
+      .hero-h1 .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+      .hero-h1 .teams .team {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .hero-h1 .teams .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .hero-h1 .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 34px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-align: center;
+      }
+      .hero-h1 .score--vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        color: var(--color-ink-muted);
+        text-transform: lowercase;
+      }
+      .hero-h1 .competition {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        padding-top: 10px;
+        border-top: 1px solid var(--color-ink);
+      }
+      .hero-h1 .status-corner {
+        position: absolute;
+        top: -10px;
+        right: 14px;
+      }
+
+      /* ═══════════ H2 — Editorial card + matchday stamp ═══════════ */
+      .hero-h2 {
+        margin: 6px 18px 18px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 22px 22px 18px;
+        position: relative;
+      }
+      .hero-h2 .stamp {
+        position: absolute;
+        top: 18px;
+        right: 22px;
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        padding: 8px 12px 6px;
+        text-align: center;
+        transform: rotate(2.5deg);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 9px;
+        line-height: 1.2;
+      }
+      .hero-h2 .stamp .date-big {
+        display: block;
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 20px;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        margin-bottom: 3px;
+        text-transform: none;
+        font-style: normal;
+      }
+      .hero-h2 .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+        margin-bottom: 14px;
+        max-width: calc(100% - 110px); /* avoid bumping into stamp */
+      }
+      .hero-h2 .kicker::before { content: "* "; opacity: 0.6; }
+      .hero-h2 .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+        align-items: center;
+      }
+      .hero-h2 .teams .team {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .hero-h2 .teams .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .hero-h2 .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 34px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-align: center;
+      }
+      .hero-h2 .score--vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        color: var(--color-ink-muted);
+        text-transform: lowercase;
+      }
+      .hero-h2 .meta {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .hero-h2 .meta .dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--color-ink);
+        display: inline-block;
+      }
+      .hero-h2 .status-inline {
+        margin-left: auto;
+      }
+
+      /* ═══════════ H3 — Card with perforated ticket footer ═══════════ */
+      .hero-h3 {
+        margin: 6px 18px 18px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        position: relative;
+        overflow: visible;
+      }
+      .hero-h3 .body {
+        padding: 22px 22px 16px;
+      }
+      .hero-h3 .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+        margin-bottom: 14px;
+      }
+      .hero-h3 .kicker::before { content: "* "; opacity: 0.6; }
+      .hero-h3 .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+        align-items: center;
+      }
+      .hero-h3 .teams .team {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .hero-h3 .teams .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .hero-h3 .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 34px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-align: center;
+      }
+      .hero-h3 .score--vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        color: var(--color-ink-muted);
+        text-transform: lowercase;
+      }
+      .hero-h3 .ticket-footer {
+        background: var(--color-cream-soft);
+        border-top: 2px dashed var(--color-ink);
+        padding: 14px 22px 14px;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        position: relative;
+      }
+      .hero-h3 .ticket-footer::before,
+      .hero-h3 .ticket-footer::after {
+        content: "";
+        position: absolute;
+        top: -10px;
+        width: 18px;
+        height: 18px;
+        background: var(--color-cream-soft);
+        border-radius: 50%;
+        border-top: 2px solid var(--color-ink);
+      }
+      .hero-h3 .ticket-footer::before { left: -10px; border-left: 2px solid var(--color-ink); }
+      .hero-h3 .ticket-footer::after  { right: -10px; border-right: 2px solid var(--color-ink); }
+      .hero-h3 .ticket-footer .dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--color-ink);
+        display: inline-block;
+      }
+      .hero-h3 .status-corner {
+        position: absolute;
+        top: -10px;
+        right: 14px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 2 · `&lt;MatchHero&gt;` · A+B hybrids</div>
+      <h1>Combining A's calm with B's matchday identity.</h1>
+      <p>
+        Round 1 left A (editorial card) and B (ticket-stub band) in the running;
+        C is eliminated. This round explores <strong>three hybrid shapes</strong>
+        that pull B's most useful idea — ticket-stub / matchday-ticket identity —
+        into A's calm paper-card chrome <em>without</em> a full-bleed dark band.
+        Each variant is rendered in both states. Data fixed:
+        <code>KCVV Elewijt</code> vs <code>RC Mechelen</code>,
+        <code>3e Provinciale A</code>, <code>za 14 jun · 14:30 · Sportpark Elewijt</code>,
+        finished score <code>3 — 1</code>.
+      </p>
+      <span class="scope-banner">Pick one — or fall back to A from round 1</span>
+      <span class="scope-banner scope-banner--note">C eliminated · round 1 still on the table</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ H1 — Ticket-card with integrated stub ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Hybrid H1</div>
+          <h2>Ticket-card.</h2>
+          <p class="sub">
+            Single <code>&lt;TapedCard&gt;</code> hero, but the card is split
+            into two zones by a perforated dashed border. <strong>Left zone</strong>
+            (~110px) is a "ticket stub" with the big display date, time, venue.
+            <strong>Right zone</strong> is the editorial body: kicker, teams +
+            score, competition line. Brings B's ticket vocabulary inside A's
+            calm card. No full-bleed dark band.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">+1 small primitive</span>
+            <span class="chip chip--good">Most matchday-flavored hybrid</span>
+            <span class="chip chip--cost">Slightly busier left zone</span>
+          </div>
+        </header>
+
+        <div class="state-label">
+          <span>Upcoming · status=scheduled</span>
+          <span class="who">aftrap 14:30</span>
+        </div>
+        <section class="hero-h1">
+          <aside class="stub">
+            <div class="date">ZA 14<br />JUN</div>
+            <div class="time">14:30</div>
+            <div class="venue">SPORTPARK<br />ELEWIJT</div>
+          </aside>
+          <div class="body">
+            <div class="kicker">VOORBESCHOUWING</div>
+            <div class="teams">
+              <div class="team team--home">
+                <span class="shield">K</span>
+                <span>KCVV Elewijt</span>
+              </div>
+              <div class="score score--vs">vs</div>
+              <div class="team team--away">
+                <span class="shield shield--opp">M</span>
+                <span>RC Mechelen</span>
+              </div>
+            </div>
+            <div class="competition">3E PROVINCIALE A · KCVV-A · SEIZOEN '26/'27</div>
+          </div>
+        </section>
+
+        <div class="state-label">
+          <span>Finished · status=finished</span>
+          <span class="who">eindstand 3 — 1</span>
+        </div>
+        <section class="hero-h1">
+          <div class="status-corner"><span class="status-badge">FT</span></div>
+          <aside class="stub">
+            <div class="date">ZA 14<br />JUN</div>
+            <div class="time">14:30</div>
+            <div class="venue">SPORTPARK<br />ELEWIJT</div>
+          </aside>
+          <div class="body">
+            <div class="kicker">MATCHVERSLAG</div>
+            <div class="teams">
+              <div class="team team--home">
+                <span class="shield">K</span>
+                <span>KCVV Elewijt</span>
+              </div>
+              <div class="score">3 — 1</div>
+              <div class="team team--away">
+                <span class="shield shield--opp">M</span>
+                <span>RC Mechelen</span>
+              </div>
+            </div>
+            <div class="competition">3E PROVINCIALE A · KCVV-A · SEIZOEN '26/'27</div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>What this brings together</h4>
+          <ul>
+            <li><strong>From A:</strong> calm paper card; no dark band; reads as one editorial unit</li>
+            <li><strong>From B:</strong> big-display date + perforated dashed line — "this is a matchday ticket"</li>
+            <li>Single component (not a band wrapper) — Storybook story matches the card paradigm of every other hero</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>+1 small primitive: the perforated dashed line + corner punch-out circles need to land somewhere reusable</li>
+            <li>Left stub eats horizontal space — the right zone gets ~110px less for teams + score</li>
+            <li>Mobile collapse needs thought (stub becomes top row or hides)</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ H2 — Editorial card + matchday stamp ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Hybrid H2</div>
+          <h2>Card + matchday stamp.</h2>
+          <p class="sub">
+            Pure A card composition — kicker → teams + score → meta row — with
+            one B-flavored addition: the date promoted to a small but bold
+            <strong>matchday stamp</strong> in the upper-right corner. Like a
+            postmark on a postcard. No perforations, no dark band, no extra
+            primitive (it's just a styled box with display typography).
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive</span>
+            <span class="chip chip--good">Lightest hybrid</span>
+            <span class="chip chip--cost">Most A, least B</span>
+          </div>
+        </header>
+
+        <div class="state-label">
+          <span>Upcoming · status=scheduled</span>
+          <span class="who">aftrap 14:30</span>
+        </div>
+        <section class="hero-h2">
+          <aside class="stamp">
+            <span class="date-big">14 JUN</span>
+            ZA · 14:30
+          </aside>
+          <div class="kicker">VOORBESCHOUWING · 3E PROVINCIALE A</div>
+          <div class="teams">
+            <div class="team team--home">
+              <span class="shield">K</span>
+              <span>KCVV Elewijt</span>
+            </div>
+            <div class="score score--vs">vs</div>
+            <div class="team team--away">
+              <span class="shield shield--opp">M</span>
+              <span>RC Mechelen</span>
+            </div>
+          </div>
+          <div class="meta">
+            <span>SPORTPARK ELEWIJT</span>
+            <span class="dot"></span>
+            <span>KCVV-A · '26/'27</span>
+          </div>
+        </section>
+
+        <div class="state-label">
+          <span>Finished · status=finished</span>
+          <span class="who">eindstand 3 — 1</span>
+        </div>
+        <section class="hero-h2">
+          <aside class="stamp">
+            <span class="date-big">14 JUN</span>
+            ZA · 14:30
+          </aside>
+          <div class="kicker">MATCHVERSLAG · 3E PROVINCIALE A</div>
+          <div class="teams">
+            <div class="team team--home">
+              <span class="shield">K</span>
+              <span>KCVV Elewijt</span>
+            </div>
+            <div class="score">3 — 1</div>
+            <div class="team team--away">
+              <span class="shield shield--opp">M</span>
+              <span>RC Mechelen</span>
+            </div>
+          </div>
+          <div class="meta">
+            <span>SPORTPARK ELEWIJT</span>
+            <span class="dot"></span>
+            <span>KCVV-A · '26/'27</span>
+            <span class="status-inline"><span class="status-badge">FT</span></span>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>What this brings together</h4>
+          <ul>
+            <li><strong>From A:</strong> entire card chrome unchanged — kicker / teams / meta exactly as in round 1</li>
+            <li><strong>From B:</strong> big display date promoted to a tilted stamp artefact — visual anchor without infrastructure</li>
+            <li>Zero new primitive (the stamp is just a styled <code>&lt;aside&gt;</code> with a transform rotate)</li>
+            <li>Status badge has a natural home inline in the meta row</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Closest to "A with a small flourish" — least matchday-flavored of the three hybrids</li>
+            <li>Stamp competes with the corner status badge for top-right attention (resolved: status inline in meta row instead)</li>
+            <li>Kicker needs to keep clearance from the stamp — the text-overflow rule is non-trivial on long competition names</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ H3 — Card with perforated ticket footer ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Hybrid H3</div>
+          <h2>Card with ticket-footer.</h2>
+          <p class="sub">
+            A's card unchanged on top (kicker + teams + score). The bottom
+            meta row gets <strong>promoted to a ticket-stub footer</strong> —
+            cream-soft tint, dashed top border, punch-out circles at the
+            corners. Reads like the perforated tear-strip at the bottom of a
+            printed ticket. Date / venue / competition live in the footer.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">+1 small primitive</span>
+            <span class="chip chip--good">Footer-only ticket motif</span>
+            <span class="chip chip--cost">Top zone less changed than H1</span>
+          </div>
+        </header>
+
+        <div class="state-label">
+          <span>Upcoming · status=scheduled</span>
+          <span class="who">aftrap 14:30</span>
+        </div>
+        <section class="hero-h3">
+          <div class="body">
+            <div class="kicker">VOORBESCHOUWING · 3E PROVINCIALE A</div>
+            <div class="teams">
+              <div class="team team--home">
+                <span class="shield">K</span>
+                <span>KCVV Elewijt</span>
+              </div>
+              <div class="score score--vs">vs</div>
+              <div class="team team--away">
+                <span class="shield shield--opp">M</span>
+                <span>RC Mechelen</span>
+              </div>
+            </div>
+          </div>
+          <footer class="ticket-footer">
+            <span>ZA 14 JUN</span>
+            <span class="dot"></span>
+            <span>14:30</span>
+            <span class="dot"></span>
+            <span>SPORTPARK ELEWIJT</span>
+          </footer>
+        </section>
+
+        <div class="state-label">
+          <span>Finished · status=finished</span>
+          <span class="who">eindstand 3 — 1</span>
+        </div>
+        <section class="hero-h3">
+          <div class="status-corner"><span class="status-badge">FT</span></div>
+          <div class="body">
+            <div class="kicker">MATCHVERSLAG · 3E PROVINCIALE A</div>
+            <div class="teams">
+              <div class="team team--home">
+                <span class="shield">K</span>
+                <span>KCVV Elewijt</span>
+              </div>
+              <div class="score">3 — 1</div>
+              <div class="team team--away">
+                <span class="shield shield--opp">M</span>
+                <span>RC Mechelen</span>
+              </div>
+            </div>
+          </div>
+          <footer class="ticket-footer">
+            <span>ZA 14 JUN</span>
+            <span class="dot"></span>
+            <span>14:30</span>
+            <span class="dot"></span>
+            <span>SPORTPARK ELEWIJT</span>
+          </footer>
+        </section>
+
+        <div class="callouts">
+          <h4>What this brings together</h4>
+          <ul>
+            <li><strong>From A:</strong> kicker + teams + score zone identical to round 1</li>
+            <li><strong>From B:</strong> dashed perforated edge + punch-out corner circles — clear "ticket-stub" reference at the bottom of the card</li>
+            <li>Compact — no extra primitive in the body, only in the footer treatment</li>
+            <li>Mobile collapse is trivial (footer wraps as today)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Less matchday-flavored than H1 — the ticket cue lives only at the bottom edge</li>
+            <li>+1 small primitive: perforated edge + punch-out circles need to be named (could be <code>&lt;TicketFooter&gt;</code> wrapping a children slot)</li>
+            <li>Cream-on-cream tonal split between body and footer is subtle — some monitors will barely see it</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <footer style="max-width:1920px;margin:36px auto 0;font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.65">
+      Round 2 of 6.B.d2 · A+B hybrids · C eliminated · round 1 variant A still on the table
+    </footer>
+  </body>
+</html>
