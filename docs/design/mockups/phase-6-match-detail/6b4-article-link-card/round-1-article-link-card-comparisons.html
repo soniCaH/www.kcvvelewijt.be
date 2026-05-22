@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 1 · MatchArticleLinkCard (6.B.d4)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page { max-width: 1920px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      .stage-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        opacity: 0.7;
+      }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+
+      /* mocked cover image (synthetic) */
+      .cover {
+        background:
+          linear-gradient(135deg, var(--color-jersey-deep) 0%, var(--color-ink) 60%),
+          radial-gradient(circle at 30% 30%, var(--color-jersey) 0%, transparent 50%);
+        background-blend-mode: screen;
+        display: flex;
+        align-items: flex-end;
+        padding: 12px;
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      /* ═══════════════════════════════════════════
+         Variant A — Compact one-line link
+         ═══════════════════════════════════════════ */
+      .va-wrap {
+        padding: 22px 18px;
+      }
+      .va-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        box-shadow: var(--shadow-paper-soft);
+        text-decoration: none;
+        color: var(--color-ink);
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 17px;
+        letter-spacing: -0.015em;
+      }
+      .va-link .kicker {
+        font-family: var(--font-mono);
+        font-style: normal;
+        font-size: 9.5px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        background: var(--color-cream-deep);
+        padding: 4px 7px;
+        flex-shrink: 0;
+      }
+      .va-link .title {
+        flex: 1;
+        line-height: 1.25;
+      }
+      .va-link .arrow {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      /* ═══════════════════════════════════════════
+         Variant B — Hero-style cover card
+         ═══════════════════════════════════════════ */
+      .vb-wrap {
+        padding: 22px 18px;
+      }
+      .vb-card {
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        box-shadow: var(--shadow-paper-md);
+        transform: rotate(-0.3deg);
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: var(--color-ink);
+        overflow: hidden;
+      }
+      .vb-card .cover {
+        aspect-ratio: 16 / 9;
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .vb-card .body {
+        padding: 16px 18px 18px;
+      }
+      .vb-card .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+        margin-bottom: 8px;
+      }
+      .vb-card .kicker::before { content: "* "; opacity: 0.6; }
+      .vb-card .title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 24px;
+        letter-spacing: -0.025em;
+        line-height: 1.1;
+        margin: 0 0 10px;
+      }
+      .vb-card .lead {
+        font-size: 13.5px;
+        line-height: 1.5;
+        margin: 0 0 14px;
+      }
+      .vb-card .cta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* ═══════════════════════════════════════════
+         Variant C — Inline magazine banner
+         ═══════════════════════════════════════════ */
+      .vc-wrap {
+        padding: 22px 18px;
+      }
+      .vc-card {
+        display: grid;
+        grid-template-columns: 120px 1fr auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 18px;
+        border: 2px solid var(--color-ink);
+        background: var(--color-cream);
+        box-shadow: var(--shadow-paper-soft);
+        text-decoration: none;
+        color: var(--color-ink);
+      }
+      .vc-card .cover {
+        aspect-ratio: 1 / 1;
+        border: 1px solid var(--color-ink);
+      }
+      .vc-card .text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .vc-card .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+      }
+      .vc-card .kicker::before { content: "* "; opacity: 0.6; }
+      .vc-card .title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 18px;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+      }
+      .vc-card .lead {
+        font-size: 12.5px;
+        line-height: 1.4;
+        opacity: 0.8;
+      }
+      .vc-card .arrow {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        align-self: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 1 · `&lt;MatchArticleLinkCard&gt;`</div>
+      <h1>How should the article link sit between the events and the related-articles?</h1>
+      <p>
+        Three treatment levels for the new
+        <code>&lt;MatchArticleLinkCard&gt;</code>. Auto-hides if no
+        <code>matchPreview</code> / <code>matchRecap</code> article exists for
+        the match. All three render the finished state (linking to a recap);
+        the upcoming state is identical in shape, only the badge / kicker copy
+        differs.
+      </p>
+      <span class="scope-banner">Pick one treatment level → write d4 lock</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Compact one-line link ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Compact one-line link.</h2>
+          <p class="sub">
+            Single inline row: kicker pill on the left, article title in the
+            middle, ellipsis arrow on the right. No image. Minimum visual
+            weight; reads as an in-text pointer. Focus stays on lineup +
+            events above.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive</span>
+            <span class="chip chip--good">Quietest treatment</span>
+            <span class="chip chip--cost">Low click affordance</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Body slot (finished — links to matchRecap article)</div>
+        <div class="va-wrap">
+          <a class="va-link" href="#">
+            <span class="kicker">LEES HET VERSLAG</span>
+            <span class="title">Drie keer Maxim, één keer pech: KCVV wint thuis tegen RC Mechelen.</span>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Smallest possible footprint — reader's attention stays on the match facts</li>
+            <li>Zero new primitive (one styled link + a small mono kicker pill)</li>
+            <li>Works identically on mobile without layout changes</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>Low click affordance — easy to scroll past</li>
+            <li>Doesn't sell the editorial content; the article author's effort gets less visual weight than the BFF lineup data</li>
+            <li>Title-only — no lead to preview the recap content</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Hero-style cover card ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Hero-style cover card.</h2>
+          <p class="sub">
+            Full-width <code>&lt;TapedCard&gt;</code> with the article cover
+            image bleeding to the top edge. Kicker + heading + one-line lead
+            below the image. Same shape as <code>&lt;NewsCard&gt;</code> on
+            the homepage — the strongest CTA of the three options.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive</span>
+            <span class="chip chip--good">Strongest CTA</span>
+            <span class="chip chip--cost">Identical to NewsCard — may confuse</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Body slot (finished — links to matchRecap article)</div>
+        <div class="vb-wrap">
+          <a class="vb-card" href="#">
+            <div class="cover">[ matchRecap cover · 16:9 ]</div>
+            <div class="body">
+              <div class="kicker">LEES HET VERSLAG · MATCHVERSLAG</div>
+              <h3 class="title">Drie keer Maxim, één keer pech.</h3>
+              <p class="lead">KCVV wint thuis tegen RC Mechelen na een
+                tweedehelftshow van Maxim Breugelmans. Tom Janssens corrigeert
+                even, maar de bezoekers vinden geen antwoord.</p>
+              <div class="cta">LEES HET HELE VERHAAL <span>→</span></div>
+            </div>
+          </a>
+        </div>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Strongest "go read this" affordance — image + kicker + heading + lead + CTA</li>
+            <li>Surfaces editorial work prominently; rewards article authors</li>
+            <li>Composes existing primitives 1:1 (<code>&lt;TapedCard&gt;</code> + <code>&lt;TapedFigure&gt;</code> + <code>&lt;EditorialHeading&gt;</code>)</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>Visually indistinguishable from a homepage <code>&lt;NewsCard&gt;</code> — may confuse readers ("why is there a news card in the middle of the match page?")</li>
+            <li>Dominates the body — competes with the match content for attention</li>
+            <li>Mobile: adds a full-width image block, more scroll</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Inline magazine banner ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Inline magazine banner.</h2>
+          <p class="sub">
+            Mid-weight horizontal card. Small square cover image (~120px) on
+            the left, kicker + title + lead on the right, arrow at the far
+            right. Reads like a magazine sidebar callout — compromise between
+            A's restraint and B's prominence.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">+1 small primitive</span>
+            <span class="chip chip--good">Compromise position</span>
+            <span class="chip chip--cost">Square image crop ≠ news cover crop</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Body slot (finished — links to matchRecap article)</div>
+        <div class="vc-wrap">
+          <a class="vc-card" href="#">
+            <div class="cover">[ cover · square ]</div>
+            <div class="text">
+              <div class="kicker">LEES HET VERSLAG</div>
+              <h3 class="title">Drie keer Maxim, één keer pech.</h3>
+              <p class="lead">Maxim Breugelmans tekent voor twee tweede-helftgoals
+                en KCVV pakt de drie punten.</p>
+            </div>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Visible but doesn't dominate — lineup + events stay central</li>
+            <li>Cover image gives editorial work weight without competing with the hero</li>
+            <li>Click affordance higher than A; lower than B</li>
+            <li>Distinct visual shape from <code>&lt;NewsCard&gt;</code> — readers recognise it as a different element</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>+1 small primitive: the square-cover-left-with-text-right horizontal layout (could be a generic <code>&lt;SidebarLinkCard&gt;</code>)</li>
+            <li>Article cover images are typically 16:9 — square crop means a derived crop is needed in the GROQ image transform</li>
+            <li>Mobile collapse needs the image to either stack on top or shrink (still solvable, not as automatic as A)</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <footer style="max-width:1920px;margin:36px auto 0;font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.65">
+      Round 1 of 6.B.d4 · article link card · pick treatment level
+    </footer>
+  </body>
+</html>
