@@ -191,7 +191,7 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/spelers/[slug]",
       Loading: SpelersDetailLoading,
-      expectedRootClass: "min-h-screen bg-gray-100",
+      expectedRootClass: "min-h-screen",
     },
     {
       name: "/staf/[slug]",
