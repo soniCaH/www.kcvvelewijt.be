@@ -119,7 +119,7 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
     <section
       data-testid="bioblock"
       data-has-pullquote={hasPullquote ? "true" : "false"}
-      className={cn("bg-cream w-full px-4 py-12 lg:px-0 lg:py-16", className)}
+      className={cn("bg-cream w-full px-4 py-12 lg:px-8 lg:py-16", className)}
     >
       <div
         className={cn(
@@ -137,7 +137,12 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
             data-testid="bioblock-pullquote"
             className="self-start lg:sticky lg:top-8"
           >
-            <PullQuote tone="jersey" attribution={{ name: playerName ?? "" }}>
+            <PullQuote
+              tone="jersey"
+              attribution={{ name: playerName ?? "" }}
+              rotation={2}
+              interactive="tilt"
+            >
               {pullquoteText}
             </PullQuote>
           </aside>
