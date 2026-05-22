@@ -35,13 +35,10 @@
  * **Multi-team disambiguation (PRD §7 Q4, AC):** this component is
  * deliberately data-flat. The hero kicker / ticket-stub `teamLabel` is
  * supplied by the page (`/spelers/[slug]/page.tsx`), which already owns
- * the active-roster selection: the legacy `<PlayerProfile>` is invoked
- * with a single resolved `teamName` ("KCVV Elewijt" today; a specific
- * team after Phase 6.A wiring). `<PlayerHero>` does not consume the
- * `playerTeams` array; the page picks the team to render. If a player
- * is rostered to multiple A/B teams in the same season, the page should
- * prefer the highest-tier team (A before B before youth), then break
- * ties by season recency.
+ * the active-roster selection via the `currentTeam` GROQ projection on
+ * `PLAYER_BY_PSD_ID_QUERY` (first non-archived team that references the
+ * player, ordered alphabetically by team name). `<PlayerHero>` does not
+ * consume a `playerTeams` array; the page picks the team to render.
  */
 
 import Image from "next/image";
