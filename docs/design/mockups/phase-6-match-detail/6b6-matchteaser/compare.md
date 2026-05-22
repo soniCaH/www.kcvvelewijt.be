@@ -53,6 +53,19 @@ Each variant must scale **down** cleanly to a compact size used by `<CalendarMon
 | Sidebar widgets / recent-matches grids on player profiles | Light cream cards | `<MatchTeaser variant="default">` | All three work; A reinforces the page hero on player profiles; B + C feel more like a generic card |
 | `HorizontalSlider.stories.tsx` inline mock | Storybook only | The PR-#1594 mock | Migrate the stories to render the real component once d6 locks; delete the inline mock per #1528 follow-up cleanup |
 
+## Round 2 — A stub iterations
+
+After round 1 owner direction: **A (mini-hero) picked**, with feedback that the left stub feels too dense. Round 2 explores three thinning iterations — same overall A shape, only the stub varies. Round-1 A is included as reference.
+
+| Iteration | Change to stub | Δ horizontal space | Tradeoff |
+| --- | --- | --- | --- |
+| **A0 — Reference** | Round 1 as shipped: weekday + day + month + time + display-big weight in 80px column | 80px / 64px | Baseline ("too dense") |
+| **A1 — Drop weekday** | Single-line "14 JUN" + time; same widths; display-big stays | 80px / 64px | Smallest change; one fewer info unit; day-of-week lost from the card |
+| **A2 — Date-only stub** | Big date number + mono month label only; centred; time moves to body kicker row | 72px / 54px | Most calendar-page identity; loses time from the stub |
+| **A3 — Wider, mono date** | Wider stub (~100px); display-big dropped entirely; day name spelled out ("ZATERDAG") + mono date + mono time | 100px / 80px | Calmest typography; loses display-big stamp; eats more horizontal space |
+
+Visual artifact: `round-2-matchteaser-A-stub-iterations.html`.
+
 ## Things this drill does NOT decide
 
 - Highlight treatment (round 2)

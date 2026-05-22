@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 2 · MatchTeaser A stub iterations (6.B.d6)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page { max-width: 1920px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant--reference > header.card {
+        background: var(--color-cream-deep);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--reference { background: var(--color-cream-deep); }
+
+      .stage-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        opacity: 0.7;
+      }
+      .demo { padding: 6px 18px 22px; }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+
+      .shield {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(circle at 30% 30%, var(--color-jersey) 0 60%, var(--color-jersey-deep) 60% 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+        color: var(--color-cream);
+        font-family: var(--font-display);
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .shield--opp {
+        background:
+          radial-gradient(circle at 70% 35%, #c34, #7a1f1f 65%);
+      }
+      .shield--lg { width: 36px; height: 42px; font-size: 12px; }
+      .shield--sm { width: 24px; height: 28px; font-size: 9px; }
+
+      /* Shared card chrome */
+      .card-default,
+      .card-compact {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .card-default { margin-bottom: 16px; }
+      .body-d {
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .body-c {
+        padding: 8px 10px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 6px;
+        align-items: center;
+      }
+      .teams-d {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .team-d {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        letter-spacing: -0.015em;
+        line-height: 1.1;
+      }
+      .team-d--away { justify-self: end; flex-direction: row-reverse; text-align: right; }
+      .team-d--highlight { font-weight: 600; }
+      .team-c {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 11px;
+        line-height: 1.1;
+      }
+      .team-c--away { justify-self: end; flex-direction: row-reverse; text-align: right; }
+      .team-c--highlight { font-weight: 600; }
+      .score-d {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 20px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .score-c {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 16px;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+      .meta-d {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        opacity: 0.6;
+      }
+      .kicker-d {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        opacity: 0.6;
+        margin-bottom: 4px;
+      }
+
+      /* ───────── A0 — original (for reference) ───────── */
+      .a0-default { display: grid; grid-template-columns: 80px 1fr; }
+      .a0-default .stub-d {
+        padding: 12px 10px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 8.5px;
+      }
+      .a0-default .stub-d .date {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 16px;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        margin-bottom: 4px;
+        text-transform: none;
+        font-style: normal;
+      }
+      .a0-default .stub-d .time {
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        opacity: 0.75;
+      }
+      .a0-compact { display: grid; grid-template-columns: 64px 1fr; }
+      .a0-compact .stub-c {
+        padding: 8px 8px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 7.5px;
+      }
+      .a0-compact .stub-c .date {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 12px;
+        line-height: 1;
+        margin-bottom: 2px;
+        text-transform: none;
+        font-style: normal;
+        letter-spacing: -0.02em;
+      }
+
+      /* ───────── A1 — drop weekday ───────── */
+      .a1-default { display: grid; grid-template-columns: 80px 1fr; }
+      .a1-default .stub-d {
+        padding: 14px 12px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+      }
+      .a1-default .stub-d .date {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 18px;
+        letter-spacing: -0.025em;
+        line-height: 1;
+        margin-bottom: 5px;
+      }
+      .a1-default .stub-d .time {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+      .a1-compact { display: grid; grid-template-columns: 64px 1fr; }
+      .a1-compact .stub-c {
+        padding: 9px 9px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+      }
+      .a1-compact .stub-c .date {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 13px;
+        line-height: 1;
+        margin-bottom: 3px;
+        letter-spacing: -0.02em;
+      }
+      .a1-compact .stub-c .time {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+
+      /* ───────── A2 — date-only stub (time in body) ───────── */
+      .a2-default { display: grid; grid-template-columns: 72px 1fr; }
+      .a2-default .stub-d {
+        padding: 14px 10px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+        text-align: center;
+      }
+      .a2-default .stub-d .date-big {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 24px;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .a2-default .stub-d .month {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin-top: 3px;
+        opacity: 0.7;
+      }
+      .a2-default .body-d .kicker-d { margin-bottom: 6px; }
+      .a2-compact { display: grid; grid-template-columns: 54px 1fr; }
+      .a2-compact .stub-c {
+        padding: 9px 6px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+        text-align: center;
+      }
+      .a2-compact .stub-c .date-big {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 17px;
+        letter-spacing: -0.02em;
+        line-height: 1;
+      }
+      .a2-compact .stub-c .month {
+        font-family: var(--font-mono);
+        font-size: 8px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-top: 2px;
+        opacity: 0.7;
+      }
+
+      /* ───────── A3 — wider + lighter (~100px, mono caps date) ───────── */
+      .a3-default { display: grid; grid-template-columns: 100px 1fr; }
+      .a3-default .stub-d {
+        padding: 14px 14px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+      }
+      .a3-default .stub-d .day {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        margin-bottom: 4px;
+      }
+      .a3-default .stub-d .date {
+        font-family: var(--font-mono);
+        font-size: 14px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 8px;
+      }
+      .a3-default .stub-d .time {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.75;
+      }
+      .a3-compact { display: grid; grid-template-columns: 80px 1fr; }
+      .a3-compact .stub-c {
+        padding: 9px 10px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+      }
+      .a3-compact .stub-c .date {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      .a3-compact .stub-c .time {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 2 · `&lt;MatchTeaser&gt;` · A stub iterations</div>
+      <h1>How dense should the left stub be?</h1>
+      <p>
+        Owner picked Variant A (mini-hero) but flagged the left stub as too
+        dense. Three iterations explore different ways to thin it out.
+        Round-1 A is included on the left as the reference baseline.
+      </p>
+      <span class="scope-banner">Pick one stub treatment · falls back to A0 if none feel right</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A0 — original reference ═════════════ -->
+      <article class="variant variant--reference">
+        <header class="card">
+          <div class="label">A0 — Reference</div>
+          <h2>Original (round 1).</h2>
+          <p class="sub">
+            What round 1 shipped. Stub width 80px / 64px (default / compact).
+            Content: <strong>ZA 14</strong>, <strong>JUN</strong>, time.
+            Display-big weight at default. The "too dense" baseline.
+          </p>
+          <div class="chips">
+            <span class="chip chip--reference">For comparison only</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Default</div>
+        <div class="demo">
+          <div class="a0-default card-default">
+            <aside class="stub-d">
+              <div class="date">ZA 14<br />JUN</div>
+              <div class="time">14:30</div>
+            </aside>
+            <div class="body-d">
+              <div class="teams-d">
+                <div class="team-d team-d--highlight">
+                  <span class="shield shield--lg">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score-d">3 — 1</div>
+                <div class="team-d team-d--away">
+                  <span class="shield shield--lg shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+              <div class="meta-d">3E PROVINCIALE A · SPORTPARK ELEWIJT</div>
+            </div>
+          </div>
+          <div class="stage-label" style="padding-left:0">Compact</div>
+          <div class="a0-compact card-compact">
+            <aside class="stub-c">
+              <div class="date">14<br />JUN</div>
+              <span>14:30</span>
+            </aside>
+            <div class="body-c">
+              <div class="team-c team-c--highlight">
+                <span class="shield shield--sm">K</span>
+                <span>KCVV E.</span>
+              </div>
+              <div class="score-c">3 — 1</div>
+              <div class="team-c team-c--away">
+                <span class="shield shield--sm shield--opp">M</span>
+                <span>RC Mech.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Why "too dense"</h4>
+          <ul>
+            <li>4 information units (weekday / day / month / time) in a narrow column</li>
+            <li>Display-big weight makes the date typographically heavy</li>
+            <li>Two lines of date stack on top of the time — visual stack feels crowded</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ A1 — drop weekday ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">A1</div>
+          <h2>Drop weekday.</h2>
+          <p class="sub">
+            Smallest change: drop the <code>ZA</code> prefix. Day-of-week is
+            already implied by context (slider rows are sorted; calendar
+            rows live under a day header). One fewer info unit in the stub,
+            slightly more breathing room around the date.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Smallest change</span>
+            <span class="chip chip--cost">Day-of-week lost from card itself</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Default</div>
+        <div class="demo">
+          <div class="a1-default card-default">
+            <aside class="stub-d">
+              <div class="date">14 JUN</div>
+              <div class="time">14:30</div>
+            </aside>
+            <div class="body-d">
+              <div class="teams-d">
+                <div class="team-d team-d--highlight">
+                  <span class="shield shield--lg">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score-d">3 — 1</div>
+                <div class="team-d team-d--away">
+                  <span class="shield shield--lg shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+              <div class="meta-d">3E PROVINCIALE A · SPORTPARK ELEWIJT</div>
+            </div>
+          </div>
+          <div class="stage-label" style="padding-left:0">Compact</div>
+          <div class="a1-compact card-compact">
+            <aside class="stub-c">
+              <div class="date">14 JUN</div>
+              <div class="time">14:30</div>
+            </aside>
+            <div class="body-c">
+              <div class="team-c team-c--highlight">
+                <span class="shield shield--sm">K</span>
+                <span>KCVV E.</span>
+              </div>
+              <div class="score-c">3 — 1</div>
+              <div class="team-c team-c--away">
+                <span class="shield shield--sm shield--opp">M</span>
+                <span>RC Mech.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Minimal change to A — same widths, same chrome, one fewer line of text</li>
+            <li>Date reads as one continuous unit ("14 JUN") instead of split across lines</li>
+            <li>Weekday is contextual data — calendar / slider rows usually provide it elsewhere</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>If the teaser appears in a non-grouped context (e.g. team page recent matches), losing the weekday means the reader has to derive it</li>
+            <li>Doesn't address the visual-weight density (display-big stays)</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ A2 — date-only stub (time in body) ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">A2</div>
+          <h2>Date-only stub.</h2>
+          <p class="sub">
+            Stub becomes <strong>one display-big date number stacked over a
+            mono month label</strong>. Time moves to a kicker row in the
+            body. Stub looks like a torn-off calendar page; body owns
+            scheduling chrome. Centred typography.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Most calendar-page feel</span>
+            <span class="chip chip--cost">Time loses stub prominence</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Default</div>
+        <div class="demo">
+          <div class="a2-default card-default">
+            <aside class="stub-d">
+              <div class="date-big">14</div>
+              <div class="month">JUN</div>
+            </aside>
+            <div class="body-d">
+              <div class="kicker-d">ZA · 14:30 · SPORTPARK ELEWIJT</div>
+              <div class="teams-d">
+                <div class="team-d team-d--highlight">
+                  <span class="shield shield--lg">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score-d">3 — 1</div>
+                <div class="team-d team-d--away">
+                  <span class="shield shield--lg shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="stage-label" style="padding-left:0">Compact</div>
+          <div class="a2-compact card-compact">
+            <aside class="stub-c">
+              <div class="date-big">14</div>
+              <div class="month">JUN</div>
+            </aside>
+            <div class="body-c">
+              <div class="team-c team-c--highlight">
+                <span class="shield shield--sm">K</span>
+                <span>KCVV E.</span>
+              </div>
+              <div class="score-c">3 — 1</div>
+              <div class="team-c team-c--away">
+                <span class="shield shield--sm shield--opp">M</span>
+                <span>RC Mech.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Stub is the single most uncluttered of the four — one big number + a mono label</li>
+            <li>Most "torn calendar page" identity — leans into the editorial-paper vocabulary</li>
+            <li>Body can carry richer scheduling chrome (day + time + venue all in one mono row) without crowding</li>
+            <li>Compact reads tightly — date number stays prominent at small scale</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>Time is no longer in the stub — readers scanning slider/calendar for kickoff time have to look at the body row</li>
+            <li>Body grows a kicker row to absorb the time/venue — slightly taller default card</li>
+            <li>Compact loses the kicker row entirely (no room) — time is implicit at small scale</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ A3 — wider + lighter ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">A3</div>
+          <h2>Wider stub, mono date.</h2>
+          <p class="sub">
+            Wider stub (~100px / 80px) but the display-big date drops out
+            entirely. Stub becomes <strong>mono caps day on top, mono caps
+            date, mono caps time</strong> — calmer typography, more
+            breathing room. Stub reads as a "mono tag" instead of a
+            "ticket-stub date stamp".
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Calmest typography</span>
+            <span class="chip chip--cost">Loses display-date impact</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Default</div>
+        <div class="demo">
+          <div class="a3-default card-default">
+            <aside class="stub-d">
+              <div class="day">ZATERDAG</div>
+              <div class="date">14 JUN</div>
+              <div class="time">14:30</div>
+            </aside>
+            <div class="body-d">
+              <div class="teams-d">
+                <div class="team-d team-d--highlight">
+                  <span class="shield shield--lg">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score-d">3 — 1</div>
+                <div class="team-d team-d--away">
+                  <span class="shield shield--lg shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+              <div class="meta-d">3E PROVINCIALE A · SPORTPARK ELEWIJT</div>
+            </div>
+          </div>
+          <div class="stage-label" style="padding-left:0">Compact</div>
+          <div class="a3-compact card-compact">
+            <aside class="stub-c">
+              <div class="date">14 JUN</div>
+              <div class="time">14:30</div>
+            </aside>
+            <div class="body-c">
+              <div class="team-c team-c--highlight">
+                <span class="shield shield--sm">K</span>
+                <span>KCVV E.</span>
+              </div>
+              <div class="score-c">3 — 1</div>
+              <div class="team-c team-c--away">
+                <span class="shield shield--sm shield--opp">M</span>
+                <span>RC Mech.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Wider stub allows full day name ("ZATERDAG") at default</li>
+            <li>Mono-only typography reads as a calmer tag — no display-big punch competing with the score</li>
+            <li>Compact drops the day name automatically (no room) — natural simplification</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>Loses the display-big date — the stub no longer "stamps" the date the way the page hero does</li>
+            <li>Wider stub eats more horizontal space — body has fewer chars for team names at default</li>
+            <li>Drifts away from the ticket-card identity that originally won round 2 of d2</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <footer style="max-width:1920px;margin:36px auto 0;font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.65">
+      Round 2 of 6.B.d6 · A stub iterations · pick one
+    </footer>
+  </body>
+</html>
