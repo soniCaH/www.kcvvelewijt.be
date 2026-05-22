@@ -44,20 +44,41 @@ Consumers: `<BrandedTabs>`, `<FilterTabs>`, `<HorizontalSlider>` arrows. **NOT a
 
 ## Audit findings
 
-### Finding 1 — Coverage gap vs `matchhero-locked.md`
+### Finding 1 — Coverage gap vs `matchhero-locked.md` (also: cancelled/postponed data-model bug)
 
-`matchhero-locked.md` spec (d2) says the corner stamp renders on **finished** matches with text **"FT"** (plus the existing FF / AFG / STOP for edge states). The current component:
+`matchhero-locked.md` spec (d2) says the corner stamp renders on **finished** matches with text **"FT"**. The current component:
 
 - **Returns `null` for `finished`** — no badge at all
-- Uses long-form Dutch ("Uitgesteld" / "Gestopt") for postponed / stopped — doesn't match d2's abbreviations ("AFG" / "STOP")
-- Uses "FF" for forfeited — matches d2
+- Uses long-form Dutch ("Uitgesteld" / "Gestopt") for postponed / stopped — doesn't match the locked-abbreviations spec
+- Uses "FF" for forfeited — matches the spec
 
-This is a real spec gap from d2. The hero needs the badge to handle `finished` (the dominant case for any post-kickoff page render). Either:
+**Also discovered during the audit:** the current `MatchStatus` literal **conflates `cancelled` with `postponed`**. From `apps/api/src/psd/transforms.ts:100`:
 
-- **(a)** Extend `<MatchStatusBadge>` to cover `finished` + render "FT", OR
-- **(b)** Have `<MatchHero>` render the FT stamp itself via a plain `<MonoLabel>` and only delegate to `<MatchStatusBadge>` for the edge states
+```typescript
+if (cancelled) return "postponed";
+if (status === 0) return goalsScored.length > 0 || ... ? "finished" : "scheduled";
+if (status === 1) return "forfeited";
+if (status === 2) return "postponed";   // PSD code 2 = afgelast
+if (status === 3) return "stopped";
+return "scheduled";
+```
 
-(a) is more consistent (one component owns all status-stamp rendering); (b) is more separated (the badge's API stays narrow — only "this match needs special attention").
+PSD's `cancelled: boolean` is a separate field that signals "definitively dead — won't be played", semantically distinct from `postponed` (PSD code 2 = afgelast = held, may reschedule). The BFF collapses both into `"postponed"`, hiding the distinction.
+
+**BFF schema delta required** — Phase 6.B owns it (per owner direction):
+
+| Touch point | Change |
+| --- | --- |
+| `packages/api-contract/src/schemas/match.ts` | Add `"cancelled"` to `MatchStatus` literal |
+| `apps/api/src/psd/transforms.ts` | Return `"cancelled"` (not `"postponed"`) when `cancelled === true`; preserve PSD code 2 → `"postponed"` |
+| `apps/api/src/psd/service.test.ts` + `apps/api/src/handlers/matches.test.ts` | Cover the new branch |
+| All consumers branching on `status === "postponed"` | Decide per-consumer whether `cancelled` shares the branch or splits |
+
+Resulting full set: **6 normalised statuses** (`scheduled`, `finished`, `forfeited`, `postponed`, `cancelled`, `stopped`); **5 render badges** (FT, FF, PP, CANC, STOP); `scheduled` doesn't render (kickoff time IS the status).
+
+### Coverage decision: extend `<MatchStatusBadge>` to cover all 5 badge states
+
+**(a)** wins. One component owns all status-stamp rendering. Easier to migrate the visual treatment in one place if/when Direction D evolves. The `<MatchHero>` simply mounts `<MatchStatusBadge status={match.status} />` and the badge decides whether to render and how.
 
 ### Finding 2 — Visual treatment vs Direction D
 
@@ -73,31 +94,36 @@ The bright-jersey pill diverges from Direction D. It's also a colour choice the 
 
 **Recommended migration:** swap `pill-jersey` → Direction D paper-chrome treatment. Either as a NEW MonoLabel variant (`pill-paper-chrome` or similar) reusable elsewhere, OR baked into `<MatchStatusBadge>` directly (component-level styling, no new primitive).
 
-### Finding 3 — Copy: long-form Dutch vs abbreviations
+### Finding 3 — Copy: long-form Dutch vs abbreviations (owner-corrected)
 
-The d2 spec uses abbreviations ("FT", "FF", "AFG", "STOP") for the corner stamp; the current component uses long-form Dutch ("Uitgesteld", "Gestopt"). Trade-off:
+The d2 spec uses abbreviations for the corner stamp; the current component uses long-form Dutch ("Uitgesteld", "Gestopt"). Owner direction during the audit:
 
-- **Abbreviations** read like printed-matchday-programme codes — fit the editorial-paper-fanzine vocabulary. Saves horizontal space on the corner stamp. Less accessible (readers don't always know "AFG" = afgelast).
-- **Long-form Dutch** is clear and accessible. Risks looking like a generic UI badge (which it currently does).
+- Abbreviations win
+- Specifically: **FT** (finished), **FF** (forfeit), **PP** (postponed), **CANC** (cancelled), **STOP** (stopped)
+- `title=` tooltip carries the long-form Dutch for accessibility
 
-Worth noting: PSD's own data uses the numeric status codes (0/1/2/3) which we already normalise to English literals (`scheduled`/`finished`/`forfeited`/`postponed`/`stopped`). The user-facing copy is fully our call.
+Reasoning: abbreviations read like printed-matchday-programme codes — fit the editorial-paper-fanzine vocabulary, save horizontal space on the corner stamp, distinct enough at a glance that readers learn them quickly.
 
-## Sub-decisions for the owner
+## Owner direction (after the audit conversation)
 
-| # | Decision | Recommendation | Why |
+- **Coverage**: extend `<MatchStatusBadge>` to render all 5 badge states (FT / FF / PP / CANC / STOP). `<MatchHero>` just mounts the badge; the badge owns whether-and-how to render.
+- **BFF schema delta**: **Phase 6.B owns it.** The `cancelled` literal extension + transform fix + downstream cascade is part of the eventual Phase 6.B implementation tickets that `/prd-to-issues` will spawn.
+- **Copy**: abbreviations. FT / FF / PP / CANC / STOP. `title=` tooltip carries the long-form Dutch for accessibility.
+- **Visual treatment**: Direction D paper-chrome base (`border-2 ink + shadow-paper-sm + bg-cream + mono caps`) with **per-status tint** signalling severity. Four tints across five statuses:
+
+| Status | Tint token | Severity tier | Why |
 | --- | --- | --- | --- |
-| **1** | Coverage: extend the badge to render `finished` ("FT") inside `<MatchStatusBadge>` (a) OR have `<MatchHero>` render FT itself via plain `<MonoLabel>` and delegate to the badge for edge states only (b) | **(a)** — extend the badge | One component owns all status-stamp rendering. Easier to migrate the visual treatment in one place if/when Direction D evolves. |
-| **2** | Visual treatment: keep current `pill-jersey` / `pill-cream` MonoLabel chrome (i) OR migrate to Direction D paper-chrome (ii) | **(ii)** — migrate to Direction D | `pill-jersey` uses the retired bright-jersey colour (see `[[feedback_no_bright_jersey]]`). Direction D matches `<MatchHero>`'s editorial-paper vocabulary directly. |
-| **3** | Copy: long-form Dutch ("Uitgesteld" / "Gestopt") (i) OR abbreviations ("AFG" / "STOP") (ii) | **(ii)** — abbreviations | Fits the matchday-printed-programme vocabulary. Saves space on the corner stamp. Tooltip on hover can give the long-form for accessibility. |
+| FT | `cream` | Normal | Game played to full time |
+| PP | `cream-deep` | No game today (held) | May reschedule |
+| FF | `cream-deep` | No game today (dead) | Won't be played; result imposed. Owner-grouped with PP — both read as "no game today" |
+| STOP | `warm` | Notice (abnormal) | Game started + ended weird — incomplete result |
+| CANC | `card-red` (new token) | Alert (dead) | Definitively dead, won't play, may have no result |
 
-If owner agrees with all three recommendations, the d5 lock captures:
+A small HTML mockup confirming the visual treatment lives at `round-1-statusbadge-comparisons.html` — all 5 statuses rendered in 3 treatments (current `pill-jersey`, uniform Direction D, Direction D + status tint).
 
-- `<MatchStatusBadge>` extended to cover `finished` (renders "FT")
-- New visual chrome on the badge: `border-2 border-ink shadow-paper-sm bg-cream` + mono caps (Direction D)
-- Edge state copy: "FF" / "AFG" / "STOP" abbreviations + `title=` long-form for tooltip accessibility
-- Component-level styling (no new MonoLabel variant; baked into MatchStatusBadge directly to keep the surface area narrow)
+## Open sub-decision
 
-If owner disagrees with any of (1) / (2) / (3), a small HTML mockup can render the alternatives for visual confirmation in a round 2.
+- **`--color-card-red` token introduction**: CANC's red would be the first redesign use of card-red. Acceptable to introduce, OR downgrade CANC to a desaturated warm-tint variant. Owner picks at d5 lock time.
 
 ## Cross-references
 

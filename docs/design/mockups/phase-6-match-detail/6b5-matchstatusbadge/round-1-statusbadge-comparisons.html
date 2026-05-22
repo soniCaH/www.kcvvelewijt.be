@@ -253,14 +253,17 @@
       .t3--ft   { /* finished — neutral cream */
         background: var(--color-cream);
       }
-      .t3--ff   { /* forfeit — warm accent */
+      .t3--ff   { /* forfeit — muted (no game played; result imposed) */
+        background: var(--color-cream-deep);
+      }
+      .t3--pp   { /* postponed — muted (may reschedule) */
+        background: var(--color-cream-deep);
+      }
+      .t3--stop { /* stopped — notice (game ended weird) */
         background: var(--color-warm);
         color: var(--color-cream);
       }
-      .t3--pp   { /* postponed — muted cream-deep */
-        background: var(--color-cream-deep);
-      }
-      .t3--stop { /* stopped — alert red */
+      .t3--canc { /* cancelled — alert (definitively dead) */
         background: var(--color-card-red);
         color: var(--color-cream);
       }
@@ -272,18 +275,24 @@
       <div class="meta">Phase 6.B · Drill round 1 · `&lt;MatchStatusBadge&gt;`</div>
       <h1>How should the status corner stamp look?</h1>
       <p>
-        Four status values render a badge: <code>finished</code> (FT),
+        Five status values render a badge: <code>finished</code> (FT),
         <code>forfeited</code> (FF), <code>postponed</code> (PP),
-        <code>stopped</code> (STOP). <code>scheduled</code> renders no
-        badge (the kickoff time in the hero IS the status).
+        <code>cancelled</code> (CANC), <code>stopped</code> (STOP).
+        <code>scheduled</code> renders no badge (the kickoff time in the
+        hero IS the status). <strong>Requires a BFF schema delta</strong>:
+        today's <code>MatchStatus</code> literal collapses
+        <code>cancelled</code> into <code>postponed</code>; Phase 6.B
+        implementation adds <code>"cancelled"</code> to the literal and
+        stops the override in <code>transforms.ts</code>.
       </p>
       <p>
-        Three visual treatments compared. Each variant shows the four badges
-        (a) in isolation as a horizontal row + (b) in-context as a corner
-        stamp on a tiny hero card so the size + visual weight read
-        realistically.
+        Three visual treatments compared. Each variant shows the five
+        badges (a) in isolation as a horizontal row + (b) in-context as
+        corner stamps on tiny hero cards. T3 uses the severity tiers
+        agreed during the audit: FT = cream (normal), PP + FF = cream-deep
+        (no game today), STOP = warm (notice), CANC = card-red (alert).
       </p>
-      <span class="scope-banner">Pick one treatment · all 4 statuses ship with it</span>
+      <span class="scope-banner">Pick one treatment · all 5 statuses ship with it</span>
     </header>
 
     <div class="grid">
@@ -312,6 +321,7 @@
             <span class="t1 t1--cream">FT</span>
             <span class="t1">FF</span>
             <span class="t1">PP</span>
+            <span class="t1">CANC</span>
             <span class="t1">STOP</span>
           </div>
           <div class="demo-row-label">On a hero corner</div>
@@ -326,6 +336,10 @@
           <div class="hero-mini">
             <div class="status-corner"><span class="t1">PP</span></div>
             KCVV — Mech · postponed
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t1">CANC</span></div>
+            KCVV — Mech · cancelled
           </div>
           <div class="hero-mini">
             <div class="status-corner"><span class="t1">STOP</span></div>
@@ -368,6 +382,7 @@
             <span class="t2">FT</span>
             <span class="t2">FF</span>
             <span class="t2">PP</span>
+            <span class="t2">CANC</span>
             <span class="t2">STOP</span>
           </div>
           <div class="demo-row-label">On a hero corner</div>
@@ -382,6 +397,10 @@
           <div class="hero-mini">
             <div class="status-corner"><span class="t2">PP</span></div>
             KCVV — Mech · postponed
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t2">CANC</span></div>
+            KCVV — Mech · cancelled
           </div>
           <div class="hero-mini">
             <div class="status-corner"><span class="t2">STOP</span></div>
@@ -408,10 +427,12 @@
           <p class="sub">
             Same Direction D chrome as T2 (border-2 ink + shadow-paper-sm
             + mono caps), but the background tints differ per status to
-            signal severity: <strong>FT</strong> = cream (neutral),
-            <strong>FF</strong> = warm (notice), <strong>PP</strong> =
-            cream-deep (muted, on hold), <strong>STOP</strong> = card-red
-            (alert).
+            signal severity. Four visual flavours across five statuses:
+            <strong>FT</strong> = cream (normal),
+            <strong>PP + FF</strong> = cream-deep (no game today; PP may
+            reschedule, FF won't be played but result imposed),
+            <strong>STOP</strong> = warm (notice — game ended weird),
+            <strong>CANC</strong> = card-red (alert — definitively dead).
           </p>
           <div class="chips">
             <span class="chip chip--good">Per-status severity signal</span>
@@ -426,6 +447,7 @@
             <span class="t3 t3--ft">FT</span>
             <span class="t3 t3--ff">FF</span>
             <span class="t3 t3--pp">PP</span>
+            <span class="t3 t3--canc">CANC</span>
             <span class="t3 t3--stop">STOP</span>
           </div>
           <div class="demo-row-label">On a hero corner</div>
@@ -442,6 +464,10 @@
             KCVV — Mech · postponed
           </div>
           <div class="hero-mini">
+            <div class="status-corner"><span class="t3 t3--canc">CANC</span></div>
+            KCVV — Mech · cancelled
+          </div>
+          <div class="hero-mini">
             <div class="status-corner"><span class="t3 t3--stop">STOP</span></div>
             KCVV — Mech · stopped
           </div>
@@ -450,11 +476,11 @@
         <div class="callouts">
           <h4>Notes</h4>
           <ul>
-            <li>Reader sees severity at a glance — FF / PP / STOP stand out from the routine FT</li>
+            <li>Reader sees severity at a glance — STOP and CANC stand out as the abnormal-and-dramatic states; PP + FF read as muted "no game today"; FT reads as routine</li>
             <li>Same chrome geometry as T2 (border + shadow + mono caps); only the bg tint differs per status</li>
-            <li>Tints use existing tokens: warm (already shipped for kicker variants), cream-deep (existing neutral fallback), card-red (would need a token — currently only used in test status colouring)</li>
-            <li>Risk: adding red to the redesign palette where it wasn't before. <code>--color-card-red</code> doesn't exist as a token today; STOP is so rare that a token decision for one badge may be over-engineered</li>
-            <li>Could downgrade STOP to use the warm tint (shared with FF) — STOP is rare enough that distinguishing it from FF visually may not matter</li>
+            <li>Tints use existing tokens: cream (shipped), cream-deep (shipped), warm (shipped for kicker variants), card-red (would need a new token — does not exist today)</li>
+            <li>Trade-off: introducing <code>--color-card-red</code> for CANC means red enters the redesign palette where it wasn't before. CANC is rare enough that a dedicated token may feel heavy; could downgrade to a desaturated warm-tint variant. Owner call.</li>
+            <li>FF and PP share the cream-deep treatment per owner direction — both are "no game today" semantically (PP may resume, FF won't but is routinely-resolved). Readers don't need to distinguish them visually.</li>
           </ul>
         </div>
       </article>
