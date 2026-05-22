@@ -125,7 +125,7 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
         className={cn(
           "mx-auto grid w-full gap-8",
           hasPullquote
-            ? "max-w-[var(--container-wide,1040px)] lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:gap-12"
+            ? "max-w-[var(--container-wide)] lg:grid-cols-[minmax(0,1fr)_minmax(0,320px)] lg:gap-12"
             : "max-w-[var(--container-prose)] grid-cols-1",
         )}
       >

@@ -121,6 +121,32 @@ describe("BioBlock", () => {
       expect(card.textContent).not.toContain("een meedogenloze tackler.");
     });
 
+    it("concatenates the first contiguous run of marked spans, even when split", () => {
+      // Sanity authors can produce two adjacent spans that both carry the
+      // `pullquote` mark (e.g. when a bold/italic span sits inside the
+      // marked range). `findFirstPullquoteText` collects across the run
+      // until the first unmarked span breaks it. A later marked span in
+      // the same block must NOT contribute to the lift.
+      const bio: PortableTextBlock[] = [
+        block(
+          { text: "Maxim groeide op. " },
+          { text: "Vanaf zijn zesde ", marks: ["pullquote"] },
+          {
+            text: "stond hij elke zaterdag op het veld.",
+            marks: ["pullquote"],
+          },
+          { text: " Op zijn zeventiende debuteerde hij." },
+          { text: "een meedogenloze tackler.", marks: ["pullquote"] },
+        ),
+      ];
+      render(<BioBlock bio={bio} />);
+      const card = screen.getByTestId("bioblock-pullquote");
+      expect(card.textContent).toContain(
+        "Vanaf zijn zesde stond hij elke zaterdag op het veld.",
+      );
+      expect(card.textContent).not.toContain("een meedogenloze tackler.");
+    });
+
     it("renders the right-column <PullQuote> with jersey tone", () => {
       render(<BioBlock bio={BIO_TWO_MARKS} />);
       const card = screen.getByTestId("bioblock-pullquote");
