@@ -60,3 +60,10 @@ export {
   migrateDropPlayerUnusedFields,
 } from './drop-player-unused-fields'
 export type {PlayerWithUnusedFieldsDoc as DropPlayerUnusedFieldsDoc} from './drop-player-unused-fields'
+
+export {
+  default as unsetPlayerPlaceholderPsdImageMigration,
+  migrateUnsetPlayerPlaceholderPsdImage,
+  PSD_PLACEHOLDER_ASSET_REF,
+} from './unset-player-placeholder-psd-image'
+export type {PlayerWithPsdImageDoc as UnsetPlayerPlaceholderPsdImageDoc} from './unset-player-placeholder-psd-image'

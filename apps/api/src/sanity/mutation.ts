@@ -3,6 +3,20 @@ import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
 import { sanityClientConfig } from "./config";
 
+/**
+ * SHA-1 (hex, lowercase, 40 chars) of PSD's "no image available" placeholder
+ * image bytes. Sanity asset _ids embed this same SHA-1 — the placeholder
+ * asset currently uploaded to staging is
+ * `image-6607821528ffa87bb0d39b159a7a4aa81dc78683-350x350-jpg` and
+ * production carries the same bytes → same hash, so the constant works for
+ * both datasets.
+ *
+ * Used by `uploadPlayerImage` to skip the placeholder during sync (#1895)
+ * so the Phase 6.A `<PlayerHero>` illustration fallback fires correctly.
+ */
+export const PSD_PLACEHOLDER_IMAGE_SHA1 =
+  "6607821528ffa87bb0d39b159a7a4aa81dc78683";
+
 // ─── Document shapes written to Sanity ───────────────────────────────────────
 
 export interface SanityPlayerDoc {
@@ -249,6 +263,40 @@ export const SanityMutationLive = Layer.effect(
           yield* Effect.log(
             `[uploadPlayerImage] player=${psdId} body_bytes=${arrayBuffer.byteLength} content-type=${contentType}`,
           );
+
+          // PSD's "no image available" placeholder slips through this code
+          // path: PSD returns it as a real image (HTTP 200, valid JPEG bytes)
+          // for any player that lacks a real photo, so the previous early
+          // 404 guard doesn't catch it. Sanity's asset deduplication means
+          // every placeholder upload across syncs lands on the same asset
+          // ref — every affected player ends up sharing one common
+          // `image-<sha1>-...` id. We detect by computing SHA-1 of the
+          // bytes and matching against the known placeholder hash.
+          //
+          // Phase 6.A design (lock 6.d2) requires the player profile photo
+          // column to be EITHER a real player photo OR the canonical
+          // `<PlayerFigure>` illustration fallback — never the silhouette.
+          // Skipping the upload here keeps `psdImage` unset on those
+          // players so the fallback fires correctly.
+          //
+          // Issue #1895 / originating screenshot: Memphis Vercammen.
+          const sha1Buffer = yield* Effect.tryPromise({
+            try: () => crypto.subtle.digest("SHA-1", arrayBuffer),
+            catch: (cause) =>
+              new SanityMutationError(
+                `Failed to hash image bytes for player ${psdId}`,
+                cause,
+              ),
+          });
+          const sha1Hex = Array.from(new Uint8Array(sha1Buffer))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+          if (sha1Hex === PSD_PLACEHOLDER_IMAGE_SHA1) {
+            yield* Effect.log(
+              `[uploadPlayerImage] player=${psdId} bytes match PSD "no image available" placeholder (sha1=${sha1Hex}) — skipping upload and patch so PlayerHero illustration fallback fires`,
+            );
+            return;
+          }
 
           // Use REST API directly — client.assets.upload() uses Node.js internals
           // incompatible with Cloudflare Workers runtime.
