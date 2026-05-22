@@ -66,6 +66,24 @@ After round 1 owner direction: **A (mini-hero) picked**, with feedback that the 
 
 Visual artifact: `round-2-matchteaser-A-stub-iterations.html`.
 
+## Round 3 — A2-italic mix + compact correction
+
+After round 2 owner direction: **A2 base picked**, with one refinement (month label in italic display, not mono caps) and one clarification ("where is compact used? — there is no date indication in compact"). Production consumer audit corrects an earlier mistake:
+
+| Consumer | Surface | Variant | Theme |
+| --- | --- | --- | --- |
+| `<MatchesSlider>` (homepage + team pages) | Homepage slider band; sidebar widgets | **`variant="compact"`** | dark (homepage) + light (sidebars) |
+| `<CalendarMonth>` | `/kalender` selected-day list | `variant="default"` | light |
+
+Compact is therefore the **most-consumed surface** (homepage slider is the site's busiest match-discovery surface). The round-2 A2 compact had the date too small (17px) on a cream-soft stub against a cream card — visually getting lost. Round 3 fixes this:
+
+- Stub widths: **76px** default (was 72px), **64px** compact (was 54px)
+- Date typography: **30px** default (was 24px), **22px** compact (was 17px) — display-big weight 900
+- Month label switches from mono caps to italic display ("juni") — owner's mix request
+- Compact rendered in BOTH light (sidebar) AND dark (homepage slider) contexts so the production look is verifiable
+
+Visual artifact: `round-3-matchteaser-A2-italic.html` — three panels (default-light, compact-light, compact-dark) with same A2-italic chrome across all.
+
 ## Things this drill does NOT decide
 
 - Highlight treatment (round 2)
