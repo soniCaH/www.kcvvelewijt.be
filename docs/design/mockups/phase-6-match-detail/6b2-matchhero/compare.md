@@ -51,6 +51,20 @@ After round 1 owner direction: **C eliminated**, A and B both still on the table
 
 If none of the hybrids feel right, **fallback is pure A from round 1**.
 
+## Round 3 — H1 separator treatment
+
+After round 2 owner direction: **H1 (Ticket-card) picked**, with a question on whether the perforation punch-out circles are necessary. Round 3 isolates the separator treatment — same H1 shape across all three variants, only the divider between stub + body varies:
+
+- **T1 — Full perforations** (as round 2 H1): 2px dashed ink line + 18px punch-out circles top + bottom. Strongest matchday-ticket cue. +1 small primitive.
+- **T2 — Dashed only**: just `border-right: 2px dashed ink` on the stub. No punch-outs. Cleanest; zero new primitive. Reads more "two-zone card" than "ticket".
+- **T3 — Subtle perforations**: 1.5px dashed ink-muted line + 12px punch-out circles. Quieter compromise. Still +1 small primitive.
+
+| Treatment | Δ primitives | Ticket identity | Maintenance cost |
+| --- | --- | --- | --- |
+| **T1 — Full** | +1 (line + circles) | Strongest | Highest (corner geometry, breakpoints) |
+| **T2 — Dashed only** | 0 (one-line CSS) | Weakest (rests on date typography + tint alone) | Lowest |
+| **T3 — Subtle** | +1 (line + small circles) | Quiet — present but not loud | Medium |
+
 ## Things this drill does NOT decide
 
 - Lineup + events layout — 6.B.d3
