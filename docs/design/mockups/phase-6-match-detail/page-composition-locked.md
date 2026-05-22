@@ -26,8 +26,8 @@ MatchStripSlot                            (top — inline, like /spelers/[slug])
 StripedSeam
 <MatchLineupSection>                      (auto-hides if no lineup → typically upcoming)
 <MatchEventsSection>                      (auto-hides if no events → typically upcoming)
-<MatchArticleLinkCard>                    (auto-hides if no matchPreview/matchRecap article)
-RelatedArticles                           (queries by articleMatch ref)
+<MatchArticleLinkCard>                    (DEFERRED to post-#1470; slot reserved, renders nothing in v1)
+RelatedArticles                           (queries by articleMatch ref — also depends on #1470 schema; render-empty fallback OK in v1)
 FooterSafeArea
 ```
 
@@ -59,7 +59,9 @@ Top-only mounting matches the precedent set by /spelers/[slug] (Phase 6.A) — t
 
 **`<MatchHero>` is a new design-system component** introduced by this lock. It supersedes the existing `<MatchHeader>` consumed by `MatchDetailView`. `<MatchHeader>` retirement is in scope for 6.B; the per-component drill (6.B.d2) settles the visual treatment.
 
-**`<MatchArticleLinkCard>` is a new design-system component** introduced by this lock. Its visual treatment is settled in 6.B.d4. The component is **OPTIONAL** — when no `matchPreview` / `matchRecap` article exists, it returns `null` (auto-hide).
+**`<MatchArticleLinkCard>` is a new design-system component** introduced by this lock. Its visual treatment is settled in 6.B.d4 (Variant B — hero-style cover card). The component is **OPTIONAL** — when no `matchPreview` / `matchRecap` article exists, it returns `null` (auto-hide).
+
+**Implementation deferred per the d4 lock.** Since no `matchPreview` / `matchRecap` articles exist in the dataset today (they ship with #1470, not on the near-term roadmap), the component would auto-hide on every match in v1. The card is therefore **not** built in Phase 6.B implementation tickets — the slot in the page composition is reserved but renders nothing pre-#1470. A follow-up issue spawned alongside #1470 implements the component to the locked design.
 
 **`<MatchLineupSection>` and `<MatchEventsSection>`** are new section-level wrappers around the existing `<MatchLineup>` + `<MatchEvents>` primitives, adding redesign chrome (kicker, heading, striped seam, container). The wrapped primitives keep their tested behaviour.
 
