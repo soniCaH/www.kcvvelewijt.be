@@ -63,11 +63,11 @@ function isAdult(birthDate: string | undefined, now: Date): boolean {
   if (birthDate === undefined || birthDate === "") return false;
   const parsed = new Date(birthDate);
   if (Number.isNaN(parsed.getTime())) return false;
-  let ageYears = now.getFullYear() - parsed.getFullYear();
-  const monthDelta = now.getMonth() - parsed.getMonth();
+  let ageYears = now.getUTCFullYear() - parsed.getUTCFullYear();
+  const monthDelta = now.getUTCMonth() - parsed.getUTCMonth();
   if (
     monthDelta < 0 ||
-    (monthDelta === 0 && now.getDate() < parsed.getDate())
+    (monthDelta === 0 && now.getUTCDate() < parsed.getUTCDate())
   ) {
     ageYears -= 1;
   }
