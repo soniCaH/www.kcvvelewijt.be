@@ -4,6 +4,8 @@ import { HighlighterStroke } from "../HighlighterStroke";
 import { QuoteMark, type QuoteMarkColor } from "../QuoteMark";
 import { TapedCard, type TapedCardProps } from "../TapedCard";
 
+type TapedCardInteractive = TapedCardProps["interactive"];
+
 export type PullQuoteTone = "cream" | "ink" | "jersey";
 
 interface TonePalette {
@@ -33,6 +35,13 @@ export interface PullQuoteProps {
   emphasis?: PullQuoteEmphasis;
   rotation?: TapedCardProps["rotation"];
   tape?: TapedCardProps["tape"];
+  /**
+   * Forwarded to the underlying `<TapedCard>`. Pass `"tilt"` (or `true`) for
+   * the homepage-style rest rotation + 1° hover delta — used by the Phase 6.A
+   * `<BioBlock>` right-column quote so a pinned-down newsprint clipping
+   * tilts further when the reader hovers it.
+   */
+  interactive?: TapedCardInteractive;
   /**
    * Optional avatar slot rendered beside the attribution name. Typically
    * `<SubjectAvatar scale="attribution" />` resolved at the article-domain
@@ -119,6 +128,7 @@ export function PullQuote({
   emphasis,
   rotation,
   tape,
+  interactive,
   avatarSlot,
   className,
 }: PullQuoteProps) {
@@ -129,6 +139,7 @@ export function PullQuote({
       shadow={palette.shadow}
       rotation={rotation}
       tape={tape}
+      interactive={interactive}
       padding="lg"
       className={cn(className)}
     >
