@@ -31,16 +31,21 @@ describe("mapGameStatus", () => {
     expect(mapGameStatus(3, null, null)).toBe("stopped");
   });
 
-  it("returns 'postponed' when cancelled regardless of status", () => {
-    expect(mapGameStatus(0, 3, 1, true)).toBe("postponed");
+  it("returns 'cancelled' when cancelled regardless of status (PSD code 0)", () => {
+    expect(mapGameStatus(0, 3, 1, true)).toBe("cancelled");
   });
 
   it("falls back to 'scheduled' for unknown status code", () => {
     expect(mapGameStatus(99, null, null)).toBe("scheduled");
   });
 
-  it("returns 'postponed' for unknown status code when cancelled", () => {
-    expect(mapGameStatus(99, null, null, true)).toBe("postponed");
+  it("returns 'cancelled' for unknown status code when cancelled", () => {
+    expect(mapGameStatus(99, null, null, true)).toBe("cancelled");
+  });
+
+  it("distinguishes 'cancelled' (cancelled flag) from 'postponed' (PSD code 2)", () => {
+    expect(mapGameStatus(0, null, null, true)).toBe("cancelled");
+    expect(mapGameStatus(2, null, null, false)).toBe("postponed");
   });
 });
 

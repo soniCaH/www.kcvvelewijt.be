@@ -113,6 +113,11 @@ describe("MatchHeader", () => {
       expect(screen.getByText("Gestopt")).toBeInTheDocument();
     });
 
+    it("renders Geannuleerd badge for cancelled matches", () => {
+      render(<MatchHeader {...defaultProps} status="cancelled" />);
+      expect(screen.getByText("Geannuleerd")).toBeInTheDocument();
+    });
+
     it("does not show date for postponed matches", () => {
       render(<MatchHeader {...defaultProps} status="postponed" time="15:00" />);
       expect(screen.queryByText("15:00")).not.toBeInTheDocument();
@@ -120,6 +125,11 @@ describe("MatchHeader", () => {
 
     it("does not show date for stopped matches", () => {
       render(<MatchHeader {...defaultProps} status="stopped" time="15:00" />);
+      expect(screen.queryByText("15:00")).not.toBeInTheDocument();
+    });
+
+    it("does not show date for cancelled matches", () => {
+      render(<MatchHeader {...defaultProps} status="cancelled" time="15:00" />);
       expect(screen.queryByText("15:00")).not.toBeInTheDocument();
     });
   });

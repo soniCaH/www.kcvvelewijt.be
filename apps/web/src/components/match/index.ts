@@ -23,6 +23,7 @@ export type { MatchEventsProps, MatchEvent } from "./MatchEvents/MatchEvents";
 export type {
   UpcomingMatch,
   MatchStatus,
+  MatchTeaserStatus,
   ScheduleMatch,
   ScheduleTeam,
 } from "./types";

@@ -12,6 +12,7 @@
  */
 
 import Link from "next/link";
+import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 import { MatchHeader, type MatchTeamProps } from "../MatchHeader";
 import { MatchLineup, type LineupPlayer } from "../MatchLineup";
 import { MatchEvents, type MatchEvent } from "../MatchEvents/MatchEvents";
@@ -26,7 +27,7 @@ export interface MatchDetailViewProps {
   /** Match time (HH:MM format) */
   time?: string;
   /** Match status */
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchStatus;
   /** Competition name */
   competition?: string;
   /** Home team lineup */

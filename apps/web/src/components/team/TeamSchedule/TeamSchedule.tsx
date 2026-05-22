@@ -79,7 +79,12 @@ export function TeamSchedule({
     );
   }
 
-  const TERMINAL_STATUSES: MatchStatus[] = ["finished", "forfeited", "stopped"];
+  const TERMINAL_STATUSES: MatchStatus[] = [
+    "finished",
+    "forfeited",
+    "stopped",
+    "cancelled",
+  ];
 
   // Filter matches based on showPast
   let filteredMatches = showPast

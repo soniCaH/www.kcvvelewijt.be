@@ -9,6 +9,7 @@ import type {
   WithContext,
 } from "schema-dts";
 
+import type { MatchStatus } from "@kcvv/api-contract";
 import { SITE_CONFIG, EXTERNAL_LINKS } from "@/lib/constants";
 
 /** Loose JSON-LD document type — allows arbitrary Schema.org properties */
@@ -190,7 +191,7 @@ export interface SportsEventInput {
   startDate: string;
   homeTeamName: string;
   awayTeamName: string;
-  status: "scheduled" | "finished" | "forfeited" | "postponed" | "stopped";
+  status: MatchStatus;
   url: string;
   venue?: string;
 }
@@ -200,6 +201,8 @@ function mapEventStatus(status: SportsEventInput["status"]): string {
     case "postponed":
     case "stopped":
       return "https://schema.org/EventPostponed";
+    case "cancelled":
+      return "https://schema.org/EventCancelled";
     case "scheduled":
     case "finished":
     case "forfeited":

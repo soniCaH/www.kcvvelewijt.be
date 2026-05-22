@@ -17,16 +17,26 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
  *   2 (AFG)       → "postponed"  (afgelast — may be rescheduled)
  *   3 (STOP)      → "stopped"    (ended prematurely — may be rescheduled)
  *
- * Override: if cancelled === true, status is always "postponed" regardless of
- * the numeric code (cancelled takes full precedence over 0/1/2/3).
+ * Override: if PSD's `cancelled` boolean is true, status is always "cancelled"
+ * regardless of the numeric code (the flag takes full precedence over 0/1/2/3).
+ * "cancelled" is distinct from "postponed": cancelled matches will not be played,
+ * postponed matches may be rescheduled.
  */
-export const MatchStatus = S.Literal(
+/**
+ * Canonical runtime tuple of all MatchStatus literals — single source of truth.
+ * Use this for Storybook argTypes, parameterized tests, or anywhere a runtime
+ * iterable is needed. The type is derived from this tuple.
+ */
+export const MATCH_STATUS_VALUES = [
   "scheduled",
   "finished",
   "forfeited",
   "postponed",
+  "cancelled",
   "stopped",
-);
+] as const;
+
+export const MatchStatus = S.Literal(...MATCH_STATUS_VALUES);
 export type MatchStatus = S.Schema.Type<typeof MatchStatus>;
 
 /** Shared fields between Match and MatchDetail */

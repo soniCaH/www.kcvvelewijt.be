@@ -199,6 +199,40 @@ describe("PsdService.getTeamMatches", () => {
     }
   });
 
+  it("maps cancelled flag to status 'cancelled' (overrides PSD code 0)", async () => {
+    const cancelledMatchList = {
+      content: [
+        {
+          id: 401,
+          status: 0,
+          cancelled: true,
+          date: "2025-04-01 00:00",
+          time: "15:00",
+          homeClub: { id: 123, name: "KCVV Elewijt" },
+          awayClub: { id: 456, name: "Opponent FC" },
+          goalsHomeTeam: null,
+          goalsAwayTeam: null,
+          competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => cancelledMatchList,
+      });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.status).toBe("cancelled");
+      // Contract boundary: cancelled is a valid MatchStatus literal
+      expect(() => S.decodeUnknownSync(Match)(result.right[0])).not.toThrow();
+    }
+  });
+
   it("maps FRIENDLY match competition to 'Vriendschappelijk'", async () => {
     const friendlyMatchList = {
       content: [
