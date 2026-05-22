@@ -5,6 +5,27 @@ import { cn } from "@/lib/utils/cn";
 import type { MatchStatus } from "../types";
 import { MatchStatusBadge } from "../MatchStatusBadge";
 
+function assertNever(value: never): never {
+  throw new Error(`Unhandled MatchStatus variant: ${String(value)}`);
+}
+
+type MatchHeroKicker = "VOORBESCHOUWING" | "MATCHVERSLAG";
+
+function getKicker(status: MatchStatus): MatchHeroKicker {
+  switch (status) {
+    case "scheduled":
+      return "VOORBESCHOUWING";
+    case "finished":
+    case "forfeited":
+    case "postponed":
+    case "cancelled":
+    case "stopped":
+      return "MATCHVERSLAG";
+    default:
+      return assertNever(status);
+  }
+}
+
 export interface MatchHeroTeam {
   name: string;
   logo?: string;
@@ -67,30 +88,37 @@ function ScoreRegion({
   homeScore?: number;
   awayScore?: number;
 }) {
-  if (status === "scheduled") {
-    return (
-      <span
-        data-score-state="vs"
-        className="font-display text-ink-muted text-[22px] leading-none lowercase italic"
-      >
-        vs
-      </span>
-    );
+  switch (status) {
+    case "scheduled":
+      return (
+        <span
+          data-score-state="vs"
+          className="font-display text-ink-muted text-[22px] leading-none lowercase italic"
+        >
+          vs
+        </span>
+      );
+    case "finished":
+    case "forfeited":
+    case "postponed":
+    case "cancelled":
+    case "stopped": {
+      const homeLabel = typeof homeScore === "number" ? homeScore : "—";
+      const awayLabel = typeof awayScore === "number" ? awayScore : "—";
+      return (
+        <div
+          data-score-state="numeric"
+          className="font-display-big text-ink flex items-baseline gap-2 text-[34px] leading-none font-black tabular-nums"
+        >
+          <span>{homeLabel}</span>
+          <span className="text-ink-muted">{"—"}</span>
+          <span>{awayLabel}</span>
+        </div>
+      );
+    }
+    default:
+      return assertNever(status);
   }
-
-  const homeLabel = typeof homeScore === "number" ? homeScore : "—";
-  const awayLabel = typeof awayScore === "number" ? awayScore : "—";
-
-  return (
-    <div
-      data-score-state="numeric"
-      className="font-display-big text-ink flex items-baseline gap-2 text-[34px] leading-none font-black tabular-nums"
-    >
-      <span>{homeLabel}</span>
-      <span className="text-ink-muted">{"—"}</span>
-      <span>{awayLabel}</span>
-    </div>
-  );
 }
 
 function TeamShieldFallback({ name }: { name: string }) {
@@ -154,7 +182,7 @@ export function MatchHero({
   className,
 }: MatchHeroProps) {
   const stubDate = formatStubDate(date);
-  const kicker = status === "scheduled" ? "VOORBESCHOUWING" : "MATCHVERSLAG";
+  const kicker = getKicker(status);
   const metaParts = buildCompetitionMeta(competition, kcvvTeamLabel, date);
 
   return (
