@@ -63,8 +63,14 @@ function isAdult(birthDate: string | undefined, now: Date): boolean {
   if (birthDate === undefined || birthDate === "") return false;
   const parsed = new Date(birthDate);
   if (Number.isNaN(parsed.getTime())) return false;
-  const ageMs = now.getTime() - parsed.getTime();
-  const ageYears = ageMs / (365.25 * 24 * 60 * 60 * 1000);
+  let ageYears = now.getFullYear() - parsed.getFullYear();
+  const monthDelta = now.getMonth() - parsed.getMonth();
+  if (
+    monthDelta < 0 ||
+    (monthDelta === 0 && now.getDate() < parsed.getDate())
+  ) {
+    ageYears -= 1;
+  }
   return ageYears >= ADULT_AGE_THRESHOLD;
 }
 

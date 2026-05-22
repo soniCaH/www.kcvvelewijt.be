@@ -46,6 +46,12 @@ export function TrackInView({
   // Don't replace with `useEffect(() => { paramsRef.current = params })`.
   const paramsRef = useRef(params);
 
+  // Clamp the threshold into IntersectionObserver's accepted [0, 1] range and
+  // reject non-finite values (NaN / ±Infinity), which would throw RangeError.
+  const safeThreshold = Number.isFinite(threshold)
+    ? Math.min(1, Math.max(0, threshold))
+    : 0.4;
+
   useEffect(() => {
     const el = ref.current;
     if (el === null) return;
@@ -63,11 +69,11 @@ export function TrackInView({
           }
         }
       },
-      { threshold },
+      { threshold: safeThreshold },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [eventName, threshold]);
+  }, [eventName, safeThreshold]);
 
   return (
     <div ref={ref} data-track-event={eventName}>
