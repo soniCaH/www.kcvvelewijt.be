@@ -15,7 +15,7 @@ The "minimal" Variant C (push lineup + events to the article system) is **reject
 | Page shape | One composition; sections auto-hide based on data availability |
 | State branching | Hero is state-aware (one `<MatchHero state="upcoming\|finished" />`); body sections gate on data, not state |
 | MatchStrip placement | Top only (`<MatchStripSlot />` inline at the top, mirroring `/spelers/[slug]`'s post-6.A resolution) |
-| RelatedArticles | Always renders below the body sections (queries by `articleMatch` ref — schema delta tracked separately, dependency on #1470) |
+| RelatedArticles | Slot reserved below the body sections; **DEFERRED to post-#1470** for the same reason as `<MatchArticleLinkCard>` — without the `linkedMatch` field that #1470 introduces on the article schema, no structured article↔match linkage exists in the dataset and the query would always return zero rows |
 
 ## Page composition
 
@@ -27,7 +27,7 @@ StripedSeam
 <MatchLineupSection>                      (auto-hides if no lineup → typically upcoming)
 <MatchEventsSection>                      (auto-hides if no events → typically upcoming)
 <MatchArticleLinkCard>                    (DEFERRED to post-#1470; slot reserved, renders nothing in v1)
-RelatedArticles                           (queries by articleMatch ref — also depends on #1470 schema; render-empty fallback OK in v1)
+RelatedArticles                           (DEFERRED to post-#1470; depends on the linkedMatch field that #1470 introduces — no article↔match linkage exists in the dataset until then)
 FooterSafeArea
 ```
 
@@ -61,7 +61,7 @@ Top-only mounting matches the precedent set by /spelers/[slug] (Phase 6.A) — t
 
 **`<MatchArticleLinkCard>` is a new design-system component** introduced by this lock. Its visual treatment is settled in 6.B.d4 (Variant B — hero-style cover card). The component is **OPTIONAL** — when no `matchPreview` / `matchRecap` article exists, it returns `null` (auto-hide).
 
-**Implementation deferred per the d4 lock.** Since no `matchPreview` / `matchRecap` articles exist in the dataset today (they ship with #1470, not on the near-term roadmap), the component would auto-hide on every match in v1. The card is therefore **not** built in Phase 6.B implementation tickets — the slot in the page composition is reserved but renders nothing pre-#1470. A follow-up issue spawned alongside #1470 implements the component to the locked design.
+**Implementation deferred per the d4 lock.** The `linkedMatch` field on the article schema (which is how an article points at a match per #1470's spec) doesn't exist today. No `matchPreview` / `matchRecap` articles exist either. Both `<MatchArticleLinkCard>` AND a match-filtered `<RelatedArticles>` would auto-hide on every match in v1 — they're shipped as dormant code or skipped entirely. The card is **not** built in Phase 6.B implementation tickets — the slot in the page composition is reserved but renders nothing pre-#1470. A follow-up issue spawned alongside #1470 implements both pieces (the link card + the related-articles match query) to the locked designs.
 
 **`<MatchLineupSection>` and `<MatchEventsSection>`** are new section-level wrappers around the existing `<MatchLineup>` + `<MatchEvents>` primitives, adding redesign chrome (kicker, heading, striped seam, container). The wrapped primitives keep their tested behaviour.
 

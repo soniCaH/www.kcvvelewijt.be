@@ -6,7 +6,7 @@ The component design is settled so that when `matchPreview` / `matchRecap` artic
 
 ## Why the deferral
 
-The component **auto-hides on every match today**. No `matchPreview` / `matchRecap` articles exist in the dataset, the article schema's `articleMatch` reference is not yet implemented, and #1470 (the issue that would ship those variants) is not on the near-term roadmap. Building `<MatchArticleLinkCard>` as part of Phase 6.B implementation would mean shipping dormant code: tests + Storybook + page wiring all for a branch that returns `null` 100% of the time in production.
+The component **auto-hides on every match today**. No `matchPreview` / `matchRecap` articles exist in the dataset, the article schema has no `linkedMatch` field yet (the actual field name from #1470's spec — it stores the PSD match ID, not a Sanity reference, since matches aren't Sanity-managed), and #1470 (the issue that would ship both the variants and the field) is not on the near-term roadmap. Building `<MatchArticleLinkCard>` as part of Phase 6.B implementation would mean shipping dormant code: tests + Storybook + page wiring all for a branch that returns `null` 100% of the time in production.
 
 The right move is to lock the design (so the future PR has a starting point) and skip the implementation. When #1470 lands, a follow-up issue spawns the build.
 
@@ -49,7 +49,7 @@ When the follow-up PR ships (paired with #1470):
 - Story title: `Features/Matches/MatchArticleLinkCard` with `tags: ["autodocs", "vr"]`
 - Stories: one per state (Preview / Recap / Hidden) — `Hidden` ships as a blank-snapshot VR baseline mirroring how Phase 6.A's `BioBlock.Empty` story is structured
 - Test coverage: auto-hide branches (no article, both articles, preview-only, recap-only) explicitly covered
-- Page-level wiring: the page's GROQ query for `/wedstrijd/[matchId]` fans out to `*[_type == "article" && articleMatch._ref == $matchId && type in ["matchPreview", "matchRecap"]]` — picks one per the per-state rule above
+- Page-level wiring: the page's GROQ query for `/wedstrijd/[matchId]` fans out to `*[_type == "article" && linkedMatch == $matchId && articleType in ["matchPreview", "matchRecap"]]` — picks one per the per-state rule above
 - Auto-hide is enforced at the page level, not just inside the component (`null` is OK but Phase 6.A's `findNthPullquoteText`-style pre-compute pattern is preferred)
 
 ## Cross-references
