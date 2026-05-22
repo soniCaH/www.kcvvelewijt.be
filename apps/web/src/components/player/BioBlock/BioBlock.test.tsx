@@ -124,7 +124,7 @@ describe("BioBlock", () => {
     it("concatenates the first contiguous run of marked spans, even when split", () => {
       // Sanity authors can produce two adjacent spans that both carry the
       // `pullquote` mark (e.g. when a bold/italic span sits inside the
-      // marked range). `findFirstPullquoteText` collects across the run
+      // marked range). `findNthPullquoteText` collects across the run
       // until the first unmarked span breaks it. A later marked span in
       // the same block must NOT contribute to the lift.
       const bio: PortableTextBlock[] = [
