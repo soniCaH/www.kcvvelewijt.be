@@ -104,21 +104,21 @@ describe("MatchTeaser", () => {
       expect(screen.getByText("FF")).toBeInTheDocument();
     });
 
-    it("renders Uitgesteld badge for postponed matches", () => {
+    it("renders PP badge for postponed matches", () => {
       render(<MatchTeaser {...defaultProps} status="postponed" />);
-      expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
+      expect(screen.getAllByText("PP").length).toBeGreaterThan(0);
     });
 
-    it("renders Gestopt badge for stopped matches", () => {
+    it("renders STOP badge for stopped matches", () => {
       render(<MatchTeaser {...defaultProps} status="stopped" />);
-      expect(screen.getByText("Gestopt")).toBeInTheDocument();
+      expect(screen.getAllByText("STOP").length).toBeGreaterThan(0);
     });
 
     it("does not render badge for upcoming matches", () => {
       render(<MatchTeaser {...defaultProps} status="upcoming" />);
       expect(screen.queryByText("FF")).not.toBeInTheDocument();
-      expect(screen.queryByText("Uitgesteld")).not.toBeInTheDocument();
-      expect(screen.queryByText("Gestopt")).not.toBeInTheDocument();
+      expect(screen.queryByText("PP")).not.toBeInTheDocument();
+      expect(screen.queryByText("STOP")).not.toBeInTheDocument();
     });
   });
 

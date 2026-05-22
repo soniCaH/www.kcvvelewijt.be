@@ -193,7 +193,7 @@ describe("TeamSchedule", () => {
         status: "postponed",
       };
       render(<TeamSchedule matches={[postponedMatch]} teamId={1235} />);
-      expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
+      expect(screen.getByText("PP")).toBeInTheDocument();
     });
 
     it("shows stopped badge", () => {
@@ -206,7 +206,7 @@ describe("TeamSchedule", () => {
         status: "stopped",
       };
       render(<TeamSchedule matches={[stoppedMatch]} teamId={1235} />);
-      expect(screen.getByText("Gestopt")).toBeInTheDocument();
+      expect(screen.getByText("STOP")).toBeInTheDocument();
     });
 
     it("shows FF badge for forfeited matches", () => {

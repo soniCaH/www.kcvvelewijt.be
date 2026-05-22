@@ -1,67 +1,78 @@
-/**
- * MatchStatusBadge Component Tests
- */
-
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { MatchStatusBadge } from "./MatchStatusBadge";
 
 describe("MatchStatusBadge", () => {
-  it("renders 'Uitgesteld' for postponed status", () => {
-    render(<MatchStatusBadge status="postponed" />);
-    expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
+  describe("rendering statuses", () => {
+    it("renders 'FT' with Voltijd tooltip + cream tint for finished", () => {
+      render(<MatchStatusBadge status="finished" />);
+      const badge = screen.getByText("FT");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("title", "Voltijd");
+      expect(badge.className).toContain("bg-cream");
+    });
+
+    it("renders 'FF' with Forfait tooltip + cream-deep tint for forfeited", () => {
+      render(<MatchStatusBadge status="forfeited" />);
+      const badge = screen.getByText("FF");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("title", "Forfait");
+      expect(badge.className).toContain("bg-cream-deep");
+    });
+
+    it("renders 'PP' with Uitgesteld tooltip + cream-deep tint for postponed", () => {
+      render(<MatchStatusBadge status="postponed" />);
+      const badge = screen.getByText("PP");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("title", "Uitgesteld");
+      expect(badge.className).toContain("bg-cream-deep");
+    });
+
+    it("renders 'CANC' with Geannuleerd tooltip + card-red tint + cream text for cancelled", () => {
+      render(<MatchStatusBadge status="cancelled" />);
+      const badge = screen.getByText("CANC");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("title", "Geannuleerd");
+      expect(badge.className).toContain("bg-card-red");
+      expect(badge.className).toContain("text-cream");
+    });
+
+    it("renders 'STOP' with Gestopt tooltip + warm tint + ink text for stopped", () => {
+      render(<MatchStatusBadge status="stopped" />);
+      const badge = screen.getByText("STOP");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("title", "Gestopt");
+      expect(badge.className).toContain("bg-warm");
+      expect(badge.className).toContain("text-ink");
+    });
   });
 
-  it("renders 'Gestopt' for stopped status", () => {
-    render(<MatchStatusBadge status="stopped" />);
-    expect(screen.getByText("Gestopt")).toBeInTheDocument();
+  describe("non-rendering statuses", () => {
+    it("renders nothing for scheduled status", () => {
+      const { container } = render(<MatchStatusBadge status="scheduled" />);
+      expect(container.innerHTML).toBe("");
+    });
+
+    it("renders nothing for unknown string status", () => {
+      const { container } = render(<MatchStatusBadge status="not-a-status" />);
+      expect(container.innerHTML).toBe("");
+    });
   });
 
-  it("renders 'FF' for forfeited status", () => {
-    render(<MatchStatusBadge status="forfeited" />);
-    expect(screen.getByText("FF")).toBeInTheDocument();
-  });
+  describe("chrome", () => {
+    it("applies Direction-D paper-chrome base classes", () => {
+      render(<MatchStatusBadge status="finished" />);
+      const badge = screen.getByText("FT");
+      expect(badge.className).toContain("border-2");
+      expect(badge.className).toContain("border-ink");
+      expect(badge.className).toContain("shadow-paper-sm");
+      expect(badge.className).toContain("font-mono");
+      expect(badge.className).toContain("uppercase");
+    });
 
-  it("renders nothing for scheduled status", () => {
-    const { container } = render(<MatchStatusBadge status="scheduled" />);
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("renders nothing for finished status", () => {
-    const { container } = render(<MatchStatusBadge status="finished" />);
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("renders nothing for cancelled status (badge extension lands in Phase 6.B)", () => {
-    const { container } = render(<MatchStatusBadge status="cancelled" />);
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("renders nothing for unknown string status", () => {
-    const { container } = render(<MatchStatusBadge status="toString" />);
-    expect(container.innerHTML).toBe("");
-  });
-
-  it("postponed maps to a pill-jersey MonoLabel variant", () => {
-    // postponed → orange → pill-jersey (Phase 1 migration; was BadgeVariant 'warning')
-    const { container } = render(<MatchStatusBadge status="postponed" />);
-    expect(
-      container.querySelector('[data-variant="pill-jersey"]'),
-    ).not.toBeNull();
-  });
-
-  it("forfeited maps to a pill-cream MonoLabel variant", () => {
-    // forfeited → gray → pill-cream
-    const { container } = render(<MatchStatusBadge status="forfeited" />);
-    expect(
-      container.querySelector('[data-variant="pill-cream"]'),
-    ).not.toBeNull();
-  });
-
-  it("applies custom className to the wrapping span", () => {
-    const { container } = render(
-      <MatchStatusBadge status="postponed" className="custom-class" />,
-    );
-    expect(container.firstChild).toHaveClass("custom-class");
+    it("applies custom className to the badge", () => {
+      render(<MatchStatusBadge status="finished" className="rotate-[-2deg]" />);
+      expect(screen.getByText("FT")).toHaveClass("rotate-[-2deg]");
+    });
   });
 });

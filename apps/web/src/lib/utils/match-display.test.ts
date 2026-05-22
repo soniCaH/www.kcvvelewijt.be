@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  hasScore,
-  getScoreDisplay,
-  getStatusColor,
-  getResultColor,
-} from "./match-display";
+import { hasScore, getScoreDisplay, getResultColor } from "./match-display";
 import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 
 interface MinimalMatch {
@@ -105,28 +100,6 @@ describe("getScoreDisplay", () => {
     expect(getScoreDisplay(createMatch({ status: "postponed" }))).toEqual({
       type: "vs",
     });
-  });
-});
-
-describe("getStatusColor", () => {
-  it("returns 'green' for finished", () => {
-    expect(getStatusColor("finished")).toBe("green");
-  });
-
-  it("returns 'orange' for postponed", () => {
-    expect(getStatusColor("postponed")).toBe("orange");
-  });
-
-  it("returns 'orange' for stopped", () => {
-    expect(getStatusColor("stopped")).toBe("orange");
-  });
-
-  it("returns 'gray' for forfeited", () => {
-    expect(getStatusColor("forfeited")).toBe("gray");
-  });
-
-  it("returns 'blue' for scheduled", () => {
-    expect(getStatusColor("scheduled")).toBe("blue");
   });
 });
 

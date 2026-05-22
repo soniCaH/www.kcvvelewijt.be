@@ -409,6 +409,12 @@
      Single source of truth for the hue; alpha variants derive via color-mix. */
   --color-warm:         #f0c264;
 
+  /* Card-red — Phase 6.B (#1909). Severity tier for the CANC `<MatchStatusBadge>`
+     tint. Locked at #c93f1c by 6.B.d5; designed to pair with cream foreground
+     text. Reserved for an "alert (dead)" severity tier — reusable elsewhere
+     once a system-alert vocabulary lands. */
+  --color-card-red:     #c93f1c;
+
   /* Edges */
   --color-paper-edge:   #d9d2bd;
 

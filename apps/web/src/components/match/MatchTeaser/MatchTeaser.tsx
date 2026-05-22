@@ -252,7 +252,7 @@ export function MatchTeaser({
         {time && status !== "upcoming" && status !== "finished" && (
           <span aria-hidden="true">·</span>
         )}
-        <MatchStatusBadge status={status} isDark={isDark} />
+        <MatchStatusBadge status={status} />
         {venue && status === "upcoming" && time && (
           <span aria-hidden="true">·</span>
         )}
@@ -287,7 +287,7 @@ export function MatchTeaser({
               {time}
             </span>
           )}
-          <MatchStatusBadge status={status} isDark={isDark} />
+          <MatchStatusBadge status={status} />
         </div>
         {venue && (
           <span className="hidden text-xs text-gray-500 sm:block">{venue}</span>

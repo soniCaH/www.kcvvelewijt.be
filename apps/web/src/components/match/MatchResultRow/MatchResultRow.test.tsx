@@ -266,7 +266,7 @@ describe("MatchResultRow", () => {
         status: "postponed",
       };
       render(<MatchResultRow match={postponedMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("Uitgesteld")).toBeInTheDocument();
+      expect(screen.getByText("PP")).toBeInTheDocument();
     });
 
     it("shows stopped badge", () => {
@@ -275,7 +275,7 @@ describe("MatchResultRow", () => {
         status: "stopped",
       };
       render(<MatchResultRow match={stoppedMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("Gestopt")).toBeInTheDocument();
+      expect(screen.getByText("STOP")).toBeInTheDocument();
     });
 
     it("shows FF badge for forfeited matches", () => {
