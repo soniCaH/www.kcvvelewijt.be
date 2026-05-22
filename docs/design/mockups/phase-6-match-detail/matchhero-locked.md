@@ -18,7 +18,7 @@ No perforation punch-out circles. Zero new design-system primitives — pure com
 | Right zone (body) | `bg="cream"`, kicker + teams/score + competition meta |
 | Divider between zones | 2px dashed ink line (`border-right` on the stub element) — **no** punch-out circles |
 | States | Same shape upcoming + finished; only score region + kicker copy swap |
-| Status badge placement | Finished state only; renders as a corner stamp top-right, slightly overlapping the card top border |
+| Status badge placement | Renders as a corner stamp top-right, slightly overlapping the card top border. `<MatchStatusBadge>` owns whether-and-how to render — see `matchstatusbadge-locked.md` (6.B.d5) for the 5-status set + tints |
 | New primitives introduced | **None** |
 | Photo treatment | None — per 6.B.d0 data-reality lock, no per-match photo source exists |
 
@@ -60,14 +60,14 @@ No perforation punch-out circles. Zero new design-system primitives — pure com
 
 ### State-aware element table
 
-| Element | Upcoming (`scheduled`) | Finished (`finished`) |
+| Element | Upcoming (`scheduled`) | Finished / edge states |
 | --- | --- | --- |
 | Kicker text | `VOORBESCHOUWING` | `MATCHVERSLAG` |
-| Score region | `vs` (italic display lowercase) | `3 — 1` (display-big) |
-| Status badge | None | Corner stamp (`FT` / `FF` / `AFG` / `STOP`) top-right |
+| Score region | `vs` (italic display lowercase) | `3 — 1` (display-big) — score reflects whatever value the BFF surfaces; FF / PP / CANC / STOP states typically show `—` or `0 — 0` per upstream data |
+| Status badge | None | Corner stamp per `matchstatusbadge-locked.md` (6.B.d5) — `FT` / `FF` / `PP` / `CANC` / `STOP` with severity tint |
 | Everything else | Identical | Identical |
 
-Edge states (`forfeited` / `postponed` / `stopped`) render as finished with the appropriate status badge — they're not separate visual treatments.
+Edge states (`forfeited` / `postponed` / `cancelled` / `stopped`) render the same hero shape as finished — they're differentiated only by the corner status badge, not by hero geometry.
 
 ## Rejected alternatives
 
