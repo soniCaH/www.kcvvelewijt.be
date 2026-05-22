@@ -31,6 +31,10 @@ import type {
 import type { ReactNode } from "react";
 import { HighlighterStroke } from "@/components/design-system/HighlighterStroke";
 import { PullQuote } from "@/components/design-system/PullQuote";
+import {
+  findNthPullquoteText,
+  hasRenderableBioContent,
+} from "@/lib/portable-text/findPullquoteText";
 import { cn } from "@/lib/utils/cn";
 
 export interface BioBlockProps {
@@ -48,58 +52,6 @@ export interface BioBlockProps {
   className?: string;
 }
 
-type PortableTextSpanLike = {
-  _type?: string;
-  text?: string;
-  marks?: string[];
-};
-
-type PortableTextBlockLike = {
-  _type?: string;
-  style?: string;
-  children?: PortableTextSpanLike[];
-};
-
-function extractBlockText(block: PortableTextBlock): string {
-  const children = (block as PortableTextBlockLike).children;
-  if (!Array.isArray(children)) return "";
-  return children
-    .map((span) => span.text ?? "")
-    .join("")
-    .trim();
-}
-
-function hasRenderableContent(blocks: PortableTextBlock[]): boolean {
-  return blocks.some((b) => extractBlockText(b).length > 0);
-}
-
-/**
- * Walk the PT tree and return the text of the FIRST contiguous run of
- * `pullquote`-marked spans. A run continues across adjacent spans so an
- * inline emphasis (e.g. `strong` mixed into the same marked substring)
- * doesn't break the lift.
- */
-function findFirstPullquoteText(blocks: PortableTextBlock[]): string | null {
-  for (const block of blocks) {
-    const children = (block as PortableTextBlockLike).children;
-    if (!Array.isArray(children)) continue;
-    let collecting = false;
-    let text = "";
-    for (const span of children) {
-      const isPullquote = span.marks?.includes("pullquote") ?? false;
-      if (isPullquote) {
-        collecting = true;
-        text += span.text ?? "";
-      } else if (collecting) {
-        break;
-      }
-    }
-    const trimmed = text.trim();
-    if (trimmed.length > 0) return trimmed;
-  }
-  return null;
-}
-
 const components: PortableTextComponents = {
   marks: {
     pullquote: ({ children }: { children?: ReactNode }) => (
@@ -110,9 +62,9 @@ const components: PortableTextComponents = {
 
 export function BioBlock({ bio, playerName, className }: BioBlockProps) {
   if (!bio || bio.length === 0) return null;
-  if (!hasRenderableContent(bio)) return null;
+  if (!hasRenderableBioContent(bio)) return null;
 
-  const pullquoteText = findFirstPullquoteText(bio);
+  const pullquoteText = findNthPullquoteText(bio, 0);
   const hasPullquote = pullquoteText !== null;
 
   return (

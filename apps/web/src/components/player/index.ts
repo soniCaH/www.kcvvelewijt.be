@@ -13,6 +13,9 @@ export type { PlayerBioProps } from "./PlayerBio";
 export { BioBlock } from "./BioBlock";
 export type { BioBlockProps } from "./BioBlock";
 
+export { QuotesBlock } from "./QuotesBlock";
+export type { QuotesBlockProps } from "./QuotesBlock";
+
 export { PlayerHero } from "./PlayerHero";
 export type { PlayerHeroProps } from "./PlayerHero";
 
