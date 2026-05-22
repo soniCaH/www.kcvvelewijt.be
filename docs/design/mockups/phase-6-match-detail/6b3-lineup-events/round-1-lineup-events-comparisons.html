@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 1 · Lineup + Events sections (6.B.d3)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --color-card-red: #c93f1c;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page { max-width: 1920px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+      .chip--warn  { background: var(--color-warm); color: var(--color-cream); border-color: var(--color-warm); }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts .danger { color: var(--color-card-red); font-weight: 700; }
+
+      /* ───────── Shared element vocabulary ───────── */
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+        margin-bottom: 8px;
+      }
+      .kicker::before { content: "* "; opacity: 0.6; }
+      .section-heading {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 26px;
+        letter-spacing: -0.02em;
+        margin: 0 0 18px;
+        line-height: 1.05;
+      }
+      .num {
+        display: inline-flex;
+        width: 26px;
+        height: 26px;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .num--keeper {
+        background: var(--color-warm);
+      }
+      .player-name {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
+      }
+      .captain-mark {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        font-weight: 700;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+        margin-left: 4px;
+        letter-spacing: 0.1em;
+      }
+      .card-mark {
+        display: inline-block;
+        width: 9px;
+        height: 12px;
+        margin-left: 4px;
+        vertical-align: -1px;
+      }
+      .card-mark--yellow { background: #f4c430; border: 1px solid #b08400; }
+      .card-mark--red    { background: var(--color-card-red); border: 1px solid #7a1f1f; }
+      .minute-mark {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        opacity: 0.7;
+        margin-left: 6px;
+        letter-spacing: 0.06em;
+      }
+
+      /* event glyphs */
+      .ev-glyph {
+        display: inline-flex;
+        width: 22px;
+        height: 22px;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 12px;
+        flex-shrink: 0;
+        background: var(--color-jersey);
+        color: var(--color-ink);
+      }
+      .ev-glyph--goal::before { content: "⚽"; font-size: 14px; }
+      .ev-glyph--card-y { background: #f4c430; border: 1px solid #b08400; }
+      .ev-glyph--card-y::before { content: ""; }
+      .ev-glyph--card-r { background: var(--color-card-red); }
+      .ev-glyph--sub  { background: var(--color-cream-deep); color: var(--color-ink); }
+      .ev-glyph--sub::before { content: "⇅"; font-size: 13px; }
+
+      /* state intro label inside each variant */
+      .stage-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        opacity: 0.7;
+      }
+
+      /* ═══════════════════════════════════════════
+         Variant A — Classic separate sections
+         ═══════════════════════════════════════════ */
+      .va {
+        padding: 16px 18px 22px;
+      }
+      .va .lineup-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+      .va .team-col {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .va .team-col h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+        opacity: 0.7;
+      }
+      .va .player-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--color-cream-deep);
+      }
+      .va .player-row:last-child { border-bottom: none; }
+      .va .subs-divider {
+        margin-top: 10px;
+        padding-top: 6px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 4px;
+      }
+      .va .striped-seam {
+        margin: 22px -18px;
+        height: 12px;
+        background:
+          repeating-linear-gradient(
+            -45deg,
+            var(--color-ink) 0 6px,
+            var(--color-cream) 6px 12px
+          );
+      }
+      .va .event-row {
+        display: grid;
+        grid-template-columns: 36px 22px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--color-cream-deep);
+      }
+      .va .event-row:last-child { border-bottom: none; }
+      .va .event-row .min {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 18px;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+      .va .event-row .team {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        text-align: right;
+      }
+      .va .event-row .who {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 15px;
+        letter-spacing: -0.01em;
+      }
+
+      /* ═══════════════════════════════════════════
+         Variant B — Combined Matchverslag interleaved
+         ═══════════════════════════════════════════ */
+      .vb {
+        padding: 16px 18px 22px;
+      }
+      .vb .three-col {
+        display: grid;
+        grid-template-columns: 1fr 110px 1fr;
+        gap: 16px;
+      }
+      .vb .team-h h4,
+      .vb .team-a h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+        opacity: 0.7;
+      }
+      .vb .team-h h4 { text-align: left; }
+      .vb .team-a h4 { text-align: right; }
+      .vb .player-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 0;
+        border-bottom: 1px dashed var(--color-cream-deep);
+        position: relative;
+      }
+      .vb .player-row:last-child { border-bottom: none; }
+      .vb .team-a .player-row { flex-direction: row-reverse; text-align: right; }
+      .vb .player-row.has-event {
+        background: var(--color-cream-soft);
+      }
+      .vb .event-anchor {
+        position: relative;
+      }
+      .vb .timeline {
+        position: relative;
+        background:
+          repeating-linear-gradient(
+            to bottom,
+            var(--color-ink) 0 1px,
+            transparent 1px 6px
+          );
+        background-size: 1px 6px;
+        background-position: center top;
+        background-repeat: no-repeat;
+        background-size: 1px 100%;
+      }
+      .vb .timeline .tick {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-cream);
+        padding: 4px 6px;
+        border: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .vb .timeline .tick.t1  { top: 4%; }
+      .vb .timeline .tick.t2  { top: 18%; }
+      .vb .timeline .tick.t3  { top: 35%; }
+      .vb .timeline .tick.t4  { top: 50%; }
+      .vb .timeline .tick.t5  { top: 62%; }
+      .vb .timeline .tick.t6  { top: 76%; }
+      .vb .timeline .tick.t7  { top: 90%; }
+      .vb .timeline .tick.home { background: var(--color-cream); }
+      .vb .timeline .tick.away { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+      .vb .subs-divider {
+        margin-top: 8px;
+        padding-top: 6px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 4px;
+      }
+      .vb .team-a .subs-divider { text-align: right; }
+
+      /* ═══════════════════════════════════════════
+         Variant C — Events first, lineup collapsible
+         ═══════════════════════════════════════════ */
+      .vc {
+        padding: 16px 18px 22px;
+      }
+      .vc .events-summary {
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        padding: 14px 16px 12px;
+        margin-bottom: 18px;
+      }
+      .vc .events-summary h3 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 18px;
+        margin: 0 0 12px;
+        letter-spacing: -0.02em;
+      }
+      .vc .event-row {
+        display: grid;
+        grid-template-columns: 34px 22px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--color-cream-deep);
+      }
+      .vc .event-row:last-child { border-bottom: none; }
+      .vc .event-row .min {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 16px;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+      .vc .event-row .who {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        letter-spacing: -0.01em;
+      }
+      .vc .event-row .team {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.65;
+        text-align: right;
+      }
+      .vc details.lineup-toggle {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 14px 16px 16px;
+      }
+      .vc details.lineup-toggle > summary {
+        cursor: pointer;
+        list-style: none;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .vc details.lineup-toggle > summary::-webkit-details-marker { display: none; }
+      .vc details.lineup-toggle > summary::after {
+        content: "▾ TOON OPSTELLING";
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .vc details.lineup-toggle[open] > summary::after { content: "▴ VERBERG"; }
+      .vc .lineup-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        margin-top: 14px;
+      }
+      .vc .team-col h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+        opacity: 0.7;
+      }
+      .vc .player-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        border-bottom: 1px dashed var(--color-cream-deep);
+      }
+      .vc .player-row:last-child { border-bottom: none; }
+      .vc .subs-divider {
+        margin-top: 10px;
+        padding-top: 6px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 4px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 1 · Lineup + Events sections</div>
+      <h1>How should lineup + events sit below the hero?</h1>
+      <p>
+        Three structural shapes for the body content that renders below
+        <code>&lt;MatchHero&gt;</code> on <strong>finished</strong> matches.
+        Both sections auto-hide for upcoming. Data is identical across all
+        three: KCVV Elewijt 3 — 1 RC Mechelen, 7 events, 11 starters + 4 subs
+        per team.
+      </p>
+      <span class="scope-banner">Pick one structural shape · per-row refinements in round 2</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Classic separate sections ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Classic separate sections.</h2>
+          <p class="sub">
+            Two blocks. <strong>Opstellingen.</strong> first (home + away as
+            two side-by-side columns), <code>&lt;StripedSeam&gt;</code>, then
+            <strong>Wedstrijdverloop.</strong> as a single timeline ordered by
+            minute. Conservative. Wraps existing <code>&lt;MatchLineup&gt;</code>
+            + <code>&lt;MatchEvents&gt;</code> primitives 1:1.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive</span>
+            <span class="chip chip--good">Lowest implementation cost</span>
+            <span class="chip chip--cost">Most conventional layout</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Body content (finished match — KCVV 3 — 1 RC Mech)</div>
+        <section class="va">
+          <div class="kicker">OPSTELLINGEN</div>
+          <h3 class="section-heading">Wie er stond.</h3>
+          <div class="lineup-grid">
+            <div class="team-col">
+              <h4>KCVV ELEWIJT</h4>
+              <div class="player-row"><span class="num num--keeper">1</span><span class="player-name">Ben Lievens</span></div>
+              <div class="player-row"><span class="num">2</span><span class="player-name">Niels Vermeulen</span></div>
+              <div class="player-row"><span class="num">4</span><span class="player-name">Jonas De Smet</span></div>
+              <div class="player-row"><span class="num">5</span><span class="player-name">Wim Verhoeven<span class="captain-mark">C</span></span></div>
+              <div class="player-row"><span class="num">6</span><span class="player-name">Maxim Breugelmans<span class="card-mark card-mark--yellow"></span><span class="minute-mark">67'</span></span></div>
+              <div class="player-row"><span class="num">7</span><span class="player-name">Lars De Vos<span class="minute-mark">⚽ 12'</span></span></div>
+              <div class="player-row"><span class="num">8</span><span class="player-name">Sander Peeters</span></div>
+              <div class="player-row"><span class="num">9</span><span class="player-name">Jens Vermeulen<span class="minute-mark">⚽ 45+2' (P)</span></span></div>
+              <div class="player-row"><span class="num">10</span><span class="player-name">Joris De Bock</span></div>
+              <div class="player-row"><span class="num">11</span><span class="player-name">Karel Bertels</span></div>
+              <div class="player-row"><span class="num">14</span><span class="player-name">Sven Janssens</span></div>
+              <div class="subs-divider">BANK</div>
+              <div class="player-row"><span class="num">16</span><span class="player-name">Pieter De Bondt<span class="minute-mark">⇅ 71'</span></span></div>
+              <div class="player-row"><span class="num">18</span><span class="player-name">Tom Goossens</span></div>
+              <div class="player-row"><span class="num">21</span><span class="player-name">Bram Lemmens</span></div>
+              <div class="player-row"><span class="num">23</span><span class="player-name">Davy De Meyer</span></div>
+            </div>
+            <div class="team-col">
+              <h4>RC MECHELEN</h4>
+              <div class="player-row"><span class="num num--keeper">1</span><span class="player-name">Stijn Vandenberg</span></div>
+              <div class="player-row"><span class="num">3</span><span class="player-name">Kevin Smets<span class="card-mark card-mark--yellow"></span><span class="minute-mark">28'</span></span></div>
+              <div class="player-row"><span class="num">4</span><span class="player-name">Pieter Janssens</span></div>
+              <div class="player-row"><span class="num">5</span><span class="player-name">Wouter De Greef</span></div>
+              <div class="player-row"><span class="num">6</span><span class="player-name">Tom Janssens<span class="minute-mark">⚽ 56'</span></span></div>
+              <div class="player-row"><span class="num">8</span><span class="player-name">Jeroen De Wolf</span></div>
+              <div class="player-row"><span class="num">10</span><span class="player-name">Robbie Vermeiren<span class="captain-mark">C</span></span></div>
+              <div class="player-row"><span class="num">11</span><span class="player-name">Bart De Cock</span></div>
+              <div class="player-row"><span class="num">14</span><span class="player-name">Mathias Verhoeven</span></div>
+              <div class="player-row"><span class="num">17</span><span class="player-name">Dylan Smet</span></div>
+              <div class="player-row"><span class="num">20</span><span class="player-name">Frederik De Vleeshouwer</span></div>
+              <div class="subs-divider">BANK</div>
+              <div class="player-row"><span class="num">2</span><span class="player-name">Ruben Pauwels</span></div>
+              <div class="player-row"><span class="num">9</span><span class="player-name">Lucas Adriaensen</span></div>
+              <div class="player-row"><span class="num">15</span><span class="player-name">Niels De Bondt</span></div>
+              <div class="player-row"><span class="num">19</span><span class="player-name">Bart De Klerk</span></div>
+            </div>
+          </div>
+
+          <div class="striped-seam"></div>
+
+          <div class="kicker">WEDSTRIJDVERLOOP</div>
+          <h3 class="section-heading">Hoe het ging.</h3>
+          <div>
+            <div class="event-row"><span class="min">12'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Lars De Vos</span><span class="team">KCVV</span></div>
+            <div class="event-row"><span class="min">28'</span><span class="ev-glyph ev-glyph--card-y"></span><span class="who">Kevin Smets</span><span class="team">MECH</span></div>
+            <div class="event-row"><span class="min">45+2'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Jens Vermeulen <em style="opacity:0.6">(strafschop)</em></span><span class="team">KCVV</span></div>
+            <div class="event-row"><span class="min">56'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Tom Janssens</span><span class="team">MECH</span></div>
+            <div class="event-row"><span class="min">67'</span><span class="ev-glyph ev-glyph--card-y"></span><span class="who">Maxim Breugelmans</span><span class="team">KCVV</span></div>
+            <div class="event-row"><span class="min">71'</span><span class="ev-glyph ev-glyph--sub"></span><span class="who">Pieter De Bondt ⇆ Lars De Vos</span><span class="team">KCVV</span></div>
+            <div class="event-row"><span class="min">78'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Maxim Breugelmans</span><span class="team">KCVV</span></div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Conventional reading order: lineup → events</li>
+            <li>Wraps existing <code>&lt;MatchLineup&gt;</code> + <code>&lt;MatchEvents&gt;</code> 1:1 — zero implementation surprises</li>
+            <li>Each section can ship + test independently</li>
+            <li>Mobile collapse is trivial — both blocks already work in stacked layouts</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>Long page; lineup eats vertical space before the reader sees events</li>
+            <li>Events repeat per-player info that's already in the lineup (the <code>⚽ 12'</code> minute marks on Lars De Vos's row are technically duplication)</li>
+            <li>Least "redesign distinctive"</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Combined Matchverslag interleaved ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Combined Matchverslag.</h2>
+          <p class="sub">
+            One section, <strong>Matchverslag.</strong>, three columns: home
+            lineup | middle timeline | away lineup. Events stamp into the middle
+            column at their minute, with the player on the correct side. Most
+            info-dense; entire story in one eye-sweep.
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">+1 new primitive</span>
+            <span class="chip chip--good">Most info-dense</span>
+            <span class="chip chip--warn">Hardest mobile collapse</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Body content (finished match — KCVV 3 — 1 RC Mech)</div>
+        <section class="vb">
+          <div class="kicker">MATCHVERSLAG</div>
+          <h3 class="section-heading">Wie speelde, wat gebeurde.</h3>
+          <div class="three-col">
+            <div class="team-h">
+              <h4>KCVV ELEWIJT</h4>
+              <div class="player-row"><span class="num num--keeper">1</span><span class="player-name">Ben Lievens</span></div>
+              <div class="player-row"><span class="num">2</span><span class="player-name">Niels Vermeulen</span></div>
+              <div class="player-row"><span class="num">4</span><span class="player-name">Jonas De Smet</span></div>
+              <div class="player-row"><span class="num">5</span><span class="player-name">Wim Verhoeven<span class="captain-mark">C</span></span></div>
+              <div class="player-row has-event"><span class="num">6</span><span class="player-name">Maxim Breugelmans<span class="card-mark card-mark--yellow"></span></span></div>
+              <div class="player-row has-event"><span class="num">7</span><span class="player-name">Lars De Vos</span></div>
+              <div class="player-row"><span class="num">8</span><span class="player-name">Sander Peeters</span></div>
+              <div class="player-row has-event"><span class="num">9</span><span class="player-name">Jens Vermeulen</span></div>
+              <div class="player-row"><span class="num">10</span><span class="player-name">Joris De Bock</span></div>
+              <div class="player-row"><span class="num">11</span><span class="player-name">Karel Bertels</span></div>
+              <div class="player-row"><span class="num">14</span><span class="player-name">Sven Janssens</span></div>
+              <div class="subs-divider">BANK</div>
+              <div class="player-row has-event"><span class="num">16</span><span class="player-name">Pieter De Bondt</span></div>
+              <div class="player-row"><span class="num">18</span><span class="player-name">Tom Goossens</span></div>
+              <div class="player-row"><span class="num">21</span><span class="player-name">Bram Lemmens</span></div>
+              <div class="player-row"><span class="num">23</span><span class="player-name">Davy De Meyer</span></div>
+            </div>
+            <div class="timeline">
+              <div class="tick t1 home">12' ⚽</div>
+              <div class="tick t2 away">28' 🟨</div>
+              <div class="tick t3 home">45+2' ⚽</div>
+              <div class="tick t4 away">56' ⚽</div>
+              <div class="tick t5 home">67' 🟨</div>
+              <div class="tick t6 home">71' ⇅</div>
+              <div class="tick t7 home">78' ⚽</div>
+            </div>
+            <div class="team-a">
+              <h4>RC MECHELEN</h4>
+              <div class="player-row"><span class="num num--keeper">1</span><span class="player-name">Stijn Vandenberg</span></div>
+              <div class="player-row has-event"><span class="num">3</span><span class="player-name">Kevin Smets<span class="card-mark card-mark--yellow"></span></span></div>
+              <div class="player-row"><span class="num">4</span><span class="player-name">Pieter Janssens</span></div>
+              <div class="player-row"><span class="num">5</span><span class="player-name">Wouter De Greef</span></div>
+              <div class="player-row has-event"><span class="num">6</span><span class="player-name">Tom Janssens</span></div>
+              <div class="player-row"><span class="num">8</span><span class="player-name">Jeroen De Wolf</span></div>
+              <div class="player-row"><span class="num">10</span><span class="player-name">Robbie Vermeiren<span class="captain-mark">C</span></span></div>
+              <div class="player-row"><span class="num">11</span><span class="player-name">Bart De Cock</span></div>
+              <div class="player-row"><span class="num">14</span><span class="player-name">Mathias Verhoeven</span></div>
+              <div class="player-row"><span class="num">17</span><span class="player-name">Dylan Smet</span></div>
+              <div class="player-row"><span class="num">20</span><span class="player-name">Frederik De Vleeshouwer</span></div>
+              <div class="subs-divider">BANK</div>
+              <div class="player-row"><span class="num">2</span><span class="player-name">Ruben Pauwels</span></div>
+              <div class="player-row"><span class="num">9</span><span class="player-name">Lucas Adriaensen</span></div>
+              <div class="player-row"><span class="num">15</span><span class="player-name">Niels De Bondt</span></div>
+              <div class="player-row"><span class="num">19</span><span class="player-name">Bart De Klerk</span></div>
+            </div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Most info-dense — lineup + events in a single visual unit</li>
+            <li>Eliminates the "duplicate minute marks" problem from variant A</li>
+            <li>Players involved in events are highlighted (cream-soft row tint)</li>
+            <li>"Matchverslag" mood = strongest editorial identity</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li><span class="danger">+1 design-system primitive:</span> <code>&lt;MatchTimelineGrid&gt;</code> with per-minute anchoring + side-aware player labels</li>
+            <li><span class="danger">Mobile collapse is hard:</span> three columns must reflow to a single column with events interleaved — needs its own drill</li>
+            <li>Implementation cost = highest of the three variants</li>
+            <li>Long lineups (11 starters + 4 subs each side) make the timeline tall + sparse</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Events first, lineup collapsible ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Events first, lineup collapsible.</h2>
+          <p class="sub">
+            Two blocks reordered. <strong>Doelpunten + kaarten.</strong> first
+            (the part most readers want to see), then a collapsible
+            <strong>Volledige opstelling.</strong> block at the bottom
+            (default-collapsed via native <code>&lt;details&gt;</code>).
+            Optimises for typical reading flow.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive (native details)</span>
+            <span class="chip chip--good">Saves vertical space</span>
+            <span class="chip chip--cost">Collapse hides a normally-visible feature</span>
+          </div>
+        </header>
+
+        <div class="stage-label">Body content (finished match — KCVV 3 — 1 RC Mech)</div>
+        <section class="vc">
+          <div class="kicker">DOELPUNTEN + KAARTEN</div>
+          <h3 class="section-heading">Hoe het ging.</h3>
+          <div class="events-summary">
+            <div class="event-row"><span class="min">12'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Lars De Vos</span><span class="team">KCVV 1 — 0</span></div>
+            <div class="event-row"><span class="min">28'</span><span class="ev-glyph ev-glyph--card-y"></span><span class="who">Kevin Smets</span><span class="team">MECH</span></div>
+            <div class="event-row"><span class="min">45+2'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Jens Vermeulen <em style="opacity:0.6">(P)</em></span><span class="team">KCVV 2 — 0</span></div>
+            <div class="event-row"><span class="min">56'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Tom Janssens</span><span class="team">MECH 2 — 1</span></div>
+            <div class="event-row"><span class="min">67'</span><span class="ev-glyph ev-glyph--card-y"></span><span class="who">Maxim Breugelmans</span><span class="team">KCVV</span></div>
+            <div class="event-row"><span class="min">71'</span><span class="ev-glyph ev-glyph--sub"></span><span class="who">Pieter De Bondt ⇆ Lars De Vos</span><span class="team">KCVV</span></div>
+            <div class="event-row"><span class="min">78'</span><span class="ev-glyph ev-glyph--goal"></span><span class="who">Maxim Breugelmans</span><span class="team">KCVV 3 — 1</span></div>
+          </div>
+
+          <details class="lineup-toggle">
+            <summary>
+              <span>VOLLEDIGE OPSTELLING</span>
+            </summary>
+            <div class="lineup-grid">
+              <div class="team-col">
+                <h4>KCVV ELEWIJT</h4>
+                <div class="player-row"><span class="num num--keeper">1</span><span class="player-name">Ben Lievens</span></div>
+                <div class="player-row"><span class="num">2</span><span class="player-name">Niels Vermeulen</span></div>
+                <div class="player-row"><span class="num">4</span><span class="player-name">Jonas De Smet</span></div>
+                <div class="player-row"><span class="num">5</span><span class="player-name">Wim Verhoeven<span class="captain-mark">C</span></span></div>
+                <div class="player-row"><span class="num">6</span><span class="player-name">Maxim Breugelmans</span></div>
+                <div class="player-row"><span class="num">7</span><span class="player-name">Lars De Vos</span></div>
+                <div class="player-row"><span class="num">8</span><span class="player-name">Sander Peeters</span></div>
+                <div class="player-row"><span class="num">9</span><span class="player-name">Jens Vermeulen</span></div>
+                <div class="player-row"><span class="num">10</span><span class="player-name">Joris De Bock</span></div>
+                <div class="player-row"><span class="num">11</span><span class="player-name">Karel Bertels</span></div>
+                <div class="player-row"><span class="num">14</span><span class="player-name">Sven Janssens</span></div>
+                <div class="subs-divider">BANK</div>
+                <div class="player-row"><span class="num">16</span><span class="player-name">Pieter De Bondt</span></div>
+                <div class="player-row"><span class="num">18</span><span class="player-name">Tom Goossens</span></div>
+                <div class="player-row"><span class="num">21</span><span class="player-name">Bram Lemmens</span></div>
+                <div class="player-row"><span class="num">23</span><span class="player-name">Davy De Meyer</span></div>
+              </div>
+              <div class="team-col">
+                <h4>RC MECHELEN</h4>
+                <div class="player-row"><span class="num num--keeper">1</span><span class="player-name">Stijn Vandenberg</span></div>
+                <div class="player-row"><span class="num">3</span><span class="player-name">Kevin Smets</span></div>
+                <div class="player-row"><span class="num">4</span><span class="player-name">Pieter Janssens</span></div>
+                <div class="player-row"><span class="num">5</span><span class="player-name">Wouter De Greef</span></div>
+                <div class="player-row"><span class="num">6</span><span class="player-name">Tom Janssens</span></div>
+                <div class="player-row"><span class="num">8</span><span class="player-name">Jeroen De Wolf</span></div>
+                <div class="player-row"><span class="num">10</span><span class="player-name">Robbie Vermeiren<span class="captain-mark">C</span></span></div>
+                <div class="player-row"><span class="num">11</span><span class="player-name">Bart De Cock</span></div>
+                <div class="player-row"><span class="num">14</span><span class="player-name">Mathias Verhoeven</span></div>
+                <div class="player-row"><span class="num">17</span><span class="player-name">Dylan Smet</span></div>
+                <div class="player-row"><span class="num">20</span><span class="player-name">Frederik De Vleeshouwer</span></div>
+                <div class="subs-divider">BANK</div>
+                <div class="player-row"><span class="num">2</span><span class="player-name">Ruben Pauwels</span></div>
+                <div class="player-row"><span class="num">9</span><span class="player-name">Lucas Adriaensen</span></div>
+                <div class="player-row"><span class="num">15</span><span class="player-name">Niels De Bondt</span></div>
+                <div class="player-row"><span class="num">19</span><span class="player-name">Bart De Klerk</span></div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <div class="callouts">
+          <h4>Pros</h4>
+          <ul>
+            <li>Matches typical reading flow: scoreboard story first, roster on demand</li>
+            <li>Saves significant vertical space (lineup is ~30 rows tall — hidden by default)</li>
+            <li>Zero new design-system primitive (native <code>&lt;details&gt;</code> is accessible by default + ships with all browsers)</li>
+            <li>Event-row entries can carry running score ("KCVV 2 — 0") — at-a-glance progress</li>
+          </ul>
+          <h4>Cons</h4>
+          <ul>
+            <li>Default-collapsing the lineup hides a feature most readers expect to see — surprise factor</li>
+            <li>Lose the per-player context for events (Lars De Vos's goal at 12' loses the "and he was subbed off at 71'" continuity unless you expand)</li>
+            <li>Native <code>&lt;details&gt;</code> animation is minimal — can feel abrupt</li>
+            <li>Less "redesign-distinctive" — uses a convention familiar from any web form</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <footer style="max-width:1920px;margin:36px auto 0;font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.65">
+      Round 1 of 6.B.d3 · structural shape · per-row refinements in round 2
+    </footer>
+  </body>
+</html>
