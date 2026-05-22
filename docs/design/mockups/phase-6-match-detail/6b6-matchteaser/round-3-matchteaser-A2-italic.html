@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 3 · MatchTeaser A2-italic (6.B.d6)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 2px 2px 0 0 var(--color-ink-muted);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page { max-width: 1440px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1440px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+      .panel {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .panel > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .panel > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .panel > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .panel > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .panel--dark {
+        background: var(--color-cream-deep);
+      }
+      .panel--dark > header.card {
+        background: var(--color-cream-soft);
+      }
+
+      .stage-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        opacity: 0.75;
+      }
+      .stage-sub {
+        font-size: 11px;
+        padding: 0 18px;
+        opacity: 0.55;
+        margin-bottom: 8px;
+      }
+      .demo-light {
+        padding: 16px 18px 22px;
+      }
+      .demo-dark {
+        padding: 22px 18px 22px;
+        background: var(--color-ink);
+        margin-top: 8px;
+      }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+
+      .shield {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(circle at 30% 30%, var(--color-jersey) 0 60%, var(--color-jersey-deep) 60% 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+        color: var(--color-cream);
+        font-family: var(--font-display);
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .shield--opp {
+        background:
+          radial-gradient(circle at 70% 35%, #c34, #7a1f1f 65%);
+      }
+      .shield--lg { width: 36px; height: 42px; font-size: 12px; }
+      .shield--sm { width: 28px; height: 32px; font-size: 10px; }
+
+      /* ═══════════════════════════════════════════
+         A2-italic — shared rules across light + dark
+         ═══════════════════════════════════════════ */
+      .teaser-default {
+        display: grid;
+        grid-template-columns: 76px 1fr;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .teaser-default .stub {
+        padding: 14px 12px 12px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+      }
+      .teaser-default .stub .date-big {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 30px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+      .teaser-default .stub .month {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        letter-spacing: -0.01em;
+        line-height: 1;
+        opacity: 0.85;
+      }
+      .teaser-default .body {
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .teaser-default .kicker {
+        font-family: var(--font-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        opacity: 0.6;
+      }
+      .teaser-default .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .teaser-default .team {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 14px;
+        letter-spacing: -0.015em;
+        line-height: 1.1;
+      }
+      .teaser-default .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .teaser-default .team--highlight { font-weight: 600; }
+      .teaser-default .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 20px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+      }
+
+      /* Compact — the homepage slider workhorse */
+      .teaser-compact {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .teaser-compact .stub {
+        padding: 10px 8px;
+        background: var(--color-cream-soft);
+        border-right: 2px dashed var(--color-ink);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        justify-content: center;
+      }
+      .teaser-compact .stub .date-big {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 22px;
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .teaser-compact .stub .month {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 11px;
+        letter-spacing: -0.01em;
+        line-height: 1;
+        opacity: 0.85;
+      }
+      .teaser-compact .body {
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .teaser-compact .kicker {
+        font-family: var(--font-mono);
+        font-size: 8.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.6;
+      }
+      .teaser-compact .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+      .teaser-compact .team {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 13px;
+        line-height: 1.1;
+      }
+      .teaser-compact .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .teaser-compact .team--highlight { font-weight: 600; }
+      .teaser-compact .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 17px;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+
+      /* Dark theme — homepage slider context */
+      .demo-dark .teaser-default,
+      .demo-dark .teaser-compact {
+        background: var(--color-cream);
+        box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .demo-dark .teaser-default .stub,
+      .demo-dark .teaser-compact .stub {
+        background: var(--color-cream-soft);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 3 · `&lt;MatchTeaser&gt;` · A2-italic mix</div>
+      <h1>A2 with italic-display month.</h1>
+      <p>
+        Owner picked A2 base (big-date stamp + month label, time moves to
+        body kicker) with one refinement: the month label in italic display
+        instead of mono caps. Plus a clarification on the compact variant —
+        which is in fact the homepage slider workhorse, not a niche calendar
+        thing — so the date needs to be visually unmissable there.
+      </p>
+      <p>
+        Three panels: <strong>Default (light)</strong>,
+        <strong>Compact (light — calendar)</strong>, and
+        <strong>Compact (dark — homepage slider)</strong>. Same A2-italic
+        layout across all three; only the surrounding context varies.
+      </p>
+      <span class="scope-banner">Confirm to lock · or flag any sizing issues</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ Default — light ═════════════ -->
+      <article class="panel">
+        <header class="card">
+          <div class="label">Default — light</div>
+          <h2>The card variant.</h2>
+          <p class="sub">
+            Used by <code>&lt;CalendarMonth&gt;</code> in the day-detail
+            view. 76px stub (slightly wider than before to breathe).
+            Big-display date "14" stacked over italic display "juni" —
+            torn-calendar-page feel with editorial typography.
+          </p>
+        </header>
+
+        <div class="stage-label">/kalender · selected day</div>
+        <div class="stage-sub">Cream paper card on a cream-soft page</div>
+        <div class="demo-light">
+          <div class="teaser-default">
+            <aside class="stub">
+              <div class="date-big">14</div>
+              <div class="month">juni</div>
+            </aside>
+            <div class="body">
+              <div class="kicker">ZA · 14:30 · SPORTPARK ELEWIJT</div>
+              <div class="teams">
+                <div class="team team--highlight">
+                  <span class="shield shield--lg">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score">3 — 1</div>
+                <div class="team team--away">
+                  <span class="shield shield--lg shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Notes</h4>
+          <ul>
+            <li>Stub widened 72 → 76px to give the italic month label horizontal breathing room</li>
+            <li>Display-big "14" at 30px reads as the dominant date stamp</li>
+            <li>Body kicker carries weekday + time + venue in a single mono row</li>
+            <li>This is the <em>default</em> variant — currently consumed only by <code>&lt;CalendarMonth&gt;</code></li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ Compact — light (calendar) ═════════════ -->
+      <article class="panel">
+        <header class="card">
+          <div class="label">Compact — light</div>
+          <h2>The compact variant.</h2>
+          <p class="sub">
+            64px stub. Same A2 chrome as default but tighter typography.
+            Date "14" + italic "juni" still prominent — no longer
+            blending with the background. Kicker keeps weekday + time
+            (no venue on compact).
+          </p>
+        </header>
+
+        <div class="stage-label">Compact on a light surface</div>
+        <div class="stage-sub">Sidebar widgets, recent-matches grids</div>
+        <div class="demo-light">
+          <div class="teaser-compact">
+            <aside class="stub">
+              <div class="date-big">14</div>
+              <div class="month">juni</div>
+            </aside>
+            <div class="body">
+              <div class="kicker">ZA · 14:30</div>
+              <div class="teams">
+                <div class="team team--highlight">
+                  <span class="shield shield--sm">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score">3 — 1</div>
+                <div class="team team--away">
+                  <span class="shield shield--sm shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Notes</h4>
+          <ul>
+            <li>Date "14" now 22px display-big (was 17px in round 2) — unmissable at compact scale</li>
+            <li>Italic "juni" at 11px sits below the date number</li>
+            <li>Shield sized up 24 → 28px for proportionality with the larger date</li>
+            <li>Full team names fit at compact width without abbreviation</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ Compact — dark (homepage slider) ═════════════ -->
+      <article class="panel panel--dark">
+        <header class="card">
+          <div class="label">Compact — dark (HOMEPAGE SLIDER)</div>
+          <h2>Where it actually ships.</h2>
+          <p class="sub">
+            The same compact variant rendered on the ink-band homepage
+            slider context. <code>&lt;MatchesSlider theme="dark"&gt;</code>
+            in <code>MatchesSlider.tsx:81</code> consumes
+            <code>variant="compact"</code> — this is the production
+            workhorse.
+          </p>
+        </header>
+
+        <div class="stage-label">/ (homepage) · MatchesSliderSection</div>
+        <div class="stage-sub">Cream paper card on ink-band — soft shadow</div>
+        <div class="demo-dark">
+          <div class="teaser-compact">
+            <aside class="stub">
+              <div class="date-big">14</div>
+              <div class="month">juni</div>
+            </aside>
+            <div class="body">
+              <div class="kicker">ZA · 14:30</div>
+              <div class="teams">
+                <div class="team team--highlight">
+                  <span class="shield shield--sm">K</span>
+                  <span>KCVV Elewijt</span>
+                </div>
+                <div class="score">3 — 1</div>
+                <div class="team team--away">
+                  <span class="shield shield--sm shield--opp">M</span>
+                  <span>RC Mechelen</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Notes</h4>
+          <ul>
+            <li>Dark theme = ink panel background; teaser card itself stays cream paper (matches Phase 2 Direction D for dark contexts)</li>
+            <li>Shadow swaps to <code>--shadow-paper-sm-soft</code> (ink-muted offset) so the cream card has a visible drop-shadow against ink</li>
+            <li>Same chrome geometry as light — no separate component, just CSS context</li>
+            <li>Date "14" punches off the cream-soft stub regardless of surrounding panel colour</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <footer style="max-width:1440px;margin:36px auto 0;font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.65">
+      Round 3 of 6.B.d6 · A2-italic + compact rendering · confirm to lock
+    </footer>
+  </body>
+</html>

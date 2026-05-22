@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 1 · MatchStatusBadge (6.B.d5)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --color-card-red: #c93f1c;
+        --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 2px 2px 0 0 var(--color-ink-muted);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+          Roboto, sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page { max-width: 1600px; margin: 0 auto 36px; }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1600px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        align-items: start;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      .stage-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        opacity: 0.7;
+      }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+
+      /* ───── Badge demo: in-context (on a tiny hero corner) + isolated row ───── */
+      .demo {
+        padding: 6px 18px 22px;
+      }
+      .demo .demo-row-label {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.55;
+        margin: 12px 0 6px;
+      }
+      .demo .hero-mini {
+        position: relative;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 12px 14px;
+        margin: 6px 0 10px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 13px;
+      }
+      .hero-mini .status-corner {
+        position: absolute;
+        top: -10px;
+        right: 14px;
+      }
+      .demo .badge-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding: 6px 0;
+      }
+
+      /* ───────── Treatment 1: current pill-jersey (as shipped) ───────── */
+      .t1 {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 500;
+        line-height: 1;
+        padding: 5px 7px;
+        background: var(--color-jersey);
+        color: var(--color-ink);
+      }
+      /* (current code uses pill-jersey for postponed/stopped/forfeited; pill-cream is
+         the gray fallback when status colour isn't recognised — extra-rare). */
+      .t1--cream {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        border: 1px solid var(--color-cream-deep);
+      }
+
+      /* ───────── Treatment 2: Direction D paper-chrome, uniform ───────── */
+      .t2 {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+        line-height: 1;
+        padding: 5px 8px;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+
+      /* ───────── Treatment 3: Direction D paper-chrome, per-status tint ───────── */
+      .t3 {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+        line-height: 1;
+        padding: 5px 8px;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+      }
+      .t3--ft   { /* finished — neutral cream */
+        background: var(--color-cream);
+      }
+      .t3--ff   { /* forfeit — muted (no game played; result imposed) */
+        background: var(--color-cream-deep);
+      }
+      .t3--pp   { /* postponed — muted (may reschedule) */
+        background: var(--color-cream-deep);
+      }
+      .t3--stop { /* stopped — notice (game ended weird) */
+        background: var(--color-warm);
+        color: var(--color-cream);
+      }
+      .t3--canc { /* cancelled — alert (definitively dead) */
+        background: var(--color-card-red);
+        color: var(--color-cream);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 1 · `&lt;MatchStatusBadge&gt;`</div>
+      <h1>How should the status corner stamp look?</h1>
+      <p>
+        Five status values render a badge: <code>finished</code> (FT),
+        <code>forfeited</code> (FF), <code>postponed</code> (PP),
+        <code>cancelled</code> (CANC), <code>stopped</code> (STOP).
+        <code>scheduled</code> renders no badge (the kickoff time in the
+        hero IS the status). <strong>Requires a BFF schema delta</strong>:
+        today's <code>MatchStatus</code> literal collapses
+        <code>cancelled</code> into <code>postponed</code>; Phase 6.B
+        implementation adds <code>"cancelled"</code> to the literal and
+        stops the override in <code>transforms.ts</code>.
+      </p>
+      <p>
+        Three visual treatments compared. Each variant shows the five
+        badges (a) in isolation as a horizontal row + (b) in-context as
+        corner stamps on tiny hero cards. T3 uses the severity tiers
+        agreed during the audit: FT = cream (normal), PP + FF = cream-deep
+        (no game today), STOP = warm (notice), CANC = card-red (alert).
+      </p>
+      <span class="scope-banner">Pick one treatment · all 5 statuses ship with it</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ Treatment 1: current pill-jersey ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Treatment 1</div>
+          <h2>Current pill-jersey.</h2>
+          <p class="sub">
+            As shipped today: <code>&lt;MonoLabel variant="pill-jersey"&gt;</code>
+            — solid bright-green pill, ink text. Used for postponed +
+            stopped + forfeited; finished is unimplemented (returns null).
+            Bright <code>--color-jersey</code> is the colour the redesign
+            otherwise retired in favour of jersey-deep.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 work</span>
+            <span class="chip chip--cost">Uses retired bright-jersey</span>
+            <span class="chip chip--cost">No FT yet</span>
+          </div>
+        </header>
+
+        <div class="demo">
+          <div class="demo-row-label">In isolation</div>
+          <div class="badge-row">
+            <span class="t1 t1--cream">FT</span>
+            <span class="t1">FF</span>
+            <span class="t1">PP</span>
+            <span class="t1">CANC</span>
+            <span class="t1">STOP</span>
+          </div>
+          <div class="demo-row-label">On a hero corner</div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t1 t1--cream">FT</span></div>
+            KCVV — Mech · finished
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t1">FF</span></div>
+            KCVV — Mech · forfeit
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t1">PP</span></div>
+            KCVV — Mech · postponed
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t1">CANC</span></div>
+            KCVV — Mech · cancelled
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t1">STOP</span></div>
+            KCVV — Mech · stopped
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Notes</h4>
+          <ul>
+            <li>All three edge statuses look identical — bright-green pill, no severity differentiation</li>
+            <li>FT shown as <code>pill-cream</code> approximation; current code returns null for finished so there's no real precedent</li>
+            <li>Diverges from the editorial paper-card vocabulary of the rest of the page</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ Treatment 2: Direction D paper-chrome, uniform ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Treatment 2</div>
+          <h2>Direction D — uniform.</h2>
+          <p class="sub">
+            Migrate every badge to the locked Phase 2 Direction D paper
+            chrome: <code>border-2 ink + shadow-paper-sm + bg-cream + mono
+            caps</code>. Same vocabulary as <code>&lt;BrandedTabs&gt;</code>
+            and <code>&lt;FilterTabs&gt;</code>. All 4 statuses look identical
+            — only the text varies.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Matches editorial paper vocab</span>
+            <span class="chip chip--good">Aligns with locked Direction D</span>
+            <span class="chip chip--cost">No per-status severity signal</span>
+          </div>
+        </header>
+
+        <div class="demo">
+          <div class="demo-row-label">In isolation</div>
+          <div class="badge-row">
+            <span class="t2">FT</span>
+            <span class="t2">FF</span>
+            <span class="t2">PP</span>
+            <span class="t2">CANC</span>
+            <span class="t2">STOP</span>
+          </div>
+          <div class="demo-row-label">On a hero corner</div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t2">FT</span></div>
+            KCVV — Mech · finished
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t2">FF</span></div>
+            KCVV — Mech · forfeit
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t2">PP</span></div>
+            KCVV — Mech · postponed
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t2">CANC</span></div>
+            KCVV — Mech · cancelled
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t2">STOP</span></div>
+            KCVV — Mech · stopped
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Notes</h4>
+          <ul>
+            <li>One visual language across all 4 statuses; reader differentiates via the letters alone</li>
+            <li>Matches Phase 2 Direction D — same chrome as the locked Tab + Arrow primitives</li>
+            <li>Slight ink-rectangle weight on every hero card corner; less visual noise overall than coloured pills</li>
+            <li>No "this needs special attention" signal — FF feels visually equivalent to a routine FT</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ Treatment 3: Direction D + per-status tint ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Treatment 3</div>
+          <h2>Direction D + status tint.</h2>
+          <p class="sub">
+            Same Direction D chrome as T2 (border-2 ink + shadow-paper-sm
+            + mono caps), but the background tints differ per status to
+            signal severity. Four visual flavours across five statuses:
+            <strong>FT</strong> = cream (normal),
+            <strong>PP + FF</strong> = cream-deep (no game today; PP may
+            reschedule, FF won't be played but result imposed),
+            <strong>STOP</strong> = warm (notice — game ended weird),
+            <strong>CANC</strong> = card-red (alert — definitively dead).
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">Per-status severity signal</span>
+            <span class="chip chip--good">Direction D base preserved</span>
+            <span class="chip chip--cost">+1 tint vocabulary to maintain</span>
+          </div>
+        </header>
+
+        <div class="demo">
+          <div class="demo-row-label">In isolation</div>
+          <div class="badge-row">
+            <span class="t3 t3--ft">FT</span>
+            <span class="t3 t3--ff">FF</span>
+            <span class="t3 t3--pp">PP</span>
+            <span class="t3 t3--canc">CANC</span>
+            <span class="t3 t3--stop">STOP</span>
+          </div>
+          <div class="demo-row-label">On a hero corner</div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t3 t3--ft">FT</span></div>
+            KCVV — Mech · finished
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t3 t3--ff">FF</span></div>
+            KCVV — Mech · forfeit
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t3 t3--pp">PP</span></div>
+            KCVV — Mech · postponed
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t3 t3--canc">CANC</span></div>
+            KCVV — Mech · cancelled
+          </div>
+          <div class="hero-mini">
+            <div class="status-corner"><span class="t3 t3--stop">STOP</span></div>
+            KCVV — Mech · stopped
+          </div>
+        </div>
+
+        <div class="callouts">
+          <h4>Notes</h4>
+          <ul>
+            <li>Reader sees severity at a glance — STOP and CANC stand out as the abnormal-and-dramatic states; PP + FF read as muted "no game today"; FT reads as routine</li>
+            <li>Same chrome geometry as T2 (border + shadow + mono caps); only the bg tint differs per status</li>
+            <li>Tints use existing tokens: cream (shipped), cream-deep (shipped), warm (shipped for kicker variants), card-red (would need a new token — does not exist today)</li>
+            <li>Trade-off: introducing <code>--color-card-red</code> for CANC means red enters the redesign palette where it wasn't before. CANC is rare enough that a dedicated token may feel heavy; could downgrade to a desaturated warm-tint variant. Owner call.</li>
+            <li>FF and PP share the cream-deep treatment per owner direction — both are "no game today" semantically (PP may resume, FF won't but is routinely-resolved). Readers don't need to distinguish them visually.</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
+    <footer style="max-width:1600px;margin:36px auto 0;font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;opacity:0.65">
+      Round 1 of 6.B.d5 · status badge treatment · pick one
+    </footer>
+  </body>
+</html>

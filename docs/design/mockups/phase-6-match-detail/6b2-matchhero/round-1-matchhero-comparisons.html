@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 6.B · Round 1 · MatchHero (6.B.d2)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b;
+        --color-jersey-deep: #006e47;
+        --color-warm: #d8763a;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-soft: 3px 3px 0 0 var(--color-ink);
+        --font-display:
+          "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big:
+          "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono:
+          "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        padding: 32px 24px 96px;
+      }
+
+      header.page {
+        max-width: 1920px;
+        margin: 0 auto 36px;
+      }
+      header.page .meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        opacity: 0.75;
+      }
+      header.page h1 {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 40px;
+        margin: 6px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      header.page p {
+        margin: 0 0 8px;
+        max-width: 90ch;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+      header.page code {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        background: var(--color-cream-deep);
+        padding: 1px 5px;
+      }
+      .scope-banner {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 6px 12px;
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-weight: 700;
+      }
+
+      .grid {
+        max-width: 1920px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+      }
+
+      .variant {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-lift);
+        display: flex;
+        flex-direction: column;
+      }
+      .variant > header.card {
+        padding: 16px 18px 14px;
+        border-bottom: 2px solid var(--color-ink);
+        background: var(--color-cream-soft);
+      }
+      .variant > header.card .label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.7;
+      }
+      .variant > header.card h2 {
+        margin: 4px 0 6px;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.015em;
+      }
+      .variant > header.card .sub {
+        font-size: 12.5px;
+        line-height: 1.5;
+        margin: 0;
+      }
+      .variant > header.card code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 4px;
+      }
+      .chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .chip {
+        font-family: var(--font-mono);
+        font-size: 9.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 3px 7px;
+        border: 1px solid var(--color-ink);
+        background: var(--color-cream);
+      }
+      .chip--good { background: var(--color-cream); }
+      .chip--cost { background: var(--color-cream-deep); }
+      .chip--delta { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+
+      .state-label {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        padding: 14px 18px 6px;
+        border-top: 1px dashed var(--color-ink-muted);
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .state-label:first-of-type { border-top: none; padding-top: 18px; }
+      .state-label .who { font-size: 9px; opacity: 0.55; }
+
+      .callouts {
+        padding: 14px 18px 18px;
+        border-top: 1px dashed var(--color-ink-muted);
+      }
+      .callouts h4 {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        margin: 0 0 6px;
+      }
+      .callouts ul {
+        margin: 0 0 12px;
+        padding-left: 16px;
+        font-size: 12.5px;
+        line-height: 1.55;
+      }
+      .callouts ul:last-child { margin-bottom: 0; }
+      .callouts .danger { color: #c93f1c; font-weight: 700; }
+
+      /* ───────── Shared mock pieces (shields / chrome) ───────── */
+      .shield {
+        width: 44px;
+        height: 50px;
+        background:
+          radial-gradient(circle at 30% 30%, var(--color-jersey) 0 60%, var(--color-jersey-deep) 60% 100%);
+        clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-cream);
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      .shield--opp {
+        background:
+          radial-gradient(circle at 70% 35%, #c34, #7a1f1f 65%);
+      }
+      .status-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 3px 8px;
+        font-weight: 700;
+      }
+      .status-badge--ff,
+      .status-badge--afg,
+      .status-badge--stop {
+        background: var(--color-cream-deep);
+        color: var(--color-ink);
+      }
+
+      /* ═══════════ Variant A — Editorial card ═══════════ */
+      .hero-a {
+        margin: 6px 18px 18px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 22px 22px 18px;
+        position: relative;
+      }
+      .hero-a .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+        margin-bottom: 14px;
+      }
+      .hero-a .kicker::before { content: "* "; opacity: 0.6; }
+      .hero-a .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+        align-items: center;
+      }
+      .hero-a .teams .team {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .hero-a .teams .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .hero-a .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 34px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .hero-a .score--vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        color: var(--color-ink-muted);
+        text-transform: lowercase;
+      }
+      .hero-a .meta {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .hero-a .meta .dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--color-ink);
+        display: inline-block;
+      }
+      .hero-a .status-corner {
+        position: absolute;
+        top: -10px;
+        right: 14px;
+      }
+
+      /* ═══════════ Variant B — Ticket-stub band ═══════════ */
+      .hero-b {
+        margin: 6px 0 18px;
+        background: var(--color-ink);
+        color: var(--color-cream);
+        padding: 22px 22px 22px 0;
+        display: grid;
+        grid-template-columns: 130px 1fr;
+        gap: 22px;
+        position: relative;
+      }
+      .hero-b .ticket-stub {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        padding: 22px 16px;
+        border-right: 2px dashed var(--color-cream-deep);
+        position: relative;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 10px;
+      }
+      .hero-b .ticket-stub::before,
+      .hero-b .ticket-stub::after {
+        content: "";
+        position: absolute;
+        right: -10px;
+        width: 20px;
+        height: 20px;
+        background: var(--color-cream);
+        border-radius: 50%;
+      }
+      .hero-b .ticket-stub::before { top: -10px; }
+      .hero-b .ticket-stub::after { bottom: -10px; }
+      .hero-b .ticket-stub .date {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 22px;
+        letter-spacing: -0.025em;
+        margin-bottom: 6px;
+        line-height: 1;
+        text-transform: none;
+      }
+      .hero-b .ticket-stub .time {
+        font-size: 16px;
+        margin-bottom: 14px;
+        letter-spacing: 0.08em;
+      }
+      .hero-b .ticket-stub .venue {
+        opacity: 0.75;
+        font-size: 9px;
+        line-height: 1.4;
+      }
+      .hero-b .ticket-stub .competition {
+        margin-top: 10px;
+        padding-top: 8px;
+        border-top: 1px dashed var(--color-ink-muted);
+        font-size: 9px;
+        opacity: 0.85;
+      }
+      .hero-b .right {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 14px;
+      }
+      .hero-b .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.6;
+      }
+      .hero-b .teams {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+      .hero-b .teams .team {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+      .hero-b .teams .team--away {
+        justify-self: end;
+        flex-direction: row-reverse;
+        text-align: right;
+      }
+      .hero-b .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 40px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-align: center;
+      }
+      .hero-b .score--vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 22px;
+        color: var(--color-cream);
+        opacity: 0.7;
+        text-transform: lowercase;
+      }
+      .hero-b .status-corner {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        background: var(--color-jersey);
+        color: var(--color-ink);
+      }
+
+      /* ═══════════ Variant C — Two-team polaroids ═══════════ */
+      .hero-c {
+        margin: 6px 18px 18px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 14px;
+        padding: 6px 0 18px;
+      }
+      .hero-c .polaroid {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-soft);
+        padding: 14px 12px 18px;
+        text-align: center;
+        position: relative;
+      }
+      .hero-c .polaroid--home { transform: rotate(-1deg); }
+      .hero-c .polaroid--away { transform: rotate(1deg); justify-self: end; }
+      .hero-c .polaroid .shield {
+        width: 70px;
+        height: 80px;
+        margin: 4px auto 12px;
+      }
+      .hero-c .polaroid .name {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 17px;
+        letter-spacing: -0.015em;
+        line-height: 1.1;
+      }
+      .hero-c .polaroid .tape {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%) rotate(-3deg);
+        width: 48px;
+        height: 14px;
+        background: rgba(0, 168, 107, 0.55);
+        border: 1px dashed rgba(0, 0, 0, 0.15);
+      }
+      .hero-c .polaroid--away .tape { transform: translateX(-50%) rotate(2deg); background: rgba(216, 118, 58, 0.5); }
+      .hero-c .score {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 60px;
+        letter-spacing: -0.04em;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        padding: 0 6px;
+      }
+      .hero-c .score--vs {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 32px;
+        color: var(--color-ink-muted);
+        text-transform: lowercase;
+      }
+      .hero-c .meta {
+        grid-column: 1 / -1;
+        margin-top: 8px;
+        padding-top: 12px;
+        border-top: 1px solid var(--color-ink);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .hero-c .meta .dot {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--color-ink);
+        display: inline-block;
+      }
+      .hero-c .kicker {
+        grid-column: 1 / -1;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        opacity: 0.85;
+        margin-bottom: 6px;
+      }
+      .hero-c .kicker::before { content: "* "; opacity: 0.6; }
+    </style>
+  </head>
+
+  <body>
+    <header class="page">
+      <div class="meta">Phase 6.B · Drill round 1 · `&lt;MatchHero&gt;`</div>
+      <h1>How should the match-detail hero look?</h1>
+      <p>
+        Three structural shapes for the new <code>&lt;MatchHero&gt;</code>
+        component on <code>/wedstrijd/[matchId]</code>. Each variant is rendered
+        in <strong>both</strong> the upcoming and finished states so
+        state-handling is judged alongside layout shape. Data is fixed:
+        <code>KCVV Elewijt</code> vs <code>RC Mechelen</code>, <code>3e
+        Provinciale A</code>, <code>za 14 jun · 14:30 · Sportpark Elewijt</code>,
+        finished score <code>3 — 1</code>.
+      </p>
+      <p>
+        All variants respect the <strong>6.B.d0 data-reality lock</strong>: no
+        per-match photo, no editorial fields rendered inside the hero. The
+        per-match preview / recap article is surfaced separately by
+        <code>&lt;MatchArticleLinkCard&gt;</code> (drilled in 6.B.d4).
+      </p>
+      <span class="scope-banner">Pick one shape · later rounds refine within it</span>
+    </header>
+
+    <div class="grid">
+      <!-- ═════════════ A — Editorial card ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant A</div>
+          <h2>Editorial card.</h2>
+          <p class="sub">
+            One <code>&lt;TapedCard&gt;</code> hero. Mono kicker on top, teams
+            and score on one row, date / venue / competition mono row at the
+            bottom. Same shape both states; only the score region swaps.
+            Reuses every primitive we already ship — maps 1:1 onto Phase 5's
+            <code>&lt;EditorialHero&gt;</code> if we ever consolidate.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive</span>
+            <span class="chip chip--good">Composes existing parts</span>
+            <span class="chip chip--cost">Less distinctive</span>
+          </div>
+        </header>
+
+        <div class="state-label">
+          <span>Upcoming · status=scheduled</span>
+          <span class="who">aftrap 14:30</span>
+        </div>
+        <section class="hero-a">
+          <div class="kicker">VOORBESCHOUWING · 3E PROVINCIALE A</div>
+          <div class="teams">
+            <div class="team team--home">
+              <span class="shield">K</span>
+              <span>KCVV Elewijt</span>
+            </div>
+            <div class="score score--vs">vs</div>
+            <div class="team team--away">
+              <span class="shield shield--opp">M</span>
+              <span>RC Mechelen</span>
+            </div>
+          </div>
+          <div class="meta">
+            <span>ZA 14 JUN</span>
+            <span class="dot"></span>
+            <span>14:30</span>
+            <span class="dot"></span>
+            <span>SPORTPARK ELEWIJT</span>
+          </div>
+        </section>
+
+        <div class="state-label">
+          <span>Finished · status=finished</span>
+          <span class="who">eindstand 3 — 1</span>
+        </div>
+        <section class="hero-a">
+          <div class="status-corner"><span class="status-badge">FT</span></div>
+          <div class="kicker">MATCHVERSLAG · 3E PROVINCIALE A</div>
+          <div class="teams">
+            <div class="team team--home">
+              <span class="shield">K</span>
+              <span>KCVV Elewijt</span>
+            </div>
+            <div class="score">3 — 1</div>
+            <div class="team team--away">
+              <span class="shield shield--opp">M</span>
+              <span>RC Mechelen</span>
+            </div>
+          </div>
+          <div class="meta">
+            <span>ZA 14 JUN</span>
+            <span class="dot"></span>
+            <span>14:30</span>
+            <span class="dot"></span>
+            <span>SPORTPARK ELEWIJT</span>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>What this gives us</h4>
+          <ul>
+            <li>Zero new design-system vocabulary — pure composition</li>
+            <li>Symmetric upcoming / finished states; one component, one test surface</li>
+            <li>Mobile collapse is trivial (teams stack, score below)</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>Reads as "article-style hero" — quiet next to a future <code>&lt;ArticleHero&gt;</code> for the matchPreview/matchRecap article (#1470)</li>
+            <li>Status badge has nowhere ceremonial to live — corner stamp is a compromise</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ B — Ticket-stub band ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant B</div>
+          <h2>Ticket-stub band.</h2>
+          <p class="sub">
+            Full-bleed dark band with a perforated 'ticket-stub' left edge
+            carrying date / venue / competition. Teams + score dominate the
+            right side of the band. Distinctive — reads like a printed matchday
+            ticket. Introduces one new primitive (<code>&lt;TicketStubBand&gt;</code>).
+          </p>
+          <div class="chips">
+            <span class="chip chip--delta">+1 new primitive</span>
+            <span class="chip chip--good">Most distinctive</span>
+            <span class="chip chip--cost">Full-bleed dark band</span>
+          </div>
+        </header>
+
+        <div class="state-label">
+          <span>Upcoming · status=scheduled</span>
+          <span class="who">aftrap 14:30</span>
+        </div>
+        <section class="hero-b">
+          <div class="status-corner"><span class="hero-b-kicker" style="background:var(--color-jersey);color:var(--color-ink);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.16em;font-weight:700;padding:3px 8px;display:inline-block">VOORBESCHOUWING</span></div>
+          <aside class="ticket-stub">
+            <div class="date">ZA 14<br />JUN</div>
+            <div class="time">14:30</div>
+            <div class="venue">SPORTPARK<br />ELEWIJT</div>
+            <div class="competition">3E PROV A</div>
+          </aside>
+          <div class="right">
+            <div class="teams">
+              <div class="team team--home">
+                <span class="shield">K</span>
+                <span>KCVV Elewijt</span>
+              </div>
+              <div class="score score--vs">vs</div>
+              <div class="team team--away">
+                <span class="shield shield--opp">M</span>
+                <span>RC Mechelen</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="state-label">
+          <span>Finished · status=finished</span>
+          <span class="who">eindstand 3 — 1</span>
+        </div>
+        <section class="hero-b">
+          <div class="status-corner"><span class="status-badge" style="background:var(--color-cream);color:var(--color-ink)">FT</span></div>
+          <aside class="ticket-stub">
+            <div class="date">ZA 14<br />JUN</div>
+            <div class="time">14:30</div>
+            <div class="venue">SPORTPARK<br />ELEWIJT</div>
+            <div class="competition">3E PROV A</div>
+          </aside>
+          <div class="right">
+            <div class="teams">
+              <div class="team team--home">
+                <span class="shield">K</span>
+                <span>KCVV Elewijt</span>
+              </div>
+              <div class="score">3 — 1</div>
+              <div class="team team--away">
+                <span class="shield shield--opp">M</span>
+                <span>RC Mechelen</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>What this gives us</h4>
+          <ul>
+            <li>Strong ticket / matchday identity; differentiates from article-hero vocabulary</li>
+            <li>Dedicated home for date / venue / competition — they're the "ticket stub" data</li>
+            <li>Reusable later for season-pass chrome, transfer-window banners</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li>+1 design-system primitive (<code>&lt;TicketStubBand&gt;</code> + perforated-edge geometry)</li>
+            <li>Full-bleed dark band is a heavy chrome choice — competes with the Phase 4.5 ClubshopBanner for dark-band attention</li>
+            <li>Mobile collapse is non-trivial (ticket stub needs to either reflow or stack vertically — round 2 work)</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ═════════════ C — Two-team polaroids ═════════════ -->
+      <article class="variant">
+        <header class="card">
+          <div class="label">Variant C</div>
+          <h2>Two-team polaroids.</h2>
+          <p class="sub">
+            Pair of taped polaroid clippings — home + away each rendered as
+            their own card with shield + name. Big <code>&lt;NumberDisplay&gt;</code>
+            score (or "vs") in the gap between them. Meta below. Leans hardest
+            into the fanzine aesthetic; zero new primitive.
+          </p>
+          <div class="chips">
+            <span class="chip chip--good">0 new primitive</span>
+            <span class="chip chip--good">Most editorial</span>
+            <span class="chip chip--cost">Shield quality matters</span>
+          </div>
+        </header>
+
+        <div class="state-label">
+          <span>Upcoming · status=scheduled</span>
+          <span class="who">aftrap 14:30</span>
+        </div>
+        <section class="hero-c">
+          <div class="kicker">VOORBESCHOUWING · 3E PROVINCIALE A</div>
+          <div class="polaroid polaroid--home">
+            <span class="tape"></span>
+            <span class="shield">K</span>
+            <div class="name">KCVV Elewijt</div>
+          </div>
+          <div class="score score--vs">vs</div>
+          <div class="polaroid polaroid--away">
+            <span class="tape"></span>
+            <span class="shield shield--opp">M</span>
+            <div class="name">RC Mechelen</div>
+          </div>
+          <div class="meta">
+            <span>ZA 14 JUN</span>
+            <span class="dot"></span>
+            <span>14:30</span>
+            <span class="dot"></span>
+            <span>SPORTPARK ELEWIJT</span>
+          </div>
+        </section>
+
+        <div class="state-label">
+          <span>Finished · status=finished</span>
+          <span class="who">eindstand 3 — 1</span>
+        </div>
+        <section class="hero-c">
+          <div class="kicker">MATCHVERSLAG <span class="status-badge" style="margin-left:8px">FT</span> · 3E PROVINCIALE A</div>
+          <div class="polaroid polaroid--home">
+            <span class="tape"></span>
+            <span class="shield">K</span>
+            <div class="name">KCVV Elewijt</div>
+          </div>
+          <div class="score">3 — 1</div>
+          <div class="polaroid polaroid--away">
+            <span class="tape"></span>
+            <span class="shield shield--opp">M</span>
+            <div class="name">RC Mechelen</div>
+          </div>
+          <div class="meta">
+            <span>ZA 14 JUN</span>
+            <span class="dot"></span>
+            <span>14:30</span>
+            <span class="dot"></span>
+            <span>SPORTPARK ELEWIJT</span>
+          </div>
+        </section>
+
+        <div class="callouts">
+          <h4>What this gives us</h4>
+          <ul>
+            <li>Most editorial-feeling option; treats the match as artefact</li>
+            <li>Reuses existing <code>&lt;TapedFigure&gt;</code> + <code>&lt;NumberDisplay&gt;</code> + <code>&lt;MonoLabelRow&gt;</code> primitives — zero net-new vocabulary</li>
+            <li>Each team gets ceremonial weight (the polaroid) — works well for cup matches, derbies, etc.</li>
+          </ul>
+          <h4>Tradeoff</h4>
+          <ul>
+            <li><span class="danger">Shield quality:</span> PSD-sourced club crests vary in quality / brand-compliance; promoting them to polaroid scale exposes that variance</li>
+            <li>More vertical real estate than A or B — pushes lineup + events further down</li>
+            <li>Three-column layout needs a strong mobile collapse story (stack vertically with score between)</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </body>
+</html>
