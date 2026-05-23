@@ -49,7 +49,7 @@ export interface HorizontalSliderProps {
   children: ReactNode;
   /** Optional section heading */
   title?: string;
-  /** Theme variant — "dark" for ink-bg sections (e.g. homepage MatchesSliderSection) */
+  /** Theme variant — "dark" for ink-bg sections. */
   theme?: "light" | "dark";
   /** Additional CSS classes */
   className?: string;

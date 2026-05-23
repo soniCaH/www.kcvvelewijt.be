@@ -121,7 +121,6 @@ function DayPanel({
                   : undefined
               }
               teamLabel={match.team}
-              variant="compact"
             />
           ))}
           {dayEvents.map((event) => (
