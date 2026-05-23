@@ -1,6 +1,26 @@
 /**
- * Match Detail Page
- * Displays individual match details including lineups
+ * Match Detail Page — Phase 6.B composition (6.B.d1 lock).
+ *
+ * Page shape (Variant A "shared shell, per-section auto-hide"):
+ *
+ *   MatchStripSlot                 ← top only, mirrors /spelers/[slug]
+ *   <MatchHero>                    ← state-aware; never auto-hides
+ *   <StripedSeam>                  ← only when a body section will render
+ *   <MatchLineupSection>           ← auto-hides on empty (typically upcoming)
+ *   <StripedSeam>                  ← only when both Lineup + Events render
+ *   <MatchEventsSection>           ← auto-hides on empty
+ *   [reserved: <MatchArticleLinkCard>]   ← deferred to post-#1470
+ *   [reserved: <RelatedArticles>]        ← deferred to post-#1470
+ *   <FooterSafeArea>
+ *
+ * Replaces the legacy `<MatchDetailView>` consumption (now orphaned;
+ * retired by the #1913 cleanup ticket).
+ *
+ * Note: the legacy `backUrl` back-link feature (a MatchDetailView-only
+ * affordance) has no slot in the new chrome and is intentionally not
+ * carried over. Users navigate via browser back or the breadcrumb
+ * (rendered as JSON-LD only — visual breadcrumb would be a separate
+ * deliberate add).
  */
 
 import { Effect } from "effect";
@@ -10,14 +30,18 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
-import type { MatchDetail } from "@kcvv/api-contract";
+import type { MatchDetail, MatchEvent } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildBreadcrumbJsonLd,
   buildSportsEventJsonLd,
 } from "@/lib/seo/jsonld";
-import { MatchDetailView } from "@/components/match/MatchDetailView";
-import { FooterSafeArea } from "@/components/design-system";
+import { MatchHero } from "@/components/match/MatchHero";
+import { MatchLineupSection } from "@/components/match/MatchLineupSection";
+import { MatchEventsSection } from "@/components/match/MatchEventsSection";
+import { FooterSafeArea, StripedSeam } from "@/components/design-system";
+import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
+import { PageViewTracker, TrackInView } from "@/components/analytics";
 import {
   transformHomeTeam,
   transformAwayTeam,
@@ -30,7 +54,6 @@ import {
 
 interface MatchPageProps {
   params: Promise<{ matchId: string }>;
-  searchParams: Promise<{ from?: string; fromTab?: string }>;
 }
 
 /**
@@ -39,9 +62,6 @@ interface MatchPageProps {
  * Fetches match details for the given `params.matchId` and produces a metadata
  * object containing a page `title`; when match data is available, also adds
  * `description` and `openGraph` fields populated from the match.
- *
- * @param params - Object containing the route params. `params.matchId` is the match identifier from the URL.
- * @returns Metadata with a page `title`. If match details are found, the metadata also includes `description` and `openGraph` (`title`, `description`, `type`). If the `matchId` is invalid or the match cannot be fetched, the returned metadata contains a "not found" title.
  */
 export async function generateMetadata({
   params,
@@ -85,48 +105,35 @@ export async function generateMetadata({
 }
 
 /**
- * Retrieve match details for the given match ID or trigger a 404 response if unavailable.
- *
- * If the match cannot be fetched, this function calls `notFound()` to produce a 404 page.
- *
- * @returns The match detail for the specified `matchId`.
+ * Retrieve match details for the given match ID. Routes the BFF's tagged
+ * `HttpNotFound` error to Next.js's `notFound()` so an unknown matchId
+ * surfaces as a 404 page. Other BFF errors (5xx, parse failures, timeouts)
+ * bubble up — Next's error boundary handles them, which is what we want
+ * for service outages: don't silently disguise them as "not found".
  */
 async function fetchMatchOrNotFound(matchId: number): Promise<MatchDetail> {
-  try {
-    return await runPromise(
-      Effect.gen(function* () {
-        const bff = yield* BffService;
-        return yield* bff.getMatchDetail(matchId);
-      }),
-    );
-  } catch {
-    notFound();
-  }
+  return runPromise(
+    Effect.gen(function* () {
+      const bff = yield* BffService;
+      return yield* bff.getMatchDetail(matchId);
+    }).pipe(
+      // `notFound()` throws Next's NEXT_NOT_FOUND sentinel; wrapping in
+      // `Effect.sync` keeps the Effect chain consistent and lets TS narrow
+      // the union (notFound returns `never`). Same pattern as the existing
+      // `apps/web/src/app/sitemap.ts` HttpNotFound handler.
+      Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound())),
+    ),
+  );
 }
 
-/**
- * Render the match detail page for a given route `matchId`.
- *
- * Parses `matchId` from route params, fetches match details, transforms teams and lineup data,
- * and returns the populated match detail view. If `matchId` is invalid or the match cannot be
- * retrieved, the route responds with a 404.
- *
- * @param params - Route params object containing the string `matchId`
- * @returns The MatchDetailView populated with teams, date, time, status, competition, lineups, and report flag
- */
-export default async function MatchPage({
-  params,
-  searchParams,
-}: MatchPageProps) {
+export default async function MatchPage({ params }: MatchPageProps) {
   const { matchId } = await params;
-  const { from, fromTab } = await searchParams;
   const numericId = parseInt(matchId, 10);
 
   if (isNaN(numericId)) {
     notFound();
   }
 
-  // Fetch match details via BffService
   const match = await fetchMatchOrNotFound(numericId);
 
   // Fetch keeper PSD ids from Sanity (cached for 24h in the repo's
@@ -134,9 +141,7 @@ export default async function MatchPage({
   // Used to flag KCVV-side keepers; opponent side falls back to the
   // jersey-#1 heuristic. Returns `undefined` (not an empty Set) on Sanity
   // failure so `enrichLineupWithKeeperFlag` can detect lookup failure and
-  // degrade BOTH sides to the jersey-#1 heuristic — an empty Set would be
-  // indistinguishable from "we asked Sanity and KCVV has no keeper", which
-  // would silently strip the KCVV keeper badge.
+  // degrade BOTH sides to the jersey-#1 heuristic.
   const keeperPsdIds: ReadonlySet<string> | undefined = await runPromise(
     Effect.gen(function* () {
       const repo = yield* PlayerRepository;
@@ -153,7 +158,6 @@ export default async function MatchPage({
     ),
   );
 
-  // Transform data for display
   const homeTeam = transformHomeTeam(match);
   const awayTeam = transformAwayTeam(match);
   const time = extractMatchTime(match);
@@ -168,7 +172,6 @@ export default async function MatchPage({
         ? "away"
         : undefined;
 
-  // Transform lineup data + tag keepers per side.
   const homeLineup =
     match.lineup?.home
       .map(transformLineupPlayer)
@@ -182,17 +185,20 @@ export default async function MatchPage({
         enrichLineupWithKeeperFlag(p, "away", kcvvSide, keeperPsdIds),
       ) ?? [];
 
-  // Only allow back-links to internal team paths (prevent open redirect)
-  const validFromTabs = ["info", "opstelling", "wedstrijden", "klassement"];
-  const backUrl =
-    from && /^\/ploegen\/[a-zA-Z0-9_-]+$/.test(from)
-      ? `${from}${fromTab && validFromTabs.includes(fromTab) ? `?tab=${fromTab}` : ""}`
-      : null;
+  const events: readonly MatchEvent[] = match.events ?? [];
+  const hasLineup = homeLineup.length > 0 || awayLineup.length > 0;
+  const hasEvents = events.length > 0;
 
   const matchLabel = formatMatchTitle(match);
 
+  const analyticsParams = {
+    match_id: numericId,
+    status: match.status,
+  };
+
   return (
     <>
+      <PageViewTracker eventName="match_detail_view" params={analyticsParams} />
       <h1 className="sr-only">{matchLabel}</h1>
       <JsonLd
         data={buildBreadcrumbJsonLd([
@@ -215,19 +221,66 @@ export default async function MatchPage({
           venue: match.venue,
         })}
       />
-      <MatchDetailView
+
+      <MatchStripSlot />
+
+      <MatchHero
         homeTeam={homeTeam}
         awayTeam={awayTeam}
         date={match.date}
         time={time}
+        venue={match.venue}
         status={match.status}
         competition={match.competition}
-        homeLineup={homeLineup}
-        awayLineup={awayLineup}
-        events={match.events}
-        hasReport={match.hasReport}
-        backUrl={backUrl ?? undefined}
+        kcvvTeamLabel={match.kcvv_team_label}
       />
+
+      {(hasLineup || hasEvents) && (
+        <StripedSeam colorPair="ink-cream" height="md" />
+      )}
+
+      {hasLineup && (
+        <TrackInView
+          eventName="match_lineup_section_in_view"
+          params={analyticsParams}
+        >
+          <MatchLineupSection
+            homeTeamName={match.home_team.name}
+            awayTeamName={match.away_team.name}
+            homeLineup={homeLineup}
+            awayLineup={awayLineup}
+          />
+        </TrackInView>
+      )}
+
+      {hasLineup && hasEvents && (
+        <StripedSeam colorPair="ink-cream" height="md" />
+      )}
+
+      {hasEvents && (
+        <TrackInView
+          eventName="match_events_section_in_view"
+          params={analyticsParams}
+        >
+          <MatchEventsSection
+            homeTeamName={match.home_team.name}
+            awayTeamName={match.away_team.name}
+            homeTeamLogo={match.home_team.logo}
+            awayTeamLogo={match.away_team.logo}
+            events={events}
+          />
+        </TrackInView>
+      )}
+
+      {/* TODO(#1470 follow-up): <MatchArticleLinkCard> renders here when a
+          matchPreview/matchRecap article exists for this match. Slot
+          reserved per the 6.B.d1 lock; component build deferred until the
+          article schema's `linkedMatch` field lands. */}
+
+      {/* TODO(#1470 follow-up): match-filtered <RelatedArticles> renders
+          here. Same dependency on the `linkedMatch` field — query would
+          return zero rows in v1, so the slot stays empty until #1470. */}
+
       <FooterSafeArea />
     </>
   );
@@ -235,6 +288,6 @@ export default async function MatchPage({
 
 /**
  * Enable ISR with 5 minute revalidation for match data
- * (shorter than team pages since match data changes more frequently)
+ * (shorter than team pages since match data changes more frequently).
  */
 export const revalidate = 300;

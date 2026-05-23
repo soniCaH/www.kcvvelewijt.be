@@ -128,7 +128,6 @@ describe("Canonical URLs on dynamic routes", () => {
     mockRunPromise.mockResolvedValueOnce(matchFixture);
     const metadata = await wedstrijd.generateMetadata({
       params: Promise.resolve({ matchId: "12345" }),
-      searchParams: Promise.resolve({}),
     });
     expect(metadata).toHaveProperty(
       "alternates.canonical",
