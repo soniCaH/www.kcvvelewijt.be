@@ -67,19 +67,25 @@ export function transformLineupPlayer(player: MatchLineupPlayer): LineupPlayer {
  *     consistent with how the rest of the BeNeLux football web reads
  *     opponent rosters.
  *
- * `kcvvSide` is derived from `match.is_home`. If the match data doesn't tell
- * us which side is KCVV (rare; legacy rows), pass `undefined` and both sides
- * fall back to the jersey-#1 heuristic — better than mis-applying the
- * Sanity flags to the wrong roster.
+ * Two `undefined` cases force the jersey-#1 heuristic on **both** sides:
+ *   1. `kcvvSide === undefined` — match data doesn't tell us which roster
+ *      is KCVV (rare; legacy rows). Mis-applying Sanity flags to the wrong
+ *      roster is worse than the heuristic.
+ *   2. `keeperPsdIds === undefined` — the Sanity lookup failed. An empty
+ *      Set would be indistinguishable from "Sanity said KCVV has no
+ *      keepers" and would silently strip the KCVV keeper badge; an
+ *      explicit `undefined` lets us route both sides through the
+ *      heuristic on outage.
  */
 export function enrichLineupWithKeeperFlag(
   player: LineupPlayer,
   side: "home" | "away",
   kcvvSide: "home" | "away" | undefined,
-  keeperPsdIds: ReadonlySet<string>,
+  keeperPsdIds: ReadonlySet<string> | undefined,
 ): LineupPlayer {
   const isKcvvSide = kcvvSide === side;
-  const isKeeper = isKcvvSide
+  const useSanityLookup = isKcvvSide && keeperPsdIds !== undefined;
+  const isKeeper = useSanityLookup
     ? player.id !== undefined && keeperPsdIds.has(String(player.id))
     : player.number === 1;
   return { ...player, isKeeper };

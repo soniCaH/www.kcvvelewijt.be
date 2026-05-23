@@ -356,4 +356,23 @@ describe("enrichLineupWithKeeperFlag", () => {
     );
     expect(enriched.isKeeper).toBe(false);
   });
+
+  it("falls back to jersey #1 on BOTH sides when keeperPsdIds is undefined (Sanity outage)", () => {
+    const kcvvKeeper = makePlayer({ id: 100, number: 1 });
+    const kcvvOutfield = makePlayer({ id: 100, number: 7 });
+    const opponentKeeper = makePlayer({ id: 999, number: 1 });
+    // keeperPsdIds=undefined → never trust Sanity; jersey-#1 only.
+    expect(
+      enrichLineupWithKeeperFlag(kcvvKeeper, "home", "home", undefined)
+        .isKeeper,
+    ).toBe(true);
+    expect(
+      enrichLineupWithKeeperFlag(kcvvOutfield, "home", "home", undefined)
+        .isKeeper,
+    ).toBe(false);
+    expect(
+      enrichLineupWithKeeperFlag(opponentKeeper, "away", "home", undefined)
+        .isKeeper,
+    ).toBe(true);
+  });
 });

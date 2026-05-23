@@ -132,11 +132,12 @@ export default async function MatchPage({
   // Fetch keeper PSD ids from Sanity (cached for 24h in the repo's
   // module-scope memo + Sanity CDN — see PlayerRepository.findKeeperPsdIds).
   // Used to flag KCVV-side keepers; opponent side falls back to the
-  // jersey-#1 heuristic. Fail-safe to an empty set if Sanity is unreachable
-  // so the match page still renders (keeper distinction degrades silently)
-  // — but log the cause so Vercel surfaces real outages instead of hiding
-  // them behind a quiet fallback.
-  const keeperPsdIds = await runPromise(
+  // jersey-#1 heuristic. Returns `undefined` (not an empty Set) on Sanity
+  // failure so `enrichLineupWithKeeperFlag` can detect lookup failure and
+  // degrade BOTH sides to the jersey-#1 heuristic — an empty Set would be
+  // indistinguishable from "we asked Sanity and KCVV has no keeper", which
+  // would silently strip the KCVV keeper badge.
+  const keeperPsdIds: ReadonlySet<string> | undefined = await runPromise(
     Effect.gen(function* () {
       const repo = yield* PlayerRepository;
       return yield* repo.findKeeperPsdIds();
@@ -147,7 +148,7 @@ export default async function MatchPage({
             "falling back to jersey-#1 heuristic on both sides.",
           { cause },
         );
-        return Effect.succeed(new Set<string>() as ReadonlySet<string>);
+        return Effect.succeed(undefined);
       }),
     ),
   );

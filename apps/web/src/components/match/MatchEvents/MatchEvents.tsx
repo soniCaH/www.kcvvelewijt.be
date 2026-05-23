@@ -16,6 +16,10 @@ import { cn } from "@/lib/utils/cn";
 import { ArrowLeftRight } from "lucide-react";
 import { CardGlyph } from "../CardGlyph";
 
+function assertNever(value: never): never {
+  throw new Error(`Unhandled MatchEvent type: ${String(value)}`);
+}
+
 /**
  * Free-standing football SVG used as the goal glyph. Cream rind with ink
  * pentagons; ~16px tall. No container — matches the other glyphs (cards
@@ -187,7 +191,7 @@ function EventGlyph({ type }: { type: MatchEvent["type"] }) {
         />
       );
     default:
-      return null;
+      return assertNever(type);
   }
 }
 
@@ -490,6 +494,6 @@ function EventDescription({ event }: { event: MatchEvent }) {
         </>
       );
     default:
-      return null;
+      return assertNever(event.type);
   }
 }

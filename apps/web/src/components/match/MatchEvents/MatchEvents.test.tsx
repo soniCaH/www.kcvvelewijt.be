@@ -132,6 +132,37 @@ describe("MatchEvents", () => {
       expect(screen.queryByText("Jonas Vermeersch")).not.toBeInTheDocument();
     });
 
+    it('treats second_yellow as a card in filter="cards"', () => {
+      // Regression test for #1908: when the BFF stopped collapsing 2nd-yellow
+      // into red_card, the `cards` filter could have silently excluded the
+      // new event type if not also widened.
+      const eventsWithSecondYellow: MatchEvent[] = [
+        {
+          id: 1,
+          type: "second_yellow",
+          minute: 82,
+          team: "home",
+          player: "Doppelganger Player",
+        },
+        {
+          id: 2,
+          type: "goal",
+          minute: 10,
+          team: "home",
+          player: "Goal Scorer",
+        },
+      ];
+      render(
+        <MatchEvents
+          {...defaultProps}
+          events={eventsWithSecondYellow}
+          filter="cards"
+        />,
+      );
+      expect(screen.getByText("Doppelganger Player")).toBeInTheDocument();
+      expect(screen.queryByText("Goal Scorer")).not.toBeInTheDocument();
+    });
+
     it("filters to substitutions only", () => {
       render(<MatchEvents {...defaultProps} filter="substitutions" />);
       expect(screen.getByText("Kevin Mertens")).toBeInTheDocument();
@@ -251,20 +282,12 @@ describe("MatchEvents", () => {
   });
 
   describe("edge cases", () => {
-    it("handles unknown event type gracefully", () => {
-      const unknownEvents: MatchEvent[] = [
-        {
-          id: 1,
-          type: "unknown_type" as MatchEvent["type"],
-          minute: 30,
-          team: "home",
-          player: "Test Player",
-        },
-      ];
-      render(<MatchEvents {...defaultProps} events={unknownEvents} />);
-      // Should render without crashing, showing the minute
-      expect(screen.getByText("30'")).toBeInTheDocument();
-    });
+    // The defensive runtime branch for unknown event types used to live in
+    // the `EventGlyph` / `EventDescription` default cases. Phase 6.B (#1908)
+    // replaced it with `assertNever` so future `MatchEventType` additions
+    // surface as TS compile errors. The BFF rejects unknown values via
+    // schema decode before they ever reach the UI; the runtime defence
+    // wasn't load-bearing. Test removed.
 
     it("shows no events message for team with no events in team grouping", () => {
       // Only home team events, away team should show empty message
