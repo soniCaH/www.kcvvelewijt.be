@@ -105,20 +105,25 @@ export async function generateMetadata({
 }
 
 /**
- * Retrieve match details for the given match ID or trigger a 404 response if
- * unavailable.
+ * Retrieve match details for the given match ID. Routes the BFF's tagged
+ * `HttpNotFound` error to Next.js's `notFound()` so an unknown matchId
+ * surfaces as a 404 page. Other BFF errors (5xx, parse failures, timeouts)
+ * bubble up — Next's error boundary handles them, which is what we want
+ * for service outages: don't silently disguise them as "not found".
  */
 async function fetchMatchOrNotFound(matchId: number): Promise<MatchDetail> {
-  try {
-    return await runPromise(
-      Effect.gen(function* () {
-        const bff = yield* BffService;
-        return yield* bff.getMatchDetail(matchId);
-      }),
-    );
-  } catch {
-    notFound();
-  }
+  return runPromise(
+    Effect.gen(function* () {
+      const bff = yield* BffService;
+      return yield* bff.getMatchDetail(matchId);
+    }).pipe(
+      // `notFound()` throws Next's NEXT_NOT_FOUND sentinel; wrapping in
+      // `Effect.sync` keeps the Effect chain consistent and lets TS narrow
+      // the union (notFound returns `never`). Same pattern as the existing
+      // `apps/web/src/app/sitemap.ts` HttpNotFound handler.
+      Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound())),
+    ),
+  );
 }
 
 export default async function MatchPage({ params }: MatchPageProps) {

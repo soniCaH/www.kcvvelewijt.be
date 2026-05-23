@@ -8,8 +8,11 @@
  */
 
 export default function MatchDetailLoading() {
+  // `min-h-screen` root preserved per the envelope-drift guard in
+  // `apps/web/src/app/__tests__/loading-envelope.test.tsx` — non-SectionStack
+  // routes pin to a contract root className.
   return (
-    <>
+    <div className="min-h-screen">
       {/* ── MatchHero skeleton — single TapedCard with stub + body ───── */}
       <section
         aria-hidden="true"
@@ -69,6 +72,6 @@ export default function MatchDetailLoading() {
           ))}
         </div>
       </section>
-    </>
+    </div>
   );
 }
