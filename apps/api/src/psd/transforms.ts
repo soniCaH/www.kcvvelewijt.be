@@ -343,10 +343,15 @@ function transformMatchEvent(
   if (actionType === "CARD") {
     const cardType = parseCardType(event);
     if (!cardType) return null;
+    // Map PSD card subtypes onto the normalised MatchEventType set. A 2nd
+    // yellow used to collapse into `red_card` here; #1908 (Phase 6.B) split
+    // it out so UI surfaces can ship a distinct stacked-card glyph.
     const type: MatchEvent["type"] =
-      cardType === "red" || cardType === "double_yellow"
-        ? "red_card"
-        : "yellow_card";
+      cardType === "double_yellow"
+        ? "second_yellow"
+        : cardType === "red"
+          ? "red_card"
+          : "yellow_card";
     return {
       id,
       type,

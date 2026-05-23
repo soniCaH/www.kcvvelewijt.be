@@ -1160,7 +1160,10 @@ describe("PsdService.getMatchDetail - events", () => {
     }
   });
 
-  it("transforms double-yellow (tweede geel) as red_card", async () => {
+  it("transforms double-yellow (tweede geel) as second_yellow", async () => {
+    // #1908: previously collapsed into `red_card`. Phase 6.B distinguishes
+    // the 2nd-yellow path so UI surfaces can ship a stacked yellow+red glyph
+    // and read it as a different in-match moment than a direct red.
     const doubleYellow = {
       ...rawDetailWithGoal,
       events: [
@@ -1181,7 +1184,7 @@ describe("PsdService.getMatchDetail - events", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      expect(result.right.events![0]?.type).toBe("red_card");
+      expect(result.right.events![0]?.type).toBe("second_yellow");
     }
   });
 

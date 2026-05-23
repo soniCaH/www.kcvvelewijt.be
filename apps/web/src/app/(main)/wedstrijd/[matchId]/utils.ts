@@ -55,6 +55,37 @@ export function transformLineupPlayer(player: MatchLineupPlayer): LineupPlayer {
 }
 
 /**
+ * Enrich a transformed `LineupPlayer` with `isKeeper`. The source depends on
+ * which side of the match the player belongs to:
+ *
+ *   - **KCVV side**: look the player's PSD id up in the `keeperPsdIds` set
+ *     sourced from Sanity `player.keeper` (PSD-synced, always reliable).
+ *   - **Opponent side**: use the jersey #1 heuristic. PSD does not surface
+ *     position data for opponent players in a match's lineup, and we don't
+ *     mirror opponents in Sanity — so we fall back to the universal football
+ *     convention that #1 is the keeper. Imperfect (~95% accurate) but
+ *     consistent with how the rest of the BeNeLux football web reads
+ *     opponent rosters.
+ *
+ * `kcvvSide` is derived from `match.is_home`. If the match data doesn't tell
+ * us which side is KCVV (rare; legacy rows), pass `undefined` and both sides
+ * fall back to the jersey-#1 heuristic — better than mis-applying the
+ * Sanity flags to the wrong roster.
+ */
+export function enrichLineupWithKeeperFlag(
+  player: LineupPlayer,
+  side: "home" | "away",
+  kcvvSide: "home" | "away" | undefined,
+  keeperPsdIds: ReadonlySet<string>,
+): LineupPlayer {
+  const isKcvvSide = kcvvSide === side;
+  const isKeeper = isKcvvSide
+    ? player.id !== undefined && keeperPsdIds.has(String(player.id))
+    : player.number === 1;
+  return { ...player, isKeeper };
+}
+
+/**
  * Returns the match time as "HH:MM" when available.
  *
  * If `match.time` is present it is returned; otherwise, if `match.date` is a Date with non-zero hours or minutes, the time extracted from that date is returned in 24-hour `HH:MM` format.

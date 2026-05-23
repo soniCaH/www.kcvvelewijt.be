@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
+import { PlayerRepository } from "@/lib/repositories/player.repository";
 import type { MatchDetail } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -21,6 +22,7 @@ import {
   transformHomeTeam,
   transformAwayTeam,
   transformLineupPlayer,
+  enrichLineupWithKeeperFlag,
   extractMatchTime,
   formatMatchTitle,
   formatMatchDescription,
@@ -127,14 +129,57 @@ export default async function MatchPage({
   // Fetch match details via BffService
   const match = await fetchMatchOrNotFound(numericId);
 
+  // Fetch keeper PSD ids from Sanity (cached for 24h in the repo's
+  // module-scope memo + Sanity CDN — see PlayerRepository.findKeeperPsdIds).
+  // Used to flag KCVV-side keepers; opponent side falls back to the
+  // jersey-#1 heuristic. Fail-safe to an empty set if Sanity is unreachable
+  // so the match page still renders (keeper distinction degrades silently)
+  // — but log the cause so Vercel surfaces real outages instead of hiding
+  // them behind a quiet fallback.
+  const keeperPsdIds = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* PlayerRepository;
+      return yield* repo.findKeeperPsdIds();
+    }).pipe(
+      Effect.catchAllCause((cause) => {
+        console.warn(
+          "[wedstrijd/[matchId]] Sanity keeper lookup failed, " +
+            "falling back to jersey-#1 heuristic on both sides.",
+          { cause },
+        );
+        return Effect.succeed(new Set<string>() as ReadonlySet<string>);
+      }),
+    ),
+  );
+
   // Transform data for display
   const homeTeam = transformHomeTeam(match);
   const awayTeam = transformAwayTeam(match);
   const time = extractMatchTime(match);
 
-  // Transform lineup data
-  const homeLineup = match.lineup?.home.map(transformLineupPlayer) ?? [];
-  const awayLineup = match.lineup?.away.map(transformLineupPlayer) ?? [];
+  // Resolve which side is KCVV from the BFF-supplied `is_home` flag. If
+  // unset (legacy rows), enrichment falls back to the universal jersey-#1
+  // heuristic for both sides.
+  const kcvvSide: "home" | "away" | undefined =
+    match.is_home === true
+      ? "home"
+      : match.is_home === false
+        ? "away"
+        : undefined;
+
+  // Transform lineup data + tag keepers per side.
+  const homeLineup =
+    match.lineup?.home
+      .map(transformLineupPlayer)
+      .map((p) =>
+        enrichLineupWithKeeperFlag(p, "home", kcvvSide, keeperPsdIds),
+      ) ?? [];
+  const awayLineup =
+    match.lineup?.away
+      .map(transformLineupPlayer)
+      .map((p) =>
+        enrichLineupWithKeeperFlag(p, "away", kcvvSide, keeperPsdIds),
+      ) ?? [];
 
   // Only allow back-links to internal team paths (prevent open redirect)
   const validFromTabs = ["info", "opstelling", "wedstrijden", "klassement"];

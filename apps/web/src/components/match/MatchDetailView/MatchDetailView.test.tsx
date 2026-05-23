@@ -98,8 +98,10 @@ describe("MatchDetailView", () => {
     });
 
     it("renders MatchLineup content", () => {
+      // The "Opstellingen" heading moved up to <MatchLineupSection> in
+      // Phase 6.B (#1908). MatchDetailView no longer renders it; lineup
+      // content is verified via player rows.
       render(<MatchDetailView {...defaultProps} />);
-      expect(screen.getByText("Opstellingen")).toBeInTheDocument();
       expect(screen.getByText("Home Player 1")).toBeInTheDocument();
       expect(screen.getByText("Away Player 1")).toBeInTheDocument();
     });
@@ -129,7 +131,6 @@ describe("MatchDetailView", () => {
           awayLineup={[]}
         />,
       );
-      expect(screen.getByText("Opstellingen")).toBeInTheDocument();
       expect(screen.getByText("Home Player 1")).toBeInTheDocument();
     });
   });

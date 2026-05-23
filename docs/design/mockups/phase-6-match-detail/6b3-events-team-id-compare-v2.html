@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="nl-BE">
+  <head>
+    <meta charset="utf-8" />
+    <title>6.B.d3 — team identification: combination round</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-warm: #f0c264;
+        --color-card-red: #c93f1c;
+        --color-paper-edge: #d9d2bd;
+        --font-display: "freight-display-pro", georgia, serif;
+        --font-display-big: "freight-big-pro", georgia, serif;
+        --font-mono:
+          ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--color-cream-soft);
+        color: var(--color-ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        margin: 0;
+        padding: 40px 20px;
+      }
+      h1 {
+        font-family: var(--font-display-big);
+        font-style: italic;
+        font-weight: 900;
+        max-width: 1040px;
+        margin: 0 auto 32px;
+      }
+      .intro {
+        max-width: 1040px;
+        margin: 0 auto 40px;
+        line-height: 1.6;
+      }
+      .legend {
+        max-width: 1040px;
+        margin: 0 auto 32px;
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        padding: 16px 20px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .legend code {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        background: var(--color-cream-deep);
+        padding: 1px 6px;
+      }
+      .option {
+        max-width: 1040px;
+        margin: 0 auto 56px;
+      }
+      .option-header {
+        margin-bottom: 12px;
+      }
+      .option-title {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .option-meta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--color-ink-muted);
+      }
+      .option-tradeoffs {
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 6px 0 0;
+        color: var(--color-ink-muted);
+      }
+      .option-tradeoffs strong {
+        color: var(--color-ink);
+      }
+      .card {
+        background: var(--color-cream);
+        border: 2px solid var(--color-ink);
+        box-shadow: 6px 6px 0 0 var(--color-ink);
+        padding: 24px 28px;
+      }
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .heading {
+        font-family: var(--font-display-big);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 32px;
+        margin: 4px 0 20px;
+      }
+      ol.events {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      ol.events > li + li {
+        border-top: 1px dashed var(--color-cream-deep);
+      }
+      .min {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 18px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        font-variant-numeric: tabular-nums;
+      }
+      .player {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 15px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .glyph {
+        display: inline-flex;
+        width: 22px;
+        height: 22px;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-mono);
+        font-weight: 700;
+        font-size: 12px;
+      }
+      .glyph.goal {
+        background: var(--color-jersey-deep);
+        color: var(--color-cream);
+      }
+      .glyph.yc {
+        background: #f4c430;
+        color: var(--color-ink);
+      }
+      .glyph.rc {
+        background: var(--color-card-red);
+        color: var(--color-cream);
+      }
+      .glyph.sub {
+        background: var(--color-cream-deep);
+        color: var(--color-ink);
+      }
+      .logo {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--color-cream-soft);
+        border: 1.5px solid var(--color-ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-style: italic;
+        font-weight: 900;
+        font-size: 11px;
+        flex-shrink: 0;
+      }
+      .stripe {
+        align-self: stretch;
+        width: 4px;
+      }
+      .stripe.home {
+        background: var(--color-jersey-deep);
+      }
+      .stripe.away {
+        background: var(--color-ink);
+      }
+      .empty {
+        visibility: hidden;
+      }
+      .team-code {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--color-ink-muted);
+      }
+
+      /* ── F: Logo + left/right split (B + D) ───────────────────────────── */
+      .opt-f .row {
+        display: grid;
+        grid-template-columns: 36px 22px 1fr 1fr 22px 36px 20px;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 0;
+      }
+      .opt-f .home,
+      .opt-f .away {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 15px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .opt-f .away {
+        text-align: right;
+      }
+      .opt-f .row.is-home .away,
+      .opt-f .row.is-home .mr-glyph,
+      .opt-f .row.is-away .home,
+      .opt-f .row.is-away .ml-glyph,
+      .opt-f .row.is-away .min-spacer {
+        visibility: hidden;
+      }
+      .opt-f .min-spacer {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 18px;
+      }
+
+      /* ── G: Logo right + side stripe (B + E) ──────────────────────────── */
+      .opt-g .row {
+        display: grid;
+        grid-template-columns: 4px 36px 22px 1fr 20px;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 0;
+      }
+
+      /* ── H: Stripe + logo + short code (E + B + A) ────────────────────── */
+      .opt-h .row {
+        display: grid;
+        grid-template-columns: 4px 36px 22px 1fr auto;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 0;
+      }
+      .opt-h .team-combo {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* ── I: Stripe + left/right split, no logo (D + E) ────────────────── */
+      .opt-i .row {
+        display: grid;
+        grid-template-columns: 4px 36px 22px 1fr 1fr 22px 36px;
+        gap: 14px;
+        align-items: center;
+        padding: 14px 0;
+      }
+      .opt-i .home,
+      .opt-i .away {
+        font-family: var(--font-display);
+        font-style: italic;
+        font-size: 15px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .opt-i .away {
+        text-align: right;
+      }
+      .opt-i .row.is-home .away,
+      .opt-i .row.is-home .mr-glyph,
+      .opt-i .row.is-away .home,
+      .opt-i .row.is-away .ml-glyph,
+      .opt-i .row.is-away .min-spacer {
+        visibility: hidden;
+      }
+      .opt-i .min-spacer {
+        font-family: var(--font-display-big);
+        font-weight: 900;
+        font-size: 18px;
+      }
+
+      /* ── J: Inline logo before name + short code right (B-soft) ───────── */
+      .opt-j .row {
+        display: grid;
+        grid-template-columns: 36px 22px 1fr auto;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 0;
+      }
+      .opt-j .name-with-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .opt-j .name-with-logo .player {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>6.B.d3 · Team ID — combinations of B / D / E</h1>
+
+    <p class="intro">
+      Owner picked B (logo) + D (left/right split) + E (side stripe) for the
+      round-2 brainstorm. Five hybrids below; each ships with the same fixture
+      (8 events; KCVV at home). Tradeoffs noted per option.
+    </p>
+
+    <div class="legend">
+      <strong>Legend.</strong> The logo placeholder shows the first letter of
+      the team. Real shields ship from the same PSD-sourced CloudFront URLs
+      used by <code>&lt;MatchHero&gt;</code>. Side stripe uses
+      <code>--color-jersey-deep</code> for home and <code>--color-ink</code>
+      for away. Mono code uses <code>--color-ink-muted</code>.
+    </div>
+
+    <!-- ── F ─────────────────────────────────────────────────────────────── -->
+    <section class="option opt-f">
+      <div class="option-header">
+        <h2 class="option-title">F — Logo + left/right split (B + D)</h2>
+        <div class="option-meta">Spatial split · logo replaces short code</div>
+        <p class="option-tradeoffs">
+          <strong>Pro:</strong> the row immediately tells you which side
+          owns the event without decoding. Logo carries recognition; mono
+          code is dropped (less clutter).
+          <strong>Con:</strong> halved name columns; long names truncate
+          earlier. Mobile collapse will need to flatten back to a single
+          column. 7-column grid.
+        </p>
+      </div>
+      <div class="card">
+        <div class="kicker">* WEDSTRIJDVERLOOP</div>
+        <h3 class="heading">Hoe het ging.</h3>
+        <ol class="events">
+          <li>
+            <div class="row is-home">
+              <span class="min">12'</span>
+              <span class="ml-glyph"><span class="glyph goal">●</span></span>
+              <span class="home">Lars De Vos</span>
+              <span class="away empty"></span>
+              <span class="mr-glyph"></span>
+              <span class="min-spacer empty">12'</span>
+              <span class="logo">K</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-away">
+              <span class="min">28'</span>
+              <span class="ml-glyph"></span>
+              <span class="home empty"></span>
+              <span class="away">Kevin Smets</span>
+              <span class="mr-glyph"><span class="glyph yc"></span></span>
+              <span class="min-spacer empty">28'</span>
+              <span class="logo">M</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-home">
+              <span class="min">45+2'</span>
+              <span class="ml-glyph"><span class="glyph goal">●</span></span>
+              <span class="home">Jens Vermeulen (strafschop)</span>
+              <span class="away empty"></span>
+              <span class="mr-glyph"></span>
+              <span class="min-spacer empty">45+2'</span>
+              <span class="logo">K</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-away">
+              <span class="min">56'</span>
+              <span class="ml-glyph"></span>
+              <span class="home empty"></span>
+              <span class="away">Tom Janssens</span>
+              <span class="mr-glyph"><span class="glyph goal">●</span></span>
+              <span class="min-spacer empty">56'</span>
+              <span class="logo">M</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-home">
+              <span class="min">71'</span>
+              <span class="ml-glyph"><span class="glyph sub">⇆</span></span>
+              <span class="home">Pieter De Bondt ⇆ Lars De Vos</span>
+              <span class="away empty"></span>
+              <span class="mr-glyph"></span>
+              <span class="min-spacer empty">71'</span>
+              <span class="logo">K</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-away">
+              <span class="min">88'</span>
+              <span class="ml-glyph"></span>
+              <span class="home empty"></span>
+              <span class="away">Kevin Smets</span>
+              <span class="mr-glyph"><span class="glyph rc"></span></span>
+              <span class="min-spacer empty">88'</span>
+              <span class="logo">M</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── G ─────────────────────────────────────────────────────────────── -->
+    <section class="option opt-g">
+      <div class="option-header">
+        <h2 class="option-title">G — Stripe + logo right (E + B)</h2>
+        <div class="option-meta">
+          Side stripe colour signal · logo carries the club identity
+        </div>
+        <p class="option-tradeoffs">
+          <strong>Pro:</strong> stripe gives peripheral colour signal even
+          when you're not actively reading the row; logo on the right gives
+          definite identification. Drops the mono code → less editorial
+          ornament but cleaner.
+          <strong>Con:</strong> jersey-deep stripe clashes with the
+          jersey-deep goal-glyph bg (both same green). One extra grid column.
+        </p>
+      </div>
+      <div class="card">
+        <div class="kicker">* WEDSTRIJDVERLOOP</div>
+        <h3 class="heading">Hoe het ging.</h3>
+        <ol class="events">
+          <li>
+            <div class="row">
+              <span class="stripe home"></span>
+              <span class="min">12'</span>
+              <span class="glyph goal">●</span>
+              <span class="player">Lars De Vos</span>
+              <span class="logo">K</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe away"></span>
+              <span class="min">28'</span>
+              <span class="glyph yc"></span>
+              <span class="player">Kevin Smets</span>
+              <span class="logo">M</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe home"></span>
+              <span class="min">45+2'</span>
+              <span class="glyph goal">●</span>
+              <span class="player">Jens Vermeulen (strafschop)</span>
+              <span class="logo">K</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe away"></span>
+              <span class="min">56'</span>
+              <span class="glyph goal">●</span>
+              <span class="player">Tom Janssens</span>
+              <span class="logo">M</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe home"></span>
+              <span class="min">71'</span>
+              <span class="glyph sub">⇆</span>
+              <span class="player">Pieter De Bondt ⇆ Lars De Vos</span>
+              <span class="logo">K</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe away"></span>
+              <span class="min">88'</span>
+              <span class="glyph rc"></span>
+              <span class="player">Kevin Smets</span>
+              <span class="logo">M</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── H ─────────────────────────────────────────────────────────────── -->
+    <section class="option opt-h">
+      <div class="option-header">
+        <h2 class="option-title">H — Stripe + logo + short code (E + B + A)</h2>
+        <div class="option-meta">Maximum signal · kitchen sink</div>
+        <p class="option-tradeoffs">
+          <strong>Pro:</strong> three independent signals (colour / shield /
+          mono code). Robust against logo failure / cold scans / accessibility
+          tools that strip colour.
+          <strong>Con:</strong> heaviest row treatment; mono code starts to
+          feel redundant once stripe + logo are both present. Consider this
+          the "belt + braces + suspenders" position.
+        </p>
+      </div>
+      <div class="card">
+        <div class="kicker">* WEDSTRIJDVERLOOP</div>
+        <h3 class="heading">Hoe het ging.</h3>
+        <ol class="events">
+          <li>
+            <div class="row">
+              <span class="stripe home"></span>
+              <span class="min">12'</span>
+              <span class="glyph goal">●</span>
+              <span class="player">Lars De Vos</span>
+              <span class="team-combo"
+                ><span class="logo">K</span
+                ><span class="team-code">KCVV</span></span
+              >
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe away"></span>
+              <span class="min">28'</span>
+              <span class="glyph yc"></span>
+              <span class="player">Kevin Smets</span>
+              <span class="team-combo"
+                ><span class="logo">M</span
+                ><span class="team-code">MECH</span></span
+              >
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe home"></span>
+              <span class="min">45+2'</span>
+              <span class="glyph goal">●</span>
+              <span class="player">Jens Vermeulen (strafschop)</span>
+              <span class="team-combo"
+                ><span class="logo">K</span
+                ><span class="team-code">KCVV</span></span
+              >
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe away"></span>
+              <span class="min">56'</span>
+              <span class="glyph goal">●</span>
+              <span class="player">Tom Janssens</span>
+              <span class="team-combo"
+                ><span class="logo">M</span
+                ><span class="team-code">MECH</span></span
+              >
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe home"></span>
+              <span class="min">71'</span>
+              <span class="glyph sub">⇆</span>
+              <span class="player">Pieter De Bondt ⇆ Lars De Vos</span>
+              <span class="team-combo"
+                ><span class="logo">K</span
+                ><span class="team-code">KCVV</span></span
+              >
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="stripe away"></span>
+              <span class="min">88'</span>
+              <span class="glyph rc"></span>
+              <span class="player">Kevin Smets</span>
+              <span class="team-combo"
+                ><span class="logo">M</span
+                ><span class="team-code">MECH</span></span
+              >
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── I ─────────────────────────────────────────────────────────────── -->
+    <section class="option opt-i">
+      <div class="option-header">
+        <h2 class="option-title">I — Stripe + left/right split, no logo (D + E)</h2>
+        <div class="option-meta">Pure spatial + colour · no shield dependency</div>
+        <p class="option-tradeoffs">
+          <strong>Pro:</strong> no shield asset needed (resilient to missing
+          logos). Side bar reinforces the spatial split (home left = green
+          stripe, away right = ink stripe). Very fanzine.
+          <strong>Con:</strong> still halves the name column. Doesn't tell
+          you WHICH opponent if multiple opponents play in the same season
+          and you're skimming an archive (one opponent ≠ identifiable colour).
+        </p>
+      </div>
+      <div class="card">
+        <div class="kicker">* WEDSTRIJDVERLOOP</div>
+        <h3 class="heading">Hoe het ging.</h3>
+        <ol class="events">
+          <li>
+            <div class="row is-home">
+              <span class="stripe home"></span>
+              <span class="min">12'</span>
+              <span class="ml-glyph"><span class="glyph goal">●</span></span>
+              <span class="home">Lars De Vos</span>
+              <span class="away empty"></span>
+              <span class="mr-glyph"></span>
+              <span class="min-spacer empty">12'</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-away">
+              <span class="stripe away"></span>
+              <span class="min">28'</span>
+              <span class="ml-glyph"></span>
+              <span class="home empty"></span>
+              <span class="away">Kevin Smets</span>
+              <span class="mr-glyph"><span class="glyph yc"></span></span>
+              <span class="min-spacer empty">28'</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-home">
+              <span class="stripe home"></span>
+              <span class="min">45+2'</span>
+              <span class="ml-glyph"><span class="glyph goal">●</span></span>
+              <span class="home">Jens Vermeulen (strafschop)</span>
+              <span class="away empty"></span>
+              <span class="mr-glyph"></span>
+              <span class="min-spacer empty">45+2'</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-away">
+              <span class="stripe away"></span>
+              <span class="min">56'</span>
+              <span class="ml-glyph"></span>
+              <span class="home empty"></span>
+              <span class="away">Tom Janssens</span>
+              <span class="mr-glyph"><span class="glyph goal">●</span></span>
+              <span class="min-spacer empty">56'</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-home">
+              <span class="stripe home"></span>
+              <span class="min">71'</span>
+              <span class="ml-glyph"><span class="glyph sub">⇆</span></span>
+              <span class="home">Pieter De Bondt ⇆ Lars De Vos</span>
+              <span class="away empty"></span>
+              <span class="mr-glyph"></span>
+              <span class="min-spacer empty">71'</span>
+            </div>
+          </li>
+          <li>
+            <div class="row is-away">
+              <span class="stripe away"></span>
+              <span class="min">88'</span>
+              <span class="ml-glyph"></span>
+              <span class="home empty"></span>
+              <span class="away">Kevin Smets</span>
+              <span class="mr-glyph"><span class="glyph rc"></span></span>
+              <span class="min-spacer empty">88'</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── J ─────────────────────────────────────────────────────────────── -->
+    <section class="option opt-j">
+      <div class="option-header">
+        <h2 class="option-title">J — Inline logo + short code right (B-soft + A)</h2>
+        <div class="option-meta">
+          Logo lives next to the player name · short code stays right
+        </div>
+        <p class="option-tradeoffs">
+          <strong>Pro:</strong> logo binds visually to the player (which is
+          what you'd want for newspaper-style match reports). Mono code on
+          the right preserves the locked vocabulary. No spatial split needed.
+          <strong>Con:</strong> player name column gets the logo overhead
+          (~28px), so it competes with the name when truncating. Substitution
+          rows look slightly busy with the ⇆ glyph + logo + names.
+        </p>
+      </div>
+      <div class="card">
+        <div class="kicker">* WEDSTRIJDVERLOOP</div>
+        <h3 class="heading">Hoe het ging.</h3>
+        <ol class="events">
+          <li>
+            <div class="row">
+              <span class="min">12'</span>
+              <span class="glyph goal">●</span>
+              <span class="name-with-logo">
+                <span class="logo">K</span>
+                <span class="player">Lars De Vos</span>
+              </span>
+              <span class="team-code">KCVV</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="min">28'</span>
+              <span class="glyph yc"></span>
+              <span class="name-with-logo">
+                <span class="logo">M</span>
+                <span class="player">Kevin Smets</span>
+              </span>
+              <span class="team-code">MECH</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="min">45+2'</span>
+              <span class="glyph goal">●</span>
+              <span class="name-with-logo">
+                <span class="logo">K</span>
+                <span class="player">Jens Vermeulen (strafschop)</span>
+              </span>
+              <span class="team-code">KCVV</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="min">56'</span>
+              <span class="glyph goal">●</span>
+              <span class="name-with-logo">
+                <span class="logo">M</span>
+                <span class="player">Tom Janssens</span>
+              </span>
+              <span class="team-code">MECH</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="min">71'</span>
+              <span class="glyph sub">⇆</span>
+              <span class="name-with-logo">
+                <span class="logo">K</span>
+                <span class="player">Pieter De Bondt ⇆ Lars De Vos</span>
+              </span>
+              <span class="team-code">KCVV</span>
+            </div>
+          </li>
+          <li>
+            <div class="row">
+              <span class="min">88'</span>
+              <span class="glyph rc"></span>
+              <span class="name-with-logo">
+                <span class="logo">M</span>
+                <span class="player">Kevin Smets</span>
+              </span>
+              <span class="team-code">MECH</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+  </body>
+</html>

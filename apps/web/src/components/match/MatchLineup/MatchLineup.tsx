@@ -16,116 +16,7 @@
 import { cn } from "@/lib/utils/cn";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import type { CardType } from "@/lib/effect/schemas/match.schema";
-
-/**
- * Yellow card icon component
- */
-function YellowCardIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 12 16"
-      className={cn("h-4 w-3", className)}
-      aria-label="Gele kaart"
-      role="img"
-    >
-      <rect
-        x="1"
-        y="1"
-        width="10"
-        height="14"
-        rx="1"
-        fill="#facc15"
-        stroke="#ca8a04"
-        strokeWidth="1"
-      />
-    </svg>
-  );
-}
-
-/**
- * Red card icon component
- */
-function RedCardIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 12 16"
-      className={cn("h-4 w-3", className)}
-      aria-label="Rode kaart"
-      role="img"
-    >
-      <rect
-        x="1"
-        y="1"
-        width="10"
-        height="14"
-        rx="1"
-        fill="#ef4444"
-        stroke="#b91c1c"
-        strokeWidth="1"
-      />
-    </svg>
-  );
-}
-
-/**
- * Double yellow (yellow-red) card icon component
- */
-function DoubleYellowCardIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 18 16"
-      className={cn("h-4 w-4.5", className)}
-      aria-label="Tweede gele kaart"
-      role="img"
-    >
-      {/* Yellow card (back) */}
-      <rect
-        x="1"
-        y="1"
-        width="10"
-        height="14"
-        rx="1"
-        fill="#facc15"
-        stroke="#ca8a04"
-        strokeWidth="1"
-      />
-      {/* Red card (front, offset) */}
-      <rect
-        x="6"
-        y="1"
-        width="10"
-        height="14"
-        rx="1"
-        fill="#ef4444"
-        stroke="#b91c1c"
-        strokeWidth="1"
-      />
-    </svg>
-  );
-}
-
-/**
- * Renders the appropriate card icon based on card type
- */
-function CardIcon({ cardType }: { cardType: CardType }) {
-  switch (cardType) {
-    case "yellow":
-      return <YellowCardIcon />;
-    case "red":
-      return <RedCardIcon />;
-    case "double_yellow":
-      return <DoubleYellowCardIcon />;
-    default: {
-      // Exhaustiveness check - if a new card type is added, TypeScript will error here
-      const _exhaustive: never = cardType;
-      // Runtime warning for unexpected card types from API
-      if (process.env.NODE_ENV === "development") {
-        console.warn(`Unexpected card type received: ${String(cardType)}`);
-      }
-      return null;
-    }
-  }
-}
+import { CardGlyph } from "../CardGlyph";
 
 export interface LineupPlayer {
   /** Player ID (optional) */
@@ -142,6 +33,12 @@ export interface LineupPlayer {
   status: "starter" | "substitute" | "substituted" | "subbed_in" | "unknown";
   /** Card received by player (if any) */
   card?: CardType;
+  /**
+   * Is this player a goalkeeper? Sourced from Sanity `player.keeper` for KCVV
+   * players (always reliable, PSD-synced); opponent-side falls back to jersey
+   * number = 1 by convention. Drives the warm-bg keeper number badge.
+   */
+  isKeeper?: boolean;
 }
 
 export interface MatchLineupProps {
@@ -186,7 +83,7 @@ export function MatchLineup({
   if (isLoading) {
     return (
       <div className={cn("space-y-6", className)}>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <LineupSkeleton />
           <LineupSkeleton />
         </div>
@@ -198,7 +95,7 @@ export function MatchLineup({
   if (homeLineup.length === 0 && awayLineup.length === 0) {
     return (
       <div className={cn("py-8 text-center", className)}>
-        <p className="text-gray-500">
+        <p className="text-ink-muted font-mono text-sm tracking-[0.14em] uppercase">
           Geen opstellingen beschikbaar voor deze wedstrijd.
         </p>
       </div>
@@ -206,18 +103,14 @@ export function MatchLineup({
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
-      <h2 className="font-title text-2xl font-bold text-gray-900">
-        Opstellingen
-      </h2>
-
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        {/* Home Team */}
-        <TeamLineup teamName={homeTeamName} players={homeLineup} side="home" />
-
-        {/* Away Team */}
-        <TeamLineup teamName={awayTeamName} players={awayLineup} side="away" />
-      </div>
+    <div
+      className={cn(
+        "grid grid-cols-1 gap-x-10 gap-y-8 md:grid-cols-2",
+        className,
+      )}
+    >
+      <TeamLineup teamName={homeTeamName} players={homeLineup} />
+      <TeamLineup teamName={awayTeamName} players={awayLineup} />
     </div>
   );
 }
@@ -233,11 +126,9 @@ export function MatchLineup({
 function TeamLineup({
   teamName,
   players,
-  side,
 }: {
   teamName: string;
   players: LineupPlayer[];
-  side: "home" | "away";
 }) {
   // Group players by status
   // Starters section: players who started (including those who were subbed out)
@@ -252,54 +143,41 @@ function TeamLineup({
       p.status === "unknown",
   );
 
-  const bgColor = side === "home" ? "bg-kcvv-green-bright/5" : "bg-gray-50";
-  const borderColor =
-    side === "home" ? "border-kcvv-green-bright/20" : "border-gray-200";
-
   return (
-    <div className={cn("rounded-lg border p-4", bgColor, borderColor)}>
-      {/* Team name header */}
-      <h3 className="font-title mb-4 text-lg font-bold text-gray-900">
+    <div>
+      {/* Team-column header: mono caps, ink top border. Stylistic seam between
+          the section heading above and the player rows below. */}
+      <h3 className="border-ink text-ink/70 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
         {teamName}
       </h3>
 
       {players.length === 0 ? (
-        <p className="text-sm text-gray-500">Geen opstelling beschikbaar</p>
+        <p className="text-ink-muted text-sm">Geen opstelling beschikbaar</p>
       ) : (
-        <div className="space-y-4">
-          {/* Starters */}
+        <div>
           {starters.length > 0 && (
-            <div>
-              <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
-                Basiself ({starters.length})
-              </h4>
-              <div className="space-y-1">
-                {starters.map((player, index) => (
-                  <PlayerRow
-                    key={player.id ?? `starter-${index}`}
-                    player={player}
-                    side={side}
-                  />
-                ))}
-              </div>
-            </div>
+            <ol className="list-none space-y-1">
+              {starters.map((player, index) => (
+                <li key={player.id ?? `starter-${index}`}>
+                  <PlayerRow player={player} />
+                </li>
+              ))}
+            </ol>
           )}
 
-          {/* Substitutes */}
           {substitutes.length > 0 && (
-            <div>
-              <h4 className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase">
-                Invallers ({substitutes.length})
+            <div className="mt-6">
+              {/* BANK divider — separates starters from bench. */}
+              <h4 className="border-ink text-ink/70 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
+                Bank
               </h4>
-              <div className="space-y-1">
+              <ol className="list-none space-y-1">
                 {substitutes.map((player, index) => (
-                  <PlayerRow
-                    key={player.id ?? `sub-${index}`}
-                    player={player}
-                    side={side}
-                  />
+                  <li key={player.id ?? `sub-${index}`}>
+                    <PlayerRow player={player} />
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
           )}
         </div>
@@ -315,17 +193,11 @@ function TeamLineup({
  * @param side - "home" or "away"; controls color styling for the jersey number badge and row accents.
  * @returns A JSX element representing the formatted player row for a lineup.
  */
-function PlayerRow({
-  player,
-  side,
-}: {
-  player: LineupPlayer;
-  side: "home" | "away";
-}) {
-  const numberBg =
-    side === "home"
-      ? "bg-kcvv-green-bright text-white"
-      : "bg-gray-700 text-white";
+function PlayerRow({ player }: { player: LineupPlayer }) {
+  // Keeper distinction: warm yellow number badge instead of the ink default.
+  // `isKeeper` is set caller-side (Sanity `player.keeper` for KCVV; jersey
+  // number = 1 heuristic for opponents).
+  const numberBg = player.isKeeper ? "bg-warm text-ink" : "bg-ink text-cream";
 
   // Determine if player has a substitution status to show
   const wasSubbedOut = player.status === "substituted";
@@ -337,50 +209,51 @@ function PlayerRow({
       {/* Substitution status icon */}
       <span className="flex w-4 items-center justify-center">
         {wasSubbedOut && (
-          <ArrowDown
-            className="text-red-500"
-            size={14}
-            aria-label="Gewisseld"
-          />
+          <ArrowDown className="text-alert" size={14} aria-label="Gewisseld" />
         )}
         {cameOn && (
           <ArrowUp
-            className="text-green-500"
+            className="text-jersey-deep"
             size={14}
             aria-label="Ingevallen"
           />
         )}
       </span>
 
-      {/* Jersey number */}
+      {/* Jersey number — bg-warm for keepers, bg-ink for outfielders. The
+          visible number stays the accessible name; the keeper hint ships as
+          an `sr-only` sibling so screen readers announce "11 Keeper" rather
+          than overriding the number entirely. */}
       {player.number !== undefined && (
         <span
           className={cn(
-            "flex h-7 w-7 items-center justify-center rounded text-xs font-bold",
+            "flex h-7 w-7 shrink-0 items-center justify-center",
+            "font-mono text-[12px] font-bold tracking-tight tabular-nums",
             numberBg,
           )}
         >
           {player.number}
+          {player.isKeeper && <span className="sr-only"> Keeper</span>}
         </span>
       )}
 
       {/* Player name */}
-      <span className="flex flex-1 items-center gap-1.5 text-sm text-gray-900">
-        <span>
+      <span className="text-ink flex min-w-0 flex-1 items-center gap-1.5">
+        <span className="font-display min-w-0 truncate text-[15px] italic">
           {player.name}
           {player.isCaptain && (
-            <span className="text-kcvv-green-bright ml-1.5 text-xs font-semibold">
-              (C)
+            <span className="text-ink-muted ml-1.5 font-mono text-[10px] tracking-[0.16em] not-italic">
+              [C]
             </span>
           )}
         </span>
         {/* Card icon */}
-        {player.card && <CardIcon cardType={player.card} />}
+        {player.card && <CardGlyph type={player.card} size={14} />}
       </span>
 
       {/* Minutes played for players with substitution status */}
       {hasSubStatus && player.minutesPlayed !== undefined && (
-        <span className="text-xs text-gray-500">
+        <span className="text-ink-muted font-mono text-[11px] tracking-[0.06em]">
           {player.minutesPlayed}&apos;
         </span>
       )}
@@ -393,13 +266,13 @@ function PlayerRow({
  */
 function LineupSkeleton() {
   return (
-    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-      <div className="mb-4 h-6 w-32 animate-pulse rounded bg-gray-200" />
+    <div>
+      <div className="border-ink bg-cream-soft mb-3 h-6 w-32 animate-pulse border-t" />
       <div className="space-y-2">
         {Array.from({ length: 11 }).map((_, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className="h-7 w-7 animate-pulse rounded bg-gray-200" />
-            <div className="h-4 flex-1 animate-pulse rounded bg-gray-200" />
+            <div className="bg-cream-soft h-7 w-7 animate-pulse" />
+            <div className="bg-cream-soft h-4 flex-1 animate-pulse" />
           </div>
         ))}
       </div>

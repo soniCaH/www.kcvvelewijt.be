@@ -3,7 +3,7 @@
  */
 
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { MatchLineup, type LineupPlayer } from "./MatchLineup";
 
 describe("MatchLineup", () => {
@@ -64,9 +64,11 @@ describe("MatchLineup", () => {
   };
 
   describe("rendering", () => {
-    it("renders title", () => {
+    // The "Opstellingen" heading moved up to <MatchLineupSection> in Phase 6.B
+    // (#1908). The primitive itself no longer owns the section heading.
+    it("does not own the section heading anymore", () => {
       render(<MatchLineup {...defaultProps} />);
-      expect(screen.getByText("Opstellingen")).toBeInTheDocument();
+      expect(screen.queryByText("Opstellingen")).not.toBeInTheDocument();
     });
 
     it("renders team names", () => {
@@ -93,34 +95,35 @@ describe("MatchLineup", () => {
   });
 
   describe("player grouping", () => {
-    it("groups starters and substitutes separately", () => {
+    it("renders the BANK divider when the team has substitutes", () => {
       render(<MatchLineup {...defaultProps} />);
-      // Both teams have "Basiself" sections, home team also has "Invallers"
-      const basiselfSections = screen.getAllByText(/Basiself/);
-      expect(basiselfSections.length).toBeGreaterThanOrEqual(2); // Both teams
-      const invallersSections = screen.getAllByText(/Invallers/);
-      expect(invallersSections.length).toBeGreaterThanOrEqual(1); // Home team has substitutes
+      // Home team has substitutes → BANK divider present.
+      expect(screen.getAllByText("Bank").length).toBeGreaterThanOrEqual(1);
     });
 
-    it("shows correct count in section headers", () => {
-      render(<MatchLineup {...defaultProps} />);
-      // Home team has 3 starters (including substituted) and 1 substitute
-      expect(screen.getByText("Basiself (3)")).toBeInTheDocument();
-      expect(screen.getByText("Invallers (1)")).toBeInTheDocument();
-      // Away team has 2 starters
-      expect(screen.getByText("Basiself (2)")).toBeInTheDocument();
+    it("omits the BANK divider when no substitutes are present", () => {
+      render(
+        <MatchLineup
+          {...defaultProps}
+          // Away team has zero substitutes in the default fixture; render
+          // both sides with only starters to make the assertion concrete.
+          homeLineup={mockHomeLineup.filter((p) => p.status === "starter")}
+          awayLineup={mockAwayLineup.filter((p) => p.status === "starter")}
+        />,
+      );
+      expect(screen.queryByText("Bank")).not.toBeInTheDocument();
     });
 
     it("includes substituted players in starters section", () => {
       render(<MatchLineup {...defaultProps} />);
-      expect(screen.getByText("Player Three")).toBeInTheDocument();
+      expect(screen.getByText(/Player Three/)).toBeInTheDocument();
     });
   });
 
   describe("captain indicator", () => {
-    it("shows (C) for captain", () => {
+    it("shows [C] for each captain", () => {
       render(<MatchLineup {...defaultProps} />);
-      const captainIndicators = screen.getAllByText("(C)");
+      const captainIndicators = screen.getAllByText("[C]");
       expect(captainIndicators).toHaveLength(2); // One for each team captain
     });
   });
@@ -207,14 +210,16 @@ describe("MatchLineup", () => {
         },
       ];
       render(<MatchLineup {...defaultProps} homeLineup={lineupWithSubbedIn} />);
-      // Should have 1 starter and 2 substitutes (subbed_in + substitute)
-      expect(screen.getByText("Basiself (1)")).toBeInTheDocument();
-      expect(screen.getByText("Invallers (2)")).toBeInTheDocument();
+      // Subbed-in players show alongside other substitutes under the BANK
+      // divider; the divider should render at least once (home side has subs).
+      expect(screen.getAllByText("Bank").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText(/Came On/)).toBeInTheDocument();
+      expect(screen.getByText(/Unused Sub/)).toBeInTheDocument();
     });
   });
 
   describe("unknown status players", () => {
-    it("groups unknown status players in substitutes section", () => {
+    it("groups unknown status players under the BANK divider", () => {
       const lineupWithUnknown: LineupPlayer[] = [
         {
           id: 1,
@@ -232,10 +237,8 @@ describe("MatchLineup", () => {
         },
       ];
       render(<MatchLineup {...defaultProps} homeLineup={lineupWithUnknown} />);
-      // Should have 1 starter and 1 substitute (unknown)
-      expect(screen.getByText("Basiself (1)")).toBeInTheDocument();
-      expect(screen.getByText("Invallers (1)")).toBeInTheDocument();
-      expect(screen.getByText("Unknown Player")).toBeInTheDocument();
+      expect(screen.getAllByText("Bank").length).toBeGreaterThanOrEqual(1);
+      expect(screen.getByText(/Unknown Player/)).toBeInTheDocument();
     });
   });
 
@@ -299,14 +302,48 @@ describe("MatchLineup", () => {
   });
 
   describe("styling", () => {
-    it("applies different styling for home and away teams", () => {
-      const { container } = render(<MatchLineup {...defaultProps} />);
-      // Home team should have green-tinted background
-      expect(
-        container.querySelector(".bg-kcvv-green-bright\\/5"),
-      ).toBeInTheDocument();
-      // Away team should have gray background
-      expect(container.querySelector(".bg-gray-50")).toBeInTheDocument();
+    it("renders a warm-bg number badge for keepers (isKeeper=true)", () => {
+      const keeperLineup: LineupPlayer[] = [
+        {
+          id: 1,
+          name: "Keeper Player",
+          number: 1,
+          isCaptain: false,
+          status: "starter",
+          isKeeper: true,
+        },
+      ];
+      const { container } = render(
+        <MatchLineup {...defaultProps} homeLineup={keeperLineup} />,
+      );
+      const badge = container.querySelector(".bg-warm");
+      expect(badge).toBeInTheDocument();
+      // The visible jersey number stays the accessible name; the keeper
+      // designation is exposed via an sr-only sibling so screen readers
+      // announce "1 Keeper" rather than overwriting the number.
+      expect(badge).toHaveTextContent(/1\s*Keeper/);
+    });
+
+    it("renders an ink-bg number badge for outfield players", () => {
+      const outfieldLineup: LineupPlayer[] = [
+        {
+          id: 1,
+          name: "Outfield Player",
+          number: 7,
+          isCaptain: false,
+          status: "starter",
+          isKeeper: false,
+        },
+      ];
+      const { container } = render(
+        <MatchLineup
+          {...defaultProps}
+          homeLineup={outfieldLineup}
+          awayLineup={[]}
+        />,
+      );
+      expect(container.querySelector(".bg-ink")).toBeInTheDocument();
+      expect(container.querySelector(".bg-warm")).not.toBeInTheDocument();
     });
   });
 
@@ -378,7 +415,7 @@ describe("MatchLineup", () => {
           awayLineup={[]}
         />,
       );
-      expect(screen.getByText("(C)")).toBeInTheDocument();
+      expect(screen.getByText("[C]")).toBeInTheDocument();
       expect(screen.getByLabelText("Gele kaart")).toBeInTheDocument();
     });
 
@@ -458,42 +495,10 @@ describe("MatchLineup", () => {
       expect(screen.getByLabelText("Tweede gele kaart")).toBeInTheDocument();
     });
 
-    it("handles invalid card type gracefully and logs warning in development", () => {
-      // Mock console.warn to verify it's called
-      const consoleWarnSpy = vi
-        .spyOn(console, "warn")
-        .mockImplementation(() => {});
-      // Set to development mode to trigger warning
-      vi.stubEnv("NODE_ENV", "development");
-
-      // Test the exhaustiveness check in CardIcon by using type assertion
-      // This tests the defensive default case that should never be reached in normal usage
-      const lineupWithInvalidCard: LineupPlayer[] = [
-        {
-          id: 1,
-          name: "Invalid Card Player",
-          number: 7,
-          isCaptain: false,
-          status: "starter",
-          // @ts-expect-error - Intentionally testing invalid card type for exhaustiveness check
-          card: "invalid",
-        },
-      ];
-
-      // Component should render without crashing even with invalid card type
-      render(
-        <MatchLineup {...defaultProps} homeLineup={lineupWithInvalidCard} />,
-      );
-      expect(screen.getByText("Invalid Card Player")).toBeInTheDocument();
-
-      // Verify warning was logged
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Unexpected card type received: invalid",
-      );
-
-      // Restore original state
-      consoleWarnSpy.mockRestore();
-      vi.unstubAllEnvs();
-    });
+    // The defensive runtime `console.warn` for unknown CardType used to live
+    // in the inline `CardIcon` switch. Phase 6.B (#1908) replaced it with
+    // the shared `<CardGlyph>` which relies on TypeScript literal-union
+    // exhaustiveness; the BFF's `decodeUnknown` rejects unknown values
+    // before they reach the UI. Test removed.
   });
 });

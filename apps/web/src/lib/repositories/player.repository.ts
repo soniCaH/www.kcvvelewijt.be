@@ -84,9 +84,49 @@ export function toPlayerVM(
   };
 }
 
+// ─── Keeper PSD-id lookup ────────────────────────────────────────────────────
+//
+// Returns just the PSD ids of players flagged `keeper: true` in Sanity. The
+// payload is tiny (one string per keeper, ~30 IDs across the club). Used by
+// match-detail surfaces to render the keeper visual distinction.
+//
+// Caching strategy:
+//   - Sanity client already runs with `useCdn: true` → first-hop cache.
+//   - Page-level ISR on /wedstrijd/[matchId] revalidates every 5 min.
+//   - On top of those, we memoise the result in module scope for 24h:
+//     keeper status changes rarely (PSD-synced) and a stale answer for a
+//     warm worker is acceptable. Cold starts re-fetch; no global state leaks
+//     between deployments.
+//
+// If a future tag-driven invalidation is wired up (e.g. from the PSD sync
+// worker), promote this to `unstable_cache` with a `keepers` tag and drop
+// the module-scope cache.
+export const KEEPER_PSD_IDS_QUERY = defineQuery(
+  `*[_type == "player" && keeper == true && archived != true].psdId`,
+);
+
+const KEEPER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+let keeperCache: { value: ReadonlySet<string>; expiresAt: number } | null =
+  null;
+
+/**
+ * Test-only: clear the module-scope keeper cache. Not exported via the
+ * repository tag because no production caller needs it.
+ */
+export function __resetKeeperCacheForTests() {
+  keeperCache = null;
+}
+
 export interface PlayerRepositoryInterface {
   readonly findAll: () => Effect.Effect<PlayerVM[]>;
   readonly findByPsdId: (psdId: string) => Effect.Effect<PlayerVM | null>;
+  /**
+   * Returns the set of PSD ids whose Sanity `player` document is flagged
+   * as a keeper. PSD ids are strings in Sanity (and may not match the
+   * `Match.home_team`/`away_team` `id` field type) — callers should
+   * coerce to string before membership testing.
+   */
+  readonly findKeeperPsdIds: () => Effect.Effect<ReadonlySet<string>>;
 }
 
 export class PlayerRepository extends Context.Tag("PlayerRepository")<
@@ -103,4 +143,18 @@ export const PlayerRepositoryLive = Layer.succeed(PlayerRepository, {
     fetchGroq<PLAYER_BY_PSD_ID_QUERY_RESULT>(PLAYER_BY_PSD_ID_QUERY, {
       psdId,
     }).pipe(Effect.map((row) => (row ? toPlayerVM(row) : null))),
+  findKeeperPsdIds: () =>
+    Effect.gen(function* () {
+      const now = Date.now();
+      if (keeperCache && keeperCache.expiresAt > now) {
+        return keeperCache.value;
+      }
+      const rows =
+        yield* fetchGroq<readonly (string | null)[]>(KEEPER_PSD_IDS_QUERY);
+      const value: ReadonlySet<string> = new Set(
+        rows.filter((id): id is string => typeof id === "string" && id !== ""),
+      );
+      keeperCache = { value, expiresAt: now + KEEPER_CACHE_TTL_MS };
+      return value;
+    }),
 });

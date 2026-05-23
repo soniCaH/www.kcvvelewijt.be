@@ -78,11 +78,18 @@ describe("MatchEvents", () => {
       expect(screen.getByText("Thomas Peeters")).toBeInTheDocument();
     });
 
-    it("renders team names", () => {
+    it("renders a team-logo chip per event row in chronological mode", () => {
       render(<MatchEvents {...defaultProps} />);
-      // Team names appear next to each event
-      const homeTeamMentions = screen.getAllByText("KCVV Elewijt");
-      expect(homeTeamMentions.length).toBeGreaterThanOrEqual(1);
+      // The default fixture has 5 home events + 4 away events = 9 total.
+      // The typographic-shield fallback renders a "K" chip for KCVV and a
+      // "K" chip for KFC. Both teams' names start with K, so just look for
+      // the aria-label = full team name.
+      expect(
+        screen.getAllByLabelText("KCVV Elewijt").length,
+      ).toBeGreaterThanOrEqual(1);
+      expect(
+        screen.getAllByLabelText("KFC Turnhout").length,
+      ).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -136,17 +143,22 @@ describe("MatchEvents", () => {
   describe("grouping", () => {
     it("groups chronologically by default", () => {
       const { container } = render(<MatchEvents {...defaultProps} />);
-      // Should have single list, not grid
-      expect(container.querySelector(".grid")).not.toBeInTheDocument();
+      // Chronological mode renders a flat <ol> (not the two-column team grid)
+      // — the outer wrapper is an ordered list and every row owns a 4-col grid.
+      expect(container.querySelector("ol")).toBeInTheDocument();
+      // The two-column team grid only exists in groupBy="team" mode.
+      expect(
+        container.querySelector(".md\\:grid-cols-2"),
+      ).not.toBeInTheDocument();
     });
 
     it("groups by team when specified", () => {
       const { container } = render(
         <MatchEvents {...defaultProps} groupBy="team" />,
       );
-      // Should have grid layout
-      expect(container.querySelector(".grid")).toBeInTheDocument();
-      // Should show both team headers
+      // groupBy="team" wraps a 2-column md grid around per-team lists.
+      expect(container.querySelector(".md\\:grid-cols-2")).toBeInTheDocument();
+      // Should show both team headers (full team name in the column headers).
       expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
       expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
     });
@@ -165,7 +177,8 @@ describe("MatchEvents", () => {
         },
       ];
       render(<MatchEvents {...defaultProps} events={penaltyEvents} />);
-      expect(screen.getByText("(pen)")).toBeInTheDocument();
+      // Phase 6.B copy: "(pen)" → "(strafschop)" per d3 lock.
+      expect(screen.getByText("(strafschop)")).toBeInTheDocument();
     });
 
     it("shows own goal indicator", () => {
