@@ -146,6 +146,9 @@ export const MinimalData: Story = {
   },
 };
 
+// vr-skip — skeleton uses `animate-pulse`, so VR baselines capture
+// non-deterministic frames of the pulse animation. The static-shape stories
+// above already cover layout regression for the loaded card.
 export const Loading: Story = {
   tags: ["vr-skip"],
   args: {
