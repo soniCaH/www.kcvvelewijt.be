@@ -7,10 +7,12 @@ import {
   transformHomeTeam,
   transformAwayTeam,
   transformLineupPlayer,
+  enrichLineupWithKeeperFlag,
   extractMatchTime,
   formatMatchTitle,
   formatMatchDescription,
 } from "./utils";
+import type { LineupPlayer } from "@/components/match/MatchLineup";
 import type {
   MatchDetail,
   MatchLineupPlayer,
@@ -276,5 +278,101 @@ describe("formatMatchDescription", () => {
     });
     const result = formatMatchDescription(match);
     expect(result).toContain("3 - 1");
+  });
+});
+
+describe("enrichLineupWithKeeperFlag", () => {
+  const keeperIds: ReadonlySet<string> = new Set(["100", "200"]);
+  function makePlayer(overrides: Partial<LineupPlayer> = {}): LineupPlayer {
+    return {
+      id: 100,
+      name: "Ben Lievens",
+      number: 11,
+      isCaptain: false,
+      status: "starter",
+      ...overrides,
+    };
+  }
+
+  it("flags KCVV-side players whose PSD id is in the Sanity keeper set", () => {
+    const player = makePlayer({ id: 100, number: 11 });
+    const enriched = enrichLineupWithKeeperFlag(
+      player,
+      "home",
+      "home",
+      keeperIds,
+    );
+    expect(enriched.isKeeper).toBe(true);
+  });
+
+  it("does NOT flag KCVV-side outfield players (id not in keeper set)", () => {
+    const player = makePlayer({ id: 999, number: 1 });
+    const enriched = enrichLineupWithKeeperFlag(
+      player,
+      "home",
+      "home",
+      keeperIds,
+    );
+    // Even though jersey=1, the Sanity lookup is authoritative on the KCVV side.
+    expect(enriched.isKeeper).toBe(false);
+  });
+
+  it("falls back to jersey #1 = keeper for opponent-side players", () => {
+    const keeper = makePlayer({ id: 999, number: 1 });
+    const outfield = makePlayer({ id: 998, number: 7 });
+    expect(
+      enrichLineupWithKeeperFlag(keeper, "away", "home", keeperIds).isKeeper,
+    ).toBe(true);
+    expect(
+      enrichLineupWithKeeperFlag(outfield, "away", "home", keeperIds).isKeeper,
+    ).toBe(false);
+  });
+
+  it("falls back to jersey #1 on BOTH sides when kcvvSide is undefined", () => {
+    const sanityKeeper = makePlayer({ id: 100, number: 7 });
+    const numberOneOutfield = makePlayer({ id: 999, number: 1 });
+    // kcvvSide=undefined → never trust the Sanity lookup, use #1 everywhere.
+    expect(
+      enrichLineupWithKeeperFlag(sanityKeeper, "home", undefined, keeperIds)
+        .isKeeper,
+    ).toBe(false);
+    expect(
+      enrichLineupWithKeeperFlag(
+        numberOneOutfield,
+        "home",
+        undefined,
+        keeperIds,
+      ).isKeeper,
+    ).toBe(true);
+  });
+
+  it("does not flag a KCVV-side player whose PSD id is undefined", () => {
+    const player = makePlayer({ id: undefined, number: 1 });
+    const enriched = enrichLineupWithKeeperFlag(
+      player,
+      "home",
+      "home",
+      keeperIds,
+    );
+    expect(enriched.isKeeper).toBe(false);
+  });
+
+  it("falls back to jersey #1 on BOTH sides when keeperPsdIds is undefined (Sanity outage)", () => {
+    const kcvvKeeper = makePlayer({ id: 100, number: 1 });
+    const kcvvOutfield = makePlayer({ id: 100, number: 7 });
+    const opponentKeeper = makePlayer({ id: 999, number: 1 });
+    // keeperPsdIds=undefined → never trust Sanity; jersey-#1 only.
+    expect(
+      enrichLineupWithKeeperFlag(kcvvKeeper, "home", "home", undefined)
+        .isKeeper,
+    ).toBe(true);
+    expect(
+      enrichLineupWithKeeperFlag(kcvvOutfield, "home", "home", undefined)
+        .isKeeper,
+    ).toBe(false);
+    expect(
+      enrichLineupWithKeeperFlag(opponentKeeper, "away", "home", undefined)
+        .isKeeper,
+    ).toBe(true);
   });
 });

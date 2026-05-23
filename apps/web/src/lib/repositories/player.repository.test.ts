@@ -13,6 +13,7 @@ import { sanityClient } from "../sanity/client";
 import {
   PlayerRepository,
   PlayerRepositoryLive,
+  __resetKeeperCacheForTests,
   type PlayerVM,
 } from "./player.repository";
 
@@ -260,6 +261,63 @@ describe("PlayerRepository", () => {
       );
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe("findKeeperPsdIds", () => {
+    it("returns the set of keeper PSD ids from the GROQ result", async () => {
+      __resetKeeperCacheForTests();
+      mockFetch.mockResolvedValueOnce(["12345", "67890", null]);
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PlayerRepository;
+          return yield* repo.findKeeperPsdIds();
+        }),
+      );
+
+      expect(result.has("12345")).toBe(true);
+      expect(result.has("67890")).toBe(true);
+      expect(result.size).toBe(2);
+    });
+
+    it("memoises the result for the cache TTL", async () => {
+      __resetKeeperCacheForTests();
+      mockFetch.mockClear();
+      mockFetch.mockResolvedValueOnce(["12345"]);
+
+      const first = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PlayerRepository;
+          return yield* repo.findKeeperPsdIds();
+        }),
+      );
+      const second = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PlayerRepository;
+          return yield* repo.findKeeperPsdIds();
+        }),
+      );
+
+      // The Sanity client should have been hit exactly once across the two
+      // calls — the second read came from the module-scope cache.
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(second).toBe(first);
+    });
+
+    it("filters out null and empty-string PSD ids defensively", async () => {
+      __resetKeeperCacheForTests();
+      mockFetch.mockResolvedValueOnce([null, "", "42"]);
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PlayerRepository;
+          return yield* repo.findKeeperPsdIds();
+        }),
+      );
+
+      expect(result.size).toBe(1);
+      expect(result.has("42")).toBe(true);
     });
   });
 });

@@ -91,10 +91,19 @@ export class MatchLineup extends S.Class<MatchLineup>("MatchLineup")({
   away: S.Array(MatchLineupPlayer),
 }) {}
 
-/** Event type for match events */
+/**
+ * Event type for match events.
+ *
+ * `second_yellow` is distinct from `red_card`: a second yellow card during
+ * a match still ends in a red, but reads differently to a fan and ships a
+ * distinct stacked-card glyph in the UI. The BFF maps PSD's
+ * `subtype: "double_yellow"` to this value; a direct red still maps to
+ * `red_card`.
+ */
 export const MatchEventType = S.Literal(
   "goal",
   "yellow_card",
+  "second_yellow",
   "red_card",
   "substitution",
 );
