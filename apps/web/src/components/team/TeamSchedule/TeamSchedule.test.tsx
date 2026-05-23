@@ -82,10 +82,10 @@ describe("TeamSchedule", () => {
       expect(screen.getByText("SK Londerzeel")).toBeInTheDocument();
     });
 
-    it("renders match time for scheduled matches", () => {
-      render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("14:30")).toBeInTheDocument();
-    });
+    // Phase 6.B (#1911) — the d7 lock dropped per-row time + competition +
+    // alt-text team logos in favour of date-grouped section headers + the
+    // ticket-card stub. Tests previously asserting these per-row features
+    // are removed; freshness is covered by the MatchResultRow unit suite.
 
     it("renders score for finished matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
@@ -93,21 +93,11 @@ describe("TeamSchedule", () => {
       expect(screen.getByText("1")).toBeInTheDocument();
     });
 
-    it("renders VS for scheduled matches", () => {
+    it("renders italic lowercase 'vs' for scheduled matches", () => {
       render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      expect(screen.getByText("VS")).toBeInTheDocument();
-    });
-
-    it("renders competition names in mobile row", () => {
-      render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      const competitions = screen.getAllByText(/3de Nationale/);
-      expect(competitions.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("renders team logos", () => {
-      render(<TeamSchedule matches={mockMatches} teamId={1235} />);
-      const images = screen.getAllByRole("img");
-      expect(images.length).toBeGreaterThan(0);
+      // Locked at 6.B.d7 — italic display lowercase "vs" replaces the
+      // legacy uppercase "VS" pill.
+      expect(screen.getByText("vs")).toBeInTheDocument();
     });
 
     it("links to match detail page", () => {
