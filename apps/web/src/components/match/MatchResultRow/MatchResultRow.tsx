@@ -134,12 +134,18 @@ export function MatchResultRow({
 
   // Compose an aria-label that surfaces the outcome to screen readers — the
   // visible W/L/G pill carries the outcome only via `title` (unreliable for
-  // SR) + a single letter (cryptic). Append the localised result + score
-  // when both are known.
+  // SR) + a single letter (cryptic). Append:
+  //   - the localised outcome label (Winst / Verlies / Gelijkspel) when a
+  //     result is known (KCVV-side rows), AND
+  //   - the score whenever the row visibly renders one — even on rows where
+  //     `isHome` is undefined (e.g. archive / opponent-of-the-week views).
+  //     Without this branch SR users miss the score entirely.
   const ariaLabelParts = [`${match.homeTeam.name} — ${match.awayTeam.name}`];
-  if (result && scored) {
+  if (scored) {
     ariaLabelParts.push(
-      `${RESULT_PILL_TITLE[result]} ${homeScore}-${awayScore}`,
+      result
+        ? `${RESULT_PILL_TITLE[result]} ${homeScore}-${awayScore}`
+        : `${homeScore}-${awayScore}`,
     );
   }
 

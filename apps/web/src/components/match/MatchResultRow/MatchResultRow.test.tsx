@@ -278,6 +278,26 @@ describe("MatchResultRow", () => {
       );
     });
 
+    it("includes the score in aria-label even when isHome is undefined", () => {
+      // Archive / opponent-of-the-week views render scores without a tracked
+      // side, so `result` is null but the score IS visible. SR users still
+      // need access to the score.
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({
+            homeScore: 3,
+            awayScore: 1,
+            isHome: undefined,
+          })}
+        />,
+      );
+      expect(screen.getByRole("link")).toHaveAttribute(
+        "aria-label",
+        "KCVV Elewijt — RC Mechelen, 3-1",
+      );
+    });
+
     it("applies the canonical press-down hover classes", () => {
       render(<MatchResultRow {...baseProps} />);
       const link = screen.getByRole("link");
