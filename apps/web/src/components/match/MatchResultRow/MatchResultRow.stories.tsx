@@ -1,10 +1,3 @@
-/**
- * MatchResultRow Component Stories
- *
- * Match row card with result badges (W/L/G), used by TeamSchedule.
- * Supports light and dark themes.
- */
-
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchResultRow } from "./MatchResultRow";
 import type { ScheduleMatch } from "../types";
@@ -14,204 +7,179 @@ const KCVV_LOGO =
 const OPPONENT_LOGO =
   "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1";
 
+const kcvv = { id: 1235, name: "KCVV Elewijt", logo: KCVV_LOGO };
+const opponent = { id: 59, name: "RC Mechelen", logo: OPPONENT_LOGO };
+
 const baseMatch: ScheduleMatch = {
-  id: 1001,
-  date: new Date("2025-11-08T14:00:00Z"),
-  time: "15:00",
-  homeTeam: {
-    id: 1235,
-    name: "KCVV Elewijt",
-    logo: KCVV_LOGO,
-  },
-  awayTeam: {
-    id: 59,
-    name: "KFC Turnhout",
-    logo: OPPONENT_LOGO,
-  },
-  status: "scheduled",
-  competition: "3de Nationale",
+  id: 12345,
+  date: new Date("2025-09-13T13:30:00Z"),
+  time: "14:30",
+  homeTeam: kcvv,
+  awayTeam: opponent,
+  status: "finished",
+  competition: "3e provinciale A",
   isHome: true,
 };
 
 const meta = {
   title: "Features/Matches/MatchResultRow",
   component: MatchResultRow,
-  parameters: {
-    layout: "padded",
-    docs: {
-      description: {
-        component: `
-Match row card for schedule sections. Supports light and dark themes.
-
-**Features:**
-- W/L/G result badges with color coding
-- "Volgende" badge for next match
-- Status badges (postponed, stopped, forfeited)
-- Logo placeholders for teams without logos
-- Light theme: white card with colored left border for results
-- Dark theme: dark bg with hover effects
-        `,
-      },
-    },
-  },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
+  parameters: { layout: "padded" },
+  decorators: [
+    (Story) => (
+      <div className="bg-cream-soft min-h-[180px] p-8">
+        <div className="mx-auto max-w-[640px]">
+          <Story />
+        </div>
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof MatchResultRow>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/**
- * Upcoming match — shows VS placeholder and time
- */
-export const Upcoming: Story = {
-  args: {
-    match: baseMatch,
-    href: "/wedstrijd/1001",
-  },
-};
+const baseArgs = {
+  match: baseMatch,
+  href: "/wedstrijd/12345",
+} as const;
 
-/**
- * Win — green W badge with green left border
- */
+// ─── Result outcomes ────────────────────────────────────────────────────
+
 export const Win: Story = {
   args: {
-    match: {
-      ...baseMatch,
-      homeScore: 3,
-      awayScore: 1,
-      status: "finished",
-    },
-    href: "/wedstrijd/1001",
+    ...baseArgs,
+    match: { ...baseMatch, homeScore: 3, awayScore: 1 },
   },
 };
 
-/**
- * Draw — yellow G badge with yellow left border
- */
 export const Draw: Story = {
   args: {
-    match: {
-      ...baseMatch,
-      homeScore: 2,
-      awayScore: 2,
-      status: "finished",
-    },
-    href: "/wedstrijd/1001",
+    ...baseArgs,
+    match: { ...baseMatch, homeScore: 1, awayScore: 1 },
   },
 };
 
-/**
- * Loss — red L badge with red left border
- */
 export const Loss: Story = {
   args: {
+    ...baseArgs,
+    match: { ...baseMatch, homeScore: 0, awayScore: 2 },
+  },
+};
+
+// ─── KCVV away (isHome=false) ──────────────────────────────────────────
+
+export const KcvvAwayWin: Story = {
+  args: {
+    ...baseArgs,
     match: {
       ...baseMatch,
+      homeTeam: opponent,
+      awayTeam: kcvv,
       homeScore: 0,
       awayScore: 2,
-      status: "finished",
+      isHome: false,
     },
-    href: "/wedstrijd/1001",
   },
 };
 
-/**
- * Postponed — shows "Uitgesteld" badge
- */
+// ─── Edge states (corner-stamp badge) ──────────────────────────────────
+
 export const Postponed: Story = {
   args: {
-    match: {
-      ...baseMatch,
-      status: "postponed",
-    },
-    href: "/wedstrijd/1001",
+    ...baseArgs,
+    match: { ...baseMatch, status: "postponed" },
   },
 };
 
-/**
- * Next match — green ring and "Volgende" badge
- */
-export const NextMatch: Story = {
+export const Cancelled: Story = {
   args: {
-    match: baseMatch,
+    ...baseArgs,
+    match: { ...baseMatch, status: "cancelled" },
+  },
+};
+
+export const Forfeited: Story = {
+  args: {
+    ...baseArgs,
+    match: {
+      ...baseMatch,
+      status: "forfeited",
+      homeScore: 5,
+      awayScore: 0,
+    },
+  },
+};
+
+export const Stopped: Story = {
+  args: {
+    ...baseArgs,
+    match: {
+      ...baseMatch,
+      status: "stopped",
+      homeScore: 1,
+      awayScore: 1,
+    },
+  },
+};
+
+// ─── Next-up annotation ────────────────────────────────────────────────
+
+export const IsNext: Story = {
+  args: {
+    ...baseArgs,
     isNext: true,
-    href: "/wedstrijd/1001",
+    match: { ...baseMatch, status: "scheduled", time: "14:30" },
   },
 };
 
-/**
- * Away match — shows "Uit · Competitie" label below the match row
- */
-export const AwayMatch: Story = {
-  args: {
-    match: {
-      ...baseMatch,
-      isHome: false,
-      homeTeam: { id: 59, name: "KFC Turnhout", logo: OPPONENT_LOGO },
-      awayTeam: { id: 1235, name: "KCVV Elewijt", logo: KCVV_LOGO },
-    },
-    href: "/wedstrijd/1001",
-  },
-};
+// ─── Stress + fallbacks ────────────────────────────────────────────────
 
-/**
- * Without logos — shows initial placeholders
- */
-export const WithoutLogos: Story = {
+export const NoLogos: Story = {
   args: {
+    ...baseArgs,
     match: {
       ...baseMatch,
       homeTeam: { id: 1235, name: "KCVV Elewijt" },
-      awayTeam: { id: 59, name: "KFC Turnhout" },
+      awayTeam: { id: 59, name: "RC Mechelen" },
+      homeScore: 2,
+      awayScore: 0,
     },
-    href: "/wedstrijd/1001",
   },
 };
 
-const darkBgDecorator = (Story: () => React.ReactNode) => (
-  <div className="bg-kcvv-black -m-4 p-8">
-    <Story />
-  </div>
-);
-
-/**
- * Dark theme — for use in dark background sections
- */
-export const DarkTheme: Story = {
+export const LongTeamNames: Story = {
   args: {
-    match: baseMatch,
-    theme: "dark",
-    href: "/wedstrijd/1001",
-  },
-  decorators: [darkBgDecorator],
-};
-
-/**
- * Dark theme with score — W badge on dark background
- */
-export const DarkThemeWin: Story = {
-  args: {
+    ...baseArgs,
     match: {
       ...baseMatch,
-      homeScore: 3,
-      awayScore: 1,
-      status: "finished",
+      homeTeam: {
+        id: 1235,
+        name: "KFC Sint-Stevens-Woluwe-Diegem",
+        logo: KCVV_LOGO,
+      },
+      awayTeam: {
+        id: 59,
+        name: "Royal Antwerpen-Borgerhout SK",
+        logo: OPPONENT_LOGO,
+      },
+      homeScore: 2,
+      awayScore: 2,
     },
-    theme: "dark",
-    href: "/wedstrijd/1001",
   },
-  decorators: [darkBgDecorator],
 };
 
-/**
- * Dark theme next match
- */
-export const DarkThemeNextMatch: Story = {
+export const NonMember: Story = {
   args: {
-    match: baseMatch,
-    theme: "dark",
-    isNext: true,
-    href: "/wedstrijd/1001",
+    ...baseArgs,
+    match: {
+      ...baseMatch,
+      // No `isHome` → no team highlight + no result pill (the row is being
+      // viewed without a tracked side, e.g. an opponent-of-the-week panel).
+      isHome: undefined,
+      homeScore: 3,
+      awayScore: 1,
+    },
   },
-  decorators: [darkBgDecorator],
 };

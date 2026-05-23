@@ -1,39 +1,17 @@
-/**
- * MatchResultRow Component
- *
- * A single match row card displaying teams, scores, status badges,
- * and result highlighting. Used by TeamSchedule to render each match.
- *
- * Supports light and dark themes — same card layout, different colors.
- */
-
 import Image from "next/image";
 import Link from "next/link";
+import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
 import { getResultColor } from "@/lib/utils/match-display";
 import { MatchStatusBadge } from "../MatchStatusBadge";
-import type { ScheduleMatch } from "../types";
+import type { ScheduleMatch, ScheduleTeam } from "../types";
 
 export interface MatchResultRowProps {
-  /** Match data */
   match: ScheduleMatch;
-  /** Whether this is the next upcoming match */
+  /** When true, the row is decorated as the next upcoming fixture. */
   isNext?: boolean;
-  /** Link destination for the match detail page */
+  /** Detail-page href; wraps the entire row. */
   href: string;
-  /** Theme variant */
-  theme?: "light" | "dark";
-}
-
-/**
- * Format date in Dutch locale
- */
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("nl-BE", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
 }
 
 type Result = "win" | "loss" | "draw" | null;
@@ -51,262 +29,220 @@ function getResult(match: ScheduleMatch): Result {
   return getResultColor(match.homeScore, match.awayScore, match.isHome);
 }
 
-const resultBadgeConfig: Record<
-  "win" | "loss" | "draw",
-  { label: string; className: string }
-> = {
-  win: {
-    label: "W",
-    className: "bg-kcvv-green-bright/15 text-kcvv-green-bright",
-  },
-  loss: { label: "L", className: "bg-red-500/15 text-red-400" },
-  draw: { label: "G", className: "bg-yellow-500/15 text-yellow-400" },
+interface StubDateParts {
+  day: string;
+  month: string;
+}
+
+function formatStubDate(date: Date): StubDateParts {
+  const dt = DateTime.fromJSDate(date).setLocale("nl");
+  return {
+    day: dt.toFormat("d"),
+    // 3-letter Dutch abbreviation, lowercase, period stripped. "juni" → "jun".
+    month: dt.toFormat("MMM").replace(/\.$/, "").toLowerCase(),
+  };
+}
+
+function TeamShield({ team }: { team: ScheduleTeam }) {
+  if (team.logo) {
+    return (
+      <Image
+        src={team.logo}
+        alt=""
+        width={20}
+        height={20}
+        unoptimized
+        className="h-5 w-5 shrink-0 object-contain"
+      />
+    );
+  }
+  const initial = team.name.trim().charAt(0).toLocaleUpperCase("nl-BE") || "·";
+  return (
+    <span
+      aria-hidden="true"
+      className="border-ink bg-cream-soft text-ink font-display inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[10px] leading-none font-black italic"
+    >
+      {initial}
+    </span>
+  );
+}
+
+const RESULT_PILL_CLASS: Record<"win" | "loss" | "draw", string> = {
+  win: "bg-jersey text-ink",
+  draw: "bg-cream-soft text-ink border border-ink",
+  // Lock spec was `bg-warm text-cream`; cream-on-warm trips axe at ~2.7:1.
+  // Same trade as the MatchStatusBadge STOP override (#1916) — dark text
+  // preserves the severity-tier visual signal without the contrast cliff.
+  loss: "bg-warm text-ink",
 };
 
-/** Result-colored left border (light theme only) */
-const resultBorderLight: Record<"win" | "loss" | "draw", string> = {
-  win: "border-l-4 border-l-kcvv-success",
-  loss: "border-l-4 border-l-kcvv-alert",
-  draw: "border-l-4 border-l-kcvv-warning",
+const RESULT_PILL_LABEL: Record<"win" | "loss" | "draw", string> = {
+  win: "W",
+  draw: "G",
+  loss: "L",
 };
 
+const RESULT_PILL_TITLE: Record<"win" | "loss" | "draw", string> = {
+  win: "Winst",
+  draw: "Gelijkspel",
+  loss: "Verlies",
+};
+
+function ResultPill({ result }: { result: "win" | "loss" | "draw" }) {
+  return (
+    <span
+      data-result={result}
+      title={RESULT_PILL_TITLE[result]}
+      className={cn(
+        "inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center font-mono text-[11px] font-bold tracking-[0.04em]",
+        RESULT_PILL_CLASS[result],
+      )}
+    >
+      {RESULT_PILL_LABEL[result]}
+    </span>
+  );
+}
+
+/**
+ * Finished-match row card for `<TeamSchedule>`. Mini-teaser-row vocabulary
+ * locked at 6.B.d7 — a scaled-down `<MatchTeaser>`:
+ *
+ *   - **Left stub (~64px)** — centred display-big day (18px, weight 900)
+ *     over italic display Dutch month abbreviation ("jun"). `bg-cream-soft`,
+ *     2px dashed ink right border.
+ *   - **Body** — 3-col grid (home `1fr` / score `auto` / away `1fr`) with
+ *     italic display team names; the tracked team (`match.isHome`) gets
+ *     `font-semibold`. Display-big score 16px / 900.
+ *   - **Result pill** — 22×22 square at the row's right edge, separated by
+ *     a 1px dashed ink-muted vertical divider. W/G/L per result.
+ *
+ * Whole row wraps in a `<Link>` with the canonical press-down hover. Light
+ * theme only (the sole consumer `<TeamSchedule>` is light).
+ */
 export function MatchResultRow({
   match,
   isNext = false,
   href,
-  theme = "light",
 }: MatchResultRowProps) {
-  const isDark = theme === "dark";
   const isMember = match.isHome !== undefined;
   const isHome = match.isHome ?? false;
   const scored = hasScores(match);
   const homeScore = scored ? match.homeScore : undefined;
   const awayScore = scored ? match.awayScore : undefined;
-
   const result = getResult(match);
+  const stubDate = formatStubDate(match.date);
+
+  // Compose an aria-label that surfaces the outcome to screen readers — the
+  // visible W/L/G pill carries the outcome only via `title` (unreliable for
+  // SR) + a single letter (cryptic). Append the localised result + score
+  // when both are known.
+  const ariaLabelParts = [`${match.homeTeam.name} — ${match.awayTeam.name}`];
+  if (result && scored) {
+    ariaLabelParts.push(
+      `${RESULT_PILL_TITLE[result]} ${homeScore}-${awayScore}`,
+    );
+  }
 
   return (
     <Link
       href={href}
+      data-component="match-result-row"
+      aria-label={ariaLabelParts.join(", ")}
       className={cn(
-        "rounded-card block p-4 transition-shadow",
-        isDark
-          ? cn(
-              "bg-white/[0.03] hover:bg-white/[0.07]",
-              isNext && "ring-kcvv-green-bright/30 ring-2",
-            )
-          : cn(
-              "border bg-white hover:shadow-md",
-              isNext
-                ? "border-kcvv-green-bright ring-kcvv-green-bright/20 ring-2"
-                : "border-gray-200",
-              result && resultBorderLight[result],
-            ),
+        "border-ink bg-cream shadow-paper-sm relative grid",
+        "grid-cols-[64px_1fr_auto] overflow-visible border-2",
+        "motion-safe:transition-all motion-safe:duration-300",
+        "motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 motion-safe:hover:shadow-none",
+        isNext && "ring-jersey-deep ring-2 ring-offset-1",
       )}
     >
-      {/* Header row: date, time, competition (sm+ only — footer shows it on mobile).
-         Competition is intentionally hidden on mobile (hidden sm:block) to avoid
-         duplication with the footer line. Do NOT remove sm:block. */}
-      <div className="mb-3 flex items-center justify-between text-sm">
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "font-medium",
-              isDark ? "text-white/70" : "text-gray-900",
-            )}
-          >
-            {formatDate(match.date)}
-          </span>
-          {match.time && (
-            <span className={isDark ? "text-white/50" : "text-gray-500"}>
-              {match.time}
-            </span>
-          )}
-          <MatchStatusBadge status={match.status} />
-          {isNext && (
-            <span
-              className={cn(
-                "inline-flex items-center rounded px-2 py-0.5 text-xs font-medium",
-                isDark
-                  ? "bg-kcvv-green-bright text-kcvv-black"
-                  : "bg-kcvv-green-bright text-white",
-              )}
-            >
-              Volgende
-            </span>
-          )}
-        </div>
-        {match.competition && (
-          <span
-            className={cn(
-              "hidden text-xs sm:block",
-              isDark ? "text-white/40" : "text-gray-500",
-            )}
-          >
-            {match.competition}
-          </span>
-        )}
+      {/* ── Stub ──────────────────────────────────────────────────── */}
+      <div className="bg-cream-soft text-ink border-ink flex flex-col items-center justify-center gap-1 border-r-2 border-dashed py-3">
+        <span className="font-display-big text-[18px] leading-none font-black">
+          {stubDate.day}
+        </span>
+        <span className="font-display text-[10px] leading-none italic opacity-85">
+          {stubDate.month}
+        </span>
       </div>
 
-      {/* Match row: teams and score */}
-      <div className="flex items-center justify-between">
-        {/* Home team */}
-        <div className="flex min-w-0 flex-1 items-center gap-2">
-          {match.homeTeam.logo ? (
-            <Image
-              src={match.homeTeam.logo}
-              alt={`${match.homeTeam.name} logo`}
-              width={32}
-              height={32}
-              className="flex-shrink-0 object-contain"
-            />
-          ) : (
-            <div
-              className={cn(
-                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
-                isDark ? "bg-white/10" : "bg-gray-200",
-              )}
-            >
-              <span
-                className={cn(
-                  "text-xs",
-                  isDark ? "text-white/40" : "text-gray-500",
-                )}
-              >
-                {match.homeTeam.name.charAt(0)}
-              </span>
-            </div>
-          )}
+      {/* ── Body ──────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-3 md:gap-4 md:px-4">
+        {/* Home */}
+        <div className="flex min-w-0 items-center gap-2">
+          <TeamShield team={match.homeTeam} />
           <span
+            title={match.homeTeam.name}
             className={cn(
-              "truncate text-sm",
-              isDark
-                ? isMember && isHome
-                  ? "font-semibold text-white"
-                  : "text-white/85"
-                : isMember && isHome
-                  ? "font-semibold"
-                  : "text-gray-700",
+              "font-display text-ink min-w-0 truncate text-[12.5px] italic",
+              isMember && isHome && "font-semibold",
             )}
           >
             {match.homeTeam.name}
           </span>
         </div>
 
-        {/* Score or VS */}
-        <div className="flex-shrink-0 px-4">
+        {/* Score / vs */}
+        <div className="flex items-baseline justify-center">
           {homeScore !== undefined && awayScore !== undefined ? (
-            <div className="flex items-center gap-2 font-mono text-lg font-bold">
-              <span
-                className={cn(
-                  isDark ? "text-white" : undefined,
-                  isMember &&
-                    isHome &&
-                    homeScore > awayScore &&
-                    "text-kcvv-green-bright",
-                )}
-              >
-                {homeScore}
-              </span>
-              <span className={isDark ? "text-white/30" : "text-gray-400"}>
-                -
-              </span>
-              <span
-                className={cn(
-                  isDark ? "text-white" : undefined,
-                  isMember &&
-                    !isHome &&
-                    awayScore > homeScore &&
-                    "text-kcvv-green-bright",
-                )}
-              >
-                {awayScore}
-              </span>
-            </div>
+            <span className="font-display-big text-ink text-[16px] leading-none font-black tabular-nums">
+              <span>{homeScore}</span>
+              <span className="text-ink-muted mx-1">—</span>
+              <span>{awayScore}</span>
+            </span>
           ) : (
-            <span
-              className={cn(
-                "font-medium",
-                isDark ? "text-white/30" : "text-gray-400",
-              )}
-            >
-              VS
+            <span className="font-display text-ink-muted text-[13px] leading-none lowercase italic">
+              vs
             </span>
           )}
         </div>
 
-        {/* Away team */}
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+        {/* Away */}
+        <div className="flex min-w-0 flex-row-reverse items-center gap-2">
+          <TeamShield team={match.awayTeam} />
           <span
+            title={match.awayTeam.name}
             className={cn(
-              "truncate text-right text-sm",
-              isDark
-                ? isMember && !isHome
-                  ? "font-semibold text-white"
-                  : "text-white/85"
-                : isMember && !isHome
-                  ? "font-semibold"
-                  : "text-gray-700",
+              "font-display text-ink min-w-0 truncate text-right text-[12.5px] italic",
+              isMember && !isHome && "font-semibold",
             )}
           >
             {match.awayTeam.name}
           </span>
-          {match.awayTeam.logo ? (
-            <Image
-              src={match.awayTeam.logo}
-              alt={`${match.awayTeam.name} logo`}
-              width={32}
-              height={32}
-              className="flex-shrink-0 object-contain"
-            />
-          ) : (
-            <div
-              className={cn(
-                "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full",
-                isDark ? "bg-white/10" : "bg-gray-200",
-              )}
-            >
-              <span
-                className={cn(
-                  "text-xs",
-                  isDark ? "text-white/40" : "text-gray-500",
-                )}
-              >
-                {match.awayTeam.name.charAt(0)}
-              </span>
-            </div>
-          )}
         </div>
+      </div>
 
-        {/* Result badge */}
-        {result && (
-          <div className="ml-3 flex-shrink-0">
-            <span
-              className={cn(
-                "inline-block rounded-sm px-2 py-0.5 text-[11px] font-bold tracking-[0.06em] uppercase",
-                resultBadgeConfig[result].className,
-              )}
-            >
-              {resultBadgeConfig[result].label}
-            </span>
-          </div>
+      {/* ── Result pill + 1px dashed ink-muted divider ───────────── */}
+      <div className="border-ink-muted/60 flex items-center border-l border-dashed px-3">
+        {result ? (
+          <ResultPill result={result} />
+        ) : (
+          <span className="inline-block h-[22px] w-[22px]" aria-hidden="true" />
         )}
       </div>
 
-      {/* Home/Away indicator (all breakpoints) + competition (mobile only via sm:hidden,
-         header shows competition on sm+). Do NOT remove sm:hidden — causes duplication. */}
-      {isMember && (
-        <div
-          className={cn(
-            "mt-2 text-xs",
-            isDark ? "text-white/40" : "text-gray-500",
-          )}
+      {/* ── Corner stamp ──────────────────────────────────────────── */
+      /* Anchored at -top-5 so the stamp sits mostly ABOVE the row with
+         just a hairline kiss against the top border — the row is too
+         short (~70px) for the hero/teaser-style deeper overlap, which
+         would visibly cover the stub date.
+         right-12 (48px) clears the pill cell at the row's right edge
+         while keeping the stamp visually anchored to the right column. */}
+      <div className="pointer-events-none absolute -top-5 right-12 z-10 rotate-[2deg]">
+        <MatchStatusBadge status={match.status} />
+      </div>
+
+      {/* ── isNext annotation ─────────────────────────────────────── */
+      /* Same -top-5 lift as the corner stamp. Horizontally placed at
+         left-12 (48px) so the stamp sits just past the 64px stub edge
+         without overshooting the body's home-team slot. */}
+      {isNext && (
+        <span
+          aria-label="Volgende wedstrijd"
+          className="bg-jersey-deep text-cream shadow-paper-sm border-ink pointer-events-none absolute -top-5 left-12 z-10 rotate-[-1deg] border-2 px-1.5 py-0.5 font-mono text-[9px] font-bold tracking-[0.18em] uppercase"
         >
-          {isHome ? "Thuis" : "Uit"}
-          <span className="sm:hidden">
-            {` · ${match.competition ?? "Competitie"}`}
-          </span>
-        </div>
+          Volgende
+        </span>
       )}
     </Link>
   );

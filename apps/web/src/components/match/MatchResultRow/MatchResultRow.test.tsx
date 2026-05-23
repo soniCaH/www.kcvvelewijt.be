@@ -1,402 +1,321 @@
-/**
- * MatchResultRow Component Tests
- */
-
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { MatchResultRow } from "./MatchResultRow";
 import type { ScheduleMatch } from "../types";
 
-// Mock next/image
+// Mock next/image so we can assert on alt + src without going through the
+// Next image-optimisation pipeline.
 vi.mock("next/image", () => ({
-  default: ({ src, alt, ...props }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} {...props} />
-  ),
+  default: ({
+    src,
+    alt,
+    ...rest
+  }: {
+    src: string;
+    alt: string;
+    [key: string]: unknown;
+  }) => {
+    return <img src={src} alt={alt} {...rest} />;
+  },
 }));
 
-// Mock next/link
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-    className,
-  }: {
-    children: React.ReactNode;
-    href: string;
-    className?: string;
-  }) => (
-    <a href={href} className={className}>
-      {children}
-    </a>
-  ),
-}));
+const kcvv = {
+  id: 1235,
+  name: "KCVV Elewijt",
+  logo: "https://example.com/kcvv.png",
+};
+const opponent = {
+  id: 59,
+  name: "RC Mechelen",
+  logo: "https://example.com/rc.png",
+};
+
+function makeMatch(overrides: Partial<ScheduleMatch> = {}): ScheduleMatch {
+  return {
+    id: 12345,
+    date: new Date("2025-09-13T13:30:00Z"),
+    time: "14:30",
+    homeTeam: kcvv,
+    awayTeam: opponent,
+    status: "finished",
+    competition: "3e provinciale A",
+    isHome: true,
+    ...overrides,
+  };
+}
+
+const baseProps = {
+  match: makeMatch(),
+  href: "/wedstrijd/12345",
+};
 
 describe("MatchResultRow", () => {
-  const pastDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const futureDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-  const scheduledMatch: ScheduleMatch = {
-    id: 1001,
-    date: futureDate,
-    time: "15:00",
-    homeTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
-    awayTeam: { id: 59, name: "KFC Turnhout", logo: "/logo2.png" },
-    status: "scheduled",
-    competition: "3de Nationale",
-  };
-
-  const finishedMatch: ScheduleMatch = {
-    id: 1002,
-    date: pastDate,
-    time: "15:00",
-    homeTeam: { id: 1235, name: "KCVV Elewijt", logo: "/logo1.png" },
-    awayTeam: { id: 59, name: "KFC Turnhout", logo: "/logo2.png" },
-    homeScore: 3,
-    awayScore: 1,
-    status: "finished",
-    competition: "3de Nationale",
-  };
-
-  describe("upcoming match", () => {
-    it("renders VS placeholder for scheduled matches", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("VS")).toBeInTheDocument();
-    });
-
-    it("renders team names", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
-      expect(screen.getByText("KFC Turnhout")).toBeInTheDocument();
-    });
-
-    it("renders match time in header", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("15:00")).toBeInTheDocument();
-    });
-
-    it("links to match detail page", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
-      const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("href", "/wedstrijd/1001");
+  describe("stub date", () => {
+    it("renders day + Dutch lowercase month abbreviation", () => {
+      render(<MatchResultRow {...baseProps} />);
+      // 2025-09-13 → "13" + "sep".
+      expect(screen.getByText("13")).toBeInTheDocument();
+      expect(screen.getByText("sep")).toBeInTheDocument();
     });
   });
 
-  describe("past match with scores", () => {
-    it("renders score for finished matches", () => {
-      render(<MatchResultRow match={finishedMatch} href="/wedstrijd/1002" />);
+  describe("result pill", () => {
+    it("renders a W pill on a KCVV win", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({ homeScore: 3, awayScore: 1, isHome: true })}
+        />,
+      );
+      const pill = screen.getByTitle("Winst");
+      expect(pill).toHaveTextContent("W");
+      expect(pill.className).toContain("bg-jersey");
+    });
+
+    it("renders an L pill on a KCVV loss", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({ homeScore: 0, awayScore: 2, isHome: true })}
+        />,
+      );
+      const pill = screen.getByTitle("Verlies");
+      expect(pill).toHaveTextContent("L");
+      expect(pill.className).toContain("bg-warm");
+      // Dark text (not the lock-spec cream) — cream-on-warm fails AA contrast
+      // at the pill size. Same override pattern as MatchStatusBadge.STOP.
+      expect(pill.className).toContain("text-ink");
+    });
+
+    it("renders a G pill on a draw", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({ homeScore: 1, awayScore: 1, isHome: true })}
+        />,
+      );
+      const pill = screen.getByTitle("Gelijkspel");
+      expect(pill).toHaveTextContent("G");
+      expect(pill.className).toContain("bg-cream-soft");
+      expect(pill.className).toContain("border-ink");
+    });
+
+    it("flips W/L when KCVV is the away side", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({
+            homeTeam: opponent,
+            awayTeam: kcvv,
+            homeScore: 0,
+            awayScore: 2,
+            isHome: false,
+          })}
+        />,
+      );
+      // KCVV won as the away side.
+      expect(screen.getByTitle("Winst")).toBeInTheDocument();
+    });
+
+    it("omits the pill entirely when isHome is undefined", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({
+            homeScore: 3,
+            awayScore: 1,
+            isHome: undefined,
+          })}
+        />,
+      );
+      expect(
+        screen.queryByTitle(/Winst|Verlies|Gelijkspel/),
+      ).not.toBeInTheDocument();
+    });
+
+    it("omits the pill when scores are missing (upcoming match)", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({
+            status: "scheduled",
+            homeScore: undefined,
+            awayScore: undefined,
+          })}
+        />,
+      );
+      expect(
+        screen.queryByTitle(/Winst|Verlies|Gelijkspel/),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("score region", () => {
+    it("renders italic 'vs' when scores are missing", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({
+            status: "scheduled",
+            homeScore: undefined,
+            awayScore: undefined,
+          })}
+        />,
+      );
+      expect(screen.getByText("vs")).toBeInTheDocument();
+    });
+
+    it("renders numeric score when scores are present", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({ homeScore: 3, awayScore: 1 })}
+        />,
+      );
       expect(screen.getByText("3")).toBeInTheDocument();
       expect(screen.getByText("1")).toBeInTheDocument();
     });
+  });
 
-    it("shows W badge for home wins using isHome", () => {
-      render(
-        <MatchResultRow
-          match={{ ...finishedMatch, isHome: true }}
-          href="/wedstrijd/1002"
-        />,
-      );
-      expect(screen.getByText("W")).toBeInTheDocument();
+  describe("highlighted team", () => {
+    it("emphasises the home team when KCVV is at home", () => {
+      render(<MatchResultRow {...baseProps} />);
+      expect(screen.getByText("KCVV Elewijt")).toHaveClass("font-semibold");
     });
 
-    it("shows L badge for home losses using isHome", () => {
+    it("emphasises the away team when KCVV is the away side", () => {
       render(
         <MatchResultRow
-          match={{ ...finishedMatch, homeScore: 0, awayScore: 2, isHome: true }}
-          href="/wedstrijd/1002"
-        />,
-      );
-      expect(screen.getByText("L")).toBeInTheDocument();
-    });
-
-    it("shows W badge for away wins using isHome", () => {
-      render(
-        <MatchResultRow
-          match={{
-            ...finishedMatch,
-            homeScore: 1,
-            awayScore: 3,
+          {...baseProps}
+          match={makeMatch({
+            homeTeam: opponent,
+            awayTeam: kcvv,
             isHome: false,
-          }}
-          href="/wedstrijd/1002"
+          })}
         />,
       );
-      expect(screen.getByText("W")).toBeInTheDocument();
+      expect(screen.getByText("KCVV Elewijt")).toHaveClass("font-semibold");
     });
 
-    it("shows L badge for away losses using isHome", () => {
+    it("does not emphasise either team when isHome is undefined", () => {
       render(
         <MatchResultRow
-          match={{
-            ...finishedMatch,
-            homeScore: 2,
-            awayScore: 0,
-            isHome: false,
-          }}
-          href="/wedstrijd/1002"
+          {...baseProps}
+          match={makeMatch({ isHome: undefined })}
         />,
       );
-      expect(screen.getByText("L")).toBeInTheDocument();
-    });
-
-    it("shows G badge for draws using isHome", () => {
-      render(
-        <MatchResultRow
-          match={{ ...finishedMatch, homeScore: 2, awayScore: 2, isHome: true }}
-          href="/wedstrijd/1002"
-        />,
-      );
-      expect(screen.getByText("G")).toBeInTheDocument();
-    });
-
-    it("shows no result badge when isHome is undefined", () => {
-      render(<MatchResultRow match={finishedMatch} href="/wedstrijd/1002" />);
-      expect(screen.queryByText("W")).not.toBeInTheDocument();
-      expect(screen.queryByText("L")).not.toBeInTheDocument();
-      expect(screen.queryByText("G")).not.toBeInTheDocument();
-    });
-
-    it("applies green styling on W badge", () => {
-      render(
-        <MatchResultRow
-          match={{ ...finishedMatch, isHome: true }}
-          href="/wedstrijd/1002"
-        />,
-      );
-      const badge = screen.getByText("W");
-      expect(badge.className).toContain("text-kcvv-green-bright");
-    });
-
-    it("applies red styling on L badge", () => {
-      render(
-        <MatchResultRow
-          match={{ ...finishedMatch, homeScore: 0, awayScore: 2, isHome: true }}
-          href="/wedstrijd/1002"
-        />,
-      );
-      const badge = screen.getByText("L");
-      expect(badge.className).toContain("text-red-400");
-    });
-
-    it("applies yellow styling on G badge", () => {
-      render(
-        <MatchResultRow
-          match={{ ...finishedMatch, homeScore: 2, awayScore: 2, isHome: true }}
-          href="/wedstrijd/1002"
-        />,
-      );
-      const badge = screen.getByText("G");
-      expect(badge.className).toContain("text-yellow-400");
-    });
-
-    describe("border colors — home/away × win/loss", () => {
-      it("home win: green left border", () => {
-        render(
-          <MatchResultRow
-            match={{
-              ...finishedMatch,
-              homeScore: 3,
-              awayScore: 1,
-              isHome: true,
-            }}
-            href="/wedstrijd/1002"
-          />,
-        );
-        expect(screen.getByRole("link").className).toContain(
-          "border-l-kcvv-success",
-        );
-      });
-
-      it("home loss: red left border", () => {
-        render(
-          <MatchResultRow
-            match={{
-              ...finishedMatch,
-              homeScore: 0,
-              awayScore: 2,
-              isHome: true,
-            }}
-            href="/wedstrijd/1002"
-          />,
-        );
-        expect(screen.getByRole("link").className).toContain(
-          "border-l-kcvv-alert",
-        );
-      });
-
-      it("away win: green left border", () => {
-        render(
-          <MatchResultRow
-            match={{
-              ...finishedMatch,
-              homeScore: 1,
-              awayScore: 3,
-              isHome: false,
-            }}
-            href="/wedstrijd/1002"
-          />,
-        );
-        expect(screen.getByRole("link").className).toContain(
-          "border-l-kcvv-success",
-        );
-      });
-
-      it("away loss: red left border", () => {
-        render(
-          <MatchResultRow
-            match={{
-              ...finishedMatch,
-              homeScore: 2,
-              awayScore: 0,
-              isHome: false,
-            }}
-            href="/wedstrijd/1002"
-          />,
-        );
-        expect(screen.getByRole("link").className).toContain(
-          "border-l-kcvv-alert",
-        );
-      });
+      expect(screen.getByText("KCVV Elewijt")).not.toHaveClass("font-semibold");
     });
   });
 
-  describe("status badges", () => {
-    it("shows postponed badge", () => {
-      const postponedMatch: ScheduleMatch = {
-        ...scheduledMatch,
-        status: "postponed",
-      };
-      render(<MatchResultRow match={postponedMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("PP")).toBeInTheDocument();
+  describe("status badge integration", () => {
+    it("renders the FT corner stamp for finished matches", () => {
+      // The stamp sits high enough (`-top-5`) and left enough (`right-12`)
+      // to clear the W/L/G result pill, so both can co-exist on the row.
+      render(<MatchResultRow {...baseProps} />);
+      expect(screen.getByText("FT")).toBeInTheDocument();
     });
 
-    it("shows stopped badge", () => {
-      const stoppedMatch: ScheduleMatch = {
-        ...scheduledMatch,
-        status: "stopped",
-      };
-      render(<MatchResultRow match={stoppedMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("STOP")).toBeInTheDocument();
+    it("renders the CANC badge for cancelled matches", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({ status: "cancelled" })}
+        />,
+      );
+      const badge = screen.getByText("CANC");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("title", "Geannuleerd");
     });
 
-    it("shows FF badge for forfeited matches", () => {
-      const forfeitedMatch: ScheduleMatch = {
-        ...finishedMatch,
-        status: "forfeited",
-      };
-      render(<MatchResultRow match={forfeitedMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("FF")).toBeInTheDocument();
+    it.each([
+      ["postponed", "PP"],
+      ["stopped", "STOP"],
+      ["forfeited", "FF"],
+    ] as const)(
+      "renders the %s edge-state badge alongside any pill",
+      (status, abbreviation) => {
+        render(<MatchResultRow {...baseProps} match={makeMatch({ status })} />);
+        expect(screen.getByText(abbreviation)).toBeInTheDocument();
+      },
+    );
+  });
+
+  describe("link wrapper", () => {
+    it("wraps the row in a Link with the provided href", () => {
+      render(<MatchResultRow {...baseProps} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute("href", "/wedstrijd/12345");
+    });
+
+    it("surfaces the result + score in the link's aria-label", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({ homeScore: 3, awayScore: 1 })}
+        />,
+      );
+      expect(screen.getByRole("link")).toHaveAttribute(
+        "aria-label",
+        "KCVV Elewijt — RC Mechelen, Winst 3-1",
+      );
+    });
+
+    it("omits the result fragment from aria-label for upcoming matches", () => {
+      render(
+        <MatchResultRow
+          {...baseProps}
+          match={makeMatch({
+            status: "scheduled",
+            homeScore: undefined,
+            awayScore: undefined,
+          })}
+        />,
+      );
+      expect(screen.getByRole("link")).toHaveAttribute(
+        "aria-label",
+        "KCVV Elewijt — RC Mechelen",
+      );
+    });
+
+    it("applies the canonical press-down hover classes", () => {
+      render(<MatchResultRow {...baseProps} />);
+      const link = screen.getByRole("link");
+      expect(link.className).toContain("motion-safe:hover:translate-x-1");
+      expect(link.className).toContain("motion-safe:hover:translate-y-1");
+      expect(link.className).toContain("motion-safe:hover:shadow-none");
     });
   });
 
-  describe("next match highlight", () => {
-    it("shows Volgende badge when isNext is true", () => {
-      render(
-        <MatchResultRow match={scheduledMatch} isNext href="/wedstrijd/1001" />,
-      );
+  describe("isNext annotation", () => {
+    it("renders the Volgende stamp when isNext is true", () => {
+      render(<MatchResultRow {...baseProps} isNext />);
       expect(screen.getByText("Volgende")).toBeInTheDocument();
     });
 
-    it("applies green ring when isNext is true (light theme)", () => {
-      render(
-        <MatchResultRow match={scheduledMatch} isNext href="/wedstrijd/1001" />,
-      );
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("ring-kcvv-green-bright");
-    });
-
-    it("does not show Volgende badge when isNext is false", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
+    it("does not render the Volgende stamp by default", () => {
+      render(<MatchResultRow {...baseProps} />);
       expect(screen.queryByText("Volgende")).not.toBeInTheDocument();
     });
   });
 
-  describe("without logos", () => {
-    it("renders placeholder initials when logos are missing", () => {
-      const noLogoMatch: ScheduleMatch = {
-        ...scheduledMatch,
-        homeTeam: { id: 1235, name: "KCVV Elewijt" },
-        awayTeam: { id: 59, name: "Opponent FC" },
-      };
-      render(<MatchResultRow match={noLogoMatch} href="/wedstrijd/1001" />);
-      expect(screen.getByText("K")).toBeInTheDocument();
-      expect(screen.getByText("O")).toBeInTheDocument();
-    });
-  });
-
-  describe("home/away indication", () => {
-    it("highlights home team name with font-semibold when isHome is true (light)", () => {
+  describe("logo fallback", () => {
+    it("renders a typographic initial chip when no logo URL is provided", () => {
       render(
         <MatchResultRow
-          match={{ ...scheduledMatch, isHome: true }}
-          href="/wedstrijd/1001"
+          {...baseProps}
+          match={makeMatch({
+            homeTeam: { id: 1235, name: "KCVV Elewijt" },
+            awayTeam: { id: 59, name: "RC Mechelen" },
+          })}
         />,
       );
-      const kcvvText = screen.getByText("KCVV Elewijt");
-      expect(kcvvText).toHaveClass("font-semibold");
-    });
-
-    it("highlights home team name with text-white when isHome is true (dark)", () => {
-      render(
-        <MatchResultRow
-          match={{ ...scheduledMatch, isHome: true }}
-          theme="dark"
-          href="/wedstrijd/1001"
-        />,
-      );
-      const kcvvText = screen.getByText("KCVV Elewijt");
-      expect(kcvvText).toHaveClass("text-white");
-    });
-
-    it("shows Thuis indicator on all breakpoints when isHome is true", () => {
-      render(
-        <MatchResultRow
-          match={{ ...scheduledMatch, isHome: true }}
-          href="/wedstrijd/1001"
-        />,
-      );
-      const indicator = screen.getByText(/Thuis/);
-      expect(indicator).toBeInTheDocument();
-      expect(indicator.className).not.toContain("sm:hidden");
-    });
-
-    it("shows Uit indicator on all breakpoints when isHome is false", () => {
-      render(
-        <MatchResultRow
-          match={{ ...scheduledMatch, isHome: false }}
-          href="/wedstrijd/1001"
-        />,
-      );
-      const indicator = screen.getByText(/Uit/);
-      expect(indicator).toBeInTheDocument();
-      expect(indicator.className).not.toContain("sm:hidden");
-    });
-  });
-
-  describe("competition", () => {
-    it("renders competition name in mobile row", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
-      const competitions = screen.getAllByText(/3de Nationale/);
-      expect(competitions.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe("theme prop", () => {
-    it("defaults to light theme", () => {
-      render(<MatchResultRow match={scheduledMatch} href="/wedstrijd/1001" />);
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("bg-white");
-    });
-
-    it("applies dark theme classes when theme is dark", () => {
-      render(
-        <MatchResultRow
-          match={scheduledMatch}
-          theme="dark"
-          href="/wedstrijd/1001"
-        />,
-      );
-      const link = screen.getByRole("link");
-      expect(link.className).toContain("bg-white/[0.03]");
+      expect(
+        screen.getByText("K", { selector: "[aria-hidden='true']" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("R", { selector: "[aria-hidden='true']" }),
+      ).toBeInTheDocument();
     });
   });
 });
