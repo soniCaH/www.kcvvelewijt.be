@@ -1,23 +1,25 @@
-/**
- * MatchTeaser Storybook Stories
- *
- * Compact match preview for lists and schedules.
- */
-
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchTeaser } from "./MatchTeaser";
+
+const KCVV_LOGO =
+  "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1";
+const OPPONENT_LOGO =
+  "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1";
+
+const kcvv = { id: 1235, name: "KCVV Elewijt", logo: KCVV_LOGO };
+const opponent = { id: 59, name: "RC Mechelen", logo: OPPONENT_LOGO };
 
 const meta = {
   title: "Features/Matches/MatchTeaser",
   component: MatchTeaser,
-  parameters: {
-    layout: "centered",
-  },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
+  parameters: { layout: "padded" },
   decorators: [
     (Story) => (
-      <div className="w-full max-w-md">
-        <Story />
+      <div className="bg-cream-soft min-h-[200px] p-8">
+        <div className="mx-auto max-w-[560px]">
+          <Story />
+        </div>
       </div>
     ),
   ],
@@ -26,242 +28,129 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// KCVV team data
-const kcvv = {
-  id: 1235,
-  name: "KCVV Elewijt",
-  logo: "/images/logo.png",
-};
+const baseArgs = {
+  homeTeam: kcvv,
+  awayTeam: opponent,
+  date: "2025-09-13",
+  time: "14:30",
+  venue: "Sportpark Elewijt",
+  highlightTeamId: 1235,
+  href: "/wedstrijd/12345",
+} as const;
 
-const opponent = {
-  id: 59,
-  name: "KFC Turnhout",
-  logo: "/images/placeholder-team.png",
-};
-
-/**
- * Default upcoming match
- */
 export const Upcoming: Story = {
   args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
-    venue: "Sportpark Elewijt",
+    ...baseArgs,
     status: "upcoming",
-    href: "/wedstrijd/123",
   },
 };
 
-/**
- * Forfeited match (FF result)
- */
-export const Forfeited: Story = {
-  args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
-    score: { home: 3, away: 0 },
-    status: "forfeited",
-    href: "/wedstrijd/123",
-  },
-};
-
-/**
- * Finished match with final result
- */
 export const Finished: Story = {
   args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-08",
-    time: "15:00",
+    ...baseArgs,
     score: { home: 3, away: 1 },
     status: "finished",
-    href: "/wedstrijd/123",
   },
 };
 
-/**
- * Postponed match
- */
+export const Forfeited: Story = {
+  args: {
+    ...baseArgs,
+    score: { home: 5, away: 0 },
+    status: "forfeited",
+  },
+};
+
 export const Postponed: Story = {
   args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
+    ...baseArgs,
     status: "postponed",
-    href: "/wedstrijd/123",
   },
 };
 
-/**
- * Stopped match (ended prematurely)
- */
+export const Cancelled: Story = {
+  args: {
+    ...baseArgs,
+    status: "cancelled",
+  },
+};
+
 export const Stopped: Story = {
   args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
+    ...baseArgs,
+    score: { home: 1, away: 1 },
     status: "stopped",
-    href: "/wedstrijd/123",
   },
 };
 
 /**
- * KCVV playing at home (highlighted)
+ * KCVV plays away — the highlight emphasis lands on the right column.
+ * Same fixture geometry, different `highlightTeamId`.
  */
-export const Home: Story = {
+export const KcvvAway: Story = {
   args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
-    venue: "Sportpark Elewijt",
-    status: "upcoming",
-    href: "/wedstrijd/123",
-    highlightTeamId: 1235,
-  },
-};
-
-/**
- * KCVV playing away
- */
-export const Away: Story = {
-  args: {
+    ...baseArgs,
     homeTeam: opponent,
     awayTeam: kcvv,
-    date: "2024-02-15",
-    time: "15:00",
-    venue: "De Stadsblokken",
-    status: "upcoming",
-    href: "/wedstrijd/123",
-    highlightTeamId: 1235,
+    score: { home: 0, away: 2 },
+    status: "finished",
   },
 };
 
 /**
- * Match with team logos
+ * `teamLabel` renders a mono-caps pre-stub label above the card — used by
+ * `<CalendarMonth>` to disambiguate when several KCVV teams play on the
+ * same day.
  */
-export const WithLogos: Story = {
-  args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
-    status: "upcoming",
-    href: "/wedstrijd/123",
-  },
-};
-
-/**
- * Match without logos
- */
-export const WithoutLogos: Story = {
-  args: {
-    homeTeam: { name: "KCVV Elewijt" },
-    awayTeam: { name: "KFC Turnhout" },
-    date: "2024-02-15",
-    time: "15:00",
-    status: "upcoming",
-    href: "/wedstrijd/123",
-  },
-};
-
-/**
- * Compact variant for tight spaces
- */
-export const Compact: Story = {
-  args: {
-    homeTeam: kcvv,
-    awayTeam: opponent,
-    date: "2024-02-15",
-    time: "15:00",
-    status: "upcoming",
-    variant: "compact",
-  },
-};
-
 export const WithTeamLabel: Story = {
   args: {
-    ...Upcoming.args,
+    ...baseArgs,
     teamLabel: "A-Ploeg",
+    status: "upcoming",
   },
 };
 
-export const DarkTheme: Story = {
+export const NoLogos: Story = {
   args: {
-    ...Upcoming.args,
-    theme: "dark",
-    teamLabel: "U21",
-  },
-  parameters: {
-    backgrounds: { default: "dark" },
+    ...baseArgs,
+    homeTeam: { id: 1235, name: "KCVV Elewijt" },
+    awayTeam: { id: 59, name: "RC Mechelen" },
+    status: "upcoming",
   },
 };
 
-export const DarkThemeWithScore: Story = {
+export const LongTeamNames: Story = {
   args: {
-    ...Finished.args,
-    theme: "dark",
-    teamLabel: "A-Ploeg",
-  },
-  parameters: {
-    backgrounds: { default: "dark" },
+    ...baseArgs,
+    homeTeam: {
+      id: 1235,
+      name: "KFC Sint-Stevens-Woluwe-Diegem",
+      logo: KCVV_LOGO,
+    },
+    awayTeam: {
+      id: 59,
+      name: "Royal Antwerpen-Borgerhout SK",
+      logo: OPPONENT_LOGO,
+    },
+    score: { home: 2, away: 2 },
+    status: "finished",
   },
 };
 
-/**
- * Loading state with skeleton
- */
+export const MinimalData: Story = {
+  args: {
+    homeTeam: kcvv,
+    awayTeam: opponent,
+    date: "2025-09-13",
+    status: "upcoming",
+  },
+};
+
 export const Loading: Story = {
+  tags: ["vr-skip"],
   args: {
-    homeTeam: { name: "" },
-    awayTeam: { name: "" },
-    date: "",
+    ...baseArgs,
     status: "upcoming",
     isLoading: true,
   },
-};
-
-/**
- * Multiple match teasers in a list
- */
-export const List: StoryObj<typeof MatchTeaser> = {
-  render: () => (
-    <div className="w-full max-w-md space-y-3">
-      <MatchTeaser
-        homeTeam={kcvv}
-        awayTeam={{
-          name: "KFC Turnhout",
-          logo: "/images/placeholder-team.png",
-        }}
-        date="2024-02-15"
-        time="15:00"
-        score={{ home: 3, away: 1 }}
-        status="finished"
-        href="/wedstrijd/121"
-      />
-      <MatchTeaser
-        homeTeam={{ name: "SK Londerzeel" }}
-        awayTeam={kcvv}
-        date="2024-02-22"
-        time="15:00"
-        status="upcoming"
-        href="/wedstrijd/122"
-      />
-      <MatchTeaser
-        homeTeam={kcvv}
-        awayTeam={{ name: "FC Diest" }}
-        date="2024-02-29"
-        time="14:30"
-        status="postponed"
-        href="/wedstrijd/123"
-      />
-    </div>
-  ),
 };
