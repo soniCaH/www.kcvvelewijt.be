@@ -15,12 +15,12 @@
   },
   "peerDependencies": {
     "@sanity/icons": "3.7.4",
-    "sanity": "5.26.0"
+    "sanity": "5.27.0"
   },
   "devDependencies": {
     "@sanity/icons": "3.7.4",
     "@typescript/native-preview": "7.0.0-dev.20260524.1",
-    "sanity": "5.26.0",
+    "sanity": "5.27.0",
     "typescript": "6.0.3"
   }
 }
