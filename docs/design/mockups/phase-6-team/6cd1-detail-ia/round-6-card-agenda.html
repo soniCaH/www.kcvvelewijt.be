@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 6 · Card rows + month agenda + colour squares + auto-scroll</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #006e47; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .demo-banner { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--color-warm); color: var(--color-ink); text-align: center; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; padding: 7px; border-bottom: 2px solid var(--color-ink); }
+    .demo-banner a { color: var(--color-ink); }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 56px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 33px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .frame { max-width: 640px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 24px 24px 30px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .ed { font-family: var(--font-display); font-weight: 700; line-height: 1.1; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .ed-md { font-size: 25px; }
+    .section-kicker { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+    .section-kicker .mono { color: var(--color-ink-muted); }
+    .legend { display:flex; gap:14px; flex-wrap:wrap; margin: 6px 0 4px; font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--color-ink-soft); }
+    .legend .sw { display:inline-flex; align-items:center; gap:6px; }
+    .legend .b { width:16px;height:16px;border:1px solid var(--color-ink); }
+
+    .amonth { font-family: var(--font-display-big); font-weight: 900; font-size: 30px; line-height: 1; margin: 26px 0 12px; border-bottom: 2px solid var(--color-ink); padding-bottom: 8px; }
+    .amonth:first-of-type { margin-top: 12px; }
+    .amonth em { font-style: italic; color: var(--color-jersey-deep); }
+    .amonth .cnt { float: right; font-family: var(--font-mono); font-size: 10px; font-weight: 400; text-transform: uppercase; letter-spacing: .08em; color: var(--color-ink-muted); margin-top: 14px; }
+
+    /* round-2 card row */
+    .mcard { display: grid; grid-template-columns: 52px 1fr auto; align-items: stretch; border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); background: var(--color-cream); margin-bottom: 10px; transition: transform .25s, box-shadow .25s; }
+    .mcard:hover { box-shadow: none; transform: translate(3px,3px); cursor: pointer; }
+    .mcard .stub { background: var(--color-cream-soft); border-right: 2px dashed var(--color-ink); padding: 8px 4px; text-align: center; display:flex; flex-direction:column; justify-content:center; }
+    .mcard .stub .d { font-family: var(--font-display-big); font-weight: 900; font-size: 18px; line-height: 1; }
+    .mcard .stub .mo { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; letter-spacing: .05em; margin-top: 2px; }
+    .mcard .body { padding: 10px 12px; display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mcard .tn { font-family: var(--font-display); font-style: italic; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mcard .tn.away { text-align: right; }
+    .mcard .grow { flex: 1; }
+    .mcard .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 19px; }
+    .mcard .vs { font-family: var(--font-display); font-style: italic; color: var(--color-ink-muted); font-size: 14px; }
+    .mcard .meta { display:block; font-family: var(--font-mono); font-style:normal; font-size: 8.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-ink-muted); margin-top: 2px; }
+    .mcard .end { display: flex; align-items: center; justify-content: center; padding: 0 12px; border-left: 1px solid var(--color-paper-edge); }
+    .mcard .tm { font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-soft); white-space: nowrap; }
+
+    /* the W/G/V square (replaces the old "FT" pill) */
+    .sq { width: 28px; height: 28px; display: inline-grid; place-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 700; border: 2px solid var(--color-ink); }
+    .sq.w { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+    .sq.d { background: var(--color-cream-deep); color: var(--color-ink); }
+    .sq.v { background: var(--color-warm); color: var(--color-ink); border-color: var(--color-warm); }
+
+    /* featured next = jersey-deep filled card */
+    .mcard.feat { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-ink); box-shadow: 6px 6px 0 0 var(--color-ink); }
+    .mcard.feat .stub { background: var(--color-jersey-deep-dark); border-right-color: rgba(245,241,230,.4); color: var(--color-cream); }
+    .mcard.feat .tn { color: var(--color-cream); }
+    .mcard.feat .vs { color: rgba(245,241,230,.7); }
+    .mcard.feat .end { border-left-color: rgba(245,241,230,.3); }
+    .mcard.feat .tm { color: var(--color-cream); font-family: var(--font-display-big); font-weight: 900; font-size: 15px; }
+    .feat-label { display:inline-block; background: var(--color-warm); color: var(--color-ink); font-family: var(--font-mono); font-size: 8.5px; font-weight:700; text-transform: uppercase; letter-spacing: .12em; padding: 4px 7px; margin-bottom: 7px; }
+
+    .alt { max-width: 640px; margin: 26px auto 0; padding: 16px 24px; background: var(--color-cream-soft); border: 2px dashed var(--color-ink-muted); }
+    .alt .lbl { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--color-ink-muted); margin-bottom: 12px; }
+    .mcard.feat-outline { background: var(--color-cream); color: var(--color-ink); border: 3px solid var(--color-jersey-deep); box-shadow: var(--shadow-paper-sm); }
+    .mcard.feat-outline .stub { background: var(--color-cream-soft); border-right: 2px dashed var(--color-jersey-deep); }
+    .mcard.feat-outline .tn { color: var(--color-ink); }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">DEMO · auto-gescrolld naar de eerstvolgende match — <a href="#top">scroll omhoog voor uitleg ↑</a></div>
+
+  <div class="drill-head" id="top">
+    <div class="tag">Phase 6.C · Team detail · Round 6 · Drill 6.C.d1</div>
+    <h1>Card rows in the month agenda + colour squares + auto-scroll.</h1>
+    <p>Your blend: round-2 ticket-card rows, inside the §6.6 month grouping, with
+       the old "FT" pill replaced by a <b>W/G/V square in the outcome colour</b>.
+       The <b>eerstvolgende</b> match is the jersey-deep filled card. On load the
+       page auto-scrolls to it (try reloading) — recent results sit above,
+       upcoming below. A restrained alternative for the featured card is shown at
+       the very bottom.</p>
+  </div>
+
+  <div class="legend" style="max-width:640px;margin:0 auto;padding:0 24px">
+    <span class="sw"><span class="b" style="background:var(--color-jersey-deep)"></span> Winst</span>
+    <span class="sw"><span class="b" style="background:var(--color-cream-deep)"></span> Gelijk</span>
+    <span class="sw"><span class="b" style="background:var(--color-warm)"></span> Verlies</span>
+    <span class="sw"><span class="b" style="background:var(--color-jersey-deep)"></span> Eerstvolgende (gevulde kaart)</span>
+  </div>
+
+  <div class="frame"><div class="page">
+    <div class="section-kicker"><span class="mono">KCVV Elewijt · A-ploeg</span><h3 class="ed ed-md">Volledige <em>kalender.</em></h3></div>
+
+    <div class="amonth">Maart <em>'26.</em><span class="cnt">5 gespeeld</span></div>
+    <div class="mcard"><div class="stub"><div class="d">8</div><div class="mo">MRT</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">2</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">Machelen</span></div><div class="end"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">15</div><div class="mo">MRT</div></div><div class="body"><span class="tn">Eppegem</span><span class="sc">1</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">KCVV</span></div><div class="end"><span class="sq d">G</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">22</div><div class="mo">MRT</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">3</span><span class="vs">—</span><span class="sc">0</span><span class="tn away grow">Weerde</span></div><div class="end"><span class="sq w">W</span></div></div>
+
+    <div class="amonth">April <em>'26.</em><span class="cnt">4 gespeeld</span></div>
+    <div class="mcard"><div class="stub"><div class="d">5</div><div class="mo">APR</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">4</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">Steenokkerzeel</span></div><div class="end"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">12</div><div class="mo">APR</div></div><div class="body"><span class="tn">Eppegem</span><span class="sc">2</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">KCVV</span></div><div class="end"><span class="sq v">V</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">19</div><div class="mo">APR</div></div><div class="body"><span class="tn">Mazenzele</span><span class="sc">1</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">KCVV</span></div><div class="end"><span class="sq d">G</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">26</div><div class="mo">APR</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">2</span><span class="vs">—</span><span class="sc">0</span><span class="tn away grow">FC Perk</span></div><div class="end"><span class="sq w">W</span></div></div>
+
+    <div class="amonth">Mei <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">3</div><div class="mo">MEI</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">1</span><span class="vs">—</span><span class="sc">3</span><span class="tn away grow">Londerzeel B</span></div><div class="end"><span class="sq v">V</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">10</div><div class="mo">MEI</div></div><div class="body"><span class="tn">Wemmel</span><span class="sc">1</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">KCVV</span></div><div class="end"><span class="sq d">G</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">17</div><div class="mo">MEI</div></div><div class="body"><span class="tn">Diegem</span><span class="sc">0</span><span class="vs">—</span><span class="sc">2</span><span class="tn away grow">KCVV</span></div><div class="end"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">24</div><div class="mo">MEI</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">3</span><span class="vs">—</span><span class="sc">1</span><span class="tn away grow">Liedekerke</span></div><div class="end"><span class="sq w">W</span></div></div>
+
+    <!-- FEATURED NEXT (jersey-deep) -->
+    <div id="next" style="scroll-margin-top: 70px">
+      <div class="feat-label">Eerstvolgende</div>
+      <div class="mcard feat"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="body"><span class="tn">KCVV</span><span class="vs">vs</span><span class="tn away grow">KFC Eppegem<span class="meta" style="color:rgba(245,241,230,.75)">3e Prov. A · Thuis</span></span></div><div class="end"><span class="tm">15:00</span></div></div>
+    </div>
+
+    <div class="amonth">Juni <em>'26.</em><span class="cnt">3 komend</span></div>
+    <div class="mcard"><div class="stub"><div class="d">7</div><div class="mo">JUN</div></div><div class="body"><span class="tn">FC Perk</span><span class="vs">vs</span><span class="tn away grow">KCVV<span class="meta">3e Prov. A · Uit</span></span></div><div class="end"><span class="tm">15:00</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">11</div><div class="mo">JUN</div></div><div class="body"><span class="tn">KCVV</span><span class="vs">vs</span><span class="tn away grow">VK Tildonk<span class="meta">Beker · 1/2 finale</span></span></div><div class="end"><span class="tm">20:00</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">14</div><div class="mo">JUN</div></div><div class="body"><span class="tn">KCVV</span><span class="vs">vs</span><span class="tn away grow">Diegem Sport<span class="meta">3e Prov. A · Thuis</span></span></div><div class="end"><span class="tm">15:00</span></div></div>
+  </div></div>
+
+  <div class="alt">
+    <div class="lbl">Alternatief voor de eerstvolgende-kaart (i.p.v. gevuld jersey-groen): omlijnd</div>
+    <div class="feat-label" style="background:var(--color-jersey-deep);color:var(--color-cream)">Eerstvolgende</div>
+    <div class="mcard feat-outline"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="body"><span class="tn">KCVV</span><span class="vs">vs</span><span class="tn away grow">KFC Eppegem<span class="meta">3e Prov. A · Thuis</span></span></div><div class="end"><span class="tm">15:00</span></div></div>
+  </div>
+
+  <div class="drill-head" style="padding-top:40px">
+    <div class="tag">Decide</div>
+    <p>If this is it: card rows + month agenda + colour W/G/V squares, featured
+       next as the <b>jersey-deep filled</b> card (or the outlined alternative),
+       auto-scroll to next on the full-schedule page. Then I lock 6.C.d1 and
+       write the 6.C PRD.</p>
+  </div>
+
+  <script>
+    // demo of the "auto-scroll to next match on load" behaviour
+    window.addEventListener("load", function () {
+      var el = document.getElementById("next");
+      if (!el) return;
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    });
+  </script>
+</body>
+</html>
