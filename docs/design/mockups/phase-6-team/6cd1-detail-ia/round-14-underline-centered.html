@@ -13,10 +13,10 @@
       --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
       --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
       --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      /* underline tints — less washed (a touch darker / more saturated) */
-      --ul-w: color-mix(in srgb, var(--color-jersey-deep) 28%, var(--color-cream));
-      --ul-d: color-mix(in srgb, var(--color-ink-muted) 22%, var(--color-cream));
-      --ul-v: color-mix(in srgb, var(--color-warm) 42%, var(--color-cream));
+      /* underline tints — darker / more saturated swipe */
+      --ul-w: color-mix(in srgb, var(--color-jersey-deep) 42%, var(--color-cream));
+      --ul-d: color-mix(in srgb, var(--color-ink-muted) 32%, var(--color-cream));
+      --ul-v: color-mix(in srgb, var(--color-warm) 58%, var(--color-cream));
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
@@ -67,6 +67,7 @@
     .feat-label { display:inline-block; background: var(--color-warm); color: var(--color-ink); font-family: var(--font-mono); font-size: 8.5px; font-weight:700; text-transform: uppercase; letter-spacing: .12em; padding: 4px 7px; margin: 4px 0 7px; }
     .mcard.feat { background: var(--color-jersey-deep); color: var(--color-cream); box-shadow: 6px 6px 0 0 var(--color-ink); }
     .mcard.feat .stub { background: var(--color-jersey-deep-dark); border-right-color: rgba(245,241,230,.4); color: var(--color-cream); }
+    .mcard.feat .stub .mo { color: rgba(245,241,230,.82); }
     .mcard.feat .tn, .mcard.feat .val { color: var(--color-cream); }
     .mcard.feat .comp { color: rgba(245,241,230,.85); }
     .mcard.feat .crest { color: var(--color-cream); border-color: rgba(245,241,230,.7); background: transparent; }
