@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 14 · Underline (toned down) + reliable vertical centering</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #006e47; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      /* toned-down underline tints */
+      --ul-w: color-mix(in srgb, var(--color-jersey-deep) 15%, var(--color-cream));
+      --ul-d: color-mix(in srgb, var(--color-ink-muted) 15%, var(--color-cream));
+      --ul-v: color-mix(in srgb, var(--color-warm) 24%, var(--color-cream));
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 40px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); max-width: 640px; margin: 18px auto 0; }
+    .frame .page { padding: 22px 22px 26px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--color-ink-muted); }
+    .amonth { font-family: var(--font-display-big); font-weight: 900; font-size: 25px; line-height: 1; margin: 14px 0 12px; }
+    .amonth em { font-style: italic; color: var(--color-jersey-deep); }
+    .section-kicker { display:flex; align-items:baseline; gap:10px; margin-bottom: 6px; }
+    .ed { font-family: var(--font-display); font-weight: 700; line-height: 1.1; margin: 0; font-size: 23px; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+
+    .mcard { border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); background: var(--color-cream); margin-bottom: 9px; display: grid; grid-template-columns: 46px 1fr; transition: transform .25s, box-shadow .25s; }
+    .mcard:hover { box-shadow:none; transform: translate(3px,3px); cursor:pointer; }
+    .stub { background: var(--color-cream-soft); border-right: 2px dashed var(--color-ink); padding: 8px 4px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    .stub .d { font-family: var(--font-display-big); font-weight: 900; font-size: 18px; line-height: 1; }
+    .stub .mo { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; margin-top: 2px; color: var(--color-ink-soft); }
+
+    /* fixline: comp lives INSIDE the centre column → grid align-items:center keeps
+       the team names centred against the score+caption block, reliably */
+    .body { padding: 11px 14px; }
+    .fixline { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+    .team { display:flex; align-items:center; gap: 7px; min-width:0; }
+    .team.home { justify-content: flex-start; }
+    .team.away { justify-content: flex-end; }
+    .team .tn { font-family: var(--font-display); font-style: italic; font-size: 15px; line-height: 1.15; }
+    .team.home .tn { text-align: left; }
+    .team.away .tn { text-align: right; }
+    .tn.kcvv { font-weight: 700; font-style: normal; }
+    .crest { width: 22px; height: 22px; border: 1.5px solid var(--color-ink-muted); border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display-big); font-size: 9px; font-weight: 900; color: var(--color-ink-muted); background: var(--color-cream-soft); flex: none; }
+    .center { display:flex; flex-direction:column; align-items:center; gap: 3px; }
+    .val { font-family: var(--font-display-big); font-weight: 900; font-size: 19px; white-space: nowrap; line-height: 1.1; }
+    .val.time { font-family: var(--font-display); font-weight: 400; font-style: italic; font-size: 18px; }
+    .val.w { box-shadow: inset 0 -6px 0 var(--ul-w); }
+    .val.d { box-shadow: inset 0 -6px 0 var(--ul-d); }
+    .val.v { box-shadow: inset 0 -6px 0 var(--ul-v); }
+    /* one treatment for ALL competitions: ink, same weight, no bullet, no special-case */
+    .comp { font-family: var(--font-mono); font-size: 8.5px; font-weight: 500; text-transform: uppercase; letter-spacing: .07em; color: var(--color-ink-soft); text-align:center; max-width: 160px; }
+
+    .feat-label { display:inline-block; background: var(--color-warm); color: var(--color-ink); font-family: var(--font-mono); font-size: 8.5px; font-weight:700; text-transform: uppercase; letter-spacing: .12em; padding: 4px 7px; margin: 4px 0 7px; }
+    .mcard.feat { background: var(--color-jersey-deep); color: var(--color-cream); box-shadow: 6px 6px 0 0 var(--color-ink); }
+    .mcard.feat .stub { background: var(--color-jersey-deep-dark); border-right-color: rgba(245,241,230,.4); color: var(--color-cream); }
+    .mcard.feat .tn, .mcard.feat .val { color: var(--color-cream); }
+    .mcard.feat .comp { color: rgba(245,241,230,.85); }
+    .mcard.feat .crest { color: var(--color-cream); border-color: rgba(245,241,230,.7); background: transparent; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 14 · Drill 6.C.d1</div>
+    <h1>Underline, toned down + centred reliably.</h1>
+    <p>Score underline is lighter now. Competition caption moved into the centre
+       column, so the team names always centre against the score+caption block —
+       try the long-name and long-competition rows at the bottom; they stay
+       balanced.</p>
+  </div>
+
+  <div class="variant-band">B &nbsp;·&nbsp; <b>Score underline (subtle)</b> + reliable vertical centering</div>
+  <div class="variant-note">Win green / draw grey / verlies warm — fainter swipe under the score. Long names &amp; competitions don't break the rhythm.</div>
+  <div class="frame"><div class="page">
+    <div class="section-kicker"><span class="mono">KCVV Elewijt · A-ploeg</span><h3 class="ed">Volledige <em>kalender.</em></h3></div>
+
+    <div class="amonth">Mei <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">17</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">D</span><span class="tn">Diegem</span></span><span class="center"><span class="val w">0–2</span><span class="comp">3e Provinciale A</span></span><span class="team away"><span class="tn kcvv">KCVV</span><span class="crest">K</span></span></div></div></div>
+    <div class="mcard"><div class="stub"><div class="d">10</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">W</span><span class="tn">Wemmel</span></span><span class="center"><span class="val d">1–1</span><span class="comp">3e Provinciale A</span></span><span class="team away"><span class="tn kcvv">KCVV</span><span class="crest">K</span></span></div></div></div>
+    <div class="mcard"><div class="stub"><div class="d">3</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="center"><span class="val v">1–3</span><span class="comp">3e Provinciale A</span></span><span class="team away"><span class="tn">Londerzeel B</span><span class="crest">L</span></span></div></div></div>
+
+    <div class="feat-label">Eerstvolgende</div>
+    <div class="mcard feat"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="center"><span class="val time">15:00</span><span class="comp">3e Provinciale A</span></span><span class="team away"><span class="tn">KFC Eppegem</span><span class="crest">E</span></span></div></div></div>
+
+    <div class="amonth">Stress test <em>·</em> lange namen / competities</div>
+    <div class="mcard"><div class="stub"><div class="d">26</div><div class="mo">APR</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV Elewijt</span></span><span class="center"><span class="val w">3–0</span><span class="comp">3e Provinciale A</span></span><span class="team away"><span class="tn">KSK Steenokkerzeel</span><span class="crest">S</span></span></div></div></div>
+    <div class="mcard"><div class="stub"><div class="d">11</div><div class="mo">JUN</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="center"><span class="val time">20:00</span><span class="comp special">Beker van Vlaams-Brabant · halve finale</span></span><span class="team away"><span class="tn">VK Tildonk</span><span class="crest">T</span></span></div></div></div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:40px">
+    <div class="tag">Decide</div>
+    <p>Underline subtlety OK? Vertical rhythm fixed (centre column holds
+       score+comp; teams centre against it)? If yes, 6.C.d1 locks.</p>
+  </div>
+
+</body>
+</html>
