@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 4 · Agenda row styles (minimal colour)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-warm: #f0c264;
+      --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 34px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { position: sticky; top: 0; z-index: 50; background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 48px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { max-width: 660px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 24px 24px 28px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .ed { font-family: var(--font-display); font-weight: 700; line-height: 1.1; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .ed-md { font-size: 25px; }
+    .section-kicker { display: flex; align-items: baseline; gap: 10px; margin: 0 0 6px; }
+    .section-kicker .mono { color: var(--color-ink-muted); }
+    .grp { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 10px; color: var(--color-ink-muted); margin: 22px 0 4px; padding-bottom: 6px; border-bottom: 2px solid var(--color-ink); }
+    .grp:first-of-type { margin-top: 12px; }
+    .nextlabel { display:inline-block; font-family: var(--font-mono); font-size: 8.5px; font-weight:700; text-transform: uppercase; letter-spacing: .12em; color: var(--color-jersey-deep); margin-bottom: 3px; }
+
+    /* ============ V1 — end square ============ */
+    .v1 .row { display: grid; grid-template-columns: 64px 1fr auto 22px; gap: 12px; align-items: center; padding: 10px 2px; border-bottom: 1px dashed var(--color-paper-edge); }
+    .v1 .row .date { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; color: var(--color-ink-muted); }
+    .v1 .row .fix { font-family: var(--font-display); font-style: italic; font-size: 16px; }
+    .v1 .row .fix .meta { display:block; font-family: var(--font-mono); font-style: normal; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-ink-muted); margin-top: 2px; }
+    .v1 .row .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 16px; }
+    .v1 .row .tm { font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-soft); }
+    .v1 .sq { width: 20px; height: 20px; display: inline-grid; place-items: center; font-family: var(--font-mono); font-size: 9px; font-weight: 700; border: 1px solid var(--color-ink); }
+    .v1 .sq.w { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+    .v1 .sq.d { background: transparent; color: var(--color-ink); }
+    .v1 .sq.v { background: var(--color-warm); color: var(--color-ink); border-color: var(--color-warm); }
+    .v1 .row.feat { border-top: 2px solid var(--color-ink); border-bottom: 2px solid var(--color-ink); padding: 13px 2px; }
+    .v1 .row.feat .fix { font-size: 18px; }
+    .v1 .row.feat .tm { font-family: var(--font-display-big); font-weight: 900; font-size: 15px; color: var(--color-ink); }
+
+    /* ============ V2 — left edge only ============ */
+    .v2 .row { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 10px 2px 10px 12px; border-bottom: 1px dashed var(--color-paper-edge); border-left: 3px solid transparent; }
+    .v2 .row.w { border-left-color: var(--color-jersey-deep); }
+    .v2 .row.d { border-left-color: var(--color-ink-muted); }
+    .v2 .row.v { border-left-color: var(--color-warm); }
+    .v2 .row .date { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; color: var(--color-ink-muted); }
+    .v2 .row .fix { font-family: var(--font-display); font-style: italic; font-size: 16px; }
+    .v2 .row .fix .meta { display:block; font-family: var(--font-mono); font-style: normal; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-ink-muted); margin-top: 2px; }
+    .v2 .row .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 16px; }
+    .v2 .row .tm { font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-soft); }
+    .v2 .row.feat { border-left: 4px solid var(--color-jersey-deep); padding-top: 13px; padding-bottom: 13px; }
+    .v2 .row.feat .fix { font-size: 18px; }
+    .v2 .row.feat .tm { font-family: var(--font-display-big); font-weight: 900; font-size: 15px; color: var(--color-ink); }
+
+    /* ============ V3 — score-led, dot marker ============ */
+    .v3 .row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: baseline; padding: 11px 2px; border-bottom: 1px solid var(--color-paper-edge); }
+    .v3 .row .left { display:flex; gap: 12px; align-items: baseline; min-width: 0; }
+    .v3 .row .date { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; color: var(--color-ink-muted); white-space: nowrap; }
+    .v3 .row .fix { font-family: var(--font-display); font-style: italic; font-size: 17px; }
+    .v3 .row .fix .meta { display:block; font-family: var(--font-mono); font-style: normal; font-size: 9px; text-transform: uppercase; letter-spacing: .06em; color: var(--color-ink-muted); margin-top: 2px; }
+    .v3 .row .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 19px; white-space: nowrap; }
+    .v3 .row .sc .dot { display:inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 7px; vertical-align: middle; }
+    .v3 .dot.w { background: var(--color-jersey-deep); }
+    .v3 .dot.d { background: var(--color-ink-muted); }
+    .v3 .dot.v { background: var(--color-warm); }
+    .v3 .row .tm { font-family: var(--font-mono); font-size: 12px; color: var(--color-ink-soft); }
+    .v3 .row.feat { border-bottom: 2px solid var(--color-ink); border-top: 2px solid var(--color-ink); padding: 14px 2px; }
+    .v3 .row.feat .fix { font-size: 19px; }
+    .v3 .row.feat .tm { font-family: var(--font-display-big); font-weight: 900; font-size: 16px; color: var(--color-ink); }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 4 · Drill 6.C.d1 (row style)</div>
+    <h1>Pick the row. Minimal colour, multiple upcoming shown.</h1>
+    <p>Three restrained row treatments for the agenda, each on the same
+       mid-season state: a <b>Komend</b> group (featured next + 4 more upcoming)
+       then an <b>Uitslagen</b> group (7 played, mixed). No row fills. Outcome
+       shown only by a small end-square (V1), a thin left edge (V2), or a dot by
+       the score (V3). Same structure works on the team-page teaser and the full
+       schedule page.</p>
+  </div>
+
+  <!-- ===== V1: END SQUARE ===== -->
+  <div class="variant-band">V1 &nbsp;·&nbsp; <b>End square</b> — W/G/V chip at the row's end</div>
+  <div class="variant-note">Cleanest "fixtures column" feel. Colour lives only in the 20px square: Winst = jersey-deep, Gelijk = outline, Verlies = warm.</div>
+  <div class="frame"><div class="page v1">
+    <div class="section-kicker"><span class="mono">Kalender</span><h3 class="ed ed-md">Wedstrijden.</h3></div>
+    <div class="grp">Komend</div>
+    <div class="row feat"><div class="date">ZA 31/5</div><div class="fix"><span class="nextlabel">Eerstvolgende</span><br>KCVV — KFC Eppegem<span class="meta">3e Prov. A · Thuis</span></div><div class="tm">15:00</div><div></div></div>
+    <div class="row"><div class="date">ZA 7/6</div><div class="fix">FC Perk — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="tm">15:00</div><div></div></div>
+    <div class="row"><div class="date">WO 11/6</div><div class="fix">KCVV — VK Tildonk<span class="meta">Beker · 1/2 finale</span></div><div class="tm">20:00</div><div></div></div>
+    <div class="row"><div class="date">ZA 14/6</div><div class="fix">KCVV — Diegem Sport<span class="meta">3e Prov. A · Thuis</span></div><div class="tm">15:00</div><div></div></div>
+    <div class="row"><div class="date">ZA 21/6</div><div class="fix">Mazenzele — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="tm">15:00</div><div></div></div>
+    <div class="grp">Uitslagen</div>
+    <div class="row"><div class="date">ZA 24/5</div><div class="fix">KCVV — VK Liedekerke<span class="meta">3e Prov. A · Thuis</span></div><div class="sc">3–1</div><div class="sq w">W</div></div>
+    <div class="row"><div class="date">ZA 17/5</div><div class="fix">Diegem — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">0–2</div><div class="sq w">W</div></div>
+    <div class="row"><div class="date">ZA 10/5</div><div class="fix">KVK Wemmel — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">1–1</div><div class="sq d">G</div></div>
+    <div class="row"><div class="date">ZA 3/5</div><div class="fix">KCVV — SK Londerzeel B<span class="meta">3e Prov. A · Thuis</span></div><div class="sc">1–3</div><div class="sq v">V</div></div>
+    <div class="row"><div class="date">ZA 26/4</div><div class="fix">KCVV — FC Perk<span class="meta">3e Prov. A · Thuis</span></div><div class="sc">2–0</div><div class="sq w">W</div></div>
+    <div class="row"><div class="date">ZA 19/4</div><div class="fix">Mazenzele — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">1–1</div><div class="sq d">G</div></div>
+    <div class="row"><div class="date">ZA 12/4</div><div class="fix">KFC Eppegem — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">2–1</div><div class="sq v">V</div></div>
+  </div></div>
+
+  <!-- ===== V2: LEFT EDGE ===== -->
+  <div class="variant-band">V2 &nbsp;·&nbsp; <b>Left edge</b> — thin coloured border, no chip</div>
+  <div class="variant-note">Even quieter. The only colour is a 3px left edge: jersey-deep (W), grey (G), warm (V). Score stays ink. Featured next = thicker jersey-deep edge.</div>
+  <div class="frame"><div class="page v2">
+    <div class="section-kicker"><span class="mono">Kalender</span><h3 class="ed ed-md">Wedstrijden.</h3></div>
+    <div class="grp">Komend</div>
+    <div class="row feat"><div class="date">ZA 31/5</div><div class="fix"><span class="nextlabel">Eerstvolgende</span><br>KCVV — KFC Eppegem<span class="meta">3e Prov. A · Thuis</span></div><div class="tm">15:00</div></div>
+    <div class="row"><div class="date">ZA 7/6</div><div class="fix">FC Perk — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="tm">15:00</div></div>
+    <div class="row"><div class="date">WO 11/6</div><div class="fix">KCVV — VK Tildonk<span class="meta">Beker · 1/2 finale</span></div><div class="tm">20:00</div></div>
+    <div class="row"><div class="date">ZA 14/6</div><div class="fix">KCVV — Diegem Sport<span class="meta">3e Prov. A · Thuis</span></div><div class="tm">15:00</div></div>
+    <div class="row"><div class="date">ZA 21/6</div><div class="fix">Mazenzele — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="tm">15:00</div></div>
+    <div class="grp">Uitslagen</div>
+    <div class="row w"><div class="date">ZA 24/5</div><div class="fix">KCVV — VK Liedekerke<span class="meta">3e Prov. A · Thuis</span></div><div class="sc">3–1</div></div>
+    <div class="row w"><div class="date">ZA 17/5</div><div class="fix">Diegem — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">0–2</div></div>
+    <div class="row d"><div class="date">ZA 10/5</div><div class="fix">KVK Wemmel — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">1–1</div></div>
+    <div class="row v"><div class="date">ZA 3/5</div><div class="fix">KCVV — SK Londerzeel B<span class="meta">3e Prov. A · Thuis</span></div><div class="sc">1–3</div></div>
+    <div class="row w"><div class="date">ZA 26/4</div><div class="fix">KCVV — FC Perk<span class="meta">3e Prov. A · Thuis</span></div><div class="sc">2–0</div></div>
+    <div class="row d"><div class="date">ZA 19/4</div><div class="fix">Mazenzele — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">1–1</div></div>
+    <div class="row v"><div class="date">ZA 12/4</div><div class="fix">KFC Eppegem — KCVV<span class="meta">3e Prov. A · Uit</span></div><div class="sc">2–1</div></div>
+  </div></div>
+
+  <!-- ===== V3: SCORE-LED DOT ===== -->
+  <div class="variant-band">V3 &nbsp;·&nbsp; <b>Score-led</b> — big score + a small outcome dot</div>
+  <div class="variant-note">Most editorial/typographic. Score is the hero; a tiny dot beside it carries the outcome (green/grey/warm). No borders, no chips, hairline dividers.</div>
+  <div class="frame"><div class="page v3">
+    <div class="section-kicker"><span class="mono">Kalender</span><h3 class="ed ed-md">Wedstrijden.</h3></div>
+    <div class="grp">Komend</div>
+    <div class="row feat"><div class="left"><div class="date">ZA 31/5</div><div class="fix"><span class="nextlabel">Eerstvolgende</span><br>KCVV — KFC Eppegem<span class="meta">3e Prov. A · Thuis</span></div></div><div class="tm">15:00</div></div>
+    <div class="row"><div class="left"><div class="date">ZA 7/6</div><div class="fix">FC Perk — KCVV<span class="meta">3e Prov. A · Uit</span></div></div><div class="tm">15:00</div></div>
+    <div class="row"><div class="left"><div class="date">WO 11/6</div><div class="fix">KCVV — VK Tildonk<span class="meta">Beker · 1/2 finale</span></div></div><div class="tm">20:00</div></div>
+    <div class="row"><div class="left"><div class="date">ZA 14/6</div><div class="fix">KCVV — Diegem Sport<span class="meta">3e Prov. A · Thuis</span></div></div><div class="tm">15:00</div></div>
+    <div class="row"><div class="left"><div class="date">ZA 21/6</div><div class="fix">Mazenzele — KCVV<span class="meta">3e Prov. A · Uit</span></div></div><div class="tm">15:00</div></div>
+    <div class="grp">Uitslagen</div>
+    <div class="row"><div class="left"><div class="date">ZA 24/5</div><div class="fix">KCVV — VK Liedekerke<span class="meta">3e Prov. A · Thuis</span></div></div><div class="sc">3–1<span class="dot w"></span></div></div>
+    <div class="row"><div class="left"><div class="date">ZA 17/5</div><div class="fix">Diegem — KCVV<span class="meta">3e Prov. A · Uit</span></div></div><div class="sc">0–2<span class="dot w"></span></div></div>
+    <div class="row"><div class="left"><div class="date">ZA 10/5</div><div class="fix">KVK Wemmel — KCVV<span class="meta">3e Prov. A · Uit</span></div></div><div class="sc">1–1<span class="dot d"></span></div></div>
+    <div class="row"><div class="left"><div class="date">ZA 3/5</div><div class="fix">KCVV — SK Londerzeel B<span class="meta">3e Prov. A · Thuis</span></div></div><div class="sc">1–3<span class="dot v"></span></div></div>
+    <div class="row"><div class="left"><div class="date">ZA 26/4</div><div class="fix">KCVV — FC Perk<span class="meta">3e Prov. A · Thuis</span></div></div><div class="sc">2–0<span class="dot w"></span></div></div>
+    <div class="row"><div class="left"><div class="date">ZA 19/4</div><div class="fix">Mazenzele — KCVV<span class="meta">3e Prov. A · Uit</span></div></div><div class="sc">1–1<span class="dot d"></span></div></div>
+    <div class="row"><div class="left"><div class="date">ZA 12/4</div><div class="fix">KFC Eppegem — KCVV<span class="meta">3e Prov. A · Uit</span></div></div><div class="sc">2–1<span class="dot v"></span></div></div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:48px">
+    <div class="tag">Decide</div>
+    <p>Pick a row style (V1 / V2 / V3) and an outcome marker. Mix-and-match is
+       fine (e.g. "V3 rows but with V1's end-square"). The featured-next
+       treatment shown is restrained — tell me if it should be even quieter or a
+       touch louder.</p>
+  </div>
+
+</body>
+</html>
