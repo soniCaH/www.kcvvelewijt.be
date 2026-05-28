@@ -482,17 +482,25 @@ Hero: `<EditorialHero variant="generic">` `Onze ploegen.` Body: `<TapedCardGrid 
 
 Existing `docs/prd/teams-landing-page.md` is superseded — restate in Phase 6.
 
+> **STATUS (2026-05-28) — direction locked (6.C).** Listing IS in Phase 6 scope. The uniform `<TapedCardGrid>` above is **rejected** — keep the A-team-featured **hierarchy** (A hero + B featured + youth directory), reskinned. See #1528 + the Phase 6 remainder decision record.
+
 ### 6.5 Team detail (`/ploegen/[slug]`)
 
 `<TeamHero>` — kicker (A-PLOEG / U21 / etc.), `<EditorialHeading>` team name, `<MonoLabelRow>` (classification, coach, season), right-column taped polaroid with team-photo or jersey illustration + `<TicketStub>SEIZOEN 25/26</TicketStub>`. Sections: `<StatsStrip>` season W/D/L + GF/GA, `<StandingsTable>` with this team highlighted, `<MatchScheduleTable>` upcoming + past, `<SquadGrid>` of `<PlayerCard>` instances (each composes `<TapedCard>` + `<PlayerFigure>` + name + position), staff section, `<SponsorsBlock>` filtered by team.
+
+> **STATUS (2026-05-28) — direction locked (6.C).** Composition trimmed to **Core + editorial, auto-hide empties**: TeamHero + StandingsTable + MatchSchedule + SquadGrid + staff + `team.body`/`trainingSchedule`/`contactInfo` when present. **Dropped:** standalone `<StatsStrip>` (redundant with the highlighted standings row) and **team-filtered `<SponsorsBlock>`** (sponsor docs don't reference teams — a **global** `<SponsorsBlock>` renders at the foot instead). Detail IA (tabs vs single-scroll) is parked for a 6.C.d1 visual A/B. See #1528.
 
 ### 6.6 Calendar (`/kalender`)
 
 Hero: `<EditorialHero variant="generic">` `Kalender.` Body: cream paper page with month-by-month sections. Each month: `<EditorialHeading size="display-md">April '26.</EditorialHeading>` followed by a `<DashedDivider>`-separated list of events — date column (mono), title column (display), location column (mono), tag column (`<MonoLabel>` for type). No card treatment — it's a tabular agenda. Filter row reskins `<FilterTabs>` (matches / events / training / supporter activities).
 
+> **STATUS (2026-05-28) — direction locked (6.D).** `/kalender` is **already built** as an interactive month/week/list widget + iCal subscribe; the tabular agenda above is one of two candidates. **Reskin-the-widget vs rebuild-to-this-agenda is parked for a 6.D.d1 visual A/B** (owner wants to see both side-by-side). Filters are **by type** — Wedstrijden + Clubevent + Supporters + Jeugdwerking + Andere — not matches/events/training/supporter (training has no standalone data source). Feed merges 3 sources: PSD matches + `event` docs + `articleType:event` articles. See #1528.
+
 ### 6.7 Events list + detail (`/events`, `/events/[slug]`)
 
 List: `<TapedCardGrid columns={3}>` of `<EventCard>` (composes `<TapedCard>` + landscape `<TapedFigure aspect="landscape-16-9">` cover image + date `<TicketStub>` overlay + title + location + `<MonoLabel>` tag). Detail: `<EditorialHero variant="event">` with date ticket-stub artefact paired with the event hero image at 16:9; body in `--container-prose` + inline `<TapedFigure>` photos for any in-line imagery + RSVP CTA + sponsor/credit footer. Event imagery is overwhelmingly 16:9 today and renders at native aspect inside the polaroid frame.
+
+> **STATUS (2026-05-28) — direction locked (6.E).** Route renamed **`/events` → `/evenementen`** (301 from `/events/*`). Detail uses a new **`<EventHero>` sibling**, NOT `<EditorialHero variant="event">` (per §5.4 sibling-per-surface lock). Schema gains **`location` + `eventType` enum** (Clubevent / Supportersactiviteit / Jeugdwerking / Andere) only — **no body PT, no RSVP**; external link stays the CTA, plus a per-event "Zet in agenda" (iCal) + "Andere events" grid. List is **upcoming-only**. The RSVP CTA + sponsor/credit footer above are dropped. `eventType` is also added to the `eventFact` block so `articleType:event` articles join the merged calendar/list feed. See #1528.
 
 ### 6.8 Sponsors (`/sponsors`)
 
