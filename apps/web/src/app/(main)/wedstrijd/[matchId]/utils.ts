@@ -6,16 +6,16 @@ import type {
   MatchDetail,
   MatchLineupPlayer,
 } from "@/lib/effect/schemas/match.schema";
-import type { MatchTeamProps } from "@/components/match/MatchHeader";
+import type { MatchHeroTeam } from "@/components/match/MatchHero";
 import type { LineupPlayer } from "@/components/match/MatchLineup";
 
 /**
- * Convert a match's home team into props suitable for the MatchHeader component.
+ * Convert a match's home team into props suitable for the MatchHero component.
  *
  * @param match - The match detail containing the home team data
- * @returns The home team's `MatchTeamProps` with `name`, `logo`, and `score`
+ * @returns The home team's `MatchHeroTeam` with `name`, `logo`, and `score`
  */
-export function transformHomeTeam(match: MatchDetail): MatchTeamProps {
+export function transformHomeTeam(match: MatchDetail): MatchHeroTeam {
   return {
     name: match.home_team.name,
     logo: match.home_team.logo,
@@ -24,11 +24,11 @@ export function transformHomeTeam(match: MatchDetail): MatchTeamProps {
 }
 
 /**
- * Converts the match's away team data into props for the MatchHeader component.
+ * Converts the match's away team data into props for the MatchHero component.
  *
  * @returns An object containing the away team's name, logo, and score.
  */
-export function transformAwayTeam(match: MatchDetail): MatchTeamProps {
+export function transformAwayTeam(match: MatchDetail): MatchHeroTeam {
   return {
     name: match.away_team.name,
     logo: match.away_team.logo,

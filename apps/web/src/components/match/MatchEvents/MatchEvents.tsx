@@ -269,8 +269,7 @@ export function MatchEvents({
     );
   }
 
-  // Group by team if requested — used by the legacy <MatchDetailView>
-  // consumer until #1913 retires it. Each column is single-side, so the
+  // Group by team if requested: each column is single-side, so the
   // left/right split idiom from the chronological mode doesn't apply.
   if (groupBy === "team") {
     const homeEvents = filteredEvents.filter((e) => e.team === "home");

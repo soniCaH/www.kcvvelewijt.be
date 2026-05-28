@@ -134,6 +134,19 @@ The R9-locked "layered hover Variant A" (photo `translateY(-2)` on parent `:hove
 - `<TrackInView>` — client wrapper that fires a single `trackEvent(eventName, params)` call the first time the wrapped subtree intersects the viewport at or above a `threshold` (clamped to `[0, 1]`, default `0.4`). Snapshots `params` at mount time so re-renders don't re-fire. SSR-safe; disconnects on unmount.
 - `<PageViewTracker>` — client component that fires a single `trackEvent` on mount and renders nothing. Use for page-level `*_view` events that should fire on hydration regardless of scroll position.
 
+**Phase 6.B additions (match-detail redesign — `/wedstrijd/[matchId]`):**
+
+The legacy `<MatchDetailView>` (header + lineup + events in one component) and `<MatchHeader>` were retired (#1913); the page now composes a state-aware hero plus two auto-hiding sections at the page level.
+
+- `<MatchHero>` (`apps/web/src/components/match/MatchHero/`) — state-aware match hero. Wraps a `<TapedCard>`; status drives the mono kicker (`VOORBESCHOUWING` for `scheduled`, `MATCHVERSLAG` for played/terminal states) and score display. Supersedes `<MatchHeader>`. Props: `homeTeam` / `awayTeam` (`MatchHeroTeam` = `{ name; logo?; score? }`), `date`, `time?`, `venue?`, `status`, `competition?`, `kcvvTeamLabel?`. The legacy `backUrl` back-link affordance was intentionally not carried over.
+- `<MatchLineupSection>` (`apps/web/src/components/match/MatchLineupSection/`) — section wrapper around `<MatchLineup>` adding editorial chrome (mono kicker `OPSTELLINGEN` + display-md italic heading `Wie er stond.` + paper container). Owns its own render decision: returns `null` when both lineups are empty (typically upcoming matches).
+- `<MatchEventsSection>` (`apps/web/src/components/match/MatchEventsSection/`) — section wrapper around `<MatchEvents>` with the same chrome pattern (kicker `WEDSTRIJDVERLOOP` + heading `Hoe het ging.`). Auto-hides (`null`) when `events` is empty.
+- `<MatchStatusBadge>` — extended with a per-status spec table (`finished`/`forfeited`/`postponed`/`cancelled`/`stopped`) carrying abbreviation, long form, and tint class. The `cancelled` tint consumes the new `--color-card-red` token via `bg-card-red text-cream`.
+- `<MatchTeaser>` — reworked to the 6.B.d6 A2-italic mini-hero ticket-card shape (date-only stub, italic-display month label). Scope slimmed to the `default` variant only; the orphaned `compact` variant was retired as dead code.
+- `<MatchResultRow>` — reworked per 6.B.d7 (date stub + result-coloured score row, composes `<MatchStatusBadge>`). Single consumer is `<TeamSchedule>` on `/ploegen/[slug]`; the legacy dark theme was dropped (no consumer).
+
+New token: `--color-card-red` (`#c93f1c`) in `globals.css` — red-card / cancelled tint, consumed by `<MatchStatusBadge>`'s `cancelled` spec.
+
 ## Design Conventions
 
 **Storybook is the authoritative design system reference.** Check `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` stories for all design tokens (colors, spacing, border-radius, typography). Do not hardcode values not defined there.
