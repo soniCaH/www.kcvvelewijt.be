@@ -1,9 +1,10 @@
 # PRD — Phase 6.C · Team Detail + Listing Redesign
 
-**Status:** ready for `/prd-to-issues`. All 7 design drills (6.C.d0 → 6.C.d6) locked 2026-05-28/29.
+**Status:** issues cut — #1938–#1947, milestone `redesign-retro-terrace-fanzine`. PR #1937 (draft until merge).
 **Authored:** 2026-05-29.
 **Owner:** @climacon.
 **Tracker:** #1528 (Phase 6 master).
+**Issues:** #1938 (tracer) · #1939–#1945 (detail) · #1946 (listing) · #1947 (cleanup). Dependencies wired via GitHub blockedBy.
 **Lock docs (authoritative for design decisions):** `docs/design/mockups/phase-6-team/*-locked.md` — `data-reality`, `detail-ia`, `teamhero`, `standings`, `squadgrid`, `staff`, `listing`. Do not re-derive in any sub-issue; quote the lock docs.
 **Decision record:** memory `project_phase_6cde_remainder_decisions` (direction + cross-surface deltas).
 **Master plan:** `docs/plans/2026-04-27-redesign-master-design.md` §6.4 (listing) + §6.5 (detail) — both carry status-notes pointing here.
@@ -58,22 +59,22 @@ Four phases. Each = one deployable unit, runnable tests, no broken state. **Mile
 
 ```text
 Phase 1: <TeamHero> live on /ploegen/[slug] — TRACER (new component + real Sanity wiring, legacy body below).
-         → feat(teams): <TeamHero> + tracer mount on /ploegen/[slug]
+         → #1938 feat(teams): <TeamHero> + tracer mount on /ploegen/[slug]
 
 Phase 2: Team-detail rebuild — parallel component sub-issues, then page assembly.
-         → feat(teams): <StandingsTable> (redesigned; KCVV row highlighted; no Vorm)
-         → feat(teams): <SquadGrid> + <PlayerCard> reskin (position-grouped; number disc)
-         → feat(teams): <TeamStaff> section (compact cards; functionTitle→label)
-         → feat(teams): match agenda row + <TeamMatchesSection> teaser
-         → feat(teams): /ploegen/[slug]/wedstrijden full-season agenda route (auto-scroll)
-         → feat(teams): <TeamEditorial> (body / trainingSchedule / contactInfo)
-         → feat(teams): /ploegen/[slug] page assembly (single-scroll + sticky-nav, auto-hide) + e2e + analytics
+         → #1939 feat(teams): <StandingsTable> (redesigned; KCVV row highlighted; no Vorm)
+         → #1940 feat(teams): <SquadGrid> + <PlayerCard> reskin (position-grouped; number disc)
+         → #1941 feat(teams): <TeamStaff> section (compact cards; functionTitle→label)
+         → #1942 feat(teams): match agenda row + <TeamMatchesSection> teaser
+         → #1943 feat(teams): /ploegen/[slug]/wedstrijden full-season agenda route (auto-scroll)
+         → #1944 feat(teams): <TeamEditorial> (body / trainingSchedule / contactInfo)
+         → #1945 feat(teams): /ploegen/[slug] page assembly (single-scroll + sticky-nav, auto-hide) + e2e + analytics
 
 Phase 3: Team-listing rebuild.
-         → feat(teams): <TeamFlagship> (A+B paired) + youth directory + /ploegen assembly + e2e
+         → #1946 feat(teams): <TeamFlagship> (A+B paired) + youth directory + /ploegen assembly + e2e
 
 Phase 4: Legacy cleanup + doc audit.
-         → chore(teams): retire legacy team components + CLAUDE.md + master-plan §6.4/6.5 closeout
+         → #1947 chore(teams): retire legacy team components + CLAUDE.md + master-plan §6.4/6.5 closeout
 ```
 
 **Dependency graph:**
