@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 1 · TeamHero identity (6.C.d2)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #133d28; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-md: 6px 6px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 32px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 46px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { max-width: 760px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 30px 28px; }
+
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .pill { display: inline-block; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-weight: 600; line-height: 1; padding: 6px 9px; border: 1px solid var(--color-paper-edge); background: var(--color-cream-soft); color: var(--color-ink); }
+    .ed { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em; line-height: 1.05; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+
+    .hero { display: grid; grid-template-columns: 1fr; gap: 26px; align-items: start; }
+    @media (min-width: 640px) { .hero { grid-template-columns: 1fr 280px; } }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .lead { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--color-ink-soft); margin-top: 16px; max-width: 42ch; line-height: 1.4; }
+
+    /* right artefact: taped squad polaroid + season stub */
+    .artefact { }
+    .polaroid { border: 2px solid var(--color-ink); background: var(--color-cream-soft); box-shadow: var(--shadow-paper-md); transform: rotate(-1.5deg); padding: 10px 10px 16px; position: relative; }
+    .polaroid .tape { position: absolute; top: -11px; left: 30%; width: 92px; height: 20px; background: var(--color-warm); opacity: .9; transform: rotate(-3deg); border: 1px solid rgba(0,0,0,.15); }
+    .polaroid .ph { aspect-ratio: 4/3; background: repeating-linear-gradient(135deg, #cdc6b2 0 11px, #c4bca6 11px 22px); display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; color: #7d7560; text-transform: uppercase; letter-spacing: .1em; }
+    .stub { margin-top: 12px; border: 2px dashed var(--color-ink); background: var(--color-cream); padding: 9px 11px; display: flex; justify-content: space-between; align-items: center; transform: rotate(.5deg); }
+    .stub .mono { color: var(--color-ink-muted); }
+    .stub b { font-family: var(--font-display-big); font-weight: 900; font-size: 16px; }
+
+    /* C — category badge (parallels PlayerHero number disc) */
+    .badge { display: inline-grid; place-items: center; width: 92px; height: 92px; background: var(--color-jersey-deep); color: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); margin-bottom: 16px; }
+    .badge span { font-family: var(--font-display-big); font-weight: 900; font-size: 46px; line-height: 1; }
+    .badge.u span { font-size: 30px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 1 · Drill 6.C.d2 (TeamHero)</div>
+    <h1>What does the team hero lead with?</h1>
+    <p>Every team is "KCVV Elewijt", so the <b>category</b> (A-ploeg / U17) is the
+       distinguishing identity. Left = words, right = a taped squad polaroid +
+       season stub (JerseyShirt illustration when no <code>teamImage</code>).
+       Three ways to frame the identity; data is what the team doc + ranking
+       actually provide.</p>
+  </div>
+
+  <!-- A -->
+  <div class="variant-band">A &nbsp;·&nbsp; <b>Category-forward</b></div>
+  <div class="variant-note">The category is the big headline; "KCVV Elewijt" is the kicker. Instantly says which team you're on. Scales to youth ("U17.").</div>
+  <div class="frame"><div class="page">
+    <div class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">KCVV Elewijt</span>
+        <h2 class="ed" style="font-family:var(--font-display-big);font-weight:900;font-size:60px;margin-top:8px">A-ploeg<em>.</em></h2>
+        <div class="meta-row">
+          <span class="pill">3e Provinciale A</span>
+          <span class="pill">Trainer · Koen Verbruggen</span>
+          <span class="pill">Seizoen 25/26</span>
+        </div>
+        <p class="lead">Een hechte groep met een gezonde mix van jeugd en ervaring, thuis op het Sportpark Driesstraat.</p>
+      </div>
+      <div class="artefact">
+        <div class="polaroid"><div class="tape"></div><div class="ph">TEAMIMAGE · SQUAD PHOTO</div></div>
+        <div class="stub"><span class="mono">Seizoen</span><b>25/26</b></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- B -->
+  <div class="variant-band">B &nbsp;·&nbsp; <b>Club-forward</b> (split name)</div>
+  <div class="variant-note">Club name is the headline (KCVV black + Elewijt italic, the 6.A split rhythm); the category rides in the kicker. More brand-forward; the category is smaller.</div>
+  <div class="frame"><div class="page">
+    <div class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">A-ploeg · 3e Provinciale A</span>
+        <h2 class="ed" style="margin-top:8px">
+          <span style="font-family:var(--font-display-big);font-weight:900;font-size:52px;display:block">KCVV</span>
+          <span style="font-style:italic;font-size:44px;display:block">Elewijt.</span>
+        </h2>
+        <div class="meta-row">
+          <span class="pill">Trainer · Koen Verbruggen</span>
+          <span class="pill">Seizoen 25/26</span>
+        </div>
+        <p class="lead">Een hechte groep met een gezonde mix van jeugd en ervaring.</p>
+      </div>
+      <div class="artefact">
+        <div class="polaroid"><div class="tape"></div><div class="ph">TEAMIMAGE · SQUAD PHOTO</div></div>
+        <div class="stub"><span class="mono">Seizoen</span><b>25/26</b></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- C -->
+  <div class="variant-band">C &nbsp;·&nbsp; <b>Category badge</b> (parallels the player number disc)</div>
+  <div class="variant-note">A jersey-deep category badge anchors the hero — the team-page echo of PlayerHero's number disc — with the club name beside it. Strong system rhyme; the badge holds "A" or "U17".</div>
+  <div class="frame"><div class="page">
+    <div class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">KCVV Elewijt · 3e Provinciale A</span>
+        <div class="badge"><span>A</span></div>
+        <h2 class="ed" style="font-size:40px">A-ploeg<em>.</em></h2>
+        <div class="meta-row">
+          <span class="pill">Trainer · Koen Verbruggen</span>
+          <span class="pill">Seizoen 25/26</span>
+        </div>
+      </div>
+      <div class="artefact">
+        <div class="polaroid"><div class="tape"></div><div class="ph">TEAMIMAGE · SQUAD PHOTO</div></div>
+        <div class="stub"><span class="mono">Seizoen</span><b>25/26</b></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:48px">
+    <div class="tag">Decide</div>
+    <p>Pick A / B / C for the hero identity. Then later d2 rounds settle the
+       artefact (photo treatment + JerseyShirt fallback + stub), the meta-row
+       field set, and the tagline/lead. Cross-age: the youth version swaps the
+       category ("U13.") and drops division/coach/photo when absent.</p>
+  </div>
+
+</body>
+</html>
