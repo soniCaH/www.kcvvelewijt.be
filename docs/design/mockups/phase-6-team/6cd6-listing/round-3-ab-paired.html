@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 3 · /ploegen A+B paired flagships (6.C.d6)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #133d28; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-md: 6px 6px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 44px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .frame { max-width: 800px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 30px 28px 36px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--color-ink-muted); }
+    .ed { font-family: var(--font-display-big); font-weight: 900; line-height: 1.02; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .lead { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--color-ink-soft); margin-top: 12px; max-width: 46ch; }
+    .seam { height: 16px; background: repeating-linear-gradient(-45deg, var(--color-ink) 0 8px, var(--color-cream) 8px 16px); margin: 28px 0; border-top: 2px solid var(--color-ink); border-bottom: 2px solid var(--color-ink); }
+    .crest { border: 2px solid var(--color-ink); border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display-big); font-weight: 900; background: var(--color-cream-soft); color: var(--color-ink); flex: none; }
+
+    .pagehero .ed { font-size: 56px; }
+
+    /* paired flagships */
+    .flag { display:grid; grid-template-columns: 1.25fr 1fr; border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); margin-top: 16px; min-height: 180px; }
+    .flag .body { padding: 26px 24px; display:flex; flex-direction:column; justify-content:center; }
+    .flag .kick { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.14em; font-size:10px; }
+    .flag h3 { font-family: var(--font-display-big); font-weight:900; font-size: 44px; margin: 8px 0 0; }
+    .flag .meta { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.07em; font-size:10px; margin-top: 12px; }
+    .flag .cta { display:inline-block; width:max-content; margin-top:18px; font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.1em; font-size:11px; padding:9px 14px; border:2px solid; }
+    .flag .photo { display:grid; place-items:center; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; }
+
+    /* A — jersey-deep, content left / photo right */
+    .flag.a { background: var(--color-jersey-deep); color: var(--color-cream); }
+    .flag.a .kick, .flag.a .meta { color: rgba(245,241,230,.82); }
+    .flag.a .cta { border-color: var(--color-cream); color: var(--color-cream); }
+    .flag.a .photo { background: repeating-linear-gradient(135deg, #0a3d2a 0 12px, #0c4a32 12px 24px); color: rgba(245,241,230,.55); }
+
+    /* B — cream, MIRRORED: photo left / content right */
+    .flag.b { background: var(--color-cream); color: var(--color-ink); grid-template-columns: 1fr 1.25fr; }
+    .flag.b .photo { grid-column: 1; background: repeating-linear-gradient(135deg, #b9b09a 0 12px, #ada590 12px 24px); filter: grayscale(1) contrast(1.05); color:#5f5847; }
+    .flag.b .body { grid-column: 2; }
+    .flag.b .kick, .flag.b .meta { color: var(--color-ink-muted); }
+    .flag.b h3 em { font-style:italic; color: var(--color-jersey-deep); }
+    .flag.b .cta { border-color: var(--color-ink); color: var(--color-ink); box-shadow: var(--shadow-paper-sm); }
+
+    .yband { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--color-ink-muted); margin: 18px 0 10px; border-bottom:1px solid var(--color-paper-edge); padding-bottom:6px; }
+    .ygrid { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap:10px; }
+    .ycard { border:2px solid var(--color-ink); background:var(--color-cream); box-shadow: var(--shadow-paper-sm); padding:12px; display:flex; align-items:center; gap:10px; }
+    .ycard .crest { width:32px;height:32px;font-size:11px; }
+    .ycard b { font-family: var(--font-display-big); font-weight:900; font-size:18px; }
+    .ycard .arrow { margin-left:auto; font-family:var(--font-mono); font-size:13px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team listing · Round 3 · Drill 6.C.d6</div>
+    <h1>A + B as a matched pair.</h1>
+    <p>A-ploeg = jersey-deep flagship (content left / photo right). B-ploeg =
+       the same block <b>mirrored</b> (photo left / content right) in <b>cream</b>
+       — equal weight, opposite hand, B clearly the lighter sibling. Youth
+       directory below.</p>
+  </div>
+
+  <div class="variant-band">/ploegen &nbsp;·&nbsp; A green + B cream (mirrored)</div>
+  <div class="frame"><div class="page">
+
+    <div class="pagehero">
+      <span class="mono">KCVV Elewijt</span>
+      <h2 class="ed" style="margin-top:8px">Onze <em>ploegen.</em></h2>
+      <p class="lead">Van de A-kern tot de jongste Onderbouw — alle ploegen van de club.</p>
+    </div>
+
+    <div class="seam"></div>
+
+    <!-- A flagship -->
+    <div class="flag a">
+      <div class="body"><span class="kick">Eerste elftal</span><h3>A-ploeg.</h3><div class="meta">3e Provinciale A · Seizoen 25/26</div><span class="cta">Bekijk ploeg →</span></div>
+      <div class="photo">TEAMIMAGE</div>
+    </div>
+
+    <!-- B flagship, mirrored + cream -->
+    <div class="flag b">
+      <div class="photo">TEAMIMAGE · NEWSPRINT</div>
+      <div class="body"><span class="kick">Tweede elftal</span><h3>B-<em>ploeg.</em></h3><div class="meta">4e Provinciale C · Seizoen 25/26</div><span class="cta">Bekijk ploeg →</span></div>
+    </div>
+
+    <div class="seam"></div>
+
+    <div>
+      <span class="mono">Jeugdwerking</span>
+      <h2 class="ed" style="font-size:30px;margin-top:6px">De <em>jeugd.</em></h2>
+      <div class="yband">Bovenbouw</div>
+      <div class="ygrid">
+        <div class="ycard"><span class="crest">K</span><b>U21</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U17</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U15</b><span class="arrow">→</span></div>
+      </div>
+      <div class="yband">Middenbouw</div>
+      <div class="ygrid">
+        <div class="ycard"><span class="crest">K</span><b>U13</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U12</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U11</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U10</b><span class="arrow">→</span></div>
+      </div>
+      <div class="yband">Onderbouw</div>
+      <div class="ygrid">
+        <div class="ycard"><span class="crest">K</span><b>U9</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U8</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U7</b><span class="arrow">→</span></div>
+        <div class="ycard"><span class="crest">K</span><b>U6</b><span class="arrow">→</span></div>
+      </div>
+    </div>
+
+  </div></div>
+
+  <div class="drill-head" style="padding-top:36px">
+    <div class="tag">Decide</div>
+    <p>A green + B cream mirrored — lock the listing? Then 6.C is fully designed.</p>
+  </div>
+
+</body>
+</html>
