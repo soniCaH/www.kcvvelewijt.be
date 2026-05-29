@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 2 · /ploegen A-flagship variants (6.C.d6)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #133d28; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-md: 6px 6px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 44px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { max-width: 780px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 28px 26px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--color-ink-muted); }
+    .crest { border: 2px solid var(--color-ink); border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display-big); font-weight: 900; background: var(--color-cream-soft); color: var(--color-ink); flex: none; }
+    .cta { display:inline-block; font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.1em; font-size:11px; }
+
+    /* V1 — jersey-deep block */
+    .v1 { display:grid; grid-template-columns: 1.3fr 1fr; border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); background: var(--color-jersey-deep); color: var(--color-cream); }
+    .v1 .body { padding: 26px 24px; }
+    .v1 .kick { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.14em; font-size:10px; color: rgba(245,241,230,.8); }
+    .v1 h3 { font-family: var(--font-display-big); font-weight:900; font-size: 46px; margin: 8px 0 0; }
+    .v1 .meta { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.07em; font-size:10px; color: rgba(245,241,230,.85); margin-top: 12px; }
+    .v1 .cta { margin-top:18px; border:2px solid var(--color-cream); padding:9px 14px; }
+    .v1 .photo { background: repeating-linear-gradient(135deg, #0a3d2a 0 12px, #0c4a32 12px 24px); display:grid; place-items:center; font-family:var(--font-mono); font-size:10px; color: rgba(245,241,230,.55); text-transform:uppercase; }
+
+    /* V2 — cream, photo-led */
+    .v2 { border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); background: var(--color-cream); display:grid; grid-template-columns: 1fr 1.1fr; }
+    .v2 .photo { background: repeating-linear-gradient(135deg, #b9b09a 0 12px, #ada590 12px 24px); filter: grayscale(1) contrast(1.05); display:grid; place-items:center; font-family:var(--font-mono); font-size:10px; color:#5f5847; text-transform:uppercase; min-height:200px; }
+    .v2 .body { padding: 26px 24px; display:flex; flex-direction:column; justify-content:center; }
+    .v2 .kick { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.14em; font-size:10px; color: var(--color-ink-muted); }
+    .v2 h3 { font-family: var(--font-display-big); font-weight:900; font-size: 46px; margin: 8px 0 0; }
+    .v2 h3 em { font-style:italic; color: var(--color-jersey-deep); }
+    .v2 .meta { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.07em; font-size:10px; color: var(--color-ink-muted); margin-top: 12px; }
+    .v2 .cta { margin-top:18px; border:2px solid var(--color-ink); padding:9px 14px; box-shadow: var(--shadow-paper-sm); }
+
+    /* V3 — editorial mini-hero (no card fill) */
+    .v3 { display:grid; grid-template-columns: 1fr 240px; gap: 26px; align-items:center; padding: 8px 4px; }
+    .v3 .kick { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.14em; font-size:11px; color: var(--color-ink-muted); }
+    .v3 h3 { font-family: var(--font-display-big); font-weight:900; font-size: 58px; margin: 8px 0 0; }
+    .v3 h3 em { font-style:italic; color: var(--color-jersey-deep); }
+    .v3 .meta-row { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+    .v3 .pill { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.08em; font-size:10px; font-weight:600; padding:6px 9px; border:1px solid var(--color-paper-edge); background:var(--color-cream-soft); }
+    .v3 .cta { margin-top:18px; color: var(--color-jersey-deep); border-bottom:2px solid var(--color-jersey-deep); padding-bottom:2px; }
+    .v3 .polaroid { border:2px solid var(--color-ink); background:var(--color-cream-soft); box-shadow: var(--shadow-paper-md); transform: rotate(-1.5deg); padding:9px 9px 16px; }
+    .v3 .polaroid .ph { aspect-ratio:4/3; background: repeating-linear-gradient(135deg, #b9b09a 0 11px, #ada590 11px 22px); filter:grayscale(1); display:grid; place-items:center; font-family:var(--font-mono); font-size:9px; color:#5f5847; text-transform:uppercase; }
+
+    /* corrected B row */
+    .tcard { border:2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 16px; display:flex; align-items:center; gap:14px; max-width: 360px; }
+    .tcard .crest { width:46px; height:46px; font-size:16px; }
+    .tcard h4 { font-family: var(--font-display-big); font-weight:900; font-size:22px; margin:0; }
+    .tcard .meta { font-family: var(--font-mono); text-transform:uppercase; letter-spacing:.06em; font-size:9px; color:var(--color-ink-muted); margin-top:4px; }
+    .tcard .arrow { margin-left:auto; font-family:var(--font-mono); font-size:14px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team listing · Round 2 · Drill 6.C.d6 (A-flagship)</div>
+    <h1>Three A-flagship treatments.</h1>
+    <p>Pick how the A-ploeg leads the listing. (No Dames team — senior side is
+       A-ploeg + B-ploeg; the corrected B card is shown once at the bottom.)
+       Squad-count dropped unless we reliably have it.</p>
+  </div>
+
+  <!-- V1 -->
+  <div class="variant-band">V1 &nbsp;·&nbsp; <b>Jersey-deep block</b></div>
+  <div class="variant-note">Bold filled card, content + photo panel. Loudest / most "flagship".</div>
+  <div class="frame"><div class="page">
+    <div class="v1">
+      <div class="body"><span class="kick">Eerste elftal</span><h3>A-ploeg.</h3><div class="meta">3e Provinciale A · Seizoen 25/26</div><span class="cta">Bekijk ploeg →</span></div>
+      <div class="photo">TEAMIMAGE</div>
+    </div>
+  </div></div>
+
+  <!-- V2 -->
+  <div class="variant-band">V2 &nbsp;·&nbsp; <b>Cream, photo-led</b></div>
+  <div class="variant-note">Newsprint squad photo leads; cream body beside it. Lighter, photographic, sits closer to the rest of the page.</div>
+  <div class="frame"><div class="page">
+    <div class="v2">
+      <div class="photo">TEAMIMAGE · NEWSPRINT</div>
+      <div class="body"><span class="kick">Eerste elftal</span><h3>A-<em>ploeg.</em></h3><div class="meta">3e Provinciale A · Seizoen 25/26</div><span class="cta">Bekijk ploeg →</span></div>
+    </div>
+  </div></div>
+
+  <!-- V3 -->
+  <div class="variant-band">V3 &nbsp;·&nbsp; <b>Editorial mini-hero</b> (no card fill)</div>
+  <div class="variant-note">No filled card — big editorial headline + meta pills + a taped polaroid. Echoes the TeamHero; most "paper", least boxy.</div>
+  <div class="frame"><div class="page">
+    <div class="v3">
+      <div>
+        <span class="kick">Eerste elftal</span>
+        <h3>A-<em>ploeg.</em></h3>
+        <div class="meta-row"><span class="pill">3e Provinciale A</span><span class="pill">Seizoen 25/26</span></div>
+        <div><span class="cta">Bekijk ploeg →</span></div>
+      </div>
+      <div class="polaroid"><div class="ph">TEAMIMAGE</div></div>
+    </div>
+  </div></div>
+
+  <!-- corrected B -->
+  <div class="variant-band" style="background:var(--color-cream);color:var(--color-ink-soft);border-color:var(--color-paper-edge)">Corrected B row &nbsp;·&nbsp; B-ploeg only (no Dames)</div>
+  <div class="frame"><div class="page">
+    <div class="tcard"><span class="crest">K</span><div><h4>B-ploeg.</h4><div class="meta">4e Provinciale C · Seizoen 25/26</div></div><span class="arrow">→</span></div>
+    <p class="mono" style="margin-top:12px">Youth directory (Bovenbouw / Middenbouw / Onderbouw) follows unchanged from round 1.</p>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:36px">
+    <div class="tag">Decide</div>
+    <p>Pick V1 / V2 / V3 for the A-flagship. Then the listing locks and 6.C is
+       fully designed → ready for the PRD.</p>
+  </div>
+
+</body>
+</html>
