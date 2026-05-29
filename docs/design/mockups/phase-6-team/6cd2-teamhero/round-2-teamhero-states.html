@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 2 · TeamHero A — artefact + states (6.C.d2)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #133d28; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-md: 6px 6px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 46px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { max-width: 760px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 30px 28px; }
+
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .pill { display: inline-block; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-weight: 600; line-height: 1; padding: 6px 9px; border: 1px solid var(--color-paper-edge); background: var(--color-cream-soft); color: var(--color-ink); }
+    .ed { font-family: var(--font-display-big); font-weight: 900; letter-spacing: -.01em; line-height: 1.02; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); font-weight: 900; }
+
+    .hero { display: grid; grid-template-columns: 1fr; gap: 26px; align-items: start; }
+    @media (min-width: 640px) { .hero { grid-template-columns: 1fr 280px; } }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .lead { font-family: var(--font-display); font-style: italic; font-size: 17px; color: var(--color-ink-soft); margin-top: 16px; max-width: 42ch; line-height: 1.4; }
+
+    .polaroid { border: 2px solid var(--color-ink); background: var(--color-cream-soft); box-shadow: var(--shadow-paper-md); transform: rotate(-1.5deg); padding: 10px 10px 16px; position: relative; }
+    .polaroid .tape { position: absolute; top: -11px; left: 30%; width: 92px; height: 20px; background: var(--color-warm); opacity: .9; transform: rotate(-3deg); border: 1px solid rgba(0,0,0,.15); }
+    .ph { aspect-ratio: 4/3; display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; position: relative; overflow: hidden; }
+    /* newsprint photo treatment (consistent with the player photo system R9) */
+    .ph.photo { background: repeating-linear-gradient(135deg, #b9b09a 0 11px, #ada590 11px 22px); color: #5f5847; filter: grayscale(1) contrast(1.06); }
+    .ph.photo::after { content:""; position:absolute; inset:0; background-image: radial-gradient(rgba(0,0,0,.18) 0.5px, transparent 0.5px); background-size: 3px 3px; mix-blend-mode: multiply; opacity:.5; }
+    /* JerseyShirt illustration fallback (jersey-deep underprint + ink overprint, stripes) */
+    .ph.jersey { background: var(--color-cream); }
+    .stub { margin-top: 12px; border: 2px dashed var(--color-ink); background: var(--color-cream); padding: 9px 11px; display: flex; justify-content: space-between; align-items: center; transform: rotate(.5deg); }
+    .stub .mono { color: var(--color-ink-muted); }
+    .stub b { font-family: var(--font-display-big); font-weight: 900; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 2 · Drill 6.C.d2 (TeamHero A)</div>
+    <h1>TeamHero A, assembled — photo, fallback, youth.</h1>
+    <p>Identity locked as category-forward (A). Here's the full hero in its real
+       states: squad photo (newsprint-treated like player photos), the no-photo
+       <b>JerseyShirt</b> fallback, and a youth team where division + coach are
+       absent. Meta = division · trainer · season, each auto-hiding when missing.
+       Tagline (team.tagline) renders as an italic lead, auto-hides when empty.</p>
+  </div>
+
+  <!-- senior + photo -->
+  <div class="variant-band">State 1 &nbsp;·&nbsp; <b>A-ploeg, with squad photo</b></div>
+  <div class="frame"><div class="page">
+    <div class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">KCVV Elewijt</span>
+        <h2 class="ed" style="font-size:60px;margin-top:8px">A-ploeg<em>.</em></h2>
+        <div class="meta-row">
+          <span class="pill">3e Provinciale A</span>
+          <span class="pill">Trainer · Koen Verbruggen</span>
+          <span class="pill">Seizoen 25/26</span>
+        </div>
+        <p class="lead">Een hechte groep met een gezonde mix van jeugd en ervaring, thuis op het Sportpark Driesstraat.</p>
+      </div>
+      <div>
+        <div class="polaroid"><div class="tape"></div><div class="ph photo">TEAMIMAGE · NEWSPRINT</div></div>
+        <div class="stub"><span class="mono">Seizoen</span><b>25/26</b></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- senior, no photo -> JerseyShirt fallback -->
+  <div class="variant-band">State 2 &nbsp;·&nbsp; <b>No teamImage → JerseyShirt fallback</b></div>
+  <div class="variant-note">When the team has no squad photo, the polaroid holds the canonical jersey illustration instead (jersey-deep underprint + ink stripes) — same frame + stub.</div>
+  <div class="frame"><div class="page">
+    <div class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">KCVV Elewijt</span>
+        <h2 class="ed" style="font-size:60px;margin-top:8px">B-ploeg<em>.</em></h2>
+        <div class="meta-row">
+          <span class="pill">4e Provinciale C</span>
+          <span class="pill">Trainer · Dirk Aerts</span>
+          <span class="pill">Seizoen 25/26</span>
+        </div>
+      </div>
+      <div>
+        <div class="polaroid"><div class="tape"></div><div class="ph jersey">
+          <svg viewBox="0 0 120 110" width="80%" style="display:block">
+            <g fill="none" stroke="var(--color-ink)" stroke-width="2.5" stroke-linejoin="round">
+              <path d="M40 22 L20 34 L30 52 L40 46 L40 92 L80 92 L80 46 L90 52 L100 34 L80 22 L70 30 Q60 38 50 30 Z" fill="var(--color-jersey-deep)"/>
+              <path d="M52 24 Q60 34 68 24" />
+              <line x1="52" y1="46" x2="52" y2="92" stroke="var(--color-ink)" stroke-width="2" opacity=".5"/>
+              <line x1="68" y1="46" x2="68" y2="92" stroke="var(--color-ink)" stroke-width="2" opacity=".5"/>
+            </g>
+          </svg>
+        </div></div>
+        <div class="stub"><span class="mono">Seizoen</span><b>25/26</b></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- youth, degraded -->
+  <div class="variant-band">State 3 &nbsp;·&nbsp; <b>Youth (U13) — division + coach absent</b></div>
+  <div class="variant-note">Cross-age degrade: category swaps to "U13."; no PSD division/standings; the meta row shows only what exists (here: jeugd category + season). Photo or fallback as available.</div>
+  <div class="frame"><div class="page">
+    <div class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">KCVV Elewijt · Jeugd</span>
+        <h2 class="ed" style="font-size:60px;margin-top:8px">U13<em>.</em></h2>
+        <div class="meta-row">
+          <span class="pill">Middenbouw</span>
+          <span class="pill">Seizoen 25/26</span>
+        </div>
+      </div>
+      <div>
+        <div class="polaroid"><div class="tape"></div><div class="ph photo">TEAMIMAGE · NEWSPRINT</div></div>
+        <div class="stub"><span class="mono">Seizoen</span><b>25/26</b></div>
+      </div>
+    </div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:48px">
+    <div class="tag">Decide</div>
+    <p>Lock TeamHero, or tweak: the artefact (photo treatment / rotation / stub),
+       the meta-row fields + order, the tagline lead, or the youth degrade. Next
+       6.C drill after this = StandingsTable.</p>
+  </div>
+
+</body>
+</html>
