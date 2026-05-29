@@ -23,7 +23,8 @@
 
 ### In scope (packages touched)
 
-- **`apps/web`** — the whole of Phase 6.C lives here. No `apps/api`, no `packages/api-contract`, no `apps/studio` changes (all data already exists; see §6).
+- **`apps/web`** — the bulk of Phase 6.C.
+- **`packages/sanity-schemas`** — **one additive delta:** add the existing `pullquote` Portable-Text decorator (introduced for `player.bio` in 6.A) to `team.body` block marks, so `<TeamEditorial>` can render an optional styled coach/team pull-quote ("Het verhaal"). Additive; no migration; reuses the 6.A web-side serializer. No `apps/api` / `packages/api-contract` / `apps/studio` changes.
   - **New route** `src/app/(main)/ploegen/[slug]/wedstrijden/page.tsx` — full-season month-grouped agenda, auto-scroll to the next match on load. Uses the existing `bff.getMatches(psdId)`.
   - **Rebuild** `src/app/(main)/ploegen/[slug]/page.tsx` to the locked single-scroll composition (sticky section-nav; sections auto-hide on empty data).
   - **Rebuild** `src/app/(main)/ploegen/page.tsx` to the A+B paired-flagship + youth-directory listing.
@@ -159,8 +160,9 @@ Phase 1 (tracer: <TeamHero>)
 
 #### `<TeamEditorial>` (body / training / contact)
 
-- [ ] Renders `team.body` (Portable Text) via a prose serializer, `team.trainingSchedule[]` (day/time/location/type) as a compact list/table, `team.contactInfo` (PT); each block auto-hides when empty
-- [ ] Uses article-prose primitives (`<EditorialHeading>` subheads + prose width); no new PT block types. Story + unit test for the empty/auto-hide path
+- [ ] **Schema (additive):** add the 6.A `pullquote` decorator to `team.body` block marks in `packages/sanity-schemas/src/team.ts` (reuse the existing decorator + web serializer; no migration)
+- [ ] Renders `team.body` (Portable Text) via a prose serializer **incl. the `pullquote` decorator → a styled "Het verhaal" pull-quote** (reuse the 6.A `<BioBlock>` serializer), `team.trainingSchedule[]` (day/time/location/type) as a compact list/table, `team.contactInfo` (PT); each block auto-hides when empty
+- [ ] Uses article-prose primitives (`<EditorialHeading>` subheads + prose width); no new PT block types beyond reusing the pullquote decorator. Story + unit test for the empty/auto-hide path + the pull-quote render
 
 #### `/ploegen/[slug]` page assembly + e2e
 
@@ -194,7 +196,7 @@ Phase 1 (tracer: <TeamHero>)
 
 ## 6. Effect Schema / api-contract changes
 
-**None.** Phase 6.C is `apps/web`-only. All data already flows: Sanity `team` (name, slug, age, division/divisionFull, season, tagline, body, contactInfo, teamImage, trainingSchedule, `players[]→player`, `staff[]→staffMember`) via `TeamRepository`; BFF `getRanking(psdId)→RankingEntry[]` and `getMatches(psdId)→Match[]` (both already consumed by the current detail page). The matches outcome underline reuses existing tokens `--color-jersey-deep` + `--color-alert` (#b84a3a, already in `globals.css`) — **no new token**. The new `/ploegen/[slug]/wedstrijden` route is a Next.js page reusing `bff.getMatches`, not an api-contract change.
+**One additive Sanity-schema delta** (the `pullquote` decorator on `team.body`, reused verbatim from 6.A's `player.bio` — same decorator + same `<BioBlock>` serializer; additive, no migration). No api-contract / endpoint changes. Everything else already flows: Sanity `team` (name, slug, age, division/divisionFull, season, tagline, body, contactInfo, teamImage, trainingSchedule, `players[]→player`, `staff[]→staffMember`) via `TeamRepository`; BFF `getRanking(psdId)→RankingEntry[]` and `getMatches(psdId)→Match[]` (both already consumed by the current detail page). The matches outcome underline reuses existing tokens `--color-jersey-deep` + `--color-alert` (#b84a3a, already in `globals.css`) — **no new token**. The new `/ploegen/[slug]/wedstrijden` route is a Next.js page reusing `bff.getMatches`, not an api-contract change.
 
 **Documented palette exception:** the matches outcome language (win jersey-deep / draw none / loss brick) is a deliberate, single exception to the redesign's "no outcome colours / no loss-red" lock — it applies to the matches agenda only (standings has no form indicator). `--color-alert` is a muted retro terracotta, not bright red.
 
