@@ -126,6 +126,7 @@ describe("TeamRepository", () => {
         footbelId: 12345,
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
+        season: "25/26",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         body: null,

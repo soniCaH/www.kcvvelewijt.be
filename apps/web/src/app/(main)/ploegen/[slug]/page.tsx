@@ -14,6 +14,7 @@ import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { TeamDetail } from "@/components/team/TeamDetail";
+import { TeamHero } from "@/components/team/TeamHero";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { FooterSafeArea } from "@/components/design-system";
 import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
@@ -169,6 +170,18 @@ export default async function TeamPage({ params }: TeamPageProps) {
           url: `${SITE_CONFIG.siteUrl}/ploegen/${slug}`,
         })}
       />
+      <TeamHero
+        age={team.age}
+        teamType={team.teamType}
+        ageGroup={team.ageGroup}
+        division={team.division}
+        divisionFull={team.divisionFull}
+        season={team.season}
+        tagline={team.tagline}
+        teamImageUrl={team.teamImageUrl}
+        className="mx-auto max-w-5xl px-4 py-8 sm:py-12"
+      />
+
       <TeamDetail
         header={{
           name: team.name,

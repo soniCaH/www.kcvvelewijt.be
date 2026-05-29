@@ -22,6 +22,7 @@ export const TEAMS_QUERY =
 export const TEAM_BY_SLUG_QUERY =
   defineQuery(`*[_type == "team" && slug.current == $slug][0] {
   _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,
+  season,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
   "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   trainingSchedule,
@@ -105,6 +106,7 @@ export interface TeamDetailVM {
   footbelId: number | null;
   division: string | null;
   divisionFull: string | null;
+  season: string | null;
   tagline: string | undefined;
   teamType: "youth" | "senior";
   ageGroup: string | undefined;
@@ -174,6 +176,7 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
     footbelId: row.footbelId,
     division: row.division,
     divisionFull: row.divisionFull,
+    season: row.season ?? null,
     tagline: computeTagline(row),
     teamType: computeTeamType(row.age),
     ageGroup: computeAgeGroup(row.age),
