@@ -171,6 +171,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         })}
       />
       <TeamHero
+        name={team.name}
         age={team.age}
         teamType={team.teamType}
         ageGroup={team.ageGroup}

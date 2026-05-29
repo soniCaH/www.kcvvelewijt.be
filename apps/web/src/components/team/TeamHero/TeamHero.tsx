@@ -7,7 +7,12 @@ import { JerseyShirt } from "@/components/design-system/JerseyShirt";
 import { getYouthDivision } from "@/lib/utils/group-teams";
 
 export interface TeamHeroProps {
-  /** Team age code from Sanity (e.g. "A", "B", "U13"). */
+  /**
+   * Full team name from Sanity (e.g. "KCVV Elewijt A", "KCVV Elewijt U13").
+   * Used as the primary source for the category headline.
+   */
+  name: string;
+  /** Team age code from Sanity (e.g. "A", "B", "U13"). Used as a fallback only. */
   age: string | null;
   /** "senior" or "youth" — drives kicker + meta pill logic. */
   teamType: "youth" | "senior";
@@ -21,26 +26,25 @@ export interface TeamHeroProps {
   season?: string | null;
   /** Editorial tagline — renders as italic display lead. Auto-hides when absent. */
   tagline?: string | null;
-  /** Squad photo URL (newsprint polaroid). No photo → JerseyShirt fallback. */
+  /** Squad photo URL (landscape newsprint photo). No photo → JerseyShirt fallback. */
   teamImageUrl?: string | null;
   className?: string;
 }
 
-function computeCategory(
-  age: string | null,
-  teamType: "youth" | "senior",
-): string {
-  if (!age) return teamType === "youth" ? "Jeugd" : "Ploeg";
+const CLUB_PREFIX = /^KCVV\s+Elewijt\s+/i;
+
+function computeCategory(name: string, teamType: "youth" | "senior"): string {
+  const suffix = name.replace(CLUB_PREFIX, "").trim();
+  if (!suffix) return teamType === "youth" ? "Jeugd" : "Ploeg";
   if (teamType === "senior") {
-    if (age.toUpperCase() === "A") return "A-ploeg";
-    if (age.toUpperCase() === "B") return "B-ploeg";
-    return age;
+    if (suffix.toUpperCase() === "A") return "A-ploeg";
+    if (suffix.toUpperCase() === "B") return "B-ploeg";
   }
-  // Youth: ageGroup is already normalised (e.g. "U13"); fall back to raw age.
-  return age.toUpperCase();
+  return suffix.toUpperCase();
 }
 
 export function TeamHero({
+  name,
   age,
   teamType,
   ageGroup,
@@ -53,7 +57,7 @@ export function TeamHero({
 }: TeamHeroProps) {
   const hasPhoto =
     teamImageUrl !== undefined && teamImageUrl !== null && teamImageUrl !== "";
-  const category = computeCategory(age, teamType);
+  const category = computeCategory(name, teamType);
 
   const kicker = teamType === "youth" ? "KCVV Elewijt · Jeugd" : "KCVV Elewijt";
 
@@ -79,7 +83,7 @@ export function TeamHero({
       data-testid="team-hero"
       aria-label={`${category} · ploegpagina`}
       className={cn(
-        "grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[1fr_minmax(220px,300px)]",
+        "grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[1fr_minmax(300px,420px)]",
         className,
       )}
     >
@@ -125,10 +129,10 @@ export function TeamHero({
       <div
         data-testid="team-hero-artefact"
         data-state={hasPhoto ? "photo" : "jersey"}
-        className="order-first flex w-full max-w-[300px] flex-col gap-3 justify-self-start sm:order-last sm:justify-self-end"
+        className="order-first flex w-full flex-col gap-3 justify-self-start sm:order-last sm:justify-self-end"
       >
         <TapedFigure
-          aspect="portrait-3-4"
+          aspect="landscape-3-2"
           rotation="b"
           tape={{ color: "jersey", length: "md" }}
           bg="cream-soft"
@@ -139,8 +143,8 @@ export function TeamHero({
             <Image
               src={teamImageUrl!}
               alt={`${category} teamfoto`}
-              width={300}
-              height={400}
+              width={420}
+              height={280}
               unoptimized
               className="block h-full w-full object-cover"
             />
@@ -149,7 +153,7 @@ export function TeamHero({
               <JerseyShirt
                 letterOverlay={jerseyLetter}
                 ariaLabel={`${category} jersey`}
-                className="h-full max-h-[200px] w-full max-w-[200px]"
+                className="h-full max-h-[160px] w-full max-w-[160px]"
               />
             </div>
           )}

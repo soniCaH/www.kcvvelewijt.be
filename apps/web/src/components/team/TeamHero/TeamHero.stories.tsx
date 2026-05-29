@@ -9,12 +9,13 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 6.C hero band for `/ploegen/[slug]`. Category-forward identity (A-ploeg./U13.) with a taped squad polaroid or JerseyShirt fallback. Composition: left words / right artefact; artefact moves above headline on mobile.",
+          "Phase 6.C hero band for `/ploegen/[slug]`. Category derived from team name (A-ploeg./U13.), landscape squad photo or JerseyShirt fallback. Two-column desktop / artefact-above-headline mobile.",
       },
     },
   },
   tags: ["autodocs", "vr"],
   argTypes: {
+    name: { control: "text" },
     age: { control: "text" },
     teamType: { control: "select", options: ["senior", "youth"] },
     division: { control: "text" },
@@ -31,6 +32,7 @@ type Story = StoryObj<typeof meta>;
 /** A-team with squad photo — canonical senior hero composition. */
 export const ATeamWithPhoto: Story = {
   args: {
+    name: "KCVV Elewijt A",
     age: "A",
     teamType: "senior",
     divisionFull: "Eerste Elftal A – 3e Nat. A",
@@ -44,6 +46,7 @@ export const ATeamWithPhoto: Story = {
 /** A-team without squad photo — JerseyShirt fallback in the same frame. */
 export const ATeamNoPhoto: Story = {
   args: {
+    name: "KCVV Elewijt A",
     age: "A",
     teamType: "senior",
     divisionFull: "Eerste Elftal A – 3e Nat. A",
@@ -56,6 +59,7 @@ export const ATeamNoPhoto: Story = {
 /** Youth U13 — degraded meta (youth band + season; no division), JerseyShirt fallback. */
 export const YouthU13: Story = {
   args: {
+    name: "KCVV Elewijt U13",
     age: "U13",
     teamType: "youth",
     ageGroup: "U13",

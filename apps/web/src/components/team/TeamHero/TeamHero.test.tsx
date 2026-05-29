@@ -3,7 +3,7 @@
  *
  * Covers:
  *  - Kicker: "KCVV Elewijt" for senior, "KCVV Elewijt · Jeugd" for youth.
- *  - Headline: category label with period (A-ploeg. / B-ploeg. / U13.).
+ *  - Headline: category derived from team name (A-ploeg. / B-ploeg. / U13.).
  *  - Meta row: division + season pills for senior; youth band + season for youth.
  *  - Meta auto-hide when both pills absent.
  *  - Tagline renders and auto-hides.
@@ -16,6 +16,7 @@ import { render, screen } from "@testing-library/react";
 import { TeamHero } from "./TeamHero";
 
 const BASE_SENIOR = {
+  name: "KCVV Elewijt A",
   age: "A" as const,
   teamType: "senior" as const,
   divisionFull: "Eerste Elftal A – 3e Nat. A",
@@ -33,7 +34,13 @@ describe("TeamHero", () => {
 
     it("renders 'KCVV Elewijt · Jeugd' for a youth team", () => {
       render(
-        <TeamHero age="U13" teamType="youth" ageGroup="U13" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt U13"
+          age="U13"
+          teamType="youth"
+          ageGroup="U13"
+          season="25/26"
+        />,
       );
       expect(screen.getByTestId("team-hero-kicker").textContent).toBe(
         "KCVV Elewijt · Jeugd",
@@ -41,30 +48,49 @@ describe("TeamHero", () => {
     });
   });
 
-  describe("Headline / category", () => {
-    it("renders 'A-ploeg.' as the h1 for age A senior", () => {
+  describe("Headline / category (derived from team name)", () => {
+    it("renders 'A-ploeg.' from name 'KCVV Elewijt A'", () => {
       render(<TeamHero {...BASE_SENIOR} />);
       const h1 = screen.getByRole("heading", { level: 1 });
       expect(h1.textContent).toBe("A-ploeg.");
     });
 
-    it("renders 'B-ploeg.' for age B senior", () => {
-      render(<TeamHero age="B" teamType="senior" season="25/26" />);
+    it("renders 'B-ploeg.' from name 'KCVV Elewijt B' regardless of age field", () => {
+      render(
+        <TeamHero
+          name="KCVV Elewijt B"
+          age="A"
+          teamType="senior"
+          season="25/26"
+        />,
+      );
       const h1 = screen.getByRole("heading", { level: 1 });
       expect(h1.textContent).toBe("B-ploeg.");
     });
 
-    it("renders 'U13.' for a U13 youth team", () => {
+    it("renders 'U13.' from name 'KCVV Elewijt U13'", () => {
       render(
-        <TeamHero age="U13" teamType="youth" ageGroup="U13" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt U13"
+          age="U13"
+          teamType="youth"
+          ageGroup="U13"
+          season="25/26"
+        />,
       );
       const h1 = screen.getByRole("heading", { level: 1 });
       expect(h1.textContent).toBe("U13.");
     });
 
-    it("renders 'U17.' for a U17 youth team", () => {
+    it("renders 'U17.' from name 'KCVV Elewijt U17'", () => {
       render(
-        <TeamHero age="U17" teamType="youth" ageGroup="U17" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt U17"
+          age="U17"
+          teamType="youth"
+          ageGroup="U17"
+          season="25/26"
+        />,
       );
       const h1 = screen.getByRole("heading", { level: 1 });
       expect(h1.textContent).toBe("U17.");
@@ -81,7 +107,13 @@ describe("TeamHero", () => {
 
     it("falls back to short division when divisionFull is absent", () => {
       render(
-        <TeamHero age="A" teamType="senior" division="3NA" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt A"
+          age="A"
+          teamType="senior"
+          division="3NA"
+          season="25/26"
+        />,
       );
       const meta = screen.getByTestId("team-hero-meta");
       expect(meta.textContent).toContain("3NA");
@@ -89,7 +121,13 @@ describe("TeamHero", () => {
 
     it("shows youth band and season for a youth team", () => {
       render(
-        <TeamHero age="U13" teamType="youth" ageGroup="U13" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt U13"
+          age="U13"
+          teamType="youth"
+          ageGroup="U13"
+          season="25/26"
+        />,
       );
       const meta = screen.getByTestId("team-hero-meta");
       expect(meta.textContent).toContain("Middenbouw");
@@ -98,7 +136,13 @@ describe("TeamHero", () => {
 
     it("shows Bovenbouw band for U17", () => {
       render(
-        <TeamHero age="U17" teamType="youth" ageGroup="U17" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt U17"
+          age="U17"
+          teamType="youth"
+          ageGroup="U17"
+          season="25/26"
+        />,
       );
       expect(screen.getByTestId("team-hero-meta").textContent).toContain(
         "Bovenbouw",
@@ -107,7 +151,13 @@ describe("TeamHero", () => {
 
     it("shows Onderbouw band for U9", () => {
       render(
-        <TeamHero age="U9" teamType="youth" ageGroup="U9" season="25/26" />,
+        <TeamHero
+          name="KCVV Elewijt U9"
+          age="U9"
+          teamType="youth"
+          ageGroup="U9"
+          season="25/26"
+        />,
       );
       expect(screen.getByTestId("team-hero-meta").textContent).toContain(
         "Onderbouw",
@@ -115,7 +165,7 @@ describe("TeamHero", () => {
     });
 
     it("auto-hides meta row when no division and no season", () => {
-      render(<TeamHero age="A" teamType="senior" />);
+      render(<TeamHero name="KCVV Elewijt A" age="A" teamType="senior" />);
       expect(screen.queryByTestId("team-hero-meta")).toBeNull();
     });
   });
@@ -164,7 +214,7 @@ describe("TeamHero", () => {
     });
 
     it("hides the season stub when season is absent", () => {
-      render(<TeamHero age="A" teamType="senior" />);
+      render(<TeamHero name="KCVV Elewijt A" age="A" teamType="senior" />);
       expect(screen.queryByTestId("team-hero-season-stub")).toBeNull();
     });
   });
