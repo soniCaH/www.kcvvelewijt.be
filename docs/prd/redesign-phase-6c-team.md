@@ -146,7 +146,7 @@ Phase 1 (tracer: <TeamHero>)
 - [ ] Agenda row component (`components/team/TeamMatchRow/` or shared) — **responsive: A symmetric scoreboard (desktop ≥~640px) / B KCVV-centric column (mobile)**, one component + one breakpoint
 - [ ] Date stub; club crests (real PSD `home_team.logo`/`away_team.logo`; neutral placeholder fallback); centred score-or-time headline in the display font (kickoff time, no `vs`); competition caption (ink, one weight, no tag) inside the centre column under the score
 - [ ] **Outcome = flat colour underline on the score**, wider than the digits, climbing toward the "–": **win = `color-mix(jersey-deep 34%, cream)` · draw = none · loss = `color-mix(--color-alert 38%, cream)`** (brick). NOT a separate column; NOT `<HighlighterStroke>`.
-- [ ] Long team names: ellipsis + `title="<full name>"`. Mobile home/away = Lucide `house`/`bus` icon
+- [ ] Long team names: ellipsis + `title="<full name>"`. Mobile home/away = **Phosphor Fill** `House`/`Bus` (`weight="fill"`, via `@/lib/icons.redesign` — the redesign's canonical icon set; **not** Lucide)
 - [ ] `<TeamMatchesSection>` (teaser on the detail page): featured next match (jersey-deep filled card) + a few recent rows (same vocabulary) + **"Volledige kalender →"** linking to `/ploegen/[slug]/wedstrijden`
 - [ ] Section auto-hides when `bff.getMatches` empty. Stories: mid-season (W/D/L mix), season-start (all upcoming), empty. VR + unit tests
 
@@ -155,8 +155,10 @@ Phase 1 (tracer: <TeamHero>)
 - [ ] New route `apps/web/src/app/(main)/ploegen/[slug]/wedstrijden/page.tsx`; ISR like the detail page; `generateMetadata`
 - [ ] Renders the full season as a **month-grouped newspaper agenda** (display-big month headings, no rule beneath; agenda rows) ascending Aug→Jun
 - [ ] **Auto-scrolls to the next match on load** (`scrollIntoView`, `block:center`, `prefers-reduced-motion` safe)
+- [ ] **No next match (end / off-season):** render the full season and **skip auto-scroll** (or scroll to top) — never crash on a missing anchor
+- [ ] **`bff.getMatches` returns empty:** render a localized empty state (e.g. "Geen wedstrijden gepland") — **no 404, no redirect**
 - [ ] Handles a 40–50-fixture season; Beker/Oefen distinguished by the competition caption text
-- [ ] Playwright e2e smoke: route renders, next-match anchor present, console clean
+- [ ] Playwright e2e smoke: route renders + console clean; asserts the **empty-state UI** when there are no fixtures, and that **auto-scroll is skipped** when there is no next match
 
 #### `<TeamEditorial>` (body / training / contact)
 
@@ -236,4 +238,3 @@ Not a hard requirement (Phase 2 sub-issues are parallel-executable), but pragmat
 5. **Page assembly + e2e** ships last in Phase 2 — consumes everything above.
 6. **Phase 3 listing** after the detail page is live (shares `<TeamHero>`/crest vocabulary; flagship reuses the hero's jersey-deep treatment).
 7. **Phase 4 cleanup** rides after, once `rg` confirms no legacy consumers — separate-ship is the cleaner default (per Phase 6.A #1886).
-```

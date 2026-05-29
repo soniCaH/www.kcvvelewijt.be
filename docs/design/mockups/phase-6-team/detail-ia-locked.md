@@ -45,7 +45,9 @@ one colour (on the jersey-deep featured card both are cream — earlier bug fixe
   KCVV bold wherever it plays. **No venue indicator** (the order conveys home/away).
 - **B · mobile = KCVV-centric column:** `[stub] [opponent crest+name+comp]
   [home/away icon] [score/time]`. KCVV is **not** repeated (you're on its page);
-  **our score first**. Home/away shown as a **Lucide `house` / `bus`** icon.
+  **our score first**. Home/away shown as a **Phosphor Fill `House` / `Bus`**
+  icon (`weight="fill"`, via `@/lib/icons.redesign` — the redesign's canonical
+  icon set; not Lucide).
 
 **Crests:** real PSD club logos (`home_team.logo` / `away_team.logo`). One
 **neutral** placeholder for all clubs (no KCVV-green — it read as a colour
@@ -84,12 +86,16 @@ wrapping to 2 lines was rejected (uneven rhythm).
 ## 4. Palette / vocabulary deltas (must be addressed in the PRD)
 
 - **Deliberate exception to the "no outcome colours / no loss-red" lock:** the
-  matches/standings outcome language is **win = jersey-deep · draw = none · loss
+  **matches-agenda** outcome language is **win = jersey-deep · draw = none · loss
   = `--color-alert` (#b84a3a) brick** (an existing token; not bright red). This
   is the single semantic-outcome-colour pair in the redesign — justify it in the
-  PRD and apply the SAME language to the `<StandingsTable>` form indicator for
-  consistency. (Supersedes the blanket "no semantic outcome colours" note in the
-  earlier palette lock for this specific case.)
+  PRD. (Supersedes the blanket "no semantic outcome colours" note in the earlier
+  palette lock for this specific case.)
+  **NOTE (superseded):** an earlier draft also applied this language to a
+  `<StandingsTable>` **form indicator** — that is dropped. `RankingEntry.form` is
+  optional/unreliable for the other teams in the division, so the standings table
+  has **no Vorm column**; the colour language applies to the **matches agenda
+  only**. See `standings-locked.md`.
 - New route: **`/ploegen/[slug]/wedstrijden`** (full-season agenda).
 - No new design-system colour token (reuses jersey-deep + alert).
 
@@ -97,7 +103,7 @@ wrapping to 2 lines was rejected (uneven rhythm).
 
 - `<TeamHero>` artefact (taped team photo / jersey-illustration fallback, season
   ticket-stub, MonoLabelRow).
-- `<StandingsTable>` layout (uses the §3 outcome language; KCVV row highlighted;
+- `<StandingsTable>` layout (KCVV row highlighted; no Vorm column — see `standings-locked.md`;
   no green/yellow/red badges from the legacy table).
 - `<SquadGrid>` + `<PlayerCard>` (position grouping; reuses `<PlayerFigure>`).
 - Staff cards; editorial section; **listing `/ploegen`** layout (hierarchy
