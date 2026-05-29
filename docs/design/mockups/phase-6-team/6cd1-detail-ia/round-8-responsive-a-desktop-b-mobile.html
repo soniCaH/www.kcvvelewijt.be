@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 8 · A on desktop / B on mobile + display-font time</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #006e47; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { position: sticky; top: 0; z-index: 50; background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 46px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame.desktop { max-width: 660px; margin: 18px auto 0; }
+    .frame.mobile { max-width: 360px; margin: 18px auto 0; }
+    .frame .page { padding: 22px 22px 28px; }
+    .frame.mobile .page { padding: 18px 16px 24px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .ed { font-family: var(--font-display); font-weight: 700; line-height: 1.1; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .ed-md { font-size: 23px; }
+    .section-kicker { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
+    .section-kicker .mono { color: var(--color-ink-muted); }
+    .amonth { font-family: var(--font-display-big); font-weight: 900; font-size: 26px; line-height: 1; margin: 22px 0 12px; }
+    .amonth:first-of-type { margin-top: 12px; }
+    .amonth em { font-style: italic; color: var(--color-jersey-deep); }
+
+    /* shared card chrome */
+    .mcard { border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); background: var(--color-cream); margin-bottom: 10px; transition: transform .25s, box-shadow .25s; }
+    .mcard:hover { box-shadow: none; transform: translate(3px,3px); cursor: pointer; }
+    .stub { background: var(--color-cream-soft); border-right: 2px dashed var(--color-ink); padding: 8px 4px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    .stub .d { font-family: var(--font-display-big); font-weight: 900; font-size: 18px; line-height: 1; }
+    .stub .mo { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; margin-top: 2px; color: var(--color-ink-soft); }
+    .tn { font-family: var(--font-display); font-style: italic; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tn.kcvv { font-weight: 700; font-style: normal; }
+    .score { font-family: var(--font-display-big); font-weight: 900; font-size: 18px; text-align: center; white-space: nowrap; }
+    /* kickoff time now in the STYLISH display font (was mono) */
+    .tm { font-family: var(--font-display); font-style: italic; font-size: 16px; color: var(--color-ink-soft); text-align: center; white-space: nowrap; }
+    .ven { font-family: var(--font-mono); font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--color-ink-muted); text-align: center; }
+    .sq { width: 26px; height: 26px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 2px solid var(--color-ink); }
+    .sq.w { background: var(--color-jersey-deep); color: var(--color-cream); }
+    .sq.d { background: var(--color-cream-deep); color: var(--color-ink); }
+    .sq.v { background: var(--color-warm); color: var(--color-ink); }
+    .feat-label { display:inline-block; background: var(--color-warm); color: var(--color-ink); font-family: var(--font-mono); font-size: 8.5px; font-weight:700; text-transform: uppercase; letter-spacing: .12em; padding: 4px 7px; margin: 4px 0 7px; }
+    .mcard.feat { background: var(--color-jersey-deep); color: var(--color-cream); box-shadow: 6px 6px 0 0 var(--color-ink); }
+    .mcard.feat .stub { background: var(--color-jersey-deep-dark); border-right-color: rgba(245,241,230,.4); color: var(--color-cream); }
+    .mcard.feat .tn, .mcard.feat .score, .mcard.feat .tm { color: var(--color-cream); }
+    .mcard.feat .ven { color: rgba(245,241,230,.8); }
+
+    /* ===== A — symmetric (desktop) ===== */
+    .a .mcard { display: grid; grid-template-columns: 46px 1fr 30px 40px; }
+    .a .body { display: grid; grid-template-columns: 1fr 52px 1fr; align-items: center; gap: 8px; padding: 10px 4px 10px 10px; }
+    .a .body .home { text-align: right; }
+    .a .body .away { text-align: left; }
+    .a .venue { display:flex; align-items:center; justify-content:center; border-left: 1px solid var(--color-paper-edge); }
+    .a .result { display:flex; align-items:center; justify-content:center; padding-right: 8px; }
+    .a .mcard.feat .venue { border-left-color: rgba(245,241,230,.3); }
+
+    /* ===== B — KCVV-centric (mobile) ===== */
+    .b .mcard { display: grid; grid-template-columns: 44px 1fr 28px 48px 38px; }
+    .b .opp { display:flex; flex-direction:column; justify-content:center; padding: 9px 4px 9px 10px; min-width:0; }
+    .b .opp .comp { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; letter-spacing:.05em; color: var(--color-ink-muted); margin-top: 2px; }
+    .b .venue { display:flex; align-items:center; justify-content:center; }
+    .b .scorecol { display:flex; align-items:center; justify-content:center; border-left: 1px solid var(--color-paper-edge); }
+    .b .result { display:flex; align-items:center; justify-content:center; padding-right: 7px; }
+    .b .mcard.feat .scorecol { border-left-color: rgba(245,241,230,.3); }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 8 · Drill 6.C.d1</div>
+    <h1>A on desktop, B on mobile — one component, one breakpoint.</h1>
+    <p>Same fixtures, same data. At ≥ ~640px the row lays out as the symmetric
+       scoreboard (A); below that it collapses to the KCVV-centric column (B),
+       where two names + a centred score won't fit. Kickoff times are now in the
+       display font (no more mono/serif clash). Left = desktop frame, right/below
+       = a 360px phone frame.</p>
+  </div>
+
+  <!-- ===== DESKTOP (A) ===== -->
+  <div class="variant-band">Desktop &nbsp;·&nbsp; ≥ ~640px &nbsp;·&nbsp; <b>A symmetric scoreboard</b></div>
+  <div class="variant-note">Both names, real home/away order, KCVV bold, score centred. Upcoming shows kickoff time in the display font.</div>
+  <div class="frame desktop"><div class="page a">
+    <div class="section-kicker"><span class="mono">KCVV Elewijt · A-ploeg</span><h3 class="ed ed-md">Volledige <em>kalender.</em></h3></div>
+
+    <div class="amonth">April <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">5</div><div class="mo">APR</div></div><div class="body"><span class="tn kcvv">KCVV</span><span class="score">4–1</span><span class="tn away">Steenokkerzeel</span></div><div class="venue"><span class="ven">T</span></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">12</div><div class="mo">APR</div></div><div class="body"><span class="tn away">KFC Eppegem</span><span class="score">2–1</span><span class="tn kcvv" style="text-align:left">KCVV</span></div><div class="venue"><span class="ven">U</span></div><div class="result"><span class="sq v">V</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">26</div><div class="mo">APR</div></div><div class="body"><span class="tn kcvv">KCVV</span><span class="score">2–0</span><span class="tn away">FC Perk</span></div><div class="venue"><span class="ven">T</span></div><div class="result"><span class="sq w">W</span></div></div>
+
+    <div class="amonth">Mei <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">17</div><div class="mo">MEI</div></div><div class="body"><span class="tn away">Diegem</span><span class="score">0–2</span><span class="tn kcvv" style="text-align:left">KCVV</span></div><div class="venue"><span class="ven">U</span></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">24</div><div class="mo">MEI</div></div><div class="body"><span class="tn kcvv">KCVV</span><span class="score">3–1</span><span class="tn away">VK Liedekerke</span></div><div class="venue"><span class="ven">T</span></div><div class="result"><span class="sq w">W</span></div></div>
+
+    <div class="feat-label">Eerstvolgende</div>
+    <div class="mcard feat"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="body"><span class="tn kcvv">KCVV</span><span class="tm">15:00</span><span class="tn away">KFC Eppegem</span></div><div class="venue"><span class="ven">T</span></div><div class="result"></div></div>
+
+    <div class="amonth">Juni <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">7</div><div class="mo">JUN</div></div><div class="body"><span class="tn away">FC Perk</span><span class="tm">15:00</span><span class="tn kcvv" style="text-align:left">KCVV</span></div><div class="venue"><span class="ven">U</span></div><div class="result"></div></div>
+    <div class="mcard"><div class="stub"><div class="d">11</div><div class="mo">JUN</div></div><div class="body"><span class="tn kcvv">KCVV</span><span class="tm">20:00</span><span class="tn away">VK Tildonk</span></div><div class="venue"><span class="ven">T</span></div><div class="result"></div></div>
+  </div></div>
+
+  <!-- ===== MOBILE (B) ===== -->
+  <div class="variant-band">Mobile &nbsp;·&nbsp; &lt; ~640px &nbsp;·&nbsp; <b>B KCVV-centric</b></div>
+  <div class="variant-note">Opponent · T/U · our score first · result. KCVV dropped (you're on its page). Kickoff time in the display font.</div>
+  <div class="frame mobile"><div class="page b">
+    <div class="section-kicker"><span class="mono">A-ploeg</span><h3 class="ed ed-md">Kalender.</h3></div>
+
+    <div class="amonth">April <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">5</div><div class="mo">APR</div></div><div class="opp"><span class="tn">Steenokkerzeel</span></div><div class="venue"><span class="ven">T</span></div><div class="scorecol"><span class="score">4–1</span></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">12</div><div class="mo">APR</div></div><div class="opp"><span class="tn">KFC Eppegem</span></div><div class="venue"><span class="ven">U</span></div><div class="scorecol"><span class="score">1–2</span></div><div class="result"><span class="sq v">V</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">26</div><div class="mo">APR</div></div><div class="opp"><span class="tn">FC Perk</span></div><div class="venue"><span class="ven">T</span></div><div class="scorecol"><span class="score">2–0</span></div><div class="result"><span class="sq w">W</span></div></div>
+
+    <div class="amonth">Mei <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">17</div><div class="mo">MEI</div></div><div class="opp"><span class="tn">Diegem Sport</span></div><div class="venue"><span class="ven">U</span></div><div class="scorecol"><span class="score">2–0</span></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">24</div><div class="mo">MEI</div></div><div class="opp"><span class="tn">VK Liedekerke</span></div><div class="venue"><span class="ven">T</span></div><div class="scorecol"><span class="score">3–1</span></div><div class="result"><span class="sq w">W</span></div></div>
+
+    <div class="feat-label">Eerstvolgende</div>
+    <div class="mcard feat"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="opp"><span class="tn">KFC Eppegem</span><span class="comp" style="color:rgba(245,241,230,.75)">3e Prov. A</span></div><div class="venue"><span class="ven">T</span></div><div class="scorecol"><span class="tm">15:00</span></div><div class="result"></div></div>
+
+    <div class="amonth">Juni <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">7</div><div class="mo">JUN</div></div><div class="opp"><span class="tn">FC Perk</span></div><div class="venue"><span class="ven">U</span></div><div class="scorecol"><span class="tm">15:00</span></div><div class="result"></div></div>
+    <div class="mcard"><div class="stub"><div class="d">11</div><div class="mo">JUN</div></div><div class="opp"><span class="tn">VK Tildonk</span><span class="comp">Beker · 1/2</span></div><div class="venue"><span class="ven">T</span></div><div class="scorecol"><span class="tm">20:00</span></div><div class="result"></div></div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:44px">
+    <div class="tag">Decide</div>
+    <p>If this lands — A desktop / B mobile, display-font times — I'll lock
+       6.C.d1 (the whole IA: single-scroll + sticky nav, month-grouped card
+       agenda, W/G/V squares, jersey featured next, auto-scroll, responsive A/B
+       rows) and write the lock + 6.C PRD.</p>
+  </div>
+
+</body>
+</html>

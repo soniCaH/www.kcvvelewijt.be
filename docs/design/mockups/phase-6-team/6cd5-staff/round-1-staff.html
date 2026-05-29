@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 1 · Staff (6.C.d5)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 44px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { max-width: 660px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 24px 22px 28px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--color-ink-muted); }
+    .ed { font-family: var(--font-display); font-weight: 700; line-height: 1.1; margin: 0; font-size: 24px; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .section-kicker { display:flex; align-items:baseline; gap:10px; margin-bottom: 14px; }
+
+    .func { font-family: var(--font-mono); text-transform: uppercase; letter-spacing:.06em; font-size: 9px; color: var(--color-ink-muted); margin-top: 4px; }
+    .nm { font-family: var(--font-display); line-height: 1.1; }
+    .nm b { font-weight: 700; } .nm em { font-style: italic; font-weight: 300; }
+    .avatar { background: var(--color-cream-soft); border: 1.5px solid var(--color-ink); display:grid; place-items:center; font-family: var(--font-display-big); font-weight:900; color: var(--color-jersey-deep); }
+    .avatar.photo { background: repeating-linear-gradient(135deg, #b9b09a 0 9px, #ada590 9px 18px); filter: grayscale(1) contrast(1.05); color: transparent; }
+
+    /* A — compact cards */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .scard { border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 10px; text-align:center; }
+    .scard .avatar { width: 64px; height: 64px; border-radius: 50%; margin: 0 auto 10px; font-size: 20px; }
+
+    /* B — list rows */
+    .list { display:flex; flex-direction:column; gap: 8px; }
+    .srow { display:flex; align-items:center; gap: 12px; border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 10px 14px; }
+    .srow .avatar { width: 44px; height: 44px; border-radius: 50%; font-size: 15px; flex:none; }
+    .srow .func { margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 1 · Drill 6.C.d5 (Staff)</div>
+    <h1>The staff section.</h1>
+    <p>A small support group: head/assistant/keeper trainer + afgevaardigde.
+       Photo (monogram fallback when absent) + name + function. The function
+       shows the readable PSD title (Hoofdtrainer / Keeperstrainer / …); codes
+       like "T1"/"T2"/"TK" map to readable labels, falling back to the role
+       bucket (Trainer / Afgevaardigde) when functionTitle is empty. Two
+       treatments — pick one.</p>
+  </div>
+
+  <!-- A -->
+  <div class="variant-band">A &nbsp;·&nbsp; <b>Compact cards</b></div>
+  <div class="variant-note">Mirrors the PlayerCard rhythm at a smaller scale; centred photo/monogram + name + function.</div>
+  <div class="frame"><div class="page">
+    <div class="section-kicker"><span class="mono">Staf</span><h3 class="ed">Begeleiding.</h3></div>
+    <div class="grid">
+      <div class="scard"><div class="avatar photo">KV</div><div class="nm"><b>Koen</b> <em>Verbruggen</em></div><div class="func">Hoofdtrainer</div></div>
+      <div class="scard"><div class="avatar">TP</div><div class="nm"><b>Tom</b> <em>Peeters</em></div><div class="func">Assistent-trainer</div></div>
+      <div class="scard"><div class="avatar photo">DJ</div><div class="nm"><b>Dirk</b> <em>Janssens</em></div><div class="func">Keeperstrainer</div></div>
+      <div class="scard"><div class="avatar">PL</div><div class="nm"><b>Patrick</b> <em>Lauwers</em></div><div class="func">Afgevaardigde</div></div>
+    </div>
+  </div></div>
+
+  <!-- B -->
+  <div class="variant-band">B &nbsp;·&nbsp; <b>List rows</b></div>
+  <div class="variant-note">More compact / secondary feel — appropriate since staff sit below the squad. Small round photo + name + function in a row.</div>
+  <div class="frame"><div class="page">
+    <div class="section-kicker"><span class="mono">Staf</span><h3 class="ed">Begeleiding.</h3></div>
+    <div class="list">
+      <div class="srow"><div class="avatar photo">KV</div><div><div class="nm"><b>Koen</b> <em>Verbruggen</em></div><div class="func">Hoofdtrainer</div></div></div>
+      <div class="srow"><div class="avatar">TP</div><div><div class="nm"><b>Tom</b> <em>Peeters</em></div><div class="func">Assistent-trainer</div></div></div>
+      <div class="srow"><div class="avatar photo">DJ</div><div><div class="nm"><b>Dirk</b> <em>Janssens</em></div><div class="func">Keeperstrainer</div></div></div>
+      <div class="srow"><div class="avatar">PL</div><div><div class="nm"><b>Patrick</b> <em>Lauwers</em></div><div class="func">Afgevaardigde</div></div></div>
+    </div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:36px">
+    <div class="tag">Decide</div>
+    <p>Pick A (compact cards) or B (list rows). Last 6.C drill after this = the
+       listing page `/ploegen` layout (the editorial body/training/contact block
+       reuses article-prose primitives — no separate drill needed).</p>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 12 · Simplified — no desktop venue, mobile home/bus icon, neutral crests</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #006e47; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { position: sticky; top: 0; z-index: 50; background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 46px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame.desktop { max-width: 660px; margin: 18px auto 0; }
+    .frame.mobile { max-width: 360px; margin: 18px auto 0; }
+    .frame .page { padding: 22px 22px 28px; }
+    .frame.mobile .page { padding: 18px 16px 24px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .ed { font-family: var(--font-display); font-weight: 700; line-height: 1.1; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .ed-md { font-size: 23px; }
+    .section-kicker { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; flex-wrap: wrap; }
+    .section-kicker .mono { color: var(--color-ink-muted); }
+    .amonth { font-family: var(--font-display-big); font-weight: 900; font-size: 26px; line-height: 1; margin: 22px 0 12px; }
+    .amonth:first-of-type { margin-top: 12px; }
+    .amonth em { font-style: italic; color: var(--color-jersey-deep); }
+
+    .mcard { border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); background: var(--color-cream); margin-bottom: 10px; transition: transform .25s, box-shadow .25s; }
+    .mcard:hover { box-shadow: none; transform: translate(3px,3px); cursor: pointer; }
+    .stub { background: var(--color-cream-soft); border-right: 2px dashed var(--color-ink); padding: 8px 4px; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    .stub .d { font-family: var(--font-display-big); font-weight: 900; font-size: 18px; line-height: 1; }
+    .stub .mo { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; margin-top: 2px; color: var(--color-ink-soft); }
+    .tn { font-family: var(--font-display); font-style: italic; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tn.kcvv { font-weight: 700; font-style: normal; }
+    /* neutral crest — ALL clubs identical placeholder (real logo drops in). No status colour. */
+    .crest { width: 22px; height: 22px; border: 1.5px solid var(--color-ink-muted); border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display-big); font-size: 9px; font-weight: 900; color: var(--color-ink-muted); background: var(--color-cream-soft); flex: none; }
+    .val { font-family: var(--font-display-big); font-weight: 900; font-size: 19px; text-align: center; white-space: nowrap; }
+    .val.time { font-family: var(--font-display); font-weight: 400; font-style: italic; font-size: 18px; }
+    .sq { width: 26px; height: 26px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; border: 2px solid var(--color-ink); }
+    .sq.w { background: var(--color-jersey-deep); color: var(--color-cream); }
+    .sq.d { background: var(--color-cream-deep); color: var(--color-ink); }
+    .sq.v { background: var(--color-warm); color: var(--color-ink); }
+    .comp { font-family: var(--font-mono); font-size: 8.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--color-ink-muted); }
+    .comp.special { color: var(--color-ink); font-weight: 700; }
+    .comp.special::before { content: "▪"; color: var(--color-warm); margin-right: 5px; }
+    .ha { width: 16px; height: 16px; color: var(--color-ink-muted); }
+    .feat-label { display:inline-block; background: var(--color-warm); color: var(--color-ink); font-family: var(--font-mono); font-size: 8.5px; font-weight:700; text-transform: uppercase; letter-spacing: .12em; padding: 4px 7px; margin: 4px 0 7px; }
+    .mcard.feat { background: var(--color-jersey-deep); color: var(--color-cream); box-shadow: 6px 6px 0 0 var(--color-ink); }
+    .mcard.feat .stub { background: var(--color-jersey-deep-dark); border-right-color: rgba(245,241,230,.4); color: var(--color-cream); }
+    .mcard.feat .tn, .mcard.feat .val { color: var(--color-cream); }
+    .mcard.feat .comp { color: rgba(245,241,230,.85); }
+    .mcard.feat .crest { color: var(--color-cream); border-color: rgba(245,241,230,.7); background: transparent; }
+    .mcard.feat .ha { color: rgba(245,241,230,.9); }
+
+    /* ===== A desktop: stub | body | result   (NO venue) ===== */
+    .a .mcard { display: grid; grid-template-columns: 46px 1fr 42px; }
+    .a .body { display:flex; flex-direction:column; justify-content:center; gap: 4px; padding: 9px 6px 9px 10px; }
+    .a .fixline { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+    .a .fixline .val { min-width: 60px; }
+    .a .team { display:flex; align-items:center; gap: 7px; min-width:0; }
+    .a .team.home { justify-content: flex-start; }
+    .a .team.away { justify-content: flex-end; }
+    .a .comp { text-align: center; }
+    .a .result { display:flex; align-items:center; justify-content:center; padding-right: 8px; }
+
+    /* ===== B mobile: stub | opp | home/away icon | score/time | result ===== */
+    .b .mcard { display: grid; grid-template-columns: 40px 1fr 26px 50px 32px; align-items: stretch; }
+    .b .opp { display:flex; align-items:center; gap: 8px; padding: 9px 4px 9px 10px; min-width:0; }
+    .b .opp .txt { display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .b .ha-cell { display:flex; align-items:center; justify-content:center; }
+    .b .scorecol { display:flex; align-items:center; justify-content:center; border-left: 1px solid var(--color-paper-edge); }
+    .b .scorecol.wide { grid-column: 4 / 6; }
+    .b .result { display:flex; align-items:center; justify-content:center; padding-right: 6px; }
+    .b .mcard.feat .scorecol { border-left-color: rgba(245,241,230,.3); }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 12 · Drill 6.C.d1</div>
+    <h1>Stripped back.</h1>
+    <p>Desktop: no home/away indicator (the order tells it) — just the clean
+       scoreboard + result square. Mobile: home/away as a Lucide
+       <b>house</b> / <b>bus</b> icon. All crests are one neutral placeholder
+       (real club logos slot in) so nothing reads like a colour legend.
+       Competition shows once.</p>
+  </div>
+
+  <!-- ===== DESKTOP A ===== -->
+  <div class="variant-band">Desktop &nbsp;·&nbsp; <b>A</b> — scoreboard, no venue</div>
+  <div class="variant-note">Home crest+name left, away name+crest right, score/time centred, result square at the end, competition centred beneath.</div>
+  <div class="frame desktop"><div class="page a">
+    <div class="section-kicker"><span class="mono">KCVV Elewijt · A-ploeg</span><h3 class="ed ed-md">Volledige <em>kalender.</em></h3></div>
+
+    <div class="amonth">Mei <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">17</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">D</span><span class="tn">Diegem</span></span><span class="val">0–2</span><span class="team away"><span class="tn kcvv">KCVV</span><span class="crest">K</span></span></div><div class="comp">3e Provinciale A</div></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">24</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="val">3–1</span><span class="team away"><span class="tn">VK Liedekerke</span><span class="crest">L</span></span></div><div class="comp">3e Provinciale A</div></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">28</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="val">2–2</span><span class="team away"><span class="tn">RC Mechelen</span><span class="crest">M</span></span></div><div class="comp special">Oefenwedstrijd</div></div><div class="result"><span class="sq d">G</span></div></div>
+
+    <div class="feat-label">Eerstvolgende</div>
+    <div class="mcard feat"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="val time">15:00</span><span class="team away"><span class="tn">KFC Eppegem</span><span class="crest">E</span></span></div><div class="comp">3e Provinciale A</div></div><div class="result"></div></div>
+
+    <div class="amonth">Juni <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">7</div><div class="mo">JUN</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">P</span><span class="tn">FC Perk</span></span><span class="val time">15:00</span><span class="team away"><span class="tn kcvv">KCVV</span><span class="crest">K</span></span></div><div class="comp">3e Provinciale A</div></div><div class="result"></div></div>
+    <div class="mcard"><div class="stub"><div class="d">11</div><div class="mo">JUN</div></div><div class="body"><div class="fixline"><span class="team home"><span class="crest">K</span><span class="tn kcvv">KCVV</span></span><span class="val time">20:00</span><span class="team away"><span class="tn">VK Tildonk</span><span class="crest">T</span></span></div><div class="comp special">Beker van Vlaams-Brabant · 1/2 finale</div></div><div class="result"></div></div>
+  </div></div>
+
+  <!-- ===== MOBILE B ===== -->
+  <div class="variant-band">Mobile &nbsp;·&nbsp; <b>B</b> — house / bus icon for home/away</div>
+  <div class="variant-note">Opponent crest + name; a Lucide house (home) or bus (away) icon instead of T/U; score/time centred; result square for played.</div>
+  <div class="frame mobile"><div class="page b">
+    <div class="section-kicker"><span class="mono">A-ploeg</span><h3 class="ed ed-md">Kalender.</h3></div>
+
+    <div class="amonth">Mei <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">17</div><div class="mo">MEI</div></div><div class="opp"><span class="crest">D</span><span class="txt"><span class="tn">Diegem Sport</span><span class="comp">3e Prov. A</span></span></div><div class="ha-cell"><svg class="ha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="10" rx="2"/><path d="M3 11h18"/><path d="M7 6V4h10v2"/><circle cx="7.5" cy="18.5" r="1.4"/><circle cx="16.5" cy="18.5" r="1.4"/></svg></div><div class="scorecol"><span class="val">0–2</span></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">24</div><div class="mo">MEI</div></div><div class="opp"><span class="crest">L</span><span class="txt"><span class="tn">VK Liedekerke</span><span class="comp">3e Prov. A</span></span></div><div class="ha-cell"><svg class="ha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg></div><div class="scorecol"><span class="val">3–1</span></div><div class="result"><span class="sq w">W</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">28</div><div class="mo">MEI</div></div><div class="opp"><span class="crest">M</span><span class="txt"><span class="tn">RC Mechelen</span><span class="comp special">Oefen</span></span></div><div class="ha-cell"><svg class="ha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg></div><div class="scorecol"><span class="val">2–2</span></div><div class="result"><span class="sq d">G</span></div></div>
+
+    <div class="feat-label">Eerstvolgende</div>
+    <div class="mcard feat"><div class="stub"><div class="d">31</div><div class="mo">MEI</div></div><div class="opp"><span class="crest">E</span><span class="txt"><span class="tn">KFC Eppegem</span><span class="comp">3e Prov. A</span></span></div><div class="ha-cell"><svg class="ha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg></div><div class="scorecol wide"><span class="val time">15:00</span></div></div>
+
+    <div class="amonth">Juni <em>'26.</em></div>
+    <div class="mcard"><div class="stub"><div class="d">7</div><div class="mo">JUN</div></div><div class="opp"><span class="crest">P</span><span class="txt"><span class="tn">FC Perk</span><span class="comp">3e Prov. A</span></span></div><div class="ha-cell"><svg class="ha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="10" rx="2"/><path d="M3 11h18"/><path d="M7 6V4h10v2"/><circle cx="7.5" cy="18.5" r="1.4"/><circle cx="16.5" cy="18.5" r="1.4"/></svg></div><div class="scorecol wide"><span class="val time">15:00</span></div></div>
+    <div class="mcard"><div class="stub"><div class="d">11</div><div class="mo">JUN</div></div><div class="opp"><span class="crest">T</span><span class="txt"><span class="tn">VK Tildonk</span><span class="comp special">Beker · 1/2</span></span></div><div class="ha-cell"><svg class="ha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/></svg></div><div class="scorecol wide"><span class="val time">20:00</span></div></div>
+  </div></div>
+
+  <div class="drill-head" style="padding-top:44px">
+    <div class="tag">Decide</div>
+    <p>Cleaner: no desktop venue, mobile house/bus icon, neutral crests, single
+       competition label. If this is the row, 6.C.d1 locks.</p>
+  </div>
+
+</body>
+</html>

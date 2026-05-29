@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 1 · SquadGrid / PlayerCard (6.C.d4)</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd; --color-ink: #0a0a0a; --color-ink-soft: #1f1f1f; --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755; --color-jersey-deep-dark: #133d28; --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink); --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: #cfc7b0; color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding: 0 0 120px; }
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 31px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 66ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band { background: var(--color-ink); color: var(--color-cream); padding: 10px 24px; margin: 44px 0 0; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px; border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm); }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+    .frame { max-width: 720px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 24px 22px 28px; }
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; color: var(--color-ink-muted); }
+
+    .pos-head { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; color: var(--color-ink-muted); margin: 20px 0 12px; border-bottom: 1px solid var(--color-paper-edge); padding-bottom: 6px; }
+    .pos-head:first-of-type { margin-top: 4px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+
+    /* base card */
+    .pc { border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 8px 8px 12px; transition: transform .25s, box-shadow .25s; }
+    .pc:hover { box-shadow: none; transform: translate(3px,3px); cursor: pointer; }
+    .photo { aspect-ratio: 3/4; position: relative; overflow: hidden; border: 1px solid var(--color-paper-edge); }
+    .photo.has { background: repeating-linear-gradient(135deg, #b9b09a 0 10px, #ada590 10px 20px); filter: grayscale(1) contrast(1.05); }
+    .photo .pl { position:absolute; inset:0; display:grid; place-items:center; font-family: var(--font-mono); font-size:8px; color:#5f5847; text-transform:uppercase; }
+    .photo.illu { background: var(--color-cream-soft); display:grid; place-items:center; }
+    .photo.illu .fig { font-size: 52px; color: var(--color-jersey-deep); opacity:.5; }
+    .name { font-family: var(--font-display); line-height: 1.05; margin-top: 8px; }
+    .name b { font-weight: 700; } .name em { font-style: italic; font-weight: 300; }
+    .pos { font-family: var(--font-mono); text-transform: uppercase; letter-spacing:.06em; font-size: 9px; color: var(--color-ink-muted); margin-top: 4px; }
+    .numdisc { width: 26px; height: 26px; background: var(--color-jersey-deep); color: var(--color-cream); display:grid; place-items:center; font-family: var(--font-display-big); font-weight:900; font-size:14px; border: 1.5px solid var(--color-ink); }
+
+    /* A — number disc overlaid on photo */
+    .a .numdisc { position:absolute; top:6px; left:6px; }
+
+    /* B — number inline before name */
+    .b .name-row { display:flex; align-items:baseline; gap:7px; margin-top:8px; }
+    .b .num-inline { font-family: var(--font-display-big); font-weight:900; font-size:18px; color: var(--color-jersey-deep); }
+
+    /* C — number big beside name row at bottom */
+    .c .foot { display:flex; align-items:center; gap:10px; margin-top:8px; }
+    .c .numbig { font-family: var(--font-display-big); font-weight:900; font-size:30px; color: var(--color-jersey-deep); line-height:1; }
+
+    .single { max-width: 720px; margin: 16px auto 0; background: var(--color-cream); border: 2px dashed var(--color-ink-muted); padding: 18px; display:flex; gap: 22px; flex-wrap:wrap; }
+    .single .col { width: 150px; }
+    .single .lbl { font-family: var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:.08em; color:var(--color-ink-muted); margin-bottom:8px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 1 · Drill 6.C.d4 (SquadGrid / PlayerCard)</div>
+    <h1>The squad grid + the player card.</h1>
+    <p>Grouped by position (Doelmannen / Verdedigers / Middenvelders /
+       Aanvallers). Each card composes the locked <code>&lt;PlayerFigure&gt;</code> (newsprint
+       photo, illustration fallback when no <code>psdImage</code>) + name +
+       jersey number + position, linking to <code>/spelers/[slug]</code>. The
+       open choice is the <b>number treatment</b> — compared at the bottom. Grid
+       below uses A.</p>
+  </div>
+
+  <div class="variant-band">SquadGrid &nbsp;·&nbsp; position-grouped (card style A)</div>
+  <div class="frame"><div class="page">
+    <div class="pos-head">Doelmannen</div>
+    <div class="grid a">
+      <div class="pc"><div class="photo has"><span class="numdisc">1</span><span class="pl">psdImage</span></div><div class="name"><b>Jonas</b> <em>Vermeer</em></div><div class="pos">Keeper</div></div>
+      <div class="pc"><div class="photo illu"><span class="numdisc">16</span><span class="fig">&#9917;</span></div><div class="name"><b>Lars</b> <em>De Smet</em></div><div class="pos">Keeper</div></div>
+    </div>
+    <div class="pos-head">Verdedigers</div>
+    <div class="grid a">
+      <div class="pc"><div class="photo has"><span class="numdisc">2</span><span class="pl">psdImage</span></div><div class="name"><b>Bram</b> <em>Wouters</em></div><div class="pos">Verdediger</div></div>
+      <div class="pc"><div class="photo has"><span class="numdisc">3</span><span class="pl">psdImage</span></div><div class="name"><b>Senne</b> <em>Maes</em></div><div class="pos">Verdediger</div></div>
+      <div class="pc"><div class="photo illu"><span class="numdisc">4</span><span class="fig">&#9917;</span></div><div class="name"><b>Thibault</b> <em>Claes</em></div><div class="pos">Verdediger</div></div>
+      <div class="pc"><div class="photo has"><span class="numdisc">5</span><span class="pl">psdImage</span></div><div class="name"><b>Jens</b> <em>Peeters</em></div><div class="pos">Verdediger</div></div>
+    </div>
+    <div class="pos-head">Aanvallers</div>
+    <div class="grid a">
+      <div class="pc"><div class="photo has"><span class="numdisc">7</span><span class="pl">psdImage</span></div><div class="name"><b>Maxim</b> <em>Breugelmans</em></div><div class="pos">Aanvaller</div></div>
+      <div class="pc"><div class="photo has"><span class="numdisc">9</span><span class="pl">psdImage</span></div><div class="name"><b>Lukas</b> <em>Dewil</em></div><div class="pos">Aanvaller</div></div>
+      <div class="pc"><div class="photo has"><span class="numdisc">11</span><span class="pl">psdImage</span></div><div class="name"><b>Stan</b> <em>Coppens</em></div><div class="pos">Aanvaller</div></div>
+    </div>
+  </div></div>
+
+  <div class="single">
+    <div class="col a"><div class="lbl">A · disc on photo</div><div class="pc"><div class="photo has"><span class="numdisc">7</span><span class="pl">psdImage</span></div><div class="name"><b>Maxim</b> <em>Breugelmans</em></div><div class="pos">Aanvaller</div></div></div>
+    <div class="col b"><div class="lbl">B · number before name</div><div class="pc"><div class="photo has"><span class="pl">psdImage</span></div><div class="name-row"><span class="num-inline">7</span><span class="name"><b>Maxim</b> <em>Breugelmans</em></span></div><div class="pos">Aanvaller</div></div></div>
+    <div class="col c"><div class="lbl">C · number big at foot</div><div class="pc"><div class="photo has"><span class="pl">psdImage</span></div><div class="foot"><span class="numbig">7</span><div><div class="name"><b>Maxim</b> <em>Breugelmans</em></div><div class="pos">Aanvaller</div></div></div></div></div>
+  </div>
+
+  <div class="drill-head" style="padding-top:36px">
+    <div class="tag">Decide</div>
+    <p>Grid grouping OK (by position)? Pick the number treatment (A disc-on-photo
+       / B inline / C big-at-foot). Keeper, captain glyph, and youth privacy
+       (minors reuse PlayerFigure's locked treatment) are follow-ups. Next 6.C
+       drill = Staff cards.</p>
+  </div>
+
+</body>
+</html>

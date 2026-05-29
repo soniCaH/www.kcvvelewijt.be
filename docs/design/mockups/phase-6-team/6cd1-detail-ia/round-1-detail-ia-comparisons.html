@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 6.C · Round 1 · Team-detail IA (6.C.d1): single-scroll vs tabs</title>
+  <style>
+    :root {
+      --color-cream: #f5f1e6;
+      --color-cream-soft: #ede8da;
+      --color-cream-deep: #e1d7bf;
+      --color-paper-edge: #d9d2bd;
+      --color-ink: #0a0a0a;
+      --color-ink-soft: #1f1f1f;
+      --color-ink-muted: #6b6b6b;
+      --color-jersey-deep: #008755;
+      --color-jersey-deep-dark: #133d28;
+      --color-warm: #f0c264;
+      --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+      --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+      --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
+      --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+      --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+      --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+      --font-mono: "Quasimoda", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      --pattern-seam-ink: repeating-linear-gradient(-45deg, var(--color-ink) 0 8px, var(--color-cream) 8px 16px);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #cfc7b0;
+      color: var(--color-ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      padding: 0 0 120px;
+    }
+
+    /* ---- drill chrome ---- */
+    .drill-head { max-width: 920px; margin: 0 auto; padding: 40px 24px 8px; }
+    .drill-head .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--color-ink-soft); }
+    .drill-head h1 { font-family: var(--font-display-big); font-weight: 900; font-size: 40px; line-height: 1.05; margin: 8px 0 6px; }
+    .drill-head p { max-width: 64ch; line-height: 1.5; color: var(--color-ink-soft); }
+    .variant-band {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--color-ink); color: var(--color-cream);
+      padding: 10px 24px; margin: 56px 0 0;
+      font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 13px;
+      border-top: 3px solid var(--color-warm); border-bottom: 3px solid var(--color-warm);
+    }
+    .variant-band b { color: var(--color-warm); }
+    .variant-note { max-width: 920px; margin: 0 auto; padding: 14px 24px 0; font-size: 13px; color: var(--color-ink-soft); line-height: 1.45; }
+
+    /* ---- "device" frame ---- */
+    .frame { max-width: 760px; margin: 18px auto 0; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); }
+    .frame .page { padding: 26px 24px 32px; }
+
+    /* ---- primitives ---- */
+    .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .14em; font-size: 11px; }
+    .pill { display: inline-block; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; font-weight: 600; line-height: 1; padding: 5px 8px; border: 1px solid var(--color-paper-edge); }
+    .pill.ink { background: var(--color-ink); color: var(--color-cream); border-color: var(--color-ink); }
+    .pill.cream { background: var(--color-cream-soft); color: var(--color-ink); }
+    .pill.warm { background: var(--color-warm); color: var(--color-ink); border-color: var(--color-ink); }
+    .ed { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em; line-height: 1.1; margin: 0; }
+    .ed em { font-style: italic; color: var(--color-jersey-deep); }
+    .ed-md { font-size: 26px; }
+    .ed-lg { font-size: 34px; }
+    .ed-2xl { font-family: var(--font-display-big); font-weight: 900; font-size: 52px; line-height: .96; }
+
+    .seam { height: 18px; background: var(--pattern-seam-ink); margin: 26px 0; border-top: 2px solid var(--color-ink); border-bottom: 2px solid var(--color-ink); }
+
+    .card { border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); }
+    .card.soft { background: var(--color-cream-soft); }
+    .card.ink { background: var(--color-ink); color: var(--color-cream); }
+    .card.jersey { background: var(--color-jersey-deep); color: var(--color-cream); }
+
+    .section-kicker { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px; }
+    .section-kicker .mono { color: var(--color-ink-muted); }
+
+    /* hero */
+    .hero { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 620px) { .hero { grid-template-columns: 1fr 240px; align-items: start; } }
+    .hero .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .hero-photo { border: 2px solid var(--color-ink); background: var(--color-cream-soft); box-shadow: var(--shadow-paper-md); transform: rotate(-1deg); padding: 8px 8px 30px; position: relative; }
+    .hero-photo .ph { aspect-ratio: 4/3; background: repeating-linear-gradient(135deg, #cdc6b2 0 10px, #c4bca6 10px 20px); display: grid; place-items: center; font-family: var(--font-mono); font-size: 10px; color: #7d7560; text-transform: uppercase; letter-spacing: .1em; }
+    .hero-photo .tape { position: absolute; top: -10px; left: 26%; width: 84px; height: 18px; background: var(--tape, var(--color-warm)); opacity: .9; transform: rotate(-3deg); border: 1px solid rgba(0,0,0,.15); }
+    .stub { margin-top: 10px; border: 2px dashed var(--color-ink); background: var(--color-cream); padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* standings */
+    table.standings { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.standings th { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; font-size: 10px; text-align: center; padding: 8px 6px; border-bottom: 2px solid var(--color-ink); color: var(--color-ink-soft); }
+    table.standings th:nth-child(2), table.standings td:nth-child(2) { text-align: left; }
+    table.standings td { padding: 9px 6px; text-align: center; border-bottom: 1px solid var(--color-paper-edge); }
+    table.standings td:nth-child(2) { font-family: var(--font-display); font-style: italic; font-size: 15px; }
+    table.standings .pos { font-family: var(--font-mono); color: var(--color-ink-muted); }
+    table.standings .pts { font-family: var(--font-display-big); font-weight: 900; }
+    table.standings tr.me td { background: color-mix(in srgb, var(--color-jersey-deep) 12%, var(--color-cream)); }
+    table.standings tr.me td:first-child { box-shadow: inset 3px 0 0 0 var(--color-jersey-deep); }
+    table.standings tr.me td:nth-child(2) { font-weight: 700; }
+    .form { display: inline-flex; gap: 3px; }
+    .form span { width: 16px; height: 16px; display: inline-grid; place-items: center; font-family: var(--font-mono); font-size: 9px; font-weight: 700; border: 1px solid var(--color-ink); }
+    .form .w { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-jersey-deep); }
+    .form .d { background: var(--color-cream-soft); color: var(--color-ink); }
+    .form .v { background: var(--color-warm); color: var(--color-ink); }
+
+    /* match rows */
+    .mrow { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 0; margin-bottom: 10px; transition: all .3s; }
+    .mrow:hover { box-shadow: none; transform: translate(4px,4px); cursor: pointer; }
+    .mrow .stubd { background: var(--color-cream-soft); border-right: 2px dashed var(--color-ink); padding: 10px 6px; text-align: center; }
+    .mrow .stubd .d { font-family: var(--font-display-big); font-weight: 900; font-size: 18px; line-height: 1; }
+    .mrow .stubd .m { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; }
+    .mrow .body { padding: 10px 4px; display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .mrow .tn { font-family: var(--font-display); font-style: italic; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mrow .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 20px; }
+    .mrow .vs { font-family: var(--font-display); font-style: italic; color: var(--color-ink-muted); font-size: 14px; }
+    .mrow .badge { padding-right: 12px; }
+
+    /* squad */
+    .pos-head { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 11px; color: var(--color-ink-muted); margin: 18px 0 10px; border-bottom: 1px solid var(--color-paper-edge); padding-bottom: 6px; }
+    .squad { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 14px; }
+    .pcard { border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 6px 6px 10px; transition: all .3s; }
+    .pcard:hover { box-shadow: none; transform: translate(4px,4px); cursor: pointer; }
+    .pcard .ph { aspect-ratio: 3/4; background: repeating-linear-gradient(135deg, #d2cbb6 0 9px, #c8c0aa 9px 18px); display: grid; place-items: center; position: relative; overflow: hidden; }
+    .pcard .ph.illu { background: var(--color-cream-soft); }
+    .pcard .ph .num { position: absolute; top: 6px; left: 7px; font-family: var(--font-display-big); font-weight: 900; font-size: 22px; color: var(--color-jersey-deep); }
+    .pcard .ph .silhou { font-size: 46px; color: var(--color-jersey-deep); opacity: .55; }
+    .pcard .ph .pl { font-family: var(--font-mono); font-size: 8px; color: #7d7560; text-transform: uppercase; }
+    .pcard .nm { margin: 8px 2px 0; font-family: var(--font-display); line-height: 1.05; }
+    .pcard .nm b { font-weight: 700; }
+    .pcard .nm em { font-style: italic; font-weight: 300; }
+    .pcard .role { margin-top: 4px; }
+
+    /* staff + editorial */
+    .two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 560px){ .two { grid-template-columns: 1fr 1fr; } }
+    .scard { border: 2px solid var(--color-ink); background: var(--color-cream); box-shadow: var(--shadow-paper-sm); padding: 12px; display: flex; gap: 12px; align-items: center; }
+    .scard .av { width: 52px; height: 52px; border: 2px solid var(--color-ink); background: var(--color-cream-soft); border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display-big); font-weight: 900; color: var(--color-jersey-deep); }
+    .prose { line-height: 1.6; color: var(--color-ink-soft); font-size: 15px; }
+    .prose p { margin: 0 0 12px; }
+
+    /* sponsors */
+    .sponsors { display: flex; flex-wrap: wrap; gap: 12px; }
+    .sponsors .logo { border: 1px solid var(--color-paper-edge); background: var(--color-cream-soft); padding: 12px 18px; font-family: var(--font-display); font-style: italic; font-size: 16px; color: #8a8270; filter: grayscale(1); }
+
+    /* tabs (variant B) */
+    .tabbar { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 4px; }
+    .tab { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 11px; font-weight: 600; padding: 9px 13px; border: 2px solid var(--color-ink); background: var(--color-cream-soft); box-shadow: var(--shadow-paper-sm); transition: all .3s; }
+    .tab[aria-current="page"] { background: var(--color-ink); color: var(--color-cream); box-shadow: var(--shadow-paper-sm-soft); }
+    .tab:hover { transform: translate(4px,4px); box-shadow: none; cursor: pointer; }
+    .panel-note { margin: 16px 0 4px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--color-ink-muted); }
+
+    /* sticky section nav (variant C) */
+    .secnav { position: sticky; top: 50px; z-index: 10; background: var(--color-cream); border-top: 2px solid var(--color-ink); border-bottom: 2px solid var(--color-ink); display: flex; gap: 8px; flex-wrap: wrap; padding: 9px 0; margin: 22px 0 0; }
+    .secnav a { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 10.5px; color: var(--color-ink-soft); text-decoration: none; padding: 4px 8px; border: 1px solid transparent; }
+    .secnav a:hover { border-color: var(--color-ink); }
+    .anchor { scroll-margin-top: 110px; }
+  </style>
+</head>
+<body>
+
+  <div class="drill-head">
+    <div class="tag">Phase 6.C · Team detail · Round 1 · Drill 6.C.d1</div>
+    <h1>One question: how do you read a team page?</h1>
+    <p>Same content, same retro vocabulary, three information architectures.
+       The data is locked (see <code>data-reality-locked.md</code>): hero,
+       standings, schedule, squad, staff, editorial, global sponsors — all
+       auto-hide when empty (youth teams). Exemplar = KCVV Elewijt A-ploeg,
+       3e&nbsp;Provinciale&nbsp;A. The only thing being decided here is the
+       <b>arrangement</b>, not the per-component look (standings cells, player
+       cards, hero artefact each get their own later drill).</p>
+  </div>
+
+  <!-- ============================ VARIANT A ============================ -->
+  <div class="variant-band">Variant <b>A</b> — Single-scroll + striped seams &nbsp;·&nbsp; the 6.A / 6.B pattern</div>
+  <div class="variant-note">Everything stacked top-to-bottom, <code>&lt;StripedSeam&gt;</code> between sections. You scroll the whole story. Empty sections simply vanish — a U8 page is just hero + squad + staff. Matches how player &amp; match detail already read.</div>
+  <div class="frame"><div class="page">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">A-PLOEG · EERSTE ELFTAL</span>
+        <h2 class="ed ed-2xl" style="margin-top:8px">KCVV <em>Elewijt.</em></h2>
+        <div class="meta-row">
+          <span class="pill cream">3e Provinciale A</span>
+          <span class="pill cream">Trainer · Koen Verbruggen</span>
+          <span class="pill cream">Seizoen 25/26</span>
+        </div>
+      </div>
+      <div>
+        <div class="hero-photo">
+          <div class="tape"></div>
+          <div class="ph">TEAMIMAGE · SQUAD PHOTO</div>
+        </div>
+        <div class="stub"><span class="mono">SEIZOEN</span><span style="font-family:var(--font-display-big);font-weight:900">25/26</span></div>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <!-- STANDINGS -->
+    <section>
+      <div class="section-kicker"><span class="mono">Stand</span><h3 class="ed ed-md">Het <em>klassement.</em></h3></div>
+      <table class="standings">
+        <thead><tr><th>#</th><th>Ploeg</th><th>M</th><th>W</th><th>G</th><th>V</th><th>+/-</th><th>Ptn</th></tr></thead>
+        <tbody>
+          <tr><td class="pos">1</td><td>KFC Eppegem</td><td>24</td><td>17</td><td>4</td><td>3</td><td>+31</td><td class="pts">55</td></tr>
+          <tr><td class="pos">2</td><td>SK Londerzeel B</td><td>24</td><td>15</td><td>5</td><td>4</td><td>+22</td><td class="pts">50</td></tr>
+          <tr><td class="pos">3</td><td>FC Perk</td><td>24</td><td>14</td><td>4</td><td>6</td><td>+15</td><td class="pts">46</td></tr>
+          <tr class="me"><td class="pos">4</td><td>KCVV Elewijt</td><td>24</td><td>13</td><td>5</td><td>6</td><td>+12</td><td class="pts">44</td></tr>
+          <tr><td class="pos">5</td><td>Eendracht Mazenzele</td><td>24</td><td>11</td><td>6</td><td>7</td><td>+4</td><td class="pts">39</td></tr>
+          <tr><td class="pos">6</td><td>KVK Wemmel</td><td>24</td><td>9</td><td>7</td><td>8</td><td>-2</td><td class="pts">34</td></tr>
+          <tr><td class="pos">7</td><td>VK Liedekerke</td><td>24</td><td>7</td><td>5</td><td>12</td><td>-14</td><td class="pts">26</td></tr>
+          <tr><td class="pos">8</td><td>Diegem Sport</td><td>24</td><td>4</td><td>4</td><td>16</td><td>-28</td><td class="pts">16</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px"><span class="mono" style="color:var(--color-ink-muted)">Vorm</span>
+        <span class="form" style="margin-left:8px"><span class="w">W</span><span class="w">W</span><span class="d">G</span><span class="v">V</span><span class="w">W</span></span>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <!-- SCHEDULE -->
+    <section>
+      <div class="section-kicker"><span class="mono">Kalender</span><h3 class="ed ed-md">Wedstrijden.</h3></div>
+      <div class="panel-note">Eerstvolgende</div>
+      <div class="mrow"><div class="stubd"><div class="d">31</div><div class="m">MEI</div></div><div class="body"><span class="tn">KCVV Elewijt</span><span class="vs">vs</span><span class="tn">KFC Eppegem</span></div><div class="badge"><span class="pill cream">15:00 · Thuis</span></div></div>
+      <div class="mrow"><div class="stubd"><div class="d">08</div><div class="m">JUN</div></div><div class="body"><span class="tn">FC Perk</span><span class="vs">vs</span><span class="tn">KCVV Elewijt</span></div><div class="badge"><span class="pill cream">15:00 · Uit</span></div></div>
+      <div class="panel-note" style="margin-top:16px">Recent</div>
+      <div class="mrow"><div class="stubd"><div class="d">24</div><div class="m">MEI</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">3</span><span class="vs">—</span><span class="sc">1</span><span class="tn">Liedekerke</span></div><div class="badge"><span class="pill ink">FT</span></div></div>
+      <div class="mrow"><div class="stubd"><div class="d">17</div><div class="m">MEI</div></div><div class="body"><span class="tn">Diegem</span><span class="sc">0</span><span class="vs">—</span><span class="sc">2</span><span class="tn">KCVV</span></div><div class="badge"><span class="pill ink">FT</span></div></div>
+    </section>
+
+    <div class="seam"></div>
+
+    <!-- SQUAD -->
+    <section>
+      <div class="section-kicker"><span class="mono">Selectie</span><h3 class="ed ed-md">De <em>kern.</em></h3></div>
+      <div class="pos-head">Doelmannen</div>
+      <div class="squad">
+        <div class="pcard"><div class="ph"><span class="num">1</span><span class="pl">psdImage</span></div><div class="nm"><b>Jonas</b> <em>Vermeer</em></div><div class="role"><span class="pill cream">Keeper</span></div></div>
+        <div class="pcard"><div class="ph illu"><span class="num">16</span><span class="silhou">&#9817;</span></div><div class="nm"><b>Lars</b> <em>De Smet</em></div><div class="role"><span class="pill cream">Keeper</span></div></div>
+      </div>
+      <div class="pos-head">Verdedigers</div>
+      <div class="squad">
+        <div class="pcard"><div class="ph"><span class="num">2</span><span class="pl">psdImage</span></div><div class="nm"><b>Bram</b> <em>Wouters</em></div><div class="role"><span class="pill cream">Verdediger</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">3</span><span class="pl">psdImage</span></div><div class="nm"><b>Senne</b> <em>Maes</em></div><div class="role"><span class="pill cream">Verdediger</span></div></div>
+        <div class="pcard"><div class="ph illu"><span class="num">4</span><span class="silhou">&#9817;</span></div><div class="nm"><b>Thibault</b> <em>Claes</em></div><div class="role"><span class="pill cream">Verdediger</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">5</span><span class="pl">psdImage</span></div><div class="nm"><b>Jens</b> <em>Peeters</em></div><div class="role"><span class="pill cream">Verdediger</span></div></div>
+      </div>
+      <div class="pos-head">Middenvelders</div>
+      <div class="squad">
+        <div class="pcard"><div class="ph"><span class="num">6</span><span class="pl">psdImage</span></div><div class="nm"><b>Milan</b> <em>Verhoeven</em></div><div class="role"><span class="pill cream">Middenvelder</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">8</span><span class="pl">psdImage</span></div><div class="nm"><b>Wout</b> <em>Janssens</em></div><div class="role"><span class="pill cream">Middenvelder</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">10</span><span class="pl">psdImage</span></div><div class="nm"><b>Daan</b> <em>Mertens</em></div><div class="role"><span class="pill cream">Middenvelder</span></div></div>
+      </div>
+      <div class="pos-head">Aanvallers</div>
+      <div class="squad">
+        <div class="pcard"><div class="ph"><span class="num">7</span><span class="pl">psdImage</span></div><div class="nm"><b>Maxim</b> <em>Breugelmans</em></div><div class="role"><span class="pill cream">Aanvaller</span></div></div>
+        <div class="pcard"><div class="ph illu"><span class="num">9</span><span class="silhou">&#9817;</span></div><div class="nm"><b>Lukas</b> <em>Dewil</em></div><div class="role"><span class="pill cream">Aanvaller</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">11</span><span class="pl">psdImage</span></div><div class="nm"><b>Stan</b> <em>Coppens</em></div><div class="role"><span class="pill cream">Aanvaller</span></div></div>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <!-- STAFF -->
+    <section>
+      <div class="section-kicker"><span class="mono">Staf</span><h3 class="ed ed-md">Begeleiding.</h3></div>
+      <div class="two">
+        <div class="scard"><div class="av">KV</div><div><div style="font-family:var(--font-display);font-size:18px"><b>Koen Verbruggen</b></div><span class="pill cream" style="margin-top:6px">Trainer</span></div></div>
+        <div class="scard"><div class="av">PL</div><div><div style="font-family:var(--font-display);font-size:18px"><b>Patrick Lauwers</b></div><span class="pill cream" style="margin-top:6px">Afgevaardigde</span></div></div>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <!-- EDITORIAL -->
+    <section>
+      <div class="section-kicker"><span class="mono">Over de ploeg</span><h3 class="ed ed-md">Info.</h3></div>
+      <div class="prose">
+        <p>De A-ploeg speelt in 3e Provinciale A en traint twee keer per week op
+           het Sportpark Driesstraat. Een hechte groep met een gezonde mix van
+           jeugd en ervaring.</p>
+      </div>
+      <div class="card soft" style="padding:12px;margin-top:8px;display:flex;gap:18px;flex-wrap:wrap">
+        <div><span class="mono" style="color:var(--color-ink-muted)">Training</span><div style="font-family:var(--font-display);font-style:italic;font-size:15px;margin-top:4px">di &amp; do · 20:00 · Driesstraat 32</div></div>
+        <div><span class="mono" style="color:var(--color-ink-muted)">Contact</span><div style="font-family:var(--font-display);font-style:italic;font-size:15px;margin-top:4px">secretariaat@kcvvelewijt.be</div></div>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <!-- SPONSORS (global) -->
+    <section>
+      <div class="section-kicker"><span class="mono">Met dank aan</span><h3 class="ed ed-md">Sponsors.</h3></div>
+      <div class="sponsors"><span class="logo">Bouwwerken</span><span class="logo">Frituur 't Pleintje</span><span class="logo">Garage Elewijt</span><span class="logo">Café De Sport</span></div>
+    </section>
+
+  </div></div>
+
+  <!-- ============================ VARIANT B ============================ -->
+  <div class="variant-band">Variant <b>B</b> — Reskinned tabs &nbsp;·&nbsp; today's IA, retro paint</div>
+  <div class="variant-note">Hero stays; below it a <code>&lt;FilterTabs&gt;</code>-style bar swaps one panel at a time. You see one section, click for the next. Dense data feels contained — but a youth team with only a squad shows tabs that lead to empty panels (or tabs must be conditionally hidden). Shown below with <b>Klassement</b> active.</div>
+  <div class="frame"><div class="page">
+
+    <section class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">A-PLOEG · EERSTE ELFTAL</span>
+        <h2 class="ed ed-2xl" style="margin-top:8px">KCVV <em>Elewijt.</em></h2>
+        <div class="meta-row">
+          <span class="pill cream">3e Provinciale A</span>
+          <span class="pill cream">Trainer · Koen Verbruggen</span>
+          <span class="pill cream">Seizoen 25/26</span>
+        </div>
+      </div>
+      <div>
+        <div class="hero-photo"><div class="tape"></div><div class="ph">TEAMIMAGE · SQUAD PHOTO</div></div>
+        <div class="stub"><span class="mono">SEIZOEN</span><span style="font-family:var(--font-display-big);font-weight:900">25/26</span></div>
+      </div>
+    </section>
+
+    <div class="tabbar">
+      <button class="tab">Info</button>
+      <button class="tab" aria-current="page">Klassement</button>
+      <button class="tab">Wedstrijden</button>
+      <button class="tab">Spelers</button>
+    </div>
+    <div class="panel-note">Actief paneel: Klassement &nbsp;—&nbsp; de andere drie verbergen hun inhoud tot je klikt</div>
+
+    <section style="margin-top:10px">
+      <table class="standings">
+        <thead><tr><th>#</th><th>Ploeg</th><th>M</th><th>W</th><th>G</th><th>V</th><th>+/-</th><th>Ptn</th></tr></thead>
+        <tbody>
+          <tr><td class="pos">1</td><td>KFC Eppegem</td><td>24</td><td>17</td><td>4</td><td>3</td><td>+31</td><td class="pts">55</td></tr>
+          <tr><td class="pos">2</td><td>SK Londerzeel B</td><td>24</td><td>15</td><td>5</td><td>4</td><td>+22</td><td class="pts">50</td></tr>
+          <tr><td class="pos">3</td><td>FC Perk</td><td>24</td><td>14</td><td>4</td><td>6</td><td>+15</td><td class="pts">46</td></tr>
+          <tr class="me"><td class="pos">4</td><td>KCVV Elewijt</td><td>24</td><td>13</td><td>5</td><td>6</td><td>+12</td><td class="pts">44</td></tr>
+          <tr><td class="pos">5</td><td>Eendracht Mazenzele</td><td>24</td><td>11</td><td>6</td><td>7</td><td>+4</td><td class="pts">39</td></tr>
+          <tr><td class="pos">6</td><td>KVK Wemmel</td><td>24</td><td>9</td><td>7</td><td>8</td><td>-2</td><td class="pts">34</td></tr>
+          <tr><td class="pos">7</td><td>VK Liedekerke</td><td>24</td><td>7</td><td>5</td><td>12</td><td>-14</td><td class="pts">26</td></tr>
+          <tr><td class="pos">8</td><td>Diegem Sport</td><td>24</td><td>4</td><td>4</td><td>16</td><td>-28</td><td class="pts">16</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+  </div></div>
+
+  <!-- ============================ VARIANT C ============================ -->
+  <div class="variant-band">Variant <b>C</b> — Single-scroll + sticky section-nav &nbsp;·&nbsp; hybrid</div>
+  <div class="variant-note">Single-scroll like A, but a thin sticky mono bar under the hero jumps you to any section. Editorial flow for casual readers, quick access for the standings/squad hunters. The nav only lists sections that exist, so it degrades cleanly for youth.</div>
+  <div class="frame"><div class="page">
+
+    <section class="hero">
+      <div>
+        <span class="mono" style="color:var(--color-ink-muted)">A-PLOEG · EERSTE ELFTAL</span>
+        <h2 class="ed ed-2xl" style="margin-top:8px">KCVV <em>Elewijt.</em></h2>
+        <div class="meta-row">
+          <span class="pill cream">3e Provinciale A</span>
+          <span class="pill cream">Trainer · Koen Verbruggen</span>
+          <span class="pill cream">Seizoen 25/26</span>
+        </div>
+      </div>
+      <div>
+        <div class="hero-photo"><div class="tape"></div><div class="ph">TEAMIMAGE · SQUAD PHOTO</div></div>
+        <div class="stub"><span class="mono">SEIZOEN</span><span style="font-family:var(--font-display-big);font-weight:900">25/26</span></div>
+      </div>
+    </section>
+
+    <nav class="secnav">
+      <a href="#c-stand">Klassement</a>
+      <a href="#c-wed">Wedstrijden</a>
+      <a href="#c-kern">Spelers</a>
+      <a href="#c-staf">Staf</a>
+      <a href="#c-info">Info</a>
+    </nav>
+
+    <section id="c-stand" class="anchor" style="margin-top:24px">
+      <div class="section-kicker"><span class="mono">Stand</span><h3 class="ed ed-md">Het <em>klassement.</em></h3></div>
+      <table class="standings">
+        <thead><tr><th>#</th><th>Ploeg</th><th>M</th><th>W</th><th>G</th><th>V</th><th>+/-</th><th>Ptn</th></tr></thead>
+        <tbody>
+          <tr><td class="pos">3</td><td>FC Perk</td><td>24</td><td>14</td><td>4</td><td>6</td><td>+15</td><td class="pts">46</td></tr>
+          <tr class="me"><td class="pos">4</td><td>KCVV Elewijt</td><td>24</td><td>13</td><td>5</td><td>6</td><td>+12</td><td class="pts">44</td></tr>
+          <tr><td class="pos">5</td><td>Eendracht Mazenzele</td><td>24</td><td>11</td><td>6</td><td>7</td><td>+4</td><td class="pts">39</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:8px"><span class="mono" style="color:var(--color-ink-muted)">Volledige tabel ↓</span></div>
+    </section>
+
+    <div class="seam"></div>
+
+    <section id="c-wed" class="anchor">
+      <div class="section-kicker"><span class="mono">Kalender</span><h3 class="ed ed-md">Wedstrijden.</h3></div>
+      <div class="mrow"><div class="stubd"><div class="d">31</div><div class="m">MEI</div></div><div class="body"><span class="tn">KCVV Elewijt</span><span class="vs">vs</span><span class="tn">KFC Eppegem</span></div><div class="badge"><span class="pill cream">15:00</span></div></div>
+      <div class="mrow"><div class="stubd"><div class="d">24</div><div class="m">MEI</div></div><div class="body"><span class="tn">KCVV</span><span class="sc">3</span><span class="vs">—</span><span class="sc">1</span><span class="tn">Liedekerke</span></div><div class="badge"><span class="pill ink">FT</span></div></div>
+    </section>
+
+    <div class="seam"></div>
+
+    <section id="c-kern" class="anchor">
+      <div class="section-kicker"><span class="mono">Selectie</span><h3 class="ed ed-md">De <em>kern.</em></h3></div>
+      <div class="squad">
+        <div class="pcard"><div class="ph"><span class="num">1</span><span class="pl">psdImage</span></div><div class="nm"><b>Jonas</b> <em>Vermeer</em></div><div class="role"><span class="pill cream">Keeper</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">7</span><span class="pl">psdImage</span></div><div class="nm"><b>Maxim</b> <em>Breugelmans</em></div><div class="role"><span class="pill cream">Aanvaller</span></div></div>
+        <div class="pcard"><div class="ph illu"><span class="num">9</span><span class="silhou">&#9817;</span></div><div class="nm"><b>Lukas</b> <em>Dewil</em></div><div class="role"><span class="pill cream">Aanvaller</span></div></div>
+        <div class="pcard"><div class="ph"><span class="num">10</span><span class="pl">psdImage</span></div><div class="nm"><b>Daan</b> <em>Mertens</em></div><div class="role"><span class="pill cream">Middenvelder</span></div></div>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <section id="c-staf" class="anchor">
+      <div class="section-kicker"><span class="mono">Staf</span><h3 class="ed ed-md">Begeleiding.</h3></div>
+      <div class="two">
+        <div class="scard"><div class="av">KV</div><div><div style="font-family:var(--font-display);font-size:18px"><b>Koen Verbruggen</b></div><span class="pill cream" style="margin-top:6px">Trainer</span></div></div>
+        <div class="scard"><div class="av">PL</div><div><div style="font-family:var(--font-display);font-size:18px"><b>Patrick Lauwers</b></div><span class="pill cream" style="margin-top:6px">Afgevaardigde</span></div></div>
+      </div>
+    </section>
+
+    <div class="seam"></div>
+
+    <section id="c-info" class="anchor">
+      <div class="section-kicker"><span class="mono">Over de ploeg</span><h3 class="ed ed-md">Info.</h3></div>
+      <div class="prose"><p>De A-ploeg speelt in 3e Provinciale A en traint twee keer per week op het Sportpark Driesstraat.</p></div>
+    </section>
+
+  </div></div>
+
+  <div class="drill-head" style="padding-top:48px">
+    <div class="tag">Decide</div>
+    <p>Pick the arrangement (A / B / C). The per-component looks — standings
+       cells, player cards, the hero artefact, the season ticket-stub — are
+       <b>not</b> decided here; they get their own drills after the IA locks.
+       See <code>compare.md</code> for the trade-offs.</p>
+  </div>
+
+</body>
+</html>
