@@ -121,7 +121,24 @@ export const team = defineType({
       name: 'body',
       title: 'Description',
       type: 'array',
-      of: [{type: 'block'}],
+      of: [
+        {
+          type: 'block',
+          // Pullquote decorator reused verbatim from player.bio (6.A) so
+          // <TeamEditorial> can surface a styled "Het verhaal" pull-quote.
+          // Additive — existing body content is unaffected (no migration).
+          marks: {
+            decorators: [
+              {title: 'Strong', value: 'strong'},
+              {title: 'Emphasis', value: 'em'},
+              {title: 'Code', value: 'code'},
+              {title: 'Underline', value: 'underline'},
+              {title: 'Strike', value: 'strike-through'},
+              {title: 'Pullquote', value: 'pullquote'},
+            ],
+          },
+        },
+      ],
     }),
     defineField({
       name: 'contactInfo',
