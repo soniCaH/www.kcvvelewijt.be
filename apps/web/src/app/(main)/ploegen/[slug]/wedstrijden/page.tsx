@@ -3,13 +3,15 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { DateTime } from "luxon";
 import { runPromise } from "@/lib/effect/runtime";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { Match } from "@kcvv/api-contract";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { FooterSafeArea } from "@/components/design-system";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { transformMatchToSchedule } from "../utils";
 import type { ScheduleMatch } from "@/components/match/types";
 import { AgendaScrollToNext } from "./AgendaScrollToNext";
@@ -26,24 +28,32 @@ export async function generateMetadata({
   params,
 }: WedstrijdenPageProps): Promise<Metadata> {
   const { slug } = await params;
-  try {
-    const team = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findBySlug(slug);
-      }),
-    );
-    if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
-    return {
-      title: `Wedstrijden — ${team.name} | KCVV Elewijt`,
-      description: `Volledig wedstrijdschema van ${team.name}.`,
-      alternates: {
-        canonical: `${SITE_CONFIG.siteUrl}/ploegen/${slug}/wedstrijden`,
-      },
-    };
-  } catch {
-    return { title: "Wedstrijden | KCVV Elewijt" };
-  }
+  const team = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* TeamRepository;
+      return yield* repo.findBySlug(slug);
+    }),
+  );
+  if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
+
+  const title = `Wedstrijden — ${team.name} | KCVV Elewijt`;
+  const description = `Volledig wedstrijdschema van ${team.name}.`;
+  const url = `${SITE_CONFIG.siteUrl}/ploegen/${slug}/wedstrijden`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: "website",
+      images: team.teamImageUrl
+        ? [{ url: team.teamImageUrl, alt: `${team.name} teamfoto` }]
+        : [DEFAULT_OG_IMAGE],
+    },
+  };
 }
 
 interface MonthGroup {
@@ -104,6 +114,7 @@ export default async function WedstrijdenPage({
   if (!team) notFound();
 
   const psdTeamId = team.psdId ? parseInt(team.psdId, 10) : NaN;
+  const pageUrl = `${SITE_CONFIG.siteUrl}/ploegen/${slug}/wedstrijden`;
 
   let rawMatches: readonly Match[] = [];
   if (Number.isFinite(psdTeamId) && psdTeamId > 0) {
@@ -112,7 +123,11 @@ export default async function WedstrijdenPage({
         const bff = yield* BffService;
         return yield* bff
           .getMatches(psdTeamId)
-          .pipe(Effect.catchAll(() => Effect.succeed([] as readonly Match[])));
+          .pipe(
+            Effect.catchTag("HttpNotFound", () =>
+              Effect.sync(() => notFound()),
+            ),
+          );
       }),
     );
   }
@@ -124,6 +139,19 @@ export default async function WedstrijdenPage({
 
   return (
     <>
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Ploegen", url: `${SITE_CONFIG.siteUrl}/ploegen` },
+          {
+            name: team.name,
+            url: `${SITE_CONFIG.siteUrl}/ploegen/${slug}`,
+          },
+          { name: "Wedstrijden", url: pageUrl },
+        ])}
+      />
+      <JsonLd data={buildSportsTeamJsonLd({ name: team.name, url: pageUrl })} />
+
       <AgendaScrollToNext nextMatchId={nextMatch?.id ?? null} />
 
       <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">

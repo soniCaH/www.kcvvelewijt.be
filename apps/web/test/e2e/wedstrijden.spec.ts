@@ -46,11 +46,9 @@ test.describe("/ploegen/[slug]/wedstrijden", () => {
       return;
     }
 
-    const response = await page.goto(`/ploegen/${teamSlug}/wedstrijden`);
-    expect(response?.status()).toBe(200);
-
-    // Either the empty-state message or a list of agenda rows must be present.
-    await expect(page.locator("h1").first()).toBeVisible();
+    await smokeTest(page, {
+      path: `/ploegen/${teamSlug}/wedstrijden`,
+    });
   });
 
   test("auto-scroll is skipped gracefully when no next match exists", async ({
@@ -71,11 +69,10 @@ test.describe("/ploegen/[slug]/wedstrijden", () => {
       path: `/ploegen/${teamSlug}/wedstrijden`,
     });
 
-    // Verify the scroll anchor data-attribute is either present (has next match)
-    // or absent (no next match) — both are acceptable; the test asserts no crash.
-    const nextAnchor = page.locator("[data-testid='wedstrijden-next-match']");
-    const count = await nextAnchor.count();
-    // count is 0 or 1 — no assertion on which, just that the page rendered.
-    expect(count).toBeGreaterThanOrEqual(0);
+    // At most one next-match anchor should exist (0 = no upcoming match, 1 = has next match).
+    const count = await page
+      .locator("[data-testid='wedstrijden-next-match']")
+      .count();
+    expect(count).toBeLessThanOrEqual(1);
   });
 });
