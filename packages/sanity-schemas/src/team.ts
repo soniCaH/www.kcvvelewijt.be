@@ -154,7 +154,6 @@ export const team = defineType({
               title: 'Staff member',
               type: 'reference',
               to: [{type: 'staffMember'}],
-              readOnly: true,
             }),
             defineField({
               name: 'role',
