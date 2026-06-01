@@ -41,15 +41,18 @@ function computeCategory(
     if (age) return age.toUpperCase();
     return "Jeugd";
   }
-  // Senior: Sanity name is the full PSD name (e.g. "KCVV Elewijt Eerste Elftallen A").
-  // The last word is the single-letter team suffix — more reliable than the age field,
-  // which PSD sometimes sends as "A" for both first and second teams.
-  const lastWord = name.trim().split(/\s+/).pop()?.toUpperCase() ?? "";
-  if (lastWord === "A") return "A-ploeg";
-  if (lastWord === "B") return "B-ploeg";
-  // Fallback to age field if name doesn't end in A/B (edge case)
-  if (age?.toUpperCase() === "A") return "A-ploeg";
-  if (age?.toUpperCase() === "B") return "B-ploeg";
+  if (teamType === "senior") {
+    // Sanity name is the full PSD name (e.g. "KCVV Elewijt Eerste Elftallen A").
+    // The last word is the single-letter team suffix — more reliable than the age field,
+    // which PSD sometimes sends as "A" for both first and second teams.
+    const lastWord = name.trim().split(/\s+/).pop()?.toUpperCase() ?? "";
+    if (lastWord === "A") return "A-ploeg";
+    if (lastWord === "B") return "B-ploeg";
+    // Fallback to age field if name doesn't end in A/B (edge case)
+    if (age?.toUpperCase() === "A") return "A-ploeg";
+    if (age?.toUpperCase() === "B") return "B-ploeg";
+    return "Ploeg";
+  }
   return "Ploeg";
 }
 
