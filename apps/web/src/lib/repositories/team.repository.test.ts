@@ -126,6 +126,7 @@ describe("TeamRepository", () => {
         footbelId: 12345,
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
+        season: "25/26",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         body: null,
@@ -180,6 +181,7 @@ describe("TeamRepository", () => {
       expect(t.slug).toBe("eerste-elftallen-a");
       expect(t.psdId).toBe("100");
       expect(t.teamImageUrl).toBe("https://cdn.sanity.io/team.webp");
+      expect(t.season).toBe("25/26");
 
       // Computed fields (absorbed from utils.ts)
       expect(t.tagline).toBe("Er is maar één plezante compagnie");

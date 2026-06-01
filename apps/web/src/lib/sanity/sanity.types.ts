@@ -2418,6 +2418,7 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
   footbelId: number | null;
   division: string | null;
   divisionFull: string | null;
+  season: string | null;
   tagline: string | null;
   body: Array<{
     children?: Array<{
