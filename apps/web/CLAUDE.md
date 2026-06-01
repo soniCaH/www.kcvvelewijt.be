@@ -143,9 +143,24 @@ The legacy `<MatchDetailView>` (header + lineup + events in one component) and `
 - `<MatchEventsSection>` (`apps/web/src/components/match/MatchEventsSection/`) — section wrapper around `<MatchEvents>` with the same chrome pattern (kicker `WEDSTRIJDVERLOOP` + heading `Hoe het ging.`). Auto-hides (`null`) when `events` is empty.
 - `<MatchStatusBadge>` — extended with a per-status spec table (`finished`/`forfeited`/`postponed`/`cancelled`/`stopped`) carrying abbreviation, long form, and tint class. The `cancelled` tint consumes the new `--color-card-red` token via `bg-card-red text-cream`.
 - `<MatchTeaser>` — reworked to the 6.B.d6 A2-italic mini-hero ticket-card shape (date-only stub, italic-display month label). Scope slimmed to the `default` variant only; the orphaned `compact` variant was retired as dead code.
-- `<MatchResultRow>` — reworked per 6.B.d7 (date stub + result-coloured score row, composes `<MatchStatusBadge>`). Single consumer is `<TeamSchedule>` on `/ploegen/[slug]`; the legacy dark theme was dropped (no consumer).
+- `<MatchResultRow>` — reworked per 6.B.d7 (date stub + result-coloured score row, composes `<MatchStatusBadge>`). Its former consumer `<TeamSchedule>` was retired in Phase 6.C (#1947), so the component is currently unconsumed — retire-or-reuse tracked in the 6.C cleanup follow-up.
 
 New token: `--color-card-red` (`#c93f1c`) in `globals.css` — red-card / cancelled tint, consumed by `<MatchStatusBadge>`'s `cancelled` spec.
+
+**Phase 6.C additions (team detail + listing redesign — `/ploegen` + `/ploegen/[slug]`):**
+
+The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSchedule>`, plus the listing's `<TeamFeaturedCard>` / `<YouthTeamsDirectory>`, were retired (#1947). Both team surfaces now compose page-level single-scroll sections. All new components live under `apps/web/src/components/team/`.
+
+- `<TeamHero>` — category-forward detail hero (`A-ploeg.` / `U13.` from the team name); kicker, division/season MonoLabel pills, italic tagline lead; landscape `<TapedFigure>` newsprint photo or `<JerseyShirt>` fallback + dashed season stub.
+- `<StandingsTable>` — classic retro standings; KCVV row tinted (`color-mix(jersey-deep 12%, cream)`) + jersey-deep left accent; no Vorm column; mobile drops `W·G·V`; auto-hides on empty.
+- `<TeamAgendaRow>` + `<TeamMatchesSection>` — responsive match row (desktop symmetric scoreboard / mobile KCVV-centric column); outcome as a flat colour underline on the score (win jersey-deep / draw none / loss brick `--color-alert`); teaser = featured next match + recent rows + "Volledige kalender →". `"use client"` (imports ESM-only Phosphor icons).
+- `<SquadGrid>` + `<PlayerCard>` — position-grouped squad (Doelmannen / Verdedigers / Middenvelders / Aanvallers + trailing "Spelers" catch-all); card = newsprint `<PlayerFigure>` vocabulary + jersey-deep number disc, links to `/spelers/[slug]`.
+- `<TeamStaff>` — compact centred staff cards; round newsprint photo or jersey-deep monogram; `resolveFunctionLabel` maps PSD codes (T1→Hoofdtrainer, …) with role-bucket fallback.
+- `<TeamEditorial>` — body / trainingSchedule / contactInfo blocks, each auto-hiding; reuses the 6.A `pullquote` decorator for a "Het verhaal" pull-quote. Schema delta: `pullquote` decorator added to `team.body` marks (no migration).
+- `<TeamFlagship>` — listing A+B paired mirrored flagships (A jersey-deep content-left/photo-right; B cream mirrored). `<YouthDirectory>` — Bovenbouw/Middenbouw/Onderbouw age-code cards. `<TeamSectionNav>` — sticky in-page section nav (auto-hide aware).
+- **Analytics:** `team_detail_view` / `team_list_view` page-views + `team_standings_/matches_/squad_in_view` intersection events. The `team_` prefix is in the live GTM trigger regex.
+- **Contrast rule:** small text on jersey-deep uses `text-white` (cream #f5f1e6 is 4.04:1 there, below AA).
+- **Deferred to #1960 (still consumed outside Phase 6.C):** `<TeamOverview>` + `<TeamCard>` (used by `/jeugd`) and `<TeamRoster>` + `<StaffCard>` (used by `/club/bestuur`) were NOT deleted — they retire once those surfaces migrate. `<MatchResultRow>` is now orphaned (also tracked in #1960).
 
 ## Design Conventions
 
