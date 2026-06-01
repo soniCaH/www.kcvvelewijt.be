@@ -482,13 +482,13 @@ Hero: `<EditorialHero variant="generic">` `Onze ploegen.` Body: `<TapedCardGrid 
 
 Existing `docs/prd/teams-landing-page.md` is superseded — restate in Phase 6.
 
-> **STATUS (2026-05-28) — direction locked (6.C).** Listing IS in Phase 6 scope. The uniform `<TapedCardGrid>` above is **rejected** — A and B are **paired mirrored flagships** (A jersey-deep, content-left/photo-right; B cream, mirrored — equal weight, not a hero/sub-feature hierarchy) + a youth directory grouped Bovenbouw/Middenbouw/Onderbouw, reskinned. See #1528 + `docs/design/mockups/phase-6-team/listing-locked.md`.
+> **STATUS — ✅ SHIPPED (6.C, 2026-06-01).** `/ploegen` rebuilt as A+B paired mirrored flagships (`<TeamFlagship>`, A jersey-deep content-left/photo-right; B cream mirrored) + `<YouthDirectory>` grouped Bovenbouw/Middenbouw/Onderbouw. The uniform `<TapedCardGrid>` above was rejected. Shipped via #1946. Legacy `<TeamFeaturedCard>` / `<YouthTeamsDirectory>` retired in #1947. See `docs/prd/redesign-phase-6c-team.md` + `docs/design/mockups/phase-6-team/listing-locked.md`.
 
 ### 6.5 Team detail (`/ploegen/[slug]`)
 
 `<TeamHero>` — kicker (A-PLOEG / U21 / etc.), `<EditorialHeading>` team name, `<MonoLabelRow>` (classification, coach, season), right-column taped polaroid with team-photo or jersey illustration + `<TicketStub>SEIZOEN 25/26</TicketStub>`. Sections: `<StatsStrip>` season W/D/L + GF/GA, `<StandingsTable>` with this team highlighted, `<MatchScheduleTable>` upcoming + past, `<SquadGrid>` of `<PlayerCard>` instances (each composes `<TapedCard>` + `<PlayerFigure>` + name + position), staff section, `<SponsorsBlock>` filtered by team.
 
-> **STATUS (2026-05-28) — direction locked (6.C).** Composition trimmed to **Core + editorial, auto-hide empties**: TeamHero + StandingsTable + MatchSchedule + SquadGrid + staff + `team.body`/`trainingSchedule`/`contactInfo` when present. **Dropped:** standalone `<StatsStrip>` (redundant with the highlighted standings row) and **team-filtered `<SponsorsBlock>`** (sponsor docs don't reference teams — a **global** `<SponsorsBlock>` renders at the foot instead). Detail IA locked to **single-scroll + sticky-nav** (visual A/B completed). See #1528 + `docs/design/mockups/phase-6-team/detail-ia-locked.md` + the PRD `docs/prd/redesign-phase-6c-team.md`.
+> **STATUS — ✅ SHIPPED (6.C, 2026-06-01).** `/ploegen/[slug]` rebuilt as a single-scroll + sticky-nav page: `<TeamHero>` → `<StandingsTable>` → `<TeamMatchesSection>` (+ `/wedstrijden` full agenda route) → `<SquadGrid>` → `<TeamStaff>` → `<TeamEditorial>` → global `<SponsorsBlock>`, every non-hero section auto-hiding on empty. **Dropped:** standalone `<StatsStrip>` and team-filtered `<SponsorsBlock>` (global block at the foot instead). Shipped via #1938 (tracer) + #1939–#1945. Legacy tabbed `<TeamDetail>` / `<TeamStandings>` / `<TeamSchedule>` retired in #1947. See `docs/prd/redesign-phase-6c-team.md` + `docs/design/mockups/phase-6-team/detail-ia-locked.md`.
 
 ### 6.6 Calendar (`/kalender`)
 

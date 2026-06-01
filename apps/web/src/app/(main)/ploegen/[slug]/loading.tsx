@@ -1,6 +1,6 @@
 /**
  * Team Detail Page — Loading Skeleton
- * Matches the TeamDetail layout: header image + tab navigation + content area
+ * Generic hero + content shimmer for the Phase 6.C single-scroll team page.
  */
 
 export default function TeamDetailLoading() {

@@ -104,8 +104,8 @@ function ResultPill({ result }: { result: "win" | "loss" | "draw" }) {
 }
 
 /**
- * Finished-match row card for `<TeamSchedule>`. Mini-teaser-row vocabulary
- * locked at 6.B.d7 — a scaled-down `<MatchTeaser>`:
+ * Finished-match row card. Mini-teaser-row vocabulary locked at 6.B.d7 — a
+ * scaled-down `<MatchTeaser>`:
  *
  *   - **Left stub (~64px)** — centred display-big day (18px, weight 900)
  *     over italic display Dutch month abbreviation ("jun"). `bg-cream-soft`,
@@ -117,7 +117,9 @@ function ResultPill({ result }: { result: "win" | "loss" | "draw" }) {
  *     a 1px dashed ink-muted vertical divider. W/G/L per result.
  *
  * Whole row wraps in a `<Link>` with the canonical press-down hover. Light
- * theme only (the sole consumer `<TeamSchedule>` is light).
+ * theme only. NOTE: currently unconsumed — its previous consumer
+ * `<TeamSchedule>` was retired in Phase 6.C (#1947). Retire-or-reuse tracked
+ * in the Phase 6.C cleanup follow-up issue.
  */
 export function MatchResultRow({
   match,
