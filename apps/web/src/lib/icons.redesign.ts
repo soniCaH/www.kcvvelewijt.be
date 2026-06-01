@@ -12,11 +12,13 @@
 
 import {
   ArrowRight as PhArrowRight,
+  Bus as PhBus,
   CaretDown as PhCaretDown,
   CaretLeft as PhCaretLeft,
   CaretRight as PhCaretRight,
   CheckCircle as PhCheckCircle,
   Heart as PhHeart,
+  House as PhHouse,
   List as PhList,
   MagnifyingGlass as PhMagnifyingGlass,
   Warning as PhWarning,
@@ -37,11 +39,13 @@ const fillWrapper = (PhIcon: ComponentType<IconProps>) => {
 };
 
 export const ArrowRight = fillWrapper(PhArrowRight);
+export const Bus = fillWrapper(PhBus);
 export const CaretDown = fillWrapper(PhCaretDown);
 export const CaretLeft = fillWrapper(PhCaretLeft);
 export const CaretRight = fillWrapper(PhCaretRight);
 export const CheckCircle = fillWrapper(PhCheckCircle);
 export const Heart = fillWrapper(PhHeart);
+export const House = fillWrapper(PhHouse);
 export const List = fillWrapper(PhList);
 export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
 export const Warning = fillWrapper(PhWarning);
