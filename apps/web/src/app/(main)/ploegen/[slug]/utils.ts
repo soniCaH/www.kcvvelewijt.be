@@ -4,15 +4,12 @@
  * BFF transform functions only — Sanity transforms are now in TeamRepository.
  */
 
-import type { Match, RankingEntry } from "@/lib/effect/schemas";
-import type {
-  ScheduleMatch,
-  ScheduleTeam,
-} from "@/components/team/TeamSchedule";
-import type { StandingsEntry } from "@/components/team/TeamStandings";
+import type { Match } from "@/lib/effect/schemas";
+import type { ScheduleMatch, ScheduleTeam } from "@/components/match/types";
 
 /**
- * Transform BFF Match to ScheduleMatch for TeamSchedule component
+ * Transform a BFF Match into the `ScheduleMatch` shape consumed by the
+ * Phase 6.C match-agenda components (`<TeamMatchesSection>` / `<TeamAgendaRow>`).
  *
  * @param match - Match from PSD API via BFF
  * @returns ScheduleMatch object for display
@@ -35,30 +32,5 @@ export function transformMatchToSchedule(match: Match): ScheduleMatch {
     status: match.status,
     competition: match.competition,
     isHome: match.is_home,
-  };
-}
-
-/**
- * Convert a BFF ranking entry into a StandingsEntry suitable for the TeamStandings UI.
- *
- * @param entry - Ranking entry object from the PSD API via BFF
- * @returns A StandingsEntry containing position, team identifiers and display fields (teamId, teamName, teamLogo), match totals (played, won, drawn, lost), goal totals (goalsFor, goalsAgainst, goalDifference), and points
- */
-export function transformRankingToStandings(
-  entry: RankingEntry,
-): StandingsEntry {
-  return {
-    position: entry.position,
-    teamId: entry.team_id,
-    teamName: entry.team_name,
-    teamLogo: entry.team_logo,
-    played: entry.played,
-    won: entry.won,
-    drawn: entry.drawn,
-    lost: entry.lost,
-    goalsFor: entry.goals_for,
-    goalsAgainst: entry.goals_against,
-    goalDifference: entry.goal_difference,
-    points: entry.points,
   };
 }
