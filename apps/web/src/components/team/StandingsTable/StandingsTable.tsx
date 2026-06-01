@@ -16,6 +16,9 @@ function Crest({ name, logo }: { name: string; logo?: string }) {
         alt=""
         width={16}
         height={16}
+        // 16px CDN crest — deliberately unoptimized (matches <MatchResultRow> /
+        // <TeamAgendaRow>): the Vercel image optimizer is metered per source
+        // image and saves negligible bytes at this size across a full division.
         unoptimized
         className="inline-block h-4 w-4 shrink-0 object-contain"
       />
