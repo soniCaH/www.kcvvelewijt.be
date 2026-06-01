@@ -533,6 +533,7 @@ describe("TeamRepository", () => {
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar één plezante compagnie",
+        season: "25/26",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         staff: [
           {
@@ -566,6 +567,7 @@ describe("TeamRepository", () => {
         age: "A",
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
+        season: "25/26",
         tagline: "Er is maar één plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         staff: [{ firstName: "Piet", lastName: "Pieters", role: "" }],

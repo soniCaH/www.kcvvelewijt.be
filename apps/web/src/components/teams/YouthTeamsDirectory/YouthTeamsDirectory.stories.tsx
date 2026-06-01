@@ -28,6 +28,7 @@ const makeTeam = (age: string) => ({
   age,
   division: null,
   divisionFull: null,
+  season: null,
   tagline: null,
   teamImageUrl: null,
   staff: null,

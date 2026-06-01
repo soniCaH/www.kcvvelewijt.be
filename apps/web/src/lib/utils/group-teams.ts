@@ -5,6 +5,7 @@ export type TeamLandingItem = {
   age: string;
   division: string | null;
   divisionFull: string | null;
+  season: string | null;
   tagline: string | null;
   teamImageUrl: string | null;
   staff: { firstName: string; lastName: string; role: string }[] | null;

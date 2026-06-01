@@ -79,12 +79,6 @@ const sectionStackRoutes: SectionStackRoute[] = [
     expectedBgClasses: ["bg-kcvv-black", "bg-gray-100", "bg-kcvv-green-dark"],
   },
   {
-    name: "/ploegen",
-    Loading: PloegenLoading,
-    expectedTransitions: 3,
-    expectedBgClasses: ["bg-kcvv-black", "bg-gray-100"],
-  },
-  {
     name: "/sponsors",
     Loading: SponsorsLoading,
     expectedTransitions: 2,
@@ -182,6 +176,11 @@ describe("loading.tsx envelope drift guard", () => {
       name: "/club/organigram",
       Loading: OrganigramLoading,
       expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/ploegen",
+      Loading: PloegenLoading,
+      expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
     },
     {
       name: "/ploegen/[slug]",

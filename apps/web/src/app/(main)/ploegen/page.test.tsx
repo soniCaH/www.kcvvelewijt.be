@@ -1,42 +1,81 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { TeamLandingItem } from "@/lib/utils/group-teams";
 
-// Mock the data layer
+// Mock the data layer — runPromise resolves the teams array the page maps.
+const teams: TeamLandingItem[] = [
+  {
+    _id: "a",
+    name: "Eerste Elftallen A",
+    slug: "eerste-elftallen-a",
+    age: "A",
+    division: "3NA",
+    divisionFull: "Eerste Elftal A – 3e Nat. A",
+    season: "25/26",
+    tagline: null,
+    teamImageUrl: null,
+    staff: null,
+  },
+  {
+    _id: "b",
+    name: "Eerste Elftallen B",
+    slug: "eerste-elftallen-b",
+    age: "A",
+    division: "4P",
+    divisionFull: "Eerste Elftal B – 4e Prov.",
+    season: "25/26",
+    tagline: null,
+    teamImageUrl: null,
+    staff: null,
+  },
+  {
+    _id: "u13",
+    name: "KCVV Elewijt U13",
+    slug: "kcvv-elewijt-u13",
+    age: "U13",
+    division: null,
+    divisionFull: null,
+    season: "25/26",
+    tagline: null,
+    teamImageUrl: null,
+    staff: null,
+  },
+];
+
 vi.mock("@/lib/effect/runtime", () => ({
-  runPromise: vi.fn().mockResolvedValue([]),
+  runPromise: vi.fn().mockResolvedValue(teams),
 }));
 
 vi.mock("@/lib/repositories/team.repository", () => ({
   TeamRepository: {},
 }));
 
-describe("/teams page — canonical section flow", () => {
+describe("/ploegen listing — Phase 6.C composition", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("renders youth directory section with kcvv-black background", async () => {
+  it("renders the editorial page header", async () => {
     const TeamsPage = (await import("./page")).default;
-    const jsx = await TeamsPage();
-    const { container } = render(jsx);
-
-    // YouthTeamsDirectory renders with heading "Onze jeugd"
-    // The section wrapper should use bg-kcvv-black, not bg-kcvv-green-dark
-    const blackSections = container.querySelectorAll(".bg-kcvv-black");
-    expect(blackSections.length).toBeGreaterThanOrEqual(1);
-
-    // No kcvv-green-dark sections on the teams page
-    const greenDarkSections = container.querySelectorAll(".bg-kcvv-green-dark");
-    expect(greenDarkSections.length).toBe(0);
+    render(await TeamsPage());
+    const h1 = screen.getByRole("heading", { level: 1 });
+    expect(h1.textContent).toContain("Onze ploegen");
   });
 
-  it("renders CTA section", async () => {
+  it("renders A and B flagships", async () => {
     const TeamsPage = (await import("./page")).default;
-    const jsx = await TeamsPage();
-    render(jsx);
+    render(await TeamsPage());
+    const flagships = screen.getAllByTestId("team-flagship");
+    expect(flagships).toHaveLength(2);
+    expect(flagships[0]?.getAttribute("data-variant")).toBe("a");
+    expect(flagships[1]?.getAttribute("data-variant")).toBe("b");
+  });
 
-    expect(
-      screen.getByRole("link", { name: /meer info/i }),
-    ).toBeInTheDocument();
+  it("renders the youth directory with the U13 card", async () => {
+    const TeamsPage = (await import("./page")).default;
+    render(await TeamsPage());
+    expect(screen.getByTestId("youth-directory")).toBeInTheDocument();
+    const youthCards = screen.getAllByTestId("youth-team-card");
+    expect(youthCards.some((c) => c.textContent?.includes("U13"))).toBe(true);
   });
 });

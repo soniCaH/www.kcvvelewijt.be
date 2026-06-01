@@ -31,6 +31,7 @@ const team: TeamLandingItem = {
   age: "B",
   division: "4C",
   divisionFull: "4de Provinciale C",
+  season: null,
   tagline: null,
   teamImageUrl: "https://example.com/team-b.jpg",
   staff: null,
