@@ -1,21 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { YouthDivisionGroup } from "@/lib/utils/group-teams";
 import { YouthDirectory } from "./YouthDirectory";
-
-function team(age: string): YouthDivisionGroup["teams"][number] {
-  return {
-    _id: `t-${age}`,
-    name: `KCVV Elewijt ${age}`,
-    slug: `kcvv-elewijt-${age.toLowerCase()}`,
-    age,
-    division: null,
-    divisionFull: null,
-    season: "25/26",
-    tagline: null,
-    teamImageUrl: null,
-    staff: null,
-  };
-}
+import { youthTeam as team } from "./youth-directory.fixtures";
 
 const divisions: YouthDivisionGroup[] = [
   {

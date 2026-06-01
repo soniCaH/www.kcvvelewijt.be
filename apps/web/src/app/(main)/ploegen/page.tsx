@@ -12,7 +12,7 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { groupTeamsForLanding } from "@/lib/utils/group-teams";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PageViewTracker } from "@/components/analytics";
@@ -22,11 +22,21 @@ import { FooterSafeArea } from "@/components/design-system";
 import { TeamFlagship } from "@/components/team/TeamFlagship";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
+const PLOEGEN_TITLE = "Onze ploegen | KCVV Elewijt";
+const PLOEGEN_DESCRIPTION =
+  "Alle ploegen van KCVV Elewijt: eerste ploeg, tweede ploeg en jeugd van U6 tot U21.";
+
 export const metadata: Metadata = {
-  title: "Onze ploegen | KCVV Elewijt",
-  description:
-    "Alle ploegen van KCVV Elewijt: eerste ploeg, tweede ploeg en jeugd van U6 tot U21.",
+  title: PLOEGEN_TITLE,
+  description: PLOEGEN_DESCRIPTION,
   alternates: { canonical: `${SITE_CONFIG.siteUrl}/ploegen` },
+  openGraph: {
+    title: PLOEGEN_TITLE,
+    description: PLOEGEN_DESCRIPTION,
+    type: "website",
+    url: `${SITE_CONFIG.siteUrl}/ploegen`,
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 async function fetchTeams() {

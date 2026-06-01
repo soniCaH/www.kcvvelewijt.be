@@ -11,21 +11,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { YouthDivisionGroup } from "@/lib/utils/group-teams";
 import { YouthDirectory } from "./YouthDirectory";
-
-function team(age: string): YouthDivisionGroup["teams"][number] {
-  return {
-    _id: `t-${age}`,
-    name: `KCVV Elewijt ${age}`,
-    slug: `kcvv-elewijt-${age.toLowerCase()}`,
-    age,
-    division: null,
-    divisionFull: null,
-    season: "25/26",
-    tagline: null,
-    teamImageUrl: null,
-    staff: null,
-  };
-}
+import { youthTeam as team } from "./youth-directory.fixtures";
 
 const divisions: YouthDivisionGroup[] = [
   { label: "Bovenbouw", range: "U17–U21", teams: [team("U17")] },
