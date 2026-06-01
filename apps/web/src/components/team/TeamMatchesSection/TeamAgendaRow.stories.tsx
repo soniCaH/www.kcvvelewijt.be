@@ -34,13 +34,14 @@ const draw: ScheduleMatch = {
   awayScore: 1,
 };
 
+// KCVV plays away (awayTeam), opponent (OPP) wins at home 2-0 → loss for KCVV.
 const loss: ScheduleMatch = {
   ...upcoming,
   id: 4,
   date: new Date("2026-08-30T15:00:00.000Z"),
   status: "finished",
-  homeScore: 0,
-  awayScore: 2,
+  homeScore: 2,
+  awayScore: 0,
   isHome: false,
   homeTeam: OPP,
   awayTeam: KCVV,

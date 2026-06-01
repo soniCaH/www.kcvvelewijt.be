@@ -118,6 +118,45 @@ describe("TeamAgendaRow", () => {
     });
   });
 
+  describe("kcvvTeamId fallback for home/away resolution", () => {
+    it("uses kcvvTeamId to resolve home when match.isHome is undefined", () => {
+      const match: ScheduleMatch = {
+        ...FINISHED_WIN,
+        isHome: undefined,
+        homeTeam: { id: 1235, name: "KCVV Elewijt" },
+        awayTeam: { id: 99, name: "FC Opponent" },
+        homeScore: 3,
+        awayScore: 1,
+      };
+      const { container } = render(
+        <TeamAgendaRow match={match} kcvvTeamId={1235} />,
+      );
+      // KCVV is home (id 1235 matches homeTeam.id 1235), home wins 3-1 → win shadow
+      const spans = container.querySelectorAll("[style*='box-shadow']");
+      expect(spans.length).toBeGreaterThan(0);
+      expect(spans[0]?.getAttribute("style")).toContain("jersey-deep");
+    });
+
+    it("uses kcvvTeamId to resolve away when match.isHome is undefined", () => {
+      const match: ScheduleMatch = {
+        ...FINISHED_LOSS,
+        isHome: undefined,
+        homeTeam: { id: 99, name: "FC Opponent" },
+        awayTeam: { id: 1235, name: "KCVV Elewijt" },
+        homeScore: 2,
+        awayScore: 0,
+      };
+      const { container } = render(
+        <TeamAgendaRow match={match} kcvvTeamId={1235} />,
+      );
+      // KCVV is away (id 1235 matches awayTeam.id? No, kcvvTeamId=1235 ≠ homeTeam.id=99 → isHome=false)
+      // isHome=false + homeScore(2) > awayScore(0) → loss shadow
+      const spans = container.querySelectorAll("[style*='box-shadow']");
+      expect(spans.length).toBeGreaterThan(0);
+      expect(spans[0]?.getAttribute("style")).toContain("color-alert");
+    });
+  });
+
   describe("Competition caption", () => {
     it("renders the competition name", () => {
       render(<TeamAgendaRow match={BASE} />);

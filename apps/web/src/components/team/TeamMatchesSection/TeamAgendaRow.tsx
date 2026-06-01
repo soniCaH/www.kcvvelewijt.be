@@ -28,16 +28,19 @@ export interface TeamAgendaRowProps {
 
 type Outcome = "win" | "draw" | "loss" | null;
 
-function computeOutcome(match: ScheduleMatch): Outcome {
+function computeOutcome(
+  match: ScheduleMatch,
+  isHome: boolean | undefined,
+): Outcome {
   if (match.status !== "finished") return null;
   if (
     typeof match.homeScore !== "number" ||
     typeof match.awayScore !== "number" ||
-    match.isHome === undefined
+    isHome === undefined
   ) {
     return null;
   }
-  return getResultColor(match.homeScore, match.awayScore, match.isHome);
+  return getResultColor(match.homeScore, match.awayScore, isHome);
 }
 
 function formatDay(date: Date): string {
@@ -99,10 +102,17 @@ const OUTCOME_SHADOW: Record<"win" | "draw" | "loss", string | undefined> = {
 
 export function TeamAgendaRow({
   match,
+  kcvvTeamId,
   featured = false,
   className,
 }: TeamAgendaRowProps) {
-  const outcome = computeOutcome(match);
+  // Prefer match.is_home (provided by BFF); fall back to comparing kcvvTeamId
+  // against the home team's id when the BFF field is absent.
+  const isHome: boolean | undefined =
+    match.isHome ??
+    (kcvvTeamId !== undefined ? kcvvTeamId === match.homeTeam.id : undefined);
+
+  const outcome = computeOutcome(match, isHome);
   const isPlayed =
     match.status === "finished" ||
     match.status === "forfeited" ||
@@ -185,7 +195,7 @@ export function TeamAgendaRow({
             className={cn(
               "min-w-0 truncate text-sm",
               featured ? "text-white" : "text-ink",
-              match.isHome === true && "font-semibold",
+              isHome === true && "font-semibold",
             )}
           >
             {match.homeTeam.name}
@@ -229,7 +239,7 @@ export function TeamAgendaRow({
             className={cn(
               "min-w-0 truncate text-right text-sm",
               featured ? "text-white" : "text-ink",
-              match.isHome === false && "font-semibold",
+              isHome === false && "font-semibold",
             )}
           >
             {match.awayTeam.name}
@@ -241,7 +251,6 @@ export function TeamAgendaRow({
       <div className="flex w-full items-center gap-2 px-3 py-2 sm:hidden">
         {/* Opponent crest + name + competition */}
         {(() => {
-          const isHome = match.isHome;
           const opponent = isHome ? match.awayTeam : match.homeTeam;
           const VenueIcon = isHome ? House : Bus;
           return (
