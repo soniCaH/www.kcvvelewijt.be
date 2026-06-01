@@ -31,16 +31,26 @@ export interface TeamHeroProps {
   className?: string;
 }
 
-const CLUB_PREFIX = /^KCVV\s+Elewijt\s+/i;
-
-function computeCategory(name: string, teamType: "youth" | "senior"): string {
-  const suffix = name.replace(CLUB_PREFIX, "").trim();
-  if (!suffix) return teamType === "youth" ? "Jeugd" : "Ploeg";
-  if (teamType === "senior") {
-    if (suffix.toUpperCase() === "A") return "A-ploeg";
-    if (suffix.toUpperCase() === "B") return "B-ploeg";
+function computeCategory(
+  name: string,
+  age: string | null,
+  teamType: "youth" | "senior",
+): string {
+  if (teamType === "youth") {
+    // age field is reliable for youth (U6, U8, U13, U17, …)
+    if (age) return age.toUpperCase();
+    return "Jeugd";
   }
-  return suffix.toUpperCase();
+  // Senior: Sanity name is the full PSD name (e.g. "KCVV Elewijt Eerste Elftallen A").
+  // The last word is the single-letter team suffix — more reliable than the age field,
+  // which PSD sometimes sends as "A" for both first and second teams.
+  const lastWord = name.trim().split(/\s+/).pop()?.toUpperCase() ?? "";
+  if (lastWord === "A") return "A-ploeg";
+  if (lastWord === "B") return "B-ploeg";
+  // Fallback to age field if name doesn't end in A/B (edge case)
+  if (age?.toUpperCase() === "A") return "A-ploeg";
+  if (age?.toUpperCase() === "B") return "B-ploeg";
+  return "Ploeg";
 }
 
 export function TeamHero({
@@ -57,7 +67,7 @@ export function TeamHero({
 }: TeamHeroProps) {
   const hasPhoto =
     teamImageUrl !== undefined && teamImageUrl !== null && teamImageUrl !== "";
-  const category = computeCategory(name, teamType);
+  const category = computeCategory(name, age, teamType);
 
   const kicker = teamType === "youth" ? "KCVV Elewijt · Jeugd" : "KCVV Elewijt";
 
@@ -83,7 +93,7 @@ export function TeamHero({
       data-testid="team-hero"
       aria-label={`${category} · ploegpagina`}
       className={cn(
-        "grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[1fr_minmax(300px,420px)]",
+        "grid grid-cols-1 items-start gap-x-10 gap-y-8 overflow-x-clip sm:grid-cols-[1fr_minmax(300px,420px)]",
         className,
       )}
     >
@@ -93,7 +103,7 @@ export function TeamHero({
           <MonoLabel variant="plain">{kicker}</MonoLabel>
         </span>
 
-        <EditorialHeading level={1} size="display-2xl" emphasis={{ text: "." }}>
+        <EditorialHeading level={1} size="display-xl" emphasis={{ text: "." }}>
           {category}
         </EditorialHeading>
 
@@ -134,7 +144,7 @@ export function TeamHero({
         <TapedFigure
           aspect="landscape-3-2"
           rotation="b"
-          tape={{ color: "jersey", length: "md" }}
+          tape={{ color: "warm", length: "md" }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"

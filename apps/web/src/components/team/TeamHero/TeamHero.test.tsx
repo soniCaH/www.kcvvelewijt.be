@@ -49,13 +49,21 @@ describe("TeamHero", () => {
   });
 
   describe("Headline / category (derived from team name)", () => {
-    it("renders 'A-ploeg.' from name 'KCVV Elewijt A'", () => {
+    it("renders 'A-ploeg.' from full PSD name 'KCVV Elewijt Eerste Elftallen A'", () => {
+      render(
+        <TeamHero {...BASE_SENIOR} name="KCVV Elewijt Eerste Elftallen A" />,
+      );
+      const h1 = screen.getByRole("heading", { level: 1 });
+      expect(h1.textContent).toBe("A-ploeg.");
+    });
+
+    it("renders 'A-ploeg.' from short name 'KCVV Elewijt A'", () => {
       render(<TeamHero {...BASE_SENIOR} />);
       const h1 = screen.getByRole("heading", { level: 1 });
       expect(h1.textContent).toBe("A-ploeg.");
     });
 
-    it("renders 'B-ploeg.' from name 'KCVV Elewijt B' regardless of age field", () => {
+    it("renders 'B-ploeg.' from name ending in B, regardless of age field", () => {
       render(
         <TeamHero
           name="KCVV Elewijt B"
