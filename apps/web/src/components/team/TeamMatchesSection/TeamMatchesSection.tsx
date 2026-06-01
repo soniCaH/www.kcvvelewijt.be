@@ -1,3 +1,9 @@
+"use client";
+
+// "use client": this section imports a Phosphor icon (ArrowRight), and
+// @phosphor-icons/react is ESM-only (calls React.createContext at module init).
+// A server component importing it breaks Next.js's build-time config collection
+// (same root cause as <TeamAgendaRow>). The section has no server-only logic.
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";

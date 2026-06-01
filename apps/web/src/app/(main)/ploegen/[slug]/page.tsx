@@ -1,11 +1,17 @@
 /**
- * Team Detail Page
- * Displays individual team pages for all teams (senior and youth)
+ * Team Detail Page — Phase 6.C single-scroll composition.
+ *
+ * SiteHeader → MatchStripSlot → TeamHero → sticky section-nav →
+ * StandingsTable → TeamMatchesSection → SquadGrid → TeamStaff →
+ * TeamEditorial → RelatedArticles → global SponsorsBlock → footer.
+ * <StripedSeam> separates sections; every non-hero section auto-hides on
+ * empty data (a U6 page degrades to hero + squad + staff).
  */
 
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
@@ -13,70 +19,63 @@ import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Match, RankingEntry } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
-import { TeamDetail } from "@/components/team/TeamDetail";
-import { TeamHero } from "@/components/team/TeamHero";
-import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { PageViewTracker, TrackInView } from "@/components/analytics";
+import { MatchStripSlot } from "@/components/layout/MatchStrip";
+import { StripedSeam } from "@/components/design-system/StripedSeam";
 import { FooterSafeArea } from "@/components/design-system";
-import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
+import { TeamHero } from "@/components/team/TeamHero";
+import { StandingsTable } from "@/components/team/StandingsTable";
+import { TeamMatchesSection } from "@/components/team/TeamMatchesSection";
+import { SquadGrid } from "@/components/team/SquadGrid";
+import { TeamStaff } from "@/components/team/TeamStaff";
+import { TeamEditorial } from "@/components/team/TeamEditorial";
+import { SponsorsSection } from "@/components/home/SponsorsSection";
+import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { TeamRepository } from "@/lib/repositories/team.repository";
-import { transformMatchToSchedule, transformRankingToStandings } from "./utils";
+import { hasRenderableBioContent } from "@/lib/portable-text/findPullquoteText";
+import { transformMatchToSchedule } from "./utils";
+import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
 }
 
-/**
- * Produce static route parameters for all teams.
- *
- * @returns An array of route parameter objects with `slug` set to each team's slug; returns an empty array if teams cannot be fetched.
- */
-// No static prerendering — the page body fetches PSD data via the BFF,
-// which is heavily rate-limited. Pages are built on-demand and ISR-cached
-// (see revalidate at the bottom of this file).
+// No static prerendering — the body fetches PSD data via the rate-limited BFF.
+// Pages are built on-demand and ISR-cached (revalidate below).
 export async function generateStaticParams() {
   return [];
 }
 
-/**
- * Generate page metadata for a team identified by the route slug.
- *
- * @param params - A promise resolving to route parameters containing `slug`, used to fetch the team
- * @returns A Metadata object with `title`, `description`, and `openGraph` fields for the team; if the team cannot be found or an error occurs, a Metadata object with a not-found title is returned
- */
 export async function generateMetadata({
   params,
 }: TeamPageProps): Promise<Metadata> {
   const { slug } = await params;
-  try {
-    const team = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findBySlug(slug);
-      }),
-    );
-    if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
+  const team = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* TeamRepository;
+      return yield* repo.findBySlug(slug);
+    }),
+  );
+  if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
 
-    const typeLabel = team.teamType === "youth" ? "Jeugdploeg" : "Ploeg";
-    const description = team.tagline
-      ? `${team.name} - ${team.tagline}`
-      : `${team.name} - KCVV Elewijt ${typeLabel}`;
+  const typeLabel = team.teamType === "youth" ? "Jeugdploeg" : "Ploeg";
+  const description = team.tagline
+    ? `${team.name} - ${team.tagline}`
+    : `${team.name} - KCVV Elewijt ${typeLabel}`;
 
-    return {
-      title: `${team.name} | KCVV Elewijt`,
+  return {
+    title: `${team.name} | KCVV Elewijt`,
+    description,
+    alternates: { canonical: `${SITE_CONFIG.siteUrl}/ploegen/${slug}` },
+    openGraph: {
+      title: team.name,
       description,
-      alternates: { canonical: `${SITE_CONFIG.siteUrl}/ploegen/${slug}` },
-      openGraph: {
-        title: team.name,
-        description,
-        type: "website",
-        images: team.teamImageUrl
-          ? [{ url: team.teamImageUrl, alt: `${team.name} teamfoto` }]
-          : [DEFAULT_OG_IMAGE],
-      },
-    };
-  } catch {
-    return { title: "Team niet gevonden | KCVV Elewijt" };
-  }
+      type: "website",
+      images: team.teamImageUrl
+        ? [{ url: team.teamImageUrl, alt: `${team.name} teamfoto` }]
+        : [DEFAULT_OG_IMAGE],
+    },
+  };
 }
 
 interface BffData {
@@ -85,18 +84,12 @@ interface BffData {
   teamId: number;
 }
 
-/**
- * Fetches matches and standings from the BFF for a given team.
- *
- * @param psdTeamId - The team's PSD internal ID (used for both matches and standings).
- * @returns An object with `matches`, `standings`, and `teamId` when successful; `null` on error.
- */
 async function fetchBffData(psdTeamId: number): Promise<BffData | null> {
   try {
     const [matches, standings] = await runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
-        const [matchesResult, standingsResult] = yield* Effect.all(
+        return yield* Effect.all(
           [
             bff
               .getMatches(psdTeamId)
@@ -113,7 +106,6 @@ async function fetchBffData(psdTeamId: number): Promise<BffData | null> {
           ],
           { concurrency: "unbounded" },
         );
-        return [matchesResult, standingsResult] as const;
       }),
     );
     return { matches, standings, teamId: psdTeamId };
@@ -122,14 +114,6 @@ async function fetchBffData(psdTeamId: number): Promise<BffData | null> {
   }
 }
 
-/**
- * Renders the team detail page for the given team slug.
- *
- * Loads team and related BFF data and returns the TeamDetail element populated with the team's header, roster, staff, matches, and standings. Triggers a 404 when no team is found for the provided slug.
- *
- * @param props.params - An object whose `slug` identifies the team to render
- * @returns The TeamDetail React element for the specified team
- */
 export default async function TeamPage({ params }: TeamPageProps) {
   const { slug } = await params;
 
@@ -155,6 +139,44 @@ export default async function TeamPage({ params }: TeamPageProps) {
       ? await fetchBffData(psdTeamId)
       : null;
 
+  const standings = bffData?.standings ?? [];
+  const scheduleMatches = (bffData?.matches ?? []).map(
+    transformMatchToSchedule,
+  );
+  const staff = team.staff.map((s) => ({
+    id: s.id,
+    firstName: s.firstName,
+    lastName: s.lastName,
+    functionTitle: s.functionTitle,
+    role: s.role,
+    imageUrl: s.imageUrl,
+  }));
+
+  const teamBody = team.body as PortableTextBlock[] | null;
+  const teamContact = team.contactInfo as PortableTextBlock[] | null;
+
+  // Section render flags — keep the sticky nav in sync with each section's
+  // own auto-hide so the nav never lists a section that doesn't render.
+  const showStandings = standings.length > 0;
+  const showMatches = scheduleMatches.length > 0;
+  const showSquad = team.players.length > 0;
+  const showStaff = staff.length > 0;
+  const showEditorial =
+    (teamBody !== null && hasRenderableBioContent(teamBody)) ||
+    (team.trainingSchedule?.length ?? 0) > 0 ||
+    (teamContact !== null && hasRenderableBioContent(teamContact));
+
+  const navItems: TeamSectionNavItem[] = [
+    showStandings && { id: "klassement", label: "Klassement" },
+    showMatches && { id: "wedstrijden", label: "Wedstrijden" },
+    showSquad && { id: "spelers", label: "Spelers" },
+    showStaff && { id: "staf", label: "Staf" },
+    showEditorial && { id: "info", label: "Info" },
+  ].filter((x): x is TeamSectionNavItem => x !== false);
+
+  const analyticsParams = { team_slug: slug };
+  const sectionClass = "mx-auto w-full max-w-5xl scroll-mt-16 px-4 py-10";
+
   return (
     <>
       <JsonLd
@@ -170,6 +192,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
           url: `${SITE_CONFIG.siteUrl}/ploegen/${slug}`,
         })}
       />
+      <PageViewTracker eventName="team_detail_view" params={analyticsParams} />
+
+      <MatchStripSlot />
+
       <TeamHero
         name={team.name}
         age={team.age}
@@ -183,33 +209,84 @@ export default async function TeamPage({ params }: TeamPageProps) {
         className="mx-auto max-w-5xl px-4 py-8 sm:py-12"
       />
 
-      <TeamDetail
-        header={{
-          name: team.name,
-          imageUrl: team.teamImageUrl ?? undefined,
-          ageGroup: team.ageGroup,
-          teamType: team.teamType,
-          tagline: team.tagline,
-        }}
-        players={team.players.filter(
-          (p): p is RoutablePlayerVM => p.href !== undefined,
-        )}
-        staff={team.staff}
-        matches={bffData?.matches.map(transformMatchToSchedule) ?? []}
-        standings={bffData?.standings.map(transformRankingToStandings) ?? []}
-        highlightTeamId={bffData?.teamId}
-        teamSlug={slug}
-        calendarUrl={
-          bffData ? `/api/calendar.ics?teamIds=${bffData.teamId}` : undefined
-        }
-      />
+      <TeamSectionNav items={navItems} />
+
+      {showStandings ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <TrackInView
+            eventName="team_standings_in_view"
+            params={analyticsParams}
+          >
+            <section id="klassement" className={sectionClass}>
+              <StandingsTable
+                entries={standings}
+                highlightTeamId={bffData?.teamId}
+              />
+            </section>
+          </TrackInView>
+        </>
+      ) : null}
+
+      {showMatches ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <TrackInView
+            eventName="team_matches_in_view"
+            params={analyticsParams}
+          >
+            <section id="wedstrijden" className={sectionClass}>
+              <TeamMatchesSection
+                matches={scheduleMatches}
+                teamSlug={slug}
+                kcvvTeamId={bffData?.teamId}
+              />
+            </section>
+          </TrackInView>
+        </>
+      ) : null}
+
+      {showSquad ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <TrackInView eventName="team_squad_in_view" params={analyticsParams}>
+            <section id="spelers" className={sectionClass}>
+              <SquadGrid players={team.players} />
+            </section>
+          </TrackInView>
+        </>
+      ) : null}
+
+      {showStaff ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <section id="staf" className={sectionClass}>
+            <TeamStaff staff={staff} />
+          </section>
+        </>
+      ) : null}
+
+      {showEditorial ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <section id="info" className={sectionClass}>
+            <TeamEditorial
+              body={teamBody}
+              trainingSchedule={team.trainingSchedule}
+              contactInfo={teamContact}
+            />
+          </section>
+        </>
+      ) : null}
 
       <RelatedArticlesSection
         articles={relatedArticles}
         pageType="team"
         pageSlug={slug}
-        className="mx-auto max-w-4xl px-4 pb-8"
+        className="mx-auto max-w-4xl px-4 pt-10 pb-8"
       />
+
+      <SponsorsSection />
       <FooterSafeArea />
     </>
   );

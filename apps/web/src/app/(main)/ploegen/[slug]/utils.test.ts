@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { transformMatchToSchedule, transformRankingToStandings } from "./utils";
-import type { Match, RankingEntry } from "@/lib/effect/schemas";
+import { transformMatchToSchedule } from "./utils";
+import type { Match } from "@/lib/effect/schemas";
 
 // Mock Match factory
 function createMockMatch(overrides: Partial<Match> = {}): Match {
@@ -28,28 +28,6 @@ function createMockMatch(overrides: Partial<Match> = {}): Match {
     competition: "3e Nationale",
     ...overrides,
   } as Match;
-}
-
-// Mock RankingEntry factory
-function createMockRankingEntry(
-  overrides: Partial<RankingEntry> = {},
-): RankingEntry {
-  return {
-    position: 1,
-    team_id: 1,
-    team_name: "KCVV Elewijt",
-    team_logo: "https://example.com/kcvv.png",
-    played: 15,
-    won: 10,
-    drawn: 3,
-    lost: 2,
-    goals_for: 35,
-    goals_against: 12,
-    goal_difference: 23,
-    points: 33,
-    form: "WWDWL",
-    ...overrides,
-  } as RankingEntry;
 }
 
 describe("transformMatchToSchedule", () => {
@@ -106,32 +84,5 @@ describe("transformMatchToSchedule", () => {
   it("leaves isHome undefined when is_home is absent", () => {
     const match = createMockMatch();
     expect(transformMatchToSchedule(match).isHome).toBeUndefined();
-  });
-});
-
-describe("transformRankingToStandings", () => {
-  it("transforms a ranking entry to standings format", () => {
-    const entry = createMockRankingEntry();
-    const result = transformRankingToStandings(entry);
-
-    expect(result.position).toBe(1);
-    expect(result.teamId).toBe(1);
-    expect(result.teamName).toBe("KCVV Elewijt");
-    expect(result.teamLogo).toBe("https://example.com/kcvv.png");
-    expect(result.played).toBe(15);
-    expect(result.won).toBe(10);
-    expect(result.drawn).toBe(3);
-    expect(result.lost).toBe(2);
-    expect(result.goalsFor).toBe(35);
-    expect(result.goalsAgainst).toBe(12);
-    expect(result.goalDifference).toBe(23);
-    expect(result.points).toBe(33);
-  });
-
-  it("handles entry without logo", () => {
-    const entry = createMockRankingEntry({ team_logo: undefined });
-    const result = transformRankingToStandings(entry);
-
-    expect(result.teamLogo).toBeUndefined();
   });
 });
