@@ -31,6 +31,10 @@ export interface TeamHeroProps {
   className?: string;
 }
 
+function assertNever(value: never): never {
+  throw new Error(`Unhandled teamType variant: ${String(value)}`);
+}
+
 function computeCategory(
   name: string,
   age: string | null,
@@ -53,7 +57,7 @@ function computeCategory(
     if (age?.toUpperCase() === "B") return "B-ploeg";
     return "Ploeg";
   }
-  return "Ploeg";
+  return assertNever(teamType);
 }
 
 export function TeamHero({
