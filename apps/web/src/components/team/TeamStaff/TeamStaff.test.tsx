@@ -43,6 +43,11 @@ describe("resolveFunctionLabel", () => {
     expect(resolveFunctionLabel("", "")).toBe("Staf");
   });
 
+  it("handles null inputs (raw CMS nullable fields)", () => {
+    expect(resolveFunctionLabel(null, "trainer")).toBe("Trainer");
+    expect(resolveFunctionLabel(null, null)).toBe("Staf");
+  });
+
   it("prefers functionTitle over role bucket", () => {
     expect(resolveFunctionLabel("T1", "afgevaardigde")).toBe("Hoofdtrainer");
   });

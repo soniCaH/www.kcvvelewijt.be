@@ -6,11 +6,11 @@ export interface TeamStaffMemberData {
   firstName: string;
   lastName: string;
   /** PSD functionTitle code or free-text (e.g. "T1", "Hoofdtrainer"). */
-  functionTitle?: string;
+  functionTitle?: string | null;
   /** Editorial role bucket fallback ("trainer" / "afgevaardigde"). */
-  role?: string;
+  role?: string | null;
   /** Round photo URL (newsprint-treated). Missing → monogram fallback. */
-  imageUrl?: string;
+  imageUrl?: string | null;
 }
 
 export interface TeamStaffProps {
@@ -39,8 +39,8 @@ const ROLE_BUCKET_LABELS: Record<string, string> = {
  *   4. nothing usable → "Staf"
  */
 export function resolveFunctionLabel(
-  functionTitle: string | undefined,
-  role: string | undefined,
+  functionTitle: string | null | undefined,
+  role: string | null | undefined,
 ): string {
   const ft = functionTitle?.trim();
   if (ft) {
@@ -60,7 +60,9 @@ function initials(firstName: string, lastName: string): string {
 }
 
 function StaffCard({ member }: { member: TeamStaffMemberData }) {
-  const hasPhoto = member.imageUrl !== undefined && member.imageUrl !== "";
+  // Trim so a whitespace-only CMS value doesn't feed an invalid <Image> src.
+  const imageUrl = member.imageUrl?.trim() ?? "";
+  const hasPhoto = imageUrl !== "";
   const fn = resolveFunctionLabel(member.functionTitle, member.role);
 
   return (
@@ -73,7 +75,7 @@ function StaffCard({ member }: { member: TeamStaffMemberData }) {
       <div className="border-ink h-16 w-16 overflow-hidden rounded-full border-2">
         {hasPhoto ? (
           <Image
-            src={member.imageUrl!}
+            src={imageUrl}
             alt={`${member.firstName} ${member.lastName}`}
             width={64}
             height={64}
