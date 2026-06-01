@@ -1,3 +1,12 @@
+/**
+ * Team listing — Phase 6.C rebuild.
+ *
+ * Editorial page-header → A-ploeg flagship (jersey-deep) → B-ploeg flagship
+ * (cream, mirrored) → youth directory (Bovenbouw / Middenbouw / Onderbouw) →
+ * footer. Replaces the legacy InteriorPageHero + TeamFeaturedCard +
+ * YouthTeamsDirectory composition (those components retire in #1947).
+ */
+
 import { Effect } from "effect";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
@@ -6,17 +15,18 @@ import { groupTeamsForLanding } from "@/lib/utils/group-teams";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
-import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
-import { TeamFeaturedCard } from "@/components/teams/TeamFeaturedCard";
-import { YouthTeamsDirectory } from "@/components/teams/YouthTeamsDirectory";
-import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
-import { getPloegenSections } from "./getPloegenSections";
+import { PageViewTracker } from "@/components/analytics";
+import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { FooterSafeArea } from "@/components/design-system";
+import { TeamFlagship } from "@/components/team/TeamFlagship";
+import { YouthDirectory } from "@/components/team/YouthDirectory";
 
 export const metadata: Metadata = {
   title: "Onze ploegen | KCVV Elewijt",
   description:
     "Alle ploegen van KCVV Elewijt: eerste ploeg, tweede ploeg en jeugd van U6 tot U21.",
+  alternates: { canonical: `${SITE_CONFIG.siteUrl}/ploegen` },
 };
 
 async function fetchTeams() {
@@ -45,48 +55,57 @@ export default async function TeamsPage() {
           { name: "Ploegen", url: `${SITE_CONFIG.siteUrl}/ploegen` },
         ])}
       />
-      <SectionStack
-        sections={getPloegenSections({
-          hero: aTeam ? (
-            <InteriorPageHero
-              image={aTeam.teamImageUrl ?? undefined}
-              imageAlt={`Team foto ${aTeam.name}`}
-              label="Eerste ploeg"
-              headline={(() => {
-                const parts = aTeam.name.split(/\s+/);
-                if (parts.length >= 2) {
-                  return (
-                    <>
-                      {parts[0]}
-                      <br />
-                      <span className="text-kcvv-green">{parts[1]}</span>
-                      {parts.length > 2 ? ` ${parts.slice(2).join(" ")}` : ""}
-                    </>
-                  );
-                }
-                return aTeam.name;
-              })()}
-              body={aTeam.divisionFull ?? ""}
-              cta={{
-                label: "Bekijk de A-ploeg",
-                href: `/ploegen/${aTeam.slug}`,
-              }}
+      <PageViewTracker eventName="team_list_view" />
+
+      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
+        {/* Page header */}
+        <header className="mb-10 flex flex-col gap-3">
+          <span>
+            <MonoLabel variant="plain">KCVV Elewijt</MonoLabel>
+          </span>
+          <EditorialHeading
+            level={1}
+            size="display-2xl"
+            emphasis={{ text: "." }}
+          >
+            Onze ploegen
+          </EditorialHeading>
+          <p className="font-display text-ink-muted text-[length:var(--text-display-sm)] leading-[var(--text-display-sm--lh)] italic">
+            Van de eerste ploeg tot de allerkleinsten — één plezante compagnie.
+          </p>
+        </header>
+
+        {/* A + B paired flagships (larger gap between the siblings) */}
+        <div className="flex flex-col gap-10 sm:gap-16">
+          {aTeam ? (
+            <TeamFlagship
+              variant="a"
+              kicker="Eerste elftal"
+              category="A-ploeg"
+              division={aTeam.divisionFull ?? aTeam.division}
+              season={aTeam.season}
+              teamImageUrl={aTeam.teamImageUrl}
+              href={`/ploegen/${aTeam.slug}`}
             />
-          ) : undefined,
-          featured: bTeam ? (
-            <TeamFeaturedCard team={bTeam} label="Tweede ploeg" />
-          ) : undefined,
-          youth: <YouthTeamsDirectory divisions={youthByDivision} />,
-          cta: (
-            <SectionCta
-              heading="Aansluiten bij KCVV Elewijt?"
-              body="Vanaf de allerkleinsten tot de eerste ploeg — iedereen is welkom op Sportpark Elewijt."
-              buttonLabel="Meer info"
-              buttonHref="/club/aansluiten"
+          ) : null}
+
+          {bTeam ? (
+            <TeamFlagship
+              variant="b"
+              kicker="Tweede elftal"
+              category="B-ploeg"
+              division={bTeam.divisionFull ?? bTeam.division}
+              season={bTeam.season}
+              teamImageUrl={bTeam.teamImageUrl}
+              href={`/ploegen/${bTeam.slug}`}
             />
-          ),
-        })}
-      />
+          ) : null}
+        </div>
+
+        <YouthDirectory divisions={youthByDivision} className="mt-16" />
+      </div>
+
+      <FooterSafeArea />
     </>
   );
 }
