@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * <TeamAgendaRow> — one match row in the team matches agenda.
  *
