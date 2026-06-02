@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>6.C.d7 · Enrolment CTA — card shade (contrast)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6;
+        --color-ink: #0a0a0a;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-deep-dark: #133d28;
+        --color-warm: #f0c264;
+        --color-alert: #b84a3a;
+        --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
+        --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--color-cream); color: var(--color-ink);
+        font-family: var(--font-mono); padding: 40px 24px 80px; line-height: 1.5;
+      }
+      .wrap { max-width: 1080px; margin: 0 auto; }
+      h1 { font-family: var(--font-display); font-size: 32px; margin: 0 0 4px; }
+      .sub { color: var(--color-ink-muted); margin: 0 0 24px; font-size: 14px; }
+      .row { display: flex; flex-wrap: wrap; gap: 32px; }
+      .col { flex: 1 1 420px; min-width: 340px; }
+      .clabel { font-family: var(--font-display); font-size: 19px; margin: 0 0 10px; }
+
+      .cta {
+        position: relative; overflow: hidden; border: 2px solid var(--color-ink);
+        padding: 30px; box-shadow: var(--shadow-paper-sm-soft);
+      }
+      .cta.s008755 { background: var(--color-jersey-deep); }
+      .cta.s133d28 { background: var(--color-jersey-deep-dark); }
+
+      .mono {
+        font-family: var(--font-mono); font-size: 13px; text-transform: uppercase;
+        letter-spacing: 0.06em; color: var(--color-cream); margin: 0 0 14px; font-weight: 500;
+      }
+      .heading {
+        font-family: var(--font-display); font-weight: 700; line-height: 1.1;
+        font-size: clamp(28px, 1.2rem + 2.4vw, 40px); margin: 0 0 16px;
+        color: var(--color-cream); padding-right: 150px;
+      }
+      .accent { font-style: italic; color: var(--color-warm); }
+      .lead {
+        font-size: 15px; line-height: 1.55; margin: 0 0 22px; color: var(--color-cream);
+      }
+      .btn {
+        display: inline-flex; gap: 10px; align-items: center; font-family: var(--font-mono);
+        font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+        background: var(--color-cream); color: var(--color-ink); padding: 11px 20px;
+        border: 2px solid var(--color-ink); box-shadow: 4px 4px 0 0 var(--color-ink); text-decoration: none;
+      }
+
+      /* jersey motif (real <JerseyShirt> paths, torso crop) */
+      .jersey { position: absolute; width: 138px; height: 138px; top: 20px; right: 24px; transform: rotate(4deg); }
+      .jlayer { position: absolute; inset: 0; }
+      .jlayer svg { width: 100%; height: 100%; display: block; }
+      .junder { opacity: 0.95; mix-blend-mode: multiply; transform: translate(2px, 2px); }
+      .jletter {
+        position: absolute; top: 53%; left: 50%; transform: translate(-50%, -50%);
+        font-family: var(--font-display); font-weight: 900; font-size: 40px; color: var(--color-cream);
+        text-shadow: 2px 2px 0 var(--color-ink), -1px -1px 0 var(--color-ink), 1px -1px 0 var(--color-ink), -1px 1px 0 var(--color-ink);
+      }
+
+      .verdict { margin-top: 14px; font-size: 13px; }
+      .badge { display: inline-block; padding: 2px 8px; border: 2px solid var(--color-ink); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-right: 6px; }
+      .fail { background: color-mix(in srgb, var(--color-alert) 30%, var(--color-cream)); }
+      .pass { background: color-mix(in srgb, var(--color-jersey-deep) 30%, var(--color-cream)); }
+      .ratio { font-family: var(--font-mono); }
+      footer { margin-top: 40px; font-size: 12px; color: var(--color-ink-muted); }
+      code { background: #ede8da; padding: 1px 5px; border: 1px solid #d9d2bd; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>6.C.d7 · Which card shade?</h1>
+      <p class="sub">
+        Same locked V2 composition + copy + motif. Only the card fill changes. WCAG AA needs
+        4.5:1 for normal text, 3:1 for large text (≥24px or ≥18.66px bold).
+      </p>
+
+      <div class="row">
+        <!-- #008755 -->
+        <div class="col">
+          <p class="clabel">A · <code>jersey-deep</code> #008755 — as approved</p>
+          <article class="cta s008755">
+            <div class="jersey" aria-hidden="true">
+              <div class="jlayer junder"><svg viewBox="0 120 220 180"><path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300 Z" fill="#0a0a0a" /></svg></div>
+              <div class="jlayer"><svg viewBox="0 120 220 180"><g fill="none" stroke="#008755" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square"><path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300" /><path d="M 92 132 L 110 156 L 128 132" /><path d="M 70 168 L 70 300" stroke-width="2" /><path d="M 88 158 L 88 300" stroke-width="2" /><path d="M 132 158 L 132 300" stroke-width="2" /><path d="M 150 168 L 150 300" stroke-width="2" /></g></svg></div>
+              <span class="jletter">U13</span>
+            </div>
+            <p class="mono">Word lid</p>
+            <h3 class="heading">Sluit je aan bij de jeugd van <span class="accent">Elewijt</span>.</h3>
+            <p class="lead">Er is maar één plezante compagnie — en die begint op het veld.</p>
+            <a class="btn" href="#">Word lid →</a>
+          </article>
+          <div class="verdict">
+            <span class="badge fail">FAIL</span> cream label/lead <span class="ratio">4.04:1</span> &lt; 4.5 ·
+            <span class="badge fail">FAIL</span> warm accent <span class="ratio">2.74:1</span> &lt; 3<br />
+            Matches the shade <code>YouthSection</code> ships (repo accepts these in addon-a11y
+            <b>warn</b> mode — non-failing). Heading-as-large-text passes; label, lead, accent don't.
+          </div>
+        </div>
+
+        <!-- #133d28 -->
+        <div class="col">
+          <p class="clabel">B · <code>jersey-deep-dark</code> #133d28 — like ClubshopBanner</p>
+          <article class="cta s133d28">
+            <div class="jersey" aria-hidden="true">
+              <div class="jlayer junder"><svg viewBox="0 120 220 180"><path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300 Z" fill="#0a0a0a" /></svg></div>
+              <div class="jlayer"><svg viewBox="0 120 220 180"><g fill="none" stroke="#008755" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square"><path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300" /><path d="M 92 132 L 110 156 L 128 132" /><path d="M 70 168 L 70 300" stroke-width="2" /><path d="M 88 158 L 88 300" stroke-width="2" /><path d="M 132 158 L 132 300" stroke-width="2" /><path d="M 150 168 L 150 300" stroke-width="2" /></g></svg></div>
+              <span class="jletter">U13</span>
+            </div>
+            <p class="mono">Word lid</p>
+            <h3 class="heading">Sluit je aan bij de jeugd van <span class="accent">Elewijt</span>.</h3>
+            <p class="lead">Er is maar één plezante compagnie — en die begint op het veld.</p>
+            <a class="btn" href="#">Word lid →</a>
+          </article>
+          <div class="verdict">
+            <span class="badge pass">PASS</span> cream label/lead <span class="ratio">~10.9:1</span> ·
+            <span class="badge pass">PASS</span> warm accent <span class="ratio">~7.4:1</span><br />
+            The shade the sibling recruitment banner <code>ClubshopBanner</code> already uses. The
+            jersey motif's green stripes also read a touch more against the darker field.
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        Both keep the exact same composition, copy, motif and "punchy dark-green recruitment ad"
+        intent of locked V2 — B is just darker. Pick the fill; I'll update the lock + re-capture
+        the VR baseline if it changes.
+      </footer>
+    </div>
+  </body>
+</html>

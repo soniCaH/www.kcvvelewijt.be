@@ -27,6 +27,7 @@ import { TeamHero } from "@/components/team/TeamHero";
 import { StandingsTable } from "@/components/team/StandingsTable";
 import { TeamMatchesSection } from "@/components/team/TeamMatchesSection";
 import { SquadGrid } from "@/components/team/SquadGrid";
+import { TeamEnrolmentCta } from "@/components/team/TeamEnrolmentCta";
 import { TeamStaff } from "@/components/team/TeamStaff";
 import { TeamEditorial } from "@/components/team/TeamEditorial";
 import { SponsorsSection } from "@/components/home/SponsorsSection";
@@ -254,6 +255,23 @@ export default async function TeamPage({ params }: TeamPageProps) {
               <SquadGrid players={team.players} />
             </section>
           </TrackInView>
+        </>
+      ) : null}
+
+      {/* Youth-only "Word lid" enrolment CTA (#1949). Gate the seam + section
+          here so senior pages get no empty chrome; <TeamEnrolmentCta> also
+          self-gates (returns null for senior). No section-nav anchor — it's a
+          CTA, not navigable content. */}
+      {team.teamType === "youth" ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <section className={sectionClass}>
+            <TeamEnrolmentCta
+              teamType={team.teamType}
+              teamSlug={slug}
+              ageGroup={team.ageGroup}
+            />
+          </section>
         </>
       ) : null}
 
