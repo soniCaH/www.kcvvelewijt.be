@@ -1,0 +1,20 @@
+# Local Wrangler secrets for `apps/api` (KCVV BFF).
+#
+# Copy this file to `.dev.vars` and fill in the values:
+#   cp apps/api/.dev.vars.example apps/api/.dev.vars
+#
+# `.dev.vars` is gitignored — never commit real secret values.
+# In production/staging these are set via `wrangler secret put <NAME> [--env staging]`.
+
+# ProSoccerData (PSD) API — match/ranking/stats source
+PSD_API_KEY=
+PSD_API_AUTH=
+PSD_API_CLUB=
+
+# Sanity — CMS read/write + webhook verification
+SANITY_API_TOKEN=
+SANITY_WEBHOOK_SECRET=
+
+# Resend — transactional email for member-facing forms.
+# See docs/prd/email-delivery.md for the email-delivery decisions.
+RESEND_API_KEY=

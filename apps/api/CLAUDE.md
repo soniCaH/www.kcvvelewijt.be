@@ -41,14 +41,15 @@ pnpm --filter @kcvv/api dev                        # wrangler dev on :8787
 
 ## Environment variables
 
-| Variable                   | Where set                            | Notes                     |
-| -------------------------- | ------------------------------------ | ------------------------- |
-| `PSD_API_BASE_URL`         | `wrangler.toml [vars]`               | Public, safe to commit    |
-| `FOOTBALISTO_LOGO_CDN_URL` | `wrangler.toml [vars]`               | Public, safe to commit    |
-| `PSD_API_KEY`              | `wrangler secret put` / CF dashboard | Never in toml             |
-| `PSD_API_AUTH`             | `wrangler secret put` / CF dashboard | Never in toml             |
-| `CACHE_LONG_TTL`           | `wrangler.toml [env.staging.vars]`   | Overrides hardTtl to 365d |
-| `PSD_API_CLUB`             | `wrangler secret put` / CF dashboard | Never in toml             |
+| Variable                   | Where set                            | Notes                                            |
+| -------------------------- | ------------------------------------ | ------------------------------------------------ |
+| `PSD_API_BASE_URL`         | `wrangler.toml [vars]`               | Public, safe to commit                           |
+| `FOOTBALISTO_LOGO_CDN_URL` | `wrangler.toml [vars]`               | Public, safe to commit                           |
+| `PSD_API_KEY`              | `wrangler secret put` / CF dashboard | Never in toml                                    |
+| `PSD_API_AUTH`             | `wrangler secret put` / CF dashboard | Never in toml                                    |
+| `CACHE_LONG_TTL`           | `wrangler.toml [env.staging.vars]`   | Overrides hardTtl to 365d                        |
+| `PSD_API_CLUB`             | `wrangler secret put` / CF dashboard | Never in toml                                    |
+| `RESEND_API_KEY`           | `wrangler secret put` / CF dashboard | Never in toml — see `docs/prd/email-delivery.md` |
 
 ## Deployment
 
@@ -61,6 +62,7 @@ Staging secrets must be set separately:
 wrangler secret put PSD_API_KEY --env staging
 wrangler secret put PSD_API_AUTH --env staging
 wrangler secret put PSD_API_CLUB --env staging
+wrangler secret put RESEND_API_KEY --env staging
 ```
 
 ## Cache
