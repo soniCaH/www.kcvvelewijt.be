@@ -47,20 +47,28 @@ export default async function EvenementenPage() {
     }),
   );
 
+  const isEmpty = events.length === 0;
+
   return (
-    <div className="bg-cream min-h-screen pb-[var(--footer-diagonal)]">
-      <header className="mx-auto max-w-3xl px-4 pt-12 pb-8">
+    <div className="bg-cream flex min-h-screen flex-col pb-[var(--footer-diagonal)]">
+      <header className="mx-auto w-full max-w-3xl px-4 pt-12 pb-8">
         <MonoLabel tone="ink">KCVV Elewijt · Agenda</MonoLabel>
         <EditorialHeading level={1} size="display-xl" className="mt-2">
           Evenementen
         </EditorialHeading>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4">
-        {events.length === 0 ? (
-          <p className="font-display text-ink text-xl">
-            Geen evenementen gepland — kom snel terug.
-          </p>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16">
+        {isEmpty ? (
+          // Centre the empty message in the available space rather than
+          // stranding it at the top of the min-h-screen wrapper. The full
+          // empty / filtered-to-zero treatment is finalised in #1966.
+          <div className="flex h-full min-h-[40vh] flex-col items-center justify-center gap-3 text-center">
+            <MonoLabel tone="ink">Agenda</MonoLabel>
+            <p className="font-display text-ink text-2xl">
+              Geen evenementen gepland — kom snel terug.
+            </p>
+          </div>
         ) : (
           <EventMonthList events={events} />
         )}
