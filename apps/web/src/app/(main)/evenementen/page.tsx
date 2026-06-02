@@ -1,10 +1,10 @@
 /**
  * Events list page (`/evenementen`).
  *
- * Tracer (#1964): renders the upcoming-only `EventRepository.findAll()` feed as
- * a minimal single column of bare `<TicketStub>`. Month grouping (#1965),
- * colour-coded filter chips (#1966) and the editorial dark-field header arrive
- * in later Phase 6.E issues. The `(main)` group hosts both this list and the
+ * Renders the upcoming-only `EventRepository.findAll()` feed as a single-column,
+ * month-grouped list of `<TicketStub>` (#1965). Colour-coded filter chips
+ * (#1966) and the `<EventHero>` detail rebuild (#1967) arrive in later Phase
+ * 6.E issues. The `(main)` group hosts both this list and the
  * `/evenementen/[slug]` detail; `/events/*` 301s here (see `next.config.ts`).
  */
 
@@ -15,7 +15,7 @@ import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
 import { EventRepository } from "@/lib/repositories/event.repository";
 import { EditorialHeading, MonoLabel } from "@/components/design-system";
-import { TicketStub } from "@/components/event/TicketStub";
+import { EventMonthList } from "@/components/event/EventMonthList";
 
 export const metadata: Metadata = {
   title: "Evenementen | KCVV Elewijt",
@@ -62,19 +62,7 @@ export default async function EvenementenPage() {
             Geen evenementen gepland — kom snel terug.
           </p>
         ) : (
-          <ul className="flex flex-col gap-4">
-            {events.map((event) => (
-              <li key={event.id}>
-                <TicketStub
-                  title={event.title}
-                  href={`/evenementen/${event.slug}`}
-                  dateStart={event.dateStart}
-                  eventType={event.eventType}
-                  location={event.location}
-                />
-              </li>
-            ))}
-          </ul>
+          <EventMonthList events={events} />
         )}
       </main>
     </div>
