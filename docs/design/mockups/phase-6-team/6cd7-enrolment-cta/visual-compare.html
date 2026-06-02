@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>6.C.d7 · Enrolment CTA — visual compare</title>
+    <style>
+      :root {
+        /* Verbatim from apps/web/src/app/globals.css */
+        --color-cream: #f5f1e6;
+        --color-cream-soft: #ede8da;
+        --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a;
+        --color-ink-soft: #1f1f1f;
+        --color-ink-muted: #6b6b6b;
+        --color-jersey-deep: #008755;
+        --color-jersey-deep-dark: #133d28;
+        --color-warm: #f0c264;
+        --color-paper-edge: #d9d2bd;
+        /* Real font is Adobe Typekit "freight-display-pro" (not loadable
+           offline) — Georgia is the closest local serif fallback. */
+        --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
+        --font-mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, monospace;
+        --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--color-ink-muted);
+        --tape-warm: color-mix(in srgb, var(--color-warm) 85%, transparent);
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--color-cream);
+        color: var(--color-ink);
+        font-family: var(--font-mono);
+        line-height: 1.5;
+        padding: 40px 24px 80px;
+      }
+      .wrap { max-width: 1180px; margin: 0 auto; }
+
+      h1 { font-family: var(--font-display); font-size: 34px; margin: 0 0 6px; }
+      .sub { color: var(--color-ink-soft); margin: 0 0 4px; font-size: 14px; }
+      .note {
+        background: var(--color-cream-soft);
+        border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm);
+        padding: 14px 18px;
+        font-size: 13px;
+        margin: 22px 0 36px;
+      }
+      .note b { font-family: var(--font-display); }
+      .locked { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 10px 0 0; }
+      .pill {
+        font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em;
+        background: var(--color-jersey-deep); color: var(--color-cream);
+        padding: 3px 9px; border: 2px solid var(--color-ink);
+      }
+
+      .compare {
+        display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start;
+      }
+      .variant { flex: 1 1 460px; min-width: 360px; }
+      .vlabel {
+        font-family: var(--font-display); font-size: 20px; margin: 0 0 4px;
+      }
+      .vmeta { font-size: 12px; color: var(--color-ink-soft); margin: 0 0 14px; min-height: 32px; }
+
+      /* ---- CTA card (TapedCard analogue: border-2 border-ink + offset shadow + press hover) ---- */
+      .cta {
+        position: relative;
+        overflow: hidden;
+        border: 2px solid var(--color-ink);
+        padding: 30px 30px 28px;
+        transition: all 0.3s ease;
+      }
+      /* Card is NOT interactive — only the LinkButton presses down. A static
+         TapedCard avoids the nested/double-hover flagged in #1949 review. */
+      .cta.cream { background: var(--color-cream); box-shadow: var(--shadow-paper-md); }
+      .cta.deep { background: var(--color-jersey-deep); box-shadow: var(--shadow-paper-sm-soft); }
+
+      .mono {
+        font-family: var(--font-mono); font-size: 12px; text-transform: uppercase;
+        letter-spacing: 0.18em; margin: 0 0 16px;
+      }
+      .mono.ink { color: var(--color-ink); }
+      .mono.cream { color: var(--color-cream); }
+
+      .heading {
+        font-family: var(--font-display); font-weight: 800; line-height: 1.08;
+        font-size: clamp(26px, 1.2rem + 2.4vw, 38px); margin: 0 0 16px;
+      }
+      .heading.ink { color: var(--color-ink); }
+      .heading.cream { color: var(--color-cream); }
+      /* Reserve the corner-motif gutter so the label + heading never run
+         behind the jersey (#1949 design review). Lead + button stay full-width
+         (the motif sits top-right only). */
+      .motif-corner .mono,
+      .motif-corner .heading { padding-right: 178px; }
+      @media (max-width: 520px) {
+        .motif-corner .mono,
+        .motif-corner .heading { padding-right: 120px; }
+      }
+      .accent-green { color: var(--color-jersey-deep); font-style: italic; }
+      .accent-warm { color: var(--color-warm); font-style: italic; }
+
+      /* Lead flows full-width — it sits below the jersey's bottom edge, so no
+         gutter is reserved (unlike the label + heading). #1949 design review. */
+      .lead { font-size: 15px; line-height: 1.55; margin: 0 0 24px; }
+      .lead.ink { color: var(--color-ink-soft); }
+      .lead.cream { color: color-mix(in srgb, var(--color-cream) 92%, transparent); }
+
+      /* LinkButton analogue */
+      .btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        font-family: var(--font-mono); font-size: 13px; font-weight: 700;
+        text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none;
+        padding: 11px 20px; border: 2px solid var(--color-ink);
+        box-shadow: var(--shadow-paper-sm); transition: all 0.3s ease;
+      }
+      .btn:hover { transform: translate(4px, 4px); box-shadow: none; }
+      .btn.primary { background: var(--color-jersey-deep); color: var(--color-cream); }
+      .btn.inverted { background: var(--color-cream); color: var(--color-ink); }
+      .btn .arrow { font-family: var(--font-display); font-size: 16px; }
+
+      /* ---- Tape strip (V1) ---- */
+      .tape {
+        position: absolute; top: -10px; left: 34px; width: 90px; height: 26px;
+        background: var(--tape-warm); transform: rotate(-2deg);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      }
+
+      /* ---- Jersey motif (faithful <JerseyShirt> paths, viewBox 0 120 220 180) ---- */
+      .jersey { position: absolute; }
+      .jersey--corner { width: 138px; height: 138px; top: 20px; right: 24px; transform: rotate(4deg); }
+      .jersey--big { position: relative; width: 150px; height: 150px; }
+      .jlayer { position: absolute; inset: 0; }
+      .jlayer svg { width: 100%; height: 100%; display: block; }
+      .junder { opacity: 0.95; mix-blend-mode: multiply; transform: translate(2px, 2px); }
+      .jletter {
+        position: absolute; top: 53%; left: 50%; transform: translate(-50%, -50%);
+        font-family: var(--font-display); font-weight: 900; font-size: 40px;
+        color: var(--color-cream);
+        text-shadow: 2px 2px 0 var(--color-ink), -1px -1px 0 var(--color-ink),
+          1px -1px 0 var(--color-ink), -1px 1px 0 var(--color-ink);
+      }
+
+      /* ---- V3 split poster ---- */
+      .split { display: grid; grid-template-columns: 150px 1fr; }
+      .split .panel-motif {
+        background: var(--color-cream-soft); display: flex; align-items: center;
+        justify-content: center; border-right: 2px solid var(--color-ink); padding: 16px 8px;
+      }
+      .split .panel-copy { background: var(--color-jersey-deep); padding: 26px 24px; }
+      @media (max-width: 460px) {
+        .split { grid-template-columns: 1fr; }
+        .split .panel-motif { border-right: none; border-bottom: 2px solid var(--color-ink); }
+      }
+
+      /* ---- Page-context strip ---- */
+      .ctx { margin-top: 56px; }
+      .ctx h2 { font-family: var(--font-display); font-size: 22px; }
+      .stack { border: 2px dashed var(--color-paper-edge); padding: 0; max-width: 760px; }
+      .ph {
+        padding: 22px 20px; font-family: var(--font-mono); font-size: 12px;
+        text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-ink-muted);
+        text-align: center;
+      }
+      .seam {
+        height: 22px;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--color-ink) 0 12px,
+          var(--color-cream) 12px 24px
+        );
+        border-top: 2px solid var(--color-ink);
+        border-bottom: 2px solid var(--color-ink);
+      }
+      .ctx-cta { padding: 26px 20px; }
+      footer { margin-top: 48px; font-size: 12px; color: var(--color-ink-muted); }
+      code { background: var(--color-cream-soft); padding: 1px 5px; border: 1px solid var(--color-paper-edge); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>6.C.d7 · Youth enrolment CTA — visual compare</h1>
+      <p class="sub">Issue #1949 · /ploegen/[slug] · drill round 3 (visual treatment)</p>
+      <div class="locked">
+        <span class="pill">Placement B · locked</span>
+        <span class="pill">Copy v1 · locked</span>
+        <span class="pill">Youth-only render</span>
+        <span class="pill">→ /club/inschrijven</span>
+      </div>
+
+      <div class="note" style="border-color: var(--color-jersey-deep); border-width: 3px">
+        <b>SELECTED → V2 (jersey-deep, cream type), with two review fixes applied:</b>
+        ① the label + heading now reserve a right gutter so they no longer run behind the
+        corner jersey; ② the card is <b>static</b> (no press-down) — only the
+        <code>&lt;LinkButton&gt;</code> presses, so there's a single hover target, not two.
+      </div>
+
+      <div class="note">
+        <b>What's locked going in:</b> standalone fanzine section between
+        <code>&lt;SquadGrid&gt;</code> and <code>&lt;TeamStaff&gt;</code> (round 1),
+        club-motto copy (round 2). <b>This round picks the card's visual treatment.</b>
+        <br /><br />
+        <b>Two real findings baked into these renders:</b>
+        <br />① The round-2 <b>“warm accent”</b> on <i>Elewijt</i> only has contrast on a
+        <i>dark</i> field — <code>&lt;EditorialHeading accentTone&gt;</code> is
+        <code>warm</code> (dark surfaces) <i>or</i> <code>jersey-deep</code> (cream/paper). So on a
+        cream card the accent is <b>jersey-deep green</b>; on a deep card it's <b>warm yellow</b>.
+        <br />② <code>&lt;JerseyShirt&gt;</code> is ink-underprint + <b>jersey-deep</b> overprint —
+        designed for a <b>cream</b> field. On a jersey-deep card the green collar/stripes wash
+        out (you'll see it on V2). V3 solves this by putting the motif on a cream panel.
+        <br /><br />
+        <i>Fonts: real display face is Adobe Typekit “freight-display-pro”; this offline
+        mock falls back to Georgia. Jersey SVG paths are verbatim from
+        <code>_jersey-paths.ts</code>.</i>
+      </div>
+
+      <div class="compare">
+        <!-- ===================== V1 ===================== -->
+        <div class="variant">
+          <p class="vlabel">V1 · Cream, ink type</p>
+          <p class="vmeta">
+            TapedCard <code>bg="cream"</code> <code>shadow="md"</code> · jersey-deep accent ·
+            corner JerseyShirt (reads well) · primary button · one TapeStrip. Quiet paper flyer.
+          </p>
+          <article class="cta cream motif-corner">
+            <span class="tape" aria-hidden="true"></span>
+            <div class="jersey jersey--corner" aria-hidden="true">
+              <div class="jlayer junder">
+                <svg viewBox="0 120 220 180" preserveAspectRatio="xMidYMid meet">
+                  <path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300 Z" fill="var(--color-ink)" />
+                </svg>
+              </div>
+              <div class="jlayer">
+                <svg viewBox="0 120 220 180" preserveAspectRatio="xMidYMid meet">
+                  <g fill="none" stroke="var(--color-jersey-deep)" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square">
+                    <path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300" />
+                    <path d="M 92 132 L 110 156 L 128 132" />
+                    <path d="M 70 168 L 70 300" stroke-width="2" />
+                    <path d="M 88 158 L 88 300" stroke-width="2" />
+                    <path d="M 132 158 L 132 300" stroke-width="2" />
+                    <path d="M 150 168 L 150 300" stroke-width="2" />
+                  </g>
+                </svg>
+              </div>
+              <span class="jletter">U13</span>
+            </div>
+            <p class="mono ink">Word lid</p>
+            <h3 class="heading ink">
+              Sluit je aan bij de jeugd van <span class="accent-green">Elewijt</span>.
+            </h3>
+            <p class="lead ink">Er is maar één plezante compagnie — en die begint op het veld.</p>
+            <a class="btn primary" href="#">Word lid <span class="arrow">→</span></a>
+          </article>
+        </div>
+
+        <!-- ===================== V2 ===================== -->
+        <div class="variant">
+          <p class="vlabel">V2 · Jersey-deep, cream type &nbsp;✓ SELECTED</p>
+          <p class="vmeta">
+            TapedCard <code>bg="jersey-deep"</code> <code>shadow="soft"</code> · warm accent ·
+            inverted button. Punchy + matches YouthSection. <b>Motif washes out</b> (green-on-green).
+          </p>
+          <article class="cta deep motif-corner">
+            <div class="jersey jersey--corner" aria-hidden="true">
+              <div class="jlayer junder">
+                <svg viewBox="0 120 220 180" preserveAspectRatio="xMidYMid meet">
+                  <path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300 Z" fill="var(--color-ink)" />
+                </svg>
+              </div>
+              <div class="jlayer">
+                <svg viewBox="0 120 220 180" preserveAspectRatio="xMidYMid meet">
+                  <g fill="none" stroke="var(--color-jersey-deep)" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square">
+                    <path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300" />
+                    <path d="M 92 132 L 110 156 L 128 132" />
+                    <path d="M 70 168 L 70 300" stroke-width="2" />
+                    <path d="M 88 158 L 88 300" stroke-width="2" />
+                    <path d="M 132 158 L 132 300" stroke-width="2" />
+                    <path d="M 150 168 L 150 300" stroke-width="2" />
+                  </g>
+                </svg>
+              </div>
+              <span class="jletter">U13</span>
+            </div>
+            <p class="mono cream">Word lid</p>
+            <h3 class="heading cream">
+              Sluit je aan bij de jeugd van <span class="accent-warm">Elewijt</span>.
+            </h3>
+            <p class="lead cream">Er is maar één plezante compagnie — en die begint op het veld.</p>
+            <a class="btn inverted" href="#">Word lid <span class="arrow">→</span></a>
+          </article>
+        </div>
+
+        <!-- ===================== V3 ===================== -->
+        <div class="variant">
+          <p class="vlabel">V3 · Split poster</p>
+          <p class="vmeta">
+            Cream motif panel (jersey reads) + jersey-deep copy panel (punch). Best of both,
+            biggest motif. <b>Higher build cost</b> — new 2-column layout, no existing precedent.
+          </p>
+          <article class="cta deep split" style="padding: 0">
+            <div class="panel-motif">
+              <div class="jersey--big" aria-hidden="true">
+                <div class="jlayer junder">
+                  <svg viewBox="0 120 220 180" preserveAspectRatio="xMidYMid meet">
+                    <path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300 Z" fill="var(--color-ink)" />
+                  </svg>
+                </div>
+                <div class="jlayer">
+                  <svg viewBox="0 120 220 180" preserveAspectRatio="xMidYMid meet">
+                    <g fill="none" stroke="var(--color-jersey-deep)" stroke-width="3" stroke-linejoin="miter" stroke-linecap="square">
+                      <path d="M 30 300 L 40 168 Q 60 138 110 130 Q 160 138 180 168 L 190 300" />
+                      <path d="M 92 132 L 110 156 L 128 132" />
+                      <path d="M 70 168 L 70 300" stroke-width="2" />
+                      <path d="M 88 158 L 88 300" stroke-width="2" />
+                      <path d="M 132 158 L 132 300" stroke-width="2" />
+                      <path d="M 150 168 L 150 300" stroke-width="2" />
+                    </g>
+                  </svg>
+                </div>
+                <span class="jletter">U13</span>
+              </div>
+            </div>
+            <div class="panel-copy">
+              <p class="mono cream">Word lid</p>
+              <h3 class="heading cream" style="font-size: clamp(22px, 1rem + 2vw, 30px)">
+                Sluit je aan bij de jeugd van <span class="accent-warm">Elewijt</span>.
+              </h3>
+              <p class="lead cream">Er is maar één plezante compagnie — en die begint op het veld.</p>
+              <a class="btn inverted" href="#">Word lid <span class="arrow">→</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- ===================== page context ===================== -->
+      <div class="ctx">
+        <h2>Placement in a thin youth page (hero + squad + staff)</h2>
+        <p class="sub">
+          Locked placement B: own section between SquadGrid and TeamStaff, framed by the page's
+          <code>&lt;StripedSeam colorPair="ink-cream" height="md"&gt;</code>. No section-nav anchor.
+        </p>
+        <div class="stack">
+          <div class="ph">▦ TeamHero (U13 · Jeugd)</div>
+          <div class="seam"></div>
+          <div class="ph">▦ SquadGrid — spelers</div>
+          <div class="seam"></div>
+          <div class="ctx-cta ph" style="color: var(--color-ink); font-family: var(--font-display); font-size: 14px; letter-spacing: normal; text-transform: none">
+            ★ Enrolment CTA section lands here (your chosen variant)
+          </div>
+          <div class="seam"></div>
+          <div class="ph">▦ TeamStaff — staf</div>
+          <div class="ph" style="border-top: 2px dashed var(--color-paper-edge)">▦ RelatedArticles · Sponsors · Footer</div>
+        </div>
+      </div>
+
+      <footer>
+        Drill artefact for AC #1 · lock will be recorded in
+        <code>docs/design/mockups/phase-6-team/enrolment-cta-locked.md</code>. Hover any card to
+        see the canonical press-down (<code>translate(4px,4px)</code>, shadow → none).
+      </footer>
+    </div>
+  </body>
+</html>
