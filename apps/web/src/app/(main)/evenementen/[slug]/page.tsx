@@ -61,7 +61,7 @@ export async function generateMetadata({
   return {
     title: `${event.title} | KCVV Elewijt`,
     description,
-    alternates: { canonical: `${SITE_CONFIG.siteUrl}/events/${slug}` },
+    alternates: { canonical: `${SITE_CONFIG.siteUrl}/evenementen/${slug}` },
     openGraph: {
       title: event.title,
       description,
@@ -87,7 +87,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   // validation) would render `Invalid DateTime`. Treat as 404 instead.
   if (!event || !event.dateStart) notFound();
 
-  const canonicalUrl = `${SITE_CONFIG.siteUrl}/events/${event.slug}`;
+  const canonicalUrl = `${SITE_CONFIG.siteUrl}/evenementen/${event.slug}`;
   const startDate = new Date(event.dateStart);
   const endDate = event.dateEnd ? new Date(event.dateEnd) : null;
   const sameDay =
@@ -102,7 +102,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
-          { name: "Evenementen", url: `${SITE_CONFIG.siteUrl}/events` },
+          { name: "Evenementen", url: `${SITE_CONFIG.siteUrl}/evenementen` },
           { name: event.title, url: canonicalUrl },
         ])}
       />
@@ -119,7 +119,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
       <header className="from-green-main via-green-hover to-green-dark-hover relative overflow-hidden bg-linear-to-br px-4 py-16 text-white">
         <div className="mx-auto max-w-5xl">
           <Link
-            href="/events"
+            href="/evenementen"
             className="mb-6 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
           >
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />

@@ -44,8 +44,8 @@ test.describe("static routes", () => {
     await smokeTest(page, { path: "/kalender" });
   });
 
-  test("/events", async ({ page }) => {
-    await smokeTest(page, { path: "/events" });
+  test("/evenementen", async ({ page }) => {
+    await smokeTest(page, { path: "/evenementen" });
   });
 
   test("/sponsors", async ({ page }) => {

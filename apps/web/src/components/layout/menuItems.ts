@@ -17,7 +17,7 @@ export interface MenuItemGroup {
 export const staticMenuItems: MenuItem[] = [
   { label: "Home", href: "/" },
   { label: "Nieuws", href: "/nieuws" },
-  { label: "Evenementen", href: "/events" },
+  { label: "Evenementen", href: "/evenementen" },
   { label: "Sponsors", href: "/sponsors" },
   { label: "Hulp", href: "/hulp" },
   {

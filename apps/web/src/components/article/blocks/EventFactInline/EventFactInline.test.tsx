@@ -61,7 +61,7 @@ describe("<EventFactInline>", () => {
       />,
     );
     const link = screen.getByText(/Ook in agenda/i).closest("a");
-    expect(link?.getAttribute("href")).toBe("/events/steakfestijn-2026");
+    expect(link?.getAttribute("href")).toBe("/evenementen/steakfestijn-2026");
   });
 
   it("does not render the linked-event line when slug is blank", () => {

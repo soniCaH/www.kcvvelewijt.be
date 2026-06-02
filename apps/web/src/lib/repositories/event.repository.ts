@@ -10,9 +10,12 @@ import type {
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
+// Upcoming-only: an event stays in the list until its end (or start, when
+// single-day) is in the past. `coalesce(dateEnd, dateStart) >= now()` keeps
+// in-progress multi-day events visible through their final day.
 export const EVENTS_QUERY =
-  defineQuery(`*[_type == "event"] | order(dateStart asc) {
-  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": false,
+  defineQuery(`*[_type == "event" && coalesce(dateEnd, dateStart) >= now()] | order(dateStart asc) {
+  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": false,
   "href": coalesce(externalLink.url, "#"),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
@@ -20,12 +23,12 @@ export const EVENTS_QUERY =
 export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
   coalesce(
     *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {
-      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),
+      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),
       "href": coalesce(externalLink.url, "#"),
       "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
     },
     *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {
-      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), "dateStart": coalesce(dateStart, ""), dateEnd, "featuredOnHome": coalesce(featuredOnHome, false),
+      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),
       "href": coalesce(externalLink.url, "#"),
       "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
     }
@@ -33,7 +36,7 @@ export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
 `);
 
 /**
- * Detail-page projection: full event payload for `/events/[slug]`. The
+ * Detail-page projection: full event payload for `/evenementen/[slug]`. The
  * `externalLink` object is read whole so the page can decide whether to
  * render the optional CTA. `coverImageUrl` is sized for the event hero.
  */

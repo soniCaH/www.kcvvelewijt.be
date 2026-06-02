@@ -348,7 +348,7 @@ function mapRelatedItem(item: RelatedContentItem): VerderLezenItem | null {
     case "event":
       return {
         title: item.title,
-        href: `/events/${item.slug}`,
+        href: `/evenementen/${item.slug}`,
         imageUrl: item.imageUrl ?? undefined,
         imageAlt: item.title,
         badge: "EVENEMENT",
