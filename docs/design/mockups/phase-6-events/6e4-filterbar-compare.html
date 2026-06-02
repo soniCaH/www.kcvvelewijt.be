@@ -12,154 +12,605 @@
     />
     <style>
       :root {
-        --cream: #f5f1e6; --cream-deep: #e1d7bf; --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
-        --jersey: #4acf52; --jersey-deep: #008755; --jersey-bright: #22c55e; --jersey-deep-dark: #133d28;
-        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
-        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+        --cream: #f5f1e6;
+        --cream-deep: #e1d7bf;
+        --ink: #0a0a0a;
+        --ink-soft: #1f1f1f;
+        --ink-muted: #6b6b6b;
+        --jersey: #4acf52;
+        --jersey-deep: #008755;
+        --jersey-bright: #22c55e;
+        --jersey-deep-dark: #133d28;
+        --warm: #f0c264;
+        --brick: #c93f1c;
+        --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
       }
-      * { box-sizing: border-box; }
-      body { margin: 0; background: var(--jersey-deep-dark); color: var(--cream); font-family: var(--font-body); }
-      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
-      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
-      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 78ch; line-height: 1.55; }
-      .harness-head code { color: var(--warm); }
-      .direction-bar { background: var(--warm); color: var(--ink);
-        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase;
-        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top: 2px solid var(--ink); }
-      .direction-bar .tag { background: var(--ink); color: var(--warm); padding: 2px 9px; font-weight: 700; }
-      .direction-bar .says { color: var(--ink-soft); text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 600; }
-      .stage { padding: 26px 28px 44px; }
-      .container { max-width: 880px; margin: 0 auto; }
-      .pagetitle { font-family: var(--font-display); font-weight: 900; font-size: 46px; color: var(--cream); margin: 0 0 4px; letter-spacing: -0.01em; }
-      .kicker { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; color: var(--warm); margin-bottom: 8px; }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--jersey-deep-dark);
+        color: var(--cream);
+        font-family: var(--font-body);
+      }
+      .harness-head {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 22px 28px;
+        font-family: var(--font-mono);
+      }
+      .harness-head h1 {
+        margin: 0 0 6px;
+        font-size: 15px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .harness-head p {
+        margin: 0;
+        font-size: 13px;
+        color: #b9b9b9;
+        max-width: 78ch;
+        line-height: 1.55;
+      }
+      .harness-head code {
+        color: var(--warm);
+      }
+      .direction-bar {
+        background: var(--warm);
+        color: var(--ink);
+        padding: 11px 28px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        border-bottom: 2px solid var(--ink);
+        border-top: 2px solid var(--ink);
+      }
+      .direction-bar .tag {
+        background: var(--ink);
+        color: var(--warm);
+        padding: 2px 9px;
+        font-weight: 700;
+      }
+      .direction-bar .says {
+        color: var(--ink-soft);
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .stage {
+        padding: 26px 28px 44px;
+      }
+      .container {
+        max-width: 880px;
+        margin: 0 auto;
+      }
+      .pagetitle {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 46px;
+        color: var(--cream);
+        margin: 0 0 4px;
+        letter-spacing: -0.01em;
+      }
+      .kicker {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+        color: var(--warm);
+        margin-bottom: 8px;
+      }
 
       /* filter atoms */
-      .pill { display: inline-flex; align-items: center; gap:6px; font-family: var(--font-mono); text-transform: uppercase;
-        letter-spacing: 0.07em; font-size: 11px; font-weight: 600; padding: 7px 13px; border: 1.5px solid var(--cream);
-        background: transparent; color: var(--cream); white-space: nowrap; cursor: pointer; }
-      .pill.on { background: var(--cream); color: var(--ink); }
-      .row { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
-      .dot { width: 11px; height: 11px; border: 1.5px solid var(--ink); display:inline-block; }
-      .d-jersey { background: var(--jersey-deep); } .d-warm { background: var(--warm); } .d-bright { background: var(--jersey-bright); } .d-ink { background: var(--ink); }
-      .legend { display:flex; gap:15px; flex-wrap:wrap; font-family: var(--font-mono); font-size: 10px; text-transform:uppercase; letter-spacing:0.07em; color:#cfe9d8; margin-top:14px; }
-      .legend span { display:inline-flex; align-items:center; gap:6px; }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 7px 13px;
+        border: 1.5px solid var(--cream);
+        background: transparent;
+        color: var(--cream);
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      .pill.on {
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .row {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .dot {
+        width: 11px;
+        height: 11px;
+        border: 1.5px solid var(--ink);
+        display: inline-block;
+      }
+      .d-jersey {
+        background: var(--jersey-deep);
+      }
+      .d-warm {
+        background: var(--warm);
+      }
+      .d-bright {
+        background: var(--jersey-bright);
+      }
+      .d-ink {
+        background: var(--ink);
+      }
+      .legend {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #cfe9d8;
+        margin-top: 14px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
 
       /* colour-coded filter chips (B) */
-      .cpill { display:inline-flex; align-items:center; gap:7px; font-family: var(--font-mono); text-transform:uppercase;
-        letter-spacing:0.07em; font-size:11px; font-weight:600; padding:7px 13px; border:1.5px solid var(--ink); cursor:pointer; }
-      .cpill .dot { border-color: rgba(0,0,0,0.35); }
-      .cp-all { background: var(--cream); color: var(--ink); }
-      .cp-jersey { background: var(--jersey-deep); color: var(--cream); }
-      .cp-warm { background: var(--warm); color: var(--ink); }
-      .cp-bright { background: var(--jersey-bright); color: var(--ink); }
-      .cp-ink { background: var(--ink); color: var(--cream); }
-      .cpill.off { background: transparent; color: var(--cream); border-color: var(--cream); opacity: 0.6; }
+      .cpill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 7px 13px;
+        border: 1.5px solid var(--ink);
+        cursor: pointer;
+      }
+      .cpill .dot {
+        border-color: rgba(0, 0, 0, 0.35);
+      }
+      .cp-all {
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .cp-jersey {
+        background: var(--jersey-deep);
+        color: var(--cream);
+      }
+      .cp-warm {
+        background: var(--warm);
+        color: var(--ink);
+      }
+      .cp-bright {
+        background: var(--jersey-bright);
+        color: var(--ink);
+      }
+      .cp-ink {
+        background: var(--ink);
+        color: var(--cream);
+      }
+      .cpill.off {
+        background: transparent;
+        color: var(--cream);
+        border-color: var(--cream);
+        opacity: 0.6;
+      }
 
       /* tabs (C) */
-      .tabs { display:flex; gap: 24px; border-bottom: 2px solid rgba(245,241,230,0.25); padding-bottom: 0; flex-wrap: wrap; }
-      .tab { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; font-size: 12px; font-weight: 600;
-        color: rgba(245,241,230,0.7); padding: 0 2px 10px; border-bottom: 3px solid transparent; cursor: pointer; }
-      .tab.on { color: var(--cream); border-bottom-color: var(--warm); }
+      .tabs {
+        display: flex;
+        gap: 24px;
+        border-bottom: 2px solid rgba(245, 241, 230, 0.25);
+        padding-bottom: 0;
+        flex-wrap: wrap;
+      }
+      .tab {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(245, 241, 230, 0.7);
+        padding: 0 2px 10px;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+      }
+      .tab.on {
+        color: var(--cream);
+        border-bottom-color: var(--warm);
+      }
 
       /* dropdown (D) */
-      .select { display:inline-flex; align-items:center; gap:10px; font-family: var(--font-mono); text-transform:uppercase;
-        letter-spacing:0.06em; font-size:12px; font-weight:600; padding: 10px 16px; border:1.5px solid var(--cream); background: transparent; color: var(--cream); cursor:pointer; }
+      .select {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 10px 16px;
+        border: 1.5px solid var(--cream);
+        background: transparent;
+        color: var(--cream);
+        cursor: pointer;
+      }
 
       /* mini list context */
-      .month { display: flex; align-items: center; gap: 14px; margin: 22px 0 14px; }
-      .month h2 { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: 24px; color: var(--cream); }
-      .seam { flex: 1; height: 11px; background: repeating-linear-gradient(-45deg, var(--cream) 0 7px, var(--jersey-deep) 7px 14px, var(--cream) 14px 21px, var(--ink) 21px 28px); }
-      .col1 { display:flex; flex-direction:column; gap: 16px; }
-      .ticket { display: flex; background: var(--cream); color: var(--ink); border: 2px solid var(--ink); box-shadow: 5px 5px 0 rgba(0,0,0,0.5); text-decoration: none; }
-      .stub { flex: 0 0 86px; border-right: 2px dashed var(--ink); display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 12px 6px; color: var(--cream); }
-      .stub .day { font-family: var(--font-display); font-weight: 900; font-size: 36px; line-height: 0.85; }
-      .stub .mon { font-family: var(--font-mono); text-transform: uppercase; font-size: 10px; margin-top: 3px; }
-      .s-jersey { background: var(--jersey-deep); } .s-warm { background: var(--warm); color: var(--ink); } .s-bright { background: var(--jersey-bright); color: var(--ink); } .s-ink { background: var(--ink); }
-      .tbody { padding: 11px 15px; }
-      .tpill { display:inline-flex; font-family: var(--font-mono); text-transform:uppercase; letter-spacing:0.07em; font-size:9.5px; font-weight:600; padding:2px 7px; border:1.5px solid var(--ink); background: var(--cream); color: var(--ink); }
-      .tbody h3 { margin: 6px 0 4px; font-family: var(--font-display); font-weight: 900; font-size: 19px; }
-      .tmeta { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; color: var(--ink-muted); }
+      .month {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 22px 0 14px;
+      }
+      .month h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 24px;
+        color: var(--cream);
+      }
+      .seam {
+        flex: 1;
+        height: 11px;
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--cream) 0 7px,
+          var(--jersey-deep) 7px 14px,
+          var(--cream) 14px 21px,
+          var(--ink) 21px 28px
+        );
+      }
+      .col1 {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .ticket {
+        display: flex;
+        background: var(--cream);
+        color: var(--ink);
+        border: 2px solid var(--ink);
+        box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+        text-decoration: none;
+      }
+      .stub {
+        flex: 0 0 86px;
+        border-right: 2px dashed var(--ink);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 6px;
+        color: var(--cream);
+      }
+      .stub .day {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 36px;
+        line-height: 0.85;
+      }
+      .stub .mon {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        font-size: 10px;
+        margin-top: 3px;
+      }
+      .s-jersey {
+        background: var(--jersey-deep);
+      }
+      .s-warm {
+        background: var(--warm);
+        color: var(--ink);
+      }
+      .s-bright {
+        background: var(--jersey-bright);
+        color: var(--ink);
+      }
+      .s-ink {
+        background: var(--ink);
+      }
+      .tbody {
+        padding: 11px 15px;
+      }
+      .tpill {
+        display: inline-flex;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-size: 9.5px;
+        font-weight: 600;
+        padding: 2px 7px;
+        border: 1.5px solid var(--ink);
+        background: var(--cream);
+        color: var(--ink);
+      }
+      .tbody h3 {
+        margin: 6px 0 4px;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 19px;
+      }
+      .tmeta {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 10px;
+        color: var(--ink-muted);
+      }
     </style>
   </head>
   <body>
     <div class="harness-head">
       <h1>Phase 6.E · /evenementen — Round 4: FILTER BAR</h1>
       <p>
-        Layout locked (single column, month-grouped, type-coloured clickable stubs). This round picks the
-        <b>eventType filter</b> treatment — and the key question: do the filters <b>carry the colour coding</b>
-        (so they double as the legend, removing a separate legend row), or stay neutral with a legend underneath?
-        "Alles" is the default (no filter). Each treatment is shown above a slice of the locked list.
+        Layout locked (single column, month-grouped, type-coloured clickable
+        stubs). This round picks the
+        <b>eventType filter</b> treatment — and the key question: do the filters
+        <b>carry the colour coding</b>
+        (so they double as the legend, removing a separate legend row), or stay
+        neutral with a legend underneath? "Alles" is the default (no filter).
+        Each treatment is shown above a slice of the locked list.
       </p>
     </div>
 
     <!-- A -->
-    <div class="direction-bar"><span class="tag">A</span> Neutrale pills + legenda <span class="says">— cream outline pills; a separate colour legend below. Cleanest pills, but the legend is a second element.</span></div>
-    <div class="stage"><div class="container">
-      <div class="kicker">KCVV ELEWIJT · AGENDA</div><h1 class="pagetitle">Evenementen.</h1>
-      <div class="row" style="margin-top:14px;">
-        <span class="pill on">Alles</span><span class="pill">Clubevent</span><span class="pill">Supporters</span><span class="pill">Jeugd</span><span class="pill">Andere</span>
+    <div class="direction-bar">
+      <span class="tag">A</span> Neutrale pills + legenda
+      <span class="says"
+        >— cream outline pills; a separate colour legend below. Cleanest pills,
+        but the legend is a second element.</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="kicker">KCVV ELEWIJT · AGENDA</div>
+        <h1 class="pagetitle">Evenementen.</h1>
+        <div class="row" style="margin-top: 14px">
+          <span class="pill on">Alles</span><span class="pill">Clubevent</span
+          ><span class="pill">Supporters</span><span class="pill">Jeugd</span
+          ><span class="pill">Andere</span>
+        </div>
+        <div class="legend">
+          <span><i class="dot d-jersey"></i>Clubevent</span
+          ><span><i class="dot d-warm"></i>Supporters</span
+          ><span><i class="dot d-bright"></i>Jeugd</span
+          ><span><i class="dot d-ink"></i>Andere</span>
+        </div>
+        <div class="month">
+          <h2>September</h2>
+          <div class="seam"></div>
+        </div>
+        <div class="col1">
+          <a class="ticket"
+            ><div class="stub s-jersey">
+              <div class="day">14</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Clubevent</span>
+              <h3>Mosselfeest</h3>
+              <div class="tmeta">18:00 · Kantine KCVV</div>
+            </div></a
+          >
+          <a class="ticket"
+            ><div class="stub s-bright">
+              <div class="day">22</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Jeugdwerking</span>
+              <h3>Jeugdtornooi U10–U13</h3>
+              <div class="tmeta">Sportpark Elewijt</div>
+            </div></a
+          >
+        </div>
       </div>
-      <div class="legend"><span><i class="dot d-jersey"></i>Clubevent</span><span><i class="dot d-warm"></i>Supporters</span><span><i class="dot d-bright"></i>Jeugd</span><span><i class="dot d-ink"></i>Andere</span></div>
-      <div class="month"><h2>September</h2><div class="seam"></div></div>
-      <div class="col1">
-        <a class="ticket"><div class="stub s-jersey"><div class="day">14</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Clubevent</span><h3>Mosselfeest</h3><div class="tmeta">18:00 · Kantine KCVV</div></div></a>
-        <a class="ticket"><div class="stub s-bright"><div class="day">22</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Jeugdwerking</span><h3>Jeugdtornooi U10–U13</h3><div class="tmeta">Sportpark Elewijt</div></div></a>
-      </div>
-    </div></div>
+    </div>
 
     <!-- B -->
-    <div class="direction-bar"><span class="tag">B</span> Kleur-pills = legenda <span class="says">— the filter chips ARE colour-coded, so they teach the colour system. No separate legend. Selected = filled, off = dimmed outline.</span></div>
-    <div class="stage"><div class="container">
-      <div class="kicker">KCVV ELEWIJT · AGENDA</div><h1 class="pagetitle">Evenementen.</h1>
-      <div class="row" style="margin-top:14px;">
-        <span class="cpill cp-all">Alles</span>
-        <span class="cpill cp-jersey"><i class="dot d-jersey"></i>Clubevent</span>
-        <span class="cpill cp-warm"><i class="dot d-warm"></i>Supporters</span>
-        <span class="cpill cp-bright"><i class="dot d-bright"></i>Jeugd</span>
-        <span class="cpill cp-ink"><i class="dot d-ink"></i>Andere</span>
+    <div class="direction-bar">
+      <span class="tag">B</span> Kleur-pills = legenda
+      <span class="says"
+        >— the filter chips ARE colour-coded, so they teach the colour system.
+        No separate legend. Selected = filled, off = dimmed outline.</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="kicker">KCVV ELEWIJT · AGENDA</div>
+        <h1 class="pagetitle">Evenementen.</h1>
+        <div class="row" style="margin-top: 14px">
+          <span class="cpill cp-all">Alles</span>
+          <span class="cpill cp-jersey"
+            ><i class="dot d-jersey"></i>Clubevent</span
+          >
+          <span class="cpill cp-warm"
+            ><i class="dot d-warm"></i>Supporters</span
+          >
+          <span class="cpill cp-bright"><i class="dot d-bright"></i>Jeugd</span>
+          <span class="cpill cp-ink"><i class="dot d-ink"></i>Andere</span>
+        </div>
+        <div class="month">
+          <h2>September</h2>
+          <div class="seam"></div>
+        </div>
+        <div class="col1">
+          <a class="ticket"
+            ><div class="stub s-jersey">
+              <div class="day">14</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Clubevent</span>
+              <h3>Mosselfeest</h3>
+              <div class="tmeta">18:00 · Kantine KCVV</div>
+            </div></a
+          >
+          <a class="ticket"
+            ><div class="stub s-bright">
+              <div class="day">22</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Jeugdwerking</span>
+              <h3>Jeugdtornooi U10–U13</h3>
+              <div class="tmeta">Sportpark Elewijt</div>
+            </div></a
+          >
+        </div>
       </div>
-      <div class="month"><h2>September</h2><div class="seam"></div></div>
-      <div class="col1">
-        <a class="ticket"><div class="stub s-jersey"><div class="day">14</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Clubevent</span><h3>Mosselfeest</h3><div class="tmeta">18:00 · Kantine KCVV</div></div></a>
-        <a class="ticket"><div class="stub s-bright"><div class="day">22</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Jeugdwerking</span><h3>Jeugdtornooi U10–U13</h3><div class="tmeta">Sportpark Elewijt</div></div></a>
-      </div>
-    </div></div>
+    </div>
 
     <!-- C -->
-    <div class="direction-bar"><span class="tag">C</span> Editoriale tabs <span class="says">— newspaper section nav: underline tabs, active = warm underline. Quietest; colour cue moves entirely onto the stubs (+ small legend).</span></div>
-    <div class="stage"><div class="container">
-      <div class="kicker">KCVV ELEWIJT · AGENDA</div><h1 class="pagetitle">Evenementen.</h1>
-      <div class="tabs" style="margin-top:16px;">
-        <span class="tab on">Alles</span><span class="tab">Clubevent</span><span class="tab">Supporters</span><span class="tab">Jeugd</span><span class="tab">Andere</span>
+    <div class="direction-bar">
+      <span class="tag">C</span> Editoriale tabs
+      <span class="says"
+        >— newspaper section nav: underline tabs, active = warm underline.
+        Quietest; colour cue moves entirely onto the stubs (+ small
+        legend).</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="kicker">KCVV ELEWIJT · AGENDA</div>
+        <h1 class="pagetitle">Evenementen.</h1>
+        <div class="tabs" style="margin-top: 16px">
+          <span class="tab on">Alles</span><span class="tab">Clubevent</span
+          ><span class="tab">Supporters</span><span class="tab">Jeugd</span
+          ><span class="tab">Andere</span>
+        </div>
+        <div class="legend">
+          <span><i class="dot d-jersey"></i>Clubevent</span
+          ><span><i class="dot d-warm"></i>Supporters</span
+          ><span><i class="dot d-bright"></i>Jeugd</span
+          ><span><i class="dot d-ink"></i>Andere</span>
+        </div>
+        <div class="month">
+          <h2>September</h2>
+          <div class="seam"></div>
+        </div>
+        <div class="col1">
+          <a class="ticket"
+            ><div class="stub s-jersey">
+              <div class="day">14</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Clubevent</span>
+              <h3>Mosselfeest</h3>
+              <div class="tmeta">18:00 · Kantine KCVV</div>
+            </div></a
+          >
+          <a class="ticket"
+            ><div class="stub s-bright">
+              <div class="day">22</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Jeugdwerking</span>
+              <h3>Jeugdtornooi U10–U13</h3>
+              <div class="tmeta">Sportpark Elewijt</div>
+            </div></a
+          >
+        </div>
       </div>
-      <div class="legend"><span><i class="dot d-jersey"></i>Clubevent</span><span><i class="dot d-warm"></i>Supporters</span><span><i class="dot d-bright"></i>Jeugd</span><span><i class="dot d-ink"></i>Andere</span></div>
-      <div class="month"><h2>September</h2><div class="seam"></div></div>
-      <div class="col1">
-        <a class="ticket"><div class="stub s-jersey"><div class="day">14</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Clubevent</span><h3>Mosselfeest</h3><div class="tmeta">18:00 · Kantine KCVV</div></div></a>
-        <a class="ticket"><div class="stub s-bright"><div class="day">22</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Jeugdwerking</span><h3>Jeugdtornooi U10–U13</h3><div class="tmeta">Sportpark Elewijt</div></div></a>
-      </div>
-    </div></div>
+    </div>
 
     <!-- D -->
-    <div class="direction-bar"><span class="tag">D</span> Compacte dropdown <span class="says">— a single "Type ▾" select. Minimal chrome, scales if categories ever grow, but hides the options behind a click.</span></div>
-    <div class="stage"><div class="container">
-      <div class="kicker">KCVV ELEWIJT · AGENDA</div><h1 class="pagetitle">Evenementen.</h1>
-      <div class="row" style="margin-top:16px; justify-content:space-between;">
-        <span class="select">Type: Alles ▾</span>
-        <span style="font-family:var(--font-mono); font-size:11px; color:#cfe9d8; text-transform:uppercase; letter-spacing:0.07em;">6 evenementen</span>
+    <div class="direction-bar">
+      <span class="tag">D</span> Compacte dropdown
+      <span class="says"
+        >— a single "Type ▾" select. Minimal chrome, scales if categories ever
+        grow, but hides the options behind a click.</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="kicker">KCVV ELEWIJT · AGENDA</div>
+        <h1 class="pagetitle">Evenementen.</h1>
+        <div
+          class="row"
+          style="margin-top: 16px; justify-content: space-between"
+        >
+          <span class="select">Type: Alles ▾</span>
+          <span
+            style="
+              font-family: var(--font-mono);
+              font-size: 11px;
+              color: #cfe9d8;
+              text-transform: uppercase;
+              letter-spacing: 0.07em;
+            "
+            >6 evenementen</span
+          >
+        </div>
+        <div class="legend">
+          <span><i class="dot d-jersey"></i>Clubevent</span
+          ><span><i class="dot d-warm"></i>Supporters</span
+          ><span><i class="dot d-bright"></i>Jeugd</span
+          ><span><i class="dot d-ink"></i>Andere</span>
+        </div>
+        <div class="month">
+          <h2>September</h2>
+          <div class="seam"></div>
+        </div>
+        <div class="col1">
+          <a class="ticket"
+            ><div class="stub s-jersey">
+              <div class="day">14</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Clubevent</span>
+              <h3>Mosselfeest</h3>
+              <div class="tmeta">18:00 · Kantine KCVV</div>
+            </div></a
+          >
+          <a class="ticket"
+            ><div class="stub s-bright">
+              <div class="day">22</div>
+              <div class="mon">SEP</div>
+            </div>
+            <div class="tbody">
+              <span class="tpill">Jeugdwerking</span>
+              <h3>Jeugdtornooi U10–U13</h3>
+              <div class="tmeta">Sportpark Elewijt</div>
+            </div></a
+          >
+        </div>
       </div>
-      <div class="legend"><span><i class="dot d-jersey"></i>Clubevent</span><span><i class="dot d-warm"></i>Supporters</span><span><i class="dot d-bright"></i>Jeugd</span><span><i class="dot d-ink"></i>Andere</span></div>
-      <div class="month"><h2>September</h2><div class="seam"></div></div>
-      <div class="col1">
-        <a class="ticket"><div class="stub s-jersey"><div class="day">14</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Clubevent</span><h3>Mosselfeest</h3><div class="tmeta">18:00 · Kantine KCVV</div></div></a>
-        <a class="ticket"><div class="stub s-bright"><div class="day">22</div><div class="mon">SEP</div></div><div class="tbody"><span class="tpill">Jeugdwerking</span><h3>Jeugdtornooi U10–U13</h3><div class="tmeta">Sportpark Elewijt</div></div></a>
-      </div>
-    </div></div>
+    </div>
 
-    <div class="harness-head" style="background: var(--ink-soft);">
-      <p>After the filter locks, remaining: <b>states</b> (empty list / filtered-to-zero / multi-day / time-less) ·
-      then the <code>&lt;EventHero&gt;</code> <b>detail page</b> (hero + iCal "Zet in agenda" + "Andere events" grid).
-      Filter × month rule already locked: a month with zero matches after filtering hides its header.</p>
+    <div class="harness-head" style="background: var(--ink-soft)">
+      <p>
+        After the filter locks, remaining: <b>states</b> (empty list /
+        filtered-to-zero / multi-day / time-less) · then the
+        <code>&lt;EventHero&gt;</code> <b>detail page</b> (hero + iCal "Zet in
+        agenda" + "Andere events" grid). Filter × month rule already locked: a
+        month with zero matches after filtering hides its header.
+      </p>
     </div>
   </body>
 </html>

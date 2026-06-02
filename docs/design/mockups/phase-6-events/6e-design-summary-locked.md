@@ -24,13 +24,13 @@ Both are part of the retro-terrace-fanzine redesign and reuse the locked design-
 
 **Filters:** a row of **colour-coded chips** that double as the legend (no separate legend):
 
-| Chip | Colour |
-| ---- | ------ |
-| Alles (default, no filter) | cream |
-| Clubevent | `jersey-deep` |
-| Supportersactiviteit | `warm` |
-| Jeugdwerking | `jersey-bright` |
-| Andere | `ink` |
+| Chip                       | Colour          |
+| -------------------------- | --------------- |
+| Alles (default, no filter) | cream           |
+| Clubevent                  | `jersey-deep`   |
+| Supportersactiviteit       | `warm`          |
+| Jeugdwerking               | `jersey-bright` |
+| Andere                     | `ink`           |
 
 Selected = filled with the type colour; unselected = dimmed cream outline. Single-select in v1.
 Each chip keeps its text label (type is never colour-only — WCAG 1.4.1).
@@ -49,7 +49,7 @@ its header**.
 - **Whole ticket is a link** to `/evenementen/[slug]`.
 - **Hover / focus-visible:** tilt + scale + a **"Meer details →"** reveal — the `EditorialHero`
   featured-image idiom: `transition-transform duration-300 group-hover:scale-[1.02]
-  group-hover:-rotate-1` (+ `group-focus-visible`, + `motion-reduce` resets); reveal is mono /
+group-hover:-rotate-1` (+ `group-focus-visible`, + `motion-reduce` resets); reveal is mono /
   uppercase / jersey-deep, `opacity-0 → group-hover:opacity-100`.
 - **No** list CTA, **no** cover thumbnail (text-forward).
 
@@ -97,7 +97,7 @@ footer (per §6.7).
   to the `event` delta, or show **`location` only** on the detail page for root events. (Do not
   fabricate an address.)
 - The `/evenementen` list is **events-only** (`event` docs + `articleType:event` articles), upcoming
-  only. The 3-source feed *including PSD matches* is the separate **`/kalender`** surface (§6.6), out
+  only. The 3-source feed _including PSD matches_ is the separate **`/kalender`** surface (§6.6), out
   of scope here.
 
 ## 6. Component deltas (`apps/web`)

@@ -12,93 +12,408 @@
     />
     <style>
       :root {
-        --cream: #f5f1e6; --cream-deep: #e1d7bf; --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
-        --jersey: #4acf52; --jersey-deep: #008755; --jersey-bright: #22c55e; --jersey-deep-dark: #133d28;
-        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
-        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+        --cream: #f5f1e6;
+        --cream-deep: #e1d7bf;
+        --ink: #0a0a0a;
+        --ink-soft: #1f1f1f;
+        --ink-muted: #6b6b6b;
+        --jersey: #4acf52;
+        --jersey-deep: #008755;
+        --jersey-bright: #22c55e;
+        --jersey-deep-dark: #133d28;
+        --warm: #f0c264;
+        --brick: #c93f1c;
+        --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
       }
-      * { box-sizing: border-box; }
-      body { margin: 0; background: var(--jersey-deep-dark); color: var(--cream); font-family: var(--font-body); }
-      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
-      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
-      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 78ch; line-height: 1.55; }
-      .harness-head code { color: var(--warm); }
-      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--warm); color: var(--ink);
-        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase;
-        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
-      .direction-bar .tag { background: var(--ink); color: var(--warm); padding: 2px 9px; font-weight: 700; }
-      .direction-bar .says { color: var(--ink-soft); text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 600; }
-      .stage { padding: 30px 28px 50px; }
-      .container { max-width: 1000px; margin: 0 auto; }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--jersey-deep-dark);
+        color: var(--cream);
+        font-family: var(--font-body);
+      }
+      .harness-head {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 22px 28px;
+        font-family: var(--font-mono);
+      }
+      .harness-head h1 {
+        margin: 0 0 6px;
+        font-size: 15px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .harness-head p {
+        margin: 0;
+        font-size: 13px;
+        color: #b9b9b9;
+        max-width: 78ch;
+        line-height: 1.55;
+      }
+      .harness-head code {
+        color: var(--warm);
+      }
+      .direction-bar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: var(--warm);
+        color: var(--ink);
+        padding: 11px 28px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        border-bottom: 2px solid var(--ink);
+      }
+      .direction-bar .tag {
+        background: var(--ink);
+        color: var(--warm);
+        padding: 2px 9px;
+        font-weight: 700;
+      }
+      .direction-bar .says {
+        color: var(--ink-soft);
+        text-transform: none;
+        letter-spacing: 0;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .stage {
+        padding: 30px 28px 50px;
+      }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
 
-      .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; font-size: 11px; }
-      .pill { display: inline-flex; align-items: center; font-family: var(--font-mono); text-transform: uppercase;
-        letter-spacing: 0.08em; font-size: 10px; font-weight: 600; padding: 3px 8px; border: 1.5px solid var(--ink);
-        background: var(--cream); color: var(--ink); white-space: nowrap; }
+      .mono {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        font-size: 11px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 3px 8px;
+        border: 1.5px solid var(--ink);
+        background: var(--cream);
+        color: var(--ink);
+        white-space: nowrap;
+      }
 
-      .ticket { display: flex; background: var(--cream); color: var(--ink); border: 2px solid var(--ink);
-        box-shadow: 6px 6px 0 rgba(0,0,0,0.5); text-decoration: none; cursor: pointer;
-        transition: transform .3s ease, box-shadow .3s ease; }
-      .ticket:hover, .ticket:focus-visible { transform: rotate(-1deg) scale(1.02); box-shadow: 9px 9px 0 rgba(0,0,0,0.55); outline: none; }
-      @media (prefers-reduced-motion: reduce) { .ticket { transition: none; } .ticket:hover { transform: none; } }
-      .stub { flex: 0 0 100px; border-right: 2px dashed var(--ink); display: flex; flex-direction: column;
-        align-items: center; justify-content: center; padding: 14px 8px; color: var(--cream); }
-      .stub .day { font-family: var(--font-display); font-weight: 900; font-size: 44px; line-height: 0.85; }
-      .stub .mon { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.1em; font-size: 11px; margin-top: 3px; }
-      .stub .wd { font-family: var(--font-mono); text-transform: uppercase; font-size: 9px; margin-top: 5px; opacity: 0.85; }
-      .s-jersey { background: var(--jersey-deep); } .s-warm { background: var(--warm); color: var(--ink); }
-      .s-bright { background: var(--jersey-bright); color: var(--ink); } .s-ink { background: var(--ink); }
-      .body { padding: 14px 16px; flex: 1; display: flex; flex-direction: column; }
-      .body h3 { margin: 6px 0 5px; font-family: var(--font-display); font-weight: 900; font-size: 22px; }
-      .meta { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10.5px; color: var(--ink-muted); }
-      .reveal { margin-top: 10px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;
-        font-size: 10.5px; font-weight: 700; color: var(--jersey-deep); opacity: 0; transition: opacity .3s ease; }
-      .ticket:hover .reveal, .ticket:focus-visible .reveal { opacity: 1; }
+      .ticket {
+        display: flex;
+        background: var(--cream);
+        color: var(--ink);
+        border: 2px solid var(--ink);
+        box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5);
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+      .ticket:hover,
+      .ticket:focus-visible {
+        transform: rotate(-1deg) scale(1.02);
+        box-shadow: 9px 9px 0 rgba(0, 0, 0, 0.55);
+        outline: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .ticket {
+          transition: none;
+        }
+        .ticket:hover {
+          transform: none;
+        }
+      }
+      .stub {
+        flex: 0 0 100px;
+        border-right: 2px dashed var(--ink);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 14px 8px;
+        color: var(--cream);
+      }
+      .stub .day {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 44px;
+        line-height: 0.85;
+      }
+      .stub .mon {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 11px;
+        margin-top: 3px;
+      }
+      .stub .wd {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        font-size: 9px;
+        margin-top: 5px;
+        opacity: 0.85;
+      }
+      .s-jersey {
+        background: var(--jersey-deep);
+      }
+      .s-warm {
+        background: var(--warm);
+        color: var(--ink);
+      }
+      .s-bright {
+        background: var(--jersey-bright);
+        color: var(--ink);
+      }
+      .s-ink {
+        background: var(--ink);
+      }
+      .body {
+        padding: 14px 16px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .body h3 {
+        margin: 6px 0 5px;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 22px;
+      }
+      .meta {
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 10.5px;
+        color: var(--ink-muted);
+      }
+      .reveal {
+        margin-top: 10px;
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--jersey-deep);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .ticket:hover .reveal,
+      .ticket:focus-visible .reveal {
+        opacity: 1;
+      }
 
-      .col1 { display: flex; flex-direction: column; gap: 20px; max-width: 680px; }
-      .col2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
-      .month { display: flex; align-items: center; gap: 16px; margin: 30px 0 18px; }
-      .month:first-child { margin-top: 4px; }
-      .month h2 { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: 30px; color: var(--cream); }
-      .seam { flex: 1; height: 12px; background:
-        repeating-linear-gradient(-45deg, var(--cream) 0 8px, var(--jersey-deep) 8px 16px, var(--cream) 16px 24px, var(--ink) 24px 32px); }
-      .legend { display:flex; gap:16px; flex-wrap:wrap; font-family: var(--font-mono); font-size: 10.5px; text-transform:uppercase; letter-spacing:0.07em; color:#cfe9d8; margin: 0 0 24px; }
-      .legend span { display:inline-flex; align-items:center; gap:7px; }
-      .sw { width:14px; height:14px; border:1.5px solid var(--ink); display:inline-block; }
+      .col1 {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        max-width: 680px;
+      }
+      .col2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+      }
+      .month {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 30px 0 18px;
+      }
+      .month:first-child {
+        margin-top: 4px;
+      }
+      .month h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 30px;
+        color: var(--cream);
+      }
+      .seam {
+        flex: 1;
+        height: 12px;
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--cream) 0 8px,
+          var(--jersey-deep) 8px 16px,
+          var(--cream) 16px 24px,
+          var(--ink) 24px 32px
+        );
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: #cfe9d8;
+        margin: 0 0 24px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .sw {
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid var(--ink);
+        display: inline-block;
+      }
     </style>
   </head>
   <body>
     <div class="harness-head">
       <h1>Phase 6.E · /evenementen — Round 3: list LAYOUT</h1>
       <p>
-        Voice + anatomy locked (type-coloured clickable ticket stubs, hover tilt + "Meer details →"). This round picks
-        how the list is <b>arranged</b>: columns (1 vs 2) × grouping (flat chronological vs month sections). Same six
-        upcoming events in each. Note: an amateur club often has only a handful of upcoming events at once — weigh
-        whether month headers earn their space.
+        Voice + anatomy locked (type-coloured clickable ticket stubs, hover tilt
+        + "Meer details →"). This round picks how the list is <b>arranged</b>:
+        columns (1 vs 2) × grouping (flat chronological vs month sections). Same
+        six upcoming events in each. Note: an amateur club often has only a
+        handful of upcoming events at once — weigh whether month headers earn
+        their space.
       </p>
     </div>
 
-    <div class="direction-bar"><span class="tag">A</span> Eén kolom · doorlopend <span class="says">— one ticket per row, flat chronological. Calmest, most readable, mobile-native.</span></div>
-    <div class="stage"><div class="container"><div class="legend" id="lg-a"></div><div class="col1" id="la"></div></div></div>
+    <div class="direction-bar">
+      <span class="tag">A</span> Eén kolom · doorlopend
+      <span class="says"
+        >— one ticket per row, flat chronological. Calmest, most readable,
+        mobile-native.</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="legend" id="lg-a"></div>
+        <div class="col1" id="la"></div>
+      </div>
+    </div>
 
-    <div class="direction-bar"><span class="tag">B</span> Twee kolommen · doorlopend <span class="says">— 2-col grid, flat chronological. Denser, more poster-wall.</span></div>
-    <div class="stage"><div class="container"><div class="legend" id="lg-b"></div><div class="col2" id="lb"></div></div></div>
+    <div class="direction-bar">
+      <span class="tag">B</span> Twee kolommen · doorlopend
+      <span class="says"
+        >— 2-col grid, flat chronological. Denser, more poster-wall.</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="legend" id="lg-b"></div>
+        <div class="col2" id="lb"></div>
+      </div>
+    </div>
 
-    <div class="direction-bar"><span class="tag">C</span> Twee kolommen · per maand <span class="says">— month headers (striped seam) + 2-col grid under each. Editorial structure.</span></div>
-    <div class="stage"><div class="container"><div class="legend" id="lg-c"></div><div id="lc"></div></div></div>
+    <div class="direction-bar">
+      <span class="tag">C</span> Twee kolommen · per maand
+      <span class="says"
+        >— month headers (striped seam) + 2-col grid under each. Editorial
+        structure.</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="legend" id="lg-c"></div>
+        <div id="lc"></div>
+      </div>
+    </div>
 
-    <div class="direction-bar"><span class="tag">D</span> Eén kolom · per maand <span class="says">— month headers + single column. Agenda-like, most "what's on next".</span></div>
-    <div class="stage"><div class="container"><div class="legend" id="lg-d"></div><div id="ld"></div></div></div>
+    <div class="direction-bar">
+      <span class="tag">D</span> Eén kolom · per maand
+      <span class="says"
+        >— month headers + single column. Agenda-like, most "what's on
+        next".</span
+      >
+    </div>
+    <div class="stage">
+      <div class="container">
+        <div class="legend" id="lg-d"></div>
+        <div id="ld"></div>
+      </div>
+    </div>
 
     <script>
-      const COLOR = { Clubevent: "s-jersey", Supportersactiviteit: "s-warm", Jeugdwerking: "s-bright", Andere: "s-ink" };
+      const COLOR = {
+        Clubevent: "s-jersey",
+        Supportersactiviteit: "s-warm",
+        Jeugdwerking: "s-bright",
+        Andere: "s-ink",
+      };
       const EVENTS = [
-        { day:"14", mon:"SEP", wd:"ZA", type:"Clubevent",           title:"Mosselfeest",            meta:"18:00 · Kantine KCVV",  month:"September" },
-        { day:"22", mon:"SEP", wd:"ZO", type:"Jeugdwerking",        title:"Jeugdtornooi U10–U13",   meta:"Sportpark Elewijt",     month:"September" },
-        { day:"05", mon:"OKT", wd:"ZA", type:"Supportersactiviteit", title:"Busreis uitwedstrijd",   meta:"Vertrek Kantine",       month:"Oktober" },
-        { day:"08", mon:"OKT", wd:"DI", type:"Andere",              title:"Bloedinzameling Rode Kruis", meta:"Parochiezaal",      month:"Oktober" },
-        { day:"18", mon:"OKT", wd:"VR", type:"Supportersactiviteit", title:"Quiz van de Compagnie",  meta:"20:00 · Kantine KCVV",  month:"Oktober" },
-        { day:"09", mon:"NOV", wd:"ZA", type:"Clubevent",           title:"Eetfestijn",             meta:"18:30 · Kantine KCVV",  month:"November" },
+        {
+          day: "14",
+          mon: "SEP",
+          wd: "ZA",
+          type: "Clubevent",
+          title: "Mosselfeest",
+          meta: "18:00 · Kantine KCVV",
+          month: "September",
+        },
+        {
+          day: "22",
+          mon: "SEP",
+          wd: "ZO",
+          type: "Jeugdwerking",
+          title: "Jeugdtornooi U10–U13",
+          meta: "Sportpark Elewijt",
+          month: "September",
+        },
+        {
+          day: "05",
+          mon: "OKT",
+          wd: "ZA",
+          type: "Supportersactiviteit",
+          title: "Busreis uitwedstrijd",
+          meta: "Vertrek Kantine",
+          month: "Oktober",
+        },
+        {
+          day: "08",
+          mon: "OKT",
+          wd: "DI",
+          type: "Andere",
+          title: "Bloedinzameling Rode Kruis",
+          meta: "Parochiezaal",
+          month: "Oktober",
+        },
+        {
+          day: "18",
+          mon: "OKT",
+          wd: "VR",
+          type: "Supportersactiviteit",
+          title: "Quiz van de Compagnie",
+          meta: "20:00 · Kantine KCVV",
+          month: "Oktober",
+        },
+        {
+          day: "09",
+          mon: "NOV",
+          wd: "ZA",
+          type: "Clubevent",
+          title: "Eetfestijn",
+          meta: "18:30 · Kantine KCVV",
+          month: "November",
+        },
       ];
       const ticket = (e) => `
         <a class="ticket" href="#">
@@ -108,15 +423,24 @@
       const legend = `
         <span><i class="sw s-jersey"></i> Clubevent</span><span><i class="sw s-warm"></i> Supporters</span>
         <span><i class="sw s-bright"></i> Jeugd</span><span><i class="sw s-ink"></i> Andere</span>`;
-      ["lg-a","lg-b","lg-c","lg-d"].forEach(id => document.getElementById(id).innerHTML = legend);
+      ["lg-a", "lg-b", "lg-c", "lg-d"].forEach(
+        (id) => (document.getElementById(id).innerHTML = legend),
+      );
 
       document.getElementById("la").innerHTML = EVENTS.map(ticket).join("");
       document.getElementById("lb").innerHTML = EVENTS.map(ticket).join("");
 
-      const months = [...new Set(EVENTS.map(e => e.month))];
-      const grouped = (wrapClass) => months.map(m => `
+      const months = [...new Set(EVENTS.map((e) => e.month))];
+      const grouped = (wrapClass) =>
+        months
+          .map(
+            (m) => `
         <div class="month"><h2>${m}</h2><div class="seam"></div></div>
-        <div class="${wrapClass}">${EVENTS.filter(e => e.month === m).map(ticket).join("")}</div>`).join("");
+        <div class="${wrapClass}">${EVENTS.filter((e) => e.month === m)
+          .map(ticket)
+          .join("")}</div>`,
+          )
+          .join("");
       document.getElementById("lc").innerHTML = grouped("col2");
       document.getElementById("ld").innerHTML = grouped("col1");
     </script>
