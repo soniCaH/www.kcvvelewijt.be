@@ -52,12 +52,12 @@ Proves the schema→typegen→GROQ→route→component chain and the redirect be
 ## 4. Phases
 
 ```text
-Phase 1: Tracer — event schema delta + /evenementen route + bare <TicketStub> list + 301   (always first)
-Phase 2: <TicketStub> finalised + month-grouped list shell
-Phase 3: Filter bar (colour chips = legend) + empty / filtered-to-zero states
-Phase 4: <EventHero> + /evenementen/[slug] editorial detail + iCal + "Andere events" + detail states
-Phase 5: Merged feed — eventType on eventFact + articleType:event articles in the list
-Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines
+Phase 1: Tracer — event schema delta + /evenementen route + bare <TicketStub> list + 301   → #1964 (tracer-bullet)
+Phase 2: <TicketStub> finalised + month-grouped list shell                                  → #1965 (blocked-by #1964)
+Phase 3: Filter bar (colour chips = legend) + empty / filtered-to-zero states               → #1966 (blocked-by #1965)
+Phase 4: <EventHero> + /evenementen/[slug] editorial detail + iCal + "Andere events"        → #1967 (blocked-by #1966)
+Phase 5: Merged feed — eventType on eventFact + articleType:event articles in the list       → #1968 (blocked-by #1967)
+Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines                 → #1969 (blocked-by #1968)
 ```
 
 ## 5. Acceptance criteria per phase
