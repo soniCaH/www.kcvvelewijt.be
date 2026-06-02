@@ -9,7 +9,15 @@ import { DateTime } from "luxon";
  */
 export const EVENT_TIMEZONE = "Europe/Brussels";
 
-/** Parse a (UTC) ISO event datetime into a Brussels-zoned, nl-locale DateTime. */
+/**
+ * Parse a (UTC) ISO event datetime into a Brussels-zoned, nl-locale DateTime.
+ * `{ zone: "utc" }` interprets offset-less inputs as UTC (the stored contract)
+ * rather than the runtime-local zone, so the result is environment-independent;
+ * for the usual `Z`-suffixed Sanity values the explicit offset already wins, so
+ * this is a no-op there.
+ */
 export function parseEventDateTime(iso: string): DateTime {
-  return DateTime.fromISO(iso).setZone(EVENT_TIMEZONE).setLocale("nl");
+  return DateTime.fromISO(iso, { zone: "utc" })
+    .setZone(EVENT_TIMEZONE)
+    .setLocale("nl");
 }
