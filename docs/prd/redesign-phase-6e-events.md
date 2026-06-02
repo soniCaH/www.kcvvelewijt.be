@@ -70,15 +70,16 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
 - [ ] `pnpm --filter @kcvv/studio typegen` (or the repo typegen script) re-run; `sanity.types.ts` updated.
 - [ ] `EVENTS_QUERY` extended to project `location`, `eventType` and filter **upcoming-only**
       (`coalesce(dateEnd, dateStart) >= now()`), keeping `order(dateStart asc)`.
-- [ ] New route `apps/web/src/app/.../evenementen/page.tsx` renders `EventRepository.findAll()` as a
+- [ ] New route `apps/web/src/app/(main)/evenementen/page.tsx` renders `EventRepository.findAll()` as a
       minimal list of `<TicketStub>` (type-coloured date block + pill + title + location). No grouping/filters.
+      (Lives in the `(main)` group alongside `kalender` + the events detail; the legacy list moves out of `(landing)`.)
 - [ ] `/events` and `/events/[slug]` issue **301** redirects to `/evenementen` (+ `/evenementen/[slug]`).
 - [ ] `pnpm --filter @kcvv/web check-all` passes.
 
 ### Phase 2 — `<TicketStub>` + month-grouped list shell
 
 - [ ] `<TicketStub>` finalised: whole-card link → `/evenementen/[slug]`; type-coloured tear-off date
-      block (Clubevent=jersey-deep · Supporters=warm · Jeugd=jersey-bright · Andere=ink), dashed
+      block (Clubevent=jersey-deep · Supportersactiviteit=warm · Jeugdwerking=jersey-bright · Andere=ink), dashed
       divider (no punch-holes); body = `eventType` pill + display-serif title + mono `time · location`.
 - [ ] Hover/focus-visible: `group-hover:scale-[1.02] group-hover:-rotate-1` + "Meer details →" reveal
       (`opacity-0 → group-hover:opacity-100`), with `motion-reduce` resets — mirrors `<EditorialHero>`.

@@ -455,8 +455,10 @@
     <div class="stage">
       <div class="container">
         <div class="grid2">
-          <a class="ticket" href="#"
-            ><div class="stub s-jersey">
+          <!-- whole-card click is wired in code (router push); the card is NOT an
+               <a> here so the secondary Reserveer link can be a real, non-nested anchor -->
+          <div class="ticket">
+            <div class="stub s-jersey">
               <div class="day">14</div>
               <div class="mon">SEP</div>
               <div class="wd">ZA</div>
@@ -465,17 +467,9 @@
               <span class="pill">Clubevent</span>
               <h3>Mosselfeest</h3>
               <div class="meta">18:00 · Kantine KCVV</div>
-              <a
-                class="chip"
-                href="#"
-                onclick="
-                  event.stopPropagation();
-                  return false;
-                "
-                >Reserveer ↗</a
-              >
-            </div></a
-          >
+              <a class="chip" href="#">Reserveer ↗</a>
+            </div>
+          </div>
           <a class="ticket" href="#"
             ><div class="stub s-jersey">
               <div class="day">22</div>
