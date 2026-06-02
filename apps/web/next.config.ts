@@ -70,6 +70,19 @@ const nextConfig: NextConfig = {
         destination: "/staf/:slug",
         permanent: true,
       },
+      // #1964 — Phase 6.E events route rename /events → /evenementen.
+      // `permanent: true` emits a 308 (matching every rename above); the
+      // issue's "301" is shorthand for a permanent redirect.
+      {
+        source: "/events",
+        destination: "/evenementen",
+        permanent: true,
+      },
+      {
+        source: "/events/:slug",
+        destination: "/evenementen/:slug",
+        permanent: true,
+      },
     ];
   },
 

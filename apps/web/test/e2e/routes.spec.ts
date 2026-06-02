@@ -44,8 +44,8 @@ test.describe("static routes", () => {
     await smokeTest(page, { path: "/kalender" });
   });
 
-  test("/events", async ({ page }) => {
-    await smokeTest(page, { path: "/events" });
+  test("/evenementen", async ({ page }) => {
+    await smokeTest(page, { path: "/evenementen" });
   });
 
   test("/sponsors", async ({ page }) => {
@@ -100,10 +100,14 @@ test.describe("dynamic routes", () => {
     await smokeTest(page, { path: `/wedstrijd/${id}` });
   });
 
-  test("/events/[slug]", async ({ page }) => {
+  test("/evenementen/[slug]", async ({ page }) => {
+    // Slugs are still discovered from the sitemap's `/events/` entries until the
+    // sitemap is migrated in #1969; the detail page itself lives at the
+    // canonical `/evenementen/[slug]`, so hit that directly (the redirect is
+    // covered by next.config.test.ts).
     const slug = fixtures.eventSlug;
     test.skip(!slug, "no event slugs in sitemap");
-    await smokeTest(page, { path: `/events/${slug}` });
+    await smokeTest(page, { path: `/evenementen/${slug}` });
   });
 });
 

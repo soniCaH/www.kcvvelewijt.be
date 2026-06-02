@@ -40,6 +40,22 @@ describe("next.config redirects", () => {
     }
   });
 
+  it("redirects /events route rename to /evenementen with 308", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const expected = [
+      { source: "/events", destination: "/evenementen" },
+      { source: "/events/:slug", destination: "/evenementen/:slug" },
+    ];
+
+    for (const { source, destination } of expected) {
+      const match = redirects.find((r) => r.source === source);
+      expect(match, `Missing redirect for ${source}`).toBeDefined();
+      expect(match!.destination).toBe(destination);
+      expect(match!.permanent).toBe(true);
+    }
+  });
+
   it("redirects /jeugd/:slug to /ploegen/:slug (excluding visie and medisch)", async () => {
     const redirects = await nextConfig.redirects!();
 

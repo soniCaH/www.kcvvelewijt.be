@@ -15,7 +15,11 @@ vi.mock("../sanity/client", () => ({
 }));
 
 import { sanityClient } from "../sanity/client";
-import { EventRepository, EventRepositoryLive } from "./event.repository";
+import {
+  EVENTS_QUERY,
+  EventRepository,
+  EventRepositoryLive,
+} from "./event.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
@@ -32,8 +36,10 @@ function makeEventRow(
     id: "event-1",
     title: "Spaghetti-avond",
     slug: "spaghetti-avond",
+    eventType: "Clubevent",
     dateStart: "2026-04-15T18:00:00Z",
     dateEnd: "2026-04-15T22:00:00Z",
+    location: "Sportpark Driesput, Elewijt",
     href: "https://tickets.example.com",
     coverImageUrl: "https://cdn.sanity.io/event.webp",
     featuredOnHome: false,
@@ -64,8 +70,10 @@ function makeFeaturedEventRow(
     id: "event-2",
     title: "Seizoensopener",
     slug: "seizoensopener",
+    eventType: "Clubevent",
     dateStart: "2026-08-01T14:00:00Z",
     dateEnd: null,
+    location: "Sportpark Driesput, Elewijt",
     href: "#",
     coverImageUrl: "https://cdn.sanity.io/featured.webp",
     featuredOnHome: true,
@@ -119,6 +127,35 @@ describe("EventRepository", () => {
       expect(e.dateEnd).toBeNull();
       expect(e.href).toBe("#");
       expect(e.coverImageUrl).toBeNull();
+    });
+
+    it("projects eventType and location, passing nulls through untouched", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeEventRow({ eventType: "Jeugdwerking", location: "Kantine" }),
+        makeEventRow({ eventType: null, location: null }),
+      ]);
+
+      const [typed, untyped] = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* EventRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(typed.eventType).toBe("Jeugdwerking");
+      expect(typed.location).toBe("Kantine");
+      expect(untyped.eventType).toBeNull();
+      expect(untyped.location).toBeNull();
+    });
+
+    it("queries upcoming-only events ordered by start date", () => {
+      // The filter runs in GROQ (fetch is mocked here), so guard the query
+      // shape directly: upcoming-only on coalesce(dateEnd, dateStart) keeps
+      // in-progress multi-day events visible through their final day.
+      expect(EVENTS_QUERY).toContain("coalesce(dateEnd, dateStart) >= now()");
+      expect(EVENTS_QUERY).toContain("order(dateStart asc)");
+      expect(EVENTS_QUERY).toContain("eventType");
+      expect(EVENTS_QUERY).toContain("location");
     });
   });
 

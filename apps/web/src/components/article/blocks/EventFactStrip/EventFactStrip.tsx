@@ -14,7 +14,7 @@
  *    single-day venue + time line.
  *  - `eventFact.ticketUrl` empty → CTA cell hides; body cell stretches.
  *  - `linkedEventSlug` set → trailing "★ Ook in agenda →" line links to
- *    `/events/${slug}`.
+ *    `/evenementen/${slug}`.
  *
  * Layout: viewport-responsive (`md:` at 768px). Below that the banner
  * stacks vertically (date → seam → body → optional CTA). The
@@ -35,7 +35,7 @@ export type EventFactStripOrientation = "auto" | "vertical";
 
 interface EventFactStripProps {
   value: EventFactValue;
-  /** When set, renders the "★ Ook in agenda →" line linking to /events/{slug}. */
+  /** When set, renders the "★ Ook in agenda →" line linking to /evenementen/{slug}. */
   linkedEventSlug?: string;
   /**
    * `auto` (default): viewport-responsive. `vertical`: force vertical
@@ -175,7 +175,7 @@ function BodyCell({
       ) : null}
       {linkedEventSlug !== undefined ? (
         <Link
-          href={`/events/${linkedEventSlug}`}
+          href={`/evenementen/${linkedEventSlug}`}
           className="text-jersey-deep mt-3 inline-block font-mono text-xs leading-none font-bold uppercase hover:underline"
         >
           ★ Ook in agenda →

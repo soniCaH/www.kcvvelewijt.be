@@ -241,7 +241,7 @@ export function EventFactInline({
 
           {linkedSlug ? (
             <Link
-              href={`/events/${linkedSlug}`}
+              href={`/evenementen/${linkedSlug}`}
               data-event-fact-inline="linked-event"
               className="text-ink-muted hover:text-ink font-mono text-[10px] tracking-[0.16em] uppercase underline-offset-4 hover:underline"
             >

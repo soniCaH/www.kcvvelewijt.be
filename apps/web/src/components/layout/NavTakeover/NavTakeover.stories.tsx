@@ -23,7 +23,7 @@ const navItems = (
   <>
     <NavTakeoverItem label="Home" href="/" />
     <NavTakeoverItem label="Nieuws" href="/nieuws" active />
-    <NavTakeoverItem label="Evenementen" href="/events" />
+    <NavTakeoverItem label="Evenementen" href="/evenementen" />
     <NavTakeoverItem label="Teams" hasSubmenu>
       <NavTakeoverItem label="A-Ploeg" href="/ploegen/a" />
       <NavTakeoverItem label="B-Ploeg" href="/ploegen/b" />

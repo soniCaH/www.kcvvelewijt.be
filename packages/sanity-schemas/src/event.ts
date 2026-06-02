@@ -20,12 +20,34 @@ export const event = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: 'eventType',
+      title: 'Event type',
+      type: 'string',
+      description:
+        'Categorie van het evenement — bepaalt de kleurcode in de agenda. Laat leeg voor "Andere".',
+      options: {
+        list: [
+          {title: 'Clubevent', value: 'Clubevent'},
+          {title: 'Supportersactiviteit', value: 'Supportersactiviteit'},
+          {title: 'Jeugdwerking', value: 'Jeugdwerking'},
+          {title: 'Andere', value: 'Andere'},
+        ],
+        layout: 'radio',
+      },
+    }),
+    defineField({
       name: 'dateStart',
       title: 'Start date',
       type: 'datetime',
       validation: (r) => r.required(),
     }),
     defineField({name: 'dateEnd', title: 'End date', type: 'datetime'}),
+    defineField({
+      name: 'location',
+      title: 'Location',
+      type: 'string',
+      description: 'Waar het evenement plaatsvindt (bv. "Sportpark Driesput, Elewijt").',
+    }),
     defineField({
       name: 'coverImage',
       title: 'Cover image',
