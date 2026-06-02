@@ -56,18 +56,24 @@ SDKs, EU region available.
 
 ## 4. Verified Domain & Sender Identity
 
-### Verified domain — `send.kcvvelewijt.be` (subdomain, not apex)
+### Verified domain — `kcvvelewijt.be` (apex)
 
-Resend was provisioned against the `send.kcvvelewijt.be` subdomain (originally set up for an
-internal sponsortool). The mail-sending path reuses it **as-is** — no new Resend domain and
-no DNS work for the apex.
+Resend verifies the **apex domain `kcvvelewijt.be`** (confirmed in the Resend dashboard:
+status _Verified_, region _Ireland — eu-west-1_). DKIM is therefore published at
+`resend._domainkey.kcvvelewijt.be` — the verified domain's selector.
+
+`send.kcvvelewijt.be` is **not** the sending identity. It is the custom **Return-Path /
+MAIL FROM subdomain** Resend provisions for bounce handling — which is why the MX and the
+`include:amazonses.com` SPF live on `send.` while the DKIM lives on the apex (see §9). This
+layout was set up alongside an internal sponsortool and is reused **as-is** — no new Resend
+domain and no additional DNS work.
 
 ### Sender identity
 
-| Header     | Value                         | Purpose                                              |
-| ---------- | ----------------------------- | ---------------------------------------------------- |
-| `From`     | `noreply@send.kcvvelewijt.be` | Sending-only identity on the verified subdomain      |
-| `Reply-To` | `info@kcvvelewijt.be`         | Genuine replies route to the existing apex catch-all |
+| Header     | Value                    | Purpose                                              |
+| ---------- | ------------------------ | ---------------------------------------------------- |
+| `From`     | `noreply@kcvvelewijt.be` | Sending identity on the verified apex domain         |
+| `Reply-To` | `info@kcvvelewijt.be`    | Genuine replies route to the existing apex catch-all |
 
 ## 5. API Key Location — Cloudflare Workers Secret
 
@@ -111,23 +117,32 @@ wrangler secret put RESEND_API_KEY --env staging
 ## 9. DNS Records — As-Built Snapshot
 
 > ⚠️ **DNS — DO NOT TOUCH.**
-> The records on `send.kcvvelewijt.be` (DKIM, MX, SPF) and the apex `_dmarc` are **already in
-> production use by an internal sponsortool**. Resend was set up later and verifies cleanly
-> against those same records (Resend sends through Amazon SES — the same records work for
-> both). They are documented here **for the record only**; **no DNS changes are part of this
-> spec or its implementation issues**, except the single additive DMARC change in §9.1.
+> The Resend records — DKIM on the apex (`resend._domainkey.kcvvelewijt.be`) and MX + SPF on
+> the `send.kcvvelewijt.be` Return-Path subdomain — coexist with records the internal
+> sponsortool already relies on (the apex `v=spf1 include:my.billit.be`, the SES `_amazonses`
+> token, and an older apex DKIM), plus the shared apex `_dmarc`. Resend verifies cleanly
+> against its own records (it sends through Amazon SES — see below). They are documented here
+> **for the record only**; **no DNS changes are part of this spec or its implementation
+> issues**, except the single additive DMARC change in §9.1.
 
-| Type | Host                                    | Value                                                                                                                                                                                                                        | Priority                      |
-| ---- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| TXT  | `resend._domainkey.send.kcvvelewijt.be` | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDRTEhGPC8O3lFG/BaAdVvZWzuRw16UJXKDouB2MoDR8xEGicagmaiGidbgR53hUhOM7I30Tc0sKDaeLj8hfOj71o1J4ueYznUu1aW8EMpbfjfSd3a0SnuQsE+8atopDwzLwKdOFBgPLEtVI9JUNQHyj0uR8bj0wj4WU8NrpinMTwIDAQAB` | —                             |
-| MX   | `send.kcvvelewijt.be`                   | `feedback-smtp.eu-west-1.amazonses.com`                                                                                                                                                                                      | 10                            |
-| TXT  | `send.kcvvelewijt.be`                   | `v=spf1 include:amazonses.com ~all`                                                                                                                                                                                          | —                             |
-| TXT  | `_dmarc.kcvvelewijt.be` (apex)          | `v=DMARC1; p=none;`                                                                                                                                                                                                          | — (current — updated in §9.1) |
+| Type | Host                                      | Value                                                                                                                                                                                                                        | Priority                      |
+| ---- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| TXT  | `resend._domainkey.kcvvelewijt.be` (apex) | `p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDRTEhGPC8O3lFG/BaAdVvZWzuRw16UJXKDouB2MoDR8xEGicagmaiGidbgR53hUhOM7I30Tc0sKDaeLj8hfOj71o1J4ueYznUu1aW8EMpbfjfSd3a0SnuQsE+8atopDwzLwKdOFBgPLEtVI9JUNQHyj0uR8bj0wj4WU8NrpinMTwIDAQAB` | —                             |
+| MX   | `send.kcvvelewijt.be`                     | `feedback-smtp.eu-west-1.amazonses.com`                                                                                                                                                                                      | 10                            |
+| TXT  | `send.kcvvelewijt.be`                     | `v=spf1 include:amazonses.com ~all`                                                                                                                                                                                          | —                             |
+| TXT  | `_dmarc.kcvvelewijt.be` (apex)            | `v=DMARC1; p=none;`                                                                                                                                                                                                          | — (current — updated in §9.1) |
 
 **Why SES records are correct for Resend:** the MX (`feedback-smtp.eu-west-1.amazonses.com`)
 and SPF (`include:amazonses.com`) records point at Amazon SES because Resend's sending
 infrastructure _is_ Amazon SES. This is expected and correct — it is **not** a
 misconfiguration, and should pre-empt confusion at code-review time.
+
+**Why DKIM is on the apex but MX/SPF are on `send.`:** the verified Resend domain is the apex
+`kcvvelewijt.be`, so its DKIM selector is `resend._domainkey.kcvvelewijt.be`. Resend routes
+bounces through the `send.kcvvelewijt.be` Return-Path subdomain, so the MX and `amazonses`
+SPF sit there instead. DMARC passes via **DKIM alignment on the apex** — the apex SPF
+(`v=spf1 include:my.billit.be`) belongs to the sponsortool and is intentionally left
+untouched; Resend does **not** need an `amazonses` entry added to the apex SPF.
 
 ### 9.1 DMARC — one additive change in this spec
 
@@ -146,7 +161,9 @@ aggregate reports are verbose XML attachments that arrive daily — routing them
 who actually reviews DMARC keeps `info@` clean and avoids provisioning a standalone mailbox.
 
 This `rua` addition is a **manual, one-time DNS edit** performed by whoever administers the
-zone; it is not automated by any code in the downstream issues.
+zone; it is not automated by any code in the downstream issues. (If the DNS UI offers no
+in-place edit, delete the `_dmarc` TXT record and recreate it with the new value — safe here
+because the record is reporting-only and `p=none` is unchanged.)
 
 Further DMARC tightening (`p=quarantine`, `p=reject`) is **out of scope** here and would only
 happen later, after ~30 days of aggregate-report review (tracked as a downstream issue).
