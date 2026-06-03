@@ -196,11 +196,13 @@ describe("TeamAgendaRow", () => {
       );
     });
 
-    it("uses the home–away label as the link's accessible name", () => {
+    it("uses the full home–away label as the link's accessible name", () => {
       render(<TeamAgendaRow match={BASE} />);
-      expect(screen.getByRole("link").getAttribute("aria-label")).toContain(
-        "KCVV Elewijt",
-      );
+      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      // Lock the full accessible-name contract — both teams in home→away order
+      // plus the date suffix (see `matchLabel` in TeamAgendaRow). The `.+`
+      // tolerates the en-dash separator without coupling to the exact glyph.
+      expect(label).toMatch(/^KCVV Elewijt .+ FC Opponent, 15 aug$/);
     });
   });
 });

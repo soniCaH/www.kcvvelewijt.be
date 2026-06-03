@@ -1048,12 +1048,13 @@
 /* ===== Smooth in-page anchor scrolling ===== */
 /* Single-scroll section navigation (team detail section nav + the header team
    dropdown) relies on hash anchors. Honour smooth scrolling for users who have
-   not requested reduced motion. `data-scroll-behavior="smooth"` on <html>
-   (see app/layout.tsx) lets Next.js keep full route transitions instant while
+   not requested reduced motion, and only when the page opts in via
+   `data-scroll-behavior="smooth"` on <html> (set in app/layout.tsx) — the same
+   signal Next.js reads to keep full route transitions instant while
    same-document hash jumps animate. Section offset is handled per-section via
    `scroll-mt-*`. */
 @media (prefers-reduced-motion: no-preference) {
-  html {
+  html[data-scroll-behavior="smooth"] {
     scroll-behavior: smooth;
   }
 }
