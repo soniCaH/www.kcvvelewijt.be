@@ -20,6 +20,7 @@ import {
   PsdSeason,
   PsdSeasonsSchema,
   PsdMatchListSchema,
+  PsdCompetitionsSchema,
   FootbalistoMatchDetailResponse,
   FootbalistoRankingArray,
   FootbalistoRankingEntry,
@@ -31,6 +32,8 @@ import {
   derivePsdTeamLabel,
   deriveOwnClubId,
   transformPsdGame,
+  buildCompetitionLabelMap,
+  type CompetitionLabelMap,
   transformFootbalistoMatchDetail,
   matchDetailToMatch,
   transformFootbalistoRankingEntry,
@@ -193,6 +196,52 @@ export const PsdServiceLive = Layer.effect(
         return current;
       });
 
+    // /competitions is the club's competition catalogue — it changes rarely, so
+    // cache the derived id→label map for a week. Best-effort: on any failure the
+    // map is empty and transforms fall back to the generic competitionType label.
+    const COMPETITION_LABELS_CACHE_KEY = "psd:competition-labels";
+    const COMPETITION_LABELS_TTL = 60 * 60 * 24 * 7; // 7 days
+
+    const getCompetitionLabels = (): Effect.Effect<
+      CompetitionLabelMap,
+      never
+    > =>
+      Effect.gen(function* () {
+        const cached = yield* cache.get(COMPETITION_LABELS_CACHE_KEY);
+        if (cached) {
+          const parsed = yield* Effect.try({
+            try: () => JSON.parse(cached) as CompetitionLabelMap,
+            catch: () => null,
+          }).pipe(Effect.option);
+          if (
+            Option.isSome(parsed) &&
+            parsed.value !== null &&
+            typeof parsed.value === "object"
+          ) {
+            return parsed.value;
+          }
+        }
+        const map = yield* countedFetch(
+          `${base}/competitions`,
+          PsdCompetitionsSchema,
+        ).pipe(
+          Effect.map(buildCompetitionLabelMap),
+          Effect.catchAll((e) =>
+            Effect.log(
+              `getCompetitionLabels: /competitions unavailable, using generic labels: ${String(e)}`,
+            ).pipe(Effect.as({} as CompetitionLabelMap)),
+          ),
+        );
+        if (Object.keys(map).length > 0) {
+          yield* cache.set(
+            COMPETITION_LABELS_CACHE_KEY,
+            JSON.stringify(map),
+            COMPETITION_LABELS_TTL,
+          );
+        }
+        return map;
+      });
+
     const VISIBLE_TEAM_IDS_CACHE_KEY = "sanity:visible-team-ids";
     const VISIBLE_TEAM_IDS_TTL = 60 * 60; // 1 hour
 
@@ -266,10 +315,11 @@ export const PsdServiceLive = Layer.effect(
           }
 
           const ownClubId = deriveOwnClubId(games);
+          const competitionLabels = yield* getCompetitionLabels();
           return games.map((game) =>
             transformPsdGame(
               { ...game, teamId: game.teamId ?? teamId },
-              { ownClubId },
+              { ownClubId, competitionLabels },
             ),
           );
         }),
@@ -279,6 +329,7 @@ export const PsdServiceLive = Layer.effect(
           const visiblePsdIds = yield* getVisibleTeamIds();
           const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
           const season = yield* getCurrentSeason();
+          const competitionLabels = yield* getCompetitionLabels();
           const now = Date.now();
 
           const visibleTeams = visiblePsdIds
@@ -318,7 +369,7 @@ export const PsdServiceLive = Layer.effect(
                     return next
                       ? transformPsdGame(
                           { ...next, teamId: team.id },
-                          { ownClubId },
+                          { ownClubId, competitionLabels },
                         )
                       : null;
                   }),
@@ -431,6 +482,7 @@ export const PsdServiceLive = Layer.effect(
             `${base}/seasons`,
             PsdSeasonsSchema,
           );
+          const competitionLabels = yield* getCompetitionLabels();
 
           // Fetch matches for every season in parallel, skipping failed seasons
           const seasonResults = yield* Effect.all(
@@ -459,7 +511,10 @@ export const PsdServiceLive = Layer.effect(
                     }
                     const ownClubId = deriveOwnClubId(games);
                     return games.map((g) =>
-                      transformPsdGame({ ...g, teamId }, { ownClubId }),
+                      transformPsdGame(
+                        { ...g, teamId },
+                        { ownClubId, competitionLabels },
+                      ),
                     );
                   }),
                 ),

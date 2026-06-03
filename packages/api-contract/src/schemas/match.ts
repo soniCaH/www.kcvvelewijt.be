@@ -7,6 +7,14 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
   name: S.String,
   logo: S.optional(S.String),
   score: S.optional(S.Number),
+  /**
+   * Team designation within the club (e.g. "A", "B", "U23") derived from PSD's
+   * per-game `homeTeam`/`awayTeam` codes. Present mainly for opponents that
+   * field a non-first team; omitted for the club's own numeric squad code
+   * (PSD labels the queried team with its numeric id, which carries no display
+   * value). Computed by the BFF — see `deriveMatchTeamLabel`.
+   */
+  team_label: S.optional(S.String),
 }) {}
 
 /**

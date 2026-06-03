@@ -23,6 +23,12 @@ export interface ScheduleTeam {
   name: string;
   /** Team logo URL */
   logo?: string;
+  /**
+   * Team designation within the club (e.g. "A", "B", "U23"), provided by the
+   * BFF via `MatchTeam.team_label`. Present mainly for opponents that field a
+   * non-first team; absent for the tracked club's own side.
+   */
+  teamLabel?: string;
 }
 
 export interface ScheduleMatch {

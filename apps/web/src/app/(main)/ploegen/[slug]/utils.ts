@@ -19,6 +19,7 @@ export function transformMatchToSchedule(match: Match): ScheduleMatch {
     id: team.id,
     name: team.name,
     logo: team.logo,
+    teamLabel: team.team_label,
   });
 
   return {
