@@ -106,11 +106,11 @@ describe("<EventsBrowser>", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Jeugdwerking" }));
 
-    expect(
-      screen.getByText(
-        /geen evenementen in de categorie jeugdwerking gepland/i,
-      ),
-    ).toBeInTheDocument();
+    // The message lives in a polite live region so screen readers announce it
+    // when a filter selection empties the list (client-side state change).
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /geen evenementen in de categorie jeugdwerking gepland/i,
+    );
     // Filter row stays visible in the filtered-to-zero state.
     expect(
       screen.getByRole("group", { name: /filter evenementen op type/i }),

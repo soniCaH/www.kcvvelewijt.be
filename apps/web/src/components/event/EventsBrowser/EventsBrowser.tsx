@@ -75,7 +75,13 @@ export function EventsBrowser({
       <EventFilterBar selected={selected} onSelect={handleSelect} />
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-5 py-12 text-center">
+        // role="status" (implicit aria-live="polite") so the per-category
+        // message is announced when a filter selection empties the list — it
+        // appears on a client-side state change, not a page load.
+        <div
+          role="status"
+          className="flex flex-col items-center gap-5 py-12 text-center"
+        >
           <p className="font-display text-cream text-2xl">
             Geen evenementen in de categorie {selected} gepland.
           </p>
