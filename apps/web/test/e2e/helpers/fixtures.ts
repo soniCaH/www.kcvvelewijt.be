@@ -19,7 +19,7 @@ export interface RouteFixtures {
 
 const PATH_PREFIXES = {
   article: "/nieuws/",
-  event: "/events/",
+  event: "/evenementen/",
   player: "/spelers/",
   team: "/ploegen/",
   match: "/wedstrijd/",

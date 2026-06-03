@@ -72,7 +72,7 @@ const teamItem: VerderLezenItem = {
 
 const eventItem: VerderLezenItem = {
   title: "Spaghetti-avond",
-  href: "/events/spaghetti-avond",
+  href: "/evenementen/spaghetti-avond",
   badge: "EVENEMENT",
   analyticsId: "event-1",
   analyticsSource: "editorial",

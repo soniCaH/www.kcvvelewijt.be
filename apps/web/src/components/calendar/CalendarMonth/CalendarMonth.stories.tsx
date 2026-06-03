@@ -73,7 +73,7 @@ const marchEvents: CalendarEvent[] = [
     id: "e1",
     title: "Paastoernooi",
     dateStart: "2026-03-20T10:00:00",
-    href: "/events/paastoernooi",
+    href: "/evenementen/paastoernooi",
   },
 ];
 

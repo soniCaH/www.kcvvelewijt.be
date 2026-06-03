@@ -31,7 +31,6 @@ import SponsorsLoading from "../(landing)/sponsors/loading";
 // ---------------------------------------------------------------------------
 // Non-SectionStack loading components
 // ---------------------------------------------------------------------------
-import EventsLoading from "../(landing)/events/loading";
 import KalenderLoading from "../(main)/kalender/loading";
 import NieuwsLoading from "../(landing)/nieuws/loading";
 import NieuwsDetailLoading from "../(main)/nieuws/[slug]/loading";
@@ -122,11 +121,6 @@ describe("loading.tsx envelope drift guard", () => {
   }
 
   const nonSectionStackRoutes: NonSectionStackRoute[] = [
-    {
-      name: "/events",
-      Loading: EventsLoading,
-      expectedRootClass: "min-h-screen bg-linear-to-br from-gray-50 to-white",
-    },
     {
       name: "/kalender",
       Loading: KalenderLoading,

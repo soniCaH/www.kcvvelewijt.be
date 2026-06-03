@@ -61,7 +61,7 @@ const weekEvents: CalendarEvent[] = [
     id: "e1",
     title: "Jeugdtraining extra",
     dateStart: "2026-03-25T18:00:00",
-    href: "/events/jeugdtraining",
+    href: "/evenementen/jeugdtraining",
   },
 ];
 
