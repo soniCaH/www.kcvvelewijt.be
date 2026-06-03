@@ -10,6 +10,7 @@
  * Design lock: docs/design/mockups/phase-6-team/detail-ia-locked.md §3
  */
 import Image from "next/image";
+import Link from "next/link";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
 import { getResultColor } from "@/lib/utils/match-display";
@@ -134,7 +135,10 @@ export function TeamAgendaRow({
     "border-2 transition-all duration-300",
     "hover:-translate-y-0 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
     featured
-      ? "bg-jersey-deep border-jersey-deep text-white shadow-[2px_2px_0_0_var(--color-cream)]"
+      ? // Soft ink-muted offset (the design-system dark-card shadow, cf.
+        // `--shadow-paper-sm-soft`) — a cream shadow vanished against the cream
+        // page, and a dark-green one would blend into the jersey-deep body.
+        "bg-jersey-deep border-jersey-deep text-white shadow-[2px_2px_0_0_var(--color-ink-muted)]"
       : "bg-cream border-ink text-ink shadow-[2px_2px_0_0_var(--color-ink)]",
     className,
   );
@@ -152,157 +156,162 @@ export function TeamAgendaRow({
   const matchLabel = `${match.homeTeam.name} – ${match.awayTeam.name}, ${day} ${month}`;
 
   return (
-    <article
-      data-testid="team-agenda-row"
-      data-featured={featured}
+    <Link
+      href={`/wedstrijd/${match.id}`}
       aria-label={matchLabel}
-      className={cardBase}
+      className="focus-visible:outline-ink block no-underline focus-visible:outline-2 focus-visible:outline-offset-2"
     >
-      {/* Date stub */}
-      <div
-        className={cn(
-          "flex shrink-0 flex-col items-center justify-center gap-0 px-3 py-3",
-          stubBorder,
-          featured ? "bg-jersey-deep" : "bg-cream-soft/30",
-        )}
-        aria-label={`${day} ${month}`}
+      <article
+        data-testid="team-agenda-row"
+        data-featured={featured}
+        className={cardBase}
       >
-        <span
-          className={cn(
-            "font-display-big text-[18px] leading-none",
-            featured ? "text-white" : "text-ink",
-          )}
-        >
-          {day}
-        </span>
-        <span
-          className={cn(
-            "font-mono text-[8px] tracking-widest uppercase",
-            monoClass,
-          )}
-        >
-          {month}
-        </span>
-      </div>
-
-      {/* Desktop layout (sm+): symmetric scoreboard */}
-      <div className="hidden w-full items-center gap-2 px-3 py-2 sm:flex">
-        {/* Home side */}
+        {/* Date stub */}
         <div
-          className="flex min-w-0 flex-1 items-center gap-2"
-          title={match.homeTeam.name}
+          className={cn(
+            "flex shrink-0 flex-col items-center justify-center gap-0 px-3 py-3",
+            stubBorder,
+            featured ? "bg-jersey-deep" : "bg-cream-soft/30",
+          )}
+          aria-label={`${day} ${month}`}
         >
-          <Crest name={match.homeTeam.name} logo={match.homeTeam.logo} />
           <span
             className={cn(
-              "min-w-0 truncate text-sm",
+              "font-display-big text-[18px] leading-none",
               featured ? "text-white" : "text-ink",
-              isHome === true && "font-semibold",
             )}
           >
-            {match.homeTeam.name}
+            {day}
+          </span>
+          <span
+            className={cn(
+              "font-mono text-[8px] tracking-widest uppercase",
+              monoClass,
+            )}
+          >
+            {month}
           </span>
         </div>
 
-        {/* Score / time + competition caption */}
-        <div className="flex shrink-0 flex-col items-center gap-0.5 px-3">
-          <span
-            className={cn(
-              "font-display-big text-[18px] leading-none tabular-nums",
-              featured ? "text-white" : "text-ink",
-            )}
-            style={
-              outlineShadow
-                ? { boxShadow: outlineShadow, padding: "0 8px" }
-                : { padding: "0 8px" }
-            }
+        {/* Desktop layout (sm+): symmetric scoreboard */}
+        <div className="hidden w-full items-center gap-2 px-3 py-2 sm:flex">
+          {/* Home side */}
+          <div
+            className="flex min-w-0 flex-1 items-center gap-2"
+            title={match.homeTeam.name}
           >
-            {scoreOrTime}
-          </span>
-          {match.competition ? (
+            <Crest name={match.homeTeam.name} logo={match.homeTeam.logo} />
             <span
               className={cn(
-                "font-mono text-[9px] tracking-wider uppercase",
-                monoClass,
+                "min-w-0 truncate text-sm",
+                featured ? "text-white" : "text-ink",
+                isHome === true && "font-semibold",
               )}
             >
-              {match.competition}
+              {match.homeTeam.name}
             </span>
-          ) : null}
-        </div>
+          </div>
 
-        {/* Away side */}
-        <div
-          className="flex min-w-0 flex-1 flex-row-reverse items-center gap-2"
-          title={match.awayTeam.name}
-        >
-          <Crest name={match.awayTeam.name} logo={match.awayTeam.logo} />
-          <span
-            className={cn(
-              "min-w-0 truncate text-right text-sm",
-              featured ? "text-white" : "text-ink",
-              isHome === false && "font-semibold",
-            )}
-          >
-            {match.awayTeam.name}
-          </span>
-        </div>
-      </div>
-
-      {/* Mobile layout: KCVV-centric column */}
-      <div className="flex w-full items-center gap-2 px-3 py-2 sm:hidden">
-        {/* Opponent crest + name + competition */}
-        {(() => {
-          const opponent = isHome ? match.awayTeam : match.homeTeam;
-          const VenueIcon = isHome ? House : Bus;
-          return (
-            <>
-              <Crest name={opponent.name} logo={opponent.logo} />
-              <div className="min-w-0 flex-1" title={opponent.name}>
-                <span
-                  className={cn(
-                    "block truncate text-sm font-semibold",
-                    featured ? "text-white" : "text-ink",
-                  )}
-                >
-                  {opponent.name}
-                </span>
-                {match.competition ? (
-                  <span
-                    className={cn(
-                      "font-mono text-[9px] tracking-wider uppercase",
-                      monoClass,
-                    )}
-                  >
-                    {match.competition}
-                  </span>
-                ) : null}
-              </div>
-              <VenueIcon
-                size={14}
-                aria-label={isHome ? "Thuiswedstrijd" : "Uitwedstrijd"}
-                className={cn(
-                  "shrink-0",
-                  featured ? "text-white" : "text-ink-muted",
-                )}
-              />
+          {/* Score / time + competition caption */}
+          <div className="flex shrink-0 flex-col items-center gap-0.5 px-3">
+            <span
+              className={cn(
+                "font-display-big text-[18px] leading-none tabular-nums",
+                featured ? "text-white" : "text-ink",
+              )}
+              style={
+                outlineShadow
+                  ? { boxShadow: outlineShadow, padding: "0 8px" }
+                  : { padding: "0 8px" }
+              }
+            >
+              {scoreOrTime}
+            </span>
+            {match.competition ? (
               <span
                 className={cn(
-                  "font-display-big shrink-0 text-[16px] leading-none tabular-nums",
-                  featured ? "text-white" : "text-ink",
+                  "font-mono text-[9px] tracking-wider uppercase",
+                  monoClass,
                 )}
-                style={
-                  outlineShadow
-                    ? { boxShadow: outlineShadow, padding: "0 6px" }
-                    : { padding: "0 6px" }
-                }
               >
-                {scoreOrTime}
+                {match.competition}
               </span>
-            </>
-          );
-        })()}
-      </div>
-    </article>
+            ) : null}
+          </div>
+
+          {/* Away side */}
+          <div
+            className="flex min-w-0 flex-1 flex-row-reverse items-center gap-2"
+            title={match.awayTeam.name}
+          >
+            <Crest name={match.awayTeam.name} logo={match.awayTeam.logo} />
+            <span
+              className={cn(
+                "min-w-0 truncate text-right text-sm",
+                featured ? "text-white" : "text-ink",
+                isHome === false && "font-semibold",
+              )}
+            >
+              {match.awayTeam.name}
+            </span>
+          </div>
+        </div>
+
+        {/* Mobile layout: KCVV-centric column */}
+        <div className="flex w-full items-center gap-2 px-3 py-2 sm:hidden">
+          {/* Opponent crest + name + competition */}
+          {(() => {
+            const opponent = isHome ? match.awayTeam : match.homeTeam;
+            const VenueIcon = isHome ? House : Bus;
+            return (
+              <>
+                <Crest name={opponent.name} logo={opponent.logo} />
+                <div className="min-w-0 flex-1" title={opponent.name}>
+                  <span
+                    className={cn(
+                      "block truncate text-sm font-semibold",
+                      featured ? "text-white" : "text-ink",
+                    )}
+                  >
+                    {opponent.name}
+                  </span>
+                  {match.competition ? (
+                    <span
+                      className={cn(
+                        "font-mono text-[9px] tracking-wider uppercase",
+                        monoClass,
+                      )}
+                    >
+                      {match.competition}
+                    </span>
+                  ) : null}
+                </div>
+                <VenueIcon
+                  size={14}
+                  aria-label={isHome ? "Thuiswedstrijd" : "Uitwedstrijd"}
+                  className={cn(
+                    "shrink-0",
+                    featured ? "text-white" : "text-ink-muted",
+                  )}
+                />
+                <span
+                  className={cn(
+                    "font-display-big shrink-0 text-[16px] leading-none tabular-nums",
+                    featured ? "text-white" : "text-ink",
+                  )}
+                  style={
+                    outlineShadow
+                      ? { boxShadow: outlineShadow, padding: "0 6px" }
+                      : { padding: "0 6px" }
+                  }
+                >
+                  {scoreOrTime}
+                </span>
+              </>
+            );
+          })()}
+        </div>
+      </article>
+    </Link>
   );
 }

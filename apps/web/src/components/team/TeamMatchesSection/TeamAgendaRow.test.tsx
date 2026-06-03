@@ -187,4 +187,20 @@ describe("TeamAgendaRow", () => {
       expect(el).not.toBeNull();
     });
   });
+
+  describe("Link to match detail", () => {
+    it("wraps the row in a link to /wedstrijd/{id}", () => {
+      render(<TeamAgendaRow match={{ ...BASE, id: 4242 }} />);
+      expect(screen.getByRole("link").getAttribute("href")).toBe(
+        "/wedstrijd/4242",
+      );
+    });
+
+    it("uses the home–away label as the link's accessible name", () => {
+      render(<TeamAgendaRow match={BASE} />);
+      expect(screen.getByRole("link").getAttribute("aria-label")).toContain(
+        "KCVV Elewijt",
+      );
+    });
+  });
 });

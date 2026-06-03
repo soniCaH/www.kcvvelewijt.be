@@ -96,6 +96,7 @@ export default async function RootLayout({
     <html
       lang="nl"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${montserrat.variable} ${ibmPlexMono.variable}`}
     >
       <head>
