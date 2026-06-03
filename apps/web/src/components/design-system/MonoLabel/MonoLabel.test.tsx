@@ -23,6 +23,16 @@ describe("MonoLabel", () => {
     expect(container.firstChild).toHaveAttribute("data-variant", "pill-jersey");
   });
 
+  it("variant pill-jersey-deep is the WCAG-safe jersey-deep pill (bg-jersey-deep + white text)", () => {
+    const { container } = render(
+      <MonoLabel variant="pill-jersey-deep">Clubevent</MonoLabel>,
+    );
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-variant", "pill-jersey-deep");
+    expect(el.className).toContain("bg-jersey-deep");
+    expect(el.className).toContain("text-white");
+  });
+
   it("size md sets data-size", () => {
     const { container } = render(<MonoLabel size="md">X</MonoLabel>);
     expect(container.firstChild).toHaveAttribute("data-size", "md");

@@ -1,6 +1,7 @@
 export type MonoLabelVariant =
   | "plain"
   | "pill-jersey"
+  | "pill-jersey-deep"
   | "pill-ink"
   | "pill-cream";
 export type MonoLabelSize = "sm" | "md";
@@ -25,6 +26,10 @@ export interface MonoLabelProps {
 const VARIANT_CLASS: Record<MonoLabelVariant, string> = {
   plain: "",
   "pill-jersey": "bg-jersey text-ink",
+  // White text (not cream) on jersey-deep — the same WCAG-safe pairing as
+  // `EVENT_TYPE_FILL.Clubevent`. The redesign-canonical green pill (the bright
+  // `bg-jersey` is retired on redesign surfaces); used by `<EventHero>` (#1967).
+  "pill-jersey-deep": "bg-jersey-deep text-white",
   "pill-ink": "bg-ink text-cream",
   "pill-cream": "bg-cream-soft text-ink border border-paper-edge",
 };

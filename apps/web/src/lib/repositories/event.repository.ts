@@ -39,6 +39,8 @@ export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
  * Detail-page projection: full event payload for `/evenementen/[slug]`. The
  * `externalLink` object is read whole so the page can decide whether to
  * render the optional CTA. `coverImageUrl` is sized for the event hero.
+ * `eventType` + `location` drive the `<EventHero>` pill, kicker and location
+ * line (#1967); a missing `eventType` falls back to "Andere" at render time.
  */
 export const EVENT_BY_SLUG_QUERY =
   defineQuery(`*[_type == "event" && slug.current == $slug][0] {
@@ -46,8 +48,10 @@ export const EVENT_BY_SLUG_QUERY =
   "updatedAt": _updatedAt,
   "title": coalesce(title, ""),
   "slug": coalesce(slug.current, ""),
+  eventType,
   "dateStart": coalesce(dateStart, ""),
   dateEnd,
+  location,
   "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",
   externalLink
 }`);
