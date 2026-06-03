@@ -461,6 +461,20 @@ describe("mergeEventFeed", () => {
     expect(feed.map((item) => item.id)).toEqual(["valid", "broken"]);
   });
 
+  it("keeps an article with a malformed startTime as all-day rather than dropping it", () => {
+    const [item] = mergeEventFeed(
+      [],
+      // "99:99" passes a naive \d{2}:\d{2} check but is not a real time — it
+      // must fall back to all-day (00:00), not poison the date and drop the row.
+      [makeArticleRow({ fact: { date: "2026-09-14", startTime: "99:99" } })],
+    );
+
+    expect(item?.id).toBe("article-1");
+    const dt = parseEventDateTime(item!.dateStart);
+    expect(dt.toFormat("yyyy-MM-dd")).toBe("2026-09-14");
+    expect(dt.toFormat("HH:mm")).toBe("00:00");
+  });
+
   it("drops article rows whose eventFact has no resolvable date", () => {
     const feed = mergeEventFeed(
       [makeEventRow({ id: "kept", slug: "kept" })],

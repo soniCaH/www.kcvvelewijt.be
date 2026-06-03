@@ -21,7 +21,11 @@ const meta = {
   title: "Features/Calendar/EventMonthList",
   component: EventMonthList,
   parameters: { layout: "fullscreen" },
-  tags: ["autodocs"],
+  // VR-tagged like its sibling list-shell stories (EventsBrowser / EventFilterBar
+  // / TicketStub): the month-grouped layout (heading + StripedSeam + ticket
+  // stack on the dark field) is a distinct composed surface not covered by
+  // TicketStub-in-isolation.
+  tags: ["autodocs", "vr"],
   // The month headings are cream-toned for the dark `/evenementen` page, so the
   // story renders on the jersey-deep-dark field to keep them legible.
   decorators: [

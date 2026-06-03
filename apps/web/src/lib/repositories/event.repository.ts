@@ -154,8 +154,14 @@ function articleFactToIso(
   time?: string | null,
 ): string | null {
   if (!date) return null;
+  // Strict HH:mm (00–23 : 00–59). A malformed or absent time falls back to
+  // local midnight (all-day) rather than poisoning `DateTime.fromISO` into an
+  // invalid value — a time typo must not silently drop an otherwise-valid event
+  // from the feed. Only an unparseable `date` (guarded below) drops the row.
   const hhmm =
-    typeof time === "string" && /^\d{2}:\d{2}$/.test(time) ? time : "00:00";
+    typeof time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(time)
+      ? time
+      : "00:00";
   const dt = DateTime.fromISO(`${date}T${hhmm}`, { zone: EVENT_TIMEZONE });
   return dt.isValid ? dt.toISO() : null;
 }
