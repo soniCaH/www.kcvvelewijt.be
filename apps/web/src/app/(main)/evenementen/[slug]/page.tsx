@@ -99,7 +99,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   const otherEvents = upcoming.filter((other) => other.id !== event.id);
 
   return (
-    <div className="bg-cream flex min-h-screen flex-col pb-[var(--footer-diagonal)]">
+    <div className="bg-cream">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -120,7 +120,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
       <EventViewTracker eventSlug={event.slug} eventType={event.eventType} />
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12">
+      <main className="mx-auto w-full max-w-3xl px-4 py-12">
         <EventHero
           title={event.title}
           eventType={event.eventType}

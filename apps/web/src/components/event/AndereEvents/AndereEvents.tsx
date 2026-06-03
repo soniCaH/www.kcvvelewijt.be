@@ -9,9 +9,10 @@ export interface AndereEventsProps {
 
 /**
  * "Andere events" section below `<EventHero>` on `/evenementen/[slug]` (design
- * lock 6e5 §"Below the hero"): a `<StripedSeam>` heading + a grid of the locked
- * `<TicketStub>` for the other upcoming events. Renders nothing when there are
- * none (the caller passes an already-filtered list).
+ * lock 6e5 §"Below the hero"): a `<StripedSeam>` heading + a single column of
+ * the locked `<TicketStub>` for the other upcoming events — full-width to match
+ * the main list (a 2-up grid squashed the date-block + title). Renders nothing
+ * when there are none (the caller passes an already-filtered list).
  */
 export function AndereEvents({ events }: AndereEventsProps) {
   if (events.length === 0) return null;
@@ -24,7 +25,7 @@ export function AndereEvents({ events }: AndereEventsProps) {
         </EditorialHeading>
         <StripedSeam height="sm" colorPair="ink-cream" />
       </header>
-      <ul className="grid gap-4 sm:grid-cols-2">
+      <ul className="flex flex-col gap-4">
         {events.map((event) => (
           <li key={event.id}>
             <TicketStub

@@ -1,3 +1,4 @@
+import { StrictMode } from "react";
 import { render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventViewTracker } from "./EventViewTracker";
@@ -28,12 +29,14 @@ describe("EventViewTracker", () => {
     });
   });
 
-  it("does not double-fire on a StrictMode-style remount of the same effect", () => {
-    const { rerender } = render(
-      <EventViewTracker eventSlug="mosselfeest" eventType="Clubevent" />,
-    );
-    rerender(
-      <EventViewTracker eventSlug="mosselfeest" eventType="Clubevent" />,
+  it("fires only once under StrictMode (the ref guard absorbs the effect double-invoke)", () => {
+    // StrictMode double-invokes effects in dev (setup → cleanup → setup) on the
+    // same instance, so the `hasFired` ref persists — without the guard this
+    // would fire twice.
+    render(
+      <StrictMode>
+        <EventViewTracker eventSlug="mosselfeest" eventType="Clubevent" />
+      </StrictMode>,
     );
     expect(trackEventMock).toHaveBeenCalledTimes(1);
   });
