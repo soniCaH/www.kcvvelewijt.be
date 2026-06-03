@@ -1,11 +1,11 @@
 import { EditorialHeading, StripedSeam } from "@/components/design-system";
-import type { EventVM } from "@/lib/repositories/event.repository";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { TicketStub } from "../TicketStub";
 import { groupEventsByMonth } from "./group-events-by-month";
 
 export interface EventMonthListProps {
-  /** Upcoming events (any order — grouped + sorted chronologically here). */
-  events: EventVM[];
+  /** Upcoming feed items (any order — grouped + sorted chronologically here). */
+  events: EventListItemVM[];
 }
 
 /**
@@ -36,7 +36,7 @@ export function EventMonthList({ events }: EventMonthListProps) {
               <li key={event.id}>
                 <TicketStub
                   title={event.title}
-                  href={`/evenementen/${event.slug}`}
+                  href={event.href}
                   dateStart={event.dateStart}
                   dateEnd={event.dateEnd}
                   eventType={event.eventType}

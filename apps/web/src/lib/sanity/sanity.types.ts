@@ -256,6 +256,7 @@ export type Subject = {
 export type EventFact = {
   _type: "eventFact";
   title?: string;
+  eventType?: "Clubevent" | "Supportersactiviteit" | "Jeugdwerking" | "Andere";
   date?: string;
   endDate?: string;
   startTime?: string;
@@ -1233,6 +1234,11 @@ export type ARTICLES_QUERY_RESULT = Array<{
         _key: string;
         _type: "eventFact";
         title?: string;
+        eventType?:
+          | "Andere"
+          | "Clubevent"
+          | "Jeugdwerking"
+          | "Supportersactiviteit";
         date?: string;
         endDate?: string;
         startTime?: string;
@@ -1615,6 +1621,11 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         _key: string;
         _type: "eventFact";
         title?: string;
+        eventType?:
+          | "Andere"
+          | "Clubevent"
+          | "Jeugdwerking"
+          | "Supportersactiviteit";
         date?: string;
         endDate?: string;
         startTime?: string;
@@ -2027,6 +2038,27 @@ export type EVENT_BY_SLUG_QUERY_RESULT = {
 export type EVENT_SLUGS_QUERY_RESULT = Array<{
   slug: string | "";
   updatedAt: string;
+}>;
+
+// Source: ../web/src/lib/repositories/event.repository.ts
+// Variable: EVENT_ARTICLES_QUERY
+// Query: *[_type == "article" && articleType == "event" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today] {  "id": _id,  "title": coalesce(pt::text(title), title, ""),  "slug": coalesce(slug.current, ""),  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType }}
+export type EVENT_ARTICLES_QUERY_RESULT = Array<{
+  id: string;
+  title: string;
+  slug: string | "";
+  fact: {
+    date: string | null;
+    endDate: string | null;
+    startTime: string | null;
+    location: string | null;
+    eventType:
+      | "Andere"
+      | "Clubevent"
+      | "Jeugdwerking"
+      | "Supportersactiviteit"
+      | null;
+  } | null;
 }>;
 
 // Source: ../web/src/lib/repositories/homepage.repository.ts
@@ -2581,6 +2613,7 @@ declare module "@sanity/client" {
     '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
     '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  eventType,\n  "dateStart": coalesce(dateStart, ""),\n  dateEnd,\n  location,\n  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  externalLink\n}': EVENT_BY_SLUG_QUERY_RESULT;
     '*[_type == "event" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }': EVENT_SLUGS_QUERY_RESULT;
+    '*[_type == "article" && articleType == "event" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today] {\n  "id": _id,\n  "title": coalesce(pt::text(title), title, ""),\n  "slug": coalesce(slug.current, ""),\n  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType }\n}': EVENT_ARTICLES_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "matchesSliderPlaceholder": matchesSliderPlaceholder {\n      nextSeasonKickoff,\n      announcementText,\n      announcementHref,\n      "highlightImage": highlightImage {\n        alt,\n        "asset": asset->{\n          _id,\n          url,\n          "lqip": metadata.lqip,\n          "dimensions": metadata.dimensions\n        }\n      }\n    }\n  }': HOMEPAGE_PLACEHOLDER_QUERY_RESULT;
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;

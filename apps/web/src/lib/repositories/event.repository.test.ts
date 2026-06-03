@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
+import { parseEventDateTime } from "../utils/event-datetime";
 import type {
   EVENTS_QUERY_RESULT,
+  EVENT_ARTICLES_QUERY_RESULT,
   EVENT_BY_SLUG_QUERY_RESULT,
   EVENT_SLUGS_QUERY_RESULT,
   NEXT_FEATURED_EVENT_QUERY_RESULT,
@@ -17,8 +19,10 @@ vi.mock("../sanity/client", () => ({
 import { sanityClient } from "../sanity/client";
 import {
   EVENTS_QUERY,
+  EVENT_ARTICLES_QUERY,
   EventRepository,
   EventRepositoryLive,
+  mergeEventFeed,
 } from "./event.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,6 +48,35 @@ function makeEventRow(
     coverImageUrl: "https://cdn.sanity.io/event.webp",
     featuredOnHome: false,
     ...overrides,
+  };
+}
+
+/**
+ * Fixture for an `articleType:event` article row (EVENT_ARTICLES_QUERY shape).
+ * `fact` accepts a partial (merged onto the default block) or an explicit
+ * `null` (article with no `eventFact` — projects as `fact: null`).
+ */
+type ArticleRow = EVENT_ARTICLES_QUERY_RESULT[number];
+type ArticleFact = NonNullable<ArticleRow["fact"]>;
+function makeArticleRow(
+  overrides: Partial<Omit<ArticleRow, "fact">> & {
+    fact?: Partial<ArticleFact> | null;
+  } = {},
+): ArticleRow {
+  const { fact, ...rest } = overrides;
+  const base: ArticleFact = {
+    date: "2026-09-14",
+    endDate: null,
+    startTime: "10:00",
+    location: "Sportpark Driesput, Elewijt",
+    eventType: "Jeugdwerking",
+  };
+  return {
+    id: "article-1",
+    title: "Jeugdtornooi groot succes",
+    slug: "jeugdtornooi-verslag",
+    fact: fact === null ? null : { ...base, ...fact },
+    ...rest,
   };
 }
 
@@ -263,5 +296,194 @@ describe("EventRepository", () => {
 
       expect(result).toEqual(rows);
     });
+  });
+
+  describe("findUpcomingForList", () => {
+    it("fetches both sources and returns one merged, chronologically-sorted feed", async () => {
+      // Two concurrent fetches (Effect.all) — route by query identity, not call
+      // order, since the requests race.
+      mockFetch.mockImplementation((query: string) => {
+        if (query === EVENTS_QUERY)
+          return Promise.resolve([
+            makeEventRow({
+              id: "event-late",
+              slug: "seizoensafsluiter",
+              dateStart: "2026-09-20T18:00:00Z",
+              dateEnd: null,
+            }),
+          ]);
+        if (query === EVENT_ARTICLES_QUERY)
+          return Promise.resolve([
+            makeArticleRow({
+              id: "article-early",
+              fact: { date: "2026-09-14" },
+            }),
+          ]);
+        return Promise.resolve(null);
+      });
+
+      try {
+        const feed = await runWithRepo(
+          Effect.gen(function* () {
+            const repo = yield* EventRepository;
+            return yield* repo.findUpcomingForList();
+          }),
+        );
+
+        expect(feed.map((item) => item.id)).toEqual([
+          "article-early",
+          "event-late",
+        ]);
+        expect(feed.map((item) => item.source)).toEqual(["article", "event"]);
+        expect(feed[0]?.href).toBe("/nieuws/jeugdtornooi-verslag");
+        expect(feed[1]?.href).toBe("/evenementen/seizoensafsluiter");
+      } finally {
+        mockFetch.mockReset();
+      }
+    });
+  });
+});
+
+describe("EVENT_ARTICLES_QUERY", () => {
+  it("selects upcoming event-articles by their eventFact date within the publish window", () => {
+    expect(EVENT_ARTICLES_QUERY).toContain('articleType == "event"');
+    // Upcoming is gated on the first eventFact's date, against the Brussels
+    // $today param (not now()) so a same-day all-day event stays in the list.
+    expect(EVENT_ARTICLES_QUERY).toContain(
+      'coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today',
+    );
+    // Only published, non-unpublished articles surface (mirrors ARTICLES_QUERY).
+    expect(EVENT_ARTICLES_QUERY).toContain("publishedAt <= now()");
+    expect(EVENT_ARTICLES_QUERY).toContain(
+      "(!defined(unpublishAt) || unpublishAt > now())",
+    );
+  });
+});
+
+describe("mergeEventFeed", () => {
+  it("orders event docs and event articles together by date, regardless of source", () => {
+    const feed = mergeEventFeed(
+      [
+        makeEventRow({
+          id: "e-mid",
+          slug: "e-mid",
+          dateStart: "2026-09-15T18:00:00Z",
+          dateEnd: null,
+        }),
+        makeEventRow({
+          id: "e-last",
+          slug: "e-last",
+          dateStart: "2026-09-25T18:00:00Z",
+          dateEnd: null,
+        }),
+      ],
+      [
+        makeArticleRow({ id: "a-first", fact: { date: "2026-09-10" } }),
+        makeArticleRow({ id: "a-third", fact: { date: "2026-09-20" } }),
+      ],
+    );
+
+    expect(feed.map((item) => item.id)).toEqual([
+      "a-first",
+      "e-mid",
+      "a-third",
+      "e-last",
+    ]);
+  });
+
+  it("links event docs to /evenementen/[slug] and event articles to /nieuws/[slug]", () => {
+    const [art, evt] = mergeEventFeed(
+      [makeEventRow({ id: "e", slug: "spaghetti-avond" })],
+      [makeArticleRow({ id: "a", slug: "jeugdtornooi-verslag" })],
+    ).sort((x, y) => (x.source < y.source ? -1 : 1)); // "article" < "event"
+
+    expect(art).toMatchObject({
+      source: "article",
+      href: "/nieuws/jeugdtornooi-verslag",
+    });
+    expect(evt).toMatchObject({
+      source: "event",
+      href: "/evenementen/spaghetti-avond",
+    });
+  });
+
+  it("carries the article's eventType + location from its eventFact block", () => {
+    const [item] = mergeEventFeed(
+      [],
+      [
+        makeArticleRow({
+          fact: { eventType: "Supportersactiviteit", location: "De Kantine" },
+        }),
+      ],
+    );
+
+    expect(item).toMatchObject({
+      eventType: "Supportersactiviteit",
+      location: "De Kantine",
+    });
+  });
+
+  it("derives the article start from eventFact date + startTime (Brussels wall-clock)", () => {
+    const [timed] = mergeEventFeed(
+      [],
+      [makeArticleRow({ fact: { date: "2026-09-14", startTime: "18:30" } })],
+    );
+
+    const dt = parseEventDateTime(timed!.dateStart);
+    expect(dt.toFormat("yyyy-MM-dd")).toBe("2026-09-14");
+    expect(dt.toFormat("HH:mm")).toBe("18:30");
+  });
+
+  it("treats a start-time-less article as all-day — local midnight, so <TicketStub> omits the time", () => {
+    const [allDay] = mergeEventFeed(
+      [],
+      [makeArticleRow({ fact: { date: "2026-09-14", startTime: null } })],
+    );
+
+    const dt = parseEventDateTime(allDay!.dateStart);
+    expect(dt.toFormat("yyyy-MM-dd")).toBe("2026-09-14");
+    expect(dt.toFormat("HH:mm")).toBe("00:00");
+  });
+
+  it("sorts an event with an unparseable dateStart to the end instead of poisoning the order", () => {
+    const feed = mergeEventFeed(
+      [
+        makeEventRow({ id: "broken", slug: "broken", dateStart: "" }),
+        makeEventRow({
+          id: "valid",
+          slug: "valid",
+          dateStart: "2026-09-12T18:00:00Z",
+        }),
+      ],
+      [],
+    );
+
+    expect(feed.map((item) => item.id)).toEqual(["valid", "broken"]);
+  });
+
+  it("keeps an article with a malformed startTime as all-day rather than dropping it", () => {
+    const [item] = mergeEventFeed(
+      [],
+      // "99:99" passes a naive \d{2}:\d{2} check but is not a real time — it
+      // must fall back to all-day (00:00), not poison the date and drop the row.
+      [makeArticleRow({ fact: { date: "2026-09-14", startTime: "99:99" } })],
+    );
+
+    expect(item?.id).toBe("article-1");
+    const dt = parseEventDateTime(item!.dateStart);
+    expect(dt.toFormat("yyyy-MM-dd")).toBe("2026-09-14");
+    expect(dt.toFormat("HH:mm")).toBe("00:00");
+  });
+
+  it("drops article rows whose eventFact has no resolvable date", () => {
+    const feed = mergeEventFeed(
+      [makeEventRow({ id: "kept", slug: "kept" })],
+      [
+        makeArticleRow({ id: "no-date", fact: { date: null } }),
+        makeArticleRow({ id: "no-fact", fact: null }),
+      ],
+    );
+
+    expect(feed.map((item) => item.id)).toEqual(["kept"]);
   });
 });

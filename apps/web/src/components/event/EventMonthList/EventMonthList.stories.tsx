@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { EventVM } from "@/lib/repositories/event.repository";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventMonthList } from "./EventMonthList";
 
-function ev(overrides: Partial<EventVM> & { id: string }): EventVM {
+function ev(
+  overrides: Partial<EventListItemVM> & { id: string },
+): EventListItemVM {
   return {
     title: "Evenement",
-    slug: overrides.id,
+    href: `/evenementen/${overrides.id}`,
     eventType: "Clubevent",
     dateStart: "2026-09-12T18:00:00Z",
     dateEnd: null,
     location: "Sportpark Driesput, Elewijt",
-    href: "#",
-    featuredOnHome: false,
-    coverImageUrl: null,
+    source: "event",
     ...overrides,
   };
 }
@@ -21,7 +21,11 @@ const meta = {
   title: "Features/Calendar/EventMonthList",
   component: EventMonthList,
   parameters: { layout: "fullscreen" },
-  tags: ["autodocs"],
+  // VR-tagged like its sibling list-shell stories (EventsBrowser / EventFilterBar
+  // / TicketStub): the month-grouped layout (heading + StripedSeam + ticket
+  // stack on the dark field) is a distinct composed surface not covered by
+  // TicketStub-in-isolation.
+  tags: ["autodocs", "vr"],
   // The month headings are cream-toned for the dark `/evenementen` page, so the
   // story renders on the jersey-deep-dark field to keep them legible.
   decorators: [

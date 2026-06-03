@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { trackEvent } from "@/lib/analytics/track-event";
 import { MonoLabel } from "@/components/design-system";
-import type { EventVM } from "@/lib/repositories/event.repository";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventMonthList } from "../EventMonthList";
 import {
   EventFilterBar,
@@ -15,8 +15,11 @@ import { DEFAULT_EVENT_TYPE } from "../event-type-style";
 import { cn } from "@/lib/utils/cn";
 
 export interface EventsBrowserProps {
-  /** Upcoming events — already filtered upcoming-only + sorted by the repo. */
-  events: EventVM[];
+  /**
+   * Merged upcoming feed — `event` docs + `articleType:event` articles, already
+   * filtered upcoming-only + sorted chronologically by the repo.
+   */
+  events: EventListItemVM[];
   /**
    * Seeds the selected filter — for tests / Storybook state-coverage stories
    * (e.g. the filtered-to-zero state). Production always starts at `"all"`.
