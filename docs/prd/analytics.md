@@ -98,6 +98,20 @@ Article ids are hashed via `hashMemberId`; no editorial strings flow into params
 `related_content_click` so BI continuity with non-article source pages is
 preserved.
 
+### Events list (`/evenementen`, Priority 5 — "which event categories draw interest?")
+
+Driven by the Phase 6.E redesign (#1966). Fired client-side from
+`<EventsBrowser>` on a filter-chip change, with a dedup guard so re-pressing the
+active chip is a no-op.
+
+| Event Name     | Trigger                              | Parameters   |
+| -------------- | ------------------------------------ | ------------ |
+| `event_filter` | `/evenementen` filter chip selection | `event_type` |
+
+`event_type` is the selected event category (`Clubevent` \| `Supportersactiviteit`
+\| `Jeugdwerking` \| `Andere`), or `all` for the "Alles" reset chip / "Toon alles"
+reset. The value is a fixed enum string — no PII, so no hashing.
+
 ## 4. Tracer Bullet
 
 GTM script integration + consent gating + one test event:
@@ -173,12 +187,12 @@ triggers. This keeps the GTM workspace manageable as new features are added.
 
 ### Trigger: `Custom Event — KCVV Analytics`
 
-| Field              | Value                                                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Trigger type       | Custom Event                                                                                                                                |
-| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_cta_` |
-| Use regex matching | checked                                                                                                                                     |
-| Fires on           | All Custom Events                                                                                                                           |
+| Field              | Value                                                                                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trigger type       | Custom Event                                                                                                                                                                    |
+| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_\|article_video_\|player_\|match_\|team_` |
+| Use regex matching | checked                                                                                                                                                                         |
+| Fires on           | All Custom Events                                                                                                                                                               |
 
 ### Tag: `GA4 Event — KCVV Custom Events`
 

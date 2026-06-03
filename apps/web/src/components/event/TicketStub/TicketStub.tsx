@@ -1,16 +1,19 @@
 import Link from "next/link";
 import type { DateTime } from "luxon";
-import type { Event as SanityEvent } from "@/lib/sanity/sanity.types";
 import { MonoLabel } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { parseEventDateTime } from "@/lib/utils/event-datetime";
+import {
+  EVENT_TYPE_FILL,
+  DEFAULT_EVENT_TYPE,
+  type EventType,
+} from "../event-type-style";
 
-/**
- * Event category. Derived from the generated Sanity `event` schema so adding a
- * new enum value surfaces as a compile error on `DATE_BLOCK_CLASS` below rather
- * than a silently-uncoloured date block.
- */
-export type EventType = NonNullable<SanityEvent["eventType"]>;
+// The category type lives in `event-type-style` now (shared with the filter
+// chips), but it types the public `eventType` prop, so re-export it from
+// `<TicketStub>`'s established entry point. `DEFAULT_EVENT_TYPE` is an internal
+// fallback — consumers import it from `event-type-style` directly, not here.
+export type { EventType };
 
 export interface TicketStubProps {
   /** Event title — the display-serif headline of the stub. */
@@ -30,18 +33,6 @@ export interface TicketStubProps {
   /** Where the event happens; shown in the mono meta line when present. */
   location?: string | null;
 }
-
-const DEFAULT_EVENT_TYPE: EventType = "Andere";
-
-// Tear-off date-block colour per eventType (design lock 6e2). The 2px ink
-// ticket border frames every colour, and the text tone follows the WCAG
-// contrast rule (small text on jersey-deep uses white, not cream).
-const DATE_BLOCK_CLASS: Record<EventType, string> = {
-  Clubevent: "bg-jersey-deep text-white",
-  Supportersactiviteit: "bg-warm text-ink",
-  Jeugdwerking: "bg-jersey-bright text-ink",
-  Andere: "bg-ink text-cream",
-};
 
 const MONO_LABEL_CLASS =
   "font-mono text-[length:var(--text-label)] tracking-[var(--text-label--tracking)]";
@@ -133,7 +124,7 @@ export function TicketStub({
           data-event-type={type}
           className={cn(
             "border-ink flex shrink-0 flex-col items-center justify-center border-r-2 border-dashed px-4 py-3 text-center uppercase",
-            DATE_BLOCK_CLASS[type],
+            EVENT_TYPE_FILL[type],
           )}
         >
           <span className={MONO_LABEL_CLASS}>
