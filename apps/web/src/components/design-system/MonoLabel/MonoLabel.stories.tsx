@@ -74,6 +74,17 @@ export const PillJerseyMd: Story = {
   args: { variant: "pill-jersey", size: "md", children: "JEUGD ⋅ U15" },
 };
 
+// The redesign-canonical green pill (jersey-deep + white). Used by
+// `<EventHero>`'s eventType pill (#1967) — the bright `pill-jersey` is retired
+// on redesign surfaces.
+export const PillJerseyDeepSm: Story = {
+  args: { variant: "pill-jersey-deep", size: "sm", children: "CLUBEVENT" },
+};
+
+export const PillJerseyDeepMd: Story = {
+  args: { variant: "pill-jersey-deep", size: "md", children: "CLUBEVENT" },
+};
+
 export const PillInkSm: Story = {
   args: { variant: "pill-ink", size: "sm", children: "8 MIN" },
 };

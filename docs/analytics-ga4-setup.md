@@ -146,6 +146,9 @@ Repeat for each row in the table below.
 | Match ID           | `match_id`           | `homepage_match_widget_clicked`                                                       |
 | Match status       | `match_status`       | `homepage_match_widget_clicked`                                                       |
 | Destination        | `destination`        | `homepage_match_widget_clicked`                                                       |
+| Event type         | `event_type`         | `event_filter`, `event_view`                                                          |
+| Event slug         | `event_slug`         | `event_view`, `event_detail_cta_click`                                                |
+| CTA                | `cta`                | `event_detail_cta_click` ("reserveer" / "agenda")                                     |
 
 > **Tip**: The dimension name is only a label for the GA4 UI. The event parameter must
 > match the code exactly (case-sensitive, snake_case).

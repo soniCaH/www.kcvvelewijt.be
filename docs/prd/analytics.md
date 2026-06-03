@@ -112,6 +112,23 @@ active chip is a no-op.
 \| `Jeugdwerking` \| `Andere`), or `all` for the "Alles" reset chip / "Toon alles"
 reset. The value is a fixed enum string — no PII, so no hashing.
 
+### Events detail (`/evenementen/[slug]`, Priority 6 — "which events convert?")
+
+Driven by the Phase 6.E detail rebuild (#1967). `event_view` fires once on mount
+via `<EventViewTracker>`; the CTA clicks fire from `<EventDetailCtas>`. Slugs and
+the type enum are non-PII, so no hashing.
+
+| Event Name               | Trigger                             | Parameters                 |
+| ------------------------ | ----------------------------------- | -------------------------- |
+| `event_view`             | Event detail page mount             | `event_slug`, `event_type` |
+| `event_detail_cta_click` | Reserveer / Zet-in-agenda CTA click | `event_slug`, `cta`        |
+
+`cta` is `reserveer` (external reservation link, opens in a new tab) or `agenda`
+(client-side iCal `.ics` download). The event name is deliberately distinct from
+the article surface's `event_cta_click` (`article_id_hashed`, `event_date`,
+`has_ticket_url`) so the two parameter shapes don't collide in one GA4 event.
+`event_type` reuses the same fixed enum as `event_filter`.
+
 ## 4. Tracer Bullet
 
 GTM script integration + consent gating + one test event:

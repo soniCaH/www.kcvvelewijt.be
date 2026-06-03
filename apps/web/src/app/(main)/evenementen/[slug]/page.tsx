@@ -1,11 +1,15 @@
 /**
- * Event Detail Page
- * Displays individual editorial events from Sanity.
+ * Event detail page (`/evenementen/[slug]`).
+ *
+ * The editorial, cream counterpoint to the dark ticket-wall list (design lock
+ * 6e5 — variant D "Editoriaal"): a centred `<EventHero>` with the Reserveer /
+ * "Zet in agenda" CTAs, followed by an "Andere events" `<TicketStub>` grid.
+ * `event_view` fires client-side via `<EventViewTracker>`; the CTAs fire
+ * `event_detail_cta_click`. `/events/[slug]` 301s here (see `next.config.ts`).
  */
 
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
 
@@ -14,11 +18,12 @@ import { EventRepository } from "@/lib/repositories/event.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildEventJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
-import { formatLongDate, formatDate } from "@/lib/utils/dates";
 import { FooterSafeArea } from "@/components/design-system";
-import { ChevronLeft } from "@/lib/icons";
+import { EventHero } from "@/components/event/EventHero";
+import { EventViewTracker } from "@/components/event/EventViewTracker";
+import { AndereEvents } from "@/components/event/AndereEvents";
 
-import { EventCtaButton } from "./EventCtaButton";
+import { EventDetailCtas } from "./EventDetailCtas";
 
 interface EventPageProps {
   params: Promise<{ slug: string }>;
@@ -75,10 +80,13 @@ export async function generateMetadata({
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
-  const event = await runPromise(
+  const { event, upcoming } = await runPromise(
     Effect.gen(function* () {
       const repo = yield* EventRepository;
-      return yield* repo.findBySlug(slug);
+      const event = yield* repo.findBySlug(slug);
+      // Skip the (upcoming-only) feed fetch for a missing event — the page 404s.
+      const upcoming = event ? yield* repo.findAll() : [];
+      return { event, upcoming };
     }),
   );
 
@@ -88,17 +96,10 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   if (!event || !event.dateStart) notFound();
 
   const canonicalUrl = `${SITE_CONFIG.siteUrl}/evenementen/${event.slug}`;
-  const startDate = new Date(event.dateStart);
-  const endDate = event.dateEnd ? new Date(event.dateEnd) : null;
-  const sameDay =
-    endDate !== null && startDate.toDateString() === endDate.toDateString();
-
-  const externalLinkUrl = event.externalLink?.url;
-  const externalLinkLabel =
-    event.externalLink?.label?.trim() || "Meer informatie";
+  const otherEvents = upcoming.filter((other) => other.id !== event.id);
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-white pb-[var(--footer-diagonal)]">
+    <div className="bg-cream flex min-h-screen flex-col pb-[var(--footer-diagonal)]">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -113,54 +114,47 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           endDate: event.dateEnd ?? undefined,
           url: canonicalUrl,
           image: event.coverImageUrl ?? undefined,
+          location: event.location ?? undefined,
         })}
       />
 
-      <header className="from-green-main via-green-hover to-green-dark-hover relative overflow-hidden bg-linear-to-br px-4 py-16 text-white">
-        <div className="mx-auto max-w-5xl">
-          <Link
-            href="/evenementen"
-            className="mb-6 inline-flex items-center gap-2 text-sm text-white/80 transition-colors hover:text-white"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            Terug naar evenementen
-          </Link>
-          <h1 className="font-title mb-4 text-4xl font-bold md:text-6xl">
-            {event.title}
-          </h1>
-          <p className="text-xl text-white/90 md:text-2xl">
-            {sameDay && endDate
-              ? `${formatLongDate(startDate)} · ${formatDate(startDate, "HH:mm")} – ${formatDate(endDate, "HH:mm")}`
-              : endDate
-                ? `${formatLongDate(startDate)} – ${formatLongDate(endDate)}`
-                : formatLongDate(startDate)}
-          </p>
-        </div>
-      </header>
+      <EventViewTracker eventSlug={event.slug} eventType={event.eventType} />
 
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        {event.coverImageUrl && (
-          <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl shadow-lg">
-            <Image
-              src={event.coverImageUrl}
-              alt={event.title}
-              fill
-              priority
-              sizes="(min-width: 1024px) 960px, 100vw"
-              className="object-cover"
-            />
-          </div>
-        )}
-
-        {externalLinkUrl && (
-          <div className="flex justify-center">
-            <EventCtaButton
-              href={externalLinkUrl}
-              label={externalLinkLabel}
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-12">
+        <EventHero
+          title={event.title}
+          eventType={event.eventType}
+          dateStart={event.dateStart}
+          dateEnd={event.dateEnd}
+          location={event.location}
+          cover={
+            event.coverImageUrl ? (
+              <Image
+                src={event.coverImageUrl}
+                alt={event.title}
+                fill
+                priority
+                sizes="(min-width: 768px) 760px, 100vw"
+                className="object-cover"
+              />
+            ) : undefined
+          }
+          ctas={
+            <EventDetailCtas
               eventSlug={event.slug}
+              eventTitle={event.title}
+              dateStart={event.dateStart}
+              dateEnd={event.dateEnd}
+              location={event.location}
+              description={`Evenement van KCVV Elewijt — meer info: ${canonicalUrl}`}
+              canonicalUrl={canonicalUrl}
+              externalUrl={event.externalLink?.url}
+              externalLabel={event.externalLink?.label}
             />
-          </div>
-        )}
+          }
+        />
+
+        <AndereEvents events={otherEvents} />
       </main>
 
       <FooterSafeArea />
