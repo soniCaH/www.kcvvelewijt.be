@@ -1,12 +1,14 @@
 /**
  * Events list page (`/evenementen`).
  *
- * Renders the upcoming-only `EventRepository.findAll()` feed as a single-column,
- * month-grouped list of `<TicketStub>` with colour-coded filter chips (#1965 +
- * #1966) on a dark `jersey-deep-dark` field (design lock 6e §2). The
- * `<EventHero>` detail rebuild (#1967) arrives in a later Phase 6.E issue. The
- * `(main)` group hosts both this list and the `/evenementen/[slug]` detail;
- * `/events/*` 301s here (see `next.config.ts`).
+ * Renders the upcoming-only `EventRepository.findUpcomingForList()` feed — the
+ * merge of `event` docs and `articleType:event` articles (#1968) — as a
+ * single-column, month-grouped list of `<TicketStub>` with colour-coded filter
+ * chips (#1965 + #1966) on a dark `jersey-deep-dark` field (design lock 6e §2).
+ * Event-doc tickets link to `/evenementen/[slug]`, article tickets to
+ * `/nieuws/[slug]` (the repo resolves each item's `href`). The `(main)` group
+ * hosts both this list and the `/evenementen/[slug]` detail; `/events/*` 301s
+ * here (see `next.config.ts`).
  *
  * The filter chips, empty / filtered-to-zero states, and analytics live in the
  * `<EventsBrowser>` client shell; this server page only fetches the feed.
@@ -47,7 +49,7 @@ export default async function EvenementenPage() {
   const events = await runPromise(
     Effect.gen(function* () {
       const repo = yield* EventRepository;
-      return yield* repo.findAll();
+      return yield* repo.findUpcomingForList();
     }),
   );
 

@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import type { EventVM } from "@/lib/repositories/event.repository";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventMonthList } from "./EventMonthList";
 
-function ev(overrides: Partial<EventVM> & { id: string }): EventVM {
+function ev(
+  overrides: Partial<EventListItemVM> & { id: string },
+): EventListItemVM {
   return {
     title: "Evenement",
-    slug: overrides.id,
+    href: `/evenementen/${overrides.id}`,
     eventType: "Clubevent",
     dateStart: "2026-09-12T18:00:00Z",
     dateEnd: null,
     location: "Sportpark Driesput, Elewijt",
-    href: "#",
-    featuredOnHome: false,
-    coverImageUrl: null,
+    source: "event",
     ...overrides,
   };
 }

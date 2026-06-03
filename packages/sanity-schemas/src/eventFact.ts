@@ -24,6 +24,22 @@ export const eventFact = defineType({
       validation: (r) => r.required(),
     }),
     defineField({
+      name: 'eventType',
+      title: 'Event type',
+      type: 'string',
+      description:
+        'Categorie van het evenement — bepaalt de kleurcode in de /evenementen-agenda wanneer dit event-artikel in de feed verschijnt. Laat leeg voor "Andere".',
+      options: {
+        list: [
+          {title: 'Clubevent', value: 'Clubevent'},
+          {title: 'Supportersactiviteit', value: 'Supportersactiviteit'},
+          {title: 'Jeugdwerking', value: 'Jeugdwerking'},
+          {title: 'Andere', value: 'Andere'},
+        ],
+        layout: 'radio',
+      },
+    }),
+    defineField({
       name: 'date',
       title: 'Start date',
       type: 'date',

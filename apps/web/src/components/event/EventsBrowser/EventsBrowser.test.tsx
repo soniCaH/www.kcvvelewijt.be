@@ -2,29 +2,29 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import type { EventVM } from "@/lib/repositories/event.repository";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { EventsBrowser } from "./EventsBrowser";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 const mockTrackEvent = vi.mocked(trackEvent);
 
-function ev(overrides: Partial<EventVM> & { id: string }): EventVM {
+function ev(
+  overrides: Partial<EventListItemVM> & { id: string },
+): EventListItemVM {
   return {
     title: "Evenement",
-    slug: overrides.id,
+    href: `/evenementen/${overrides.id}`,
     eventType: "Clubevent",
     dateStart: "2026-09-12T18:00:00Z",
     dateEnd: null,
     location: "Sportpark Driesput, Elewijt",
-    href: "#",
-    featuredOnHome: false,
-    coverImageUrl: null,
+    source: "event",
     ...overrides,
   };
 }
 
-const EVENTS: EventVM[] = [
+const EVENTS: EventListItemVM[] = [
   ev({
     id: "spaghetti-avond",
     title: "Spaghetti-avond",

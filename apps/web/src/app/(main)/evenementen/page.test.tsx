@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
-import type { EventVM } from "@/lib/repositories/event.repository";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 
-// Mock the data layer — the GROQ upcoming-only filter is exercised in the
-// repository test; here we drive the page from a fixed list.
+// Mock the data layer — the GROQ upcoming-only filter + the event/article merge
+// are exercised in the repository test; here we drive the page from a fixed
+// already-merged list.
 vi.mock("@/lib/effect/runtime", () => ({
   runPromise: vi.fn(),
 }));
@@ -16,18 +17,16 @@ vi.mock("@/lib/repositories/event.repository", () => ({
 const { runPromise } = await import("@/lib/effect/runtime");
 const mockRunPromise = vi.mocked(runPromise);
 
-function makeEvent(overrides: Partial<EventVM> = {}): EventVM {
+function makeEvent(overrides: Partial<EventListItemVM> = {}): EventListItemVM {
   return {
     id: "event-1",
     title: "Spaghetti-avond",
-    slug: "spaghetti-avond",
+    href: "/evenementen/spaghetti-avond",
     eventType: "Clubevent",
     dateStart: "2026-09-12T18:00:00Z",
     dateEnd: null,
     location: "Sportpark Driesput, Elewijt",
-    href: "#",
-    featuredOnHome: false,
-    coverImageUrl: null,
+    source: "event",
     ...overrides,
   };
 }
@@ -57,25 +56,32 @@ describe("/evenementen page", () => {
     expect(screen.getByText(/Geen evenementen gepland/i)).toBeInTheDocument();
   });
 
-  it("renders a ticket linking to /evenementen/[slug] per upcoming event", async () => {
+  it("renders a ticket per feed item, linking event docs to /evenementen and event articles to /nieuws", async () => {
     mockRunPromise.mockResolvedValue([
-      makeEvent({ slug: "spaghetti-avond", title: "Spaghetti-avond" }),
       makeEvent({
-        id: "event-2",
-        slug: "supportersreis",
-        title: "Supportersreis",
-        eventType: "Supportersactiviteit",
+        href: "/evenementen/spaghetti-avond",
+        title: "Spaghetti-avond",
+      }),
+      makeEvent({
+        id: "article-1",
+        href: "/nieuws/jeugdtornooi-verslag",
+        title: "Jeugdtornooi",
+        eventType: "Jeugdwerking",
+        source: "article",
+        dateStart: "2026-09-20T10:00:00Z",
       }),
     ]);
 
     const EvenementenPage = (await import("./page")).default;
     render(await EvenementenPage());
 
+    // Event-doc ticket → detail route; article ticket → the article itself.
     expect(
       screen.getByRole("link", { name: /Spaghetti-avond/i }),
     ).toHaveAttribute("href", "/evenementen/spaghetti-avond");
-    expect(
-      screen.getByRole("link", { name: /Supportersreis/i }),
-    ).toHaveAttribute("href", "/evenementen/supportersreis");
+    expect(screen.getByRole("link", { name: /Jeugdtornooi/i })).toHaveAttribute(
+      "href",
+      "/nieuws/jeugdtornooi-verslag",
+    );
   });
 });
