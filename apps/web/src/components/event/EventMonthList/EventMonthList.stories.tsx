@@ -20,8 +20,17 @@ function ev(overrides: Partial<EventVM> & { id: string }): EventVM {
 const meta = {
   title: "Features/Calendar/EventMonthList",
   component: EventMonthList,
-  parameters: { layout: "padded" },
+  parameters: { layout: "fullscreen" },
   tags: ["autodocs"],
+  // The month headings are cream-toned for the dark `/evenementen` page, so the
+  // story renders on the jersey-deep-dark field to keep them legible.
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep-dark p-6">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof EventMonthList>;
 
 export default meta;
