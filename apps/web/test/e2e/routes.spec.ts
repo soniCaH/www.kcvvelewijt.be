@@ -101,10 +101,10 @@ test.describe("dynamic routes", () => {
   });
 
   test("/evenementen/[slug]", async ({ page }) => {
-    // Slugs are still discovered from the sitemap's `/events/` entries until the
-    // sitemap is migrated in #1969; the detail page itself lives at the
-    // canonical `/evenementen/[slug]`, so hit that directly (the redirect is
-    // covered by next.config.test.ts).
+    // Event slugs are discovered from the sitemap's canonical `/evenementen/`
+    // entries (#1969 migrated the sitemap off `/events/`). The legacy
+    // `/events/[slug]` → `/evenementen/[slug]` redirect is covered by
+    // next.config.test.ts.
     const slug = fixtures.eventSlug;
     test.skip(!slug, "no event slugs in sitemap");
     await smokeTest(page, { path: `/evenementen/${slug}` });

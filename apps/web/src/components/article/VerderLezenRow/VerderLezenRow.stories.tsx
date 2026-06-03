@@ -149,7 +149,7 @@ export const SliderOverflow: Story = {
       },
       {
         title: "Steakfestijn 2026",
-        href: "/events/steakfestijn-2026",
+        href: "/evenementen/steakfestijn-2026",
         imageUrl: fixtureImage("event-cover", 0),
         imageAlt: "Steakfestijn afbeelding",
         badge: "EVENEMENT",

@@ -171,7 +171,7 @@ export const mockResponsibilityPaths: ResponsibilityPath[] = [
       {
         order: 1,
         description: "Check de evenementenpagina voor beschikbare stages",
-        link: "/events",
+        link: "/evenementen",
       },
       {
         order: 2,

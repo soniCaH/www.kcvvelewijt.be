@@ -29,6 +29,8 @@ interface ArticleSitemapRow {
 interface EventSitemapRow {
   slug: string;
   updatedAt: string;
+  /** OG image URL (ogImage over coverImage), or null when the event has neither. */
+  image: string | null;
 }
 
 interface SlugRow {
@@ -52,7 +54,8 @@ const ARTICLE_SITEMAP_QUERY = `*[_type == "article" && defined(slug.current) && 
 // portable subtract-duration helper across Sanity API versions.
 const EVENT_SITEMAP_QUERY = `*[_type == "event" && defined(slug.current) && coalesce(dateEnd, dateStart) > $cutoff] | order(dateStart asc) {
   "slug": slug.current,
-  "updatedAt": _updatedAt
+  "updatedAt": _updatedAt,
+  "image": coalesce(ogImage.asset->url, coverImage.asset->url) + "?w=1200&h=630&fit=crop&fm=webp&q=80"
 }`;
 
 const PLAYER_SITEMAP_QUERY = `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] {
@@ -171,10 +174,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const eventEntries = events.map((event) => ({
-    url: `${SITE_CONFIG.siteUrl}/events/${event.slug}`,
+    url: `${SITE_CONFIG.siteUrl}/evenementen/${event.slug}`,
     lastModified: new Date(event.updatedAt),
     changeFrequency: "weekly" as const,
     priority: 0.6,
+    // Google image-sitemap extension — only when the event has a cover/OG image.
+    ...(event.image ? { images: [event.image] } : {}),
   }));
 
   const playerEntries = players.map((p) => ({
