@@ -7,7 +7,7 @@ export default defineCliConfig({
   },
   deployment: {
     appId: 'spu38xebdj9gax6q21ibckzf',
-    autoUpdates: true,
+    autoUpdates: false,
   },
   typegen: {
     path: '../web/src/lib/repositories/*.ts',
