@@ -91,14 +91,18 @@ export const buildSeniorMenuItem = (
 ): MenuItem | null => {
   if (!team?.slug) return null;
   const href = `/ploegen/${team.slug}`;
+  // The team detail page is a single-scroll composition (Phase 6.C); sub-items
+  // jump to in-page section anchors (smooth-scrolled via globals.css), not the
+  // retired `?tab=` query params. Anchor ids mirror the `<section id>` values in
+  // `ploegen/[slug]/page.tsx`. "Info" lands on the page top (hero/overview).
   return {
     label,
     href,
     children: [
       { label: "Info", href },
-      { label: "Spelers & Staff", href: `${href}?tab=opstelling` },
-      { label: "Wedstrijden", href: `${href}?tab=wedstrijden` },
-      { label: "Stand", href: `${href}?tab=klassement` },
+      { label: "Spelers & Staff", href: `${href}#spelers` },
+      { label: "Wedstrijden", href: `${href}#wedstrijden` },
+      { label: "Stand", href: `${href}#klassement` },
     ],
   };
 };

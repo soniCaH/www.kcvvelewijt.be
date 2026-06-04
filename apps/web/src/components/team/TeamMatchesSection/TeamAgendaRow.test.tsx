@@ -188,6 +188,25 @@ describe("TeamAgendaRow", () => {
     });
   });
 
+  describe("Link to match detail", () => {
+    it("wraps the row in a link to /wedstrijd/{id}", () => {
+      render(<TeamAgendaRow match={{ ...BASE, id: 4242 }} />);
+      expect(screen.getByRole("link").getAttribute("href")).toBe(
+        "/wedstrijd/4242",
+      );
+    });
+
+    it("uses the full home–away label as the link's accessible name", () => {
+      render(<TeamAgendaRow match={BASE} />);
+      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      // Lock the full accessible-name contract — both teams in home→away order,
+      // a space-padded dash separator, plus the date suffix (see `matchLabel`
+      // in TeamAgendaRow). The `[–—-]` class tolerates en-/em-dash or hyphen
+      // without locking the exact glyph, but still fails on a format change.
+      expect(label).toMatch(/^KCVV Elewijt [–—-] FC Opponent, 15 aug$/);
+    });
+  });
+
   describe("Team designation (team_label)", () => {
     it("renders the opponent's team designation suffix", () => {
       render(

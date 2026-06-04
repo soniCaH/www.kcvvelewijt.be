@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   staticMenuItems,
   buildMenuItems,
+  buildSeniorMenuItem,
   buildJeugdItem,
   isMenuItemActive,
   flattenChildren,
@@ -135,6 +136,35 @@ describe("buildMenuItems", () => {
 
     const club = result.find((item) => item.label === "De club");
     expect(club?.childGroups?.length).toBeGreaterThan(0);
+  });
+});
+
+describe("buildSeniorMenuItem", () => {
+  const team = { slug: "a-ploeg", name: "KCVV Elewijt A" } as TeamNavVM;
+
+  it("returns null when the team has no slug", () => {
+    expect(buildSeniorMenuItem(undefined, "A-Ploeg")).toBeNull();
+    expect(
+      buildSeniorMenuItem({ slug: "", name: "x" } as TeamNavVM, "A-Ploeg"),
+    ).toBeNull();
+  });
+
+  it("points sub-items at single-scroll section anchors, not ?tab= params", () => {
+    const item = buildSeniorMenuItem(team, "A-Ploeg");
+    expect(item).not.toBeNull();
+    const hrefs = Object.fromEntries(
+      (item!.children ?? []).map((c) => [c.label, c.href]),
+    );
+    expect(hrefs).toEqual({
+      Info: "/ploegen/a-ploeg",
+      "Spelers & Staff": "/ploegen/a-ploeg#spelers",
+      Wedstrijden: "/ploegen/a-ploeg#wedstrijden",
+      Stand: "/ploegen/a-ploeg#klassement",
+    });
+    // No legacy tab query params survive.
+    for (const child of item!.children ?? []) {
+      expect(child.href).not.toContain("?tab=");
+    }
   });
 });
 
@@ -305,6 +335,19 @@ describe("isMenuItemActive", () => {
     expect(isMenuItemActive("/club", "/club/geschiedenis", params())).toBe(
       true,
     );
+  });
+
+  it("does not mark a section-anchor child active (no scroll-spy)", () => {
+    // Hash-only differences cannot be resolved from the pathname alone, so a
+    // single-scroll section child stays inactive — the team's own page (and its
+    // bare "Info" child / parent) carries the active marker instead.
+    expect(
+      isMenuItemActive(
+        "/ploegen/a-ploeg#wedstrijden",
+        "/ploegen/a-ploeg",
+        params(),
+      ),
+    ).toBe(false);
   });
 });
 

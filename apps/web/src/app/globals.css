@@ -13,11 +13,11 @@
   --color-kcvv-green-dark-hover: #006b43;
 
   /* Neutral Colors */
-  --color-kcvv-black: #1E2024;
+  --color-kcvv-black: #1e2024;
   --color-kcvv-gray-blue: #31404b;
   --color-kcvv-gray-dark: #292c31;
-  --color-kcvv-gray: #62656A;
-  --color-kcvv-gray-light: #CCC;
+  --color-kcvv-gray: #62656a;
+  --color-kcvv-gray-light: #ccc;
   --color-kcvv-white: #fefefe;
 
   /* Foundation Grays */
@@ -35,12 +35,12 @@
   --color-green--bright--alpha--75: rgba(74, 207, 82, 0.75);
   --color-green--bright--alpha--25: rgba(74, 207, 82, 0.25);
   --color-green--dark: #008755;
-  --color-black: #1E2024;
-  --color-gray--light: #CCC;
-  --color-gray--medium: #62656A;
+  --color-black: #1e2024;
+  --color-gray--light: #ccc;
+  --color-gray--medium: #62656a;
   --color-gray--dark: #292c31;
   --color-gray-blue: #31404b;
-  --color-green: #BADA55;
+  --color-green: #bada55;
   --color-green-dark-hover: #006b43;
 
   /* Layout Variables */
@@ -67,13 +67,25 @@
    inline use where a 96 px barber-pole bar is too heavy. */
 
 @keyframes kcvv-scarf-scroll {
-  0% { background-position: 0 0; }
-  100% { background-position: 80px 0; }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 80px 0;
+  }
 }
 
 @keyframes kcvv-spinner-dot-pulse {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
-  40% { opacity: 1; transform: scale(1); }
+  0%,
+  80%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .kcvv-spinner-scarf {
@@ -141,10 +153,22 @@
   );
 }
 
-.kcvv-spinner-scarf--sm { width: 96px; height: 16px; }
-.kcvv-spinner-scarf--md { width: 180px; height: 28px; }
-.kcvv-spinner-scarf--lg { width: 240px; height: 36px; }
-.kcvv-spinner-scarf--xl { width: 360px; height: 56px; }
+.kcvv-spinner-scarf--sm {
+  width: 96px;
+  height: 16px;
+}
+.kcvv-spinner-scarf--md {
+  width: 180px;
+  height: 28px;
+}
+.kcvv-spinner-scarf--lg {
+  width: 240px;
+  height: 36px;
+}
+.kcvv-spinner-scarf--xl {
+  width: 360px;
+  height: 56px;
+}
 
 .kcvv-spinner-pulse {
   display: inline-flex;
@@ -160,8 +184,12 @@
   animation: kcvv-spinner-dot-pulse 1.2s ease-in-out infinite;
 }
 
-.kcvv-spinner-pulse > span:nth-child(2) { animation-delay: 0.15s; }
-.kcvv-spinner-pulse > span:nth-child(3) { animation-delay: 0.3s; }
+.kcvv-spinner-pulse > span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.kcvv-spinner-pulse > span:nth-child(3) {
+  animation-delay: 0.3s;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .kcvv-spinner-scarf::before,
@@ -280,12 +308,12 @@
   --color-ring-kcvv-green: #4acf52;
 
   /* Neutral Colors */
-  --color-kcvv-black: #1E2024;
-  --color-kcvv-dark-blue: #1E2836;
+  --color-kcvv-black: #1e2024;
+  --color-kcvv-dark-blue: #1e2836;
   --color-kcvv-gray-blue: #31404b;
   --color-kcvv-gray-dark: #292c31;
-  --color-kcvv-gray: #62656A;
-  --color-kcvv-gray-light: #CCC;
+  --color-kcvv-gray: #62656a;
+  --color-kcvv-gray-light: #ccc;
   --color-kcvv-white: #fefefe;
 
   /* Foundation Grays */
@@ -308,27 +336,39 @@
   /* Font Families
      - Montserrat & IBM Plex Mono: self-hosted via next/font/google (CSS vars injected on <html>)
      - Quasimoda & Stenciletta: loaded via Adobe Typekit (afterInteractive) */
-  --font-family-title: quasimoda, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
-  --font-family-body: var(--font-montserrat), -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
-  --font-family-alt: stenciletta, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
-  --font-family-mono: var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", "Courier", monospace;
+  --font-family-title:
+    quasimoda, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI",
+    "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  --font-family-body:
+    var(--font-montserrat), -apple-system, system-ui, "BlinkMacSystemFont",
+    "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  --font-family-alt:
+    stenciletta, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI",
+    "Roboto", "Helvetica Neue", "Arial", sans-serif;
+  --font-family-mono:
+    var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", "Courier",
+    monospace;
 
   /* Font Sizes with Line Heights */
-  --font-size-xs: 0.75rem;      /* 12px */
-  --font-size-sm: 0.8125rem;    /* 13px */
-  --font-size-base: 1rem;       /* 16px */
-  --font-size-lg: 1.125rem;     /* 18px */
-  --font-size-xl: 1.25rem;      /* 20px */
-  --font-size-2xl: 1.375rem;    /* 22px */
-  --font-size-3xl: 1.5rem;      /* 24px */
-  --font-size-4xl: 1.75rem;     /* 28px */
-  --font-size-5xl: 2rem;        /* 32px */
-  --font-size-6xl: 3rem;        /* 48px */
-  --font-size-hero: clamp(3rem, 7vw, 5.5rem);  /* 48px → 88px, responsive hero heading */
-  --font-size-stat: 2.5rem;     /* 40px */
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.8125rem; /* 13px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-lg: 1.125rem; /* 18px */
+  --font-size-xl: 1.25rem; /* 20px */
+  --font-size-2xl: 1.375rem; /* 22px */
+  --font-size-3xl: 1.5rem; /* 24px */
+  --font-size-4xl: 1.75rem; /* 28px */
+  --font-size-5xl: 2rem; /* 32px */
+  --font-size-6xl: 3rem; /* 48px */
+  --font-size-hero: clamp(
+    3rem,
+    7vw,
+    5.5rem
+  ); /* 48px → 88px, responsive hero heading */
+  --font-size-stat: 2.5rem; /* 40px */
 
   /* Line Heights */
-  --line-height-hero: 0.9;      /* hero headings — tight stacking for large type */
+  --line-height-hero: 0.9; /* hero headings — tight stacking for large type */
   --line-height-tight: 1.2;
   --line-height-snug: 1.25;
   --line-height-normal: 1.5;
@@ -341,31 +381,31 @@
   --font-weight-bold: 700;
 
   /* Letter Spacing */
-  --letter-spacing-label: 0.14em;   /* uppercase kicker / label */
-  --letter-spacing-caps: 0.08em;    /* uppercase links / footer captions */
+  --letter-spacing-label: 0.14em; /* uppercase kicker / label */
+  --letter-spacing-caps: 0.08em; /* uppercase links / footer captions */
 
   /* ===== Spacing ===== */
 
-  --spacing-0_75: 0.75rem;    /* 12px - mobile padding */
-  --spacing-15: 3.75rem;      /* 60px */
-  --spacing-17_5: 4.375rem;   /* 70px */
-  --spacing-22_5: 5.625rem;   /* 90px */
-  --spacing-35: 35rem;        /* Hero image height */
+  --spacing-0_75: 0.75rem; /* 12px - mobile padding */
+  --spacing-15: 3.75rem; /* 60px */
+  --spacing-17_5: 4.375rem; /* 70px */
+  --spacing-22_5: 5.625rem; /* 90px */
+  --spacing-35: 35rem; /* Hero image height */
 
   /* ===== Breakpoints ===== */
 
-  --breakpoint-sm: 640px;     /* Tailwind sm */
-  --breakpoint-md: 768px;     /* Tailwind md - Foundation medium */
-  --breakpoint-desk: 960px;   /* Gatsby desktop breakpoint (60rem) */
-  --breakpoint-lg: 1024px;    /* Tailwind lg */
-  --breakpoint-xl: 1280px;    /* Tailwind xl - Foundation xlarge */
-  --breakpoint-2xl: 1536px;   /* Tailwind 2xl */
+  --breakpoint-sm: 640px; /* Tailwind sm */
+  --breakpoint-md: 768px; /* Tailwind md - Foundation medium */
+  --breakpoint-desk: 960px; /* Gatsby desktop breakpoint (60rem) */
+  --breakpoint-lg: 1024px; /* Tailwind lg */
+  --breakpoint-xl: 1280px; /* Tailwind xl - Foundation xlarge */
+  --breakpoint-2xl: 1536px; /* Tailwind 2xl */
 
   /* ===== Max Widths ===== */
 
-  --max-width-inner: 60rem;       /* 960px */
-  --max-width-inner-lg: 70rem;    /* 1120px */
-  --max-width-outer: 90rem;       /* 1440px */
+  --max-width-inner: 60rem; /* 960px */
+  --max-width-inner-lg: 70rem; /* 1120px */
+  --max-width-outer: 90rem; /* 1440px */
 
   /* ===== Border Radius ===== */
 
@@ -376,29 +416,30 @@
 
   --shadow-none: none;
   --shadow-sm: 0 2px 5px 0 rgba(0, 0, 0, 0.16);
-  --shadow-DEFAULT: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  --shadow-DEFAULT:
+    0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   --shadow-md: 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 0 10px rgba(0, 0, 0, 0.7);
   --shadow-green: 0 0 6px 1px rgba(74, 207, 82, 0.5);
-  --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.15);   /* soft elevated card hover */
+  --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.15); /* soft elevated card hover */
   --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-input-focus: 0 0 5px #cacaca;
 
   /* ===== Redesign / Cream Surface (Phase 0) ===== */
 
   /* Surface */
-  --color-cream:        #f5f1e6;
-  --color-cream-soft:   #ede8da;
-  --color-cream-deep:   #e1d7bf;
+  --color-cream: #f5f1e6;
+  --color-cream-soft: #ede8da;
+  --color-cream-deep: #e1d7bf;
 
   /* Ink */
-  --color-ink:          #0a0a0a;
-  --color-ink-soft:     #1f1f1f;
-  --color-ink-muted:    #6b6b6b;
+  --color-ink: #0a0a0a;
+  --color-ink-soft: #1f1f1f;
+  --color-ink-muted: #6b6b6b;
 
   /* Brand green (anchored to existing #4acf52 / #008755) */
-  --color-jersey:       #4acf52;
-  --color-jersey-deep:  #008755;
+  --color-jersey: #4acf52;
+  --color-jersey-deep: #008755;
   --color-jersey-bright: #22c55e;
   /* Desaturated retro forest — third stop of `--gradient-jersey-deep-overlay`
      and any darker-jersey accent (e.g. <TapeStrip warm> story border).
@@ -407,55 +448,55 @@
 
   /* Warm yellow — accent text (#1698), tape (`--tape-warm`), button stripes.
      Single source of truth for the hue; alpha variants derive via color-mix. */
-  --color-warm:         #f0c264;
+  --color-warm: #f0c264;
 
   /* Card-red — Phase 6.B (#1909). Severity tier for the CANC `<MatchStatusBadge>`
      tint. Locked at #c93f1c by 6.B.d5; designed to pair with cream foreground
      text. Reserved for an "alert (dead)" severity tier — reusable elsewhere
      once a system-alert vocabulary lands. */
-  --color-card-red:     #c93f1c;
+  --color-card-red: #c93f1c;
 
   /* Edges */
-  --color-paper-edge:   #d9d2bd;
+  --color-paper-edge: #d9d2bd;
 
   /* ===== Redesign / Typography (Phase 0) ===== */
 
   /* Font families — Freight already loaded via existing Adobe Typekit kit */
-  --font-display:     "freight-display-pro", georgia, "Times New Roman", serif;
+  --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
   --font-display-big: "freight-big-pro", georgia, "Times New Roman", serif;
   /* --font-body and --font-mono are existing — Quasimoda flips title→body in Phase 9 cleanup */
 
   /* Type scale (fluid via clamp) */
-  --text-display-2xl:        clamp(3.5rem, 1.5rem + 8vw, 6rem);
-  --text-display-2xl--lh:    1.0;
-  --text-display-xl:         clamp(2.75rem, 1.5rem + 5vw, 4.5rem);
-  --text-display-xl--lh:     1.05;
-  --text-display-lg:         clamp(2rem, 1.25rem + 3vw, 3rem);
-  --text-display-lg--lh:     1.1;
-  --text-display-md:         clamp(1.5rem, 1rem + 1.5vw, 2rem);
-  --text-display-md--lh:     1.2;
-  --text-display-sm:         clamp(1.25rem, 1rem + 1vw, 1.5rem);
-  --text-display-sm--lh:     1.3;
-  --text-body-lg:            1.125rem;
-  --text-body-lg--lh:        1.55;
-  --text-body-md:            1rem;
-  --text-body-md--lh:        1.6;
-  --text-body-sm:            0.875rem;
-  --text-body-sm--lh:        1.55;
-  --text-mono-md:            0.875rem;
-  --text-mono-md--lh:        1.4;
-  --text-mono-sm:            0.75rem;
-  --text-mono-sm--lh:        1.4;
-  --text-label:              0.6875rem;
-  --text-label--lh:          1;
-  --text-label--tracking:    0.08em;
+  --text-display-2xl: clamp(3.5rem, 1.5rem + 8vw, 6rem);
+  --text-display-2xl--lh: 1;
+  --text-display-xl: clamp(2.75rem, 1.5rem + 5vw, 4.5rem);
+  --text-display-xl--lh: 1.05;
+  --text-display-lg: clamp(2rem, 1.25rem + 3vw, 3rem);
+  --text-display-lg--lh: 1.1;
+  --text-display-md: clamp(1.5rem, 1rem + 1.5vw, 2rem);
+  --text-display-md--lh: 1.2;
+  --text-display-sm: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  --text-display-sm--lh: 1.3;
+  --text-body-lg: 1.125rem;
+  --text-body-lg--lh: 1.55;
+  --text-body-md: 1rem;
+  --text-body-md--lh: 1.6;
+  --text-body-sm: 0.875rem;
+  --text-body-sm--lh: 1.55;
+  --text-mono-md: 0.875rem;
+  --text-mono-md--lh: 1.4;
+  --text-mono-sm: 0.75rem;
+  --text-mono-sm--lh: 1.4;
+  --text-label: 0.6875rem;
+  --text-label--lh: 1;
+  --text-label--tracking: 0.08em;
 
   /* ===== Redesign / Layout & Motion (Phase 0) ===== */
 
-  --container-prose:    680px;
-  --container-wide:     1040px;
-  --container-page:     1120px;
-  --container-default:  1200px;
+  --container-prose: 680px;
+  --container-wide: 1040px;
+  --container-page: 1120px;
+  --container-default: 1200px;
   /* --max-width-outer (1440px) already exists — reuse for full-bleed */
 
   /* Pool tuned twice on 2026-04-29 per owner feedback. Original master
@@ -465,10 +506,10 @@
      individual rotation is barely perceptible but breaks the perfect-grid
      feel. If a phase wants more dramatic tilt for emphasis cards, set
      <TapedCard rotation> explicitly per card. */
-  --rotate-tape-a:     -0.5deg;
-  --rotate-tape-b:     -0.25deg;
-  --rotate-tape-c:      0.25deg;
-  --rotate-tape-d:      0.5deg;
+  --rotate-tape-a: -0.5deg;
+  --rotate-tape-b: -0.25deg;
+  --rotate-tape-c: 0.25deg;
+  --rotate-tape-d: 0.5deg;
 
   /* Polaroid-scale tape rotations — Phase 5 (#1853). Intentionally outside
      the sub-degree pool above: the <EventFactInline> polaroid composition
@@ -476,18 +517,18 @@
      card reads as "hand-pinned" rather than perfectly aligned. Scoped to
      the polaroid composition only; the sub-degree pool stays canonical
      for grid cards per feedback_visual_preferences + Phase 1 §11.5. */
-  --rotate-tape-polaroid-a:  -5deg;
-  --rotate-tape-polaroid-b:   4deg;
+  --rotate-tape-polaroid-a: -5deg;
+  --rotate-tape-polaroid-b: 4deg;
 
   /* Warm-yellow tape — Phase 4. Used on jersey-deep surfaces where the
      default jersey-green tape lacks contrast (e.g. <FeaturedEventBand>).
      Derives from `--color-warm` so the hue lives in exactly one place. */
-  --tape-warm:         color-mix(in srgb, var(--color-warm) 85%, transparent);
+  --tape-warm: color-mix(in srgb, var(--color-warm) 85%, transparent);
 
   /* Cream-soft tape — Phase 4.5 (R9). Third tape colour that nearly
      disappears into the paper, visible by edge and shadow only. Breaks
      the warm/jersey rhythm per the photo-treatment slot cycle table. */
-  --color-tape-cream:  rgb(232 224 200 / 0.85);
+  --color-tape-cream: rgb(232 224 200 / 0.85);
 
   /* Newsprint warm-tint filter — Phase 4.5 (R9). Applied to all <TapedFigure>
      images for a "very subtle warm tint" (slight cream shift in highlights,
@@ -502,22 +543,22 @@
      network request). */
   --pattern-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 
-  --shadow-paper-sm:   4px 4px 0 0 var(--color-ink);
-  --shadow-paper-md:   6px 6px 0 0 var(--color-ink);
+  --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
+  --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
   --shadow-paper-lift: 8px 8px 0 0 var(--color-ink);
-  --shadow-soft:       0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
 
   /* Asymmetric photo shadow — Phase 4.5 (R9). Different cadence from
      `--shadow-paper-{sm,md,lg}` (symmetric, for cards): tape-shadow offsets
      2px right + 4px down ("leans forward" feel). Hover-lift moves to
      `tape-lift` to suggest the photo rising off the page. Used by
      <TapedFigure>. */
-  --shadow-photo-tape:      2px 4px 0 0 var(--color-ink);
+  --shadow-photo-tape: 2px 4px 0 0 var(--color-ink);
   --shadow-photo-tape-lift: 4px 8px 0 0 var(--color-ink);
 
-  --motion-fast:  150ms ease-out;
-  --motion-base:  240ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --motion-tape:  300ms ease-out;
+  --motion-fast: 150ms ease-out;
+  --motion-base: 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-tape: 300ms ease-out;
 
   /* ===== Redesign / Pattern Tokens (Phase 0) ===== */
 
@@ -570,9 +611,9 @@
      surfaces. Tones tuned for fanzine print feel: alert = dusty brick red,
      warning = aged mustard ochre. Legacy kcvv-* equivalents stay defined
      for components still on the legacy vocabulary. */
-  --color-alert:        #b84a3a;
-  --color-alert-soft:   #e8d5cf;
-  --color-warning:      #c68b2c;
+  --color-alert: #b84a3a;
+  --color-alert-soft: #e8d5cf;
+  --color-warning: #c68b2c;
   --color-warning-soft: #ecddb8;
   /* Success body tint — desaturated sage. Pairs with the existing
      `--color-warning-soft` (mustard) and `--color-alert-soft` (dusty
@@ -598,8 +639,8 @@
      state. `--color-alert-soft` matches the alert border so the offset reads
      as part of the same alert moment instead of a generic gray drop. Mirrors
      the soft/soft-hover pair for state-machine symmetry. */
-  --shadow-paper-sm-alert:        4px 4px 0 0 var(--color-alert-soft);
-  --shadow-paper-sm-alert-hover:  3px 3px 0 0 var(--color-alert-soft);
+  --shadow-paper-sm-alert: 4px 4px 0 0 var(--color-alert-soft);
+  --shadow-paper-sm-alert-hover: 3px 3px 0 0 var(--color-alert-soft);
 }
 
 /* ===== Global Styles ===== */
@@ -621,7 +662,12 @@
   }
 
   /* Heading Styles */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-family-title);
     font-weight: var(--font-weight-bold);
     color: var(--color-kcvv-gray-blue);
@@ -630,21 +676,45 @@
   }
 
   /* Mobile Heading Sizes */
-  h1 { font-size: var(--font-size-4xl); }  /* 28px */
-  h2 { font-size: var(--font-size-2xl); }  /* 22px */
-  h3 { font-size: var(--font-size-xl); }   /* 20px */
-  h4 { font-size: var(--font-size-lg); }   /* 18px */
-  h5 { font-size: var(--font-size-base); } /* 16px */
-  h6 { font-size: var(--font-size-sm); }   /* 14px */
+  h1 {
+    font-size: var(--font-size-4xl);
+  } /* 28px */
+  h2 {
+    font-size: var(--font-size-2xl);
+  } /* 22px */
+  h3 {
+    font-size: var(--font-size-xl);
+  } /* 20px */
+  h4 {
+    font-size: var(--font-size-lg);
+  } /* 18px */
+  h5 {
+    font-size: var(--font-size-base);
+  } /* 16px */
+  h6 {
+    font-size: var(--font-size-sm);
+  } /* 14px */
 
   /* Desktop Heading Sizes */
   @media (min-width: 768px) {
-    h1 { font-size: var(--font-size-6xl); } /* 48px */
-    h2 { font-size: var(--font-size-5xl); } /* 32px */
-    h3 { font-size: var(--font-size-3xl); } /* 24px */
-    h4 { font-size: var(--font-size-2xl); } /* 22px */
-    h5 { font-size: var(--font-size-base); } /* 16px */
-    h6 { font-size: var(--font-size-sm); }   /* 14px */
+    h1 {
+      font-size: var(--font-size-6xl);
+    } /* 48px */
+    h2 {
+      font-size: var(--font-size-5xl);
+    } /* 32px */
+    h3 {
+      font-size: var(--font-size-3xl);
+    } /* 24px */
+    h4 {
+      font-size: var(--font-size-2xl);
+    } /* 22px */
+    h5 {
+      font-size: var(--font-size-base);
+    } /* 16px */
+    h6 {
+      font-size: var(--font-size-sm);
+    } /* 14px */
   }
 
   /* Font Family Utilities */
@@ -689,11 +759,17 @@
   .content-link {
     color: var(--color-kcvv-green-dark);
     text-decoration-line: underline;
-    text-decoration-color: color-mix(in srgb, var(--color-kcvv-green-bright) 30%, transparent);
+    text-decoration-color: color-mix(
+      in srgb,
+      var(--color-kcvv-green-bright) 30%,
+      transparent
+    );
     text-decoration-skip-ink: auto;
     text-underline-offset: 2px;
     text-decoration-thickness: 1px;
-    transition: color 0.3s ease, text-decoration-color 0.3s ease;
+    transition:
+      color 0.3s ease,
+      text-decoration-color 0.3s ease;
   }
 
   .content-link:hover {
@@ -738,7 +814,7 @@
 }
 
 .prose blockquote::before {
-  content: '\201C';
+  content: "\201C";
   color: var(--color-kcvv-green-bright);
   font-size: 15rem;
   line-height: 0.8;
@@ -751,7 +827,12 @@
 /* Editorial card overlay gradients — reference design tokens for consistency.
    Fallback rgba() line for browsers without relative color syntax support. */
 .editorial-card-overlay--default {
-  background: linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,32,36,0.5) 40%, rgba(30,32,36,0.1) 100%);
+  background: linear-gradient(
+    to top,
+    rgba(30, 32, 36, 0.95) 0%,
+    rgba(30, 32, 36, 0.5) 40%,
+    rgba(30, 32, 36, 0.1) 100%
+  );
   background: linear-gradient(
     to top,
     rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,
@@ -761,7 +842,12 @@
 }
 
 .editorial-card-overlay--nav {
-  background: linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%);
+  background: linear-gradient(
+    to top,
+    rgba(30, 32, 36, 0.95) 0%,
+    rgba(30, 40, 54, 0.6) 40%,
+    rgba(30, 40, 54, 0.2) 100%
+  );
   background: linear-gradient(
     to top,
     rgb(from var(--color-kcvv-black) r g b / 0.95) 0%,
@@ -799,7 +885,7 @@
 
 /* Utility Classes */
 .featured-border::before {
-  content: '';
+  content: "";
   display: block;
   width: 4rem;
   border-top: 2px solid var(--color-kcvv-green-bright);
@@ -817,9 +903,8 @@
   width: 4rem;
   bottom: -8px;
   left: 0;
-  content: '';
+  content: "";
 }
-
 
 /* ===== Article body — announcement / interview / transfer / event templates =====
 
@@ -857,7 +942,6 @@
   }
 }
 
-
 /* ===== Phases 5 + 6 (#1331, #1332): Overview-row stack =======================
 
    Consecutive `transferFact` / `eventFact` overview rows fuse into a
@@ -873,28 +957,27 @@
 
    The selector list groups both overview variants so a mixed stack
    (transferFact followed by eventFact, etc.) also flows seamlessly. */
-[data-testid='transfer-overview'],
-[data-testid='event-overview'] {
+[data-testid="transfer-overview"],
+[data-testid="event-overview"] {
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
 }
 
-[data-testid='transfer-overview']
-  + :is([data-testid='transfer-overview'], [data-testid='event-overview']),
-[data-testid='event-overview']
-  + :is([data-testid='transfer-overview'], [data-testid='event-overview']) {
+[data-testid="transfer-overview"]
+  + :is([data-testid="transfer-overview"], [data-testid="event-overview"]),
+[data-testid="event-overview"]
+  + :is([data-testid="transfer-overview"], [data-testid="event-overview"]) {
   margin-top: 0;
 }
 
-[data-testid='transfer-overview']:has(
-    + :is([data-testid='transfer-overview'], [data-testid='event-overview'])
-  ),
-[data-testid='event-overview']:has(
-    + :is([data-testid='transfer-overview'], [data-testid='event-overview'])
-  ) {
+[data-testid="transfer-overview"]:has(
+  + :is([data-testid="transfer-overview"], [data-testid="event-overview"])
+),
+[data-testid="event-overview"]:has(
+  + :is([data-testid="transfer-overview"], [data-testid="event-overview"])
+) {
   margin-bottom: 0;
 }
-
 
 /* ===== Phase 4: Mobile Optimizations ===== */
 
@@ -922,10 +1005,10 @@
 
 /* Hide native scrollbar — cross-browser utility for horizontal scroll containers */
 @utility scrollbar-hide {
-  scrollbar-width: none;            /* Firefox */
-  -ms-overflow-style: none;         /* IE / Edge */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge */
   &::-webkit-scrollbar {
-    display: none;                  /* Chrome, Safari, Opera */
+    display: none; /* Chrome, Safari, Opera */
   }
 }
 
@@ -945,8 +1028,12 @@
 
 /* ===== Carousel Progress Indicator ===== */
 @keyframes carousel-progress {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -955,6 +1042,20 @@
     animation-name: carousel-progress;
     animation-timing-function: linear;
     animation-fill-mode: forwards;
+  }
+}
+
+/* ===== Smooth in-page anchor scrolling ===== */
+/* Single-scroll section navigation (team detail section nav + the header team
+   dropdown) relies on hash anchors. Honour smooth scrolling for users who have
+   not requested reduced motion, and only when the page opts in via
+   `data-scroll-behavior="smooth"` on <html> (set in app/layout.tsx) — the same
+   signal Next.js reads to keep full route transitions instant while
+   same-document hash jumps animate. Section offset is handled per-section via
+   `scroll-mt-*`. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-scroll-behavior="smooth"] {
+    scroll-behavior: smooth;
   }
 }
 
