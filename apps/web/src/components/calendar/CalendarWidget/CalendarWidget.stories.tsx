@@ -3,9 +3,10 @@ import { within, userEvent } from "storybook/test";
 import { CalendarWidget } from "./CalendarWidget";
 import type {
   CalendarMatch,
-  CalendarEvent,
   CalendarTeamInfo,
 } from "@/app/(main)/kalender/utils";
+import { buildCalendarFeed } from "@/app/(main)/kalender/utils";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import CalendarLoading from "@/app/(main)/kalender/loading";
 import { fixtureImage } from "@test-fixtures/images";
 
@@ -56,12 +57,16 @@ const matches: CalendarMatch[] = [
   },
 ];
 
-const events: CalendarEvent[] = [
+const events: EventListItemVM[] = [
   {
     id: "e1",
     title: "Paastoernooi",
-    dateStart: "2026-03-20T10:00:00",
     href: "/evenementen/paastoernooi",
+    dateStart: "2026-03-20T10:00:00",
+    dateEnd: null,
+    eventType: "Clubevent",
+    location: "Sportpark Driesput, Elewijt",
+    source: "event",
   },
 ];
 
@@ -69,6 +74,8 @@ const teams: CalendarTeamInfo[] = [
   { id: "t1", name: "A-ploeg", psdId: 101, label: "A-ploeg" },
   { id: "t2", name: "U15 A", psdId: 103, label: "U15 A" },
 ];
+
+const feed = buildCalendarFeed(matches, events);
 
 const meta = {
   title: "Features/Calendar/CalendarWidget",
@@ -81,8 +88,7 @@ const meta = {
   },
   tags: ["autodocs"],
   args: {
-    matches,
-    events,
+    feed,
     teams,
   },
 } satisfies Meta<typeof CalendarWidget>;
@@ -104,6 +110,30 @@ export const WeekView: Story = {
   parameters: {
     nextjs: {
       navigation: { pathname: "/kalender", query: { view: "week" } },
+    },
+  },
+};
+
+/** By-type filter applied — only `Wedstrijden` (matches) survive the filter. */
+export const FilteredToWedstrijden: Story = {
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: "/kalender",
+        query: { view: "month", type: "Wedstrijden" },
+      },
+    },
+  },
+};
+
+/** Filtered-to-zero — a category with no upcoming items shows the reset state. */
+export const FilteredToZero: Story = {
+  parameters: {
+    nextjs: {
+      navigation: {
+        pathname: "/kalender",
+        query: { view: "month", type: "Supportersactiviteit" },
+      },
     },
   },
 };

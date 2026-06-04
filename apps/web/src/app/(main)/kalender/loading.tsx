@@ -43,16 +43,18 @@ export default function CalendarLoading() {
             />
           </div>
 
-          {/* Team filter tabs — pill-shaped placeholders matching FilterTabs (md) */}
+          {/* Type filter chips — pill placeholders matching KalenderFilterBar
+              (Alles · Wedstrijden · Clubevent · Supportersactiviteit ·
+              Jeugdwerking · Andere) */}
           <div
-            className="flex gap-2"
+            className="flex flex-wrap gap-2"
             data-testid="calendar-skeleton-filter-tabs"
           >
-            {["w-24", "w-20", "w-20", "w-24"].map((w, i) => (
+            {["w-16", "w-28", "w-24", "w-44", "w-28", "w-20"].map((w, i) => (
               <div
                 key={i}
-                className={`${w} h-[42px] animate-pulse rounded border-2 border-gray-300 bg-gray-100`}
-                /* h-[42px] ≈ py-3 × 2 + text-sm line-height, matching FilterTabs medium size */
+                className={`${w} h-[34px] animate-pulse rounded-full border-2 border-gray-300 bg-gray-100`}
+                /* h-[34px] ≈ py-1.5 × 2 + label line-height, matching KalenderFilterBar chips */
                 data-testid="skeleton-pill"
               />
             ))}

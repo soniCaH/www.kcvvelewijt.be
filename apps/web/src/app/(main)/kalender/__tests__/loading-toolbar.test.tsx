@@ -6,7 +6,7 @@
  *
  * The real toolbar has:
  * 1. Top row: view toggle (segmented control) + subscribe button
- * 2. Second row: FilterTabs (scrollable pill-shaped team filter tabs)
+ * 2. Second row: KalenderFilterBar (pill-shaped by-type colour chips)
  * 3. Calendar grid
  *
  * @see https://github.com/kcvvelewijt/www.kcvvelewijt.be/issues/1261
@@ -49,7 +49,7 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
     );
     expect(filterTabs).not.toBeNull();
 
-    // Should have at least 3 pill-shaped placeholders (Alle teams + 2 team tabs)
+    // Should have at least 3 pill placeholders (Alles + Wedstrijden + event types)
     const pills = filterTabs!.querySelectorAll("[data-testid='skeleton-pill']");
     expect(pills.length).toBeGreaterThanOrEqual(3);
   });

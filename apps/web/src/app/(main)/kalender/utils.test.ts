@@ -6,6 +6,7 @@ import { describe, it, expect } from "vitest";
 import {
   transformMatchToCalendar,
   eventListItemToCalendarEvent,
+  buildCalendarFeed,
   getMatchesForDay,
   getEventsForDay,
   getDaysInMonth,
@@ -329,5 +330,99 @@ describe("getMatchDotType", () => {
       awayTeam: { id: 2, name: "KCVV Elewijt A" },
     });
     expect(getMatchDotType(match)).toBe("away");
+  });
+});
+
+// ── buildCalendarFeed ─────────────────────────────────────────────────────
+
+describe("buildCalendarFeed", () => {
+  it("merges matches and events into one feed sorted chronologically by dateStart", () => {
+    const feed = buildCalendarFeed(
+      [
+        makeCalendarMatch({ id: 1, date: "2026-09-20T15:00:00Z" }),
+        makeCalendarMatch({ id: 2, date: "2026-09-12T18:00:00Z" }),
+      ],
+      [
+        makeEventListItem({ id: "e-late", dateStart: "2026-09-25T18:00:00Z" }),
+        makeEventListItem({
+          id: "a-early",
+          dateStart: "2026-09-14T10:00:00Z",
+          source: "article",
+          href: "/nieuws/a-early",
+        }),
+      ],
+    );
+
+    // 09-12 match · 09-14 article · 09-20 match · 09-25 event
+    expect(feed.map((item) => item.id)).toEqual([
+      "match-2",
+      "a-early",
+      "match-1",
+      "e-late",
+    ]);
+  });
+
+  it("tags matches as 'Wedstrijden' and events/articles with their eventType (null → 'Andere')", () => {
+    const feed = buildCalendarFeed(
+      [makeCalendarMatch({ id: 1, date: "2026-09-10T15:00:00Z" })],
+      [
+        makeEventListItem({
+          id: "clubevent",
+          dateStart: "2026-09-11T10:00:00Z",
+          eventType: "Clubevent",
+        }),
+        makeEventListItem({
+          id: "untyped",
+          dateStart: "2026-09-12T10:00:00Z",
+          eventType: null,
+        }),
+      ],
+    );
+
+    const typeById = Object.fromEntries(
+      feed.map((item) => [item.id, item.kalenderType]),
+    );
+    expect(typeById["match-1"]).toBe("Wedstrijden");
+    expect(typeById["clubevent"]).toBe("Clubevent");
+    expect(typeById["untyped"]).toBe("Andere");
+  });
+
+  it("discriminates by source — match items carry the CalendarMatch, event/article items the CalendarEvent with its resolved href", () => {
+    const [matchItem, eventItem, articleItem] = buildCalendarFeed(
+      [makeCalendarMatch({ id: 7, date: "2026-09-10T15:00:00Z" })],
+      [
+        makeEventListItem({
+          id: "evt",
+          dateStart: "2026-09-11T10:00:00Z",
+          source: "event",
+          href: "/evenementen/spaghetti-avond",
+        }),
+        makeEventListItem({
+          id: "art",
+          dateStart: "2026-09-12T10:00:00Z",
+          source: "article",
+          href: "/nieuws/jeugdtornooi",
+        }),
+      ],
+    );
+
+    // match item — id is source-prefixed so it can't collide with a Sanity _id.
+    expect(matchItem?.source).toBe("match");
+    if (matchItem?.source === "match") {
+      expect(matchItem.id).toBe("match-7");
+      expect(matchItem.match.id).toBe(7);
+    }
+
+    // event-doc item links to /evenementen/[slug].
+    expect(eventItem?.source).toBe("event");
+    if (eventItem && eventItem.source !== "match") {
+      expect(eventItem.event.href).toBe("/evenementen/spaghetti-avond");
+    }
+
+    // article item links to /nieuws/[slug].
+    expect(articleItem?.source).toBe("article");
+    if (articleItem && articleItem.source !== "match") {
+      expect(articleItem.event.href).toBe("/nieuws/jeugdtornooi");
+    }
   });
 });
