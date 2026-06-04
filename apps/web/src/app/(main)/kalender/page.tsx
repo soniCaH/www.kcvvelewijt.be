@@ -11,12 +11,15 @@ import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import {
   EventRepository,
-  type EventVM,
+  type EventListItemVM,
 } from "@/lib/repositories/event.repository";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { InteriorPageHero } from "@/components/layout";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
-import { transformMatchToCalendar } from "./utils";
+import {
+  transformMatchToCalendar,
+  eventListItemToCalendarEvent,
+} from "./utils";
 import type { CalendarMatch, CalendarEvent, CalendarTeamInfo } from "./utils";
 
 export const metadata: Metadata = {
@@ -90,10 +93,13 @@ async function fetchCalendarData(): Promise<CalendarData> {
           return map;
         }, new Map<number, CalendarMatch>());
 
-      // Fetch events (graceful degradation on failure)
-      const eventVMs = yield* eventRepo
-        .findAll()
-        .pipe(Effect.catchAll(() => Effect.succeed([] as EventVM[])));
+      // Fetch the merged event feed — `event` docs + `articleType:event`
+      // articles (Phase 6.E, #1968) — so event-articles surface on the
+      // calendar alongside matches. Graceful degradation on failure: a Sanity
+      // error yields an empty feed, not a crash.
+      const feedItems = yield* eventRepo
+        .findUpcomingForList()
+        .pipe(Effect.catchAll(() => Effect.succeed([] as EventListItemVM[])));
 
       const teamInfos: CalendarTeamInfo[] = teamsWithPsd.map((t) => ({
         id: t.id,
@@ -102,13 +108,11 @@ async function fetchCalendarData(): Promise<CalendarData> {
         label: t.name,
       }));
 
-      const events: CalendarEvent[] = eventVMs.map((e) => ({
-        id: e.id,
-        title: e.title,
-        dateStart: e.dateStart,
-        dateEnd: e.dateEnd ?? undefined,
-        href: e.href,
-      }));
+      // The repo already resolves each item's detail `href`
+      // (`/evenementen/[slug]` for event docs, `/nieuws/[slug]` for articles).
+      const events: CalendarEvent[] = feedItems.map(
+        eventListItemToCalendarEvent,
+      );
 
       return {
         matches: [...deduplicatedMatches.values()],
