@@ -16,11 +16,12 @@ import {
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { InteriorPageHero } from "@/components/layout";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
-import {
-  transformMatchToCalendar,
-  eventListItemToCalendarEvent,
+import { transformMatchToCalendar, buildCalendarFeed } from "./utils";
+import type {
+  CalendarMatch,
+  CalendarFeedItem,
+  CalendarTeamInfo,
 } from "./utils";
-import type { CalendarMatch, CalendarEvent, CalendarTeamInfo } from "./utils";
 
 export const metadata: Metadata = {
   title: "Wedstrijdkalender | KCVV Elewijt",
@@ -44,8 +45,7 @@ export const metadata: Metadata = {
 };
 
 interface CalendarData {
-  matches: CalendarMatch[];
-  events: CalendarEvent[];
+  feed: CalendarFeedItem[];
   teams: CalendarTeamInfo[];
 }
 
@@ -108,23 +108,25 @@ async function fetchCalendarData(): Promise<CalendarData> {
         label: t.name,
       }));
 
-      // The repo already resolves each item's detail `href`
-      // (`/evenementen/[slug]` for event docs, `/nieuws/[slug]` for articles).
-      const events: CalendarEvent[] = feedItems.map(
-        eventListItemToCalendarEvent,
+      // Compose matches + the event feed into one chronological, discriminated
+      // `CalendarFeedItem[]` (each tagged with its `kalenderType`). The widget
+      // filters this by type and projects it back to the renderers. The repo
+      // already resolved each event's detail href (`/evenementen/[slug]` for
+      // event docs, `/nieuws/[slug]` for articles).
+      const feed = buildCalendarFeed(
+        [...deduplicatedMatches.values()],
+        feedItems,
       );
 
       return {
-        matches: [...deduplicatedMatches.values()],
-        events,
+        feed,
         teams: teamInfos,
       };
     }).pipe(
       Effect.catchAll((error) => {
         console.error("[Calendar] Failed to fetch calendar data:", error);
         return Effect.succeed({
-          matches: [],
-          events: [],
+          feed: [],
           teams: [],
         } as CalendarData);
       }),
@@ -152,11 +154,7 @@ export default async function CalendarPage() {
       />
 
       <div className="mx-auto max-w-5xl px-4 py-10">
-        <CalendarWidget
-          matches={data.matches}
-          events={data.events}
-          teams={data.teams}
-        />
+        <CalendarWidget feed={data.feed} teams={data.teams} />
       </div>
     </div>
   );

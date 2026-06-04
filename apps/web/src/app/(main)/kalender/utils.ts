@@ -5,6 +5,10 @@
 import { DateTime } from "luxon";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
+import {
+  DEFAULT_EVENT_TYPE,
+  type EventType,
+} from "@/components/event/event-type-style";
 import type { MatchStatus } from "@/components/match/types";
 import { getScoreDisplay, type ScoreDisplay } from "@/lib/utils/match-display";
 export type { ScoreDisplay } from "@/lib/utils/match-display";
@@ -90,6 +94,82 @@ export function eventListItemToCalendarEvent(
     dateEnd: item.dateEnd ?? undefined,
     href: item.href,
   };
+}
+
+/**
+ * The kalender filter facet (#1992 — Phase 6.D Phase 2): the four event
+ * categories plus `"Wedstrijden"` for PSD matches. `Wedstrijden` is NOT a Sanity
+ * `eventType`, so this is a deliberate superset of `EventType` — it keeps the
+ * strict `EVENT_TYPE_FILL` (`satisfies Record<EventType, …>`) untouched while
+ * letting one predicate filter both matches and events.
+ */
+export type KalenderType = "Wedstrijden" | EventType;
+
+/**
+ * Unified calendar feed item — a discriminated union over `source` that merges
+ * the two sources the calendar renders: PSD matches and the 6.E event feed
+ * (`event` docs + `articleType:event` articles). Every item carries a single
+ * `kalenderType` facet so the by-type filter narrows matches and events through
+ * one predicate. The source payload is preserved so the existing month/week
+ * renderers (which consume `CalendarMatch[]` / `CalendarEvent[]`) can be
+ * projected back from a filtered feed without re-fetching.
+ */
+export type CalendarFeedItem =
+  | {
+      source: "match";
+      id: string;
+      dateStart: string;
+      kalenderType: "Wedstrijden";
+      match: CalendarMatch;
+    }
+  | {
+      source: "event" | "article";
+      id: string;
+      dateStart: string;
+      kalenderType: KalenderType;
+      event: CalendarEvent;
+    };
+
+/** ISO → epoch ms sort key; an unparseable date sorts to the end (not NaN). */
+function toFeedSortKey(iso: string): number {
+  const ms = DateTime.fromISO(iso).toMillis();
+  return Number.isNaN(ms) ? Number.POSITIVE_INFINITY : ms;
+}
+
+/**
+ * Compose PSD matches + the 6.E event feed into one chronological
+ * `CalendarFeedItem[]`. Matches are tagged `"Wedstrijden"`; events/articles take
+ * their `eventType` (a missing type → `"Andere"` via `DEFAULT_EVENT_TYPE`, the
+ * same fallback `/evenementen` applies). Match ids are source-prefixed
+ * (`match-<id>`) so a numeric PSD id can never collide with a Sanity `_id`.
+ */
+export function buildCalendarFeed(
+  matches: CalendarMatch[],
+  events: EventListItemVM[],
+): CalendarFeedItem[] {
+  const matchItems = matches.map(
+    (match): CalendarFeedItem => ({
+      source: "match",
+      id: `match-${match.id}`,
+      dateStart: match.date,
+      kalenderType: "Wedstrijden",
+      match,
+    }),
+  );
+
+  const eventItems = events.map(
+    (event): CalendarFeedItem => ({
+      source: event.source,
+      id: event.id,
+      dateStart: event.dateStart,
+      kalenderType: event.eventType ?? DEFAULT_EVENT_TYPE,
+      event: eventListItemToCalendarEvent(event),
+    }),
+  );
+
+  return [...matchItems, ...eventItems].sort(
+    (a, b) => toFeedSortKey(a.dateStart) - toFeedSortKey(b.dateStart),
+  );
 }
 
 const TIMEZONE = "Europe/Brussels";

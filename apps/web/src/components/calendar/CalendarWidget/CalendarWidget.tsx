@@ -4,19 +4,30 @@ import { useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
-import { FilterTabs, type FilterTab } from "@/components/design-system";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { CalendarMonth } from "../CalendarMonth";
 import { CalendarWeek } from "../CalendarWeek";
 import { CalendarSubscribePanel } from "../CalendarSubscribePanel";
+import {
+  KalenderFilterBar,
+  isKalenderFilterValue,
+  type KalenderFilterValue,
+} from "../KalenderFilterBar";
 import type {
+  CalendarFeedItem,
   CalendarMatch,
   CalendarEvent,
   CalendarTeamInfo,
 } from "@/app/(main)/kalender/utils";
 
 export interface CalendarWidgetProps {
-  matches: CalendarMatch[];
-  events: CalendarEvent[];
+  /**
+   * Unified, chronologically-sorted calendar feed — PSD matches + the 6.E event
+   * feed (`event` docs + `articleType:event` articles), composed by
+   * `buildCalendarFeed`. The widget filters this by `kalenderType` and projects
+   * it back to the match/event arrays the month/week renderers consume.
+   */
+  feed: CalendarFeedItem[];
   teams: CalendarTeamInfo[];
 }
 
@@ -28,16 +39,18 @@ const VIEW_TABS: { value: ViewMode; label: string; mobileHidden?: boolean }[] =
     { value: "week", label: "Week", mobileHidden: true },
   ];
 
-export function CalendarWidget({
-  matches,
-  events,
-  teams,
-}: CalendarWidgetProps) {
+export function CalendarWidget({ feed, teams }: CalendarWidgetProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const rawView = searchParams.get("view");
   const view: ViewMode = rawView === "week" ? "week" : "month";
-  const activeTeamFilter = searchParams.get("team") ?? "all";
+
+  // By-type filter (Phase 6.D Phase 2, #1992) — replaces the legacy by-team
+  // filter. An unknown `?type=` value falls back to "all".
+  const rawType = searchParams.get("type");
+  const activeTypeFilter: KalenderFilterValue = isKalenderFilterValue(rawType)
+    ? rawType
+    : "all";
 
   const today = DateTime.now();
   const [selectedDate, setSelectedDate] = useState(today.toISODate()!);
@@ -80,55 +93,45 @@ export function CalendarWidget({
     setWeekStart((ws) => DateTime.fromISO(ws).plus({ weeks: 1 }).toISODate()!);
   }
 
-  // Derive team tabs from match data
-  const teamLabels: string[] = [];
-  const seen = new Set<string>();
-  for (const m of matches) {
-    if (m.team && !seen.has(m.team)) {
-      seen.add(m.team);
-      teamLabels.push(m.team);
-    }
-  }
-  // Sort: seniors first (A, B), then youth by age descending (U21, U17, U15, ...)
-  // When same age group, sort by label (which includes team ID like "U15 A", "U15 B")
-  teamLabels.sort((a, b) => {
-    const ageOf = (label: string): number => {
-      const m = label.match(/U(\d+)/i);
-      return m ? parseInt(m[1], 10) : Infinity; // seniors = Infinity → sort first
-    };
-    const seniorOrder = ["A-ploeg", "B-ploeg"];
-    const sa = seniorOrder.indexOf(a);
-    const sb = seniorOrder.indexOf(b);
-    // Both senior → preserve A before B
-    if (sa !== -1 && sb !== -1) return sa - sb;
-    // One senior → senior first
-    if (sa !== -1) return -1;
-    if (sb !== -1) return 1;
-    // Both youth → higher age first (U21 > U17 > U15 > ...)
-    const ageDiff = ageOf(b) - ageOf(a);
-    return ageDiff !== 0 ? ageDiff : a.localeCompare(b);
-  });
-
-  function setTeam(team: string) {
+  function setType(value: KalenderFilterValue) {
+    // Dedup guard: re-pressing the active chip is a no-op, so neither the URL
+    // push nor the `kalender_filter` analytics event fires twice for the same
+    // selection (repo analytics policy).
+    if (value === activeTypeFilter) return;
     const params = new URLSearchParams(searchParams.toString());
-    if (team === "all") {
-      params.delete("team");
+    if (value === "all") {
+      params.delete("type");
     } else {
-      params.set("team", team);
+      params.set("type", value);
     }
     router.push(`/kalender${params.size ? `?${params.toString()}` : ""}`, {
       scroll: false,
     });
+    trackEvent("kalender_filter", { kalender_type: value });
   }
 
-  // Filter matches by active team filter
-  const filteredMatches =
-    activeTeamFilter === "all"
-      ? matches
-      : matches.filter((m) => m.team === activeTeamFilter);
+  // Narrow the unified feed to the active type, then project the survivors back
+  // to the match/event arrays the month/week renderers already consume.
+  const filteredFeed =
+    activeTypeFilter === "all"
+      ? feed
+      : feed.filter((item) => item.kalenderType === activeTypeFilter);
+  const matches: CalendarMatch[] = filteredFeed.flatMap((item) =>
+    item.source === "match" ? [item.match] : [],
+  );
+  const events: CalendarEvent[] = filteredFeed.flatMap((item) =>
+    item.source !== "match" ? [item.event] : [],
+  );
 
-  const preselectedTeamLabel =
-    activeTeamFilter !== "all" ? activeTeamFilter : undefined;
+  // Empty + filtered-to-zero copy — both render a message instead of a blank
+  // grid. "all" + nothing = genuinely empty; a specific facet + nothing = the
+  // selection emptied the calendar.
+  const zeroMessage =
+    activeTypeFilter === "all"
+      ? "Geen wedstrijden of evenementen gepland."
+      : activeTypeFilter === "Wedstrijden"
+        ? "Geen wedstrijden gepland."
+        : `Geen evenementen in de categorie ${activeTypeFilter} gepland.`;
 
   return (
     <div className="space-y-4">
@@ -185,68 +188,73 @@ export function CalendarWidget({
         </button>
       </div>
 
-      {/* Subscribe panel */}
-      <CalendarSubscribePanel
-        teams={teams}
-        preselectedTeamLabel={preselectedTeamLabel}
-        isOpen={subscribePanelOpen}
-      />
+      {/* Subscribe panel — a team-match feed, orthogonal to the type filter */}
+      <CalendarSubscribePanel teams={teams} isOpen={subscribePanelOpen} />
 
-      {/* Team filter */}
-      {teamLabels.length > 0 && (
-        <FilterTabs
-          tabs={[
-            { value: "all", label: "Alle teams" } as FilterTab,
-            ...teamLabels.map(
-              (team): FilterTab => ({ value: team, label: team }),
-            ),
-          ]}
-          activeTab={activeTeamFilter}
-          onChange={setTeam}
-          ariaLabel="Filter op team"
-          showCounts={false}
-        />
-      )}
+      {/* By-type filter chips (the row doubles as the colour legend) */}
+      <KalenderFilterBar selected={activeTypeFilter} onSelect={setType} />
 
-      {/* View content */}
-      {view === "month" && (
-        <CalendarMonth
-          matches={filteredMatches}
-          events={events}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
-          currentMonth={currentMonth}
-          currentYear={currentYear}
-          onPrevMonth={handlePrevMonth}
-          onNextMonth={handleNextMonth}
-        />
-      )}
-
-      {view === "week" && (
-        <CalendarWeek
-          matches={filteredMatches}
-          events={events}
-          weekStart={weekStart}
-          onPrevWeek={handlePrevWeek}
-          onNextWeek={handleNextWeek}
-        />
-      )}
-
-      {/* Legend */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-gray-200 pt-4 text-xs text-gray-500">
-        <div className="flex items-center gap-1.5">
-          <span className="bg-kcvv-green-bright h-2 w-2 rounded-full" />
-          <span>Thuiswedstrijd</span>
+      {filteredFeed.length === 0 ? (
+        // role="status" (implicit aria-live="polite") so the message is
+        // announced when a filter selection empties the calendar — it appears
+        // on a client-side state change, not a page load.
+        <div
+          role="status"
+          className="flex flex-col items-center gap-3 py-12 text-center text-gray-600"
+        >
+          <p className="font-medium">{zeroMessage}</p>
+          {activeTypeFilter !== "all" && (
+            <button
+              type="button"
+              onClick={() => setType("all")}
+              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              Toon alles
+            </button>
+          )}
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="border-kcvv-green-bright h-2 w-2 rounded-full border" />
-          <span>Uitwedstrijd</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-full bg-blue-500" />
-          <span>Evenement</span>
-        </div>
-      </div>
+      ) : (
+        <>
+          {view === "month" && (
+            <CalendarMonth
+              matches={matches}
+              events={events}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+              currentMonth={currentMonth}
+              currentYear={currentYear}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
+            />
+          )}
+
+          {view === "week" && (
+            <CalendarWeek
+              matches={matches}
+              events={events}
+              weekStart={weekStart}
+              onPrevWeek={handlePrevWeek}
+              onNextWeek={handleNextWeek}
+            />
+          )}
+
+          {/* Legend */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-gray-200 pt-4 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5">
+              <span className="bg-kcvv-green-bright h-2 w-2 rounded-full" />
+              <span>Thuiswedstrijd</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="border-kcvv-green-bright h-2 w-2 rounded-full border" />
+              <span>Uitwedstrijd</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-blue-500" />
+              <span>Evenement</span>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

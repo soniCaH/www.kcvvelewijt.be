@@ -7,9 +7,11 @@ import userEvent from "@testing-library/user-event";
 import { CalendarWidget } from "./CalendarWidget";
 import type {
   CalendarMatch,
-  CalendarEvent,
   CalendarTeamInfo,
 } from "@/app/(main)/kalender/utils";
+import { buildCalendarFeed } from "@/app/(main)/kalender/utils";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { getScoreDisplay } from "@/lib/utils/match-display";
 import { DateTime } from "luxon";
 
@@ -45,6 +47,8 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockSearchParams,
 }));
 
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
 function makeMatch(
@@ -70,14 +74,29 @@ function makeMatch(
   };
 }
 
+function makeEventVM(
+  overrides: Partial<EventListItemVM> & { id: string },
+): EventListItemVM {
+  return {
+    title: "Paastoernooi",
+    href: "/evenementen/paastoernooi",
+    dateStart: "2026-03-20T10:00:00",
+    dateEnd: null,
+    eventType: "Clubevent",
+    location: null,
+    source: "event",
+    ...overrides,
+  };
+}
+
 const teams: CalendarTeamInfo[] = [
   { id: "t1", name: "A-ploeg", psdId: 101, label: "A-ploeg" },
   { id: "t2", name: "B-ploeg", psdId: 102, label: "B-ploeg" },
 ];
 
+// One match + one Clubevent event → the feed the widget filters by type.
 const defaultProps = {
-  matches: [makeMatch({ id: 1 })],
-  events: [] as CalendarEvent[],
+  feed: buildCalendarFeed([makeMatch({ id: 1 })], [makeEventVM({ id: "e1" })]),
   teams,
 };
 
@@ -150,16 +169,74 @@ describe("CalendarWidget", () => {
       await user.click(screen.getByText("Abonneer"));
       expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
     });
+  });
 
-    it("passes team filter as preselectedTeamLabel", async () => {
+  describe("by-type filter", () => {
+    it("renders the by-type chips (Alles + Wedstrijden + event types)", () => {
+      render(<CalendarWidget {...defaultProps} />);
+      expect(screen.getByRole("button", { name: "Alles" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Wedstrijden" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Clubevent" }),
+      ).toBeInTheDocument();
+    });
+
+    it("marks the active ?type= chip as pressed", () => {
+      mockSearchParams = new URLSearchParams("type=Wedstrijden");
+      render(<CalendarWidget {...defaultProps} />);
+      expect(
+        screen.getByRole("button", { name: "Wedstrijden" }),
+      ).toHaveAttribute("aria-pressed", "true");
+    });
+
+    it("pushes ?type= and fires kalender_filter when selecting a new type", async () => {
       const user = userEvent.setup();
-      mockSearchParams = new URLSearchParams("team=A-ploeg");
       render(<CalendarWidget {...defaultProps} />);
 
-      await user.click(screen.getByText("Abonneer"));
-      // When preselected, only A-ploeg should have a remove button
-      const chips = screen.getAllByRole("button", { name: /×/ });
-      expect(chips).toHaveLength(1);
+      await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
+
+      expect(mockPush).toHaveBeenCalledWith(
+        expect.stringContaining("type=Wedstrijden"),
+        expect.anything(),
+      );
+      expect(trackEvent).toHaveBeenCalledWith("kalender_filter", {
+        kalender_type: "Wedstrijden",
+      });
+    });
+
+    it("dedup guard: re-pressing the active chip pushes nothing and fires no analytics", async () => {
+      const user = userEvent.setup();
+      mockSearchParams = new URLSearchParams("type=Wedstrijden");
+      render(<CalendarWidget {...defaultProps} />);
+
+      await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
+
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it("renders the filtered-to-zero state + reset when a type has no items", () => {
+      mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
+      render(<CalendarWidget {...defaultProps} />);
+
+      expect(screen.getByRole("status")).toHaveTextContent(
+        /Geen evenementen in de categorie Supportersactiviteit/i,
+      );
+      expect(
+        screen.getByRole("button", { name: "Toon alles" }),
+      ).toBeInTheDocument();
+    });
+
+    it("clicking 'Toon alles' from a filtered-to-zero state resets the URL to /kalender", async () => {
+      const user = userEvent.setup();
+      mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
+      render(<CalendarWidget {...defaultProps} />);
+
+      await user.click(screen.getByRole("button", { name: "Toon alles" }));
+
+      expect(mockPush).toHaveBeenCalledWith("/kalender", expect.anything());
     });
   });
 });
