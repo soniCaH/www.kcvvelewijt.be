@@ -199,10 +199,11 @@ describe("TeamAgendaRow", () => {
     it("uses the full home–away label as the link's accessible name", () => {
       render(<TeamAgendaRow match={BASE} />);
       const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
-      // Lock the full accessible-name contract — both teams in home→away order
-      // plus the date suffix (see `matchLabel` in TeamAgendaRow). The `.+`
-      // tolerates the en-dash separator without coupling to the exact glyph.
-      expect(label).toMatch(/^KCVV Elewijt .+ FC Opponent, 15 aug$/);
+      // Lock the full accessible-name contract — both teams in home→away order,
+      // a space-padded dash separator, plus the date suffix (see `matchLabel`
+      // in TeamAgendaRow). The `[–—-]` class tolerates en-/em-dash or hyphen
+      // without locking the exact glyph, but still fails on a format change.
+      expect(label).toMatch(/^KCVV Elewijt [–—-] FC Opponent, 15 aug$/);
     });
   });
 
