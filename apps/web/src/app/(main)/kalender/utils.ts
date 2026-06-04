@@ -4,6 +4,7 @@
 
 import { DateTime } from "luxon";
 import type { Match } from "@/lib/effect/schemas/match.schema";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import type { MatchStatus } from "@/components/match/types";
 import { getScoreDisplay, type ScoreDisplay } from "@/lib/utils/match-display";
 export type { ScoreDisplay } from "@/lib/utils/match-display";
@@ -66,6 +67,28 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     competition: match.competition,
     team: match.kcvv_team_label,
     isHome: match.is_home,
+  };
+}
+
+/**
+ * Project a merged-feed item (`EventRepository.findUpcomingForList()`) onto the
+ * `CalendarEvent` shape the widget renders. The repo already resolves each
+ * item's `href` — `/evenementen/[slug]` for `event` docs, `/nieuws/[slug]` for
+ * `source: "article"` rows — so this only narrows the fields the calendar
+ * consumes: a `null` end date becomes `undefined` (`CalendarEvent.dateEnd` is
+ * optional, not nullable). Requiring the merged-feed `EventListItemVM` (which
+ * the event-docs-only `EventVM` is not assignable to — it lacks `source`) keeps
+ * the page on the 3-source feed; a revert to `findAll()` is a compile error.
+ */
+export function eventListItemToCalendarEvent(
+  item: EventListItemVM,
+): CalendarEvent {
+  return {
+    id: item.id,
+    title: item.title,
+    dateStart: item.dateStart,
+    dateEnd: item.dateEnd ?? undefined,
+    href: item.href,
   };
 }
 

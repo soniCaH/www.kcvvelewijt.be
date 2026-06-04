@@ -5,6 +5,7 @@
 import { describe, it, expect } from "vitest";
 import {
   transformMatchToCalendar,
+  eventListItemToCalendarEvent,
   getMatchesForDay,
   getEventsForDay,
   getDaysInMonth,
@@ -12,6 +13,7 @@ import {
   getMatchDotType,
 } from "./utils";
 import type { Match } from "@/lib/effect/schemas/match.schema";
+import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import type { CalendarMatch, CalendarEvent } from "./utils";
 
 function createMatch(overrides: Partial<Match> = {}): Match {
@@ -84,6 +86,61 @@ describe("transformMatchToCalendar", () => {
     expect(result.homeScore).toBeUndefined();
     expect(result.awayScore).toBeUndefined();
     expect(result.scoreDisplay).toEqual({ type: "vs" });
+  });
+});
+
+// ── eventListItemToCalendarEvent ──────────────────────────────────────────
+
+function makeEventListItem(
+  overrides: Partial<EventListItemVM> = {},
+): EventListItemVM {
+  return {
+    id: "event-1",
+    title: "Spaghetti-avond",
+    href: "/evenementen/spaghetti-avond",
+    dateStart: "2026-04-15T18:00:00Z",
+    dateEnd: "2026-04-15T22:00:00Z",
+    eventType: "Clubevent",
+    location: "Sportpark Driesput, Elewijt",
+    source: "event",
+    ...overrides,
+  };
+}
+
+describe("eventListItemToCalendarEvent", () => {
+  it("maps an event-doc row to a calendar event keeping its /evenementen/[slug] href", () => {
+    const result = eventListItemToCalendarEvent(makeEventListItem());
+
+    expect(result).toEqual({
+      id: "event-1",
+      title: "Spaghetti-avond",
+      dateStart: "2026-04-15T18:00:00Z",
+      dateEnd: "2026-04-15T22:00:00Z",
+      href: "/evenementen/spaghetti-avond",
+    });
+  });
+
+  it("maps a source:article row through with its /nieuws/[slug] href intact", () => {
+    const result = eventListItemToCalendarEvent(
+      makeEventListItem({
+        id: "article-1",
+        title: "Jeugdtornooi groot succes",
+        href: "/nieuws/jeugdtornooi-verslag",
+        source: "article",
+        dateEnd: null,
+      }),
+    );
+
+    expect(result.href).toBe("/nieuws/jeugdtornooi-verslag");
+    expect(result.id).toBe("article-1");
+  });
+
+  it("normalises a null dateEnd to undefined (CalendarEvent has no nullable end)", () => {
+    const result = eventListItemToCalendarEvent(
+      makeEventListItem({ dateEnd: null }),
+    );
+
+    expect(result.dateEnd).toBeUndefined();
   });
 });
 
