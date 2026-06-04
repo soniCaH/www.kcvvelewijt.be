@@ -3,12 +3,14 @@ import {
   mapGameStatus,
   isUnknownGameStatus,
   mapCompetitionLabel,
+  buildCompetitionLabelMap,
+  deriveMatchTeamLabel,
   deriveOwnClubId,
   transformPsdGame,
   transformFootbalistoMatchDetail,
   psdGameToMs,
 } from "./transforms";
-import type { PsdGame } from "./schemas";
+import type { PsdGame, PsdCompetition } from "./schemas";
 
 describe("mapGameStatus", () => {
   it("returns 'finished' for status 0 with goals", () => {
@@ -325,5 +327,116 @@ describe("mapCompetitionLabel", () => {
   it("is case-insensitive on the type code", () => {
     expect(mapCompetitionLabel("official", null)).toBe("Competitie");
     expect(mapCompetitionLabel("Official", null)).toBe("Competitie");
+  });
+});
+
+describe("buildCompetitionLabelMap", () => {
+  const comp = (
+    id: number,
+    overrides: Partial<PsdCompetition> = {},
+  ): PsdCompetition =>
+    ({ id, type: "CUP", name: null, ...overrides }) as PsdCompetition;
+
+  it("resolves the Dutch label from labelTranslations (cups have null name)", () => {
+    const map = buildCompetitionLabelMap([
+      comp(9, {
+        labelTranslations: [
+          { language: "fr", value: "Coupe du Brabant" },
+          { language: "nl", value: "Beker van Brabant" },
+          { language: "vls", value: "Beker van Brabant" },
+        ],
+      }),
+      comp(11, {
+        labelTranslations: [{ language: "nl", value: "Croky Cup" }],
+      }),
+    ]);
+    expect(map).toEqual({ 9: "Beker van Brabant", 11: "Croky Cup" });
+  });
+
+  it("prefers nl, then falls back to vls", () => {
+    const map = buildCompetitionLabelMap([
+      comp(12, {
+        labelTranslations: [{ language: "vls", value: "Beker van Vlaanderen" }],
+      }),
+    ]);
+    expect(map[12]).toBe("Beker van Vlaanderen");
+  });
+
+  it("falls back to `name` when no translations are present", () => {
+    const map = buildCompetitionLabelMap([
+      comp(3, { type: "FRIENDLY", name: "vriendschappelijk" }),
+    ]);
+    expect(map[3]).toBe("vriendschappelijk");
+  });
+
+  it("omits competitions with neither a translation nor a name", () => {
+    const map = buildCompetitionLabelMap([comp(1, { type: "OFFICIAL" })]);
+    expect(map).toEqual({});
+  });
+});
+
+describe("deriveMatchTeamLabel", () => {
+  it("returns alpha opponent designations verbatim", () => {
+    expect(deriveMatchTeamLabel("A")).toBe("A");
+    expect(deriveMatchTeamLabel("B")).toBe("B");
+    expect(deriveMatchTeamLabel("U23")).toBe("U23");
+    expect(deriveMatchTeamLabel("U21")).toBe("U21");
+  });
+
+  it("omits the club's own numeric team code", () => {
+    expect(deriveMatchTeamLabel("1")).toBeUndefined();
+    expect(deriveMatchTeamLabel("2")).toBeUndefined();
+    expect(deriveMatchTeamLabel("21")).toBeUndefined();
+  });
+
+  it("omits null / undefined / blank codes", () => {
+    expect(deriveMatchTeamLabel(null)).toBeUndefined();
+    expect(deriveMatchTeamLabel(undefined)).toBeUndefined();
+    expect(deriveMatchTeamLabel("  ")).toBeUndefined();
+  });
+});
+
+describe("transformPsdGame — competition label + team designation", () => {
+  it("resolves a cup's specific name via the competition-label map", () => {
+    const game = makePsdGame({
+      competitionType: {
+        id: 9,
+        name: null,
+        type: "CUP",
+      } as PsdGame["competitionType"],
+    });
+    const match = transformPsdGame(game, {
+      competitionLabels: { 9: "Beker van Brabant" },
+    });
+    expect(match.competition).toBe("Beker van Brabant");
+  });
+
+  it("falls back to the generic label when the cup id is not in the map", () => {
+    const game = makePsdGame({
+      competitionType: {
+        id: 9,
+        name: null,
+        type: "CUP",
+      } as PsdGame["competitionType"],
+    });
+    expect(transformPsdGame(game).competition).toBe("Beker");
+    expect(transformPsdGame(game, { competitionLabels: {} }).competition).toBe(
+      "Beker",
+    );
+  });
+
+  it("attaches the opponent team designation, omitting the own numeric code", () => {
+    // KCVV (home, code "1") vs opponent away "U23"
+    const match = transformPsdGame(
+      makePsdGame({ homeTeam: "1", awayTeam: "U23" }),
+    );
+    expect(match.home_team.team_label).toBeUndefined();
+    expect(match.away_team.team_label).toBe("U23");
+  });
+
+  it("leaves team_label undefined when codes are absent", () => {
+    const match = transformPsdGame(makePsdGame());
+    expect(match.home_team.team_label).toBeUndefined();
+    expect(match.away_team.team_label).toBeUndefined();
   });
 });

@@ -270,10 +270,15 @@ Game {
   awayClub: Club
   goalsHomeTeam: number
   goalsAwayTeam: number
-  homeTeam: string      // home team name
-  awayTeam: string      // away team name
+  homeTeam: string      // team-designation code per side (NOT the club name):
+  awayTeam: string      //   the queried club's own side is its numeric team id
+                        //   ("1", "2", "21"); the opponent is an alpha code
+                        //   ("A", "B", "U21", "U23"). Surfaced as MatchTeam.team_label
+                        //   (numeric self-codes are dropped). homeTeamName/awayTeamName
+                        //   exist but are typically null.
   homeGame: boolean
-  competitionType: CompetitionType
+  competition: string   // competition id/slug ("official", "friendly", "11") — NOT a name
+  competitionType: CompetitionType  // { id, name, type } — `name` is null for cups
   round: GameRound      // { id, name }
   season: Season
   cancelled: boolean
@@ -293,6 +298,14 @@ Club {
 ```
 
 **Important:** The new PSD API includes `logo` URLs directly on `Club` — no CloudFront CDN workaround needed for clubs. `FOOTBALISTO_LOGO_CDN_URL` was a workaround for the legacy Lambda format.
+
+**Competition names (cups):** on the games-list endpoint a cup's `competitionType.name`
+is `null`, so the specific name ("Beker van Brabant", "Croky Cup") is only resolvable
+via `GET /competitions`, where it lives in `labelTranslations` (prefer `language: "nl"`,
+fall back to `"vls"`) keyed by the same competition id. The BFF caches an
+id → label map and resolves it in `transformPsdGame`. The match-detail endpoint
+(`/games/{id}/info`) already inlines the resolved string (e.g. `"Croky Cup"`), so the
+lookup is only needed for the list path.
 
 ---
 

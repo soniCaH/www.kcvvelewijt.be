@@ -187,4 +187,29 @@ describe("TeamAgendaRow", () => {
       expect(el).not.toBeNull();
     });
   });
+
+  describe("Team designation (team_label)", () => {
+    it("renders the opponent's team designation suffix", () => {
+      render(
+        <TeamAgendaRow
+          match={{
+            ...BASE,
+            awayTeam: {
+              id: 20,
+              name: "Yellow Red KV Mechelen",
+              teamLabel: "U23",
+            },
+          }}
+        />,
+      );
+      // Appears once per layout (desktop away + mobile opponent column).
+      const labels = screen.getAllByText("U23");
+      expect(labels.length).toBeGreaterThan(0);
+    });
+
+    it("does not render a suffix when teamLabel is absent", () => {
+      render(<TeamAgendaRow match={BASE} />);
+      expect(screen.queryByText("U23")).toBeNull();
+    });
+  });
 });

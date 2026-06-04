@@ -10,6 +10,7 @@ import type {
 } from "@kcvv/api-contract";
 import {
   PsdGame,
+  type PsdCompetition,
   type PsdCompetitionType,
   FootbalistoLineupPlayer,
   FootbalistoMatchEvent,
@@ -41,24 +42,75 @@ export function mapCompetitionLabel(
   }
 }
 
+/** Map of PSD competition id → specific Dutch label (e.g. 9 → "Beker van Brabant"). */
+export type CompetitionLabelMap = Record<number, string>;
+
+/** Pick the Dutch (or Flemish) label value from a competition's translations. */
+function pickDutchLabel(
+  translations: PsdCompetition["labelTranslations"],
+): string | undefined {
+  if (!translations) return undefined;
+  const nl = translations.find((t) => t.language === "nl");
+  const vls = translations.find((t) => t.language === "vls");
+  const value = (nl ?? vls)?.value?.trim();
+  return value || undefined;
+}
+
+/**
+ * Build a competition-id → Dutch-label map from the /competitions response.
+ * The specific name lives in `labelTranslations` (the top-level `name` is null
+ * for cups); fall back to `name` when no translation is present.
+ */
+export function buildCompetitionLabelMap(
+  competitions: readonly PsdCompetition[],
+): CompetitionLabelMap {
+  const map: CompetitionLabelMap = {};
+  for (const c of competitions) {
+    const label = pickDutchLabel(c.labelTranslations) ?? c.name?.trim();
+    if (label) map[c.id] = label;
+  }
+  return map;
+}
+
 /**
  * Resolve a PSD competitionType field (object, plain string, or null/undefined)
  * to a Dutch display label. Returns undefined when no competition info is available.
  *
  * Needed because:
- * - /games/team/{id}/seasons/{id} returns an object { id, name, type }
- * - /match/{id}/general sometimes returns a plain string (e.g. "Competitie")
- * - Both endpoints may return null when no competition is assigned
+ * - /games/team/{id}/seasons/{id} returns an object { id, name, type }; for cups
+ *   `name` is null, so the specific name ("Beker van Brabant") is resolved from
+ *   `competitionLabels` (built from /competitions) keyed by the competition id.
+ * - /games/{id}/info already inlines the resolved string (e.g. "Croky Cup").
+ * - Both endpoints may return null when no competition is assigned.
  *
  * Note: `typeof null === "object"` in JavaScript, so a null check must come
  * before the typeof guard.
  */
 function resolveCompetitionLabel(
   ct: PsdCompetitionType | string | null | undefined,
+  competitionLabels?: CompetitionLabelMap,
 ): string | undefined {
   if (ct == null) return undefined;
   if (typeof ct === "string") return mapCompetitionLabel(ct, undefined);
+  const specific = competitionLabels?.[ct.id];
+  if (specific) return specific;
   return mapCompetitionLabel(ct.type ?? "UNKNOWN", ct.name);
+}
+
+/**
+ * Derive the display team designation for a match side from PSD's per-game
+ * `homeTeam`/`awayTeam` code. Opponents carry an alpha designation ("A", "B",
+ * "U21", "U23"); the queried club's own side carries its numeric team id
+ * ("1", "2", "21"), which has no display value. Returns undefined for empty or
+ * purely-numeric codes so only meaningful opponent labels surface.
+ */
+export function deriveMatchTeamLabel(
+  code: string | null | undefined,
+): string | undefined {
+  if (code == null) return undefined;
+  const trimmed = code.trim();
+  if (trimmed === "" || /^\d+$/.test(trimmed)) return undefined;
+  return trimmed;
 }
 
 // ─── Team label helpers ───────────────────────────────────────────────────────
@@ -182,7 +234,7 @@ export function deriveOwnClubId(games: PsdGame[]): number | undefined {
 
 export function transformPsdGame(
   game: PsdGame,
-  options?: { ownClubId?: number },
+  options?: { ownClubId?: number; competitionLabels?: CompetitionLabelMap },
 ): Match {
   const datePart = game.date.split(" ")[0]!;
   const timeStr = game.time ?? game.date.split(" ")[1] ?? "00:00";
@@ -216,15 +268,20 @@ export function transformPsdGame(
       name: game.homeClub.name,
       logo: game.homeClub.logo ?? undefined,
       score: game.goalsHomeTeam ?? undefined,
+      team_label: deriveMatchTeamLabel(game.homeTeam),
     },
     away_team: {
       id: game.awayClub.id,
       name: game.awayClub.name,
       logo: game.awayClub.logo ?? undefined,
       score: game.goalsAwayTeam ?? undefined,
+      team_label: deriveMatchTeamLabel(game.awayTeam),
     },
     status,
-    competition: resolveCompetitionLabel(game.competitionType),
+    competition: resolveCompetitionLabel(
+      game.competitionType,
+      options?.competitionLabels,
+    ),
     kcvv_team_id: game.teamId ?? undefined,
     is_home: isHome,
   };
