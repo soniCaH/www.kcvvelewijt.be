@@ -31,7 +31,10 @@ function makeEnvLayer() {
 }
 
 const cacheMock: KvCacheInterface = {
-  get: () => Effect.succeed(null),
+  // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
+  // does not insert a /competitions fetch into the order-based fetch mocks.
+  get: (key: string) =>
+    Effect.succeed(key === "psd:competition-labels" ? "{}" : null),
   set: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
 };
@@ -168,6 +171,41 @@ describe("PsdService.getTeamMatches", () => {
       expect(result.right[0]?.competition).toBe("3de Nationale");
       // Contract boundary: validate transform output against api-contract schema
       expect(() => S.decodeUnknownSync(Match)(result.right[0])).not.toThrow();
+    }
+  });
+
+  it("surfaces the opponent team designation via team_label", async () => {
+    const matchListWithCodes = {
+      content: [
+        {
+          id: 301,
+          status: 0,
+          date: "2099-11-01 00:00",
+          time: "15:00",
+          homeClub: { id: 123, name: "KCVV Elewijt" },
+          awayClub: { id: 456, name: "Yellow Red KV Mechelen" },
+          goalsHomeTeam: null,
+          goalsAwayTeam: null,
+          competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
+          // KCVV side carries its numeric team id; the opponent an alpha code.
+          homeTeam: "1",
+          awayTeam: "U23",
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => matchListWithCodes,
+      });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right[0]?.home_team.team_label).toBeUndefined();
+      expect(result.right[0]?.away_team.team_label).toBe("U23");
     }
   });
 

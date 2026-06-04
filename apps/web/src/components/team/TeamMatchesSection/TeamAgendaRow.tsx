@@ -103,6 +103,55 @@ const OUTCOME_SHADOW: Record<"win" | "draw" | "loss", string | undefined> = {
   loss: "inset 0 -9px 0 color-mix(in srgb, var(--color-alert) 38%, var(--color-cream))",
 };
 
+/**
+ * Team name with an optional designation suffix ("A" / "B" / "U23"). The club
+ * name truncates within the available space; the suffix stays pinned beside it
+ * so the opponent's specific team (e.g. "… U23") is always legible.
+ */
+function TeamName({
+  team,
+  featured,
+  bold = false,
+  align = "left",
+}: {
+  team: ScheduleMatch["homeTeam"];
+  featured: boolean;
+  bold?: boolean;
+  align?: "left" | "right";
+}) {
+  return (
+    <span
+      className={cn(
+        "flex min-w-0 flex-1 items-baseline gap-1.5",
+        align === "right" && "justify-end",
+      )}
+    >
+      <span
+        className={cn(
+          "min-w-0 truncate text-sm",
+          align === "right" && "text-right",
+          featured ? "text-white" : "text-ink",
+          bold && "font-semibold",
+        )}
+      >
+        {team.name}
+      </span>
+      {team.teamLabel ? (
+        <span
+          className={cn(
+            "shrink-0 font-mono text-[10px] font-semibold tracking-wide",
+            // White on jersey-deep / ink-muted on cream — matches the
+            // competition caption's contrast-safe tones.
+            featured ? "text-white" : "text-ink-muted",
+          )}
+        >
+          {team.teamLabel}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 export function TeamAgendaRow({
   match,
   kcvvTeamId,
@@ -201,15 +250,11 @@ export function TeamAgendaRow({
             title={match.homeTeam.name}
           >
             <Crest name={match.homeTeam.name} logo={match.homeTeam.logo} />
-            <span
-              className={cn(
-                "min-w-0 truncate text-sm",
-                featured ? "text-white" : "text-ink",
-                isHome === true && "font-semibold",
-              )}
-            >
-              {match.homeTeam.name}
-            </span>
+            <TeamName
+              team={match.homeTeam}
+              featured={featured}
+              bold={isHome === true}
+            />
           </div>
 
           {/* Score / time + competition caption */}
@@ -245,15 +290,12 @@ export function TeamAgendaRow({
             title={match.awayTeam.name}
           >
             <Crest name={match.awayTeam.name} logo={match.awayTeam.logo} />
-            <span
-              className={cn(
-                "min-w-0 truncate text-right text-sm",
-                featured ? "text-white" : "text-ink",
-                isHome === false && "font-semibold",
-              )}
-            >
-              {match.awayTeam.name}
-            </span>
+            <TeamName
+              team={match.awayTeam}
+              featured={featured}
+              bold={isHome === false}
+              align="right"
+            />
           </div>
         </div>
 
@@ -267,14 +309,7 @@ export function TeamAgendaRow({
               <>
                 <Crest name={opponent.name} logo={opponent.logo} />
                 <div className="min-w-0 flex-1" title={opponent.name}>
-                  <span
-                    className={cn(
-                      "block truncate text-sm font-semibold",
-                      featured ? "text-white" : "text-ink",
-                    )}
-                  >
-                    {opponent.name}
-                  </span>
+                  <TeamName team={opponent} featured={featured} bold />
                   {match.competition ? (
                     <span
                       className={cn(

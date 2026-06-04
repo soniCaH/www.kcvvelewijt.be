@@ -104,6 +104,31 @@ export class PsdCompetitionType extends S.Class<PsdCompetitionType>(
   type: S.String, // "LEAGUE", "CUP", "FRIENDLY", etc.
 }) {}
 
+// ─── /competitions (specific competition names) ─────────────────────────────
+// The games-list endpoint returns competitionType with a null `name` for cups,
+// so the specific name ("Beker van Brabant", "Croky Cup") is only resolvable
+// via /competitions, where it lives in localized `labelTranslations` keyed by
+// the same competition id. (The match-detail endpoint already inlines the
+// resolved string, so this lookup is only needed for the list path.)
+
+export class PsdCompetitionLabelTranslation extends S.Class<PsdCompetitionLabelTranslation>(
+  "PsdCompetitionLabelTranslation",
+)({
+  language: S.String, // "nl", "vls", "fr", "en", …
+  value: S.String,
+}) {}
+
+export class PsdCompetition extends S.Class<PsdCompetition>("PsdCompetition")({
+  id: S.Number,
+  type: S.optional(S.NullOr(S.String)),
+  name: S.optional(S.NullOr(S.String)),
+  labelTranslations: S.optional(
+    S.NullOr(S.Array(PsdCompetitionLabelTranslation)),
+  ),
+}) {}
+
+export const PsdCompetitionsSchema = S.Array(PsdCompetition);
+
 export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetailGeneral>(
   "FootbalistoMatchDetailGeneral",
 )({
@@ -144,7 +169,10 @@ export const PsdSeasonsSchema = S.Array(PsdSeason);
 // ─── Shared game fields ─────────────────────────────────────────────────────
 // Field names differ from the old Footbalisto API:
 //  - competitionType is an object (not a string)
-//  - homeTeam/awayTeam are string team codes ("1", "A") — not used for IDs, use homeClub/awayClub
+//  - homeTeam/awayTeam are short team-designation codes for each side. The
+//    queried club's own side is its numeric team id ("1", "2", "21"); the
+//    opponent's side is an alpha designation ("A", "B", "U21", "U23"). These
+//    are NOT club ids — use homeClub/awayClub for ids. See `deriveMatchTeamLabel`.
 //  - time is a separate field ("HH:MM"); date has "00:00" as its time component
 //  - no timestamp, no viewGameReport (use reportGeneral)
 
@@ -161,6 +189,10 @@ const PsdGameBaseFields = {
   // PSD team IDs for home/away — used to compute is_home (team ID != club ID)
   homeTeamId: S.optional(S.NullOr(S.Number)),
   awayTeamId: S.optional(S.NullOr(S.Number)),
+  // Per-side team-designation codes ("A"/"B"/"U23" for opponents, the numeric
+  // team id for the queried club) — surfaced as MatchTeam.team_label.
+  homeTeam: S.optional(S.NullOr(S.String)),
+  awayTeam: S.optional(S.NullOr(S.String)),
   // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
   cancelled: S.optional(S.NullOr(S.Boolean)),
 };

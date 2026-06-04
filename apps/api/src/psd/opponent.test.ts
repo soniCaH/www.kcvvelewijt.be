@@ -31,7 +31,10 @@ function makeEnvLayer() {
 }
 
 const cacheMock: KvCacheInterface = {
-  get: () => Effect.succeed(null),
+  // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
+  // does not insert a /competitions fetch into these order-based fetch mocks.
+  get: (key: string) =>
+    Effect.succeed(key === "psd:competition-labels" ? "{}" : null),
   set: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
 };

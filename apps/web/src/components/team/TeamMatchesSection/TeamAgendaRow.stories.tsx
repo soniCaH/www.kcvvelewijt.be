@@ -81,3 +81,21 @@ export const FinishedLoss: Story = {
 export const Upcoming: Story = {
   args: { match: upcoming },
 };
+
+/**
+ * Opponent fields a non-first team — the "U23" designation (from PSD's
+ * `awayTeam` code) is pinned beside the club name. The KCVV side carries its
+ * numeric squad code and shows no suffix.
+ */
+export const WithOpponentTeamLabel: Story = {
+  args: {
+    match: {
+      ...upcoming,
+      awayTeam: {
+        id: 88,
+        name: "Yellow Red KV Mechelen",
+        teamLabel: "U23",
+      },
+    },
+  },
+};
