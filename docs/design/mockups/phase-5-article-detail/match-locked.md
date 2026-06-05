@@ -43,13 +43,19 @@ Below card C on **recap only** (preview has no goals → card C alone):
 - **Gap from card C → Doelpunten: `30px`** (`mt-[30px]`) — the scorer list reads as
   a distinct section, not attached to the card.
 - A `Doelpunten.` `<EditorialHeading>`-style italic display heading + 2px ink rule.
-- The list **reuses `<MatchEvents filter="goals">`** — its Option-F sided rows
-  (home left / away right, central football glyph, minute on the far left).
+- The list **reuses `<MatchEvents filter="goals">`** — its Option-F rows
+  (minute on the far left, then a **sided** glyph: home events render their glyph
+  on the **left**, away events on the **right**; the opposite side stays empty).
   Goals-only (no cards/subs) keeps it lighter than and distinct from the match
   page's full timeline.
-- KCVV scorers rendered in `jersey-deep`; opponent in ink. Penalty / own-goal
-  carry a small mono `pen` / `e.d.` tag (from `event.isPenalty` / `isOwnGoal`).
-- **Football glyph = the existing `<MatchEvents>` goal SVG (cream ball + ink
+- **Scorer names render in `text-ink` italic display** (MatchEvents' default — it
+  does **not** tint per team). Highlighting KCVV scorers in `jersey-deep` is a
+  desired delta that requires a small `highlightTeam` prop addition to
+  `<MatchEvents>` in #1470; it is **not** free from the current component.
+- **Penalty → `(strafschop)`** and **own-goal → `(e.d.)`** render as
+  parenthesized text after the name (from `event.isPenalty` / `event.isOwnGoal`);
+  own-goal uses `text-alert` (red), penalty uses `text-ink-muted` — **not** a mono tag.
+- **Goal glyph = the existing `<MatchEvents>` goal SVG (cream ball + ink
   pentagons), NOT an emoji** (icons-over-emojis rule).
 
 ## Data reality (audited — drives the "no inline duplication" decision)
