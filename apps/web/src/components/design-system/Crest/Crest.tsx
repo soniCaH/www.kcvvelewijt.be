@@ -14,8 +14,8 @@ export interface CrestProps {
 
 /**
  * Small club crest — the club logo when a `logo` URL is present, else a
- * mono-initialled outline disc. Shared across the calendar, team, and match
- * surfaces (was hand-rolled three times before #2006).
+ * mono-initialled outline disc. Shared across the calendar and team surfaces
+ * (was hand-rolled three times before #2006).
  *
  * The fallback disc uses `border-current` (ink-muted) with a font-size derived
  * from `size`, so the glyph scales with the crest. Logo images are deliberately
@@ -44,13 +44,18 @@ export function Crest({ name, logo, size = 20, className }: CrestProps) {
     <span
       aria-hidden="true"
       className={cn(
-        "text-ink-muted inline-flex shrink-0 items-center justify-center rounded-full border border-current font-mono leading-none",
+        // No `leading-none`: at these small sizes IBM Plex Mono's tight line
+        // box makes a single cap sit high in the disc. Default line-height lets
+        // flex `items-center` optically centre the glyph.
+        "text-ink-muted inline-flex shrink-0 items-center justify-center rounded-full border border-current font-mono",
         className,
       )}
       style={{
         width: size,
         height: size,
-        fontSize: Math.max(8, Math.round(size * 0.5)),
+        // Glyph scales with the disc: half the box, snapped to a whole pixel
+        // (deterministic — same size always yields the same font).
+        fontSize: Math.round(size * 0.5),
       }}
     >
       {initial}

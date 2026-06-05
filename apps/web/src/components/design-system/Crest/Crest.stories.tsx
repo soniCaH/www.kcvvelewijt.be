@@ -29,9 +29,6 @@ export const WithLogo: Story = {
   args: { logo: "/images/logo-flat.png" },
 };
 
-/** No logo — initialled outline disc fallback. */
-export const Fallback: Story = {};
-
 /** Empty name + no logo — the `·` placeholder glyph. */
 export const FallbackEmptyName: Story = {
   args: { name: "" },
