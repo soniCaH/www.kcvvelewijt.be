@@ -5,11 +5,15 @@
  * header, per-day groups (count sub-header + DashedDivider) and every item shown,
  * events tinted so a dense day never buries them.
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { CalendarAgenda } from "./CalendarAgenda";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 import { getScoreDisplay } from "@/lib/utils/match-display";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -70,6 +74,7 @@ function makeEvent(
     dateStart: "2026-09-12T18:00:00",
     href: "/evenementen/spaghetti-avond",
     eventType: "Clubevent",
+    source: "event",
     ...overrides,
   };
 }
@@ -168,5 +173,39 @@ describe("CalendarAgenda", () => {
     );
     const row = screen.getByTestId("agenda-match-row");
     expect(row).toHaveTextContent("3 – 1");
+  });
+
+  describe("kalender_item_click", () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it("fires source=match when a match row is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[makeMatch({ id: 1 })]}
+          events={[]}
+        />,
+      );
+      await user.click(screen.getByTestId("agenda-match-row"));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_item_click", {
+        source: "match",
+      });
+    });
+
+    it("fires the event's source when an event row is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[]}
+          events={[makeEvent({ id: "e1", source: "article" })]}
+        />,
+      );
+      await user.click(screen.getByTestId("agenda-event-row"));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_item_click", {
+        source: "article",
+      });
+    });
   });
 });

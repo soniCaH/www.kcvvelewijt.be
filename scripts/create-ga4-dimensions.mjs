@@ -53,6 +53,12 @@ const dimensions = [
   { parameterName: "video_provider",    displayName: "Video provider" },
   { parameterName: "video_position",    displayName: "Video position" },
   { parameterName: "event_type",        displayName: "Event type" },
+  // Phase 6.D /kalender (#1992/#1995). `view` + `source` reuse the existing
+  // params above. `kalender_type` is registered SEPARATELY from `event_type`:
+  // it is a superset ("Wedstrijden" ∪ the 4 eventType values), not an eventType.
+  { parameterName: "kalender_type",      displayName: "Kalender type" },
+  { parameterName: "teams_count",        displayName: "Teams count" },
+  { parameterName: "side",               displayName: "Match side" },
 ];
 
 let token;

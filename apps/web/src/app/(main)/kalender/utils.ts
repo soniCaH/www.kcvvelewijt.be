@@ -11,6 +11,7 @@ import {
 } from "@/components/event/event-type-style";
 import type { MatchStatus, ScheduleMatch } from "@/components/match/types";
 import { getScoreDisplay, type ScoreDisplay } from "@/lib/utils/match-display";
+import type { ItemListEntry } from "@/lib/seo/jsonld";
 export type { ScoreDisplay } from "@/lib/utils/match-display";
 
 export interface CalendarTeam {
@@ -47,6 +48,13 @@ export interface CalendarEvent {
    * tag) can colour an event by type without re-deriving it.
    */
   eventType: EventType;
+  /**
+   * Feed source — `"event"` (a `event` doc → `/evenementen/[slug]`) vs
+   * `"article"` (an `articleType:event` article → `/nieuws/[slug]`). Carried so
+   * the `kalender_item_click` analytics can report the `source` param without
+   * re-deriving it from the href.
+   */
+  source: "event" | "article";
 }
 
 export interface CalendarTeamInfo {
@@ -101,6 +109,7 @@ export function eventListItemToCalendarEvent(
     dateEnd: item.dateEnd ?? undefined,
     href: item.href,
     eventType: item.eventType ?? DEFAULT_EVENT_TYPE,
+    source: item.source,
   };
 }
 
@@ -180,42 +189,42 @@ export function buildCalendarFeed(
   );
 }
 
+/**
+ * Project the feed onto upcoming `{ name, url }` entries for the page's
+ * `ItemList` JSON-LD (SEO summary, not per-item Event schema). Matches link to
+ * `/wedstrijd/[id]`, events/articles to their resolved `href`. Filtered to items
+ * at/after `nowMs` (matches are full-season, so past ones are dropped) and
+ * capped at `limit`. Pure — `nowMs` is injectable for deterministic tests. The
+ * entry shape (`ItemListEntry`) is owned by the seo builder it feeds.
+ */
+export function buildKalenderItemListEntries(
+  feed: CalendarFeedItem[],
+  siteUrl: string,
+  options: { nowMs?: number; limit?: number } = {},
+): ItemListEntry[] {
+  const nowMs = options.nowMs ?? Date.now();
+  const limit = options.limit ?? 30;
+  return feed
+    .filter((item) => {
+      const ms = DateTime.fromISO(item.dateStart).toMillis();
+      return !Number.isNaN(ms) && ms >= nowMs;
+    })
+    .slice(0, limit)
+    .map((item) =>
+      item.source === "match"
+        ? {
+            name: `${item.match.homeTeam.name} — ${item.match.awayTeam.name}`,
+            url: `${siteUrl}/wedstrijd/${item.match.id}`,
+          }
+        : { name: item.event.title, url: `${siteUrl}${item.event.href}` },
+    );
+}
+
 const TIMEZONE = "Europe/Brussels";
 
 /** Parse an ISO string into the club's local timezone */
 function toLocalDate(iso: string): DateTime {
   return DateTime.fromISO(iso, { zone: TIMEZONE });
-}
-
-/** Filter matches whose date falls on the given YYYY-MM-DD, sorted by time */
-export function getMatchesForDay(
-  matches: CalendarMatch[],
-  day: string,
-): CalendarMatch[] {
-  return matches
-    .filter((m) => {
-      const dt = toLocalDate(m.date);
-      return dt.isValid && dt.toISODate() === day;
-    })
-    .sort((a, b) => a.date.localeCompare(b.date));
-}
-
-/** Filter events that span the given YYYY-MM-DD, sorted by start date */
-export function getEventsForDay(
-  events: CalendarEvent[],
-  day: string,
-): CalendarEvent[] {
-  return events
-    .filter((e) => {
-      const start = toLocalDate(e.dateStart);
-      if (!start.isValid) return false;
-      const startDay = start.toISODate()!;
-      if (startDay === day) return true;
-      if (!e.dateEnd) return false;
-      const end = toLocalDate(e.dateEnd);
-      return end.isValid && day >= startDay && day <= end.toISODate()!;
-    })
-    .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
 }
 
 /** A single day's bucketed feed — matches + events, each time-sorted. */

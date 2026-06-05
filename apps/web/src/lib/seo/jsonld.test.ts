@@ -4,6 +4,7 @@ import {
   buildSportsClubJsonLd,
   buildNewsArticleJsonLd,
   buildBreadcrumbJsonLd,
+  buildItemListJsonLd,
   buildPersonJsonLd,
   buildSportsTeamJsonLd,
   buildSportsEventJsonLd,
@@ -228,6 +229,40 @@ describe("buildBreadcrumbJsonLd", () => {
     }>;
     expect(items).toHaveLength(1);
     expect(items[0].position).toBe(1);
+  });
+});
+
+describe("buildItemListJsonLd", () => {
+  it("builds an ItemList of ListItems with position/name/url", () => {
+    const result = buildItemListJsonLd([
+      { name: "KCVV — Zemst", url: "https://www.kcvvelewijt.be/wedstrijd/7" },
+      {
+        name: "Spaghetti-avond",
+        url: "https://www.kcvvelewijt.be/evenementen/s",
+      },
+    ]);
+
+    expect(result["@context"]).toBe("https://schema.org");
+    expect(result["@type"]).toBe("ItemList");
+    const items = result.itemListElement as Array<{
+      "@type": string;
+      position: number;
+      name: string;
+      url: string;
+    }>;
+    expect(items).toHaveLength(2);
+    expect(items[0]).toMatchObject({
+      "@type": "ListItem",
+      position: 1,
+      name: "KCVV — Zemst",
+      url: "https://www.kcvvelewijt.be/wedstrijd/7",
+    });
+    expect(items[1].position).toBe(2);
+  });
+
+  it("returns an empty itemListElement for no items", () => {
+    const result = buildItemListJsonLd([]);
+    expect(result.itemListElement).toEqual([]);
   });
 });
 

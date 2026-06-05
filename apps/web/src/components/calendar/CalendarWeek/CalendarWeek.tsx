@@ -6,6 +6,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import { EVENT_TYPE_FILL } from "@/components/event/event-type-style";
+import { trackKalenderItemClick } from "../calendar-analytics";
 import {
   getDaysInWeek,
   getMatchDotType,
@@ -73,7 +74,12 @@ function WeekMatchCard({ match }: { match: CalendarMatch }) {
   );
 
   return hasDetail ? (
-    <Link href={`/wedstrijd/${match.id}`} data-match className={cardClass}>
+    <Link
+      href={`/wedstrijd/${match.id}`}
+      data-match
+      onClick={() => trackKalenderItemClick("match")}
+      className={cardClass}
+    >
       {body}
     </Link>
   ) : (
@@ -133,6 +139,7 @@ export function CalendarWeek({
                   <Link
                     key={event.id}
                     href={event.href}
+                    onClick={() => trackKalenderItemClick(event.source)}
                     className="border-ink bg-cream block border p-1.5 transition-all duration-300 hover:shadow-[2px_2px_0_0_var(--color-ink)]"
                   >
                     <div className="flex items-start gap-1">

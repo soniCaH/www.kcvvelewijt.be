@@ -129,6 +129,25 @@ the article surface's `event_cta_click` (`article_id_hashed`, `event_date`,
 `has_ticket_url`) so the two parameter shapes don't collide in one GA4 event.
 `event_type` reuses the same fixed enum as `event_filter`.
 
+### Kalender (Phase 6.D — #1992 / #1995)
+
+`/kalender` fires the `kalender_` family. `kalender_filter` shipped in #1992; the
+rest in #1995. All non-PII (public titles/slugs only).
+
+| Event Name                | Trigger                             | Parameters                           |
+| ------------------------- | ----------------------------------- | ------------------------------------ |
+| `kalender_view`           | page mount (`<PageViewTracker>`)    | —                                    |
+| `kalender_filter`         | by-type chip change (dedup-guarded) | `kalender_type`                      |
+| `kalender_view_toggle`    | Maand/Week/Agenda switch (deduped)  | `view`                               |
+| `kalender_item_click`     | feed item → detail click-through    | `source` (`match`/`event`/`article`) |
+| `kalender_subscribe_open` | open the iCal subscribe panel       | —                                    |
+| `kalender_subscribe_copy` | copy the webcal feed                | `teams_count`, `side`                |
+
+`kalender_type` is registered as its own GA4 dimension — distinct from
+`event_type` — because it is a superset (`Wedstrijden` ∪ the 4 `eventType`
+values). `view` + `source` reuse existing dimensions. Manual GTM/GA4 wiring
+lives in the #1974 umbrella (§6).
+
 ## 4. Tracer Bullet
 
 GTM script integration + consent gating + one test event:
@@ -204,12 +223,12 @@ triggers. This keeps the GTM workspace manageable as new features are added.
 
 ### Trigger: `Custom Event — KCVV Analytics`
 
-| Field              | Value                                                                                                                                                                           |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Trigger type       | Custom Event                                                                                                                                                                    |
-| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_\|article_video_\|player_\|match_\|team_` |
-| Use regex matching | checked                                                                                                                                                                         |
-| Fires on           | All Custom Events                                                                                                                                                               |
+| Field              | Value                                                                                                                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Trigger type       | Custom Event                                                                                                                                                                               |
+| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_\|article_video_\|player_\|match_\|team_\|kalender_` |
+| Use regex matching | checked                                                                                                                                                                                    |
+| Fires on           | All Custom Events                                                                                                                                                                          |
 
 ### Tag: `GA4 Event — KCVV Custom Events`
 

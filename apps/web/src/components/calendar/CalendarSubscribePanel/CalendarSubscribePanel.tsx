@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils/cn";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { RemovableChip } from "@/components/design-system";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
@@ -74,6 +75,10 @@ export function CalendarSubscribePanel({
       await navigator.clipboard.writeText(webcalUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      trackEvent("kalender_subscribe_copy", {
+        teams_count: selectedPsdIds.length,
+        side,
+      });
     } catch (err) {
       console.error("Failed to copy to clipboard:", err);
     }

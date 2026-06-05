@@ -9,7 +9,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CalendarSubscribePanel } from "./CalendarSubscribePanel";
+import { trackEvent } from "@/lib/analytics/track-event";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -145,6 +148,17 @@ describe("CalendarSubscribePanel", () => {
       render(<CalendarSubscribePanel {...defaultProps} />);
       await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
       expect(screen.getByText("Gekopieerd")).toBeInTheDocument();
+    });
+
+    it("fires kalender_subscribe_copy with teams_count + side", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      await user.click(screen.getByRole("button", { name: "Thuis" }));
+      await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_copy", {
+        teams_count: 3,
+        side: "home",
+      });
     });
   });
 });

@@ -57,7 +57,14 @@ function event(
   title: string,
   eventType: CalendarEvent["eventType"],
 ): CalendarEvent {
-  return { id, dateStart, title, href: `/evenementen/${id}`, eventType };
+  return {
+    id,
+    dateStart,
+    title,
+    href: `/evenementen/${id}`,
+    eventType,
+    source: "event",
+  };
 }
 
 const baseProps = { currentMonth: 9, currentYear: 2026 };

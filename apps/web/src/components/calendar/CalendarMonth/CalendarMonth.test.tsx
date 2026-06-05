@@ -12,6 +12,9 @@ import { DateTime } from "luxon";
 import { CalendarMonth } from "./CalendarMonth";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 import { getScoreDisplay } from "@/lib/utils/match-display";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -72,6 +75,7 @@ function makeEvent(
     dateStart: "2026-03-15T18:00:00",
     href: "/evenementen/spaghetti-avond",
     eventType: "Clubevent",
+    source: "event",
     ...overrides,
   };
 }
@@ -226,5 +230,39 @@ describe("CalendarMonth", () => {
     );
     await user.click(screen.getByRole("button", { name: "20 maart" }));
     expect(onSelectDate).toHaveBeenCalledWith("2026-03-20");
+  });
+
+  describe("kalender_item_click (selected-day detail)", () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it("fires source=match when a detail match row is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[makeMatch({ id: 1 })]}
+          events={[]}
+        />,
+      );
+      await user.click(screen.getByTestId("team-agenda-row"));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_item_click", {
+        source: "match",
+      });
+    });
+
+    it("fires the event's source when a detail event row is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[]}
+          events={[makeEvent({ id: "e1", source: "article" })]}
+        />,
+      );
+      await user.click(screen.getByTestId("day-event-row"));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_item_click", {
+        source: "article",
+      });
+    });
   });
 });

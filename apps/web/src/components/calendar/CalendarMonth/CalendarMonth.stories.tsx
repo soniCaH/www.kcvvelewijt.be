@@ -76,6 +76,7 @@ const marchEvents: CalendarEvent[] = [
     dateStart: "2026-03-20T10:00:00",
     href: "/evenementen/paastoernooi",
     eventType: "Clubevent",
+    source: "event",
   },
 ];
 
@@ -103,6 +104,7 @@ const denseSaturdayEvents: CalendarEvent[] = [
     dateStart: "2026-03-14T18:00:00",
     href: "/evenementen/spaghetti-avond",
     eventType: "Clubevent",
+    source: "event",
   },
 ];
 
