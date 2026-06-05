@@ -1,47 +1,57 @@
 # Locked — matchPreview / matchRecap article body (5.d-mat)
 
-**Status:** Locked 2026-06-05 · **Issue:** #1791 · **Drill:** `5d-mat/` (rounds 1–3)
+**Status:** Locked 2026-06-05 · **Issue:** #1791 · **Drill:** `5d-mat/` (rounds 1–5)
 **Builds in:** #1470 (article variants) · **Sibling:** #1914 (match-page `<MatchArticleLinkCard>`)
 
 ## Decision summary
 
 The `matchPreview` / `matchRecap` article **does not re-render** lineups, the
 full event timeline, or stats — those stay canonical on `/wedstrijd/[matchId]`
-(Phase 6.B). The article body is **editorial prose + a compact card that links
-to the match**, plus (recap only) a **goals-only** scorer list.
+(Phase 6.B). The **hero carries the matchup** (score-forward, H3); the body is
+**editorial prose**, plus (recap only) a **goals-only** scorer list, then a link
+to the match.
+
+> **Round 4–5 reconciliation (supersedes the round-1 body card):** the matchup
+> moved into the hero (H3). The standalone body "card C" is **dropped** — keeping
+> both would duplicate teams + score. The match link is now a plain text CTA.
 
 Composition (top → bottom):
 
 ```text
-<EditorialHero variant="matchPreview|matchRecap">   ← announcement-shape hero,
+<EditorialHero variant="matchPreview|matchRecap">   ← H3 score-forward hero:
                                                        kicker VOORBESCHOUWING /
-                                                       MATCHVERSLAG (per #1470)
+                                                       MATCHVERSLAG + score bar
+                                                       on the cover (see below)
 <ArticleBody>                                        ← editorial prose
-<MatchCard>                                          ← Round 1 = Variant C
-[recap only] <Doelpunten>                            ← Round 2 = V3, sided
+[recap only] <Doelpunten>                            ← Round 2 = V3, sided goals
+"naar wedstrijd →"                                   ← plain text link to /wedstrijd
 ```
 
-## Round 1 — match card = **Variant C (taped result card)**
+## Hero (rounds 4–5) — **H3, score-forward**
 
-A `<TapedCard>`-based card, whole-card link to `/wedstrijd/[matchId]`:
+`<EditorialHero variant="matchPreview|matchRecap">` keeps the editorial shell
+(kicker + display H1 + lead + cover) and adds a **score bar** straddling the
+cover's lower edge — the same overlay idiom as the `event` variant's day-block.
 
-- Washi **tape** strip on the top-left corner; slight paper rotation (`-0.6°`);
-  `shadow-paper-lift`; canonical **press-down hover**
-  (`hover:shadow-none hover:translate-x-1 hover:translate-y-1`, `duration-300`).
-- **Top:** mono kicker `competition · short-date`. `<MatchStatusBadge>` as a
-  **corner stamp** top-right (it self-hides for `scheduled`, so preview shows none).
-- **Middle:** symmetric 3-col row — `[home crest + name] [score|time] [name + away crest]`.
-  Recap → `font-display-big` score (e.g. `2–1`); preview → kickoff `15:00` (or `vs`).
-- **Foot:** `venue` (left) · `naar wedstrijd →` mono CTA (right).
-- **Reuse:** `<TapedCard>`, `<MatchStatusBadge>`, `<Crest>`, `<MonoLabel>` — no new primitive.
-- Distinct from `<MatchTeaser>` (date-stub-led, asymmetric) by being **symmetric + tape-led**.
+- **Score bar:** a centred, balanced `crest · score · crest` pill (cream, `border-2 border-ink`,
+  `shadow-paper-sm`). Score is `font-display-big`, tabular, with a fixed min-width so
+  `2 – 1` and `15:00` stay centred. Recap appends an `<MatchStatusBadge>` (`FT`);
+  preview shows the **kickoff time** (or `vs`) and no badge.
+- **Kicker:** `VOORBESCHOUWING` (preview) / `MATCHVERSLAG` (recap) `· competition · date`.
+- **Desktop:** editorial column + cover side-by-side (the existing hero grid). The
+  bar sits bottom-centre of the cover.
+- **Mobile:** cover on top (full-bleed) with the score bar straddling its lower edge,
+  editorial (kicker + H1 + lead) below.
+- **Reuse:** the `event`-variant cover-overlay mechanism, `<Crest>`, `<MatchStatusBadge>`.
+- Because the hero carries the matchup, there is **no standalone body match card**
+  (the round-1 "card C" is dropped — see the reconciliation note above).
 
 ## Round 2 — recap goalscorers = **V3, sided "Doelpunten" block**
 
-Below card C on **recap only** (preview has no goals → card C alone):
+After the prose on **recap only** (preview has no goals → no Doelpunten):
 
-- **Gap from card C → Doelpunten: `30px`** (`mt-[30px]`) — the scorer list reads as
-  a distinct section, not attached to the card.
+- **Gap above Doelpunten: `30px`** (`mt-[30px]`) — the scorer list reads as a
+  distinct section.
 - A `Doelpunten.` `<EditorialHeading>`-style italic display heading + 2px ink rule.
 - The list **reuses `<MatchEvents filter="goals">`** — its Option-F rows
   (minute on the far left, then a **sided** glyph: home events render their glyph
@@ -69,25 +79,30 @@ exist in the schema. Previews have **no** score/events/lineup (not played yet).
 
 ## Implementation notes (for #1470)
 
-- The card + Doelpunten are **presentational** (props-only) so they're Storybook/
-  VR-able; the page server-fetches via `BffService.getMatchDetail(linkedMatch)`
-  and feeds them. Article renders without the card if the match 404s.
+- The hero score bar + Doelpunten are **presentational** (props-only) so they're
+  Storybook/VR-able; the page server-fetches via `BffService.getMatchDetail(linkedMatch)`
+  and feeds them. Article renders the editorial hero **without** the score bar if the
+  match 404s (graceful).
 - `matchPreview`/`matchRecap` excluded from `generateStaticParams` (on-demand ISR)
   so match data renders server-side without per-article PSD hits at build.
-- Goals for the roll-call = `events.filter(type === "goal")`.
+- Goals for the roll-call = `events.filter(type === "goal")` → `<MatchEvents filter="goals">`.
+- KCVV-in-`jersey-deep` highlight needs a small `highlightTeam` prop added to
+  `<MatchEvents>` (it currently renders all names in ink) — see Round 2.
+- **No standalone match card** to build (card C dropped). The match link is a plain
+  text CTA after the body.
 
 ## Reuse map
 
 | Element | Reuses |
 | --- | --- |
-| Card shell | `<TapedCard>` (tape, rotation, press-down) |
-| Status stamp | `<MatchStatusBadge>` |
-| Team crests | `<Crest>` |
-| Kicker / labels | `<MonoLabel>` |
-| Doelpunten rows | `<MatchEvents filter="goals">` |
+| Hero shell | `<EditorialHero>` (new `matchPreview`/`matchRecap` variants) |
+| Cover score bar | `event`-variant cover-overlay idiom + `<Crest>` + `<MatchStatusBadge>` |
+| Doelpunten rows | `<MatchEvents filter="goals">` (+ a `highlightTeam` prop) |
 
 ## Mockups
 
-- `5d-mat/round-1-card-shape-comparisons.html` — A/B/C card directions.
-- `5d-mat/round-2-goalscorer-rollcall.html` — V1/V2/V3 roll-call attachments.
-- `5d-mat/round-3-final-locked.html` — locked composition (card C + sided Doelpunten), recap + preview.
+- `5d-mat/round-1-card-shape-comparisons.html` — body card directions A/B/C (C chosen, later superseded).
+- `5d-mat/round-2-goalscorer-rollcall.html` — V1/V2/V3 roll-call attachments (V3, sided).
+- `5d-mat/round-3-final-locked.html` — body composition with card C (superseded by rounds 4–5).
+- `5d-mat/round-4-hero-composition.html` — hero options H1/H2/H3.
+- `5d-mat/round-5-hero-h3-final.html` — **locked** H3 hero (aligned score + mobile).
