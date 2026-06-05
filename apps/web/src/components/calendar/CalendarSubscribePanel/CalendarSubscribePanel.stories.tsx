@@ -14,7 +14,7 @@ const meta = {
   title: "Features/Calendar/CalendarSubscribePanel",
   component: CalendarSubscribePanel,
   parameters: { layout: "padded" },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     teams,
     isOpen: true,
@@ -36,16 +36,11 @@ export const PrefilledSingleTeam: Story = {
   },
 };
 
-export const WithQRCodeOpen: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByRole("button", { name: /Toon QR-code/i }),
-    );
-  },
-};
-
 export const CopiedFeedback: Story = {
+  // Excluded from VR: the play-state depends on the clipboard write resolving,
+  // which is permission-dependent in the headless runner — the snapshot would be
+  // non-deterministic. Kept for autodocs/interaction coverage.
+  tags: ["vr-skip"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(

@@ -8,11 +8,9 @@ const meta = {
   title: "Features/Calendar/CalendarMonth",
   component: CalendarMonth,
   parameters: { layout: "padded" },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     onSelectDate: fn(),
-    onPrevMonth: fn(),
-    onNextMonth: fn(),
   },
 } satisfies Meta<typeof CalendarMonth>;
 
@@ -43,6 +41,7 @@ const marchMatches: CalendarMatch[] = [
     status: "scheduled",
     competition: "Nationale 1",
     team: "A-ploeg",
+    isHome: true,
   },
   {
     id: 2,
@@ -54,6 +53,7 @@ const marchMatches: CalendarMatch[] = [
     status: "scheduled",
     competition: "Nationale 1",
     team: "A-ploeg",
+    isHome: false,
   },
   {
     id: 3,
@@ -65,6 +65,7 @@ const marchMatches: CalendarMatch[] = [
     status: "scheduled",
     competition: "Jeugd",
     team: "U15 A",
+    isHome: true,
   },
 ];
 
@@ -74,6 +75,34 @@ const marchEvents: CalendarEvent[] = [
     title: "Paastoernooi",
     dateStart: "2026-03-20T10:00:00",
     href: "/evenementen/paastoernooi",
+    eventType: "Clubevent",
+  },
+];
+
+// A 10-match Saturday + 1 event — the dense-day stress case (6d0 audit).
+const denseSaturdayMatches: CalendarMatch[] = Array.from(
+  { length: 10 },
+  (_, i) => ({
+    id: 100 + i,
+    date: `2026-03-14T${String(9 + i).padStart(2, "0")}:00:00`,
+    time: `${String(9 + i).padStart(2, "0")}:00`,
+    homeTeam: i % 3 === 0 ? opponent : kcvv,
+    awayTeam: i % 3 === 0 ? kcvv : { id: 30 + i, name: "Tegenstander" },
+    scoreDisplay: { type: "vs" },
+    status: "scheduled",
+    competition: "Jeugd",
+    team: `U${7 + i}`,
+    isHome: i % 3 !== 0,
+  }),
+);
+
+const denseSaturdayEvents: CalendarEvent[] = [
+  {
+    id: "e-dense",
+    title: "Spaghetti-avond",
+    dateStart: "2026-03-14T18:00:00",
+    href: "/evenementen/spaghetti-avond",
+    eventType: "Clubevent",
   },
 ];
 
@@ -104,6 +133,16 @@ export const SelectedDayWithEvent: Story = {
     matches: [],
     events: marchEvents,
     selectedDate: "2026-03-20",
+    currentMonth: 3,
+    currentYear: 2026,
+  },
+};
+
+export const DenseSaturday: Story = {
+  args: {
+    matches: denseSaturdayMatches,
+    events: denseSaturdayEvents,
+    selectedDate: "2026-03-14",
     currentMonth: 3,
     currentYear: 2026,
   },

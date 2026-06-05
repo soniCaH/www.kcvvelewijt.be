@@ -9,7 +9,7 @@ import {
   DEFAULT_EVENT_TYPE,
   type EventType,
 } from "@/components/event/event-type-style";
-import type { MatchStatus } from "@/components/match/types";
+import type { MatchStatus, ScheduleMatch } from "@/components/match/types";
 import { getScoreDisplay, type ScoreDisplay } from "@/lib/utils/match-display";
 export type { ScoreDisplay } from "@/lib/utils/match-display";
 
@@ -40,6 +40,13 @@ export interface CalendarEvent {
   dateStart: string;
   dateEnd?: string;
   href: string;
+  /**
+   * Resolved event category (`item.eventType ?? "Andere"`). Carried onto the
+   * VM — not just the feed item's `kalenderType` facet — so the renderers that
+   * consume the projected `CalendarEvent[]` (grid type-colour dot, agenda type
+   * tag) can colour an event by type without re-deriving it.
+   */
+  eventType: EventType;
 }
 
 export interface CalendarTeamInfo {
@@ -93,6 +100,7 @@ export function eventListItemToCalendarEvent(
     dateStart: item.dateStart,
     dateEnd: item.dateEnd ?? undefined,
     href: item.href,
+    eventType: item.eventType ?? DEFAULT_EVENT_TYPE,
   };
 }
 
@@ -210,6 +218,70 @@ export function getEventsForDay(
     .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
 }
 
+/** A single day's bucketed feed — matches + events, each time-sorted. */
+export interface DayFeed {
+  matches: CalendarMatch[];
+  events: CalendarEvent[];
+}
+
+function ensureDayFeed(map: Map<string, DayFeed>, day: string): DayFeed {
+  let entry = map.get(day);
+  if (!entry) {
+    entry = { matches: [], events: [] };
+    map.set(day, entry);
+  }
+  return entry;
+}
+
+/**
+ * Bucket the whole feed into a `dayISO → { matches, events }` map in a single
+ * pass — each date is parsed once, not once per (cell × item). Replaces the
+ * `O(days × items)` pattern of calling `getMatchesForDay`/`getEventsForDay` for
+ * every grid cell / month day. Multi-day events surface under every day they
+ * span (same semantics as `getEventsForDay`); buckets are time-sorted to match
+ * the per-day helpers. Consumers `useMemo` this on `[matches, events]`.
+ */
+export function groupFeedByDay(
+  matches: CalendarMatch[],
+  events: CalendarEvent[],
+): Map<string, DayFeed> {
+  const map = new Map<string, DayFeed>();
+
+  for (const match of matches) {
+    const dt = toLocalDate(match.date);
+    if (!dt.isValid) continue;
+    ensureDayFeed(map, dt.toISODate()!).matches.push(match);
+  }
+
+  for (const event of events) {
+    const start = toLocalDate(event.dateStart);
+    if (!start.isValid) continue;
+    // The start day always carries the event…
+    ensureDayFeed(map, start.toISODate()!).events.push(event);
+    // …and every later day it spans (inclusive), for a valid multi-day end.
+    if (event.dateEnd) {
+      const end = toLocalDate(event.dateEnd);
+      if (end.isValid) {
+        let cursor = start.startOf("day").plus({ days: 1 });
+        const last = end.startOf("day");
+        while (cursor <= last) {
+          ensureDayFeed(map, cursor.toISODate()!).events.push(event);
+          cursor = cursor.plus({ days: 1 });
+        }
+      }
+    }
+  }
+
+  for (const entry of map.values()) {
+    entry.matches.sort((a, b) => a.date.localeCompare(b.date));
+    entry.events.sort((a, b) => a.dateStart.localeCompare(b.dateStart));
+  }
+  return map;
+}
+
+/** Empty day feed — a stable reference for cells/days with no items. */
+export const EMPTY_DAY_FEED: DayFeed = { matches: [], events: [] };
+
 /**
  * Returns YYYY-MM-DD strings for all day cells in a month grid.
  * Always starts on Monday and ends on Sunday, producing 35 or 42 cells.
@@ -248,4 +320,170 @@ export function getMatchDotType(match: CalendarMatch): "home" | "away" {
   }
   // Fallback for matches without BFF-computed isHome
   return match.homeTeam.name.toLowerCase().includes("kcvv") ? "home" : "away";
+}
+
+/**
+ * Adapt a `CalendarMatch` (route VM, `date: string`) to the `ScheduleMatch`
+ * shape the 6.C `<TeamAgendaRow>` consumes (`date: Date`). Reused by the
+ * grid's selected-day detail so the calendar renders the locked 6.C scoreboard
+ * vocabulary instead of a bespoke row.
+ *
+ * `/kalender` mixes every KCVV squad on one surface, so the squad context
+ * (`match.team`, e.g. "U13"/"A-ploeg") is injected as the KCVV side's
+ * `teamLabel` — `<TeamAgendaRow>` renders it beside the club name, surfacing
+ * *which* KCVV team plays (on the team-detail page this is implicit, here it is
+ * not). The opponent keeps no designation (the BFF gives none for the calendar
+ * feed).
+ */
+export function calendarMatchToScheduleMatch(
+  match: CalendarMatch,
+): ScheduleMatch {
+  const dotType = getMatchDotType(match);
+  return {
+    id: match.id,
+    date: new Date(match.date),
+    time: match.time,
+    homeTeam: {
+      id: match.homeTeam.id,
+      name: match.homeTeam.name,
+      logo: match.homeTeam.logo,
+      teamLabel: dotType === "home" ? match.team : undefined,
+    },
+    awayTeam: {
+      id: match.awayTeam.id,
+      name: match.awayTeam.name,
+      logo: match.awayTeam.logo,
+      teamLabel: dotType === "away" ? match.team : undefined,
+    },
+    homeScore: match.homeScore,
+    awayScore: match.awayScore,
+    status: match.status,
+    competition: match.competition,
+    isHome: match.isHome ?? dotType === "home",
+  };
+}
+
+/** Capitalise the first letter (Dutch weekday/month headings render uppercase). */
+function capitalizeFirst(value: string): string {
+  return value.length === 0
+    ? value
+    : value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
+ * Day-detail / agenda day heading — `"Zaterdag 12 september"` (weekday
+ * capitalised, club locale). Used by the grid's selected-day detail and the
+ * agenda's per-day groups so both read identically.
+ */
+export function formatDayDetailHeading(day: string): string {
+  const dt = DateTime.fromISO(day, { zone: TIMEZONE });
+  if (!dt.isValid) return day;
+  return capitalizeFirst(
+    dt.toLocaleString(
+      { weekday: "long", day: "numeric", month: "long" },
+      { locale: "nl-BE" },
+    ),
+  );
+}
+
+/**
+ * Count caption for a day group — `"10 wedstrijden · 1 evenement"`. Pluralised
+ * for Dutch; only non-zero parts appear; returns `null` when the day is empty.
+ */
+export function formatItemCount(
+  matchCount: number,
+  eventCount: number,
+): string | null {
+  const parts: string[] = [];
+  if (matchCount > 0) {
+    parts.push(
+      `${matchCount} ${matchCount === 1 ? "wedstrijd" : "wedstrijden"}`,
+    );
+  }
+  if (eventCount > 0) {
+    parts.push(
+      `${eventCount} ${eventCount === 1 ? "evenement" : "evenementen"}`,
+    );
+  }
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+/**
+ * Compact month label for the shared period nav + the agenda header —
+ * `"September '26"` (capitalised Dutch month + apostrophe year). One formatter
+ * keeps the toolbar nav (grid/agenda) and the agenda's `<EditorialHeading>` in
+ * sync.
+ */
+export function formatMonthNavLabel(year: number, month: number): string {
+  const monthName = DateTime.local(year, month, 1).toLocaleString(
+    { month: "long" },
+    { locale: "nl-BE" },
+  );
+  return `${capitalizeFirst(monthName)} '${String(year).slice(-2)}`;
+}
+
+/**
+ * Week-range label for the shared period nav in Week view —
+ * `"9 - 15 maart 2026"`, or `"28 feb - 6 maart 2026"` across a month boundary.
+ */
+export function formatWeekRangeLabel(weekStart: string): string {
+  const days = getDaysInWeek(weekStart);
+  const first = DateTime.fromISO(days[0]!);
+  const last = DateTime.fromISO(days[6]!);
+  const sameMonth = first.month === last.month && first.year === last.year;
+  return sameMonth
+    ? `${first.day} - ${last.day} ${first.toLocaleString({ month: "long", year: "numeric" }, { locale: "nl-BE" })}`
+    : `${first.day} ${first.toLocaleString({ month: "long" }, { locale: "nl-BE" })} - ${last.day} ${last.toLocaleString({ month: "long", year: "numeric" }, { locale: "nl-BE" })}`;
+}
+
+/**
+ * Local kickoff/start time (`"18:00"`) for a feed item, or `null` for an all-day
+ * item (`00:00`) — mirrors `<TicketStub>`'s rule so an all-day event shows no
+ * spurious midnight time.
+ */
+export function formatEventTime(iso: string): string | null {
+  const dt = DateTime.fromISO(iso, { zone: TIMEZONE });
+  if (!dt.isValid) return null;
+  const time = dt.toFormat("HH:mm");
+  return time === "00:00" ? null : time;
+}
+
+/** One day's worth of feed items in the agenda's labelled wall. */
+export interface AgendaDayGroup {
+  /** YYYY-MM-DD of the day. */
+  date: string;
+  /** Matches on this day, sorted by kickoff. */
+  matches: CalendarMatch[];
+  /** Events spanning this day, sorted by start. */
+  events: CalendarEvent[];
+}
+
+/**
+ * Group the feed into the agenda's per-day wall for a single navigated month
+ * window (6.D lock — the agenda is month-windowed, never the whole season nor a
+ * flat "all upcoming" feed). Returns only days that carry ≥1 item, in
+ * chronological order; each day's matches/events are time-sorted. A multi-day
+ * event surfaces under every day it spans within the window — the same span
+ * semantics the grid uses. Buckets once via `groupFeedByDay`, then windows.
+ */
+export function buildMonthAgenda(
+  matches: CalendarMatch[],
+  events: CalendarEvent[],
+  year: number,
+  month: number,
+): AgendaDayGroup[] {
+  const byDay = groupFeedByDay(matches, events);
+  const first = DateTime.local(year, month, 1);
+  const daysInMonth = first.daysInMonth!;
+
+  const groups: AgendaDayGroup[] = [];
+  for (let i = 0; i < daysInMonth; i++) {
+    const day = first.plus({ days: i }).toISODate()!;
+    const entry = byDay.get(day);
+    if (!entry || (entry.matches.length === 0 && entry.events.length === 0)) {
+      continue;
+    }
+    groups.push({ date: day, matches: entry.matches, events: entry.events });
+  }
+  return groups;
 }

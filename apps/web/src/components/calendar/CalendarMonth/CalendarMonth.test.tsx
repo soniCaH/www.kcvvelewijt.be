@@ -1,5 +1,9 @@
 /**
- * CalendarMonth Component Tests
+ * CalendarMonth Component Tests (Phase 6.D reskin — #1994).
+ *
+ * Covers the 6d3-v2 cell (events-on-top titles + card-red match pips, no count
+ * badge), the paper/ink grid, and the selected-day detail (TeamAgendaRow + event
+ * rows).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
@@ -22,12 +26,13 @@ vi.mock("next/link", () => ({
     children,
     href,
     className,
+    ...rest
   }: {
     children: React.ReactNode;
     href: string;
     className?: string;
   }) => (
-    <a href={href} className={className}>
+    <a href={href} className={className} {...rest}>
       {children}
     </a>
   ),
@@ -44,6 +49,7 @@ function makeMatch(
     awayTeam: { id: 2, name: "Racing Mechelen" },
     status: "scheduled" as CalendarMatch["status"],
     team: "A-ploeg",
+    isHome: true,
     ...overrides,
   };
   return {
@@ -62,198 +68,163 @@ function makeEvent(
   overrides: Partial<CalendarEvent> & { id: string },
 ): CalendarEvent {
   return {
-    title: "Paastoernooi",
-    dateStart: "2026-03-15T10:00:00",
-    href: "/evenementen/paastoernooi",
+    title: "Spaghetti-avond",
+    dateStart: "2026-03-15T18:00:00",
+    href: "/evenementen/spaghetti-avond",
+    eventType: "Clubevent",
     ...overrides,
   };
 }
 
-const defaultProps = {
-  matches: [] as CalendarMatch[],
-  events: [] as CalendarEvent[],
+const baseProps = {
   selectedDate: "2026-03-15",
   onSelectDate: vi.fn(),
-  currentMonth: 3, // March (1-based, as Luxon uses)
+  currentMonth: 3,
   currentYear: 2026,
-  onPrevMonth: vi.fn(),
-  onNextMonth: vi.fn(),
 };
-
-// ── Tests ──────────────────────────────────────────────────────────────────
 
 describe("CalendarMonth", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Mock DateTime.now() for consistent "today" in tests
     vi.spyOn(DateTime, "now").mockReturnValue(
       DateTime.fromISO("2026-03-15T12:00:00") as DateTime<true>,
     );
   });
 
-  // ── Grid rendering ────────────────────────────────────────────────────
+  it("renders the month grid", () => {
+    render(<CalendarMonth {...baseProps} matches={[]} events={[]} />);
+    expect(screen.getByTestId("month-grid")).toBeInTheDocument();
+  });
 
-  describe("grid rendering", () => {
-    it("renders 7 day-of-week headers", () => {
-      render(<CalendarMonth {...defaultProps} />);
-      const headers = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
-      for (const h of headers) {
-        expect(screen.getByText(h)).toBeInTheDocument();
-      }
+  describe("match pips (no count badge)", () => {
+    it("renders a filled card-red pip for a home match", () => {
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[makeMatch({ id: 1, isHome: true })]}
+          events={[]}
+        />,
+      );
+      const pips = within(
+        screen.getByTestId("day-pips-2026-03-15"),
+      ).getAllByTestId("match-pip");
+      expect(pips).toHaveLength(1);
+      expect(pips[0]).toHaveAttribute("data-venue", "home");
+      expect(pips[0]!.className).toContain("bg-card-red");
     });
 
-    it("renders day cells for the month", () => {
-      render(<CalendarMonth {...defaultProps} />);
-      const grid = screen.getByTestId("month-grid");
-      const buttons = within(grid).getAllByRole("button");
-      // March 2026 starts Sunday → grid has 42 cells (6 rows)
-      expect(buttons.length).toBe(42);
+    it("renders a ring (away) pip for an away match", () => {
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[makeMatch({ id: 2, isHome: false })]}
+          events={[]}
+        />,
+      );
+      const pip = within(screen.getByTestId("day-pips-2026-03-15")).getByTestId(
+        "match-pip",
+      );
+      expect(pip).toHaveAttribute("data-venue", "away");
+      expect(pip.className).toContain("border-card-red");
     });
 
-    it("renders month/year label", () => {
-      render(<CalendarMonth {...defaultProps} />);
-      expect(screen.getByText("maart 2026")).toBeInTheDocument();
-    });
-
-    it("highlights today with a distinct background", () => {
-      render(<CalendarMonth {...defaultProps} selectedDate="2026-03-01" />);
-      // Find the button for the 15th (today)
-      const todayButton = screen.getByRole("button", { name: /15/i });
-      expect(todayButton.className).toContain("bg-gray-100");
-    });
-
-    it("highlights selected date with green background", () => {
-      render(<CalendarMonth {...defaultProps} selectedDate="2026-03-15" />);
-      const selectedButton = screen.getByRole("button", { name: /15/i });
-      expect(selectedButton.className).toContain("bg-kcvv-green-bright");
-    });
-
-    it("mutes days outside current month", () => {
-      render(<CalendarMonth {...defaultProps} />);
-      // March 2026 starts on Sunday, so Feb 23-28 are leading days
-      // The grid should have Feb days with muted styling
-      const grid = screen.getByTestId("month-grid");
-      const buttons = within(grid).getAllByRole("button");
-      // First button is Feb 23 → should be muted
-      expect(buttons[0].className).toContain("text-gray-300");
+    it("renders one pip per match without a numeric count badge", () => {
+      const matches = Array.from({ length: 5 }, (_, i) =>
+        makeMatch({ id: i + 1 }),
+      );
+      render(<CalendarMonth {...baseProps} matches={matches} events={[]} />);
+      const pips = within(
+        screen.getByTestId("day-pips-2026-03-15"),
+      ).getAllByTestId("match-pip");
+      expect(pips).toHaveLength(5);
+      expect(screen.queryByTestId("count-badge")).not.toBeInTheDocument();
     });
   });
 
-  // ── Dots ──────────────────────────────────────────────────────────────
-
-  describe("match/event dots", () => {
-    it("shows filled green dot for home match", () => {
-      const matches = [
-        makeMatch({
-          id: 1,
-          date: "2026-03-15T15:00:00",
-          homeTeam: { id: 1, name: "KCVV Elewijt A" },
-          awayTeam: { id: 2, name: "Racing Mechelen" },
-        }),
-      ];
-      render(<CalendarMonth {...defaultProps} matches={matches} />);
-      const dot = screen.getByTestId("dot-home-2026-03-15");
-      expect(dot.className).toContain("bg-kcvv-green-bright");
-    });
-
-    it("shows outlined green dot for away match", () => {
-      const matches = [
-        makeMatch({
-          id: 1,
-          date: "2026-03-15T15:00:00",
-          homeTeam: { id: 2, name: "Racing Mechelen" },
-          awayTeam: { id: 1, name: "KCVV Elewijt A" },
-        }),
-      ];
-      render(<CalendarMonth {...defaultProps} matches={matches} />);
-      const dot = screen.getByTestId("dot-away-2026-03-15");
-      expect(dot.className).toContain("border-kcvv-green-bright");
-    });
-
-    it("shows blue dot for events", () => {
-      const events = [
-        makeEvent({ id: "e1", dateStart: "2026-03-20T10:00:00" }),
-      ];
-      render(<CalendarMonth {...defaultProps} events={events} />);
-      const dot = screen.getByTestId("dot-event-2026-03-20");
-      expect(dot.className).toContain("bg-blue-500");
+  describe("events on top", () => {
+    it("renders an event as an in-cell title (not a pip)", () => {
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[]}
+          events={[makeEvent({ id: "e1", title: "Spaghetti-avond" })]}
+        />,
+      );
+      const cell = screen.getByTestId("day-events-2026-03-15");
+      expect(within(cell).getByText("Spaghetti-avond")).toBeInTheDocument();
     });
   });
 
-  // ── Interaction ───────────────────────────────────────────────────────
-
-  describe("interaction", () => {
-    it("calls onSelectDate when clicking a day", async () => {
-      const user = userEvent.setup();
-      const onSelectDate = vi.fn();
-      render(<CalendarMonth {...defaultProps} onSelectDate={onSelectDate} />);
-      await user.click(screen.getByRole("button", { name: /20/ }));
-      expect(onSelectDate).toHaveBeenCalledWith("2026-03-20");
+  describe("selected-day detail", () => {
+    it("renders a TeamAgendaRow per match on the selected day", () => {
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[makeMatch({ id: 1 }), makeMatch({ id: 2 })]}
+          events={[]}
+        />,
+      );
+      expect(screen.getAllByTestId("team-agenda-row")).toHaveLength(2);
     });
 
-    it("calls onPrevMonth when clicking prev arrow", async () => {
-      const user = userEvent.setup();
-      const onPrevMonth = vi.fn();
-      render(<CalendarMonth {...defaultProps} onPrevMonth={onPrevMonth} />);
-      await user.click(screen.getByLabelText("Vorige maand"));
-      expect(onPrevMonth).toHaveBeenCalled();
+    it("renders an event row linking to its detail route with a type tag", () => {
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[]}
+          events={[
+            makeEvent({ id: "e1", href: "/evenementen/spaghetti-avond" }),
+          ]}
+        />,
+      );
+      const row = screen.getByTestId("day-event-row");
+      expect(row).toHaveAttribute("href", "/evenementen/spaghetti-avond");
+      expect(within(row).getByTestId("event-type-tag")).toHaveAttribute(
+        "data-event-type",
+        "Clubevent",
+      );
     });
 
-    it("calls onNextMonth when clicking next arrow", async () => {
-      const user = userEvent.setup();
-      const onNextMonth = vi.fn();
-      render(<CalendarMonth {...defaultProps} onNextMonth={onNextMonth} />);
-      await user.click(screen.getByLabelText("Volgende maand"));
-      expect(onNextMonth).toHaveBeenCalled();
-    });
-  });
-
-  // ── Day panel ─────────────────────────────────────────────────────────
-
-  describe("day panel", () => {
-    it("shows formatted date heading for selected day", () => {
-      render(<CalendarMonth {...defaultProps} selectedDate="2026-03-22" />);
-      // March 22, 2026 is a Sunday
+    it("shows the day heading with a pluralised count caption", () => {
+      render(
+        <CalendarMonth
+          {...baseProps}
+          matches={[makeMatch({ id: 1 }), makeMatch({ id: 2 })]}
+          events={[makeEvent({ id: "e1" })]}
+        />,
+      );
       const heading = screen.getByTestId("day-panel-heading");
-      expect(heading.textContent?.toLowerCase()).toContain("22");
-      expect(heading.textContent?.toLowerCase()).toContain("maart");
+      expect(heading).toHaveTextContent(/zondag 15 maart/i);
+      expect(heading).toHaveTextContent("2 wedstrijden · 1 evenement");
     });
 
-    it("shows compact MatchTeaser for matches on selected day", () => {
-      const matches = [
-        makeMatch({ id: 1, date: "2026-03-15T15:00:00", time: "15:00" }),
-      ];
+    it("shows an empty message when the selected day has no items", () => {
       render(
         <CalendarMonth
-          {...defaultProps}
-          matches={matches}
-          selectedDate="2026-03-15"
+          {...baseProps}
+          selectedDate="2026-03-20"
+          matches={[makeMatch({ id: 1 })]}
+          events={[]}
         />,
       );
-      // MatchTeaser renders team names
-      expect(screen.getByText("KCVV Elewijt A")).toBeInTheDocument();
-      expect(screen.getByText("Racing Mechelen")).toBeInTheDocument();
-    });
-
-    it("shows event info for events on selected day", () => {
-      const events = [
-        makeEvent({ id: "e1", dateStart: "2026-03-15T10:00:00" }),
-      ];
-      render(
-        <CalendarMonth
-          {...defaultProps}
-          events={events}
-          selectedDate="2026-03-15"
-        />,
-      );
-      expect(screen.getByText("Paastoernooi")).toBeInTheDocument();
-    });
-
-    it("shows empty state when no matches or events on day", () => {
-      render(<CalendarMonth {...defaultProps} selectedDate="2026-03-20" />);
       expect(
-        screen.getByText("Geen wedstrijden of activiteiten op deze dag."),
+        screen.getByText(/Geen wedstrijden of activiteiten op deze dag/i),
       ).toBeInTheDocument();
     });
+  });
+
+  it("calls onSelectDate when a day cell is clicked", async () => {
+    const user = userEvent.setup();
+    const onSelectDate = vi.fn();
+    render(
+      <CalendarMonth
+        {...baseProps}
+        onSelectDate={onSelectDate}
+        matches={[]}
+        events={[]}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "20 maart" }));
+    expect(onSelectDate).toHaveBeenCalledWith("2026-03-20");
   });
 });

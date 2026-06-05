@@ -15,11 +15,11 @@ Drill artefacts (this dir): `6d0-data-reality-audit.md` · `6d1-reskin-vs-agenda
 auto-by-filter switch (rejected), not one-or-the-other. The widget's existing `Maand / Week`
 segmented control extends to a **3-way view toggle**:
 
-| View      | Form                         | Default | URL              |
-| --------- | ---------------------------- | ------- | ---------------- |
-| **Maand** | month **grid** (reskinned)   | ✅ yes  | `?view=month`    |
-| **Week**  | week **grid** (reskinned)    | —       | `?view=week`     |
-| **Agenda**| month **list** (newspaper)   | —       | `?view=agenda`   |
+| View       | Form                       | Default | URL            |
+| ---------- | -------------------------- | ------- | -------------- |
+| **Maand**  | month **grid** (reskinned) | ✅ yes  | `?view=month`  |
+| **Week**   | week **grid** (reskinned)  | —       | `?view=week`   |
+| **Agenda** | month **list** (newspaper) | —       | `?view=agenda` |
 
 **Owner quote:** _"I want both, with a tab or something to switch. Grid as default."_
 
@@ -67,8 +67,8 @@ outcome colour) + event rows. (Unchanged interaction model from today's widget.)
 ## Filters (confirmed from #1992 — finalised here)
 
 - **By-type colour chips** (`<KalenderFilterBar>`), reusing `/evenementen`'s `EVENT_CHIP_BASE`
-  + `EVENT_TYPE_FILL` vocabulary, on the light field. Locked set + order:
-  **Alles · Wedstrijden · Clubevent · Supportersactiviteit · Jeugdwerking · Andere.**
+  - `EVENT_TYPE_FILL` vocabulary, on the light field. Locked set + order:
+    **Alles · Wedstrijden · Clubevent · Supportersactiviteit · Jeugdwerking · Andere.**
 - **Wedstrijden = `card-red` (`#c93f1c`)** — owner-locked (6d1/#1992), repurposing the Phase
   6.B alert token as the primary-category fill. The chip row **doubles as the colour legend**
   — so the standalone bottom legend ("Thuiswedstrijd / Uitwedstrijd / Evenement") that the
@@ -81,12 +81,25 @@ outcome colour) + event rows. (Unchanged interaction model from today's widget.)
 **win = jersey-deep · draw = none · loss = brick (`--color-alert`)**, as a flat underline on
 the score — applies to played matches in both the grid detail and the agenda. No new vocabulary.
 
-## iCal subscribe (retain + reskin)
+## iCal subscribe (retain + reskin → 6d5 drilled 2026-06-05)
 
 The **"Abonneer" panel is kept** — a **matches-only "follow your team" feed**, orthogonal to
-the type filter (per PRD §2/§7). Reskin the `<CalendarSubscribePanel>` chrome to paper/ink +
-the chip vocabulary; `/api/calendar.ics` is unchanged. No events in the subscribe feed
-(per-event "Zet in agenda" already exists on `/evenementen/[slug]`).
+the type filter (per PRD §2/§7). `/api/calendar.ics` is unchanged. No events in the subscribe
+feed (per-event "Zet in agenda" already exists on `/evenementen/[slug]`).
+
+The gate only asked for a "chrome reskin" — no layout was drilled — so a `6d5` A/B was run
+(`6d5-subscribe-compare.html`, 3 options). **Owner picked (ii) "Seizoenskaart" — a perforated
+ticket-stub:**
+
+- **Left stub = the QR, always visible** (scan-to-add on mobile); a dashed perforation divides
+  it from the body. The raw `webcal://` URL is **not surfaced** (it was technical noise).
+- **Body** = `"Volg je ploeg(en)."` italic-display headline → selected-team tokens → a
+  `Alle / Thuis / Uit` segmented control + a single **`Kopieer link`** button. The segmented
+  control and the copy button are **equal height** (owner refinement).
+- **Selected-team tokens use the new `<RemovableChip>` design-system primitive** (label + ×).
+  Extracted here because the "chip with a cross" pattern was hand-rolled in ~6 places
+  (organigram search bars, nav) and never consolidated — those are follow-up migrations.
+- Subscribe **analytics** (`kalender_subscribe_*`) remain in **#1995**.
 
 ---
 

@@ -139,11 +139,12 @@ export default async function CalendarPage() {
 
   return (
     // `pb-[var(--footer-diagonal)]` on the root wrapper (instead of a
-    // trailing <FooterSafeArea />) lets `bg-gray-100` extend through the
+    // trailing <FooterSafeArea />) lets `bg-cream` extend through the
     // footer-diagonal overlap zone — the overlap's transparent upper
-    // triangle then reveals the page's own gray surface rather than
-    // white body. See #1360.
-    <div className="min-h-screen bg-gray-100 pb-[var(--footer-diagonal)]">
+    // triangle then reveals the page's own cream surface rather than
+    // white body. See #1360. (Phase 6.D: cream paper field hosts the
+    // reskinned paper/ink calendar panel.)
+    <div className="bg-cream min-h-screen pb-[var(--footer-diagonal)]">
       <InteriorPageHero
         image="/images/youth-trainers.jpg"
         imageAlt="KCVV jeugdtraining"

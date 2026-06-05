@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { cn } from "@/lib/utils/cn";
+import { RemovableChip } from "@/components/design-system";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
 export interface CalendarSubscribePanelProps {
@@ -11,6 +13,12 @@ export interface CalendarSubscribePanelProps {
 }
 
 type Side = "all" | "home" | "away";
+
+const SIDE_TABS: { value: Side; label: string }[] = [
+  { value: "all", label: "Alle" },
+  { value: "home", label: "Thuis" },
+  { value: "away", label: "Uit" },
+];
 
 function buildWebcalUrl(teamIds: number[], side: Side, host: string): string {
   return `webcal://${host}/api/calendar.ics?teamIds=${teamIds.join(",")}&side=${side}`;
@@ -37,7 +45,6 @@ export function CalendarSubscribePanel({
   );
   const [side, setSide] = useState<Side>("all");
   const [copied, setCopied] = useState(false);
-  const [showQR, setShowQR] = useState(false);
 
   const host =
     typeof window !== "undefined"
@@ -79,105 +86,97 @@ export function CalendarSubscribePanel({
   return (
     <div
       data-testid="subscribe-panel"
-      className="mb-4 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
+      className="border-paper-edge bg-cream-soft border-b-2 border-dashed p-4"
     >
-      {/* Team selection */}
-      <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Teams
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {teams
-            .filter((t) => selectedTeamIds.has(t.id))
-            .map((team) => (
-              <span
-                key={team.id}
-                className="bg-kcvv-green-bright inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm text-white"
-              >
-                {team.label}
-                <button
-                  onClick={() => removeTeam(team.id)}
-                  aria-label={`${team.label} ×`}
-                  className="flex h-4 w-4 items-center justify-center rounded-full text-xs hover:bg-white/20"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          {unselectedTeams.length > 0 && (
-            <select
-              onChange={(e) => {
-                if (e.target.value) addTeam(e.target.value);
-                e.target.value = "";
-              }}
-              className="rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-600"
-              aria-label="Team toevoegen"
-            >
-              <option value="">+ voeg toe</option>
-              {unselectedTeams.map((team) => (
-                <option key={team.id} value={team.id}>
-                  {team.label}
-                </option>
+      {/* Seizoenskaart — a perforated "abonnement" ticket (6d5 lock). The QR
+          lives in the always-visible left stub; the body carries the team
+          chips + thuis/uit segmented control + a single copy button. The raw
+          webcal URL is intentionally not surfaced. */}
+      <div className="border-ink bg-cream flex flex-col border-2 sm:flex-row">
+        {/* Stub — QR (always visible) */}
+        <div className="border-ink bg-cream-soft flex shrink-0 flex-col items-center justify-center gap-2 border-b-2 border-dashed px-5 py-4 sm:border-r-2 sm:border-b-0">
+          <div data-testid="qr-code" className="bg-cream border-ink border p-1">
+            <QRCodeSVG value={webcalUrl} size={92} />
+          </div>
+          <span className="text-ink-muted font-mono text-[9px] tracking-wider uppercase">
+            Scan → agenda
+          </span>
+        </div>
+
+        {/* Body */}
+        <div className="min-w-0 flex-1 p-4">
+          <p className="text-ink-muted font-mono text-[10px] font-semibold tracking-widest uppercase">
+            Abonnement
+          </p>
+          <p className="font-display text-ink mb-3 text-lg font-bold italic">
+            Volg je ploeg(en).
+          </p>
+
+          {/* Team chips */}
+          <div className="mb-3 flex flex-wrap gap-2">
+            {teams
+              .filter((t) => selectedTeamIds.has(t.id))
+              .map((team) => (
+                <RemovableChip
+                  key={team.id}
+                  label={team.label}
+                  onRemove={() => removeTeam(team.id)}
+                />
               ))}
-            </select>
-          )}
+            {unselectedTeams.length > 0 && (
+              <select
+                onChange={(e) => {
+                  if (e.target.value) addTeam(e.target.value);
+                  e.target.value = "";
+                }}
+                className="border-ink bg-cream text-ink border-2 px-2.5 py-1 font-mono text-[11px] font-semibold"
+                aria-label="Team toevoegen"
+              >
+                <option value="">+ voeg toe</option>
+                {unselectedTeams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.label}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Side filter (segmented) + copy — equal height */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div
+              role="group"
+              aria-label="Filter wedstrijden"
+              className="border-ink inline-flex border-2"
+            >
+              {SIDE_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  type="button"
+                  onClick={() => setSide(tab.value)}
+                  aria-pressed={side === tab.value}
+                  className={cn(
+                    "not-last:border-ink px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase transition-colors not-last:border-r-2",
+                    side === tab.value
+                      ? "bg-ink text-cream"
+                      : "text-ink hover:bg-cream-soft",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={handleCopy}
+              disabled={selectedPsdIds.length === 0}
+              className="border-ink bg-jersey-deep border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide text-white uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
+            >
+              {copied ? "Gekopieerd" : "Kopieer link"}
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* Side filter */}
-      <div>
-        <label
-          htmlFor="side-filter"
-          className="mb-1 block text-sm font-medium text-gray-700"
-        >
-          Filter
-        </label>
-        <select
-          id="side-filter"
-          value={side}
-          onChange={(e) => setSide(e.target.value as Side)}
-          aria-label="Filter"
-          className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:w-auto"
-        >
-          <option value="all">Alle wedstrijden</option>
-          <option value="home">Alleen thuiswedstrijden</option>
-          <option value="away">Alleen uitwedstrijden</option>
-        </select>
-      </div>
-
-      {/* URL display */}
-      <div>
-        <input
-          type="text"
-          readOnly
-          value={webcalUrl}
-          data-testid="webcal-url"
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm text-gray-600"
-        />
-      </div>
-
-      {/* Action buttons */}
-      <div className="flex flex-wrap gap-3">
-        <button
-          onClick={handleCopy}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-        >
-          {copied ? "Gekopieerd" : "Kopieer link"}
-        </button>
-        <button
-          onClick={() => setShowQR((prev) => !prev)}
-          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-        >
-          {showQR ? "Verberg QR-code" : "Toon QR-code"}
-        </button>
-      </div>
-
-      {/* QR code */}
-      {showQR && (
-        <div data-testid="qr-code" className="flex justify-center p-4">
-          <QRCodeSVG value={webcalUrl} size={200} />
-        </div>
-      )}
     </div>
   );
 }

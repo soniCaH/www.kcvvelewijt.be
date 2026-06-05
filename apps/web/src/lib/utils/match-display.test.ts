@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { hasScore, getScoreDisplay, getResultColor } from "./match-display";
+import {
+  hasScore,
+  getScoreDisplay,
+  getResultColor,
+  isPlayedMatch,
+} from "./match-display";
 import type { MatchStatus } from "@/lib/effect/schemas/match.schema";
 
 interface MinimalMatch {
@@ -130,5 +135,27 @@ describe("getResultColor", () => {
 
   it("handles 0-0 draw", () => {
     expect(getResultColor(0, 0, true)).toBe("draw");
+  });
+});
+
+describe("isPlayedMatch", () => {
+  it("is true for played statuses", () => {
+    for (const status of [
+      "finished",
+      "forfeited",
+      "stopped",
+    ] as MatchStatus[]) {
+      expect(isPlayedMatch(status)).toBe(true);
+    }
+  });
+
+  it("is false for unplayed statuses", () => {
+    for (const status of [
+      "scheduled",
+      "postponed",
+      "cancelled",
+    ] as MatchStatus[]) {
+      expect(isPlayedMatch(status)).toBe(false);
+    }
   });
 });

@@ -124,7 +124,8 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/kalender",
       Loading: KalenderLoading,
-      expectedRootClass: "min-h-screen bg-gray-100",
+      // Phase 6.D (#1994): cream paper field hosts the reskinned paper/ink panel.
+      expectedRootClass: "bg-cream min-h-screen",
     },
     {
       name: "/nieuws",

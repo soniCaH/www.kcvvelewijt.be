@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { CalendarMonth } from "../CalendarMonth";
 import { CalendarWeek } from "../CalendarWeek";
+import { CalendarAgenda } from "../CalendarAgenda";
 import { CalendarSubscribePanel } from "../CalendarSubscribePanel";
 import {
   KalenderFilterBar,
   isKalenderFilterValue,
   type KalenderFilterValue,
 } from "../KalenderFilterBar";
+import {
+  formatMonthNavLabel,
+  formatWeekRangeLabel,
+} from "@/app/(main)/kalender/utils";
 import type {
   CalendarFeedItem,
   CalendarMatch,
@@ -25,41 +30,61 @@ export interface CalendarWidgetProps {
    * Unified, chronologically-sorted calendar feed — PSD matches + the 6.E event
    * feed (`event` docs + `articleType:event` articles), composed by
    * `buildCalendarFeed`. The widget filters this by `kalenderType` and projects
-   * it back to the match/event arrays the month/week renderers consume.
+   * it back to the match/event arrays the month/week/agenda renderers consume.
    */
   feed: CalendarFeedItem[];
   teams: CalendarTeamInfo[];
+  /**
+   * ISO date (`YYYY-MM-DD`) that seeds the initial navigated period + selected
+   * day. Defaults to the real "today". Injected by stories/tests so the opening
+   * window is deterministic regardless of the render clock (the grid's own
+   * "today" highlight still follows the real clock).
+   */
+  today?: string;
 }
 
-type ViewMode = "month" | "week";
+type ViewMode = "month" | "week" | "agenda";
 
 const VIEW_TABS: { value: ViewMode; label: string; mobileHidden?: boolean }[] =
   [
     { value: "month", label: "Maand" },
     { value: "week", label: "Week", mobileHidden: true },
+    { value: "agenda", label: "Agenda" },
   ];
 
-export function CalendarWidget({ feed, teams }: CalendarWidgetProps) {
+function parseView(raw: string | null): ViewMode {
+  return raw === "week" || raw === "agenda" ? raw : "month";
+}
+
+export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const rawView = searchParams.get("view");
-  const view: ViewMode = rawView === "week" ? "week" : "month";
+  const view = parseView(searchParams.get("view"));
 
-  // By-type filter (Phase 6.D Phase 2, #1992) — replaces the legacy by-team
-  // filter. An unknown `?type=` value falls back to "all".
+  // By-type filter (Phase 6.D Phase 2, #1992). An unknown `?type=` falls to "all".
   const rawType = searchParams.get("type");
   const activeTypeFilter: KalenderFilterValue = isKalenderFilterValue(rawType)
     ? rawType
     : "all";
 
-  const today = DateTime.now();
-  const [selectedDate, setSelectedDate] = useState(today.toISODate()!);
-  const [currentMonth, setCurrentMonth] = useState<number>(today.month);
-  const [currentYear, setCurrentYear] = useState(today.year);
-  const [weekStart, setWeekStart] = useState(
-    today.startOf("week").toISODate()!,
-  );
+  // One shared period anchor for all three views (6.D lock — switching Maand /
+  // Week / Agenda keeps the navigated window). Month + Agenda page by month,
+  // Week pages by week; both derive from this single cursor, seeded from
+  // `today` (defaults to the real clock).
+  const seedDay = today ?? DateTime.now().toISODate()!;
+  const [cursor, setCursor] = useState<string>(seedDay);
+  const [selectedDate, setSelectedDate] = useState(seedDay);
   const [subscribePanelOpen, setSubscribePanelOpen] = useState(false);
+
+  const cursorDt = DateTime.fromISO(cursor);
+  const currentMonth = cursorDt.month;
+  const currentYear = cursorDt.year;
+  const weekStart = cursorDt.startOf("week").toISODate()!;
+
+  const periodLabel =
+    view === "week"
+      ? formatWeekRangeLabel(weekStart)
+      : formatMonthNavLabel(currentYear, currentMonth);
 
   function setView(newView: ViewMode) {
     const params = new URLSearchParams(searchParams.toString());
@@ -67,36 +92,26 @@ export function CalendarWidget({ feed, teams }: CalendarWidgetProps) {
     router.push(`/kalender?${params.toString()}`, { scroll: false });
   }
 
-  function handlePrevMonth() {
-    if (currentMonth === 1) {
-      setCurrentMonth(12);
-      setCurrentYear((y) => y - 1);
-    } else {
-      setCurrentMonth((m) => m - 1);
+  function stepPeriod(direction: 1 | -1) {
+    const next = DateTime.fromISO(cursor).plus(
+      view === "week" ? { weeks: direction } : { months: direction },
+    );
+    setCursor(next.toISODate()!);
+    // Keep the grid's selected day inside the navigated month so the
+    // selected-day detail never shows a day outside the visible grid after
+    // paging (week stepping leaves the detail's day alone — it isn't rendered
+    // in week view).
+    if (view !== "week") {
+      setSelectedDate(next.startOf("month").toISODate()!);
     }
   }
 
-  function handleNextMonth() {
-    if (currentMonth === 12) {
-      setCurrentMonth(1);
-      setCurrentYear((y) => y + 1);
-    } else {
-      setCurrentMonth((m) => m + 1);
-    }
-  }
-
-  function handlePrevWeek() {
-    setWeekStart((ws) => DateTime.fromISO(ws).minus({ weeks: 1 }).toISODate()!);
-  }
-
-  function handleNextWeek() {
-    setWeekStart((ws) => DateTime.fromISO(ws).plus({ weeks: 1 }).toISODate()!);
-  }
+  const handlePrev = () => stepPeriod(-1);
+  const handleNext = () => stepPeriod(1);
 
   function setType(value: KalenderFilterValue) {
     // Dedup guard: re-pressing the active chip is a no-op, so neither the URL
-    // push nor the `kalender_filter` analytics event fires twice for the same
-    // selection (repo analytics policy).
+    // push nor the `kalender_filter` analytics event fires twice (repo policy).
     if (value === activeTypeFilter) return;
     const params = new URLSearchParams(searchParams.toString());
     if (value === "all") {
@@ -110,22 +125,26 @@ export function CalendarWidget({ feed, teams }: CalendarWidgetProps) {
     trackEvent("kalender_filter", { kalender_type: value });
   }
 
-  // Narrow the unified feed to the active type, then project the survivors back
-  // to the match/event arrays the month/week renderers already consume.
-  const filteredFeed =
-    activeTypeFilter === "all"
-      ? feed
-      : feed.filter((item) => item.kalenderType === activeTypeFilter);
-  const matches: CalendarMatch[] = filteredFeed.flatMap((item) =>
-    item.source === "match" ? [item.match] : [],
-  );
-  const events: CalendarEvent[] = filteredFeed.flatMap((item) =>
-    item.source !== "match" ? [item.event] : [],
-  );
+  // Narrow the unified feed to the active type, then partition the survivors
+  // back into the match/event arrays the renderers consume — in one pass, and
+  // memoized so day-selection / view-toggle re-renders don't re-derive (and the
+  // children's per-day grouping memos keep their references).
+  const { filteredFeed, matches, events } = useMemo(() => {
+    const filtered =
+      activeTypeFilter === "all"
+        ? feed
+        : feed.filter((item) => item.kalenderType === activeTypeFilter);
+    const matchList: CalendarMatch[] = [];
+    const eventList: CalendarEvent[] = [];
+    for (const item of filtered) {
+      if (item.source === "match") matchList.push(item.match);
+      else eventList.push(item.event);
+    }
+    return { filteredFeed: filtered, matches: matchList, events: eventList };
+  }, [feed, activeTypeFilter]);
 
-  // Empty + filtered-to-zero copy — both render a message instead of a blank
-  // grid. "all" + nothing = genuinely empty; a specific facet + nothing = the
-  // selection emptied the calendar.
+  // Empty + filtered-to-zero copy. "all" + nothing = genuinely empty; a specific
+  // facet + nothing = the selection emptied the calendar.
   const zeroMessage =
     activeTypeFilter === "all"
       ? "Geen wedstrijden of evenementen gepland."
@@ -135,87 +154,100 @@ export function CalendarWidget({ feed, teams }: CalendarWidgetProps) {
 
   return (
     <div className="space-y-4">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between gap-2">
-        {/* View tabs — segmented control */}
-        <div className="inline-flex overflow-hidden rounded-lg border border-gray-300">
-          {VIEW_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setView(tab.value)}
-              className={cn(
-                "px-4 py-2 text-sm font-medium transition-colors",
-                tab.mobileHidden && "hidden md:inline-flex",
-                view === tab.value
-                  ? "bg-gray-900 text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50",
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Subscribe button */}
-        <button
-          onClick={() => setSubscribePanelOpen((prev) => !prev)}
-          aria-expanded={subscribePanelOpen}
-          className={cn(
-            "inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-            subscribePanelOpen
-              ? "border-gray-400 bg-gray-50 text-gray-900"
-              : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50",
-          )}
-        >
-          Abonneer
-          <svg
-            className={cn(
-              "h-4 w-4 transition-transform",
-              subscribePanelOpen && "rotate-180",
-            )}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
-        </button>
-      </div>
-
-      {/* Subscribe panel — a team-match feed, orthogonal to the type filter */}
-      <CalendarSubscribePanel teams={teams} isOpen={subscribePanelOpen} />
-
       {/* By-type filter chips (the row doubles as the colour legend) */}
       <KalenderFilterBar selected={activeTypeFilter} onSelect={setType} />
 
-      {filteredFeed.length === 0 ? (
-        // role="status" (implicit aria-live="polite") so the message is
-        // announced when a filter selection empties the calendar — it appears
-        // on a client-side state change, not a page load.
-        <div
-          role="status"
-          className="flex flex-col items-center gap-3 py-12 text-center text-gray-600"
-        >
-          <p className="font-medium">{zeroMessage}</p>
-          {activeTypeFilter !== "all" && (
+      {/* Paper/ink panel shell */}
+      <div className="border-ink bg-cream shadow-paper-md border-2">
+        {/* Toolbar: view toggle · shared period nav · subscribe */}
+        <div className="border-ink flex flex-wrap items-center justify-between gap-3 border-b-2 p-3">
+          {/* 3-way segmented control */}
+          <div className="border-ink inline-flex overflow-hidden border-2">
+            {VIEW_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                onClick={() => setView(tab.value)}
+                aria-pressed={view === tab.value}
+                className={cn(
+                  "border-ink px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase transition-colors not-last:border-r-2",
+                  tab.mobileHidden && "hidden md:inline-flex",
+                  view === tab.value
+                    ? "bg-ink text-cream"
+                    : "text-ink hover:bg-cream-soft",
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Shared period nav */}
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setType("all")}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+              onClick={handlePrev}
+              aria-label={view === "week" ? "Vorige week" : "Vorige maand"}
+              className="border-ink bg-cream hover:bg-cream-soft flex h-8 w-8 items-center justify-center border-2 font-mono transition-colors"
             >
-              Toon alles
+              ‹
             </button>
-          )}
+            <span
+              data-testid="period-label"
+              className="font-display text-ink min-w-[8.5rem] text-center text-lg font-black"
+            >
+              {periodLabel}
+            </span>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label={view === "week" ? "Volgende week" : "Volgende maand"}
+              className="border-ink bg-cream hover:bg-cream-soft flex h-8 w-8 items-center justify-center border-2 font-mono transition-colors"
+            >
+              ›
+            </button>
+          </div>
+
+          {/* Subscribe toggle */}
+          <button
+            type="button"
+            onClick={() => setSubscribePanelOpen((prev) => !prev)}
+            aria-expanded={subscribePanelOpen}
+            className={cn(
+              "border-ink inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase transition-colors",
+              subscribePanelOpen
+                ? "bg-ink text-cream"
+                : "text-ink hover:bg-cream-soft",
+            )}
+          >
+            ⤓ Abonneer
+          </button>
         </div>
-      ) : (
-        <>
-          {view === "month" && (
+
+        {/* Subscribe panel — a team-match feed, orthogonal to the type filter */}
+        <CalendarSubscribePanel teams={teams} isOpen={subscribePanelOpen} />
+
+        {/* View content */}
+        <div className="p-4">
+          {filteredFeed.length === 0 ? (
+            // role="status" so the message is announced when a filter selection
+            // empties the calendar (a client-side state change, not a page load).
+            <div
+              role="status"
+              className="text-ink-muted flex flex-col items-center gap-3 py-12 text-center"
+            >
+              <p className="font-mono font-medium">{zeroMessage}</p>
+              {activeTypeFilter !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => setType("all")}
+                  className="border-ink bg-cream text-ink hover:bg-cream-soft border-2 px-4 py-2 font-mono text-sm font-medium transition-colors"
+                >
+                  Toon alles
+                </button>
+              )}
+            </div>
+          ) : view === "month" ? (
             <CalendarMonth
               matches={matches}
               events={events}
@@ -223,38 +255,23 @@ export function CalendarWidget({ feed, teams }: CalendarWidgetProps) {
               onSelectDate={setSelectedDate}
               currentMonth={currentMonth}
               currentYear={currentYear}
-              onPrevMonth={handlePrevMonth}
-              onNextMonth={handleNextMonth}
             />
-          )}
-
-          {view === "week" && (
+          ) : view === "week" ? (
             <CalendarWeek
               matches={matches}
               events={events}
               weekStart={weekStart}
-              onPrevWeek={handlePrevWeek}
-              onNextWeek={handleNextWeek}
+            />
+          ) : (
+            <CalendarAgenda
+              matches={matches}
+              events={events}
+              currentMonth={currentMonth}
+              currentYear={currentYear}
             />
           )}
-
-          {/* Legend */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-gray-200 pt-4 text-xs text-gray-500">
-            <div className="flex items-center gap-1.5">
-              <span className="bg-kcvv-green-bright h-2 w-2 rounded-full" />
-              <span>Thuiswedstrijd</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="border-kcvv-green-bright h-2 w-2 rounded-full border" />
-              <span>Uitwedstrijd</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <span>Evenement</span>
-            </div>
-          </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

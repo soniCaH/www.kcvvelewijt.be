@@ -4,10 +4,11 @@
  * Ensures the loading skeleton's toolbar chrome matches the structure
  * of the real CalendarWidget toolbar, preventing layout shift on hydration.
  *
- * The real toolbar has:
- * 1. Top row: view toggle (segmented control) + subscribe button
- * 2. Second row: KalenderFilterBar (pill-shaped by-type colour chips)
- * 3. Calendar grid
+ * The reskinned layout (Phase 6.D, #1994) is:
+ * 1. KalenderFilterBar (pill-shaped by-type colour chips) on top
+ * 2. A paper/ink panel whose toolbar row = view toggle (3-way segmented) +
+ *    shared period nav + subscribe button
+ * 3. Calendar grid inside the panel
  *
  * @see https://github.com/kcvvelewijt/www.kcvvelewijt.be/issues/1261
  */
@@ -54,7 +55,7 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
     expect(pills.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("uses space-y-4 wrapper matching CalendarWidget's outer spacing", () => {
+  it("nests the toolbar inside the space-y-4 wrapper matching CalendarWidget's outer spacing", () => {
     const { container } = render(<CalendarLoading />);
 
     // Anchor the lookup to the toolbar testid so we only assert against the
@@ -65,8 +66,10 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
     );
     expect(toolbarTop).not.toBeNull();
 
-    const contentWrapper = toolbarTop!.parentElement;
+    // The toolbar now lives inside the paper panel, which lives inside the
+    // space-y-4 content wrapper — assert it as the nearest ancestor (not the
+    // direct parent, which is the panel).
+    const contentWrapper = toolbarTop!.closest(".space-y-4");
     expect(contentWrapper).not.toBeNull();
-    expect(contentWrapper!.className).toContain("space-y-4");
   });
 });
