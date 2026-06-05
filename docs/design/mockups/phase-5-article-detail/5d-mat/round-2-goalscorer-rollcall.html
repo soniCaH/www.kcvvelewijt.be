@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phase 5 · 5.d-mat · Round 2 · Goalscorer roll-call (recap)</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a; --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b; --color-jersey-deep: #006e47; --color-warm: #d8763a; --color-alert: #c0392b;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink); --shadow-paper-md: 4px 4px 0 0 var(--color-ink); --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono: "Quasimoda", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body { background: var(--color-cream-soft); color: var(--color-ink); font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; padding: 32px 24px 96px; }
+      header.page { max-width: 1680px; margin: 0 auto 28px; }
+      header.page .meta { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; opacity: 0.75; }
+      header.page h1 { font-family: var(--font-display); font-style: italic; font-size: 38px; margin: 6px 0 10px; }
+      header.page p { margin: 0 0 6px; max-width: 96ch; font-size: 14px; line-height: 1.6; }
+      header.page code { font-family: var(--font-mono); font-size: 12px; background: var(--color-cream-deep); padding: 1px 5px; }
+      .grid { max-width: 1680px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; align-items: start; }
+      .variant { display: flex; flex-direction: column; gap: 12px; }
+      .vhead .label { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--color-jersey-deep); font-weight: 700; }
+      .vhead h2 { margin: 3px 0 5px; font-family: var(--font-display); font-style: italic; font-size: 22px; }
+      .vhead p { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--color-ink-muted); }
+      .body { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 22px; }
+      .prose { font-family: var(--font-display); font-size: 15px; line-height: 1.7; color: #222; margin: 0 0 18px; }
+
+      .crest { width: 24px; height: 24px; border-radius: 999px; border: 1px solid var(--color-ink-muted); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 10px; color: var(--color-ink-muted); flex: 0 0 auto; }
+      .crest.kcvv { border-color: var(--color-jersey-deep); color: var(--color-jersey-deep); }
+      .ftbadge { font-family: var(--font-mono); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; border: 2px solid var(--color-ink); background: var(--color-cream); padding: 3px 6px; box-shadow: var(--shadow-paper-sm); }
+      .cta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--color-jersey-deep); font-weight: 700; }
+      .kick { font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-ink-muted); }
+
+      /* locked card C */
+      .c-wrap { position: relative; padding-top: 10px; }
+      .c-card { position: relative; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-lift); padding: 16px 18px 14px; transform: rotate(-0.6deg); }
+      .c-tape { position: absolute; top: -10px; left: 22px; width: 96px; height: 26px; background: rgba(0,110,71,0.30); border: 1px solid rgba(0,0,0,0.18); transform: rotate(-4deg); }
+      .c-badge-slot { position: absolute; top: -10px; right: -8px; }
+      .c-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; margin: 12px 0 10px; }
+      .c-team { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 14.5px; }
+      .c-team.away { flex-direction: row-reverse; }
+      .c-score { font-family: var(--font-display-big); font-weight: 900; font-size: 24px; }
+      .c-foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--color-ink-muted); }
+
+      /* goal item shared */
+      .goal { font-size: 12.5px; }
+      .goal .min { font-family: var(--font-mono); color: var(--color-ink-muted); font-size: 11px; }
+      .goal .tag { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-ink-muted); }
+
+      /* V1 — inline summary line inside card */
+      .v1-goals { border-top: 1px dashed var(--color-ink-muted); margin-top: 10px; padding-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+      .v1-goals .side { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-jersey-deep); }
+
+      /* V2 — two columns inside card */
+      .v2-cols { border-top: 1px dashed var(--color-ink-muted); margin-top: 10px; padding-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .v2-cols .col h4 { margin: 0 0 5px; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-ink-muted); }
+      .v2-cols .col.away { text-align: right; }
+      .v2-cols .goal { margin: 3px 0; }
+
+      /* V3 — separate "Doelpunten" block below card */
+      .v3-block { margin-top: 14px; background: var(--color-cream-soft); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 12px 16px; }
+      .v3-block h4 { margin: 0 0 8px; font-family: var(--font-display); font-style: italic; font-size: 16px; }
+      .v3-list { display: flex; flex-direction: column; gap: 5px; }
+      .v3-list .goal { display: flex; align-items: baseline; gap: 8px; }
+      .v3-list .goal .ball { color: var(--color-jersey-deep); }
+      .v3-list .goal.kcvv .who { font-weight: 700; color: var(--color-jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <header class="page">
+      <div class="meta">Phase 5 · 5.d-mat · Round 2 · Goalscorer roll-call (recap only)</div>
+      <h1>Recap goalscorers — goals-only, attached to card C</h1>
+      <p>
+        Card shape locked = <strong>C (taped result card)</strong>. This round picks how the recap <strong>goalscorers</strong>
+        (from <code>events</code>, <strong>goals only</strong> — not the full card/sub timeline, which stays on <code>/wedstrijd</code>) attach.
+        Sample: 2–1 KCVV — 12' e.d. Mertens, 78' Janssens (pen) · 55' Devos. Preview has no goals, so it just renders card C with no roll-call.
+      </p>
+    </header>
+
+    <div class="grid">
+      <!-- V1 -->
+      <section class="variant">
+        <div class="vhead"><div class="label">Variant 1</div><h2>Inline summary line</h2><p>Goals as one wrapped line inside the card, under a dashed rule. Most compact; reads as a caption.</p></div>
+        <div class="body">
+          <p class="prose">…en zo sleepte KCVV in de slotfase toch de drie punten over de streep.</p>
+          <div class="c-wrap"><div class="c-card">
+            <div class="c-tape"></div><div class="c-badge-slot"><span class="ftbadge">FT</span></div>
+            <div class="kick">3e Provinciale · za 13 sep</div>
+            <div class="c-row"><span class="c-team home"><span class="crest kcvv">K</span> KCVV</span><span class="c-score">2–1</span><span class="c-team away"><span class="crest">R</span> Racing</span></div>
+            <div class="v1-goals">
+              <span><span class="side">KCVV</span> <span class="goal"><span class="min">12'</span> Mertens <span class="tag">e.d.</span> · <span class="min">78'</span> Janssens <span class="tag">pen</span></span></span>
+              <span><span class="side" style="color:var(--color-ink-muted)">Racing</span> <span class="goal"><span class="min">55'</span> Devos</span></span>
+            </div>
+            <div class="c-foot" style="margin-top:10px"><span>Driesstraat</span><span class="cta">naar wedstrijd →</span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- V2 -->
+      <section class="variant">
+        <div class="vhead"><div class="label">Variant 2</div><h2>Two columns (home | away)</h2><p>Scorers split by team inside the card, mirroring the scoreboard. Clear attribution; a touch taller.</p></div>
+        <div class="body">
+          <p class="prose">…en zo sleepte KCVV in de slotfase toch de drie punten over de streep.</p>
+          <div class="c-wrap"><div class="c-card">
+            <div class="c-tape"></div><div class="c-badge-slot"><span class="ftbadge">FT</span></div>
+            <div class="kick">3e Provinciale · za 13 sep</div>
+            <div class="c-row"><span class="c-team home"><span class="crest kcvv">K</span> KCVV</span><span class="c-score">2–1</span><span class="c-team away"><span class="crest">R</span> Racing</span></div>
+            <div class="v2-cols">
+              <div class="col home"><h4>KCVV</h4>
+                <div class="goal"><span class="min">12'</span> Mertens <span class="tag">e.d.</span></div>
+                <div class="goal"><span class="min">78'</span> Janssens <span class="tag">pen</span></div>
+              </div>
+              <div class="col away"><h4>Racing</h4>
+                <div class="goal"><span class="min">55'</span> Devos</div>
+              </div>
+            </div>
+            <div class="c-foot" style="margin-top:10px"><span>Driesstraat</span><span class="cta">naar wedstrijd →</span></div>
+          </div></div>
+        </div>
+      </section>
+
+      <!-- V3 -->
+      <section class="variant">
+        <div class="vhead"><div class="label">Variant 3</div><h2>Separate "Doelpunten" block</h2><p>Card C stays a clean result; goals live in their own paper block below it (display heading + ⚽ list). Most editorial.</p></div>
+        <div class="body">
+          <p class="prose">…en zo sleepte KCVV in de slotfase toch de drie punten over de streep.</p>
+          <div class="c-wrap"><div class="c-card">
+            <div class="c-tape"></div><div class="c-badge-slot"><span class="ftbadge">FT</span></div>
+            <div class="kick">3e Provinciale · za 13 sep</div>
+            <div class="c-row"><span class="c-team home"><span class="crest kcvv">K</span> KCVV</span><span class="c-score">2–1</span><span class="c-team away"><span class="crest">R</span> Racing</span></div>
+            <div class="c-foot"><span>Driesstraat</span><span class="cta">naar wedstrijd →</span></div>
+          </div></div>
+          <div class="v3-block">
+            <h4>Doelpunten.</h4>
+            <div class="v3-list">
+              <div class="goal kcvv"><span class="ball">⚽</span> <span class="min">12'</span> <span class="who">Mertens</span> <span class="tag">eigen doelpunt</span></div>
+              <div class="goal"><span class="ball">⚽</span> <span class="min">55'</span> <span class="who">Devos</span></div>
+              <div class="goal kcvv"><span class="ball">⚽</span> <span class="min">78'</span> <span class="who">Janssens</span> <span class="tag">strafschop</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
