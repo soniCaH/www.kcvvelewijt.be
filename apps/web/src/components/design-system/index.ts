@@ -290,3 +290,7 @@ export type {
   ShieldFigureSize,
   ShieldFigureVariant,
 } from "./ShieldFigure";
+
+// Crest
+export { Crest } from "./Crest";
+export type { CrestProps } from "./Crest";

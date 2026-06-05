@@ -210,6 +210,10 @@ export function SearchBar({
         />
 
         {/* Clear Button */}
+        {/* FUTURE (#2006): this clear-the-whole-field "×" is duplicated in
+            <UnifiedSearchBar>. When organigram moves onto the redesign palette,
+            extract a shared "clearable input" primitive (NOT <RemovableChip>,
+            which is for removing one item from a multi-selection). */}
         {value && (
           <button
             onClick={handleClear}

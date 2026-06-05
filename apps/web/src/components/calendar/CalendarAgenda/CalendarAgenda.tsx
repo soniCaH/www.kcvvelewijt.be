@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { EditorialHeading, DashedDivider } from "@/components/design-system";
+import {
+  EditorialHeading,
+  DashedDivider,
+  Crest,
+} from "@/components/design-system";
 import { getResultColor, isPlayedMatch } from "@/lib/utils/match-display";
 import { EventTypeTag, MatchVenueTag } from "../calendar-tags";
 import { trackKalenderItemClick } from "../calendar-analytics";
@@ -24,31 +27,6 @@ export interface CalendarAgendaProps {
   events: CalendarEvent[];
   currentMonth: number;
   currentYear: number;
-}
-
-/** Small crest — club logo when present, else an initialled outline disc. */
-function Crest({ name, logo }: { name: string; logo?: string }) {
-  if (logo) {
-    return (
-      <Image
-        src={logo}
-        alt=""
-        width={18}
-        height={18}
-        unoptimized
-        className="h-[18px] w-[18px] shrink-0 object-contain"
-      />
-    );
-  }
-  const initial = name.trim().charAt(0).toLocaleUpperCase("nl-BE") || "·";
-  return (
-    <span
-      aria-hidden="true"
-      className="border-ink text-ink-muted flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border font-mono text-[8px] font-bold"
-    >
-      {initial}
-    </span>
-  );
 }
 
 const OUTCOME_UNDERLINE: Record<"win" | "draw" | "loss", string | undefined> = {
@@ -84,7 +62,11 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
     >
       <span className="text-ink-muted font-mono text-[11px]">{when}</span>
       <span className="flex min-w-0 items-center gap-2">
-        <Crest name={match.homeTeam.name} logo={match.homeTeam.logo} />
+        <Crest
+          name={match.homeTeam.name}
+          logo={match.homeTeam.logo}
+          size={18}
+        />
         {match.team && (
           <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
             {match.team}
