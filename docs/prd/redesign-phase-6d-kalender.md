@@ -108,33 +108,50 @@ will be rewritten against the locked design contract.
 - [ ] Empty + filtered-to-zero states render (no blank widget).
 - [ ] `pnpm --filter @kcvv/web check-all` passes.
 
-### Phase 3 — Design gate (no build)
+### Phase 3 — Design gate (no build) — ✅ LOCKED 2026-06-05 (#1993)
 
-- [ ] `6d0` data-reality audit committed (what each source actually provides for a calendar row;
-      youth-match volume; dense-day rendering needs).
-- [ ] `6d1` produces **side-by-side mockups**: (A) reskin the existing widget vs (B) rebuild to the
-      §6.6 newspaper agenda. Owner selects a direction (recorded in the lock doc).
-- [ ] Per-component drills (`6d2…`) lock the chosen direction's primitives (e.g. month-cell match
-      row, type-coloured filter legend, iCal subscribe affordance) per the repo design-drill cadence.
-- [ ] Lock doc(s) under `docs/design/mockups/phase-6-kalender/*-locked.md`; this PRD's §7 + Phases
-      4–5 rewritten against the lock; master-plan §6.6 status note updated to point here.
+Lock doc: `docs/design/mockups/phase-6-kalender/6d-kalender-locked.md`.
 
-### Phase 4 — Build presentation (provisional, rewritten at Phase 3 lock)
+- [x] `6d0` data-reality audit committed (`…/6d0-data-reality-audit.md`).
+- [x] `6d1` side-by-side mockups produced — **owner picked: ship BOTH presentations, user-toggled,
+      grid default** (not A-or-B, not auto-by-filter). Recorded in the lock doc.
+- [x] Per-component drills locked: `6d2` agenda dense-day = **labelled wall** (show all, day-count
+      header, events tinted) · `6d3` grid cell = **events-on-top titles + match pips, no badge** ·
+      `6d4` agenda is **month-windowed** (shares the grid's period nav; not whole-season, not flat
+      upcoming). Filter = #1992 colour chips + **Wedstrijden = card-red** (confirmed).
+- [x] Lock doc committed; §7 + Phases 4–5 rewritten below; master-plan §6.6 status note updated.
 
-- [ ] The locked direction is implemented in retro-terrace-fanzine language, composing approved
-      primitives; new sub-components ship Storybook stories (`Features/Calendar/*`) + unit tests.
-- [ ] Each `vr`-tagged new/changed story has committed baselines (captured in Docker).
-- [ ] States covered: empty feed, filtered-to-zero, loading skeleton, dense day, no-cover items.
+### Phase 4 — Build the locked presentation (#1994)
+
+- [ ] **3-way view toggle** — Maand (grid · **default**) / Week (grid) / Agenda (list),
+      `?view=month|week|agenda`; the month/week period nav is **shared across all three views**.
+- [ ] **Agenda view** — new `<CalendarAgenda>` (`Features/Calendar/*`): the current-month-windowed
+      labelled-wall list — `<EditorialHeading>` month header + day groups (count sub-header +
+      `<DashedDivider>`) + match/event rows reusing the 6.C `<TeamAgendaRow>` vocabulary +
+      `<TicketStub>`/`<MonoLabel>` type tags; **event rows tinted** so a dense day never buries them.
+- [ ] **Grid reskin** (`<CalendarMonth>`/`<CalendarWeek>`) — 6d3 cell: events-on-top full-width
+      titles + match pips (filled = thuis, ring = uit), **no count badge**; paper/ink chrome.
+      Selected-day detail reuses the 6.C `<TeamAgendaRow>` scoreboard + outcome colour
+      (win = jersey-deep / draw = none / loss = brick).
+- [ ] Drop the legacy bottom dot-legend — the colour chips are the legend.
+- [ ] New sub-components ship `Features/Calendar/*` Storybook stories + unit tests.
+- [ ] **VR adoption for the whole kalender surface** — `<KalenderFilterBar>` (deferred from #1992),
+      the reskinned grid, and `<CalendarAgenda>` get the `vr` tag + committed Docker baselines.
+- [ ] States covered: empty feed, filtered-to-zero, loading skeleton, dense day (10-match Saturday),
+      2-event day.
 - [ ] `pnpm --filter @kcvv/web check-all` passes.
 
-### Phase 5 — iCal + analytics + SEO + cleanup (provisional)
+### Phase 5 — iCal + analytics + SEO + cleanup (#1995)
 
-- [ ] iCal subscribe panel reskinned + retained as a team-match feed; `/api/calendar.ics` unchanged.
-- [ ] `kalender_*` analytics fire (taxonomy §9); `kalender_` appended to the live GTM trigger RegEx
-      (manual step, called out in the PR body) and any new DLVs/GA4 params mapped.
-- [ ] Metadata refreshed; optional `ItemList` JSON-LD of upcoming items validated.
-- [ ] Legacy `<CalendarWidget>` children retired or absorbed per the locked direction; orphaned
-      compact-match components reconciled (coordinate with #1960).
+- [ ] `<CalendarSubscribePanel>` reskinned (paper/ink + chip vocabulary), retained as a matches-only
+      "follow your team" feed; `/api/calendar.ics` unchanged.
+- [ ] `kalender_*` analytics fire (taxonomy §9) — incl. **`kalender_view_toggle`** (Maand/Week/Agenda
+      switch — the §9 "A/B-dependent" caveat now resolves to **yes**) + `kalender_view` page-view.
+      `kalender_` appended to the live GTM trigger RegEx (manual step, PR body); the `kalender_type`
+      GA4-dimension decision (reuse `event_type` vs register new) made + DLVs/params mapped.
+- [ ] Metadata refreshed; optional `ItemList` JSON-LD of the **current window's** items validated.
+- [ ] Legacy `<CalendarWidget>` children retired or absorbed per the lock; orphaned compact-match
+      components reconciled (coordinate with #1960).
 - [ ] CI `visual-regression` + e2e green; `pnpm --filter @kcvv/web check-all` passes.
 
 ## 6. Effect Schema / api-contract changes
@@ -147,24 +164,26 @@ will be rewritten against the locked design contract.
   `CalendarMatch` / `CalendarEvent` VMs in the kalender route's `utils.ts` (or a sibling module) — the
   same Sanity-native, apps/web-only posture 6.E took.
 
-## 7. Open questions
+## 7. Open questions — ✅ RESOLVED at the Phase 3 gate (#1993, 2026-06-05)
 
-- `[ ]` **Reskin the existing ~2k-line widget vs rebuild to the §6.6 newspaper agenda** — the central
-  decision, **parked by owner instruction pending side-by-side mockups**. Resolved at Phase 3
-  (`6d1`). Everything in Phases 4–5 is provisional until this locks.
-- `[ ]` **Dense month-cell match rendering** — the `<MatchTeaser>` `compact` variant was retired in
-  #1913 (6.B). If the reskin direction wins, month cells likely need a calendar-specific compact row.
-  Answered by the Phase 3 drills + the 6d0 audit (how many matches land on a single day for youth).
-- `[ ]` **Filter component: reuse `/evenementen`'s custom `<EventFilterBar>` (colour chips) extended
-  with a `Wedstrijden` chip, or the design-system `<FilterTabs>`?** Master plan §6.6 says FilterTabs;
-  `/evenementen` shipped a custom bar. Resolve at Phase 2/Phase 3 — and pin the `Wedstrijden` colour
-  (extend `EVENT_TYPE_FILL`, or borrow the 6.C win/draw/loss outcome language). Owner decision.
-- `[ ]` **Does the iCal _subscribe_ feed stay matches-only?** Recommendation: yes — it's a "follow a
-  team" feature, orthogonal to the type filter; per-event "Zet in agenda" already covers events.
-  Confirm at Phase 5.
-- `[ ]` **Past/archive scope** — `/evenementen` is upcoming-only, but a _calendar_ arguably wants to
-  page backwards. Today's widget is month-navigable (implicitly past-capable). Confirm whether 6.D
-  keeps month navigation into the past or goes upcoming-only. Answered by the Phase 3 direction.
+All headline questions are answered in `docs/design/mockups/phase-6-kalender/6d-kalender-locked.md`.
+
+- `[x]` **Reskin vs rebuild** → **ship BOTH**, behind a user-driven 3-way view toggle
+  (Maand grid · **default** / Week grid / Agenda list). Not A-or-B; not an auto-by-filter switch.
+- `[x]` **Dense month-cell match rendering** → 6d3 cell: events-on-top full-width titles + match
+  pips (filled = thuis, ring = uit), **no count badge**; full scoreboard on day-click reuses the
+  6.C `<TeamAgendaRow>`. Agenda dense-day (6d2) = **labelled wall** (show all, day-count header,
+  events tinted).
+- `[x]` **Filter component + `Wedstrijden` colour** → reuse `/evenementen`'s colour-chip vocabulary
+  (`<KalenderFilterBar>`, `EVENT_CHIP_BASE` + `EVENT_TYPE_FILL`), **not** `<FilterTabs>`;
+  **Wedstrijden = `card-red`**. Shipped #1992, confirmed here. The chip row is the legend (the
+  legacy bottom dot-legend is dropped).
+- `[x]` **iCal subscribe stays matches-only** → yes; retained + reskinned, orthogonal to the type
+  filter.
+- `[x]` **Past/archive scope** → the Agenda is **month-windowed** and shares the grid's period nav
+  (`‹ Month ›`); page back/forward by month in any view. **Not** whole-season (≈1000 matches at
+  kickoff) and **not** flat upcoming-only. Past months simply carry played results (matches are
+  full-season) and no events (events are upcoming-only by data).
 
 ## 8. Discovered unknowns (filled during implementation)
 

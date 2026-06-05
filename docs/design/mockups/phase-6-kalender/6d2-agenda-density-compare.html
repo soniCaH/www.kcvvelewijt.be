@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 6.D — /kalender · 6d2: agenda dense-day mitigation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream:#f5f1e6;--cream-soft:#ede8da;--cream-deep:#e1d7bf;--ink:#0a0a0a;--ink-soft:#1f1f1f;--ink-muted:#6b6b6b;
+        --jersey-deep:#008755;--jersey-bright:#22c55e;--warm:#f0c264;--brick:#c93f1c;--paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif;--font-body:"Archivo",system-ui,sans-serif;--font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+      .harness-head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono)}
+      .harness-head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+      .harness-head p{margin:0;font-size:13px;color:#b9b9b9;max-width:92ch;line-height:1.55}
+      .harness-head a{color:var(--warm)}
+      .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+      @media(max-width:1100px){.grid3{grid-template-columns:1fr}}
+      .col{padding:0 22px 40px;border-right:1px dashed var(--paper-edge)}
+      .col:last-child{border-right:none}
+      .opt-h{position:sticky;top:0;background:var(--jersey-deep);color:var(--cream);padding:10px 14px;margin:0 -22px 4px;
+        font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink);z-index:5}
+      .opt-h.ii{background:var(--brick)}.opt-h.iii{background:var(--ink)}
+      .gloss{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:10px 0 14px;line-height:1.5;min-height:64px}
+      .gloss b{color:var(--ink-soft)}
+      .month{font-family:var(--font-display);font-weight:900;font-size:30px;margin:14px 0 2px}
+      .month .em{font-style:italic;color:var(--jersey-deep)}
+      .mrule{border:none;border-top:2px solid var(--ink);margin:0 0 8px}
+      .dayhead{display:flex;align-items:baseline;justify-content:space-between;padding:10px 0 5px;border-bottom:1px dashed var(--paper-edge)}
+      .dayhead .dh{font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;font-size:11.5px;font-weight:600}
+      .dayhead .cnt{font-family:var(--font-mono);font-size:10.5px;color:var(--ink-muted)}
+      .row{display:grid;grid-template-columns:42px 1fr auto;gap:9px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--paper-edge)}
+      .row .when{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted)}
+      .nm{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
+      .crest{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--ink);background:var(--cream-deep);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:7.5px;font-weight:700;flex:none}
+      .crest.kcvv{background:var(--jersey-deep);color:var(--cream)}
+      .tag{font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;font-size:9px;font-weight:600;padding:2px 6px;border:1.5px solid var(--ink);white-space:nowrap}
+      .tag.wed{background:var(--brick);color:var(--cream)}.tag.uit{background:transparent}
+      .tag.club{background:var(--jersey-deep);color:#fff}.tag.jeugd{background:var(--jersey-bright);color:var(--ink)}
+      .et{font-family:var(--font-display);font-weight:700;font-style:italic;font-size:14px}
+      /* collapse group (option ii) */
+      .grp{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px dashed var(--paper-edge);cursor:pointer;background:color-mix(in srgb,var(--brick) 7%,var(--cream))}
+      .grp .disc{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--brick)}
+      .grp .lbl{font-weight:700;font-size:13px}
+      .grp .chev{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--ink-muted)}
+      .event-strong{background:color-mix(in srgb,var(--jersey-deep) 6%,var(--cream))}
+      /* tier subgroup (option iii) */
+      .tier{font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.07em;font-size:10px;font-weight:700;color:var(--jersey-deep);padding:8px 0 3px}
+      .verdict{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:12px 0 0;line-height:1.5}
+      .verdict .pro{color:var(--jersey-deep)}.verdict .con{color:var(--brick)}
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 6.D · 6d2 — Agenda view: dense-day mitigation</h1>
+      <p>
+        The <a href="./6d1-reskin-vs-agenda-compare.html">6d1</a> lock ships BOTH views (grid default + agenda tab). The agenda's
+        one weakness is the dense Saturday — 10 near-identical match rows that bury the occasional event. Same
+        <b>Zaterdag 12 september (10 wedstrijden + Spaghetti-avond)</b> rendered three ways. Which keeps the agenda
+        readable AND never buries events? (Grid view already handles density; this is purely the agenda tab.)
+      </p>
+    </div>
+
+    <div class="grid3">
+      <!-- ============ (i) Labeled wall ============ -->
+      <div class="col">
+        <div class="opt-h">(i) Labelled wall — show everything</div>
+        <div class="gloss"><b>All rows, always.</b> Day-count header sets expectation; events get a tinted row so they stand out. Zero interaction — everything is on the page.</div>
+        <h2 class="month">September <span class="em">’26.</span></h2><hr class="mrule" />
+        <div class="dayhead"><span class="dh">Zaterdag 12 sep</span><span class="cnt">10 wed · 1 event</span></div>
+        <div class="row"><span class="when">10:00</span><span class="nm"><span class="crest kcvv">K</span>U7 KCVV — Zemst</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">10:00</span><span class="nm"><span class="crest kcvv">K</span>U9 KCVV — Eppegem</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">11:00</span><span class="nm"><span class="crest">E</span>U11 Eppegem — KCVV</span><span class="tag uit">Uit</span></div>
+        <div class="row"><span class="when">11:30</span><span class="nm"><span class="crest kcvv">K</span>U13 KCVV — Diest</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">13:00</span><span class="nm"><span class="crest kcvv">K</span>U15 A — Mechelen</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">14:30</span><span class="nm"><span class="crest">T</span>U17 Tervuren — KCVV</span><span class="tag uit">Uit</span></div>
+        <div class="row"><span class="when">15:00</span><span class="nm"><span class="crest kcvv">K</span>U21 KCVV — Vilvoorde</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">15:00</span><span class="nm"><span class="crest kcvv">K</span>B-ploeg — Weerde</span><span class="tag wed">Thuis</span></div>
+        <div class="row" style="color:var(--ink-muted)"><span class="when"></span><span style="font-style:italic">+ U6, U10 …</span><span></span></div>
+        <div class="row event-strong"><span class="when">18:00</span><span class="et">Spaghetti-avond</span><span class="tag club">Clubevent</span></div>
+        <div class="verdict"><span class="pro">+ everything visible, 0 clicks</span><br /><span class="con">– still long; event tint is the only rescue</span></div>
+      </div>
+
+      <!-- ============ (ii) Collapse Wedstrijden ============ -->
+      <div class="col">
+        <div class="opt-h ii">(ii) Collapse matches ▸ — events always open</div>
+        <div class="gloss"><b>Matches fold into one tappable group per day</b> ("10 wedstrijden ▸", collapsed by default); events render in full beneath, never buried. One tap expands the matches. Honours the by-type filter (selecting Wedstrijden auto-expands).</div>
+        <h2 class="month">September <span class="em">’26.</span></h2><hr class="mrule" />
+        <div class="dayhead"><span class="dh">Zaterdag 12 sep</span></div>
+        <div class="grp"><span class="disc">⚽</span><span class="lbl">10 wedstrijden</span><span class="chev">▸ toon</span></div>
+        <div class="row event-strong"><span class="when">18:00</span><span class="et">Spaghetti-avond</span><span class="tag club">Clubevent</span></div>
+        <div class="dayhead" style="margin-top:14px"><span class="dh">Zaterdag 19 sep</span></div>
+        <div class="row event-strong"><span class="when">10:00</span><span class="et">Najaarstornooi U13</span><span class="tag jeugd">Jeugd</span></div>
+        <div class="grp"><span class="disc">⚽</span><span class="lbl">7 wedstrijden</span><span class="chev">▸ toon</span></div>
+        <div class="verdict"><span class="pro">+ events never buried; day skim-able; great when you came for events</span><br /><span class="con">– matches (95% of data) hidden 1 tap deep by default</span></div>
+      </div>
+
+      <!-- ============ (iii) Group by tier ============ -->
+      <div class="col">
+        <div class="opt-h iii">(iii) Group by tier within the day</div>
+        <div class="gloss"><b>Within each day, matches split into Senioren / Jeugd sub-groups</b> (each foldable); events sit above as their own block. Structured — mirrors how people think ("did the A-ploeg play?").</div>
+        <h2 class="month">September <span class="em">’26.</span></h2><hr class="mrule" />
+        <div class="dayhead"><span class="dh">Zaterdag 12 sep</span><span class="cnt">10 wed · 1 event</span></div>
+        <div class="row event-strong"><span class="when">18:00</span><span class="et">Spaghetti-avond</span><span class="tag club">Clubevent</span></div>
+        <div class="tier">▾ Senioren (1)</div>
+        <div class="row"><span class="when">15:00</span><span class="nm"><span class="crest kcvv">K</span>B-ploeg — Weerde</span><span class="tag wed">Thuis</span></div>
+        <div class="tier">▾ Jeugd (9)</div>
+        <div class="row"><span class="when">10:00</span><span class="nm"><span class="crest kcvv">K</span>U7 KCVV — Zemst</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">10:00</span><span class="nm"><span class="crest kcvv">K</span>U9 KCVV — Eppegem</span><span class="tag wed">Thuis</span></div>
+        <div class="row"><span class="when">11:00</span><span class="nm"><span class="crest">E</span>U11 Eppegem — KCVV</span><span class="tag uit">Uit</span></div>
+        <div class="row" style="color:var(--ink-muted)"><span class="when"></span><span style="font-style:italic">+ 6 jeugd …</span><span></span></div>
+        <div class="verdict"><span class="pro">+ structured; "did A/B play?" answered fast; events on top</span><br /><span class="con">– most chrome; two sub-headers per day; folding state to manage</span></div>
+      </div>
+    </div>
+  </body>
+</html>
