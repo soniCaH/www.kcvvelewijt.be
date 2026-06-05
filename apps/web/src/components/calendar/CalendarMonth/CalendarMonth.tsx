@@ -4,12 +4,18 @@ import { useMemo } from "react";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
-import { MatchTeaser } from "@/components/match/MatchTeaser";
+import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
+import { EVENT_TYPE_FILL } from "@/components/event/event-type-style";
+import { EventTypeTag } from "../calendar-tags";
 import {
   getDaysInMonth,
-  getMatchesForDay,
-  getEventsForDay,
   getMatchDotType,
+  calendarMatchToScheduleMatch,
+  formatDayDetailHeading,
+  formatItemCount,
+  formatEventTime,
+  groupFeedByDay,
+  EMPTY_DAY_FEED,
 } from "@/app/(main)/kalender/utils";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 
@@ -20,120 +26,150 @@ export interface CalendarMonthProps {
   onSelectDate: (date: string) => void;
   currentMonth: number;
   currentYear: number;
-  onPrevMonth: () => void;
-  onNextMonth: () => void;
 }
 
 const DAY_HEADERS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
-function DayDots({
+/**
+ * Dense-day cell body (6.D lock / 6d3-v2): events first as full-width italic
+ * display titles + a type-colour dot (rare + high-value, never hidden), then a
+ * row of match pips below — `card-red` filled = thuis, `card-red` ring = uit.
+ * No count badge; the pip row is the volume signal.
+ */
+function DayCellBody({
   day,
-  matches,
-  events,
+  dayMatches,
+  dayEvents,
 }: {
   day: string;
-  matches: CalendarMatch[];
-  events: CalendarEvent[];
+  dayMatches: CalendarMatch[];
+  dayEvents: CalendarEvent[];
 }) {
-  const dayMatches = getMatchesForDay(matches, day);
-  const dayEvents = getEventsForDay(events, day);
-
-  const hasHome = dayMatches.some((m) => getMatchDotType(m) === "home");
-  const hasAway = dayMatches.some((m) => getMatchDotType(m) === "away");
-  const hasEvent = dayEvents.length > 0;
-
-  if (!hasHome && !hasAway && !hasEvent) return null;
+  if (dayMatches.length === 0 && dayEvents.length === 0) return null;
 
   return (
-    <div className="mt-0.5 flex justify-center gap-0.5">
-      {hasHome && (
-        <span
-          data-testid={`dot-home-${day}`}
-          className="bg-kcvv-green-bright h-1.5 w-1.5 rounded-full"
-        />
+    <div className="mt-1 w-full space-y-1">
+      {dayEvents.length > 0 && (
+        <div data-testid={`day-events-${day}`} className="space-y-0.5">
+          {dayEvents.map((event) => (
+            <div
+              key={event.id}
+              data-testid="cell-event"
+              className="flex items-start gap-1 text-left"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "mt-1 h-[7px] w-[7px] shrink-0 rounded-full",
+                  EVENT_TYPE_FILL[event.eventType],
+                )}
+              />
+              <span className="font-display text-ink line-clamp-2 text-[11px] leading-tight font-bold italic">
+                {event.title}
+              </span>
+            </div>
+          ))}
+        </div>
       )}
-      {hasAway && (
-        <span
-          data-testid={`dot-away-${day}`}
-          className="border-kcvv-green-bright h-1.5 w-1.5 rounded-full border"
-        />
-      )}
-      {hasEvent && (
-        <span
-          data-testid={`dot-event-${day}`}
-          className="h-1.5 w-1.5 rounded-full bg-blue-500"
-        />
+
+      {dayMatches.length > 0 && (
+        <div
+          data-testid={`day-pips-${day}`}
+          className="flex flex-wrap gap-[3px]"
+        >
+          {dayMatches.map((match) => {
+            const venue = getMatchDotType(match);
+            return (
+              <span
+                key={match.id}
+                data-testid="match-pip"
+                data-venue={venue}
+                className={cn(
+                  "h-2 w-2 rounded-full",
+                  venue === "home"
+                    ? "bg-card-red"
+                    : "border-card-red border-[1.5px] bg-transparent",
+                )}
+              />
+            );
+          })}
+        </div>
       )}
     </div>
   );
 }
 
-function DayPanel({
+/**
+ * Selected-day detail below the grid. Matches reuse the 6.C `<TeamAgendaRow>`
+ * scoreboard (time · crests · KCVV-team label · thuis/uit · outcome colour),
+ * stub omitted since the day is already the heading; events render as a
+ * type-tagged title row linking to their detail route.
+ */
+function SelectedDayDetail({
   date,
-  matches,
-  events,
+  dayMatches,
+  dayEvents,
 }: {
   date: string;
-  matches: CalendarMatch[];
-  events: CalendarEvent[];
+  dayMatches: CalendarMatch[];
+  dayEvents: CalendarEvent[];
 }) {
-  const dayMatches = getMatchesForDay(matches, date);
-  const dayEvents = getEventsForDay(events, date);
-  const formatted = DateTime.fromISO(date).toLocaleString(
-    { weekday: "long", day: "numeric", month: "long" },
-    { locale: "nl-BE" },
-  );
+  const heading = formatDayDetailHeading(date);
+  const caption = formatItemCount(dayMatches.length, dayEvents.length);
 
   return (
-    <div className="mt-6 rounded-lg border border-gray-200 bg-white p-6 transition-all duration-300">
+    <div className="border-ink mt-6 border-t-2 pt-5">
       <h3
         data-testid="day-panel-heading"
-        className="mb-4 text-lg font-semibold text-gray-800 capitalize"
+        className="font-display text-ink mb-4 text-xl leading-none font-black"
       >
-        {formatted}
+        {heading}
+        {caption && (
+          <span className="text-ink-muted ml-2 font-mono text-xs font-normal tracking-wide">
+            · {caption}
+          </span>
+        )}
       </h3>
 
       {dayMatches.length === 0 && dayEvents.length === 0 ? (
-        <p className="text-gray-500">
+        <p className="text-ink-muted font-mono text-sm">
           Geen wedstrijden of activiteiten op deze dag.
         </p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {dayMatches.map((match) => (
-            <MatchTeaser
+            <TeamAgendaRow
               key={match.id}
-              homeTeam={match.homeTeam}
-              awayTeam={match.awayTeam}
-              date={match.date}
-              time={match.time}
-              score={
-                match.scoreDisplay.type === "score"
-                  ? {
-                      home: match.scoreDisplay.home,
-                      away: match.scoreDisplay.away,
-                    }
-                  : undefined
-              }
-              status={match.status === "scheduled" ? "upcoming" : match.status}
-              href={
-                match.status !== "scheduled"
-                  ? `/wedstrijd/${match.id}`
-                  : undefined
-              }
-              teamLabel={match.team}
+              match={calendarMatchToScheduleMatch(match)}
+              showDateStub={false}
             />
           ))}
-          {dayEvents.map((event) => (
-            <Link
-              key={event.id}
-              href={event.href}
-              className="block rounded-lg border border-blue-200 bg-blue-50 p-3 transition-colors hover:bg-blue-100"
-            >
-              <span className="text-sm font-medium text-blue-800">
-                {event.title}
-              </span>
-            </Link>
-          ))}
+          {dayEvents.map((event) => {
+            const time = formatEventTime(event.dateStart);
+            return (
+              <Link
+                key={event.id}
+                href={event.href}
+                data-testid="day-event-row"
+                className={cn(
+                  "border-ink bg-cream text-ink shadow-[2px_2px_0_0_var(--color-ink)]",
+                  "flex items-center gap-3 border-2 px-3 py-2 no-underline transition-all duration-300",
+                  "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+                  "focus-visible:outline-ink focus-visible:outline-2 focus-visible:outline-offset-2",
+                )}
+              >
+                {time && (
+                  <span className="text-ink-muted shrink-0 font-mono text-xs">
+                    {time}
+                  </span>
+                )}
+                <span className="font-display min-w-0 flex-1 truncate text-base font-bold italic">
+                  {event.title}
+                </span>
+                <EventTypeTag eventType={event.eventType} />
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
@@ -147,74 +183,30 @@ export function CalendarMonth({
   onSelectDate,
   currentMonth,
   currentYear,
-  onPrevMonth,
-  onNextMonth,
 }: CalendarMonthProps) {
   const days = useMemo(
     () => getDaysInMonth(currentYear, currentMonth),
     [currentYear, currentMonth],
   );
 
+  // Bucket the feed once per feed change instead of filtering the full arrays
+  // per cell (×35–42) and again for the detail — a map lookup per day.
+  const byDay = useMemo(
+    () => groupFeedByDay(matches, events),
+    [matches, events],
+  );
+  const selected = byDay.get(selectedDate) ?? EMPTY_DAY_FEED;
+
   const today = DateTime.now().toISODate()!;
-  const monthLabel = DateTime.local(
-    currentYear,
-    currentMonth,
-    1,
-  ).toLocaleString({ month: "long", year: "numeric" }, { locale: "nl-BE" });
 
   return (
     <div>
-      {/* Navigation header */}
-      <div className="mb-4 flex items-center justify-between">
-        <button
-          onClick={onPrevMonth}
-          aria-label="Vorige maand"
-          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <span className="text-lg font-semibold text-gray-800">
-          {monthLabel}
-        </span>
-        <button
-          onClick={onNextMonth}
-          aria-label="Volgende maand"
-          className="rounded-lg p-2 transition-colors hover:bg-gray-100"
-        >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
-
       {/* Day headers */}
-      <div className="mb-1 grid grid-cols-7">
+      <div className="border-paper-edge mb-1 grid grid-cols-7 border-b border-dashed">
         {DAY_HEADERS.map((h) => (
           <div
             key={h}
-            className="py-2 text-center text-xs font-semibold text-gray-500"
+            className="text-ink-muted py-2 text-center font-mono text-[10px] font-semibold tracking-wider uppercase"
           >
             {h}
           </div>
@@ -222,38 +214,62 @@ export function CalendarMonth({
       </div>
 
       {/* Day grid */}
-      <div className="grid grid-cols-7" data-testid="month-grid">
+      <div
+        className="border-ink grid grid-cols-7 border-2"
+        data-testid="month-grid"
+      >
         {days.map((day) => {
           const dt = DateTime.fromISO(day);
           const isCurrentMonth = dt.month === currentMonth;
           const isToday = day === today;
           const isSelected = day === selectedDate;
+          const feed = byDay.get(day) ?? EMPTY_DAY_FEED;
 
           return (
             <button
               key={day}
+              type="button"
               onClick={() => onSelectDate(day)}
               aria-label={dt.toLocaleString(
                 { day: "numeric", month: "long" },
                 { locale: "nl-BE" },
               )}
+              aria-pressed={isSelected}
               className={cn(
-                "flex flex-col items-center rounded-lg px-1 py-2 text-sm transition-colors",
-                !isCurrentMonth && "text-gray-300",
-                isCurrentMonth && !isSelected && !isToday && "text-gray-700",
-                isToday && !isSelected && "bg-gray-100 font-semibold",
-                isSelected && "bg-kcvv-green-bright font-semibold text-white",
+                "border-paper-edge flex min-h-[108px] flex-col items-stretch border-r border-b border-dashed p-1.5 text-left transition-colors last:border-r-0",
+                "[&:nth-child(7n)]:border-r-0",
+                "focus-visible:outline-jersey-deep focus-visible:outline-2 focus-visible:-outline-offset-2",
+                isSelected
+                  ? "bg-jersey-deep/12 outline-jersey-deep outline-2 -outline-offset-2"
+                  : "hover:bg-cream-soft/60",
               )}
             >
-              <span>{dt.day}</span>
-              <DayDots day={day} matches={matches} events={events} />
+              <span
+                className={cn(
+                  "font-mono text-[11px]",
+                  !isCurrentMonth && "text-ink-muted/40",
+                  isCurrentMonth && !isToday && "text-ink-muted",
+                  isToday && "text-ink font-bold",
+                )}
+              >
+                {dt.day}
+              </span>
+              <DayCellBody
+                day={day}
+                dayMatches={feed.matches}
+                dayEvents={feed.events}
+              />
             </button>
           );
         })}
       </div>
 
       {/* Day detail panel */}
-      <DayPanel date={selectedDate} matches={matches} events={events} />
+      <SelectedDayDetail
+        date={selectedDate}
+        dayMatches={selected.matches}
+        dayEvents={selected.events}
+      />
     </div>
   );
 }

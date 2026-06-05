@@ -46,3 +46,15 @@ export function getResultColor(
   const homeWins = homeScore > awayScore;
   return homeWins === isHome ? "win" : "loss";
 }
+
+/**
+ * Whether a match has been played (a score is meaningful). Shared by every row
+ * that switches between a kickoff time and a scoreline + outcome underline
+ * (`<TeamAgendaRow>`, the kalender agenda row) so the status set can't drift
+ * between them.
+ */
+export function isPlayedMatch(status: MatchStatus): boolean {
+  return (
+    status === "finished" || status === "forfeited" || status === "stopped"
+  );
+}

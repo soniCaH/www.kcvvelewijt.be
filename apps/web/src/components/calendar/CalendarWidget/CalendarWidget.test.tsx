@@ -1,5 +1,9 @@
 /**
- * CalendarWidget Component Tests
+ * CalendarWidget Component Tests (Phase 6.D — #1994).
+ *
+ * Covers the 3-way view toggle (Maand / Week / Agenda), the shared period nav
+ * (one cursor, month/week stepping per view), the by-type filter + dedup guard,
+ * and the subscribe toggle.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -28,12 +32,13 @@ vi.mock("next/link", () => ({
     children,
     href,
     className,
+    ...rest
   }: {
     children: React.ReactNode;
     href: string;
     className?: string;
   }) => (
-    <a href={href} className={className}>
+    <a href={href} className={className} {...rest}>
       {children}
     </a>
   ),
@@ -60,6 +65,7 @@ function makeMatch(
     awayTeam: { id: 2, name: "Racing Mechelen" },
     status: "scheduled" as CalendarMatch["status"],
     team: "A-ploeg",
+    isHome: true,
     ...overrides,
   };
   return {
@@ -94,7 +100,6 @@ const teams: CalendarTeamInfo[] = [
   { id: "t2", name: "B-ploeg", psdId: 102, label: "B-ploeg" },
 ];
 
-// One match + one Clubevent event → the feed the widget filters by type.
 const defaultProps = {
   feed: buildCalendarFeed([makeMatch({ id: 1 })], [makeEventVM({ id: "e1" })]),
   teams,
@@ -111,43 +116,44 @@ describe("CalendarWidget", () => {
     );
   });
 
-  describe("view tabs", () => {
-    it("renders two view tabs: Maand, Week", () => {
+  describe("view toggle", () => {
+    it("renders three view tabs: Maand, Week, Agenda", () => {
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByRole("button", { name: "Maand" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Week" })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Agenda" }),
+      ).toBeInTheDocument();
     });
 
-    it("defaults to month view when no ?view param", () => {
+    it("defaults to month view", () => {
       render(<CalendarWidget {...defaultProps} />);
-      // Month view should show the month/year label
-      expect(screen.getByText("maart 2026")).toBeInTheDocument();
-    });
-
-    it("shows month view when ?view=month", () => {
-      mockSearchParams = new URLSearchParams("view=month");
-      render(<CalendarWidget {...defaultProps} />);
-      expect(screen.getByText("maart 2026")).toBeInTheDocument();
+      expect(screen.getByTestId("month-grid")).toBeInTheDocument();
     });
 
     it("shows week view when ?view=week", () => {
       mockSearchParams = new URLSearchParams("view=week");
       render(<CalendarWidget {...defaultProps} />);
-      // Week view shows day range
-      expect(screen.getByText(/9 - 15 maart 2026/)).toBeInTheDocument();
+      expect(screen.getByTestId("week-grid")).toBeInTheDocument();
+    });
+
+    it("shows agenda view when ?view=agenda", () => {
+      mockSearchParams = new URLSearchParams("view=agenda");
+      render(<CalendarWidget {...defaultProps} />);
+      expect(screen.getByTestId("calendar-agenda")).toBeInTheDocument();
     });
 
     it("clicking a tab updates URL to ?view=X", async () => {
       const user = userEvent.setup();
       render(<CalendarWidget {...defaultProps} />);
-      await user.click(screen.getByRole("button", { name: "Week" }));
+      await user.click(screen.getByRole("button", { name: "Agenda" }));
       expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("view=week"),
+        expect.stringContaining("view=agenda"),
         expect.anything(),
       );
     });
 
-    it("week tab has hidden md:inline-flex class for mobile", () => {
+    it("week tab is hidden on mobile (hidden md:inline-flex)", () => {
       render(<CalendarWidget {...defaultProps} />);
       const weekTab = screen.getByRole("button", { name: "Week" });
       expect(weekTab.className).toContain("hidden");
@@ -155,24 +161,76 @@ describe("CalendarWidget", () => {
     });
   });
 
-  describe("subscribe panel", () => {
-    it("renders Abonneer button in toolbar", () => {
+  describe("shared period nav", () => {
+    it("labels the period with the month for month/agenda view", () => {
       render(<CalendarWidget {...defaultProps} />);
-      expect(screen.getByText("Abonneer")).toBeInTheDocument();
+      const label = screen.getByTestId("period-label");
+      expect(label.textContent).toContain("Maart");
+      expect(label.textContent).toContain("'26");
     });
 
-    it("toggles subscribe panel when clicking Abonneer", async () => {
+    it("labels the period with a week range for week view", () => {
+      mockSearchParams = new URLSearchParams("view=week");
+      render(<CalendarWidget {...defaultProps} />);
+      expect(screen.getByTestId("period-label")).toHaveTextContent(
+        "9 - 15 maart 2026",
+      );
+    });
+
+    it("steps by month in month view", async () => {
       const user = userEvent.setup();
       render(<CalendarWidget {...defaultProps} />);
+      await user.click(screen.getByLabelText("Vorige maand"));
+      expect(screen.getByTestId("period-label").textContent).toContain(
+        "Februari",
+      );
+    });
 
+    it("steps by week in week view", async () => {
+      const user = userEvent.setup();
+      mockSearchParams = new URLSearchParams("view=week");
+      render(<CalendarWidget {...defaultProps} />);
+      await user.click(screen.getByLabelText("Volgende week"));
+      expect(screen.getByTestId("period-label")).toHaveTextContent(
+        "16 - 22 maart 2026",
+      );
+    });
+
+    it("snaps the selected-day detail into the navigated month when paging months", async () => {
+      const user = userEvent.setup();
+      render(<CalendarWidget {...defaultProps} />);
+      // Defaults to the selected day = today (15 maart).
+      expect(screen.getByTestId("day-panel-heading")).toHaveTextContent(
+        /maart/i,
+      );
+      await user.click(screen.getByLabelText("Volgende maand"));
+      // Detail now reflects the new month (snapped to 1 april), not a stale
+      // March day outside the visible grid.
+      expect(screen.getByTestId("day-panel-heading")).toHaveTextContent(
+        /april/i,
+      );
+    });
+  });
+
+  describe("subscribe panel", () => {
+    it("renders the Abonneer button", () => {
+      render(<CalendarWidget {...defaultProps} />);
+      expect(
+        screen.getByRole("button", { name: /Abonneer/ }),
+      ).toBeInTheDocument();
+    });
+
+    it("toggles the subscribe panel", async () => {
+      const user = userEvent.setup();
+      render(<CalendarWidget {...defaultProps} />);
       expect(screen.queryByTestId("subscribe-panel")).not.toBeInTheDocument();
-      await user.click(screen.getByText("Abonneer"));
+      await user.click(screen.getByRole("button", { name: /Abonneer/ }));
       expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
     });
   });
 
   describe("by-type filter", () => {
-    it("renders the by-type chips (Alles + Wedstrijden + event types)", () => {
+    it("renders the by-type chips", () => {
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByRole("button", { name: "Alles" })).toBeInTheDocument();
       expect(
@@ -191,12 +249,10 @@ describe("CalendarWidget", () => {
       ).toHaveAttribute("aria-pressed", "true");
     });
 
-    it("pushes ?type= and fires kalender_filter when selecting a new type", async () => {
+    it("pushes ?type= and fires kalender_filter on a new selection", async () => {
       const user = userEvent.setup();
       render(<CalendarWidget {...defaultProps} />);
-
       await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
-
       expect(mockPush).toHaveBeenCalledWith(
         expect.stringContaining("type=Wedstrijden"),
         expect.anything(),
@@ -210,9 +266,7 @@ describe("CalendarWidget", () => {
       const user = userEvent.setup();
       mockSearchParams = new URLSearchParams("type=Wedstrijden");
       render(<CalendarWidget {...defaultProps} />);
-
       await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
-
       expect(mockPush).not.toHaveBeenCalled();
       expect(trackEvent).not.toHaveBeenCalled();
     });
@@ -220,7 +274,6 @@ describe("CalendarWidget", () => {
     it("renders the filtered-to-zero state + reset when a type has no items", () => {
       mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
       render(<CalendarWidget {...defaultProps} />);
-
       expect(screen.getByRole("status")).toHaveTextContent(
         /Geen evenementen in de categorie Supportersactiviteit/i,
       );
@@ -229,13 +282,11 @@ describe("CalendarWidget", () => {
       ).toBeInTheDocument();
     });
 
-    it("clicking 'Toon alles' from a filtered-to-zero state resets the URL to /kalender", async () => {
+    it("clicking 'Toon alles' resets the URL to /kalender", async () => {
       const user = userEvent.setup();
       mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
       render(<CalendarWidget {...defaultProps} />);
-
       await user.click(screen.getByRole("button", { name: "Toon alles" }));
-
       expect(mockPush).toHaveBeenCalledWith("/kalender", expect.anything());
     });
   });

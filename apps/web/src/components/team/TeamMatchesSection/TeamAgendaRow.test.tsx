@@ -62,6 +62,18 @@ describe("TeamAgendaRow", () => {
       render(<TeamAgendaRow match={BASE} />);
       expect(screen.getByTestId("team-agenda-row").textContent).toMatch(/aug/i);
     });
+
+    it("renders the date stub by default", () => {
+      render(<TeamAgendaRow match={BASE} />);
+      expect(screen.getByLabelText("15 aug")).toBeInTheDocument();
+    });
+
+    it("omits the date stub when showDateStub is false", () => {
+      render(<TeamAgendaRow match={BASE} showDateStub={false} />);
+      expect(screen.queryByLabelText("15 aug")).not.toBeInTheDocument();
+      // the row itself still renders.
+      expect(screen.getByTestId("team-agenda-row")).toBeInTheDocument();
+    });
   });
 
   describe("Score / time", () => {

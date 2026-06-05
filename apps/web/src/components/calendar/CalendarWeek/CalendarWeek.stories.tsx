@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
 import { CalendarWeek } from "./CalendarWeek";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 import { fixtureImage } from "@test-fixtures/images";
@@ -8,11 +7,7 @@ const meta = {
   title: "Features/Calendar/CalendarWeek",
   component: CalendarWeek,
   parameters: { layout: "padded" },
-  tags: ["autodocs"],
-  args: {
-    onPrevWeek: fn(),
-    onNextWeek: fn(),
-  },
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof CalendarWeek>;
 
 export default meta;
@@ -42,6 +37,7 @@ const weekMatches: CalendarMatch[] = [
     status: "scheduled",
     competition: "Nationale 1",
     team: "A-ploeg",
+    isHome: true,
   },
   {
     id: 2,
@@ -53,6 +49,7 @@ const weekMatches: CalendarMatch[] = [
     status: "scheduled",
     competition: "Jeugd",
     team: "U15 A",
+    isHome: true,
   },
 ];
 
@@ -62,6 +59,7 @@ const weekEvents: CalendarEvent[] = [
     title: "Jeugdtraining extra",
     dateStart: "2026-03-25T18:00:00",
     href: "/evenementen/jeugdtraining",
+    eventType: "Jeugdwerking",
   },
 ];
 

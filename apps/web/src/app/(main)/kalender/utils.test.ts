@@ -12,6 +12,9 @@ import {
   getDaysInMonth,
   getDaysInWeek,
   getMatchDotType,
+  calendarMatchToScheduleMatch,
+  buildMonthAgenda,
+  groupFeedByDay,
 } from "./utils";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
@@ -118,7 +121,15 @@ describe("eventListItemToCalendarEvent", () => {
       dateStart: "2026-04-15T18:00:00Z",
       dateEnd: "2026-04-15T22:00:00Z",
       href: "/evenementen/spaghetti-avond",
+      eventType: "Clubevent",
     });
+  });
+
+  it("falls back to 'Andere' when the source row has no eventType", () => {
+    const result = eventListItemToCalendarEvent(
+      makeEventListItem({ eventType: null }),
+    );
+    expect(result.eventType).toBe("Andere");
   });
 
   it("maps a source:article row through with its /nieuws/[slug] href intact", () => {
@@ -168,6 +179,7 @@ function makeCalendarEvent(
     title: "Paastoernooi",
     dateStart: "2026-03-15T10:00:00",
     href: "/evenementen/paastoernooi",
+    eventType: "Clubevent",
     ...overrides,
   };
 }
@@ -424,5 +436,169 @@ describe("buildCalendarFeed", () => {
     if (articleItem && articleItem.source !== "match") {
       expect(articleItem.event.href).toBe("/nieuws/jeugdtornooi");
     }
+  });
+});
+
+// ── calendarMatchToScheduleMatch ──────────────────────────────────────────
+
+describe("calendarMatchToScheduleMatch", () => {
+  it("maps the VM onto the ScheduleMatch shape (date string → Date)", () => {
+    const result = calendarMatchToScheduleMatch(
+      makeCalendarMatch({
+        id: 7,
+        date: "2026-09-12T10:00:00.000Z",
+        time: "10:00",
+        homeScore: 3,
+        awayScore: 1,
+        status: "finished",
+        competition: "Tornooi",
+      }),
+    );
+
+    expect(result.id).toBe(7);
+    expect(result.date).toBeInstanceOf(Date);
+    expect(result.date.toISOString()).toBe("2026-09-12T10:00:00.000Z");
+    expect(result.time).toBe("10:00");
+    expect(result.homeScore).toBe(3);
+    expect(result.awayScore).toBe(1);
+    expect(result.status).toBe("finished");
+    expect(result.competition).toBe("Tornooi");
+  });
+
+  it("injects the KCVV squad label on the home side for a home match", () => {
+    const result = calendarMatchToScheduleMatch(
+      makeCalendarMatch({ id: 1, team: "U13", isHome: true }),
+    );
+    expect(result.homeTeam.teamLabel).toBe("U13");
+    expect(result.awayTeam.teamLabel).toBeUndefined();
+    expect(result.isHome).toBe(true);
+  });
+
+  it("injects the KCVV squad label on the away side for an away match", () => {
+    const result = calendarMatchToScheduleMatch(
+      makeCalendarMatch({ id: 2, team: "U13", isHome: false }),
+    );
+    expect(result.awayTeam.teamLabel).toBe("U13");
+    expect(result.homeTeam.teamLabel).toBeUndefined();
+    expect(result.isHome).toBe(false);
+  });
+
+  it("falls back to name-based home/away when isHome is absent", () => {
+    const result = calendarMatchToScheduleMatch(
+      makeCalendarMatch({
+        id: 3,
+        isHome: undefined,
+        homeTeam: { id: 1, name: "KCVV Elewijt" },
+        awayTeam: { id: 2, name: "Zemst" },
+        team: "A-ploeg",
+      }),
+    );
+    // name contains "kcvv" → treated as home.
+    expect(result.isHome).toBe(true);
+    expect(result.homeTeam.teamLabel).toBe("A-ploeg");
+  });
+});
+
+// ── buildMonthAgenda ──────────────────────────────────────────────────────
+
+describe("buildMonthAgenda", () => {
+  it("groups items by day, only days with items, in chronological order", () => {
+    const matches = [
+      makeCalendarMatch({ id: 1, date: "2026-09-12T10:00:00.000Z" }),
+      makeCalendarMatch({ id: 2, date: "2026-09-12T11:00:00.000Z" }),
+      makeCalendarMatch({ id: 3, date: "2026-09-13T15:00:00.000Z" }),
+    ];
+    const events = [
+      makeCalendarEvent({ id: "e1", dateStart: "2026-09-12T18:00:00.000Z" }),
+    ];
+
+    const groups = buildMonthAgenda(matches, events, 2026, 9);
+
+    expect(groups.map((g) => g.date)).toEqual(["2026-09-12", "2026-09-13"]);
+    expect(groups[0]!.matches).toHaveLength(2);
+    expect(groups[0]!.events).toHaveLength(1);
+    expect(groups[1]!.matches).toHaveLength(1);
+    expect(groups[1]!.events).toHaveLength(0);
+  });
+
+  it("windows to the given month — items in other months are excluded", () => {
+    const matches = [
+      makeCalendarMatch({ id: 1, date: "2026-09-30T10:00:00.000Z" }),
+      makeCalendarMatch({ id: 2, date: "2026-10-01T10:00:00.000Z" }),
+      makeCalendarMatch({ id: 3, date: "2026-08-31T10:00:00.000Z" }),
+    ];
+
+    const groups = buildMonthAgenda(matches, [], 2026, 9);
+
+    expect(groups.map((g) => g.date)).toEqual(["2026-09-30"]);
+  });
+
+  it("sorts matches within a day by kickoff", () => {
+    const matches = [
+      makeCalendarMatch({ id: 1, date: "2026-09-12T15:00:00.000Z" }),
+      makeCalendarMatch({ id: 2, date: "2026-09-12T10:00:00.000Z" }),
+    ];
+
+    const groups = buildMonthAgenda(matches, [], 2026, 9);
+
+    expect(groups[0]!.matches.map((m) => m.id)).toEqual([2, 1]);
+  });
+
+  it("returns an empty array for a month with no items", () => {
+    expect(buildMonthAgenda([], [], 2026, 9)).toEqual([]);
+  });
+});
+
+// ── groupFeedByDay ────────────────────────────────────────────────────────
+
+describe("groupFeedByDay", () => {
+  it("buckets matches + events under their local day, time-sorted", () => {
+    const map = groupFeedByDay(
+      [
+        makeCalendarMatch({ id: 1, date: "2026-09-12T15:00:00" }),
+        makeCalendarMatch({ id: 2, date: "2026-09-12T10:00:00" }),
+        makeCalendarMatch({ id: 3, date: "2026-09-13T10:00:00" }),
+      ],
+      [makeCalendarEvent({ id: "e1", dateStart: "2026-09-12T18:00:00" })],
+    );
+
+    expect(map.get("2026-09-12")!.matches.map((m) => m.id)).toEqual([2, 1]);
+    expect(map.get("2026-09-12")!.events.map((e) => e.id)).toEqual(["e1"]);
+    expect(map.get("2026-09-13")!.matches.map((m) => m.id)).toEqual([3]);
+    expect(map.has("2026-09-14")).toBe(false);
+  });
+
+  it("surfaces a multi-day event under every spanned day (inclusive)", () => {
+    const map = groupFeedByDay(
+      [],
+      [
+        makeCalendarEvent({
+          id: "e1",
+          dateStart: "2026-09-12T10:00:00",
+          dateEnd: "2026-09-14T18:00:00",
+        }),
+      ],
+    );
+    expect(map.get("2026-09-12")!.events.map((e) => e.id)).toEqual(["e1"]);
+    expect(map.get("2026-09-13")!.events.map((e) => e.id)).toEqual(["e1"]);
+    expect(map.get("2026-09-14")!.events.map((e) => e.id)).toEqual(["e1"]);
+    expect(map.has("2026-09-15")).toBe(false);
+  });
+
+  it("matches getMatchesForDay/getEventsForDay for a given day", () => {
+    const matches = [
+      makeCalendarMatch({ id: 1, date: "2026-09-12T15:00:00" }),
+      makeCalendarMatch({ id: 2, date: "2026-09-12T10:00:00" }),
+    ];
+    const events = [
+      makeCalendarEvent({ id: "e1", dateStart: "2026-09-12T18:00:00" }),
+    ];
+    const map = groupFeedByDay(matches, events);
+    expect(map.get("2026-09-12")!.matches).toEqual(
+      getMatchesForDay(matches, "2026-09-12"),
+    );
+    expect(map.get("2026-09-12")!.events).toEqual(
+      getEventsForDay(events, "2026-09-12"),
+    );
   });
 });

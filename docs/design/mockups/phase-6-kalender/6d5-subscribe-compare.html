@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 6.D — /kalender · 6d5: iCal subscribe panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,500;1,9..144,700&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream:#f5f1e6;--cream-soft:#ede8da;--cream-deep:#e1d7bf;--ink:#0a0a0a;--ink-soft:#1f1f1f;--ink-muted:#6b6b6b;
+        --jersey-deep:#008755;--jersey-bright:#22c55e;--warm:#f0c264;--brick:#c93f1c;--paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif;--font-body:"Archivo",system-ui,sans-serif;--font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+      .harness-head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono)}
+      .harness-head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+      .harness-head p{margin:0;font-size:13px;color:#b9b9b9;max-width:94ch;line-height:1.55}
+      .harness-head a{color:var(--warm)}
+      .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+      @media(max-width:1180px){.grid3{grid-template-columns:1fr}}
+      .col{padding:22px;border-right:1px dashed var(--paper-edge)}.col:last-child{border-right:none}
+      .opt-h{background:var(--jersey-deep);color:var(--cream);padding:10px 14px;margin:-22px -22px 16px;
+        font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink)}
+      .opt-h.ii{background:var(--brick)}.opt-h.iii{background:var(--ink)}
+      .gloss{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:0 0 16px;line-height:1.55;min-height:74px}
+      .gloss b{color:var(--ink-soft)}
+      /* shared paper card */
+      .panel{background:var(--cream);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+      .lbl{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);margin:0 0 7px}
+      .lead{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);line-height:1.5;margin:0 0 14px}
+      .chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;font-weight:600;
+        padding:5px 11px;border:2px solid var(--ink);background:var(--cream);color:var(--ink);cursor:pointer;border-radius:0}
+      .chip.on{background:var(--ink);color:var(--cream)}
+      .chip .x{opacity:.7}
+      /* segmented control + button share an exact height (line-height:1, 7px y-padding) */
+      .seg{display:inline-flex;border:2px solid var(--ink)}
+      .seg span{font-family:var(--font-mono);font-size:11px;line-height:1;text-transform:uppercase;letter-spacing:.05em;padding:7px 12px;border-right:2px solid var(--ink)}
+      .seg span:last-child{border-right:none}
+      .seg .on{background:var(--ink);color:var(--cream)}
+      .url{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);border:2px solid var(--ink);background:var(--cream);padding:8px 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .btn{font-family:var(--font-mono);font-size:11px;line-height:1;font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+        padding:7px 14px;border:2px solid var(--ink);background:var(--cream);color:var(--ink);cursor:pointer}
+      .btn.primary{background:var(--jersey-deep);color:var(--cream)}
+      .qr{width:96px;height:96px;border:2px solid var(--ink);background:
+        repeating-conic-gradient(var(--ink) 0 25%, var(--cream) 0 50%) 0 0/14px 14px}
+      .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+      .verdict{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:16px 0 0;line-height:1.55}
+      .verdict .pro{color:var(--jersey-deep)}.verdict .con{color:var(--brick)}
+      .stepnum{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid var(--ink);
+        font-family:var(--font-mono);font-size:10px;font-weight:700;margin-right:7px}
+      .perf{border-left:2px dashed var(--ink)}
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 6.D · 6d5 — iCal subscribe panel (“volg je ploeg”)</h1>
+      <p>
+        The subscribe panel is a <b>matches-only “follow your team” webcal feed</b> (orthogonal to the by-type filter;
+        <a href="./6d-kalender-locked.md">6d lock</a> §iCal). Function is fixed: pick team(s) → optional thuis/uit → get a
+        <code>webcal://</code> link (copy or QR) to add to a calendar app. No design was drilled at the gate — only “reskin
+        the chrome to paper/ink.” Three treatments of the SAME fields. Harness chrome (dark bars) is not part of the design.
+      </p>
+    </div>
+
+    <div class="grid3">
+      <!-- (i) Guided one-column -->
+      <div class="col">
+        <div class="opt-h">(i) Clean stack — utilitarian</div>
+        <div class="gloss"><b>The reskinned current IA, tidied.</b> Team toggle-chips (multi-select, ink fill = selected), a thuis/uit segmented control, then the link + copy/QR. Everything visible at once; no steps. Neutral <b>ink</b> chips (not card-red) so they don’t read as the Wedstrijden filter.</div>
+        <div class="panel" style="padding:16px">
+          <p class="lead">Volg de wedstrijden van je ploeg in je eigen agenda-app.</p>
+          <p class="lbl">Ploegen</p>
+          <div class="row" style="margin-bottom:14px">
+            <span class="chip on">A-ploeg <span class="x">×</span></span>
+            <span class="chip on">U15 A <span class="x">×</span></span>
+            <span class="chip">B-ploeg</span>
+            <span class="chip">+ voeg toe</span>
+          </div>
+          <p class="lbl">Wedstrijden</p>
+          <div class="seg" style="margin-bottom:14px"><span class="on">Alle</span><span>Thuis</span><span>Uit</span></div>
+          <div class="url" style="margin-bottom:10px">webcal://kcvvelewijt.be/api/calendar.ics?teamIds=101,103&amp;side=all</div>
+          <div class="row"><button class="btn primary">Kopieer link</button><button class="btn">Toon QR-code</button></div>
+        </div>
+        <div class="verdict"><span class="pro">+ one glance, nothing hidden; least code (current IA)</span><br /><span class="con">– the raw webcal URL is technical noise; tallest panel</span></div>
+      </div>
+
+      <!-- (ii) Ticket-stub motif -->
+      <div class="col">
+        <div class="opt-h ii">(ii) Seizoenskaart — ticket-stub</div>
+        <div class="gloss"><b>Leans into the fanzine TicketStub vocabulary.</b> A perforated “abonnement” ticket: the QR lives in the always-visible left stub (scan-to-add on mobile), the right body carries the team chips + thuis/uit + a single “Kopieer link”. Reads as “your season ticket to the fixtures.”</div>
+        <div class="panel" style="display:flex">
+          <div style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--cream-soft)">
+            <div class="qr"></div>
+            <span style="font-family:var(--font-mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted)">Scan → agenda</span>
+          </div>
+          <div class="perf" style="padding:16px;flex:1">
+            <p class="lbl" style="margin-bottom:4px">Abonnement</p>
+            <p style="font-family:var(--font-display);font-style:italic;font-weight:700;font-size:18px;margin:0 0 12px">Volg je ploeg(en).</p>
+            <div class="row" style="margin-bottom:12px">
+              <span class="chip on">A-ploeg <span class="x">×</span></span>
+              <span class="chip on">U15 A <span class="x">×</span></span>
+              <span class="chip">+ voeg toe</span>
+            </div>
+            <div class="row" style="margin-bottom:2px">
+              <div class="seg"><span class="on">Alle</span><span>Thuis</span><span>Uit</span></div>
+              <button class="btn primary">Kopieer link</button>
+            </div>
+          </div>
+        </div>
+        <div class="verdict"><span class="pro">+ on-brand; QR always ready; hides the ugly URL; compact</span><br /><span class="con">+ net-new ticket composition for a utility panel — more to build/VR</span></div>
+      </div>
+
+      <!-- (iii) Progressive disclosure -->
+      <div class="col">
+        <div class="opt-h iii">(iii) Twee stappen — progressive</div>
+        <div class="gloss"><b>Guided for first-timers.</b> Step 1: pick ploeg(en) + thuis/uit. Step 2 (revealed after a pick): the link + QR + a one-line “zo voeg je toe.” The technical webcal URL stays hidden until it’s actually needed. Smallest resting footprint.</div>
+        <div class="panel" style="padding:16px">
+          <p class="lbl"><span class="stepnum">1</span>Welke ploegen?</p>
+          <div class="row" style="margin:0 0 8px 25px">
+            <span class="chip on">A-ploeg <span class="x">×</span></span>
+            <span class="chip">U15 A</span>
+            <span class="chip">B-ploeg</span>
+            <span class="chip">+ voeg toe</span>
+          </div>
+          <div class="seg" style="margin:0 0 16px 25px"><span class="on">Alle</span><span>Thuis</span><span>Uit</span></div>
+          <p class="lbl"><span class="stepnum">2</span>Voeg toe aan je agenda</p>
+          <div class="row" style="margin-left:25px;align-items:flex-start">
+            <div class="qr" style="width:72px;height:72px"></div>
+            <div style="flex:1;min-width:120px">
+              <button class="btn primary" style="margin-bottom:8px;width:100%">Kopieer link</button>
+              <p style="font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);line-height:1.5;margin:0">Scan de QR op je telefoon, of plak de link in je agenda-app onder “abonneren”.</p>
+            </div>
+          </div>
+        </div>
+        <div class="verdict"><span class="pro">+ never shows raw URL; guided; smallest resting height</span><br /><span class="con">– most chrome (step numbers, helper copy); two visual zones</span></div>
+      </div>
+    </div>
+  </body>
+</html>

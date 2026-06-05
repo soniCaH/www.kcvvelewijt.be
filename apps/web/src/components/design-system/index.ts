@@ -170,6 +170,13 @@ export type {
 export { QuoteMark } from "./QuoteMark";
 export type { QuoteMarkProps, QuoteMarkColor } from "./QuoteMark";
 
+// RemovableChip
+export {
+  RemovableChip,
+  type RemovableChipProps,
+  type RemovableChipTone,
+} from "./RemovableChip";
+
 // StripedSeam
 export { StripedSeam } from "./StripedSeam";
 export type {

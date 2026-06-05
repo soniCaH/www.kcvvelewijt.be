@@ -86,10 +86,13 @@ const meta = {
       navigation: { pathname: "/kalender", query: {} },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     feed,
     teams,
+    // Seed the opening window to the fixtures' month so VR baselines render
+    // content regardless of the runner's pinned clock (see the `today` prop).
+    today: "2026-03-15",
   },
 } satisfies Meta<typeof CalendarWidget>;
 
@@ -110,6 +113,14 @@ export const WeekView: Story = {
   parameters: {
     nextjs: {
       navigation: { pathname: "/kalender", query: { view: "week" } },
+    },
+  },
+};
+
+export const AgendaView: Story = {
+  parameters: {
+    nextjs: {
+      navigation: { pathname: "/kalender", query: { view: "agenda" } },
     },
   },
 };

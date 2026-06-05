@@ -13,7 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
-import { getResultColor } from "@/lib/utils/match-display";
+import { getResultColor, isPlayedMatch } from "@/lib/utils/match-display";
 import { House, Bus } from "@/lib/icons.redesign";
 import type { ScheduleMatch } from "@/components/match/types";
 
@@ -26,6 +26,13 @@ export interface TeamAgendaRowProps {
   kcvvTeamId?: number;
   /** When true, renders as the featured "Eerstvolgende" card (jersey-deep bg). */
   featured?: boolean;
+  /**
+   * When false, omits the leading date stub. Used where the row is already
+   * grouped under a known day (the `/kalender` grid's selected-day detail) so
+   * the day/month stub is redundant. Defaults to `true` — the team-detail
+   * agenda (6.C) spans many dates and always shows it.
+   */
+  showDateStub?: boolean;
   className?: string;
 }
 
@@ -156,6 +163,7 @@ export function TeamAgendaRow({
   match,
   kcvvTeamId,
   featured = false,
+  showDateStub = true,
   className,
 }: TeamAgendaRowProps) {
   // Prefer match.is_home (provided by BFF); fall back to comparing kcvvTeamId
@@ -165,10 +173,7 @@ export function TeamAgendaRow({
     (kcvvTeamId !== undefined ? kcvvTeamId === match.homeTeam.id : undefined);
 
   const outcome = computeOutcome(match, isHome);
-  const isPlayed =
-    match.status === "finished" ||
-    match.status === "forfeited" ||
-    match.status === "stopped";
+  const isPlayed = isPlayedMatch(match.status);
 
   const scoreOrTime =
     isPlayed &&
@@ -216,31 +221,33 @@ export function TeamAgendaRow({
         className={cardBase}
       >
         {/* Date stub */}
-        <div
-          className={cn(
-            "flex shrink-0 flex-col items-center justify-center gap-0 px-3 py-3",
-            stubBorder,
-            featured ? "bg-jersey-deep" : "bg-cream-soft/30",
-          )}
-          aria-label={`${day} ${month}`}
-        >
-          <span
+        {showDateStub ? (
+          <div
             className={cn(
-              "font-display-big text-[18px] leading-none",
-              featured ? "text-white" : "text-ink",
+              "flex shrink-0 flex-col items-center justify-center gap-0 px-3 py-3",
+              stubBorder,
+              featured ? "bg-jersey-deep" : "bg-cream-soft/30",
             )}
+            aria-label={`${day} ${month}`}
           >
-            {day}
-          </span>
-          <span
-            className={cn(
-              "font-mono text-[8px] tracking-widest uppercase",
-              monoClass,
-            )}
-          >
-            {month}
-          </span>
-        </div>
+            <span
+              className={cn(
+                "font-display-big text-[18px] leading-none",
+                featured ? "text-white" : "text-ink",
+              )}
+            >
+              {day}
+            </span>
+            <span
+              className={cn(
+                "font-mono text-[8px] tracking-widest uppercase",
+                monoClass,
+              )}
+            >
+              {month}
+            </span>
+          </div>
+        ) : null}
 
         {/* Desktop layout (sm+): symmetric scoreboard */}
         <div className="hidden w-full items-center gap-2 px-3 py-2 sm:flex">
