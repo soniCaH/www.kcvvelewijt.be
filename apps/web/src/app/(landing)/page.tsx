@@ -137,6 +137,11 @@ function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
       };
     case "announcement":
       return { ...shared, variant, category: article.tags[0] };
+    case "matchPreview":
+    case "matchRecap":
+      // Kicker-only hero (VOORBESCHOUWING / MATCHVERSLAG); match facts render
+      // in the article-body card, not the homepage hero.
+      return { ...shared, variant };
     default: {
       const _exhaustive: never = variant;
       throw new Error(
@@ -164,6 +169,8 @@ function toUitgelichtArticleType(
     case "interview":
     case "announcement":
     case "event":
+    case "matchPreview":
+    case "matchRecap":
       return type;
     default: {
       const _exhaustive: never = type;

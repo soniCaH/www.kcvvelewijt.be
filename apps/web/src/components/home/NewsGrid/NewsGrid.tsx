@@ -14,7 +14,13 @@ import type {
  * `matchPreview` / `matchRecap` types (per `card-semantics-locked.md`
  * §"Open follow-ups") slot in here when they land.
  */
-type ArticleType = "transfer" | "interview" | "announcement" | "event";
+type ArticleType =
+  | "transfer"
+  | "interview"
+  | "announcement"
+  | "event"
+  | "matchPreview"
+  | "matchRecap";
 
 export interface NewsGridArticle {
   href: string;
@@ -54,6 +60,9 @@ const BG_BY_TYPE: Record<ArticleType, NewsCardBg> = {
   interview: "cream",
   announcement: "cream",
   event: "cream",
+  // Default cream per card-semantics-locked.md ("a future round picks the colour").
+  matchPreview: "cream",
+  matchRecap: "cream",
 };
 
 function bgForArticle(type: NewsGridArticle["articleType"]): NewsCardBg {

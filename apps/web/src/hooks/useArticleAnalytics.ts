@@ -2,7 +2,13 @@ import { useCallback } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { hashMemberId } from "@/lib/analytics/hash-member-id";
 
-export type ArticleType = "announcement" | "interview" | "transfer" | "event";
+export type ArticleType =
+  | "announcement"
+  | "interview"
+  | "transfer"
+  | "event"
+  | "matchPreview"
+  | "matchRecap";
 export type ShareChannel = "native" | "facebook";
 
 /**

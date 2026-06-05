@@ -155,6 +155,21 @@ function renderArticleHero({
           coverImage={landscapeCover}
         />
       );
+    case "matchPreview":
+    case "matchRecap":
+      // Kicker-only match hero; the match facts render in the body card
+      // (<MatchResultCard> + Doelpunten) fed by `article.linkedMatch`.
+      return (
+        <EditorialHero
+          variant={article.articleType}
+          placement="detail"
+          title={titleProp}
+          lead={lead}
+          author={author}
+          date={publishedDate}
+          coverImage={landscapeCover}
+        />
+      );
     default:
       // Missing or unknown articleType falls through to announcement —
       // matches the PRD §3 legacy-article fallback rule.

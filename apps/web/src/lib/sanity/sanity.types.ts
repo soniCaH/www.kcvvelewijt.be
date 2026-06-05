@@ -445,7 +445,14 @@ export type Article = {
   _createdAt: string;
   _updatedAt: string;
   _rev: string;
-  articleType?: "interview" | "announcement" | "transfer" | "event";
+  articleType?:
+    | "interview"
+    | "announcement"
+    | "transfer"
+    | "event"
+    | "matchPreview"
+    | "matchRecap";
+  linkedMatch?: string;
   subjects?: Array<
     {
       _key: string;
@@ -1078,7 +1085,14 @@ export type ARTICLES_QUERY_RESULT = Array<{
   featured: boolean | false;
   tags: Array<string> | Array<never>;
   coverImageUrl: string | null;
-  articleType: "announcement" | "event" | "interview" | "transfer" | null;
+  articleType:
+    | "announcement"
+    | "event"
+    | "interview"
+    | "matchPreview"
+    | "matchRecap"
+    | "transfer"
+    | null;
   subjects: Array<{
     _key: string;
     kind: "custom" | "player" | "staff" | null;
@@ -1481,7 +1495,14 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
   publishedAt: string | null;
   featured: boolean | false;
   tags: Array<string> | Array<never>;
-  articleType: "announcement" | "event" | "interview" | "transfer" | null;
+  articleType:
+    | "announcement"
+    | "event"
+    | "interview"
+    | "matchPreview"
+    | "matchRecap"
+    | "transfer"
+    | null;
   author: string | "";
   photographer: string | "";
   metaDescription: string | null;

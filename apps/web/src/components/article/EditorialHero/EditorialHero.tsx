@@ -56,7 +56,9 @@ export type EditorialHeroVariant =
   | "announcement"
   | "transfer"
   | "event"
-  | "interview";
+  | "interview"
+  | "matchPreview"
+  | "matchRecap";
 
 export type EditorialHeroPlacement = "detail" | "homepage";
 
@@ -160,11 +162,20 @@ type TransferProps = EditorialHeroSharedProps &
     feature?: TransferFactValue | null;
   };
 
+// matchPreview / matchRecap share one shape — a kicker-only hero (the match
+// facts render in the locked <MatchResultCard> + Doelpunten body block per
+// #1791, fed by the article's `linkedMatch` PSD id). No structured `feature`.
+type MatchProps = EditorialHeroSharedProps &
+  PlacementProps & {
+    variant: "matchPreview" | "matchRecap";
+  };
+
 export type EditorialHeroProps =
   | AnnouncementProps
   | InterviewProps
   | EventProps
-  | TransferProps;
+  | TransferProps
+  | MatchProps;
 
 // ─── Cover ───────────────────────────────────────────────────────────────────
 
@@ -353,6 +364,29 @@ function renderTransferEditorial(
   );
 }
 
+function renderMatchEditorial(
+  title: EditorialHeroSharedProps["title"],
+  lead: string | undefined,
+  author: string | undefined,
+  variant: "matchPreview" | "matchRecap",
+  date: string | undefined,
+) {
+  // Kicker mirrors the match-page status vocabulary (<MatchHero>): preview →
+  // VOORBESCHOUWING, recap → MATCHVERSLAG. Match facts live in the body card.
+  const label = variant === "matchPreview" ? "Voorbeschouwing" : "Matchverslag";
+  const items = buildPlainKickerItems(label, [], date);
+  return (
+    <>
+      <EditorialKicker items={items} />
+      <EditorialHeading level={1} size="display-xl">
+        {title}
+      </EditorialHeading>
+      {lead && lead.trim() ? <EditorialLead>{lead}</EditorialLead> : null}
+      <EditorialByline author={author} />
+    </>
+  );
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function EditorialHero(props: EditorialHeroProps) {
@@ -413,8 +447,7 @@ export function EditorialHero(props: EditorialHeroProps) {
         endTime={props.feature?.endTime ?? null}
       />
     );
-  } else {
-    // Transfer
+  } else if (props.variant === "transfer") {
     coverAspect = "landscape-3-2";
     editorial = renderTransferEditorial(
       title,
@@ -423,6 +456,9 @@ export function EditorialHero(props: EditorialHeroProps) {
       props.feature,
       date,
     );
+  } else {
+    // matchPreview | matchRecap — kicker-only hero; facts live in the body card.
+    editorial = renderMatchEditorial(title, lead, author, props.variant, date);
   }
 
   const tiltOnHover =

@@ -30,11 +30,35 @@ export const article = defineType({
           { title: "Announcement", value: "announcement" },
           { title: "Transfer", value: "transfer" },
           { title: "Event", value: "event" },
+          { title: "Match preview", value: "matchPreview" },
+          { title: "Match recap", value: "matchRecap" },
         ],
         layout: "radio",
       },
       initialValue: "announcement",
       validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "linkedMatch",
+      title: "Linked match (preview/recap only)",
+      type: "string",
+      description:
+        "PSD match id — copy it from the /wedstrijd/[matchId] URL. Required for match preview / match recap articles.",
+      hidden: ({ parent }) =>
+        !["matchPreview", "matchRecap"].includes(parent?.articleType ?? ""),
+      validation: (r) =>
+        r.custom((value, ctx) => {
+          const articleType = (
+            ctx.document as { articleType?: string } | undefined
+          )?.articleType;
+          if (
+            ["matchPreview", "matchRecap"].includes(articleType ?? "") &&
+            !(typeof value === "string" && value.trim())
+          ) {
+            return "Match preview / recap articles need a linked match id.";
+          }
+          return true;
+        }),
     }),
     defineField({
       name: "subjects",
