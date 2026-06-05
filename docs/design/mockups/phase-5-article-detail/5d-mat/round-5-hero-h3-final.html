@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Phase 5 · 5.d-mat · H3 hero LOCKED — desktop + mobile</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a; --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b; --color-jersey-deep: #006e47; --color-warm: #d8763a; --color-alert: #c0392b;
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink); --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono: "Quasimoda", ui-monospace, "SF Mono", "Menlo", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--color-cream-soft); color: var(--color-ink); font-family: ui-sans-serif, system-ui, sans-serif; padding: 30px 22px 90px; }
+      .page { max-width: 1500px; margin: 0 auto; }
+      .page > .meta { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-jersey-deep); font-weight: 700; }
+      .page > h1 { font-family: var(--font-display); font-style: italic; font-size: 32px; margin: 6px 0 6px; }
+      .page > p { margin: 0 0 18px; max-width: 96ch; font-size: 13.5px; line-height: 1.6; }
+      .rowlabel { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--color-ink-muted); border-top: 1px solid var(--color-ink-muted); padding-top: 8px; margin: 24px 0 10px; }
+
+      /* shared score overlay — balanced: crest · score · crest, centred */
+      .scorebar { display: inline-flex; align-items: center; gap: 14px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 6px 16px; }
+      .scorebar .crest { width: 26px; height: 26px; border-radius: 999px; border: 1.5px solid var(--color-ink-muted); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); flex: 0 0 auto; }
+      .scorebar .crest.kcvv { border-color: var(--color-jersey-deep); color: var(--color-jersey-deep); }
+      .scorebar .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: -0.01em; min-width: 58px; text-align: center; font-variant-numeric: tabular-nums; }
+      .scorebar .badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; border: 1.5px solid var(--color-ink); padding: 2px 5px; margin-left: 2px; }
+
+      .ed .kick { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.13em; color: var(--color-ink-muted); }
+      .ed h2 { font-family: var(--font-display-big); font-weight: 900; line-height: 1.04; letter-spacing: -0.02em; margin: 7px 0 8px; }
+      .ed .lead { font-family: var(--font-display); line-height: 1.45; color: #333; margin: 0; }
+      .cover { background: repeating-linear-gradient(45deg, var(--color-cream-deep), var(--color-cream-deep) 9px, var(--color-cream-soft) 9px, var(--color-cream-soft) 18px); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); position: relative; }
+      .cover .tape { position: absolute; top: -8px; left: 34%; width: 64px; height: 18px; background: rgba(0,110,71,0.3); border: 1px solid rgba(0,0,0,0.15); transform: rotate(-4deg); }
+      .cover .ph { position: absolute; top: 8px; left: 10px; font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); }
+      /* overlay anchored bottom-centre, straddling the cover's lower edge */
+      .cover .scorewrap { position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%); }
+
+      /* ── desktop ── */
+      .desk { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+      .desk .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 18px; display: grid; grid-template-columns: 1.5fr 1fr; gap: 18px; align-items: center; }
+      .desk .cover { aspect-ratio: 4/3; }
+      .desk .ed h2 { font-size: 26px; }
+      .desk .ed .lead { font-size: 13px; }
+      .colcap { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-ink-muted); margin-bottom: 6px; }
+
+      /* ── mobile (375px) ── */
+      .mob { display: flex; gap: 30px; flex-wrap: wrap; }
+      .phone { width: 360px; }
+      .phone .hero { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 0 0 16px; }
+      .phone .cover { aspect-ratio: 16/10; border-left: 0; border-right: 0; border-top: 0; }
+      .phone .ed { padding: 26px 16px 0; }
+      .phone .ed h2 { font-size: 22px; }
+      .phone .ed .lead { font-size: 13px; }
+      .bodynote { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--color-ink-muted); margin-top: 10px; padding: 6px 8px; background: var(--color-cream-deep); }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="meta">Phase 5 · 5.d-mat · H3 hero — LOCKED</div>
+      <h1>Score-forward match hero — aligned score + mobile</h1>
+      <p>Score (recap) / fixture (preview) on a balanced <code>crest · score · crest</code> bar straddling the cover's lower edge, centred. Body drops card C → prose + (recap) Doelpunten + "naar wedstrijd →". Desktop: editorial + cover side-by-side. Mobile: cover on top with the score bar, editorial below.</p>
+
+      <div class="rowlabel">Desktop</div>
+      <div class="desk">
+        <div>
+          <div class="colcap">matchRecap</div>
+          <div class="hero">
+            <div class="ed">
+              <div class="kick">Matchverslag · 3e Provinciale · za 13 sep</div>
+              <h2>KCVV pakt de drie punten in de slotfase.</h2>
+              <p class="lead">Een koele strafschop besliste een taaie partij tegen Racing.</p>
+            </div>
+            <div class="cover"><div class="tape"></div><div class="ph">cover</div>
+              <div class="scorewrap"><div class="scorebar"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="colcap">matchPreview</div>
+          <div class="hero">
+            <div class="ed">
+              <div class="kick">Voorbeschouwing · 3e Provinciale · za 13 sep</div>
+              <h2>Topper tegen Racing wacht.</h2>
+              <p class="lead">Een driepunter tilt KCVV naar de subtop.</p>
+            </div>
+            <div class="cover"><div class="tape"></div><div class="ph">cover</div>
+              <div class="scorewrap"><div class="scorebar"><span class="crest kcvv">K</span><span class="sc" style="font-size:14px">15:00</span><span class="crest">R</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rowlabel">Mobile (360px)</div>
+      <div class="mob">
+        <div class="phone">
+          <div class="colcap">matchRecap</div>
+          <div class="hero">
+            <div class="cover"><div class="tape"></div><div class="ph">cover</div>
+              <div class="scorewrap"><div class="scorebar"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div></div>
+            </div>
+            <div class="ed">
+              <div class="kick">Matchverslag · 3e Provinciale · za 13 sep</div>
+              <h2>KCVV pakt de drie punten in de slotfase.</h2>
+              <p class="lead">Een koele strafschop besliste een taaie partij tegen Racing.</p>
+            </div>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="colcap">matchPreview</div>
+          <div class="hero">
+            <div class="cover"><div class="tape"></div><div class="ph">cover</div>
+              <div class="scorewrap"><div class="scorebar"><span class="crest kcvv">K</span><span class="sc" style="font-size:14px">15:00</span><span class="crest">R</span></div></div>
+            </div>
+            <div class="ed">
+              <div class="kick">Voorbeschouwing · 3e Provinciale · za 13 sep</div>
+              <h2>Topper tegen Racing wacht.</h2>
+              <p class="lead">Een driepunter tilt KCVV naar de subtop.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bodynote">BODY (both states): editorial prose → (recap only) Doelpunten section → "naar wedstrijd →" link. CARD C dropped — the hero now carries the matchup.</div>
+    </div>
+  </body>
+</html>
