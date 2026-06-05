@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 6.D — /kalender · Round 1: reskin-widget vs newspaper-agenda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Freight is Typekit-only; Fraunces is the closest free editorial serif for mockup fidelity -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6;
+        --cream-soft: #ede8da;
+        --cream-deep: #e1d7bf;
+        --ink: #0a0a0a;
+        --ink-soft: #1f1f1f;
+        --ink-muted: #6b6b6b;
+        --jersey: #4acf52;
+        --jersey-deep: #008755;
+        --jersey-bright: #22c55e;
+        --jersey-deep-dark: #133d28;
+        --warm: #f0c264;
+        --brick: #c93f1c; /* = --color-card-red · Wedstrijden tint (locked #1992) */
+        --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, "Times New Roman", serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+
+      /* ---------- compare-harness chrome (NOT part of the design) ---------- */
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0 0 4px; font-size: 13px; color: #b9b9b9; max-width: 92ch; line-height: 1.55; }
+      .harness-head a { color: var(--warm); }
+      .opt-bar { position: sticky; top: 0; z-index: 50; padding: 11px 28px; font-family: var(--font-mono);
+        font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; display: flex; gap: 14px;
+        align-items: baseline; border-bottom: 2px solid var(--ink); color: var(--cream); }
+      .opt-bar.a { background: var(--jersey-deep); }
+      .opt-bar.b { background: var(--brick); }
+      .opt-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 10px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .opt-bar .says { color: #f2e9d6; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .maps { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-muted); padding: 8px 28px;
+        background: var(--cream-soft); border-bottom: 1px dashed var(--paper-edge); }
+      .maps b { color: var(--ink-soft); }
+      .stage { padding: 30px 28px 60px; max-width: 1040px; margin: 0 auto; }
+
+      /* ---------- shared design-system approximations ---------- */
+      .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.09em; font-size: 11px; }
+      .chiprow { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+      .chip { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.07em; font-size: 11px;
+        font-weight: 600; padding: 6px 13px; border: 2px solid var(--ink); border-radius: 999px; background: transparent;
+        color: var(--ink); cursor: pointer; }
+      .chip.sel.all { background: var(--ink); color: var(--cream); }
+      .chip.wed { border-color: var(--brick); }
+      .chip.sel.wed { background: var(--brick); color: var(--cream); }
+      .chip.club { border-color: var(--jersey-deep); }
+      .chip.supp { border-color: var(--warm); }
+      .chip.jeugd { border-color: var(--jersey-bright); }
+      .chip.and { border-color: var(--ink); }
+      .display { font-family: var(--font-display); font-weight: 900; line-height: 0.95; letter-spacing: -0.01em; }
+      .tag { display: inline-flex; align-items: center; font-family: var(--font-mono); text-transform: uppercase;
+        letter-spacing: 0.07em; font-size: 9.5px; font-weight: 600; padding: 2px 7px; border: 1.5px solid var(--ink); white-space: nowrap; }
+      .tag.wed { background: var(--brick); color: var(--cream); }
+      .tag.club { background: var(--jersey-deep); color: #fff; }
+      .tag.supp { background: var(--warm); color: var(--ink); }
+      .tag.jeugd { background: var(--jersey-bright); color: var(--ink); }
+      .tag.and { background: var(--ink); color: var(--cream); }
+      .crest { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--ink); background: var(--cream-deep);
+        display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 9px; font-weight: 700; flex: none; }
+      .crest.kcvv { background: var(--jersey-deep); color: var(--cream); }
+
+      /* ================= OPTION A — reskinned month grid ================= */
+      .a-wrap { background: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+      .a-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 2px solid var(--ink); }
+      .a-seg { display: inline-flex; border: 2px solid var(--ink); border-radius: 8px; overflow: hidden; }
+      .a-seg span { padding: 5px 14px; font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+      .a-seg .on { background: var(--ink); color: var(--cream); }
+      .a-monthnav { display: flex; align-items: center; gap: 12px; }
+      .a-monthnav .m { font-family: var(--font-display); font-weight: 900; font-size: 22px; }
+      .a-monthnav button { border: 2px solid var(--ink); background: var(--cream); width: 30px; height: 30px; cursor: pointer; font-size: 14px; }
+      .a-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+      .a-dow { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; text-align: center;
+        padding: 8px 0; color: var(--ink-muted); border-bottom: 1px dashed var(--paper-edge); }
+      .a-cell { min-height: 92px; border-right: 1px dashed var(--paper-edge); border-bottom: 1px dashed var(--paper-edge); padding: 5px 6px; position: relative; }
+      .a-cell:nth-child(7n) { border-right: none; }
+      .a-cell .d { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+      .a-cell.out .d { opacity: .35; }
+      .a-cell.sel { background: color-mix(in srgb, var(--jersey-deep) 12%, var(--cream)); outline: 2px solid var(--jersey-deep); outline-offset: -2px; }
+      .a-pips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+      .a-pip { width: 8px; height: 8px; border-radius: 50%; }
+      .a-pip.wed { background: var(--brick); }
+      .a-pip.wedaway { background: transparent; border: 1.5px solid var(--brick); }
+      .a-pip.club { background: var(--jersey-deep); }
+      .a-pip.jeugd { background: var(--jersey-bright); }
+      .a-count { position: absolute; top: 5px; right: 6px; font-family: var(--font-mono); font-size: 10px; font-weight: 700;
+        background: var(--brick); color: var(--cream); border-radius: 999px; padding: 0 6px; }
+      .a-detail { border-top: 2px solid var(--ink); padding: 16px; }
+      .a-detail h4 { font-family: var(--font-display); font-weight: 900; font-size: 18px; margin: 0 0 12px; }
+      .a-row { display: grid; grid-template-columns: 46px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--paper-edge); }
+      .a-row .time { font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted); }
+      .a-row .teams { display: flex; align-items: center; gap: 7px; font-weight: 600; font-size: 13.5px; }
+      .a-row .teams .sub { color: var(--ink-muted); font-weight: 500; }
+      .a-mini-event { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--paper-edge); }
+      .a-mini-event .et { font-family: var(--font-display); font-weight: 700; font-size: 14px; font-style: italic; }
+
+      /* ================= OPTION B — newspaper agenda ================= */
+      .b-wrap { background: var(--cream); }
+      .b-month { font-family: var(--font-display); font-weight: 900; font-size: clamp(34px, 5vw, 52px); line-height: .95; margin: 28px 0 4px; }
+      .b-month .em { font-style: italic; color: var(--jersey-deep); }
+      .b-monthrule { border: none; border-top: 2px solid var(--ink); margin: 0 0 10px; }
+      .b-daygroup { margin-bottom: 6px; }
+      .b-dayhead { display: flex; align-items: baseline; justify-content: space-between; padding: 12px 0 6px; border-bottom: 1px dashed var(--paper-edge); }
+      .b-dayhead .dh { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 600; }
+      .b-dayhead .cnt { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+      /* agenda row: date · content · tag */
+      .b-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center; padding: 9px 0; border-bottom: 1px dashed var(--paper-edge); }
+      .b-row .when { font-family: var(--font-mono); font-size: 12px; color: var(--ink-muted); line-height: 1.3; }
+      .b-row .when b { display: block; color: var(--ink); font-size: 13px; }
+      .b-match { display: flex; align-items: center; gap: 9px; }
+      .b-match .ml { display: flex; align-items: center; gap: 6px; min-width: 0; }
+      .b-match .nm { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .b-match .score { font-family: var(--font-display); font-weight: 900; font-size: 17px; padding: 0 8px; }
+      .b-match .vs { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); padding: 0 6px; }
+      .b-match .comp { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .05em; }
+      /* outcome underline (win jersey-deep / draw none / loss brick) — locked 6.C */
+      .b-match .score.win { box-shadow: inset 0 -4px 0 var(--jersey-deep); }
+      .b-match .score.loss { box-shadow: inset 0 -4px 0 var(--brick); }
+      .b-event .et { font-family: var(--font-display); font-weight: 700; font-size: 16px; font-style: italic; }
+      .b-event .loc { font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .05em; }
+      .note { font-family: var(--font-mono); font-size: 11px; color: var(--brick); background: color-mix(in srgb, var(--brick) 8%, var(--cream));
+        border: 1px dashed var(--brick); padding: 8px 12px; margin: 8px 0 0; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 6.D · /kalender — Round 1: reskin-widget vs newspaper-agenda</h1>
+      <p>
+        Same data in both: a dense in-season window — <b>Saturday 12 Sep (10 youth matches + a Clubevent)</b>,
+        <b>Sunday 13 Sep (A-ploeg)</b>, plus a sprinkling either side. The only variable is the FORM. Both carry the
+        #1992 locks: by-type colour chips + <b>Wedstrijden = card-red</b>; outcome colour (win=jersey-deep /
+        loss=brick) per 6.C. Grounded by <a href="./6d0-data-reality-audit.md">6d0 data-reality audit</a> — the calendar
+        is ~95% matches, clustered on weekends, so the gating question is how each form survives a 10-match Saturday.
+      </p>
+      <p>Fonts are free stand-ins (Fraunces≈Freight, Archivo≈Quasimoda). Tokens match globals.css. Harness chrome (dark bars) is not part of the design.</p>
+    </div>
+
+    <div style="background:#fffaf0;border-bottom:3px solid var(--ink);border-top:3px dashed var(--jersey-deep);padding:16px 28px;font-family:var(--font-mono)">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--jersey-deep)">★ LOCKED — 2026-06-05 — BOTH, user-toggled, grid default</div>
+      <p style="margin:8px 0 0;font-size:12.5px;line-height:1.6;color:var(--ink-soft);max-width:94ch">
+        Owner: <i>"I want both, with a tab or something to switch. Grid as default."</i> → Resolution: ship <b>both</b>
+        presentations behind the widget's existing view segmented-control, extended to a 3-way
+        <b>Maand (grid · DEFAULT) · Week (grid) · Agenda (newspaper list)</b> — `?view=month|week|agenda`. NOT an
+        auto-by-filter switch (that was rejected Option C); a manual view tab the user drives. Both views carry the
+        #1992 by-type colour chips + Wedstrijden=card-red and the 6.C outcome colour. Next drills: <b>6d2</b> agenda
+        dense-day mitigation (the ⚠ wall) · 6d3 grid cell density treatment · 6d4 view-toggle affordance · 6d5 iCal
+        subscribe + past/archive paging. The A/B panels below stay for reference.
+      </p>
+    </div>
+
+    <!-- ============================ OPTION A ============================ -->
+    <div class="opt-bar a">
+      <span class="tag">OPTION A</span> RESKIN THE MONTH-GRID WIDGET
+      <span class="says">keep grid + day-detail; dress it in fanzine paper/ink — density stays compact in cells</span>
+    </div>
+    <div class="maps">
+      <b>Reuses:</b> existing CalendarMonth grid + selected-day detail · <b>TapedCard</b> shell · #1992 KalenderFilterBar chips ·
+      6.C TeamAgendaRow scoreboard in the detail · iCal subscribe button. <b>Net-new:</b> fanzine cell styling + count badge.
+    </div>
+    <div class="stage">
+      <div class="chiprow">
+        <button class="chip sel all">Alles</button>
+        <button class="chip wed">Wedstrijden</button>
+        <button class="chip club">Clubevent</button>
+        <button class="chip supp">Supportersactiviteit</button>
+        <button class="chip jeugd">Jeugdwerking</button>
+        <button class="chip and">Andere</button>
+      </div>
+      <div class="a-wrap">
+        <div class="a-toolbar">
+          <div class="a-seg"><span class="on">Maand</span><span>Week</span></div>
+          <div class="a-monthnav">
+            <button>‹</button><span class="m">September ’26</span><button>›</button>
+          </div>
+          <button class="chip" style="border-radius:8px">⤓ Abonneer</button>
+        </div>
+        <div class="a-grid">
+          <div class="a-dow">Ma</div><div class="a-dow">Di</div><div class="a-dow">Wo</div><div class="a-dow">Do</div><div class="a-dow">Vr</div><div class="a-dow">Za</div><div class="a-dow">Zo</div>
+          <!-- week 1 -->
+          <div class="a-cell out"><span class="d">31</span></div>
+          <div class="a-cell"><span class="d">1</span></div>
+          <div class="a-cell"><span class="d">2</span></div>
+          <div class="a-cell"><span class="d">3</span></div>
+          <div class="a-cell"><span class="d">4</span></div>
+          <div class="a-cell"><span class="d">5</span><div class="a-pips"><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip wed"></span></div></div>
+          <div class="a-cell"><span class="d">6</span><div class="a-pips"><span class="a-pip wed"></span></div></div>
+          <!-- week 2 (dense Saturday 12) -->
+          <div class="a-cell"><span class="d">7</span></div>
+          <div class="a-cell"><span class="d">8</span></div>
+          <div class="a-cell"><span class="d">9</span><div class="a-pips"><span class="a-pip club"></span></div></div>
+          <div class="a-cell"><span class="d">10</span></div>
+          <div class="a-cell"><span class="d">11</span></div>
+          <div class="a-cell sel"><span class="d">12</span><span class="a-count">10</span>
+            <div class="a-pips">
+              <span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span>
+              <span class="a-pip wed"></span><span class="a-pip wedaway"></span><span class="a-pip wed"></span><span class="a-pip wedaway"></span>
+              <span class="a-pip wed"></span><span class="a-pip club"></span>
+            </div>
+          </div>
+          <div class="a-cell"><span class="d">13</span><div class="a-pips"><span class="a-pip wed"></span></div></div>
+          <!-- week 3 -->
+          <div class="a-cell"><span class="d">14</span></div>
+          <div class="a-cell"><span class="d">15</span></div>
+          <div class="a-cell"><span class="d">16</span></div>
+          <div class="a-cell"><span class="d">17</span></div>
+          <div class="a-cell"><span class="d">18</span></div>
+          <div class="a-cell"><span class="d">19</span><span class="a-count">7</span><div class="a-pips"><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip wed"></span><span class="a-pip wedaway"></span><span class="a-pip wed"></span><span class="a-pip jeugd"></span></div></div>
+          <div class="a-cell"><span class="d">20</span><div class="a-pips"><span class="a-pip wed"></span></div></div>
+          <!-- week 4 -->
+          <div class="a-cell"><span class="d">21</span></div>
+          <div class="a-cell"><span class="d">22</span></div>
+          <div class="a-cell"><span class="d">23</span></div>
+          <div class="a-cell"><span class="d">24</span></div>
+          <div class="a-cell"><span class="d">25</span></div>
+          <div class="a-cell"><span class="d">26</span><span class="a-count">9</span><div class="a-pips"><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip jeugd"></span><span class="a-pip wed"></span><span class="a-pip wedaway"></span><span class="a-pip wed"></span><span class="a-pip wed"></span><span class="a-pip jeugd"></span></div></div>
+          <div class="a-cell"><span class="d">27</span><div class="a-pips"><span class="a-pip wed"></span></div></div>
+        </div>
+        <!-- selected-day detail (Zaterdag 12) -->
+        <div class="a-detail">
+          <h4>Zaterdag 12 september <span style="font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);font-weight:400">· 10 wedstrijden · 1 evenement</span></h4>
+          <div class="a-row"><span class="time">10:00</span><span class="teams"><span class="crest kcvv">KCVV</span> U7 KCVV <span class="sub">— Zemst</span></span><span class="tag wed">Thuis</span></div>
+          <div class="a-row"><span class="time">10:00</span><span class="teams"><span class="crest kcvv">KCVV</span> U9 KCVV <span class="sub">— Eppegem</span></span><span class="tag wed">Thuis</span></div>
+          <div class="a-row"><span class="time">11:00</span><span class="teams"><span class="crest">EPP</span> U11 Eppegem <span class="sub">— KCVV</span></span><span class="tag" style="background:transparent">Uit</span></div>
+          <div class="a-row"><span class="time">11:30</span><span class="teams"><span class="crest kcvv">KCVV</span> U13 KCVV <span class="sub">— Diest</span></span><span class="tag wed">Thuis</span></div>
+          <div class="a-row"><span class="time">13:00</span><span class="teams"><span class="crest kcvv">KCVV</span> U15 A KCVV <span class="sub">— Mechelen</span></span><span class="tag wed">Thuis</span></div>
+          <div class="a-row" style="color:var(--ink-muted)"><span class="time"></span><span class="teams" style="font-style:italic;font-weight:500">+ 5 meer wedstrijden …</span><span></span></div>
+          <div class="a-mini-event"><span class="time" style="font-family:var(--font-mono);font-size:12px;color:var(--ink-muted)">18:00</span><span class="a-et" style="font-family:var(--font-display);font-weight:700;font-style:italic;font-size:14px">Spaghetti-avond</span><span class="tag club" style="margin-left:auto">Clubevent</span></div>
+        </div>
+      </div>
+      <p style="font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);max-width:90ch">
+        <b>A reads:</b> "a calendar." Density is absorbed — a 10-match Saturday is a count badge + pips; the scoreboard rows
+        only appear on the selected day. Familiar mental model, scannable across a whole month, past-month paging is native.
+        <b>Cost:</b> two-step (scan grid → click day); the fanzine voice lives mostly in chrome, not the data; pips/counts
+        are abstract (you don't see WHO plays until you click).
+      </p>
+    </div>
+
+    <!-- ============================ OPTION B ============================ -->
+    <div class="opt-bar b">
+      <span class="tag">OPTION B</span> NEWSPAPER MONTH-AGENDA (master-plan §6.6)
+      <span class="says">flat chronological list, month-grouped; every item on the page — editorial, voice-forward</span>
+    </div>
+    <div class="maps">
+      <b>Reuses:</b> EditorialHeading month headers · DashedDivider rows · #1992 KalenderFilterBar chips · 6.C scoreboard row +
+      outcome underline · MonoLabel type tags. <b>Net-new:</b> day-group sub-header with a "N wedstrijden" count to tame dense days.
+    </div>
+    <div class="stage">
+      <div class="chiprow">
+        <button class="chip sel all">Alles</button>
+        <button class="chip wed">Wedstrijden</button>
+        <button class="chip club">Clubevent</button>
+        <button class="chip supp">Supportersactiviteit</button>
+        <button class="chip jeugd">Jeugdwerking</button>
+        <button class="chip and">Andere</button>
+      </div>
+      <div class="b-wrap">
+        <h2 class="b-month">September <span class="em">’26.</span></h2>
+        <hr class="b-monthrule" />
+
+        <!-- sparse weekday-ish lead-in -->
+        <div class="b-daygroup">
+          <div class="b-dayhead"><span class="dh">Dinsdag 9 september</span></div>
+          <div class="b-row">
+            <span class="when"><b>20:00</b></span>
+            <span class="b-event"><span class="et">Algemene ledenvergadering</span> <span class="loc">· Kantine, Driesstraat</span></span>
+            <span class="tag club">Clubevent</span>
+          </div>
+        </div>
+
+        <!-- DENSE Saturday 12 — the stress case -->
+        <div class="b-daygroup">
+          <div class="b-dayhead"><span class="dh">Zaterdag 12 september</span><span class="cnt">10 wedstrijden · 1 evenement</span></div>
+          <div class="b-row"><span class="when"><b>10:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">U7 KCVV — Zemst</span></span><span class="vs">VS</span><span class="comp">Tornooi</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row"><span class="when"><b>10:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">U9 KCVV — Eppegem</span></span><span class="vs">VS</span><span class="comp">Comp.</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row"><span class="when"><b>11:00</b></span><span class="b-match"><span class="ml"><span class="crest">EPP</span><span class="nm">U11 Eppegem — KCVV</span></span><span class="vs">VS</span><span class="comp">Comp.</span></span><span class="tag" style="background:transparent">Uit</span></div>
+          <div class="b-row"><span class="when"><b>11:30</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">U13 KCVV — Diest</span></span><span class="vs">VS</span><span class="comp">Comp.</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row"><span class="when"><b>13:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">U15 A KCVV — Mechelen</span></span><span class="vs">VS</span><span class="comp">Comp.</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row"><span class="when"><b>14:30</b></span><span class="b-match"><span class="ml"><span class="crest">TER</span><span class="nm">U17 Tervuren — KCVV</span></span><span class="vs">VS</span><span class="comp">Comp.</span></span><span class="tag" style="background:transparent">Uit</span></div>
+          <div class="b-row"><span class="when"><b>15:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">U21 KCVV — Vilvoorde</span></span><span class="vs">VS</span><span class="comp">Comp.</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row"><span class="when"><b>15:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">B-ploeg KCVV — Weerde</span></span><span class="vs">VS</span><span class="comp">3e Prov.</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row" style="color:var(--ink-muted)"><span class="when"></span><span style="font-style:italic">+ 2 meer wedstrijden (U6, U10) …</span><span></span></div>
+          <div class="b-row"><span class="when"><b>18:00</b></span><span class="b-event"><span class="et">Spaghetti-avond</span> <span class="loc">· Kantine</span></span><span class="tag club">Clubevent</span></div>
+          <p class="note">⚠ Density stress: 10 near-identical match rows stack under one Saturday — the Spaghetti-avond is easy to miss in the wall. This is the §6.6 agenda's weak spot the 6d0 audit flagged; the "N wedstrijden" day-header + a possible collapse-by-default for Wedstrijden is the mitigation to drill in 6d2.</p>
+        </div>
+
+        <!-- Sunday A-team — where the agenda SHINES (sparse, hero-worthy) -->
+        <div class="b-daygroup">
+          <div class="b-dayhead"><span class="dh">Zondag 13 september</span></div>
+          <div class="b-row"><span class="when"><b>15:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">A-ploeg KCVV — Racing Mechelen</span></span><span class="vs">VS</span><span class="comp">2e Prov.</span></span><span class="tag wed">Thuis</span></div>
+        </div>
+
+        <div class="b-daygroup">
+          <div class="b-dayhead"><span class="dh">Zaterdag 19 september</span><span class="cnt">7 wedstrijden · 1 evenement</span></div>
+          <div class="b-row"><span class="when"><b>10:00</b></span><span class="b-event"><span class="et">Najaarstornooi U13</span> <span class="loc">· Sportpark Driesput</span></span><span class="tag jeugd">Jeugdwerking</span></div>
+          <div class="b-row"><span class="when"><b>14:00</b></span><span class="b-match"><span class="ml"><span class="crest kcvv">KCVV</span><span class="nm">A-ploeg KCVV — Kampenhout</span></span><span class="score loss">1–2</span><span class="comp">2e Prov.</span></span><span class="tag wed">Thuis</span></div>
+          <div class="b-row" style="color:var(--ink-muted)"><span class="when"></span><span style="font-style:italic">+ 6 meer wedstrijden …</span><span></span></div>
+        </div>
+      </div>
+      <p style="font-family:var(--font-mono);font-size:12px;color:var(--ink-muted);max-width:90ch">
+        <b>B reads:</b> "a club magazine." Every item is on the page, voice-forward, beautiful for the sparse cases
+        (a lone Sunday A-match, an event). One-step (no click to see WHO plays). <b>Cost:</b> a 10-match Saturday is a wall
+        of near-identical rows that buries the occasional event (see ⚠); needs a density mitigation (day-count header,
+        collapse-Wedstrijden-by-default, or time-bucketing) to be drilled in 6d2; whole-season past browsing is a long scroll.
+      </p>
+    </div>
+  </body>
+</html>

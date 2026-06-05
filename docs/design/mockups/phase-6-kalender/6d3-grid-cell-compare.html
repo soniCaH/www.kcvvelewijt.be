@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 6.D — /kalender · 6d3: grid month-cell dense-day treatment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,500&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{--cream:#f5f1e6;--cream-soft:#ede8da;--cream-deep:#e1d7bf;--ink:#0a0a0a;--ink-muted:#6b6b6b;
+        --jersey-deep:#008755;--jersey-bright:#22c55e;--warm:#f0c264;--brick:#c93f1c;--paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif;--font-body:"Archivo",system-ui,sans-serif;--font-mono:"IBM Plex Mono",monospace}
+      *{box-sizing:border-box}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E")}
+      .harness-head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono)}
+      .harness-head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase}
+      .harness-head p{margin:0;font-size:13px;color:#b9b9b9;max-width:92ch;line-height:1.55}
+      .harness-head a{color:var(--warm)}
+      .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+      @media(max-width:1100px){.grid3{grid-template-columns:1fr}}
+      .col{padding:0 22px 30px;border-right:1px dashed var(--paper-edge)}.col:last-child{border-right:none}
+      .opt-h{position:sticky;top:0;background:var(--jersey-deep);color:var(--cream);padding:10px 14px;margin:0 -22px 10px;
+        font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink);z-index:5}
+      .opt-h.ii{background:var(--brick)}.opt-h.iii{background:var(--ink)}
+      .gloss{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:0 0 12px;line-height:1.5;min-height:58px}
+      .gloss b{color:var(--ink)}
+      /* a mini 3-cell row of the grid: Fri 11 / Sat 12 (dense) / Sun 13 */
+      .mini{display:grid;grid-template-columns:repeat(3,1fr);border:2px solid var(--ink);background:var(--cream)}
+      .cell{min-height:128px;border-right:1px dashed var(--paper-edge);padding:6px 7px;position:relative}
+      .cell:last-child{border-right:none}
+      .cell.sat{background:color-mix(in srgb,var(--jersey-deep) 7%,var(--cream))}
+      .d{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted)}
+      .d.today{color:var(--ink);font-weight:700}
+      /* (i) pips + count */
+      .pips{display:flex;flex-wrap:wrap;gap:3px;margin-top:7px}
+      .pip{width:8px;height:8px;border-radius:50%}
+      .pip.wed{background:var(--brick)}.pip.uit{background:transparent;border:1.5px solid var(--brick)}
+      .pip.club{background:var(--jersey-deep)}.pip.jeugd{background:var(--jersey-bright)}
+      .countbadge{position:absolute;top:6px;right:7px;font-family:var(--font-mono);font-size:10px;font-weight:700;background:var(--brick);color:var(--cream);border-radius:999px;padding:0 6px}
+      /* (ii) type-count chips */
+      .cchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+      .cc{font-family:var(--font-mono);font-size:10px;font-weight:700;padding:1px 6px;border:1.5px solid var(--ink);display:inline-flex;gap:3px;align-items:center}
+      .cc.wed{background:var(--brick);color:var(--cream)}.cc.club{background:var(--jersey-deep);color:#fff}.cc.jeugd{background:var(--jersey-bright);color:var(--ink)}
+      /* (iii) event-forward */
+      .evt{margin-top:7px;font-family:var(--font-display);font-style:italic;font-weight:700;font-size:12px;line-height:1.15;display:flex;gap:4px;align-items:flex-start}
+      .evt .dot{width:7px;height:7px;border-radius:50%;background:var(--jersey-deep);margin-top:4px;flex:none}
+      .wsum{margin-top:6px;font-family:var(--font-mono);font-size:10.5px;font-weight:700;color:var(--brick);display:flex;gap:4px;align-items:center}
+      .wsum .bar{height:6px;background:var(--brick);border-radius:3px}
+      .verdict{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:12px 0 0;line-height:1.5}
+      .verdict .pro{color:var(--jersey-deep)}.verdict .con{color:var(--brick)}
+      .legend{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);margin-top:8px}
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 6.D · 6d3 — Grid month-cell: dense-day treatment (DEFAULT view)</h1>
+      <p>
+        The grid is the default view (<a href="./6d1-reskin-vs-agenda-compare.html">6d1</a> lock). A fanzine day-cell must
+        show a 10-match Saturday legibly in ~128px, and — per the 6d2 "don't bury events" principle — the lone event must
+        not vanish among match indicators. Three cells shown: <b>Vr 11 (quiet) · Za 12 (10 wed + 1 event) · Zo 13 (A-ploeg)</b>.
+        Clicking any day still opens the full scoreboard detail below the grid (unchanged).
+      </p>
+    </div>
+
+    <div style="background:#fffaf0;border-bottom:3px solid var(--ink);border-top:3px dashed var(--jersey-deep);padding:18px 28px">
+      <div style="font-family:var(--font-mono);font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--jersey-deep)">★ v2 ITERATION — combine (iii) events-on-top + (i) match pips below</div>
+      <p style="font-family:var(--font-mono);margin:8px 0 16px;font-size:12.5px;line-height:1.6;color:var(--ink-soft);max-width:94ch">
+        Owner: <i>"events on top full width, then the pips as in (i)."</i> → Events render as full-width italic titles at the
+        top of the cell (impossible to miss, stack cleanly when there are 2+); matches render as the familiar option-(i)
+        colour pips below, with a count badge on busy days. Best of both: events surface, match density stays compact.
+      </p>
+      <div class="mini" style="max-width:560px">
+        <div class="cell"><span class="d">11</span></div>
+        <div class="cell sat"><span class="d today">12</span><span class="countbadge">⚽10</span>
+          <div class="evt" style="margin-top:6px"><span class="dot"></span>Spaghetti-avond</div>
+          <div class="pips" style="margin-top:8px"><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip wed"></span><span class="pip uit"></span><span class="pip wed"></span><span class="pip uit"></span><span class="pip wed"></span><span class="pip wed"></span></div>
+        </div>
+        <div class="cell"><span class="d">13</span><div class="pips" style="margin-top:7px"><span class="pip wed"></span></div></div>
+      </div>
+      <!-- a 2-event day to test full-width stacking -->
+      <div class="mini" style="max-width:560px;margin-top:10px">
+        <div class="cell"><span class="d">18</span></div>
+        <div class="cell sat"><span class="d today">19</span><span class="countbadge">⚽7</span>
+          <div class="evt" style="margin-top:6px"><span class="dot" style="background:var(--jersey-bright)"></span>Najaarstornooi U13</div>
+          <div class="evt" style="margin-top:4px"><span class="dot"></span>Kaas- &amp; wijnavond</div>
+          <div class="pips" style="margin-top:8px"><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip wed"></span><span class="pip uit"></span><span class="pip wed"></span><span class="pip jeugd"></span></div>
+        </div>
+        <div class="cell"><span class="d">20</span><div class="pips" style="margin-top:7px"><span class="pip wed"></span></div></div>
+      </div>
+      <div class="legend" style="padding:0 0 2px">events = italic display title + type-colour dot · matches = option-(i) pips (● brick thuis · ○ ring uit · ● bright jeugd) · ⚽N badge on busy days</div>
+    </div>
+
+    <div style="font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);padding:10px 28px;background:var(--cream-soft);border-bottom:1px dashed var(--paper-edge)">Original 6d3 options (i)/(ii)/(iii) kept below for reference.</div>
+
+    <div class="grid3">
+      <!-- (i) pips + count -->
+      <div class="col">
+        <div class="opt-h">(i) Colour pips + count badge</div>
+        <div class="gloss"><b>One pip per item</b>, coloured by type (filled=thuis, ring=uit for matches); a count badge when a day is busy. Abstract but ultra-compact; the existing widget's idiom, reskinned.</div>
+        <div class="mini">
+          <div class="cell"><span class="d">11</span></div>
+          <div class="cell sat"><span class="d today">12</span><span class="countbadge">11</span>
+            <div class="pips"><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip jeugd"></span><span class="pip wed"></span><span class="pip uit"></span><span class="pip wed"></span><span class="pip uit"></span><span class="pip wed"></span><span class="pip jeugd"></span><span class="pip club"></span></div>
+          </div>
+          <div class="cell"><span class="d">13</span><div class="pips"><span class="pip wed"></span></div></div>
+        </div>
+        <div class="legend">● brick=wed thuis · ○ ring=uit · ● green=clubevent · ● bright=jeugd</div>
+        <div class="verdict"><span class="pro">+ compact, whole month scannable, familiar</span><br /><span class="con">– event pip lost among 10 match pips (buries events) · counts abstract</span></div>
+      </div>
+
+      <!-- (ii) type-count chips -->
+      <div class="col">
+        <div class="opt-h ii">(ii) Type-count chips</div>
+        <div class="gloss"><b>One small chip per present type with a count</b> (⚽10 in card-red, the event as its own coloured chip). Reads the day's shape at a glance; the event always gets its own chip so it can't hide.</div>
+        <div class="mini">
+          <div class="cell"><span class="d">11</span></div>
+          <div class="cell sat"><span class="d today">12</span>
+            <div class="cchips"><span class="cc wed">⚽10</span><span class="cc club">1</span></div>
+          </div>
+          <div class="cell"><span class="d">13</span><div class="cchips"><span class="cc wed">⚽1</span></div></div>
+        </div>
+        <div class="legend">⚽N = N wedstrijden (card-red) · coloured chip per event type</div>
+        <div class="verdict"><span class="pro">+ day-shape legible · event never buried · very compact</span><br /><span class="con">– you still don't see WHO/WHEN until you click</span></div>
+      </div>
+
+      <!-- (iii) event-forward -->
+      <div class="col">
+        <div class="opt-h iii">(iii) Event-forward + match summary</div>
+        <div class="gloss"><b>Events shown as titles in-cell</b> (they're rare + high-value); matches collapse to a single "⚽ 10" summary bar. Mirrors the 6d2 agenda principle exactly: events surface, matches summarise.</div>
+        <div class="mini">
+          <div class="cell"><span class="d">11</span></div>
+          <div class="cell sat"><span class="d today">12</span>
+            <div class="evt"><span class="dot"></span>Spaghetti-avond</div>
+            <div class="wsum"><span>⚽ 10</span><span class="bar" style="width:34px"></span></div>
+          </div>
+          <div class="cell"><span class="d">13</span><div class="wsum"><span>⚽ 1</span><span class="bar" style="width:10px"></span></div></div>
+        </div>
+        <div class="legend">event title in italic display · ⚽N bar = match volume</div>
+        <div class="verdict"><span class="pro">+ events impossible to miss · consistent w/ agenda · still compact</span><br /><span class="con">– long event titles truncate · two visual languages in one cell</span></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -494,7 +494,15 @@ Existing `docs/prd/teams-landing-page.md` is superseded — restate in Phase 6.
 
 Hero: `<EditorialHero variant="generic">` `Kalender.` Body: cream paper page with month-by-month sections. Each month: `<EditorialHeading size="display-md">April '26.</EditorialHeading>` followed by a `<DashedDivider>`-separated list of events — date column (mono), title column (display), location column (mono), tag column (`<MonoLabel>` for type). No card treatment — it's a tabular agenda. Filter row reskins `<FilterTabs>` (matches / events / training / supporter activities).
 
-> **STATUS (2026-05-28) — direction locked (6.D).** `/kalender` is **already built** as an interactive month/week/list widget + iCal subscribe; the tabular agenda above is one of two candidates. **Reskin-the-widget vs rebuild-to-this-agenda is parked for a 6.D.d1 visual A/B** (owner wants to see both side-by-side). Filters are **by type** — Wedstrijden + Clubevent + Supporters + Jeugdwerking + Andere — not matches/events/training/supporter (training has no standalone data source). Feed merges 3 sources: PSD matches + `event` docs + `articleType:event` articles. See #1528.
+> **STATUS (2026-06-05) — design LOCKED (6.D, #1993).** The reskin-vs-rebuild A/B resolved to
+> **ship BOTH**, behind a user-driven 3-way view toggle: **Maand (grid · default) / Week (grid) /
+> Agenda (this tabular list)** — all three render the same month-windowed feed, sharing the period
+> nav. The tabular agenda above is the Agenda tab, rendered as a **labelled wall** (show all, day-count
+> header, events tinted). Grid cell = events-on-top titles + match pips. Filters are **by type**
+> (Wedstrijden + Clubevent + Supportersactiviteit + Jeugdwerking + Andere) via colour chips reusing
+> `<EventFilterBar>`'s vocabulary — **Wedstrijden = card-red**; the chip row is the legend.
+> Feed merges 3 sources (PSD matches + `event` docs + `articleType:event` articles — shipped #1991/#1992).
+> Full lock: `docs/design/mockups/phase-6-kalender/6d-kalender-locked.md`. Build = #1994/#1995. See #1528.
 
 ### 6.7 Events list + detail (`/events`, `/events/[slug]`)
 
