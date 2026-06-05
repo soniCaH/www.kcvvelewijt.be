@@ -40,6 +40,8 @@ A `<TapedCard>`-based card, whole-card link to `/wedstrijd/[matchId]`:
 
 Below card C on **recap only** (preview has no goals → card C alone):
 
+- **Gap from card C → Doelpunten: `30px`** (`mt-[30px]`) — the scorer list reads as
+  a distinct section, not attached to the card.
 - A `Doelpunten.` `<EditorialHeading>`-style italic display heading + 2px ink rule.
 - The list **reuses `<MatchEvents filter="goals">`** — its Option-F sided rows
   (home left / away right, central football glyph, minute on the far left).
