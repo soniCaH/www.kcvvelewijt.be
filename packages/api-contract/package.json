@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@effect/platform": "0.96.1",
-    "effect": "3.21.2"
+    "effect": "3.21.3"
   },
   "devDependencies": {
     "@typescript/native-preview": "7.0.0-dev.20260605.1",
