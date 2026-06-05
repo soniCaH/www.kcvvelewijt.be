@@ -19,6 +19,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** Controls-driven playground — toggle `logo` / `size` / `name` via the panel. */
+export const Playground: Story = {
+  args: {},
+};
+
 /** Logo present — rendered as a (decorative) club crest image. */
 export const WithLogo: Story = {
   args: { logo: "/images/logo-flat.png" },
