@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Crest } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import type { RankingEntry } from "@kcvv/api-contract";
 
@@ -6,33 +6,6 @@ export interface StandingsTableProps {
   entries: readonly RankingEntry[];
   /** PSD team_id of the KCVV team to highlight. */
   highlightTeamId?: number;
-}
-
-function Crest({ name, logo }: { name: string; logo?: string }) {
-  if (logo) {
-    return (
-      <Image
-        src={logo}
-        alt=""
-        width={16}
-        height={16}
-        // 16px CDN crest — deliberately unoptimized (matches <MatchResultRow> /
-        // <TeamAgendaRow>): the Vercel image optimizer is metered per source
-        // image and saves negligible bytes at this size across a full division.
-        unoptimized
-        className="inline-block h-4 w-4 shrink-0 object-contain"
-      />
-    );
-  }
-  const initial = name.trim().charAt(0).toLocaleUpperCase("nl-BE") || "·";
-  return (
-    <span
-      aria-hidden="true"
-      className="text-ink-muted inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-current font-mono text-[8px] leading-none"
-    >
-      {initial}
-    </span>
-  );
 }
 
 export function StandingsTable({
@@ -123,7 +96,11 @@ export function StandingsTable({
                 {/* Team name + crest */}
                 <td className="py-2 pr-3">
                   <span className="flex items-center gap-1.5">
-                    <Crest name={entry.team_name} logo={entry.team_logo} />
+                    <Crest
+                      name={entry.team_name}
+                      logo={entry.team_logo}
+                      size={16}
+                    />
                     <span
                       className={cn(
                         "font-display text-ink min-w-0 truncate",

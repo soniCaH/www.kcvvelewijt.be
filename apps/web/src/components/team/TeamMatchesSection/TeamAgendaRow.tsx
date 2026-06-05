@@ -9,9 +9,9 @@
  *
  * Design lock: docs/design/mockups/phase-6-team/detail-ia-locked.md §3
  */
-import Image from "next/image";
 import Link from "next/link";
 import { DateTime } from "luxon";
+import { Crest } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { getResultColor, isPlayedMatch } from "@/lib/utils/match-display";
 import { House, Bus } from "@/lib/icons.redesign";
@@ -74,40 +74,6 @@ function formatMonth(date: Date): string {
 function formatKickoff(match: ScheduleMatch): string {
   if (match.time) return match.time;
   return DateTime.fromJSDate(match.date).setLocale("nl").toFormat("HH:mm");
-}
-
-function Crest({
-  name,
-  logo,
-  size = 20,
-}: {
-  name: string;
-  logo?: string;
-  size?: number;
-}) {
-  if (logo) {
-    return (
-      <Image
-        src={logo}
-        alt=""
-        width={size}
-        height={size}
-        unoptimized
-        className="shrink-0 object-contain"
-        style={{ width: size, height: size }}
-      />
-    );
-  }
-  const initial = name.trim().charAt(0).toLocaleUpperCase("nl-BE") || "·";
-  return (
-    <span
-      aria-hidden="true"
-      className="text-ink-muted flex shrink-0 items-center justify-center rounded-full border border-current font-mono text-[10px] leading-none"
-      style={{ width: size, height: size }}
-    >
-      {initial}
-    </span>
-  );
 }
 
 const OUTCOME_SHADOW: Record<"win" | "draw" | "loss", string | undefined> = {

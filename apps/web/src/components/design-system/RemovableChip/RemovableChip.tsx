@@ -28,8 +28,9 @@ const TONE_CLASS: Record<RemovableChipTone, string> = {
 /**
  * A selected-value token with a remove (×) control — the "chip with a cross"
  * pattern (team selections, search filters, tag pickers). Paper/ink, mono.
- * Extracted as a shared primitive; consumers that hand-roll this (organigram
- * search bars, nav) can migrate onto it.
+ * Use this for removing ONE item from a multi-selection. A single
+ * clear-the-whole-field "×" on a search input is a *different* idiom (see the
+ * organigram search bars) and is NOT a RemovableChip.
  */
 export function RemovableChip({
   label,

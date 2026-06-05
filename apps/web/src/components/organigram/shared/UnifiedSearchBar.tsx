@@ -399,6 +399,9 @@ export function UnifiedSearchBar({
               : undefined
           }
         />
+        {/* FUTURE (#2006): clear-the-whole-field "×", also hand-rolled in
+            <SearchBar>. Extract a shared "clearable input" primitive during the
+            organigram redesign — distinct from <RemovableChip>. */}
         {value && (
           <button
             onClick={handleClear}
