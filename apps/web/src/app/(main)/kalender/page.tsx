@@ -15,8 +15,16 @@ import {
 } from "@/lib/repositories/event.repository";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { InteriorPageHero } from "@/components/layout";
+import { PageViewTracker } from "@/components/analytics";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildItemListJsonLd } from "@/lib/seo/jsonld";
+import { SITE_CONFIG } from "@/lib/constants";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
-import { transformMatchToCalendar, buildCalendarFeed } from "./utils";
+import {
+  transformMatchToCalendar,
+  buildCalendarFeed,
+  buildKalenderItemListEntries,
+} from "./utils";
 import type {
   CalendarMatch,
   CalendarFeedItem,
@@ -24,21 +32,24 @@ import type {
 } from "./utils";
 
 export const metadata: Metadata = {
-  title: "Wedstrijdkalender | KCVV Elewijt",
+  title: "Kalender | KCVV Elewijt",
   description:
-    "Bekijk alle aankomende wedstrijden van KCVV Elewijt — A-ploeg, B-ploeg en jeugdteams op één overzicht.",
+    "Alle wedstrijden én clubactiviteiten van KCVV Elewijt op één kalender — A-ploeg, B-ploeg en jeugd. Bekijk per maand, week of als agenda, of abonneer je op je ploeg.",
   keywords: [
     "wedstrijden",
     "kalender",
-    "schema",
+    "agenda",
+    "evenementen",
+    "activiteiten",
     "A-ploeg",
     "B-ploeg",
     "jeugd",
     "KCVV Elewijt",
   ],
   openGraph: {
-    title: "Wedstrijdkalender - KCVV Elewijt",
-    description: "Alle aankomende wedstrijden van KCVV Elewijt",
+    title: "Kalender — KCVV Elewijt",
+    description:
+      "Alle wedstrijden én clubactiviteiten van KCVV Elewijt op één kalender.",
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
@@ -136,6 +147,10 @@ async function fetchCalendarData(): Promise<CalendarData> {
 
 export default async function CalendarPage() {
   const data = await fetchCalendarData();
+  const itemListEntries = buildKalenderItemListEntries(
+    data.feed,
+    SITE_CONFIG.siteUrl,
+  );
 
   return (
     // `pb-[var(--footer-diagonal)]` on the root wrapper (instead of a
@@ -145,6 +160,10 @@ export default async function CalendarPage() {
     // white body. See #1360. (Phase 6.D: cream paper field hosts the
     // reskinned paper/ink calendar panel.)
     <div className="bg-cream min-h-screen pb-[var(--footer-diagonal)]">
+      <PageViewTracker eventName="kalender_view" />
+      {itemListEntries.length > 0 && (
+        <JsonLd data={buildItemListJsonLd(itemListEntries)} />
+      )}
       <InteriorPageHero
         image="/images/youth-trainers.jpg"
         imageAlt="KCVV jeugdtraining"

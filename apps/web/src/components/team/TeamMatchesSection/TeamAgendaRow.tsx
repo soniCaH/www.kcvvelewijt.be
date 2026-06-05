@@ -33,6 +33,12 @@ export interface TeamAgendaRowProps {
    * agenda (6.C) spans many dates and always shows it.
    */
   showDateStub?: boolean;
+  /**
+   * Fired when the row is clicked through to the match detail. Lets a host
+   * surface attach navigation-time side-effects (e.g. `/kalender`'s
+   * `kalender_item_click` analytics) without re-implementing the row.
+   */
+  onNavigate?: () => void;
   className?: string;
 }
 
@@ -164,6 +170,7 @@ export function TeamAgendaRow({
   kcvvTeamId,
   featured = false,
   showDateStub = true,
+  onNavigate,
   className,
 }: TeamAgendaRowProps) {
   // Prefer match.is_home (provided by BFF); fall back to comparing kcvvTeamId
@@ -213,6 +220,7 @@ export function TeamAgendaRow({
     <Link
       href={`/wedstrijd/${match.id}`}
       aria-label={matchLabel}
+      onClick={onNavigate}
       className="focus-visible:outline-ink block no-underline focus-visible:outline-2 focus-visible:outline-offset-2"
     >
       <article

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { EditorialHeading, DashedDivider } from "@/components/design-system";
 import { getResultColor, isPlayedMatch } from "@/lib/utils/match-display";
 import { EventTypeTag, MatchVenueTag } from "../calendar-tags";
+import { trackKalenderItemClick } from "../calendar-analytics";
 import {
   buildMonthAgenda,
   formatDayDetailHeading,
@@ -78,6 +79,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
     <Link
       href={`/wedstrijd/${match.id}`}
       data-testid="agenda-match-row"
+      onClick={() => trackKalenderItemClick("match")}
       className="border-paper-edge hover:bg-cream-soft/50 grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 no-underline transition-colors last:border-b-0"
     >
       <span className="text-ink-muted font-mono text-[11px]">{when}</span>
@@ -123,6 +125,7 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
     <Link
       href={event.href}
       data-testid="agenda-event-row"
+      onClick={() => trackKalenderItemClick(event.source)}
       className="border-paper-edge bg-jersey-deep/6 hover:bg-jersey-deep/12 grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 no-underline transition-colors last:border-b-0"
     >
       <span className="text-ink-muted font-mono text-[11px]">{when}</span>

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils/cn";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
 import { EVENT_TYPE_FILL } from "@/components/event/event-type-style";
 import { EventTypeTag } from "../calendar-tags";
+import { trackKalenderItemClick } from "../calendar-analytics";
 import {
   getDaysInMonth,
   getMatchDotType,
@@ -142,6 +143,7 @@ function SelectedDayDetail({
               key={match.id}
               match={calendarMatchToScheduleMatch(match)}
               showDateStub={false}
+              onNavigate={() => trackKalenderItemClick("match")}
             />
           ))}
           {dayEvents.map((event) => {
@@ -151,6 +153,7 @@ function SelectedDayDetail({
                 key={event.id}
                 href={event.href}
                 data-testid="day-event-row"
+                onClick={() => trackKalenderItemClick(event.source)}
                 className={cn(
                   "border-ink bg-cream text-ink shadow-[2px_2px_0_0_var(--color-ink)]",
                   "flex items-center gap-3 border-2 px-3 py-2 no-underline transition-all duration-300",

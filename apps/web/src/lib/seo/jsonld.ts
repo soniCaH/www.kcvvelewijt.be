@@ -2,6 +2,7 @@ import type {
   BreadcrumbList,
   Event as EventSchema,
   FAQPage,
+  ItemList,
   MergeLeafTypes,
   NewsArticle,
   OrganizationLeaf,
@@ -51,6 +52,37 @@ export function buildBreadcrumbJsonLd(
       position: index + 1,
       name: item.name,
       item: item.url,
+    })),
+  };
+}
+
+/** One entry in an {@link buildItemListJsonLd} summary list. */
+export interface ItemListEntry {
+  /** Display name (match "Home — Away", or event title). */
+  name: string;
+  /** Absolute URL of the item's detail route. */
+  url: string;
+}
+
+/**
+ * `ItemList` summary JSON-LD for a listing page — each entry is a `ListItem`
+ * with `position`, `name`, and a `url` to its detail route. Deliberately a
+ * *summary* (url + name only), **not** per-item `Event`/`SportsEvent` schema:
+ * the rich item schema already lives on each detail page (e.g.
+ * `/evenementen/[slug]`), so duplicating it on the index would be redundant.
+ * Used by `/kalender` for its current-window feed.
+ */
+export function buildItemListJsonLd(
+  items: ItemListEntry[],
+): WithContext<ItemList> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem" as const,
+      position: index + 1,
+      name: item.name,
+      url: item.url,
     })),
   };
 }

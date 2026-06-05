@@ -5,10 +5,14 @@
  * the 7-day paper/ink column grid for a given week window.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { CalendarWeek } from "./CalendarWeek";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 import { getScoreDisplay } from "@/lib/utils/match-display";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -69,6 +73,7 @@ function makeEvent(
     dateStart: "2026-03-28T10:00:00",
     href: "/evenementen/paastoernooi",
     eventType: "Clubevent",
+    source: "event",
     ...overrides,
   };
 }
@@ -116,5 +121,48 @@ describe("CalendarWeek", () => {
     render(<CalendarWeek {...defaultProps} />);
     expect(screen.queryByLabelText("Vorige week")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("Volgende week")).not.toBeInTheDocument();
+  });
+
+  describe("kalender_item_click", () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it("fires source=match when a played match card is clicked", async () => {
+      const user = userEvent.setup();
+      const { container } = render(
+        <CalendarWeek
+          {...defaultProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              status: "finished",
+              homeScore: 2,
+              awayScore: 1,
+              scoreDisplay: { type: "score", home: 2, away: 1 },
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      await user.click(container.querySelector("[data-match]")!);
+      expect(trackEvent).toHaveBeenCalledWith("kalender_item_click", {
+        source: "match",
+      });
+    });
+
+    it("fires the event's source when an event link is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <CalendarWeek
+          {...defaultProps}
+          matches={[]}
+          events={[makeEvent({ id: "e1", source: "article" })]}
+        />,
+      );
+      const col = screen.getByTestId("week-col-2026-03-28");
+      await user.click(within(col).getByText("Paastoernooi"));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_item_click", {
+        source: "article",
+      });
+    });
   });
 });

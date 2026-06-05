@@ -159,6 +159,24 @@ describe("CalendarWidget", () => {
       expect(weekTab.className).toContain("hidden");
       expect(weekTab.className).toContain("md:inline-flex");
     });
+
+    it("fires kalender_view_toggle with the new view on a tab change", async () => {
+      const user = userEvent.setup();
+      render(<CalendarWidget {...defaultProps} />);
+      await user.click(screen.getByRole("button", { name: "Agenda" }));
+      expect(trackEvent).toHaveBeenCalledWith("kalender_view_toggle", {
+        view: "agenda",
+      });
+    });
+
+    it("dedup guard: re-selecting the active view pushes nothing and fires no analytics", async () => {
+      const user = userEvent.setup();
+      render(<CalendarWidget {...defaultProps} />);
+      // Default view is month — clicking Maand again is a no-op.
+      await user.click(screen.getByRole("button", { name: "Maand" }));
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
   });
 
   describe("shared period nav", () => {
@@ -226,6 +244,17 @@ describe("CalendarWidget", () => {
       expect(screen.queryByTestId("subscribe-panel")).not.toBeInTheDocument();
       await user.click(screen.getByRole("button", { name: /Abonneer/ }));
       expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
+    });
+
+    it("fires kalender_subscribe_open on open only (not on collapse)", async () => {
+      const user = userEvent.setup();
+      render(<CalendarWidget {...defaultProps} />);
+      const btn = screen.getByRole("button", { name: /Abonneer/ });
+      await user.click(btn); // open
+      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_open");
+      vi.mocked(trackEvent).mockClear();
+      await user.click(btn); // collapse — no event
+      expect(trackEvent).not.toHaveBeenCalled();
     });
   });
 

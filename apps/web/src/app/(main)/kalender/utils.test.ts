@@ -7,14 +7,13 @@ import {
   transformMatchToCalendar,
   eventListItemToCalendarEvent,
   buildCalendarFeed,
-  getMatchesForDay,
-  getEventsForDay,
   getDaysInMonth,
   getDaysInWeek,
   getMatchDotType,
   calendarMatchToScheduleMatch,
   buildMonthAgenda,
   groupFeedByDay,
+  buildKalenderItemListEntries,
 } from "./utils";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
@@ -122,7 +121,15 @@ describe("eventListItemToCalendarEvent", () => {
       dateEnd: "2026-04-15T22:00:00Z",
       href: "/evenementen/spaghetti-avond",
       eventType: "Clubevent",
+      source: "event",
     });
+  });
+
+  it("carries the feed source through (article)", () => {
+    const result = eventListItemToCalendarEvent(
+      makeEventListItem({ source: "article", href: "/nieuws/jeugdtornooi" }),
+    );
+    expect(result.source).toBe("article");
   });
 
   it("falls back to 'Andere' when the source row has no eventType", () => {
@@ -180,69 +187,10 @@ function makeCalendarEvent(
     dateStart: "2026-03-15T10:00:00",
     href: "/evenementen/paastoernooi",
     eventType: "Clubevent",
+    source: "event",
     ...overrides,
   };
 }
-
-// ── getMatchesForDay ──────────────────────────────────────────────────────
-
-describe("getMatchesForDay", () => {
-  it("returns matches whose ISO date matches the given day", () => {
-    const matches = [
-      makeCalendarMatch({ id: 1, date: "2026-03-15T15:00:00" }),
-      makeCalendarMatch({ id: 2, date: "2026-03-16T10:00:00" }),
-      makeCalendarMatch({ id: 3, date: "2026-03-15T18:00:00" }),
-    ];
-    const result = getMatchesForDay(matches, "2026-03-15");
-    expect(result.map((m) => m.id)).toEqual([1, 3]);
-  });
-
-  it("returns empty array when no matches on day", () => {
-    const matches = [makeCalendarMatch({ id: 1, date: "2026-03-16T10:00:00" })];
-    expect(getMatchesForDay(matches, "2026-03-15")).toEqual([]);
-  });
-});
-
-// ── getEventsForDay ───────────────────────────────────────────────────────
-
-describe("getEventsForDay", () => {
-  it("returns events whose dateStart matches the given day", () => {
-    const events = [
-      makeCalendarEvent({ id: "e1", dateStart: "2026-03-15T10:00:00" }),
-      makeCalendarEvent({ id: "e2", dateStart: "2026-03-16T10:00:00" }),
-    ];
-    const result = getEventsForDay(events, "2026-03-15");
-    expect(result.map((e) => e.id)).toEqual(["e1"]);
-  });
-
-  it("returns empty array when no events on day", () => {
-    const events = [
-      makeCalendarEvent({ id: "e1", dateStart: "2026-03-16T10:00:00" }),
-    ];
-    expect(getEventsForDay(events, "2026-03-15")).toEqual([]);
-  });
-
-  it("returns multi-day events for days between dateStart and dateEnd", () => {
-    const events = [
-      makeCalendarEvent({
-        id: "e1",
-        dateStart: "2026-03-15T10:00:00",
-        dateEnd: "2026-03-17T18:00:00",
-      }),
-    ];
-    expect(getEventsForDay(events, "2026-03-15").map((e) => e.id)).toEqual([
-      "e1",
-    ]);
-    expect(getEventsForDay(events, "2026-03-16").map((e) => e.id)).toEqual([
-      "e1",
-    ]);
-    expect(getEventsForDay(events, "2026-03-17").map((e) => e.id)).toEqual([
-      "e1",
-    ]);
-    expect(getEventsForDay(events, "2026-03-18")).toEqual([]);
-    expect(getEventsForDay(events, "2026-03-14")).toEqual([]);
-  });
-});
 
 // ── getDaysInMonth ────────────────────────────────────────────────────────
 
@@ -585,7 +533,7 @@ describe("groupFeedByDay", () => {
     expect(map.has("2026-09-15")).toBe(false);
   });
 
-  it("matches getMatchesForDay/getEventsForDay for a given day", () => {
+  it("time-sorts each day's matches and events", () => {
     const matches = [
       makeCalendarMatch({ id: 1, date: "2026-09-12T15:00:00" }),
       makeCalendarMatch({ id: 2, date: "2026-09-12T10:00:00" }),
@@ -594,11 +542,66 @@ describe("groupFeedByDay", () => {
       makeCalendarEvent({ id: "e1", dateStart: "2026-09-12T18:00:00" }),
     ];
     const map = groupFeedByDay(matches, events);
-    expect(map.get("2026-09-12")!.matches).toEqual(
-      getMatchesForDay(matches, "2026-09-12"),
+    expect(map.get("2026-09-12")!.matches.map((m) => m.id)).toEqual([2, 1]);
+    expect(map.get("2026-09-12")!.events.map((e) => e.id)).toEqual(["e1"]);
+  });
+});
+
+// ── buildKalenderItemListEntries (ItemList JSON-LD source) ─────────────────
+
+describe("buildKalenderItemListEntries", () => {
+  const SITE = "https://kcvvelewijt.be";
+  // 2026-09-01T00:00:00Z
+  const NOW = Date.parse("2026-09-01T00:00:00.000Z");
+
+  it("maps matches to /wedstrijd and events to their href, absolute-URLed", () => {
+    const feed = buildCalendarFeed(
+      [
+        makeCalendarMatch({
+          id: 7,
+          date: "2026-09-12T10:00:00.000Z",
+          homeTeam: { id: 1, name: "KCVV Elewijt" },
+          awayTeam: { id: 2, name: "Zemst" },
+        }),
+      ],
+      [
+        makeEventListItem({
+          id: "e1",
+          title: "Spaghetti-avond",
+          href: "/evenementen/spaghetti-avond",
+          dateStart: "2026-09-15T18:00:00.000Z",
+        }),
+      ],
     );
-    expect(map.get("2026-09-12")!.events).toEqual(
-      getEventsForDay(events, "2026-09-12"),
+
+    const entries = buildKalenderItemListEntries(feed, SITE, { nowMs: NOW });
+
+    expect(entries).toContainEqual({
+      name: "KCVV Elewijt — Zemst",
+      url: "https://kcvvelewijt.be/wedstrijd/7",
+    });
+    expect(entries).toContainEqual({
+      name: "Spaghetti-avond",
+      url: "https://kcvvelewijt.be/evenementen/spaghetti-avond",
+    });
+  });
+
+  it("drops past items and caps at the limit", () => {
+    const feed = buildCalendarFeed(
+      [
+        makeCalendarMatch({ id: 1, date: "2026-08-01T10:00:00.000Z" }), // past
+        makeCalendarMatch({ id: 2, date: "2026-09-10T10:00:00.000Z" }),
+        makeCalendarMatch({ id: 3, date: "2026-09-11T10:00:00.000Z" }),
+      ],
+      [],
     );
+
+    const entries = buildKalenderItemListEntries(feed, SITE, {
+      nowMs: NOW,
+      limit: 1,
+    });
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.url).toBe("https://kcvvelewijt.be/wedstrijd/2");
   });
 });

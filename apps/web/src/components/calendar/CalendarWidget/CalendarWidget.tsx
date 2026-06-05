@@ -87,9 +87,13 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
       : formatMonthNavLabel(currentYear, currentMonth);
 
   function setView(newView: ViewMode) {
+    // Dedup guard (repo analytics policy): re-selecting the active view is a
+    // no-op, so neither the URL push nor `kalender_view_toggle` fires twice.
+    if (newView === view) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", newView);
     router.push(`/kalender?${params.toString()}`, { scroll: false });
+    trackEvent("kalender_view_toggle", { view: newView });
   }
 
   function stepPeriod(direction: 1 | -1) {
@@ -108,6 +112,13 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
 
   const handlePrev = () => stepPeriod(-1);
   const handleNext = () => stepPeriod(1);
+
+  function toggleSubscribe() {
+    const next = !subscribePanelOpen;
+    setSubscribePanelOpen(next);
+    // Fire only on open (the panel revealing), not on collapse.
+    if (next) trackEvent("kalender_subscribe_open");
+  }
 
   function setType(value: KalenderFilterValue) {
     // Dedup guard: re-pressing the active chip is a no-op, so neither the URL
@@ -211,7 +222,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
           {/* Subscribe toggle */}
           <button
             type="button"
-            onClick={() => setSubscribePanelOpen((prev) => !prev)}
+            onClick={toggleSubscribe}
             aria-expanded={subscribePanelOpen}
             className={cn(
               "border-ink inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase transition-colors",

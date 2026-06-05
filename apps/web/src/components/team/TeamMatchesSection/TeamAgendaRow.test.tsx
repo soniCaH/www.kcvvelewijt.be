@@ -11,10 +11,29 @@
  *  - Long name truncation (title attribute)
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { TeamAgendaRow } from "./TeamAgendaRow";
 import type { ScheduleMatch } from "@/components/match/types";
+
+// Render Link as a plain anchor that forwards onClick (no router in tests).
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    onClick,
+    ...rest
+  }: {
+    children: React.ReactNode;
+    href: string;
+    onClick?: () => void;
+  }) => (
+    <a href={href} onClick={onClick} {...rest}>
+      {children}
+    </a>
+  ),
+}));
 
 const BASE: ScheduleMatch = {
   id: 1,
@@ -241,6 +260,16 @@ describe("TeamAgendaRow", () => {
     it("does not render a suffix when teamLabel is absent", () => {
       render(<TeamAgendaRow match={BASE} />);
       expect(screen.queryByText("U23")).toBeNull();
+    });
+  });
+
+  describe("onNavigate", () => {
+    it("fires onNavigate when the row is clicked through", async () => {
+      const user = userEvent.setup();
+      const onNavigate = vi.fn();
+      render(<TeamAgendaRow match={BASE} onNavigate={onNavigate} />);
+      await user.click(screen.getByTestId("team-agenda-row"));
+      expect(onNavigate).toHaveBeenCalledTimes(1);
     });
   });
 });
