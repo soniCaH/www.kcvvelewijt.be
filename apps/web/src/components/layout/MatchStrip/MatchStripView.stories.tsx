@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchStripView } from "./MatchStripView";
 import type { UpcomingMatch } from "@/components/match/types";
-import { KCVV_FIRST_TEAM_CLUB_ID } from "@/lib/constants";
+import { KCVV_CLUB_ID } from "@/lib/constants";
 
 const meta = {
   title: "UI/MatchStrip",
@@ -21,7 +21,7 @@ const baseMatch: UpcomingMatch = {
   competition: "Tweede Provinciale A",
   status: "scheduled",
   homeTeam: {
-    id: KCVV_FIRST_TEAM_CLUB_ID,
+    id: KCVV_CLUB_ID,
     name: "KCVV",
   },
   awayTeam: {
@@ -40,7 +40,7 @@ export const AwayUpcoming: Story = {
     match: {
       ...baseMatch,
       homeTeam: { id: 9999, name: "VK De Volharding" },
-      awayTeam: { id: KCVV_FIRST_TEAM_CLUB_ID, name: "KCVV" },
+      awayTeam: { id: KCVV_CLUB_ID, name: "KCVV" },
       // intentionally no opponent logo — exercises the initial-fallback path
     },
   },

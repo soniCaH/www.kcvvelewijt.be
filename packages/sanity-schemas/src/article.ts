@@ -43,7 +43,7 @@ export const article = defineType({
       title: "Linked match (preview/recap only)",
       type: "string",
       description:
-        "PSD match id — copy it from the /wedstrijd/[matchId] URL. Required for match preview / match recap articles.",
+        "PSD-wedstrijd-id — kopieer het uit de /wedstrijd/[matchId] URL. Verplicht voor match preview- en match recap-artikels.",
       hidden: ({ parent }) =>
         !["matchPreview", "matchRecap"].includes(parent?.articleType ?? ""),
       validation: (r) =>
@@ -51,11 +51,15 @@ export const article = defineType({
           const articleType = (
             ctx.document as { articleType?: string } | undefined
           )?.articleType;
-          if (
-            ["matchPreview", "matchRecap"].includes(articleType ?? "") &&
-            !(typeof value === "string" && value.trim())
-          ) {
-            return "Match preview / recap articles need a linked match id.";
+          if (!["matchPreview", "matchRecap"].includes(articleType ?? "")) {
+            return true;
+          }
+          // PSD match ids are numeric (e.g. 2775); enforce digits-only so a
+          // mistyped slug/URL can't slip through. An empty value fails this
+          // too, so it doubles as the required-field check for the two types.
+          const trimmed = typeof value === "string" ? value.trim() : "";
+          if (!/^\d+$/.test(trimmed)) {
+            return "Match preview- / recap-artikels hebben een numeriek PSD-wedstrijd-id nodig (kopieer het uit de /wedstrijd/[matchId] URL).";
           }
           return true;
         }),

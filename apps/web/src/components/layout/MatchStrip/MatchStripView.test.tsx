@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MatchStripView } from "./MatchStripView";
-import { KCVV_FIRST_TEAM_CLUB_ID } from "@/lib/constants";
+import { KCVV_CLUB_ID } from "@/lib/constants";
 import type { UpcomingMatch } from "@/components/match/types";
 
 const baseMatch: UpcomingMatch = {
@@ -11,7 +11,7 @@ const baseMatch: UpcomingMatch = {
   venue: "De Schalk",
   competition: "Tweede Provinciale A",
   status: "scheduled",
-  homeTeam: { id: KCVV_FIRST_TEAM_CLUB_ID, name: "KCVV" },
+  homeTeam: { id: KCVV_CLUB_ID, name: "KCVV" },
   awayTeam: { id: 9999, name: "RC Mechelen", logo: "https://psd/rc.png" },
 };
 
@@ -35,7 +35,7 @@ describe("MatchStripView", () => {
             name: "RC Mechelen",
             logo: "https://psd/rc.png",
           },
-          awayTeam: { id: KCVV_FIRST_TEAM_CLUB_ID, name: "KCVV" },
+          awayTeam: { id: KCVV_CLUB_ID, name: "KCVV" },
         }}
       />,
     );

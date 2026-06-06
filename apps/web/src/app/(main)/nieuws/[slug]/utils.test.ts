@@ -94,6 +94,16 @@ describe("toHeroMatchData", () => {
     expect(data.kickoffTime).toBe("19:45");
   });
 
+  it("leaves kickoffTime undefined when `time` is absent and the date has no time component", () => {
+    const data = toHeroMatchData(
+      makeMatch({
+        time: undefined,
+        date: new Date("2026-09-13T00:00:00"),
+      }),
+    );
+    expect(data.kickoffTime).toBeUndefined();
+  });
+
   it("leaves scores undefined for an unplayed (preview) match", () => {
     const data = toHeroMatchData(
       makeMatch({

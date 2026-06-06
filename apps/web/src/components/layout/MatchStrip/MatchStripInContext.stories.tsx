@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { MatchStripView } from "./MatchStripView";
-import { KCVV_FIRST_TEAM_CLUB_ID } from "@/lib/constants";
+import { KCVV_CLUB_ID } from "@/lib/constants";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
 import type { UpcomingMatch } from "@/components/match/types";
 
@@ -44,7 +44,7 @@ const homeMatch: UpcomingMatch = {
   venue: "De Schalk",
   competition: "Tweede Provinciale A",
   status: "scheduled",
-  homeTeam: { id: KCVV_FIRST_TEAM_CLUB_ID, name: "KCVV" },
+  homeTeam: { id: KCVV_CLUB_ID, name: "KCVV" },
   awayTeam: {
     id: 9999,
     name: "RC Mechelen",
@@ -55,7 +55,7 @@ const homeMatch: UpcomingMatch = {
 const awayMatch: UpcomingMatch = {
   ...homeMatch,
   homeTeam: { id: 9999, name: "VK De Volharding" },
-  awayTeam: { id: KCVV_FIRST_TEAM_CLUB_ID, name: "KCVV" },
+  awayTeam: { id: KCVV_CLUB_ID, name: "KCVV" },
 };
 
 function PageShell({ match }: { match: UpcomingMatch | null }) {
