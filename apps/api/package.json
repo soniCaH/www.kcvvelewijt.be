@@ -24,10 +24,10 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.20260529.1",
     "@typescript/native-preview": "7.0.0-dev.20260605.1",
-    "@vitest/coverage-v8": "4.1.7",
+    "@vitest/coverage-v8": "4.1.8",
     "typescript": "6.0.3",
     "typescript-eslint": "8.60.1",
-    "vitest": "4.1.7",
+    "vitest": "4.1.8",
     "wrangler": "4.94.0"
   }
 }
