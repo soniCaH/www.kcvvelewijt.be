@@ -1,6 +1,7 @@
 // apps/web/src/components/home/NewsGrid/NewsGrid.tsx
 import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "@/components/article/NewsCard";
+import { matchTypeCardLabel } from "@/lib/utils/article-type-label";
 import type {
   NewsCardBg,
   NewsCardRotation,
@@ -14,7 +15,13 @@ import type {
  * `matchPreview` / `matchRecap` types (per `card-semantics-locked.md`
  * §"Open follow-ups") slot in here when they land.
  */
-type ArticleType = "transfer" | "interview" | "announcement" | "event";
+type ArticleType =
+  | "transfer"
+  | "interview"
+  | "announcement"
+  | "event"
+  | "matchPreview"
+  | "matchRecap";
 
 export interface NewsGridArticle {
   href: string;
@@ -54,6 +61,9 @@ const BG_BY_TYPE: Record<ArticleType, NewsCardBg> = {
   interview: "cream",
   announcement: "cream",
   event: "cream",
+  // Default cream per card-semantics-locked.md ("a future round picks the colour").
+  matchPreview: "cream",
+  matchRecap: "cream",
 };
 
 function bgForArticle(type: NewsGridArticle["articleType"]): NewsCardBg {
@@ -109,6 +119,7 @@ export const NewsGrid = ({
                 imageUrl={article.imageUrl}
                 imageAlt={article.imageAlt}
                 badge={article.tags?.[0]?.name}
+                typeLabel={matchTypeCardLabel(article.articleType)}
                 date={article.date}
                 aspectRatio="landscape-16-9"
                 rotation={SLOT_ROTATIONS[idx]}

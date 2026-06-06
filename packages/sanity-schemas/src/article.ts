@@ -30,11 +30,39 @@ export const article = defineType({
           { title: "Announcement", value: "announcement" },
           { title: "Transfer", value: "transfer" },
           { title: "Event", value: "event" },
+          { title: "Match preview", value: "matchPreview" },
+          { title: "Match recap", value: "matchRecap" },
         ],
         layout: "radio",
       },
       initialValue: "announcement",
       validation: (r) => r.required(),
+    }),
+    defineField({
+      name: "linkedMatch",
+      title: "Linked match (preview/recap only)",
+      type: "string",
+      description:
+        "PSD-wedstrijd-id — kopieer het uit de /wedstrijd/[matchId] URL. Verplicht voor match preview- en match recap-artikels.",
+      hidden: ({ parent }) =>
+        !["matchPreview", "matchRecap"].includes(parent?.articleType ?? ""),
+      validation: (r) =>
+        r.custom((value, ctx) => {
+          const articleType = (
+            ctx.document as { articleType?: string } | undefined
+          )?.articleType;
+          if (!["matchPreview", "matchRecap"].includes(articleType ?? "")) {
+            return true;
+          }
+          // PSD match ids are numeric (e.g. 2775); enforce digits-only so a
+          // mistyped slug/URL can't slip through. An empty value fails this
+          // too, so it doubles as the required-field check for the two types.
+          const trimmed = typeof value === "string" ? value.trim() : "";
+          if (!/^\d+$/.test(trimmed)) {
+            return "Match preview- / recap-artikels hebben een numeriek PSD-wedstrijd-id nodig (kopieer het uit de /wedstrijd/[matchId] URL).";
+          }
+          return true;
+        }),
     }),
     defineField({
       name: "subjects",

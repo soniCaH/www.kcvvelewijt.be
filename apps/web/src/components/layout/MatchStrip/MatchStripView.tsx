@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { getButtonClasses } from "@/components/design-system/Button";
-import { KCVV_FIRST_TEAM_CLUB_ID } from "@/lib/constants";
+import { KCVV_CLUB_ID } from "@/lib/constants";
 import { formatWidgetDate } from "@/lib/utils/dates";
 import type { UpcomingMatch } from "@/components/match/types";
 
@@ -13,7 +13,7 @@ export interface MatchStripViewProps {
 }
 
 export function MatchStripView({ match }: MatchStripViewProps) {
-  const isKcvvHome = match.homeTeam.id === KCVV_FIRST_TEAM_CLUB_ID;
+  const isKcvvHome = match.homeTeam.id === KCVV_CLUB_ID;
 
   // Convention: render fixture left-to-right as home then away. KCVV's
   // position (left = home, right = away) is how home/away is signalled —

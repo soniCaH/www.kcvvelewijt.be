@@ -5,6 +5,7 @@
 
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
+import type { MatchDetail } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
@@ -31,7 +32,13 @@ import {
   buildAboutFromSubject,
   buildEventJsonLdInput,
 } from "@/lib/seo/article-jsonld";
-import { EditorialHero } from "@/components/article/EditorialHero";
+import {
+  EditorialHero,
+  type HeroMatchData,
+} from "@/components/article/EditorialHero";
+import { MatchGoalsBlock } from "@/components/article/blocks/MatchGoalsBlock";
+import { LinkButton } from "@/components/design-system";
+import { toHeroMatchData } from "./utils";
 import { ArticleMetadata } from "@/components/article/ArticleMetadata";
 import { ArticleBodyMotion } from "@/components/article/ArticleBodyMotion";
 import {
@@ -85,6 +92,8 @@ interface RenderArticleHeroArgs {
   publishedDate?: string;
   firstTransferFact?: TransferFactValue | null;
   firstEventFact?: EventFactValue | null;
+  /** PSD match facts for the score-forward match hero (null → graceful). */
+  heroMatch?: HeroMatchData | null;
 }
 
 function renderArticleHero({
@@ -94,6 +103,7 @@ function renderArticleHero({
   publishedDate,
   firstTransferFact,
   firstEventFact,
+  heroMatch,
 }: RenderArticleHeroArgs) {
   // EditorialHero accepts string OR PortableTextBlock[] — prefer the
   // rich shape so editor-marked `accent` spans render italic +
@@ -155,6 +165,23 @@ function renderArticleHero({
           coverImage={landscapeCover}
         />
       );
+    case "matchPreview":
+    case "matchRecap":
+      // Score-forward H3 hero — the cover gains a crest·score·crest bar from
+      // `heroMatch` (server-fetched via `article.linkedMatch`). Null heroMatch
+      // (404 / unreachable) degrades to the kicker-only shell.
+      return (
+        <EditorialHero
+          variant={article.articleType}
+          placement="detail"
+          title={titleProp}
+          lead={lead}
+          author={author}
+          date={publishedDate}
+          coverImage={landscapeCover}
+          match={heroMatch}
+        />
+      );
     default:
       // Missing or unknown articleType falls through to announcement —
       // matches the PRD §3 legacy-article fallback rule.
@@ -210,7 +237,16 @@ export async function generateStaticParams() {
         return yield* repo.findAll();
       }),
     );
-    return articles.map((a) => ({ slug: a.slug }));
+    // Exclude matchPreview/matchRecap from the prebuild set: their hero +
+    // Doelpunten require a per-article PSD fetch, so prebuilding them would
+    // hammer the rate-limited BFF at build time. They render on-demand via
+    // ISR instead (revalidate stays 3600). See #1470 / feedback_no_psd_prerendering.
+    return articles
+      .filter(
+        (a) =>
+          a.articleType !== "matchPreview" && a.articleType !== "matchRecap",
+      )
+      .map((a) => ({ slug: a.slug }));
   } catch {
     return [];
   }
@@ -300,6 +336,30 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     ? formatArticleDate(new Date(article.publishedAt))
     : undefined;
 
+  // matchPreview / matchRecap server-fetch the linked PSD match (5.d-mat).
+  // The match id is a plain string copied from /wedstrijd/[matchId]; guard
+  // against missing/non-numeric values. Match chrome (score bar + Doelpunten)
+  // is enhancement — any BFF failure (404, outage, parse) degrades to no
+  // chrome rather than 404'ing or crashing the article.
+  const isMatchArticle =
+    article.articleType === "matchPreview" ||
+    article.articleType === "matchRecap";
+  const matchId =
+    isMatchArticle && article.linkedMatch
+      ? Number(article.linkedMatch)
+      : Number.NaN;
+  const matchDetail: MatchDetail | null = Number.isFinite(matchId)
+    ? await runPromise(
+        Effect.gen(function* () {
+          const bff = yield* BffService;
+          return yield* bff.getMatchDetail(matchId);
+        }).pipe(
+          Effect.catchAll(() => Effect.succeed<MatchDetail | null>(null)),
+        ),
+      )
+    : null;
+  const heroMatch = matchDetail ? toHeroMatchData(matchDetail) : null;
+
   const hasEditorialArticles =
     article.relatedArticles && article.relatedArticles.length > 0;
 
@@ -339,6 +399,29 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const about = buildAboutFromSubject(article);
   const eventJsonLd = buildEventJsonLdInput(article, shareConfig.url);
 
+  // matchPreview → `mentions` an upcoming SportsEvent; matchRecap → `about`
+  // a played one. Nested inline via buildNewsArticleJsonLd's `sportsEvent`
+  // param (reuses buildSportsEventJsonLd). The SportsEvent url is the
+  // canonical match page, not the article.
+  const matchSportsEvent =
+    matchDetail && article.linkedMatch
+      ? {
+          relation:
+            article.articleType === "matchRecap"
+              ? ("about" as const)
+              : ("mentions" as const),
+          data: {
+            name: `${matchDetail.home_team.name} vs ${matchDetail.away_team.name}`,
+            startDate: matchDetail.date.toISOString(),
+            homeTeamName: matchDetail.home_team.name,
+            awayTeamName: matchDetail.away_team.name,
+            status: matchDetail.status,
+            url: `${SITE_CONFIG.siteUrl}/wedstrijd/${article.linkedMatch}`,
+            venue: matchDetail.venue,
+          },
+        }
+      : undefined;
+
   // Analytics flags derive from the same resolved-subjects list the hero
   // filters on — so subjectCount/subjectKind reflect what the UI actually
   // renders, not the raw subjects[]. A broken player ref makes both the
@@ -377,6 +460,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             image: article.coverImageUrl ?? undefined,
             url: shareConfig.url,
             about,
+            sportsEvent: matchSportsEvent,
           })}
         />
       )}
@@ -395,6 +479,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         publishedDate,
         firstTransferFact,
         firstEventFact,
+        heroMatch,
       })}
 
       <ArticleMetadata
@@ -472,6 +557,41 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             );
           })()
         : null}
+
+      {/* Recap-only goalscorer roll-call (auto-hides on no goals). */}
+      {article.articleType === "matchRecap" && matchDetail ? (
+        <MatchGoalsBlock
+          homeTeamName={matchDetail.home_team.name}
+          awayTeamName={matchDetail.away_team.name}
+          homeTeamLogo={matchDetail.home_team.logo}
+          awayTeamLogo={matchDetail.away_team.logo}
+          events={matchDetail.events ?? []}
+          kcvvSide={heroMatch?.kcvvSide}
+        />
+      ) : null}
+
+      {/* Match-page CTA — both preview + recap. A centered paper-stamp button
+          (5.d-mat-refine Foot A) closes the article; only rendered when the
+          match resolved, since a 404'd id would dead-link. */}
+      {isMatchArticle && matchDetail ? (
+        <div className="bg-cream w-full px-4 pb-10 lg:px-0">
+          <div
+            className="mx-auto w-full"
+            style={{ maxWidth: "var(--container-prose)" }}
+          >
+            <div className="border-ink flex justify-center border-t pt-8">
+              <LinkButton
+                href={`/wedstrijd/${article.linkedMatch}`}
+                variant="primary"
+                size="md"
+                withArrow
+              >
+                Bekijk de wedstrijd
+              </LinkButton>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {article.articleType === "event" &&
       firstEventFact &&

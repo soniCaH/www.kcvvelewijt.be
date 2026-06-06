@@ -76,6 +76,7 @@ function makeArticleDetailRow(
     featured: true,
     tags: ["Eerste ploeg"],
     articleType: "announcement",
+    linkedMatch: null,
     author: "",
     photographer: "",
     metaDescription: null,
@@ -473,6 +474,8 @@ describe("ArticleRepository", () => {
         "announcement",
         "transfer",
         "event",
+        "matchPreview",
+        "matchRecap",
         null,
       ] as const) {
         const row = makeArticleDetailRow({ articleType: value });
@@ -485,6 +488,21 @@ describe("ArticleRepository", () => {
         );
         expect(result!.articleType).toBe(value);
       }
+    });
+
+    it("passes a non-null linkedMatch through findBySlug (match variants)", async () => {
+      const row = makeArticleDetailRow({
+        articleType: "matchRecap",
+        linkedMatch: "67890",
+      });
+      mockFetch.mockResolvedValueOnce(row);
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test-article-detail");
+        }),
+      );
+      expect(result!.linkedMatch).toBe("67890");
     });
 
     it("maps related articles on detail VM", async () => {

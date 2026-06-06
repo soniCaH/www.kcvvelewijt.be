@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>5.d-mat-refine · round 2 — hero score bar (D) positioning</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a; --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b; --color-jersey-deep: #006e47; --color-warm: #d8763a; --color-alert: #c0392b;
+        --shadow-paper-md: 4px 4px 0 0 var(--color-ink); --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono: "Quasimoda", ui-monospace, "SF Mono", "Menlo", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--color-cream-soft); color: var(--color-ink); font-family: ui-sans-serif, system-ui, sans-serif; padding: 28px 22px 90px; }
+      .page { max-width: 1180px; margin: 0 auto; }
+      .page > .meta { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-jersey-deep); font-weight: 700; }
+      .page > h1 { font-family: var(--font-display); font-style: italic; font-size: 30px; margin: 6px 0 4px; }
+      .page > p.intro { margin: 0 0 8px; max-width: 92ch; font-size: 13.5px; line-height: 1.6; }
+      .secnote { font-size: 12.5px; color: var(--color-ink-muted); margin: 4px 0 22px; max-width: 92ch; line-height: 1.5; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 30px; }
+      .vlabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin-bottom: 10px; }
+      .vlabel span { color: var(--color-ink-muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+      /* faux cover with a subject torso, so occlusion is visible */
+      .cover { position: relative; aspect-ratio: 4/3; border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: hidden; background:
+        radial-gradient(120% 80% at 50% 8%, #cfe7da 0%, #cfe7da 38%, transparent 39%), /* head */
+        linear-gradient(180deg, transparent 0 46%, #2f7d5b 46% 100%), /* shoulders/jersey */
+        repeating-linear-gradient(45deg, var(--color-cream-deep), var(--color-cream-deep) 9px, var(--color-cream-soft) 9px, var(--color-cream-soft) 18px); }
+      .cover .tape { position: absolute; top: -8px; left: 30%; width: 64px; height: 18px; background: rgba(0,110,71,0.30); border: 1px solid rgba(0,0,0,0.15); transform: rotate(-4deg); z-index: 5; }
+      .cover .subjnote { position: absolute; top: 8px; left: 10px; font-family: var(--font-mono); font-size: 9px; color: rgba(0,0,0,0.4); }
+
+      /* the chosen two-tier (D) bar */
+      .sbD { display: inline-flex; flex-direction: column; align-items: center; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 8px 18px 7px; }
+      .sbD .top { display: flex; align-items: center; gap: 14px; }
+      .sbD .crest { width: 26px; height: 26px; border-radius: 999px; border: 1.5px solid var(--color-ink-muted); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); background: var(--color-cream); }
+      .sbD .crest.kcvv { border-color: var(--color-jersey-deep); color: var(--color-jersey-deep); box-shadow: 0 0 0 2px var(--color-cream), 0 0 0 3.5px var(--color-jersey-deep); }
+      .sbD .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 24px; min-width: 60px; text-align: center; font-variant-numeric: tabular-nums; }
+      .sbD .badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; border: 1.5px solid var(--color-ink); padding: 2px 5px; }
+      .sbD .sub { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-top: 5px; border-top: 1px solid var(--color-cream-deep); padding-top: 4px; width: 100%; text-align: center; }
+
+      /* positioning wrappers */
+      .pos { position: absolute; z-index: 6; }
+      .p1 { left: 50%; bottom: -22px; transform: translateX(-50%); }              /* straddle, centered (shipped) */
+      .p2 { left: 20px; bottom: -22px; }                                          /* straddle, left-aligned */
+      .p3 { left: 50%; bottom: 12px; transform: translateX(-50%); }               /* inside, lower-third centered */
+      .belowwrap { display: flex; justify-content: center; margin-top: 14px; }     /* detached below */
+      .stage { padding-bottom: 26px; }
+      .stage.below { padding-bottom: 0; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="meta">Phase 5 · 5.d-mat-refine · round 2 — hero bar (D) positioning</div>
+      <h1>Where should the two-tier score bar sit?</h1>
+      <p class="intro">Hero variant <strong>D</strong> is locked (score row + <code>competition · date</code> subline). Only the placement on the cover is open. The faux cover has a centred “subject” (head + green jersey) so you can judge face/torso occlusion. Recap shown (score + FT).</p>
+      <p class="secnote">Reply with one, e.g. <strong>“P1”</strong>. The cover here is desktop 4:3; on mobile it’s a wider 16:10 full-bleed, so whatever wins, I’ll keep it centred-friendly there too.</p>
+
+      <div class="grid">
+        <div>
+          <div class="vlabel">P1 — <span>straddle the lower edge, centered (shipped)</span></div>
+          <div class="stage"><div class="cover"><div class="tape"></div><div class="subjnote">cover + subject</div>
+            <div class="pos p1"><div class="sbD"><div class="top"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div><div class="sub">3e Provinciale · za 13 september</div></div></div>
+          </div></div>
+        </div>
+
+        <div>
+          <div class="vlabel">P2 — <span>straddle the lower edge, left-aligned</span></div>
+          <div class="stage"><div class="cover"><div class="tape"></div><div class="subjnote">cover + subject</div>
+            <div class="pos p2"><div class="sbD"><div class="top"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div><div class="sub">3e Provinciale · za 13 september</div></div></div>
+          </div></div>
+        </div>
+
+        <div>
+          <div class="vlabel">P3 — <span>fully inside, resting near the bottom (lower-third)</span></div>
+          <div class="stage"><div class="cover"><div class="tape"></div><div class="subjnote">cover + subject</div>
+            <div class="pos p3"><div class="sbD"><div class="top"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div><div class="sub">3e Provinciale · za 13 september</div></div></div>
+          </div></div>
+        </div>
+
+        <div>
+          <div class="vlabel">P4 — <span>detached plinth below the cover (no overlap)</span></div>
+          <div class="stage below"><div class="cover"><div class="tape"></div><div class="subjnote">cover + subject</div></div>
+            <div class="belowwrap"><div class="sbD"><div class="top"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div><div class="sub">3e Provinciale · za 13 september</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

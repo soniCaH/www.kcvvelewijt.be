@@ -411,4 +411,22 @@ describe("NewsCard", () => {
       expect(container.querySelector("article")).toHaveClass("my-custom-class");
     });
   });
+
+  describe("typeLabel (match cards)", () => {
+    it("renders the type label ahead of the badge when supplied", () => {
+      render(
+        <NewsCard {...defaultProps} typeLabel="Matchverslag" badge="A-ploeg" />,
+      );
+      const label = screen.getByTestId("newscard-type-label");
+      expect(label).toHaveTextContent("Matchverslag");
+      expect(label.className).toContain("text-jersey-deep");
+    });
+
+    it("omits the type label when not supplied", () => {
+      render(<NewsCard {...defaultProps} badge="A-ploeg" />);
+      expect(
+        screen.queryByTestId("newscard-type-label"),
+      ).not.toBeInTheDocument();
+    });
+  });
 });

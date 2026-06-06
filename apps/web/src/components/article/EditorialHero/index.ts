@@ -4,4 +4,5 @@ export {
   type EditorialHeroVariant,
   type EditorialHeroPlacement,
   type EditorialHeroCoverImage,
+  type HeroMatchData,
 } from "./EditorialHero";

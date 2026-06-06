@@ -59,7 +59,7 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 // featured-first rule applies only to the homepage feed (ARTICLES_QUERY).
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
-  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
@@ -80,6 +80,10 @@ export const ARTICLE_BY_SLUG_QUERY =
   "titleRich": title,
   "lead": coalesce(lead, ""),
   "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  // PSD match id for matchPreview/matchRecap variants (#1470). String, not a
+  // Sanity reference — matches are BFF/PSD-native. The page fetches the match
+  // via BffService.getMatchDetail to feed the hero score bar + Doelpunten.
+  linkedMatch,
   // 5.B.int (#1795) — author + photographer drive <EditorialByline>'s
   // "Door {author}" line (fallback "Door redactie") and the
   // <ArticleCredits> Door / Beeld rows. Both fields are optional on
@@ -268,7 +272,9 @@ function widenToArticleVM(
 ): ArticleVM {
   return {
     ...row,
-    articleType: null,
+    // The paginated projection carries `articleType` (so /nieuws cards can
+    // show a match type label); the related projection doesn't.
+    articleType: "articleType" in row ? row.articleType : null,
     subjects: null,
     firstTransferFact: null,
     firstEventFact: null,

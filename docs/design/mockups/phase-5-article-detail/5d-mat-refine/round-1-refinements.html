@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>5.d-mat-refine · round 1 — foot CTA / hero score bar / card label</title>
+    <style>
+      :root {
+        --color-cream: #f5f1e6; --color-cream-soft: #ede8da; --color-cream-deep: #e1d7bf;
+        --color-ink: #0a0a0a; --color-ink-muted: #6b6b6b;
+        --color-jersey: #00a86b; --color-jersey-deep: #006e47; --color-warm: #d8763a; --color-alert: #c0392b;
+        --shadow-paper-lift: 6px 6px 0 0 var(--color-ink); --shadow-paper-md: 4px 4px 0 0 var(--color-ink); --shadow-paper-sm: 2px 2px 0 0 var(--color-ink);
+        --font-display: "Freight Display Pro", "Playfair Display", ui-serif, Georgia, serif;
+        --font-display-big: "Freight Display Pro Black", "Playfair Display", ui-serif, Georgia, serif;
+        --font-mono: "Quasimoda", ui-monospace, "SF Mono", "Menlo", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--color-cream-soft); color: var(--color-ink); font-family: ui-sans-serif, system-ui, sans-serif; padding: 28px 22px 90px; }
+      .page { max-width: 1180px; margin: 0 auto; }
+      .page > .meta { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-jersey-deep); font-weight: 700; }
+      .page > h1 { font-family: var(--font-display); font-style: italic; font-size: 30px; margin: 6px 0 4px; }
+      .page > p.intro { margin: 0 0 8px; max-width: 90ch; font-size: 13.5px; line-height: 1.6; }
+      .sec { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--color-ink); border-top: 2px solid var(--color-ink); padding-top: 10px; margin: 40px 0 6px; font-weight: 700; }
+      .secnote { font-size: 12.5px; color: var(--color-ink-muted); margin: 0 0 18px; max-width: 90ch; line-height: 1.5; }
+      .variants { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+      .v { }
+      .vlabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--color-jersey-deep); font-weight: 700; margin-bottom: 8px; }
+      .vlabel span { color: var(--color-ink-muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+      .stage { background: var(--color-cream); border: 1px solid var(--color-cream-deep); padding: 22px; }
+
+      /* shared primitives ------------------------------------------------ */
+      .crest { width: 26px; height: 26px; border-radius: 999px; border: 1.5px solid var(--color-ink-muted); display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); flex: 0 0 auto; background: var(--color-cream); }
+      .crest.kcvv { border-color: var(--color-jersey-deep); color: var(--color-jersey-deep); box-shadow: 0 0 0 2px var(--color-cream), 0 0 0 3.5px var(--color-jersey-deep); }
+      .mono { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.14em; }
+      .prosefade { font-family: var(--font-display); font-size: 14px; line-height: 1.7; color: #555; margin: 0 0 14px; }
+      .endmark { display: flex; align-items: center; gap: 12px; color: var(--color-ink-muted); margin: 18px 0; }
+      .endmark .ln { flex: 1; height: 0; border-top: 1px solid var(--color-ink); }
+      .endmark .lbl { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.18em; color: var(--color-ink); }
+      .endmark .st { color: var(--color-jersey-deep); }
+
+      /* paper-stamp button */
+      .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 11px 18px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink); }
+      .btn.jersey { background: var(--color-jersey-deep); color: var(--color-cream); border-color: var(--color-ink); }
+
+      /* tape strip */
+      .tape { position: absolute; top: -9px; left: 26px; width: 78px; height: 20px; background: rgba(0,110,71,0.30); border: 1px solid rgba(0,0,0,0.18); transform: rotate(-4deg); }
+
+      /* FOOT A — centered button */
+      .footA { text-align: center; }
+      .footA .rule { border-top: 1px solid var(--color-ink); margin: 0 0 16px; }
+
+      /* FOOT B — compact match-link card */
+      .cardlink { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 14px 16px; transform: rotate(-0.4deg); }
+      .cardlink .teams { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 15px; font-weight: 600; }
+      .cardlink .teams .vs { font-family: var(--font-mono); font-size: 11px; color: var(--color-ink-muted); }
+      .cardlink .go { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-jersey-deep); white-space: nowrap; }
+      .cardlink .metaline { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); margin-top: 2px; }
+
+      /* FOOT C — full-bleed jersey band */
+      .band { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--color-jersey-deep); color: var(--color-cream); padding: 16px 20px; margin: 0 -22px; }
+      .band .l { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; }
+      .band .l b { display:block; font-family: var(--font-display); font-style: italic; font-size: 18px; letter-spacing: 0; text-transform: none; font-weight: 700; margin-top: 2px; }
+      .band .go { font-family: var(--font-mono); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: 2px solid var(--color-cream); padding: 8px 12px; white-space: nowrap; }
+
+      /* FOOT D — ticket stub */
+      .ticket { position: relative; display: flex; align-items: stretch; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); }
+      .ticket .body { flex: 1; padding: 14px 16px; }
+      .ticket .body .k { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-ink-muted); }
+      .ticket .body .t { font-family: var(--font-display); font-style: italic; font-size: 16px; margin-top: 3px; }
+      .ticket .stub { border-left: 2px dashed var(--color-ink); padding: 0 16px; display: flex; align-items: center; font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-jersey-deep); }
+
+      /* HERO score bars on a faux cover -------------------------------- */
+      .cover { background: repeating-linear-gradient(45deg, var(--color-cream-deep), var(--color-cream-deep) 9px, var(--color-cream-soft) 9px, var(--color-cream-soft) 18px); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); position: relative; aspect-ratio: 16/10; margin-bottom: 34px; }
+      .cover .ph { position: absolute; top: 8px; left: 10px; font-family: var(--font-mono); font-size: 9px; color: var(--color-ink-muted); }
+      .barwrap { position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); }
+
+      /* HERO A — baseline pill */
+      .sbA { display: inline-flex; align-items: center; gap: 14px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); padding: 6px 16px; }
+      .sbA .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 22px; min-width: 58px; text-align: center; font-variant-numeric: tabular-nums; }
+      .sbA .badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; border: 1.5px solid var(--color-ink); padding: 2px 5px; }
+
+      /* HERO B — wider scoreboard with abbreviations */
+      .sbB { display: inline-grid; grid-auto-flow: column; align-items: center; gap: 16px; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 10px 20px; }
+      .sbB .team { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .sbB .team .abbr { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; color: var(--color-ink-muted); }
+      .sbB .team.kcvv .abbr { color: var(--color-jersey-deep); }
+      .sbB .crest { width: 30px; height: 30px; }
+      .sbB .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 28px; min-width: 70px; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+      .sbB .badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; border: 2px solid var(--color-ink); padding: 3px 6px; box-shadow: var(--shadow-paper-sm); background: var(--color-cream); }
+
+      /* HERO C — ticket-stub score */
+      .sbC { display: inline-flex; align-items: stretch; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); }
+      .sbC .main { display: flex; align-items: center; gap: 12px; padding: 8px 16px; }
+      .sbC .main .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 22px; min-width: 56px; text-align: center; font-variant-numeric: tabular-nums; }
+      .sbC .perf { border-left: 2px dashed var(--color-ink); display: flex; align-items: center; padding: 0 11px; font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; }
+
+      /* HERO D — two-tier with competition subline */
+      .sbD { display: inline-flex; flex-direction: column; align-items: center; background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-md); padding: 8px 18px 7px; }
+      .sbD .top { display: flex; align-items: center; gap: 14px; }
+      .sbD .top .sc { font-family: var(--font-display-big); font-weight: 900; font-size: 24px; min-width: 60px; text-align: center; font-variant-numeric: tabular-nums; }
+      .sbD .top .badge { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.14em; border: 1.5px solid var(--color-ink); padding: 2px 5px; }
+      .sbD .sub { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-ink-muted); margin-top: 5px; border-top: 1px solid var(--color-cream-deep); padding-top: 4px; width: 100%; text-align: center; }
+
+      /* CARD label variants ------------------------------------------- */
+      .cardrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+      .ncard { background: var(--color-cream); border: 2px solid var(--color-ink); box-shadow: var(--shadow-paper-sm); overflow: hidden; }
+      .ncard .img { aspect-ratio: 16/10; background: repeating-linear-gradient(45deg, var(--color-cream-deep), var(--color-cream-deep) 9px, var(--color-cream-soft) 9px, var(--color-cream-soft) 18px); position: relative; }
+      .ncard .body { padding: 12px 13px 14px; }
+      .ncard .title { font-family: var(--font-display); font-style: italic; font-size: 16px; line-height: 1.25; margin: 0 0 8px; }
+      .ncard .date { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); }
+      /* A: corner ribbon */
+      .ribbon { position: absolute; top: 10px; left: 0; background: var(--color-jersey-deep); color: var(--color-cream); font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 10px 4px 12px; box-shadow: var(--shadow-paper-sm); }
+      /* B: mono kicker line above title */
+      .kicker { font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; color: var(--color-jersey-deep); display: flex; align-items: center; gap: 6px; margin: 0 0 5px; }
+      .kicker .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--color-jersey-deep); display: inline-block; }
+      /* C: glyph chip in meta row */
+      .metarow { display: flex; align-items: center; gap: 8px; }
+      .glyphchip { display: inline-flex; align-items: center; gap: 5px; border: 1.5px solid var(--color-ink); padding: 2px 7px; font-family: var(--font-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="meta">Phase 5 · 5.d-mat-refine · round 1 — pick one per surface</div>
+      <h1>Match article refinements — foot CTA · hero score bar · card label</h1>
+      <p class="intro">Reactions to the shipped 5.d-mat build. Reply with one pick per section, e.g. <strong>“Foot = B, Hero = D, Card = A”</strong>. All variants reuse the locked paper vocabulary (TapedCard / paper-stamp button / MonoLabel / Crest / TicketStub / StripedSeam-band). Cover art + crests are placeholders.</p>
+
+      <!-- ════════ SURFACE 1 — ARTICLE FOOT CTA ════════ -->
+      <div class="sec">Surface 1 · Article-foot CTA (the “sad whitespace + link”)</div>
+      <p class="secnote">Replaces the lonely <code>naar wedstrijd →</code> mono link. Goal: a satisfying end-of-article affordance to <code>/wedstrijd/[id]</code> that closes the page. Each sits where the link is now (after the prose, after Doelpunten on recaps).</p>
+      <div class="variants">
+        <div class="v">
+          <div class="vlabel">Foot A — <span>centered paper-stamp button (no matchup repeat)</span></div>
+          <div class="stage">
+            <p class="prosefade">…volgt de uitslag achteraf op de wedstrijdpagina.</p>
+            <div class="endmark"><span class="ln"></span><span class="st">★</span><span class="lbl">EINDE ARTIKEL</span><span class="st">★</span><span class="ln"></span></div>
+            <div class="footA"><div class="rule"></div><a class="btn jersey">Bekijk de wedstrijd →</a></div>
+          </div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Foot B — <span>compact taped match-link card (whole card → /wedstrijd)</span></div>
+          <div class="stage">
+            <p class="prosefade">…volgt de uitslag achteraf op de wedstrijdpagina.</p>
+            <div class="cardlink"><div class="tape"></div>
+              <div>
+                <div class="teams"><span class="crest kcvv">K</span> KCVV <span class="vs">2–1</span> Racing <span class="crest">R</span></div>
+                <div class="metaline">3e Provinciale · za 13 sep · Driesstraat</div>
+              </div>
+              <span class="go">Bekijk →</span>
+            </div>
+          </div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Foot C — <span>full-bleed jersey-deep band (strong page close)</span></div>
+          <div class="stage">
+            <p class="prosefade">…volgt de uitslag achteraf op de wedstrijdpagina.</p>
+            <div class="band"><div class="l">Volledig verslag<b>KCVV — Racing Mechelen</b></div><span class="go">Naar wedstrijd →</span></div>
+          </div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Foot D — <span>ticket-stub CTA (on-brand ticket vocabulary)</span></div>
+          <div class="stage">
+            <p class="prosefade">…volgt de uitslag achteraf op de wedstrijdpagina.</p>
+            <div class="ticket"><div class="body"><div class="k">Wedstrijdpagina</div><div class="t">KCVV — Racing Mechelen, 3e Prov.</div></div><div class="stub">Bekijk →</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════ SURFACE 2 — HERO SCORE BAR ════════ -->
+      <div class="sec">Surface 2 · Hero score bar (straddling the cover’s lower edge)</div>
+      <p class="secnote">Currently a small quiet pill (= variant A). Make it read bolder against the large cover. Recap shown (score + FT); preview swaps the score for the kickoff time and drops the badge.</p>
+      <div class="variants">
+        <div class="v">
+          <div class="vlabel">Hero A — <span>shipped baseline (for reference)</span></div>
+          <div class="stage"><div class="cover"><div class="ph">cover</div><div class="barwrap"><div class="sbA"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div></div></div></div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Hero B — <span>wider scoreboard, bigger crests + abbreviations</span></div>
+          <div class="stage"><div class="cover"><div class="ph">cover</div><div class="barwrap"><div class="sbB"><div class="team kcvv"><span class="crest kcvv">K</span><span class="abbr">KCVV</span></div><span class="sc">2 – 1</span><div class="team"><span class="crest">R</span><span class="abbr">RAC</span></div><span class="badge">FT</span></div></div></div></div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Hero C — <span>ticket-stub score (perforated FT stub)</span></div>
+          <div class="stage"><div class="cover"><div class="ph">cover</div><div class="barwrap"><div class="sbC"><div class="main"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span></div><div class="perf">FT</div></div></div></div></div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Hero D — <span>two-tier: score on top, competition · date subline</span></div>
+          <div class="stage"><div class="cover"><div class="ph">cover</div><div class="barwrap"><div class="sbD"><div class="top"><span class="crest kcvv">K</span><span class="sc">2 – 1</span><span class="crest">R</span><span class="badge">FT</span></div><div class="sub">3e Provinciale · za 13 september</div></div></div></div></div>
+        </div>
+      </div>
+
+      <!-- ════════ SURFACE 3 — CARD TYPE LABEL ════════ -->
+      <div class="sec">Surface 3 · /nieuws card type label (investigation — generic data)</div>
+      <p class="secnote">Cards stay generic (no live score/date — that would need per-card PSD calls). The only thing we know is the <code>articleType</code>, so the question is just how to <em>signal the type</em>. (Same idea would extend to interview/transfer/event so the index reads as typed.) Verify against <code>card-semantics-locked.md</code> before building.</p>
+      <div class="cardrow">
+        <div class="v">
+          <div class="vlabel">Card A — <span>corner ribbon on the cover</span></div>
+          <div class="ncard"><div class="img"><div class="ribbon">Matchverslag</div></div><div class="body"><div class="title">KCVV pakt de drie punten in de slotfase.</div><div class="date">22 apr 2026</div></div></div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Card B — <span>mono kicker line above the title</span></div>
+          <div class="ncard"><div class="img"></div><div class="body"><div class="kicker"><span class="dot"></span> Matchverslag</div><div class="title">KCVV pakt de drie punten in de slotfase.</div><div class="date">22 apr 2026</div></div></div>
+        </div>
+        <div class="v">
+          <div class="vlabel">Card C — <span>glyph chip in the meta row</span></div>
+          <div class="ncard"><div class="img"></div><div class="body"><div class="title">KCVV pakt de drie punten in de slotfase.</div><div class="metarow"><span class="glyphchip">⚽ Verslag</span><span class="date">22 apr 2026</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

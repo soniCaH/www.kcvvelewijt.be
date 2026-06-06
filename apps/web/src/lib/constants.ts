@@ -46,7 +46,14 @@ export const DEFAULT_OG_IMAGE = {
 } as const;
 
 // PSD API identifiers
-export const KCVV_FIRST_TEAM_CLUB_ID = 1235;
+/**
+ * PSD club id for KCVV Elewijt — shared across all KCVV teams (A / B / youth),
+ * since it identifies the club, not a specific team. Used to determine which
+ * side of a match is KCVV when the BFF doesn't supply the team-scoped `is_home`
+ * flag (e.g. `getMatchDetail`, which has no teamId context). Id-based, never
+ * name-based (see `feedback_psd_match_identification`).
+ */
+export const KCVV_CLUB_ID = 1235;
 
 // External Links
 export const EXTERNAL_LINKS = {

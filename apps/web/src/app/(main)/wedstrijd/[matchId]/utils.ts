@@ -91,30 +91,11 @@ export function enrichLineupWithKeeperFlag(
   return { ...player, isKeeper };
 }
 
-/**
- * Returns the match time as "HH:MM" when available.
- *
- * If `match.time` is present it is returned; otherwise, if `match.date` is a Date with non-zero hours or minutes, the time extracted from that date is returned in 24-hour `HH:MM` format.
- *
- * @returns The time as `HH:MM` if available, `undefined` otherwise.
- */
-export function extractMatchTime(match: MatchDetail): string | undefined {
-  if (match.time) {
-    return match.time;
-  }
-
-  // Try to extract time from date if it's a full datetime
-  const date = match.date;
-  if (date instanceof Date) {
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    if (hours !== 0 || minutes !== 0) {
-      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-    }
-  }
-
-  return undefined;
-}
+// `extractMatchTime` now lives in `@/lib/utils/match-time` so the
+// matchPreview/matchRecap article hero can derive kickoff identically
+// (#1470). Re-exported here so existing `./utils` consumers + tests keep
+// their import path.
+export { extractMatchTime } from "@/lib/utils/match-time";
 
 /**
  * Builds an SEO-friendly match title.

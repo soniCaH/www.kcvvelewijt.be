@@ -114,6 +114,19 @@ export interface NewsArticleInput {
    * type; Google accepts NewsArticle + about:Person as the fallback.
    */
   about?: PersonAboutInput;
+  /**
+   * Optional related match for matchPreview / matchRecap articles. The
+   * `SportsEvent` is emitted inline under `mentions` (preview — references
+   * an upcoming match) or `about` (recap — covers a played match), reusing
+   * {@link buildSportsEventJsonLd} so the SportsEvent shape isn't
+   * duplicated. The nested node drops its own `@context`. Match articles
+   * never carry a Person subject, so this never collides with `about`
+   * above.
+   */
+  sportsEvent?: {
+    relation: "about" | "mentions";
+    data: SportsEventInput;
+  };
 }
 
 export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
@@ -139,7 +152,7 @@ export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
 export function buildNewsArticleJsonLd(
   input: NewsArticleInput,
 ): WithContext<NewsArticle> {
-  return {
+  const doc: WithContext<NewsArticle> = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: input.headline,
@@ -175,6 +188,22 @@ export function buildNewsArticleJsonLd(
         }
       : {}),
   };
+
+  // Nest the related match's SportsEvent under about (recap) / mentions
+  // (preview). schema-dts types about/mentions as `Thing`; our SportsEvent
+  // builder returns the loose JsonLdDocument shape, so assign through a
+  // `Record` cast rather than widening the strict NewsArticle literal above.
+  if (input.sportsEvent) {
+    const event = buildSportsEventJsonLd(input.sportsEvent.data) as Record<
+      string,
+      unknown
+    >;
+    delete event["@context"];
+    (doc as unknown as Record<string, unknown>)[input.sportsEvent.relation] =
+      event;
+  }
+
+  return doc;
 }
 
 export interface PersonInput {

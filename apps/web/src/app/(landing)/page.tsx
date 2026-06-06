@@ -137,6 +137,12 @@ function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
       };
     case "announcement":
       return { ...shared, variant, category: article.tags[0] };
+    case "matchPreview":
+    case "matchRecap":
+      // Homepage hero stays kicker-only (VOORBESCHOUWING / MATCHVERSLAG) — no
+      // `match` data, so no score bar. The score-forward bar only renders on
+      // the detail page, which server-fetches the linked match (5.d-mat).
+      return { ...shared, variant };
     default: {
       const _exhaustive: never = variant;
       throw new Error(
@@ -164,6 +170,8 @@ function toUitgelichtArticleType(
     case "interview":
     case "announcement":
     case "event":
+    case "matchPreview":
+    case "matchRecap":
       return type;
     default: {
       const _exhaustive: never = type;

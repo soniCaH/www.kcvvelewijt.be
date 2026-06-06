@@ -349,3 +349,85 @@ describe("EditorialHero — transfer variant", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+// ─── Match variant (5.d-mat H3 score-forward hero) ──────────────────────────
+
+describe("EditorialHero — match variant", () => {
+  const COVER = { url: "/cover.jpg", alt: "Cover" };
+  const RECAP_MATCH = {
+    homeTeam: { name: "KCVV Elewijt" },
+    awayTeam: { name: "Racing Mechelen" },
+    kcvvSide: "home" as const,
+    homeScore: 2,
+    awayScore: 1,
+    status: "finished" as const,
+    competition: "3e Provinciale",
+    matchDate: "Za 13 september",
+  };
+  const PREVIEW_MATCH = {
+    homeTeam: { name: "KCVV Elewijt" },
+    awayTeam: { name: "Racing Mechelen" },
+    kcvvSide: "home" as const,
+    kickoffTime: "15:00",
+    status: "scheduled" as const,
+    competition: "3e Provinciale",
+    matchDate: "Za 13 september",
+  };
+
+  it("recap: MATCHVERSLAG kicker; bar carries score + FT + competition + date", () => {
+    render(
+      <EditorialHero
+        variant="matchRecap"
+        {...SHARED}
+        coverImage={COVER}
+        match={RECAP_MATCH}
+      />,
+    );
+    expect(screen.getByText("Matchverslag")).toBeInTheDocument();
+    // Competition + match date live in the bar subline, not the kicker.
+    const bar = screen.getByTestId("hero-match-score-bar");
+    expect(bar).toHaveTextContent(/2\s*–\s*1/);
+    expect(bar).toHaveTextContent("FT");
+    expect(bar).toHaveTextContent("3e Provinciale");
+    expect(bar).toHaveTextContent("Za 13 september");
+    // Article date is not duplicated into the kicker when the bar is present.
+    expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
+  });
+
+  it("preview: VOORBESCHOUWING kicker; bar shows kickoff time + competition, no FT", () => {
+    render(
+      <EditorialHero
+        variant="matchPreview"
+        {...SHARED}
+        coverImage={COVER}
+        match={PREVIEW_MATCH}
+      />,
+    );
+    expect(screen.getByText("Voorbeschouwing")).toBeInTheDocument();
+    const bar = screen.getByTestId("hero-match-score-bar");
+    expect(bar).toHaveTextContent("15:00");
+    expect(bar).toHaveTextContent("3e Provinciale");
+    expect(bar).not.toHaveTextContent("FT");
+  });
+
+  it("falls back to the kicker-only hero (no score bar) when match is null", () => {
+    render(
+      <EditorialHero
+        variant="matchRecap"
+        {...SHARED}
+        coverImage={COVER}
+        match={null}
+      />,
+    );
+    expect(screen.getByText("Matchverslag")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("hero-match-score-bar"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses the article date in the kicker when no match data is supplied", () => {
+    render(<EditorialHero variant="matchPreview" {...SHARED} />);
+    expect(screen.getByText("Voorbeschouwing")).toBeInTheDocument();
+    expect(screen.getByText("6 mei 2026")).toBeInTheDocument();
+  });
+});

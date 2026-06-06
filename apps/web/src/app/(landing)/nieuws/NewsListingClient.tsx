@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { NewsCard, CategoryFilters } from "@/components/article";
 import { formatArticleDate } from "@/lib/utils/dates";
+import { matchTypeCardLabel } from "@/lib/utils/article-type-label";
 import type { PaginatedArticles } from "./utils";
 import { deduplicateById } from "./utils";
 import { BATCH_SIZE, INITIAL_TOTAL } from "./constants";
@@ -198,6 +199,7 @@ export function NewsListingClient({
       imageUrl={article.coverImageUrl ?? undefined}
       imageAlt={article.title}
       badge={article.tags[0] ?? undefined}
+      typeLabel={matchTypeCardLabel(article.articleType)}
       date={
         article.publishedAt
           ? formatArticleDate(new Date(article.publishedAt))
