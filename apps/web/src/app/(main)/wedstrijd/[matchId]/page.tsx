@@ -9,8 +9,9 @@
  *   <MatchLineupSection>           ← auto-hides on empty (typically upcoming)
  *   <StripedSeam>                  ← only when both Lineup + Events render
  *   <MatchEventsSection>           ← auto-hides on empty
- *   [reserved: <MatchArticleLinkCard>]   ← deferred to post-#1470
- *   [reserved: <RelatedArticles>]        ← deferred to post-#1470
+ *   <StripedSeam>                  ← only before the card when a body section rendered
+ *   <MatchArticleLinkCard>         ← auto-hides; the matchPreview/matchRecap article
+ *                                    linked to this match, in a <TrackInView> (#1914)
  *   <FooterSafeArea>
  *
  * Replaces the legacy `<MatchDetailView>` consumption (now orphaned;
@@ -21,6 +22,11 @@
  * carried over. Users navigate via browser back or the breadcrumb
  * (rendered as JSON-LD only — visual breadcrumb would be a separate
  * deliberate add).
+ *
+ * Note: the match-filtered `<RelatedArticles>` slot reserved at the 6.B.d1
+ * lock is not a separate section — a match has at most one *other* linked
+ * article (the non-dominant preview/recap), so it's surfaced as the card's
+ * inline `secondary` "Lees ook …" link instead (owner decision, #1914).
  */
 
 import { Effect } from "effect";
