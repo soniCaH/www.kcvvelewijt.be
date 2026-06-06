@@ -192,15 +192,11 @@ export type EditorialHeroProps =
 interface EditorialHeroCoverProps {
   coverImage: EditorialHeroCoverImage;
   aspect: "landscape-16-9" | "landscape-3-2";
-  /** Optional overlay node anchored inside the figure (e.g. the
-   *  Event day-block stamp). `position: relative` is already set on
-   *  the inner figure container; consumers position themselves. */
+  /** Optional overlay node anchored inside the figure (e.g. the Event
+   *  day-block stamp, or the match score bar in the cover's lower third).
+   *  `position: relative` is already set on the inner figure container;
+   *  consumers position themselves. */
   overlay?: React.ReactNode;
-  /** Optional node straddling the cover's LOWER edge (the match score
-   *  bar). Unlike `overlay` it renders OUTSIDE the figure's
-   *  `overflow-hidden` photo box so it can protrude half-below the
-   *  cover; the wrapper reserves the protruding height. */
-  straddle?: React.ReactNode;
   /** When `true`, the figure adds a `group-hover` rotate + scale so
    *  the framed photo tilts on hover. Only used by the homepage
    *  placement when `hoverStyle === "tilt-photo"`. The wrapping
@@ -212,10 +208,9 @@ function EditorialHeroCover({
   coverImage,
   aspect,
   overlay,
-  straddle,
   tiltOnHover,
 }: EditorialHeroCoverProps) {
-  const figure = (
+  return (
     <TapedFigure
       aspect={aspect}
       rotation="b"
@@ -235,21 +230,6 @@ function EditorialHeroCover({
       />
       {overlay}
     </TapedFigure>
-  );
-
-  if (!straddle) return figure;
-
-  // The score bar must sit half-below the cover's lower edge, but
-  // <TapedFigure>'s photo box is `overflow-hidden`, so it can't live as a
-  // figure child. Wrap the figure in a relative box (with `pb-6` reserving
-  // the protruding height) and centre the bar on the figure's bottom edge.
-  return (
-    <div className="relative mx-auto w-full max-w-[440px] pb-6">
-      {figure}
-      <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 translate-y-1/2">
-        {straddle}
-      </div>
-    </div>
   );
 }
 
@@ -401,14 +381,13 @@ function renderMatchEditorial(
   author: string | undefined,
   variant: "matchPreview" | "matchRecap",
   date: string | undefined,
-  competition: string | undefined,
 ) {
   // Kicker mirrors the match-page status vocabulary (<MatchHero>): preview →
-  // VOORBESCHOUWING, recap → MATCHVERSLAG, then `· competition · date`. The
-  // matchup itself lives in the cover score bar (H3).
+  // VOORBESCHOUWING, recap → MATCHVERSLAG. When the cover score bar is present
+  // it carries the competition + match date (so `date` is passed undefined);
+  // when the match 404s the bar is gone, so the kicker keeps the article date.
   const label = variant === "matchPreview" ? "Voorbeschouwing" : "Matchverslag";
-  const meta = competition?.trim() ? [competition.trim()] : [];
-  const items = buildPlainKickerItems(label, meta, date);
+  const items = buildPlainKickerItems(label, [], date);
   return (
     <>
       <EditorialKicker items={items} />
@@ -432,7 +411,6 @@ export function EditorialHero(props: EditorialHeroProps) {
   let editorial: React.ReactNode;
   let coverAspect: "landscape-16-9" | "landscape-3-2" = "landscape-16-9";
   let coverOverlay: React.ReactNode = null;
-  let coverStraddle: React.ReactNode = null;
   let belowHero: React.ReactNode = null;
   // Match hero stacks the cover above the editorial on mobile so the score
   // bar is read first (5.d-mat lock). Other variants keep editorial-first.
@@ -495,31 +473,25 @@ export function EditorialHero(props: EditorialHeroProps) {
       date,
     );
   } else {
-    // matchPreview | matchRecap — score-forward H3 hero. The kicker carries
-    // the competition + match date; the cover gains a crest·score·crest bar.
+    // matchPreview | matchRecap — score-forward hero. The two-tier score bar
+    // sits in the cover's lower third (5.d-mat-refine D@P3) and carries the
+    // competition + match date, so the kicker stays a clean type label and
+    // only falls back to the article date when the bar is absent (404).
     const match = props.match;
-    const kickerDate = match?.matchDate ?? date;
+    const kickerDate = match ? undefined : date;
     editorial = renderMatchEditorial(
       title,
       lead,
       author,
       props.variant,
       kickerDate,
-      match?.competition,
     );
     if (match) {
       coverFirstOnMobile = true;
-      coverStraddle = (
-        <HeroMatchScoreBar
-          variant={props.variant}
-          homeTeam={match.homeTeam}
-          awayTeam={match.awayTeam}
-          kcvvSide={match.kcvvSide}
-          homeScore={match.homeScore}
-          awayScore={match.awayScore}
-          kickoffTime={match.kickoffTime}
-          status={match.status}
-        />
+      coverOverlay = (
+        <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3">
+          <HeroMatchScoreBar variant={props.variant} {...match} />
+        </div>
       );
     }
   }
@@ -537,7 +509,6 @@ export function EditorialHero(props: EditorialHeroProps) {
             coverImage={coverImage}
             aspect={coverAspect}
             overlay={coverOverlay}
-            straddle={coverStraddle}
             tiltOnHover={tiltOnHover}
           />
         ) : undefined

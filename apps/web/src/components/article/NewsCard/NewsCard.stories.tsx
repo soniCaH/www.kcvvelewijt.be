@@ -292,3 +292,29 @@ export const NoImagePlaceholder: Story = {
   args: { ...bgSharedArgs, bg: "cream", imageUrl: undefined },
   tags: ["vr"],
 };
+
+// ===== 5.d-mat-refine Card B — match type kicker =====
+//
+// matchPreview / matchRecap cards on the news index gain a jersey-deep type
+// kicker (dot + label) ahead of the category badge. Match cards sit on cream
+// per `card-semantics-locked.md`.
+
+export const MatchRecapType: Story = {
+  args: {
+    ...bgSharedArgs,
+    bg: "cream",
+    typeLabel: "Matchverslag",
+    title: "KCVV pakt de drie punten in de slotfase.",
+  },
+  tags: ["vr"],
+};
+
+export const MatchPreviewType: Story = {
+  args: {
+    ...bgSharedArgs,
+    bg: "cream",
+    typeLabel: "Voorbeschouwing",
+    title: "Topper tegen Racing wacht.",
+  },
+  tags: ["vr"],
+};

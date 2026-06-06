@@ -374,18 +374,7 @@ describe("EditorialHero — match variant", () => {
     matchDate: "Za 13 september",
   };
 
-  it("renders the MATCHVERSLAG kicker with competition + match date (recap)", () => {
-    render(
-      <EditorialHero variant="matchRecap" {...SHARED} match={RECAP_MATCH} />,
-    );
-    expect(screen.getByText("Matchverslag")).toBeInTheDocument();
-    expect(screen.getByText("3e Provinciale")).toBeInTheDocument();
-    // Match date wins over the article date in the kicker.
-    expect(screen.getByText("Za 13 september")).toBeInTheDocument();
-    expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
-  });
-
-  it("renders the score + FT badge on the recap score bar", () => {
+  it("recap: MATCHVERSLAG kicker; bar carries score + FT + competition + date", () => {
     render(
       <EditorialHero
         variant="matchRecap"
@@ -394,12 +383,18 @@ describe("EditorialHero — match variant", () => {
         match={RECAP_MATCH}
       />,
     );
+    expect(screen.getByText("Matchverslag")).toBeInTheDocument();
+    // Competition + match date live in the bar subline, not the kicker.
     const bar = screen.getByTestId("hero-match-score-bar");
     expect(bar).toHaveTextContent(/2\s*–\s*1/);
     expect(bar).toHaveTextContent("FT");
+    expect(bar).toHaveTextContent("3e Provinciale");
+    expect(bar).toHaveTextContent("Za 13 september");
+    // Article date is not duplicated into the kicker when the bar is present.
+    expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
   });
 
-  it("renders VOORBESCHOUWING + kickoff time and no FT badge (preview)", () => {
+  it("preview: VOORBESCHOUWING kicker; bar shows kickoff time + competition, no FT", () => {
     render(
       <EditorialHero
         variant="matchPreview"
@@ -411,6 +406,7 @@ describe("EditorialHero — match variant", () => {
     expect(screen.getByText("Voorbeschouwing")).toBeInTheDocument();
     const bar = screen.getByTestId("hero-match-score-bar");
     expect(bar).toHaveTextContent("15:00");
+    expect(bar).toHaveTextContent("3e Provinciale");
     expect(bar).not.toHaveTextContent("FT");
   });
 

@@ -93,11 +93,11 @@ exist in the schema. Previews have **no** score/events/lineup (not played yet).
 
 ## Reuse map
 
-| Element | Reuses |
-| --- | --- |
-| Hero shell | `<EditorialHero>` (new `matchPreview`/`matchRecap` variants) |
+| Element         | Reuses                                                                 |
+| --------------- | ---------------------------------------------------------------------- |
+| Hero shell      | `<EditorialHero>` (new `matchPreview`/`matchRecap` variants)           |
 | Cover score bar | `event`-variant cover-overlay idiom + `<Crest>` + `<MatchStatusBadge>` |
-| Doelpunten rows | `<MatchEvents filter="goals">` (+ a `highlightTeam` prop) |
+| Doelpunten rows | `<MatchEvents filter="goals">` (+ a `highlightTeam` prop)              |
 
 ## Mockups
 
@@ -105,4 +105,26 @@ exist in the schema. Previews have **no** score/events/lineup (not played yet).
 - `5d-mat/round-2-goalscorer-rollcall.html` — V1/V2/V3 roll-call attachments (V3, sided).
 - `5d-mat/round-3-final-locked.html` — body composition with card C (superseded by rounds 4–5).
 - `5d-mat/round-4-hero-composition.html` — hero options H1/H2/H3.
-- `5d-mat/round-5-hero-h3-final.html` — **locked** H3 hero (aligned score + mobile).
+- `5d-mat/round-5-hero-h3-final.html` — H3 hero (aligned score + mobile).
+
+## Build refinements (5.d-mat-refine, #1470 review)
+
+After shipping the H3 build, the owner refined three surfaces (mockups in
+`5d-mat-refine/round-1-refinements.html` + `round-2-hero-positioning.html`):
+
+- **Hero score bar → two-tier, inside the cover (variant D @ P3).** Supersedes
+  the single-row straddling pill. Top row = `crest · score · crest` (+ `FT` on
+  recap); a hairline subline carries `competition · matchDate`. The bar now sits
+  **inside** the cover's lower third (not straddling the edge — the two-tier
+  bar split awkwardly across it). Because the bar carries competition + date,
+  the **kicker collapses to the bare type label** (`VOORBESCHOUWING` /
+  `MATCHVERSLAG`); it only falls back to the article date when the match 404s
+  and the bar is absent.
+- **Article-foot CTA → centered paper-stamp button (Foot A).** Replaces the
+  bare `naar wedstrijd →` text link with a centered `<LinkButton variant="primary" withArrow>` ("Bekijk de wedstrijd") above a thin ink rule.
+- **News-index cards → match type kicker (Card B).** matchPreview/matchRecap
+  cards gain a jersey-deep dot + type label (`Voorbeschouwing` / `Matchverslag`)
+  ahead of the category badge. Cards stay generic on data (no per-card PSD
+  score/date fetch); this is type-signal only. Required adding `articleType` to
+  the paginated `/nieuws` GROQ projection. Extending a type kicker to the other
+  article types is a separate card-semantics decision (deferred).

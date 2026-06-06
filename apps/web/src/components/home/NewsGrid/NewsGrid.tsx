@@ -1,6 +1,7 @@
 // apps/web/src/components/home/NewsGrid/NewsGrid.tsx
 import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "@/components/article/NewsCard";
+import { matchTypeCardLabel } from "@/lib/utils/article-type-label";
 import type {
   NewsCardBg,
   NewsCardRotation,
@@ -118,6 +119,7 @@ export const NewsGrid = ({
                 imageUrl={article.imageUrl}
                 imageAlt={article.imageAlt}
                 badge={article.tags?.[0]?.name}
+                typeLabel={matchTypeCardLabel(article.articleType)}
                 date={article.date}
                 aspectRatio="landscape-16-9"
                 rotation={SLOT_ROTATIONS[idx]}

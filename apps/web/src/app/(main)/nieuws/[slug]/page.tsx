@@ -4,7 +4,6 @@
  */
 
 import { Effect } from "effect";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { MatchDetail } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
@@ -38,6 +37,7 @@ import {
   type HeroMatchData,
 } from "@/components/article/EditorialHero";
 import { MatchGoalsBlock } from "@/components/article/blocks/MatchGoalsBlock";
+import { LinkButton } from "@/components/design-system";
 import { toHeroMatchData } from "./utils";
 import { ArticleMetadata } from "@/components/article/ArticleMetadata";
 import { ArticleBodyMotion } from "@/components/article/ArticleBodyMotion";
@@ -570,21 +570,25 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         />
       ) : null}
 
-      {/* Plain text CTA to the match page — both preview + recap (5.d-mat:
-          card C dropped, the hero carries the matchup). Only when the match
-          resolved, since a 404'd id would dead-link. */}
+      {/* Match-page CTA — both preview + recap. A centered paper-stamp button
+          (5.d-mat-refine Foot A) closes the article; only rendered when the
+          match resolved, since a 404'd id would dead-link. */}
       {isMatchArticle && matchDetail ? (
-        <div className="bg-cream w-full px-4 pb-4 lg:px-0">
+        <div className="bg-cream w-full px-4 pb-10 lg:px-0">
           <div
-            className="mx-auto mt-4 w-full"
+            className="mx-auto w-full"
             style={{ maxWidth: "var(--container-prose)" }}
           >
-            <Link
-              href={`/wedstrijd/${article.linkedMatch}`}
-              className="text-jersey-deep font-mono text-xs font-bold tracking-[0.04em] uppercase hover:underline"
-            >
-              naar wedstrijd →
-            </Link>
+            <div className="border-ink flex justify-center border-t pt-8">
+              <LinkButton
+                href={`/wedstrijd/${article.linkedMatch}`}
+                variant="primary"
+                size="md"
+                withArrow
+              >
+                Bekijk de wedstrijd
+              </LinkButton>
+            </div>
           </div>
         </div>
       ) : null}

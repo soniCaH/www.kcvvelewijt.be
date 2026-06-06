@@ -360,13 +360,20 @@ export interface HeroMatchScoreBarProps extends HeroMatchData {
 }
 
 /**
- * Balanced `crest · score · crest` pill straddling the cover's lower edge
- * (5.d-mat round 5, H3). Cream paper-stamp, `border-2 border-ink`,
- * `shadow-paper-sm`. The score is `font-display-big`, tabular, with a fixed
- * min-width so `2 – 1` (recap) and `15:00` (preview) both stay centred.
+ * Two-tier `crest · score · crest` bar sitting inside the cover's lower third
+ * (5.d-mat-refine round 1+2 — variant D @ P3). Cream paper-stamp, `border-2
+ * border-ink`, `shadow-paper-md`:
+ *
+ *   ┌──────────────────────────────┐
+ *   │   (K)   2 – 1   (R)   [FT]    │  ← score row (font-display-big, tabular)
+ *   │  ────────────────────────────│
+ *   │   3e Provinciale · za 13 sep  │  ← competition · date subline (mono)
+ *   └──────────────────────────────┘
+ *
  * Recap appends `<MatchStatusBadge>` (`FT`); preview shows the kickoff time
- * (or `vs`) and no badge. Reuses `<Crest>` + `<MatchStatusBadge>` per the
- * lock's reuse map.
+ * (or `vs`) and no badge. The competition + match date moved off the editorial
+ * kicker into this subline, so the bar carries the full match facts and the
+ * kicker stays a clean type label. Reuses `<Crest>` + `<MatchStatusBadge>`.
  */
 export function HeroMatchScoreBar({
   variant,
@@ -377,12 +384,18 @@ export function HeroMatchScoreBar({
   awayScore,
   kickoffTime,
   status,
+  competition,
+  matchDate,
 }: HeroMatchScoreBarProps) {
   const hasScore =
     typeof homeScore === "number" && typeof awayScore === "number";
   const scoreText = hasScore
     ? `${homeScore} – ${awayScore}`
     : (kickoffTime ?? "vs");
+
+  const subline = [competition?.trim(), matchDate?.trim()]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
 
   // KCVV's crest is distinguished with a jersey-deep ring. A bare
   // `text-jersey-deep` only tints the initialled fallback disc — KCVV almost
@@ -395,30 +408,37 @@ export function HeroMatchScoreBar({
     <div
       data-testid="hero-match-score-bar"
       data-variant={variant}
-      className="border-ink shadow-paper-sm bg-cream inline-flex items-center gap-3.5 border-2 px-4 py-1.5"
+      className="border-ink shadow-paper-md bg-cream inline-flex flex-col items-center border-2 px-[18px] pt-2 pb-[7px]"
     >
-      <Crest
-        name={homeTeam.name}
-        logo={homeTeam.logo}
-        size={26}
-        className={kcvvSide === "home" ? kcvvRing : undefined}
-      />
-      <span
-        className={cn(
-          "font-display-big text-ink min-w-[58px] text-center leading-none font-black tracking-[-0.01em] tabular-nums",
-          hasScore ? "text-[22px]" : "text-[14px]",
-        )}
-      >
-        {scoreText}
-      </span>
-      <Crest
-        name={awayTeam.name}
-        logo={awayTeam.logo}
-        size={26}
-        className={kcvvSide === "away" ? kcvvRing : undefined}
-      />
-      {variant === "matchRecap" ? (
-        <MatchStatusBadge status={status} className="ml-0.5" />
+      <div className="flex items-center gap-3.5">
+        <Crest
+          name={homeTeam.name}
+          logo={homeTeam.logo}
+          size={26}
+          className={kcvvSide === "home" ? kcvvRing : undefined}
+        />
+        <span
+          className={cn(
+            "font-display-big text-ink min-w-[60px] text-center leading-none font-black tracking-[-0.01em] tabular-nums",
+            hasScore ? "text-[24px]" : "text-[16px]",
+          )}
+        >
+          {scoreText}
+        </span>
+        <Crest
+          name={awayTeam.name}
+          logo={awayTeam.logo}
+          size={26}
+          className={kcvvSide === "away" ? kcvvRing : undefined}
+        />
+        {variant === "matchRecap" ? (
+          <MatchStatusBadge status={status} className="ml-0.5" />
+        ) : null}
+      </div>
+      {subline ? (
+        <div className="border-cream-deep text-ink-muted mt-[5px] w-full border-t pt-1 text-center font-mono text-[9px] tracking-[0.12em] uppercase">
+          {subline}
+        </div>
       ) : null}
     </div>
   );

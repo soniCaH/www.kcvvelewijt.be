@@ -29,6 +29,12 @@ export interface NewsCardProps {
   imageAlt?: string;
   /** Single category label — shown in the MonoLabel row above the title. */
   badge?: string;
+  /**
+   * Article-type kicker shown ahead of the badge in the MonoLabel row, as a
+   * jersey-deep dot + label (5.d-mat-refine Card B). Used to flag match
+   * preview/recap cards on the news index; omit on other types.
+   */
+  typeLabel?: string;
   /** Display date for articles (shown in MonoLabel row when no event meta). */
   date?: string;
   /** ISO datetime or formatted string for event date (shown with Calendar icon). */
@@ -159,6 +165,7 @@ export const NewsCard = ({
   imageUrl,
   imageAlt,
   badge,
+  typeLabel,
   date,
   eventDate,
   eventTime,
@@ -279,10 +286,25 @@ export const NewsCard = ({
           metaPadding,
         )}
       >
-        {/* MonoLabel row — badge + optional event meta. Truthy check (not `??`)
-            guards against empty-string CMS values. */}
-        {(badge || eventDate || eventTime) && (
+        {/* MonoLabel row — type kicker + badge + optional event meta. Truthy
+            check (not `??`) guards against empty-string CMS values. */}
+        {(typeLabel || badge || eventDate || eventTime) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            {typeLabel && (
+              <span
+                data-testid="newscard-type-label"
+                className={cn(
+                  "inline-flex items-center gap-1.5 font-mono text-[length:var(--text-label)] font-bold tracking-[var(--text-label--tracking)] uppercase",
+                  isDark ? "text-cream" : "text-jersey-deep",
+                )}
+              >
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current"
+                />
+                {typeLabel}
+              </span>
+            )}
             {badge && <MonoLabel tone={labelTone}>{badge}</MonoLabel>}
             {eventDate && (
               <MonoLabel tone={labelTone}>
