@@ -37,6 +37,13 @@ type AnnouncementStory = StoryFor<"announcement">;
 type InterviewStory = StoryFor<"interview">;
 type EventStory = StoryFor<"event">;
 type TransferStory = StoryFor<"transfer">;
+// matchPreview / matchRecap share a single props member whose `variant` is a
+// 2-literal union, so `Extract<..., { variant: "matchPreview" }>` collapses to
+// never. Extract on the full union recovers the member; each story sets its
+// own literal variant.
+type MatchStory = StoryObj<
+  Extract<EditorialHeroProps, { variant: "matchPreview" | "matchRecap" }>
+>;
 
 const COVER_GENERIC = {
   url: fixtureImage("article-hero-generic", 0),
@@ -340,6 +347,67 @@ export const TransferHomepage: TransferStory = {
       age: 24,
       otherClubName: "KV Mechelen B",
     },
+  },
+};
+
+// ─── Match preview / recap (5.d-mat H3 score-forward hero) ──────────────────
+
+const MATCH_RECAP_DATA = {
+  homeTeam: { name: "KCVV Elewijt" },
+  awayTeam: { name: "Racing Mechelen" },
+  kcvvSide: "home" as const,
+  homeScore: 2,
+  awayScore: 1,
+  status: "finished" as const,
+  competition: "3e Provinciale",
+  matchDate: "Za 13 september",
+};
+
+const MATCH_PREVIEW_DATA = {
+  homeTeam: { name: "KCVV Elewijt" },
+  awayTeam: { name: "Racing Mechelen" },
+  kcvvSide: "home" as const,
+  kickoffTime: "15:00",
+  status: "scheduled" as const,
+  competition: "3e Provinciale",
+  matchDate: "Za 13 september",
+};
+
+export const MatchRecapDetail: MatchStory = {
+  args: {
+    variant: "matchRecap",
+    title: "KCVV pakt de drie punten in de slotfase.",
+    lead: "Een koele strafschop besliste een taaie partij tegen Racing.",
+    author: "Redactie",
+    date: "13 september 2026",
+    coverImage: COVER_GENERIC,
+    match: MATCH_RECAP_DATA,
+  },
+};
+
+export const MatchPreviewDetail: MatchStory = {
+  args: {
+    variant: "matchPreview",
+    title: "Topper tegen Racing wacht.",
+    lead: "Een driepunter tilt KCVV naar de subtop.",
+    author: "Redactie",
+    date: "10 september 2026",
+    coverImage: COVER_GENERIC,
+    match: MATCH_PREVIEW_DATA,
+  },
+};
+
+// Graceful degradation: the linked match 404'd, so no `match` data reaches
+// the hero. It falls back to the kicker-only editorial shell (no score bar).
+export const MatchRecapNoMatch: MatchStory = {
+  args: {
+    variant: "matchRecap",
+    title: "KCVV pakt de drie punten in de slotfase.",
+    lead: "Een koele strafschop besliste een taaie partij tegen Racing.",
+    author: "Redactie",
+    date: "13 september 2026",
+    coverImage: COVER_GENERIC,
+    match: null,
   },
 };
 

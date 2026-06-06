@@ -169,6 +169,48 @@ describe("buildNewsArticleJsonLd", () => {
     expect(result.about.url).toBeUndefined();
     expect(result.about.jobTitle).toBe("Jeugdcoördinator");
   });
+
+  const SPORTS_EVENT_DATA = {
+    name: "KCVV Elewijt vs Racing Mechelen",
+    startDate: "2026-09-13T15:00:00Z",
+    homeTeamName: "KCVV Elewijt",
+    awayTeamName: "Racing Mechelen",
+    status: "finished" as const,
+    url: "https://www.kcvvelewijt.be/wedstrijd/12345",
+    venue: "Driesstraat",
+  };
+
+  it("nests the SportsEvent under `about` for a recap, without its own @context", () => {
+    const result = buildNewsArticleJsonLd({
+      ...input,
+      sportsEvent: { relation: "about", data: SPORTS_EVENT_DATA },
+    }) as AnyJsonLd;
+
+    expect(result.about["@type"]).toBe("SportsEvent");
+    expect(result.about.name).toBe("KCVV Elewijt vs Racing Mechelen");
+    expect(result.about.url).toBe("https://www.kcvvelewijt.be/wedstrijd/12345");
+    expect(result.about.homeTeam.name).toBe("KCVV Elewijt");
+    // Nested nodes inherit the document @context — they must not carry one.
+    expect(result.about["@context"]).toBeUndefined();
+    expect(result.mentions).toBeUndefined();
+  });
+
+  it("nests the SportsEvent under `mentions` for a preview", () => {
+    const result = buildNewsArticleJsonLd({
+      ...input,
+      sportsEvent: {
+        relation: "mentions",
+        data: { ...SPORTS_EVENT_DATA, status: "scheduled" },
+      },
+    }) as AnyJsonLd;
+
+    expect(result.mentions["@type"]).toBe("SportsEvent");
+    expect(result.mentions.eventStatus).toBe(
+      "https://schema.org/EventScheduled",
+    );
+    expect(result.mentions["@context"]).toBeUndefined();
+    expect(result.about).toBeUndefined();
+  });
 });
 
 describe("buildBreadcrumbJsonLd", () => {

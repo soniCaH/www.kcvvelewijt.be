@@ -80,6 +80,10 @@ export const ARTICLE_BY_SLUG_QUERY =
   "titleRich": title,
   "lead": coalesce(lead, ""),
   "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  // PSD match id for matchPreview/matchRecap variants (#1470). String, not a
+  // Sanity reference — matches are BFF/PSD-native. The page fetches the match
+  // via BffService.getMatchDetail to feed the hero score bar + Doelpunten.
+  linkedMatch,
   // 5.B.int (#1795) — author + photographer drive <EditorialByline>'s
   // "Door {author}" line (fallback "Door redactie") and the
   // <ArticleCredits> Door / Beeld rows. Both fields are optional on

@@ -195,6 +195,52 @@ describe("MatchEvents", () => {
     });
   });
 
+  describe("highlightTeam", () => {
+    const goalEvents: MatchEvent[] = [
+      { id: 1, type: "goal", minute: 23, team: "home", player: "Janssens" },
+      { id: 2, type: "goal", minute: 55, team: "away", player: "Devos" },
+    ];
+
+    // The tint lives on the name-slot span that wraps the EventDescription;
+    // getByText returns the inner player <span>, so assert on its parent.
+    const nameSlot = (player: string) =>
+      screen.getByText(player).parentElement?.className ?? "";
+
+    it("renders all names in ink by default (no highlightTeam)", () => {
+      render(<MatchEvents {...defaultProps} events={goalEvents} />);
+      expect(nameSlot("Janssens")).toContain("text-ink");
+      expect(nameSlot("Janssens")).not.toContain("text-jersey-deep");
+      expect(nameSlot("Devos")).toContain("text-ink");
+    });
+
+    it("tints only the highlighted side's names jersey-deep", () => {
+      render(
+        <MatchEvents
+          {...defaultProps}
+          events={goalEvents}
+          highlightTeam="home"
+        />,
+      );
+      expect(nameSlot("Janssens")).toContain("text-jersey-deep");
+      // The opposite (away) side stays ink.
+      expect(nameSlot("Devos")).toContain("text-ink");
+      expect(nameSlot("Devos")).not.toContain("text-jersey-deep");
+    });
+
+    it("honours highlightTeam in groupBy='team' mode", () => {
+      render(
+        <MatchEvents
+          {...defaultProps}
+          events={goalEvents}
+          groupBy="team"
+          highlightTeam="away"
+        />,
+      );
+      expect(nameSlot("Devos")).toContain("text-jersey-deep");
+      expect(nameSlot("Janssens")).toContain("text-ink");
+    });
+  });
+
   describe("special events", () => {
     it("shows penalty indicator", () => {
       const penaltyEvents: MatchEvent[] = [

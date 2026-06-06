@@ -349,3 +349,89 @@ describe("EditorialHero — transfer variant", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+// ─── Match variant (5.d-mat H3 score-forward hero) ──────────────────────────
+
+describe("EditorialHero — match variant", () => {
+  const COVER = { url: "/cover.jpg", alt: "Cover" };
+  const RECAP_MATCH = {
+    homeTeam: { name: "KCVV Elewijt" },
+    awayTeam: { name: "Racing Mechelen" },
+    kcvvSide: "home" as const,
+    homeScore: 2,
+    awayScore: 1,
+    status: "finished" as const,
+    competition: "3e Provinciale",
+    matchDate: "Za 13 september",
+  };
+  const PREVIEW_MATCH = {
+    homeTeam: { name: "KCVV Elewijt" },
+    awayTeam: { name: "Racing Mechelen" },
+    kcvvSide: "home" as const,
+    kickoffTime: "15:00",
+    status: "scheduled" as const,
+    competition: "3e Provinciale",
+    matchDate: "Za 13 september",
+  };
+
+  it("renders the MATCHVERSLAG kicker with competition + match date (recap)", () => {
+    render(
+      <EditorialHero variant="matchRecap" {...SHARED} match={RECAP_MATCH} />,
+    );
+    expect(screen.getByText("Matchverslag")).toBeInTheDocument();
+    expect(screen.getByText("3e Provinciale")).toBeInTheDocument();
+    // Match date wins over the article date in the kicker.
+    expect(screen.getByText("Za 13 september")).toBeInTheDocument();
+    expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
+  });
+
+  it("renders the score + FT badge on the recap score bar", () => {
+    render(
+      <EditorialHero
+        variant="matchRecap"
+        {...SHARED}
+        coverImage={COVER}
+        match={RECAP_MATCH}
+      />,
+    );
+    const bar = screen.getByTestId("hero-match-score-bar");
+    expect(bar).toHaveTextContent(/2\s*–\s*1/);
+    expect(bar).toHaveTextContent("FT");
+  });
+
+  it("renders VOORBESCHOUWING + kickoff time and no FT badge (preview)", () => {
+    render(
+      <EditorialHero
+        variant="matchPreview"
+        {...SHARED}
+        coverImage={COVER}
+        match={PREVIEW_MATCH}
+      />,
+    );
+    expect(screen.getByText("Voorbeschouwing")).toBeInTheDocument();
+    const bar = screen.getByTestId("hero-match-score-bar");
+    expect(bar).toHaveTextContent("15:00");
+    expect(bar).not.toHaveTextContent("FT");
+  });
+
+  it("falls back to the kicker-only hero (no score bar) when match is null", () => {
+    render(
+      <EditorialHero
+        variant="matchRecap"
+        {...SHARED}
+        coverImage={COVER}
+        match={null}
+      />,
+    );
+    expect(screen.getByText("Matchverslag")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("hero-match-score-bar"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses the article date in the kicker when no match data is supplied", () => {
+    render(<EditorialHero variant="matchPreview" {...SHARED} />);
+    expect(screen.getByText("Voorbeschouwing")).toBeInTheDocument();
+    expect(screen.getByText("6 mei 2026")).toBeInTheDocument();
+  });
+});

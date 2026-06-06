@@ -139,8 +139,9 @@ function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
       return { ...shared, variant, category: article.tags[0] };
     case "matchPreview":
     case "matchRecap":
-      // Kicker-only hero (VOORBESCHOUWING / MATCHVERSLAG); match facts render
-      // in the article-body card, not the homepage hero.
+      // Homepage hero stays kicker-only (VOORBESCHOUWING / MATCHVERSLAG) — no
+      // `match` data, so no score bar. The score-forward bar only renders on
+      // the detail page, which server-fetches the linked match (5.d-mat).
       return { ...shared, variant };
     default: {
       const _exhaustive: never = variant;

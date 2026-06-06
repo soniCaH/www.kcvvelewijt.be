@@ -11,15 +11,22 @@
  *   of the Event cover photo (signature visual hook from R1.5b).
  * - `<HeroCompressedEventStrip>` — single-row strip below the Event
  *   hero card: `▸ ${location} · ${date} · ${start}–${end}`.
- * - `<HeroTransferDirChip>` — jersey-filled inline chip with arrow
- *   glyph + Dutch label (`↓ Inkomend` / `↑ Uitgaand` / `↻ Verlengd`).
+ * - `<HeroMatchScoreBar>` — `crest · score · crest` pill straddling the
+ *   match cover's lower edge (5.d-mat H3): recap shows score + FT badge,
+ *   preview shows kickoff time. Reuses `<Crest>` + `<MatchStatusBadge>`.
+ * - `<HeroTransferClubRow>` — two-club logo row with a direction arrow
+ *   below the Transfer H1 (replaced the abstract dirChip in #1749).
  * - `<HeroTransferMetaLine>` — graceful-omit meta line below the
- *   Transfer H1 (`${age} jaar · ${position} · van ${otherClubName}`).
+ *   Transfer H1 (`${age} jaar · ${position}`).
  *
- * Source-of-record: docs/design/mockups/phase-4-homepage/hero-flourishes-locked.md (R1.5).
+ * Source-of-record: docs/design/mockups/phase-4-homepage/hero-flourishes-locked.md (R1.5),
+ * docs/design/mockups/phase-5-article-detail/match-locked.md (match, 5.d-mat).
  */
 import Image from "next/image";
+import type { MatchStatus } from "@kcvv/api-contract";
 import { cn } from "@/lib/utils/cn";
+import { Crest } from "@/components/design-system";
+import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import type { ResolvedSubject } from "@/components/article/SubjectAttribution";
 import type {
   ResolvedTransfer,
@@ -319,6 +326,101 @@ export function HeroTransferMetaLine({ feature }: HeroTransferMetaLineProps) {
         </span>
       ))}
     </p>
+  );
+}
+
+// ─── Match (5.d-mat H3 score-forward hero) ──────────────────────────────────
+
+/** A team's identity for the hero score bar — name + optional PSD shield. */
+export interface HeroMatchTeam {
+  name: string;
+  logo?: string;
+}
+
+export interface HeroMatchData {
+  homeTeam: HeroMatchTeam;
+  awayTeam: HeroMatchTeam;
+  /** Side KCVV plays on — tints that crest jersey-deep. */
+  kcvvSide?: "home" | "away";
+  /** Final scores (recap). When both are present the bar shows the score. */
+  homeScore?: number;
+  awayScore?: number;
+  /** Kickoff time `"HH:MM"` shown on the preview bar (falls back to `vs`). */
+  kickoffTime?: string;
+  /** Normalized match status — drives the `FT` badge on the recap bar. */
+  status: MatchStatus;
+  /** Competition name appended to the hero kicker (e.g. `3e Provinciale`). */
+  competition?: string;
+  /** Pre-formatted Dutch match date for the kicker (e.g. `Za 13 september`). */
+  matchDate?: string;
+}
+
+export interface HeroMatchScoreBarProps extends HeroMatchData {
+  variant: "matchPreview" | "matchRecap";
+}
+
+/**
+ * Balanced `crest · score · crest` pill straddling the cover's lower edge
+ * (5.d-mat round 5, H3). Cream paper-stamp, `border-2 border-ink`,
+ * `shadow-paper-sm`. The score is `font-display-big`, tabular, with a fixed
+ * min-width so `2 – 1` (recap) and `15:00` (preview) both stay centred.
+ * Recap appends `<MatchStatusBadge>` (`FT`); preview shows the kickoff time
+ * (or `vs`) and no badge. Reuses `<Crest>` + `<MatchStatusBadge>` per the
+ * lock's reuse map.
+ */
+export function HeroMatchScoreBar({
+  variant,
+  homeTeam,
+  awayTeam,
+  kcvvSide,
+  homeScore,
+  awayScore,
+  kickoffTime,
+  status,
+}: HeroMatchScoreBarProps) {
+  const hasScore =
+    typeof homeScore === "number" && typeof awayScore === "number";
+  const scoreText = hasScore
+    ? `${homeScore} – ${awayScore}`
+    : (kickoffTime ?? "vs");
+
+  // KCVV's crest is distinguished with a jersey-deep ring. A bare
+  // `text-jersey-deep` only tints the initialled fallback disc — KCVV almost
+  // always has a raster logo, which a text colour can't recolour — so a ring
+  // is the treatment that actually renders for both logo and disc.
+  const kcvvRing =
+    "rounded-full ring-2 ring-jersey-deep ring-offset-1 ring-offset-cream";
+
+  return (
+    <div
+      data-testid="hero-match-score-bar"
+      data-variant={variant}
+      className="border-ink shadow-paper-sm bg-cream inline-flex items-center gap-3.5 border-2 px-4 py-1.5"
+    >
+      <Crest
+        name={homeTeam.name}
+        logo={homeTeam.logo}
+        size={26}
+        className={kcvvSide === "home" ? kcvvRing : undefined}
+      />
+      <span
+        className={cn(
+          "font-display-big text-ink min-w-[58px] text-center leading-none font-black tracking-[-0.01em] tabular-nums",
+          hasScore ? "text-[22px]" : "text-[14px]",
+        )}
+      >
+        {scoreText}
+      </span>
+      <Crest
+        name={awayTeam.name}
+        logo={awayTeam.logo}
+        size={26}
+        className={kcvvSide === "away" ? kcvvRing : undefined}
+      />
+      {variant === "matchRecap" ? (
+        <MatchStatusBadge status={status} className="ml-0.5" />
+      ) : null}
+    </div>
   );
 }
 

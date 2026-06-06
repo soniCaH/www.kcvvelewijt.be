@@ -28,4 +28,32 @@ describe("EditorialHeroShell", () => {
       expect(container.querySelectorAll("section > div")).toHaveLength(1);
     },
   );
+
+  it("keeps the editorial column first by default (no order utilities)", () => {
+    const { container } = render(
+      <EditorialHeroShell editorial={<p>editorial</p>} cover={<p>cover</p>} />,
+    );
+    const [editorialCol, coverCol] =
+      container.querySelectorAll("section > div");
+    expect(editorialCol.className).not.toContain("order-2");
+    expect(coverCol.className).not.toContain("order-1");
+  });
+
+  it("stacks the cover above the editorial on mobile when coverFirstOnMobile", () => {
+    const { container } = render(
+      <EditorialHeroShell
+        editorial={<p>editorial</p>}
+        cover={<p>cover</p>}
+        coverFirstOnMobile
+      />,
+    );
+    const [editorialCol, coverCol] =
+      container.querySelectorAll("section > div");
+    // editorial drops below the cover on mobile, restores to the left on lg.
+    expect(editorialCol.className).toContain("order-2");
+    expect(editorialCol.className).toContain("lg:order-1");
+    // cover rises to the top on mobile, restores to the right on lg.
+    expect(coverCol.className).toContain("order-1");
+    expect(coverCol.className).toContain("lg:order-2");
+  });
 });

@@ -55,6 +55,27 @@ describe("useArticleAnalytics", () => {
       });
     });
 
+    it.each(["matchPreview", "matchRecap"] as const)(
+      "passes the %s article_type through unchanged",
+      (articleType) => {
+        const { result } = renderHook(() => useArticleAnalytics());
+
+        act(() => {
+          result.current.trackArticleView({
+            articleType,
+            articleId: `id-${articleType}`,
+            hasSubject: false,
+          });
+        });
+
+        expect(mockTrackEvent).toHaveBeenCalledWith("article_view", {
+          article_type: articleType,
+          article_id_hashed: hashMemberId(`id-${articleType}`),
+          has_subject: false,
+        });
+      },
+    );
+
     it("normalises missing articleType to 'announcement' (legacy fallback)", () => {
       const { result } = renderHook(() => useArticleAnalytics());
 

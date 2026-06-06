@@ -43,14 +43,19 @@ import {
 import type { EventFactValue } from "@/components/article/blocks/EventFact/types";
 import { serializeTitle } from "@/lib/utils/serialize-title";
 import { formatArticleDate } from "@/lib/utils/dates";
+import { cn } from "@/lib/utils/cn";
 import {
   HeroCompressedEventStrip,
   HeroCreditChip,
   HeroDayBlockOverlay,
+  HeroMatchScoreBar,
   HeroTransferClubRow,
   HeroTransferMetaLine,
   buildInterviewKickerMeta,
+  type HeroMatchData,
 } from "./_variant-parts";
+
+export type { HeroMatchData } from "./_variant-parts";
 
 export type EditorialHeroVariant =
   | "announcement"
@@ -162,12 +167,17 @@ type TransferProps = EditorialHeroSharedProps &
     feature?: TransferFactValue | null;
   };
 
-// matchPreview / matchRecap share one shape — a kicker-only hero (the match
-// facts render in the locked <MatchResultCard> + Doelpunten body block per
-// #1791, fed by the article's `linkedMatch` PSD id). No structured `feature`.
+// matchPreview / matchRecap share one shape — the score-forward H3 hero
+// (5.d-mat lock). When `match` data is supplied (detail page, fed by the
+// article's `linkedMatch` PSD id), the cover gains a `crest · score · crest`
+// score bar straddling its lower edge and the kicker carries the competition
+// + match date. When `match` is null/absent (homepage hero, or a 404'd match
+// on the detail page) the hero degrades gracefully to the kicker-only shell.
 type MatchProps = EditorialHeroSharedProps &
   PlacementProps & {
     variant: "matchPreview" | "matchRecap";
+    /** PSD match facts for the score bar + kicker. Null → no bar (graceful). */
+    match?: HeroMatchData | null;
   };
 
 export type EditorialHeroProps =
@@ -186,6 +196,11 @@ interface EditorialHeroCoverProps {
    *  Event day-block stamp). `position: relative` is already set on
    *  the inner figure container; consumers position themselves. */
   overlay?: React.ReactNode;
+  /** Optional node straddling the cover's LOWER edge (the match score
+   *  bar). Unlike `overlay` it renders OUTSIDE the figure's
+   *  `overflow-hidden` photo box so it can protrude half-below the
+   *  cover; the wrapper reserves the protruding height. */
+  straddle?: React.ReactNode;
   /** When `true`, the figure adds a `group-hover` rotate + scale so
    *  the framed photo tilts on hover. Only used by the homepage
    *  placement when `hoverStyle === "tilt-photo"`. The wrapping
@@ -197,18 +212,19 @@ function EditorialHeroCover({
   coverImage,
   aspect,
   overlay,
+  straddle,
   tiltOnHover,
 }: EditorialHeroCoverProps) {
-  return (
+  const figure = (
     <TapedFigure
       aspect={aspect}
       rotation="b"
       tape={{ color: "jersey", length: "md" }}
-      className={
-        tiltOnHover
-          ? "relative max-w-[440px] transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0 motion-reduce:group-focus-visible:scale-100 motion-reduce:group-focus-visible:rotate-0"
-          : "relative max-w-[440px]"
-      }
+      className={cn(
+        "relative max-w-[440px]",
+        tiltOnHover &&
+          "transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0 motion-reduce:group-focus-visible:scale-100 motion-reduce:group-focus-visible:rotate-0",
+      )}
     >
       <Image
         src={coverImage.url}
@@ -219,6 +235,21 @@ function EditorialHeroCover({
       />
       {overlay}
     </TapedFigure>
+  );
+
+  if (!straddle) return figure;
+
+  // The score bar must sit half-below the cover's lower edge, but
+  // <TapedFigure>'s photo box is `overflow-hidden`, so it can't live as a
+  // figure child. Wrap the figure in a relative box (with `pb-6` reserving
+  // the protruding height) and centre the bar on the figure's bottom edge.
+  return (
+    <div className="relative mx-auto w-full max-w-[440px] pb-6">
+      {figure}
+      <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 translate-y-1/2">
+        {straddle}
+      </div>
+    </div>
   );
 }
 
@@ -370,11 +401,14 @@ function renderMatchEditorial(
   author: string | undefined,
   variant: "matchPreview" | "matchRecap",
   date: string | undefined,
+  competition: string | undefined,
 ) {
   // Kicker mirrors the match-page status vocabulary (<MatchHero>): preview →
-  // VOORBESCHOUWING, recap → MATCHVERSLAG. Match facts live in the body card.
+  // VOORBESCHOUWING, recap → MATCHVERSLAG, then `· competition · date`. The
+  // matchup itself lives in the cover score bar (H3).
   const label = variant === "matchPreview" ? "Voorbeschouwing" : "Matchverslag";
-  const items = buildPlainKickerItems(label, [], date);
+  const meta = competition?.trim() ? [competition.trim()] : [];
+  const items = buildPlainKickerItems(label, meta, date);
   return (
     <>
       <EditorialKicker items={items} />
@@ -398,7 +432,11 @@ export function EditorialHero(props: EditorialHeroProps) {
   let editorial: React.ReactNode;
   let coverAspect: "landscape-16-9" | "landscape-3-2" = "landscape-16-9";
   let coverOverlay: React.ReactNode = null;
+  let coverStraddle: React.ReactNode = null;
   let belowHero: React.ReactNode = null;
+  // Match hero stacks the cover above the editorial on mobile so the score
+  // bar is read first (5.d-mat lock). Other variants keep editorial-first.
+  let coverFirstOnMobile = false;
 
   if (props.variant === "announcement") {
     editorial = renderAnnouncementEditorial(
@@ -457,8 +495,33 @@ export function EditorialHero(props: EditorialHeroProps) {
       date,
     );
   } else {
-    // matchPreview | matchRecap — kicker-only hero; facts live in the body card.
-    editorial = renderMatchEditorial(title, lead, author, props.variant, date);
+    // matchPreview | matchRecap — score-forward H3 hero. The kicker carries
+    // the competition + match date; the cover gains a crest·score·crest bar.
+    const match = props.match;
+    const kickerDate = match?.matchDate ?? date;
+    editorial = renderMatchEditorial(
+      title,
+      lead,
+      author,
+      props.variant,
+      kickerDate,
+      match?.competition,
+    );
+    if (match) {
+      coverFirstOnMobile = true;
+      coverStraddle = (
+        <HeroMatchScoreBar
+          variant={props.variant}
+          homeTeam={match.homeTeam}
+          awayTeam={match.awayTeam}
+          kcvvSide={match.kcvvSide}
+          homeScore={match.homeScore}
+          awayScore={match.awayScore}
+          kickoffTime={match.kickoffTime}
+          status={match.status}
+        />
+      );
+    }
   }
 
   const tiltOnHover =
@@ -467,12 +530,14 @@ export function EditorialHero(props: EditorialHeroProps) {
   const shell = (
     <EditorialHeroShell
       editorial={editorial}
+      coverFirstOnMobile={coverFirstOnMobile}
       cover={
         coverImage !== undefined ? (
           <EditorialHeroCover
             coverImage={coverImage}
             aspect={coverAspect}
             overlay={coverOverlay}
+            straddle={coverStraddle}
             tiltOnHover={tiltOnHover}
           />
         ) : undefined

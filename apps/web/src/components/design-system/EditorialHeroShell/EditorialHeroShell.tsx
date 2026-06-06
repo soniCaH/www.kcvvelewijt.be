@@ -8,17 +8,27 @@
  * Spec: PRD redesign-phase-3 §5.B.1.
  */
 import type { ReactNode } from "react";
+import { cn } from "@/lib/utils/cn";
 
 export interface EditorialHeroShellProps {
   /** Editorial column — kicker, headline, lead, byline. */
   editorial: ReactNode;
   /** Cover artefact column — TapedCard + TapedFigure composition. Optional. */
   cover?: ReactNode;
+  /**
+   * Stack the cover ABOVE the editorial column on mobile (single-column
+   * layout) while keeping the desktop side-by-side order (editorial left,
+   * cover right). Used by the score-forward match hero (5.d-mat lock) so
+   * the score bar is the first thing read on a phone. Default `false`
+   * keeps the canonical editorial-first stacking.
+   */
+  coverFirstOnMobile?: boolean;
 }
 
 export function EditorialHeroShell({
   editorial,
   cover,
+  coverFirstOnMobile = false,
 }: EditorialHeroShellProps) {
   return (
     <section className="mx-auto grid w-full max-w-[1120px] grid-cols-1 gap-x-12 gap-y-8 pt-12 pb-6 lg:grid-cols-[60fr_40fr]">
@@ -30,11 +40,25 @@ export function EditorialHeroShell({
           the page's `lang="nl"` dictionary so long Dutch compound words split
           on syllable boundaries (door-zet-tings-ver-mo-gen) rather than
           overflowing the column. */}
-      <div className="flex min-w-0 flex-col gap-3 hyphens-auto">
+      <div
+        className={cn(
+          "flex min-w-0 flex-col gap-3 hyphens-auto",
+          // On mobile, drop the editorial column below the cover; reset to
+          // its natural first position on the desktop two-column grid.
+          coverFirstOnMobile && "order-2 lg:order-1",
+        )}
+      >
         {editorial}
       </div>
       {cover ? (
-        <div className="flex min-w-0 items-start justify-center">{cover}</div>
+        <div
+          className={cn(
+            "flex min-w-0 items-start justify-center",
+            coverFirstOnMobile && "order-1 lg:order-2",
+          )}
+        >
+          {cover}
+        </div>
       ) : null}
     </section>
   );

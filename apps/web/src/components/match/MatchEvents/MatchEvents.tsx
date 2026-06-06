@@ -135,6 +135,14 @@ export interface MatchEventsProps {
   events: readonly MatchEvent[];
   /** Filter events by type */
   filter?: "all" | "goals" | "cards" | "substitutions";
+  /**
+   * Tint the player/scorer names on one side `jersey-deep` instead of the
+   * default `text-ink` — used by the article-side Doelpunten block to
+   * highlight KCVV scorers (5.d-mat lock, Round 2). Pass the side KCVV
+   * plays on (`"home"` | `"away"`). Omit on the match page's full timeline
+   * so every name renders in ink.
+   */
+  highlightTeam?: "home" | "away";
   /** Show event type icons */
   showIcons?: boolean;
   /** Group events by team */
@@ -215,6 +223,7 @@ export function MatchEvents({
   awayTeamLogo,
   events,
   filter = "all",
+  highlightTeam,
   showIcons = true,
   groupBy = "chronological",
   isLoading = false,
@@ -281,13 +290,21 @@ export function MatchEvents({
           <h3 className="border-ink text-ink/70 mb-2 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
             {homeTeamName}
           </h3>
-          <EventList events={homeEvents} showIcons={showIcons} />
+          <EventList
+            events={homeEvents}
+            showIcons={showIcons}
+            highlightTeam={highlightTeam}
+          />
         </div>
         <div>
           <h3 className="border-ink text-ink/70 mb-2 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
             {awayTeamName}
           </h3>
-          <EventList events={awayEvents} showIcons={showIcons} />
+          <EventList
+            events={awayEvents}
+            showIcons={showIcons}
+            highlightTeam={highlightTeam}
+          />
         </div>
       </div>
     );
@@ -314,6 +331,7 @@ export function MatchEvents({
           <EventRow
             event={event}
             showIcon={showIcons}
+            highlighted={highlightTeam === event.team}
             teamName={event.team === "home" ? homeTeamName : awayTeamName}
             teamLogo={event.team === "home" ? homeTeamLogo : awayTeamLogo}
           />
@@ -334,9 +352,11 @@ export function MatchEvents({
 function EventList({
   events,
   showIcons,
+  highlightTeam,
 }: {
   events: readonly MatchEvent[];
   showIcons: boolean;
+  highlightTeam?: "home" | "away";
 }) {
   if (events.length === 0) {
     return (
@@ -355,7 +375,11 @@ function EventList({
             index > 0 && "border-cream-deep border-t border-dashed",
           )}
         >
-          <SingleSideEventRow event={event} showIcon={showIcons} />
+          <SingleSideEventRow
+            event={event}
+            showIcon={showIcons}
+            highlighted={highlightTeam === event.team}
+          />
         </li>
       ))}
     </ol>
@@ -370,15 +394,19 @@ function EventList({
 function EventRow({
   event,
   showIcon,
+  highlighted,
   teamName,
   teamLogo,
 }: {
   event: MatchEvent;
   showIcon: boolean;
+  /** When true, the player name renders in `jersey-deep` (KCVV highlight). */
+  highlighted: boolean;
   teamName: string;
   teamLogo: string | undefined;
 }) {
   const isHome = event.team === "home";
+  const nameTint = highlighted ? "text-jersey-deep" : "text-ink";
   return (
     <div className="grid grid-cols-[36px_22px_1fr_1fr_22px_20px] items-center gap-3 py-3 md:gap-4">
       {/* Minute — display-big numeric, tight tracking. */}
@@ -394,7 +422,8 @@ function EventRow({
       {/* Home name slot — left-aligned italic display. */}
       <span
         className={cn(
-          "font-display text-ink min-w-0 truncate text-[15px] italic",
+          "font-display min-w-0 truncate text-[15px] italic",
+          nameTint,
           !isHome && "invisible",
         )}
       >
@@ -404,7 +433,8 @@ function EventRow({
       {/* Away name slot — right-aligned italic display. */}
       <span
         className={cn(
-          "font-display text-ink min-w-0 truncate text-right text-[15px] italic",
+          "font-display min-w-0 truncate text-right text-[15px] italic",
+          nameTint,
           isHome && "invisible",
         )}
       >
@@ -429,9 +459,12 @@ function EventRow({
 function SingleSideEventRow({
   event,
   showIcon,
+  highlighted,
 }: {
   event: MatchEvent;
   showIcon: boolean;
+  /** When true, the player name renders in `jersey-deep` (KCVV highlight). */
+  highlighted: boolean;
 }) {
   return (
     <div className="grid grid-cols-[36px_22px_1fr] items-center gap-3 py-3 md:gap-4">
@@ -441,7 +474,12 @@ function SingleSideEventRow({
       <span className="flex items-center justify-center">
         {showIcon && <EventGlyph type={event.type} />}
       </span>
-      <span className="font-display text-ink min-w-0 truncate text-[15px] italic">
+      <span
+        className={cn(
+          "font-display min-w-0 truncate text-[15px] italic",
+          highlighted ? "text-jersey-deep" : "text-ink",
+        )}
+      >
         <EventDescription event={event} />
       </span>
     </div>

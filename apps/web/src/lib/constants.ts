@@ -20,6 +20,14 @@ export const SITE_CONFIG = {
   stamnummer: 55,
 } as const;
 
+/**
+ * PSD club id for KCVV Elewijt — shared across all KCVV teams (A / B / youth).
+ * Used to determine which side of a match is KCVV when the BFF doesn't supply
+ * the team-scoped `is_home` flag (e.g. `getMatchDetail`, which has no teamId
+ * context). Id-based, never name-based (see `feedback_psd_match_identification`).
+ */
+export const KCVV_CLUB_ID = 1235;
+
 // Revalidation Intervals (in seconds)
 export const REVALIDATE = {
   articles: 60, // 1 minute

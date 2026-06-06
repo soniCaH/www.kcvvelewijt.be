@@ -21,7 +21,9 @@ function normaliseType(articleType: string | null | undefined): ArticleType {
   if (
     articleType === "interview" ||
     articleType === "transfer" ||
-    articleType === "event"
+    articleType === "event" ||
+    articleType === "matchPreview" ||
+    articleType === "matchRecap"
   ) {
     return articleType;
   }
