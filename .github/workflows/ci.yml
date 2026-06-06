@@ -13,15 +13,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -54,7 +54,7 @@ jobs:
         run: npx turbo build --filter=@kcvv/studio
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v6.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: apps/web/coverage
@@ -67,15 +67,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -95,7 +95,7 @@ jobs:
         run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
 
       - name: Upload Storybook static
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: storybook-static
           path: apps/web/storybook-static
@@ -110,11 +110,11 @@ jobs:
       visual: ${{ steps.filter.outputs.visual }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Detect visual paths
         id: filter
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@v4.0.1
         with:
           filters: |
             visual:
@@ -152,15 +152,15 @@ jobs:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -169,7 +169,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download Storybook static
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.1
         with:
           name: storybook-static
           path: apps/web/storybook-static
@@ -179,7 +179,7 @@ jobs:
 
       - name: Upload diff PNGs on failure
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: vr-diff-output
           path: |
@@ -198,13 +198,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
         with:
           token: ${{ secrets.KCVV_VR_BOT_TOKEN }}
           fetch-depth: 0
 
       - name: Download diff artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@v8.0.1
         continue-on-error: true
         with:
           name: vr-diff-output
@@ -294,15 +294,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -320,10 +320,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
@@ -345,15 +345,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -378,15 +378,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -411,15 +411,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6.0.3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@v6.0.8
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v6.4.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
