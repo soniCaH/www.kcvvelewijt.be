@@ -7,6 +7,7 @@ import type {
   ARTICLE_TAGS_QUERY_RESULT,
   ARTICLE_BY_SLUG_QUERY_RESULT,
   RELATED_ARTICLES_QUERY_RESULT,
+  MATCH_ARTICLES_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import { formatArticleDate } from "../utils/dates";
 
@@ -67,6 +68,26 @@ export const RELATED_ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
+}`);
+
+// Match preview/recap articles linked to a PSD match (#1470 + #1914). Matches
+// are BFF/PSD-native (not Sanity documents), so the link is the article's
+// `linkedMatch` string field holding the PSD match id — not a Sanity
+// `references()` edge. Returns 0–2 rows (at most one `matchPreview` + one
+// `matchRecap` per match); `selectMatchArticle` (component layer) applies the
+// per-state truth table to pick which one the `<MatchArticleLinkCard>` hero
+// features. Ordered newest-first so a same-type duplicate (data anomaly) keeps
+// the most recent. `pt::text(title)` flattens the constrained-PT title to a
+// plain string — the hero heading renders verbatim, no accent decorator.
+export const MATCH_ARTICLES_QUERY =
+  defineQuery(`*[_type == "article" && linkedMatch == $matchId && articleType in ["matchPreview", "matchRecap"] && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
+  "id": _id,
+  "title": coalesce(pt::text(title), title, ""),
+  "lead": coalesce(lead, ""),
+  "slug": coalesce(slug.current, ""),
+  publishedAt,
+  articleType,
+  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
 // Title is constrained Portable Text (single block, accent decorator).
@@ -211,6 +232,19 @@ type ARTICLE_BY_SLUG_DETAIL = NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>;
 
 export type ArticleDetailVM = ARTICLE_BY_SLUG_DETAIL;
 
+/** A `matchPreview` / `matchRecap` article linked to a PSD match (#1914).
+ *  `articleType` is narrowed to the two match variants — the GROQ filter
+ *  guarantees the row is one of them at runtime, so consumers
+ *  (`selectMatchArticle`) can switch on it without a wider-union guard. */
+export type MatchArticleVM = Omit<
+  MATCH_ARTICLES_QUERY_RESULT[number],
+  "title" | "slug" | "articleType"
+> & {
+  title: string;
+  slug: string;
+  articleType: "matchPreview" | "matchRecap";
+};
+
 export type RelatedArticleRef = NonNullable<
   ARTICLE_BY_SLUG_DETAIL["relatedArticles"]
 >[number];
@@ -312,6 +346,11 @@ export interface ArticleRepositoryInterface {
   }) => Effect.Effect<ArticleVM[]>;
   readonly findTags: () => Effect.Effect<ARTICLE_TAGS_QUERY_RESULT>;
   readonly findRelated: (documentId: string) => Effect.Effect<ArticleVM[]>;
+  /** Match preview/recap articles linked to a PSD match by its string id
+   *  (#1914). Returns 0–2 rows, newest-first. */
+  readonly findByLinkedMatch: (
+    matchId: string,
+  ) => Effect.Effect<MatchArticleVM[]>;
 }
 
 export class ArticleRepository extends Context.Tag("ArticleRepository")<
@@ -338,4 +377,21 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
     fetchGroq<RELATED_ARTICLES_QUERY_RESULT>(RELATED_ARTICLES_QUERY, {
       documentId,
     }).pipe(Effect.map((rows) => rows.map(widenToArticleVM))),
+  findByLinkedMatch: (matchId) =>
+    // The GROQ filter already constrains `articleType` to the two match
+    // variants, but typegen widens it to the full article union. Narrow back
+    // to `MatchArticleVM` with a type-guard `filter` rather than a bare cast —
+    // it drops any anomalous row (e.g. a null `articleType`) instead of
+    // mislabeling it, and mirrors the other repository mappers.
+    fetchGroq<MATCH_ARTICLES_QUERY_RESULT>(MATCH_ARTICLES_QUERY, {
+      matchId,
+    }).pipe(
+      Effect.map((rows) =>
+        rows.filter(
+          (row): row is MatchArticleVM =>
+            row.articleType === "matchPreview" ||
+            row.articleType === "matchRecap",
+        ),
+      ),
+    ),
 });

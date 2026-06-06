@@ -30,6 +30,10 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
+import {
+  ArticleRepository,
+  type MatchArticleVM,
+} from "@/lib/repositories/article.repository";
 import type { MatchDetail, MatchEvent } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -39,6 +43,10 @@ import {
 import { MatchHero } from "@/components/match/MatchHero";
 import { MatchLineupSection } from "@/components/match/MatchLineupSection";
 import { MatchEventsSection } from "@/components/match/MatchEventsSection";
+import {
+  MatchArticleLinkCard,
+  selectMatchArticle,
+} from "@/components/match/MatchArticleLinkCard";
 import { FooterSafeArea, StripedSeam } from "@/components/design-system";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
@@ -189,6 +197,30 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const hasLineup = homeLineup.length > 0 || awayLineup.length > 0;
   const hasEvents = events.length > 0;
 
+  // Fetch the editorial article(s) linked to this match (#1914). Matches are
+  // BFF/PSD-native, so the link is the article's `linkedMatch` string id — the
+  // route `matchId` itself. `selectMatchArticle` applies the per-state truth
+  // table to pick the hero article + (optional) inline secondary link.
+  // Resilient: a Sanity outage degrades to "no card" rather than 500-ing the
+  // whole match page, mirroring the keeper-lookup fallback above.
+  const linkedArticles = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* ArticleRepository;
+      return yield* repo.findByLinkedMatch(matchId);
+    }).pipe(
+      Effect.catchAllCause((cause) => {
+        console.warn(
+          "[wedstrijd/[matchId]] linked-article lookup failed; " +
+            "rendering without the article link card.",
+          { cause },
+        );
+        return Effect.succeed<MatchArticleVM[]>([]);
+      }),
+    ),
+  );
+  const articleSelection = selectMatchArticle(linkedArticles, match.status);
+  const hasArticle = articleSelection !== null;
+
   const matchLabel = formatMatchTitle(match);
 
   const analyticsParams = {
@@ -235,7 +267,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         kcvvTeamLabel={match.kcvv_team_label}
       />
 
-      {(hasLineup || hasEvents) && (
+      {(hasLineup || hasEvents || hasArticle) && (
         <StripedSeam colorPair="ink-cream" height="md" />
       )}
 
@@ -272,14 +304,42 @@ export default async function MatchPage({ params }: MatchPageProps) {
         </TrackInView>
       )}
 
-      {/* TODO(#1470 follow-up): <MatchArticleLinkCard> renders here when a
-          matchPreview/matchRecap article exists for this match. Slot
-          reserved per the 6.B.d1 lock; component build deferred until the
-          article schema's `linkedMatch` field lands. */}
+      {/* Seam before the article card when a body section preceded it, so the
+          card isn't flush against the lineup/events block. */}
+      {hasArticle && (hasLineup || hasEvents) && (
+        <StripedSeam colorPair="ink-cream" height="md" />
+      )}
 
-      {/* TODO(#1470 follow-up): match-filtered <RelatedArticles> renders
-          here. Same dependency on the `linkedMatch` field — query would
-          return zero rows in v1, so the slot stays empty until #1470. */}
+      {/* <MatchArticleLinkCard> (6.B.d4 lock) — the matchPreview/matchRecap
+          article written about this match. `articleSelection` is precomputed
+          server-side; <TrackInView> only mounts when the card will render, so
+          `match_article_link_card_in_view` never fires on the auto-hide branch
+          (Phase 6.A pattern). The truth-table pick (recap vs preview + the
+          optional inline "Lees ook …" secondary) lives in `selectMatchArticle`.
+
+          The match-filtered <RelatedArticles> slot reserved in 6.B.d1 is
+          intentionally NOT a separate section: a match has at most one *other*
+          linked article (the non-dominant preview/recap), so it's surfaced as
+          the card's inline `secondary` link instead (owner decision, #1914). */}
+      {articleSelection && (
+        <TrackInView
+          eventName="match_article_link_card_in_view"
+          params={analyticsParams}
+        >
+          <MatchArticleLinkCard
+            article={articleSelection.article}
+            kicker={articleSelection.kicker}
+            secondary={
+              articleSelection.secondary
+                ? {
+                    slug: articleSelection.secondary.article.slug,
+                    label: articleSelection.secondary.label,
+                  }
+                : null
+            }
+          />
+        </TrackInView>
+      )}
 
       <FooterSafeArea />
     </>
