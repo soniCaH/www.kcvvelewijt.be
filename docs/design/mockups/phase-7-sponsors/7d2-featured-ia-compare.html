@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /sponsors · Round 2: IA — featured count + placement</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0 0 4px; font-size: 13px; color: #b9b9b9; max-width: 82ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 28px 36px; }
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      h2.hd { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px, 5.5vw, 66px); line-height: 0.92; margin: 12px 0 0; }
+      h2.hd .dot { color: var(--jersey-deep); }
+      .lead { font-family: var(--font-display); font-size: 19px; line-height: 1.5; max-width: 56ch; margin: 16px 0 0; color: var(--ink-soft); }
+      .swatch { width: 22px; height: 22px; border: 1px solid var(--ink); flex: none; filter: grayscale(1); transition: filter .3s; }
+      .tile:hover .swatch, .fcard:hover .swatch { filter: grayscale(0); }
+      .tier-kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-muted); display: flex; align-items: center; gap: 12px; margin-top: 38px; }
+      .tier-kicker::after { content: ""; height: 2px; flex: 1; background: var(--paper-edge); }
+      .grid-main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 16px; }
+      .tile { background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 22px 14px 12px; text-align: center; }
+      .tile:nth-child(1){transform:rotate(-0.4deg)} .tile:nth-child(2){transform:rotate(0.3deg)} .tile:nth-child(3){transform:rotate(0.5deg)}
+      .tile .logo-box { min-height: 54px; display:flex; align-items:center; justify-content:center; }
+      .tile .name { font-family: var(--font-display); font-style: italic; font-size: 14px; margin-top: 8px; }
+
+      /* featured card */
+      .fcard { background: var(--jersey-deep-dark); color: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 5px 0 0 var(--ink); padding: 22px; }
+      .fcard .kicker { color: var(--warm); }
+      .fcard .logo-box { background: var(--cream); border: 2px solid var(--ink); padding: 18px; margin: 12px 0; min-height: 60px; display:flex; align-items:center; justify-content:center; }
+      .fcard .logo-box .swatch { width: 26px; height: 26px; }
+      .fcard .fname { font-family: var(--font-display); font-style: italic; font-size: 20px; }
+      .fcard .blurb { font-size: 13px; line-height: 1.5; color: rgba(245,241,230,0.8); margin-top: 6px; }
+      .fcard .visit { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warm); margin-top: 10px; display: inline-block; }
+
+      .note-strip { background: var(--cream-deep); border-top: 1px dashed var(--ink); border-bottom: 1px dashed var(--ink); padding: 10px 28px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 20px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+
+      /* V1 split hero */
+      .v1-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 34px; align-items: end; }
+      /* V2 band */
+      .fband { margin-top: 28px; background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); padding: 22px 22px 24px; }
+      .fband .band-kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .fband-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 14px; }
+      .fband .fcard { box-shadow: 3px 3px 0 0 var(--ink); padding: 18px; }
+      .fband .fcard .fname { font-size: 17px; }
+      /* V3 inline strip */
+      .fstrip { margin-top: 30px; border: 2px solid var(--ink); background: var(--cream-soft); display: grid; grid-template-columns: 150px 1fr; }
+      .fstrip .label { background: var(--jersey-deep-dark); color: var(--warm); font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 16px; display: flex; align-items: center; }
+      .fstrip .row { display: flex; gap: 0; }
+      .fstrip .mini { flex: 1; padding: 14px; border-left: 1px solid var(--ink); display: flex; align-items: center; gap: 10px; }
+      .fstrip .mini .swatch { width: 20px; height: 20px; }
+      .fstrip .mini .mn { font-family: var(--font-display); font-style: italic; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /sponsors — Round 2: IA — featured "In de kijker" count + placement</h1>
+      <p>Voice locked to A·Merci + a prominent featured card (<a href="./7d1-voice-locked.md">7d1-voice-locked.md</a>).
+        This round only varies <b>how many featured cards show and where they sit</b>. Everything else
+        (Merci hero, taped tier grids, CTA) is held constant. Data reality: 0, 1, or many sponsors
+        can have <code>featured=true</code> — each variant notes how it scales + its empty (0-featured) behaviour.</p>
+    </div>
+
+    <!-- ===== V1 — single marquee in the hero (split) ===== -->
+    <div class="direction-bar"><span class="tag">V1</span> Marquee in hero (split) <span class="note">headline left, ONE featured card right — D's original placement</span></div>
+    <div class="wrap">
+      <div class="v1-split">
+        <div>
+          <div class="kicker">Er is maar één plezante compagnie</div>
+          <h2 class="hd">Merci aan onze sponsors<span class="dot">.</span></h2>
+          <p class="lead">Zonder hen geen ballen, geen tenues, geen jeugdwerking.</p>
+        </div>
+        <div class="fcard">
+          <div class="kicker">In de kijker</div>
+          <div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div>
+          <div class="fname">Garage Peeters</div>
+          <div class="blurb">Hoofdsponsor sinds dag één — leverde de wedstrijdballen voor het hele seizoen.</div>
+          <span class="visit">Bezoek website ↗</span>
+        </div>
+      </div>
+      <div class="tier-kicker">Hoofdsponsors</div>
+      <div class="grid-main">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="name">Garage Peeters</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="name">Bouwwerken Van Assche</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div><div class="name">Immo Zennevallei</div></div>
+      </div>
+    </div>
+    <div class="note-strip">SCALES: shows ONE card only — if several sponsors are featured, picks the top one (e.g. highest tier). EMPTY: hero collapses to headline-only (full width). RISK: wastes the other featured flags.</div>
+
+    <!-- ===== V2 — featured band below hero (1–N cards) ===== -->
+    <div class="direction-bar"><span class="tag">V2</span> Featured band below hero <span class="note">hero = headline only; a full-width "In de kijker" band holds 1–3 cards</span></div>
+    <div class="wrap">
+      <div class="kicker">Er is maar één plezante compagnie</div>
+      <h2 class="hd">Merci aan onze sponsors<span class="dot">.</span></h2>
+      <p class="lead">Zonder hen geen ballen, geen tenues, geen jeugdwerking. KCVV Elewijt draait op de steun van lokale partners.</p>
+
+      <div class="fband">
+        <div class="band-kicker">In de kijker</div>
+        <div class="fband-grid">
+          <div class="fcard"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="fname">Garage Peeters</div><div class="blurb">Leverde de wedstrijdballen voor het hele seizoen.</div><span class="visit">Bezoek ↗</span></div>
+          <div class="fcard"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="fname">Bouwwerken Van Assche</div><div class="blurb">Vernieuwde de kleedkamers in de zomerstop.</div><span class="visit">Bezoek ↗</span></div>
+          <div class="fcard"><div class="logo-box"><span class="swatch" style="background:#2f8f5b"></span></div><div class="fname">Frituur 't Pleintje</div><div class="blurb">Elke thuiswedstrijd present aan de kantine.</div><span class="visit">Bezoek ↗</span></div>
+        </div>
+      </div>
+
+      <div class="tier-kicker">Hoofdsponsors</div>
+      <div class="grid-main">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="name">Garage Peeters</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="name">Bouwwerken Van Assche</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div><div class="name">Immo Zennevallei</div></div>
+      </div>
+    </div>
+    <div class="note-strip">SCALES: 1 card → centred; 2–3 → row; 4+ → wrap/cap at 3 + "meer". EMPTY: whole band hides (no orphan header). RISK: featured sponsors appear twice (band + their tier grid) — accepted as deliberate emphasis.</div>
+
+    <!-- ===== V3 — inline labelled strip above the grids ===== -->
+    <div class="direction-bar"><span class="tag">V3</span> Inline "In de kijker" strip <span class="note">compact labelled row between hero and grids — logo + name, no blurb</span></div>
+    <div class="wrap">
+      <div class="kicker">Er is maar één plezante compagnie</div>
+      <h2 class="hd">Merci aan onze sponsors<span class="dot">.</span></h2>
+      <p class="lead">Zonder hen geen ballen, geen tenues, geen jeugdwerking.</p>
+
+      <div class="fstrip">
+        <div class="label">In de kijker</div>
+        <div class="row">
+          <div class="mini tile"><span class="swatch" style="background:#c0392b"></span><span class="mn">Garage Peeters</span></div>
+          <div class="mini tile"><span class="swatch" style="background:#2e6fb0"></span><span class="mn">Bouwwerken Van Assche</span></div>
+        </div>
+      </div>
+
+      <div class="tier-kicker">Hoofdsponsors</div>
+      <div class="grid-main">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="name">Garage Peeters</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="name">Bouwwerken Van Assche</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div><div class="name">Immo Zennevallei</div></div>
+      </div>
+    </div>
+    <div class="note-strip">SCALES: horizontal strip, N minis (wraps). EMPTY: strip hides. NOTE: drops the blurb (description goes unused) — lightest, but loses the editorial "feature" feel you liked in D.</div>
+
+    <div class="legend">
+      <b>Trade-off in one line:</b> V1 = boldest single hero, wastes extra featured flags ·
+      V2 = scales to many + keeps the blurb/editorial feel (closest to "featured like D") ·
+      V3 = lightest, but discards the <code>description</code> blurb.<br />
+      Featured-card <b>visual chrome</b> (jersey-deep-dark vs cream, blurb length, link style)
+      is a later DETAIL round — judge placement/count here, not the exact card styling.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /sponsors · Round 4: IA — CTA placement (full assembly)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0 0 4px; font-size: 13px; color: #b9b9b9; max-width: 82ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
+      .direction-bar.lk { background: var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .swatch { width: 22px; height: 22px; border: 1px solid var(--ink); flex: none; filter: grayscale(1); transition: filter .3s; }
+      .tile:hover .swatch, .fcard:hover .swatch { filter: grayscale(0); }
+
+      /* hero */
+      .hero { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 34px; align-items: end; padding: 44px 0 8px; }
+      .hero h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(34px,4.6vw,58px); line-height: 0.92; margin: 12px 0 0; }
+      .hero h2 .dot { color: var(--jersey-deep); }
+      .hero .lead { font-family: var(--font-display); font-size: 18px; line-height: 1.5; margin: 14px 0 0; color: var(--ink-soft); }
+      .fcard { background: var(--jersey-deep-dark); color: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 5px 0 0 var(--ink); padding: 20px; }
+      .fcard .kicker { color: var(--warm); }
+      .fcard .logo-box { background: var(--cream); border: 2px solid var(--ink); padding: 16px; margin: 10px 0; min-height: 52px; display:flex; align-items:center; justify-content:center; }
+      .fcard .logo-box .swatch { width: 24px; height: 24px; }
+      .fcard .fname { font-family: var(--font-display); font-style: italic; font-size: 19px; }
+      .fcard .blurb { font-size: 12.5px; line-height: 1.5; color: rgba(245,241,230,0.8); margin-top: 5px; }
+
+      .tier-kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-muted); display: flex; align-items: center; gap: 12px; margin-top: 38px; }
+      .tier-kicker::after { content: ""; height: 2px; flex: 1; background: var(--paper-edge); }
+      .gmain { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-top: 16px; }
+      .gmain .tile { background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 18px 12px 10px; text-align: center; }
+      .gmain .tile:nth-child(1){transform:rotate(-0.4deg)} .gmain .tile:nth-child(2){transform:rotate(0.3deg)} .gmain .tile:nth-child(3){transform:rotate(0.5deg)}
+      .gmain .logo-box { display:flex; align-items:center; justify-content:center; min-height: 46px; } .gmain .swatch { width: 26px; height: 26px; }
+      .gmain .cap { font-family: var(--font-display); font-style: italic; font-size: 14px; margin-top: 8px; }
+      .wallgap { margin-top: 22px; }
+      .wall { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; }
+      .wall .tile { background: var(--cream-soft); border: 1.5px solid var(--ink); padding: 14px 8px; text-align: center; }
+      .wall .logo-box { display:flex; align-items:center; justify-content:center; min-height: 30px; } .wall .swatch { width: 18px; height: 18px; }
+
+      /* CTA C1 footer band */
+      .c1 { margin-top: 46px; background: var(--jersey-deep-dark); color: var(--cream); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); padding: 40px 0; }
+      .c1 .inner { max-width: 1080px; margin: 0 auto; padding: 0 28px; display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+      .c1 h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 30px; margin: 0; }
+      .c1 p { margin: 6px 0 0; color: rgba(245,241,230,0.78); font-size: 14px; max-width: 46ch; }
+      .cta-pill { display: inline-block; font-family: var(--font-mono); font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; border: 2px solid var(--ink); padding: 13px 22px; background: var(--warm); color: var(--ink); box-shadow: 4px 4px 0 0 var(--ink); }
+
+      /* CTA C2 inline quiet */
+      .c2 { margin: 44px 0 10px; text-align: center; }
+      .c2 p { font-family: var(--font-display); font-style: italic; font-size: 18px; color: var(--ink-soft); margin: 0 0 16px; }
+
+      /* CTA C3 join-the-wall tile */
+      .c3wall { display: grid; grid-template-columns: repeat(6,1fr); gap: 10px; }
+      .c3wall .tile { background: var(--cream-soft); border: 1.5px solid var(--ink); padding: 14px 8px; text-align: center; }
+      .c3wall .logo-box { display:flex; align-items:center; justify-content:center; min-height: 30px; } .c3wall .swatch { width: 18px; height: 18px; }
+      .c3wall .join { background: var(--warm); border: 2px dashed var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; text-decoration: none; color: var(--ink); }
+      .c3wall .join .big { font-family: var(--font-display); font-style: italic; font-size: 15px; }
+      .c3wall .join .sm { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+      .note-strip { background: var(--cream-deep); border-top: 1px dashed var(--ink); border-bottom: 1px dashed var(--ink); padding: 10px 28px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 20px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .secthead { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-muted); padding: 26px 28px 0; max-width: 1080px; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /sponsors — Round 4: CTA placement (full assembly)</h1>
+      <p>Everything above the CTA is now LOCKED (hero split + marquee · "Hoofdsponsors" label + big taped tiles ·
+        one unlabeled wall for the rest). See <a href="./7d3-tier-treatment-locked.md">7d3 lock</a>.
+        This round only varies <b>where the "Word sponsor" CTA lives</b>. The recruitment CTA is deliberately
+        secondary (gratitude is the page's purpose).</p>
+    </div>
+
+    <!-- LOCKED assembled page -->
+    <div class="direction-bar lk"><span class="tag" style="background:#cfeede">LOCKED</span> Assembled page — hero + hoofd + wall (CTA is the variable below)</div>
+    <div class="wrap">
+      <div class="hero">
+        <div>
+          <div class="kicker">Er is maar één plezante compagnie</div>
+          <h2>Merci aan onze sponsors<span class="dot">.</span></h2>
+          <p class="lead">Zonder hen geen ballen, geen tenues, geen jeugdwerking.</p>
+        </div>
+        <div class="fcard">
+          <div class="kicker">In de kijker</div>
+          <div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div>
+          <div class="fname">Garage Peeters</div>
+          <div class="blurb">Hoofdsponsor sinds dag één — leverde de wedstrijdballen.</div>
+        </div>
+      </div>
+
+      <div class="tier-kicker">Hoofdsponsors</div>
+      <div class="gmain">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="cap">Garage Peeters</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="cap">Bouwwerken Van Assche</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div><div class="cap">Immo Zennevallei</div></div>
+      </div>
+
+      <div class="wallgap"></div>
+      <div class="wall">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#7a4ea0"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2f8f5b"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#b0562e"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#3a7abd"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c93f1c"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#888"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#999"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#777"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#8a8a8a"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#929292"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#7d7d7d"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#959595"></span></div></div>
+      </div>
+    </div>
+
+    <!-- ===== C1 footer band ===== -->
+    <div class="secthead">↓ CTA option C1</div>
+    <div class="direction-bar"><span class="tag">C1</span> Footer band <span class="note">full-width jersey-deep-dark close band: thank-you turns into invitation</span></div>
+    <div class="c1">
+      <div class="inner">
+        <div>
+          <h3>Ook jouw zaak langs de lijn?</h3>
+          <p>Word sponsor en steun mee de club, de jeugd en de toekomst van KCVV Elewijt.</p>
+        </div>
+        <span class="cta-pill">Word sponsor +</span>
+      </div>
+    </div>
+    <div class="note-strip">Strongest close, clear next step, mirrors the homepage ClubshopBanner dark-band idiom. Most "page has an ending".</div>
+
+    <!-- ===== C2 inline quiet ===== -->
+    <div class="secthead">↓ CTA option C2</div>
+    <div class="direction-bar"><span class="tag">C2</span> Inline quiet <span class="note">a single centred line + button on cream, no band</span></div>
+    <div class="wrap"><div class="c2">
+      <p>Wil je KCVV Elewijt steunen?</p>
+      <span class="cta-pill">Word sponsor +</span>
+    </div></div>
+    <div class="note-strip">Quietest, most modest — keeps the page all-cream/all-paper, no dark band. Risks reading as an afterthought.</div>
+
+    <!-- ===== C3 join-the-wall ===== -->
+    <div class="secthead">↓ CTA option C3</div>
+    <div class="direction-bar"><span class="tag">C3</span> "Jouw logo hier" tile <span class="note">CTA is the last cell of the wall — an open invitation to join</span></div>
+    <div class="wrap">
+      <div class="tier-kicker" style="margin-top:18px">Hoofdsponsors</div>
+      <div class="gmain">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="cap">Garage Peeters</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="cap">Bouwwerken Van Assche</div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div><div class="cap">Immo Zennevallei</div></div>
+      </div>
+      <div class="wallgap"></div>
+      <div class="c3wall">
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#7a4ea0"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2f8f5b"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#b0562e"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#3a7abd"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c93f1c"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#888"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#999"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#777"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#8a8a8a"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#929292"></span></div></div>
+        <div class="tile"><div class="logo-box"><span class="swatch" style="background:#7d7d7d"></span></div></div>
+        <a class="tile join" href="#"><span class="big">Jouw logo hier?</span><span class="sm">Word sponsor +</span></a>
+      </div>
+    </div>
+    <div class="note-strip">Most charming + on-brand (the wall literally has a spot for you), low-pressure. But less prominent than a band and could be missed if the wall is long. Could PAIR with a slim C2 line too.</div>
+
+    <div class="legend">
+      <b>One-line trade-off:</b> C1 = strongest, clearest close (dark band) ·
+      C2 = quietest, all-paper, modest ·
+      C3 = most charming, woven into the wall, lower prominence.<br />
+      Picking one closes the IA. Then DETAIL rounds: hero type scale, featured-card chrome,
+      tile borders/shadows/hover + "Bezoek website" affordance, empty states.
+    </div>
+  </body>
+</html>
