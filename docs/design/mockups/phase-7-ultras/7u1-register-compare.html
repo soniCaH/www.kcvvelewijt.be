@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /club/ultras · Round 1: register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 84ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .wrap { max-width: 1000px; margin: 0 auto; padding: 0 28px; }
+      .pill { font-family: var(--font-mono); font-weight: 700; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; border: 2px solid var(--ink); padding: 11px 18px; background: var(--warm); color: var(--ink); box-shadow: 3px 3px 0 0 var(--ink); display:inline-block; }
+      .seckick { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-muted); display:flex; align-items:center; gap:10px; margin: 26px 0 12px; }
+      .seckick::after { content:""; height:2px; flex:1; background: var(--paper-edge); }
+      .body-hint { font-size: 14px; line-height:1.6; color: var(--ink-soft); max-width: 60ch; }
+
+      /* U1 cream editorial */
+      .u1 { padding: 48px 0 8px; }
+      .u1 .kicker { font-family: var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color: var(--jersey-deep); }
+      .u1 h1 { font-family: var(--font-display); font-style:italic; font-weight:900; font-size: clamp(40px,6vw,76px); line-height:.9; margin:12px 0 0; }
+      .u1 h1 .dot { color: var(--jersey-deep); }
+      .u1 .lead { font-family: var(--font-display); font-size:18px; line-height:1.5; margin:16px 0 18px; color: var(--ink-soft); max-width:48ch; }
+
+      /* U2 terrace poster (dark) */
+      .u2 { background: var(--jersey-deep-dark); color: var(--cream); padding: 56px 0; position:relative; overflow:hidden; border-bottom:2px solid var(--ink); }
+      .u2::before { content:""; position:absolute; inset:0; background: repeating-linear-gradient(135deg, rgba(245,241,230,0.05) 0 18px, transparent 18px 36px); }
+      .u2 .inner { position:relative; }
+      .u2 .kicker { font-family: var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color: var(--warm); }
+      .u2 h1 { font-family: var(--font-body); font-weight:900; font-size: clamp(48px,9vw,120px); line-height:.82; margin:10px 0 0; text-transform:uppercase; letter-spacing:-0.02em; color: var(--cream); }
+      .u2 h1 .hl { color: var(--warm); }
+      .u2 .lead { font-size:17px; margin:18px 0 20px; color: rgba(245,241,230,.8); max-width:46ch; }
+      .u2 .pill { background: var(--warm); box-shadow: 4px 4px 0 0 #000; }
+
+      /* U3 hybrid: bold dark hero + cream body marker */
+      .u3 { background: var(--jersey-deep-dark); color: var(--cream); padding: 48px 0; border-bottom:2px solid var(--ink); position:relative; overflow:hidden; }
+      .u3::before { content:""; position:absolute; inset:0; background: radial-gradient(120% 80% at 50% -10%, rgba(74,207,82,.16), transparent 60%); }
+      .u3 .inner { position:relative; display:grid; grid-template-columns: 1.1fr .9fr; gap:30px; align-items:center; }
+      .u3 .kicker { font-family: var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color: var(--warm); }
+      .u3 h1 { font-family: var(--font-display); font-style:italic; font-weight:900; font-size: clamp(38px,5.4vw,66px); line-height:.9; margin:12px 0 0; color: var(--cream); }
+      .u3 h1 .dot { color: var(--warm); }
+      .u3 .lead { font-size:15px; margin:14px 0 18px; color: rgba(245,241,230,.78); max-width:40ch; }
+      .u3 .photo { background: rgba(245,241,230,.08); border:2px solid var(--cream); aspect-ratio:4/3; display:flex; align-items:flex-end; padding:10px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color: rgba(245,241,230,.6); }
+
+      .note-strip { background: var(--cream-deep); border-top:1px dashed var(--ink); border-bottom:1px dashed var(--ink); padding:10px 28px; font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); }
+      .legend { background: var(--cream-deep); border-top:2px solid var(--ink); padding:18px 28px; font-family: var(--font-mono); font-size:12.5px; line-height:1.7; }
+      .bodysec { padding-bottom: 18px; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /club/ultras — Round 1: register</h1>
+      <p>The Ultras ARE the terrace/fanzine subject — so how loud should this page go? Three
+        registers for the hero; the body (Wie zijn we / Wat doen we / Lid worden, photos, the
+        "Schijt je rijk" highlight) reskins to editorial vocabulary regardless. See
+        <a href="./7u0-data-reality-locked.md">7u0</a>.</p>
+    </div>
+
+    <!-- U1 -->
+    <div class="direction-bar"><span class="tag">U1</span> Cream-editorial <span class="note">calm, consistent with the other club pages</span></div>
+    <div class="wrap"><div class="u1">
+      <div class="kicker">Supporters · sinds 2018</div>
+      <h1>KCVV Ultra's<span class="dot">.</span></h1>
+      <p class="lead">De luidste hoek van het veld — trommels, spandoeken en bussen vol sfeer, elke wedstrijd opnieuw.</p>
+      <span class="pill">Word lid via Facebook ↗</span>
+    </div></div>
+    <div class="wrap bodysec"><div class="seckick">Wie zijn we</div><p class="body-hint">De naam KCVV Ultras werd enkele jaren geleden op Facebook in het leven geroepen… (editorial prose + TapedFigure photos).</p></div>
+    <div class="note-strip">Consistent with sponsors/jeugd/board. RISK: a bit quiet for a supporters' page that's literally about being loud.</div>
+
+    <!-- U2 -->
+    <div class="direction-bar"><span class="tag">U2</span> Terrace-poster <span class="note">dark, sans-serif poster-weight; leans hard into the Ultras energy</span></div>
+    <div class="u2"><div class="wrap"><div class="inner">
+      <div class="kicker">Supporters · KCVV Ultra's 55</div>
+      <h1>ALTIJD<br><span class="hl">LUIDER.</span></h1>
+      <p class="lead">Trommels, spandoeken, bengaals vuur en bussen vol sfeer. Positief, vocaal, elke wedstrijd.</p>
+      <span class="pill">Word lid via Facebook ↗</span>
+    </div></div></div>
+    <div class="wrap bodysec"><div class="seckick">Wie zijn we</div><p class="body-hint">De naam KCVV Ultras werd enkele jaren geleden op Facebook in het leven geroepen… (editorial prose + TapedFigure photos).</p></div>
+    <div class="note-strip">Most on-theme + energetic — a terrace poster. Uses heavy sans display (Archivo Black), not the editorial serif. RISK: biggest departure from the system's italic-serif display; could read as a different brand if overdone.</div>
+
+    <!-- U3 -->
+    <div class="direction-bar"><span class="tag">U3</span> Hybrid <span class="note">bold dark hero (with sfeeractie photo) + cream editorial body</span></div>
+    <div class="u3"><div class="wrap"><div class="inner">
+      <div>
+        <div class="kicker">Supporters · sinds 2018</div>
+        <h1>De luidste hoek van het veld<span class="dot">.</span></h1>
+        <p class="lead">Trommels, spandoeken en bussen vol sfeer — positief, vocaal, elke wedstrijd.</p>
+        <span class="pill">Word lid via Facebook ↗</span>
+      </div>
+      <div class="photo">[ sfeeractie foto · TapedFigure ]</div>
+    </div></div></div>
+    <div class="wrap bodysec"><div class="seckick">Wie zijn we</div><p class="body-hint">De naam KCVV Ultras werd enkele jaren geleden op Facebook in het leven geroepen… (editorial prose + TapedFigure photos).</p></div>
+    <div class="note-strip">Loud entry, readable story: a dark energetic hero (keeps the italic-serif display + photo) then the cream editorial body. Best of both — stays in-system but signals the Ultras energy.</div>
+
+    <div class="legend">
+      <b>One-line trade-off:</b> U1 = calm/consistent (maybe too quiet) ·
+      U2 = full terrace-poster (most on-theme, but heavy-sans breaks the serif-display system) ·
+      U3 = bold dark hero + cream body (energetic but in-system).<br />
+      Body treatment (PullQuote for the blockquote, a callout for "500 lotjes / €750",
+      TapedFigure photos, Facebook CtaBand) is the same under all three.
+    </div>
+  </body>
+</html>
