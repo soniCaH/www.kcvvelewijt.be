@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /sponsors · Round 1: VOICE compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Freight is Typekit-only; Fraunces is the closest free editorial serif for mockup fidelity -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6;
+        --cream-soft: #ede8da;
+        --cream-deep: #e1d7bf;
+        --ink: #0a0a0a;
+        --ink-soft: #1f1f1f;
+        --ink-muted: #6b6b6b;
+        --jersey: #4acf52;
+        --jersey-deep: #008755;
+        --jersey-deep-dark: #133d28;
+        --warm: #f0c264;
+        --brick: #c93f1c;
+        --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, "Times New Roman", serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+
+      /* ---------- compare-harness chrome (NOT part of the design) ---------- */
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0 0 4px; font-size: 13px; color: #b9b9b9; max-width: 80ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar {
+        position: sticky; top: 0; z-index: 50;
+        background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink);
+      }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 0 0 8px; }
+
+      /* ---------- shared design tokens-as-classes ---------- */
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+      .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+      .logo-box {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+        color: var(--ink-muted); text-align: center; line-height: 1.2;
+      }
+      .swatch { width: 18px; height: 18px; border: 1px solid var(--ink); flex: none; filter: grayscale(1); transition: filter .3s; }
+      .tile:hover .swatch, .board:hover .swatch { filter: grayscale(0); }
+      .cap { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-muted); }
+      .cta-pill {
+        display: inline-block; font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+        letter-spacing: 0.08em; text-transform: uppercase; border: 2px solid var(--ink);
+        padding: 11px 20px; background: var(--warm); color: var(--ink); box-shadow: 4px 4px 0 0 var(--ink);
+      }
+
+      /* ======================================================
+         A · MERCI — grateful terrace thank-you
+      ====================================================== */
+      .dir-a { background: var(--cream); padding: 56px 0 44px; }
+      .dir-a .kicker { color: var(--jersey-deep); }
+      .dir-a h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px, 6vw, 76px); line-height: 0.92; margin: 14px 0 0; letter-spacing: -0.01em; }
+      .dir-a h2 .dot { color: var(--jersey-deep); }
+      .dir-a .lead { font-family: var(--font-display); font-size: 20px; line-height: 1.5; max-width: 60ch; margin: 20px 0 0; color: var(--ink-soft); }
+      .dir-a .tier-kicker { margin-top: 44px; color: var(--ink-muted); display: flex; align-items: center; gap: 12px; }
+      .dir-a .tier-kicker::after { content: ""; height: 2px; flex: 1; background: var(--paper-edge); }
+      .dir-a .grid-main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 18px; }
+      .dir-a .grid-second { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 14px; }
+      .dir-a .tile { background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 22px 14px 12px; text-align: center; }
+      .dir-a .grid-main .tile { transform: rotate(-0.4deg); }
+      .dir-a .grid-main .tile:nth-child(2) { transform: rotate(0.3deg); }
+      .dir-a .grid-main .tile:nth-child(3) { transform: rotate(0.5deg); }
+      .dir-a .tile .logo-box { min-height: 56px; font-size: 13px; }
+      .dir-a .grid-second .tile .logo-box { min-height: 38px; font-size: 11px; }
+      .dir-a .tile .swatch { width: 22px; height: 22px; }
+      .dir-a .tile .name { font-family: var(--font-display); font-style: italic; font-size: 14px; margin-top: 8px; }
+      .dir-a .footer-cta { margin-top: 40px; }
+
+      /* ======================================================
+         B · EREBLAD — printed honour-board / programme back-page
+      ====================================================== */
+      .dir-b { background: var(--cream); padding: 52px 0 44px; }
+      .dir-b .masthead { border-top: 3px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 8px 0; display: flex; justify-content: space-between; align-items: baseline; }
+      .dir-b .masthead .kicker { color: var(--ink); }
+      .dir-b h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(36px, 5vw, 60px); line-height: 1; margin: 22px 0 0; text-align: center; letter-spacing: -0.01em; }
+      .dir-b .rule2 { border-bottom: 3px double var(--ink); margin: 14px 0 6px; }
+      .dir-b .sub { text-align: center; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); }
+      .dir-b .ledger { margin-top: 34px; border: 2px solid var(--ink); }
+      .dir-b .ledger-band { background: var(--ink); color: var(--cream); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; padding: 7px 12px; }
+      .dir-b .rowmain { display: grid; grid-template-columns: repeat(2, 1fr); }
+      .dir-b .rowsecond { display: grid; grid-template-columns: repeat(4, 1fr); }
+      .dir-b .rowreg { display: grid; grid-template-columns: repeat(6, 1fr); }
+      .dir-b .cell { border-right: 1px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 20px 10px; text-align: center; }
+      .dir-b .rowmain .cell { padding: 34px 10px; }
+      .dir-b .rowreg .cell { padding: 13px 8px; }
+      .dir-b .cell .swatch { width: 20px; height: 20px; }
+      .dir-b .cell .name { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-soft); margin-top: 7px; }
+      .dir-b .footer-cta { margin-top: 34px; text-align: center; }
+
+      /* ======================================================
+         C · RECLAMEBORDEN — pitchside advertising boards
+      ====================================================== */
+      .dir-c { background: var(--jersey-deep-dark); color: var(--cream); padding: 52px 0 46px; position: relative; overflow: hidden; }
+      .dir-c::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% -10%, rgba(74,207,82,0.16), transparent 60%); pointer-events: none; }
+      .dir-c .kicker { color: var(--warm); }
+      .dir-c h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px, 5.5vw, 66px); line-height: 0.95; margin: 14px 0 0; color: var(--cream); }
+      .dir-c .lead { font-size: 16px; max-width: 56ch; margin: 16px 0 0; color: rgba(245,241,230,0.72); line-height: 1.55; }
+      .dir-c .boards { margin-top: 40px; display: flex; flex-direction: column; gap: 14px; }
+      .dir-c .board-band { display: flex; align-items: center; gap: 10px; }
+      .dir-c .band-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(245,241,230,0.55); width: 92px; flex: none; }
+      .dir-c .board-row { display: flex; gap: 12px; flex: 1; }
+      .dir-c .board { flex: 1; background: var(--cream); color: var(--ink); border: 2px solid var(--ink); box-shadow: 0 4px 0 0 rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+      .dir-c .board-main { height: 78px; font-size: 13px; }
+      .dir-c .board-second { height: 54px; }
+      .dir-c .board-reg { height: 34px; font-size: 10px; }
+      .dir-c .board .swatch { width: 20px; height: 20px; }
+      .dir-c .footer-cta { margin-top: 38px; }
+      .dir-c .cta-pill { background: var(--jersey); box-shadow: 4px 4px 0 0 #000; }
+
+      /* ======================================================
+         D · PARTNERS — partnership / recruitment-forward
+      ====================================================== */
+      .dir-d { background: var(--cream); padding: 52px 0 44px; }
+      .dir-d .split { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; align-items: center; }
+      .dir-d .kicker { color: var(--jersey-deep); }
+      .dir-d h2 { font-family: var(--font-display); font-weight: 900; font-size: clamp(38px, 5vw, 64px); line-height: 0.96; margin: 14px 0 0; }
+      .dir-d h2 em { font-style: italic; color: var(--jersey-deep); }
+      .dir-d .lead { font-size: 16px; line-height: 1.6; max-width: 48ch; margin: 18px 0 24px; color: var(--ink-soft); }
+      .dir-d .cta-row { display: flex; gap: 14px; align-items: center; }
+      .dir-d .cta-row .ghost { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+      .dir-d .feature-card { background: var(--jersey-deep-dark); color: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 5px 0 0 var(--ink); padding: 24px; transform: rotate(-0.5deg); }
+      .dir-d .feature-card .kicker { color: var(--warm); }
+      .dir-d .feature-card .logo-box { background: var(--cream); color: var(--ink); border: 2px solid var(--ink); padding: 22px; margin: 14px 0; min-height: 70px; }
+      .dir-d .feature-card .swatch { width: 26px; height: 26px; }
+      .dir-d .feature-card .fname { font-family: var(--font-display); font-style: italic; font-size: 22px; }
+      .dir-d .feature-card .blurb { font-size: 13px; line-height: 1.5; color: rgba(245,241,230,0.78); margin-top: 6px; }
+      .dir-d .proof { margin-top: 44px; }
+      .dir-d .proof .tier-kicker { color: var(--ink-muted); display: flex; align-items: center; gap: 12px; }
+      .dir-d .proof .tier-kicker::after { content: ""; height: 2px; flex: 1; background: var(--paper-edge); }
+      .dir-d .proof-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 14px; }
+      .dir-d .proof-grid .tile { background: var(--cream-soft); border: 1.5px solid var(--ink); padding: 14px 8px; text-align: center; }
+      .dir-d .proof-grid .swatch { width: 16px; height: 16px; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 22px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend b { font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /sponsors — Round 1: VOICE</h1>
+      <p>
+        Four registers for the sponsors page. Placeholder local-business names + greyscale
+        swatches stand in for real logos (voice round = chrome/tone, not final fields). Every
+        direction obeys the locked data reality: logos primary, greyscale→hover-colour,
+        name fallback, 3 tiers (hoofdsponsor / sponsor / sympathisant), "In de kijker" band kept
+        but deferred. See <a href="./data-reality-locked.md">data-reality-locked.md</a>.
+      </p>
+      <p>Hover any swatch to preview the greyscale→colour reveal.</p>
+    </div>
+
+    <!-- ============ A · MERCI ============ -->
+    <div class="direction-bar"><span class="tag">A</span> Merci — grateful terrace <span class="note">warmth-led; gratitude is the organizing emotion</span></div>
+    <section class="stage dir-a">
+      <div class="wrap">
+        <div class="kicker">Er is maar één plezante compagnie</div>
+        <h2>Merci aan onze sponsors<span class="dot">.</span></h2>
+        <p class="lead">Zonder hen geen ballen, geen tenues, geen jeugdwerking. KCVV Elewijt
+          draait op de steun van lokale partners die mee aan de zijlijn staan — wedstrijd na
+          wedstrijd, seizoen na seizoen.</p>
+
+        <div class="kicker tier-kicker">Hoofdsponsors</div>
+        <div class="grid-main">
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="name">Garage Peeters</div></div>
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="name">Bouwwerken Van Assche</div></div>
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div><div class="name">Immo Zennevallei</div></div>
+        </div>
+
+        <div class="kicker tier-kicker">Sponsors</div>
+        <div class="grid-second">
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#7a4ea0"></span></div></div>
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2f8f5b"></span></div></div>
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#b0562e"></span></div></div>
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#3a7abd"></span></div></div>
+          <div class="tile"><div class="logo-box"><span class="swatch" style="background:#c93f1c"></span></div></div>
+        </div>
+
+        <div class="footer-cta"><span class="cta-pill">Word sponsor +</span></div>
+      </div>
+    </section>
+
+    <!-- ============ B · EREBLAD ============ -->
+    <div class="direction-bar"><span class="tag">B</span> Ereblad — programme back-page <span class="note">institutional record; dense thin-ink ledger, logos as the archive</span></div>
+    <section class="stage dir-b">
+      <div class="wrap">
+        <div class="masthead">
+          <span class="kicker">KCVV Elewijt</span>
+          <span class="kicker">Seizoen 25/26</span>
+        </div>
+        <h2>Onze sponsors.</h2>
+        <div class="rule2"></div>
+        <div class="sub">Met dank aan wie de club mee draagt</div>
+
+        <div class="ledger">
+          <div class="ledger-band">Hoofdsponsors</div>
+          <div class="rowmain">
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#c0392b"></span></div><div class="name">Garage Peeters</div></div>
+            <div class="cell" style="border-right:none"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div><div class="name">Bouwwerken Van Assche</div></div>
+          </div>
+          <div class="ledger-band">Sponsors</div>
+          <div class="rowsecond">
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#7a4ea0"></span></div><div class="name">Immo Zennevallei</div></div>
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#2f8f5b"></span></div><div class="name">Frituur 't Pleintje</div></div>
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#b0562e"></span></div><div class="name">Apotheek Centrum</div></div>
+            <div class="cell" style="border-right:none"><div class="logo-box"><span class="swatch" style="background:#3a7abd"></span></div><div class="name">Slagerij Janssens</div></div>
+          </div>
+          <div class="ledger-band">Sympathisanten</div>
+          <div class="rowreg">
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#888"></span></div></div>
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#999"></span></div></div>
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#777"></span></div></div>
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#8a8a8a"></span></div></div>
+            <div class="cell"><div class="logo-box"><span class="swatch" style="background:#929292"></span></div></div>
+            <div class="cell" style="border-right:none"><div class="logo-box"><span class="name" style="margin:0">Café De Zwaan</span></div></div>
+          </div>
+        </div>
+        <div class="footer-cta"><span class="cta-pill" style="background:var(--cream-soft)">Word sponsor +</span></div>
+      </div>
+    </section>
+
+    <!-- ============ C · RECLAMEBORDEN ============ -->
+    <div class="direction-bar"><span class="tag">C</span> Reclameborden — pitchside boards <span class="note">terrace/matchday metaphor; logos as advertising boards, floodlight colour-reveal</span></div>
+    <section class="stage dir-c">
+      <div class="wrap">
+        <div class="kicker">Langs de lijn</div>
+        <h2>Zij staan langs de lijn.</h2>
+        <p class="lead">Elke wedstrijd staan ze rond het veld. De borden van wie KCVV Elewijt
+          mogelijk maakt — van hoofdsponsor tot sympathisant.</p>
+
+        <div class="boards">
+          <div class="board-band">
+            <span class="band-label">Hoofdsponsors</span>
+            <div class="board-row">
+              <div class="board board-main"><span class="swatch" style="background:#c0392b"></span> Garage Peeters</div>
+              <div class="board board-main"><span class="swatch" style="background:#2e6fb0"></span> Bouwwerken Van Assche</div>
+            </div>
+          </div>
+          <div class="board-band">
+            <span class="band-label">Sponsors</span>
+            <div class="board-row">
+              <div class="board board-second"><span class="swatch" style="background:#e0a020"></span> Immo</div>
+              <div class="board board-second"><span class="swatch" style="background:#2f8f5b"></span> Frituur</div>
+              <div class="board board-second"><span class="swatch" style="background:#b0562e"></span> Apotheek</div>
+              <div class="board board-second"><span class="swatch" style="background:#3a7abd"></span> Slagerij</div>
+            </div>
+          </div>
+          <div class="board-band">
+            <span class="band-label">Sympathisanten</span>
+            <div class="board-row">
+              <div class="board board-reg"><span class="swatch" style="background:#888"></span></div>
+              <div class="board board-reg"><span class="swatch" style="background:#999"></span></div>
+              <div class="board board-reg"><span class="swatch" style="background:#777"></span></div>
+              <div class="board board-reg"><span class="swatch" style="background:#8a8a8a"></span></div>
+              <div class="board board-reg">Café De Zwaan</div>
+            </div>
+          </div>
+        </div>
+        <div class="footer-cta"><span class="cta-pill">Zet jouw bord langs de lijn +</span></div>
+      </div>
+    </section>
+
+    <!-- ============ D · PARTNERS ============ -->
+    <div class="direction-bar"><span class="tag">D</span> Partners — recruitment-forward <span class="note">page sells sponsorship; CTA in hero, existing sponsors as social proof</span></div>
+    <section class="stage dir-d">
+      <div class="wrap">
+        <div class="split">
+          <div>
+            <div class="kicker">Partner worden</div>
+            <h2>Word <em>partner</em> van KCVV.</h2>
+            <p class="lead">Bereik elke week honderden supporters, ouders en buurtbewoners.
+              Steun de jeugd en zet jouw zaak in de kijker — van bord langs de lijn tot
+              hoofdsponsor.</p>
+            <div class="cta-row">
+              <span class="cta-pill">Word sponsor +</span>
+              <span class="ghost">of bekijk onze partners ↓</span>
+            </div>
+          </div>
+          <div class="feature-card">
+            <div class="kicker">In de kijker</div>
+            <div class="logo-box"><span class="swatch" style="background:#c0392b;width:26px;height:26px"></span></div>
+            <div class="fname">Garage Peeters</div>
+            <div class="blurb">Hoofdsponsor sinds dag één — leverde de wedstrijdballen voor het
+              hele seizoen.</div>
+          </div>
+        </div>
+
+        <div class="proof">
+          <div class="kicker tier-kicker">Onze partners</div>
+          <div class="proof-grid">
+            <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2e6fb0"></span></div></div>
+            <div class="tile"><div class="logo-box"><span class="swatch" style="background:#e0a020"></span></div></div>
+            <div class="tile"><div class="logo-box"><span class="swatch" style="background:#7a4ea0"></span></div></div>
+            <div class="tile"><div class="logo-box"><span class="swatch" style="background:#2f8f5b"></span></div></div>
+            <div class="tile"><div class="logo-box"><span class="swatch" style="background:#b0562e"></span></div></div>
+            <div class="tile"><div class="logo-box"><span class="swatch" style="background:#3a7abd"></span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="legend">
+      <b>How to read these:</b> all four reuse approved primitives (EditorialHeading,
+      MonoLabel kickers, TapedCard/TapedCardGrid tiles, the SponsorsBlock dense grid,
+      paper-stamp CTA). Net-new vocabulary flagged as deltas:<br />
+      • <b>C</b> introduces a wide "advertising-board" tile + a jersey-deep-dark page field —
+      net-new shape, biggest departure from the cream-paper system.<br />
+      • <b>D</b> foregrounds recruitment + an editorial feature card (the kept "In de kijker"
+      band, pulled into the hero) — most commercial register.<br />
+      • <b>A</b> and <b>B</b> stay entirely inside the existing cream-paper vocabulary;
+      A is warm/rotated, B is dense/orthogonal-ledger.
+    </div>
+  </body>
+</html>
