@@ -27,16 +27,20 @@ into articles-first (N2-as-drawn rejected). Instead:
 
 ## Nav-card label refinement (data audit)
 
-The tag pill is **editorially managed** — sourced from `editorialCards[].tag` (the editor sets it
-on the `jeugdLandingPage` singleton) — with a **type-based fallback** when empty. The pill stays on
-**both** variants. This is data-honest (it's real CMS data, not invented) and never blank.
+The tag pill is **editorially managed** — sourced from CMS data (`editorialCards[].tag` for nav
+cards, `article.tags[0]` for news cards) with a **constant fallback** when empty. The pill stays on
+**both** variants. This is data-honest (it's real CMS data, not invented).
 
-- **Tag source (per card):** `editorialCards.tag` when set →
-  fallback **`Jeugd`** for news/article cards, **`Praktisch`** for nav cards.
-  (Article-card fallback may prefer the article's own `article.tags[0]` before "Jeugd" — richer;
-  decide at build.)
-- `editorialCards.tag` **stays in use** (no schema change). The earlier "drop the pill" /
-  "single constant Praktisch" framings are both superseded by this editor-sourced + fallback rule.
+- **Tag source — news/article cards:** `article.tags[0]` when present, else the constant **`Jeugd`**
+  (precedence: `article.tags[0]` → `Jeugd`). `editorialCards.tag` is **not** read for article slots —
+  articles bubble in and carry their own tags. See `JeugdEditorialGrid.tsx`:
+  `tag={article.tags[0] ?? "Jeugd"}`.
+- **Tag source — nav cards:** `editorialCards.tag` when set (CMS override), else the pinned card's own
+  hardcoded label in `NAV_CARDS` (e.g. **`Praktisch`**, `Aansluiten`, …). `Praktisch` is one of those
+  six literals, **not** a generic nav fallback — a Sanity nav card with no `tag` renders an empty pill
+  (`tag={entry.tag ?? ""}` for `variant="nav"`).
+- `editorialCards.tag` **stays in use** (no schema change) for nav cards. The earlier "drop the pill" /
+  "single constant Praktisch" framings are both superseded by this rule.
 - Visual: news pill = jersey-deep on the photo; nav pill = cream on the jersey-deep glyph panel.
 
 ## Implications
