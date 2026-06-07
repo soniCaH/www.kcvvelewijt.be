@@ -45,7 +45,7 @@ Single phase (small, self-contained reskin).
 - [ ] No legacy tokens (`kcvv-green-bright`, `kcvv-black`); `<StripedSeam>` for section breaks.
 - [ ] Decorative line/markers `aria-hidden`; semantic order carried by the cards; headings
       hierarchy valid.
-- [ ] Analytics: `geschiedenis_view` (or `club_view`) page view; add the prefix to the GTM trigger
+- [ ] Analytics: `geschiedenis_view` page view; add `geschiedenis_` to the GTM trigger
       regex (manual, note in PR). No PII.
 - [ ] Stories (`vr`) for the hero + a left/right `TimelineItem` + a `TimelineImage`; baselines
       committed. e2e `/club/geschiedenis` smoke green.
