@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /jeugd · Round 1: VOICE compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 82ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+      .hero { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 36px; align-items: center; padding: 52px 28px 30px; }
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .hero h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(38px,5.4vw,72px); line-height: 0.9; margin: 14px 0 0; letter-spacing: -0.01em; }
+      .hero h2 .dot { color: var(--jersey-deep); }
+      .hero .lead { font-family: var(--font-display); font-size: 19px; line-height: 1.5; max-width: 48ch; margin: 18px 0 0; color: var(--ink-soft); }
+      .hero .meta { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-top: 18px; }
+
+      /* jersey-illustration artefact (two-pass print placeholder) */
+      .artefact { display: flex; justify-content: center; }
+      .jersey { width: 230px; height: auto; transform: rotate(-2deg); filter: drop-shadow(5px 6px 0 rgba(10,10,10,0.85)); }
+
+      /* section hint below hero */
+      .hint { max-width: 1080px; margin: 0 auto; padding: 4px 28px 18px; }
+      .hint-row { display: flex; gap: 10px; flex-wrap: wrap; }
+      .chip { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); border: 1.5px solid var(--paper-edge); padding: 6px 10px; }
+      .note-strip { background: var(--cream-deep); border-top: 1px dashed var(--ink); border-bottom: 1px dashed var(--ink); padding: 10px 28px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 20px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /jeugd — Round 1: VOICE</h1>
+      <p>Four parent-facing registers for the youth landing. Hero = sibling component (kicker +
+        EditorialHeading + lead + jersey-illustration artefact via &lt;JerseyShirt&gt;). Page below
+        is the locked lean scope: editorial cards → filosofie → divisions (Bovenbouw/Middenbouw/
+        Onderbouw, reusing &lt;YouthDirectory&gt;) → schrijf-je-in CTA. NO sponsors, NO trainers grid.
+        See <a href="./7j0-data-reality-locked.md">7j0 lock</a>. Voice = "for parents, not players".</p>
+    </div>
+
+    <!-- A -->
+    <div class="direction-bar"><span class="tag">A</span> Toekomst — proud / aspirational <span class="note">the kids ARE the club's future; confident, forward-looking</span></div>
+    <div class="hero">
+      <div>
+        <div class="kicker">Jeugdopleiding · U6 tot U21</div>
+        <h2>De toekomst van Elewijt<span class="dot">.</span></h2>
+        <p class="lead">Vandaag op het oefenveld, morgen in de eerste ploeg. Bij KCVV Elewijt groeien meer dan 300 kinderen op met de bal aan de voet.</p>
+        <div class="meta">Onderbouw · Middenbouw · Bovenbouw</div>
+      </div>
+      <div class="artefact">
+        <svg class="jersey" viewBox="0 0 200 220" aria-hidden="true"><g fill="none" stroke="#0a0a0a" stroke-width="3"><path d="M60 28 L30 50 L46 78 L62 66 L62 196 Q62 200 66 200 L134 200 Q138 200 138 196 L138 66 L154 78 L170 50 L140 28 Q120 44 100 44 Q80 44 60 28 Z" fill="#008755"/><path d="M88 30 Q100 42 112 30" /><g stroke="#0a0a0a" stroke-width="6" opacity="0.85"><line x1="84" y1="60" x2="84" y2="198"/><line x1="100" y1="48" x2="100" y2="200"/><line x1="116" y1="60" x2="116" y2="198"/></g></g></svg>
+      </div>
+    </div>
+    <div class="hint"><div class="hint-row"><span class="chip">Editorial cards</span><span class="chip">Filosofie</span><span class="chip">Bovenbouw / Middenbouw / Onderbouw</span><span class="chip">Schrijf je in</span></div></div>
+    <div class="note-strip">Proud + outward. Appeals to club identity + parents who want their kid to "be part of something". "De toekomst van Elewijt." is the master-plan headline.</div>
+
+    <!-- B -->
+    <div class="direction-bar"><span class="tag">B</span> Plezier — fun-first / reassuring <span class="note">plezier &gt; prestatie; reassures parents it's not a pressure cooker</span></div>
+    <div class="hero">
+      <div>
+        <div class="kicker">Spelplezier op één</div>
+        <h2>Eerst plezier. <br>Dan de rest<span class="dot">.</span></h2>
+        <p class="lead">Bij KCVV Elewijt leren kinderen voetballen zonder de druk. Want wie graag speelt, groeit vanzelf — op en naast het veld.</p>
+        <div class="meta">U6 tot U21 · iedereen speelt</div>
+      </div>
+      <div class="artefact">
+        <svg class="jersey" viewBox="0 0 200 220" aria-hidden="true"><g fill="none" stroke="#0a0a0a" stroke-width="3"><path d="M60 28 L30 50 L46 78 L62 66 L62 196 Q62 200 66 200 L134 200 Q138 200 138 196 L138 66 L154 78 L170 50 L140 28 Q120 44 100 44 Q80 44 60 28 Z" fill="#008755"/><path d="M88 30 Q100 42 112 30" /><g stroke="#0a0a0a" stroke-width="6" opacity="0.85"><line x1="84" y1="60" x2="84" y2="198"/><line x1="100" y1="48" x2="100" y2="200"/><line x1="116" y1="60" x2="116" y2="198"/></g></g></svg>
+      </div>
+    </div>
+    <div class="hint"><div class="hint-row"><span class="chip">Editorial cards</span><span class="chip">Filosofie</span><span class="chip">Bovenbouw / Middenbouw / Onderbouw</span><span class="chip">Schrijf je in</span></div></div>
+    <div class="note-strip">Most reassuring to parents (the real audience). Leads with the club's actual philosophy (the current MissionBanner quote). Warm, low-pressure.</div>
+
+    <!-- C -->
+    <div class="direction-bar"><span class="tag">C</span> Welkom — invitational / onboarding <span class="note">belonging + "kom erbij"; foregrounds joining</span></div>
+    <div class="hero">
+      <div>
+        <div class="kicker">Welkom op De Kapblok</div>
+        <h2>Iedereen hoort erbij<span class="dot">.</span></h2>
+        <p class="lead">Van de allerkleinsten tot de U21: bij KCVV Elewijt is er een plek voor elk kind. Kom eens langs op training — de eerste keer is altijd vrijblijvend.</p>
+        <div class="meta">U6 tot U21 · kom proberen</div>
+      </div>
+      <div class="artefact">
+        <svg class="jersey" viewBox="0 0 200 220" aria-hidden="true"><g fill="none" stroke="#0a0a0a" stroke-width="3"><path d="M60 28 L30 50 L46 78 L62 66 L62 196 Q62 200 66 200 L134 200 Q138 200 138 196 L138 66 L154 78 L170 50 L140 28 Q120 44 100 44 Q80 44 60 28 Z" fill="#008755"/><path d="M88 30 Q100 42 112 30" /><g stroke="#0a0a0a" stroke-width="6" opacity="0.85"><line x1="84" y1="60" x2="84" y2="198"/><line x1="100" y1="48" x2="100" y2="200"/><line x1="116" y1="60" x2="116" y2="198"/></g></g></svg>
+      </div>
+    </div>
+    <div class="hint"><div class="hint-row"><span class="chip">Editorial cards</span><span class="chip">Filosofie</span><span class="chip">Bovenbouw / Middenbouw / Onderbouw</span><span class="chip">Schrijf je in</span></div></div>
+    <div class="note-strip">Most action-oriented for recruiting families. Pairs naturally with the schrijf-je-in CTA. RISK: leans on "kom proberen" copy that needs the CTA destination fixed (the 404).</div>
+
+    <!-- D -->
+    <div class="direction-bar"><span class="tag">D</span> Opleiding — developmental / academy <span class="note">structured pathway Onderbouw→Bovenbouw; quality coaching</span></div>
+    <div class="hero">
+      <div>
+        <div class="kicker">De jeugdopleiding</div>
+        <h2>Stap voor stap, <br>seizoen na seizoen<span class="dot">.</span></h2>
+        <p class="lead">Van Onderbouw over Middenbouw naar Bovenbouw: een doordachte opleiding waar elk kind op zijn tempo beter wordt — met plezier als basis.</p>
+        <div class="meta">Onderbouw → Middenbouw → Bovenbouw</div>
+      </div>
+      <div class="artefact">
+        <svg class="jersey" viewBox="0 0 200 220" aria-hidden="true"><g fill="none" stroke="#0a0a0a" stroke-width="3"><path d="M60 28 L30 50 L46 78 L62 66 L62 196 Q62 200 66 200 L134 200 Q138 200 138 196 L138 66 L154 78 L170 50 L140 28 Q120 44 100 44 Q80 44 60 28 Z" fill="#008755"/><path d="M88 30 Q100 42 112 30" /><g stroke="#0a0a0a" stroke-width="6" opacity="0.85"><line x1="84" y1="60" x2="84" y2="198"/><line x1="100" y1="48" x2="100" y2="200"/><line x1="116" y1="60" x2="116" y2="198"/></g></g></svg>
+      </div>
+    </div>
+    <div class="hint"><div class="hint-row"><span class="chip">Editorial cards</span><span class="chip">Filosofie</span><span class="chip">Bovenbouw / Middenbouw / Onderbouw</span><span class="chip">Schrijf je in</span></div></div>
+    <div class="note-strip">Most "serious football education" — appeals to parents weighing clubs on quality. RISK: can read as performance-focused, brushing against "plezier op één" + "for parents not players". The division pathway maps 1:1 to the YouthDirectory below.</div>
+
+    <div class="legend">
+      <b>One-line trade-off:</b> A = proud club-future (master-plan headline) ·
+      B = fun-first, most reassuring to parents ·
+      C = invitational, best for recruiting (needs the CTA fixed) ·
+      D = academy/pathway, risks reading performance-y.<br />
+      All four reuse the same primitives (EditorialHeading, MonoLabel kicker, JerseyShirt artefact)
+      and the same locked page scope beneath the hero. Voice picks the register; headline follows.
+    </div>
+  </body>
+</html>
