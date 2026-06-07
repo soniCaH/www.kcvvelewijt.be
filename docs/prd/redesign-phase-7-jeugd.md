@@ -81,8 +81,10 @@ cream grid. Proves route + data + e2e before new components land.
       preserved (article slots auto-fill latest Jeugd articles; nav cards pinned).
 - [ ] Two card variants: **news** (photographic, jersey-deep tag, greyscale→hover) vs **nav**
       (jersey-deep glyph panel via `@/lib/icons.redesign`, cream tag, `text-white`, no photo).
-- [ ] Tag pill (both variants) is **editorially managed**: `editorialCards.tag` when set, else
-      fallback `Jeugd` (news) / `Praktisch` (nav). Never blank. `editorialCards.tag` stays in use.
+- [ ] Tag pill (both variants) is **editorially managed**: news/article cards use `article.tags[0]`
+      → `Jeugd` (`editorialCards.tag` is **not** read for article slots); nav cards use
+      `editorialCards.tag` → the card's hardcoded `NAV_CARDS` label (e.g. `Praktisch`).
+      `editorialCards.tag` stays in use for nav cards.
 - [ ] `position` drives placement/order only (not size); `cardType` selects variant + bubbling.
 - [ ] Repointed targets: jeugdvisie → `#visie`; medisch → Jeugd article / `/hulp`; word lid →
       `/hulp` (or mailto). Editor overrides via the singleton still honoured.

@@ -53,9 +53,11 @@ The `/jeugd` redesign in the retro-terrace-fanzine system. Audience: **parents**
     (`@/lib/icons.redesign`) + cream tag pill + italic-display title + mono arrow. `text-white`
     on jersey-deep (contrast rule). One distinct, coherent variant — not a new vocabulary.
   - Both: `border-2 border-ink`, `shadow-paper`, canonical press-down hover.
-  - **Tag pill (both variants): editorially managed** — `editorialCards.tag` when set, else
-    fallback `Jeugd` (news) / `Praktisch` (nav). Never blank; real CMS data, not invented (7j3
-    refinement). News pill = jersey-deep on photo; nav pill = cream on the jersey-deep panel.
+  - **Tag pill — editorially managed (per variant; see 7j3 data audit for the full rule):** news
+    cards use `article.tags[0]` → `Jeugd`; nav cards use `editorialCards.tag` → the card's hardcoded
+    `NAV_CARDS` label (e.g. `Praktisch`). `editorialCards.tag` is **not** read for news/article cards.
+    Real CMS data, not invented (7j3 refinement). News pill = jersey-deep on photo; nav pill = cream
+    on the jersey-deep panel.
   - Fixed-position template preserved; `cardType` selects variant + bubbling; `position` =
     placement order only (no longer drives size).
 - **Filosofie/visie:** `<PullQuote>` or a `<TapedCard>` block, jersey-deep quote mark, italic
