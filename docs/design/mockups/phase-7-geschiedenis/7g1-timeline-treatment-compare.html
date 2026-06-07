@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /club/geschiedenis · Round 1: timeline treatment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 84ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
+      .direction-bar.lk { background: var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .wrap { max-width: 1000px; margin: 0 auto; padding: 0 28px; }
+
+      /* hero */
+      .hero { padding: 50px 0 26px; }
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .hero h1 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(40px,6vw,80px); line-height:.9; margin: 12px 0 0; }
+      .hero h1 .dot { color: var(--jersey-deep); }
+      .hero .lead { font-family: var(--font-display); font-size: 19px; line-height: 1.5; margin: 16px 0 0; color: var(--ink-soft); max-width: 54ch; }
+
+      .seam { height: 14px; margin: 22px 0 30px; background: repeating-linear-gradient(135deg, var(--ink) 0 10px, var(--cream) 10px 20px); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); opacity:.92; }
+      .datelbl { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: var(--warm); border: 1.5px solid var(--ink); padding: 3px 8px; display:inline-block; }
+      .card { background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 16px 18px; }
+      .card p { font-size: 13.5px; line-height: 1.6; margin: 8px 0 0; color: var(--ink-soft); }
+      .photo { background: repeating-linear-gradient(45deg, #d7d0bb 0 12px, #c8c1aa 12px 24px); border: 2px solid var(--ink); box-shadow: 4px 5px 0 0 var(--ink); aspect-ratio: 16/9; display:flex; align-items:flex-end; padding: 10px; filter: sepia(.25); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; color: var(--ink-muted); }
+      .cap { font-family: var(--font-display); font-style: italic; font-size: 13px; color: var(--ink-muted); text-align:center; margin-top: 8px; }
+
+      /* T1 alternating + seam */
+      .t1 { position: relative; }
+      .t1 .line { position:absolute; top:0; bottom:0; left:50%; width:0; border-left:2px dashed var(--ink); opacity:.5; transform: translateX(-1px); }
+      .t1 .row { display:grid; grid-template-columns: 1fr 40px 1fr; align-items:start; margin-bottom: 22px; }
+      .t1 .dot { width:14px; height:14px; background: var(--jersey-deep); border:2px solid var(--ink); border-radius:9999px; margin: 6px auto 0; }
+      .t1 .left { text-align:left; } .t1 .right { grid-column: 3; }
+      .t1 .cell { } .t1 .cell .datelbl { margin-bottom: 8px; }
+      .t1 .full { margin: 8px 0 26px; }
+
+      /* T2 single-column scrapbook */
+      .t2 .stack { max-width: 620px; margin: 0 auto; display:flex; flex-direction:column; gap: 22px; }
+      .t2 .card:nth-child(odd){ transform: rotate(-0.5deg); } .t2 .card:nth-child(even){ transform: rotate(0.5deg); }
+      .t2 .tphoto { transform: rotate(0.6deg); }
+
+      /* T3 era-chaptered */
+      .t3 .era { margin-bottom: 36px; }
+      .t3 .era h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: clamp(26px,3.4vw,40px); margin: 0 0 4px; }
+      .t3 .era h2 .dot { color: var(--jersey-deep); }
+      .t3 .era .span { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); }
+      .t3 .cluster { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+      .t3 .cluster .full { grid-column: 1 / 3; }
+
+      .note-strip { background: var(--cream-deep); border-top: 1px dashed var(--ink); border-bottom: 1px dashed var(--ink); padding: 10px 28px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); }
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 20px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /club/geschiedenis — Round 1: timeline treatment</h1>
+      <p>Heritage hero shown once, then three ways to render the chronicle (era-labelled cards +
+        historical photos) in the fanzine vocabulary. All use TapedCard + TapedFigure + MonoLabel
+        date chips. See <a href="./7g0-data-reality-locked.md">7g0</a>. Content is hardcoded — pure reskin.</p>
+    </div>
+
+    <!-- HERO (locked-ish) -->
+    <div class="direction-bar lk"><span class="tag" style="background:#cfeede">HERO</span> Heritage hero — same across variants</div>
+    <div class="wrap"><div class="hero">
+      <div class="kicker">De club · sinds 1909</div>
+      <h1>Meer dan een eeuw<span class="dot">.</span></h1>
+      <p class="lead">Van een veldje met witte truien en een rode band tot vandaag — de rijkgevulde geschiedenis van KCVV Elewijt, seizoen na seizoen.</p>
+    </div></div>
+    <div class="wrap"><div class="seam"></div></div>
+
+    <!-- T1 -->
+    <div class="direction-bar"><span class="tag">T1</span> Alternating + seam <span class="note">faithful to today: cards either side of a dashed-ink centre line, ink/jersey markers</span></div>
+    <div class="wrap"><div class="t1">
+      <div class="line"></div>
+      <div class="row"><div class="cell left"><span class="datelbl">1909 – 1935</span><div class="card"><p>De Elewijtse voetbalgeschiedenis gaat terug tot 1909-1910. De jongens speelden in witte truien met een rode band — "Wit en Rood".</p></div></div><div class="dot"></div><div></div></div>
+      <div class="row"><div></div><div class="dot"></div><div class="cell right"><span class="datelbl">Eerste wereldoorlog</span><div class="card"><p>De oorlog legde het prille voetballeven stil; pas nadien werd de draad weer opgepikt.</p></div></div></div>
+      <div class="row"><div class="cell left"><span class="datelbl">De "Leopold"</span><div class="card"><p>Een nieuwe ploeg ontstond rond café De Leopold — een vaste stek voor de spelers.</p></div></div><div class="dot"></div><div></div></div>
+      <div class="full"><div class="photo">[ SK Elewijt kampioen 52–53 ]</div><div class="cap">Kampioenenelftal SK Elewijt, seizoen 1952–53.</div></div>
+    </div></div>
+    <div class="note-strip">Keeps the recognised "timeline" reading (two sides, a spine). Desktop-rich; on mobile it collapses to one column (as today). Closest to the current page.</div>
+
+    <!-- T2 -->
+    <div class="direction-bar"><span class="tag">T2</span> Single-column scrapbook <span class="note">one centred column of taped cards flowing down, photos inline — album feel</span></div>
+    <div class="wrap"><div class="t2"><div class="stack">
+      <div class="card"><span class="datelbl">1909 – 1935</span><p style="margin-top:10px">De Elewijtse voetbalgeschiedenis gaat terug tot 1909-1910. De jongens speelden in witte truien met een rode band — "Wit en Rood".</p></div>
+      <div class="card"><span class="datelbl">Eerste wereldoorlog</span><p style="margin-top:10px">De oorlog legde het prille voetballeven stil; pas nadien werd de draad weer opgepikt.</p></div>
+      <div class="tphoto"><div class="photo">[ SK Elewijt kampioen 52–53 ]</div><div class="cap">Kampioenenelftal SK Elewijt, 1952–53.</div></div>
+      <div class="card"><span class="datelbl">De "Leopold"</span><p style="margin-top:10px">Een nieuwe ploeg ontstond rond café De Leopold — een vaste stek voor de spelers.</p></div>
+    </div></div></div>
+    <div class="note-strip">Most "fanzine album" — a scrapbook you scroll. Same on mobile + desktop (no awkward alternation). RISK: loses the explicit two-sided "timeline" metaphor; relies on the date chips to carry chronology.</div>
+
+    <!-- T3 -->
+    <div class="direction-bar"><span class="tag">T3</span> Era-chaptered <span class="note">big era headings group the cards into chapters — magazine feature</span></div>
+    <div class="wrap"><div class="t3">
+      <div class="era">
+        <h2>De beginjaren<span class="dot">.</span></h2>
+        <div class="span">1909 – 1935 · Wit en Rood</div>
+        <div class="cluster">
+          <div class="card"><span class="datelbl">1909 – 1910</span><p style="margin-top:8px">Het begin: witte truien met een rode band, een veldje, en jongens met goesting.</p></div>
+          <div class="card"><span class="datelbl">Eerste wereldoorlog</span><p style="margin-top:8px">De oorlog legde het voetballeven stil; nadien werd de draad weer opgepikt.</p></div>
+          <div class="full"><div class="photo">[ SK Elewijt kampioen 52–53 ]</div><div class="cap">Kampioenenelftal SK Elewijt, 1952–53.</div></div>
+        </div>
+      </div>
+      <div class="era">
+        <h2>Sportkring &amp; FC<span class="dot">.</span></h2>
+        <div class="span">1935 – 1960 · clubnamen &amp; rivaliteit</div>
+        <div class="cluster">
+          <div class="card"><span class="datelbl">Sportkring Elewijt</span><p style="margin-top:8px">Een vaste clubnaam, een vaste stek, en de eerste titels.</p></div>
+          <div class="card"><span class="datelbl">Rivaliteit</span><p style="margin-top:8px">Twee Elewijtse ploegen, één dorp — de rivaliteit leefde op straat.</p></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="note-strip">Most editorial/magazine: chapters with big EditorialHeadings give the century structure + scannability. RISK: biggest departure from a "timeline"; needs era groupings defined (the era names already exist in the content).</div>
+
+    <div class="legend">
+      <b>One-line trade-off:</b> T1 = familiar two-sided timeline, reskinned (most faithful) ·
+      T2 = single-column scrapbook/album (cleanest, mobile-equal) ·
+      T3 = era-chaptered magazine feature (most structured, biggest change).<br />
+      Date-chip styling (MonoLabel vs ticket-stub), photo caption, and the hero headline are later
+      detail tweaks.
+    </div>
+  </body>
+</html>
