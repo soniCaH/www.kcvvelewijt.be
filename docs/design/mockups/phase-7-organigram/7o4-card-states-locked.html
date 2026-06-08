@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o4 LOCKED — card states (shared dual-avatar · vacant recruit)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:16px 28px;font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;}
+      .head b{color:var(--warm);}
+      .wrap{max-width:1000px;margin:0 auto;padding:26px 24px;}
+      .grid{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;}
+      .cell{display:flex;flex-direction:column;align-items:center;gap:10px;}
+      .cap{font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--jersey-deep);}
+      .cap b{color:var(--ink);}
+
+      .pcard{border:2px solid var(--ink);background:var(--cream);box-shadow:3px 3px 0 0 var(--ink);display:flex;flex-direction:column;align-items:center;padding:14px 12px;text-align:center;width:172px;position:relative;}
+      .pcard .av{width:64px;height:64px;border-radius:9999px;border:2px solid var(--ink);overflow:hidden;background:var(--cream-soft);display:flex;align-items:center;justify-content:center;}
+      .pcard .av .mono{font-family:var(--font-display);font-weight:900;color:var(--jersey-deep);font-size:23px;}
+      .pcard .av .ph{width:100%;height:100%;background:repeating-linear-gradient(45deg,#d7d0bb 0 8px,#c8c1aa 8px 16px);filter:sepia(.3) saturate(.8);}
+      .pcard .nm{font-family:var(--font-display);margin-top:9px;line-height:1.05;font-size:16px;}
+      .pcard .nm b{font-weight:600;} .pcard .nm em{font-style:italic;font-weight:400;}
+      .pcard .fn{font-family:var(--font-mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-muted);margin-top:5px;}
+      .rolepill{position:absolute;top:9px;right:9px;font-family:var(--font-mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--jersey-deep);color:var(--cream);border:1.5px solid var(--ink);padding:1px 5px;}
+
+      /* shared dual avatar — static cue (no hover) */
+      .av.dual{position:relative;background:transparent;border:none;width:78px;height:64px;overflow:visible;}
+      .av.dual .c{position:absolute;width:52px;height:52px;border-radius:9999px;border:2px solid var(--ink);overflow:hidden;background:var(--cream-soft);display:flex;align-items:center;justify-content:center;cursor:default;top:6px;}
+      .av.dual .c1{left:0;z-index:2;} .av.dual .c2{right:0;z-index:1;}
+      .av.dual .c .mono{font-family:var(--font-display);font-weight:900;color:var(--jersey-deep);font-size:18px;}
+      .av.dual .c .tip{display:none;}
+      .plusN{position:absolute;right:-6px;top:6px;width:30px;height:30px;border-radius:9999px;background:var(--jersey-deep);color:var(--cream);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:600;z-index:3;}
+
+      /* vacant recruit */
+      .pcard.vac{background:var(--warm);box-shadow:4px 4px 0 0 var(--ink);}
+      .pcard.vac .av{background:rgba(255,255,255,.45);border-style:dashed;}
+      .pcard.vac .av .q{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:24px;color:var(--jersey-deep);}
+      .pcard.vac .cta{margin-top:9px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--ink);padding:6px 10px;background:var(--cream);box-shadow:2px 2px 0 0 var(--ink);}
+
+      .spec{background:var(--cream-deep);border:1.5px solid var(--ink);padding:14px 16px;font-family:var(--font-mono);font-size:11.5px;line-height:1.75;color:var(--ink-soft);margin-top:26px;}
+      .spec b{color:var(--jersey-deep);} .spec .k{color:var(--ink);font-weight:600;}
+      .try{font-family:var(--font-mono);font-size:11px;color:var(--brick);text-align:center;margin-top:4px;}
+    </style>
+  </head>
+  <body>
+    <div class="head">7o4 LOCKED · <b>single (6.C) · shared = dual-avatar (static cue) · vacant = recruit</b></div>
+    <div class="wrap">
+      <div class="grid">
+        <div class="cell">
+          <span class="cap"><b>SINGLE</b> · 6.C</span>
+          <div class="pcard"><span class="rolepill">VZ</span><div class="av"><span class="mono">LB</span></div><div class="nm"><b>Luc</b> <em>Boons</em></div><div class="fn">Voorzitter</div></div>
+          <span class="cap">photo or monogram</span>
+        </div>
+
+        <div class="cell">
+          <span class="cap"><b>SHARED</b> · 2 personen</span>
+          <div class="pcard">
+            <div class="av dual">
+              <span class="c c1"><span class="mono">JD</span><span class="tip">Jan De Smet</span></span>
+              <span class="c c2"><span class="ph"></span><span class="tip">Paula Vos</span></span>
+            </div>
+            <div class="nm"><b>Wedstrijd-</b> <em>secretariaat</em></div><div class="fn">2 personen</div>
+          </div>
+          <span class="try">klik de functie → opent de persoon (7o5)</span>
+        </div>
+
+        <div class="cell">
+          <span class="cap"><b>SHARED 3+</b> · 2 + “+N”</span>
+          <div class="pcard">
+            <div class="av dual">
+              <span class="c c1"><span class="mono">EC</span><span class="tip">Els Claes</span></span>
+              <span class="c c2"><span class="mono">NB</span><span class="tip">Nina Bral</span></span>
+              <span class="plusN">+1</span>
+            </div>
+            <div class="nm"><b>Feest-</b> <em>comité</em></div><div class="fn">3 personen</div>
+          </div>
+          <span class="cap">“+1” → opent detail</span>
+        </div>
+
+        <div class="cell">
+          <span class="cap"><b>VACANT</b> · recruit</span>
+          <div class="pcard vac"><div class="av"><span class="q">+</span></div><div class="nm"><em>Penningmeester</em></div><div class="fn">deze plek is vrij</div><span class="cta">Iets voor jou? →</span></div>
+          <span class="cap">warm · CTA → contact/Hulp</span>
+        </div>
+      </div>
+
+      <div class="spec">
+        <span class="k">DISCOVERY (locked, person-first — 7o5):</span> the whole card/node is a <b>single click target</b> that opens the <b>person detail</b> directly — single holder → that person; shared → the first holder + a name-tab switcher. <b>No per-avatar interaction.</b><br>
+        <span class="k">SHARED (S-A):</span> two overlapping avatars + “N personen” are a <b>purely static visual cue</b> (no hover, no tooltip). 3+ → two avatars + a <b>“+N”</b> chip; the whole card (and the chip) opens the detail. Same chrome at directory scale (64px) and smaller explorer-node scale.<br>
+        <span class="k">VACANT (V-C):</span> warm card · dashed avatar with “+” · position name · “deze plek is vrij” · soft <b>“Iets voor jou? →”</b> CTA to contact/Hulp. Vacant cards appear in the directory + explorer only — <b>never in the hero index</b>. (Honest volunteer call for a vrijwilligers-run club.)<br>
+        <span class="k">SHARED + roleCode:</span> optional <b>roleCode pill</b> top-right when present (e.g. “VZ”, “T1”); auto-hides otherwise.
+      </div>
+    </div>
+  </body>
+</html>

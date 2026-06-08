@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o4: NODE / PEOPLE-CARD STATES</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:94ch;}
+      .head b{color:var(--warm);}
+      .row-bar{position:sticky;top:0;z-index:50;background:var(--jersey-deep);color:var(--cream);padding:10px 28px;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink);}
+      .row-bar.lock{background:var(--ink);} .row-bar.lock b{color:var(--jersey);}
+      .stage{padding:26px 28px 30px;border-bottom:1px dashed var(--paper-edge);}
+      .opts{max-width:1060px;margin:0 auto;display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;}
+      .opt{flex:1;min-width:240px;}
+      .opt .tag{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--warm);border:1.5px solid var(--ink);padding:2px 8px;display:inline-block;margin-bottom:10px;}
+      .opt .tag.rec{background:var(--jersey);}
+      .opt p{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:10px 0 0;}
+      .cardwrap{display:flex;justify-content:center;padding:16px;background:var(--cream-soft);border:1.5px dashed var(--paper-edge);}
+
+      /* people card (6.C TeamStaff) */
+      .pcard{border:2px solid var(--ink);background:var(--cream);box-shadow:3px 3px 0 0 var(--ink);display:flex;flex-direction:column;align-items:center;padding:14px 12px;text-align:center;width:170px;position:relative;}
+      .pcard .av{width:64px;height:64px;border-radius:9999px;border:2px solid var(--ink);overflow:hidden;background:var(--cream-soft);display:flex;align-items:center;justify-content:center;}
+      .pcard .av .mono{font-family:var(--font-display);font-weight:900;color:var(--jersey-deep);font-size:23px;}
+      .pcard .av .ph{width:100%;height:100%;background:repeating-linear-gradient(45deg,#d7d0bb 0 8px,#c8c1aa 8px 16px);filter:sepia(.3) saturate(.8);}
+      .pcard .nm{font-family:var(--font-display);margin-top:9px;line-height:1.05;font-size:16px;}
+      .pcard .nm b{font-weight:600;} .pcard .nm em{font-style:italic;font-weight:400;}
+      .pcard .fn{font-family:var(--font-mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-muted);margin-top:5px;}
+      .rolepill{position:absolute;top:9px;right:9px;font-family:var(--font-mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--jersey-deep);color:var(--cream);border:1.5px solid var(--ink);padding:1px 5px;}
+
+      /* shared variants */
+      .av.dual{position:relative;background:transparent;border:none;width:74px;}
+      .av.dual .c{position:absolute;width:50px;height:50px;border-radius:9999px;border:2px solid var(--ink);overflow:hidden;background:var(--cream-soft);display:flex;align-items:center;justify-content:center;}
+      .av.dual .c1{left:0;top:7px;z-index:1;} .av.dual .c2{right:0;top:7px;}
+      .av.dual .c .mono{font-family:var(--font-display);font-weight:900;color:var(--jersey-deep);font-size:17px;}
+      .badgeN{position:absolute;bottom:-3px;right:-3px;background:var(--jersey-deep);color:var(--cream);border:2px solid var(--ink);border-radius:9999px;width:24px;height:24px;font-family:var(--font-mono);font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:600;}
+      .av-rel{position:relative;}
+      .mini-list{margin-top:9px;display:flex;flex-direction:column;gap:5px;width:100%;}
+      .mini-list .mrow{display:flex;align-items:center;gap:7px;border:1.5px solid var(--ink);padding:4px 7px;background:var(--cream-soft);}
+      .mini-list .mrow .ma{width:24px;height:24px;border-radius:9999px;border:1.5px solid var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:11px;color:var(--jersey-deep);flex:none;}
+      .mini-list .mrow .mn{font-family:var(--font-display);font-size:12px;}
+
+      /* vacant variants */
+      .pcard.vac-warm{background:var(--warm);}
+      .pcard.vac-warm .av{background:rgba(255,255,255,.4);border-style:solid;}
+      .pcard.vac-warm .av .q{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:26px;color:var(--ink);}
+      .pcard.vac-ghost{border-style:dashed;background:var(--cream-soft);box-shadow:none;}
+      .pcard.vac-ghost .av{border-style:dashed;background:transparent;}
+      .pcard.vac-ghost .av .q{font-family:var(--font-display);font-style:italic;font-size:26px;color:var(--ink-muted);}
+      .pcard.vac-ghost .fn{color:var(--brick);}
+      .pcard.vac-recruit{background:var(--warm);box-shadow:4px 4px 0 0 var(--ink);}
+      .pcard.vac-recruit .av{background:rgba(255,255,255,.45);border-style:dashed;}
+      .pcard.vac-recruit .av .q{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:24px;color:var(--jersey-deep);}
+      .pcard.vac-recruit .cta{margin-top:9px;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--ink);padding:5px 9px;background:var(--cream);box-shadow:2px 2px 0 0 var(--ink);}
+
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /club/organigram · 7o4 — NODE / PEOPLE-CARD STATES</h1>
+      <p>The single-person card is the <b>locked 6.C &lt;TeamStaff&gt; idiom</b> (round newsprint photo / jersey-deep monogram · name first-semibold + last-italic · mono function label). Same chrome is used in the directory and (smaller) as explorer nodes. Two states still need a call: <b>shared</b> (a position held by 2+ people) and <b>vacant</b> (an open position, 0 people). The optional <b>roleCode pill</b> (“T1”, “VP”) is shown top-right where present.</p>
+    </div>
+
+    <!-- LOCKED single -->
+    <div class="row-bar lock">LOCKED · <b>single</b> — the 6.C &lt;TeamStaff&gt; card (reference)</div>
+    <div class="stage"><div class="opts">
+      <div class="opt" style="max-width:200px;">
+        <div class="cardwrap"><div class="pcard"><span class="rolepill">VZ</span><div class="av"><span class="mono">LB</span></div><div class="nm"><b>Luc</b> <em>Boons</em></div><div class="fn">Voorzitter</div></div></div>
+        <p>Monogram when no photo (~90% of staff). With a photo it’s the newsprint round portrait. roleCode pill optional.</p>
+      </div>
+      <div class="opt" style="max-width:200px;">
+        <div class="cardwrap"><div class="pcard"><div class="av"><span class="ph"></span></div><div class="nm"><b>Inge</b> <em>Maes</em></div><div class="fn">Secretaris</div></div></div>
+        <p>Photo variant (newsprint-treated). No roleCode here → no pill (auto-hides).</p>
+      </div>
+    </div></div>
+
+    <!-- SHARED -->
+    <div class="row-bar">DECISION 1 · <b>shared</b> — a position held by 2+ people (e.g. “Wedstrijdsecretariaat · 2 personen”)</div>
+    <div class="stage"><div class="opts">
+      <div class="opt">
+        <span class="tag rec">S-A ★ Dual avatar</span>
+        <div class="cardwrap"><div class="pcard"><div class="av dual"><span class="c c1"><span class="mono">JD</span></span><span class="c c2"><span class="ph"></span></span></div><div class="nm"><b>Wedstrijd-</b> <em>secretariaat</em></div><div class="fn">2 personen</div></div></div>
+        <p>Two overlapping avatars read “shared” instantly; “2 personen” label. Clean at card + node scale. (3+ → show 2 + a “+1”.)</p>
+      </div>
+      <div class="opt">
+        <span class="tag">S-B Badge + expand</span>
+        <div class="cardwrap"><div class="pcard"><div class="av av-rel"><span class="ph"></span><span class="badgeN">2</span></div><div class="nm"><b>Wedstrijd-</b> <em>secretariaat</em></div><div class="fn">klik voor beide</div></div></div>
+        <p>One avatar + a count badge; click opens both in the 7o5 detail. Most compact; the “shared” cue is subtler.</p>
+      </div>
+      <div class="opt">
+        <span class="tag">S-C Mini-list</span>
+        <div class="cardwrap"><div class="pcard" style="width:190px;"><div class="fn" style="margin-top:0;">Wedstrijdsecretariaat</div><div class="mini-list"><div class="mrow"><span class="ma">JD</span><span class="mn">Jan De Smet</span></div><div class="mrow"><span class="ma">PV</span><span class="mn">Paula Vos</span></div></div></div></div>
+        <p>Both names listed inside the card. Most explicit, but taller — awkward as a small explorer node and in a tight grid.</p>
+      </div>
+    </div></div>
+
+    <!-- VACANT -->
+    <div class="row-bar">DECISION 2 · <b>vacant</b> — an open position with 0 people</div>
+    <div class="stage"><div class="opts">
+      <div class="opt">
+        <span class="tag rec">V-C ★ Recruit</span>
+        <div class="cardwrap"><div class="pcard vac-recruit"><div class="av"><span class="q">+</span></div><div class="nm"><em>Penningmeester</em></div><div class="fn">deze plek is vrij</div><span class="cta">Iets voor jou? →</span></div></div>
+        <p>Turns a gap into a volunteer call — on-brand for a club run by vrijwilligers. Warm card, “+”, soft CTA → contact/Hulp. Honest (the seat IS open) and useful.</p>
+      </div>
+      <div class="opt">
+        <span class="tag">V-A Warm neutral</span>
+        <div class="cardwrap"><div class="pcard vac-warm"><div class="av"><span class="q">?</span></div><div class="nm"><em>Penningmeester</em></div><div class="fn">vacant</div></div></div>
+        <p>Warm card, “?”, “vacant” — flags the opening without a CTA. Calmer; no recruiting nudge.</p>
+      </div>
+      <div class="opt">
+        <span class="tag">V-B Ghost</span>
+        <div class="cardwrap"><div class="pcard vac-ghost"><div class="av"><span class="q">?</span></div><div class="nm"><em>Open functie</em></div><div class="fn">vacant</div></div></div>
+        <p>Dashed “ghost” card, brick label. Reads clearly as empty/placeholder; the most muted, least celebratory.</p>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o4 — shared + vacant card states</h3>
+      <p>
+        <b>Shared:</b> S-A dual-avatar (instant cue, scales) · S-B badge+expand (compact, subtle) · S-C mini-list
+        (explicit, tall). <b>Vacant:</b> V-C recruit (on-brand volunteer call) · V-A warm-neutral (flag only) ·
+        V-B ghost (muted placeholder).
+      </p>
+      <p style="color:var(--ink-muted);">
+        Locked regardless: single = 6.C &lt;TeamStaff&gt;; monogram fallback (no photo); optional roleCode pill top-right;
+        same chrome at directory scale (64px avatar) and explorer-node scale (smaller). Vacant cards never appear in the
+        hero index, only in the directory/explorer. Pick one shared + one vacant treatment.
+      </p>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · /hulp hub · 7o6: Hulp finder reskin (answer disclosure)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:94ch;}
+      .head b{color:var(--warm);}
+      .bar{background:var(--jersey-deep);color:var(--cream);padding:11px 28px;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink);}
+      .bar.rec .tg{background:var(--jersey);} .bar .tg{background:var(--warm);color:var(--ink);padding:2px 9px;font-weight:700;border:1.5px solid var(--ink);margin-right:10px;}
+      .bar .note{color:#cfeede;text-transform:none;letter-spacing:0;font-size:12px;}
+      .stage{padding:24px 28px 30px;border-bottom:1px dashed var(--paper-edge);}
+      .wrap{max-width:920px;margin:0 auto;}
+      .kicker{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--jersey-deep);}
+      .h2{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:30px;margin:8px 0 0;}
+      .dot{color:var(--jersey-deep);}
+      .catbar{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0;}
+      .catbar .c{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--ink);padding:6px 11px;background:var(--cream);box-shadow:2px 2px 0 0 var(--ink);}
+      .catbar .c.on{background:var(--jersey-deep);color:var(--cream);}
+      .catlabel{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border-bottom:2px solid var(--jersey-deep);padding-bottom:3px;display:inline-block;margin:16px 0 12px;}
+
+      /* question card */
+      .q{border:2px solid var(--ink);background:var(--cream);box-shadow:3px 3px 0 0 var(--ink);margin-bottom:10px;}
+      .q .qhead{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;}
+      .q .qhead .ic{font-family:var(--font-mono);color:var(--jersey-deep);font-size:18px;width:24px;text-align:center;}
+      .q .qhead .qt{flex:1;font-family:var(--font-display);font-style:italic;font-weight:600;font-size:17px;}
+      .q .qhead .cat{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--ink-muted);}
+      .q .qhead .chev{font-family:var(--font-mono);color:var(--ink-muted);}
+      .q.open .qhead .chev{color:var(--jersey-deep);}
+      .q .ans{border-top:2px dashed var(--paper-edge);padding:14px 16px;display:none;}
+      .q.open .ans{display:block;}
+      .q .ans .sum{font-size:14px;color:var(--ink-soft);line-height:1.55;margin:0 0 12px;}
+      .steps{counter-reset:s;margin:0 0 14px;padding:0;list-style:none;}
+      .steps li{counter-increment:s;position:relative;padding:6px 0 6px 30px;font-size:13px;line-height:1.5;border-bottom:1px dotted var(--paper-edge);}
+      .steps li::before{content:counter(s);position:absolute;left:0;top:6px;width:20px;height:20px;background:var(--jersey-deep);color:var(--cream);font-family:var(--font-mono);font-size:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--ink);}
+      .contact{display:flex;align-items:center;gap:11px;border:2px solid var(--ink);background:var(--cream-soft);box-shadow:2px 2px 0 0 var(--ink);padding:9px 12px;}
+      .contact .av{width:38px;height:38px;border-radius:9999px;border:2px solid var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:13px;color:var(--jersey-deep);flex:none;}
+      .contact .who{flex:1;line-height:1.2;}
+      .contact .who .nm{font-family:var(--font-display);font-weight:600;font-size:14px;}
+      .contact .who .fn{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--jersey-deep);}
+      .contact .acts{display:flex;gap:6px;}
+      .contact .acts a{font-family:var(--font-mono);font-size:11px;border:1.5px solid var(--ink);width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--cream);box-shadow:1px 1px 0 0 var(--ink);}
+      .struct-link{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--jersey-deep);border:1.5px solid var(--jersey-deep);padding:4px 7px;}
+
+      /* B panel variant mini */
+      .splitB{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
+      .qlistB .q{cursor:pointer;} .qlistB .q.sel{box-shadow:0 0 0 3px var(--warm),3px 3px 0 0 var(--ink);}
+      .panelB{border:2px solid var(--ink);background:var(--cream);box-shadow:-5px 5px 0 0 rgba(10,10,10,.15);}
+      .panelB .ph{background:var(--jersey-deep-dark);color:var(--cream);padding:13px 15px;}
+      .panelB .ph .k{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;color:var(--warm);}
+      .panelB .ph .t{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:19px;margin-top:4px;}
+      .panelB .pb{padding:14px 15px;}
+
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /hulp hub · 7o6 — HULP FINDER RESKIN (the Hulp half)</h1>
+      <p>Reskin the existing <code>&lt;HulpPage&gt;</code> finder (search · category browse · answer · contact) into the hub’s fanzine vocabulary. IA is already good — the real fork is <b>how an answer reveals</b>. Browse stays <b>category-led</b> (icons = Phosphor Fill) with the hero’s audience chips as a filter. Contact reuses the locked person vocabulary; “toon in structuur” cross-links into the explorer.</p>
+    </div>
+
+    <!-- A accordion -->
+    <div class="bar rec"><span class="tg">A ★</span>Inline accordion <span class="note">· master §6.11 “FAQ accordions in TapedCard” · stay in the list · best for SEO/FAQ</span></div>
+    <div class="stage"><div class="wrap">
+      <span class="kicker">Hulp · vind het juiste antwoord</span>
+      <div class="h2">Wie kan me helpen<span class="dot">?</span></div>
+      <div class="catbar"><span class="c on">Alles</span><span class="c">Medisch</span><span class="c">Sportief</span><span class="c">Administratief</span><span class="c">Gedrag</span><span class="c">Commercieel</span></div>
+
+      <span class="catlabel">Administratief</span>
+      <div class="q open">
+        <div class="qhead"><span class="ic">▤</span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">−</span></div>
+        <div class="ans">
+          <p class="sum">Inschrijven kan het hele seizoen door. De jeugdsecretaris helpt je met formulieren, lidgeld en de juiste ploeg.</p>
+          <ol class="steps">
+            <li>Mail of bel de jeugdsecretaris voor een afspraak.</li>
+            <li>Vul het inschrijvingsformulier in (online of op de club).</li>
+            <li>Betaal het lidgeld — je kind is verzekerd zodra dit in orde is.</li>
+          </ol>
+          <div class="contact"><span class="av">KW</span><span class="who"><span class="nm">Karen Wouters</span><span class="fn">Jeugdsecretaris</span></span><span class="struct-link">toon in structuur →</span><span class="acts"><a>✉</a><a>☎</a></span></div>
+        </div>
+      </div>
+      <div class="q">
+        <div class="qhead"><span class="ic">▤</span><span class="qt">Wat kost een lidmaatschap?</span><span class="chev">+</span></div>
+      </div>
+
+      <span class="catlabel">Medisch</span>
+      <div class="q">
+        <div class="qhead"><span class="ic">✚</span><span class="qt">Mijn zoon is geblesseerd — wat nu?</span><span class="chev">+</span></div>
+      </div>
+    </div></div>
+
+    <!-- B panel -->
+    <div class="bar"><span class="tg">B</span>Answer in a side-panel <span class="note">· same panel idiom as the person detail (7o5) · hub consistency</span></div>
+    <div class="stage"><div class="wrap">
+      <div class="splitB">
+        <div class="qlistB">
+          <span class="catlabel">Administratief</span>
+          <div class="q sel"><div class="qhead"><span class="ic">▤</span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">→</span></div></div>
+          <div class="q"><div class="qhead"><span class="ic">▤</span><span class="qt">Wat kost een lidmaatschap?</span><span class="chev">→</span></div></div>
+          <span class="catlabel">Medisch</span>
+          <div class="q"><div class="qhead"><span class="ic">✚</span><span class="qt">Mijn zoon is geblesseerd?</span><span class="chev">→</span></div></div>
+        </div>
+        <div class="panelB">
+          <div class="ph"><div class="k">Administratief</div><div class="t">Hoe schrijf ik mijn kind in?</div></div>
+          <div class="pb">
+            <p style="font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 12px;">Inschrijven kan het hele seizoen door…</p>
+            <ol class="steps"><li>Mail of bel de jeugdsecretaris.</li><li>Vul het formulier in.</li><li>Betaal het lidgeld.</li></ol>
+            <div class="contact"><span class="av">KW</span><span class="who"><span class="nm">Karen Wouters</span><span class="fn">Jeugdsecretaris</span></span><span class="acts"><a>✉</a><a>☎</a></span></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o6 — answer disclosure (finder reskin)</h3>
+      <p>
+        <b>A ★ accordion</b> — click a question, it expands in place to summary + numbered steps + contact. Matches
+        master §6.11 (“FAQ accordions in TapedCard”), keeps you in the browsing list, and all answers sit in the DOM
+        (good for the FAQ rich-results JSON-LD). <b>B panel</b> — the answer opens in a right side-panel, identical idiom
+        to the 7o5 person panel (hub consistency) — but the question list and the answer compete for width, and answers
+        aren’t in the initial DOM.
+      </p>
+      <p style="color:var(--ink-muted);">
+        Either way: <b>contact reuses the locked person vocabulary</b> (monogram/photo · name · ✉/☎ · “toon in
+        structuur →” cross-links into the explorer, opening that node + the person panel). Browse stays category-led with
+        the hero audience chips as a filter. Deep-link `/hulp#&lt;slug&gt;` per answer regardless.
+      </p>
+    </div>
+  </body>
+</html>

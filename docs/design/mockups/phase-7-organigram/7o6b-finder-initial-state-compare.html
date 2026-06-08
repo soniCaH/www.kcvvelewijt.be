@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · /hulp hub · 7o6b: finder “Alles” initial state at scale</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:94ch;}
+      .head b{color:var(--warm);}
+      .bar{background:var(--jersey-deep);color:var(--cream);padding:11px 28px;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink);}
+      .bar.rec .tg{background:var(--jersey);} .bar .tg{background:var(--warm);color:var(--ink);padding:2px 9px;font-weight:700;border:1.5px solid var(--ink);margin-right:10px;}
+      .bar .note{color:#cfeede;text-transform:none;letter-spacing:0;font-size:12px;}
+      .stage{padding:22px 28px 28px;border-bottom:1px dashed var(--paper-edge);}
+      .wrap{max-width:760px;margin:0 auto;}
+      .catbar{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;}
+      .catbar .c{font-family:var(--font-mono);font-size:10px;letter-spacing:.04em;text-transform:uppercase;border:1.5px solid var(--ink);padding:5px 9px;background:var(--cream);box-shadow:2px 2px 0 0 var(--ink);}
+      .catbar .c.on{background:var(--jersey-deep);color:var(--cream);}
+      .catlabel{display:flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:14px 0 9px;}
+      .catlabel .ml{border-bottom:2px solid var(--jersey-deep);padding-bottom:2px;}
+      .catlabel .ic{color:var(--jersey-deep);font-size:15px;}
+      .q{display:flex;align-items:center;gap:10px;border:2px solid var(--ink);background:var(--cream);box-shadow:2px 2px 0 0 var(--ink);padding:10px 13px;margin-bottom:7px;}
+      .q .qt{flex:1;font-family:var(--font-display);font-style:italic;font-weight:600;font-size:15px;}
+      .q .chev{font-family:var(--font-mono);color:var(--ink-muted);font-size:12px;}
+      .more{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--jersey-deep);border:1.5px solid var(--jersey-deep);padding:6px 10px;display:inline-block;margin:2px 0 6px;}
+
+      /* B accordion rows */
+      .crow{display:flex;align-items:center;gap:11px;border:2px solid var(--ink);background:var(--cream-soft);box-shadow:3px 3px 0 0 var(--ink);padding:13px 15px;margin-bottom:8px;cursor:pointer;}
+      .crow .ic{color:var(--jersey-deep);font-size:18px;width:24px;text-align:center;}
+      .crow .t{flex:1;font-family:var(--font-display);font-weight:600;font-size:17px;}
+      .crow .ct{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);}
+      .crow .chev{font-family:var(--font-mono);color:var(--ink-muted);}
+      .crow.open{background:var(--jersey-deep);color:var(--cream);} .crow.open .ct{color:rgba(245,241,230,.8);} .crow.open .ic,.crow.open .chev{color:var(--cream);}
+      .nested{margin:0 0 10px 14px;}
+
+      /* C search-led */
+      .bigsearch{display:flex;align-items:center;gap:11px;border:2px solid var(--ink);background:var(--cream);box-shadow:4px 4px 0 0 var(--ink);padding:14px 16px;}
+      .bigsearch .mag{color:var(--jersey-deep);font-size:18px;}.bigsearch .ph{color:var(--ink-muted);font-size:15px;}
+      .csub{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);margin:14px 0 9px;}
+
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /hulp hub · 7o6b — FINDER “ALLES” INITIAL STATE (at scale)</h1>
+      <p>Answer reveal = inline accordion (7o6 locked). This decides what the browse shows on load when <b>“Alles”</b> is selected and there are <b>many</b> questions (and growing). The hero search is still the fast path; this is the browse-fallback. Goal: never dump the full flat list.</p>
+    </div>
+
+    <!-- A capped preview -->
+    <div class="bar rec"><span class="tg">A ★</span>Category sections, capped preview <span class="note">· top 3 per categorie + “Alle N →” · mirrors the Structuur “Toon alle 23 →”</span></div>
+    <div class="stage"><div class="wrap">
+      <div class="catbar"><span class="c on">Alles</span><span class="c">Medisch</span><span class="c">Sportief</span><span class="c">Administratief</span><span class="c">Gedrag</span><span class="c">Commercieel</span></div>
+      <div class="catlabel"><span class="ic">✚</span><span class="ml">Medisch</span> <span style="color:var(--ink-muted);font-weight:400;letter-spacing:0;">· 8 vragen</span></div>
+      <div class="q"><span class="qt">Mijn kind is geblesseerd — wat nu?</span><span class="chev">+</span></div>
+      <div class="q"><span class="qt">Hoe werkt de sportverzekering?</span><span class="chev">+</span></div>
+      <div class="q"><span class="qt">Waar vind ik een keuringsattest?</span><span class="chev">+</span></div>
+      <a class="more">Alle 8 medische vragen →</a>
+      <div class="catlabel"><span class="ic">▤</span><span class="ml">Administratief</span> <span style="color:var(--ink-muted);font-weight:400;letter-spacing:0;">· 9 vragen</span></div>
+      <div class="q"><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">+</span></div>
+      <div class="q"><span class="qt">Wat kost een lidmaatschap?</span><span class="chev">+</span></div>
+      <div class="q"><span class="qt">Hoe zeg ik mijn lidmaatschap op?</span><span class="chev">+</span></div>
+      <a class="more">Alle 9 administratieve vragen →</a>
+    </div></div>
+
+    <!-- B category accordion -->
+    <div class="bar"><span class="tg">B</span>Category accordion <span class="note">· Alles = ~6 collapsed category rows · click to expand questions</span></div>
+    <div class="stage"><div class="wrap">
+      <div class="catbar"><span class="c on">Alles</span><span class="c">per thema ↓</span></div>
+      <div class="crow"><span class="ic">✚</span><span class="t">Medisch</span><span class="ct">8 vragen</span><span class="chev">+</span></div>
+      <div class="crow open"><span class="ic">▤</span><span class="t">Administratief</span><span class="ct">9 vragen</span><span class="chev">−</span></div>
+      <div class="nested">
+        <div class="q"><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">+</span></div>
+        <div class="q"><span class="qt">Wat kost een lidmaatschap?</span><span class="chev">+</span></div>
+      </div>
+      <div class="crow"><span class="ic">⚑</span><span class="t">Sportief</span><span class="ct">6 vragen</span><span class="chev">+</span></div>
+      <div class="crow"><span class="ic">◎</span><span class="t">Gedrag</span><span class="ct">3 vragen</span><span class="chev">+</span></div>
+      <div class="crow"><span class="ic">€</span><span class="t">Commercieel</span><span class="ct">4 vragen</span><span class="chev">+</span></div>
+    </div></div>
+
+    <!-- C search-led -->
+    <div class="bar"><span class="tg">C</span>Search-led <span class="note">· Alles = prompt + category chips · questions appear after typing / picking</span></div>
+    <div class="stage"><div class="wrap">
+      <div class="bigsearch"><span class="mag">⌕</span><span class="ph">Typ je vraag… bv. “lidgeld”, “blessure”, “boete”</span></div>
+      <div class="csub">— of kies een thema —</div>
+      <div class="catbar"><span class="c">Medisch · 8</span><span class="c">Sportief · 6</span><span class="c">Administratief · 9</span><span class="c">Gedrag · 3</span><span class="c">Commercieel · 4</span></div>
+      <p style="font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);margin-top:14px;">(geen vragenlijst tot je typt of een thema kiest)</p>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o6b — the “Alles” landing at scale</h3>
+      <p>
+        <b>A ★ capped preview</b> — each category shows its top 3 + “Alle N →”; the category chip filters to that
+        category’s full list. Browsable on load, caps the render no matter how big the corpus grows, and reuses the
+        Structuur “Toon alle 23 →” pattern. <b>B category accordion</b> — Alles shows ~6 collapsed category rows; one
+        click expands a category. Most compact load, but every question is two clicks deep. <b>C search-led</b> — no list
+        until you type or pick a theme; leans hardest on search (which the hero already provides).
+      </p>
+      <p style="color:var(--ink-muted);">
+        “Top 3” needs an order with no popularity data — use existing declaration/`sortOrder` or alphabetical (no
+        fabricated “most asked”). Selecting a category chip → that category’s full accordion list. Search (hero or a
+        finder-local field) always shortcuts straight to matching questions.
+      </p>
+    </div>
+  </body>
+</html>
