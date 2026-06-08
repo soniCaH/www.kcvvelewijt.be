@@ -3,12 +3,17 @@ import {
   LinkButton,
   StripedSeam,
 } from "@/components/design-system";
+import { getButtonClasses } from "@/components/design-system/Button/button-styles";
 
 export interface SponsorCtaBandProps {
   /** Where "Word sponsor +" links. Defaults to the club contact page (which
-   *  surfaces the sponsoring address). */
+   *  surfaces the sponsoring address). Internal routes use `<LinkButton>`;
+   *  `mailto:` / `tel:` / external `http(s):` hrefs render a plain styled `<a>`
+   *  (next/link is for client-side route navigation only). */
   href?: string;
 }
+
+const EXTERNAL_HREF = /^(https?:|mailto:|tel:)/i;
 
 /**
  * <SponsorCtaBand> — the `/sponsors` closing footer band (7.d4 · C1). After the
@@ -25,6 +30,15 @@ export interface SponsorCtaBandProps {
 export function SponsorCtaBand({
   href = "/club/contact",
 }: SponsorCtaBandProps) {
+  const isExternal = EXTERNAL_HREF.test(href);
+  const isHttp = /^https?:/i.test(href);
+  const buttonClassName = "bg-warm hover:bg-warm";
+  const label = (
+    <>
+      Word sponsor <span aria-hidden="true">+</span>
+    </>
+  );
+
   return (
     <>
       <StripedSeam colorPair="ink-cream" height="md" />
@@ -49,13 +63,28 @@ export function SponsorCtaBand({
           </p>
 
           <div className="flex justify-center">
-            <LinkButton
-              href={href}
-              variant="inverted"
-              className="bg-warm hover:bg-warm"
-            >
-              Word sponsor <span aria-hidden="true">+</span>
-            </LinkButton>
+            {isExternal ? (
+              <a
+                href={href}
+                className={getButtonClasses({
+                  variant: "inverted",
+                  className: buttonClassName,
+                })}
+                {...(isHttp
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
+              >
+                {label}
+              </a>
+            ) : (
+              <LinkButton
+                href={href}
+                variant="inverted"
+                className={buttonClassName}
+              >
+                {label}
+              </LinkButton>
+            )}
           </div>
         </div>
       </section>

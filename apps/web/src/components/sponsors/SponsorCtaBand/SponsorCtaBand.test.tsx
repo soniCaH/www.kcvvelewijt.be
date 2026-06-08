@@ -29,12 +29,19 @@ describe("SponsorCtaBand", () => {
     expect(link).toHaveAttribute("href", "/club/contact");
   });
 
-  it("honours a custom href", () => {
+  it("renders a mailto href as a plain anchor (no new-tab target)", () => {
     render(<SponsorCtaBand href="mailto:sponsoring@kcvvelewijt.be" />);
-    expect(screen.getByRole("link", { name: /Word sponsor/i })).toHaveAttribute(
-      "href",
-      "mailto:sponsoring@kcvvelewijt.be",
-    );
+    const link = screen.getByRole("link", { name: /Word sponsor/i });
+    expect(link).toHaveAttribute("href", "mailto:sponsoring@kcvvelewijt.be");
+    expect(link).not.toHaveAttribute("target");
+  });
+
+  it("opens an external http(s) href in a new tab with a safe rel", () => {
+    render(<SponsorCtaBand href="https://partner.example.com" />);
+    const link = screen.getByRole("link", { name: /Word sponsor/i });
+    expect(link).toHaveAttribute("href", "https://partner.example.com");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 
   it("exposes a named landmark for the CTA", () => {
