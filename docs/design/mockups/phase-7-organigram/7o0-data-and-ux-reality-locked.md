@@ -27,11 +27,13 @@ A **tabbed interactive tool** wrapped in legacy chrome, server-rendered then hyd
   ISR `revalidate = 3600`. Breadcrumb JSON-LD. Legacy hero strings: label `"De club"`,
   headline `"Clubstructuur"`, body `"Ontdek de organisatie achter KCVV Elewijt."`.
 - **Client:** `<UnifiedOrganigramClient>` — three views switched by a tab bar:
+
   | Tab value | Label | Component | What it is |
   | --- | --- | --- | --- |
   | `cards` | **Overzicht** | `<CardHierarchy>` | vertical expand/collapse card tree (mobile default) |
   | `chart` | **Diagram** | `<EnhancedOrgChart>` | `d3-org-chart` pan/zoom canvas (desktop default) |
   | `responsibilities` | **Hulp** | `<ResponsibilityFinder>` | "wie kan me helpen met…" finder |
+
 - Plus: a top **`<UnifiedSearchBar>`** (searches people + responsibilities), **`<MemberDetailsModal>`**
   (click any node/card/result → modal), department filter (`all`/`hoofdbestuur`/`jeugdbestuur`),
   PNG export, keyboard shortcuts, swipe gestures, deep-linkable via `?view=`/`?memberId=`.

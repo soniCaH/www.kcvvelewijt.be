@@ -12,8 +12,9 @@
    The page body is a calm single-scroll (house style, matches 6.C team + /jeugd) with a sticky in-page
    section nav. The relational diagram is **not** an inline section that fights the page; it is an
    **opt-in fullscreen focused mode** launched from a button. This fixes **scroll-jacking by
-   construction** (a canvas that owns the whole screen cannot hijack page scroll) and gives the literal
-   **3-D investigation its natural home** (rotate/zoom is expected in a verkenner, not in a page band).
+   construction** (a canvas that owns the whole screen cannot hijack page scroll) and gives the
+   relational diagram a focused **2-D** home where pan/zoom can't fight the page. _(A literal 3-D viewer
+   was later investigated at scale and **removed** — `7o3`; the verkenner is **2-D only**.)_
 
 2. **Finding model = I — one search front door; the sections are the browse backup.**
    The hero search is the single fast path and spans **both** intents: typing returns **Personen**

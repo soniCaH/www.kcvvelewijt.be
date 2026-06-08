@@ -54,8 +54,8 @@ verkenner · `7o3` spotlight explorer (2-D, **3-D removed**) · `7o4` card state
   organigram `UnifiedSearchBar` and the finder's `HulpSearchInput`); **semantic/AI** (bge-m3 + Vectorize)
   folded in here.
 - **Cross-links** Structuur ⇄ Hulp (contact → "toon in structuur"; person → "helpt met").
-- **General contact form + address/hours** (master §6.11) — decide inclusion at **7o7**.
-- **Section order** within the hub (finder-first vs structure-first under the hero) — **7o7**.
+- **General contact form + address/hours** (master §6.11) — **LOCKED `7o7`: dropped** (CtaBand only).
+- **Section order** — **LOCKED `7o7`: Hulp-first** (finder under the hero, Structuur second).
 - **Two-nav-door wiring** + retiring `/club/organigram` route — **7o7** / PRD.
 
 ## Superseded
