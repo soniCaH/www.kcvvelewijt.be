@@ -1,9 +1,10 @@
 /**
  * SponsorsPage Stories — Phase 7.
  *
- * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) over a cream
- * `<SponsorTile>` grid of all sponsors. Not `vr`-tagged: the hero, marquee card
- * and tile each carry their own VR coverage.
+ * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) → `<StripedSeam>`
+ * → `<SponsorTiers>` (labelled Hoofdsponsors grid + unlabelled merged wall). Not
+ * `vr`-tagged: the hero, marquee card, hoofd tile, tile and tiers each carry
+ * their own VR coverage.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -22,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 7 /sponsors. Split `<SponsorHero>` (MonoLabel kicker + EditorialHeading + italic lead + the single `<FeaturedSponsorCard>` marquee) over a cream `<SponsorTile>` grid of all sponsors. Replaces the legacy dark header + SectionStack/diagonal composition. Tier bodies and the CTA band land in later phases.",
+          "Phase 7 /sponsors. Split `<SponsorHero>` (MonoLabel kicker + EditorialHeading + italic lead + the single `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>`: a labelled Hoofdsponsors grid over one unlabelled merged wall of sponsor + sympathisant tiles. Replaces the legacy dark header + SectionStack/diagonal composition. The CTA band + full empty states land in later phases.",
       },
     },
   },
@@ -42,13 +43,18 @@ export const Empty: Story = {
   args: { sponsors: [] },
 };
 
-/** Mobile viewport — grid collapses to two columns. */
+/** Mobile viewport — hoofd grid + wall collapse to fewer columns. */
 export const MobileViewport: Story = {
   args: { sponsors: ordered },
   globals: { viewport: { value: "kcvvMobile" } },
 };
 
-/** Route-level loading skeleton. */
+/**
+ * Route-level loading skeleton. Kept as a bare `StoryObj` (not
+ * `StoryObj<typeof meta>`): it renders `<SponsorsLoading />`, not
+ * `<SponsorsPage>`, so it has no `sponsors` arg — `StoryObj<typeof meta>` would
+ * require one (TS2322).
+ */
 export const RouteSkeleton: StoryObj = {
   render: () => <SponsorsLoading />,
   parameters: { layout: "fullscreen" },

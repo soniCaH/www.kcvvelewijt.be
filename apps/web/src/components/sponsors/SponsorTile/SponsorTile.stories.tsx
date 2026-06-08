@@ -77,3 +77,24 @@ export const WithoutLink: Story = {
     },
   },
 };
+
+export const Framed: Story = {
+  args: {
+    sponsor: {
+      id: "s-4",
+      name: "Apotheek Dilbeek",
+      logo: fixtureImage("sponsor-logo", 1),
+      url: "https://example.com/apotheek",
+      tier: "sponsor",
+    },
+    framed: true,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`framed` → the `/sponsors` merged-wall variant: a 1.5px ink border + light ink-muted offset shadow that presses down on hover. One step lighter than the hoofd tiles.",
+      },
+    },
+  },
+};

@@ -1,5 +1,5 @@
 /**
- * SponsorsPage Component Tests — Phase 7 tracer.
+ * SponsorsPage Component Tests — Phase 7.
  */
 
 import { describe, it, expect, vi } from "vitest";
@@ -62,9 +62,17 @@ describe("SponsorsPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders one tile per sponsor", () => {
+  it("renders one tile per sponsor across the hoofd grid and wall", () => {
     render(<SponsorsPage sponsors={sponsors} />);
     expect(screen.getAllByRole("listitem")).toHaveLength(sponsors.length);
+  });
+
+  it("labels the Hoofdsponsors group and renders the striped seam", () => {
+    const { container } = render(<SponsorsPage sponsors={sponsors} />);
+    expect(screen.getByText("Hoofdsponsors")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-color-pair="ink-cream"]'),
+    ).toBeInTheDocument();
   });
 
   it("collapses the hero (no marquee) when no sponsor is featured", () => {
@@ -101,9 +109,13 @@ describe("SponsorsPage", () => {
     expect(container.querySelector('[class*="kcvv-black"]')).toBeNull();
   });
 
-  it("renders the header but no tiles when there are no sponsors", () => {
-    render(<SponsorsPage sponsors={[]} />);
+  it("renders the header but no tiers/seam when there are no sponsors", () => {
+    const { container } = render(<SponsorsPage sponsors={[]} />);
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(screen.queryByText("Hoofdsponsors")).not.toBeInTheDocument();
+    expect(
+      container.querySelector('[data-color-pair="ink-cream"]'),
+    ).not.toBeInTheDocument();
   });
 });
