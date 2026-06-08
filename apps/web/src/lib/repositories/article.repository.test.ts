@@ -27,6 +27,7 @@ function makeArticleListRow(
   return {
     id: "article-1",
     title: "Test Article",
+    lead: "",
     slug: "test-article",
     publishedAt: "2026-03-20T10:00:00Z",
     featured: false,

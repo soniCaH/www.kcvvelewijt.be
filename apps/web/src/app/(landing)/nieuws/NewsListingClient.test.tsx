@@ -95,6 +95,77 @@ describe("NewsListingClient", () => {
     ).toBeInTheDocument();
   });
 
+  it("does not force an aspect override on the featured-split cards (#2027)", () => {
+    const featuredArticles = [
+      makeArticle({ id: "f1", title: "Featured One" }),
+      makeArticle({ id: "f2", title: "Featured Two" }),
+      makeArticle({ id: "f3", title: "Featured Three" }),
+    ];
+
+    const { container } = render(
+      <NewsListingClient
+        featuredArticles={featuredArticles}
+        initialArticles={[]}
+        categories={categories}
+        hasMore={false}
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+
+    // Every NewsCard (rendered as `<article>`) must keep its locked aspect —
+    // the right-stack cards previously received `flex-1 aspect-auto`, which
+    // height-matched them to the featured card and broke the 16:9 image region.
+    const cards = container.querySelectorAll("article");
+    expect(cards.length).toBe(3);
+    for (const card of cards) {
+      expect(card.className).not.toMatch(/\baspect-auto\b/);
+      expect(card.className).not.toMatch(/\bflex-1\b/);
+    }
+
+    // The locked 16:9 image region survives on every featured card.
+    const imageRegions = container.querySelectorAll(
+      '[data-testid="newscard-image-region"]',
+    );
+    expect(imageRegions.length).toBe(3);
+    for (const region of imageRegions) {
+      expect(region.getAttribute("data-aspect")).toBe("landscape-16-9");
+    }
+  });
+
+  it("renders the lead/dek on featured cards but not on grid cards (#2027)", () => {
+    const featuredArticles = [
+      makeArticle({
+        id: "f1",
+        title: "Featured With Lead",
+        lead: "Een korte samenvatting van het artikel.",
+      }),
+    ];
+    const gridArticles = [
+      makeArticle({
+        id: "g1",
+        title: "Grid With Lead",
+        lead: "Deze samenvatting hoort niet in de grid.",
+      }),
+    ];
+
+    render(
+      <NewsListingClient
+        featuredArticles={featuredArticles}
+        initialArticles={gridArticles}
+        categories={categories}
+        hasMore={false}
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+
+    expect(
+      screen.getByText("Een korte samenvatting van het artikel."),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Deze samenvatting hoort niet in de grid."),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders category filter tabs as buttons", () => {
     render(
       <NewsListingClient

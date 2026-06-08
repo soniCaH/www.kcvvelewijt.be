@@ -80,10 +80,10 @@ export interface NewsCardProps {
    */
   tapeColors?: readonly [TapeStripColor, TapeStripColor];
   /**
-   * Number of corner tape strips. `2` (default) = the R10 TL + TR
-   * corner pair. `1` = TL only, used by cramped-card surfaces (e.g.
-   * the Uitgelicht 3-up row at #1750) where two corner strips
-   * dominate the photo. Right strip simply isn't rendered.
+   * Number of corner tape strips. `1` (default) = TL only — the
+   * single-tape look adopted site-wide (#2027) after the R10 TL + TR
+   * corner pair read as cluttered across full card grids. `2` opts
+   * back into the TL + TR corner pair for surfaces that want it.
    */
   tapeCount?: 1 | 2;
   /**
@@ -177,7 +177,7 @@ export const NewsCard = ({
   rotation = "none",
   bg = "cream",
   tapeColors = DEFAULT_TAPE_COLORS,
-  tapeCount = 2,
+  tapeCount = 1,
   tapeLength,
   as = "h3",
   className,
@@ -372,8 +372,20 @@ export const NewsCard = ({
             {href && (
               <span
                 aria-hidden="true"
+                data-testid="newscard-readmore"
                 className={cn(
                   "inline-flex items-center gap-1 font-mono text-[length:var(--text-label)] font-medium tracking-[var(--text-label--tracking)] uppercase",
+                  // Hidden at rest, revealed on hover / keyboard focus —
+                  // mirrors the homepage hero's "Lees verder" reveal idiom
+                  // (#2027). Opacity-only so the footer row reserves its
+                  // height and nothing reflows. The canonical press-down
+                  // hover stays intact via TapedCard's `interactive="press"`.
+                  // `group-focus-within` (not `-focus-visible`): the `group`
+                  // is the non-focusable <article> wrapper and the focusable
+                  // <Link> is a descendant, so we react to focus *within* the
+                  // card. (EditorialHero can use `-focus-visible` because there
+                  // the `group` sits on the <Link> itself.)
+                  "opacity-0 transition-opacity duration-300 group-focus-within:opacity-100 group-hover:opacity-100",
                   isDark ? "text-cream" : "text-jersey-deep",
                 )}
               >
