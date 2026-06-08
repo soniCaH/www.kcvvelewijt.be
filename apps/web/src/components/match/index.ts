@@ -1,7 +1,4 @@
 // Match components
-export { MatchResultRow } from "./MatchResultRow";
-export type { MatchResultRowProps } from "./MatchResultRow";
-
 export { MatchLineup } from "./MatchLineup";
 export type { MatchLineupProps, LineupPlayer } from "./MatchLineup";
 
@@ -23,7 +20,6 @@ export type { MatchEventsSectionProps } from "./MatchEventsSection";
 export type {
   UpcomingMatch,
   MatchStatus,
-  MatchTeaserStatus,
   ScheduleMatch,
   ScheduleTeam,
 } from "./types";
