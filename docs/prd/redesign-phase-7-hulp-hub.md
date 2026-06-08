@@ -168,12 +168,12 @@ change required; new params still need DLVs + GA4 mappings.
 | --- | --- | --- |
 | `hub_view` | `/hulp` page view | — |
 | `organigram_section_in_view` | Structuur/Hulp section scrolled into view | `section` |
-| `organigram_search_used` | unified search query | `query_text` (sanitised via `sanitizeQuery`) |
+| `organigram_search_used` | unified search query | `query_length` (length only — no query content; matches the existing `responsibility_search` convention, replaces the legacy `query_text`) |
 | `organigram_member_clicked` | open `<MemberDetailPanel>` (incl. holder-switch) | `member_id` (hashed via `hashMemberId`), `source` (directory/explorer/search) |
 | `organigram_explorer_opened` | "Open verkenner ⤢" | — |
-| `responsibility_view` | open a question accordion | `path_id` (slug) |
-| `responsibility_contact_click` | ✉/☎ on a Hulp contact | `path_id`, `contact_type` |
-| `responsibility_show_in_structure` | "toon in structuur →" | `node_id` (hashed) |
+| `responsibility_view` | open a question accordion | `path_id` (public slug — not PII) |
+| `responsibility_contact_clicked` | ✉/☎ on a Hulp contact | `path_id`, `contact_type` |
+| `responsibility_organigram_link` | "toon in structuur →" | `node_id` (hashed via `hashMemberId` — the generic id-hasher; no separate node helper exists) |
 
 Drop the legacy 3-D / diagram-mode events (no 3-D). No PII: hash internal ids, sanitise queries, never
 send emails/phones/raw names.
