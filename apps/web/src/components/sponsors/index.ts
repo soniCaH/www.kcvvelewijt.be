@@ -15,8 +15,6 @@ export type {
   SponsorsSpotlightProps,
   SpotlightSponsor,
 } from "./SponsorsSpotlight";
-export { SponsorCallToAction } from "./SponsorCallToAction";
-export type { SponsorCallToActionProps } from "./SponsorCallToAction";
 export { SponsorEmptyState } from "./SponsorEmptyState";
 export type { SponsorEmptyStateProps } from "./SponsorEmptyState";
 export { mockSponsors } from "./Sponsors.mocks";

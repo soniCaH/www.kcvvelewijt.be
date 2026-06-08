@@ -36,6 +36,21 @@ describe("EditorialHeading", () => {
     );
   });
 
+  it("keeps a question or exclamation terminator instead of appending a period", () => {
+    const { rerender } = render(
+      <EditorialHeading level={2}>
+        Ook jouw zaak langs de lijn?
+      </EditorialHeading>,
+    );
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(
+      "Ook jouw zaak langs de lijn?",
+    );
+    rerender(<EditorialHeading level={2}>Kom erbij!</EditorialHeading>);
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe(
+      "Kom erbij!",
+    );
+  });
+
   it("default size is display-lg, applied as data-size", () => {
     const { container } = render(
       <EditorialHeading level={2}>x</EditorialHeading>,
