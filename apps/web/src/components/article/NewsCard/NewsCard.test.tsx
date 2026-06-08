@@ -193,6 +193,14 @@ describe("NewsCard", () => {
       expect(article).toHaveAttribute("data-interactive", "false");
       expect(article?.className).not.toMatch(/--card-press-x/);
     });
+
+    it("hides the 'Lees verder' affordance at rest, reveals it on hover/focus (#2027)", () => {
+      const { getByTestId } = render(<NewsCard {...defaultProps} />);
+      const readMore = getByTestId("newscard-readmore");
+      expect(readMore.className).toMatch(/\bopacity-0\b/);
+      expect(readMore.className).toMatch(/group-hover:opacity-100/);
+      expect(readMore.className).toMatch(/group-focus-within:opacity-100/);
+    });
   });
 
   describe("Event card features", () => {
@@ -276,25 +284,40 @@ describe("NewsCard", () => {
       ).toBeInTheDocument();
     });
 
-    it("outer card carries two corner tape strips (warm TL + jersey TR by default)", () => {
-      // Query by data-position rather than index — the render order of the
-      // tape array is incidental and could change for z-stacking reasons.
+    it("outer card carries a single warm TL corner tape strip by default (#2027)", () => {
+      // Single-tape is the site-wide default since #2027 — the right strip
+      // only renders when a consumer opts back in with tapeCount={2}.
       const { container } = render(<NewsCard {...defaultProps} />);
       const all = container.querySelectorAll("[data-color][data-position]");
-      expect(all).toHaveLength(2);
+      expect(all).toHaveLength(1);
       const left = container.querySelector(
         '[data-position="left"][data-color="warm"]',
       );
-      const right = container.querySelector(
-        '[data-position="right"][data-color="jersey"]',
-      );
       expect(left).not.toBeNull();
-      expect(right).not.toBeNull();
+      expect(container.querySelector('[data-position="right"]')).toBeNull();
+    });
+
+    it("opts back into the warm TL + jersey TR pair with tapeCount={2}", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} tapeCount={2} />,
+      );
+      const all = container.querySelectorAll("[data-color][data-position]");
+      expect(all).toHaveLength(2);
+      expect(
+        container.querySelector('[data-position="left"][data-color="warm"]'),
+      ).not.toBeNull();
+      expect(
+        container.querySelector('[data-position="right"][data-color="jersey"]'),
+      ).not.toBeNull();
     });
 
     it("tapeColors prop overrides the default corner pairing", () => {
       const { container } = render(
-        <NewsCard {...defaultProps} tapeColors={["cream", "ink"]} />,
+        <NewsCard
+          {...defaultProps}
+          tapeCount={2}
+          tapeColors={["cream", "ink"]}
+        />,
       );
       expect(
         container.querySelector('[data-position="left"][data-color="cream"]'),
@@ -338,7 +361,11 @@ describe("NewsCard", () => {
     });
 
     it("tape strips pick opposite rotation pool entries — varies card-to-card by title hash", () => {
-      const { container } = render(<NewsCard {...defaultProps} />);
+      // Render both strips to assert the pairing — single-tape is the
+      // default since #2027, so the right strip needs tapeCount={2}.
+      const { container } = render(
+        <NewsCard {...defaultProps} tapeCount={2} />,
+      );
       const left = container.querySelector('[data-position="left"]');
       const right = container.querySelector('[data-position="right"]');
       const lr = left?.getAttribute("data-rotation");

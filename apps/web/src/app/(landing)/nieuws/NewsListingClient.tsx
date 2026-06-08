@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { NewsCard, CategoryFilters } from "@/components/article";
+import { EditorialHeading } from "@/components/design-system";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { matchTypeCardLabel } from "@/lib/utils/article-type-label";
 import type { PaginatedArticles } from "./utils";
@@ -185,21 +186,23 @@ export function NewsListingClient({
     handleCategoryChangeRef.current = handleCategoryChange;
   }, [loadMore, handleCategoryChange]);
 
-  const renderCard = (
-    article: ArticleVM,
-    variant: "featured" | "standard",
-    className?: string,
-  ) => (
+  const renderCard = (article: ArticleVM, variant: "featured" | "standard") => (
     <NewsCard
       key={article.id}
       variant={variant}
-      className={className}
       title={article.title}
       href={`/nieuws/${article.slug}`}
       imageUrl={article.coverImageUrl ?? undefined}
       imageAlt={article.title}
       badge={article.tags[0] ?? undefined}
       typeLabel={matchTypeCardLabel(article.articleType)}
+      // Featured row uses the medium `md` tape (mirroring
+      // <FeaturedUitgelichtRow>) so the corner strip doesn't dominate the
+      // photo at 1/3-width; standard grid cards keep their `md` default.
+      tapeLength={variant === "featured" ? "md" : undefined}
+      // Lead/dek only on the featured row — keeps the chronological grid
+      // compact while the Uitgelicht cards carry a one-line summary (#2027).
+      dek={variant === "featured" ? article.lead || undefined : undefined}
       date={
         article.publishedAt
           ? formatArticleDate(new Date(article.publishedAt))
@@ -228,22 +231,31 @@ export function NewsListingClient({
       </div>
 
       <div className="max-w-inner-lg mx-auto px-3 py-6 lg:px-0">
-        {/* Featured split: 2fr | 1fr */}
+        {/* Featured row — symmetrical 3-up of equal 16:9 featured cards,
+            mirroring the homepage <FeaturedUitgelichtRow> treatment (#2027).
+            Every card holds its locked 16:9 aspect; no height-matching (the
+            old 2fr|1fr split forced `flex-1 aspect-auto` on the right stack
+            and distorted the cards). */}
         {featuredArticles.length > 0 && (
-          <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-            {/* Main featured article — 2fr */}
-            <div className="md:col-span-2">
-              {featuredArticles[0] &&
-                renderCard(featuredArticles[0], "featured")}
-            </div>
-            {/* Right stack — 1fr, 2 stacked standard cards that split the featured card's height */}
-            <div className="flex flex-col gap-4">
-              {featuredArticles
-                .slice(1, 3)
-                .map((article) =>
-                  renderCard(article, "standard", "flex-1 aspect-auto"),
-                )}
-            </div>
+          <section className="mb-10">
+            <EditorialHeading
+              level={2}
+              size="display-md"
+              tone="ink"
+              emphasis={{ text: "gelicht" }}
+              className="mb-6"
+            >
+              {/* EditorialHeading appends the trailing period; renders
+                  "Uitgelicht." with italic emphasis on "gelicht". */}
+              Uitgelicht
+            </EditorialHeading>
+            <ul className="grid list-none grid-cols-1 gap-6 p-0 md:grid-cols-3">
+              {featuredArticles.slice(0, 3).map((article) => (
+                <li key={article.id} className="h-full">
+                  {renderCard(article, "featured")}
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

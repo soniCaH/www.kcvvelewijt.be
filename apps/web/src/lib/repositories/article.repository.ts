@@ -19,7 +19,7 @@ import { formatArticleDate } from "../utils/dates";
 // NewsGrid slice [3..8] inherits the same ordering automatically.
 export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {
-  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
   articleType,
   subjects[]{
@@ -60,7 +60,7 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 // featured-first rule applies only to the homepage feed (ARTICLES_QUERY).
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
-  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
+  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
   "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
 }`);
 
@@ -226,6 +226,11 @@ export type ArticleVM = Omit<
   slug: string;
   featured: boolean;
   tags: string[];
+  /** Article lead/dek. Surfaced by `ARTICLES_QUERY` + the paginated
+   *  projection (coalesced to ""); the related projection omits it, so
+   *  `widenToArticleVM` defaults it. Optional here so hand-built test
+   *  fixtures need not set it. Consumed by the /nieuws featured row (#2027). */
+  lead?: string;
 };
 
 type ARTICLE_BY_SLUG_DETAIL = NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>;
@@ -307,8 +312,10 @@ function widenToArticleVM(
   return {
     ...row,
     // The paginated projection carries `articleType` (so /nieuws cards can
-    // show a match type label); the related projection doesn't.
+    // show a match type label) and `lead` (featured-row dek); the related
+    // projection carries neither.
     articleType: "articleType" in row ? row.articleType : null,
+    lead: "lead" in row ? row.lead : "",
     subjects: null,
     firstTransferFact: null,
     firstEventFact: null,
