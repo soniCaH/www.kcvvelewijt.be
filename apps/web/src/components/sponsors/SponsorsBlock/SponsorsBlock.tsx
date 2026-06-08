@@ -26,7 +26,7 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <SectionHeader title="Met dank aan onze sponsors" />
 
-        <ul className={`mt-8 ${SPONSOR_TILE_GRID_CLASS}`}>
+        <ul className={cn("mt-8", SPONSOR_TILE_GRID_CLASS)}>
           {visible.map((sponsor) => (
             <li key={sponsor.id}>
               <SponsorTile sponsor={sponsor} />
