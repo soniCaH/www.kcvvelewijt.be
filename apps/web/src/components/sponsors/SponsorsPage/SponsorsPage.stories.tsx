@@ -49,7 +49,12 @@ export const MobileViewport: Story = {
   globals: { viewport: { value: "kcvvMobile" } },
 };
 
-/** Route-level loading skeleton. */
+/**
+ * Route-level loading skeleton. Kept as a bare `StoryObj` (not
+ * `StoryObj<typeof meta>`): it renders `<SponsorsLoading />`, not
+ * `<SponsorsPage>`, so it has no `sponsors` arg — `StoryObj<typeof meta>` would
+ * require one (TS2322).
+ */
 export const RouteSkeleton: StoryObj = {
   render: () => <SponsorsLoading />,
   parameters: { layout: "fullscreen" },

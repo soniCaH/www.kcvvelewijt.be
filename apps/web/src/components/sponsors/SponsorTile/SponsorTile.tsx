@@ -54,11 +54,12 @@ export const SponsorTile = ({ sponsor, framed = false }: SponsorTileProps) => {
       className={cn(
         "bg-cream-soft flex min-h-[70px] items-center justify-center px-3.5 py-2",
         framed && "border-ink shadow-paper-sm-soft border-[1.5px]",
-        // Canonical press-down only when the framed tile is itself a link —
-        // the shadow then collapses flush as the cell shifts into it on hover.
+        // Canonical press-down only when the framed tile is itself a link — the
+        // shadow collapses flush as the cell shifts into it on hover AND on
+        // keyboard focus, so pointer and keyboard users get the same feedback.
         framed &&
           sponsor.url &&
-          "transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none",
+          "transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none group-focus-visible:translate-x-1 group-focus-visible:translate-y-1 group-focus-visible:shadow-none",
       )}
     >
       {inner}
