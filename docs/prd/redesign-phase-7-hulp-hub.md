@@ -89,32 +89,32 @@ Order = **Hulp-first**. Explorer = **2-D spotlight, no 3-D** (investigated + rem
 > Phases are sequential; each ends green (`check-all`, stories, VR, e2e where relevant). Component-level
 > work ships its Storybook story (+ `vr` tag + baselines) and unit tests per the apps/web contract.
 
-### Phase 1 — Tracer: hub shell + route + unified search + nav
+### Phase 1 — Tracer: hub shell + route + unified search + nav — #2052
 Stand up `/hulp` as the hub: `<OrganigramSectionNav>` (two doors + sticky search), `<OrganigramHero>`
 (dark band + `<HubSearch>` + audience chips + structure-index artefact from real counts), skeleton
 `#hulp` / `#structuur` sections, `<CtaBand>`. Wire both repos server-side (ISR 3600). **Retire the
 `/club/organigram` route**; add the "Organigram" → `/hulp#structuur` nav entry. `<HubSearch>` ships
 keyword-ranked (people + answers), replacing `UnifiedSearchBar` + `HulpSearchInput`.
 
-### Phase 2 — Structuur directory + person card
+### Phase 2 — Structuur directory + person card — #2053
 `<StructureDirectory>` (people grouped by afdeling, compact + "Toon alle N →"). `<OrgPersonCard>`
 (extends 6.C `<TeamStaff>`): **single** (photo/monogram) · **shared** (dual-avatar + "N personen", click →
 panel) · **vacant** (recruit: warm card, "deze plek is vrij", "Iets voor jou? →"). Optional roleCode pill.
 
-### Phase 3 — `<OrganigramExplorer>` (fullscreen 2-D spotlight)
+### Phase 3 — `<OrganigramExplorer>` (fullscreen 2-D spotlight) — #2054
 Opt-in fullscreen focused mode launched from "Open verkenner ⤢". Spotlight drill-down: selected node
 centred · parent above + breadcrumb · siblings flank · children fan below · click/keyboard nav
 (↑↓←→/Enter) · zoom/fit · Esc. **Retire `EnhancedOrgChart` + the `d3-org-chart` dependency,
 `MobileNavigationDrawer`, `ContactOverlay`.** No 3-D, no WebGL.
 
-### Phase 4 — `<MemberDetailPanel>` (person-first)
+### Phase 4 — `<MemberDetailPanel>` (person-first) — #2055
 Right side-panel (desktop) / full-width bottom sheet (mobile). **Single** → opens directly; **shared** →
 lands on first holder + **name-tab holder-switcher**. Contact (✉/☎ if present) · "Helpt met" → Hulp ·
 "Volledig profiel →" (`/staf/{psdId}` if present). Opens from a directory card **and** an explorer leaf.
 Labelled dialog, focus trap, `?memberId=` deep-link. **Retire `MemberDetailsModal`** (panel replaces it +
 `ContactOverlay`).
 
-### Phase 5 — `<HulpFinder>` (reskin `<HulpPage>`)
+### Phase 5 — `<HulpFinder>` (reskin `<HulpPage>`) — #2056
 Reskin to fanzine vocab: category + audience chips · **"Alles" = capped category preview** (top 3 per
 category by declaration/`sortOrder`/alpha — **no fabricated "most asked"** + "Alle N →") · `<QuestionCard>`
 **inline accordion** → summary · numbered steps · `<ContactCard>`. Contact reuses person vocab + a
@@ -122,7 +122,7 @@ category by declaration/`sortOrder`/alpha — **no fabricated "most asked"** + "
 `resolveContact` / `team-role-resolution` (position / team-role / manual). **Retire the old
 `ResponsibilityFinder` + `HulpSearchInput`.**
 
-### Phase 6 — Semantic/AI question search
+### Phase 6 — Semantic/AI question search — #2057
 Embed `responsibility` docs into a Cloudflare **Vectorize** index (`@cf/baai/bge-m3`, 1024-dim cosine,
 `MIN_SCORE ≈ 0.35`) via a BFF endpoint; route the hub search's **question intent** through it so natural
 language ("mijn kind heeft zich bezeerd") matches without keyword overlap. People-search stays
@@ -130,7 +130,7 @@ keyword/structured. Graceful fallback to keyword if the index/endpoint is unavai
 may split into "index+endpoint" / "wire-up". If descoped, Phase 5's keyword search stands and this becomes
 a fast-follow.)_
 
-### Phase 7 — Assembly · cross-links · SEO · analytics · retirement · tests
+### Phase 7 — Assembly · cross-links · SEO · analytics · retirement · tests — #2058
 Final Hulp-first assembly + `<StripedSeam>` + cross-links (Structuur ⇄ Hulp). FAQ + BreadcrumbList +
 Organization JSON-LD. Analytics (§6) + GTM note. Delete all retired legacy + confirm `git grep` clean.
 Update `/hulp` e2e smoke (route is now the hub), add the `/club/organigram` removal. VR baselines for every
