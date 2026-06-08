@@ -55,14 +55,40 @@ describe("SponsorsPage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
-  it("renders the KCVV Elewijt kicker", () => {
+  it("renders the club-motto kicker", () => {
     render(<SponsorsPage sponsors={sponsors} />);
-    expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
+    expect(
+      screen.getByText("Er is maar één plezante compagnie"),
+    ).toBeInTheDocument();
   });
 
   it("renders one tile per sponsor", () => {
     render(<SponsorsPage sponsors={sponsors} />);
     expect(screen.getAllByRole("listitem")).toHaveLength(sponsors.length);
+  });
+
+  it("collapses the hero (no marquee) when no sponsor is featured", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    expect(screen.queryByText("In de kijker")).not.toBeInTheDocument();
+  });
+
+  it("surfaces the featured sponsor in the hero marquee", () => {
+    render(
+      <SponsorsPage
+        sponsors={[
+          ...sponsors,
+          {
+            id: "feat",
+            name: "Featured Co",
+            logo: "/feat.png",
+            url: "https://example.com/feat",
+            tier: "hoofdsponsor",
+            featured: true,
+          },
+        ]}
+      />,
+    );
+    expect(screen.getByText("In de kijker")).toBeInTheDocument();
   });
 
   it("does not compose with SectionStack diagonal transitions", () => {
