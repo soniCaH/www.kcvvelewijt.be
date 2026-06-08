@@ -19,7 +19,7 @@ describe("SponsorCtaBand", () => {
   it("renders the invitation heading without a spurious period", () => {
     render(<SponsorCtaBand />);
     const heading = screen.getByRole("heading", { level: 2 });
-    expect(heading).toHaveTextContent("Ook jouw zaak langs de lijn?");
+    expect(heading).toHaveTextContent("Jouw zaak ook langs de zijlijn?");
     expect(heading.textContent).not.toContain("?.");
   });
 

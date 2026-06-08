@@ -37,15 +37,15 @@ export function SponsorCtaBand({
             level={2}
             size="display-lg"
             tone="cream"
-            emphasis={{ text: "langs de lijn", tone: "warm" }}
+            emphasis={{ text: "langs de zijlijn", tone: "warm" }}
             className="mb-4"
           >
-            Ook jouw zaak langs de lijn?
+            Jouw zaak ook langs de zijlijn?
           </EditorialHeading>
 
           <p className="text-cream/90 mx-auto mb-7 max-w-xl text-base leading-relaxed">
-            Word partner van de plezantste compagnie en steun mee de jeugd én de
-            eerste ploeg.
+            Word partner van de plezantste compagnie en steun onze jeugd en
+            eerste ploegen!
           </p>
 
           <div className="flex justify-center">

@@ -114,7 +114,7 @@ describe("SponsorsPage", () => {
     // EditorialHeading splits the title across spans for the warm accent, so
     // match by heading name rather than a single text node.
     expect(
-      screen.getByRole("heading", { name: /Ook jouw zaak langs de lijn/ }),
+      screen.getByRole("heading", { name: /Jouw zaak ook langs de zijlijn/ }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Word sponsor/i }),
@@ -131,7 +131,7 @@ describe("SponsorsPage", () => {
       screen.getByRole("heading", { name: /Nog geen sponsors/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Ook jouw zaak langs de lijn/ }),
+      screen.getByRole("heading", { name: /Jouw zaak ook langs de zijlijn/ }),
     ).toBeInTheDocument();
   });
 });
