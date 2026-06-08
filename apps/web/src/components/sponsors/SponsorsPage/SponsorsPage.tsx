@@ -1,14 +1,16 @@
 /**
  * SponsorsPage — Phase 7.
  *
- * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) over a cream
- * `<SponsorTile>` grid of all sponsors. Replaces the legacy dark-header +
- * `SectionStack`/`diagonal` composition. Tier bodies and the CTA band land in
- * later phases (see docs/prd/redesign-phase-7-sponsors.md).
+ * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) → `<StripedSeam>`
+ * → `<SponsorTiers>` (labelled Hoofdsponsors grid + one unlabelled merged wall).
+ * Replaces the legacy dark-header + `SectionStack`/`diagonal` composition. The
+ * CTA band + full empty states land in later phases (see
+ * docs/prd/redesign-phase-7-sponsors.md).
  */
 
+import { StripedSeam } from "@/components/design-system/StripedSeam";
 import { SponsorHero } from "../SponsorHero";
-import { SponsorTile, SPONSOR_TILE_GRID_CLASS } from "../SponsorTile";
+import { SponsorTiers } from "../SponsorTiers";
 import { selectFeaturedSponsor } from "../selectFeaturedSponsor";
 import type { Sponsor } from "../Sponsors";
 
@@ -25,13 +27,12 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
       <SponsorHero featured={featured} />
 
       {sponsors.length > 0 && (
-        <ul className={SPONSOR_TILE_GRID_CLASS}>
-          {sponsors.map((sponsor) => (
-            <li key={sponsor.id}>
-              <SponsorTile sponsor={sponsor} />
-            </li>
-          ))}
-        </ul>
+        <>
+          <div className="mb-10 sm:mb-12">
+            <StripedSeam colorPair="ink-cream" height="md" />
+          </div>
+          <SponsorTiers sponsors={sponsors} />
+        </>
       )}
     </div>
   );
