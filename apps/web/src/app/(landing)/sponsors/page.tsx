@@ -1,6 +1,8 @@
 /**
- * Sponsors Page
- * Displays all sponsors grouped by tier (gold/silver/bronze)
+ * Sponsors Page — Phase 7 tracer.
+ *
+ * Fetches all sponsors from Sanity (via SponsorRepository), orders them by tier
+ * then name, and renders the rebuilt `<SponsorsPage>` on the cream vocabulary.
  */
 
 import { Effect } from "effect";
@@ -13,7 +15,9 @@ import {
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { FooterSafeArea } from "@/components/design-system";
 import type { Sponsor } from "@/components/sponsors/Sponsors";
+import { sortByTierThenName } from "@/components/sponsors/sortByTierThenName";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
 
 export const metadata: Metadata = {
@@ -21,18 +25,13 @@ export const metadata: Metadata = {
   description: "Overzicht van de sponsors die KCVV Elewijt steunen.",
 };
 
-const GOLD_TYPES = ["crossing"];
-const SILVER_TYPES = ["green", "white"];
-
 function mapToSponsor(s: SponsorVM): Sponsor {
   return {
     id: s.id,
     name: s.name,
-    logo: s.logoUrl ?? "/images/placeholder-sponsor.png",
+    logo: s.logoUrl ?? "",
     url: s.url ?? undefined,
     tier: s.tier ?? undefined,
-    featured: s.featured,
-    description: s.description ?? undefined,
   };
 }
 
@@ -49,31 +48,7 @@ export default async function SponsorsPageRoute() {
     ),
   );
 
-  const goldSponsors = sponsors
-    .filter(
-      (s) =>
-        s.tier === "hoofdsponsor" ||
-        (!s.tier && s.type && GOLD_TYPES.includes(s.type)),
-    )
-    .map(mapToSponsor);
-  const silverSponsors = sponsors
-    .filter(
-      (s) =>
-        s.tier === "sponsor" ||
-        (!s.tier && s.type && SILVER_TYPES.includes(s.type)),
-    )
-    .map(mapToSponsor);
-  const bronzeSponsors = sponsors
-    .filter(
-      (s) =>
-        s.tier === "sympathisant" ||
-        (!s.tier &&
-          (!s.type ||
-            (!GOLD_TYPES.includes(s.type) && !SILVER_TYPES.includes(s.type)))),
-    )
-    .map(mapToSponsor);
-
-  const featuredSponsors = sponsors.filter((s) => s.featured).map(mapToSponsor);
+  const allSponsors = sponsors.map(mapToSponsor).sort(sortByTierThenName);
 
   return (
     <>
@@ -83,12 +58,8 @@ export default async function SponsorsPageRoute() {
           { name: "Sponsors", url: `${SITE_CONFIG.siteUrl}/sponsors` },
         ])}
       />
-      <SponsorsPage
-        goldSponsors={goldSponsors}
-        silverSponsors={silverSponsors}
-        bronzeSponsors={bronzeSponsors}
-        featuredSponsors={featuredSponsors}
-      />
+      <SponsorsPage sponsors={allSponsors} />
+      <FooterSafeArea />
     </>
   );
 }
