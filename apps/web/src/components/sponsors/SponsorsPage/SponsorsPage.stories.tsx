@@ -1,8 +1,9 @@
 /**
- * SponsorsPage Stories — Phase 7 tracer.
+ * SponsorsPage Stories — Phase 7.
  *
- * Editorial header over a cream `<SponsorTile>` grid of all sponsors. Not
- * `vr`-tagged: the tile itself carries the VR coverage (see SponsorTile).
+ * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) over a cream
+ * `<SponsorTile>` grid of all sponsors. Not `vr`-tagged: the hero, marquee card
+ * and tile each carry their own VR coverage.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -21,7 +22,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 7 tracer for /sponsors. Editorial header (MonoLabel kicker + EditorialHeading) over a cream `<SponsorTile>` grid of all sponsors. Replaces the legacy dark header + SectionStack/diagonal composition. Tier bodies, the featured marquee and the CTA band land in later phases.",
+          "Phase 7 /sponsors. Split `<SponsorHero>` (MonoLabel kicker + EditorialHeading + italic lead + the single `<FeaturedSponsorCard>` marquee) over a cream `<SponsorTile>` grid of all sponsors. Replaces the legacy dark header + SectionStack/diagonal composition. Tier bodies and the CTA band land in later phases.",
       },
     },
   },

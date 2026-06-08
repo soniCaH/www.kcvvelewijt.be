@@ -32,6 +32,8 @@ function mapToSponsor(s: SponsorVM): Sponsor {
     logo: s.logoUrl ?? "",
     url: s.url ?? undefined,
     tier: s.tier ?? undefined,
+    featured: s.featured,
+    description: s.description ?? undefined,
   };
 }
 
