@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o3 LOCKED — spotlight drill-down (2-D, no 3-D)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:16px 28px;font-family:var(--font-mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;}
+      .head b{color:var(--warm);}
+      .wrap{max-width:1040px;margin:0 auto;padding:24px;}
+      .lbl{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--jersey-deep);margin:6px 0 10px;}
+      .lbl b{color:var(--ink);}
+
+      .fs{border:2px solid var(--ink);background:#0e2b1d;box-shadow:6px 6px 0 0 var(--ink);overflow:hidden;margin-bottom:8px;}
+      .fs .bar{display:flex;align-items:center;gap:7px;padding:8px 11px;border-bottom:1.5px solid rgba(245,241,230,.2);background:#0a2016;flex-wrap:wrap;}
+      .fs .bar .ttl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream);}
+      .fs .bar .sp{flex:1;}
+      .fs .ctl{font-family:var(--font-mono);font-size:9px;color:var(--cream);border:1.5px solid rgba(245,241,230,.4);padding:3px 6px;}
+      .fs .crumb{font-family:var(--font-mono);font-size:10px;color:rgba(245,241,230,.8);padding:6px 11px;border-bottom:1.5px solid rgba(245,241,230,.12);}
+      .fs .crumb b{color:var(--warm);}
+      .fs .crumb a{color:rgba(245,241,230,.8);text-decoration:underline;text-underline-offset:2px;}
+      .stagebox{height:340px;position:relative;overflow:hidden;}
+      .grid-bg{position:absolute;inset:0;background:linear-gradient(rgba(245,241,230,.05) 1px,transparent 1px) 0 0/28px 28px,linear-gradient(90deg,rgba(245,241,230,.05) 1px,transparent 1px) 0 0/28px 28px,radial-gradient(120% 90% at 50% 0%,rgba(74,207,82,.12),transparent 55%);}
+      .hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:rgba(245,241,230,.55);text-align:center;width:92%;}
+
+      .nd{border:2px solid var(--ink);background:var(--cream);padding:4px 7px;text-align:center;box-shadow:2px 2px 0 0 rgba(0,0,0,.4);}
+      .nd .a{font-family:var(--font-display);font-weight:600;font-size:11px;line-height:1.05;}
+      .nd .b{font-family:var(--font-mono);font-size:7px;text-transform:uppercase;color:var(--ink-muted);}
+      .nd.dept{background:var(--jersey-deep-dark);color:var(--cream);}.nd.dept .b{color:rgba(245,241,230,.8);}
+      .nd.vac{background:var(--warm);}
+
+      .b-parent{position:absolute;left:50%;top:14px;transform:translateX(-50%);}
+      .b-sib{position:absolute;top:44%;transform:translateY(-50%);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:rgba(245,241,230,.62);border:1.5px solid rgba(245,241,230,.35);padding:7px 9px;}
+      .b-center{position:absolute;left:50%;top:33%;transform:translate(-50%,-50%);background:var(--cream);border:2px solid var(--ink);box-shadow:4px 4px 0 0 var(--warm);padding:9px 18px;text-align:center;}
+      .b-center .a{font-family:var(--font-display);font-weight:600;font-size:16px;}
+      .b-center .b{font-family:var(--font-mono);font-size:8px;text-transform:uppercase;color:var(--ink-muted);}
+      .b-kids{position:absolute;left:3%;right:3%;bottom:30px;display:flex;flex-wrap:wrap;gap:7px;justify-content:center;}
+      .b-kids .nd{width:104px;cursor:pointer;}
+      .b-conn{position:absolute;left:50%;top:calc(33% + 22px);width:2px;height:34px;background:rgba(245,241,230,.3);transform:translateX(-50%);}
+
+      .spec{background:var(--cream-deep);border:1.5px solid var(--ink);padding:14px 16px;font-family:var(--font-mono);font-size:11.5px;line-height:1.7;color:var(--ink-soft);margin-top:6px;}
+      .spec b{color:var(--jersey-deep);} .spec .k{color:var(--ink);font-weight:600;}
+      .killed{background:#f3e0da;border:1.5px dashed var(--brick);padding:10px 14px;font-family:var(--font-mono);font-size:11px;color:var(--brick);margin-top:8px;}
+      .killed b{color:var(--brick);}
+    </style>
+  </head>
+  <body>
+    <div class="head">7o3 LOCKED · <b>Spotlight drill-down — 2-D only</b> · inside the fullscreen verkenner (7o2) · 3-D removed</div>
+
+    <div class="wrap">
+      <div class="lbl"><b>THE EXPLORER</b> — Spotlight drill-down (focus + context)</div>
+      <div class="fs">
+        <div class="bar"><span class="ttl">▣ Verkenner</span><span class="sp"></span><span class="ctl">↤ terug</span><span class="ctl">⤢ overzicht</span><span class="ctl">✕ Esc</span></div>
+        <div class="crumb"><a href="#">KCVV Elewijt</a> &nbsp;▸&nbsp; <b>Jeugdbestuur</b> &nbsp;<span style="color:rgba(245,241,230,.4)">(10 functies)</span></div>
+        <div class="stagebox"><div class="grid-bg"></div>
+          <div class="b-parent nd dept" style="width:138px;"><div class="a">KCVV Elewijt ▲</div><div class="b">ouder · klik om omhoog</div></div>
+          <div class="b-conn"></div>
+          <div class="b-sib" style="left:12px;">◂ Hoofdbestuur</div>
+          <div class="b-sib" style="right:12px;">Algemeen ▸</div>
+          <div class="b-center"><div class="a">Jeugdbestuur</div><div class="b">afdeling · 10 functies</div></div>
+          <div class="b-kids">
+            <div class="nd"><div class="a">Jeugdvoorz.</div><div class="b">S. Peeters</div></div>
+            <div class="nd"><div class="a">Jeugdsecr.</div><div class="b">K. Wouters</div></div>
+            <div class="nd"><div class="a">TVJO</div><div class="b">T. Michiels</div></div>
+            <div class="nd"><div class="a">Coörd. Boven</div><div class="b">B. Janssens</div></div>
+            <div class="nd"><div class="a">Coörd. Midden</div><div class="b">E. Claes</div></div>
+            <div class="nd"><div class="a">Coörd. Onder</div><div class="b">N. De Cock</div></div>
+            <div class="nd"><div class="a">Gastheer</div><div class="b">A. Mertens</div></div>
+            <div class="nd vac"><div class="a">Tornooien</div><div class="b">vacant</div></div>
+            <div class="nd"><div class="a">Uitrusting</div><div class="b">K. Wille</div></div>
+            <div class="nd"><div class="a">Keeperstr.</div><div class="b">D. Cools</div></div>
+          </div>
+          <div class="hint">klik kind → nieuw midden · klik ouder/buur → omhoog/opzij · klik persoon → detail (7o5) · ↑↓←→ + Enter · nooit verdwalen, nooit slepen</div>
+        </div>
+      </div>
+
+      <div class="spec">
+        <span class="k">LOCKED — spotlight (2-D, the whole explorer):</span> selected node centred · parent above + in breadcrumb · siblings flank (lateral move) · children fan below (descend). Navigate by <b>click</b> + <b>↑↓←→/Enter</b>; never free-pan, never drag. Persistent breadcrumb = the map → no “getting lost”. Click a <b>person/leaf → 7o5 detail</b> (contact). Node states (single / shared +N / vacant) → <b>7o4</b>. Mobile = tap-only. Container = fullscreen focused mode (7o2) → breadcrumb + zoom/fit + Esc; cannot scroll-jack. <b>Pan/zoom is only for the contained canvas; the spotlight needs neither.</b>
+      </div>
+      <div class="killed">
+        <b>REMOVED — 3-D (owner call, 2026-06-08):</b> the orbital 3-D enhancement is dropped entirely — “doesn’t add value, au contraire.” No three.js / react-three-fiber, no ◎ toggle, no spatial mode. The 2-D spotlight stands alone. (Investigated in <code>7o3-explorer-at-scale-compare.html</code> option D, retained as drill history.) No 3-D build phase in the PRD.
+      </div>
+    </div>
+  </body>
+</html>

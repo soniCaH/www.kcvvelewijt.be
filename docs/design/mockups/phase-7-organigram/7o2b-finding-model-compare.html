@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o2b: THE FINDING MODEL (search ⟷ Hulp ⟷ browse)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:94ch;}
+      .head b{color:var(--warm);}
+      .wrap{max-width:1060px;margin:0 auto;padding:0 24px;}
+
+      /* the shared "what the search returns" panel */
+      .explain{padding:26px 0;}
+      .explain h2{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:26px;margin:0 0 4px;}
+      .explain .sub{font-size:14px;color:var(--ink-soft);margin:0 0 18px;max-width:70ch;}
+      .demo{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+      .sbox{border:2px solid var(--ink);background:var(--cream);box-shadow:4px 4px 0 0 var(--ink);}
+      .sbox .inp{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:2px solid var(--ink);}
+      .sbox .inp .mag{color:var(--jersey-deep);font-weight:600;font-family:var(--font-mono);}
+      .sbox .inp .qy{font-family:var(--font-mono);font-size:14px;color:var(--ink);}
+      .sbox .inp .cur{width:1px;height:16px;background:var(--ink);display:inline-block;margin-left:1px;}
+      .grp{padding:8px 0;}
+      .grp .gh{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);padding:4px 14px;}
+      .res{display:flex;align-items:center;gap:10px;padding:8px 14px;}
+      .res:hover{background:var(--cream-soft);}
+      .res .ic{width:30px;height:30px;border:2px solid var(--ink);border-radius:9999px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:12px;color:var(--jersey-deep);background:var(--cream-soft);flex:none;}
+      .res .ic.q{border-radius:3px;color:var(--warm);background:var(--jersey-deep-dark);}
+      .res .tx{line-height:1.2;}
+      .res .tx .a{font-family:var(--font-display);font-weight:600;font-size:14px;}
+      .res .tx .b{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;color:var(--ink-muted);}
+      .res .go{margin-left:auto;font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--jersey-deep);border:1.5px solid var(--jersey-deep);padding:3px 7px;}
+      .tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);margin:6px 0 0;text-align:center;}
+
+      .direction-bar{position:sticky;top:0;z-index:50;background:var(--jersey-deep);color:var(--cream);padding:11px 28px;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em;text-transform:uppercase;display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);}
+      .direction-bar .t{background:var(--warm);color:var(--ink);padding:2px 9px;font-weight:700;border:1.5px solid var(--ink);}
+      .direction-bar.rec .t{background:var(--jersey);}
+      .direction-bar .note{color:#cfeede;text-transform:none;letter-spacing:0;font-size:12px;}
+      .stage{padding:24px 28px 32px;border-bottom:1px dashed var(--paper-edge);}
+      .mgrid{max-width:1060px;margin:0 auto;display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:start;}
+
+      .map{border:2px solid var(--ink);background:var(--cream);box-shadow:5px 5px 0 0 var(--ink);padding:12px;}
+      .box{border:1.5px solid var(--ink);padding:8px 10px;margin-bottom:7px;font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;}
+      .box small{display:block;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:9px;color:var(--ink-muted);margin-top:2px;}
+      .box.search{background:var(--jersey-deep-dark);color:var(--cream);} .box.search small{color:rgba(245,241,230,.72);}
+      .box.search2{background:var(--cream-deep);}
+      .box.ppl{background:var(--cream-soft);}
+      .box.ans{background:color-mix(in srgb,var(--jersey-deep) 12%,var(--cream));border-color:var(--jersey-deep);}
+      .box.verk{background:repeating-linear-gradient(45deg,var(--cream-soft) 0 8px,var(--cream-deep) 8px 16px);}
+      .arrow{font-family:var(--font-mono);font-size:9px;color:var(--ink-muted);text-align:center;margin:-2px 0 5px;}
+      .split{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+
+      .notes h3{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:22px;margin:0 0 8px;}
+      .notes p{font-size:14px;line-height:1.55;color:var(--ink-soft);margin:0 0 10px;max-width:64ch;}
+      .notes .bestfor{font-family:var(--font-mono);font-size:11px;color:var(--jersey-deep);text-transform:uppercase;letter-spacing:.05em;}
+      .notes .tradeoff{font-family:var(--font-mono);font-size:11px;color:var(--brick);text-transform:uppercase;letter-spacing:.05em;}
+
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /club/organigram · 7o2b — THE FINDING MODEL</h1>
+      <p>
+        Resolving the real question: <b>how do the search box, the Hulp finder, and the browse sections work together</b>
+        for someone looking for something specific? First — what the search actually <b>returns</b> (it spans people AND
+        answers). Then three coherent ways to organise the page around it. This decides the <b>finding model</b> before we
+        lock 7o2.
+      </p>
+    </div>
+
+    <!-- WHAT THE SEARCH RETURNS -->
+    <div class="wrap explain">
+      <h2>First: what one search box returns.</h2>
+      <p class="sub">The existing search ranks across <b>people</b> (name · function) and <b>hulpvragen</b> (question · keywords · summary). Two query kinds, two result types — typed and clearly labelled, so a click goes to the right place.</p>
+      <div class="demo">
+        <div>
+          <div class="sbox">
+            <div class="inp"><span class="mag">⌕</span><span class="qy">Boons</span><span class="cur"></span></div>
+            <div class="grp"><div class="gh">Personen</div>
+              <div class="res"><span class="ic">LB</span><span class="tx"><span class="a">Luc Boons</span><span class="b">Voorzitter · Hoofdbestuur</span></span><span class="go">contact →</span></div>
+            </div>
+          </div>
+          <div class="tag">“I know who” → a person → contact + “toon in verkenner”</div>
+        </div>
+        <div>
+          <div class="sbox">
+            <div class="inp"><span class="mag">⌕</span><span class="qy">lidgeld</span><span class="cur"></span></div>
+            <div class="grp"><div class="gh">Antwoorden · hulpvragen</div>
+              <div class="res"><span class="ic q">?</span><span class="tx"><span class="a">Hoe schrijf ik mijn kind in?</span><span class="b">Administratief · Karen Wouters</span></span><span class="go">antwoord →</span></div>
+              <div class="res"><span class="ic q">?</span><span class="tx"><span class="a">Wat kost een lidmaatschap?</span><span class="b">Administratief</span></span><span class="go">antwoord →</span></div>
+            </div>
+          </div>
+          <div class="tag">“I have a problem” → an answer → steps + the right contact</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODEL I -->
+    <div class="direction-bar rec"><span class="t">I ★</span> One front door · browse is the backup <span class="note">recommended · search = type · sections = browse · same data, two doors</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="map">
+        <div class="box search">⌕ ÉÉN ZOEKBALK (hero)<small>returns Personen + Antwoorden</small></div>
+        <div class="arrow">▼ &nbsp; liever bladeren? &nbsp; ▼</div>
+        <div class="box ppl">① Structuur — mensen<small>directory per afdeling</small></div>
+        <div class="box verk">② Verkenner — relaties<small>fullscreen explorer / 3-D</small></div>
+        <div class="box ans">③ Hulp — vragen per thema<small>browse the SAME answers the search finds</small></div>
+      </div>
+      <div class="notes">
+        <h3>Search is the verb. The sections are the nouns.</h3>
+        <p>One box up top answers both intents (a person <em>or</em> an answer). The three sections below are the
+          <em>same dataset</em> reached by browsing instead of typing — Structuur = browse people, Verkenner = browse
+          relationships, Hulp = browse the answers by topic. <b>Nothing is duplicated</b>: Hulp isn’t a second search, it’s
+          the catalogue you land in if you’d rather click categories than type. The fast user types; the browser scrolls.</p>
+        <p class="bestfor">Best for: clearest “how it fits”, keeps the loved structure-explorer, one mental model.</p>
+        <p class="tradeoff">Cost: the Hulp section must read as “browse the answers”, never as another search box.</p>
+      </div>
+    </div></div>
+
+    <!-- MODEL II -->
+    <div class="direction-bar"><span class="t">II</span> Two scoped doors: mensen ⟷ hulplijn <span class="note">each search stays in its lane · no blended results</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="map">
+        <div class="split">
+          <div class="box search">⌕ ZOEK PERSOON<small>people only</small></div>
+          <div class="box search" style="background:var(--jersey-deep);">⌕ STEL JE VRAAG<small>answers only</small></div>
+        </div>
+        <div class="arrow">▼ two separate halves ▼</div>
+        <div class="box ppl">DE MENSEN<small>directory + verkenner</small></div>
+        <div class="box ans">DE HULPLIJN<small>responsibility finder</small></div>
+      </div>
+      <div class="notes">
+        <h3>Pick your door first.</h3>
+        <p>Two explicitly separate lanes. A people-search feeds the structure half; a question-finder is its own half.
+          Each search is scoped to one domain, so results never mix. The page literally splits into “De mensen” and
+          “De hulplijn”.</p>
+        <p class="bestfor">Best for: zero overlap, each box does exactly one thing.</p>
+        <p class="tradeoff">Cost: two search boxes; the user must self-diagnose which intent they have before typing.</p>
+      </div>
+    </div></div>
+
+    <!-- MODEL III -->
+    <div class="direction-bar"><span class="t">III</span> Hulp-led · structure is reference <span class="note">lead with the question-finder · most users arrive with a problem</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="map">
+        <div class="box search">⌕ STEL JE VRAAG (hero)<small>answers first, + matching person</small></div>
+        <div class="arrow">▼ then, as reference ▼</div>
+        <div class="box ans">① Hulp — vragen per thema</div>
+        <div class="box ppl">② Structuur — mensen</div>
+        <div class="box verk">③ Verkenner — relaties</div>
+      </div>
+      <div class="notes">
+        <h3>Answer first, org chart second.</h3>
+        <p>Inverts the emphasis: the page leads with the problem-solver (because most end-users come with a question,
+          not a name). The org structure + verkenner become reference material lower down. The hero box is a
+          question-finder that also surfaces the matching contact.</p>
+        <p class="bestfor">Best for: a help-desk-first club site; demotes the org chart.</p>
+        <p class="tradeoff">Cost: buries the structure explorer you specifically loved; weaker as an “organigram” page.</p>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o2b — the finding model</h3>
+      <p>
+        <b>I ★</b> one search (people + answers) as the fast path, the three sections as the browse-the-same-data backup
+        — clearest “how it all fits”, keeps the structure explorer central. <b>II</b> two scoped boxes / two halves —
+        zero overlap but two doors. <b>III</b> Hulp-led — answer-first, structure demoted.
+      </p>
+      <p style="color:var(--ink-muted);">
+        Orthogonal call (any model): <b>search intelligence</b>. Today = keyword/substring ranking (free, exists). Upgrade =
+        semantic/AI over the responsibility docs (the bge-m3 + Vectorize stack already powering <b>/zoeken</b>) so natural
+        language like <em>“mijn kind heeft zich bezeerd”</em> finds the medical contact without a keyword match. Real value
+        for the Hulp job, but it’s extra BFF/embeddings build — a scoped issue, not free.
+      </p>
+    </div>
+  </body>
+</html>

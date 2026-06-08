@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o3: EXPLORER INTERACTION (+ 3-D investigation)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:96ch;}
+      .head b{color:var(--warm);}
+      .direction-bar{position:sticky;top:0;z-index:50;background:var(--jersey-deep);color:var(--cream);padding:11px 28px;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em;text-transform:uppercase;display:flex;gap:14px;align-items:baseline;border-bottom:2px solid var(--ink);}
+      .direction-bar .t{background:var(--warm);color:var(--ink);padding:2px 9px;font-weight:700;border:1.5px solid var(--ink);}
+      .direction-bar.rec .t{background:var(--jersey);}
+      .direction-bar .note{color:#cfeede;text-transform:none;letter-spacing:0;font-size:12px;}
+      .stage{padding:22px 28px 30px;border-bottom:1px dashed var(--paper-edge);}
+      .mgrid{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:1fr 360px;gap:26px;align-items:start;}
+
+      /* fullscreen verkenner chrome (locked container) */
+      .fs{border:2px solid var(--ink);background:#0e2b1d;box-shadow:6px 6px 0 0 var(--ink);overflow:hidden;}
+      .fs .bar{display:flex;align-items:center;gap:8px;padding:8px 11px;border-bottom:1.5px solid rgba(245,241,230,.2);background:#0a2016;flex-wrap:wrap;}
+      .fs .bar .ttl{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream);}
+      .fs .bar .sp{flex:1;}
+      .fs .ctl{font-family:var(--font-mono);font-size:9.5px;color:var(--cream);border:1.5px solid rgba(245,241,230,.4);padding:3px 7px;}
+      .fs .ctl.warm{border-color:var(--warm);color:var(--warm);}
+      .fs .crumb{font-family:var(--font-mono);font-size:10px;color:rgba(245,241,230,.8);padding:6px 11px;border-bottom:1.5px solid rgba(245,241,230,.12);}
+      .fs .crumb b{color:var(--warm);}
+      .fs .stagebox{height:320px;position:relative;overflow:hidden;}
+      .grid-bg{position:absolute;inset:0;background:linear-gradient(rgba(245,241,230,.05) 1px,transparent 1px) 0 0/28px 28px,linear-gradient(90deg,rgba(245,241,230,.05) 1px,transparent 1px) 0 0/28px 28px,radial-gradient(120% 90% at 50% 0%,rgba(74,207,82,.13),transparent 55%);}
+      .hint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:rgba(245,241,230,.55);text-align:center;width:90%;}
+
+      .node{position:absolute;border:2px solid var(--ink);background:var(--cream);box-shadow:3px 3px 0 0 rgba(0,0,0,.45);padding:5px 8px;text-align:center;}
+      .node .nn{font-family:var(--font-display);font-weight:600;font-size:11px;}
+      .node .nf{font-family:var(--font-mono);font-size:7px;text-transform:uppercase;color:var(--ink-muted);}
+      .node.root{background:var(--jersey-deep);color:var(--cream);}.node.root .nf{color:rgba(245,241,230,.85);}
+      .node.warm{background:var(--warm);}
+      .node.cur{box-shadow:0 0 0 3px var(--warm),3px 3px 0 0 rgba(0,0,0,.45);}
+      svg.links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+      svg.links line{stroke:rgba(245,241,230,.45);stroke-width:2;}
+
+      /* B spotlight focus+context */
+      .center-node{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border:2px solid var(--ink);background:var(--cream);box-shadow:4px 4px 0 0 var(--warm);padding:12px 18px;text-align:center;}
+      .center-node .nn{font-family:var(--font-display);font-weight:600;font-size:18px;}
+      .center-node .nf{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--ink-muted);}
+      .pill-up{position:absolute;left:50%;top:16px;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--cream);border:1.5px solid rgba(245,241,230,.5);padding:5px 10px;background:rgba(10,32,22,.6);}
+      .child-row{position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;gap:12px;}
+      .child{border:2px solid var(--ink);background:var(--cream-soft);box-shadow:2px 2px 0 0 rgba(0,0,0,.4);padding:6px 10px;text-align:center;}
+      .child .nn{font-family:var(--font-display);font-weight:600;font-size:11px;}.child .nf{font-family:var(--font-mono);font-size:7px;text-transform:uppercase;color:var(--ink-muted);}
+      .sib{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:rgba(245,241,230,.6);}
+
+      /* C radial (tilted to hint 3-D) */
+      .radial{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+      .ring{position:relative;width:300px;height:300px;transform:rotateX(34deg);transform-style:preserve-3d;}
+      .ring .spoke{position:absolute;left:50%;top:50%;height:2px;width:120px;background:rgba(245,241,230,.35);transform-origin:left center;}
+      . rcenter{}
+      .rnode{position:absolute;left:50%;top:50%;}
+
+      /* D true 3-D scene */
+      .scene{position:absolute;inset:0;perspective:760px;display:flex;align-items:center;justify-content:center;}
+      .world{position:relative;width:1px;height:1px;transform-style:preserve-3d;animation:orbit 18s linear infinite;}
+      .stagebox:hover .world{animation-play-state:paused;}
+      @keyframes orbit{from{transform:rotateX(-16deg) rotateY(0deg);}to{transform:rotateX(-16deg) rotateY(360deg);}}
+      .n3{position:absolute;transform-style:preserve-3d;border:2px solid var(--ink);padding:5px 9px;text-align:center;background:var(--cream);box-shadow:0 6px 14px rgba(0,0,0,.4);}
+      .n3 .nn{font-family:var(--font-display);font-weight:600;font-size:11px;}.n3 .nf{font-family:var(--font-mono);font-size:7px;text-transform:uppercase;color:var(--ink-muted);}
+      .n3.root{background:var(--jersey-deep);color:var(--cream);}.n3.root .nf{color:rgba(245,241,230,.85);}
+      .n3.warm{background:var(--warm);}
+      .strut{position:absolute;left:0;top:0;width:2px;background:rgba(74,207,82,.5);transform-origin:top center;}
+      .floor{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;border:1px solid rgba(245,241,230,.12);border-radius:50%;transform:rotateX(90deg);}
+
+      .notes h3{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:21px;margin:0 0 8px;}
+      .notes p{font-size:13.5px;line-height:1.55;color:var(--ink-soft);margin:0 0 10px;}
+      .sc{border-collapse:collapse;font-family:var(--font-mono);font-size:10.5px;width:100%;}
+      .sc td,.sc th{border:1.5px solid var(--ink);padding:5px 7px;text-align:left;}
+      .sc th{background:var(--ink);color:var(--cream);text-transform:uppercase;font-size:9px;letter-spacing:.04em;}
+      .y{color:var(--jersey-deep);font-weight:600;}.m{color:#b07d00;font-weight:600;}.n{color:var(--brick);font-weight:600;}
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /club/organigram · 7o3 — EXPLORER INTERACTION (+ 3-D)</h1>
+      <p>
+        The fullscreen container is locked (breadcrumb · zoom/fit · Esc — can’t scroll-jack). This decides
+        <b>what lives inside it</b> — from a fixed 2-D tree to a literal orbitable 3-D scene. <b>D and C animate for real</b>
+        (hover to pause). Weigh: orientation, mobile/touch, accessibility + performance, build cost, and wow. Note: any
+        option ships with a guaranteed <b>2-D fallback</b> for reduced-motion / no-WebGL / screen-readers.
+      </p>
+    </div>
+
+    <!-- A -->
+    <div class="direction-bar"><span class="t">A</span> Contained 2-D node-tree (pan/zoom, fixed) <span class="note">today's diagram, done right inside the container · cheapest · familiar</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="fs">
+        <div class="bar"><span class="ttl">▣ Verkenner</span><span class="sp"></span><span class="ctl">–</span><span class="ctl">100%</span><span class="ctl">+</span><span class="ctl">⤢ passend</span><span class="ctl">✕ Esc</span></div>
+        <div class="crumb">KCVV Elewijt &nbsp;▸&nbsp; <b>Hoofdbestuur</b></div>
+        <div class="stagebox"><div class="grid-bg"></div>
+          <svg class="links"><line x1="50%" y1="58" x2="22%" y2="150"/><line x1="50%" y1="58" x2="50%" y2="150"/><line x1="50%" y1="58" x2="78%" y2="150"/><line x1="22%" y1="186" x2="22%" y2="244"/><line x1="78%" y1="186" x2="78%" y2="244"/></svg>
+          <div class="node root" style="left:43%;top:36px;"><div class="nn">KCVV Elewijt</div><div class="nf">de club</div></div>
+          <div class="node" style="left:14%;top:150px;"><div class="nn">Luc Boons</div><div class="nf">Voorzitter</div></div>
+          <div class="node" style="left:43%;top:150px;"><div class="nn">Inge Maes</div><div class="nf">Secretaris</div></div>
+          <div class="node" style="left:71%;top:150px;"><div class="nn">Sam Peeters</div><div class="nf">Jeugdvz.</div></div>
+          <div class="node" style="left:14%;top:244px;"><div class="nn">Tom Michiels</div><div class="nf">TVJO</div></div>
+          <div class="node warm" style="left:71%;top:244px;"><div class="nn">Open functie</div><div class="nf">Vacant</div></div>
+          <div class="hint">sleep om te pannen · scroll/pinch om te zoomen · klik = focus + uitklappen</div>
+        </div>
+      </div>
+      <div class="notes">
+        <h3>The known quantity.</h3>
+        <p>The classic top-down org tree, but inside the fullscreen container so pan/zoom is fine. Reuses
+          d3-org-chart → cheapest + most familiar + fully accessible. But it’s the least “wow”, and big trees still
+          mean lots of panning to see it all.</p>
+        <table class="sc"><tr><th>Orient</th><th>Mobile</th><th>A11y/perf</th><th>Build</th><th>Wow</th></tr>
+          <tr><td class="y">✓</td><td class="m">△</td><td class="y">✓</td><td class="y">low</td><td class="n">low</td></tr></table>
+      </div>
+    </div></div>
+
+    <!-- B -->
+    <div class="direction-bar"><span class="t">B</span> Spotlight drill-down (focus + context) <span class="note">click to re-centre · never drag · always oriented · tap-native</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="fs">
+        <div class="bar"><span class="ttl">▣ Verkenner</span><span class="sp"></span><span class="ctl">↤ terug</span><span class="ctl">⤢ overzicht</span><span class="ctl">✕ Esc</span></div>
+        <div class="crumb">KCVV Elewijt &nbsp;▸&nbsp; Hoofdbestuur &nbsp;▸&nbsp; <b>Voorzitter</b></div>
+        <div class="stagebox"><div class="grid-bg"></div>
+          <div class="pill-up">▲ Hoofdbestuur</div>
+          <div class="sib" style="left:14px;">◂ Secretaris</div>
+          <div class="sib" style="right:14px;">Penningmeester ▸</div>
+          <div class="center-node"><div class="nn">Luc Boons</div><div class="nf">Voorzitter · Hoofdbestuur</div></div>
+          <div class="child-row">
+            <div class="child"><div class="nn">Sportieve cel</div><div class="nf">3 leden</div></div>
+            <div class="child"><div class="nn">Gerechtelijk</div><div class="nf">P. Geerts</div></div>
+            <div class="child"><div class="nn">Wedstrijdsecr.</div><div class="nf">2 personen</div></div>
+          </div>
+          <div class="hint">klik een buur/kind → het schuift naar het midden · adem-ruimte, geen verdwalen · pijltjestoetsen werken</div>
+        </div>
+      </div>
+      <div class="notes">
+        <h3>Always centred on someone.</h3>
+        <p>No free panning. The selected node sits dead centre; its parent floats above (breadcrumb), siblings flank
+          it, children fan below. You navigate by <em>clicking</em>, so you’re never lost and it’s perfect on touch.
+          Best pure-UX answer to “orientation” + “mobile”. 2-D, but a subtle depth-tilt can be added.</p>
+        <table class="sc"><tr><th>Orient</th><th>Mobile</th><th>A11y/perf</th><th>Build</th><th>Wow</th></tr>
+          <tr><td class="y">✓✓</td><td class="y">✓✓</td><td class="y">✓</td><td class="m">med</td><td class="m">med</td></tr></table>
+      </div>
+    </div></div>
+
+    <!-- C -->
+    <div class="direction-bar"><span class="t">C</span> Radial “constellation” + 3-D orbit toggle <span class="note">whole club as one shape · ◎ tilts it into orbit · animated below</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="fs">
+        <div class="bar"><span class="ttl">▣ Verkenner</span><span class="sp"></span><span class="ctl">–</span><span class="ctl">+</span><span class="ctl warm">◎ 3-D aan</span><span class="ctl">✕ Esc</span></div>
+        <div class="crumb">KCVV Elewijt &nbsp;▸&nbsp; <b>alle afdelingen</b></div>
+        <div class="stagebox"><div class="grid-bg"></div>
+          <div class="radial"><div class="ring">
+            <div class="rnode" style="transform:translate(-50%,-50%) translateZ(20px);"><div class="node root" style="position:static;"><div class="nn">KCVV</div><div class="nf">club</div></div></div>
+            <div class="rnode" style="transform:translate(-50%,-50%) rotateZ(0deg) translateX(120px) rotateZ(0deg);"><div class="node" style="position:static;"><div class="nn">Voorzitter</div><div class="nf">L. Boons</div></div></div>
+            <div class="rnode" style="transform:translate(-50%,-50%) rotateZ(72deg) translateX(120px) rotateZ(-72deg);"><div class="node" style="position:static;"><div class="nn">Secretaris</div><div class="nf">I. Maes</div></div></div>
+            <div class="rnode" style="transform:translate(-50%,-50%) rotateZ(144deg) translateX(120px) rotateZ(-144deg);"><div class="node warm" style="position:static;"><div class="nn">Vacant</div><div class="nf">penning.</div></div></div>
+            <div class="rnode" style="transform:translate(-50%,-50%) rotateZ(216deg) translateX(120px) rotateZ(-216deg);"><div class="node" style="position:static;"><div class="nn">Jeugd</div><div class="nf">S. Peeters</div></div></div>
+            <div class="rnode" style="transform:translate(-50%,-50%) rotateZ(288deg) translateX(120px) rotateZ(-288deg);"><div class="node" style="position:static;"><div class="nn">TVJO</div><div class="nf">T. Michiels</div></div></div>
+            <div class="spoke" style="transform:rotate(0deg);"></div><div class="spoke" style="transform:rotate(72deg);"></div><div class="spoke" style="transform:rotate(144deg);"></div><div class="spoke" style="transform:rotate(216deg);"></div><div class="spoke" style="transform:rotate(288deg);"></div>
+          </div></div>
+          <div class="hint">de hele club in één beeld · ◎ kantelt het vlak naar een 3-D constellatie die je kan ronddraaien</div>
+        </div>
+      </div>
+      <div class="notes">
+        <h3>The whole shape, at a glance.</h3>
+        <p>A radial tree: the club at the centre, departments + positions radiating outward — you see the entire
+          organisation as one figure. The ◎ toggle tilts the plane into an orbitable 3-D constellation. Striking and
+          legible-as-a-whole; deep sub-trees need a click-to-recentre like B. Medium build (2-D SVG/CSS + an optional
+          CSS/r3f tilt).</p>
+        <table class="sc"><tr><th>Orient</th><th>Mobile</th><th>A11y/perf</th><th>Build</th><th>Wow</th></tr>
+          <tr><td class="m">△</td><td class="m">△</td><td class="m">△</td><td class="m">med-high</td><td class="y">high</td></tr></table>
+      </div>
+    </div></div>
+
+    <!-- D -->
+    <div class="direction-bar rec"><span class="t">D ◎</span> Full 3-D spatial explorer <span class="note">orbit the whole org in space · real CSS-3D below (hover to pause) · the investigation</span></div>
+    <div class="stage"><div class="mgrid">
+      <div class="fs">
+        <div class="bar"><span class="ttl">▣ Verkenner — 3-D</span><span class="sp"></span><span class="ctl">–</span><span class="ctl">+</span><span class="ctl warm">◎ 3-D</span><span class="ctl">⤢ passend</span><span class="ctl">✕ Esc</span></div>
+        <div class="crumb">KCVV Elewijt &nbsp;▸&nbsp; <b>ruimtelijk</b> &nbsp;·&nbsp; sleep om te draaien</div>
+        <div class="stagebox"><div class="grid-bg"></div>
+          <div class="scene"><div class="world">
+            <div class="floor"></div>
+            <!-- struts -->
+            <div class="strut" style="height:120px;transform:rotateX(90deg) rotateY(0deg);"></div>
+            <div class="strut" style="height:120px;transform:rotateX(90deg) rotateY(120deg);"></div>
+            <div class="strut" style="height:120px;transform:rotateX(90deg) rotateY(240deg);"></div>
+            <!-- nodes -->
+            <div class="n3 root" style="transform:translate(-50%,-50%) translateY(-70px);"><div class="nn">KCVV Elewijt</div><div class="nf">de club</div></div>
+            <div class="n3" style="transform:translate(-50%,-50%) translateY(40px) translateZ(110px);"><div class="nn">Luc Boons</div><div class="nf">Voorzitter</div></div>
+            <div class="n3" style="transform:translate(-50%,-50%) translateY(40px) rotateY(120deg) translateZ(110px) rotateY(-120deg);"><div class="nn">Inge Maes</div><div class="nf">Secretaris</div></div>
+            <div class="n3 warm" style="transform:translate(-50%,-50%) translateY(40px) rotateY(240deg) translateZ(110px) rotateY(-240deg);"><div class="nn">Open</div><div class="nf">Vacant</div></div>
+          </div></div>
+          <div class="hint">sleep om te orbiten · scroll = zoom · klik een node = focus · auto-draait tot je ‘m aanraakt</div>
+        </div>
+      </div>
+      <div class="notes">
+        <h3>Orbit the club.</h3>
+        <p>The org as a real spatial structure you rotate, zoom and fly through — depth carries hierarchy, the whole
+          thing turns. Maximum memorability; genuinely unique for a village club. Cost is real: <b>three.js / react-three-fiber</b>,
+          a WebGL + perf budget, label legibility in 3-D, and a mandatory <b>2-D fallback</b> for reduced-motion /
+          low-power / screen-readers. Best treated as the <b>◎ enhancement on top of a solid 2-D base</b>, not the only
+          way in.</p>
+        <table class="sc"><tr><th>Orient</th><th>Mobile</th><th>A11y/perf</th><th>Build</th><th>Wow</th></tr>
+          <tr><td class="m">△</td><td class="n">✗→△</td><td class="n">✗→△*</td><td class="n">high</td><td class="y">✓✓✓</td></tr></table>
+        <p style="font-size:10.5px;font-family:var(--font-mono);color:var(--ink-muted);">*only with the fallback + perf budget done properly.</p>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o3 — the explorer interaction</h3>
+      <p>
+        <b>A</b> safe 2-D tree (cheap, low wow). <b>B</b> spotlight drill-down — the strongest pure fix for orientation
+        + mobile (you’re never lost, never dragging). <b>C</b> radial constellation — the whole club as one figure, with
+        a 3-D orbit toggle. <b>D ◎</b> full 3-D spatial — maximum wow, heaviest build, needs a real 2-D fallback.
+      </p>
+      <p style="color:var(--ink-muted);">
+        These compose. The responsible shape for your “3-D is awesome” + “don’t let me get lost / fix mobile” is a
+        <b>solid 2-D base (B’s spotlight nav) that the ◎ toggle lifts into 3-D (D’s scene)</b> — progressive enhancement,
+        with C’s radial as a candidate base if you want the whole-shape view. Pick the <b>base</b> + how far the <b>3-D
+        toggle</b> goes, and I’ll lock the combination (and flag 3-D as its own build phase in the PRD, since it’s the
+        heavy part).
+      </p>
+    </div>
+  </body>
+</html>

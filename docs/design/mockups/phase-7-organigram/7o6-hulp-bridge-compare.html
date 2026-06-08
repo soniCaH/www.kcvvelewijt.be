@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o6: HULP section = bridge to /hulp</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:94ch;}
+      .head b{color:var(--warm);}
+      .bar{background:var(--jersey-deep);color:var(--cream);padding:11px 28px;font-family:var(--font-mono);font-size:13px;letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--ink);}
+      .bar.rec .tg{background:var(--jersey);} .bar .tg{background:var(--warm);color:var(--ink);padding:2px 9px;font-weight:700;border:1.5px solid var(--ink);margin-right:10px;}
+      .bar .note{color:#cfeede;text-transform:none;letter-spacing:0;font-size:12px;}
+      .stage{padding:24px 28px 30px;border-bottom:1px dashed var(--paper-edge);}
+      .wrap{max-width:1000px;margin:0 auto;}
+      .kicker{font-family:var(--font-mono);font-size:12px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--jersey-deep);}
+      .h2{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:30px;margin:8px 0 0;}
+      .dot{color:var(--jersey-deep);}
+
+      /* B richer teaser */
+      .chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+      .chip{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:1.5px solid var(--ink);background:var(--cream);padding:7px 11px;box-shadow:2px 2px 0 0 var(--ink);}
+      .cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+      .cat{border:2px solid var(--ink);background:var(--cream-soft);box-shadow:3px 3px 0 0 var(--ink);padding:13px;}
+      .cat .ic{font-family:var(--font-mono);color:var(--jersey-deep);font-size:18px;}
+      .cat .t{font-family:var(--font-display);font-weight:600;font-size:15px;margin-top:5px;}
+      .cat .s{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;color:var(--ink-muted);margin-top:3px;}
+      .toall{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:2px solid var(--ink);background:var(--warm);color:var(--ink);padding:11px 16px;box-shadow:4px 4px 0 0 var(--ink);margin-top:6px;}
+
+      /* A minimal band */
+      .band{background:var(--jersey-deep-dark);color:var(--cream);border:2px solid var(--ink);box-shadow:5px 5px 0 0 var(--ink);padding:24px 26px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;}
+      .band h3{font-family:var(--font-display);font-style:italic;font-weight:900;font-size:24px;margin:0;}
+      .band p{margin:5px 0 0;color:rgba(245,241,230,.8);font-size:13px;}
+      .band .go{font-family:var(--font-mono);font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;border:2px solid var(--ink);background:var(--warm);color:var(--ink);padding:12px 18px;box-shadow:4px 4px 0 0 var(--ink);}
+
+      /* C none */
+      .none{border:2px dashed var(--paper-edge);padding:20px;text-align:center;color:var(--ink-muted);font-family:var(--font-mono);font-size:12px;line-height:1.7;}
+      .none b{color:var(--jersey-deep);}
+      .heroref{background:var(--jersey-deep-dark);color:var(--cream);border:2px solid var(--ink);padding:14px 16px;margin-top:12px;border-radius:0;}
+      .heroref .hs{display:flex;align-items:center;gap:8px;border:2px solid var(--ink);background:var(--cream);padding:8px 11px;max-width:360px;}
+      .heroref .hs .ph{color:var(--ink-muted);font-size:12px;}
+      .heroref .hc{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;}
+      .heroref .hc span{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;border:1.5px solid rgba(245,241,230,.5);color:var(--cream);padding:4px 8px;}
+
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /club/organigram · 7o6 — HULP = BRIDGE TO /hulp</h1>
+      <p><b>/hulp is Phase 8</b> (#1530) and already owns the canonical finder (search · browse · answer · contact). So the organigram does <b>not</b> rebuild a finder — its “Hulp” section <b>bridges</b> to /hulp, and the old inline <code>ResponsibilityFinder</code> tab is retired. Question: how much bridge? (Section order 7o2 stays: Structuur → Hulp → Verkenner.)</p>
+    </div>
+
+    <!-- B richer -->
+    <div class="bar rec"><span class="tg">B ★</span>Richer teaser <span class="note">· keeps the “find help” job visible on the page, delegates depth to /hulp</span></div>
+    <div class="stage"><div class="wrap">
+      <span class="kicker">Sectie · vind hulp</span>
+      <div class="h2">Wie kan me helpen<span class="dot">?</span></div>
+      <p style="font-size:14px;color:var(--ink-soft);max-width:60ch;margin:8px 0 0;">Kies waar je vraag over gaat, of wie je bent — je springt naar de juiste vraag &amp; contactpersoon.</p>
+      <div class="chips"><span class="chip">Ik ben ouder</span><span class="chip">Speler</span><span class="chip">Trainer</span><span class="chip">Supporter</span></div>
+      <div class="cats">
+        <div class="cat"><div class="ic">✚</div><div class="t">Medisch</div><div class="s">blessure · verzekering</div></div>
+        <div class="cat"><div class="ic">⚑</div><div class="t">Sportief</div><div class="s">ploeg · training</div></div>
+        <div class="cat"><div class="ic">▤</div><div class="t">Administratief</div><div class="s">lidgeld · inschrijven</div></div>
+      </div>
+      <a class="toall">Alle vragen &amp; contacten → /hulp</a>
+    </div></div>
+
+    <!-- A minimal -->
+    <div class="bar"><span class="tg">A</span>Minimal band <span class="note">· one clean bridge, lowest footprint</span></div>
+    <div class="stage"><div class="wrap">
+      <div class="band">
+        <div><h3>Een vraag, maar niet wie je moet hebben?</h3><p>Onze hulplijn wijst je naar de juiste persoon — per thema of per situatie.</p></div>
+        <a class="go">Naar Hulp →</a>
+      </div>
+    </div></div>
+
+    <!-- C none -->
+    <div class="bar"><span class="tg">C</span>No section <span class="note">· hero handles it; page is pure structure</span></div>
+    <div class="stage"><div class="wrap">
+      <div class="none">
+        Geen aparte Hulp-sectie. De <b>hero</b> doet het werk: de zoekbalk geeft ook antwoorden (→ /hulp) en de doelgroep-chips linken rechtstreeks naar /hulp. De pagina = enkel structuur.
+        <div class="heroref">
+          <div class="hs"><span style="color:var(--jersey-deep)">⌕</span><span class="ph">“lidgeld” of “mijn kind is geblesseerd”…</span></div>
+          <div class="hc"><span>↓ Ik ben ouder → /hulp</span><span>Speler → /hulp</span><span>Trainer → /hulp</span></div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o6 — the Hulp bridge (all route to /hulp; none rebuild the finder)</h3>
+      <p>
+        <b>B ★</b> richer teaser (audience chips + 3 category tiles + “Alle vragen → /hulp”) — keeps the find-help job
+        visible on the page (the thing you worried was buried), delegates depth to /hulp. <b>A</b> minimal band — one
+        clean CTA to /hulp. <b>C</b> no section — the hero’s search + chips already bridge to /hulp; page stays pure
+        structure.
+      </p>
+      <p style="color:var(--ink-muted);">
+        Knock-on (confirm): the <b>semantic/AI search</b> investigated in 7o2b is really the <b>finder’s</b> job →
+        it belongs with <b>/hulp in Phase 8</b>, not this PR. The organigram <b>hero search</b> stays: people (name /
+        function → person panel) + question-hits that <b>link out to /hulp</b>. The old <code>ResponsibilityFinder</code>
+        is retired from the organigram either way.
+      </p>
+    </div>
+  </body>
+</html>

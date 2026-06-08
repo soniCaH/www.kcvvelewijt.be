@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o1: VOICE / REGISTER compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--cream); color: var(--ink);
+        font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 90ch; }
+      .harness-head b { color: var(--warm); }
+      .direction-bar {
+        position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em;
+        text-transform: uppercase; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink);
+      }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 30px 28px 44px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 1040px; margin: 0 auto; }
+
+      /* ---- shared component vocabulary ---- */
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .eh { font-family: var(--font-display); font-style: italic; font-weight: 900; line-height: 0.92; margin: 10px 0 0; }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; line-height: 1.45; }
+      .dot-warm { color: var(--warm); font-style: normal; }
+      .dot-deep { color: var(--jersey-deep); font-style: normal; }
+
+      /* people-card (6.C TeamStaff idiom) */
+      .pgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+      .pcard { border: 2px solid var(--ink); background: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); display: flex; flex-direction: column; align-items: center; padding: 10px 8px; text-align: center; }
+      .pcard .av { width: 50px; height: 50px; border-radius: 9999px; border: 2px solid var(--ink); overflow: hidden; background: var(--cream-soft); display: flex; align-items: center; justify-content: center; }
+      .pcard .av .mono { font-family: var(--font-display); font-weight: 900; color: var(--jersey-deep); font-size: 18px; }
+      .pcard .av .ph { width: 100%; height: 100%; background: repeating-linear-gradient(45deg, #d7d0bb 0 7px, #c8c1aa 7px 14px); filter: sepia(0.3) saturate(0.8); }
+      .pcard .nm { font-family: var(--font-display); margin-top: 7px; line-height: 1.04; font-size: 13px; }
+      .pcard .nm b { font-weight: 600; } .pcard .nm em { font-style: italic; font-weight: 400; }
+      .pcard .fn { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); margin-top: 4px; }
+
+      /* tabs / chrome below hero */
+      .chrome { margin-top: 18px; }
+      .tabs { display: flex; gap: 0; border: 2px solid var(--ink); width: max-content; box-shadow: 3px 3px 0 0 var(--ink); background: var(--cream); }
+      .tab { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 16px; border-right: 2px solid var(--ink); color: var(--ink-muted); }
+      .tab:last-child { border-right: none; }
+      .tab.active { background: var(--jersey-deep); color: var(--cream); }
+      .searchbar { margin-top: 12px; display: flex; align-items: center; gap: 10px; border: 2px solid var(--ink); background: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); padding: 11px 14px; max-width: 560px; }
+      .searchbar .mag { font-family: var(--font-mono); color: var(--jersey-deep); font-weight: 600; }
+      .searchbar .ph { color: var(--ink-muted); font-size: 14px; }
+      .chip { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; border: 1.5px solid var(--ink); background: var(--cream); padding: 6px 11px; box-shadow: 2px 2px 0 0 var(--ink); }
+
+      /* seam */
+      .seam { height: 12px; margin: 20px 0; background: repeating-linear-gradient(135deg, var(--ink) 0 9px, var(--cream) 9px 18px); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 22px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 0; padding-left: 18px; }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /club/organigram · 7o1 — VOICE / REGISTER</h1>
+      <p>
+        First decision: <b>the page's center of gravity + chrome tone.</b> Same data, same Phase-7 vocabulary,
+        three registers — from "editorial story about the club" to "practical tool to find who to contact."
+        This sets how the three jobs (browse · person detail · find-a-contact) are weighted. The
+        <b>view-model (how many views / what's primary)</b> is the NEXT round (7o2); the
+        <b>diagram interaction + 3-D investigation</b> is 7o3. Placeholder names/positions are illustrative.
+      </p>
+    </div>
+
+    <!-- ===================== OPTION A ===================== -->
+    <div class="direction-bar"><span class="tag">A</span> Dark “roster spotlight” band <span class="note">authoritative · matches the board pages · org = the club's spine</span></div>
+    <div class="stage">
+      <div class="wrap">
+        <div style="background: var(--jersey-deep-dark); color: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 5px 0 0 var(--ink); padding: 34px 30px; position: relative; overflow: hidden;">
+          <div style="position:absolute; inset:0; background: radial-gradient(120% 80% at 72% 0%, rgba(74,207,82,0.14), transparent 60%);"></div>
+          <div style="position: relative; display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 30px; align-items: center;">
+            <div>
+              <span class="kicker" style="color: var(--warm);">De club</span>
+              <h1 class="eh" style="font-size: clamp(34px, 4.8vw, 56px); color: var(--cream);">Wie doet wat<span class="dot-warm">.</span></h1>
+              <p class="lead" style="font-size: 17px; color: rgba(245,241,230,0.82); margin-top: 12px; max-width: 40ch;">
+                Het bestuur, de jeugdwerking en de mensen erachter — in één overzicht. Klik door tot je de juiste persoon vindt.
+              </p>
+            </div>
+            <div>
+              <div class="pgrid" style="grid-template-columns: repeat(2, 1fr); gap: 9px;">
+                <div class="pcard"><div class="av"><span class="mono">LB</span></div><div class="nm"><b>Luc</b> <em>Boons</em></div><div class="fn">Voorzitter</div></div>
+                <div class="pcard"><div class="av"><span class="ph"></span></div><div class="nm"><b>Inge</b> <em>Maes</em></div><div class="fn">Secretaris</div></div>
+                <div class="pcard"><div class="av"><span class="mono">DV</span></div><div class="nm"><b>Dirk</b> <em>Van Loo</em></div><div class="fn">Penningm.</div></div>
+                <div class="pcard"><div class="av"><span class="ph"></span></div><div class="nm"><b>Sam</b> <em>Peeters</em></div><div class="fn">Jeugdvz.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chrome">
+          <div class="tabs"><span class="tab active">Overzicht</span><span class="tab">Diagram</span><span class="tab">Hulp</span></div>
+          <div class="searchbar"><span class="mag">⌕</span><span class="ph">Zoek een naam, functie of vraag…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== OPTION B ===================== -->
+    <div class="direction-bar"><span class="tag">B</span> Cream sibling-editorial hero <span class="note">warm · quiet · consistent with sponsors / jeugd / geschiedenis</span></div>
+    <div class="stage">
+      <div class="wrap">
+        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 34px; align-items: center;">
+          <div>
+            <span class="kicker">De club</span>
+            <h1 class="eh" style="font-size: clamp(34px, 4.8vw, 56px); color: var(--ink);">De clubstructuur<span class="dot-deep">.</span></h1>
+            <p class="lead" style="font-size: 18px; color: var(--ink-soft); margin-top: 12px; max-width: 44ch;">
+              Een kleine club draait op veel vrijwilligers. Hier zie je hoe alles in elkaar past — en wie je aanspreekt.
+            </p>
+          </div>
+          <div>
+            <div style="border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 5px 6px 0 0 var(--ink); transform: rotate(-1deg); padding: 16px 14px; position: relative;">
+              <div style="position:absolute; top:-11px; left:50%; transform: translateX(-50%) rotate(-1.5deg); width: 110px; height: 22px; background: rgb(232 224 200 / 0.85); border: 1px solid rgba(10,10,10,0.25);"></div>
+              <div class="micro" style="text-align:center; margin-bottom: 10px;">Hoofdbestuur · 2025–26</div>
+              <div class="pgrid" style="grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                <div class="pcard" style="box-shadow:2px 2px 0 0 var(--ink);"><div class="av" style="width:42px;height:42px;"><span class="mono" style="font-size:15px;">LB</span></div><div class="nm" style="font-size:11px;"><b>Luc</b> <em>B.</em></div></div>
+                <div class="pcard" style="box-shadow:2px 2px 0 0 var(--ink);"><div class="av" style="width:42px;height:42px;"><span class="ph"></span></div><div class="nm" style="font-size:11px;"><b>Inge</b> <em>M.</em></div></div>
+                <div class="pcard" style="box-shadow:2px 2px 0 0 var(--ink);"><div class="av" style="width:42px;height:42px;"><span class="mono" style="font-size:15px;">DV</span></div><div class="nm" style="font-size:11px;"><b>Dirk</b> <em>V.</em></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chrome">
+          <div class="tabs"><span class="tab active">Overzicht</span><span class="tab">Diagram</span><span class="tab">Hulp</span></div>
+          <div class="searchbar"><span class="mag">⌕</span><span class="ph">Zoek een naam, functie of vraag…</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== OPTION C ===================== -->
+    <div class="direction-bar"><span class="tag">C</span> Tool / “wegwijzer” register <span class="note">find-a-contact first · search-led · directly answers the “Hulp is buried” pain</span></div>
+    <div class="stage">
+      <div class="wrap">
+        <div style="background: var(--jersey-deep-dark); color: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 5px 0 0 var(--ink); padding: 34px 30px; position: relative; overflow: hidden;">
+          <div style="position:absolute; inset:0; background: radial-gradient(120% 80% at 50% 0%, rgba(74,207,82,0.13), transparent 60%);"></div>
+          <div style="position: relative; text-align: center; max-width: 680px; margin: 0 auto;">
+            <span class="kicker" style="color: var(--warm);">Organigram &amp; hulp</span>
+            <h1 class="eh" style="font-size: clamp(34px, 5vw, 58px); color: var(--cream);">Wie zoek je<span class="dot-warm">?</span></h1>
+            <p class="lead" style="font-size: 16px; color: rgba(245,241,230,0.82); margin: 12px auto 0; max-width: 46ch;">
+              Een naam, een functie, of gewoon een vraag — typ het, wij wijzen je de juiste persoon.
+            </p>
+            <div class="searchbar" style="margin: 20px auto 0; max-width: 520px; background: var(--cream); box-shadow: 4px 4px 0 0 var(--ink);">
+              <span class="mag">⌕</span><span class="ph">bv. “lidgeld”, “Hoofdtrainer”, of een naam…</span>
+            </div>
+            <div style="display:flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+              <span class="chip">Ik ben ouder</span><span class="chip">Speler</span><span class="chip">Trainer</span><span class="chip">Supporter</span>
+            </div>
+          </div>
+        </div>
+        <div class="seam"></div>
+        <div class="wrap" style="text-align:center;">
+          <span class="kicker">Of blader door de structuur</span>
+          <div class="tabs" style="margin: 10px auto 0;"><span class="tab active">Overzicht</span><span class="tab">Diagram</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== LEGEND ===================== -->
+    <div class="legend">
+      <h3>Decision 7o1 — pick the register</h3>
+      <p>
+        <b>A · Dark roster spotlight</b> — leads with the people, authoritative, reuses the board-page hero verbatim →
+        strongest visual tie to the rest of /club. Treats browse (Overzicht/Diagram) as the main act, Hulp as a peer tab.<br />
+        <b>B · Cream sibling-editorial</b> — quietest, most "magazine," matches sponsors/jeugd/geschiedenis exactly →
+        best whole-of-Phase-7 consistency, but the lowest-energy entry for a tool people come to with a task.<br />
+        <b>C · Tool / wegwijzer</b> — puts the search + audience chips ABOVE the fold and demotes browse below a seam →
+        directly fixes “Hulp is the useful job but buried” + “3-view discoverability”; biggest departure from the editorial sibling heroes.
+      </p>
+      <p class="micro">
+        Note: C pre-states part of the IA (search-first) that 7o2 would otherwise drill. A/B keep the IA open. Hybrids are
+        available — e.g. A's dark band WITH C's embedded search — say the word and I'll graft. Person-cards above use the
+        locked 6.C &lt;TeamStaff&gt; idiom (round newsprint photo / jersey-deep monogram · first-semibold + last-italic · mono function label).
+      </p>
+    </div>
+  </body>
+</html>

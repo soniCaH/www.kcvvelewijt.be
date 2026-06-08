@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · /hulp hub · 7o7 — full assembly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root{
+        --cream:#f5f1e6; --cream-soft:#ede8da; --cream-deep:#e1d7bf;
+        --ink:#0a0a0a; --ink-soft:#1f1f1f; --ink-muted:#6b6b6b;
+        --jersey:#4acf52; --jersey-deep:#008755; --jersey-deep-dark:#133d28;
+        --warm:#f0c264; --brick:#c93f1c; --paper-edge:#d9d2bd;
+        --font-display:"Fraunces",georgia,serif; --font-body:"Archivo",system-ui,sans-serif; --font-mono:"IBM Plex Mono",monospace;
+      }
+      *{box-sizing:border-box;}
+      body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--font-body);
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");}
+      .head{background:var(--ink);color:var(--cream);padding:22px 28px;font-family:var(--font-mono);}
+      .head h1{margin:0 0 6px;font-size:15px;letter-spacing:.04em;text-transform:uppercase;}
+      .head p{margin:0;font-size:13px;color:#b9b9b9;line-height:1.6;max-width:96ch;}
+      .head b{color:var(--warm);}
+      .stage{padding:26px 28px;}
+      .cols{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start;}
+      .coltitle{font-family:var(--font-mono);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px;}
+      .coltitle .tg{background:var(--warm);border:1.5px solid var(--ink);padding:2px 8px;margin-right:8px;}
+      .coltitle.rec .tg{background:var(--jersey);}
+
+      .spine{border:2px solid var(--ink);background:var(--cream-soft);box-shadow:5px 5px 0 0 var(--ink);overflow:hidden;}
+      .nav{background:var(--cream-deep);border-bottom:2px solid var(--ink);padding:8px 10px;display:flex;gap:6px;align-items:center;font-family:var(--font-mono);font-size:9px;text-transform:uppercase;}
+      .nav .d{border:1.5px solid var(--ink);padding:4px 8px;background:var(--cream);box-shadow:1px 1px 0 0 var(--ink);}
+      .nav .d.on{background:var(--jersey-deep);color:var(--cream);}
+      .nav .sp{flex:1;}
+      .nav .s{border:1.5px solid var(--ink);padding:4px 8px;color:var(--jersey-deep);background:var(--cream);}
+      .b{padding:11px 12px;border-bottom:1.5px dashed var(--paper-edge);font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.03em;}
+      .b small{display:block;font-family:var(--font-body);text-transform:none;letter-spacing:0;font-size:10px;color:var(--ink-muted);margin-top:3px;}
+      .b.hero{background:var(--jersey-deep-dark);color:var(--cream);} .b.hero small{color:rgba(245,241,230,.72);}
+      .b.struct{background:var(--cream);}
+      .b.hulp{background:color-mix(in srgb,var(--jersey-deep) 12%,var(--cream));}
+      .b.form{background:var(--cream-deep);}
+      .b.cta{background:var(--jersey-deep-dark);color:var(--cream);}
+      .b.opt{border:1.5px dashed var(--brick);} .b.opt .fl{color:var(--brick);font-family:var(--font-mono);font-size:8px;}
+      .b .n{display:inline-block;background:var(--warm);color:var(--ink);border:1px solid var(--ink);font-size:8px;padding:0 4px;margin-right:5px;}
+
+      .legend{background:var(--cream-deep);border-top:2px solid var(--ink);padding:22px 28px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+      .legend h3{margin:0 0 8px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;}
+      .legend b{color:var(--jersey-deep);}
+      .locked{max-width:1080px;margin:18px auto 0;font-family:var(--font-mono);font-size:11px;color:var(--ink-muted);line-height:1.7;border:1.5px solid var(--paper-edge);padding:12px 14px;background:var(--cream);}
+      .locked b{color:var(--jersey-deep);}
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <h1>Phase 7 · /hulp hub · 7o7 — FULL ASSEMBLY</h1>
+      <p>Everything locked, assembled into one single-scroll hub at <b>/hulp</b> with <b>two nav doors</b> ("Hulp" → top, "Organigram" → <code>#structuur</code>). Two open decisions: <b>(1) scroll order</b> — Hulp-first vs Structuur-first — and <b>(2) the general contact form + address/hours</b> (master §6.11): include, or just a CtaBand?</p>
+    </div>
+
+    <div class="stage"><div class="cols">
+      <!-- order 1 hulp first -->
+      <div>
+        <div class="coltitle rec"><span class="tg">ORDER 1 ★</span>Hulp-first (help-primary)</div>
+        <div class="spine">
+          <div class="nav"><span class="d on">Hulp</span><span class="d">Organigram →#structuur</span><span class="sp"></span><span class="s">⌕ zoek</span></div>
+          <div class="b hero">HERO — “Wie doet wat.”<small>one unified search (people + answers) · audience chips · structure index artefact</small></div>
+          <div class="b hulp"><span class="n">①</span>HULP — de vraagvinder<small>search-above · category preview (top 3 + “Alle N →”) · accordion antwoorden · contact (+ toon in structuur)</small></div>
+          <div class="b struct" id="structuur"><span class="n">②</span>STRUCTUUR<small>directory per afdeling (Toon alle 23 →) · “Open verkenner ⤢” → fullscreen spotlight · person side-panel</small></div>
+          <div class="b form opt"><span class="fl">optie (decision 2)</span> CONTACT-FORMULIER + Driesstraat 32 + uren</div>
+          <div class="b cta">CTA-band — “Niemand gevonden? → Contacteer de club”</div>
+        </div>
+        <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;max-width:46ch;margin-top:12px;">The “Hulp” door lands you immediately on the finder — matches the help-primary identity + the dominant “I have a problem” intent. Structure browse follows; the “Organigram” door jumps straight to it.</p>
+      </div>
+
+      <!-- order 2 structuur first -->
+      <div>
+        <div class="coltitle"><span class="tg">ORDER 2</span>Structuur-first (the old 7o2 order)</div>
+        <div class="spine">
+          <div class="nav"><span class="d on">Hulp</span><span class="d">Organigram →#structuur</span><span class="sp"></span><span class="s">⌕ zoek</span></div>
+          <div class="b hero">HERO — “Wie doet wat.”<small>one unified search · audience chips · structure index artefact</small></div>
+          <div class="b struct"><span class="n">①</span>STRUCTUUR<small>directory per afdeling · “Open verkenner ⤢” · person side-panel</small></div>
+          <div class="b hulp"><span class="n">②</span>HULP — de vraagvinder<small>search-above · category preview · accordion antwoorden · contact</small></div>
+          <div class="b form opt"><span class="fl">optie (decision 2)</span> CONTACT-FORMULIER + Driesstraat 32 + uren</div>
+          <div class="b cta">CTA-band — “Niemand gevonden? → Contacteer de club”</div>
+        </div>
+        <p style="font-size:12.5px;color:var(--ink-soft);line-height:1.5;max-width:46ch;margin-top:12px;">Leads with “who’s who” (the org), then the problem finder. Browse-first feel; but the help-primary front door (“Hulp”) then sits below the structure on scroll.</p>
+      </div>
+    </div></div>
+
+    <div class="locked">
+      <b>Locked into this assembly (no re-drill):</b> hero 7o1 (dark band + one search + chips + structure index) · single-scroll + sticky nav 7o2 · Structuur = directory + fullscreen <b>spotlight explorer (2-D, no 3-D)</b> 7o3 · card states (single / shared dual-avatar / <b>vacant recruit</b>) 7o4 · person-first right side-panel 7o5 · Hulp finder (unified search + capped category preview + accordion answers + contact w/ “toon in structuur”) 7o6 · canonical <b>/hulp</b>, two nav doors, <code>/club/organigram</code> retired 7o2c.
+    </div>
+
+    <div class="legend">
+      <h3>Decision 7o7 — (1) scroll order · (2) contact form</h3>
+      <p>
+        <b>Order 1 ★ Hulp-first</b> — the help finder right after the hero (matches the /hulp identity + the dominant
+        “I have a problem” intent); Structuur follows, reached directly via its nav door. <b>Order 2 Structuur-first</b>
+        — “who’s who” first, then the finder (browse-first feel, but help sits lower).
+      </p>
+      <p>
+        <b>Contact form?</b> Master §6.11 specced a general contact form + <code>Driesstraat 32</code> + opening hours.
+        <b>Include</b> it (a catch-all “couldn’t find it? message us” + the club’s physical contact) — or keep it lean
+        with just the <b>CtaBand → contact</b> (the finder already routes to specific people)?
+      </p>
+      <p style="color:var(--ink-muted);">
+        Defaults I'll bake into the PRD unless you say otherwise: FAQ + Breadcrumb + Organization JSON-LD on the hub ·
+        analytics keep `organigram_*` + `responsibility_*` (one `organigram_view`→`hub_view`, explorer-open + 3-D events
+        dropped) · legacy retired (UnifiedOrganigramClient, d3-org-chart, ContactOverlay, MemberDetailsModal, old
+        ResponsibilityFinder, HulpSearchInput, InteriorPageHero/SectionStack) · the A-style “volledig organigram / print”
+        view = <b>deferred follow-up</b>, not v1.
+      </p>
+    </div>
+  </body>
+</html>

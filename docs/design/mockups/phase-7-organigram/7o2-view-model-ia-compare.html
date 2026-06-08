@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · organigram · 7o2: VIEW MODEL / IA compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900;1,9..144,400&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 94ch; }
+      .harness-head b { color: var(--warm); }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar.rec .tag { background: var(--jersey); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 26px 28px 34px; border-bottom: 1px dashed var(--paper-edge); }
+      .grid { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 30px; align-items: start; }
+
+      /* device schematic */
+      .device { border: 2px solid var(--ink); background: var(--cream); box-shadow: 5px 5px 0 0 var(--ink); padding: 10px; }
+      .scrollnote { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); text-align: center; margin: 4px 0 8px; }
+      .band { border: 1.5px solid var(--ink); margin-bottom: 7px; padding: 9px 10px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .band small { display: block; font-size: 9px; text-transform: none; letter-spacing: 0; color: var(--ink-muted); margin-top: 3px; font-family: var(--font-body); }
+      .band.hero { background: var(--jersey-deep-dark); color: var(--cream); border-color: var(--ink); }
+      .band.hero small { color: rgba(245,241,230,0.7); }
+      .band.nav { background: var(--cream-deep); }
+      .band.sticky { background: var(--cream-deep); position: relative; }
+      .band.sticky::after { content: "📌 sticky"; position: absolute; right: 8px; top: 8px; font-size: 8px; color: var(--ink-muted); }
+      .band.section { background: var(--cream-soft); }
+      .band.diagram { background: repeating-linear-gradient(45deg, var(--cream-soft) 0 9px, var(--cream-deep) 9px 18px); }
+      .band.hulp { background: color-mix(in srgb, var(--jersey-deep) 12%, var(--cream)); border-color: var(--jersey-deep); }
+      .band.cta { background: var(--jersey-deep-dark); color: var(--cream); }
+      .tabs { display: flex; gap: 0; border: 1.5px solid var(--ink); }
+      .tabs span { flex: 1; text-align: center; font-family: var(--font-mono); font-size: 9.5px; padding: 7px 4px; text-transform: uppercase; letter-spacing: 0.04em; border-right: 1.5px solid var(--ink); }
+      .tabs span:last-child { border-right: none; }
+      .tabs span.on { background: var(--jersey-deep); color: var(--cream); }
+      .popbtn { border: 1.5px dashed var(--jersey-deep); color: var(--jersey-deep); background: var(--cream); text-align: center; font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px; margin-bottom: 7px; }
+      .overlay { border: 2px solid var(--ink); background: var(--jersey-deep-dark); color: var(--cream); padding: 9px 10px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; box-shadow: 4px 4px 0 0 var(--warm); }
+      .overlay small { display:block; text-transform: none; font-family: var(--font-body); font-size: 9px; color: rgba(245,241,230,0.8); margin-top: 3px; }
+
+      /* notes + pain matrix */
+      .notes h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 22px; margin: 2px 0 8px; }
+      .notes p { font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 12px; max-width: 60ch; }
+      .matrix { border-collapse: collapse; font-family: var(--font-mono); font-size: 11px; width: 100%; max-width: 520px; }
+      .matrix td, .matrix th { border: 1.5px solid var(--ink); padding: 6px 9px; text-align: left; }
+      .matrix th { background: var(--ink); color: var(--cream); text-transform: uppercase; letter-spacing: 0.05em; font-size: 10px; }
+      .y { color: var(--jersey-deep); font-weight: 600; } .m { color: #b07d00; font-weight: 600; } .n { color: var(--brick); font-weight: 600; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 22px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.75; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .legend b { color: var(--jersey-deep); }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /club/organigram · 7o2 — VIEW MODEL / IA</h1>
+      <p>
+        The 7o1 hero is fixed. This decides <b>everything below it</b>: how many views, what's primary, and how the
+        three jobs (browse the structure · a person's detail · find-a-contact/Hulp) are arranged. The four pains in play:
+        <b>scroll-jacking</b>, <b>orientation</b>, <b>3-view discoverability</b>, <b>mobile</b>. NB: this round only decides
+        the <b>container</b> for the diagram — what the diagram interaction actually is (pan-zoom vs in-page tree vs literal
+        3-D) is the next round, 7o3.
+      </p>
+    </div>
+
+    <!-- ===== C baseline ===== -->
+    <div class="direction-bar"><span class="tag">C</span> Keep 3 tabs (reskin only) <span class="note">baseline · least change · least improvement</span></div>
+    <div class="stage"><div class="grid">
+      <div class="device">
+        <div class="scrollnote">— one pane visible at a time —</div>
+        <div class="band hero">HERO + zoek</div>
+        <div class="tabs"><span class="on">Overzicht</span><span>Diagram</span><span>Hulp</span></div>
+        <div class="band section" style="margin-top:7px; height:120px;">ACTIEVE VIEW<small>cards / diagram / hulp — exactly today's three, restyled</small></div>
+        <div class="band cta">CTA-band</div>
+      </div>
+      <div class="notes">
+        <h3>Same machine, new paint.</h3>
+        <p>Three co-equal tabs, just reskinned in Phase-7 vocabulary. Cheapest, lowest-risk — but it keeps the two
+          redundant browse views (cards ≈ diagram) and leaves Hulp as the 3rd tab. None of the four pains is structurally
+          solved; the diagram still owns a pane and can still scroll-jack.</p>
+        <table class="matrix"><tr><th>Scroll-jack</th><th>Orientation</th><th>Discoverability</th><th>Mobile</th></tr>
+          <tr><td class="n">✗</td><td class="n">✗</td><td class="n">✗</td><td class="m">△</td></tr></table>
+      </div>
+    </div></div>
+
+    <!-- ===== B two-mode ===== -->
+    <div class="direction-bar"><span class="tag">B</span> Two modes: Structuur ⟷ Hulp <span class="note">collapse 3→2 · diagram = a render of Structuur</span></div>
+    <div class="stage"><div class="grid">
+      <div class="device">
+        <div class="scrollnote">— one mode visible at a time —</div>
+        <div class="band hero">HERO + zoek</div>
+        <div class="tabs"><span class="on">Structuur</span><span>Hulp</span></div>
+        <div class="tabs" style="margin-top:7px; border-style:dashed;"><span class="on">Lijst</span><span>Diagram</span></div>
+        <div class="band section" style="margin-top:7px; height:104px;">STRUCTUUR<small>one browse surface; list↔diagram is a sub-toggle, not a peer tab</small></div>
+        <div class="band cta">CTA-band</div>
+      </div>
+      <div class="notes">
+        <h3>Browse, or get help.</h3>
+        <p>Two co-equal modes. The cards/diagram redundancy is demoted to a <em>sub-toggle inside one “Structuur”
+          mode</em> (list vs diagram = two renderings of the same data, by choice). Hulp is lifted to half the page.
+          Solves redundancy + discoverability cleanly; still a mode-switch (not the house single-scroll), and the diagram
+          sub-view can still scroll-jack when active.</p>
+        <table class="matrix"><tr><th>Scroll-jack</th><th>Orientation</th><th>Discoverability</th><th>Mobile</th></tr>
+          <tr><td class="m">△</td><td class="m">△</td><td class="y">✓</td><td class="y">✓</td></tr></table>
+      </div>
+    </div></div>
+
+    <!-- ===== A single-scroll ===== -->
+    <div class="direction-bar"><span class="tag">A</span> Single-scroll + sticky section-nav <span class="note">matches 6.C / jeugd house style · all sections inline</span></div>
+    <div class="stage"><div class="grid">
+      <div class="device">
+        <div class="scrollnote">↓ one continuous scroll ↓</div>
+        <div class="band hero">HERO + zoek</div>
+        <div class="band sticky">Structuur · Diagram · Hulp</div>
+        <div class="band section">① STRUCTUUR<small>directory of people by department</small></div>
+        <div class="band diagram">② DIAGRAM<small>the node-tree, inline</small></div>
+        <div class="band hulp">③ HULP<small>responsibility finder</small></div>
+        <div class="band cta">CTA-band</div>
+      </div>
+      <div class="notes">
+        <h3>One page, scroll it all.</h3>
+        <p>Everything stacked on one scroll with a sticky in-page nav — identical to the locked 6.C team + /jeugd pattern.
+          Best whole-of-Phase-7 consistency and discoverability (nothing hidden behind a tab). Catch: an interactive
+          diagram <em>inline</em> is exactly where scroll-jacking bites — so this <b>forces 7o3 to a tame, scroll-safe
+          inline diagram</b> (expand/collapse tree, no free pan-zoom) and leaves <b>no natural home for an immersive 3-D
+          explorer</b>.</p>
+        <table class="matrix"><tr><th>Scroll-jack</th><th>Orientation</th><th>Discoverability</th><th>Mobile</th></tr>
+          <tr><td class="m">△*</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr></table>
+        <p style="font-size:11px; font-family:var(--font-mono); color:var(--ink-muted);">*only if 7o3 drops pan/zoom for an inline tree.</p>
+      </div>
+    </div></div>
+
+    <!-- ===== D single-scroll + opt-in immersive ===== -->
+    <div class="direction-bar rec"><span class="tag">D ★</span> Single-scroll · diagram = opt-in fullscreen “Verken” <span class="note">recommended · scroll-safe by construction · the home for 3-D</span></div>
+    <div class="stage"><div class="grid">
+      <div class="device">
+        <div class="scrollnote">↓ calm scroll ↓ &nbsp; + &nbsp; ⤢ pops out</div>
+        <div class="band hero">HERO + zoek</div>
+        <div class="band sticky">Structuur · Hulp</div>
+        <div class="band section">① STRUCTUUR<small>directory: people by department (quick scan)</small></div>
+        <div class="popbtn">⤢ &nbsp;Open de organigram-verkenner</div>
+        <div class="overlay">▣ IMMERSIVE DIAGRAM / 3-D<small>fullscreen focused mode — owns the screen, pan/zoom/rotate expected, no page-scroll conflict, Esc to return</small></div>
+        <div class="band hulp">② HULP<small>responsibility finder</small></div>
+        <div class="band cta">CTA-band</div>
+      </div>
+      <div class="notes">
+        <h3>Calm page. Immersive on demand.</h3>
+        <p>The page itself is a quiet single-scroll: a <b>directory</b> (people grouped by department — the quick “who’s
+          who” scan) + <b>Hulp</b> + CTA. The relational <b>diagram/3-D explorer is a deliberate opt-in</b> launched from a
+          button into a <b>fullscreen focused mode</b>. That one move resolves scroll-jacking <em>by construction</em>
+          (the canvas only exists when it owns the whole screen) and gives the <b>literal 3-D investigation its natural
+          home</b> — rotate/zoom is expected in a verkenner, not in a page section. Directory vs diagram stop being
+          redundant: one is “scan who’s who”, the other is “explore how it connects”.</p>
+        <table class="matrix"><tr><th>Scroll-jack</th><th>Orientation</th><th>Discoverability</th><th>Mobile</th></tr>
+          <tr><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td><td class="y">✓</td></tr></table>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Decision 7o2 — pick the view model</h3>
+      <p>
+        <b>C</b> reskins today's 3 tabs (solves nothing structurally). <b>B</b> collapses to Structuur⟷Hulp (kills
+        redundancy, still mode-switch). <b>A</b> goes full single-scroll like the rest of Phase 7 (best consistency, but
+        an inline interactive diagram fights scroll → forces a tame 7o3 + no 3-D home). <b>D ★</b> keeps the calm
+        single-scroll for browse+Hulp but makes the diagram an <b>opt-in fullscreen verkenner</b> — the only option that
+        fixes all four pains <em>and</em> gives the literal 3-D idea a place to live.
+      </p>
+      <p style="color:var(--ink-muted);">
+        Whatever wins sets the <b>container</b> for 7o3. A → inline tame tree. B → diagram as a sub-render. D → immersive
+        focused mode (pan-zoom / drill / 3-D all viable there). A “D but with a small inline structure preview that
+        expands to fullscreen” hybrid is available on request.
+      </p>
+    </div>
+  </body>
+</html>
