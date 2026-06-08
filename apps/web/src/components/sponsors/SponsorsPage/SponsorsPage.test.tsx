@@ -1,5 +1,5 @@
 /**
- * SponsorsPage Component Tests
+ * SponsorsPage Component Tests — Phase 7 tracer.
  */
 
 import { describe, it, expect, vi } from "vitest";
@@ -27,215 +27,57 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-const hoofdsponsors: Sponsor[] = [
+const sponsors: Sponsor[] = [
   {
     id: "1",
     name: "Hoofdsponsor A",
     logo: "/logo-a.png",
+    url: "https://example.com/a",
     tier: "hoofdsponsor",
-    featured: true,
   },
   {
     id: "2",
-    name: "Hoofdsponsor B",
+    name: "Sponsor B",
     logo: "/logo-b.png",
-    tier: "hoofdsponsor",
-    featured: false,
+    tier: "sponsor",
   },
-];
-
-const sponsors: Sponsor[] = [
   {
     id: "3",
-    name: "Sponsor C",
-    logo: "/logo-c.png",
-    tier: "sponsor",
-    featured: false,
-  },
-];
-
-const sympathisanten: Sponsor[] = [
-  {
-    id: "4",
-    name: "Sympathisant D",
-    logo: "/logo-d.png",
+    name: "Sympathisant C",
+    logo: "",
     tier: "sympathisant",
-    featured: false,
   },
 ];
-
-const featuredSponsors: Sponsor[] = hoofdsponsors.filter((s) => s.featured);
 
 describe("SponsorsPage", () => {
-  describe("SponsorsStats removed", () => {
-    it("does not render sponsor count stats text", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={featuredSponsors}
-        />,
-      );
-
-      expect(screen.queryByText(/trouwe partner/i)).not.toBeInTheDocument();
-      expect(
-        screen.queryByText(/steunen kcvv elewijt/i),
-      ).not.toBeInTheDocument();
-    });
+  it("renders a level-1 heading", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
-  describe("intro text", () => {
-    it("renders an intro paragraph below the page title", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={featuredSponsors}
-        />,
-      );
-
-      const intro = screen.getByTestId("sponsors-intro");
-      expect(intro).toBeInTheDocument();
-    });
+  it("renders the KCVV Elewijt kicker", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
   });
 
-  describe("SponsorsSpotlight conditional rendering", () => {
-    it("renders spotlight section when featuredSponsors exist", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={featuredSponsors}
-        />,
-      );
-
-      expect(screen.getByText(/in de kijker/i)).toBeInTheDocument();
-    });
-
-    it("does not render spotlight section when no featuredSponsors", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={[]}
-        />,
-      );
-
-      expect(screen.queryByText(/in de kijker/i)).not.toBeInTheDocument();
-    });
+  it("renders one tile per sponsor", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(sponsors.length);
   });
 
-  describe("no tier headings", () => {
-    it("does not render gold/silver/bronze tier headings", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={featuredSponsors}
-        />,
-      );
-
-      expect(screen.queryByText(/gouden sponsors/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/zilveren sponsors/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/bronzen sponsors/i)).not.toBeInTheDocument();
-    });
+  it("does not compose with SectionStack diagonal transitions", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    expect(screen.queryByTestId("section-transition")).toBeNull();
   });
 
-  describe("logos only grid", () => {
-    it("does not show sponsor names in the main grid", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={[]}
-        />,
-      );
-
-      // SponsorCard with showName=false renders logos via alt text but no visible name text
-      expect(screen.queryByText("Hoofdsponsor A")).not.toBeInTheDocument();
-      expect(screen.queryByText("Sponsor C")).not.toBeInTheDocument();
-    });
+  it("does not render the legacy dark kcvv-black header background", () => {
+    const { container } = render(<SponsorsPage sponsors={sponsors} />);
+    expect(container.querySelector('[class*="kcvv-black"]')).toBeNull();
   });
 
-  describe("diagonal section transitions", () => {
-    it("renders at least one diagonal section-transition before the CTA section", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={[]}
-          silverSponsors={[]}
-          bronzeSponsors={[]}
-          featuredSponsors={[]}
-        />,
-      );
-
-      // SectionTransition renders data-testid="section-transition"
-      expect(
-        screen.getAllByTestId("section-transition").length,
-      ).toBeGreaterThan(0);
-    });
-
-    it("renders fewer section-transitions when no featuredSponsors (no spotlight diagonal)", () => {
-      const { getAllByTestId: withoutSpotlight } = render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={[]}
-        />,
-      );
-      // Without spotlight: header→grid + grid→cta = 2 transitions
-      expect(withoutSpotlight("section-transition").length).toBe(2);
-    });
-
-    it("renders more section-transitions when featuredSponsors exist (spotlight adds two diagonals)", () => {
-      const { getAllByTestId: withSpotlight } = render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={featuredSponsors}
-        />,
-      );
-      // With spotlight: header→spotlight + spotlight→grid + grid→cta = 3 transitions
-      expect(withSpotlight("section-transition").length).toBe(3);
-    });
-
-    it("does not use the legacy green PageTitle background", () => {
-      const { container } = render(
-        <SponsorsPage
-          goldSponsors={hoofdsponsors}
-          silverSponsors={sponsors}
-          bronzeSponsors={sympathisanten}
-          featuredSponsors={[]}
-        />,
-      );
-
-      // Legacy PageTitle uses inline style background: #4acf52
-      const legacyHeader = container.querySelector(
-        '[style*="background"][style*="4acf52"]',
-      );
-      expect(legacyHeader).toBeNull();
-    });
-
-    it("renders a dark-themed page title heading", () => {
-      render(
-        <SponsorsPage
-          goldSponsors={[]}
-          silverSponsors={[]}
-          bronzeSponsors={[]}
-          featuredSponsors={[]}
-        />,
-      );
-
-      // Modern page header should still have an h1 with sponsors-related text
-      const heading = screen.getByRole("heading", { level: 1 });
-      expect(heading).toBeInTheDocument();
-    });
+  it("renders the header but no tiles when there are no sponsors", () => {
+    render(<SponsorsPage sponsors={[]} />);
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
   });
 });

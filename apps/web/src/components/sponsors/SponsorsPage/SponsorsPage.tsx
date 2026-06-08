@@ -1,111 +1,46 @@
 /**
- * SponsorsPage Component
- * Sponsors page: modern dark header, optional featured spotlight, size-differentiated logo grid, CTA.
- * Sections are composed via SectionStack with diagonal transitions.
+ * SponsorsPage — Phase 7 tracer.
+ *
+ * Editorial header (MonoLabel kicker + EditorialHeading) over a cream
+ * `<SponsorTile>` grid of all sponsors. Replaces the legacy dark-header +
+ * `SectionStack`/`diagonal` composition. Tier bodies, the featured marquee and
+ * the CTA band land in later phases (see docs/prd/redesign-phase-7-sponsors.md).
  */
 
-import { SectionStack } from "@/components/design-system";
-// Import each component directly rather than from the @/components/sponsors
-// barrel: that barrel re-exports SponsorsBlock, a server component whose
-// transitive Sanity client (`createClient` at module load) crashes the
-// Storybook chunk with `Configuration must contain projectId`.
-import { SponsorsSpotlight } from "../SponsorsSpotlight";
-import { SponsorCallToAction } from "../SponsorCallToAction";
-import { SponsorEmptyState } from "../SponsorEmptyState";
-import { SponsorGrid } from "../SponsorGrid/SponsorGrid";
-import { getSponsorsSections } from "../getSponsorsSections";
+import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { SponsorTile, SPONSOR_TILE_GRID_CLASS } from "../SponsorTile";
 import type { Sponsor } from "../Sponsors";
 
 export interface SponsorsPageProps {
-  /** Hoofdsponsor tier sponsors */
-  goldSponsors: Sponsor[];
-  /** Sponsor tier sponsors */
-  silverSponsors: Sponsor[];
-  /** Sympathisant tier sponsors */
-  bronzeSponsors: Sponsor[];
-  /** Sponsors with featured=true — drives the spotlight section */
-  featuredSponsors: Sponsor[];
+  /** All sponsors across every tier, already ordered for display. */
+  sponsors: Sponsor[];
 }
 
-export function SponsorsPage({
-  goldSponsors,
-  silverSponsors,
-  bronzeSponsors,
-  featuredSponsors,
-}: SponsorsPageProps) {
-  const totalSponsors =
-    goldSponsors.length + silverSponsors.length + bronzeSponsors.length;
-  const hasSpotlight = featuredSponsors.length > 0;
+export function SponsorsPage({ sponsors }: SponsorsPageProps) {
+  return (
+    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
+      <header className="mb-10 flex flex-col gap-3">
+        <span>
+          <MonoLabel variant="plain">KCVV Elewijt</MonoLabel>
+        </span>
+        <EditorialHeading level={1} size="display-2xl" emphasis={{ text: "." }}>
+          Onze sponsors
+        </EditorialHeading>
+        <p className="font-display text-ink-muted text-[length:var(--text-display-sm)] leading-[var(--text-display-sm--lh)] italic">
+          KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
+        </p>
+      </header>
 
-  const spotlightSponsors = featuredSponsors.map((s) => ({
-    id: s.id,
-    name: s.name,
-    logo: s.logo,
-    url: s.url,
-    description: s.description,
-  }));
-
-  const headerContent = (
-    <div className="max-w-inner-lg mx-auto px-4 md:px-10">
-      <div className="mb-4 flex items-center gap-2 text-[0.6875rem] font-extrabold tracking-[0.14em] text-white/50 uppercase">
-        <span className="bg-kcvv-green block h-0.5 w-5" aria-hidden="true" />
-        KCVV Elewijt
-      </div>
-      <h1 className="font-title mb-4 text-[clamp(3rem,7vw,5.5rem)] leading-[0.9] font-black text-white uppercase">
-        Onze sponsors
-      </h1>
-      <p
-        data-testid="sponsors-intro"
-        className="max-w-2xl text-lg text-white/60"
-      >
-        KCVV Elewijt kan rekenen op de steun van lokale en regionale partners.
-        Dankzij onze sponsors kunnen we blijven investeren in onze club, onze
-        jeugd en onze toekomst. We zijn hen daar enorm dankbaar voor.
-      </p>
-    </div>
-  );
-
-  const gridContent = (
-    <div className="max-w-inner-lg mx-auto space-y-8 px-4 py-10 md:px-10">
-      {totalSponsors === 0 && !hasSpotlight && <SponsorEmptyState />}
-
-      {goldSponsors.length > 0 && (
-        <SponsorGrid
-          sponsors={goldSponsors}
-          columns={4}
-          size="lg"
-          showNames={false}
-        />
-      )}
-
-      {silverSponsors.length > 0 && (
-        <SponsorGrid
-          sponsors={silverSponsors}
-          columns={5}
-          size="md"
-          showNames={false}
-        />
-      )}
-
-      {bronzeSponsors.length > 0 && (
-        <SponsorGrid
-          sponsors={bronzeSponsors}
-          columns={6}
-          size="sm"
-          showNames={false}
-        />
+      {sponsors.length > 0 && (
+        <ul className={SPONSOR_TILE_GRID_CLASS}>
+          {sponsors.map((sponsor) => (
+            <li key={sponsor.id}>
+              <SponsorTile sponsor={sponsor} />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
-
-  const sections = getSponsorsSections({
-    header: headerContent,
-    spotlight: hasSpotlight && (
-      <SponsorsSpotlight sponsors={spotlightSponsors} />
-    ),
-    grid: gridContent,
-    cta: <SponsorCallToAction />,
-  });
-
-  return <SectionStack sections={sections} />;
 }

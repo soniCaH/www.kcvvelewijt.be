@@ -26,13 +26,13 @@ import ClubLoading from "../(main)/club/loading";
 import HulpLoading from "../(main)/hulp/loading";
 import JeugdLoading from "../(landing)/jeugd/loading";
 import PloegenLoading from "../(main)/ploegen/loading";
-import SponsorsLoading from "../(landing)/sponsors/loading";
 
 // ---------------------------------------------------------------------------
 // Non-SectionStack loading components
 // ---------------------------------------------------------------------------
 import KalenderLoading from "../(main)/kalender/loading";
 import NieuwsLoading from "../(landing)/nieuws/loading";
+import SponsorsLoading from "../(landing)/sponsors/loading";
 import NieuwsDetailLoading from "../(main)/nieuws/[slug]/loading";
 import ScheurkalenderLoading from "../(main)/scheurkalender/loading";
 import ZoekenLoading from "../(main)/zoeken/loading";
@@ -76,12 +76,6 @@ const sectionStackRoutes: SectionStackRoute[] = [
     Loading: JeugdLoading,
     expectedTransitions: 4,
     expectedBgClasses: ["bg-kcvv-black", "bg-gray-100", "bg-kcvv-green-dark"],
-  },
-  {
-    name: "/sponsors",
-    Loading: SponsorsLoading,
-    expectedTransitions: 2,
-    expectedBgClasses: ["bg-kcvv-black", "bg-gray-100"],
   },
 ];
 
@@ -175,6 +169,13 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/ploegen",
       Loading: PloegenLoading,
+      expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
+    },
+    {
+      name: "/sponsors",
+      Loading: SponsorsLoading,
+      // Phase 7 (#2033): cream editorial header + SponsorTile grid skeleton,
+      // mirroring the rebuilt /sponsors page (no SectionStack envelope).
       expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
     },
     {
