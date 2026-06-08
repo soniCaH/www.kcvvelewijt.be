@@ -111,7 +111,7 @@ centred · parent above + breadcrumb · siblings flank · children fan below · 
 Right side-panel (desktop) / full-width bottom sheet (mobile). **Single** → opens directly; **shared** →
 lands on first holder + **name-tab holder-switcher**. Contact (✉/☎ if present) · "Helpt met" → Hulp ·
 "Volledig profiel →" (`/staf/{psdId}` if present). Opens from a directory card **and** an explorer leaf.
-Labelled dialog, focus trap, `?memberId=` deep-link. **Retire `MemberDetailsModal`** (panel replaces it +
+Labelled dialog, focus trap, `?member=` deep-link. **Retire `MemberDetailsModal`** (panel replaces it +
 `ContactOverlay`).
 
 ### Phase 5 — `<HulpFinder>` (reskin `<HulpPage>`) — #2056
@@ -148,7 +148,7 @@ from repo data; [ ] `<HubSearch>` returns people + answers (keyword); [ ] e2e sm
 scroll-jacking** (no page wheel capture); [ ] `d3-org-chart` removed from `package.json`; [ ]
 `EnhancedOrgChart`/`MobileNavigationDrawer`/`ContactOverlay` deleted (`git grep` clean); [ ] mobile tap-only.
 **Phase 4** — [ ] panel opens from directory + explorer; single direct / shared switcher; contact actions
-only when data present; [ ] labelled dialog + focus trap + `?memberId=`; [ ] `MemberDetailsModal` deleted.
+only when data present; [ ] labelled dialog + focus trap + `?member=`; [ ] `MemberDetailsModal` deleted.
 **Phase 5** — [ ] "Alles" never renders the full flat list (capped preview); [ ] accordion answer = summary
 + steps + contact; [ ] "toon in structuur" deep-links the explorer; [ ] `ResponsibilityFinder` +
 `HulpSearchInput` deleted; [ ] `resolveContact` paths (position/team-role/manual) covered by tests.

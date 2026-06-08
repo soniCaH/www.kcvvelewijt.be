@@ -36,7 +36,7 @@ A **tabbed interactive tool** wrapped in legacy chrome, server-rendered then hyd
 
 - Plus: a top **`<UnifiedSearchBar>`** (searches people + responsibilities), **`<MemberDetailsModal>`**
   (click any node/card/result → modal), department filter (`all`/`hoofdbestuur`/`jeugdbestuur`),
-  PNG export, keyboard shortcuts, swipe gestures, deep-linkable via `?view=`/`?memberId=`.
+  PNG export, keyboard shortcuts, swipe gestures, deep-linkable via `?view=`/`?member=`.
 
 ## 2. UX problems we are fixing (not just reskinning)
 
@@ -101,7 +101,7 @@ optional per-step `contact`), `relatedPaths[]`.
 ## 4. MUST PRESERVE (functionality contract)
 
 - **Three jobs:** browse the hierarchy, see a person's detail, find the right contact for a question.
-- **Deep-linking:** `?view=`, `?memberId=`, and Hulp→chart "Bekijk in organigram" centering.
+- **Deep-linking:** `?view=`, `?member=`, and Hulp→chart "Bekijk in organigram" centering.
 - **Analytics (5 events, names frozen — `organigram_` is in the live GTM regex):**
   `organigram_view_changed {view, source}` · `organigram_member_clicked {member_id(hashed), view}` ·
   `organigram_search_used {query_text(sanitised)}` · `organigram_department_filtered {department}` ·

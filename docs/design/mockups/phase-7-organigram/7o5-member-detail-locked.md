@@ -50,7 +50,7 @@ not in the panel.
   stays correct.
 - **Holder-switcher a11y:** render as real controls — a button-based `role="tablist"`/`tab` (or a radio
   group), not static spans — with `aria-selected` on the active holder.
-- Deep-link: `?memberId=` opens the panel on load; for a **shared** position it reflects the **currently
+- Deep-link: `?member=` opens the panel on load; for a **shared** position it reflects the **currently
   selected holder** and is **updated silently** (`updateUrlSilently` — no history push) when switching.
 - **Analytics:** `organigram_member_clicked { member_id (hashed via hashMemberId), view }` — **existing
   event family, extended behaviour**: fires on panel open **and again on each holder-switch** (vs the prior
