@@ -142,8 +142,7 @@ The legacy `<MatchDetailView>` (header + lineup + events in one component) and `
 - `<MatchLineupSection>` (`apps/web/src/components/match/MatchLineupSection/`) — section wrapper around `<MatchLineup>` adding editorial chrome (mono kicker `OPSTELLINGEN` + display-md italic heading `Wie er stond.` + paper container). Owns its own render decision: returns `null` when both lineups are empty (typically upcoming matches).
 - `<MatchEventsSection>` (`apps/web/src/components/match/MatchEventsSection/`) — section wrapper around `<MatchEvents>` with the same chrome pattern (kicker `WEDSTRIJDVERLOOP` + heading `Hoe het ging.`). Auto-hides (`null`) when `events` is empty.
 - `<MatchStatusBadge>` — extended with a per-status spec table (`finished`/`forfeited`/`postponed`/`cancelled`/`stopped`) carrying abbreviation, long form, and tint class. The `cancelled` tint consumes the new `--color-card-red` token via `bg-card-red text-cream`.
-- `<MatchTeaser>` — reworked to the 6.B.d6 A2-italic mini-hero ticket-card shape (date-only stub, italic-display month label). Scope slimmed to the `default` variant only; the orphaned `compact` variant was retired as dead code.
-- `<MatchResultRow>` — reworked per 6.B.d7 (date stub + result-coloured score row, composes `<MatchStatusBadge>`). Its former consumer `<TeamSchedule>` was retired in Phase 6.C (#1947), so the component is currently unconsumed — retire-or-reuse tracked in the 6.C cleanup follow-up.
+- `<MatchTeaser>` / `<MatchResultRow>` — **retired (#2049).** Both were reskinned during Phase 6.B (MatchTeaser to the 6.B.d6 A2-italic ticket card, MatchResultRow to the 6.B.d7 result row) but ended Phase 6 with zero production consumers: `<MatchTeaser>`'s last consumer (`<CalendarMonth>`) switched to `<TeamAgendaRow>` in #1994, and `<MatchResultRow>`'s consumer (`<TeamSchedule>`) was retired in #1947. Upcoming matches now render via the homepage's inline `<MatchRow>` (`UpcomingMatchesClient.tsx`) and `<TeamAgendaRow>` (kalender + team pages); finished matches via `<TeamAgendaRow>`. The components, their stories/tests/VR baselines, the `MatchTeaserStatus` type, and the slider's match-card showcase stories were deleted.
 
 New token: `--color-card-red` (`#c93f1c`) in `globals.css` — red-card / cancelled tint, consumed by `<MatchStatusBadge>`'s `cancelled` spec.
 
@@ -160,7 +159,7 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 - `<TeamFlagship>` — listing A+B paired mirrored flagships (A jersey-deep content-left/photo-right; B cream mirrored). `<YouthDirectory>` — Bovenbouw/Middenbouw/Onderbouw age-code cards. `<TeamSectionNav>` — sticky in-page section nav (auto-hide aware).
 - **Analytics:** `team_detail_view` / `team_list_view` page-views + `team_standings_/matches_/squad_in_view` intersection events. The `team_` prefix is in the live GTM trigger regex.
 - **Contrast rule:** small text on jersey-deep uses `text-white` (cream #f5f1e6 is 4.04:1 there, below AA).
-- **Deferred to #1960 (still consumed outside Phase 6.C):** `<TeamOverview>` + `<TeamCard>` (used by `/jeugd`) and `<TeamRoster>` + `<StaffCard>` (used by `/club/bestuur`) were NOT deleted — they retire once those surfaces migrate. `<MatchResultRow>` is now orphaned (also tracked in #1960).
+- **Deferred to #1960 (still consumed outside Phase 6.C):** `<TeamOverview>` + `<TeamCard>` (used by `/jeugd`) and `<TeamRoster>` + `<StaffCard>` (used by `/club/bestuur`) were NOT deleted — they retire once those surfaces migrate. `<MatchResultRow>` (formerly orphaned, tracked in #1960) was retired in #2049.
 
 ## Design Conventions
 

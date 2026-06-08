@@ -12,15 +12,6 @@ export const CardDemo = ({ label, hasAccent, children }) => (
   </div>
 );
 
-export const RowDemo = ({ label }) => (
-  <div className="group relative overflow-hidden rounded-card bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:shadow-md cursor-pointer" style={{ width: '420px', padding: '10px 16px' }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9a9da2' }}>{label}</div>
-      <div style={{ fontSize: '12px', color: '#31404b' }}>radius only, subtle shadow</div>
-    </div>
-  </div>
-);
-
 # Card Interactions
 
 All cards across the site share a common set of interaction tokens to create a consistent, tactile feel. Hover any demo below to see the effect in action.
@@ -136,15 +127,6 @@ These cards present information but are not primary navigation targets. They use
   </CardDemo>
 </div>
 
-### Row Items (radius only)
-
-Compact row-style components that only use `rounded-card` and a subtle `hover:shadow-md`. No lift or accent bar.
-
-<div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', marginBottom: '32px' }}>
-  <RowDemo label="MatchTeaser" />
-  <RowDemo label="MatchResultRow" />
-</div>
-
 ---
 
 ## Exceptions
@@ -160,11 +142,6 @@ Not every card follows the standard recipe. These are the documented deviations:
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td><code>MatchTeaser</code> / <code>MatchResultRow</code></td>
-      <td>Radius only, subtle <code>hover:shadow-md</code> — no lift, no accent bar</td>
-      <td>Compact rows where lift would feel excessive; these sit in tight vertical lists</td>
-    </tr>
     <tr>
       <td><code>SponsorCard</code></td>
       <td>Grayscale toggle on hover — no shadow, no lift</td>

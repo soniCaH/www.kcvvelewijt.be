@@ -8,14 +8,6 @@ export type { MatchStatus } from "@kcvv/api-contract";
 
 import type { MatchStatus } from "@kcvv/api-contract";
 
-/**
- * Display-only status used by `<MatchTeaser>` and its row variants.
- * Folds the contract's `"scheduled"` into a `"upcoming"` label so the
- * teaser can render before/after kickoff without a separate branch.
- * Use this in any teaser-shaped component that swaps `scheduled → upcoming`.
- */
-export type MatchTeaserStatus = Exclude<MatchStatus, "scheduled"> | "upcoming";
-
 export interface ScheduleTeam {
   /** Team ID */
   id: number;
