@@ -2,7 +2,7 @@
  * Text Shadow Utilities
  *
  * Generates 3D text-shadow effects for decorative badge numbers.
- * Used by PlayerCard (green), TeamRoster staff (navy), and TeamCard (blue).
+ * Used by PlayerCard (green) and TeamCard (blue).
  */
 
 import { CARD_COLORS, type BadgeColor } from "./card-tokens";
