@@ -16,7 +16,6 @@ import {
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@/lib/seo/jsonld";
-import { FooterSafeArea } from "@/components/design-system";
 import type { Sponsor } from "@/components/sponsors/Sponsors";
 import { sortByTierThenName } from "@/components/sponsors/sortByTierThenName";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
@@ -72,7 +71,6 @@ export default async function SponsorsPageRoute() {
         <JsonLd data={buildItemListJsonLd(sponsorListItems)} />
       )}
       <SponsorsPage sponsors={allSponsors} />
-      <FooterSafeArea />
     </>
   );
 }
