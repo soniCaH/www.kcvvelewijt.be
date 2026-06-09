@@ -96,7 +96,7 @@
     "jest-image-snapshot": "6.5.2",
     "jsdom": "29.1.1",
     "postcss": "8.5.15",
-    "prettier": "3.8.3",
+    "prettier": "3.8.4",
     "prettier-plugin-tailwindcss": "0.8.0",
     "schema-dts": "2.0.0",
     "sharp": "0.34.5",
