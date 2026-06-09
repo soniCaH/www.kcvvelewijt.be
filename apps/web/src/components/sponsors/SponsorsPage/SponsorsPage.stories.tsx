@@ -1,10 +1,10 @@
 /**
  * SponsorsPage Stories — Phase 7.
  *
- * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) → `<StripedSeam>`
- * → `<SponsorTiers>` (labelled Hoofdsponsors grid + unlabelled merged wall). Not
- * `vr`-tagged: the hero, marquee card, hoofd tile, tile and tiers each carry
- * their own VR coverage.
+ * Split `<SponsorHero>` → `<StripedSeam>` → `<SponsorTiers>` (Hoofdsponsors grid
+ * + unlabelled wall) → `<SponsorCtaBand>`; 0 sponsors collapses to a
+ * `<SponsorEmptyState>` + band. Not `vr`-tagged: the hero, marquee card, hoofd
+ * tile, tile, tiers, empty state and CTA band each carry their own VR coverage.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 7 /sponsors. Split `<SponsorHero>` (MonoLabel kicker + EditorialHeading + italic lead + the single `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>`: a labelled Hoofdsponsors grid over one unlabelled merged wall of sponsor + sympathisant tiles. Replaces the legacy dark header + SectionStack/diagonal composition. The CTA band + full empty states land in later phases.",
+          "Phase 7 /sponsors. `<SponsorHero>` (kicker + EditorialHeading + lead + `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>` (labelled Hoofdsponsors grid over one unlabelled merged wall) → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors the body collapses to a `<SponsorEmptyState>` + the band. Replaces the legacy dark header + SectionStack/diagonal composition.",
       },
     },
   },
@@ -38,7 +38,7 @@ export const Default: Story = {
   args: { sponsors: ordered },
 };
 
-/** No sponsors — header only (the full empty state lands in Phase 4). */
+/** No sponsors — headline-only hero → `<SponsorEmptyState>` → CTA band. */
 export const Empty: Story = {
   args: { sponsors: [] },
 };

@@ -91,7 +91,9 @@ const ACCENT_TONE_CLASS: Record<EditorialHeadingAccentTone, string> = {
 };
 
 function ensureTrailingPeriod(text: string): string {
-  return text.endsWith(".") ? text : `${text}.`;
+  // A heading already terminated by sentence punctuation keeps it — appending a
+  // period to a question ("…langs de lijn?") or exclamation would be wrong.
+  return /[.?!]$/.test(text.trimEnd()) ? text : `${text}.`;
 }
 
 function splitOnEmphasis(

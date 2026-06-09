@@ -109,13 +109,29 @@ describe("SponsorsPage", () => {
     expect(container.querySelector('[class*="kcvv-black"]')).toBeNull();
   });
 
-  it("renders the header but no tiers/seam when there are no sponsors", () => {
-    const { container } = render(<SponsorsPage sponsors={[]} />);
+  it("always renders the CTA band", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    // EditorialHeading splits the title across spans for the warm accent, so
+    // match by heading name rather than a single text node.
+    expect(
+      screen.getByRole("heading", { name: /Jouw zaak ook langs de zijlijn/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Word sponsor/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("collapses to the empty state + CTA band when there are no sponsors", () => {
+    render(<SponsorsPage sponsors={[]} />);
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     expect(screen.queryAllByRole("listitem")).toHaveLength(0);
     expect(screen.queryByText("Hoofdsponsors")).not.toBeInTheDocument();
+    // The reskinned empty state + the CTA band both render.
     expect(
-      container.querySelector('[data-color-pair="ink-cream"]'),
-    ).not.toBeInTheDocument();
+      screen.getByRole("heading", { name: /Nog geen sponsors/ }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Jouw zaak ook langs de zijlijn/ }),
+    ).toBeInTheDocument();
   });
 });
