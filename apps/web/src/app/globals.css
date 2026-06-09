@@ -942,6 +942,43 @@
   }
 }
 
+/* §7.5b — Timeline fly-in motion (/club/geschiedenis). `TimelineReveal`
+   adds the `timeline-reveal` class to the wrapper on mount, then the
+   `--entered` modifier to each `[data-timeline-item]` as it crosses the
+   IntersectionObserver threshold. Cards slide in directionally (left side
+   from the left, right side from the right) and fade up; centred photos
+   (no `data-side`) default to a pure fade-up. The scoping under
+   `.timeline-reveal` means stories/no-JS render at the final state. */
+.timeline-reveal [data-timeline-item] {
+  --timeline-reveal-x: 0px;
+  opacity: 0;
+  transform: translateX(var(--timeline-reveal-x)) translateY(24px);
+  transition:
+    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.timeline-reveal [data-timeline-item][data-side="left"] {
+  --timeline-reveal-x: -32px;
+}
+
+.timeline-reveal [data-timeline-item][data-side="right"] {
+  --timeline-reveal-x: 32px;
+}
+
+.timeline-reveal [data-timeline-item].timeline-item--entered {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-reveal [data-timeline-item] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ===== Phases 5 + 6 (#1331, #1332): Overview-row stack =======================
 
    Consecutive `transferFact` / `eventFact` overview rows fuse into a

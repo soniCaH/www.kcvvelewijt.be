@@ -8,6 +8,7 @@ import {
   TimelineItem,
   TimelineSection,
 } from "./HistoryTimeline";
+import { TimelineReveal } from "./TimelineReveal";
 import {
   HISTORY_52_53,
   HISTORY_58_59,
@@ -562,7 +563,9 @@ export function HistoryContent() {
         <StripedSeam />
       </div>
 
-      <TimelineContent />
+      <TimelineReveal>
+        <TimelineContent />
+      </TimelineReveal>
 
       <FooterSafeArea />
     </>

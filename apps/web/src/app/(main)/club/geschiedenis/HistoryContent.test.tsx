@@ -12,8 +12,11 @@ describe("HistoryContent", () => {
   });
 
   it("renders the timeline content inside the max-w-5xl container", () => {
-    const { container } = render(<HistoryContent />);
-    expect(container.querySelector(".max-w-5xl")).not.toBeNull();
+    render(<HistoryContent />);
+    // Anchor on actual timeline content — the hero also uses max-w-5xl, so a
+    // bare `.max-w-5xl` query would pass even if the timeline wrapper regressed.
+    const firstTimelineDate = screen.getByText("1909 - 1935");
+    expect(firstTimelineDate.closest(".max-w-5xl")).not.toBeNull();
   });
 
   it("renders the first and last timeline dates as chips", () => {

@@ -74,15 +74,23 @@ export function TimelineItem({
   children: ReactNode;
   side?: "left" | "right";
 }) {
+  // The card lives on one side; the opposite column renders as an invisible
+  // md spacer so the alternating two-sided layout stays balanced. Defining the
+  // card once keeps the two columns from drifting apart.
+  const card = <TimelineCard date={date}>{children}</TimelineCard>;
   return (
-    <div className="relative mb-10 md:flex md:items-start md:justify-between">
+    <div
+      data-timeline-item
+      data-side={side}
+      className="relative mb-10 md:flex md:items-start md:justify-between"
+    >
       <div
         className={cn(
           "w-full md:w-[45%]",
           side === "right" && "hidden md:invisible md:block",
         )}
       >
-        {side === "left" && <TimelineCard date={date}>{children}</TimelineCard>}
+        {side === "left" && card}
       </div>
 
       {/* Node marker — decorative; cream ring masks the dashed line behind it. */}
@@ -97,9 +105,7 @@ export function TimelineItem({
           side === "left" && "hidden md:invisible md:block",
         )}
       >
-        {side === "right" && (
-          <TimelineCard date={date}>{children}</TimelineCard>
-        )}
+        {side === "right" && card}
       </div>
     </div>
   );
@@ -152,7 +158,7 @@ export function TimelineImage({
   rotation?: "a" | "b" | "none";
 }) {
   return (
-    <figure className="mx-auto my-12 max-w-2xl">
+    <figure data-timeline-item className="mx-auto my-12 max-w-2xl">
       <TapedFigure
         aspect="landscape-16-9"
         bg="cream"
