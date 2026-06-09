@@ -45,4 +45,37 @@ describe("YouthDirectory", () => {
     const u17 = cards.find((c) => c.textContent?.includes("U17"));
     expect(u17?.getAttribute("href")).toBe("/ploegen/kcvv-elewijt-u17");
   });
+
+  it("renders the squad photo when a team has one", () => {
+    render(
+      <YouthDirectory
+        divisions={[
+          {
+            label: "Bovenbouw",
+            range: "U17–U21",
+            teams: [team("U17", "/images/ploeg.jpg")],
+          },
+        ]}
+      />,
+    );
+    const img = screen.getByAltText("KCVV Elewijt U17 ploegfoto");
+    expect(img).toBeInTheDocument();
+  });
+
+  it("falls back to the JerseyShirt illustration when a team has no photo", () => {
+    render(
+      <YouthDirectory
+        divisions={[
+          { label: "Bovenbouw", range: "U17–U21", teams: [team("U17")] },
+        ]}
+      />,
+    );
+    // No squad <img>; the JerseyShirt fallback carries an accessible label.
+    expect(
+      screen.queryByAltText("KCVV Elewijt U17 ploegfoto"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText("KCVV Elewijt U17 (geen ploegfoto)"),
+    ).toBeInTheDocument();
+  });
 });
