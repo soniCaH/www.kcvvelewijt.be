@@ -35,8 +35,11 @@ const ROLE_BUCKET_LABELS: Record<string, string> = {
  * Resolve a staff member's display function:
  *   1. functionTitle is a known code → mapped label
  *   2. functionTitle is already-readable free text → pass through
- *   3. functionTitle null → role bucket (Trainer / Afgevaardigde)
- *   4. nothing usable → "Staf"
+ *   3. functionTitle null, role is a known bucket → bucket label (Trainer / …)
+ *   4. functionTitle null, role is free text → pass the role through verbatim
+ *      (board titles "Voorzitter" / "Secretaris" / … live in `role`; their
+ *      `functionTitle` is PSD-empty, so without this they'd fall to "Staf")
+ *   5. nothing usable → "Staf"
  */
 export function resolveFunctionLabel(
   functionTitle: string | null | undefined,
@@ -46,9 +49,9 @@ export function resolveFunctionLabel(
   if (ft) {
     return FUNCTION_CODE_LABELS[ft.toUpperCase()] ?? ft;
   }
-  const bucket = role?.trim().toLowerCase();
-  if (bucket && ROLE_BUCKET_LABELS[bucket]) {
-    return ROLE_BUCKET_LABELS[bucket];
+  const roleText = role?.trim();
+  if (roleText) {
+    return ROLE_BUCKET_LABELS[roleText.toLowerCase()] ?? roleText;
   }
   return "Staf";
 }

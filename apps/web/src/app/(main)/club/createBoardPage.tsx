@@ -6,12 +6,12 @@
  */
 
 import type { Metadata } from "next";
+import type { PortableTextBlock } from "@portabletext/react";
 import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
 import { BestuurPage } from "@/components/club/BestuurPage/BestuurPage";
-import { type RoutablePlayerVM } from "@/lib/repositories/player.repository";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 
 interface BoardPageConfig {
@@ -104,9 +104,7 @@ export function createBoardPage({
           tagline: team.tagline,
           teamType: "club",
         }}
-        players={team.players.filter(
-          (p): p is RoutablePlayerVM => p.href !== undefined,
-        )}
+        body={team.body as PortableTextBlock[] | null}
         staff={team.staff}
       />
     );
