@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SectionHeader } from "@/components/design-system";
-import { Sponsors } from "@/components/sponsors/Sponsors";
+import { SponsorsBlock } from "@/components/sponsors";
 import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
 
 /**
- * SponsorsSection is an async server component (fetches from Sanity).
- * This story renders the visual composition using mock data with the
- * dark green background with sponsor logos.
+ * SponsorsSection is an async server component (fetches from Sanity) that renders
+ * the redesign `<SponsorsBlock>`. This story renders that block with mock data
+ * (hoofd + sponsor tiers — the homepage subset).
  */
 const meta = {
   title: "Features/Homepage/SponsorsSection",
@@ -16,28 +15,7 @@ const meta = {
     const homepageSponsors = mockSponsors.filter(
       (s) => s.tier === "hoofdsponsor" || s.tier === "sponsor",
     );
-
-    return (
-      <section className="bg-kcvv-green-dark py-6">
-        <div className="mx-auto max-w-7xl px-4 md:px-8">
-          <SectionHeader
-            title="Onze sponsors"
-            linkText="Alle partners"
-            linkHref="/sponsors"
-            variant="dark"
-          />
-          <Sponsors
-            sponsors={homepageSponsors}
-            title=""
-            description=""
-            showViewAll={false}
-            variant="dark"
-            columns={5}
-            className="py-0"
-          />
-        </div>
-      </section>
-    );
+    return <SponsorsBlock sponsors={homepageSponsors} />;
   },
 } satisfies Meta;
 

@@ -1,8 +1,9 @@
 /**
- * Sponsors Page — Phase 7 tracer.
+ * Sponsors Page — Phase 7.
  *
  * Fetches all sponsors from Sanity (via SponsorRepository), orders them by tier
- * then name, and renders the rebuilt `<SponsorsPage>` on the cream vocabulary.
+ * then name, and renders the rebuilt `<SponsorsPage>`. Emits breadcrumb +
+ * ItemList JSON-LD.
  */
 
 import { Effect } from "effect";
@@ -14,7 +15,7 @@ import {
 } from "@/lib/repositories/sponsor.repository";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@/lib/seo/jsonld";
 import { FooterSafeArea } from "@/components/design-system";
 import type { Sponsor } from "@/components/sponsors/Sponsors";
 import { sortByTierThenName } from "@/components/sponsors/sortByTierThenName";
@@ -52,6 +53,13 @@ export default async function SponsorsPageRoute() {
 
   const allSponsors = sponsors.map(mapToSponsor).sort(sortByTierThenName);
 
+  // ItemList of sponsors that link out — name + external url (no internal ids).
+  const sponsorListItems = allSponsors
+    .filter((sponsor): sponsor is Sponsor & { url: string } =>
+      Boolean(sponsor.url),
+    )
+    .map((sponsor) => ({ name: sponsor.name, url: sponsor.url }));
+
   return (
     <>
       <JsonLd
@@ -60,6 +68,9 @@ export default async function SponsorsPageRoute() {
           { name: "Sponsors", url: `${SITE_CONFIG.siteUrl}/sponsors` },
         ])}
       />
+      {sponsorListItems.length > 0 && (
+        <JsonLd data={buildItemListJsonLd(sponsorListItems)} />
+      )}
       <SponsorsPage sponsors={allSponsors} />
       <FooterSafeArea />
     </>

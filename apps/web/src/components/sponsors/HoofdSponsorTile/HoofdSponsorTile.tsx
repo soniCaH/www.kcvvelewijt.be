@@ -59,6 +59,8 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Bezoek de website van ${sponsor.name}`}
+        data-sponsor-id={sponsor.id}
+        data-sponsor-tier={sponsor.tier}
         className="focus-visible:outline-jersey-deep group block focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         {tile}

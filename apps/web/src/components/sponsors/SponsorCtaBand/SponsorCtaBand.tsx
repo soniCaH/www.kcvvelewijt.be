@@ -66,6 +66,7 @@ export function SponsorCtaBand({
             {isExternal ? (
               <a
                 href={href}
+                data-sponsor-cta="true"
                 className={getButtonClasses({
                   variant: "inverted",
                   className: buttonClassName,
@@ -81,6 +82,7 @@ export function SponsorCtaBand({
                 href={href}
                 variant="inverted"
                 className={buttonClassName}
+                {...{ "data-sponsor-cta": "true" }}
               >
                 {label}
               </LinkButton>

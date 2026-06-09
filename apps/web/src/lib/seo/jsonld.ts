@@ -60,7 +60,8 @@ export function buildBreadcrumbJsonLd(
 export interface ItemListEntry {
   /** Display name (match "Home — Away", or event title). */
   name: string;
-  /** Absolute URL of the item's detail route. */
+  /** Absolute URL of the item's detail route (or an external target, e.g. a
+   *  sponsor's own site on the /sponsors ItemList). */
   url: string;
 }
 
