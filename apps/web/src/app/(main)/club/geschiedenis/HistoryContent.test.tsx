@@ -3,32 +3,37 @@ import { render, screen } from "@testing-library/react";
 import { HistoryContent } from "./HistoryContent";
 
 describe("HistoryContent", () => {
-  it("renders InteriorPageHero with the Onze club label", () => {
+  it("renders the heritage hero kicker and headline", () => {
     render(<HistoryContent />);
-    expect(screen.getByText("Onze club")).toBeInTheDocument();
+    expect(screen.getByText("De club · sinds 1909")).toBeInTheDocument();
     expect(
-      screen.getByText(/meer dan een eeuw voetbalpassie/i),
+      screen.getByRole("heading", { level: 1, name: /meer dan een eeuw/i }),
     ).toBeInTheDocument();
   });
 
-  it("renders timeline content inside the max-w-5xl container", () => {
+  it("renders the timeline content inside the max-w-5xl container", () => {
     const { container } = render(<HistoryContent />);
-    const wrapper = container.querySelector(".max-w-5xl");
-    expect(wrapper).not.toBeNull();
+    expect(container.querySelector(".max-w-5xl")).not.toBeNull();
   });
 
-  it("renders the first and last timeline dates", () => {
+  it("renders the first and last timeline dates as chips", () => {
     render(<HistoryContent />);
     expect(screen.getByText("1909 - 1935")).toBeInTheDocument();
     expect(screen.getByText("2025 - ...")).toBeInTheDocument();
   });
 
-  it("renders the closing SectionCta with a Word lid button", () => {
+  it("renders the credits attribution", () => {
     render(<HistoryContent />);
     expect(
-      screen.getByRole("heading", { name: /maak deel uit van ons verhaal/i }),
+      screen.getByRole("heading", { name: /credits/i }),
     ).toBeInTheDocument();
-    const cta = screen.getByRole("link", { name: /word lid/i });
-    expect(cta).toHaveAttribute("href", "/hulp");
+    expect(screen.getByText(/martijn van den berg/i)).toBeInTheDocument();
+  });
+
+  it("does not render any retired legacy CTA copy", () => {
+    render(<HistoryContent />);
+    expect(
+      screen.queryByText(/maak deel uit van ons verhaal/i),
+    ).not.toBeInTheDocument();
   });
 });

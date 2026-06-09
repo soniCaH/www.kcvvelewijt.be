@@ -1,10 +1,13 @@
 import Image from "next/image";
-import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
+import { PageViewTracker } from "@/components/analytics";
+import { StripedSeam } from "@/components/design-system/StripedSeam";
+import { FooterSafeArea } from "@/components/design-system";
 import {
-  SectionStack,
-  type SectionConfig,
-} from "@/components/design-system/SectionStack/SectionStack";
-import { SectionCta } from "@/components/design-system/SectionCta/SectionCta";
+  HeritageHero,
+  TimelineImage,
+  TimelineItem,
+  TimelineSection,
+} from "./HistoryTimeline";
 import {
   HISTORY_52_53,
   HISTORY_58_59,
@@ -14,105 +17,9 @@ import {
   HISTORY_2018,
   HISTORY_2022,
   HISTORY_24_25,
-  HISTORY_24_25_HERO,
 } from "@/lib/sanity/images";
 
-function TimelineCard({
-  date,
-  children,
-}: {
-  date?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="border-kcvv-green-bright rounded-sm border-l-4 bg-white p-6 shadow-sm">
-      {date && (
-        <p className="text-kcvv-green-dark mb-2 text-xs font-bold tracking-[0.15em] uppercase">
-          {date}
-        </p>
-      )}
-      <div className="text-kcvv-black text-sm leading-relaxed">{children}</div>
-    </div>
-  );
-}
-
-function TimelineItem({
-  date,
-  children,
-  side = "left",
-}: {
-  date?: string;
-  children: React.ReactNode;
-  side?: "left" | "right";
-}) {
-  return (
-    <div className="relative mb-10 md:flex md:items-start md:justify-between">
-      {/* Left content */}
-      <div
-        className={`w-full md:w-[45%] ${side === "right" ? "hidden md:invisible md:block" : ""}`}
-      >
-        {side === "left" && <TimelineCard date={date}>{children}</TimelineCard>}
-      </div>
-
-      {/* Timeline dot */}
-      <div
-        className="bg-kcvv-green-bright absolute left-1/2 hidden h-4 w-4 -translate-x-1/2 rounded-full shadow-[0_0_0_4px_rgba(243,244,246,1)] md:block"
-        aria-hidden="true"
-      />
-
-      {/* Right content */}
-      <div
-        className={`w-full md:w-[45%] ${side === "left" ? "hidden md:invisible md:block" : ""}`}
-      >
-        {side === "right" && (
-          <TimelineCard date={date}>{children}</TimelineCard>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function TimelineImage({
-  src,
-  alt,
-  caption,
-}: {
-  src: string;
-  alt: string;
-  caption: React.ReactNode;
-}) {
-  return (
-    <div className="my-12">
-      <figure>
-        <div className="relative aspect-[16/9] w-full">
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="object-contain"
-          />
-        </div>
-        <figcaption className="mt-4 px-4 text-center text-sm text-gray-600">
-          {caption}
-        </figcaption>
-      </figure>
-    </div>
-  );
-}
-
-function TimelineSection({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="relative py-4">
-      {/* Vertical green line */}
-      <div
-        className="bg-kcvv-green-bright/40 pointer-events-none absolute inset-y-0 left-1/2 hidden w-1 -translate-x-0.5 md:block"
-        aria-hidden="true"
-      />
-      {children}
-    </div>
-  );
-}
+const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
 function TimelineContent() {
   return (
@@ -277,42 +184,55 @@ function TimelineContent() {
 
       {/* Image: SK Elewijt kampioen 52-53 */}
       <TimelineImage
-        src={HISTORY_52_53}
-        alt="SK Elewijt kampioen 52-53"
         caption={
           <>
-            <p className="font-semibold">Figuur 1: SK Elewijt kampioen 52-53</p>
-            <p>
-              Boven: Labiau - Maurits Janssens - Maurits De Laet - Wannes Lepage
-              - Julien Patry - Djois (Jean Peeters) - Felix Vandervorst (bijnaam
-              Feke Van Den Asse) - Pierre Geerens
-              <br />
-              Onder: Coosemans - David Vandermeulen - Lucien Coppens - Gust
-              Coppens - Warre Van Herck - Omer Lesage Felix De Koninck
-            </p>
+            <span className="font-semibold not-italic">
+              Figuur 1: SK Elewijt kampioen 52-53
+            </span>
+            <br />
+            Boven: Labiau - Maurits Janssens - Maurits De Laet - Wannes Lepage -
+            Julien Patry - Djois (Jean Peeters) - Felix Vandervorst (bijnaam
+            Feke Van Den Asse) - Pierre Geerens
+            <br />
+            Onder: Coosemans - David Vandermeulen - Lucien Coppens - Gust
+            Coppens - Warre Van Herck - Omer Lesage Felix De Koninck
           </>
         }
-      />
+      >
+        <Image
+          src={HISTORY_52_53}
+          alt="SK Elewijt kampioen 52-53"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* Image: SK Elewijt kampioen 58-59 */}
       <TimelineImage
-        src={HISTORY_58_59}
-        alt="SK Elewijt kampioen 58-59"
         caption={
           <>
-            <p className="font-semibold">Figuur 2: SK Elewijt kampioen 58-59</p>
-            <p>
-              Staand: Jan De Ron; Maurits Janssens; Raymond Jaspers; Emiel
-              Knaepen &quot;Mieleke van Beezel&quot;; Jean Lauwers; Jaak
-              Janssens
-              <br />
-              Zittend: David Vander Meulen ; Ket Raeymaekers ; Jacky Van Mol;
-              Mathieu Van Helden; René Van Gysel; Julien Coppens; Jozef
-              Janssens; Maurits De Laet
-            </p>
+            <span className="font-semibold not-italic">
+              Figuur 2: SK Elewijt kampioen 58-59
+            </span>
+            <br />
+            Staand: Jan De Ron; Maurits Janssens; Raymond Jaspers; Emiel Knaepen
+            &quot;Mieleke van Beezel&quot;; Jean Lauwers; Jaak Janssens
+            <br />
+            Zittend: David Vander Meulen ; Ket Raeymaekers ; Jacky Van Mol;
+            Mathieu Van Helden; René Van Gysel; Julien Coppens; Jozef Janssens;
+            Maurits De Laet
           </>
         }
-      />
+      >
+        <Image
+          src={HISTORY_58_59}
+          alt="SK Elewijt kampioen 58-59"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* FC Elewijt section */}
       <TimelineSection>
@@ -328,36 +248,49 @@ function TimelineContent() {
 
       {/* Image: FC Elewijt kampioen 63-64 */}
       <TimelineImage
-        src={HISTORY_63_64}
-        alt="FC Elewijt kampioen 63-64"
         caption={
           <>
-            <p className="font-semibold">Figuur 3: FC Elewijt kampioen 63-64</p>
-            <p>
-              Rij bovenaan : François De Win (burger), Gust Boxtaens, Chris
-              Bessendorffer, Guy Van den Wijngaerd, Guy Busschots , Alfons
-              Beullens (de Kras), Warre Bosmans, Jaak Vandergucht (burger)
-              <br />
-              Rij onderaan : Hugo Vanderbeken, Jaak Demesmaecker , Jan Ervens ,
-              Rik Claes , Roger Wijns
-            </p>
+            <span className="font-semibold not-italic">
+              Figuur 3: FC Elewijt kampioen 63-64
+            </span>
+            <br />
+            Rij bovenaan : François De Win (burger), Gust Boxtaens, Chris
+            Bessendorffer, Guy Van den Wijngaerd, Guy Busschots , Alfons
+            Beullens (de Kras), Warre Bosmans, Jaak Vandergucht (burger)
+            <br />
+            Rij onderaan : Hugo Vanderbeken, Jaak Demesmaecker , Jan Ervens ,
+            Rik Claes , Roger Wijns
           </>
         }
-      />
+      >
+        <Image
+          src={HISTORY_63_64}
+          alt="FC Elewijt kampioen 63-64"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* Image: Fusieclub VV Elewijt */}
       <TimelineImage
-        src={HISTORY_FUSIE}
-        alt="De fusieclub VV Elewijt"
         caption={
-          <p>
+          <>
             Figuur 4: De fusieclub VV Elewijt (rood-wit - op de foto Luc Buedts
             als kind) sinds 1971-1972 in competitie speelde; ontstaan uit FC
             Elewijt (rood-geel - op de foto Etienne Cnops als moeder) en SK
             Elewijt (groen-wit - op de foto Walter Van As als vader).
-          </p>
+          </>
         }
-      />
+      >
+        <Image
+          src={HISTORY_FUSIE}
+          alt="De fusieclub VV Elewijt"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* 1971 - 1991 */}
       <TimelineSection>
@@ -397,15 +330,21 @@ function TimelineContent() {
 
       {/* Image: Beker van Brabant */}
       <TimelineImage
-        src={HISTORY_BVB}
-        alt="Crossing Elewijt won de beker van Brabant in 1988"
         caption={
-          <p>
+          <>
             Figuur 5: Crossing Elewijt won de beker van Brabant in 1988 na een
             4-1 overwinning in de finale tegen Peutie.
-          </p>
+          </>
         }
-      />
+      >
+        <Image
+          src={HISTORY_BVB}
+          alt="Crossing Elewijt won de beker van Brabant in 1988"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* 1991 - 2018 */}
       <TimelineSection>
@@ -449,15 +388,21 @@ function TimelineContent() {
 
       {/* Image: Kampioen 2018-2019 */}
       <TimelineImage
-        src={HISTORY_2018}
-        alt="KCVV Elewijt speelt kampioen in 2018-2019 met 79 punten op 90"
         caption={
-          <p className="font-semibold">
+          <span className="font-semibold not-italic">
             Figuur 6: KCVV Elewijt speelt kampioen in 2018-2019 met 79 punten op
             90.
-          </p>
+          </span>
         }
-      />
+      >
+        <Image
+          src={HISTORY_2018}
+          alt="KCVV Elewijt speelt kampioen in 2018-2019 met 79 punten op 90"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* 2018 - present */}
       <TimelineSection>
@@ -478,15 +423,21 @@ function TimelineContent() {
 
       {/* Image: Promotie eerste provinciale */}
       <TimelineImage
-        src={HISTORY_2022}
-        alt="KCVV Elewijt promoveert via eindronde naar eerste provinciale"
         caption={
-          <p className="font-semibold">
+          <span className="font-semibold not-italic">
             Figuur 7: KCVV Elewijt promoveert via eindronde naar eerste
             provinciale.
-          </p>
+          </span>
         }
-      />
+      >
+        <Image
+          src={HISTORY_2022}
+          alt="KCVV Elewijt promoveert via eindronde naar eerste provinciale"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* Final section */}
       <TimelineSection>
@@ -534,20 +485,25 @@ function TimelineContent() {
 
       {/* Image: Kampioen 2024-2025 */}
       <TimelineImage
-        src={HISTORY_24_25}
-        alt="KCVV Elewijt kampioen 2024-2025 in eerste provinciale"
         caption={
           <>
-            <p className="font-semibold">
+            <span className="font-semibold not-italic">
               Figuur 8: KCVV Elewijt kampioen 2024-2025
-            </p>
-            <p>
-              Titel in eerste provinciale met 58 punten — 8 punten voorsprong op
-              eerste achtervolger OHR Huldenberg.
-            </p>
+            </span>
+            <br />
+            Titel in eerste provinciale met 58 punten — 8 punten voorsprong op
+            eerste achtervolger OHR Huldenberg.
           </>
         }
-      />
+      >
+        <Image
+          src={HISTORY_24_25}
+          alt="KCVV Elewijt kampioen 2024-2025 in eerste provinciale"
+          fill
+          sizes={PHOTO_SIZES}
+          className="object-contain"
+        />
+      </TimelineImage>
 
       {/* 2025 - nationaal voetbal */}
       <TimelineSection>
@@ -582,11 +538,11 @@ function TimelineContent() {
       </TimelineSection>
 
       {/* Credits */}
-      <div className="mt-12 px-4">
-        <h3 className="border-kcvv-green-bright mb-4 border-l-4 pl-4 text-xl font-bold">
+      <div className="mt-16 px-1">
+        <h2 className="text-ink-muted text-mono-sm border-ink/30 mb-4 border-l-2 pl-4 font-mono tracking-[0.08em] uppercase">
           Credits
-        </h3>
-        <p>
+        </h2>
+        <p className="text-body-md text-ink-soft">
           Met dank aan Martijn van den Berg voor de foto&apos;s en teksten over
           de geschiedenis van KCVV Elewijt!
         </p>
@@ -596,49 +552,19 @@ function TimelineContent() {
 }
 
 export function HistoryContent() {
-  const sections: SectionConfig[] = [
-    {
-      key: "hero",
-      bg: "kcvv-black",
-      paddingTop: "pt-0",
-      paddingBottom: "pb-0",
-      content: (
-        <InteriorPageHero
-          image={HISTORY_24_25_HERO}
-          imageAlt="KCVV Elewijt kampioen 2024-2025"
-          label="Onze club"
-          headline={
-            <>
-              Onze <span className="text-kcvv-green">geschiedenis</span>
-            </>
-          }
-          body="Van 1909 tot vandaag — meer dan een eeuw voetbalpassie in Elewijt."
-        />
-      ),
-      transition: { type: "diagonal", direction: "right", overlap: "full" },
-    },
-    {
-      key: "timeline",
-      bg: "gray-100",
-      content: <TimelineContent />,
-      transition: { type: "diagonal", direction: "left" },
-    },
-    {
-      key: "cta",
-      bg: "kcvv-black",
-      paddingTop: "pt-16",
-      paddingBottom: "pb-16",
-      content: (
-        <SectionCta
-          variant="dark"
-          heading="Maak deel uit van ons verhaal"
-          body="Kom langs op een wedstrijd of word lid van de plezantste compagnie."
-          buttonLabel="Word lid"
-          buttonHref="/hulp"
-        />
-      ),
-    },
-  ];
+  return (
+    <>
+      <PageViewTracker eventName="geschiedenis_view" />
 
-  return <SectionStack sections={sections} />;
+      <HeritageHero />
+
+      <div className="mt-8">
+        <StripedSeam />
+      </div>
+
+      <TimelineContent />
+
+      <FooterSafeArea />
+    </>
+  );
 }
