@@ -81,6 +81,9 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`Bezoek de website van ${sponsor.name}`}
+        data-sponsor-id={sponsor.id}
+        data-sponsor-tier={sponsor.tier}
+        data-sponsor-featured="true"
         className={cn(
           frameClass,
           "group focus-visible:outline-jersey-deep transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2",

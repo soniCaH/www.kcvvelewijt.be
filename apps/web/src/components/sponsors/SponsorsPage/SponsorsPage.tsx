@@ -14,6 +14,7 @@ import { SponsorHero } from "../SponsorHero";
 import { SponsorTiers } from "../SponsorTiers";
 import { SponsorEmptyState } from "../SponsorEmptyState";
 import { SponsorCtaBand } from "../SponsorCtaBand";
+import { SponsorsAnalytics } from "../SponsorsAnalytics";
 import { selectFeaturedSponsor } from "../selectFeaturedSponsor";
 import type { Sponsor } from "../Sponsors";
 
@@ -27,7 +28,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
   const hasSponsors = sponsors.length > 0;
 
   return (
-    <>
+    <SponsorsAnalytics>
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
         <SponsorHero featured={featured} />
 
@@ -44,6 +45,6 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
       </div>
 
       <SponsorCtaBand />
-    </>
+    </SponsorsAnalytics>
   );
 }
