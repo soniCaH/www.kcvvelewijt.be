@@ -60,6 +60,10 @@ test.describe("static routes", () => {
     await smokeTest(page, { path: "/club/geschiedenis" });
   });
 
+  test("/club/ultras", async ({ page }) => {
+    await smokeTest(page, { path: "/club/ultras" });
+  });
+
   test("/hulp", async ({ page }) => {
     await smokeTest(page, { path: "/hulp" });
   });
