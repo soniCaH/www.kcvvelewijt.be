@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 — /jeugd · Round 5b: photo finish (colour)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,900&family=Archivo:wght@400;600;800;900&family=IBM+Plex+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-deep: #e1d7bf; --ink: #0a0a0a; --ink-muted: #6b6b6b;
+        --jersey-deep: #008755; --warm: #f0c264; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+        --newsprint: sepia(0.28) saturate(0.82) hue-rotate(-8deg) contrast(1.03) brightness(0.99);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 90ch; line-height: 1.6; }
+      .wrap { max-width: 1000px; margin: 0 auto; padding: 28px; }
+      .opt { margin-bottom: 34px; }
+      .ohead { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cream); background: var(--ink); padding: 7px 12px; display:inline-block; margin-bottom: 4px; }
+      .osub { font-size: 12.5px; color: var(--ink-muted); margin: 6px 0 14px; max-width: 70ch; line-height: 1.5; }
+      .osub b { color: var(--ink); }
+      .row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 18px 14px; }
+      a.ypol { position: relative; background: var(--cream); border: 1.5px solid var(--paper-edge); box-shadow: 3px 4px 0 0 rgba(10,10,10,0.18); padding: 8px 8px 6px; text-decoration:none; color: var(--ink); }
+      a.ypol:nth-child(3n+1){ transform: rotate(-1.1deg);} a.ypol:nth-child(3n+2){ transform: rotate(0.7deg);} a.ypol:nth-child(3n+3){ transform: rotate(-0.5deg);}
+      a.ypol .tape { position:absolute; top:-9px; left:50%; transform: translateX(-50%) rotate(-3deg); width: 52px; height: 17px; background: rgba(240,194,100,0.78); border: 1px solid rgba(10,10,10,0.25); }
+      a.ypol .ph { aspect-ratio: 4/3; border: 1px solid var(--ink); background-size: cover; background-position: center; }
+      a.ypol .cap { display:flex; justify-content:center; margin-top: 6px; }
+      a.ypol .agecode { font-family: var(--font-display); font-weight: 900; line-height: 0.9; font-size: 22px; }
+      .newsprint .ph { filter: var(--newsprint); }
+      .vivid .ph { filter: none; }
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 20px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend b { color: var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 7 · /jeugd — Round 5b: photo finish</h1>
+      <p>Greyscale is gone. Two colour finishes left — same taped polaroid (variant C, age code only), same real photos. The only difference is the filter.</p>
+    </div>
+    <div class="wrap">
+      <div class="opt">
+        <div class="ohead">① Newsprint colour</div>
+        <p class="osub">Warm paper tint (<b>--filter-photo-newsprint</b>) — gentle sepia, slightly desaturated. <b>In colour</b>, just toned to read as "printed on paper". This is what every other photo on the redesigned site uses (articles, team heroes, sponsors) → fully consistent.</p>
+        <div class="row newsprint">
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/1d02a9847f745963de0557337c70a947f045bd85-2818x1583.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U13</span></div></a>
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/9f61b4e27265dffd677d1201b236f483e4763099-3008x2000.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U14</span></div></a>
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/e0ca4200a5f7a0f97dd02e843b318e793430d7ff-3001x2092.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U15</span></div></a>
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/d79e023d165ced6b6e60ad8a688ac50be77e4f38-3757x2818.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U11</span></div></a>
+        </div>
+      </div>
+
+      <div class="opt">
+        <div class="ohead">② Full colour (vivid)</div>
+        <p class="osub">The photo exactly as shot — <b>no filter</b>, full saturation. Pops the most. Trade-off: youth cards would be the <b>only</b> photos on the site not toned to the paper look, so they read a bit "digital" against the fanzine treatment elsewhere.</p>
+        <div class="row vivid">
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/1d02a9847f745963de0557337c70a947f045bd85-2818x1583.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U13</span></div></a>
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/9f61b4e27265dffd677d1201b236f483e4763099-3008x2000.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U14</span></div></a>
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/e0ca4200a5f7a0f97dd02e843b318e793430d7ff-3001x2092.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U15</span></div></a>
+          <a class="ypol"><span class="tape"></span><div class="ph" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/d79e023d165ced6b6e60ad8a688ac50be77e4f38-3757x2818.jpg?w=360&h=270&fit=crop')"></div><div class="cap"><span class="agecode">U11</span></div></a>
+        </div>
+      </div>
+    </div>
+    <div class="legend">
+      Both are <b>in colour</b> — no greyscale, no hover swap. ① keeps the warm paper consistency with the rest of the site; ② is punchier but the lone "untreated" photo surface. Reply <b>①</b> or <b>②</b> and I build it.
+    </div>
+  </body>
+</html>

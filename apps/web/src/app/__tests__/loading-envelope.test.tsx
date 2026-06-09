@@ -71,12 +71,6 @@ const sectionStackRoutes: SectionStackRoute[] = [
     expectedTransitions: 1,
     expectedBgClasses: ["bg-kcvv-black", "bg-gray-100"],
   },
-  {
-    name: "/jeugd",
-    Loading: JeugdLoading,
-    expectedTransitions: 4,
-    expectedBgClasses: ["bg-kcvv-black", "bg-gray-100", "bg-kcvv-green-dark"],
-  },
 ];
 
 describe("loading.tsx envelope drift guard", () => {
@@ -165,6 +159,13 @@ describe("loading.tsx envelope drift guard", () => {
       name: "/club/organigram",
       Loading: OrganigramLoading,
       expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/jeugd",
+      Loading: JeugdLoading,
+      // Phase 7 (#2038): cream tracer composition (header + nav grid + youth
+      // directory), no SectionStack envelope.
+      expectedRootClass: "mx-auto w-full max-w-[70rem] px-4 py-10 sm:py-14",
     },
     {
       name: "/ploegen",
