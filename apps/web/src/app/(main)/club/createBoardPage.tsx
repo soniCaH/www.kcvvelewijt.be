@@ -13,6 +13,7 @@ import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
 import { BestuurPage } from "@/components/club/BestuurPage/BestuurPage";
 import { TeamRepository } from "@/lib/repositories/team.repository";
+import { PageViewTracker } from "@/components/analytics";
 
 interface BoardPageConfig {
   /** Sanity team slug (e.g. "bestuur", "jeugdbestuur") */
@@ -97,16 +98,20 @@ export function createBoardPage({
     const team = await fetchBoardTeamOrNotFound(slug);
 
     return (
-      <BestuurPage
-        header={{
-          name: team.name,
-          imageUrl: team.teamImageUrl ?? undefined,
-          tagline: team.tagline,
-          teamType: "club",
-        }}
-        body={team.body as PortableTextBlock[] | null}
-        staff={team.staff}
-      />
+      <>
+        {/* `board` slug is non-PII (bestuur / jeugdbestuur / angels). */}
+        <PageViewTracker eventName="board_view" params={{ board: slug }} />
+        <BestuurPage
+          header={{
+            name: team.name,
+            imageUrl: team.teamImageUrl ?? undefined,
+            tagline: team.tagline,
+            teamType: "club",
+          }}
+          body={team.body as PortableTextBlock[] | null}
+          staff={team.staff}
+        />
+      </>
     );
   }
 
