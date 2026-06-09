@@ -38,6 +38,13 @@ describe("resolveFunctionLabel", () => {
     );
   });
 
+  it("passes through a free-text board role instead of falling to 'Staf'", () => {
+    // Board titles live in `role` with an empty PSD `functionTitle`.
+    expect(resolveFunctionLabel(undefined, "Voorzitter")).toBe("Voorzitter");
+    expect(resolveFunctionLabel(null, "Secretaris")).toBe("Secretaris");
+    expect(resolveFunctionLabel("", "Penningmeester")).toBe("Penningmeester");
+  });
+
   it("falls back to 'Staf' when nothing usable is present", () => {
     expect(resolveFunctionLabel(undefined, undefined)).toBe("Staf");
     expect(resolveFunctionLabel("", "")).toBe("Staf");

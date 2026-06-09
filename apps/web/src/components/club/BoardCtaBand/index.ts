@@ -1,0 +1,1 @@
+export { BoardCtaBand } from "./BoardCtaBand";

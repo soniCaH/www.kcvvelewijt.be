@@ -56,6 +56,18 @@ test.describe("static routes", () => {
     await smokeTest(page, { path: "/club/organigram" });
   });
 
+  test("/club/bestuur", async ({ page }) => {
+    await smokeTest(page, { path: "/club/bestuur" });
+  });
+
+  test("/club/jeugdbestuur", async ({ page }) => {
+    await smokeTest(page, { path: "/club/jeugdbestuur" });
+  });
+
+  test("/club/angels", async ({ page }) => {
+    await smokeTest(page, { path: "/club/angels" });
+  });
+
   test("/club/geschiedenis", async ({ page }) => {
     await smokeTest(page, { path: "/club/geschiedenis" });
   });
