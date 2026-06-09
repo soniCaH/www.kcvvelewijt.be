@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import UltrasPage from "./page";
 
 describe("/club/ultras page", () => {
@@ -25,7 +25,10 @@ describe("/club/ultras page", () => {
   it("renders the raffle callout stats", () => {
     render(<UltrasPage />);
 
-    expect(screen.getByText("500")).toBeInTheDocument();
-    expect(screen.getByText("750")).toBeInTheDocument();
+    // Scope to the callout — "500"/"750" also appear in the body prose, so a
+    // page-wide text match would be ambiguous.
+    const callout = within(screen.getByTestId("raffle-callout"));
+    expect(callout.getByText("500")).toBeInTheDocument();
+    expect(callout.getByText("750")).toBeInTheDocument();
   });
 });

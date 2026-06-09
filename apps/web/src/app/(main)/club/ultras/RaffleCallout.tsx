@@ -15,6 +15,7 @@ export function RaffleCallout() {
       rotation="b"
       tape={{ color: "warm", length: "md", position: "left", rotation: "a" }}
       padding="lg"
+      dataAttrs={{ "data-testid": "raffle-callout" }}
     >
       <p className="text-cream/80 mb-5 text-center font-mono text-[length:var(--text-label)] tracking-[0.08em] uppercase">
         Schijt je rijk · seizoen 2018-2019
