@@ -2,14 +2,49 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
+    # Docs-only changes don't affect the API/Studio deploys this workflow runs.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+    # ready_for_review is included so marking a draft PR ready triggers CI even
+    # without a new push (jobs are draft-gated below).
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+# Cancel superseded runs on the same ref so repeated pushes to a PR branch don't
+# each pay for a full pipeline. Main is exempted (cancel-in-progress: false) so
+# in-flight deploy jobs on the default branch are never interrupted mid-deploy.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# Turbo Remote Cache — when TURBO_TOKEN (repo secret) + TURBO_TEAM (repo
+# variable) are set, `turbo` restores unchanged lint/type-check/test/build
+# results from a shared remote cache instead of recomputing them every run and
+# every Renovate rebase. Unset = turbo runs normally with no remote cache (no
+# failure), so this is safe to commit before the credentials exist. Setup steps
+# are in the PR description.
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
+  # Quality checks + build merged into one job: `build` previously did its own
+  # checkout + install and ran only after this job, so merging removes a whole
+  # redundant install cycle per run. Steps fail-fast, so a lint/type/test
+  # failure still stops before the (later) build steps — same early-exit as the
+  # old two-job split. Draft PRs are skipped to avoid CI on work-in-progress.
   quality-checks:
-    name: Quality Checks
+    name: Quality Checks + Build
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
 
     steps:
       - name: Checkout code
@@ -53,35 +88,21 @@ jobs:
       - name: Build Studio
         run: npx turbo build --filter=@kcvv/studio
 
+      # Folded in from the former standalone `security-scan` job — it reuses this
+      # job's already-installed dependencies instead of paying for its own
+      # checkout + install. Non-blocking (advisory only). Deeper dependency
+      # vulnerability scanning is handled by the Snyk GitHub App (the
+      # `security/snyk` PR check), which runs on Snyk's infrastructure with no
+      # GitHub Actions minutes.
+      - name: Audit dependencies (pnpm)
+        run: pnpm audit --audit-level=moderate
+        continue-on-error: true
+
       - name: Upload coverage
         uses: codecov/codecov-action@v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: apps/web/coverage
-
-  build:
-    name: Build Check
-    runs-on: ubuntu-latest
-    needs: quality-checks
-    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6.0.3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
-        with:
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6.4.0
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Build Next.js
         run: npx turbo build --filter=@kcvv/web
@@ -91,10 +112,17 @@ jobs:
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
+      # REDESIGN-DISABLED: the Storybook build + artifact upload only exist to
+      # feed the `visual-regression` job, paused during the redesign to save the
+      # bulk of the ~14-15 min/push VR cost. Re-enable the whole VR chain by
+      # setting repository variable RUN_VISUAL_REGRESSION=true (Settings →
+      # Secrets and variables → Actions → Variables) — no YAML edit needed.
       - name: Build Storybook
+        if: ${{ vars.RUN_VISUAL_REGRESSION == 'true' }}
         run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
 
       - name: Upload Storybook static
+        if: ${{ vars.RUN_VISUAL_REGRESSION == 'true' }}
         uses: actions/upload-artifact@v7.0.1
         with:
           name: storybook-static
@@ -105,7 +133,8 @@ jobs:
   visual-regression-changes:
     name: VR — Detect visual changes
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    # REDESIGN-DISABLED: gated off via the RUN_VISUAL_REGRESSION repo variable.
+    if: ${{ vars.RUN_VISUAL_REGRESSION == 'true' && github.event_name == 'pull_request' }}
     outputs:
       visual: ${{ steps.filter.outputs.visual }}
     steps:
@@ -126,16 +155,22 @@ jobs:
   visual-regression:
     name: Visual Regression
     runs-on: ubuntu-latest
-    needs: [build, visual-regression-changes]
-    # Path-filtered on PR (only run when visual paths change), unconditional on
-    # push to main/develop so merge-race regressions are caught on the merge
-    # commit even if the merging PR didn't itself touch visual paths. The
-    # `always()` plus explicit build-success guard is required because
-    # visual-regression-changes is itself PR-only — without `always()` GitHub
-    # would mark this job skipped on push since one of its `needs` was skipped.
+    timeout-minutes: 20
+    needs: [quality-checks, visual-regression-changes]
+    # REDESIGN-DISABLED: gated off via the RUN_VISUAL_REGRESSION repo variable —
+    # set it to 'true' to re-enable the whole VR chain (this job, the
+    # visual-regression-changes job, and the Storybook build steps) at once.
+    #
+    # When enabled, the trailing condition is the original: path-filtered on PR
+    # (only run when visual paths change), unconditional on push to main so
+    # merge-race regressions are caught on the merge commit even if the merging
+    # PR didn't itself touch visual paths. `always()` is required because
+    # visual-regression-changes is PR-only — without it GitHub would mark this
+    # job skipped on push since one of its `needs` was skipped.
     if: |
+      vars.RUN_VISUAL_REGRESSION == 'true' &&
       always() &&
-      needs.build.result == 'success' &&
+      needs.quality-checks.result == 'success' &&
       (
         github.event_name == 'push' ||
         (github.event_name == 'pull_request' && needs.visual-regression-changes.outputs.visual == 'true')
@@ -191,6 +226,7 @@ jobs:
   vr-diff-comment:
     name: VR — Post diff comment
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [visual-regression]
     if: failure() && needs.visual-regression.result == 'failure' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
     permissions:
@@ -286,62 +322,12 @@ jobs:
           path: ${{ steps.build-comment.outputs.comment_file }}
           GITHUB_TOKEN: ${{ secrets.KCVV_VR_BOT_TOKEN }}
 
-  migration-status:
-    name: Update Migration Status
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [quality-checks, build]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6.0.3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
-        with:
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6.4.0
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate migration report
-        working-directory: apps/web
-        run: pnpm run migration:status
-
-  security-scan:
-    name: Security Audit
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6.0.3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
-        with:
-          run_install: false
-
-      - name: Run pnpm audit
-        run: pnpm audit --audit-level=moderate
-        continue-on-error: true
-
-      - name: Run Snyk security scan
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
   deploy-api-staging:
     name: Deploy API staging to Cloudflare Workers
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: quality-checks
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
 
     steps:
       - name: Checkout code
@@ -370,10 +356,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-  deploy-api:
-    name: Deploy API to Cloudflare Workers
+  # Combined deploy: API (Cloudflare Workers) + Sanity Studio run as sequential
+  # steps in one job instead of two parallel jobs, sharing a single checkout +
+  # install. Trade-off: a failed API deploy aborts the job before Studio deploys
+  # (previously independent). Acceptable on the main-only deploy path; re-split
+  # if independent failure isolation is needed.
+  deploy:
+    name: Deploy API + Studio
     runs-on: ubuntu-latest
-    needs: [quality-checks, build]
+    timeout-minutes: 15
+    needs: [quality-checks]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
@@ -397,35 +389,11 @@ jobs:
       - name: Build api-contract
         run: npx turbo build --filter=@kcvv/api-contract
 
-      - name: Deploy to Cloudflare Workers
+      - name: Deploy API to Cloudflare Workers
         run: pnpm --filter @kcvv/api run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-studio:
-    name: Deploy Sanity Studio
-    runs-on: ubuntu-latest
-    needs: [quality-checks, build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6.0.3
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
-        with:
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6.4.0
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Deploy Sanity Studio
         run: pnpm --filter @kcvv/studio run deploy

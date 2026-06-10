@@ -12,12 +12,16 @@
 name: "CodeQL Advanced"
 
 on:
-  push:
-    branches: ["main"]
+  # Per-push-to-main analysis dropped to save CI minutes — PRs are scanned
+  # before merge and the weekly schedule provides a default-branch baseline.
   pull_request:
     branches: ["main"]
   schedule:
     - cron: "23 6 * * 4"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -28,6 +32,7 @@ jobs:
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: 20
     permissions:
       # required for all workflows
       security-events: write

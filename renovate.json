@@ -87,6 +87,18 @@
       "automerge": true
     },
     {
+      "description": "Batch all remaining non-major devDependencies into one weekly PR to cut CI runs. Placed before the specific groups below so those (eslint, storybook, typescript, playwright, react types) still win for their packages; everything else (wrangler, prettier, workers-types, etc.) collapses here.",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "groupName": "dev dependencies (non-major)"
+    },
+    {
+      "description": "Batch all remaining non-major production dependencies into one weekly PR. Specific groups below still override this for their packages.",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "production dependencies (non-major)"
+    },
+    {
       "description": "Group ESLint packages",
       "groupName": "eslint packages",
       "matchPackageNames": ["/^eslint/", "/^@eslint//"]
@@ -186,5 +198,6 @@
   "postUpdateOptions": ["pnpmDedupe"],
   "prCreation": "immediate",
   "prConcurrentLimit": 3,
-  "rebaseWhen": "behind-base-branch"
+  "schedule": ["before 6am on monday"],
+  "rebaseWhen": "conflicted"
 }
