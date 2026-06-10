@@ -4,6 +4,7 @@ import {
   type NavGlyphName,
 } from "@/components/editorial/NavGlyph/NavGlyph";
 import { SectionKicker } from "@/components/design-system";
+import { hashMemberId } from "@/lib/analytics/hash-member-id";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import type { EditorialCardConfig } from "@/lib/repositories/jeugd-landing-page.repository";
 
@@ -108,6 +109,8 @@ function renderArticleCard(article: ArticleVM): React.ReactNode {
       title={article.title}
       arrowText="Lees meer"
       imageUrl={article.coverImageUrl ?? undefined}
+      // Hashed id for `jeugd_card_click` analytics (no PII / no raw id in DOM).
+      articleIdHashed={hashMemberId(article.id)}
       // Decorative — the title is the link's accessible name, so an alt would
       // duplicate it.
     />
