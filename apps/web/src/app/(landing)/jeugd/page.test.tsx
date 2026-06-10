@@ -37,17 +37,28 @@ describe("/jeugd page — cream tracer composition", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the page heading on cream (no SectionStack transitions)", async () => {
+  it("renders the JeugdHero heading on cream (no SectionStack transitions)", async () => {
     const JeugdPage = (await import("./page")).default;
     const { container } = render(await JeugdPage());
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /jeugdopleiding/i }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: /beter worden begint met plezier/i,
+      }),
     ).toBeInTheDocument();
     // The legacy dark SectionStack + diagonal transitions are gone.
     expect(
       container.querySelectorAll('[data-testid="section-transition"]'),
     ).toHaveLength(0);
+  });
+
+  it("renders the filosofie/visie block with the #visie anchor", async () => {
+    const JeugdPage = (await import("./page")).default;
+    const { container } = render(await JeugdPage());
+
+    expect(container.querySelector("section#visie")).toBeInTheDocument();
+    expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
   });
 
   it("no longer renders the legacy 'Word ook lid' CTA", async () => {

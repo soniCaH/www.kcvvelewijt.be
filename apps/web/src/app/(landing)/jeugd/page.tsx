@@ -18,9 +18,9 @@ import {
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { MonoLabel } from "@/components/design-system/MonoLabel";
-import { EditorialHeading } from "@/components/design-system/EditorialHeading";
-import { FooterSafeArea } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
+import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
+import { JeugdVisie } from "@/components/jeugd/JeugdVisie/JeugdVisie";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
@@ -79,12 +79,11 @@ async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
 }
 
 /**
- * `/jeugd` — Phase 7 tracer (PRD redesign-phase-7-jeugd §3). The route is
- * rebuilt on the cream vocabulary: a temporary editorial header + the existing
- * nav cards (`<JeugdEditorialGrid>`) + the 6.C `<YouthDirectory>` division grid
- * (replacing the legacy dark `<TeamOverview>`). The `<JeugdHero>`, filosofie
- * block, nav-hub reskin, and CTA band land in Phases 2-5 (#2039-#2042); this
- * proves the route + data + e2e on the new spine first.
+ * `/jeugd` — Phase 7 redesign (PRD redesign-phase-7-jeugd). The route renders
+ * on the cream vocabulary: `<JeugdHero>` (photo) → `<StripedSeam>` →
+ * `<JeugdVisie>` (the `#visie` filosofie block) → the existing nav cards
+ * (`<JeugdEditorialGrid>`) → the 6.C `<YouthDirectory>` division grid. The
+ * nav-hub reskin and CTA band land in the remaining phases (#2040-#2042).
  */
 export default async function JeugdPage() {
   const [teams, articles, editorialConfig] = await Promise.all([
@@ -105,35 +104,23 @@ export default async function JeugdPage() {
       />
 
       <div className="mx-auto w-full max-w-[70rem] px-4 py-10 sm:py-14">
-        {/* Temporary tracer header — replaced by <JeugdHero> in Phase 2. */}
-        <header className="mb-12 flex flex-col gap-3">
-          <span>
-            <MonoLabel variant="plain">
-              De jeugdopleiding · U6 tot U21
-            </MonoLabel>
-          </span>
-          <EditorialHeading
-            level={1}
-            size="display-2xl"
-            emphasis={{ text: "." }}
-          >
-            Jeugdopleiding
-          </EditorialHeading>
-          <p className="font-display text-ink-muted text-[length:var(--text-display-sm)] leading-[var(--text-display-sm--lh)] italic">
-            Van U6 tot U21 — ploegen, nieuws en praktische info voor onze
-            jongste compagnie.
-          </p>
-        </header>
+        <JeugdHero />
 
-        <JeugdEditorialGrid
-          articles={articles}
-          editorialConfig={editorialConfig}
-        />
+        <div className="my-10 sm:my-12">
+          <StripedSeam colorPair="ink-cream" height="md" />
+        </div>
+
+        <JeugdVisie />
+
+        <div className="mt-16">
+          <JeugdEditorialGrid
+            articles={articles}
+            editorialConfig={editorialConfig}
+          />
+        </div>
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />
       </div>
-
-      <FooterSafeArea />
     </>
   );
 }
