@@ -119,13 +119,11 @@ export default async function JeugdPage() {
 
         <JeugdVisie />
 
-        <EditorialHubAnalytics eventName="jeugd_card_click">
-          <div className="mt-16">
-            <JeugdEditorialGrid
-              articles={articles}
-              editorialConfig={editorialConfig}
-            />
-          </div>
+        <EditorialHubAnalytics eventName="jeugd_card_click" className="mt-16">
+          <JeugdEditorialGrid
+            articles={articles}
+            editorialConfig={editorialConfig}
+          />
         </EditorialHubAnalytics>
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />

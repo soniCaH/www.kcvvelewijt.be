@@ -6,6 +6,8 @@ import { trackEvent } from "@/lib/analytics/track-event";
 export interface EditorialHubAnalyticsProps {
   /** Event fired on a card click, e.g. `jeugd_card_click`. */
   eventName: string;
+  /** Optional class on the wrapper `<div>` (e.g. layout margin). */
+  className?: string;
   children: ReactNode;
 }
 
@@ -22,6 +24,7 @@ export interface EditorialHubAnalyticsProps {
  */
 export function EditorialHubAnalytics({
   eventName,
+  className,
   children,
 }: EditorialHubAnalyticsProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -33,7 +36,7 @@ export function EditorialHubAnalytics({
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement | null;
       const card = target?.closest<HTMLElement>("[data-card-type]");
-      if (!card || !node.contains(card)) return;
+      if (!card) return;
 
       const cardType = card.dataset.cardType;
       if (!cardType) return;
@@ -50,5 +53,9 @@ export function EditorialHubAnalytics({
     return () => node.removeEventListener("click", handleClick);
   }, [eventName]);
 
-  return <div ref={ref}>{children}</div>;
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
 }

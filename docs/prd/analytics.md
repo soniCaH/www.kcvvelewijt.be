@@ -223,12 +223,12 @@ triggers. This keeps the GTM workspace manageable as new features are added.
 
 ### Trigger: `Custom Event — KCVV Analytics`
 
-| Field              | Value                                                                                                                                                                                              |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Trigger type       | Custom Event                                                                                                                                                                                       |
-| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_\|article_video_\|player_\|match_\|team_\|kalender_\|jeugd_` |
-| Use regex matching | checked                                                                                                                                                                                            |
-| Fires on           | All Custom Events                                                                                                                                                                                  |
+| Field              | Value                                                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Trigger type       | Custom Event                                                                                                                                                                                                 |
+| Event name (regex) | `responsibility_\|search_\|organigram_\|related_content_\|homepage_\|directions_\|firstteam_strip_\|article_\|related_article_\|event_\|article_video_\|player_\|match_\|team_\|kalender_\|sponsor_\|jeugd_` |
+| Use regex matching | checked                                                                                                                                                                                                      |
+| Fires on           | All Custom Events                                                                                                                                                                                            |
 
 ### Tag: `GA4 Event — KCVV Custom Events`
 
