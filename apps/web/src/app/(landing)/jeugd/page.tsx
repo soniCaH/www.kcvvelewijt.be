@@ -22,6 +22,7 @@ import { StripedSeam } from "@/components/design-system";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
 import { JeugdVisie } from "@/components/jeugd/JeugdVisie/JeugdVisie";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
+import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
 export const metadata: Metadata = {
@@ -81,9 +82,11 @@ async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
 /**
  * `/jeugd` — Phase 7 redesign (PRD redesign-phase-7-jeugd). The route renders
  * on the cream vocabulary: `<JeugdHero>` (photo) → `<StripedSeam>` →
- * `<JeugdVisie>` (the `#visie` filosofie block) → the existing nav cards
- * (`<JeugdEditorialGrid>`) → the 6.C `<YouthDirectory>` division grid. The
- * nav-hub reskin and CTA band land in the remaining phases (#2040-#2042).
+ * `<JeugdVisie>` (the `#visie` filosofie block) → the `<JeugdEditorialGrid>`
+ * nav hub → the 6.C `<YouthDirectory>` division grid → the full-bleed
+ * `<JeugdCtaBand>`. Empty states: no youth teams → `<YouthDirectory>` drops the
+ * section (returns null); no Jeugd articles → the nav hub collapses to its
+ * pinned nav cards. Analytics + SEO land in #2042.
  */
 export default async function JeugdPage() {
   const [teams, articles, editorialConfig] = await Promise.all([
@@ -121,6 +124,8 @@ export default async function JeugdPage() {
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />
       </div>
+
+      <JeugdCtaBand />
     </>
   );
 }

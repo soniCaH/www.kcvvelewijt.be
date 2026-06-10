@@ -277,6 +277,10 @@ export type {
 export { ClippedCard } from "./ClippedCard";
 export type { ClippedCardProps, ClippedCardAs } from "./ClippedCard";
 
+// CtaBand
+export { CtaBand } from "./CtaBand";
+export type { CtaBandProps } from "./CtaBand";
+
 // StampBadge
 export { StampBadge } from "./StampBadge";
 export type {

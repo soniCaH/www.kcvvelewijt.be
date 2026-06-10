@@ -42,7 +42,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The /jeugd nav hub (7j3): a uniform grid of 16:9 image-top `<EditorialHubCard>`s. News slots bubble the latest Jeugd articles (greyscale→hover photo, jersey-deep tag); six nav cards stay pinned (jersey-deep glyph panel, cream tag). With no articles the hub collapses to the pinned nav cards.",
+          "The /jeugd nav hub (7j3): a uniform grid of 16:9 image-top `<EditorialHubCard>`s. News slots bubble the latest Jeugd articles (newsprint-colour photo, jersey-deep tag); six nav cards stay pinned (jersey-deep glyph panel, cream tag). With no articles the hub collapses to the pinned nav cards.",
       },
     },
   },

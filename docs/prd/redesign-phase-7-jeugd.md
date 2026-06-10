@@ -79,7 +79,8 @@ cream grid. Proves route + data + e2e before new components land.
 
 - [ ] `<JeugdEditorialGrid>` reskinned: uniform **16:9 image-top** cards; **fixed-position bubbling**
       preserved (article slots auto-fill latest Jeugd articles; nav cards pinned).
-- [ ] Two card variants: **news** (photographic, jersey-deep tag, greyscale→hover) vs **nav**
+- [ ] Two card variants: **news** (photographic, jersey-deep tag, **newsprint colour** —
+      greyscale→hover is sponsor-logo-only, corrected 2026-06-10) vs **nav**
       (jersey-deep glyph panel via `@/lib/icons.redesign`, cream tag, `text-white`, no photo).
 - [ ] Tag pill (both variants) is **editorially managed**: news/article cards use `article.tags[0]`
       → `Jeugd` (`editorialCards.tag` is **not** read for article slots); nav cards use

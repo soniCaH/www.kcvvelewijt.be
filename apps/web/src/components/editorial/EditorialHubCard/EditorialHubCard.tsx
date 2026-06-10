@@ -17,7 +17,7 @@ export interface EditorialHubCardProps {
   title: string;
   arrowText: string;
   variant: EditorialHubCardVariant;
-  /** News variant cover photo (greyscale → hover-colour). */
+  /** News variant cover photo (newsprint colour — never greyscale). */
   imageUrl?: string;
   /** Alt text for the news cover photo. */
   imageAlt?: string;
@@ -41,8 +41,9 @@ const DEFAULT_NEWS_SIZES =
  * `/club` hub; supersedes the legacy full-bleed `<EditorialCard>`.
  *
  * Two variants:
- * - **news** — a greyscale→hover-colour cover photo with a jersey-deep tag pill
- *   (the "funeral card" greyscale exception). Bubbles in the latest articles.
+ * - **news** — a newsprint-colour cover photo with a jersey-deep tag pill.
+ *   Bubbles in the latest articles. (Greyscale→hover is reserved for sponsor
+ *   logos only — never news cards/listings.)
  * - **nav** — a `bg-jersey-deep` panel with a centered Phosphor-fill glyph and a
  *   cream tag pill; no photo. Pinned navigation links.
  *
@@ -93,12 +94,15 @@ export function EditorialHubCard({
         ) : (
           <>
             {imageUrl && (
+              // Newsprint COLOUR — news covers are never greyscale (that
+              // treatment is reserved for sponsor logos).
               <Image
                 src={imageUrl}
                 alt={imageAlt ?? ""}
                 fill
                 sizes={sizes ?? DEFAULT_NEWS_SIZES}
-                className="object-cover grayscale transition-all duration-300 ease-out group-hover:grayscale-0 group-focus-visible:grayscale-0 motion-reduce:transition-none"
+                className="object-cover"
+                style={{ filter: "var(--filter-photo-newsprint)" }}
               />
             )}
             <span className="relative z-10 m-2.5">

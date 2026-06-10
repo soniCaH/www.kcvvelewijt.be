@@ -1,95 +1,34 @@
-import {
-  EditorialHeading,
-  LinkButton,
-  StripedSeam,
-} from "@/components/design-system";
-import { getButtonClasses } from "@/components/design-system/Button/button-styles";
+import { CtaBand } from "@/components/design-system";
 
 export interface SponsorCtaBandProps {
   /** Where "Word sponsor +" links. Defaults to the club contact page (which
    *  surfaces the sponsoring address). Internal routes use `<LinkButton>`;
-   *  `mailto:` / `tel:` / external `http(s):` hrefs render a plain styled `<a>`
-   *  (next/link is for client-side route navigation only). */
+   *  `mailto:` / `tel:` / external `http(s):` hrefs render a plain styled `<a>`. */
   href?: string;
 }
 
-const EXTERNAL_HREF = /^(https?:|mailto:|tel:)/i;
-
 /**
  * <SponsorCtaBand> — the `/sponsors` closing footer band (7.d4 · C1). After the
- * gratitude of the wall, the page turns the thanks into an invitation: a
- * full-width `bg-jersey-deep-dark` band (`border-y-2 border-ink`, with a leading
- * `<StripedSeam>`) carrying an italic question + sub-line + a `warm` paper-stamp
- * "Word sponsor +". Mirrors the homepage `<ClubshopBanner>` dark-band idiom.
- *
- * The button reuses `<LinkButton variant="inverted">` (the dark-surface
- * paper-stamp: soft offset shadow + canonical press-down) recoloured to
- * `bg-warm`; promote to a dedicated `warm` variant once a second CtaBand
- * (e.g. <JeugdCtaBand>, #2041) needs it.
+ * gratitude of the wall, the page turns the thanks into an invitation: the
+ * shared `<CtaBand>` with sponsor copy and a `warm` paper-stamp
+ * "Word sponsor +".
  */
 export function SponsorCtaBand({
   href = "/club/contact",
 }: SponsorCtaBandProps) {
-  const isExternal = EXTERNAL_HREF.test(href);
-  const isHttp = /^https?:/i.test(href);
-  const buttonClassName = "bg-warm hover:bg-warm";
-  const label = (
-    <>
-      Word sponsor <span aria-hidden="true">+</span>
-    </>
-  );
-
   return (
-    <>
-      <StripedSeam colorPair="ink-cream" height="md" />
-      <section
-        aria-label="Word sponsor"
-        className="bg-jersey-deep-dark border-ink border-y-2"
-      >
-        <div className="mx-auto max-w-5xl px-4 py-12 text-center sm:py-16">
-          <EditorialHeading
-            level={2}
-            size="display-lg"
-            tone="cream"
-            emphasis={{ text: "langs de zijlijn", tone: "warm" }}
-            className="mb-4"
-          >
-            Jouw zaak ook langs de zijlijn?
-          </EditorialHeading>
-
-          <p className="text-cream/90 mx-auto mb-7 max-w-xl text-base leading-relaxed">
-            Word partner van de plezantste compagnie en steun onze jeugd en
-            eerste ploegen!
-          </p>
-
-          <div className="flex justify-center">
-            {isExternal ? (
-              <a
-                href={href}
-                data-sponsor-cta="true"
-                className={getButtonClasses({
-                  variant: "inverted",
-                  className: buttonClassName,
-                })}
-                {...(isHttp
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
-              >
-                {label}
-              </a>
-            ) : (
-              <LinkButton
-                href={href}
-                variant="inverted"
-                className={buttonClassName}
-                {...{ "data-sponsor-cta": "true" }}
-              >
-                {label}
-              </LinkButton>
-            )}
-          </div>
-        </div>
-      </section>
-    </>
+    <CtaBand
+      ariaLabel="Word sponsor"
+      heading="Jouw zaak ook langs de zijlijn?"
+      emphasis={{ text: "langs de zijlijn", tone: "warm" }}
+      lead="Word partner van de plezantste compagnie en steun onze jeugd en eerste ploegen!"
+      buttonLabel={
+        <>
+          Word sponsor <span aria-hidden="true">+</span>
+        </>
+      }
+      href={href}
+      buttonData={{ "data-sponsor-cta": "true" }}
+    />
   );
 }

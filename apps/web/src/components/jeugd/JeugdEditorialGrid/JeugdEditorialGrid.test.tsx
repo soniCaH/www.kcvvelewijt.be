@@ -238,5 +238,10 @@ describe("JeugdEditorialGrid", () => {
       render(<JeugdEditorialGrid articles={[]} />);
       expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
     });
+
+    it("falls back to hardcoded defaults when editorialConfig is empty (§4)", () => {
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={[]} />);
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+    });
   });
 });
