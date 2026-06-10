@@ -1,7 +1,7 @@
 import {
-  MonoLabel,
   MonoLabelRow,
   QuoteMark,
+  SectionKicker,
   TapedCard,
 } from "@/components/design-system";
 
@@ -31,10 +31,7 @@ const VISIE_TAGS = [
 export function JeugdVisie() {
   return (
     <section id="visie" className="scroll-mt-24">
-      <div className="mb-4 flex items-center gap-2.5">
-        <MonoLabel variant="plain">Onze jeugdvisie</MonoLabel>
-        <span aria-hidden="true" className="bg-paper-edge h-0.5 flex-1" />
-      </div>
+      <SectionKicker className="mb-4">Onze jeugdvisie</SectionKicker>
 
       <TapedCard bg="cream-soft" padding="lg" shadow="md">
         <div className="grid grid-cols-[auto_1fr] items-center gap-5 sm:gap-6">

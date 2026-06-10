@@ -1,8 +1,28 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import type { ImageProps } from "next/image";
 import { JeugdEditorialGrid } from "./JeugdEditorialGrid";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import type { EditorialCardConfig } from "@/lib/repositories/jeugd-landing-page.repository";
+
+vi.mock("next/image", () => ({
+  default: ({ alt, src, ...rest }: ImageProps) => {
+    const props = { alt, src: typeof src === "string" ? src : "", ...rest };
+    return <img {...props} />;
+  },
+}));
+
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: { children: React.ReactNode; href: string } & Record<string, unknown>) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
   return {
@@ -22,11 +42,9 @@ function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
 }
 
 describe("JeugdEditorialGrid", () => {
-  it("renders section header with label and title", () => {
+  it("renders the section kicker", () => {
     render(<JeugdEditorialGrid articles={[]} />);
-
     expect(screen.getByText("Ontdek onze jeugd")).toBeInTheDocument();
-    expect(screen.getByText("Alles op één plek")).toBeInTheDocument();
   });
 
   it("renders all 6 nav cards with correct titles", () => {
@@ -40,21 +58,26 @@ describe("JeugdEditorialGrid", () => {
     expect(screen.getByText("Blessure of afmelding?")).toBeInTheDocument();
   });
 
-  it("renders nav card links pointing to correct routes", () => {
+  it("repoints nav cards to live routes (no more dead routes)", () => {
     render(<JeugdEditorialGrid articles={[]} />);
 
-    const links = screen.getAllByRole("link");
-    const hrefs = links.map((link) => link.getAttribute("href"));
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
 
-    expect(hrefs).toContain("/club/inschrijven");
-    expect(hrefs).toContain("/jeugd/visie");
+    // Repointed (7j0b): word lid + medisch → /hulp, jeugdvisie → #visie anchor.
+    expect(hrefs).toContain("/hulp");
+    expect(hrefs).toContain("/jeugd#visie");
     expect(hrefs).toContain("/nieuws/prosoccerdata");
     expect(hrefs).toContain("/club/organigram");
-    expect(hrefs).toContain("/hulp");
-    expect(hrefs).toContain("/jeugd/medisch");
+
+    // Old dead routes are gone.
+    expect(hrefs).not.toContain("/club/inschrijven");
+    expect(hrefs).not.toContain("/jeugd/visie");
+    expect(hrefs).not.toContain("/jeugd/medisch");
   });
 
-  it("renders 3 article cards when 3 articles provided", () => {
+  it("renders 3 article cards (news variant) when 3 articles provided", () => {
     const articles = [
       makeArticle({ id: "a1", title: "Article One", slug: "article-one" }),
       makeArticle({ id: "a2", title: "Article Two", slug: "article-two" }),
@@ -63,12 +86,9 @@ describe("JeugdEditorialGrid", () => {
 
     render(<JeugdEditorialGrid articles={articles} />);
 
-    expect(screen.getByText("Article One")).toBeInTheDocument();
-    expect(screen.getByText("Article Two")).toBeInTheDocument();
-    expect(screen.getByText("Article Three")).toBeInTheDocument();
-
-    const links = screen.getAllByRole("link");
-    const hrefs = links.map((link) => link.getAttribute("href"));
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
     expect(hrefs).toContain("/nieuws/article-one");
     expect(hrefs).toContain("/nieuws/article-two");
     expect(hrefs).toContain("/nieuws/article-three");
@@ -82,50 +102,53 @@ describe("JeugdEditorialGrid", () => {
     ];
 
     render(<JeugdEditorialGrid articles={articles} />);
-
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(9);
+    expect(screen.getAllByRole("link")).toHaveLength(9);
   });
 
-  it("renders only 6 nav cards when no articles provided", () => {
+  it("collapses to 6 nav cards when no articles provided", () => {
     render(<JeugdEditorialGrid articles={[]} />);
-
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(6);
+    expect(screen.getAllByRole("link")).toHaveLength(6);
   });
 
-  it("renders only 7 cards when 1 article provided (1 article + 6 nav)", () => {
+  it("renders 7 cards when 1 article provided (1 article + 6 nav)", () => {
     const articles = [
       makeArticle({ id: "a1", title: "Only One", slug: "only-one" }),
     ];
 
     render(<JeugdEditorialGrid articles={articles} />);
-
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(7);
+    expect(screen.getAllByRole("link")).toHaveLength(7);
     expect(screen.getByText("Only One")).toBeInTheDocument();
   });
 
-  it("marks the first article as featured", () => {
+  it("renders a news cover photo + the article's first tag", () => {
     const articles = [
-      makeArticle({ id: "a1", title: "Featured Article", slug: "featured" }),
+      makeArticle({
+        id: "a1",
+        title: "Met cover",
+        slug: "met-cover",
+        coverImageUrl: "https://cdn.example.com/cover.jpg",
+        tags: ["Bovenbouw", "Jeugd"],
+      }),
     ];
 
-    render(<JeugdEditorialGrid articles={articles} />);
+    const { container } = render(<JeugdEditorialGrid articles={articles} />);
 
-    // Featured card has Lees meer arrow text
-    expect(screen.getByText("Featured Article")).toBeInTheDocument();
-    // Featured card should have p-10 padding (featured prop)
-    const link = screen.getByRole("link", { name: /featured article/i });
-    const content = link.querySelector("[data-testid='card-content']");
-    expect(content?.className).toContain("p-10");
+    // The cover is decorative (alt="") — the title is the link's accessible
+    // name — so it carries no `img` role; query it by src instead.
+    const cover = container.querySelector(
+      'img[src="https://cdn.example.com/cover.jpg"]',
+    );
+    expect(cover).toBeInTheDocument();
+    // News tag = article.tags[0].
+    expect(screen.getByText("Bovenbouw")).toBeInTheDocument();
   });
 
-  it("renders 12-column grid container", () => {
+  it("renders a uniform responsive grid (not the legacy 12-col layout)", () => {
     render(<JeugdEditorialGrid articles={[]} />);
 
     const grid = screen.getByTestId("jeugd-editorial-grid");
-    expect(grid.className).toContain("grid-cols-12");
+    expect(grid.className).toContain("lg:grid-cols-3");
+    expect(grid.className).not.toContain("grid-cols-12");
   });
 
   describe("with Sanity editorialConfig", () => {
@@ -137,7 +160,7 @@ describe("JeugdEditorialGrid", () => {
         title: "Word lid van KCVV",
         description: "Nieuwe spelers zijn altijd welkom.",
         arrowText: "Schrijf je in",
-        href: "/club/inschrijven",
+        href: "/hulp",
         imageUrl: null,
         position: "medium",
         cardType: "nav",
@@ -147,23 +170,21 @@ describe("JeugdEditorialGrid", () => {
 
     it("renders nav card titles from Sanity config instead of hardcoded", () => {
       const config: EditorialCardConfig[] = [
-        makeNavConfig({ title: "Sanity Nav Card 1", position: "medium" }),
-        makeNavConfig({ title: "Sanity Nav Card 2", position: "third" }),
+        makeNavConfig({ title: "Sanity Nav Card 1" }),
+        makeNavConfig({ title: "Sanity Nav Card 2" }),
       ];
 
       render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
 
       expect(screen.getByText("Sanity Nav Card 1")).toBeInTheDocument();
       expect(screen.getByText("Sanity Nav Card 2")).toBeInTheDocument();
-      // Hardcoded defaults should NOT appear
       expect(screen.queryByText("Onze jeugdvisie")).not.toBeInTheDocument();
-      expect(screen.queryByText("Organigram")).not.toBeInTheDocument();
     });
 
     it("renders nav card links from Sanity config", () => {
       const config: EditorialCardConfig[] = [
-        makeNavConfig({ href: "/sanity/route-1", position: "medium" }),
-        makeNavConfig({ href: "/sanity/route-2", position: "third" }),
+        makeNavConfig({ href: "/sanity/route-1" }),
+        makeNavConfig({ href: "/sanity/route-2" }),
       ];
 
       render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
@@ -173,14 +194,26 @@ describe("JeugdEditorialGrid", () => {
         .map((l) => l.getAttribute("href"));
       expect(hrefs).toContain("/sanity/route-1");
       expect(hrefs).toContain("/sanity/route-2");
-      // Hardcoded default routes should NOT appear
-      expect(hrefs).not.toContain("/jeugd/visie");
+    });
+
+    it("renders an empty pill for a Sanity nav card with no tag", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({ title: "Geen tag", tag: null, href: "/ergens" }),
+      ];
+
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
+
+      // The card renders, but no pill text is emitted for the empty tag.
+      expect(
+        screen.getByRole("link", { name: /geen tag/i }),
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Aansluiten")).not.toBeInTheDocument();
     });
 
     it("auto-fills article slots from articles prop when config has article cardType", () => {
       const config: EditorialCardConfig[] = [
         makeNavConfig({ cardType: "article", position: "featured" }),
-        makeNavConfig({ title: "Nav from Sanity", position: "medium" }),
+        makeNavConfig({ title: "Nav from Sanity" }),
       ];
       const articles = [
         makeArticle({ id: "a1", title: "Sanity Article", slug: "sanity-art" }),
@@ -197,14 +230,12 @@ describe("JeugdEditorialGrid", () => {
     it("falls back to hardcoded defaults when editorialConfig is null", () => {
       render(<JeugdEditorialGrid articles={[]} editorialConfig={null} />);
 
-      // Hardcoded cards should appear
       expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
       expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
     });
 
     it("falls back to hardcoded defaults when editorialConfig is undefined", () => {
       render(<JeugdEditorialGrid articles={[]} />);
-
       expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
     });
   });

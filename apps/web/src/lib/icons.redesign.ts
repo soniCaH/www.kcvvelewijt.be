@@ -17,10 +17,15 @@ import {
   CaretLeft as PhCaretLeft,
   CaretRight as PhCaretRight,
   CheckCircle as PhCheckCircle,
+  Eye as PhEye,
+  FirstAid as PhFirstAid,
   Heart as PhHeart,
   House as PhHouse,
   List as PhList,
   MagnifyingGlass as PhMagnifyingGlass,
+  SoccerBall as PhSoccerBall,
+  TreeStructure as PhTreeStructure,
+  UsersThree as PhUsersThree,
   Warning as PhWarning,
   WarningCircle as PhWarningCircle,
   X as PhX,
@@ -44,10 +49,15 @@ export const CaretDown = fillWrapper(PhCaretDown);
 export const CaretLeft = fillWrapper(PhCaretLeft);
 export const CaretRight = fillWrapper(PhCaretRight);
 export const CheckCircle = fillWrapper(PhCheckCircle);
+export const Eye = fillWrapper(PhEye);
+export const FirstAid = fillWrapper(PhFirstAid);
 export const Heart = fillWrapper(PhHeart);
 export const House = fillWrapper(PhHouse);
 export const List = fillWrapper(PhList);
 export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
+export const SoccerBall = fillWrapper(PhSoccerBall);
+export const TreeStructure = fillWrapper(PhTreeStructure);
+export const UsersThree = fillWrapper(PhUsersThree);
 export const Warning = fillWrapper(PhWarning);
 export const WarningCircle = fillWrapper(PhWarningCircle);
 export const X = fillWrapper(PhX);

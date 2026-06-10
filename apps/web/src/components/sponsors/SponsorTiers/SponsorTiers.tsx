@@ -1,4 +1,4 @@
-import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { SectionKicker } from "@/components/design-system/SectionKicker";
 import { TapedCardGrid } from "@/components/design-system/TapedCardGrid";
 import { HoofdSponsorTile } from "../HoofdSponsorTile";
 import { SponsorTile, SPONSOR_TILE_GRID_CLASS } from "../SponsorTile";
@@ -32,10 +32,7 @@ export function SponsorTiers({ sponsors }: SponsorTiersProps) {
     <div className="flex flex-col gap-10 sm:gap-12">
       {hoofd.length > 0 && (
         <section aria-label="Hoofdsponsors">
-          <div className="mb-4 flex items-center gap-3">
-            <MonoLabel variant="plain">Hoofdsponsors</MonoLabel>
-            <span aria-hidden className="bg-paper-edge h-0.5 flex-1" />
-          </div>
+          <SectionKicker className="mb-4">Hoofdsponsors</SectionKicker>
           <TapedCardGrid columns={3} gap="md" as="ul">
             {hoofd.map((sponsor) => (
               <HoofdSponsorTile key={sponsor.id} sponsor={sponsor} />
