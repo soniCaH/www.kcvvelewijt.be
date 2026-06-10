@@ -83,8 +83,8 @@ describe("EditorialHubCard", () => {
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
     });
 
-    it("omits the tag pill when tag is an empty string", () => {
-      render(
+    it("renders an empty pill when tag is an empty string (7j3 nav contract)", () => {
+      const { container } = render(
         <EditorialHubCard
           variant="nav"
           href="/club/organigram"
@@ -94,11 +94,14 @@ describe("EditorialHubCard", () => {
           icon={navGlyph}
         />,
       );
-      // The title and arrow render; no empty pill element carries stray text.
       expect(
         screen.getByRole("link", { name: /organigram/i }),
       ).toBeInTheDocument();
       expect(screen.getByTestId("nav-glyph")).toBeInTheDocument();
+      // The pill still renders per the contract — just empty.
+      const pill = container.querySelector('[data-variant="pill-cream"]');
+      expect(pill).toBeInTheDocument();
+      expect(pill).toHaveTextContent("");
     });
   });
 });

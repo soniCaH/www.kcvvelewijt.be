@@ -9,8 +9,9 @@ export type EditorialHubCardVariant = "news" | "nav";
 export interface EditorialHubCardProps {
   href: string;
   /**
-   * Tag pill label. An empty string renders no pill — used by Sanity nav cards
-   * that carry no `editorialCards.tag`.
+   * Tag pill label. The pill always renders; an empty string renders an empty
+   * pill — the 7j3 contract for Sanity nav cards that carry no
+   * `editorialCards.tag`.
    */
   tag: string;
   title: string;
@@ -83,11 +84,10 @@ export function EditorialHubCard({
       >
         {isNav ? (
           <>
-            {tag && (
-              <span className="absolute top-2.5 left-2.5 z-10">
-                <MonoLabel variant="pill-cream">{tag}</MonoLabel>
-              </span>
-            )}
+            {/* Pill always renders; an empty `tag` is an empty pill (7j3). */}
+            <span className="absolute top-2.5 left-2.5 z-10">
+              <MonoLabel variant="pill-cream">{tag}</MonoLabel>
+            </span>
             {icon}
           </>
         ) : (
@@ -101,11 +101,9 @@ export function EditorialHubCard({
                 className="object-cover grayscale transition-all duration-300 ease-out group-hover:grayscale-0 group-focus-visible:grayscale-0 motion-reduce:transition-none"
               />
             )}
-            {tag && (
-              <span className="relative z-10 m-2.5">
-                <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
-              </span>
-            )}
+            <span className="relative z-10 m-2.5">
+              <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
+            </span>
           </>
         )}
       </div>

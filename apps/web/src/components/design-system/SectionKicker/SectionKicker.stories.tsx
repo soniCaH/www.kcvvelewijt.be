@@ -26,6 +26,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+/** Interactive playground — tweak the label via Controls. */
+export const Playground: Story = {
+  args: { children: "Ontdek onze jeugd" },
+};
+
 export const Default: Story = {
   args: { children: "Ontdek onze jeugd" },
 };

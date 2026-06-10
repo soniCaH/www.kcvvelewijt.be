@@ -1,6 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { NavGlyph } from "../NavGlyph/NavGlyph";
-import { EditorialHubCard } from "./EditorialHubCard";
+import { NavGlyph, type NavGlyphName } from "../NavGlyph/NavGlyph";
+import {
+  EditorialHubCard,
+  type EditorialHubCardProps,
+} from "./EditorialHubCard";
+
+/**
+ * The card's `icon` is a `ReactNode` (so the card stays a server component).
+ * Stories expose a serializable `iconName` instead and map it to `<NavGlyph>`
+ * in `render`, keeping Storybook args serializable / Controls-friendly.
+ */
+type StoryArgs = Omit<EditorialHubCardProps, "icon"> & {
+  iconName?: NavGlyphName;
+};
 
 const meta = {
   title: "Features/Editorial/EditorialHubCard",
@@ -11,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The uniform 16:9 image-top card of a landing-page nav hub (7j3). Shared across the /jeugd nav hub and (later) /club. **news** = greyscale→hover cover photo + jersey-deep tag pill; **nav** = jersey-deep glyph panel (Phosphor-fill) + cream tag pill, no photo. Both share border-2 ink + shadow-paper + canonical press-down.",
+          "The uniform 16:9 image-top card of a landing-page nav hub (7j3). Shared across the /jeugd nav hub and (later) /club. **news** = greyscale→hover cover photo + jersey-deep tag pill; **nav** = jersey-deep glyph panel (Phosphor-fill) + cream tag pill. Both share border-2 ink + shadow-paper + canonical press-down.",
       },
     },
   },
@@ -22,7 +34,13 @@ const meta = {
       </div>
     ),
   ],
-} satisfies Meta<typeof EditorialHubCard>;
+  render: ({ iconName, ...args }) => (
+    <EditorialHubCard
+      {...args}
+      icon={iconName ? <NavGlyph name={iconName} /> : undefined}
+    />
+  ),
+} satisfies Meta<StoryArgs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -59,7 +77,7 @@ export const Nav: Story = {
     tag: "Visie",
     title: "Onze jeugdvisie",
     arrowText: "Ontdek",
-    icon: <NavGlyph name="Eye" />,
+    iconName: "Eye",
   },
 };
 
@@ -71,11 +89,11 @@ export const NavTrainingen: Story = {
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
     arrowText: "Meer info",
-    icon: <NavGlyph name="SoccerBall" />,
+    iconName: "SoccerBall",
   },
 };
 
-/** Nav variant with no CMS tag — the pill is omitted entirely. */
+/** Nav variant with no CMS tag — the pill still renders, just empty (7j3). */
 export const NavNoTag: Story = {
   args: {
     variant: "nav",
@@ -83,6 +101,6 @@ export const NavNoTag: Story = {
     tag: "",
     title: "Organigram",
     arrowText: "Bekijk",
-    icon: <NavGlyph name="TreeStructure" />,
+    iconName: "TreeStructure",
   },
 };

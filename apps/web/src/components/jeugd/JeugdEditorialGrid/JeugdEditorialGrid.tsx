@@ -79,6 +79,10 @@ type GridItem = {
   element: React.ReactNode;
 };
 
+function assertNever(value: never): never {
+  throw new Error(`Unhandled editorialCards.cardType: ${String(value)}`);
+}
+
 function renderNavCard(nav: NavCardConfig): React.ReactNode {
   return (
     <EditorialHubCard
@@ -128,7 +132,7 @@ function buildItemsFromConfig(
         key: `article-${article.id}`,
         element: renderArticleCard(article),
       });
-    } else {
+    } else if (entry.cardType === "nav") {
       // Nav card — skip if required fields are missing.
       if (!entry.title || !entry.href) continue;
       items.push({
@@ -145,6 +149,10 @@ function buildItemsFromConfig(
           />
         ),
       });
+    } else {
+      // Exhaustiveness guard — fails loudly if `cardType` gains a value the
+      // render doesn't handle (schema drift).
+      assertNever(entry.cardType);
     }
   }
 
