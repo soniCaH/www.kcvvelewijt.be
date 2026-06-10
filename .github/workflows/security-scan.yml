@@ -7,7 +7,7 @@ name: Security Scan
 
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main]
   schedule:
     - cron: "17 6 * * 1"
 
@@ -24,9 +24,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6.0.3
+        with:
+          # This job only scans; it never pushes. Don't persist the token.
+          persist-credentials: false
 
       - name: Run Snyk security scan
-        uses: snyk/actions/node@master
+        uses: snyk/actions/node@v1.0.0
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
