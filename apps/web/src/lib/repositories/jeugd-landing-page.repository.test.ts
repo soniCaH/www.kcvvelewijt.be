@@ -75,6 +75,19 @@ describe("JeugdLandingPageRepository", () => {
       expect(result).toBeNull();
     });
 
+    it("returns null (not []) when editorialCards is an empty array", async () => {
+      mockFetch.mockResolvedValueOnce({ editorialCards: [] });
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* JeugdLandingPageRepository;
+          return yield* repo.getEditorialCards();
+        }),
+      );
+
+      expect(result).toBeNull();
+    });
+
     it("maps a nav card correctly", async () => {
       mockFetch.mockResolvedValueOnce({
         editorialCards: [makeCard()],
