@@ -13,7 +13,7 @@ name: E2E
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - "apps/web/src/**"
       - "apps/web/public/**"
@@ -26,7 +26,10 @@ on:
       - ".nvmrc"
       - ".github/workflows/e2e.yml"
   pull_request:
-    branches: [main, develop]
+    branches: [main]
+    # ready_for_review so marking a draft ready triggers the suite (job is
+    # draft-gated below).
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "apps/web/src/**"
       - "apps/web/public/**"
@@ -39,10 +42,24 @@ on:
       - ".nvmrc"
       - ".github/workflows/e2e.yml"
 
+# Cancel superseded e2e runs on the same ref — repeated PR pushes shouldn't each
+# pay for a full Playwright run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Turbo Remote Cache — see ci.yml for setup. Lets the api-contract/web builds
+# below restore from cache when unchanged.
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
 jobs:
   e2e:
     name: E2E
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
     # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image used by the visual-regression suite. Bump all of these

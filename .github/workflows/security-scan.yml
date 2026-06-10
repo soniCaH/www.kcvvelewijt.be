@@ -1,0 +1,32 @@
+name: Security Scan
+
+# Snyk dependency/vulnerability scan. Split out of ci.yml and moved off the
+# per-push hot path to a PR + weekly cadence to save CI minutes — dependencies
+# rarely change between commits. The lighter `pnpm audit` still runs on every
+# quality-checks run inside ci.yml.
+
+on:
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "17 6 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  snyk:
+    name: Snyk
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.3
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
