@@ -19,9 +19,11 @@ import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { StripedSeam } from "@/components/design-system";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
 import { JeugdVisie } from "@/components/jeugd/JeugdVisie/JeugdVisie";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
+import { EditorialHubAnalytics } from "@/components/editorial/EditorialHubAnalytics/EditorialHubAnalytics";
 import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
@@ -86,7 +88,8 @@ async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
  * nav hub → the 6.C `<YouthDirectory>` division grid → the full-bleed
  * `<JeugdCtaBand>`. Empty states: no youth teams → `<YouthDirectory>` drops the
  * section (returns null); no Jeugd articles → the nav hub collapses to its
- * pinned nav cards. Analytics + SEO land in #2042.
+ * pinned nav cards. Fires `jeugd_view` (page view) + `jeugd_card_click` (nav-hub
+ * card clicks, via `<EditorialHubAnalytics>` delegation).
  */
 export default async function JeugdPage() {
   const [teams, articles, editorialConfig] = await Promise.all([
@@ -99,6 +102,7 @@ export default async function JeugdPage() {
 
   return (
     <>
+      <PageViewTracker eventName="jeugd_view" />
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -115,12 +119,14 @@ export default async function JeugdPage() {
 
         <JeugdVisie />
 
-        <div className="mt-16">
-          <JeugdEditorialGrid
-            articles={articles}
-            editorialConfig={editorialConfig}
-          />
-        </div>
+        <EditorialHubAnalytics eventName="jeugd_card_click">
+          <div className="mt-16">
+            <JeugdEditorialGrid
+              articles={articles}
+              editorialConfig={editorialConfig}
+            />
+          </div>
+        </EditorialHubAnalytics>
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />
       </div>

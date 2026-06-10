@@ -30,6 +30,12 @@ export interface EditorialHubCardProps {
   icon?: ReactNode;
   /** `next/image` `sizes` hint for the news cover. */
   sizes?: string;
+  /**
+   * Pre-hashed article id (`hashMemberId`), news variant only. Emitted as an
+   * inert `data-article-id-hashed` marker for page-scoped click-delegation
+   * analytics (e.g. `<EditorialHubAnalytics>`). No raw id reaches the DOM.
+   */
+  articleIdHashed?: string;
 }
 
 const DEFAULT_NEWS_SIZES =
@@ -61,12 +67,18 @@ export function EditorialHubCard({
   imageAlt,
   icon,
   sizes,
+  articleIdHashed,
 }: EditorialHubCardProps) {
   const isNav = variant === "nav";
 
   return (
     <Link
       href={href}
+      // Inert analytics markers — read by a page-scoped click-delegation
+      // wrapper (<EditorialHubAnalytics>); no per-card onClick.
+      data-card-type={variant}
+      data-tag={tag}
+      data-article-id-hashed={articleIdHashed}
       className={cn(
         "group border-ink shadow-paper-sm bg-cream-soft flex h-full flex-col overflow-hidden border-2",
         // Canonical press-down on hover AND keyboard focus (parity with

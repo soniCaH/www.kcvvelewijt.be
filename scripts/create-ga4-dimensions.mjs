@@ -59,6 +59,10 @@ const dimensions = [
   { parameterName: "kalender_type",      displayName: "Kalender type" },
   { parameterName: "teams_count",        displayName: "Teams count" },
   { parameterName: "side",               displayName: "Match side" },
+  // Phase 7 /jeugd nav hub (#2042) — jeugd_card_click.
+  { parameterName: "card_type",          displayName: "Card type" },
+  { parameterName: "tag",                displayName: "Card tag" },
+  { parameterName: "article_id_hashed",  displayName: "Article ID (hashed)" },
 ];
 
 let token;

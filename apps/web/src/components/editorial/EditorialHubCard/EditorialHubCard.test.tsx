@@ -49,6 +49,24 @@ describe("EditorialHubCard", () => {
       expect(screen.queryByTestId("nav-glyph")).not.toBeInTheDocument();
     });
 
+    it("emits inert analytics markers (card-type, tag, hashed article id)", () => {
+      render(
+        <EditorialHubCard
+          variant="news"
+          href="/nieuws/u15-wint"
+          tag="Bovenbouw"
+          title="U15 wint in stijl"
+          arrowText="Lees meer"
+          imageUrl="/images/cover.jpg"
+          articleIdHashed="deadbeef"
+        />,
+      );
+      const link = screen.getByRole("link", { name: /u15 wint in stijl/i });
+      expect(link).toHaveAttribute("data-card-type", "news");
+      expect(link).toHaveAttribute("data-tag", "Bovenbouw");
+      expect(link).toHaveAttribute("data-article-id-hashed", "deadbeef");
+    });
+
     it("renders without a cover image (fallback panel), keeping the tag", () => {
       render(
         <EditorialHubCard

@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 
+const trackEvent = vi.fn();
+vi.mock("@/lib/analytics/track-event", () => ({
+  trackEvent: (name: string, params?: Record<string, unknown>) =>
+    trackEvent(name, params),
+}));
+
 // Mock the data layer so the async server component can render.
 vi.mock("@/lib/effect/runtime", () => ({
   runPromise: vi.fn().mockResolvedValue([]),
@@ -88,6 +94,25 @@ describe("/jeugd page — cream tracer composition", () => {
     expect(
       within(cta).getByRole("link", { name: /schrijf je in/i }),
     ).toHaveAttribute("href", "/hulp");
+  });
+
+  it("fires jeugd_view on page view", async () => {
+    const JeugdPage = (await import("./page")).default;
+    render(await JeugdPage());
+
+    expect(trackEvent).toHaveBeenCalledWith("jeugd_view", undefined);
+  });
+
+  it("fires jeugd_card_click when a nav-hub card is clicked", async () => {
+    const JeugdPage = (await import("./page")).default;
+    render(await JeugdPage());
+
+    screen.getByText("Word lid van KCVV").click();
+
+    expect(trackEvent).toHaveBeenCalledWith(
+      "jeugd_card_click",
+      expect.objectContaining({ card_type: "nav" }),
+    );
   });
 
   it("empty data: drops the divisions section, keeps a nav-only hub + the CTA", async () => {
