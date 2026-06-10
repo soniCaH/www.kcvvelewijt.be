@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The uniform 16:9 image-top card of a landing-page nav hub (7j3). Shared across the /jeugd nav hub and (later) /club. **news** = greyscale→hover cover photo + jersey-deep tag pill; **nav** = jersey-deep glyph panel (Phosphor-fill) + cream tag pill. Both share border-2 ink + shadow-paper + canonical press-down.",
+          "The uniform 16:9 image-top card of a landing-page nav hub (7j3). Shared across the /jeugd nav hub and (later) /club. **news** = newsprint-colour cover photo + jersey-deep tag pill; **nav** = jersey-deep glyph panel (Phosphor-fill) + cream tag pill. Both share border-2 ink + shadow-paper + canonical press-down. (Greyscale→hover is sponsor-logo-only — never news cards.)",
       },
     },
   },
@@ -45,7 +45,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** News variant — greyscale cover photo (resolves to colour on hover) + jersey-deep tag. */
+/** News variant — newsprint-colour cover photo + jersey-deep tag. */
 export const News: Story = {
   args: {
     variant: "news",

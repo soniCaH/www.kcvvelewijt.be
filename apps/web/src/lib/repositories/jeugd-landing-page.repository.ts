@@ -63,7 +63,10 @@ export function toEditorialCardsVM(
   const cards = data.editorialCards
     .map(toEditorialCardConfig)
     .filter((c): c is EditorialCardConfig => c !== null);
-  return cards;
+  // Honest contract: non-empty array or null, never `[]` — an unset singleton
+  // and an all-invalid card list both mean "no editor config" (→ the hardcoded
+  // nav fallback, design-summary §4).
+  return cards.length > 0 ? cards : null;
 }
 
 // ─── Repository ──────────────────────────────────────────────────────────────

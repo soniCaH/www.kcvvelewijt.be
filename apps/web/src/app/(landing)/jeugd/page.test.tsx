@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 
 // Mock the data layer so the async server component can render.
 vi.mock("@/lib/effect/runtime", () => ({
@@ -57,8 +57,12 @@ describe("/jeugd page — cream tracer composition", () => {
     const JeugdPage = (await import("./page")).default;
     const { container } = render(await JeugdPage());
 
-    expect(container.querySelector("section#visie")).toBeInTheDocument();
-    expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
+    const visie = container.querySelector("section#visie");
+    expect(visie).toBeInTheDocument();
+    // Scope to the section — "Onze jeugdvisie" is also a nav-hub card title.
+    expect(
+      within(visie as HTMLElement).getByText("Onze jeugdvisie"),
+    ).toBeInTheDocument();
   });
 
   it("no longer renders the legacy 'Word ook lid' CTA", async () => {
@@ -68,5 +72,37 @@ describe("/jeugd page — cream tracer composition", () => {
     expect(
       screen.queryByRole("link", { name: /word ook lid/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders the closing JeugdCtaBand linking to /hulp", async () => {
+    const JeugdPage = (await import("./page")).default;
+    render(await JeugdPage());
+
+    const cta = screen.getByRole("region", { name: "Schrijf je in" });
+    expect(
+      within(cta).getByRole("heading", {
+        level: 2,
+        name: /interesse in onze jeugd/i,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(cta).getByRole("link", { name: /schrijf je in/i }),
+    ).toHaveAttribute("href", "/hulp");
+  });
+
+  it("empty data: drops the divisions section, keeps a nav-only hub + the CTA", async () => {
+    const JeugdPage = (await import("./page")).default;
+    const { container } = render(await JeugdPage());
+
+    // 0 youth teams → <YouthDirectory> returns null (section dropped).
+    expect(
+      container.querySelector('[data-testid="youth-directory"]'),
+    ).not.toBeInTheDocument();
+    // 0 Jeugd articles → nav-only hub (the pinned nav cards remain).
+    expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+    // The CTA band still renders.
+    expect(
+      screen.getByRole("region", { name: "Schrijf je in" }),
+    ).toBeInTheDocument();
   });
 });

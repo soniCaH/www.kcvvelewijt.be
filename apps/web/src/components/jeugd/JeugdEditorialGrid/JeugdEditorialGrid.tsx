@@ -216,15 +216,16 @@ interface JeugdEditorialGridProps {
  * variant + bubbling.
  *
  * Content comes from the Sanity `editorialCards` singleton when set; otherwise
- * the hardcoded `NAV_CARDS` fallback ships (repointed targets). With no
- * articles, the hub collapses to the pinned nav cards.
+ * (null or empty) the hardcoded `NAV_CARDS` fallback ships (repointed targets,
+ * design-summary §4). With no articles, the hub collapses to the pinned nav
+ * cards.
  */
 export function JeugdEditorialGrid({
   articles,
   editorialConfig,
 }: JeugdEditorialGridProps) {
   const items =
-    editorialConfig != null
+    editorialConfig != null && editorialConfig.length > 0
       ? buildItemsFromConfig(editorialConfig, articles)
       : buildItemsFromHardcoded(articles);
 

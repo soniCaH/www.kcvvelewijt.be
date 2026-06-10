@@ -13,8 +13,11 @@ into articles-first (N2-as-drawn rejected). Instead:
 
 - **Card chrome (uniform):** every card is identical — a **16:9 image-top** region + text below
   (MonoLabel tag · italic-display title · optional description · mono arrow link). Replaces today's
-  full-bleed-background + overlay model. TapedCard vocabulary, greyscale→hover-colour image,
+  full-bleed-background + overlay model. TapedCard vocabulary, newsprint-colour image,
   canonical press-down hover.
+  > **Correction (2026-06-10, owner):** news covers are **newsprint COLOUR**, not
+  > greyscale→hover. Greyscale→hover is reserved for sponsor logos only — never
+  > news cards/listings.
 - **Fixed-position template:** the 9 slots sit at **predetermined positions**. Some slots are
   **article slots**, the rest are **fixed nav slots**.
   - **Article slots bubble:** the latest Jeugd-category articles auto-fill the article slots in

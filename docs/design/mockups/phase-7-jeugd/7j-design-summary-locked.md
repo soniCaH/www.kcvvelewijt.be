@@ -47,7 +47,8 @@ The `/jeugd` redesign in the retro-terrace-fanzine system. Audience: **parents**
   `<TapedFigure>` youth photo (newsprint filter, `landscape-4-3` or `16-9`). Split mirrors the
   sponsors `<SponsorHero>` structure.
 - **Nav-hub cards (uniform 16:9 image-top):**
-  - **News variant** — `<TapedFigure>`-style 16:9 cover photo, greyscale→hover-colour,
+  - **News variant** — `<TapedFigure>`-style 16:9 cover photo, **newsprint colour**
+    (corrected 2026-06-10 — greyscale→hover is sponsor-logo-only, never news cards),
     jersey-deep tag pill, italic-display title, mono "Lees meer →".
   - **Nav variant** — 16:9 `bg-jersey-deep` panel (no photo) with a Phosphor-fill glyph
     (`@/lib/icons.redesign`) + cream tag pill + italic-display title + mono arrow. `text-white`

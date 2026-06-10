@@ -51,6 +51,15 @@ export default function JeugdLoading() {
           ))}
         </div>
       </div>
+
+      {/* CTA band (full-bleed) */}
+      <div className="bg-jersey-deep-dark border-ink animate-pulse border-y-2">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 px-4 py-12 sm:py-16">
+          <div className="bg-cream/15 h-8 w-72 max-w-full rounded" />
+          <div className="bg-cream/15 h-4 w-96 max-w-full rounded" />
+          <div className="bg-cream/15 h-11 w-40 rounded" />
+        </div>
+      </div>
     </>
   );
 }
