@@ -90,8 +90,10 @@ jobs:
 
       # Folded in from the former standalone `security-scan` job — it reuses this
       # job's already-installed dependencies instead of paying for its own
-      # checkout + install. Non-blocking (advisory only). The heavier Snyk scan
-      # moved to security-scan.yml on a PR + weekly cadence.
+      # checkout + install. Non-blocking (advisory only). Deeper dependency
+      # vulnerability scanning is handled by the Snyk GitHub App (the
+      # `security/snyk` PR check), which runs on Snyk's infrastructure with no
+      # GitHub Actions minutes.
       - name: Audit dependencies (pnpm)
         run: pnpm audit --audit-level=moderate
         continue-on-error: true
