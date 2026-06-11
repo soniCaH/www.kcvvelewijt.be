@@ -103,19 +103,16 @@ pnpm turbo build --filter=@kcvv/web
 
 Do not proceed to PR if any check fails.
 
-## Step 5.5 — Code Review (Pre-PR)
+## Step 5.5 — Pre-PR Review Gate (`/code-review` + `/simplify`)
 
-After quality checks pass, spawn the `superpowers:code-reviewer` agent to review all changes before pushing. This catches issues that would otherwise be flagged by CodeRabbitAI.
+After quality checks pass, run **both** review skills on the branch diff (`git diff origin/main...HEAD`) before pushing. This is a **required gate on every Ralph issue**, not optional — it catches what CodeRabbitAI would otherwise flag.
 
-Use the Agent tool with `subagent_type: "superpowers:code-reviewer"` and provide:
+1. **`/code-review`** (high effort) — the full multi-agent correctness/bug hunt. Fix every confirmed finding; refute false positives with a one-line reason.
+2. **`/simplify`** — the 4 cleanup agents (reuse · simplification · efficiency · altitude). Apply the genuine wins; skip out-of-scope or false-positive findings with a brief reason.
 
-- The issue number and PRD context
-- The diff of all changes (`git diff origin/main...HEAD`)
-- Instruction to review against CLAUDE.md coding standards
+Run them against the worktree branch. When working from a separate worktree, point the review agents at the worktree path (`git diff origin/main...HEAD` there). After applying fixes, **re-run the quality gate** (Step 5) before Step 6. In the PR body / session summary, note what was applied vs skipped.
 
-Fix any issues the reviewer identifies, then re-run the quality gate before proceeding to Step 6.
-
-Do not skip this step — it exists to reduce PR review round-trips.
+Do not skip this step — it exists to reduce PR review round-trips. (The legacy `superpowers:code-reviewer` agent referenced here previously does not exist in this environment; the two skills above replace it.)
 
 ## Step 6 — Commit, Push, and Open PR
 
