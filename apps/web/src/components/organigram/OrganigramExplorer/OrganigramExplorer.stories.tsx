@@ -41,3 +41,12 @@ export const VacantNode: Story = {
 export const SharedNode: Story = {
   args: { initialFocusId: "kledij" },
 };
+
+/**
+ * Phase 4 (#2055) "trigger + consolidate": with `onOpenMember` wired, the centred
+ * node shows a "Contactgegevens" trigger (opens the `<MemberDetailPanel>` over the
+ * verkenner) instead of the inline profile link + shared-member list.
+ */
+export const WithContactTrigger: Story = {
+  args: { onOpenMember: fn() },
+};

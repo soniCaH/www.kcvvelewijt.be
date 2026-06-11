@@ -25,6 +25,13 @@ export interface StructureDirectoryProps {
   nodes: OrgChartNode[];
   /** Forwarded to each vacant card's recruit CTA. */
   vacantCtaHref?: string;
+  /**
+   * Render each card as a focusable `<button>` that opens the
+   * `<MemberDetailPanel>` (Phase 4, #2055). The hub passes this so its single
+   * click-delegation listener can drive the panel; standalone/presentational
+   * usage (default) keeps the inert `<article>` cards.
+   */
+  interactive?: boolean;
   className?: string;
 }
 
@@ -79,6 +86,7 @@ export function groupByDepartment(nodes: OrgChartNode[]): DirectoryGroup[] {
 export function StructureDirectory({
   nodes,
   vacantCtaHref,
+  interactive = false,
   className,
 }: StructureDirectoryProps) {
   const groups = groupByDepartment(nodes);
@@ -108,6 +116,7 @@ export function StructureDirectory({
               <OrgPersonCard
                 key={node.id}
                 node={node}
+                interactive={interactive}
                 {...(vacantCtaHref ? { vacantCtaHref } : {})}
               />
             ))}

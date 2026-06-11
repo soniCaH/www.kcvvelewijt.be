@@ -25,3 +25,12 @@ type Story = StoryObj<typeof meta>;
  * fixture's real vacant (Sponsorverantwoordelijke) + shared (Co-Penningmeester).
  */
 export const Default: Story = {};
+
+/**
+ * The hub variant (Phase 4, #2055): each card is a focusable button (canonical
+ * press-down hover) that opens the `<MemberDetailPanel>` via the hub's
+ * click-delegation. Wrap in `<HubMemberPanel>` on the page to make it open.
+ */
+export const Interactive: Story = {
+  args: { interactive: true },
+};

@@ -20,12 +20,14 @@ import {
   CaretUp as PhCaretUp,
   CheckCircle as PhCheckCircle,
   DownloadSimple as PhDownloadSimple,
+  Envelope as PhEnvelope,
   Eye as PhEye,
   FirstAid as PhFirstAid,
   Heart as PhHeart,
   House as PhHouse,
   List as PhList,
   MagnifyingGlass as PhMagnifyingGlass,
+  Phone as PhPhone,
   Question as PhQuestion,
   SoccerBall as PhSoccerBall,
   TreeStructure as PhTreeStructure,
@@ -57,12 +59,14 @@ export const CaretRight = fillWrapper(PhCaretRight);
 export const CaretUp = fillWrapper(PhCaretUp);
 export const CheckCircle = fillWrapper(PhCheckCircle);
 export const DownloadSimple = fillWrapper(PhDownloadSimple);
+export const Envelope = fillWrapper(PhEnvelope);
 export const Eye = fillWrapper(PhEye);
 export const FirstAid = fillWrapper(PhFirstAid);
 export const Heart = fillWrapper(PhHeart);
 export const House = fillWrapper(PhHouse);
 export const List = fillWrapper(PhList);
 export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
+export const Phone = fillWrapper(PhPhone);
 export const Question = fillWrapper(PhQuestion);
 export const SoccerBall = fillWrapper(PhSoccerBall);
 export const TreeStructure = fillWrapper(PhTreeStructure);

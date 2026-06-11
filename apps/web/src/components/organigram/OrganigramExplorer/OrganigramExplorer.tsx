@@ -20,6 +20,7 @@ import {
   CaretLeft,
   CaretRight,
   CaretUp,
+  Envelope,
   X,
 } from "@/lib/icons.redesign";
 import { SpotlightNodeCard } from "./SpotlightNodeCard";
@@ -62,6 +63,13 @@ export interface OrganigramExplorerProps {
   childrenCap?: number;
   /** Element focus returns to on close (typically the launcher button). */
   returnFocusRef?: RefObject<HTMLElement | null>;
+  /**
+   * Phase 4 (#2055): open the person-first `<MemberDetailPanel>` for the centred
+   * node (the verkenner entry point, 7o5 "trigger + consolidate"). When set, the
+   * centre shows a "Contactgegevens" trigger instead of the inline profile link +
+   * shared-member list — the panel becomes the single person-first surface.
+   */
+  onOpenMember?: (node: OrgChartNode, trigger: HTMLElement) => void;
 }
 
 const NAV_KEYS = new Set<string>([
@@ -106,6 +114,7 @@ export function OrganigramExplorer({
   initialFocusId,
   childrenCap = 7,
   returnFocusRef,
+  onOpenMember,
 }: OrganigramExplorerProps) {
   const tree = useMemo(() => buildSpotlightTree(nodes), [nodes]);
   // Open on the deep-linked node when valid, else the primary top node
@@ -404,37 +413,51 @@ export function OrganigramExplorer({
                     {siblingsOpen ? "verberg" : "alle functies"}
                   </button>
                 )}
-                {profileHref && (
-                  <Link
-                    href={profileHref}
-                    className="text-warm hover:text-cream flex items-center gap-1 font-mono text-[10px] uppercase"
+                {onOpenMember && view.focus.id !== CLUB_ROOT_ID ? (
+                  <button
+                    type="button"
+                    onClick={(e) => onOpenMember(view.focus, e.currentTarget)}
+                    aria-haspopup="dialog"
+                    className="border-warm bg-warm text-ink hover:bg-cream flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[10px] font-bold tracking-[0.04em] uppercase transition-colors"
                   >
-                    Volledig profiel <ArrowRight size={11} aria-hidden />
-                  </Link>
-                )}
-                {focusState === "shared" && (
-                  <ul
-                    aria-label="Personen in deze functie"
-                    className="flex flex-col items-center gap-1"
-                  >
-                    {view.focus.members.map((member) => (
-                      <li key={member.id}>
-                        {member.href ? (
-                          <Link
-                            href={member.href}
-                            className="text-warm hover:text-cream flex items-center gap-1 font-mono text-[10px]"
-                          >
-                            {member.name?.trim() || "—"}{" "}
-                            <ArrowRight size={10} aria-hidden />
-                          </Link>
-                        ) : (
-                          <span className="text-cream/75 font-mono text-[10px]">
-                            {member.name?.trim() || "—"}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                    <Envelope size={12} aria-hidden />
+                    Contactgegevens
+                  </button>
+                ) : (
+                  <>
+                    {profileHref && (
+                      <Link
+                        href={profileHref}
+                        className="text-warm hover:text-cream flex items-center gap-1 font-mono text-[10px] uppercase"
+                      >
+                        Volledig profiel <ArrowRight size={11} aria-hidden />
+                      </Link>
+                    )}
+                    {focusState === "shared" && (
+                      <ul
+                        aria-label="Personen in deze functie"
+                        className="flex flex-col items-center gap-1"
+                      >
+                        {view.focus.members.map((member) => (
+                          <li key={member.id}>
+                            {member.href ? (
+                              <Link
+                                href={member.href}
+                                className="text-warm hover:text-cream flex items-center gap-1 font-mono text-[10px]"
+                              >
+                                {member.name?.trim() || "—"}{" "}
+                                <ArrowRight size={10} aria-hidden />
+                              </Link>
+                            ) : (
+                              <span className="text-cream/75 font-mono text-[10px]">
+                                {member.name?.trim() || "—"}
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
                 )}
               </div>
 
