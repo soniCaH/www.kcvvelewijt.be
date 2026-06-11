@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { searchMembers, searchResponsibilities, searchHub } from "./hub-search";
+import {
+  searchMembers,
+  searchResponsibilities,
+  searchHub,
+  dedupeMembersByPerson,
+} from "./hub-search";
+import type { HubMemberResult } from "./hub-search";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
@@ -76,6 +82,79 @@ describe("searchMembers", () => {
 
   it("caps results to maxResults", () => {
     expect(searchMembers("bestuur", members, 1)).toHaveLength(1);
+  });
+
+  it("consolidates a person who holds several positions into one result", () => {
+    // A multi-position person (primary holder of 3 nodes) must surface once,
+    // not 3× — the bug owner-reported on the live hub search.
+    const multi: OrgChartNode[] = [
+      {
+        id: "node-a",
+        title: "Secretaris",
+        department: "hoofdbestuur",
+        members: [{ id: "kvr", name: "Kevin Van Ransbeeck" }],
+      },
+      {
+        id: "node-b",
+        title: "Website & Communicatie",
+        department: "algemeen",
+        members: [{ id: "kvr", name: "Kevin Van Ransbeeck" }],
+      },
+      {
+        id: "node-c",
+        title: "Gerechtelijk Correspondent",
+        department: "hoofdbestuur",
+        members: [{ id: "kvr", name: "Kevin Van Ransbeeck" }],
+      },
+    ];
+    const results = searchMembers("kevin", multi, 10);
+    expect(results).toHaveLength(1);
+    expect(results[0].member.members[0]?.id).toBe("kvr");
+    expect(results[0].extraPositions).toBe(2);
+  });
+
+  it("does not consolidate distinct people who both match", () => {
+    const results = searchMembers("a", members, 10); // matches several names
+    const personIds = results.map((r) => r.member.members[0]?.id);
+    expect(new Set(personIds).size).toBe(personIds.length);
+    expect(results.every((r) => r.extraPositions === 0)).toBe(true);
+  });
+});
+
+describe("dedupeMembersByPerson", () => {
+  const result = (
+    nodeId: string,
+    personId: string | undefined,
+    score: number,
+  ): HubMemberResult => ({
+    type: "member",
+    score,
+    matchedFields: [],
+    extraPositions: 0,
+    member: {
+      id: nodeId,
+      title: nodeId,
+      members: personId ? [{ id: personId, name: personId }] : [],
+    },
+  });
+
+  it("keeps the highest-scoring position as the representative", () => {
+    const deduped = dedupeMembersByPerson([
+      result("low", "p1", 50),
+      result("high", "p1", 80),
+    ]);
+    expect(deduped).toHaveLength(1);
+    expect(deduped[0].member.id).toBe("high");
+    expect(deduped[0].extraPositions).toBe(1);
+  });
+
+  it("passes vacant / holder-less matches through untouched", () => {
+    const deduped = dedupeMembersByPerson([
+      result("vacant-1", undefined, 10),
+      result("vacant-2", undefined, 10),
+    ]);
+    expect(deduped).toHaveLength(2);
+    expect(deduped.every((r) => r.extraPositions === 0)).toBe(true);
   });
 });
 

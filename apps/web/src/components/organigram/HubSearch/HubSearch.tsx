@@ -262,6 +262,10 @@ export function HubSearch({
                     </span>
                     <span className="text-ink-muted block truncate font-mono text-[11px] tracking-wide uppercase">
                       {result.member.title}
+                      {result.extraPositions > 0 &&
+                        ` · +${result.extraPositions} ${
+                          result.extraPositions === 1 ? "functie" : "functies"
+                        }`}
                     </span>
                   </span>
                 </button>
