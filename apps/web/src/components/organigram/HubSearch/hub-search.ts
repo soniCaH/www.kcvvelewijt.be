@@ -30,6 +30,14 @@ export interface HubMemberResult {
   member: OrgChartNode;
   score: number;
   matchedFields: MatchedFields;
+  /**
+   * How many *other* positions the same person holds among the matches. When a
+   * person primarily holds several positions, their rows are consolidated into
+   * one (their best-scoring position is the representative) and this is the count
+   * of the rest — driving a "+N functies" hint. 0 for a single-position person
+   * or a position-only/vacant match (no primary holder to consolidate by).
+   */
+  extraPositions: number;
 }
 
 export interface HubResponsibilityResult {
@@ -90,11 +98,60 @@ export function searchMembers(
     }
 
     if (score > 0) {
-      results.push({ type: "member", member, score, matchedFields });
+      results.push({
+        type: "member",
+        member,
+        score,
+        matchedFields,
+        extraPositions: 0,
+      });
     }
   }
 
-  return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
+  // Consolidate before capping: a person who primarily holds several positions
+  // would otherwise return one row per position (e.g. searching a name surfaces
+  // them 3×). De-duping here, not after the slice, keeps the cap honest.
+  return dedupeMembersByPerson(results)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxResults);
+}
+
+/**
+ * Collapse multiple position-rows for the same person into a single result,
+ * keeping their highest-scoring position as the representative and counting the
+ * rest into `extraPositions`. Position-only matches (vacant nodes, or title /
+ * role / department hits with no primary holder) have no person to key on and
+ * pass through untouched.
+ */
+export function dedupeMembersByPerson(
+  results: HubMemberResult[],
+): HubMemberResult[] {
+  const byPerson = new Map<string, HubMemberResult>();
+  const passthrough: HubMemberResult[] = [];
+
+  for (const result of results) {
+    const personId = result.member.members[0]?.id;
+    if (personId === undefined) {
+      passthrough.push(result);
+      continue;
+    }
+
+    const existing = byPerson.get(personId);
+    if (existing === undefined) {
+      byPerson.set(personId, result);
+      continue;
+    }
+
+    // Keep the higher-scoring position as the representative; either way the
+    // person now has one more position folded in.
+    const representative = result.score > existing.score ? result : existing;
+    byPerson.set(personId, {
+      ...representative,
+      extraPositions: existing.extraPositions + 1,
+    });
+  }
+
+  return [...byPerson.values(), ...passthrough];
 }
 
 /**
