@@ -34,6 +34,7 @@ import {
   OrganigramHero,
   deriveStructureIndex,
 } from "@/components/organigram/OrganigramHero";
+import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
 import { OrganigramOverview } from "@/components/organigram/OrganigramExplorer";
 
@@ -147,24 +148,33 @@ export default async function HulpHubPage() {
             Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
           </p>
 
-          <div className="mt-8">
-            <StructureDirectory nodes={members} />
-          </div>
+          {/* Person-first detail panel (7o5 / #2055): one `<MemberDetailPanel>`
+              wired to both the directory cards (click delegation) and the
+              verkenner's "Contactgegevens" trigger, with the `?member=`
+              deep-link. */}
+          <HubMemberPanel
+            nodes={members}
+            responsibilityPaths={responsibilityPaths}
+          >
+            <div className="mt-8">
+              <StructureDirectory nodes={members} interactive />
+            </div>
 
-          {/* Volledig organigram — the full reporting chart (click a node to
-              drill into the verkenner) + the one-A4 PDF. */}
-          <div className="mt-14">
-            <MonoLabel variant="plain">Volledig overzicht</MonoLabel>
-            <EditorialHeading
-              level={3}
-              size="display-sm"
-              emphasis={{ text: "in beeld" }}
-              className="mt-2 mb-6"
-            >
-              De hele structuur in beeld
-            </EditorialHeading>
-            <OrganigramOverview nodes={members} />
-          </div>
+            {/* Volledig organigram — the full reporting chart (click a node to
+                drill into the verkenner) + the one-A4 PDF. */}
+            <div className="mt-14">
+              <MonoLabel variant="plain">Volledig overzicht</MonoLabel>
+              <EditorialHeading
+                level={3}
+                size="display-sm"
+                emphasis={{ text: "in beeld" }}
+                className="mt-2 mb-6"
+              >
+                De hele structuur in beeld
+              </EditorialHeading>
+              <OrganigramOverview nodes={members} />
+            </div>
+          </HubMemberPanel>
         </section>
       </div>
 

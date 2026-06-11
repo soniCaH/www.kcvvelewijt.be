@@ -209,3 +209,60 @@ describe("OrgPersonCard — vacant", () => {
     );
   });
 });
+
+describe("OrgPersonCard — interactive (Phase 4 panel trigger)", () => {
+  it("is a presentational article (no button) by default", () => {
+    render(<OrgPersonCard node={node()} />);
+    expect(screen.getByTestId("org-person-card").tagName).toBe("ARTICLE");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("renders a focusable button with a person-first label + data-member-card", () => {
+    render(<OrgPersonCard node={node()} interactive />);
+    const card = screen.getByRole("button", {
+      name: "Contactgegevens van Luc Boons",
+    });
+    expect(card).toHaveAttribute("data-member-card", "true");
+    expect(card).toHaveAttribute("data-node-id", "n1");
+    expect(card).toHaveAttribute("data-card-state", "single");
+  });
+
+  it("labels a shared card with the position + holder count", () => {
+    render(
+      <OrgPersonCard
+        node={node({
+          title: "Feestcomité",
+          members: [
+            { id: "p1", name: "Els Claes" },
+            { id: "p2", name: "Nina Bral" },
+          ],
+        })}
+        interactive
+      />,
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "Contactgegevens — Feestcomité, 2 personen",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("drops the inline recruit link on a vacant card (the panel carries the CTA)", () => {
+    render(
+      <OrgPersonCard
+        node={node({ title: "Penningmeester", members: [] })}
+        interactive
+      />,
+    );
+    expect(
+      screen.getByRole("button", {
+        name: "Penningmeester — deze plek is vrij",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("org-person-card-vacant-cta"),
+    ).not.toBeInTheDocument();
+    // The recruit copy stays visible (now inert) inside the card.
+    expect(screen.getByText("Iets voor jou? →")).toBeInTheDocument();
+  });
+});

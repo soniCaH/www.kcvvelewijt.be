@@ -43,7 +43,28 @@ export interface OrgPersonCardProps {
    * contact/Hulp"; final route confirmed in 7o7).
    */
   vacantCtaHref?: string;
+  /**
+   * Phase 4 (#2055): render the whole card as a focusable `<button>` that opens
+   * the `<MemberDetailPanel>`. The card carries `data-member-card` so the hub's
+   * single click-delegation listener can target directory cards without catching
+   * the verkenner's own `data-node-id` nav nodes. When interactive, the vacant
+   * card drops its inline recruit link — the panel's vacant state carries the
+   * CTA instead. Presentational (`<article>`) by default.
+   */
+  interactive?: boolean;
   className?: string;
+}
+
+/** Accessible name for an interactive card (its visible text is decorative). */
+function cardActionLabel(
+  node: OrgChartNode,
+  state: OrgPersonCardState,
+): string {
+  if (state === "vacant") return `${node.title} — deze plek is vrij`;
+  if (state === "shared") {
+    return `Contactgegevens — ${node.title}, ${node.members.length} personen`;
+  }
+  return `Contactgegevens van ${node.members[0]?.name ?? node.title}`;
 }
 
 // ─── Pure helpers (exported for unit tests) ──────────────────────────────────
@@ -274,6 +295,7 @@ export function OrgPersonCard({
   node,
   scale = "directory",
   vacantCtaHref = "/club/contact",
+  interactive = false,
   className,
 }: OrgPersonCardProps) {
   const state = deriveCardState(node.members.length);
@@ -281,20 +303,18 @@ export function OrgPersonCard({
 
   const baseCard =
     "border-ink relative flex flex-col items-center border-2 p-3 text-center";
+  const rootClass = cn(
+    baseCard,
+    state === "vacant"
+      ? "bg-warm shadow-paper-sm"
+      : "bg-cream shadow-[3px_3px_0_0_var(--color-ink)]",
+    interactive &&
+      "focus-visible:outline-ink w-full cursor-pointer transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2",
+    className,
+  );
 
-  return (
-    <article
-      data-testid="org-person-card"
-      data-node-id={node.id}
-      data-card-state={state}
-      className={cn(
-        baseCard,
-        state === "vacant"
-          ? "bg-warm shadow-paper-sm"
-          : "bg-cream shadow-[3px_3px_0_0_var(--color-ink)]",
-        className,
-      )}
-    >
+  const content = (
+    <>
       {/* roleCode pill — top-right, auto-hides when absent (7o4). */}
       {node.roleCode && (
         <span
@@ -356,15 +376,50 @@ export function OrgPersonCard({
       {state === "vacant" && (
         <>
           <p className={SUBLABEL}>deze plek is vrij</p>
-          <Link
-            href={vacantCtaHref}
-            data-testid="org-person-card-vacant-cta"
-            className="border-ink bg-cream text-ink shadow-paper-sm mt-2.5 border-[1.5px] px-2.5 py-1.5 font-mono text-[9px] font-bold tracking-[0.06em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-          >
-            Iets voor jou? →
-          </Link>
+          {/* Interactive cards open the panel (vacant state carries the CTA);
+              the inline link is only for the presentational directory. */}
+          {interactive ? (
+            <span className="border-ink bg-cream text-ink shadow-paper-sm mt-2.5 border-[1.5px] px-2.5 py-1.5 font-mono text-[9px] font-bold tracking-[0.06em] uppercase">
+              Iets voor jou? →
+            </span>
+          ) : (
+            <Link
+              href={vacantCtaHref}
+              data-testid="org-person-card-vacant-cta"
+              className="border-ink bg-cream text-ink shadow-paper-sm mt-2.5 border-[1.5px] px-2.5 py-1.5 font-mono text-[9px] font-bold tracking-[0.06em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+            >
+              Iets voor jou? →
+            </Link>
+          )}
         </>
       )}
+    </>
+  );
+
+  if (interactive) {
+    return (
+      <button
+        type="button"
+        data-testid="org-person-card"
+        data-member-card="true"
+        data-node-id={node.id}
+        data-card-state={state}
+        aria-label={cardActionLabel(node, state)}
+        className={rootClass}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <article
+      data-testid="org-person-card"
+      data-node-id={node.id}
+      data-card-state={state}
+      className={rootClass}
+    >
+      {content}
     </article>
   );
 }

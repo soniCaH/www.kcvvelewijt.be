@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { OrgChartNode } from "@/types/organigram";
+import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { OrganigramExplorer } from "./OrganigramExplorer";
 import { VolledigOrganigram } from "./VolledigOrganigram";
 
@@ -17,6 +18,7 @@ export interface OrganigramOverviewProps {
 }
 
 export function OrganigramOverview({ nodes }: OrganigramOverviewProps) {
+  const hubPanel = useHubMemberPanel();
   const [open, setOpen] = useState(false);
   const [focusId, setFocusId] = useState<string | undefined>(undefined);
   // Bumped on every open so the explorer remounts fresh and initialises directly
@@ -48,6 +50,12 @@ export function OrganigramOverview({ nodes }: OrganigramOverviewProps) {
         onClose={() => setOpen(false)}
         {...(focusId ? { initialFocusId: focusId } : {})}
         returnFocusRef={returnFocusRef}
+        {...(hubPanel
+          ? {
+              onOpenMember: (node, trigger) =>
+                hubPanel.openMember(node, { trigger, view: "chart" }),
+            }
+          : {})}
       />
     </>
   );
