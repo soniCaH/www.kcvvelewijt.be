@@ -10,6 +10,7 @@ import { explorerFixture } from "./organigram-explorer.fixture";
 
 afterEach(() => {
   document.getElementById("vo-print-style")?.remove();
+  document.documentElement.style.removeProperty("--vo-print-scale");
   delete (window as { print?: unknown }).print;
 });
 
@@ -41,13 +42,18 @@ describe("VolledigOrganigram", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders the 'Open verkenner' button when onOpenExplorer is provided", () => {
+  it("calls onOpenExplorer when the 'Open verkenner' button is clicked", async () => {
+    const onOpenExplorer = vi.fn();
     render(
-      <VolledigOrganigram nodes={explorerFixture} onOpenExplorer={vi.fn()} />,
+      <VolledigOrganigram
+        nodes={explorerFixture}
+        onOpenExplorer={onOpenExplorer}
+      />,
     );
-    expect(
+    await userEvent.click(
       screen.getByRole("button", { name: /Open verkenner/ }),
-    ).toBeInTheDocument();
+    );
+    expect(onOpenExplorer).toHaveBeenCalled();
   });
 
   it("marks vacant positions", () => {

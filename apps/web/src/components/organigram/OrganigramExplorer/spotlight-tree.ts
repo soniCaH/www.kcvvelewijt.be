@@ -250,8 +250,12 @@ export function splitFan<T>(
   cap: number,
   expanded: boolean,
 ): { visible: T[]; hidden: number } {
-  if (expanded || items.length <= cap) {
+  if (expanded) {
     return { visible: items, hidden: 0 };
   }
-  return { visible: items.slice(0, cap), hidden: items.length - cap };
+  // Normalise the cap to an integer in [0, items.length] so `hidden` is always a
+  // whole, in-range count even if a caller passes a fractional or out-of-range cap.
+  const integerCap = Math.min(Math.max(0, Math.floor(cap)), items.length);
+  const visible = items.slice(0, integerCap);
+  return { visible, hidden: items.length - visible.length };
 }

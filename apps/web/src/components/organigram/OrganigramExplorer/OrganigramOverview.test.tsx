@@ -31,13 +31,13 @@ describe("OrganigramOverview", () => {
     );
   });
 
-  it("closes the explorer and returns to the chart on Esc", async () => {
+  it("closes the explorer and returns focus to the trigger on Esc", async () => {
     render(<OrganigramOverview nodes={explorerFixture} />);
-    await userEvent.click(
-      screen.getByRole("button", { name: /Open verkenner/ }),
-    );
+    const launcher = screen.getByRole("button", { name: /Open verkenner/ });
+    await userEvent.click(launcher);
     await screen.findByRole("dialog");
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(launcher).toHaveFocus();
   });
 });

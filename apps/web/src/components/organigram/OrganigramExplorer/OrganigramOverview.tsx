@@ -25,6 +25,9 @@ export function OrganigramOverview({ nodes }: OrganigramOverviewProps) {
   const returnFocusRef = useRef<HTMLElement | null>(null);
 
   const openAt = (id: string | undefined, trigger: HTMLElement) => {
+    // Dedup: re-triggering the exact same open (already open, same node + same
+    // trigger) is a no-op — avoids a needless explorer remount via setOpenKey.
+    if (open && id === focusId && returnFocusRef.current === trigger) return;
     returnFocusRef.current = trigger;
     setFocusId(id);
     setOpen(true);
