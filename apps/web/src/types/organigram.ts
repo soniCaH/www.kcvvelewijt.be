@@ -1,8 +1,10 @@
 /**
  * Organigram (Organizational Chart) Types
  *
- * Used for the club organizational structure visualization.
- * These types define the hierarchical structure for d3-org-chart library.
+ * Used for the club organizational structure visualisation — the `/hulp#structuur`
+ * directory and the spotlight `<OrganigramExplorer>`. The flat `OrgChartNode[]`
+ * (with `parentId`) is turned into a navigable tree by the explorer's
+ * `spotlight-tree` model.
  */
 
 /**

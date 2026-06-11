@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system";
@@ -8,17 +5,16 @@ import { OrgPersonCard } from "@/components/organigram/OrgPersonCard";
 
 /**
  * `<StructureDirectory>` — the Phase 7 `/hulp` "Structuur" browse (design lock
- * `7o2` view model + `7o7` assembly).
+ * `7o2` view model).
  *
  * The calm, single-scroll people directory: every active organigram position
  * grouped by **afdeling** (Hoofdbestuur · Jeugdbestuur · Algemeen) and rendered
- * as an `<OrgPersonCard>` (single / shared / vacant). It stays **compact** — each
- * afdeling shows a few cards until one global "Toon alle N →" toggle expands the
- * whole directory — so it doesn't wall off the Hulp half above it.
+ * as an `<OrgPersonCard>` (single / shared / vacant). Every position is shown —
+ * no per-afdeling cap (an arbitrary "first N" read as a featured subset, #2054
+ * owner review); navigation lives in the explorer + the clickable full chart, so
+ * the directory's job is simply to list everyone honestly.
  *
  * Data only: vacant cards are the real 0-members positions, never fabricated.
- * The "Open verkenner ⤢" launcher and the click → `<MemberDetailPanel>` wiring
- * arrive with the explorer (Phase 3, #2054) and the panel (Phase 4, #2055).
  */
 
 export interface StructureDirectoryProps {
@@ -27,8 +23,6 @@ export interface StructureDirectoryProps {
    * synthetic "club" root node is filtered out internally.
    */
   nodes: OrgChartNode[];
-  /** Cards shown per afdeling before "Toon alle N →" expands. Default 4. */
-  initialPerDepartment?: number;
   /** Forwarded to each vacant card's recruit CTA. */
   vacantCtaHref?: string;
   className?: string;
@@ -84,70 +78,42 @@ export function groupByDepartment(nodes: OrgChartNode[]): DirectoryGroup[] {
 
 export function StructureDirectory({
   nodes,
-  initialPerDepartment = 4,
   vacantCtaHref,
   className,
 }: StructureDirectoryProps) {
-  const [expanded, setExpanded] = useState(false);
-
   const groups = groupByDepartment(nodes);
-  const total = groups.reduce((sum, group) => sum + group.nodes.length, 0);
-
-  if (total === 0) return null;
-
-  const hasHidden = groups.some(
-    (group) => group.nodes.length > initialPerDepartment,
-  );
+  if (groups.length === 0) return null;
 
   return (
     <div
       data-testid="structure-directory"
-      data-expanded={expanded}
       className={cn("flex flex-col gap-10", className)}
     >
-      {groups.map((group) => {
-        const visible = expanded
-          ? group.nodes
-          : group.nodes.slice(0, initialPerDepartment);
-        return (
-          <section key={group.key} aria-label={group.label}>
-            <h3 className="flex flex-wrap items-center gap-3">
-              <MonoLabel variant="pill-ink" size="sm">
-                {group.label}
-              </MonoLabel>
-              <span
-                aria-hidden="true"
-                className="text-ink-muted font-mono text-[10px] tracking-[0.06em] uppercase"
-              >
-                {group.nodes.length}{" "}
-                {group.nodes.length === 1 ? "functie" : "functies"}
-              </span>
-            </h3>
-            <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
-              {visible.map((node) => (
-                <OrgPersonCard
-                  key={node.id}
-                  node={node}
-                  {...(vacantCtaHref ? { vacantCtaHref } : {})}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
-
-      {hasHidden && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setExpanded((value) => !value)}
-            aria-expanded={expanded}
-            className="border-ink bg-cream-soft text-ink shadow-paper-sm focus-visible:outline-ink border-2 px-4 py-3 font-mono text-sm font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
-          >
-            {expanded ? "Toon minder ←" : `Toon alle ${total} →`}
-          </button>
-        </div>
-      )}
+      {groups.map((group) => (
+        <section key={group.key} aria-label={group.label}>
+          <h3 className="flex flex-wrap items-center gap-3">
+            <MonoLabel variant="pill-ink" size="sm">
+              {group.label}
+            </MonoLabel>
+            <span
+              aria-hidden="true"
+              className="text-ink-muted font-mono text-[10px] tracking-[0.06em] uppercase"
+            >
+              {group.nodes.length}{" "}
+              {group.nodes.length === 1 ? "functie" : "functies"}
+            </span>
+          </h3>
+          <div className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
+            {group.nodes.map((node) => (
+              <OrgPersonCard
+                key={node.id}
+                node={node}
+                {...(vacantCtaHref ? { vacantCtaHref } : {})}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

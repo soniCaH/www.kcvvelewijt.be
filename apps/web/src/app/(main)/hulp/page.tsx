@@ -35,6 +35,7 @@ import {
   deriveStructureIndex,
 } from "@/components/organigram/OrganigramHero";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
+import { OrganigramOverview } from "@/components/organigram/OrganigramExplorer";
 
 export const revalidate = 3600;
 
@@ -148,6 +149,21 @@ export default async function HulpHubPage() {
 
           <div className="mt-8">
             <StructureDirectory nodes={members} />
+          </div>
+
+          {/* Volledig organigram — the full reporting chart (click a node to
+              drill into the verkenner) + the one-A4 PDF. */}
+          <div className="mt-14">
+            <MonoLabel variant="plain">Volledig overzicht</MonoLabel>
+            <EditorialHeading
+              level={3}
+              size="display-sm"
+              emphasis={{ text: "in beeld" }}
+              className="mt-2 mb-6"
+            >
+              De hele structuur in beeld
+            </EditorialHeading>
+            <OrganigramOverview nodes={members} />
           </div>
         </section>
       </div>

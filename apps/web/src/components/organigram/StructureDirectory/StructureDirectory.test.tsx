@@ -14,7 +14,6 @@
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { StructureDirectory, groupByDepartment } from "./StructureDirectory";
 import type { OrgChartNode } from "@/types/organigram";
 
@@ -109,39 +108,13 @@ describe("StructureDirectory", () => {
     expect(screen.getByText("1 functie")).toBeInTheDocument();
   });
 
-  it("caps each afdeling at initialPerDepartment until expanded", async () => {
-    const nodes = Array.from({ length: 6 }, (_, i) =>
+  it("shows every position per afdeling — no cap, no toggle", () => {
+    const nodes = Array.from({ length: 9 }, (_, i) =>
       position(`h${i}`, "hoofdbestuur"),
     );
-    render(<StructureDirectory nodes={nodes} initialPerDepartment={4} />);
-
-    expect(screen.getAllByTestId("org-person-card")).toHaveLength(4);
-
-    await userEvent.click(screen.getByRole("button", { name: /Toon alle 6/ }));
-    expect(screen.getAllByTestId("org-person-card")).toHaveLength(6);
-  });
-
-  it("toggles the global control between 'Toon alle N →' and 'Toon minder ←'", async () => {
-    const nodes = Array.from({ length: 5 }, (_, i) =>
-      position(`h${i}`, "hoofdbestuur"),
-    );
-    render(<StructureDirectory nodes={nodes} initialPerDepartment={4} />);
-
-    const toggle = screen.getByRole("button", { name: /Toon alle 5/ });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-
-    await userEvent.click(toggle);
-    const collapse = screen.getByRole("button", { name: /Toon minder/ });
-    expect(collapse).toHaveAttribute("aria-expanded", "true");
-  });
-
-  it("does not render the toggle when nothing is hidden", () => {
-    render(
-      <StructureDirectory
-        nodes={[position("a", "hoofdbestuur")]}
-        initialPerDepartment={4}
-      />,
-    );
+    render(<StructureDirectory nodes={nodes} />);
+    // All 9 cards render and there is no "Toon alle / Toon minder" control.
+    expect(screen.getAllByTestId("org-person-card")).toHaveLength(9);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
