@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · /hulp hub · 7o6c — Finder detail decisions (4)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        /* full 6-colour map (decision 1, variant B only) */
+        --cat-purple: #6b4f9e; --cat-orange: #e08a2b; --cat-teal: #2a8c8c; --cat-grey: #6b6b6b;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+      code { font-family: var(--font-mono); font-size: .92em; }
+
+      /* ---- chrome ---- */
+      .head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+      .head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.65; max-width: 96ch; }
+      .head b { color: var(--warm); }
+      .head .em { color: var(--jersey); }
+
+      .toc { position: sticky; top: 0; z-index: 30; background: var(--jersey-deep-dark); border-bottom: 2px solid var(--ink);
+        display: flex; gap: 0; flex-wrap: wrap; font-family: var(--font-mono); }
+      .toc a { color: var(--cream); text-decoration: none; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase;
+        padding: 10px 16px; border-right: 1px solid rgba(245,241,230,.18); }
+      .toc a:hover { background: var(--jersey-deep); }
+      .toc a b { color: var(--warm); }
+
+      .dsec { border-top: 3px solid var(--ink); }
+      .dhead { background: var(--ink-soft); color: var(--cream); padding: 18px 28px; font-family: var(--font-mono); }
+      .dhead .n { color: var(--warm); font-size: 12px; letter-spacing: .14em; }
+      .dhead h2 { margin: 4px 0 6px; font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 25px; color: var(--cream); }
+      .dhead p { margin: 0; font-size: 12.5px; color: #c4c4c4; line-height: 1.6; max-width: 92ch; }
+      .dhead b { color: var(--warm); }
+
+      .bar { background: var(--jersey-deep); color: var(--cream); padding: 11px 28px; font-family: var(--font-mono);
+        font-size: 13px; letter-spacing: .05em; text-transform: uppercase; border-bottom: 2px solid var(--ink); border-top: 1px solid rgba(0,0,0,.25); }
+      .bar.rec .tg { background: var(--jersey); }
+      .bar .tg { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); margin-right: 10px; }
+      .bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+      .stage { padding: 24px 28px 30px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 760px; margin: 0 auto; }
+      .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; max-width: 1000px; margin: 0 auto; }
+      @media (max-width: 820px){ .twocol { grid-template-columns: 1fr; } }
+
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .h2 { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 28px; margin: 8px 0 2px; }
+      .dot { color: var(--jersey-deep); }
+      .sub { font-family: var(--font-display); font-style: italic; font-size: 15px; color: var(--ink-soft); margin: 0 0 6px; }
+
+      /* ---- chips ---- */
+      .catbar { display: flex; gap: 7px; flex-wrap: wrap; margin: 16px 0 6px; }
+      .chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em;
+        text-transform: uppercase; border: 1.5px solid var(--ink); padding: 6px 11px 6px 8px; background: var(--cream); box-shadow: 2px 2px 0 0 var(--ink); }
+      .chip svg { width: 14px; height: 14px; }
+      .chip.on { background: var(--jersey-deep); color: var(--cream); box-shadow: 2px 2px 0 0 var(--ink); }
+      .chip.on svg { fill: var(--cream); }
+      .audrow { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 4px; }
+      .aud { font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; border: 1.5px solid var(--ink-muted);
+        color: var(--ink-soft); padding: 4px 9px; background: transparent; }
+      .aud.on { background: var(--ink); color: var(--cream); border-color: var(--ink); }
+      .audlabel { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .1em; margin-right: 4px; align-self: center; }
+
+      .catlabel { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; font-weight: 600;
+        letter-spacing: .14em; text-transform: uppercase; border-bottom: 2px solid var(--jersey-deep); padding-bottom: 3px; margin: 18px 0 12px; }
+      .catlabel svg { width: 15px; height: 15px; fill: var(--jersey-deep); }
+      .catlabel .cnt { color: var(--ink-muted); font-weight: 400; letter-spacing: 0; }
+      .seeall { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--jersey-deep);
+        border: 1.5px solid var(--jersey-deep); padding: 5px 9px; background: var(--cream); margin: 4px 0 18px; display: inline-block; box-shadow: 2px 2px 0 0 var(--jersey-deep); }
+
+      /* ---- question card ---- */
+      .q { border: 2px solid var(--ink); background: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); margin-bottom: 10px; transition: all .2s; }
+      .q .qhead { display: flex; align-items: center; gap: 12px; padding: 13px 15px; cursor: pointer; }
+      .disc { width: 30px; height: 30px; flex: none; border: 1.5px solid var(--ink); background: var(--cream-soft);
+        display: flex; align-items: center; justify-content: center; }
+      .disc svg { width: 16px; height: 16px; fill: var(--ink); }
+      .q .qt { flex: 1; font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 16.5px; line-height: 1.25; }
+      .q .chev { font-family: var(--font-mono); color: var(--ink-muted); font-size: 18px; }
+      .q.open .chev { color: var(--jersey-deep); }
+      .q.open { box-shadow: 5px 5px 0 0 var(--ink); }
+      .q .ans { border-top: 2px dashed var(--paper-edge); padding: 14px 16px 16px; display: none; }
+      .q.open .ans { display: block; }
+      .q .sum { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin: 0 0 13px; }
+
+      .steps { counter-reset: s; margin: 0 0 14px; padding: 0; list-style: none; }
+      .steps li { counter-increment: s; position: relative; padding: 7px 0 7px 32px; font-size: 13px; line-height: 1.5; border-bottom: 1px dotted var(--paper-edge); }
+      .steps li:last-child { border-bottom: 0; }
+      .steps li::before { content: counter(s); position: absolute; left: 0; top: 6px; width: 21px; height: 21px; background: var(--jersey-deep);
+        color: var(--cream); font-family: var(--font-mono); font-size: 10px; display: flex; align-items: center; justify-content: center; border: 1.5px solid var(--ink); }
+
+      /* ---- contact (person vocab) ---- */
+      .contact { display: flex; align-items: center; gap: 11px; border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 2px 2px 0 0 var(--ink); padding: 10px 12px; }
+      .contact .av { width: 42px; height: 42px; border-radius: 9999px; border: 2px solid var(--ink); background: var(--cream);
+        display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 14px; color: var(--jersey-deep); flex: none; overflow: hidden; }
+      .contact .av img { width: 100%; height: 100%; object-fit: cover; filter: sepia(.06) saturate(.94) contrast(1.02); }
+      .contact .who { flex: 1; line-height: 1.25; min-width: 0; }
+      .contact .who .nm { font-family: var(--font-display); font-size: 15px; }
+      .contact .who .nm b { font-weight: 600; } .contact .who .nm i { font-style: italic; font-weight: 400; }
+      .contact .who .fn { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .05em; color: var(--jersey-deep); margin-top: 2px; }
+      .contact .acts { display: flex; gap: 6px; flex: none; }
+      .contact .acts a { font-family: var(--font-mono); font-size: 13px; border: 1.5px solid var(--ink); width: 34px; height: 34px;
+        display: flex; align-items: center; justify-content: center; background: var(--cream); box-shadow: 1px 1px 0 0 var(--ink); color: var(--ink); text-decoration: none; }
+      .contact .acts a svg { width: 15px; height: 15px; fill: var(--ink); }
+      .struct-link { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+        letter-spacing: .04em; color: var(--jersey-deep); border: 1.5px solid var(--jersey-deep); padding: 5px 8px; margin-top: 10px; background: var(--cream); }
+      .struct-link svg { width: 12px; height: 12px; fill: var(--jersey-deep); }
+
+      /* ---- emergency banner (decision 3) ---- */
+      .emerg { display: flex; align-items: center; gap: 10px; border: 2px solid var(--ink); background: var(--brick); color: var(--cream);
+        padding: 11px 13px; box-shadow: 3px 3px 0 0 var(--ink); margin: 0 0 13px; }
+      .emerg svg { width: 22px; height: 22px; fill: var(--cream); flex: none; }
+      .emerg .et { font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 15px; line-height: 1.2; }
+      .emerg .et b { font-weight: 900; }
+      .emerg .ecall { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-size: 15px; border: 1.5px solid var(--cream);
+        padding: 5px 11px; text-decoration: none; color: var(--cream); }
+      .urgent-stripe { border-left: 5px solid var(--brick) !important; }
+      .disc.med-urgent { background: var(--brick); border-color: var(--ink); }
+      .disc.med-urgent svg { fill: var(--cream); }
+
+      /* ---- decision 4: structuur + panel ---- */
+      .struct-stage { position: relative; border: 2px solid var(--ink); background: var(--cream); box-shadow: 4px 4px 0 0 var(--ink); overflow: hidden; min-height: 280px; }
+      .struct-grid { padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+      @media (max-width: 560px){ .struct-grid { grid-template-columns: repeat(2,1fr); } }
+      .pcard { border: 1.5px solid var(--ink); background: var(--cream-soft); padding: 11px 9px; text-align: center; box-shadow: 2px 2px 0 0 var(--ink); }
+      .pcard.hl { box-shadow: 0 0 0 3px var(--warm), 2px 2px 0 0 var(--ink); }
+      .pcard .pa { width: 46px; height: 46px; margin: 0 auto 7px; border-radius: 9999px; border: 2px solid var(--ink); background: var(--cream);
+        display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; color: var(--jersey-deep); font-size: 15px; overflow: hidden; }
+      .pcard .pa img { width: 100%; height: 100%; object-fit: cover; filter: sepia(.06) saturate(.94); }
+      .pcard .pn { font-family: var(--font-display); font-size: 13px; line-height: 1.15; }
+      .pcard .pn b { font-weight: 600; } .pcard .pn i { font-style: italic; font-weight: 400; }
+      .pcard .pf { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; color: var(--ink-muted); margin-top: 3px; }
+
+      .panel { position: absolute; top: 0; right: 0; bottom: 0; width: 64%; background: var(--cream); border-left: 2px solid var(--ink);
+        box-shadow: -6px 0 16px rgba(10,10,10,.18); display: flex; flex-direction: column; }
+      .panel .ph { background: var(--jersey-deep-dark); color: var(--cream); padding: 14px 16px; }
+      .panel .ph .k { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--warm); }
+      .panel .ph .close { float: right; font-family: var(--font-mono); color: var(--cream); border: 1px solid rgba(245,241,230,.4); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+      .panel .pbody { padding: 16px; }
+      .panel .phero { display: flex; gap: 13px; align-items: center; margin-bottom: 14px; }
+      .panel .phero .pa { width: 64px; height: 64px; border-radius: 9999px; border: 2px solid var(--ink); background: var(--cream-soft);
+        display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; color: var(--jersey-deep); font-size: 20px; overflow: hidden; flex: none; }
+      .panel .phero .pa img { width: 100%; height: 100%; object-fit: cover; filter: sepia(.06) saturate(.94); }
+      .panel .phero .pnm { font-family: var(--font-display); font-size: 21px; line-height: 1.1; }
+      .panel .phero .pnm b { font-weight: 600; } .panel .phero .pnm i { font-style: italic; font-weight: 400; }
+      .panel .phero .pfn { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; color: var(--jersey-deep); margin-top: 4px; }
+      .panel .prow { display: flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 12px; padding: 7px 0; border-bottom: 1px dotted var(--paper-edge); }
+      .panel .prow svg { width: 14px; height: 14px; fill: var(--jersey-deep); }
+      .panel .helpt { margin-top: 13px; }
+      .panel .helpt .hl { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; color: var(--ink-muted); letter-spacing: .1em; margin-bottom: 6px; }
+      .panel .helpt .hchip { display: inline-block; font-family: var(--font-mono); font-size: 10px; border: 1.5px solid var(--ink); padding: 4px 8px; background: var(--cream-soft); margin: 0 5px 5px 0; }
+
+      /* decision 4 — explorer (dark spotlight) */
+      .explorer { border: 2px solid var(--ink); background: var(--jersey-deep-dark); box-shadow: 4px 4px 0 0 var(--ink); padding: 20px 16px; position: relative; min-height: 280px;
+        background-image: radial-gradient(120% 90% at 50% 12%, rgba(74,207,82,.16), transparent 62%); }
+      .explorer .ebar { font-family: var(--font-mono); font-size: 10px; color: var(--warm); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }
+      .explorer .crumb { font-family: var(--font-mono); font-size: 10px; color: rgba(245,241,230,.6); margin-bottom: 16px; }
+      .enode { border: 2px solid var(--cream); background: rgba(245,241,230,.08); color: var(--cream); padding: 9px 10px; text-align: center; }
+      .enode .en { font-family: var(--font-display); font-size: 13px; } .enode .ef { font-family: var(--font-mono); font-size: 8px; color: rgba(245,241,230,.65); text-transform: uppercase; margin-top: 2px; }
+      .enode.parent { opacity: .65; max-width: 150px; margin: 0 auto 12px; }
+      .enode.center { border-color: var(--warm); background: var(--cream); color: var(--ink); box-shadow: 0 0 0 4px rgba(240,194,100,.35); max-width: 190px; margin: 0 auto; }
+      .enode.center .ef { color: var(--jersey-deep); }
+      .esibs { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
+      .esibs .enode { opacity: .8; flex: 1; max-width: 130px; }
+      .eclose { position: absolute; top: 12px; right: 14px; font-family: var(--font-mono); color: var(--cream); border: 1px solid rgba(245,241,230,.4); padding: 3px 8px; font-size: 11px; }
+
+      .mini-cap { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .06em; margin: 0 0 10px; }
+
+      /* ---- legend ---- */
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 20px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+      .legend b { color: var(--jersey-deep); } .legend .rec { color: var(--brick); font-weight: 700; }
+      .legend ul { margin: 8px 0 0; padding-left: 18px; } .legend li { margin-bottom: 4px; }
+      .pill-rec { background: var(--jersey); border: 1.5px solid var(--ink); color: var(--ink); padding: 1px 8px; font-weight: 700; font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <!-- ===== SVG icon sprite (Phosphor-Fill-ish) ===== -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="i-med" viewBox="0 0 24 24"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></symbol>
+      <symbol id="i-sport" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4l3 2.2-1.1 3.5h-3.8L9 8.2 12 6zm-6.5 4.8l2.8.2 1.1 3.4-2.3 2A8 8 0 015.5 10.8zM12 20a8 8 0 01-3.2-.7l1.3-2.6h3.8l1.3 2.6A8 8 0 0112 20zm5.4-3.6l-2.3-2 1.1-3.4 2.8-.2a8 8 0 01-1.6 5.6z"/></symbol>
+      <symbol id="i-admin" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zm8 1.5V6h2.5zM8 11h8v1.6H8zm0 3.2h8v1.6H8zm0 3.2h5v1.6H8z" fill-rule="evenodd"/></symbol>
+      <symbol id="i-gedrag" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 8.6-8 11-4.6-2.4-8-6-8-11V5z"/></symbol>
+      <symbol id="i-algemeen" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 4.4a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM14 17h-4v-1.6h1V12h-1v-1.6h3v5h1z"/></symbol>
+      <symbol id="i-comm" viewBox="0 0 24 24"><path d="M3 3h8l10 10-8 8L3 11zm4 2.5A1.7 1.7 0 105.6 7 1.7 1.7 0 007 5.5z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24"><path d="M2 5h20v14H2zm2 2.3v.2l8 5 8-5v-.2H4z"/></symbol>
+      <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.6 2l3 1 1 4-2 1.6a12 12 0 005.8 5.8L16 17.4l4 1 1 3a2 2 0 01-2 2C9.6 23.4 1.6 15.4 1.6 5a2 2 0 012-2z"/></symbol>
+      <symbol id="i-struct" viewBox="0 0 24 24"><path d="M9 2h6v5h-2v3h6v4h2v6h-6v-6h2v-2h-4v8H7v-8H3v2h2v6h-6 0v-6h2v-4h6V7H9z" fill-rule="evenodd"/><path d="M10 13h4v2h-2v3H8v-3h2zM3 13h4v6H1v-6h2zm14 0h4v6h-6v-6h2z"/></symbol>
+      <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 2l11 19H1zM11 9v6h2V9zm0 8v2h2v-2z" fill-rule="evenodd"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 11h12l-5-5 1.4-1.4L21 12l-8.6 7.4L11 18l5-5H4z"/></symbol>
+    </svg>
+
+    <div class="head">
+      <h1>Phase 7 · /hulp hub · 7o6c — Finder reskin: the four detail decisions</h1>
+      <p>
+        The IA is locked (<code>7o6</code>: category-led browse · capped "Alles" preview · inline accordion · person-vocab contact).
+        These four micro-decisions shape <b>how it feels for the person who actually shows up</b> — a Flemish parent on a phone at the
+        sideline, with a real question (<span class="em">"mijn kind is geblesseerd — wat nu?"</span>). Everything below uses the locked
+        fanzine vocabulary (cream paper · ink · jersey-deep · warm · brick) and real-shape KCVV content. <b>Names/photos are placeholder</b>
+        (mockup convention). Pick one per decision.
+      </p>
+    </div>
+
+    <nav class="toc">
+      <a href="#d1"><b>1 ·</b> Categorie-kleur</a>
+      <a href="#d2"><b>2 ·</b> Accordion-gedrag</a>
+      <a href="#d3"><b>3 ·</b> Medisch / urgentie</a>
+      <a href="#d4"><b>4 ·</b> "Toon in structuur"</a>
+    </nav>
+
+    <!-- ============================================================ DECISION 1 -->
+    <section class="dsec" id="d1">
+      <div class="dhead">
+        <div class="n">DECISION 1 / 4</div>
+        <h2>Hoe onderscheiden we de 6 categorieën?</h2>
+        <p>
+          The current code uses 6 generic Tailwind brights (red/green/purple/orange/blue/teal). The redesign palette is restrained
+          (cream · ink · jersey-deep · warm · brick). Question: keep colour-coding for scannability, or restrain for fanzine cohesion +
+          contrast? <b>Phosphor-Fill glyph per category</b> in all three.
+        </p>
+      </div>
+
+      <div class="bar rec"><span class="tg">A ★</span>Restrained + Medisch-uitzondering <span class="note">· ink glyphs · jersey-deep = actieve chip · Medisch = brick (urgentie)</span></div>
+      <div class="stage"><div class="wrap">
+        <span class="kicker">Hulp · vind het juiste antwoord</span>
+        <div class="h2">Waarmee kunnen we je helpen<span class="dot">?</span></div>
+        <div class="audrow"><span class="audlabel">Ik ben</span><span class="aud">Ouder</span><span class="aud on">Speler</span><span class="aud">Trainer</span><span class="aud">Supporter</span></div>
+        <div class="catbar">
+          <span class="chip on">Alles</span>
+          <span class="chip" style="border-left:4px solid var(--brick)"><svg><use href="#i-med"/></svg>Medisch</span>
+          <span class="chip"><svg><use href="#i-sport"/></svg>Sportief</span>
+          <span class="chip"><svg><use href="#i-admin"/></svg>Administratief</span>
+          <span class="chip"><svg><use href="#i-gedrag"/></svg>Gedrag</span>
+          <span class="chip"><svg><use href="#i-algemeen"/></svg>Algemeen</span>
+          <span class="chip"><svg><use href="#i-comm"/></svg>Commercieel</span>
+        </div>
+        <div class="catlabel"><svg style="fill:var(--brick)"><use href="#i-med"/></svg>Medisch <span class="cnt">(2)</span></div>
+        <div class="q open urgent-stripe">
+          <div class="qhead"><span class="disc med-urgent"><svg><use href="#i-med"/></svg></span><span class="qt">Mijn zoon is geblesseerd tijdens de match — wat nu?</span><span class="chev">−</span></div>
+          <div class="ans">
+            <p class="sum">Eerste zorg gaat altijd voor. Daarna helpt de gerechtigd correspondent je met de ongevalsaangifte zodat de verzekering tussenkomt.</p>
+            <div class="contact"><span class="av">LB</span><span class="who"><span class="nm"><b>Luc</b> <i>Boons</i></span><span class="fn">Gerechtigd correspondent</span></span><span class="acts"><a><svg><use href="#i-mail"/></svg></a><a><svg><use href="#i-phone"/></svg></a></span></div>
+          </div>
+        </div>
+        <div class="q"><div class="qhead"><span class="disc med-urgent"><svg><use href="#i-med"/></svg></span><span class="qt">Hoe doe ik aangifte van een sportongeval?</span><span class="chev">+</span></div></div>
+        <div class="catlabel"><svg><use href="#i-admin"/></svg>Administratief <span class="cnt">(5)</span></div>
+        <div class="q"><div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">+</span></div></div>
+        <div class="q"><div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Wat kost een lidmaatschap?</span><span class="chev">+</span></div></div>
+        <span class="seeall">Alle 5 in Administratief →</span>
+      </div></div>
+
+      <div class="bar"><span class="tg">B</span>Volledige 6-kleuren-codering <span class="note">· elk z'n eigen accent · max scanbaarheid · minder fanzine, contrast-risico op cream</span></div>
+      <div class="stage"><div class="wrap">
+        <div class="catbar">
+          <span class="chip on">Alles</span>
+          <span class="chip" style="color:var(--brick);border-color:var(--brick)"><svg style="fill:var(--brick)"><use href="#i-med"/></svg>Medisch</span>
+          <span class="chip" style="color:var(--jersey-deep);border-color:var(--jersey-deep)"><svg style="fill:var(--jersey-deep)"><use href="#i-sport"/></svg>Sportief</span>
+          <span class="chip" style="color:var(--cat-purple);border-color:var(--cat-purple)"><svg style="fill:var(--cat-purple)"><use href="#i-admin"/></svg>Administratief</span>
+          <span class="chip" style="color:var(--cat-orange);border-color:var(--cat-orange)"><svg style="fill:var(--cat-orange)"><use href="#i-gedrag"/></svg>Gedrag</span>
+          <span class="chip" style="color:var(--cat-grey);border-color:var(--cat-grey)"><svg style="fill:var(--cat-grey)"><use href="#i-algemeen"/></svg>Algemeen</span>
+          <span class="chip" style="color:var(--cat-teal);border-color:var(--cat-teal)"><svg style="fill:var(--cat-teal)"><use href="#i-comm"/></svg>Commercieel</span>
+        </div>
+        <div class="catlabel" style="border-color:var(--cat-purple)"><svg style="fill:var(--cat-purple)"><use href="#i-admin"/></svg>Administratief <span class="cnt">(5)</span></div>
+        <div class="q"><div class="qhead"><span class="disc" style="background:#efe7f4;border-color:var(--cat-purple)"><svg style="fill:var(--cat-purple)"><use href="#i-admin"/></svg></span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">+</span></div></div>
+        <div class="catlabel" style="border-color:var(--cat-orange)"><svg style="fill:var(--cat-orange)"><use href="#i-gedrag"/></svg>Gedrag <span class="cnt">(2)</span></div>
+        <div class="q"><div class="qhead"><span class="disc" style="background:#f8ecdb;border-color:var(--cat-orange)"><svg style="fill:var(--cat-orange)"><use href="#i-gedrag"/></svg></span><span class="qt">Ik wil ongepast gedrag melden</span><span class="chev">+</span></div></div>
+        <div class="catlabel" style="border-color:var(--cat-teal)"><svg style="fill:var(--cat-teal)"><use href="#i-comm"/></svg>Commercieel <span class="cnt">(3)</span></div>
+        <div class="q"><div class="qhead"><span class="disc" style="background:#dcecec;border-color:var(--cat-teal)"><svg style="fill:var(--cat-teal)"><use href="#i-comm"/></svg></span><span class="qt">Ik wil sponsor worden</span><span class="chev">+</span></div></div>
+        <p class="mini-cap" style="margin-top:14px">6 accenten naast elkaar — drukker, minder "geprint", en groen/oranje/grijs op cream zakken qua contrast.</p>
+      </div></div>
+
+      <div class="bar"><span class="tg">C</span>Puur monochroom <span class="note">· alles ink · enkel glyph + label · jersey-deep alleen voor actieve chip</span></div>
+      <div class="stage"><div class="wrap">
+        <div class="catbar">
+          <span class="chip on">Alles</span>
+          <span class="chip"><svg><use href="#i-med"/></svg>Medisch</span>
+          <span class="chip"><svg><use href="#i-sport"/></svg>Sportief</span>
+          <span class="chip"><svg><use href="#i-admin"/></svg>Administratief</span>
+          <span class="chip"><svg><use href="#i-gedrag"/></svg>Gedrag</span>
+          <span class="chip"><svg><use href="#i-algemeen"/></svg>Algemeen</span>
+          <span class="chip"><svg><use href="#i-comm"/></svg>Commercieel</span>
+        </div>
+        <div class="catlabel" style="border-color:var(--ink)"><svg style="fill:var(--ink)"><use href="#i-med"/></svg>Medisch <span class="cnt">(2)</span></div>
+        <div class="q"><div class="qhead"><span class="disc"><svg><use href="#i-med"/></svg></span><span class="qt">Mijn zoon is geblesseerd — wat nu?</span><span class="chev">+</span></div></div>
+        <div class="catlabel" style="border-color:var(--ink)"><svg style="fill:var(--ink)"><use href="#i-admin"/></svg>Administratief <span class="cnt">(5)</span></div>
+        <div class="q"><div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">+</span></div></div>
+        <p class="mini-cap" style="margin-top:14px">Maximale rust + authenticiteit, maar niets trekt het oog naar Medisch — en de glyph alleen draagt het hele onderscheid.</p>
+      </div></div>
+
+      <div class="legend">
+        <h3>Decision 1 — categorie-kleur</h3>
+        <p>
+          <span class="pill-rec">A ★ aanbevolen</span> &nbsp;<b>A — restrained + Medisch-uitzondering.</b> Eén samenhangend, "geprint" palet; de
+          enige kleurbreuk (<span class="rec">brick</span> op Medisch) dráágt betekenis — urgentie — i.p.v. decoratie. Haalt contrast,
+          blijft fanzine, en stuurt het oog naar de hoogste inzet. Sluit aan bij <b>no bright jersey</b> + restraint-locks.
+        </p>
+        <ul>
+          <li><b>B</b> — scant het snelst, maar 6 brights breken de fanzine-cohesie (oogt generiek/Bootstrap) en groen/oranje/grijs op cream zakken onder 4.5:1.</li>
+          <li><b>C</b> — puurste vibe, maar geen urgentie-signaal voor Medisch en alle last op de glyph; zwakker voor een gehaaste ouder.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================================ DECISION 2 -->
+    <section class="dsec" id="d2">
+      <div class="dhead">
+        <div class="n">DECISION 2 / 4</div>
+        <h2>Hoe klapt een antwoord open?</h2>
+        <p>
+          <code>7o6</code> koos <b>inline accordion</b> (goed voor FAQ-SEO + je blijft in de lijst). Open vraag: één-tegelijk of
+          meerdere tegelijk? Antwoorden zijn lang (samenvatting + stappen + contact) → meerdere open maakt de pagina snel hoog op een telefoon.
+        </p>
+      </div>
+
+      <div class="twocol" style="padding:24px 28px 8px;">
+        <div>
+          <div class="bar rec" style="border-radius:0;margin:-1px -1px 14px;"><span class="tg">A ★</span>Eén-tegelijk</div>
+          <p class="mini-cap">Een nieuwe vraag openen sluit de vorige. Korte scroll, je raakt je plek nooit kwijt.</p>
+          <div class="q"><div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Hoe vraag ik een transfer aan?</span><span class="chev">+</span></div></div>
+          <div class="q open">
+            <div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">−</span></div>
+            <div class="ans">
+              <p class="sum">Inschrijven kan het hele seizoen door. De jeugdsecretaris helpt je met formulieren, lidgeld en de juiste ploeg.</p>
+              <ol class="steps"><li>Mail of bel de jeugdsecretaris voor een afspraak.</li><li>Vul het inschrijvingsformulier in.</li><li>Betaal het lidgeld — je kind is verzekerd zodra dit in orde is.</li></ol>
+              <div class="contact"><span class="av">KW</span><span class="who"><span class="nm"><b>Karen</b> <i>Wouters</i></span><span class="fn">Jeugdsecretaris</span></span><span class="acts"><a><svg><use href="#i-mail"/></svg></a><a><svg><use href="#i-phone"/></svg></a></span></div>
+            </div>
+          </div>
+          <div class="q"><div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Wat kost een lidmaatschap?</span><span class="chev">+</span></div></div>
+        </div>
+        <div>
+          <div class="bar" style="border-radius:0;margin:-1px -1px 14px;"><span class="tg">B</span>Meerdere tegelijk</div>
+          <p class="mini-cap">Elke vraag toggelt los; meerdere antwoorden blijven open. Flexibel, maar lange scroll op een telefoon.</p>
+          <div class="q open">
+            <div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Hoe vraag ik een transfer aan?</span><span class="chev">−</span></div>
+            <div class="ans">
+              <p class="sum">Een overschrijving regel je tijdens de transferperiode via de gerechtigd correspondent.</p>
+              <ol class="steps"><li>Check of je binnen de transferperiode zit.</li><li>Bezorg je gegevens aan de GC.</li></ol>
+              <div class="contact"><span class="av">LB</span><span class="who"><span class="nm"><b>Luc</b> <i>Boons</i></span><span class="fn">Gerechtigd correspondent</span></span><span class="acts"><a><svg><use href="#i-mail"/></svg></a><a><svg><use href="#i-phone"/></svg></a></span></div>
+            </div>
+          </div>
+          <div class="q open">
+            <div class="qhead"><span class="disc"><svg><use href="#i-admin"/></svg></span><span class="qt">Hoe schrijf ik mijn kind in?</span><span class="chev">−</span></div>
+            <div class="ans">
+              <p class="sum">Inschrijven kan het hele seizoen door. De jeugdsecretaris helpt je verder.</p>
+              <ol class="steps"><li>Mail of bel de jeugdsecretaris.</li><li>Vul het formulier in.</li><li>Betaal het lidgeld.</li></ol>
+              <div class="contact"><span class="av">KW</span><span class="who"><span class="nm"><b>Karen</b> <i>Wouters</i></span><span class="fn">Jeugdsecretaris</span></span><span class="acts"><a><svg><use href="#i-mail"/></svg></a><a><svg><use href="#i-phone"/></svg></a></span></div>
+            </div>
+          </div>
+          <p class="mini-cap" style="text-align:center;color:var(--brick)">↕ blijft groeien…</p>
+        </div>
+      </div>
+      <div class="legend">
+        <h3>Decision 2 — accordion-gedrag</h3>
+        <p>
+          <span class="pill-rec">A ★ aanbevolen</span> &nbsp;<b>Eén-tegelijk.</b> Onderzoek (NN/g-stijl mobile + oudere/niet-technische
+          gebruikers) is duidelijk: één open houdt de scroll kort en je verliest je plek niet. Antwoorden zijn lang → twee open en de
+          contactkaart die je zoekt is al van het scherm. <b>Beide</b> houden alle antwoorden in de DOM voor de <b>FAQ-JSON-LD</b> en
+          krijgen een <code>#&lt;slug&gt;</code> deep-link (een coach plakt 'm zo in de WhatsApp-groep).
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ DECISION 3 -->
+    <section class="dsec" id="d3">
+      <div class="dhead">
+        <div class="n">DECISION 3 / 4</div>
+        <h2>Krijgt Medisch een eigen "levensbelang"-behandeling?</h2>
+        <p>
+          De hoogste inzet op de hele site: een ouder met een geblesseerd kind langs de lijn. NHS-111-patroon → bij een
+          <b>levensbedreigende</b> blessure komt <b>112 eerst</b>, vóór eender welk clubcontact. Toont alleen wat in de Sanity-data
+          staat (geen verzonnen nummers) — de "112"-regel is een <b>vaste, categorie-brede</b> veiligheidsbanner voor Medisch, geen data.
+        </p>
+      </div>
+
+      <div class="twocol" style="padding:24px 28px 8px;">
+        <div>
+          <div class="bar rec" style="border-radius:0;margin:-1px -1px 14px;"><span class="tg">A ★</span>Urgentie + 112 eerst</div>
+          <div class="q open urgent-stripe">
+            <div class="qhead"><span class="disc med-urgent"><svg><use href="#i-med"/></svg></span><span class="qt">Mijn zoon is geblesseerd tijdens de match — wat nu?</span><span class="chev">−</span></div>
+            <div class="ans">
+              <div class="emerg">
+                <svg><use href="#i-warn"/></svg>
+                <span class="et"><b>Levensbedreigend of bewusteloos?</b> Bel onmiddellijk de hulpdiensten.</span>
+                <a class="ecall" href="tel:112">112</a>
+              </div>
+              <p class="sum">Eerste zorg gaat altijd voor. Is het niet dringend? Dan helpt de gerechtigd correspondent je met de ongevalsaangifte zodat de verzekering tussenkomt.</p>
+              <ol class="steps"><li>Zorg voor eerste hulp; laat een verzorger of trainer erbij komen.</li><li>Noteer wat er gebeurde (datum, ploeg, wat en hoe).</li><li>Vraag binnen 48u het aangifteformulier bij de GC.</li></ol>
+              <div class="contact"><span class="av">LB</span><span class="who"><span class="nm"><b>Luc</b> <i>Boons</i></span><span class="fn">Gerechtigd correspondent</span></span><span class="acts"><a><svg><use href="#i-mail"/></svg></a><a><svg><use href="#i-phone"/></svg></a></span></div>
+            </div>
+          </div>
+          <p class="mini-cap">Brick-streep + waarschuwingsbanner. De kritieke, onpersoonlijke stap (112) leidt; de warme clubpersoon volgt.</p>
+        </div>
+        <div>
+          <div class="bar" style="border-radius:0;margin:-1px -1px 14px;"><span class="tg">B</span>Uniforme behandeling</div>
+          <div class="q open">
+            <div class="qhead"><span class="disc"><svg><use href="#i-med"/></svg></span><span class="qt">Mijn zoon is geblesseerd tijdens de match — wat nu?</span><span class="chev">−</span></div>
+            <div class="ans">
+              <p class="sum">Eerste zorg gaat altijd voor. Daarna helpt de gerechtigd correspondent je met de ongevalsaangifte zodat de verzekering tussenkomt.</p>
+              <ol class="steps"><li>Zorg voor eerste hulp; laat een verzorger of trainer erbij komen.</li><li>Noteer wat er gebeurde (datum, ploeg, wat en hoe).</li><li>Vraag binnen 48u het aangifteformulier bij de GC.</li></ol>
+              <div class="contact"><span class="av">LB</span><span class="who"><span class="nm"><b>Luc</b> <i>Boons</i></span><span class="fn">Gerechtigd correspondent</span></span><span class="acts"><a><svg><use href="#i-mail"/></svg></a><a><svg><use href="#i-phone"/></svg></a></span></div>
+            </div>
+          </div>
+          <p class="mini-cap">Zelfde lay-out als alle categorieën — niets onderscheidt het noodgeval; de ouder leest eerst een paragraaf.</p>
+        </div>
+      </div>
+      <div class="legend">
+        <h3>Decision 3 — Medisch / urgentie</h3>
+        <p>
+          <span class="pill-rec">A ★ aanbevolen</span> &nbsp;<b>Urgentie + 112 eerst.</b> Voor de hoogste-inzet-vraag is "veiligheid eerst"
+          de juiste reflex. De banner is <b>statisch + categorie-breed</b> (geen verzonnen data — voldoet aan no-fabricated-data), gebruikt
+          de <span class="rec">brick</span>-token uit het palet, en zet de tappable <code>tel:112</code> bovenaan. <b>B</b> is veiliger qua
+          consistentie maar laat een gestreste ouder eerst lezen. Klein risico A: de banner mag niet op élke kleine kwaal schreeuwen — copy
+          richt op "levensbedreigend / bewusteloos", de rest stroomt gewoon door.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================================ DECISION 4 -->
+    <section class="dsec" id="d4">
+      <div class="dhead">
+        <div class="n">DECISION 4 / 4</div>
+        <h2>Waar landt "toon in structuur →"?</h2>
+        <p>
+          De contactkaart heeft een cross-link naar de Structuur-helft. (De huidige <code>resolveContact</code> wijst nog naar de
+          <b>geretireerde</b> <code>/club/organigram?node=</code> — moet sowieso herbedraad worden.) Vraag: enkel het persoons-paneel
+          openen, of óók de fullscreen-verkenner op die node?
+        </p>
+      </div>
+
+      <div class="bar rec"><span class="tg">A ★</span>Persoons-paneel + scroll naar Structuur <span class="note">· <code>?member=&lt;nodeId&gt;#structuur</code> · matcht exact de Phase-4 deep-link-infra</span></div>
+      <div class="stage">
+        <div style="max-width:920px;margin:0 auto">
+          <p class="mini-cap"><code>klik "toon in structuur →"  →  /hulp?member=voorzitter#structuur</code> — scrollt naar Structuur, schuift het persoons-paneel open.</p>
+          <div class="struct-stage">
+            <div class="struct-grid">
+              <div class="pcard"><div class="pa">JV</div><div class="pn"><b>Jan</b> <i>Verlinden</i></div><div class="pf">Secretaris</div></div>
+              <div class="pcard hl"><div class="pa">LB</div><div class="pn"><b>Luc</b> <i>Boons</i></div><div class="pf">Voorzitter</div></div>
+              <div class="pcard"><div class="pa">KW</div><div class="pn"><b>Karen</b> <i>Wouters</i></div><div class="pf">Jeugdsecr.</div></div>
+              <div class="pcard"><div class="pa">DM</div><div class="pn"><b>Dirk</b> <i>Mertens</i></div><div class="pf">Penningm.</div></div>
+              <div class="pcard"><div class="pa">SV</div><div class="pn"><b>Sofie</b> <i>V.</i></div><div class="pf">Gastvrouw</div></div>
+              <div class="pcard"><div class="pa">PD</div><div class="pn"><b>Peter</b> <i>D.</i></div><div class="pf">Terreinm.</div></div>
+            </div>
+            <aside class="panel">
+              <div class="ph"><span class="close">✕</span><div class="k">Contactgegevens</div></div>
+              <div class="pbody">
+                <div class="phero"><span class="pa">LB</span><div><div class="pnm"><b>Luc</b> <i>Boons</i></div><div class="pfn">Voorzitter · Gerechtigd correspondent</div></div></div>
+                <div class="prow"><svg><use href="#i-mail"/></svg> luc.boons@kcvvelewijt.be</div>
+                <div class="prow"><svg><use href="#i-phone"/></svg> 0470 12 34 56</div>
+                <div class="helpt">
+                  <div class="hl">Helpt met</div>
+                  <span class="hchip">Sportongeval aangeven</span><span class="hchip">Transfer aanvragen</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <div class="bar"><span class="tg">B</span>Óók de verkenner openen (fullscreen) <span class="note">· extra "zie hem in de structuur"-moment · vergt nieuwe URL→verkenner-bedrading</span></div>
+      <div class="stage">
+        <div style="max-width:920px;margin:0 auto">
+          <p class="mini-cap"><code>klik "toon in structuur →"  →  fullscreen-verkenner gefocust op de node + paneel</code></p>
+          <div class="explorer">
+            <span class="eclose">Esc ✕</span>
+            <div class="ebar">Organigram-verkenner</div>
+            <div class="crumb">KCVV Elewijt › Hoofdbestuur › <b style="color:var(--warm)">Voorzitter</b></div>
+            <div class="enode parent"><div class="en">Hoofdbestuur</div><div class="ef">afdeling</div></div>
+            <div class="enode center"><div class="en">Luc Boons</div><div class="ef">Voorzitter</div></div>
+            <div class="esibs">
+              <div class="enode"><div class="en">Jan Verlinden</div><div class="ef">Secretaris</div></div>
+              <div class="enode"><div class="en">Dirk Mertens</div><div class="ef">Penningmeester</div></div>
+              <div class="enode"><div class="en">Karen Wouters</div><div class="ef">Jeugdsecretaris</div></div>
+            </div>
+          </div>
+          <p class="mini-cap" style="margin-top:10px">Rijker ruimtelijk moment, maar de verkenner is nu nog niet URL-gestuurd (opent via "Open verkenner ⤢"-knop) → extra werk buiten Phase 5.</p>
+        </div>
+      </div>
+      <div class="legend">
+        <h3>Decision 4 — "toon in structuur →"</h3>
+        <p>
+          <span class="pill-rec">A ★ aanbevolen</span> &nbsp;<b>Persoons-paneel + scroll.</b> Hergebruikt exact de geleverde Phase-4
+          <code>?member=</code>-infra (geen nieuwe bedrading), is person-first (precies wat een hulpzoeker wil: de mens + z'n kanalen +
+          "helpt met"), en blijft binnen de Phase-5-scope. Vuurt <code>responsibility_organigram_link {node_id}</code>. <b>B</b> is een mooier
+          "zie hem staan"-moment maar vergt URL→verkenner-bedrading die nu niet bestaat — beter als fast-follow als je het wil.
+        </p>
+      </div>
+    </section>
+
+    <div class="legend" style="background:var(--ink);color:var(--cream);border-top:3px solid var(--warm)">
+      <h3 style="color:var(--warm)">Samengevat — mijn aanbeveling als designer</h3>
+      <p style="color:#d9d9d9">
+        <b style="color:var(--jersey)">1</b> Restrained + Medisch-brick · <b style="color:var(--jersey)">2</b> Eén-tegelijk accordion ·
+        <b style="color:var(--jersey)">3</b> Medisch urgentie + 112 eerst · <b style="color:var(--jersey)">4</b> Persoons-paneel + scroll.
+        Samen: cohesief fanzine, rustig op een telefoon, veilig bij het ergste, en person-first richting de structuur — allemaal binnen
+        de gelockte <code>7o6</code>-IA en de bestaande infra. Laat weten wat je anders wil; daarna bouw ik TDD-first + een Storybook-checkpoint.
+      </p>
+    </div>
+  </body>
+</html>

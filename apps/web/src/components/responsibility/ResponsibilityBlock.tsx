@@ -12,8 +12,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronRight, Users, Mail, UserPlus } from "@/lib/icons";
-import { HulpSearchInput } from "@/components/hulp/HulpPage";
+import { ChevronRight, Users, Mail, UserPlus, Search } from "@/lib/icons";
 
 export function ResponsibilityBlock() {
   const router = useRouter();
@@ -54,11 +53,19 @@ export function ResponsibilityBlock() {
           aria-label="Hulp zoeken"
           className="rounded-2xl bg-white p-6 shadow-xl md:p-10"
         >
-          <HulpSearchInput
-            value={query}
-            onChange={setQuery}
-            ariaLabel="Hulp zoeken"
-          />
+          <div className="relative mx-auto w-full max-w-2xl">
+            <div className="text-kcvv-gray pointer-events-none absolute inset-y-0 left-5 flex items-center">
+              <Search className="h-6 w-6" />
+            </div>
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Waar ben je naar op zoek?"
+              aria-label="Hulp zoeken"
+              className="text-kcvv-black placeholder:text-kcvv-gray focus:border-kcvv-green-bright focus:ring-kcvv-green-bright/30 w-full rounded-sm border border-gray-200 bg-white py-5 pr-5 pl-14 text-base shadow-md focus:ring-2 focus:outline-none"
+            />
+          </div>
 
           {/* Link to full page */}
           <div className="mt-8 text-center">

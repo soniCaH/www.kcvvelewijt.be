@@ -22,13 +22,17 @@ import {
   DownloadSimple as PhDownloadSimple,
   Envelope as PhEnvelope,
   Eye as PhEye,
+  FileText as PhFileText,
   FirstAid as PhFirstAid,
+  Handshake as PhHandshake,
   Heart as PhHeart,
   House as PhHouse,
+  Info as PhInfo,
   List as PhList,
   MagnifyingGlass as PhMagnifyingGlass,
   Phone as PhPhone,
   Question as PhQuestion,
+  ShieldCheck as PhShieldCheck,
   SoccerBall as PhSoccerBall,
   TreeStructure as PhTreeStructure,
   User as PhUser,
@@ -61,13 +65,17 @@ export const CheckCircle = fillWrapper(PhCheckCircle);
 export const DownloadSimple = fillWrapper(PhDownloadSimple);
 export const Envelope = fillWrapper(PhEnvelope);
 export const Eye = fillWrapper(PhEye);
+export const FileText = fillWrapper(PhFileText);
 export const FirstAid = fillWrapper(PhFirstAid);
+export const Handshake = fillWrapper(PhHandshake);
 export const Heart = fillWrapper(PhHeart);
 export const House = fillWrapper(PhHouse);
+export const Info = fillWrapper(PhInfo);
 export const List = fillWrapper(PhList);
 export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
 export const Phone = fillWrapper(PhPhone);
 export const Question = fillWrapper(PhQuestion);
+export const ShieldCheck = fillWrapper(PhShieldCheck);
 export const SoccerBall = fillWrapper(PhSoccerBall);
 export const TreeStructure = fillWrapper(PhTreeStructure);
 export const User = fillWrapper(PhUser);

@@ -42,11 +42,12 @@ describe("OrganigramHero", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders four audience chips that deep-link into Hulp", () => {
+  it("renders four audience chips that deep-link into Hulp with the audience pre-filtered", () => {
     renderHero();
-    const chips = screen
-      .getAllByRole("link")
-      .filter((link) => link.getAttribute("href") === "#hulp");
+    const chips = screen.getAllByRole("link").filter((link) => {
+      const href = link.getAttribute("href") ?? "";
+      return href.startsWith("/hulp?audience=") && href.endsWith("#hulp");
+    });
     expect(chips).toHaveLength(4);
     expect(screen.getByText("Ik ben ouder")).toBeInTheDocument();
   });

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { EditorialHeading, TapedCard } from "@/components/design-system";
 import { HubSearch } from "../HubSearch";
 import type { OrgChartNode } from "@/types/organigram";
@@ -88,13 +89,16 @@ export function OrganigramHero({
           <ul className="flex flex-wrap gap-2">
             {AUDIENCE_CHIPS.map((chip) => (
               <li key={chip.audience}>
-                <a
-                  href="#hulp"
+                {/* Deep-links into the finder with the audience pre-filtered
+                    (#2056): `<HulpFinder>` reads `?audience` and the hash scrolls
+                    to the Hulp half. */}
+                <Link
+                  href={`/hulp?audience=${chip.audience}#hulp`}
                   data-audience={chip.audience}
                   className="border-cream/50 text-cream hover:bg-cream hover:text-jersey-deep-dark inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-colors duration-200"
                 >
                   {chip.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>

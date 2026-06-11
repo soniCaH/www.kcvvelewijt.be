@@ -15,6 +15,7 @@
  */
 
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Effect } from "effect";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
@@ -37,6 +38,7 @@ import {
 import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
 import { OrganigramOverview } from "@/components/organigram/OrganigramExplorer";
+import { HulpFinder } from "@/components/hulp/HulpFinder";
 
 export const revalidate = 3600;
 
@@ -96,66 +98,74 @@ export default async function HulpHubPage() {
         responsibilityPaths={responsibilityPaths}
       />
 
-      <div className="mx-auto w-full max-w-[80rem] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <OrganigramHero
-          members={members}
-          responsibilityPaths={responsibilityPaths}
-          structureIndex={structureIndex}
-        />
-
-        {/* ① Hulp-first — the responsibility finder (built in #2056). */}
-        <section
-          id="hulp"
-          aria-label="Hulp"
-          className="mt-12 scroll-mt-32 sm:mt-16"
-        >
-          <MonoLabel variant="plain">De vraagvinder</MonoLabel>
-          <EditorialHeading
-            level={2}
-            size="display-md"
-            emphasis={{ text: "helpen" }}
-            className="mt-2 mb-0"
-          >
-            Waarmee kunnen we je helpen
-          </EditorialHeading>
-          <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
-            Zoek hierboven op een naam, functie of vraag — of kies je rol. Hier
-            blader je straks door de categorieën met antwoorden, stappen en de
-            juiste contactpersoon.
-          </p>
-        </section>
-
-        <div className="my-10 sm:my-12">
-          <StripedSeam colorPair="ink-cream" height="md" />
-        </div>
-
-        {/* ② Structuur — the people directory + verkenner (built in #2053). */}
-        <section
-          id="structuur"
-          aria-label="Structuur"
-          className="scroll-mt-32 pb-4"
-        >
-          <MonoLabel variant="plain">De structuur</MonoLabel>
-          <EditorialHeading
-            level={2}
-            size="display-md"
-            emphasis={{ text: "wie-is-wie" }}
-            className="mt-2 mb-0"
-          >
-            Het organigram — wie-is-wie
-          </EditorialHeading>
-          <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
-            Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
-          </p>
-
-          {/* Person-first detail panel (7o5 / #2055): one `<MemberDetailPanel>`
-              wired to both the directory cards (click delegation) and the
-              verkenner's "Contactgegevens" trigger, with the `?member=`
-              deep-link. */}
-          <HubMemberPanel
-            nodes={members}
+      {/* One `<HubMemberPanel>` (7o5 / #2055) spans BOTH halves: the directory
+          cards open it by click-delegation, the verkenner via context, and the
+          finder's "Toon in structuur →" via `openMemberById` (7o6c · 4). */}
+      <HubMemberPanel nodes={members} responsibilityPaths={responsibilityPaths}>
+        <div className="mx-auto w-full max-w-[80rem] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+          <OrganigramHero
+            members={members}
             responsibilityPaths={responsibilityPaths}
+            structureIndex={structureIndex}
+          />
+
+          {/* ① Hulp-first — the responsibility finder (#2056). */}
+          <section
+            id="hulp"
+            aria-label="Hulp"
+            className="mt-12 scroll-mt-32 sm:mt-16"
           >
+            <MonoLabel variant="plain">De vraagvinder</MonoLabel>
+            <EditorialHeading
+              level={2}
+              size="display-md"
+              emphasis={{ text: "helpen" }}
+              className="mt-2 mb-0"
+            >
+              Waarmee kunnen we je helpen
+            </EditorialHeading>
+            <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
+              Zoek hierboven op een naam, functie of vraag — of kies hieronder
+              je rol en categorie. Elk antwoord geeft je de stappen én de juiste
+              contactpersoon.
+            </p>
+
+            {/* `<HulpFinder>` reads `?audience` via `useSearchParams`, so it must
+                sit under a Suspense boundary on this statically-rendered (ISR) route. */}
+            <div className="mt-8">
+              <Suspense
+                fallback={
+                  <div className="border-ink bg-cream h-40 animate-pulse border-2 shadow-[3px_3px_0_0_var(--color-ink)]" />
+                }
+              >
+                <HulpFinder responsibilityPaths={responsibilityPaths} />
+              </Suspense>
+            </div>
+          </section>
+
+          <div className="my-10 sm:my-12">
+            <StripedSeam colorPair="ink-cream" height="md" />
+          </div>
+
+          {/* ② Structuur — the people directory + verkenner (#2053–#2055). */}
+          <section
+            id="structuur"
+            aria-label="Structuur"
+            className="scroll-mt-32 pb-4"
+          >
+            <MonoLabel variant="plain">De structuur</MonoLabel>
+            <EditorialHeading
+              level={2}
+              size="display-md"
+              emphasis={{ text: "wie-is-wie" }}
+              className="mt-2 mb-0"
+            >
+              Het organigram — wie-is-wie
+            </EditorialHeading>
+            <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
+              Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
+            </p>
+
             <div className="mt-8">
               <StructureDirectory nodes={members} interactive />
             </div>
@@ -174,9 +184,9 @@ export default async function HulpHubPage() {
               </EditorialHeading>
               <OrganigramOverview nodes={members} />
             </div>
-          </HubMemberPanel>
-        </section>
-      </div>
+          </section>
+        </div>
+      </HubMemberPanel>
 
       <CtaBand
         ariaLabel="Contacteer de club"

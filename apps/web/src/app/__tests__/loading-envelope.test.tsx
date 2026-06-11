@@ -23,13 +23,13 @@ import { resolve } from "node:path";
 // SectionStack loading components
 // ---------------------------------------------------------------------------
 import ClubLoading from "../(main)/club/loading";
-import HulpLoading from "../(main)/hulp/loading";
 import JeugdLoading from "../(landing)/jeugd/loading";
 import PloegenLoading from "../(main)/ploegen/loading";
 
 // ---------------------------------------------------------------------------
 // Non-SectionStack loading components
 // ---------------------------------------------------------------------------
+import HulpLoading from "../(main)/hulp/loading";
 import KalenderLoading from "../(main)/kalender/loading";
 import NieuwsLoading from "../(landing)/nieuws/loading";
 import SponsorsLoading from "../(landing)/sponsors/loading";
@@ -63,12 +63,6 @@ const sectionStackRoutes: SectionStackRoute[] = [
     Loading: ClubLoading,
     expectedTransitions: 3,
     expectedBgClasses: ["bg-kcvv-black", "bg-gray-100", "bg-kcvv-green-dark"],
-  },
-  {
-    name: "/hulp",
-    Loading: HulpLoading,
-    expectedTransitions: 1,
-    expectedBgClasses: ["bg-kcvv-black", "bg-gray-100"],
   },
 ];
 
@@ -108,6 +102,13 @@ describe("loading.tsx envelope drift guard", () => {
   }
 
   const nonSectionStackRoutes: NonSectionStackRoute[] = [
+    {
+      name: "/hulp",
+      Loading: HulpLoading,
+      // Phase 7 (#2056): the hub is no longer a SectionStack page — cream-paper
+      // skeleton shaped like the two-door nav + dark hero + finder.
+      expectedRootClass: "bg-cream min-h-screen",
+    },
     {
       name: "/kalender",
       Loading: KalenderLoading,

@@ -47,6 +47,11 @@ export function useResponsibilityAnalytics() {
     [],
   );
 
+  /** Fired when a question accordion is opened (PRD §6 `responsibility_view`). */
+  const trackView = useCallback((pathId: string) => {
+    trackEvent("responsibility_view", { path_id: pathId });
+  }, []);
+
   const trackContactClicked = useCallback(
     (pathId: string, contactType: "email" | "phone") => {
       hadContactInteractionRef.current = true;
@@ -58,16 +63,15 @@ export function useResponsibilityAnalytics() {
     [],
   );
 
-  const trackOrganigramLink = useCallback(
-    (pathId: string, memberId: string) => {
-      hadContactInteractionRef.current = true;
-      trackEvent("responsibility_organigram_link", {
-        path_id: pathId,
-        member_id: hashMemberId(memberId),
-      });
-    },
-    [],
-  );
+  const trackOrganigramLink = useCallback((pathId: string, nodeId: string) => {
+    hadContactInteractionRef.current = true;
+    // `node_id` (hashed) per PRD §6 — the organigram position the
+    // "toon in structuur →" cross-link opens.
+    trackEvent("responsibility_organigram_link", {
+      path_id: pathId,
+      node_id: hashMemberId(nodeId),
+    });
+  }, []);
 
   const trackStepLinkClicked = useCallback(
     (pathId: string, stepIndex: number) => {
@@ -135,6 +139,7 @@ export function useResponsibilityAnalytics() {
     trackSearch,
     trackNoResults,
     trackSuggestionClicked,
+    trackView,
     trackContactClicked,
     trackOrganigramLink,
     trackStepLinkClicked,
