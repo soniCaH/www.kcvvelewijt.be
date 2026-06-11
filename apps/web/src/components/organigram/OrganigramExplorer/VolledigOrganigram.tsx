@@ -4,7 +4,7 @@ import { useMemo, useRef } from "react";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
 import { deriveCardState } from "@/components/organigram/OrgPersonCard";
-import { DownloadSimple } from "@/lib/icons.redesign";
+import { ArrowsOut, DownloadSimple } from "@/lib/icons.redesign";
 import { holderLabel } from "./SpotlightNodeCard";
 import { buildSpotlightTree, childrenOf, CLUB_ROOT_ID } from "./spotlight-tree";
 
@@ -20,6 +20,10 @@ import { buildSpotlightTree, childrenOf, CLUB_ROOT_ID } from "./spotlight-tree";
 
 export interface VolledigOrganigramProps {
   nodes: OrgChartNode[];
+  /** When provided, each node box becomes a button that drills into the explorer. */
+  onNodeClick?: (id: string, trigger: HTMLElement) => void;
+  /** When provided, renders an "Open verkenner ⤢" button in the toolbar. */
+  onOpenExplorer?: (trigger: HTMLElement) => void;
   className?: string;
 }
 
@@ -28,30 +32,50 @@ const A4_LANDSCAPE_PX = { width: 277 * 3.7795, height: 190 * 3.7795 }; // printa
 function OrgBranch({
   node,
   childrenByParent,
+  onNodeClick,
   isRoot = false,
 }: {
   node: OrgChartNode;
   childrenByParent: (id: string) => OrgChartNode[];
+  onNodeClick?: (id: string, trigger: HTMLElement) => void;
   isRoot?: boolean;
 }) {
   const kids = childrenByParent(node.id);
   const state = isRoot ? "root" : deriveCardState(node.members.length);
+  const boxClass = cn(
+    "border-ink inline-flex min-w-[64px] flex-col border-2 px-2 py-1 text-center",
+    state === "vacant" ? "bg-warm" : "bg-cream",
+    onNodeClick &&
+      "cursor-pointer transition-transform hover:-translate-y-0.5 motion-reduce:transition-none",
+  );
+  const content = (
+    <>
+      <span className="font-display text-ink text-[9px] leading-[1.1] font-semibold">
+        {node.title}
+      </span>
+      <span className="text-ink-muted font-mono text-[7px] tracking-[0.04em] uppercase">
+        {isRoot ? "de club" : holderLabel(node)}
+      </span>
+    </>
+  );
+
   return (
     <li>
-      <div
-        data-state={state}
-        className={cn(
-          "border-ink inline-flex min-w-[64px] flex-col border-2 px-2 py-1 text-center",
-          state === "vacant" ? "bg-warm" : "bg-cream",
-        )}
-      >
-        <span className="font-display text-ink text-[9px] leading-[1.1] font-semibold">
-          {node.title}
-        </span>
-        <span className="text-ink-muted font-mono text-[7px] tracking-[0.04em] uppercase">
-          {isRoot ? "de club" : holderLabel(node)}
-        </span>
-      </div>
+      {onNodeClick ? (
+        <button
+          type="button"
+          data-state={state}
+          onClick={(e) => onNodeClick(node.id, e.currentTarget)}
+          aria-label={`Open ${node.title} in de verkenner`}
+          className={boxClass}
+        >
+          {content}
+        </button>
+      ) : (
+        <div data-state={state} className={boxClass}>
+          {content}
+        </div>
+      )}
       {kids.length > 0 && (
         <ul>
           {kids.map((kid) => (
@@ -59,6 +83,7 @@ function OrgBranch({
               key={kid.id}
               node={kid}
               childrenByParent={childrenByParent}
+              onNodeClick={onNodeClick}
             />
           ))}
         </ul>
@@ -69,6 +94,8 @@ function OrgBranch({
 
 export function VolledigOrganigram({
   nodes,
+  onNodeClick,
+  onOpenExplorer,
   className,
 }: VolledigOrganigramProps) {
   const tree = useMemo(() => buildSpotlightTree(nodes), [nodes]);
@@ -128,17 +155,30 @@ export function VolledigOrganigram({
     >
       <div className="vo-no-print mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-ink-soft max-w-[60ch] text-sm leading-relaxed">
-          De volledige rapporteringsstructuur in één overzicht — handig om af te
-          drukken of als bijlage te delen.
+          De volledige rapporteringsstructuur in één overzicht. Klik een functie
+          om ze in de verkenner te openen, of druk het geheel af.
         </p>
-        <button
-          type="button"
-          onClick={handleDownload}
-          className="border-ink bg-cream-soft text-ink shadow-paper-sm focus-visible:outline-ink flex shrink-0 items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
-        >
-          <DownloadSimple size={16} aria-hidden />
-          Download als PDF
-        </button>
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {onOpenExplorer && (
+            <button
+              type="button"
+              onClick={(e) => onOpenExplorer(e.currentTarget)}
+              aria-haspopup="dialog"
+              className="border-ink bg-jersey-deep text-cream shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              <ArrowsOut size={16} aria-hidden />
+              Open verkenner ⤢
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleDownload}
+            className="border-ink bg-cream-soft text-ink shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
+          >
+            <DownloadSimple size={16} aria-hidden />
+            Download als PDF
+          </button>
+        </div>
       </div>
 
       <div ref={chartRef} className="vo-chart overflow-x-auto pb-2">
@@ -149,6 +189,7 @@ export function VolledigOrganigram({
           <OrgBranch
             node={root}
             childrenByParent={childrenByParent}
+            {...(onNodeClick ? { onNodeClick } : {})}
             isRoot={root.id === CLUB_ROOT_ID}
           />
         </ul>

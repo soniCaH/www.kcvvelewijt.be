@@ -23,6 +23,33 @@ describe("VolledigOrganigram", () => {
     expect(chart).toHaveTextContent("Lid Ethische Commissie"); // depth 5 leaf
   });
 
+  it("makes each node a drill button when onNodeClick is provided", async () => {
+    const onNodeClick = vi.fn();
+    render(
+      <VolledigOrganigram nodes={explorerFixture} onNodeClick={onNodeClick} />,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Open Voorzitter in de verkenner" }),
+    );
+    expect(onNodeClick).toHaveBeenCalledWith("voorzitter", expect.anything());
+  });
+
+  it("stays static (no node buttons) without onNodeClick", () => {
+    render(<VolledigOrganigram nodes={explorerFixture} />);
+    expect(
+      screen.queryByRole("button", { name: /in de verkenner/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the 'Open verkenner' button when onOpenExplorer is provided", () => {
+    render(
+      <VolledigOrganigram nodes={explorerFixture} onOpenExplorer={vi.fn()} />,
+    );
+    expect(
+      screen.getByRole("button", { name: /Open verkenner/ }),
+    ).toBeInTheDocument();
+  });
+
   it("marks vacant positions", () => {
     render(<VolledigOrganigram nodes={explorerFixture} />);
     const vacant = screen

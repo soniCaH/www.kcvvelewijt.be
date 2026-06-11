@@ -1,7 +1,7 @@
 export { OrganigramExplorer, announceFocus } from "./OrganigramExplorer";
 export type { OrganigramExplorerProps } from "./OrganigramExplorer";
-export { ExplorerLauncher } from "./ExplorerLauncher";
-export type { ExplorerLauncherProps } from "./ExplorerLauncher";
+export { OrganigramOverview } from "./OrganigramOverview";
+export type { OrganigramOverviewProps } from "./OrganigramOverview";
 export { SpotlightNodeCard, holderLabel } from "./SpotlightNodeCard";
 export type {
   SpotlightNodeCardProps,

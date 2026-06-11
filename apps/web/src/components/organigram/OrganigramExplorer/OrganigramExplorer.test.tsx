@@ -194,6 +194,14 @@ describe("OrganigramExplorer — siblings + profile", () => {
       screen.queryByRole("link", { name: /Volledig profiel/ }),
     ).not.toBeInTheDocument();
   });
+
+  it("lists every holder for a shared role (so their names are reachable)", () => {
+    open({ initialFocusId: "kledij" }); // 3 personen
+    const list = screen.getByRole("list", {
+      name: "Personen in deze functie",
+    });
+    expect(within(list).getAllByRole("listitem")).toHaveLength(3);
+  });
 });
 
 describe("OrganigramExplorer — Esc", () => {

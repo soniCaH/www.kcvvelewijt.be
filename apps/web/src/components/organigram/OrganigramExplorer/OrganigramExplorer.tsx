@@ -412,6 +412,30 @@ export function OrganigramExplorer({
                     Volledig profiel <ArrowRight size={11} aria-hidden />
                   </Link>
                 )}
+                {focusState === "shared" && (
+                  <ul
+                    aria-label="Personen in deze functie"
+                    className="flex flex-col items-center gap-1"
+                  >
+                    {view.focus.members.map((member) => (
+                      <li key={member.id}>
+                        {member.href ? (
+                          <Link
+                            href={member.href}
+                            className="text-warm hover:text-cream flex items-center gap-1 font-mono text-[10px]"
+                          >
+                            {member.name?.trim() || "—"}{" "}
+                            <ArrowRight size={10} aria-hidden />
+                          </Link>
+                        ) : (
+                          <span className="text-cream/75 font-mono text-[10px]">
+                            {member.name?.trim() || "—"}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <button
