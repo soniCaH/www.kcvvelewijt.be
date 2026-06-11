@@ -30,7 +30,7 @@ const cards: CardData[] = [
     arrowText: "Ontdek",
   },
   {
-    href: "/club/organigram",
+    href: "/hulp#structuur",
     tag: "Organigram",
     title: "Onze structuur",
     description: "Van voorzitter tot jeugdcoördinator — wie doet wat?",

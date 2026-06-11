@@ -55,7 +55,7 @@ describe("ResponsibilityBlock", () => {
     render(<ResponsibilityBlock />);
     expect(screen.getByRole("link", { name: /organigram/i })).toHaveAttribute(
       "href",
-      "/club/organigram",
+      "/hulp#structuur",
     );
     expect(screen.getByRole("link", { name: /contact/i })).toHaveAttribute(
       "href",

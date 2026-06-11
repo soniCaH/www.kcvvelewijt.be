@@ -41,7 +41,7 @@ export default function StafNotFound() {
         {/* Action buttons */}
         <div className="flex flex-col justify-center gap-4 sm:flex-row">
           <Link
-            href="/club/organigram"
+            href="/hulp#structuur"
             className="bg-kcvv-green-bright hover:bg-kcvv-green inline-flex items-center justify-center rounded-lg px-6 py-3 font-medium text-white transition-colors"
           >
             <svg

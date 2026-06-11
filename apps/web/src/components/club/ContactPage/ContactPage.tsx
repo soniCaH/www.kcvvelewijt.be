@@ -127,7 +127,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
                 </span>
               </Link>
               <Link
-                href="/club/organigram"
+                href="/hulp#structuur"
                 className="hover:bg-green-main/5 group flex items-center justify-between rounded-lg bg-gray-50 p-3 transition-colors"
               >
                 <div>

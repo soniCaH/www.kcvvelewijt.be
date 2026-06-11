@@ -48,7 +48,7 @@ const NAV_CARDS: NavCardConfig[] = [
     tag: "Structuur",
     title: "Organigram",
     arrowText: "Bekijk",
-    href: "/club/organigram",
+    href: "/hulp#structuur",
     iconName: "TreeStructure",
   },
   {

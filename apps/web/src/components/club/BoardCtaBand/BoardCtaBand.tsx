@@ -41,7 +41,7 @@ export function BoardCtaBand() {
 
           <div className="flex justify-center">
             <LinkButton
-              href="/club/organigram"
+              href="/hulp#structuur"
               variant="inverted"
               className="bg-warm hover:bg-warm"
             >

@@ -28,7 +28,7 @@ export const staticMenuItems: MenuItem[] = [
         label: "Wie we zijn",
         items: [
           { label: "Geschiedenis", href: "/club/geschiedenis" },
-          { label: "Organigram", href: "/club/organigram" },
+          { label: "Organigram", href: "/hulp#structuur" },
           { label: "Bestuur", href: "/club/bestuur" },
           { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
           { label: "KCVV Angels", href: "/club/angels" },
