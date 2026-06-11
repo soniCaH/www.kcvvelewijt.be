@@ -75,7 +75,7 @@ Behaviour:
 | `event-cover`               | 16:9   | FeaturedEventBand, EventCard                            | 3    |
 | `match-action`              | 16:9   | Match preview / recap action                            | 3    |
 | `match-action-portrait`     | 3:4    | Vertical match-action for mobile cards                  | 3    |
-| `team-group`                | 16:9   | TeamHero, TeamCard                                      | 3    |
+| `team-group`                | 16:9   | TeamHero                                                | 3    |
 | `stadium-hero`              | 16:9   | Stadium / venue heroes                                  | 3    |
 | `training`                  | 16:9   | Training / behind-the-scenes                            | 3    |
 | `crowd-atmosphere`          | 16:9   | Supporter / crowd shots                                 | 3    |
