@@ -32,7 +32,7 @@ describe("ClubEditorialGrid", () => {
     const hrefs = links.map((link) => link.getAttribute("href"));
     expect(hrefs).toContain("/club/geschiedenis");
     expect(hrefs).toContain("/club/bestuur");
-    expect(hrefs).toContain("/club/organigram");
+    expect(hrefs).toContain("/hulp#structuur");
     expect(hrefs).toContain("/club/ultras");
     expect(hrefs).toContain("/club/angels");
     expect(hrefs).toContain("/club/aansluiten");

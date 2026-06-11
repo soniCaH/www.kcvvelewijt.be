@@ -69,7 +69,7 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).toContain("/hulp");
     expect(hrefs).toContain("/jeugd#visie");
     expect(hrefs).toContain("/nieuws/prosoccerdata");
-    expect(hrefs).toContain("/club/organigram");
+    expect(hrefs).toContain("/hulp#structuur");
 
     // Old dead routes are gone.
     expect(hrefs).not.toContain("/club/inschrijven");

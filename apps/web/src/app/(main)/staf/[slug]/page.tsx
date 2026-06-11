@@ -101,7 +101,7 @@ export default async function StafPage({ params }: StaffPageProps) {
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
           { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
-          { name: "Staf", url: `${SITE_CONFIG.siteUrl}/club/organigram` },
+          { name: "Staf", url: `${SITE_CONFIG.siteUrl}/hulp#structuur` },
           { name: fullName, url: `${SITE_CONFIG.siteUrl}/staf/${slug}` },
         ])}
       />

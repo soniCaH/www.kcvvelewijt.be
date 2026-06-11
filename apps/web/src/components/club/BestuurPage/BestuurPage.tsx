@@ -6,7 +6,7 @@
  *     → <StripedSeam>
  *     → editorial description ("Over het …", team.body, jersey-deep left rule)
  *     → "De leden" — <TeamStaff> (6.C, staff-by-role)
- *     → <BoardCtaBand> → /club/organigram
+ *     → <BoardCtaBand> → /hulp#structuur
  *
  * Replaces the legacy SectionStack + InteriorPageHero + TeamRoster + SectionCta
  * composition; boards were the last consumer of <TeamRoster>/<StaffCard>.

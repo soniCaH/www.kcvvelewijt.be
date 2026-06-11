@@ -40,7 +40,6 @@ import ClubDetailLoading from "../(main)/club/[slug]/loading";
 import AngelsLoading from "../(main)/club/angels/loading";
 import BestuurLoading from "../(main)/club/bestuur/loading";
 import JeugdbestuurLoading from "../(main)/club/jeugdbestuur/loading";
-import OrganigramLoading from "../(main)/club/organigram/loading";
 import PloegenDetailLoading from "../(main)/ploegen/[slug]/loading";
 import SpelersDetailLoading from "../(main)/spelers/[slug]/loading";
 import StafDetailLoading from "../(main)/staf/[slug]/loading";
@@ -154,11 +153,6 @@ describe("loading.tsx envelope drift guard", () => {
       name: "/club/jeugdbestuur",
       Loading: JeugdbestuurLoading,
       expectedRootClass: "min-h-screen space-y-12",
-    },
-    {
-      name: "/club/organigram",
-      Loading: OrganigramLoading,
-      expectedRootClass: "min-h-screen",
     },
     {
       name: "/jeugd",

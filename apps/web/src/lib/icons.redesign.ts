@@ -23,8 +23,10 @@ import {
   House as PhHouse,
   List as PhList,
   MagnifyingGlass as PhMagnifyingGlass,
+  Question as PhQuestion,
   SoccerBall as PhSoccerBall,
   TreeStructure as PhTreeStructure,
+  User as PhUser,
   UsersThree as PhUsersThree,
   Warning as PhWarning,
   WarningCircle as PhWarningCircle,
@@ -55,8 +57,10 @@ export const Heart = fillWrapper(PhHeart);
 export const House = fillWrapper(PhHouse);
 export const List = fillWrapper(PhList);
 export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
+export const Question = fillWrapper(PhQuestion);
 export const SoccerBall = fillWrapper(PhSoccerBall);
 export const TreeStructure = fillWrapper(PhTreeStructure);
+export const User = fillWrapper(PhUser);
 export const UsersThree = fillWrapper(PhUsersThree);
 export const Warning = fillWrapper(PhWarning);
 export const WarningCircle = fillWrapper(PhWarningCircle);
