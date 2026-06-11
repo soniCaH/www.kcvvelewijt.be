@@ -159,7 +159,7 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 - `<TeamFlagship>` — listing A+B paired mirrored flagships (A jersey-deep content-left/photo-right; B cream mirrored). `<YouthDirectory>` — Bovenbouw/Middenbouw/Onderbouw age-code cards. `<TeamSectionNav>` — sticky in-page section nav (auto-hide aware).
 - **Analytics:** `team_detail_view` / `team_list_view` page-views + `team_standings_/matches_/squad_in_view` intersection events. The `team_` prefix is in the live GTM trigger regex.
 - **Contrast rule:** small text on jersey-deep uses `text-white` (cream #f5f1e6 is 4.04:1 there, below AA).
-- **Deferred to #1960 (still consumed outside Phase 6.C):** `<TeamOverview>` + `<TeamCard>` (used by `/jeugd`) and `<TeamRoster>` + `<StaffCard>` (used by `/club/bestuur`) were NOT deleted — they retire once those surfaces migrate. `<MatchResultRow>` (formerly orphaned, tracked in #1960) was retired in #2049.
+- **Phase 6.C deferred deletions — complete (#1960):** `<TeamOverview>` + `<TeamCard>` (retired with the `/jeugd` redesign, #2092), `<TeamRoster>` + the legacy `<StaffCard>` (retired with the board pages, #2044), and `<MatchResultRow>` (#2049) all lost their last consumers as Phase 7 rebuilt those surfaces and were deleted — files, stories, tests, and barrel exports. `git grep` confirms zero remaining consumers.
 
 ## Design Conventions
 
