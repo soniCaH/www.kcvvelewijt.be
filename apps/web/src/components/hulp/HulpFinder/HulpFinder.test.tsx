@@ -22,6 +22,14 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => mockSearchParams,
 }));
 
+let mockPanel: {
+  openMemberById: ReturnType<typeof vi.fn>;
+  openMember: ReturnType<typeof vi.fn>;
+} | null = null;
+vi.mock("@/components/organigram/HubMemberPanel", () => ({
+  useHubMemberPanel: () => mockPanel,
+}));
+
 const trackView = vi.fn();
 const trackContactClicked = vi.fn();
 const trackOrganigramLink = vi.fn();
@@ -49,6 +57,7 @@ beforeEach(() => {
   trackOrganigramLink.mockClear();
   trackStepLinkClicked.mockClear();
   mockSearchParams = new URLSearchParams();
+  mockPanel = null;
 });
 
 const q = (re: RegExp) => screen.getByRole("button", { name: re });
@@ -117,6 +126,29 @@ describe("HulpFinder", () => {
     fireEvent.click(q(/mijn kind is geblesseerd/i));
     fireEvent.click(screen.getByRole("link", { name: /toon in structuur/i }));
     expect(trackOrganigramLink).toHaveBeenCalledWith("blessure", "node-gc");
+  });
+
+  it("opens the member panel in-page when inside a HubMemberPanel provider", () => {
+    const openMemberById = vi.fn();
+    mockPanel = { openMemberById, openMember: vi.fn() };
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    fireEvent.click(q(/mijn kind is geblesseerd/i));
+    fireEvent.click(screen.getByRole("link", { name: /toon in structuur/i }));
+    expect(openMemberById).toHaveBeenCalledWith(
+      "node-gc",
+      expect.objectContaining({ view: "cards" }),
+    );
+    expect(trackOrganigramLink).toHaveBeenCalledWith("blessure", "node-gc");
+  });
+
+  it("shows a per-category empty state when the active audience empties a category", () => {
+    mockSearchParams = new URLSearchParams("audience=supporter");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    // No medisch path is tagged 'supporter' → the category is empty for them.
+    fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      /geen hulpvragen in deze categorie/i,
+    );
   });
 
   it("filters by the ?audience param (hero deep-link)", () => {

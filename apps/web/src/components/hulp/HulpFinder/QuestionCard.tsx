@@ -26,7 +26,10 @@ export interface QuestionCardProps {
   onToggle: () => void;
   onContactClick?: (channel: "email" | "phone") => void;
   onStepLinkClick?: (stepIndex: number) => void;
-  onShowInStructure?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  onShowInStructure?: (
+    event: MouseEvent<HTMLAnchorElement>,
+    nodeId: string,
+  ) => void;
 }
 
 export function QuestionCard({
@@ -58,7 +61,7 @@ export function QuestionCard({
           id={headerId}
           onClick={onToggle}
           aria-expanded={open}
-          aria-controls={panelId}
+          aria-controls={open ? panelId : undefined}
           className="flex w-full items-center gap-3 p-3 text-left"
         >
           <span

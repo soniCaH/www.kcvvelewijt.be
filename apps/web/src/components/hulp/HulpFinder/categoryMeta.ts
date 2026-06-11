@@ -74,6 +74,11 @@ export function groupPathsByCategory(
 ): Record<CategoryKey, ResponsibilityPath[]> {
   const grouped = {} as Record<CategoryKey, ResponsibilityPath[]>;
   for (const cat of CATEGORY_ORDER) grouped[cat] = [];
-  for (const path of paths) grouped[path.category].push(path);
+  for (const path of paths) {
+    // Skip categories not in the known set — guards against CMS data drift
+    // (a category added in Sanity before the front-end map) rather than
+    // throwing on an undefined bucket.
+    grouped[path.category]?.push(path);
+  }
   return grouped;
 }

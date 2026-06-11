@@ -55,4 +55,13 @@ describe("categoryMeta", () => {
     expect(grouped.sportief.map((p) => p.id)).toEqual(["b"]);
     expect(grouped.commercieel).toEqual([]);
   });
+
+  it("skips paths whose category is outside the known set (CMS drift guard)", () => {
+    const drifted = {
+      ...mk("x", "medisch"),
+      category: "onbekend" as ResponsibilityPath["category"],
+    };
+    const grouped = groupPathsByCategory([mk("a", "medisch"), drifted]);
+    expect(grouped.medisch.map((p) => p.id)).toEqual(["a"]);
+  });
 });

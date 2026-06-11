@@ -61,7 +61,10 @@ describe("ContactCard", () => {
     const link = screen.getByRole("link", { name: /toon in structuur/i });
     expect(link).toHaveAttribute("href", "/hulp?member=node-vz#structuur");
     fireEvent.click(link);
-    expect(onShowInStructure).toHaveBeenCalledTimes(1);
+    expect(onShowInStructure).toHaveBeenCalledWith(
+      expect.anything(),
+      "node-vz",
+    );
   });
 
   it("renders a plain 'Vind je ploeg' link for a team-role contact (no structuur intercept)", () => {

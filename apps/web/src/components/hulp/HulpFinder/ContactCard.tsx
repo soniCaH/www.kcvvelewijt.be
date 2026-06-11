@@ -33,11 +33,15 @@ export interface ContactCardProps {
   onContactClick?: (channel: "email" | "phone") => void;
   /**
    * Click handler for the "Toon in structuur →" cross-link (position contacts
-   * only). The finder intercepts (`preventDefault`) for a smooth in-page panel
-   * open + `responsibility_organigram_link`; without it the link navigates to
-   * the `?member=` deep-link href.
+   * only) — receives the resolved `nodeId`. The finder intercepts
+   * (`preventDefault`) for a smooth in-page panel open +
+   * `responsibility_organigram_link`; without it the link navigates to the
+   * `?member=` deep-link href.
    */
-  onShowInStructure?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  onShowInStructure?: (
+    event: MouseEvent<HTMLAnchorElement>,
+    nodeId: string,
+  ) => void;
 }
 
 const ACTION =
@@ -52,13 +56,14 @@ export function ContactCard({
   onShowInStructure,
 }: ContactCardProps) {
   const { lead, rest } = splitDisplayName(contact.name);
+  const { nodeId } = contact;
   const hasName = contact.name.trim().length > 0;
   const showRole =
     contact.role.trim().length > 0 && contact.role !== contact.name;
   const phoneHref = contact.phone
     ? `tel:${contact.phone.replace(/\s/g, "")}`
     : undefined;
-  const isStructuur = Boolean(contact.nodeId);
+  const isStructuur = Boolean(nodeId);
 
   return (
     <div>
@@ -118,7 +123,9 @@ export function ContactCard({
       {contact.organigramHref && (
         <Link
           href={contact.organigramHref}
-          onClick={isStructuur ? onShowInStructure : undefined}
+          onClick={
+            nodeId ? (event) => onShowInStructure?.(event, nodeId) : undefined
+          }
           className={CROSS_LINK}
         >
           {isStructuur && <TreeStructure size={12} aria-hidden />}

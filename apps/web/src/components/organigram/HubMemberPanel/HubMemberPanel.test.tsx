@@ -11,7 +11,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { HubMemberPanel } from "./HubMemberPanel";
+import { HubMemberPanel, useHubMemberPanel } from "./HubMemberPanel";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
 import { staffMembersFixture } from "@/components/organigram/__fixtures__/staff-members.fixture";
 import { hashMemberId } from "@/lib/analytics/hash-member-id";
@@ -31,6 +31,27 @@ function renderHub() {
   return render(
     <HubMemberPanel nodes={staffMembersFixture} responsibilityPaths={[]}>
       <StructureDirectory nodes={staffMembersFixture} interactive />
+    </HubMemberPanel>,
+  );
+}
+
+/** Exercises the context opener the finder's "Toon in structuur →" calls. */
+function OpenByIdButton({ nodeId }: { nodeId: string }) {
+  const panel = useHubMemberPanel();
+  return (
+    <button
+      type="button"
+      onClick={() => panel?.openMemberById(nodeId, { view: "cards" })}
+    >
+      open-by-id
+    </button>
+  );
+}
+
+function renderHubWithOpener(nodeId: string) {
+  return render(
+    <HubMemberPanel nodes={staffMembersFixture} responsibilityPaths={[]}>
+      <OpenByIdButton nodeId={nodeId} />
     </HubMemberPanel>,
   );
 }
@@ -133,6 +154,22 @@ describe("HubMemberPanel", () => {
         name: "Contactgegevens — Els Penningmeester",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("openMemberById opens the panel for a known node id (finder cross-link path)", async () => {
+    const user = userEvent.setup();
+    renderHubWithOpener("president");
+    await user.click(screen.getByRole("button", { name: "open-by-id" }));
+    expect(
+      screen.getByRole("dialog", { name: "Contactgegevens — Jan Voorzitter" }),
+    ).toBeInTheDocument();
+  });
+
+  it("openMemberById is a no-op for an unknown node id", async () => {
+    const user = userEvent.setup();
+    renderHubWithOpener("does-not-exist");
+    await user.click(screen.getByRole("button", { name: "open-by-id" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("clears the deep-link params when the panel is closed", async () => {
