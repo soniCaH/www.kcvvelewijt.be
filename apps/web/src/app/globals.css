@@ -1171,3 +1171,98 @@
 #cc-main .pm__footer {
   background-color: var(--color-kcvv-black) !important;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Volledig organigram — pure-CSS box tree (Phase 7 · #2054)
+   Connector elbows drawn with ::before/::after on the <li>s (the canonical
+   CSS-only tree). Node boxes are styled with Tailwind in the component; this
+   block owns only the structural connectors. The A4 print stylesheet is
+   injected dynamically by the "Download als PDF" handler (so it can never
+   hijack an unrelated page's print).
+   ────────────────────────────────────────────────────────────────────────── */
+.vo-tree,
+.vo-tree ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 20px 0 0;
+  position: relative;
+}
+.vo-tree li {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 7px 0;
+  position: relative;
+}
+/* Horizontal elbows from each child up to the sibling connector line. */
+.vo-tree li::before,
+.vo-tree li::after {
+  border-top: 2px solid var(--color-ink);
+  content: "";
+  height: 20px;
+  position: absolute;
+  right: 50%;
+  top: 0;
+  width: 50%;
+}
+.vo-tree li::after {
+  border-left: 2px solid var(--color-ink);
+  left: 50%;
+  right: auto;
+}
+.vo-tree li:only-child::before,
+.vo-tree li:only-child::after {
+  display: none;
+}
+.vo-tree li:only-child {
+  padding-top: 20px;
+}
+.vo-tree li:first-child::before,
+.vo-tree li:last-child::after {
+  border: 0 none;
+}
+.vo-tree li:last-child::before {
+  border-radius: 0 4px 0 0;
+  border-right: 2px solid var(--color-ink);
+}
+.vo-tree li:first-child::after {
+  border-radius: 4px 0 0 0;
+}
+/* Vertical stub dropping from a parent down to its children row. */
+.vo-tree ul::before {
+  border-left: 2px solid var(--color-ink);
+  content: "";
+  height: 20px;
+  left: 50%;
+  position: absolute;
+  top: 0;
+  width: 0;
+}
+.vo-tree > li:only-child {
+  padding-top: 0;
+}
+
+/* Spotlight re-centre enter motion (Phase 7 · #2054). The stage content is keyed
+   by the focused node id, so it remounts on every navigation and this animation
+   replays — conveying the re-centre without JS state. Disabled under reduced
+   motion (WCAG 2.3.3). */
+@keyframes spotlight-pop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Opacity-only so the context fade composes with (never fights) the centre
+   node's FLIP travel transform, applied imperatively via the Web Animations
+   API in the component. */
+.spotlight-pop {
+  animation: spotlight-pop 200ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-pop {
+    animation: none;
+  }
+}

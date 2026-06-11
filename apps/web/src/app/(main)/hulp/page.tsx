@@ -35,6 +35,10 @@ import {
   deriveStructureIndex,
 } from "@/components/organigram/OrganigramHero";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
+import {
+  ExplorerLauncher,
+  VolledigOrganigram,
+} from "@/components/organigram/OrganigramExplorer";
 
 export const revalidate = 3600;
 
@@ -142,12 +146,30 @@ export default async function HulpHubPage() {
           >
             Het organigram — wie-is-wie
           </EditorialHeading>
-          <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
-            Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
-          </p>
+          <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+            <p className="text-ink-soft max-w-[60ch] text-base leading-relaxed">
+              Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
+              Of open de verkenner om door de rapporteringslijn te navigeren.
+            </p>
+            <ExplorerLauncher nodes={members} />
+          </div>
 
           <div className="mt-8">
             <StructureDirectory nodes={members} />
+          </div>
+
+          {/* Volledig organigram — the full reporting chart + one-A4 PDF. */}
+          <div className="mt-14">
+            <MonoLabel variant="plain">Volledig overzicht</MonoLabel>
+            <EditorialHeading
+              level={3}
+              size="display-sm"
+              emphasis={{ text: "in beeld" }}
+              className="mt-2 mb-6"
+            >
+              De hele structuur in beeld
+            </EditorialHeading>
+            <VolledigOrganigram nodes={members} />
           </div>
         </section>
       </div>

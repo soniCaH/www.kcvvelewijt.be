@@ -21,11 +21,14 @@ vi.mock("@phosphor-icons/react", () => {
 
   return {
     ArrowRight: makeIcon("ArrowRight"),
+    ArrowsOut: makeIcon("ArrowsOut"),
     Bus: makeIcon("Bus"),
     CaretDown: makeIcon("CaretDown"),
     CaretLeft: makeIcon("CaretLeft"),
     CaretRight: makeIcon("CaretRight"),
+    CaretUp: makeIcon("CaretUp"),
     CheckCircle: makeIcon("CheckCircle"),
+    DownloadSimple: makeIcon("DownloadSimple"),
     Eye: makeIcon("Eye"),
     FirstAid: makeIcon("FirstAid"),
     Heart: makeIcon("Heart"),
@@ -45,11 +48,14 @@ vi.mock("@phosphor-icons/react", () => {
 
 import {
   ArrowRight,
+  ArrowsOut,
   Bus,
   CaretDown,
   CaretLeft,
   CaretRight,
+  CaretUp,
   CheckCircle,
+  DownloadSimple,
   Eye,
   FirstAid,
   Heart,
@@ -70,11 +76,14 @@ const wrappers: Array<
   [string, ComponentType<{ size?: number; className?: string }>]
 > = [
   ["ArrowRight", ArrowRight],
+  ["ArrowsOut", ArrowsOut],
   ["Bus", Bus],
   ["CaretDown", CaretDown],
   ["CaretLeft", CaretLeft],
   ["CaretRight", CaretRight],
+  ["CaretUp", CaretUp],
   ["CheckCircle", CheckCircle],
+  ["DownloadSimple", DownloadSimple],
   ["Eye", Eye],
   ["FirstAid", FirstAid],
   ["Heart", Heart],
