@@ -34,6 +34,7 @@ import {
   OrganigramHero,
   deriveStructureIndex,
 } from "@/components/organigram/OrganigramHero";
+import { StructureDirectory } from "@/components/organigram/StructureDirectory";
 
 export const revalidate = 3600;
 
@@ -143,9 +144,11 @@ export default async function HulpHubPage() {
           </EditorialHeading>
           <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
             Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
-            Hier vind je straks de volledige directory en open je de verkenner
-            om door de structuur te navigeren.
           </p>
+
+          <div className="mt-8">
+            <StructureDirectory nodes={members} />
+          </div>
         </section>
       </div>
 
