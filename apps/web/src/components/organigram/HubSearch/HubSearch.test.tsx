@@ -127,6 +127,25 @@ describe("HubSearch", () => {
     expect(await screen.findByText(/Slim gezocht/i)).toBeInTheDocument();
   });
 
+  it("shimmers (no empty-state flash) while the answer lane is still resolving", async () => {
+    // executedQuery !== the typed query → not settled yet, nothing stale to show.
+    setSemantic({ results: [], executedQuery: "" });
+    renderSearch();
+    typeQuery("blessure");
+    expect(await screen.findByText(/Slim zoeken/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Geen resultaten/)).not.toBeInTheDocument();
+  });
+
+  it("keyboard-selects the answer-forward card (ArrowDown + Enter)", async () => {
+    setSemantic({ results: [hit("blessure", 0.82)], executedQuery: "bezeerd" });
+    renderSearch();
+    const input = typeQuery("bezeerd");
+    await screen.findByText(/Lees volledig antwoord/i);
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(window.location.hash).toBe("#blessure");
+  });
+
   it("falls back to keyword (no smart hint) when the endpoint errors", async () => {
     setSemantic({ error: "boom" });
     renderSearch();

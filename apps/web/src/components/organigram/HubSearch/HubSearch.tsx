@@ -222,19 +222,20 @@ export function HubSearch({
     return () => clearTimeout(id);
   }, [value]);
 
-  // Answer lane — semantic; the hook debounces (300ms) + aborts in flight.
+  const trimmed = value.trim();
+
+  // Answer lane — semantic; the hook debounces (300ms) + aborts in flight. Pass
+  // the TRIMMED query so the hook's `executedQuery` converges with `trimmed`
+  // (the settle signal below) even when the input has surrounding whitespace.
   const {
     results: semanticResults,
-    loading: semanticLoading,
     error: semanticError,
     executedQuery,
     search: runSemantic,
   } = useSemanticSearch({ type: "responsibility", limit: maxResults });
   useEffect(() => {
-    runSemantic(value);
-  }, [value, runSemantic]);
-
-  const trimmed = value.trim();
+    runSemantic(trimmed);
+  }, [trimmed, runSemantic]);
 
   const pathById = useMemo(
     () => new Map(responsibilityPaths.map((p) => [p.id, p])),
@@ -266,11 +267,12 @@ export function HubSearch({
         answerForward ? semanticAnswers.slice(1) : semanticAnswers,
       );
 
-  // Shimmer only on the first resolve of a query (no settled answers yet); on
-  // refine the previous results stay visible (no flash).
-  const answersResolving =
-    !usingFallback && semanticLoading && executedQuery !== trimmed;
-  const showShimmer = answersResolving && semanticAnswers.length === 0;
+  // The answer lane has "settled" for the current query once the hook's
+  // executedQuery matches it (or we're on the sync keyword fallback). Until then
+  // we shimmer only when there's nothing stale to show — so the empty state
+  // never flashes during the debounce window, and refining keeps prior results.
+  const answersSettled = usingFallback || executedQuery === trimmed;
+  const showShimmer = !answersSettled && semanticAnswers.length === 0;
 
   const items: HubSearchResult[] = answerForward
     ? [answerForward, ...rows]
