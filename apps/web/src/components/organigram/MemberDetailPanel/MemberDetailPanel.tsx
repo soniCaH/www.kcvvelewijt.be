@@ -348,12 +348,20 @@ export function MemberDetailPanel({
                     <ul className="flex flex-wrap gap-1.5">
                       {holderResponsibilities.map((path) => (
                         <li key={path.id}>
-                          {/* Deep-link the question's slug (7o9 / F10) + close the
-                              panel, so the finder's hashchange `reveal()` opens
-                              that exact answer in view — not just scroll to #hulp. */}
+                          {/* Deep-link the question's slug (7o9 / F10): the
+                              finder's hashchange `reveal()` opens + scrolls to
+                              that answer. Close WITHOUT the usual focus-restore —
+                              null the return target first so the panel's close
+                              effect skips `returnFocusRef.current.focus()`, which
+                              would otherwise pull focus/scroll back to the now-
+                              off-screen launcher and fight the hash navigation
+                              (matches normal in-page anchor behaviour). */}
                           <Link
                             href={`#${path.id}`}
-                            onClick={onClose}
+                            onClick={() => {
+                              if (returnFocusRef) returnFocusRef.current = null;
+                              onClose();
+                            }}
                             className="border-jersey-deep text-jersey-deep hover:bg-jersey-deep hover:text-cream inline-block border-[1.5px] px-2 py-1 font-mono text-[10px] tracking-[0.02em] uppercase transition-colors"
                           >
                             {path.question}

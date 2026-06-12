@@ -194,16 +194,19 @@ export default async function HulpHubPage() {
             </div>
           </section>
         </div>
-      </HubMemberPanel>
 
-      <CtaBand
-        ariaLabel="Contacteer de club"
-        heading="Niemand gevonden?"
-        emphasis={{ text: "gevonden", tone: "warm" }}
-        lead="Vind je niet meteen de juiste persoon? Stuur ons een bericht — we helpen je verder."
-        buttonLabel="Contacteer de club →"
-        href="/club/contact"
-      />
+        {/* Inside <HubMemberPanel> so it joins the page's `inert` subtree while a
+            member panel is open (B1) — the CTA must not stay focusable behind the
+            modal. Full-width: a sibling of the max-w content div, not inside it. */}
+        <CtaBand
+          ariaLabel="Contacteer de club"
+          heading="Niemand gevonden?"
+          emphasis={{ text: "gevonden", tone: "warm" }}
+          lead="Vind je niet meteen de juiste persoon? Stuur ons een bericht — we helpen je verder."
+          buttonLabel="Contacteer de club →"
+          href="/club/contact"
+        />
+      </HubMemberPanel>
     </>
   );
 }

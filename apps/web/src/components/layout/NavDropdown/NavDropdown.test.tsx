@@ -21,7 +21,7 @@ const deClubGroups: NavDropdownGroup[] = [
     label: "Wie we zijn",
     items: [
       { label: "Geschiedenis", href: "/club/geschiedenis" },
-      { label: "Organigram", href: "/club/organigram" },
+      { label: "Organigram", href: "/hulp#structuur" },
     ],
   },
   {

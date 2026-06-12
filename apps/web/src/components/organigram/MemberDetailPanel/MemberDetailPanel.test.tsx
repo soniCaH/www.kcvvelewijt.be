@@ -248,6 +248,40 @@ describe("MemberDetailPanel", () => {
       await user.click(screen.getByRole("link", { name: "Lid worden" }));
       expect(onClose).toHaveBeenCalledTimes(1);
     });
+
+    it("closes a chip WITHOUT restoring focus to the launcher (F10 — hash nav owns the scroll)", async () => {
+      const user = userEvent.setup();
+      const launcher = document.createElement("button");
+      document.body.appendChild(launcher);
+      const returnFocusRef = { current: launcher as HTMLElement | null };
+      const onClose = vi.fn();
+      const { rerender } = render(
+        <MemberDetailPanel
+          node={singleNode}
+          open
+          onClose={onClose}
+          responsibilityPaths={responsibilityPaths}
+          returnFocusRef={returnFocusRef}
+        />,
+      );
+      await user.click(screen.getByRole("link", { name: "Lid worden" }));
+      // The return target is cleared so the close effect skips focus restore.
+      expect(returnFocusRef.current).toBeNull();
+
+      // Parent closes the panel; focus must NOT jump back to the launcher (which
+      // the hash navigation has scrolled away from).
+      rerender(
+        <MemberDetailPanel
+          node={singleNode}
+          open={false}
+          onClose={onClose}
+          responsibilityPaths={responsibilityPaths}
+          returnFocusRef={returnFocusRef}
+        />,
+      );
+      expect(launcher).not.toHaveFocus();
+      document.body.removeChild(launcher);
+    });
   });
 
   describe("shared holders", () => {

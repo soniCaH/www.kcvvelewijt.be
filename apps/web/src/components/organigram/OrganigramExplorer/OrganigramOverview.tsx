@@ -64,7 +64,7 @@ export function OrganigramOverview({
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              aria-expanded
+              aria-expanded={true}
               className="text-ink-muted hover:text-ink mb-3 inline-flex items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] uppercase transition-colors"
             >
               ↑ Verberg het organigram
