@@ -95,22 +95,14 @@ export interface ResponsibilityPath {
 }
 
 /**
- * Role options for the UI role selector.
- * "andere" is intentionally excluded — it is a valid UserRole for data but not shown as a picker choice.
- */
-export const ROLE_OPTIONS: ReadonlyArray<{ value: UserRole; label: string }> = [
-  { value: "speler", label: "Speler" },
-  { value: "ouder", label: "Ouder" },
-  { value: "trainer", label: "Trainer" },
-  { value: "supporter", label: "Supporter" },
-  { value: "niet-lid", label: "Niet-lid" },
-];
-
-/**
  * Audience filters for the `/hulp` hub — the single source of truth shared by
  * the hero deep-link chips (`<OrganigramHero>`) and the finder filter chips
  * (`<HulpFinder>`), so the two can never drift (7o9). Ouder-first (the most
  * common help-seeker); "Nieuw lid" gives non-members a door (they had none).
+ *
+ * Supersedes the former `ROLE_OPTIONS` picker list (removed in #2058 — it had
+ * been dead since the redesign migrated every consumer here). "andere" stays
+ * excluded: a valid `UserRole` for data, but never a picker choice.
  */
 export const HUB_AUDIENCE_FILTERS: ReadonlyArray<{
   value: UserRole;
