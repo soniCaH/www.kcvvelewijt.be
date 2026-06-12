@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 8 — /zoeken · 8s1.1 heading copy + accent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 88ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top:2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
+      .note-strip { background: var(--cream-deep); border-bottom:1px dashed var(--ink); padding:9px 28px; font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); }
+      .note-strip b { color: var(--brick); }
+
+      .block { padding: 38px 0 30px; }
+      h1.title { font-family: var(--font-display); font-style:italic; font-weight:900; font-size: clamp(38px,5.6vw,68px); line-height:.92; margin:0 0 20px; letter-spacing:-0.01em; }
+      h1.title .acc { color: var(--jersey-deep); }
+      /* searchbar with magnifier icon button (no "ZOEK" text) */
+      .searchbar { display:flex; align-items:stretch; border:2px solid var(--ink); border-radius:8px; background:#fff; box-shadow: 4px 4px 0 0 var(--ink); max-width:660px; overflow:hidden; }
+      .searchbar input { flex:1; border:0; padding:15px 18px; font-size:17px; font-family:var(--font-body); background:transparent; outline:none; }
+      .searchbar .go { background:var(--jersey-deep); color:var(--cream); border:0; border-left:2px solid var(--ink); padding:0 20px; display:flex; align-items:center; cursor:pointer; }
+      .searchbar .go svg { width:22px; height:22px; }
+      .subnote { font-family:var(--font-mono); font-size:11.5px; color:var(--ink-muted); margin-top:12px; letter-spacing:.03em; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 8 · /zoeken — 8s1.1: heading copy + accent</h1>
+      <p>Architecture is locked to S1 (lean, results-first): <b style="color:var(--warm)">no mono kicker</b>,
+        serif title with an accent-colour part, and the search button is a <b style="color:var(--warm)">magnifier
+        icon</b> (no "ZOEK" word) so nothing duplicates "zoek". Pick the heading copy + which word carries the
+        jersey-deep accent. All four render on the identical locked layout. See
+        <a href="./8s1-architecture-locked.md">8s1 lock</a>.</p>
+    </div>
+
+    <!-- H_A -->
+    <div class="direction-bar"><span class="tag">A</span> "Zoeken." <span class="note">literal, one word — accent on the dot only</span></div>
+    <div class="wrap"><div class="block">
+      <h1 class="title">Zoeken<span class="acc">.</span></h1>
+      <div class="searchbar"><input value="elewijt" /><button class="go" aria-label="Zoek"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg></button></div>
+      <div class="subnote">Typ minstens 2 letters · nieuws · spelers · ploegen · staf</div>
+    </div></div>
+    <div class="note-strip">A — most literal, matches the URL. Calm, but the least personality of the four.</div>
+
+    <!-- H_B -->
+    <div class="direction-bar"><span class="tag">B</span> "Wat zoek je?" <span class="note">friendly question — accent on "zoek"</span></div>
+    <div class="wrap"><div class="block">
+      <h1 class="title">Wat <span class="acc">zoek</span> je?</h1>
+      <div class="searchbar"><input value="elewijt" /><button class="go" aria-label="Zoek"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg></button></div>
+      <div class="subnote">Typ minstens 2 letters · nieuws · spelers · ploegen · staf</div>
+    </div></div>
+    <div class="note-strip">B — the question a search page asks; warmest, most human. "zoek" appears once (heading only — button is an icon).</div>
+
+    <!-- H_C -->
+    <div class="direction-bar"><span class="tag">C</span> "Vind je weg." <span class="note">warm, no verb "zoek" at all — accent on "weg"</span></div>
+    <div class="wrap"><div class="block">
+      <h1 class="title">Vind je <span class="acc">weg</span>.</h1>
+      <div class="searchbar"><input value="elewijt" /><button class="go" aria-label="Zoek"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg></button></div>
+      <div class="subnote">Typ minstens 2 letters · nieuws · spelers · ploegen · staf</div>
+    </div></div>
+    <div class="note-strip">C — avoids "zoek" entirely, more editorial. RISK: slightly indirect for a pure utility page.</div>
+
+    <!-- H_D -->
+    <div class="direction-bar"><span class="tag">D</span> "Zoek mee." <span class="note">short, communal "plezante compagnie" voice — accent on "mee"</span></div>
+    <div class="wrap"><div class="block">
+      <h1 class="title">Zoek <span class="acc">mee</span>.</h1>
+      <div class="searchbar"><input value="elewijt" /><button class="go" aria-label="Zoek"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg></button></div>
+      <div class="subnote">Typ minstens 2 letters · nieuws · spelers · ploegen · staf</div>
+    </div></div>
+    <div class="note-strip">D — short + club-voice, but "Zoek mee" implies collaboration the feature doesn't really have.</div>
+  </body>
+</html>

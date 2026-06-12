@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 8 — /zoeken · 8s1.1 softened S3 + accent colour</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 90ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top:2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .wrap { max-width: 1040px; margin: 0 auto; padding: 0 28px; }
+      .note-strip { background: var(--cream-deep); border-bottom:1px dashed var(--ink); padding:9px 28px; font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); }
+      .note-strip b { color: var(--brick); }
+
+      /* softened S3 masthead */
+      .mast { background: var(--jersey-deep-dark); color: var(--cream); padding: 50px 0 46px; border-bottom:2px solid var(--ink); position:relative; overflow:hidden; }
+      .mast::before { content:""; position:absolute; inset:0; background: repeating-linear-gradient(135deg, rgba(245,241,230,0.045) 0 18px, transparent 18px 36px); }
+      .mast::after { content:""; position:absolute; inset:0; background: radial-gradient(120% 90% at 18% -10%, rgba(74,207,82,.14), transparent 60%); }
+      .mast .inner { position:relative; }
+      .mast h1 { font-family: var(--font-display); font-style:italic; font-weight:900; font-size: clamp(40px,6vw,74px); line-height:.9; margin:0 0 22px; letter-spacing:-0.01em; color: var(--cream); }
+      .searchbar { display:flex; align-items:stretch; border:2px solid var(--ink); border-radius:8px; background:#fff; box-shadow: 5px 5px 0 0 #000; max-width:680px; overflow:hidden; }
+      .searchbar input { flex:1; border:0; padding:16px 18px; font-size:17px; font-family:var(--font-body); background:var(--cream); outline:none; color:var(--ink); }
+      .searchbar .go { border:0; border-left:2px solid var(--ink); padding:0 22px; display:flex; align-items:center; cursor:pointer; color:var(--ink); }
+      .searchbar .go svg { width:23px; height:23px; }
+      .mast .hint { font-family:var(--font-mono); font-size:12px; color:rgba(245,241,230,.72); margin-top:14px; letter-spacing:.03em; }
+
+      /* glimpse of results on cream */
+      .results { display:grid; gap:10px; padding: 22px 0 30px; }
+      .res { display:flex; gap:14px; align-items:center; background:#fff; border:1px solid var(--paper-edge); border-radius:6px; padding:12px 14px; }
+      .res .thumb { width:48px; height:48px; flex:0 0 auto; border-radius:4px; background:var(--cream-deep); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:10px; color:var(--ink-muted); }
+      .res .tlabel { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--jersey-deep); }
+      .res .ttl { font-weight:700; font-size:15px; margin:2px 0 0; }
+      .res .snip { font-size:12.5px; color:var(--ink-muted); margin:2px 0 0; }
+      .glasshint { font-family:var(--font-mono); font-size:11px; color:var(--ink-muted); padding-top:14px; }
+
+      /* accent variants */
+      .warm h1 .acc { color: var(--warm); }
+      .warm .searchbar .go { background: var(--warm); }
+      .bright h1 .acc { color: var(--jersey); }
+      .bright .searchbar .go { background: var(--jersey); }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 8 · /zoeken — 8s1.1: softened S3 + accent colour</h1>
+      <p>Corrected base: <b style="color:var(--warm)">S3 dark masthead</b>, softened — no kicker, serif italic
+        title "Wat <em>zoek</em> je?", magnifier-icon button. On the dark ground the accent can't be jersey-deep,
+        so pick the light accent for the "zoek" word + the icon-button cell: <b>warm gold</b> or <b>bright jersey</b>.
+        Both render the identical masthead; result rows below are still neutral placeholders (vocabulary = 8s2).
+        See <a href="./8s1-architecture-locked.md">8s1 lock</a>.</p>
+    </div>
+
+    <!-- WARM -->
+    <div class="direction-bar"><span class="tag">W</span> Warm-gold accent <span class="note">matches the dark-band heading accent on /club/ultras + clubshop</span></div>
+    <div class="warm">
+      <div class="mast"><div class="wrap inner">
+        <h1>Wat <span class="acc">zoek</span> je?</h1>
+        <div class="searchbar"><input value="elewijt" /><button class="go" aria-label="Zoek"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg></button></div>
+        <div class="hint">Typ minstens 2 letters · nieuws · spelers · ploegen · staf</div>
+      </div></div>
+      <div class="wrap"><div class="results">
+        <div class="res"><div class="thumb">FOTO</div><div><div class="tlabel">Nieuws</div><div class="ttl">Elewijt pakt de drie punten tegen Kampenhout</div><div class="snip">Een late kopbal bezorgt de A-ploeg een deugddoende zege…</div></div></div>
+        <div class="res"><div class="thumb">FOTO</div><div><div class="tlabel">Speler</div><div class="ttl">Wout Van Elewijt</div><div class="snip">Middenvelder · A-ploeg</div></div></div>
+      </div><div class="glasshint">— result-card vocabulary decided in 8s2 —</div></div>
+    </div>
+    <div class="note-strip">W — warm gold reads as the established "dark-hero accent" across the site; calmer, a bit vintage.</div>
+
+    <!-- BRIGHT -->
+    <div class="direction-bar"><span class="tag">J</span> Bright-jersey accent <span class="note">the bright pitch green — louder, more "live"</span></div>
+    <div class="bright">
+      <div class="mast"><div class="wrap inner">
+        <h1>Wat <span class="acc">zoek</span> je?</h1>
+        <div class="searchbar"><input value="elewijt" /><button class="go" aria-label="Zoek"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M229.66 218.34l-50.07-50.06a88.11 88.11 0 1 0-11.31 11.31l50.06 50.07a8 8 0 0 0 11.32-11.32ZM40 112a72 72 0 1 1 72 72 72.08 72.08 0 0 1-72-72Z"/></svg></button></div>
+        <div class="hint">Typ minstens 2 letters · nieuws · spelers · ploegen · staf</div>
+      </div></div>
+      <div class="wrap"><div class="results">
+        <div class="res"><div class="thumb">FOTO</div><div><div class="tlabel">Nieuws</div><div class="ttl">Elewijt pakt de drie punten tegen Kampenhout</div><div class="snip">Een late kopbal bezorgt de A-ploeg een deugddoende zege…</div></div></div>
+        <div class="res"><div class="thumb">FOTO</div><div><div class="tlabel">Speler</div><div class="ttl">Wout Van Elewijt</div><div class="snip">Middenvelder · A-ploeg</div></div></div>
+      </div><div class="glasshint">— result-card vocabulary decided in 8s2 —</div></div>
+    </div>
+    <div class="note-strip">J — bright jersey is punchier and more "matchday", but it competes harder with the green result-type labels below.</div>
+  </body>
+</html>

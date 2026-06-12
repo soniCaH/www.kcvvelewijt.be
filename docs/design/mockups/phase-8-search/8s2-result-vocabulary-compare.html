@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 8 — /zoeken · 8s2 result-card vocabulary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 90ch; line-height: 1.6; }
+      .harness-head a { color: var(--warm); }
+      .direction-bar { background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top:2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+      .note-strip { background: var(--cream-deep); border-bottom:1px dashed var(--ink); padding:9px 28px; font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); }
+      .note-strip b { color: var(--brick); }
+      .mini-mast { background: var(--jersey-deep-dark); color: var(--cream); font-family:var(--font-mono); font-size:12px; padding:10px 28px; letter-spacing:.04em; }
+      .mini-mast .acc { color: var(--warm); }
+      .countline { font-family:var(--font-mono); font-size:12px; color:var(--ink-muted); margin:22px 0 12px; letter-spacing:.04em; }
+      .stack { display:grid; gap:12px; padding-bottom:34px; }
+      .tlabel { font-family:var(--font-mono); font-size:10px; font-weight:600; letter-spacing:.13em; text-transform:uppercase; color:var(--jersey-deep); }
+      .ttl { font-family:var(--font-body); font-weight:800; font-size:16px; margin:3px 0 0; line-height:1.18; }
+      .snip { font-size:13px; color:var(--ink-muted); margin:4px 0 0; line-height:1.45; }
+      .date { font-family:var(--font-mono); font-size:10px; color:var(--ink-muted); }
+      .tags { display:flex; gap:6px; margin-top:7px; flex-wrap:wrap; }
+      .tags span { font-family:var(--font-mono); font-size:9.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--paper-edge); border-radius:999px; padding:2px 7px; color:var(--ink-soft); background:var(--cream); }
+      .thumb { flex:0 0 auto; border-radius:5px; background:var(--cream-deep); display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:9px; color:var(--ink-muted); overflow:hidden; }
+      .crest { background: var(--jersey-deep); color: var(--cream); font-family:var(--font-display); font-style:italic; font-weight:900; }
+      svg.ar { width:18px; height:18px; color:var(--ink-muted); }
+
+      /* ---------- A: clean paper rows ---------- */
+      .A .row { display:flex; gap:14px; align-items:center; background:#fff; border:1.5px solid var(--ink); border-left:5px solid var(--jersey-deep); border-radius:6px; padding:13px 16px 13px 13px;
+        box-shadow:2px 2px 0 0 var(--ink); transition:all .25s; }
+      .A .row:hover { box-shadow:none; transform:translate(2px,2px); }
+      .A .thumb { width:60px; height:60px; }
+      .A .body { min-width:0; flex:1; }
+      .A .right { margin-left:auto; }
+
+      /* ---------- B: TapedCard index rows ---------- */
+      .B .row { position:relative; display:flex; gap:16px; align-items:flex-start; background:var(--cream-soft); border:2px solid var(--ink); border-radius:4px; padding:15px 16px;
+        box-shadow:3px 3px 0 0 var(--ink); transition:all .25s; }
+      .B .row:hover { box-shadow:none; transform:translate(3px,3px); }
+      .B .thumb { width:74px; height:74px; border:1.5px solid var(--ink); }
+      .B .pill { display:inline-block; font-family:var(--font-mono); font-size:10px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; background:var(--jersey-deep); color:var(--cream); border:1.5px solid var(--ink); border-radius:999px; padding:3px 10px; }
+      .B .ttl { margin-top:8px; }
+      .B .body { flex:1; min-width:0; }
+
+      /* ---------- C: ticket-stub rows ---------- */
+      .C .row { display:flex; align-items:stretch; background:#fff; border:2px solid var(--ink); border-radius:5px; box-shadow:3px 3px 0 0 var(--ink); overflow:hidden; transition:all .25s; }
+      .C .row:hover { box-shadow:none; transform:translate(3px,3px); }
+      .C .stub { flex:0 0 64px; background:var(--jersey-deep); color:var(--cream); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border-right:2px dashed var(--cream);
+        font-family:var(--font-mono); font-size:9px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; text-align:center; position:relative; }
+      .C .stub svg { width:22px; height:22px; }
+      .C .main { display:flex; gap:14px; align-items:center; padding:13px 16px; flex:1; min-width:0; }
+      .C .thumb { width:56px; height:56px; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 8 · /zoeken — 8s2: result-card vocabulary</h1>
+      <p>The masthead is locked (warm-gold softened S3). Now the result list. Three vocabularies, each rendering the
+        <b style="color:var(--warm)">same 4 mixed result types</b> so you see how each handles the rich case (article: image
+        + date + tags) and the lean case (team: <em>no image</em> → fallback). Single-column only — a rotated card grid reads
+        "seasick" (#1672). Press-down hover on all. See <a href="./8s1-architecture-locked.md">8s1 lock</a>.</p>
+    </div>
+    <div class="mini-mast">mast locked: Wat <span class="acc">zoek</span> je? · 🔍 · cream results below</div>
+
+    <!-- ============ A ============ -->
+    <div class="direction-bar"><span class="tag">A</span> Clean paper rows <span class="note">thin card + jersey-deep left edge, mono micro-label — most scannable</span></div>
+    <div class="wrap A">
+      <div class="countline">5 resultaten voor "elewijt"</div>
+      <div class="stack">
+        <a class="row">
+          <div class="thumb">FOTO 16:9</div>
+          <div class="body"><div class="tlabel">Nieuws · <span class="date">9 nov 2025</span></div>
+            <div class="ttl">Elewijt pakt de drie punten tegen Kampenhout</div>
+            <div class="snip">Een late kopbal van invaller bezorgt de A-ploeg een deugddoende thuiszege…</div>
+            <div class="tags"><span>Eerste ploeg</span><span>Verslag</span></div></div>
+          <div class="right"><svg class="ar" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66 133.66l-72 72a8 8 0 0 1-11.32-11.32L196.69 136H40a8 8 0 0 1 0-16h156.69l-58.35-58.34a8 8 0 0 1 11.32-11.32l72 72a8 8 0 0 1 0 11.32Z"/></svg></div>
+        </a>
+        <a class="row">
+          <div class="thumb">FOTO</div>
+          <div class="body"><div class="tlabel">Speler</div>
+            <div class="ttl">Wout Van Elewijt</div>
+            <div class="snip">Middenvelder · A-ploeg</div></div>
+          <div class="right"><svg class="ar" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66 133.66l-72 72a8 8 0 0 1-11.32-11.32L196.69 136H40a8 8 0 0 1 0-16h156.69l-58.35-58.34a8 8 0 0 1 11.32-11.32l72 72a8 8 0 0 1 0 11.32Z"/></svg></div>
+        </a>
+        <a class="row">
+          <div class="thumb crest">A</div>
+          <div class="body"><div class="tlabel">Team</div>
+            <div class="ttl">A-ploeg</div>
+            <div class="snip">Eerste elftal · 2e Provinciale B</div></div>
+          <div class="right"><svg class="ar" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66 133.66l-72 72a8 8 0 0 1-11.32-11.32L196.69 136H40a8 8 0 0 1 0-16h156.69l-58.35-58.34a8 8 0 0 1 11.32-11.32l72 72a8 8 0 0 1 0 11.32Z"/></svg></div>
+        </a>
+        <a class="row">
+          <div class="thumb">FOTO</div>
+          <div class="body"><div class="tlabel">Staf</div>
+            <div class="ttl">Jan Peeters</div>
+            <div class="snip">Hoofdtrainer · A-ploeg</div></div>
+          <div class="right"><svg class="ar" viewBox="0 0 256 256" fill="currentColor"><path d="M221.66 133.66l-72 72a8 8 0 0 1-11.32-11.32L196.69 136H40a8 8 0 0 1 0-16h156.69l-58.35-58.34a8 8 0 0 1 11.32-11.32l72 72a8 8 0 0 1 0 11.32Z"/></svg></div>
+        </a>
+      </div>
+    </div>
+    <div class="note-strip">A — calmest, fastest to scan, the left edge gives just enough colour. Closest to the current card but on retro tokens. RISK: a touch <b>plain</b>.</div>
+
+    <!-- ============ B ============ -->
+    <div class="direction-bar"><span class="tag">B</span> TapedCard index rows <span class="note">full paper card + MonoLabel pill — pinned-to-a-board feel</span></div>
+    <div class="wrap B">
+      <div class="countline">5 resultaten voor "elewijt"</div>
+      <div class="stack">
+        <a class="row">
+          <div class="thumb" style="width:96px;height:74px">FOTO 16:9</div>
+          <div class="body"><span class="pill">Nieuws</span><span class="date" style="margin-left:8px">9 nov 2025</span>
+            <div class="ttl">Elewijt pakt de drie punten tegen Kampenhout</div>
+            <div class="snip">Een late kopbal van invaller bezorgt de A-ploeg een deugddoende thuiszege…</div>
+            <div class="tags"><span>Eerste ploeg</span><span>Verslag</span></div></div>
+        </a>
+        <a class="row">
+          <div class="thumb">FOTO</div>
+          <div class="body"><span class="pill">Speler</span>
+            <div class="ttl">Wout Van Elewijt</div>
+            <div class="snip">Middenvelder · A-ploeg</div></div>
+        </a>
+        <a class="row">
+          <div class="thumb crest">A</div>
+          <div class="body"><span class="pill">Team</span>
+            <div class="ttl">A-ploeg</div>
+            <div class="snip">Eerste elftal · 2e Provinciale B</div></div>
+        </a>
+        <a class="row">
+          <div class="thumb">FOTO</div>
+          <div class="body"><span class="pill">Staf</span>
+            <div class="ttl">Jan Peeters</div>
+            <div class="snip">Hoofdtrainer · A-ploeg</div></div>
+        </a>
+      </div>
+    </div>
+    <div class="note-strip">B — most substantial + fanzine, the MonoLabel pill clearly tags each type. RISK: heavier; a long result list becomes a tall stack of <b>chunky cards</b>.</div>
+
+    <!-- ============ C ============ -->
+    <div class="direction-bar"><span class="tag">C</span> Ticket-stub rows <span class="note">perforated type-stub left — ties to the events/ticket motif</span></div>
+    <div class="wrap C">
+      <div class="countline">5 resultaten voor "elewijt"</div>
+      <div class="stack">
+        <a class="row">
+          <div class="stub"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M232 64H24a8 8 0 0 0-8 8v112a8 8 0 0 0 8 8h208a8 8 0 0 0 8-8V72a8 8 0 0 0-8-8Zm-8 112H32V80h192ZM56 104h80a8 8 0 0 1 0 16H56a8 8 0 0 1 0-16Zm0 32h64a8 8 0 0 1 0 16H56a8 8 0 0 1 0-16Z"/></svg>Nieuws</div>
+          <div class="main"><div class="thumb" style="width:64px;height:50px">FOTO</div>
+            <div class="body"><span class="date">9 nov 2025</span>
+              <div class="ttl">Elewijt pakt de drie punten tegen Kampenhout</div>
+              <div class="snip">Een late kopbal bezorgt de A-ploeg een deugddoende thuiszege…</div></div></div>
+        </a>
+        <a class="row">
+          <div class="stub"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0C63.78 166.78 40.31 185.66 25.08 212a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8Z"/></svg>Speler</div>
+          <div class="main"><div class="thumb" style="width:50px;height:50px">FOTO</div>
+            <div class="body"><div class="ttl">Wout Van Elewijt</div><div class="snip">Middenvelder · A-ploeg</div></div></div>
+        </a>
+        <a class="row">
+          <div class="stub"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M164.47 195.63a8 8 0 0 1-6.7 12.37H10.23a8 8 0 0 1-6.7-12.37 95.83 95.83 0 0 1 47.22-37.71 60 60 0 1 1 66.5 0 95.83 95.83 0 0 1 47.22 37.71Zm87.91-.15a95.87 95.87 0 0 0-47.13-37.56A60 60 0 0 0 144.7 54.59a4 4 0 0 0-1.33 6.45 76 76 0 0 1 4 28.93 4 4 0 0 0 2.84 4.1 60 60 0 0 1 25.66 91.7Z"/></svg>Team</div>
+          <div class="main"><div class="thumb crest" style="width:50px;height:50px">A</div>
+            <div class="body"><div class="ttl">A-ploeg</div><div class="snip">Eerste elftal · 2e Provinciale B</div></div></div>
+        </a>
+        <a class="row">
+          <div class="stub"><svg viewBox="0 0 256 256" fill="currentColor"><path d="M230.92 212c-15.23-26.33-38.7-45.21-66.09-54.16a72 72 0 1 0-73.66 0C63.78 166.78 40.31 185.66 25.08 212a8 8 0 1 0 13.85 8c18.84-32.56 52.14-52 89.07-52s70.23 19.44 89.07 52a8 8 0 1 0 13.85-8Z"/></svg>Staf</div>
+          <div class="main"><div class="thumb" style="width:50px;height:50px">FOTO</div>
+            <div class="body"><div class="ttl">Jan Peeters</div><div class="snip">Hoofdtrainer · A-ploeg</div></div></div>
+        </a>
+      </div>
+    </div>
+    <div class="note-strip">C — most distinctive, the type-stub doubles as icon + label and ties into the ticket/events vocabulary. RISK: the fixed stub <b>eats horizontal room</b> on mobile + the article image shrinks.</div>
+  </body>
+</html>
