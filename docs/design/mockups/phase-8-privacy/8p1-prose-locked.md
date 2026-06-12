@@ -14,9 +14,11 @@ Rejected:
 ## Spec (LOCKED)
 
 - **No hero band.** Header is: mono kicker `JURIDISCH` (jersey-deep) → serif italic
-  title **"Privacyverklaring."** (Freight Display, accent dot jersey-deep) → mono
-  last-updated line (`Laatst bijgewerkt · {LAST_UPDATED}`) → a Freight Display
-  intro lead paragraph.
+  title **"Privacyverklaring."** (the production display font is **Freight Display**;
+  the mockups stand it in with Fraunces via `--font-display`, since Freight Display
+  ships through Adobe Typekit and can't load in a standalone HTML; accent dot
+  jersey-deep) → mono last-updated line (`Laatst bijgewerkt · {LAST_UPDATED}`) → a
+  Freight Display intro lead paragraph.
 - **Prose column** ≈`max-w-2xl` (≈680px), cream background, **ink/cream prose —
   not the legacy gray `prose-gray`.** H2s in Freight Display (700), body in
   Archivo, links jersey-deep. `<DottedDivider>` between H2 sections.

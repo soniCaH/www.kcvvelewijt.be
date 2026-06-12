@@ -1,8 +1,8 @@
 # PRD: Redesign Phase 8 — Search, Privacy, Error pages
 
 **Status:** Ready · **Milestone:** `redesign-retro-terrace-fanzine` (the redesign
-series umbrella — Phase 8 inherits it, not a new milestone) · **Umbrella issue:**
-#1530
+series umbrella — Phase 8 inherits it, not a new milestone) · **Umbrella
+issue:** #1530
 
 **Design checkpoint:** complete. Locked decisions + mockups in
 `docs/design/mockups/phase-8-{search,privacy,errors}/` and the phase

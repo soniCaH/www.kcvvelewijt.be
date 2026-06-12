@@ -19,7 +19,12 @@ Rejected:
 - **No-results** (valid query, 0 hits): paper card with a small taped
   `<JerseyShirt>` artefact + a football-pun headline + a body line that names the
   missing query and offers **inline way-forward links** (nieuws · ploegen ·
-  spelers). The links resolve E1's dead-end problem.
+  spelers). **Contract:** these are plain `next/link` navigations to the section
+  index routes (`/nieuws`, `/ploegen`, and the players index) — escape hatches out
+  of the dead end. They are **NOT** `/zoeken?type=…` filter shortcuts: a
+  no-results query stays empty when re-filtered by type, so a filter shortcut
+  would lead nowhere. Exact players-index target confirmed at build (#2106). The
+  links resolve E1's dead-end problem.
 - **Loading**: existing `<Spinner>` kept — no redesign.
 - **Error**: paper `<Alert>` reskin ("Er ging iets mis bij het zoeken — probeer
   opnieuw"). No direction choice.

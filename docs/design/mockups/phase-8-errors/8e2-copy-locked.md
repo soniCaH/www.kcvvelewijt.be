@@ -14,8 +14,9 @@ layout-independent and renders in the Storybook prototype.
 - **Actions (two):**
   1. `Naar de homepage` (primary, jersey) → `/`
   2. **`Zoeken`** (secondary, ghost) → `/zoeken` — owner add: give a lost visitor
-     a way to *search* instead of only bouncing home. May also surface inline in
-     the body ("…of zoek meteen wat je nodig hebt.") — copy detail at build.
+     a way to *search* instead of only bouncing home. Keep this as the **single**
+     search affordance in the action row — do not also surface it inline in the
+     body (avoids a duplicate search affordance).
 
 ## 500 — server error
 
