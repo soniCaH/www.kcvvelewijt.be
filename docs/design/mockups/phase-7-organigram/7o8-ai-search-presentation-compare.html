@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · /hulp hub · 7o8 — AI/semantic search presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --alert: #b84a3a; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+      code { font-family: var(--font-mono); font-size: .92em; }
+      .head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+      .head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.65; max-width: 96ch; }
+      .head b { color: var(--warm); } .head .em { color: var(--jersey); }
+
+      .bar { background: var(--jersey-deep); color: var(--cream); padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .05em; text-transform: uppercase; border-bottom: 2px solid var(--ink); border-top: 1px solid rgba(0,0,0,.25); }
+      .bar.rec .tg { background: var(--jersey); } .bar .tg { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); margin-right: 10px; }
+      .bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 26px 28px 32px; border-bottom: 1px dashed var(--paper-edge); display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
+      @media (max-width: 900px){ .stage { grid-template-columns: 1fr; } }
+      .stage .why { font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+      .stage .why h4 { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--jersey-deep); margin: 0 0 8px; }
+      .stage .why ul { margin: 8px 0 0; padding-left: 16px; } .stage .why li { margin-bottom: 5px; }
+      .stage .why .con { color: var(--brick); }
+
+      /* hero band holding the search */
+      .demo { background: var(--jersey-deep-dark); border: 2px solid var(--ink); box-shadow: 5px 5px 0 0 var(--ink); padding: 20px; }
+      .demo .lbl { font-family: var(--font-mono); font-size: 10px; color: var(--warm); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 10px; }
+
+      /* search input */
+      .search { position: relative; }
+      .sbox { display: flex; align-items: center; gap: 9px; border: 2px solid var(--ink); background: var(--cream); box-shadow: 4px 4px 0 0 var(--ink); padding: 11px 12px; }
+      .sbox svg { width: 18px; height: 18px; fill: var(--jersey-deep); flex: none; }
+      .sbox .q { flex: 1; font-size: 15px; color: var(--ink); }
+      .sbox .cur { color: var(--ink-muted); }
+
+      /* dropdown */
+      .dd { border: 2px solid var(--ink); background: var(--cream); box-shadow: 4px 4px 0 0 var(--ink); margin-top: 9px; overflow: hidden; }
+      .dd .hint { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-bottom: 1.5px solid var(--paper-edge); background: var(--cream-soft); font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-muted); }
+      .dd .hint svg { width: 13px; height: 13px; }
+      .dd .hint .spark { fill: var(--jersey-deep); }
+      .dd .hint .live { color: var(--jersey-deep); }
+      .row { display: flex; gap: 11px; padding: 10px 12px; border-bottom: 1px solid var(--paper-edge); align-items: flex-start; }
+      .row:last-child { border-bottom: 0; }
+      .row .ic { width: 34px; height: 34px; border-radius: 9999px; border: 2px solid var(--ink); background: var(--cream-soft); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 12px; color: var(--jersey-deep); flex: none; }
+      .row .ic.ans { border-radius: 0; border: none; background: transparent; }
+      .row .ic.ans svg { width: 22px; height: 22px; fill: var(--jersey-deep); }
+      .row .bd { min-width: 0; flex: 1; }
+      .row .cat { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--jersey-deep); }
+      .row .ti { font-size: 14px; font-weight: 600; line-height: 1.25; margin-top: 1px; }
+      .row .ex { font-size: 12px; color: var(--ink-muted); line-height: 1.35; margin-top: 2px; }
+      .row .nm { font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+      .row .fn { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; color: var(--ink-muted); margin-top: 2px; }
+      .row.sel { background: rgba(0,135,85,.08); }
+
+      /* shimmer (loading answer lane) */
+      .shim { height: 11px; border-radius: 2px; background: linear-gradient(90deg, var(--cream-soft) 25%, var(--cream-deep) 50%, var(--cream-soft) 75%); background-size: 200% 100%; animation: sh 1.1s linear infinite; }
+      @keyframes sh { to { background-position: -200% 0; } }
+
+      /* answer-forward (B) expanded top card */
+      .ansfwd { border-bottom: 2px solid var(--ink); background: var(--cream); padding: 12px; }
+      .ansfwd .cat { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--alert); display: flex; align-items: center; gap: 5px; }
+      .ansfwd .cat svg { width: 13px; height: 13px; fill: var(--alert); }
+      .ansfwd .ti { font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 16px; line-height: 1.2; margin: 3px 0 5px; }
+      .ansfwd .sum { font-size: 12.5px; color: var(--ink-soft); line-height: 1.5; }
+      .ansfwd .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 9px; gap: 8px; }
+      .ansfwd .who { display: flex; align-items: center; gap: 7px; }
+      .ansfwd .who .av { width: 26px; height: 26px; border-radius: 9999px; border: 1.5px solid var(--ink); background: var(--cream-soft); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 10px; color: var(--jersey-deep); }
+      .ansfwd .who .t { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; color: var(--ink-muted); }
+      .ansfwd .more { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--jersey-deep); border: 1.5px solid var(--jersey-deep); padding: 4px 8px; white-space: nowrap; }
+      .moreq { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-muted); padding: 7px 12px 3px; }
+
+      /* LLM card (C) */
+      .llm { border-bottom: 2px solid var(--ink); background: #eef4ef; padding: 12px; }
+      .llm .tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--jersey-deep); border: 1.5px solid var(--jersey-deep); padding: 2px 7px; }
+      .llm .tag svg { width: 11px; height: 11px; fill: var(--jersey-deep); }
+      .llm .txt { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 8px 0 7px; }
+      .llm .dis { font-family: var(--font-mono); font-size: 9.5px; color: var(--brick); display: flex; align-items: center; gap: 5px; }
+      .llm .dis svg { width: 12px; height: 12px; fill: var(--brick); }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 22px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.75; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+      .legend b { color: var(--jersey-deep); } .legend .pill-rec { background: var(--jersey); border: 1.5px solid var(--ink); color: var(--ink); padding: 1px 8px; font-weight: 700; font-size: 11px; }
+      .legend ul { margin: 8px 0 0; padding-left: 18px; } .legend li { margin-bottom: 5px; }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="i-search" viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.3 14l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0010 2zm0 2.4a5.6 5.6 0 110 11.2 5.6 5.6 0 010-11.2z"/></symbol>
+      <symbol id="i-q" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.3 4.4c2.2 0 3.9 1.4 3.9 3.4 0 1.5-.8 2.3-2 3-.9.5-1.2.9-1.2 1.7v.4h-2v-.6c0-1.4.6-2.2 1.7-2.8.9-.5 1.3-.9 1.3-1.6 0-.8-.7-1.4-1.7-1.4s-1.7.6-1.8 1.6h-2c.1-2 1.7-3.1 3.8-3.1zM11 16.5h2v2h-2z"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8zM19 14l.9 2.6L22.5 17l-2.6.9L19 20.5l-.9-2.6L15.5 17l2.6-.9z"/></symbol>
+      <symbol id="i-med" viewBox="0 0 24 24"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z"/></symbol>
+      <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 2l11 19H1zM11 9v6h2V9zm0 8v2h2v-2z" fill-rule="evenodd"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 11h12l-5-5 1.4-1.4L21 12l-8.6 7.4L11 18l5-5H4z"/></symbol>
+    </svg>
+
+    <div class="head">
+      <h1>Phase 7 · /hulp hub · 7o8 — AI / semantic search: how do results present?</h1>
+      <p>
+        The semantic stack (bge-m3 + Vectorize + <code>/api/search</code>) already exists; #2057 wires the hub search's
+        <b>answer lane</b> through it (people stay keyword). New question: when a user types a real question
+        (<span class="em">"mijn kind heeft zich bezeerd"</span> — zero keyword overlap with "blessure"), <b>how does the
+        dropdown present the smart match?</b> Same query in all three. People appear instantly (keyword); answers resolve
+        a beat later (async) → every variant shows a <b>"slim"</b> signal + a loading state. <b>The LLM `answer` the
+        endpoint can return is the crux of the debate.</b>
+      </p>
+    </div>
+
+    <!-- A -->
+    <div class="bar"><span class="tg">A</span>List-only (smart-ranked) <span class="note">· matched questions, click → accordion · safest · but "I asked a question, I got a list"</span></div>
+    <div class="stage">
+      <div class="demo">
+        <div class="lbl">Hero · unified search</div>
+        <div class="search">
+          <div class="sbox"><svg><use href="#i-search"/></svg><span class="q">mijn kind heeft zich bezeerd<span class="cur">▍</span></span></div>
+          <div class="dd">
+            <div class="hint"><svg class="spark"><use href="#i-spark"/></svg> <span class="live">Slim gezocht</span> · vragen &amp; mensen</div>
+            <div class="row sel"><span class="ic ans"><svg><use href="#i-q"/></svg></span><div class="bd"><div class="cat">Medisch</div><div class="ti">Mijn zoon is geblesseerd tijdens de match — wat nu?</div><div class="ex">Eerste zorg gaat altijd voor; daarna de ongevalsaangifte…</div></div></div>
+            <div class="row"><span class="ic ans"><svg><use href="#i-q"/></svg></span><div class="bd"><div class="cat">Medisch</div><div class="ti">Hoe doe ik aangifte van een sportongeval?</div><div class="ex">Binnen 48u via de gerechtigd correspondent.</div></div></div>
+            <div class="row"><span class="ic">LB</span><div class="bd"><div class="nm">Luc Boons</div><div class="fn">Gerechtigd correspondent</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="why">
+        <h4>Waarom / waarom niet</h4>
+        <ul>
+          <li>Zelfde vorm als de keyword-dropdown — minimale wijziging, vertrouwd.</li>
+          <li>Geen enkel hallucinatie-risico: niets wordt door AI geformuleerd.</li>
+          <li><span class="con">Maar:</span> de gebruiker stelde een volledige vraag en krijgt een lijst om uit te kiezen — één klik verwijderd van het antwoord, maar de "search snapte me niet"-wrijving die je aanvoelde.</li>
+          <li>Async: mensen (keyword) meteen; antwoord-rijen tonen een shimmer tot semantisch settelt.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="bar rec"><span class="tg">B ★</span>Antwoord-vooraan (echte CMS-tekst) <span class="note">· top-match toont z'n eigen samenvatting + contact + "lees meer →" · directe payoff, géén LLM</span></div>
+    <div class="stage">
+      <div class="demo">
+        <div class="lbl">Hero · unified search</div>
+        <div class="search">
+          <div class="sbox"><svg><use href="#i-search"/></svg><span class="q">mijn kind heeft zich bezeerd<span class="cur">▍</span></span></div>
+          <div class="dd">
+            <div class="hint"><svg class="spark"><use href="#i-spark"/></svg> <span class="live">Beste match</span> · op basis van je vraag</div>
+            <div class="ansfwd">
+              <div class="cat"><svg><use href="#i-med"/></svg> Medisch</div>
+              <div class="ti">Mijn zoon is geblesseerd tijdens de match — wat nu?</div>
+              <div class="sum">Eerste zorg gaat altijd voor. Is het niet dringend? Dan helpt de gerechtigd correspondent je met de ongevalsaangifte zodat de verzekering tussenkomt.</div>
+              <div class="foot">
+                <div class="who"><span class="av">LB</span><span class="t">Luc Boons · GC</span></div>
+                <span class="more">Lees volledig antwoord →</span>
+              </div>
+            </div>
+            <div class="moreq">Ook gevonden</div>
+            <div class="row"><span class="ic ans"><svg><use href="#i-q"/></svg></span><div class="bd"><div class="cat">Medisch</div><div class="ti">Hoe doe ik aangifte van een sportongeval?</div></div></div>
+            <div class="row"><span class="ic">LB</span><div class="bd"><div class="nm">Luc Boons</div><div class="fn">Gerechtigd correspondent</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="why">
+        <h4>Waarom / waarom niet</h4>
+        <ul>
+          <li><b>Lost jouw zorg op:</b> je stelde een vraag → je ziet meteen het antwoord, niet enkel een lijst.</li>
+          <li>De tekst is de <b>échte CMS-samenvatting</b> van de top-match — clubeigen woorden, geen model. Nul hallucinatie.</li>
+          <li>Alleen "vooraan" als de match sterk genoeg is (score ≥ 0.5, de drempel die de backend al gebruikt); zwakke match → valt terug op lijst (= A).</li>
+          <li><span class="con">Kost:</span> dropdown is hoger; we kiezen één top-antwoord (gemitigeerd door de score-drempel).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="bar"><span class="tg">C</span>AI-antwoord (LLM) <span class="note">· het `answer` van het endpoint, met disclaimer · directst — maar het model formuleert clubprocedures</span></div>
+    <div class="stage">
+      <div class="demo">
+        <div class="lbl">Hero · unified search</div>
+        <div class="search">
+          <div class="sbox"><svg><use href="#i-search"/></svg><span class="q">mijn kind heeft zich bezeerd<span class="cur">▍</span></span></div>
+          <div class="dd">
+            <div class="hint"><svg class="spark"><use href="#i-spark"/></svg> <span class="live">Slim gezocht</span></div>
+            <div class="llm">
+              <span class="tag"><svg><use href="#i-spark"/></svg> AI-antwoord</span>
+              <div class="txt">Zorg eerst voor je kind; bij twijfel bel de hulpdiensten. Daarna vraag je binnen 48 uur de ongevalsaangifte aan bij de gerechtigd correspondent zodat de verzekering tussenkomt.</div>
+              <div class="dis"><svg><use href="#i-warn"/></svg> Door AI samengevat — controleer altijd het volledige antwoord hieronder.</div>
+            </div>
+            <div class="row sel"><span class="ic ans"><svg><use href="#i-q"/></svg></span><div class="bd"><div class="cat">Medisch</div><div class="ti">Mijn zoon is geblesseerd tijdens de match — wat nu?</div></div></div>
+            <div class="row"><span class="ic">LB</span><div class="bd"><div class="nm">Luc Boons</div><div class="fn">Gerechtigd correspondent</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="why">
+        <h4>Waarom / waarom niet</h4>
+        <ul>
+          <li>Directst: vraag in, antwoord uit — voelt het meest "AI".</li>
+          <li><span class="con">Risico:</span> Llama-3.1-8B formuleert <b>clubspecifieke procedures</b> (48u-deadline, wie mailen). Subtiel mis = een ouder mist een verzekeringsdeadline. Hoge inzet.</li>
+          <li><span class="con">Disclaimer nodig</span> ("controleer hieronder") — als je een disclaimer onder een antwoord moet zetten, ondergraaf je het vertrouwen dat je net probeerde te winnen.</li>
+          <li>Beter bewaard voor een latere <code>/zoeken</code>-pagina met ruimte, niet de compacte hub-dropdown.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>Decision 7o8 — AI/semantic search presentation</h3>
+      <p>
+        <span class="pill-rec">B ★ aanbevolen</span> &nbsp;<b>Antwoord-vooraan met échte CMS-tekst.</b> Het serveert precies
+        jouw zorg — wie een vraag stelt wil een antwoord, geen lijst — <b>zonder</b> het hallucinatie-risico van C, want de
+        getoonde tekst is de clubeigen samenvatting van de top-match, niet die van het model. Gegate op de score-drempel die
+        de backend al kent (≥ 0.5): sterke match → vooraan; zwakke match → terugval op de lijst (A). De LLM <code>answer</code>
+        blijft uit de hub-dropdown (kandidaat voor een latere <code>/zoeken</code>-pagina).
+      </p>
+      <ul>
+        <li><b>Slim-signaal</b> (alle varianten): een sparkle + "Slim gezocht / Beste match" mono-hint bovenaan de dropdown, zodat de gebruiker ziet dat natuurlijke taal werkte. Géén nieuwe merkkleur — jersey-deep + de bestaande iconografie.</li>
+        <li><b>Async</b>: mensen (keyword) verschijnen meteen; de antwoord-lane toont een shimmer en vult zich als semantisch settelt. Faalt het endpoint → stille terugval op keyword (de PRD-vloer), zonder "AI"-hint.</li>
+        <li><b>"Meer resultaten / enter"</b>: de dropdown ís de resultatenset (geen aparte resultatenpagina in deze fase). Klikken op een rij of "lees volledig antwoord →" opent de accordion in de finder. We tonen onderaan géén nep "druk enter voor meer".</li>
+      </ul>
+      <p style="color:var(--ink-muted)">Kies A / B / C — daarna bouw ik TDD-first + Storybook-checkpoint, net als 7o6c.</p>
+    </div>
+  </body>
+</html>

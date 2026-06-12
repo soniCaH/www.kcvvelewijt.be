@@ -34,6 +34,7 @@ import {
   Question as PhQuestion,
   ShieldCheck as PhShieldCheck,
   SoccerBall as PhSoccerBall,
+  Sparkle as PhSparkle,
   TreeStructure as PhTreeStructure,
   User as PhUser,
   UsersThree as PhUsersThree,
@@ -77,6 +78,7 @@ export const Phone = fillWrapper(PhPhone);
 export const Question = fillWrapper(PhQuestion);
 export const ShieldCheck = fillWrapper(PhShieldCheck);
 export const SoccerBall = fillWrapper(PhSoccerBall);
+export const Sparkle = fillWrapper(PhSparkle);
 export const TreeStructure = fillWrapper(PhTreeStructure);
 export const User = fillWrapper(PhUser);
 export const UsersThree = fillWrapper(PhUsersThree);

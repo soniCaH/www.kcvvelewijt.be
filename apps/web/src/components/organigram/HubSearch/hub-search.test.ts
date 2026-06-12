@@ -4,6 +4,8 @@ import {
   searchResponsibilities,
   searchHub,
   dedupeMembersByPerson,
+  mapSemanticResults,
+  interleaveResults,
 } from "./hub-search";
 import type { HubMemberResult } from "./hub-search";
 import type { OrgChartNode } from "@/types/organigram";
@@ -207,5 +209,42 @@ describe("searchHub", () => {
 
   it("returns [] when nothing matches", () => {
     expect(searchHub("zzzzz", members, paths, 5)).toEqual([]);
+  });
+});
+
+describe("mapSemanticResults", () => {
+  const pathById = new Map(paths.map((p) => [p.id, p]));
+
+  it("maps semantic hits to paths by slug (then id), carrying the cosine score", () => {
+    const mapped = mapSemanticResults(
+      [
+        { id: "x", slug: "blessure", score: 0.71 },
+        { id: "inschrijven", slug: "no-such-slug", score: 0.42 },
+      ],
+      pathById,
+    );
+    expect(mapped).toHaveLength(2);
+    expect(mapped[0].path.id).toBe("blessure");
+    expect(mapped[0].score).toBe(0.71);
+    expect(mapped[0].type).toBe("responsibility");
+    expect(mapped[1].path.id).toBe("inschrijven"); // id fallback
+  });
+
+  it("drops hits with no matching path", () => {
+    const mapped = mapSemanticResults(
+      [{ id: "ghost", slug: "ghost", score: 0.9 }],
+      pathById,
+    );
+    expect(mapped).toEqual([]);
+  });
+});
+
+describe("interleaveResults", () => {
+  it("interleaves person, answer, person, answer", () => {
+    const combined = interleaveResults(
+      searchMembers("peeters", members, 5),
+      searchResponsibilities("inschrijven", paths, 5),
+    );
+    expect(combined.map((r) => r.type)).toEqual(["member", "responsibility"]);
   });
 });
