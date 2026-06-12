@@ -63,8 +63,8 @@ const proseClasses = [
 
 export default function PrivacyPage() {
   return (
-    <div className="bg-cream">
-      <div className="mx-auto max-w-2xl px-4 py-16 md:px-10 md:py-20">
+    <div className="bg-cream px-4 py-16 md:px-10 md:py-20">
+      <div className="mx-auto max-w-2xl">
         <header className="flex flex-col">
           {/* Raw styled span rather than <MonoLabel>: the 8p1 lock calls for a
               jersey-deep kicker, but MonoLabel's `plain` variant only supports
@@ -75,9 +75,9 @@ export default function PrivacyPage() {
           </span>
           <EditorialHeading
             level={1}
-            size="display-2xl"
-            emphasis={{ text: "." }}
-            className="mt-3"
+            size="display-xl"
+            emphasis={{ text: "verklaring." }}
+            className="mt-3 mb-0 break-words hyphens-auto"
           >
             Privacyverklaring
           </EditorialHeading>
