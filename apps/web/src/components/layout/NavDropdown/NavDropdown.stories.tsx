@@ -53,7 +53,7 @@ const deClubGroups: NavDropdownGroup[] = [
     label: "Wie we zijn",
     items: [
       { label: "Geschiedenis", href: "/club/geschiedenis" },
-      { label: "Organigram", href: "/club/organigram" },
+      { label: "Organigram", href: "/hulp#structuur" },
       { label: "Bestuur", href: "/club/bestuur" },
       { label: "Jeugdbestuur", href: "/club/jeugdbestuur" },
       { label: "KCVV Angels", href: "/club/angels" },
@@ -202,7 +202,7 @@ export const WithHoveredItem: Story = {
   },
   parameters: {
     pseudo: {
-      hover: '[role="menuitem"][href="/club/organigram"]',
+      hover: '[role="menuitem"][href="/hulp#structuur"]',
     },
   },
   render: (args) => (
