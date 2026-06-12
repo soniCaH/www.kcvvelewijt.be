@@ -96,42 +96,45 @@ export function QuestionCard({
 
           {path.steps.length > 0 && (
             <ol className="mb-4 space-y-2">
-              {path.steps.map((step, i) => (
-                <li
-                  key={i}
-                  className="border-paper-edge flex gap-3 border-b border-dotted pb-2 last:border-b-0"
-                >
-                  <span
-                    aria-hidden
-                    className="border-ink bg-jersey-deep text-cream flex h-5 w-5 flex-shrink-0 items-center justify-center border-[1.5px] font-mono text-[10px]"
+              {path.steps.map((step, i) => {
+                // Only allow http(s) or absolute-path links; drop unsafe
+                // schemes (javascript:, data:, …) even from CMS-authored steps.
+                const safeLink =
+                  step.link && /^(https?:\/\/|\/)/i.test(step.link)
+                    ? step.link
+                    : undefined;
+                const external = safeLink?.startsWith("http") ?? false;
+                return (
+                  <li
+                    key={i}
+                    className="border-paper-edge flex gap-3 border-b border-dotted pb-2 last:border-b-0"
                   >
-                    {i + 1}
-                  </span>
-                  <span className="text-ink pt-px text-[13px] leading-relaxed">
-                    {step.description}
-                    {step.link && (
-                      <>
-                        {" "}
-                        <a
-                          href={step.link}
-                          onClick={() => onStepLinkClick?.(i)}
-                          target={
-                            step.link.startsWith("http") ? "_blank" : undefined
-                          }
-                          rel={
-                            step.link.startsWith("http")
-                              ? "noopener noreferrer"
-                              : undefined
-                          }
-                          className="text-jersey-deep hover:text-jersey-deep-dark font-semibold underline"
-                        >
-                          Meer info
-                        </a>
-                      </>
-                    )}
-                  </span>
-                </li>
-              ))}
+                    <span
+                      aria-hidden
+                      className="border-ink bg-jersey-deep text-cream flex h-5 w-5 flex-shrink-0 items-center justify-center border-[1.5px] font-mono text-[10px]"
+                    >
+                      {i + 1}
+                    </span>
+                    <span className="text-ink pt-px text-[13px] leading-relaxed">
+                      {step.description}
+                      {safeLink && (
+                        <>
+                          {" "}
+                          <a
+                            href={safeLink}
+                            onClick={() => onStepLinkClick?.(i)}
+                            target={external ? "_blank" : undefined}
+                            rel={external ? "noopener noreferrer" : undefined}
+                            className="text-jersey-deep hover:text-jersey-deep-dark font-semibold underline"
+                          >
+                            Meer info
+                          </a>
+                        </>
+                      )}
+                    </span>
+                  </li>
+                );
+              })}
             </ol>
           )}
 
