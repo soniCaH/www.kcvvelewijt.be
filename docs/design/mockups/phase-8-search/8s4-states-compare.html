@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 8 — /zoeken · 8s4 empty / no-result / pre-search states</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 20px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 92ch; line-height: 1.6; }
+      .direction-bar { background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top:2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .wrap { max-width: 880px; margin: 0 auto; padding: 0 28px; }
+      .note-strip { background: var(--cream-deep); border-bottom:1px dashed var(--ink); padding:9px 28px; font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); }
+      .note-strip b { color: var(--brick); }
+      .statelabel { font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-muted); margin:24px 0 10px; display:flex; align-items:center; gap:10px; }
+      .statelabel::after { content:""; height:1px; flex:1; background:var(--paper-edge); }
+
+      /* real FilterTabs paper chips (reference) */
+      .ftabs { display:flex; gap:12px; flex-wrap:wrap; margin:4px 0 0; }
+      .fchip { font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; border:2px solid var(--ink); border-radius:0; background:var(--cream-soft); color:var(--ink); padding:8px 13px; box-shadow:2px 2px 0 0 var(--ink); display:inline-flex; gap:8px; align-items:center; }
+      .fchip.on { background:var(--ink); color:var(--cream); }
+      .fchip .n { opacity:.55; border-left:1px solid currentColor; padding-left:8px; }
+
+      /* paper card base */
+      .card { background:var(--cream-soft); border:2px solid var(--ink); box-shadow:4px 4px 0 0 var(--ink); padding:30px 28px; }
+      .display { font-family:var(--font-display); font-style:italic; font-weight:900; font-size:clamp(26px,3.4vw,38px); line-height:1; margin:0; }
+      .display .acc { color:var(--jersey-deep); }
+      .lead { font-size:14.5px; color:var(--ink-soft); margin:12px 0 0; max-width:54ch; line-height:1.55; }
+      .typehints { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+      .typehints span { font-family:var(--font-mono); font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; border:1.5px solid var(--ink); background:var(--cream); padding:6px 11px; box-shadow:2px 2px 0 0 var(--ink); }
+      .browsegrid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; }
+      .browse { border:2px solid var(--ink); background:var(--cream); box-shadow:3px 3px 0 0 var(--ink); padding:16px 12px; text-align:center; }
+      .browse .ic { width:30px;height:30px;color:var(--jersey-deep); margin:0 auto 8px; display:block; }
+      .browse .bl { font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+      .jersey { width:120px; aspect-ratio:4/5; border:2px solid var(--ink); background: repeating-linear-gradient(90deg, var(--jersey-deep) 0 13px, var(--jersey-deep-dark) 13px 26px); box-shadow:5px 5px 0 0 var(--ink); transform:rotate(-3deg); position:relative; flex:0 0 auto; }
+      .jersey .tape { position:absolute; top:-12px; left:50%; transform:translateX(-50%) rotate(-4deg); width:60px; height:22px; background:var(--warm); border:1.5px solid var(--ink); opacity:.92; }
+      .punrow { display:flex; gap:26px; align-items:center; }
+      .blocksub { padding-bottom:14px; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 8 · /zoeken — 8s4: empty / no-result / pre-search states</h1>
+      <p>Masthead + result rows + FilterTabs are locked. This is the last search decision: the non-result states.
+        Three directions, each showing <b style="color:var(--warm)">pre-search</b> (query &lt; 2 chars) and
+        <b style="color:var(--warm)">no-results</b> (valid query, 0 hits) so the voice is cohesive. Loading (Spinner) +
+        error (Alert reskin) are minor and noted at the bottom. The football-pun choice here should rhyme with the
+        404/500 pages (round 8e).</p>
+    </div>
+
+    <!-- ============ E1 ============ -->
+    <div class="direction-bar"><span class="tag">E1</span> Calm paper notes <span class="note">restrained — a quiet note + type hints, no artefact</span></div>
+    <div class="wrap">
+      <div class="statelabel">Pre-search (nog niets getypt)</div>
+      <div class="card blocksub">
+        <h2 class="display">Waar ben je naar op <span class="acc">zoek</span>?</h2>
+        <p class="lead">Typ minstens 2 letters. Je doorzoekt nieuws, spelers, ploegen en staf in één keer.</p>
+        <div class="typehints"><span>Een spelersnaam</span><span>Een ploeg</span><span>Een nieuwsbericht</span></div>
+      </div>
+      <div class="statelabel">No results ("xyzqr")</div>
+      <div class="card">
+        <h2 class="display">Niets gevonden<span class="acc">.</span></h2>
+        <p class="lead">Geen resultaten voor <strong>"xyzqr"</strong>. Controleer je spelling of probeer een kortere, algemenere term.</p>
+      </div>
+    </div>
+    <div class="note-strip">E1 — calmest + most consistent with the privacy page. RISK: a no-result dead end with <b>no way forward</b> (no links to browse).</div>
+
+    <!-- ============ E2 ============ -->
+    <div class="direction-bar"><span class="tag">E2</span> Football voice + JerseyShirt <span class="note">pun + taped jersey artefact — ties to the 404/500 family</span></div>
+    <div class="wrap">
+      <div class="statelabel">Pre-search (nog niets getypt)</div>
+      <div class="card blocksub">
+        <h2 class="display">Waar ben je naar op <span class="acc">zoek</span>?</h2>
+        <p class="lead">Typ minstens 2 letters — nieuws, spelers, ploegen en staf, allemaal doorzoekbaar.</p>
+        <div class="typehints"><span>Een spelersnaam</span><span>Een ploeg</span><span>Een nieuwsbericht</span></div>
+      </div>
+      <div class="statelabel">No results ("xyzqr")</div>
+      <div class="card"><div class="punrow">
+        <div class="jersey"><div class="tape"></div></div>
+        <div>
+          <h2 class="display">Naast de bal<span class="acc">.</span></h2>
+          <p class="lead">Niets gevonden voor <strong>"xyzqr"</strong>. Probeer een andere term — of spring meteen naar
+            <a href="#" style="color:var(--jersey-deep);font-weight:700">nieuws</a>,
+            <a href="#" style="color:var(--jersey-deep);font-weight:700">ploegen</a> of
+            <a href="#" style="color:var(--jersey-deep);font-weight:700">spelers</a>.</p>
+        </div>
+      </div></div>
+    </div>
+    <div class="note-strip">E2 — most personality, the pun + jersey rhyme with the error pages and give the dead end a way forward. RISK: the jersey artefact is <b>a lot of furniture</b> for a transient state.</div>
+
+    <!-- ============ E3 ============ -->
+    <div class="direction-bar"><span class="tag">E3</span> Browse-instead shortcuts <span class="note">never a dead end — quick links to the main sections</span></div>
+    <div class="wrap">
+      <div class="statelabel">Pre-search (nog niets getypt)</div>
+      <div class="card blocksub">
+        <h2 class="display">Of blader er gewoon <span class="acc">doorheen</span>.</h2>
+        <p class="lead">Typ minstens 2 letters om te zoeken — of ga direct naar:</p>
+        <div class="browsegrid">
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M232 64H24a8 8 0 0 0-8 8v112a8 8 0 0 0 8 8h208a8 8 0 0 0 8-8V72a8 8 0 0 0-8-8Zm-8 112H32V80h192Zm-32-72H56a8 8 0 0 0 0 16h136a8 8 0 0 0 0-16Z"/></svg><div class="bl">Nieuws</div></div>
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M164.47 195.63a8 8 0 0 1-6.7 12.37H10.23a8 8 0 0 1-6.7-12.37 95.83 95.83 0 0 1 47.22-37.71 60 60 0 1 1 66.5 0 95.83 95.83 0 0 1 47.22 37.71Z"/></svg><div class="bl">Spelers</div></div>
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M223.68 66.15 135.68 18a16 16 0 0 0-15.36 0l-88 48.18a16 16 0 0 0-8.32 14v95.64a16 16 0 0 0 8.32 14l88 48.17a16 16 0 0 0 15.36 0l88-48.17a16 16 0 0 0 8.32-14V80.18a16 16 0 0 0-8.32-14.03Z"/></svg><div class="bl">Ploegen</div></div>
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M208 32h-24v-8a8 8 0 0 0-16 0v8H88v-8a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H48V96h160Z"/></svg><div class="bl">Kalender</div></div>
+        </div>
+      </div>
+      <div class="statelabel">No results ("xyzqr")</div>
+      <div class="card">
+        <h2 class="display">Geen resultaten voor <span class="acc">"xyzqr"</span></h2>
+        <p class="lead">Pas je zoekterm aan — of blader verder:</p>
+        <div class="browsegrid">
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M232 64H24a8 8 0 0 0-8 8v112a8 8 0 0 0 8 8h208a8 8 0 0 0 8-8V72a8 8 0 0 0-8-8Zm-8 112H32V80h192Zm-32-72H56a8 8 0 0 0 0 16h136a8 8 0 0 0 0-16Z"/></svg><div class="bl">Nieuws</div></div>
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M164.47 195.63a8 8 0 0 1-6.7 12.37H10.23a8 8 0 0 1-6.7-12.37 95.83 95.83 0 0 1 47.22-37.71 60 60 0 1 1 66.5 0 95.83 95.83 0 0 1 47.22 37.71Z"/></svg><div class="bl">Spelers</div></div>
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M223.68 66.15 135.68 18a16 16 0 0 0-15.36 0l-88 48.18a16 16 0 0 0-8.32 14v95.64a16 16 0 0 0 8.32 14l88 48.17a16 16 0 0 0 15.36 0l88-48.17a16 16 0 0 0 8.32-14V80.18a16 16 0 0 0-8.32-14.03Z"/></svg><div class="bl">Ploegen</div></div>
+          <div class="browse"><svg class="ic" viewBox="0 0 256 256" fill="currentColor"><path d="M208 32h-24v-8a8 8 0 0 0-16 0v8H88v-8a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H48V96h160Z"/></svg><div class="bl">Kalender</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="note-strip">E3 — most useful, turns every empty state into navigation. RISK: <b>least personality</b>; reads more "app" than "fanzine", and duplicates the main nav.</div>
+
+    <div class="note-strip" style="background:var(--cream-soft);border-bottom:2px solid var(--ink)">Loading = existing <b>&lt;Spinner&gt;</b> (kept). Error = paper <b>&lt;Alert&gt;</b> reskin ("Er ging iets mis bij het zoeken — probeer opnieuw"). Neither needs a direction choice.</div>
+  </body>
+</html>

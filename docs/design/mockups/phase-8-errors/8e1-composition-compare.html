@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 8 — 404/500 · Round 1: composition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 20px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; max-width: 92ch; line-height: 1.6; }
+      .direction-bar { background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase;
+        display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top:2px solid var(--ink); }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .note-strip { background: var(--cream-deep); border-bottom:1px dashed var(--ink); padding:9px 28px; font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); }
+      .note-strip b { color: var(--brick); }
+      .stage { padding: 40px 28px 44px; display:flex; justify-content:center; }
+
+      /* jersey artefact */
+      .jersey { position:relative; width:160px; height:178px; flex:0 0 auto; }
+      .jersey .shirt { position:absolute; inset:0; background: repeating-linear-gradient(90deg, var(--jersey-deep) 0 18px, var(--jersey-deep-dark) 18px 36px);
+        border:2.5px solid var(--ink); box-shadow:6px 6px 0 0 var(--ink);
+        clip-path: polygon(30% 0, 70% 0, 100% 16%, 86% 34%, 86% 100%, 14% 100%, 14% 34%, 0 16%); }
+      .jersey .num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-body); font-weight:900; font-size:54px; color:var(--cream); letter-spacing:-2px; padding-top:18px; }
+      .jersey .tape { position:absolute; top:-14px; left:50%; transform:translateX(-50%) rotate(-5deg); width:78px; height:26px; background:var(--warm); border:1.5px solid var(--ink); opacity:.92; }
+      .jersey.small { width:108px; height:122px; }
+      .jersey.small .num { font-size:34px; padding-top:12px; }
+
+      .pun { font-family:var(--font-display); font-style:italic; font-weight:900; font-size:clamp(34px,5vw,56px); line-height:.95; margin:0; }
+      .pun .acc { color:var(--jersey-deep); }
+      .sub { font-size:15.5px; color:var(--ink-soft); line-height:1.55; margin:14px 0 0; max-width:46ch; }
+      .code { font-family:var(--font-mono); font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-muted); }
+      .btns { display:flex; gap:12px; flex-wrap:wrap; margin-top:22px; }
+      .btn { font-family:var(--font-mono); font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase; border:2px solid var(--ink); padding:12px 18px; box-shadow:3px 3px 0 0 var(--ink); background:var(--jersey-deep); color:var(--cream); text-decoration:none; display:inline-block; }
+      .btn.ghost { background:var(--cream); color:var(--ink); }
+
+      /* A centered */
+      .A .inner { max-width:520px; text-align:center; }
+      .A .jersey { margin:0 auto 24px; }
+      .A .btns { justify-content:center; }
+      /* B split */
+      .B .inner { max-width:760px; display:grid; grid-template-columns:auto 1fr; gap:42px; align-items:center; }
+      .B .jersey { transform:rotate(-3deg); }
+      /* C scoreboard */
+      .C .inner { max-width:640px; text-align:center; }
+      .C .board { font-family:var(--font-display); font-weight:900; font-size:clamp(90px,18vw,168px); line-height:.8; letter-spacing:-4px; margin:0; }
+      .C .board .acc { color:var(--jersey-deep); }
+      .C .jersey.small { display:inline-block; vertical-align:middle; transform:rotate(4deg); margin-left:8px; }
+      .C .btns { justify-content:center; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 8 · 404 / 500 — Round 1: composition</h1>
+      <p>Master-design brief: <b style="color:var(--warm)">football pun + cream bg + JerseyShirt taped artefact</b>.
+        One shared component renders both pages (404 + 500) parameterised by code, pun, body, and buttons (500 adds a
+        "probeer opnieuw" reset). Idea worth a look: the HTTP code lives <b style="color:var(--warm)">as the jersey
+        number</b>. 404 shown in all three layouts; a 500 example confirms the family. Pun copy + button labels are
+        decided next (8e2) — placeholders here. Voice should rhyme with "Geen treffers" (8s4).</p>
+    </div>
+
+    <!-- A -->
+    <div class="direction-bar"><span class="tag">A</span> Centered, code-as-jersey-number <span class="note">taped shirt with "404" as the number, pun below — symmetric</span></div>
+    <div class="stage A"><div class="inner">
+      <div class="jersey"><div class="tape"></div><div class="shirt"></div><div class="num">404</div></div>
+      <div class="code">Fout 404 · pagina niet gevonden</div>
+      <h1 class="pun">Buiten de <span class="acc">lijnen</span>.</h1>
+      <p class="sub" style="margin-left:auto;margin-right:auto">Deze pagina staat niet (meer) op het veld. Misschien is ze verplaatst of bestaat de link niet.</p>
+      <div class="btns"><a class="btn">Naar de homepage</a></div>
+    </div></div>
+    <div class="note-strip">A — clean, the code-as-number ties artefact + error elegantly; works identically for 404/500. RISK: centered + symmetric is the <b>most conventional</b> error layout.</div>
+
+    <!-- B -->
+    <div class="direction-bar"><span class="tag">B</span> Split editorial <span class="note">taped shirt left, copy right — matches the no-results card vibe</span></div>
+    <div class="stage B"><div class="inner">
+      <div class="jersey"><div class="tape"></div><div class="shirt"></div><div class="num">404</div></div>
+      <div>
+        <div class="code">Fout 404 · pagina niet gevonden</div>
+        <h1 class="pun">Buiten de <span class="acc">lijnen</span>.</h1>
+        <p class="sub">Deze pagina staat niet (meer) op het veld. Misschien is ze verplaatst of bestaat de link niet.</p>
+        <div class="btns"><a class="btn">Naar de homepage</a></div>
+      </div>
+    </div></div>
+    <div class="note-strip">B — asymmetric + editorial, sits in the same family as the search "Geen treffers" card. RISK: split layout <b>centres awkwardly</b> on a short 500 message; needs care on mobile (stacks).</div>
+
+    <!-- C -->
+    <div class="direction-bar"><span class="tag">C</span> Scoreboard <span class="note">giant serif code as hero + small jersey flourish — code-forward</span></div>
+    <div class="stage C"><div class="inner">
+      <div class="board"><span>4</span><div class="jersey small"><div class="tape"></div><div class="shirt"></div><div class="num">0</div></div><span>4</span></div>
+      <div class="code" style="margin-top:10px">Fout 404 · pagina niet gevonden</div>
+      <h1 class="pun" style="font-size:34px;margin-top:6px">Buiten de <span class="acc">lijnen</span>.</h1>
+      <p class="sub" style="margin:12px auto 0">Deze pagina staat niet (meer) op het veld.</p>
+      <div class="btns"><a class="btn">Naar de homepage</a></div>
+    </div></div>
+    <div class="note-strip">C — boldest, the "0" of 404 becomes the jersey (scoreboard energy). RISK: the middle-digit-as-shirt trick <b>only reads for codes with a middle 0</b> (404/500 both work, but it's a gimmick); biggest furniture.</div>
+
+    <!-- 500 family check -->
+    <div class="direction-bar"><span class="tag">500</span> Family check (layout A) <span class="note">same component, 500 copy + reset button</span></div>
+    <div class="stage A"><div class="inner">
+      <div class="jersey"><div class="tape"></div><div class="shirt"></div><div class="num">500</div></div>
+      <div class="code">Fout 500 · er ging iets mis</div>
+      <h1 class="pun">Technische <span class="acc">panne</span>.</h1>
+      <p class="sub" style="margin-left:auto;margin-right:auto">Er ging iets mis aan onze kant. Probeer het zo dadelijk opnieuw.</p>
+      <div class="btns" style="justify-content:center"><a class="btn">Probeer opnieuw</a><a class="btn ghost">Naar de homepage</a></div>
+    </div></div>
+    <div class="note-strip">500 reuses the chosen layout with two buttons (reset + home). The <code>reset()</code> callback from <code>error.tsx</code> must stay wired to "Probeer opnieuw".</div>
+  </body>
+</html>
