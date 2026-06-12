@@ -285,6 +285,17 @@ export function HubSearch({
   const navItems = showShimmer ? memberResults : items;
   const showResults = isFocused && trimmed.length > 0;
 
+  // When the result set recomposes across the shimmer↔settled boundary
+  // (`navItems` flips from `memberResults` to the answer-forward list), a stale
+  // keyboard highlight would point at a row whose meaning just changed — so
+  // Enter could fire on a different option than the one shown highlighted. Drop
+  // the highlight on that transition. `onChange` already resets it for an
+  // actual query change; this covers the async settle that `onChange` can't see.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync to the async answer-lane settle, which no event handler observes
+    setSelectedIndex(-1);
+  }, [showShimmer]);
+
   // Dismiss the dropdown on an outside click.
   useEffect(() => {
     const onClick = (event: MouseEvent) => {

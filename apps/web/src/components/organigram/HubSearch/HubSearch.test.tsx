@@ -166,6 +166,30 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
+  it("drops a stale keyboard highlight when the result set recomposes (shimmer→answer-forward)", async () => {
+    // Shimmer first: a person query is highlighted while the answer lane resolves.
+    setSemantic({ results: [], executedQuery: "" });
+    const view = renderSearch();
+    const input = typeQuery("in");
+    await screen.findByText(/Slim zoeken/i);
+    fireEvent.keyDown(input, { key: "ArrowDown" }); // highlight the first member
+
+    // The answer lane settles with a strong answer-forward → navItems recompose
+    // (member at index 0 is now the answer card). The highlight must be dropped.
+    setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "in" });
+    view.rerender(
+      <HubSearch
+        members={HUB_SEARCH_MEMBERS}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+      />,
+    );
+    await screen.findByText(/Lees volledig antwoord/i);
+
+    // Enter now selects nothing (no stale index → no wrong-item navigation).
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(window.location.hash).toBe("");
+  });
+
   it("falls back to keyword (no smart hint) when the endpoint errors", async () => {
     setSemantic({ error: "boom" });
     renderSearch();

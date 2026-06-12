@@ -211,9 +211,12 @@ describe("MemberDetailPanel", () => {
         />,
       );
       expect(screen.getByText("Helpt met")).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: "Lid worden" }),
-      ).toBeInTheDocument();
+      // The chip deep-links the question's slug (7o9 / F10) so the finder opens
+      // that exact answer in view, not just a scroll to #hulp.
+      expect(screen.getByRole("link", { name: "Lid worden" })).toHaveAttribute(
+        "href",
+        "#lid-worden",
+      );
       // Els' responsibility must not leak into Luc's panel.
       expect(
         screen.queryByRole("link", { name: "Evenement aanvragen" }),
@@ -229,6 +232,21 @@ describe("MemberDetailPanel", () => {
         />,
       );
       expect(screen.queryByText("Helpt met")).not.toBeInTheDocument();
+    });
+
+    it("closes the panel when a 'Helpt met' chip is clicked (F10)", async () => {
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <MemberDetailPanel
+          node={singleNode}
+          open
+          onClose={onClose}
+          responsibilityPaths={responsibilityPaths}
+        />,
+      );
+      await user.click(screen.getByRole("link", { name: "Lid worden" }));
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
   });
 
