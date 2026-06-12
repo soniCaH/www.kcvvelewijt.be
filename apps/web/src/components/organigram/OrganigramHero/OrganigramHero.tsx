@@ -124,9 +124,7 @@ export function OrganigramHero({
             </p>
 
             <svg
-              className="mx-auto block"
-              width="100%"
-              height="auto"
+              className="mx-auto block h-auto w-full"
               viewBox="0 0 210 118"
               aria-hidden
             >

@@ -5,6 +5,7 @@
  */
 
 import type { Contact, ResponsibilityPath } from "@/types/responsibility";
+import type { FAQEntry } from "@/lib/seo/jsonld";
 
 /**
  * Check if a contact references the given staff member (through organigramNode members).
@@ -156,13 +157,14 @@ export function buildResponsibilityUrl(
  * results want plain text, not markup). Paths whose question or answer is empty
  * are dropped so the structured data never ships a blank Q&A.
  *
- * The return shape matches `FAQEntry` from `@/lib/seo/jsonld`, so the page can
- * pass it straight to `buildFAQPageJsonLd` — kept structural (not an import) to
- * keep this domain util free of SEO-layer coupling.
+ * Typed as `FAQEntry` (a plain `{ question, answer }` DTO — a `import type`, so
+ * zero runtime coupling to the SEO layer) so the page can pass the result
+ * straight to `buildFAQPageJsonLd`, and the contract is compiler-enforced: a
+ * future field on `FAQEntry` becomes a type error here, not silent drift.
  */
 export function responsibilityPathsToFaqEntries(
   paths: ReadonlyArray<ResponsibilityPath>,
-): Array<{ question: string; answer: string }> {
+): FAQEntry[] {
   return paths
     .map((path) => ({
       question: path.question.trim(),

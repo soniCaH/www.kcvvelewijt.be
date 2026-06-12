@@ -85,8 +85,11 @@ const nextConfig: NextConfig = {
       },
       // #2058 — Phase 7 hub assembly: the standalone organigram page was fused
       // into the unified `/hulp` hub (its directory lives at `#structuur`). 308
-      // so old bookmarks / search-index entries don't 404; Next preserves the
-      // query string, so `?member=`/`?view=` deep-links survive the hop.
+      // so old bookmarks / search-index entries land on the structure section
+      // instead of 404ing. Note: a `#fragment` in the destination is not a
+      // reliable carrier for the source query string, so legacy `?member=`/
+      // `?view=` deep-links are not preserved — those rare links land on the hub
+      // and the person is one search away (acceptable for a retired route).
       {
         source: "/club/organigram",
         destination: "/hulp#structuur",

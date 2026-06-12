@@ -2,7 +2,7 @@
  * OrganigramOverview — ties the on-page chart to the fullscreen explorer (#2054).
  */
 
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrganigramOverview } from "./OrganigramOverview";
@@ -12,6 +12,13 @@ import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 describe("OrganigramOverview", () => {
+  beforeEach(() => {
+    // The B2 test mounts <HubMemberPanel>, which writes `?member=` to the URL on
+    // open (replaceMemberParams). Reset the URL so that state can't leak into a
+    // later test and auto-restore a panel (happy-dom shares one window per file).
+    window.history.replaceState(null, "", "/");
+  });
+
   it("opens the explorer focused on a clicked chart node", async () => {
     render(<OrganigramOverview nodes={explorerFixture} />);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

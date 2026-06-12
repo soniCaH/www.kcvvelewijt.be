@@ -285,16 +285,24 @@ export function HubSearch({
   const navItems = showShimmer ? memberResults : items;
   const showResults = isFocused && trimmed.length > 0;
 
-  // When the result set recomposes across the shimmer↔settled boundary
-  // (`navItems` flips from `memberResults` to the answer-forward list), a stale
-  // keyboard highlight would point at a row whose meaning just changed — so
-  // Enter could fire on a different option than the one shown highlighted. Drop
-  // the highlight on that transition. `onChange` already resets it for an
-  // actual query change; this covers the async settle that `onChange` can't see.
+  // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
+  // the list — the shimmer→settled flip, an answer-forward card sliding into
+  // position 0, the debounce reordering members — changes what a given index
+  // *means*. A stale highlight would then let Enter fire a row other than the
+  // one shown highlighted. Reset on every composition change (keyed on a content
+  // signature, NOT just the shimmer flag, so the async settle is covered too); a
+  // pure highlight move leaves the signature untouched, so hover/arrow persist.
+  const navItemsKey = navItems
+    .map((result) =>
+      result.type === "member"
+        ? `m:${result.member.id}`
+        : `a:${result.path.id}`,
+    )
+    .join("|");
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync to the async answer-lane settle, which no event handler observes
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync to async result recomposition (debounce/answer-lane settle) that no event handler observes
     setSelectedIndex(-1);
-  }, [showShimmer]);
+  }, [navItemsKey]);
 
   // Dismiss the dropdown on an outside click.
   useEffect(() => {

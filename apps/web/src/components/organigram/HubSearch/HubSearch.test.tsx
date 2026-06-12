@@ -190,6 +190,30 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("");
   });
 
+  it("drops a stale highlight on a settled→settled recompose (answer-forward changes, no shimmer)", async () => {
+    // Already settled with one answer-forward (no shimmer at any point).
+    setSemantic({ results: [hit("blessure", 0.82)], executedQuery: "x" });
+    const view = renderSearch();
+    const input = typeQuery("x");
+    await screen.findByText(/Lees volledig antwoord/i);
+    fireEvent.keyDown(input, { key: "ArrowDown" }); // highlight the answer-forward
+
+    // A fresh settle for the SAME query promotes a DIFFERENT answer-forward —
+    // showShimmer stays false throughout, so only a content-keyed reset catches it.
+    setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "x" });
+    view.rerender(
+      <HubSearch
+        members={HUB_SEARCH_MEMBERS}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+      />,
+    );
+    await screen.findByText("Hoe schrijf ik mijn kind in?");
+
+    // The highlight was dropped → Enter does not fire the newly-promoted answer.
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(window.location.hash).toBe("");
+  });
+
   it("falls back to keyword (no smart hint) when the endpoint errors", async () => {
     setSemantic({ error: "boom" });
     renderSearch();
