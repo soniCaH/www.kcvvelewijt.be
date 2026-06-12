@@ -46,12 +46,6 @@ export interface HubSearchProps {
   className?: string;
 }
 
-/** Section a result type scrolls to (tracer nav target). */
-const SECTION_FOR: Record<HubSearchResult["type"], "structuur" | "hulp"> = {
-  member: "structuur",
-  responsibility: "hulp",
-};
-
 function initials(name: string): string {
   return name
     .trim()
@@ -111,7 +105,11 @@ export function HubSearch({
     trackEvent("organigram_search_used", { query_length: value.length });
 
     if (typeof window !== "undefined") {
-      window.location.hash = SECTION_FOR[result.type];
+      // A person scrolls to the directory (`#structuur`); an answer deep-links
+      // the finder accordion by its slug, which `<HulpFinder>` opens + scrolls
+      // to on `hashchange` (#2056).
+      window.location.hash =
+        result.type === "member" ? "structuur" : result.path.id;
     }
     setValue(
       result.type === "member"

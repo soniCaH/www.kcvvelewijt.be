@@ -56,14 +56,15 @@ describe("HubSearch", () => {
     });
   });
 
-  it("scrolls to #hulp when an answer is chosen", async () => {
+  it("deep-links the finder accordion by slug when an answer is chosen", async () => {
     renderSearch();
     typeQuery("blessure");
     const answer = await screen.findByText(
       "Wat moet ik doen bij een blessure?",
     );
     fireEvent.click(answer);
-    expect(window.location.hash).toBe("#hulp");
+    // The answer's slug — <HulpFinder> opens + scrolls to it on hashchange.
+    expect(window.location.hash).toBe("#blessure");
   });
 
   it("shows an empty state when nothing matches", async () => {

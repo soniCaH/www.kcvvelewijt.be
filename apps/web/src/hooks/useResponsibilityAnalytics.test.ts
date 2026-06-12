@@ -110,17 +110,31 @@ describe("useResponsibilityAnalytics", () => {
     });
   });
 
-  describe("responsibility_organigram_link", () => {
-    it("fires with path_id and member_id", () => {
+  describe("responsibility_view", () => {
+    it("fires with path_id when a question accordion opens", () => {
       const { result } = renderHook(() => useResponsibilityAnalytics());
 
       act(() => {
-        result.current.trackOrganigramLink("herstel-blessure", "kinesist");
+        result.current.trackView("herstel-blessure");
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("responsibility_view", {
+        path_id: "herstel-blessure",
+      });
+    });
+  });
+
+  describe("responsibility_organigram_link", () => {
+    it("fires with path_id and a hashed node_id", () => {
+      const { result } = renderHook(() => useResponsibilityAnalytics());
+
+      act(() => {
+        result.current.trackOrganigramLink("herstel-blessure", "node-kine");
       });
 
       expect(mockTrackEvent).toHaveBeenCalledWith(
         "responsibility_organigram_link",
-        { path_id: "herstel-blessure", member_id: hashMemberId("kinesist") },
+        { path_id: "herstel-blessure", node_id: hashMemberId("node-kine") },
       );
     });
   });

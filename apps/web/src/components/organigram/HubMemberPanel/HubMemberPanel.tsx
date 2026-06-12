@@ -45,6 +45,13 @@ interface OpenMemberOptions {
 
 interface HubMemberPanelContextValue {
   openMember: (node: OrgChartNode, options: OpenMemberOptions) => void;
+  /**
+   * Open the panel for a node by its id — the resolution path for cross-links
+   * that only carry a `nodeId` (e.g. the finder's "Toon in structuur →", which
+   * has the responsibility contact's node but not the `OrgChartNode`). No-op
+   * when the id is unknown.
+   */
+  openMemberById: (nodeId: string, options: OpenMemberOptions) => void;
 }
 
 const HubMemberPanelContext = createContext<HubMemberPanelContextValue | null>(
@@ -108,6 +115,14 @@ export function HubMemberPanel({
     [],
   );
 
+  const openMemberById = useCallback(
+    (nodeId: string, options: OpenMemberOptions) => {
+      const node = nodeById.get(nodeId);
+      if (node) openMember(node, options);
+    },
+    [nodeById, openMember],
+  );
+
   const handleClose = useCallback(() => {
     setOpen(false);
     // Clear the shown node so a reopen of the same position is a node change —
@@ -159,8 +174,8 @@ export function HubMemberPanel({
   );
 
   const contextValue = useMemo<HubMemberPanelContextValue>(
-    () => ({ openMember }),
-    [openMember],
+    () => ({ openMember, openMemberById }),
+    [openMember, openMemberById],
   );
 
   return (

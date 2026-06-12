@@ -18,7 +18,7 @@ describe("resolveContact", () => {
     });
   });
 
-  it("uses the first member of a position contact", () => {
+  it("uses the first member of a position contact and deep-links the hub structuur", () => {
     const resolved = resolveContact({
       contactType: "position",
       position: "Voorzitter",
@@ -31,11 +31,22 @@ describe("resolveContact", () => {
     expect(resolved.name).toBe("Jan Willems");
     expect(resolved.role).toBe("Voorzitter");
     expect(resolved.email).toBe("vz@kcvvelewijt.be");
-    expect(resolved.memberId).toBe("m1");
-    expect(resolved.organigramHref).toBe("/club/organigram?node=node-vz");
+    expect(resolved.nodeId).toBe("node-vz");
+    // Rewired off the retired /club/organigram route to the hub deep-link.
+    expect(resolved.organigramHref).toBe("/hulp?member=node-vz#structuur");
   });
 
-  it("falls back to the position label when a position contact has no members", () => {
+  it("encodes the nodeId in the deep-link", () => {
+    const resolved = resolveContact({
+      contactType: "position",
+      position: "Trainer A",
+      nodeId: "node/A 1",
+      members: [{ id: "m1", name: "Coach" }],
+    });
+    expect(resolved.organigramHref).toBe("/hulp?member=node%2FA%201#structuur");
+  });
+
+  it("omits the cross-link when a position contact has no node or members", () => {
     const resolved = resolveContact({
       contactType: "position",
       position: "Voorzitter",
@@ -43,7 +54,8 @@ describe("resolveContact", () => {
     });
     expect(resolved.name).toBe("Voorzitter");
     expect(resolved.email).toBeUndefined();
-    expect(resolved.organigramHref).toBe("/club/organigram");
+    expect(resolved.nodeId).toBeUndefined();
+    expect(resolved.organigramHref).toBeUndefined();
   });
 
   it("renders a team-role contact with a generic role label and a /ploegen link", () => {
@@ -55,11 +67,21 @@ describe("resolveContact", () => {
     expect(trainer.organigramHref).toBe("/ploegen");
     expect(trainer.email).toBeUndefined();
     expect(trainer.phone).toBeUndefined();
+    expect(trainer.nodeId).toBeUndefined();
 
     const afgevaardigde = resolveContact({
       contactType: "team-role",
       teamRole: "afgevaardigde",
     });
     expect(afgevaardigde.role).toBe("Afgevaardigde van jouw ploeg");
+  });
+
+  it("falls back to teamRoleFallback when the primary teamRole is unset", () => {
+    const resolved = resolveContact({
+      contactType: "team-role",
+      teamRoleFallback: "afgevaardigde",
+    });
+    expect(resolved.role).toBe("Afgevaardigde van jouw ploeg");
+    expect(resolved.organigramHref).toBe("/ploegen");
   });
 });
