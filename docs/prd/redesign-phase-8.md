@@ -106,13 +106,13 @@ meatier search + error work.
 
 ## 5. Phases (one issue = one worktree = one PR)
 
-| # | Issue | Depends on |
-| - | ----- | ---------- |
-| 8.1 | **Tracer:** `/privacy` cream-minimal reskin | — |
-| 8.2 | `/zoeken` dark masthead + page shell (SearchForm → hard-shadow + icon) | 8.1 |
-| 8.3 | `/zoeken` paper result rows + football-voice empty states | 8.2 |
-| 8.4 | 404/500 `<ErrorState>` — Storybook A/B, pick, wire-in, retire loser | 8.1 |
-| 8.5 | Phase 8 final pass — SEO/analytics/e2e/VR sweep + master-design closeout | 8.2, 8.3, 8.4 |
+| # | Issue | GitHub | Depends on |
+| - | ----- | ------ | ---------- |
+| 8.1 | **Tracer:** `/privacy` cream-minimal reskin | #2104 | — |
+| 8.2 | `/zoeken` dark masthead + page shell (SearchForm → hard-shadow + icon) | #2105 | #2104 |
+| 8.3 | `/zoeken` paper result rows + football-voice empty states | #2106 | #2105 |
+| 8.4 | 404/500 `<ErrorState>` — Storybook A/B, pick, wire-in, retire loser | #2107 | #2104 |
+| 8.5 | Phase 8 final pass — SEO/analytics/e2e/VR sweep + master-design closeout | #2108 | #2105, #2106, #2107 |
 
 ## 6. Acceptance criteria per phase
 
