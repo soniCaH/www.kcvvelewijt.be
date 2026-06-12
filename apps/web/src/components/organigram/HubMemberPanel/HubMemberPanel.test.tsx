@@ -77,6 +77,23 @@ describe("HubMemberPanel", () => {
     ).toBeInTheDocument();
   });
 
+  it("makes the page background inert while the panel is open (B1)", async () => {
+    const user = userEvent.setup();
+    renderHub();
+    const background = screen.getByTestId("structure-directory").parentElement!;
+    expect(background).not.toHaveAttribute("inert");
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Contactgegevens van Jan Voorzitter",
+      }),
+    );
+    expect(background).toHaveAttribute("inert");
+
+    await user.click(screen.getByRole("button", { name: "Sluiten" }));
+    expect(background).not.toHaveAttribute("inert");
+  });
+
   it("fires organigram_member_clicked on open", async () => {
     const user = userEvent.setup();
     renderHub();

@@ -114,7 +114,8 @@ export default async function HulpHubPage() {
           <section
             id="hulp"
             aria-label="Hulp"
-            className="mt-12 scroll-mt-32 sm:mt-16"
+            tabIndex={-1}
+            className="mt-12 scroll-mt-32 focus:outline-none sm:mt-16"
           >
             <EditorialHeading
               level={2}
@@ -151,7 +152,8 @@ export default async function HulpHubPage() {
           <section
             id="structuur"
             aria-label="Structuur"
-            className="scroll-mt-32 pb-4"
+            tabIndex={-1}
+            className="scroll-mt-32 pb-4 focus:outline-none"
           >
             <MonoLabel variant="plain">De structuur</MonoLabel>
             <EditorialHeading

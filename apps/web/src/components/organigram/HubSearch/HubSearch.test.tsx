@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { HubSearch } from "./HubSearch";
 import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
@@ -216,5 +217,37 @@ describe("HubSearch", () => {
     await screen.findByText("Inge De Wit");
     fireEvent.click(screen.getByLabelText("Wissen"));
     expect(input.value).toBe("");
+  });
+
+  it("Escape closes the listbox but keeps focus in the input, and typing reopens it (S2)", async () => {
+    const user = userEvent.setup();
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    renderSearch();
+    const input = screen.getByLabelText(
+      "Zoek een persoon of hulpvraag",
+    ) as HTMLInputElement;
+    await user.click(input);
+    await user.type(input, "in");
+    await screen.findByText("Inge De Wit");
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    // Popup closed, but focus stays in the input (not blurred to <body>).
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(input).toHaveFocus();
+
+    // Typing reopens the popup (onChange re-sets isFocused).
+    await user.type(input, "g");
+    expect(await screen.findByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("announces the result count to screen readers via a polite live region (S1)", async () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    renderSearch();
+    typeQuery("in");
+    await screen.findByText("Inge De Wit");
+    const status = screen.getByRole("status");
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(status).toHaveTextContent(/\d+ resulta(at|ten)/);
   });
 });

@@ -2,11 +2,14 @@
  * OrganigramOverview — ties the on-page chart to the fullscreen explorer (#2054).
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrganigramOverview } from "./OrganigramOverview";
 import { explorerFixture } from "./organigram-explorer.fixture";
+import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 describe("OrganigramOverview", () => {
   it("opens the explorer focused on a clicked chart node", async () => {
@@ -41,6 +44,27 @@ describe("OrganigramOverview", () => {
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(launcher).toHaveFocus();
+  });
+
+  it("closes the verkenner when a member panel opens from it (B2 — no stacked dialogs)", async () => {
+    render(
+      <HubMemberPanel nodes={explorerFixture} responsibilityPaths={[]}>
+        <OrganigramOverview nodes={explorerFixture} />
+      </HubMemberPanel>,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Blader door het organigram/ }),
+    );
+    // The verkenner dialog (with its tree) is open.
+    expect(await screen.findByRole("treeitem")).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Contactgegevens" }),
+    );
+    // The person panel took over and the verkenner collapsed — never two
+    // stacked modal dialogs.
+    expect(screen.getByTestId("member-detail-panel")).toBeInTheDocument();
+    expect(screen.queryByRole("treeitem")).not.toBeInTheDocument();
   });
 
   it("collapsible: hides the chart behind a disclosure until opened (7o9 · 2)", async () => {

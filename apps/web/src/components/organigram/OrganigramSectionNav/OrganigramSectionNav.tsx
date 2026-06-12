@@ -103,7 +103,16 @@ export function OrganigramSectionNav({
                 <a
                   href={`#${section.id}`}
                   aria-current={isActive ? "location" : undefined}
-                  onClick={() => setActive(section.id)}
+                  onClick={() => {
+                    setActive(section.id);
+                    // Move keyboard focus into the target section (it's
+                    // tabIndex=-1) so a keyboard/SR user actually lands there —
+                    // the hash anchor alone leaves focus on the door (B3). The
+                    // hash navigation handles the scroll (preventScroll here).
+                    document
+                      .getElementById(section.id)
+                      ?.focus({ preventScroll: true });
+                  }}
                   className={cn(
                     "border-ink inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-all duration-200",
                     isActive

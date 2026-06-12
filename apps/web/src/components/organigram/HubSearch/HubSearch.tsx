@@ -346,12 +346,24 @@ export function HubSearch({
         }
         break;
       case "Escape":
+        // APG combobox: close the popup but KEEP focus in the input (S2) — don't
+        // blur to <body>. Typing reopens it (onChange re-sets isFocused).
         event.preventDefault();
         setIsFocused(false);
-        inputRef.current?.blur();
         break;
     }
   };
+
+  // Announce result state to screen readers when the listbox is open (S1).
+  const statusMessage = !showResults
+    ? ""
+    : showShimmer
+      ? // Distinct from the visible "Slim zoeken…" hint so SR users hear a
+        // spoken sentence, not a clipped UI label (and the two never collide).
+        "Bezig met zoeken…"
+      : items.length > 0
+        ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
+        : "Geen resultaten";
 
   const isHero = variant === "hero";
   const boxShadow = isHero
@@ -435,6 +447,8 @@ export function HubSearch({
           onChange={(event) => {
             setValue(event.target.value);
             setSelectedIndex(-1);
+            // Typing reopens the popup after an Escape that closed it (S2).
+            setIsFocused(true);
           }}
           onFocus={() => setIsFocused(true)}
           onKeyDown={onKeyDown}
@@ -462,12 +476,19 @@ export function HubSearch({
               inputRef.current?.focus();
             }}
             aria-label="Wissen"
-            className="text-ink-muted hover:text-ink flex-shrink-0 transition-colors"
+            // Pull-back padding widens the tap target without shifting layout (B4).
+            className="text-ink-muted hover:text-ink -m-1.5 flex-shrink-0 p-1.5 transition-colors"
           >
             <X size={iconSize} aria-hidden />
           </button>
         )}
       </div>
+
+      {/* Screen-reader-only running status — announces result counts as the
+          listbox settles (S1), so a SR user knows what the live search found. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {statusMessage}
+      </span>
 
       {showResults && (
         <div

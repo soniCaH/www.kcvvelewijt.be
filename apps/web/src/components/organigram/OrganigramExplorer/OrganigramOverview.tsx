@@ -86,8 +86,18 @@ export function OrganigramOverview({
         returnFocusRef={returnFocusRef}
         {...(hubPanel
           ? {
-              onOpenMember: (node, trigger) =>
-                hubPanel.openMember(node, { trigger, view: "chart" }),
+              onOpenMember: (node) => {
+                // B2 — never stack two modal dialogs: collapse the verkenner as
+                // the person panel takes over. Return focus to the verkenner's
+                // own launcher (a live page element) rather than the now-
+                // unmounting in-chart node, so closing the panel lands the user
+                // back on the page.
+                setOpen(false);
+                hubPanel.openMember(node, {
+                  trigger: returnFocusRef.current,
+                  view: "chart",
+                });
+              },
             }
           : {})}
       />

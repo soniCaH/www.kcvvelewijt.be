@@ -265,9 +265,11 @@ export function MemberDetailPanel({
               type="button"
               onClick={onClose}
               aria-label="Sluiten"
-              className="border-cream/50 text-cream hover:border-cream absolute top-3 right-3 border-[1.5px] px-1.5 py-0.5"
+              // A 36px square keeps a comfortable tap target (B4) while staying a
+              // tidy bordered close box in the dark header.
+              className="border-cream/50 text-cream hover:border-cream absolute top-3 right-3 flex h-9 w-9 items-center justify-center border-[1.5px]"
             >
-              <X size={12} aria-hidden />
+              <X size={14} aria-hidden />
             </button>
 
             <p className="text-warm font-mono text-[10px] tracking-[0.1em] uppercase">
