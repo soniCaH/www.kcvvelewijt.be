@@ -211,23 +211,39 @@ export function searchResponsibilities(
 }
 
 /**
- * Unified hub search: ranks people and answers independently, then interleaves
- * them (person, answer, person, answer …) so both intents surface together in a
- * single dropdown. `maxResults` caps each category before interleaving.
+ * Map semantic-search hits (slug + cosine score) back to full
+ * `ResponsibilityPath`s for the answer lane (#2057). Matches by slug first
+ * (the responsibility index keys vectors by slug) then id, dropping hits whose
+ * path isn't in the supplied set. Score is the cosine similarity (0–1) — unlike
+ * the additive keyword scores — so callers must not compare the two scales.
  */
-export function searchHub(
-  query: string,
-  members: OrgChartNode[],
-  paths: ResponsibilityPath[],
-  maxResults: number,
-): HubSearchResult[] {
-  const memberResults = searchMembers(query, members, maxResults);
-  const responsibilityResults = searchResponsibilities(
-    query,
-    paths,
-    maxResults,
-  );
+export function mapSemanticResults(
+  results: ReadonlyArray<{ id: string; slug: string; score: number }>,
+  pathById: Map<string, ResponsibilityPath>,
+): HubResponsibilityResult[] {
+  const out: HubResponsibilityResult[] = [];
+  for (const result of results) {
+    const path = pathById.get(result.slug) ?? pathById.get(result.id);
+    if (path) {
+      out.push({
+        type: "responsibility",
+        path,
+        score: result.score,
+        matchedFields: [],
+      });
+    }
+  }
+  return out;
+}
 
+/**
+ * Interleave people and answers (person, answer, person, answer …) so both
+ * intents surface together in a single dropdown.
+ */
+export function interleaveResults(
+  memberResults: HubMemberResult[],
+  responsibilityResults: HubResponsibilityResult[],
+): HubSearchResult[] {
   const combined: HubSearchResult[] = [];
   const maxLength = Math.max(
     memberResults.length,
@@ -242,4 +258,22 @@ export function searchHub(
   }
 
   return combined;
+}
+
+/**
+ * Unified KEYWORD hub search: ranks people and answers independently, then
+ * interleaves them. `maxResults` caps each category. Used as the graceful
+ * fallback when the semantic endpoint is unavailable (#2057); the answer lane is
+ * otherwise semantic.
+ */
+export function searchHub(
+  query: string,
+  members: OrgChartNode[],
+  paths: ResponsibilityPath[],
+  maxResults: number,
+): HubSearchResult[] {
+  return interleaveResults(
+    searchMembers(query, members, maxResults),
+    searchResponsibilities(query, paths, maxResults),
+  );
 }

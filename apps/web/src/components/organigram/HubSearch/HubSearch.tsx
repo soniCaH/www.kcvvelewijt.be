@@ -3,36 +3,57 @@
 /**
  * <HubSearch> — the unified front-door search for the `/hulp` hub.
  *
- * One search box spanning BOTH intents (decision 7o2c / finding-model I):
- * - a name / function → a **person** (Structuur)
- * - a problem / question → an **answer** (Hulp)
+ * One search box spanning BOTH intents:
+ * - a name / function → a **person** (keyword/structured → Structuur)
+ * - a problem / question → an **answer** (semantic → Hulp)
  *
- * Results are ranked by keyword (`searchHub`) and interleaved (person, answer,
- * …) in a single dropdown. It replaces both the organigram `<UnifiedSearchBar>`
- * and the finder's `<HulpSearchInput>` on the hub.
- *
- * Tracer behaviour (Phase 1, #2052): selecting a result smooth-scrolls to the
- * relevant hub section (`#structuur` for a person, `#hulp` for an answer). The
- * person side-panel (#2055) and the answer accordion (#2056) become the richer
- * selection targets in their phases; the search spine is proven here. Semantic
- * question search (#2057) augments `searchHub` later — people stay keyword.
+ * The **answer lane is semantic** (#2057, decision 7o8): the query is embedded
+ * (`bge-m3`) and matched against the `responsibility` Vectorize index via
+ * `useSemanticSearch` → `POST /api/search`, so natural language ("mijn kind
+ * heeft zich bezeerd") matches without keyword overlap. The **people lane stays
+ * keyword** (`searchMembers`). A strong top answer (score ≥ 0.5) renders
+ * **answer-forward** — its own CMS summary + contact inline (never an LLM
+ * answer; avoids hallucination on club procedures). On endpoint failure the
+ * answer lane **falls back to keyword** (`searchHub`) — the PRD floor — with no
+ * smart hint. Selecting a person scrolls to `#structuur`; an answer deep-links
+ * the finder accordion by slug (`<HulpFinder>` opens it on `hashchange`, #2056).
  */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Image from "next/image";
-import { MagnifyingGlass, Question, User, X } from "@/lib/icons.redesign";
+import {
+  ArrowRight,
+  MagnifyingGlass,
+  Question,
+  Sparkle,
+  User,
+  X,
+} from "@/lib/icons.redesign";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
+import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
-import { searchHub, type HubSearchResult } from "./hub-search";
+import {
+  interleaveResults,
+  mapSemanticResults,
+  searchHub,
+  searchMembers,
+  type HubMemberResult,
+  type HubResponsibilityResult,
+  type HubSearchResult,
+} from "./hub-search";
 
 export type HubSearchVariant = "hero" | "nav";
+
+/** Cosine score above which the top answer renders "answer-forward" — mirrors
+ *  the backend's LLM gate (`LLM_SCORE_THRESHOLD`). */
+const ANSWER_FORWARD_MIN_SCORE = 0.5;
 
 export interface HubSearchProps {
   /** Members (organigram nodes) to search for people. */
   members: OrgChartNode[];
-  /** Responsibility paths to search for answers. */
+  /** Responsibility paths — the answer-lane corpus (mapped from semantic hits). */
   responsibilityPaths: ResponsibilityPath[];
   /**
    * `"hero"` — the prominent cream, ink-bordered box inside the dark hero band.
@@ -55,6 +76,130 @@ function initials(name: string): string {
     .join("");
 }
 
+/** A light contact label for the answer-forward card (no resolveContact dep). */
+function forwardContact(
+  path: ResponsibilityPath,
+): { name: string; sub?: string } | null {
+  const contact = path.primaryContact;
+  const memberName = contact.members?.[0]?.name?.trim();
+  if (memberName) {
+    return {
+      name: memberName,
+      ...(contact.position ? { sub: contact.position } : {}),
+    };
+  }
+  if (contact.contactType === "manual" && contact.role?.trim()) {
+    return { name: contact.role };
+  }
+  if (contact.contactType === "position" && contact.position?.trim()) {
+    return { name: contact.position };
+  }
+  return null;
+}
+
+const rowClass = (selected: boolean) =>
+  `flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+    selected ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
+  } border-paper-edge border-b last:border-b-0`;
+
+interface RowProps<T extends HubSearchResult> {
+  result: T;
+  optionId: string;
+  selected: boolean;
+  /** `select` from the parent — called only in the row's click handler. */
+  onSelect: (result: HubSearchResult) => void;
+  onHover: () => void;
+}
+
+/** Person result row — keeps `select` out of the parent's render path. */
+function MemberRow({
+  result,
+  optionId,
+  selected,
+  onSelect,
+  onHover,
+}: RowProps<HubMemberResult>) {
+  const person = result.member.members[0];
+  const name = person?.name ?? result.member.title;
+  return (
+    <button
+      type="button"
+      id={optionId}
+      role="option"
+      aria-selected={selected}
+      onClick={() => onSelect(result)}
+      onMouseEnter={onHover}
+      className={rowClass(selected)}
+    >
+      <span className="border-ink bg-cream-soft text-jersey-deep flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2">
+        {person?.imageUrl ? (
+          <Image
+            src={person.imageUrl}
+            alt=""
+            width={40}
+            height={40}
+            className="h-full w-full object-cover"
+          />
+        ) : name ? (
+          <span className="font-display text-sm font-black">
+            {initials(name)}
+          </span>
+        ) : (
+          <User size={18} aria-hidden />
+        )}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="font-display text-ink block truncate font-semibold">
+          {name}
+        </span>
+        <span className="text-ink-muted block truncate font-mono text-[11px] tracking-wide uppercase">
+          {result.member.title}
+          {result.extraPositions > 0 &&
+            ` · +${result.extraPositions} ${
+              result.extraPositions === 1 ? "functie" : "functies"
+            }`}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+/** Answer (responsibility) result row. */
+function AnswerRow({
+  result,
+  optionId,
+  selected,
+  onSelect,
+  onHover,
+}: RowProps<HubResponsibilityResult>) {
+  return (
+    <button
+      type="button"
+      id={optionId}
+      role="option"
+      aria-selected={selected}
+      onClick={() => onSelect(result)}
+      onMouseEnter={onHover}
+      className={`${rowClass(selected)} items-start`}
+    >
+      <span className="text-jersey-deep mt-0.5 flex-shrink-0">
+        <Question size={20} aria-hidden />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="text-jersey-deep mb-0.5 block font-mono text-[10px] font-semibold tracking-[0.08em] uppercase">
+          {getCategoryInfo(result.path.category).label}
+        </span>
+        <span className="text-ink block text-sm font-medium">
+          {result.path.question}
+        </span>
+        <span className="text-ink-muted mt-0.5 line-clamp-1 block text-xs">
+          {result.path.summary}
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export function HubSearch({
   members,
   responsibilityPaths,
@@ -71,18 +216,67 @@ export function HubSearch({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
 
-  // Debounce the query for ranking (200ms — matches the legacy search feel).
+  // Debounce the people (keyword) lane (200ms — matches the legacy feel).
   useEffect(() => {
     const id = setTimeout(() => setDebouncedValue(value), 200);
     return () => clearTimeout(id);
   }, [value]);
 
-  const results = useMemo(
-    () => searchHub(debouncedValue, members, responsibilityPaths, maxResults),
-    [debouncedValue, members, responsibilityPaths, maxResults],
+  // Answer lane — semantic; the hook debounces (300ms) + aborts in flight.
+  const {
+    results: semanticResults,
+    loading: semanticLoading,
+    error: semanticError,
+    executedQuery,
+    search: runSemantic,
+  } = useSemanticSearch({ type: "responsibility", limit: maxResults });
+  useEffect(() => {
+    runSemantic(value);
+  }, [value, runSemantic]);
+
+  const trimmed = value.trim();
+
+  const pathById = useMemo(
+    () => new Map(responsibilityPaths.map((p) => [p.id, p])),
+    [responsibilityPaths],
+  );
+  const memberResults = useMemo(
+    () => searchMembers(debouncedValue, members, maxResults),
+    [debouncedValue, members, maxResults],
+  );
+  const semanticAnswers = useMemo(
+    () => mapSemanticResults(semanticResults, pathById),
+    [semanticResults, pathById],
   );
 
-  const showResults = isFocused && value.trim().length > 0;
+  // On endpoint failure, fall back to keyword for the answer lane (PRD floor) —
+  // no answer-forward, no smart hint.
+  const usingFallback = semanticError !== null;
+  const answerForward =
+    !usingFallback &&
+    semanticAnswers[0] &&
+    semanticAnswers[0].score >= ANSWER_FORWARD_MIN_SCORE
+      ? semanticAnswers[0]
+      : null;
+
+  const rows: HubSearchResult[] = usingFallback
+    ? searchHub(debouncedValue, members, responsibilityPaths, maxResults)
+    : interleaveResults(
+        memberResults,
+        answerForward ? semanticAnswers.slice(1) : semanticAnswers,
+      );
+
+  // Shimmer only on the first resolve of a query (no settled answers yet); on
+  // refine the previous results stay visible (no flash).
+  const answersResolving =
+    !usingFallback && semanticLoading && executedQuery !== trimmed;
+  const showShimmer = answersResolving && semanticAnswers.length === 0;
+
+  const items: HubSearchResult[] = answerForward
+    ? [answerForward, ...rows]
+    : rows;
+  const navItems = showShimmer ? memberResults : items;
+  const showResults = isFocused && trimmed.length > 0;
 
   // Dismiss the dropdown on an outside click.
   useEffect(() => {
@@ -100,14 +294,12 @@ export function HubSearch({
   }, []);
 
   const select = (result: HubSearchResult) => {
-    // `organigram_search_used` — length only, no query content (PRD §6, matches
-    // the `responsibility_search` privacy convention).
+    // `organigram_search_used` — length only, no query content (PRD §6).
     trackEvent("organigram_search_used", { query_length: value.length });
 
     if (typeof window !== "undefined") {
       // A person scrolls to the directory (`#structuur`); an answer deep-links
-      // the finder accordion by its slug, which `<HulpFinder>` opens + scrolls
-      // to on `hashchange` (#2056).
+      // the finder accordion by its slug (#2056).
       window.location.hash =
         result.type === "member" ? "structuur" : result.path.id;
     }
@@ -126,16 +318,16 @@ export function HubSearch({
     switch (event.key) {
       case "ArrowDown":
         event.preventDefault();
-        setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+        setSelectedIndex((prev) => (prev < navItems.length - 1 ? prev + 1 : 0));
         break;
       case "ArrowUp":
         event.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : navItems.length - 1));
         break;
       case "Enter":
         event.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < results.length) {
-          select(results[selectedIndex]);
+        if (selectedIndex >= 0 && selectedIndex < navItems.length) {
+          select(navItems[selectedIndex]);
         }
         break;
       case "Escape":
@@ -151,12 +343,65 @@ export function HubSearch({
     ? "shadow-[4px_4px_0_0_var(--color-ink)]"
     : "shadow-[2px_2px_0_0_var(--color-ink)]";
   const iconSize = isHero ? 20 : 16;
-  // The hero input is wide enough for the dropdown to match it; the compact nav
-  // input is not — give its dropdown a comfortable reading width, right-aligned
-  // to the input and capped to the viewport on small screens.
   const dropdownWidth = isHero
     ? "w-full"
     : "right-0 w-[24rem] max-w-[calc(100vw-1.5rem)]";
+
+  // Built as a JSX value (not a render-phase function) so the React Compiler
+  // recognises the onClick as an event handler — `select` writes the hash + reads
+  // a ref, which a directly-invoked render function would flag.
+  const forwardContactInfo = answerForward
+    ? forwardContact(answerForward.path)
+    : null;
+  const forwardCard = answerForward ? (
+    <button
+      type="button"
+      id={`${listboxId}-opt-0`}
+      role="option"
+      aria-selected={selectedIndex === 0}
+      onClick={() => select(answerForward)}
+      onMouseEnter={() => setSelectedIndex(0)}
+      className={`border-ink block w-full border-b-2 px-3 py-3 text-left transition-colors ${
+        selectedIndex === 0 ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
+      }`}
+    >
+      <span className="text-jersey-deep block font-mono text-[10px] font-semibold tracking-[0.08em] uppercase">
+        {getCategoryInfo(answerForward.path.category).label}
+      </span>
+      <span className="font-display text-ink mt-1 block text-[15px] leading-tight font-semibold italic">
+        {answerForward.path.question}
+      </span>
+      <span className="text-ink-soft mt-1 line-clamp-2 block text-xs leading-relaxed">
+        {answerForward.path.summary}
+      </span>
+      <span className="mt-2 flex items-center justify-between gap-2">
+        {forwardContactInfo ? (
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="border-ink bg-cream-soft text-jersey-deep font-display flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] text-[9px] font-black">
+              {initials(forwardContactInfo.name)}
+            </span>
+            <span className="text-ink-muted truncate font-mono text-[9px] tracking-wide uppercase">
+              {forwardContactInfo.name}
+              {forwardContactInfo.sub ? ` · ${forwardContactInfo.sub}` : ""}
+            </span>
+          </span>
+        ) : (
+          <span />
+        )}
+        <span className="text-jersey-deep inline-flex flex-shrink-0 items-center gap-1 font-mono text-[10px] font-semibold tracking-[0.04em] uppercase">
+          Lees volledig antwoord
+          <ArrowRight size={12} aria-hidden />
+        </span>
+      </span>
+    </button>
+  ) : null;
+
+  const smartHint = (label: string) => (
+    <div className="border-paper-edge bg-cream-soft flex items-center gap-1.5 border-b-[1.5px] px-3 py-1.5 font-mono text-[10px] tracking-[0.07em] uppercase">
+      <Sparkle size={12} className="text-jersey-deep" aria-hidden />
+      <span className="text-jersey-deep">{label}</span>
+    </div>
+  );
 
   return (
     <div className={`relative ${className}`}>
@@ -185,7 +430,7 @@ export function HubSearch({
           aria-expanded={showResults}
           aria-controls={showResults ? listboxId : undefined}
           aria-activedescendant={
-            selectedIndex >= 0 && selectedIndex < results.length
+            selectedIndex >= 0 && selectedIndex < navItems.length
               ? `${listboxId}-opt-${selectedIndex}`
               : undefined
           }
@@ -209,7 +454,7 @@ export function HubSearch({
         )}
       </div>
 
-      {showResults && results.length > 0 && (
+      {showResults && (
         <div
           ref={dropdownRef}
           id={listboxId}
@@ -217,102 +462,70 @@ export function HubSearch({
           aria-label="Zoekresultaten"
           className={`border-ink bg-cream absolute z-50 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[4px_4px_0_0_var(--color-ink)]`}
         >
-          {results.map((result, index) => {
-            const isSelected = index === selectedIndex;
-            const rowClass = `flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
-              isSelected ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
-            } border-paper-edge border-b last:border-b-0`;
-
-            if (result.type === "member") {
-              const person = result.member.members[0];
-              const name = person?.name ?? result.member.title;
-              return (
-                <button
+          {showShimmer ? (
+            <>
+              {smartHint("Slim zoeken…")}
+              {memberResults.map((result, index) => (
+                <MemberRow
                   key={`member-${result.member.id}`}
-                  type="button"
-                  id={`${listboxId}-opt-${index}`}
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => select(result)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                  className={rowClass}
-                >
-                  <span className="border-ink bg-cream-soft text-jersey-deep flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2">
-                    {person?.imageUrl ? (
-                      <Image
-                        src={person.imageUrl}
-                        alt=""
-                        width={40}
-                        height={40}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : name ? (
-                      <span className="font-display text-sm font-black">
-                        {initials(name)}
-                      </span>
-                    ) : (
-                      <User size={18} aria-hidden />
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="font-display text-ink block truncate font-semibold">
-                      {name}
-                    </span>
-                    <span className="text-ink-muted block truncate font-mono text-[11px] tracking-wide uppercase">
-                      {result.member.title}
-                      {result.extraPositions > 0 &&
-                        ` · +${result.extraPositions} ${
-                          result.extraPositions === 1 ? "functie" : "functies"
-                        }`}
-                    </span>
-                  </span>
-                </button>
-              );
-            }
-
-            const category = getCategoryInfo(result.path.category);
-            return (
-              <button
-                key={`answer-${result.path.id}`}
-                type="button"
-                id={`${listboxId}-opt-${index}`}
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => select(result)}
-                onMouseEnter={() => setSelectedIndex(index)}
-                className={`${rowClass} items-start`}
-              >
-                <span className="text-jersey-deep mt-0.5 flex-shrink-0">
-                  <Question size={20} aria-hidden />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="text-jersey-deep mb-0.5 block font-mono text-[10px] font-semibold tracking-[0.08em] uppercase">
-                    {category.label}
-                  </span>
-                  <span className="text-ink block text-sm font-medium">
-                    {result.path.question}
-                  </span>
-                  <span className="text-ink-muted mt-0.5 line-clamp-1 block text-xs">
-                    {result.path.summary}
-                  </span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {showResults && results.length === 0 && (
-        <div
-          ref={dropdownRef}
-          className={`border-ink bg-cream absolute z-50 mt-2 ${dropdownWidth} border-2 px-4 py-6 text-center shadow-[4px_4px_0_0_var(--color-ink)]`}
-        >
-          <p className="text-ink text-sm">
-            Geen resultaten voor &ldquo;{value}&rdquo;
-          </p>
-          <p className="text-ink-muted mt-1 text-xs">
-            Probeer een andere zoekterm.
-          </p>
+                  result={result}
+                  optionId={`${listboxId}-opt-${index}`}
+                  selected={index === selectedIndex}
+                  onSelect={select}
+                  onHover={() => setSelectedIndex(index)}
+                />
+              ))}
+              <div aria-hidden className="px-3 py-2.5">
+                <div className="flex items-center gap-3">
+                  <div className="bg-cream-soft h-9 w-9 flex-shrink-0 animate-pulse rounded-full" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="bg-cream-soft h-2.5 w-1/3 animate-pulse" />
+                    <div className="bg-cream-soft h-2.5 w-3/4 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : items.length > 0 ? (
+            <>
+              {!usingFallback &&
+                smartHint(answerForward ? "Beste match" : "Slim gezocht")}
+              {forwardCard}
+              {rows.map((result, i) => {
+                const index = answerForward ? i + 1 : i;
+                const optionId = `${listboxId}-opt-${index}`;
+                const selected = index === selectedIndex;
+                const onHover = () => setSelectedIndex(index);
+                return result.type === "member" ? (
+                  <MemberRow
+                    key={`member-${result.member.id}`}
+                    result={result}
+                    optionId={optionId}
+                    selected={selected}
+                    onSelect={select}
+                    onHover={onHover}
+                  />
+                ) : (
+                  <AnswerRow
+                    key={`answer-${result.path.id}`}
+                    result={result}
+                    optionId={optionId}
+                    selected={selected}
+                    onSelect={select}
+                    onHover={onHover}
+                  />
+                );
+              })}
+            </>
+          ) : (
+            <div className="px-4 py-6 text-center">
+              <p className="text-ink text-sm">
+                Geen resultaten voor &ldquo;{value}&rdquo;
+              </p>
+              <p className="text-ink-muted mt-1 text-xs">
+                Probeer een andere zoekterm.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
