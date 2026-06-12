@@ -23,7 +23,7 @@ describe("OrganigramOverview", () => {
   it("opens the explorer at the primary node from the toolbar button", async () => {
     render(<OrganigramOverview nodes={explorerFixture} />);
     await userEvent.click(
-      screen.getByRole("button", { name: /Open verkenner/ }),
+      screen.getByRole("button", { name: /Blader door het organigram/ }),
     );
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByRole("treeitem")).toHaveTextContent(
@@ -33,7 +33,9 @@ describe("OrganigramOverview", () => {
 
   it("closes the explorer and returns focus to the trigger on Esc", async () => {
     render(<OrganigramOverview nodes={explorerFixture} />);
-    const launcher = screen.getByRole("button", { name: /Open verkenner/ });
+    const launcher = screen.getByRole("button", {
+      name: /Blader door het organigram/,
+    });
     await userEvent.click(launcher);
     await screen.findByRole("dialog");
     await userEvent.keyboard("{Escape}");

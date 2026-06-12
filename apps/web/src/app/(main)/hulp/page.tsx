@@ -115,19 +115,18 @@ export default async function HulpHubPage() {
             aria-label="Hulp"
             className="mt-12 scroll-mt-32 sm:mt-16"
           >
-            <MonoLabel variant="plain">De vraagvinder</MonoLabel>
             <EditorialHeading
               level={2}
               size="display-md"
-              emphasis={{ text: "helpen" }}
-              className="mt-2 mb-0"
+              emphasis={{ text: "vragen" }}
+              className="mb-0"
             >
-              Waarmee kunnen we je helpen
+              Veelgestelde vragen
             </EditorialHeading>
             <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
-              Zoek hierboven op een naam, functie of vraag — of kies hieronder
-              je rol en categorie. Elk antwoord geeft je de stappen én de juiste
-              contactpersoon.
+              Kies je rol of een categorie en blader door de antwoorden — elk
+              antwoord geeft je de stappen én de juiste contactpersoon. Of zoek
+              hierboven op een naam, functie of vraag.
             </p>
 
             {/* `<HulpFinder>` reads `?audience` via `useSearchParams`, so it must

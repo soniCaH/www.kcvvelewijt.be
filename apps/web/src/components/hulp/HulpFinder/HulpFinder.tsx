@@ -34,7 +34,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "@/lib/icons.redesign";
 import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
-import type { ResponsibilityPath, UserRole } from "@/types/responsibility";
+import {
+  HUB_AUDIENCE_FILTERS,
+  type ResponsibilityPath,
+  type UserRole,
+} from "@/types/responsibility";
 import {
   ACCENT_GLYPH_CLASS,
   CATEGORY_META,
@@ -43,13 +47,6 @@ import {
   type CategoryKey,
 } from "./categoryMeta";
 import { QuestionCard } from "./QuestionCard";
-
-const AUDIENCE_OPTIONS = [
-  { value: "ouder", label: "Ouder" },
-  { value: "speler", label: "Speler" },
-  { value: "trainer", label: "Trainer" },
-  { value: "supporter", label: "Supporter" },
-] as const;
 
 const AUDIENCE_PARAM = "audience";
 type CategoryFilter = "alles" | CategoryKey;
@@ -72,9 +69,11 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   const [category, setCategory] = useState<CategoryFilter>("alles");
   const [openId, setOpenId] = useState<string | null>(null);
   const pendingScroll = useRef<string | null>(null);
+  const finderRef = useRef<HTMLDivElement>(null);
+  const scrollToTopRef = useRef(false);
 
   const audienceParam = searchParams.get(AUDIENCE_PARAM);
-  const audience: UserRole | null = AUDIENCE_OPTIONS.some(
+  const audience: UserRole | null = HUB_AUDIENCE_FILTERS.some(
     (o) => o.value === audienceParam,
   )
     ? (audienceParam as UserRole)
@@ -143,6 +142,16 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
     }
   }, [openId, category]);
 
+  // "Alle N →" switches from the multi-category "Alles" preview to one category's
+  // full list, which makes the finder SHORTER — a fixed scroll position would
+  // then land lower on the page (in the Structuur section). Scroll the finder
+  // back to the top so the now-filtered list is what the user sees.
+  useEffect(() => {
+    if (!scrollToTopRef.current) return;
+    scrollToTopRef.current = false;
+    finderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [category]);
+
   const setAudience = useCallback(
     (next: UserRole | null) => {
       // Read the live URL (this is a client-only handler) so the panel's
@@ -159,6 +168,13 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
 
   const handleToggle = useCallback((id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
+  }, []);
+
+  // Switch to a single category via "Alle N →" and flag a scroll-to-top so the
+  // user lands on the filtered list, not stranded lower on the now-shorter page.
+  const handleSeeAll = useCallback((cat: CategoryKey) => {
+    setCategory(cat);
+    scrollToTopRef.current = true;
   }, []);
 
   // `nodeId` is threaded up from the card's already-resolved contact (no second
@@ -242,7 +258,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
             category={cat}
             paths={grouped[cat]}
             renderCard={renderCard}
-            onSeeAll={() => setCategory(cat)}
+            onSeeAll={() => handleSeeAll(cat)}
           />
         ))}
       </div>
@@ -250,13 +266,13 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   };
 
   return (
-    <div>
+    <div ref={finderRef} className="scroll-mt-32">
       {/* Audience filter — mirrors the hero chips; drives ?audience. */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-ink-muted font-mono text-[11px] tracking-[0.1em] uppercase">
           Ik ben
         </span>
-        {AUDIENCE_OPTIONS.map((option) => {
+        {HUB_AUDIENCE_FILTERS.map((option) => {
           const active = audience === option.value;
           return (
             <button

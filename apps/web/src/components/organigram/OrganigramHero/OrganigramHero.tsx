@@ -1,17 +1,8 @@
-import Link from "next/link";
 import { EditorialHeading, TapedCard } from "@/components/design-system";
 import { HubSearch } from "../HubSearch";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import type { StructureIndex } from "./structure-index";
-
-/** Audience chips — deep-link into Hulp (the per-audience filter lands in #2056). */
-const AUDIENCE_CHIPS: ReadonlyArray<{ label: string; audience: string }> = [
-  { label: "Ik ben ouder", audience: "ouder" },
-  { label: "Speler", audience: "speler" },
-  { label: "Trainer", audience: "trainer" },
-  { label: "Supporter", audience: "supporter" },
-];
 
 export interface OrganigramHeroProps {
   members: OrgChartNode[];
@@ -29,23 +20,24 @@ export interface OrganigramHeroProps {
  * jersey-deep-dark "roster spotlight" band (2px ink border · paper shadow ·
  * radial jersey wash) wearing the find-a-contact tool's search inside it.
  *
- * Left: warm kicker "De club" · `<EditorialHeading>` "Wie doet wat." (warm
- * period) · italic lead · the embedded `<HubSearch>` · audience chips → Hulp.
- * Right: a cream taped **structure artefact** — an abstract paper org-tree motif
- * (no names) + the derivable structure index (positions / people / departments).
+ * Left: warm kicker · help-forward `<EditorialHeading>` "Waarmee kunnen we je
+ * helpen?" (warm "?", 7o9 · 1) · italic lead · the embedded `<HubSearch>` (with
+ * an example placeholder that teaches natural-language, 7o9 · 4) · a "blader
+ * hieronder" bridge · audience chips → Hulp. Right: a cream taped **structure
+ * artefact** — an abstract paper org-tree motif + the derivable structure index.
  */
 export function OrganigramHero({
   members,
   responsibilityPaths,
   structureIndex,
-  kicker = "De club",
-  heading = "Wie doet wat",
-  lead = "Het bestuur, de jeugdwerking en de mensen erachter — typ een naam, functie of vraag, of blader hieronder door de structuur.",
+  kicker,
+  heading = "Waarmee kunnen we je helpen?",
+  lead = "Typ je vraag of een naam — wij wijzen je naar het antwoord én de juiste persoon.",
 }: OrganigramHeroProps) {
   return (
     <header
       id="hub-hero"
-      className="bg-jersey-deep-dark border-ink relative border-2 px-6 py-8 shadow-[6px_6px_0_0_var(--color-ink)] sm:px-9 sm:py-10"
+      className="bg-jersey-deep-dark border-ink relative border-2 px-6 py-6 shadow-[6px_6px_0_0_var(--color-ink)] sm:px-9 sm:py-7"
     >
       {/* Radial jersey wash — decorative. `inset-0` keeps it bounded to the
           band without an `overflow-hidden` that would clip the search dropdown. */}
@@ -58,50 +50,58 @@ export function OrganigramHero({
         }}
       />
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:gap-12">
-        {/* Left — voice + search + chips. */}
-        <div className="flex flex-col gap-5">
-          <span className="text-warm font-mono text-[12px] font-semibold tracking-[0.18em] uppercase">
-            {kicker}
-          </span>
+      <div className="relative grid items-center gap-6 lg:grid-cols-[1fr_0.82fr] lg:gap-10">
+        {/* Left — voice + search. The audience chips live in the finder only
+            (7o9) so they aren't repeated within one viewport. */}
+        <div className="flex flex-col gap-4">
+          {kicker && (
+            <span className="text-warm font-mono text-[12px] font-semibold tracking-[0.18em] uppercase">
+              {kicker}
+            </span>
+          )}
 
           <EditorialHeading
             level={1}
-            size="display-xl"
+            size="display-lg"
             tone="cream"
-            emphasis={{ text: ".", tone: "warm" }}
+            emphasis={{ text: "?", tone: "warm" }}
             className="mb-0"
           >
             {heading}
           </EditorialHeading>
 
-          <p className="text-cream/80 font-display max-w-[42ch] text-[17px] leading-[1.45] italic">
+          <p className="text-cream/80 font-display max-w-[44ch] text-[16px] leading-[1.4] italic">
             {lead}
           </p>
 
-          <HubSearch
-            members={members}
-            responsibilityPaths={responsibilityPaths}
-            variant="hero"
-            className="max-w-[480px]"
-          />
-
-          <ul className="flex flex-wrap gap-2">
-            {AUDIENCE_CHIPS.map((chip) => (
-              <li key={chip.audience}>
-                {/* Deep-links into the finder with the audience pre-filtered
-                    (#2056): `<HulpFinder>` reads `?audience` and the hash scrolls
-                    to the Hulp half. */}
-                <Link
-                  href={`/hulp?audience=${chip.audience}#hulp`}
-                  data-audience={chip.audience}
-                  className="border-cream/50 text-cream hover:bg-cream hover:text-jersey-deep-dark inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-colors duration-200"
-                >
-                  {chip.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col gap-2">
+            <HubSearch
+              members={members}
+              responsibilityPaths={responsibilityPaths}
+              variant="hero"
+              placeholder={'bv. "mijn kind is geblesseerd" of een naam…'}
+              className="max-w-[480px]"
+            />
+            {/* Browse bridge (7o9 · 4) — names the alternative to searching so a
+                user who'd rather browse knows the finder is right below. */}
+            <a
+              href="#hulp"
+              className="text-cream/70 hover:text-cream inline-flex w-fit items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] uppercase transition-colors"
+            >
+              {/* Inline SVG (not @/lib/icons.redesign) — this hero is a server
+                  component; Phosphor's createContext can't run server-side. */}
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden
+              >
+                <path d="M12 16 5 9h14z" />
+              </svg>
+              of blader hieronder door de categorieën
+            </a>
+          </div>
         </div>
 
         {/* Right — non-person structure artefact (counts only, no faces). */}
@@ -117,7 +117,7 @@ export function OrganigramHero({
               position: "left",
               verticalEdge: "top",
             }}
-            className="w-full max-w-[280px]"
+            className="w-full max-w-[340px]"
           >
             <p className="text-ink-muted mb-2 text-center font-mono text-[10px] tracking-[0.1em] uppercase">
               De structuur
@@ -125,8 +125,8 @@ export function OrganigramHero({
 
             <svg
               className="mx-auto block"
-              width="210"
-              height="112"
+              width="100%"
+              height="auto"
               viewBox="0 0 210 118"
               aria-hidden
             >

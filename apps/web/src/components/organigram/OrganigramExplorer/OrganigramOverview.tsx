@@ -8,7 +8,7 @@ import { VolledigOrganigram } from "./VolledigOrganigram";
 
 /**
  * Ties the on-page full-organigram chart to the fullscreen `<OrganigramExplorer>`:
- * clicking any node in the chart (or the "Open verkenner ⤢" button) opens the
+ * clicking any node in the chart (or the "Blader door het organigram ⤢" button) opens the
  * explorer focused on that node. Owns the explorer's open/focus state and points
  * `returnFocusRef` at whichever element triggered the open, so focus returns
  * there on close.

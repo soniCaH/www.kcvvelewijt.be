@@ -107,6 +107,23 @@ export const ROLE_OPTIONS: ReadonlyArray<{ value: UserRole; label: string }> = [
 ];
 
 /**
+ * Audience filters for the `/hulp` hub — the single source of truth shared by
+ * the hero deep-link chips (`<OrganigramHero>`) and the finder filter chips
+ * (`<HulpFinder>`), so the two can never drift (7o9). Ouder-first (the most
+ * common help-seeker); "Nieuw lid" gives non-members a door (they had none).
+ */
+export const HUB_AUDIENCE_FILTERS: ReadonlyArray<{
+  value: UserRole;
+  label: string;
+}> = [
+  { value: "ouder", label: "Ouder" },
+  { value: "speler", label: "Speler" },
+  { value: "trainer", label: "Trainer" },
+  { value: "supporter", label: "Supporter" },
+  { value: "niet-lid", label: "Nieuw lid" },
+];
+
+/**
  * Autocomplete suggestion
  */
 export interface AutocompleteSuggestion {
