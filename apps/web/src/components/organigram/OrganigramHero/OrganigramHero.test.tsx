@@ -19,10 +19,10 @@ function renderHero() {
 }
 
 describe("OrganigramHero", () => {
-  it("renders the heading as an h1 with a trailing period", () => {
+  it("renders the help-forward heading as an h1", () => {
     renderHero();
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent("Wie doet wat.");
+    expect(heading).toHaveTextContent("Waarmee kunnen we je helpen?");
   });
 
   it("renders the structure-index counts and labels", () => {
@@ -42,13 +42,20 @@ describe("OrganigramHero", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders four audience chips that deep-link into Hulp with the audience pre-filtered", () => {
+  it("does NOT repeat the audience chips (they live in the finder only, 7o9)", () => {
     renderHero();
-    const chips = screen.getAllByRole("link").filter((link) => {
+    const audienceLinks = screen.queryAllByRole("link").filter((link) => {
       const href = link.getAttribute("href") ?? "";
-      return href.startsWith("/hulp?audience=") && href.endsWith("#hulp");
+      return href.startsWith("/hulp?audience=");
     });
-    expect(chips).toHaveLength(4);
-    expect(screen.getByText("Ik ben ouder")).toBeInTheDocument();
+    expect(audienceLinks).toHaveLength(0);
+    expect(screen.queryByText("Ik ben")).not.toBeInTheDocument();
+  });
+
+  it("offers a browse bridge into the finder", () => {
+    renderHero();
+    expect(
+      screen.getByText(/blader hieronder door de categorieën/i),
+    ).toBeInTheDocument();
   });
 });

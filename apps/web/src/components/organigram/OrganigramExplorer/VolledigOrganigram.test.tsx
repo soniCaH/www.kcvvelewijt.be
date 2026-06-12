@@ -42,7 +42,7 @@ describe("VolledigOrganigram", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("calls onOpenExplorer when the 'Open verkenner' button is clicked", async () => {
+  it("calls onOpenExplorer when the 'Blader door het organigram' button is clicked", async () => {
     const onOpenExplorer = vi.fn();
     render(
       <VolledigOrganigram
@@ -51,7 +51,7 @@ describe("VolledigOrganigram", () => {
       />,
     );
     await userEvent.click(
-      screen.getByRole("button", { name: /Open verkenner/ }),
+      screen.getByRole("button", { name: /Blader door het organigram/ }),
     );
     expect(onOpenExplorer).toHaveBeenCalled();
   });

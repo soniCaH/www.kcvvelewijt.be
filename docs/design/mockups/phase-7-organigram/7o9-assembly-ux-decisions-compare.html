@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 7 · /hulp hub · 7o9 — Assembly UX decisions (4)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --alert: #b84a3a; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      code { font-family: var(--font-mono); font-size: .92em; }
+
+      .head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+      .head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.65; max-width: 98ch; }
+      .head b { color: var(--warm); } .head .em { color: var(--jersey); }
+
+      .toc { position: sticky; top: 0; z-index: 40; background: var(--jersey-deep-dark); border-bottom: 2px solid var(--ink); display: flex; flex-wrap: wrap; font-family: var(--font-mono); }
+      .toc a { color: var(--cream); text-decoration: none; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; padding: 10px 16px; border-right: 1px solid rgba(245,241,230,.18); }
+      .toc a:hover { background: var(--jersey-deep); } .toc a b { color: var(--warm); }
+
+      .dsec { border-top: 3px solid var(--ink); }
+      .dhead { background: var(--ink-soft); color: var(--cream); padding: 18px 28px; font-family: var(--font-mono); }
+      .dhead .n { color: var(--warm); font-size: 12px; letter-spacing: .14em; }
+      .dhead h2 { margin: 4px 0 6px; font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 24px; color: var(--cream); }
+      .dhead p { margin: 0; font-size: 12.5px; color: #c4c4c4; line-height: 1.6; max-width: 94ch; } .dhead b { color: var(--warm); }
+
+      .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; }
+      @media (max-width: 1000px){ .grid { grid-template-columns: 1fr; } }
+      .opt { border-right: 1px dashed var(--paper-edge); border-bottom: 1px dashed var(--paper-edge); padding: 0 0 18px; }
+      .obar { background: var(--jersey-deep); color: var(--cream); padding: 9px 16px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; border-bottom: 2px solid var(--ink); display: flex; align-items: center; gap: 9px; }
+      .obar.rec { background: var(--jersey-deep-dark); } .obar .tg { background: var(--warm); color: var(--ink); padding: 2px 8px; font-weight: 700; border: 1.5px solid var(--ink); } .obar.rec .tg { background: var(--jersey); }
+      .obar.cur .tg { background: var(--cream-deep); }
+      .stage { padding: 18px 16px 6px; }
+      .why { padding: 4px 16px 0; font-size: 12px; line-height: 1.55; color: var(--ink-soft); font-family: var(--font-mono); }
+      .why .pro { color: var(--jersey-deep); } .why .con { color: var(--brick); }
+
+      /* ---- shared mini-mockup bits ---- */
+      .hero { background: var(--jersey-deep-dark); border: 2px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); padding: 16px; position: relative; overflow: hidden; }
+      .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 80% at 72% 0%, rgba(74,207,82,.14), transparent 60%); pointer-events: none; }
+      .hero .k { font-family: var(--font-mono); font-size: 9px; color: var(--warm); text-transform: uppercase; letter-spacing: .16em; }
+      .hero h3 { font-family: var(--font-display); font-style: italic; font-weight: 900; color: var(--cream); font-size: 24px; line-height: 1.05; margin: 6px 0 0; }
+      .hero h3 .dot { color: var(--warm); }
+      .hero .lead { color: rgba(245,241,230,.8); font-family: var(--font-display); font-style: italic; font-size: 12px; line-height: 1.4; margin: 7px 0 0; max-width: 36ch; }
+      .hsearch { display: flex; align-items: center; gap: 8px; border: 2px solid var(--ink); background: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); padding: 8px 10px; margin: 10px 0 0; }
+      .hsearch svg { width: 15px; height: 15px; fill: var(--jersey-deep); } .hsearch .ph { font-size: 12px; color: var(--ink-muted); }
+      .achips { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0 0; }
+      .achip { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .05em; border: 1px solid rgba(245,241,230,.5); color: var(--cream); padding: 3px 8px; }
+      .qchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 9px 0 0; }
+      .qchip { font-family: var(--font-mono); font-size: 9.5px; text-transform: uppercase; letter-spacing: .03em; border: 1.5px solid var(--warm); color: var(--ink); background: var(--warm); padding: 4px 9px; font-weight: 700; }
+
+      .artecard { background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 9px; }
+      .artecard .at { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-muted); text-align: center; }
+      .artecard svg { display: block; margin: 4px auto; }
+      .artecard .stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; border-top: 1.5px solid var(--paper-edge); padding-top: 6px; margin-top: 4px; }
+      .artecard .stat { text-align: center; } .artecard .stat .v { font-family: var(--font-display); font-weight: 900; color: var(--jersey-deep); font-size: 18px; } .artecard .stat .l { font-family: var(--font-mono); font-size: 7px; text-transform: uppercase; color: var(--ink-muted); }
+      .veelcard { background: var(--cream-soft); border: 2px solid var(--ink); box-shadow: 3px 3px 0 0 var(--ink); padding: 10px; }
+      .veelcard .vt { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--jersey-deep); border-bottom: 1.5px solid var(--paper-edge); padding-bottom: 5px; margin-bottom: 6px; }
+      .veelcard .vq { display: flex; align-items: center; gap: 6px; font-family: var(--font-display); font-style: italic; font-size: 12.5px; padding: 4px 0; border-bottom: 1px dotted var(--paper-edge); }
+      .veelcard .vq:last-child { border-bottom: 0; } .veelcard .vq svg { width: 13px; height: 13px; fill: var(--jersey-deep); flex: none; }
+      .herогrid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 12px; position: relative; z-index: 1; }
+      @media (max-width: 560px){ .herогrid { grid-template-columns: 1fr; } }
+
+      /* structuur */
+      .seam { height: 14px; background: repeating-linear-gradient(45deg, var(--ink) 0 7px, transparent 7px 14px); opacity: .25; margin: 12px 0; }
+      .sec-label { font-family: var(--font-mono); font-size: 9px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .1em; }
+      .sec-h { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 18px; margin: 3px 0 8px; }
+      .sec-h .dot { color: var(--jersey-deep); }
+      .pgrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 7px; }
+      @media (max-width: 560px){ .pgrid { grid-template-columns: repeat(3,1fr); } }
+      .pcard { border: 1.5px solid var(--ink); background: var(--cream-soft); box-shadow: 2px 2px 0 0 var(--ink); padding: 7px 4px; text-align: center; }
+      .pcard .pa { width: 30px; height: 30px; border-radius: 9999px; border: 1.5px solid var(--ink); background: var(--cream); margin: 0 auto 4px; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 900; font-size: 9px; color: var(--jersey-deep); overflow: hidden; }
+      .pcard .pa img { width: 100%; height: 100%; object-fit: cover; filter: sepia(.06) saturate(.94); }
+      .pcard .pn { font-family: var(--font-display); font-size: 9px; line-height: 1.1; } .pcard .pf { font-family: var(--font-mono); font-size: 6.5px; text-transform: uppercase; color: var(--ink-muted); margin-top: 2px; }
+      .pcard.vacant { background: #fbf3df; border-style: dashed; } .pcard.vacant .pa { border-style: dashed; background: transparent; color: var(--warm); } .pcard.vacant .pn { color: var(--ink-muted); font-style: italic; }
+      .pcard.muted { opacity: .55; }
+      .vacrow { grid-column: 1 / -1; border: 1.5px dashed var(--ink); background: #fbf3df; box-shadow: 2px 2px 0 0 var(--ink); padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+      .vacrow .cta { border: 1.5px solid var(--ink); background: var(--warm); padding: 4px 8px; font-weight: 700; }
+      .explorerlink { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--jersey-deep); color: var(--jersey-deep); background: var(--cream); box-shadow: 2px 2px 0 0 var(--jersey-deep); padding: 6px 11px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+      .explorerbig { border: 2px solid var(--ink); background: var(--jersey-deep-dark); color: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); padding: 14px; text-align: center; }
+      .explorerbig .eb-h { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 15px; } .explorerbig .eb-s { font-family: var(--font-mono); font-size: 9px; color: rgba(245,241,230,.65); text-transform: uppercase; margin-top: 3px; }
+      .dirfilter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+      .dirfilter .ff { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; border: 1.5px solid var(--ink); background: var(--cream); box-shadow: 2px 2px 0 0 var(--ink); padding: 4px 9px; } .dirfilter .ff.on { background: var(--jersey-deep); color: var(--cream); }
+      .dirsearch { display: flex; align-items: center; gap: 7px; border: 1.5px solid var(--ink); background: var(--cream); box-shadow: 2px 2px 0 0 var(--ink); padding: 6px 9px; margin-bottom: 8px; max-width: 220px; } .dirsearch svg { width: 13px; height: 13px; fill: var(--ink-muted); } .dirsearch .ph { font-size: 11px; color: var(--ink-muted); }
+
+      /* search signposting */
+      .ssbox { max-width: 420px; }
+      .bridge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--jersey-deep); margin-top: 8px; }
+      .bridge svg { width: 12px; height: 12px; fill: var(--jersey-deep); }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 18px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 6px; font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); } .legend .pill { background: var(--jersey); border: 1.5px solid var(--ink); color: var(--ink); padding: 1px 7px; font-weight: 700; font-size: 10.5px; }
+      .endnote { background: var(--ink); color: #d9d9d9; padding: 18px 28px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; } .endnote b { color: var(--warm); }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <symbol id="i-search" viewBox="0 0 24 24"><path d="M10 2a8 8 0 105.3 14l5.4 5.4 1.4-1.4-5.4-5.4A8 8 0 0010 2zm0 2.4a5.6 5.6 0 110 11.2 5.6 5.6 0 010-11.2z"/></symbol>
+      <symbol id="i-q" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.3 4.4c2.2 0 3.9 1.4 3.9 3.4 0 1.5-.8 2.3-2 3-.9.5-1.2.9-1.2 1.7v.4h-2v-.6c0-1.4.6-2.2 1.7-2.8.9-.5 1.3-.9 1.3-1.6 0-.8-.7-1.4-1.7-1.4s-1.7.6-1.8 1.6h-2c.1-2 1.7-3.1 3.8-3.1zM11 16.5h2v2h-2z"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 11h12l-5-5 1.4-1.4L21 12l-8.6 7.4L11 18l5-5H4z"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24"><path d="M11 4v12l-5-5-1.4 1.4L12 21l7.4-8.6L18 11l-5 5V4z"/></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 4h7v2H6v5H4zM13 4h7v7h-2V6h-5zM4 13h2v5h5v2H4zM18 13h2v7h-7v-2h5z"/></symbol>
+    </svg>
+
+    <div class="head">
+      <h1>Phase 7 · /hulp hub · 7o9 — Final-assembly UX decisions</h1>
+      <p>
+        Four UX forks from the multi-pass review of the <b>assembled</b> hub. Each shows <b>several real options</b> (incl. "keep
+        current") so you can pick per question, one by one. Anchored on the <span class="em">sideline-parent on a phone</span>. The
+        clear fixes (a11y inert/focus, cross-link slugs, search→panel, no-results contact escape, scrollspy nav, centralise audience
+        list) are NOT here — they're not forks, they get implemented directly. Pick one option per decision below.
+      </p>
+    </div>
+
+    <nav class="toc">
+      <a href="#d1"><b>1 ·</b> Hero & top-taken</a>
+      <a href="#d2"><b>2 ·</b> Verkenner-prominentie</a>
+      <a href="#d3"><b>3 ·</b> Vacante kaarten</a>
+      <a href="#d4"><b>4 ·</b> Zoek-signposting</a>
+    </nav>
+
+    <!-- ============ DECISION 1 — HERO & TOP-TASKS ============ -->
+    <section class="dsec" id="d1">
+      <div class="dhead">
+        <div class="n">DECISION 1 / 4 · het eerste scherm</div>
+        <h2>Hero-stem + wat staat er bovenaan?</h2>
+        <p>De pagina is "Hulp-first" gelockt, maar de hero leidt met de <b>organigram-stem</b> "Wie doet wat." en een decoratieve
+        structuur-telkaart (posities/mensen/afdelingen) — info die een hulpzoeker niet nodig heeft. Opties variëren de <b>kop</b> en
+        wat de <b>rechterkaart</b> toont. Persona: ouder met een vraag, niet "ik wil de clubstructuur bekijken".</p>
+      </div>
+      <div class="grid">
+        <div class="opt">
+          <div class="obar cur"><span class="tg">A</span> Huidig — "Wie doet wat." + telkaart</div>
+          <div class="stage"><div class="hero"><div class="herогrid">
+            <div><div class="k">De club</div><h3>Wie doet wat<span class="dot">.</span></h3><div class="lead">Het bestuur, de jeugdwerking en de mensen erachter — typ een naam, functie of vraag.</div>
+              <div class="hsearch"><svg><use href="#i-search"/></svg><span class="ph">Zoek een naam, functie of vraag…</span></div>
+              <div class="achips"><span class="achip">Ik ben ouder</span><span class="achip">Speler</span><span class="achip">Trainer</span><span class="achip">Supporter</span></div></div>
+            <div class="artecard"><div class="at">De structuur</div><svg width="120" height="60" viewBox="0 0 120 60"><g fill="none" stroke="var(--ink)" stroke-width="2"><line x1="60" y1="12" x2="60" y2="22"/><line x1="28" y1="22" x2="92" y2="22"/><line x1="28" y1="22" x2="28" y2="30"/><line x1="60" y1="22" x2="60" y2="30"/><line x1="92" y1="22" x2="92" y2="30"/></g><rect x="48" y="4" width="24" height="10" fill="var(--jersey-deep)" stroke="var(--ink)" stroke-width="2"/><rect x="16" y="30" width="24" height="10" fill="var(--cream)" stroke="var(--ink)" stroke-width="2"/><rect x="48" y="30" width="24" height="10" fill="var(--cream)" stroke="var(--ink)" stroke-width="2"/><rect x="80" y="30" width="24" height="10" fill="var(--warm)" stroke="var(--ink)" stroke-width="2"/></svg>
+              <div class="stats"><div class="stat"><div class="v">23</div><div class="l">posities</div></div><div class="stat"><div class="v">31</div><div class="l">mensen</div></div><div class="stat"><div class="v">3</div><div class="l">afdelingen</div></div></div></div>
+          </div></div></div>
+          <div class="why"><span class="con">Tegen:</span> kop = organigram-stem op een hulp-pagina; telkaart dient clubtrots, niet de taak; op mobiel duwt de telkaart de zoekbalk naar onder.</div>
+        </div>
+
+        <div class="opt">
+          <div class="obar"><span class="tg">B</span> Hulp-kop + telkaart blijft</div>
+          <div class="stage"><div class="hero"><div class="herогrid">
+            <div><div class="k">Hulp · vind het juiste</div><h3>Waarmee kunnen we je helpen<span class="dot">?</span></h3><div class="lead">Typ je vraag of een naam — wij wijzen je de weg naar het antwoord én de juiste persoon.</div>
+              <div class="hsearch"><svg><use href="#i-search"/></svg><span class="ph">Zoek een naam, functie of vraag…</span></div>
+              <div class="achips"><span class="achip">Ik ben ouder</span><span class="achip">Speler</span><span class="achip">Trainer</span><span class="achip">Supporter</span></div></div>
+            <div class="artecard"><div class="at">De structuur</div><svg width="120" height="60" viewBox="0 0 120 60"><g fill="none" stroke="var(--ink)" stroke-width="2"><line x1="60" y1="12" x2="60" y2="22"/><line x1="28" y1="22" x2="92" y2="22"/><line x1="28" y1="22" x2="28" y2="30"/><line x1="60" y1="22" x2="60" y2="30"/><line x1="92" y1="22" x2="92" y2="30"/></g><rect x="48" y="4" width="24" height="10" fill="var(--jersey-deep)" stroke="var(--ink)" stroke-width="2"/><rect x="16" y="30" width="24" height="10" fill="var(--cream)" stroke="var(--ink)" stroke-width="2"/><rect x="48" y="30" width="24" height="10" fill="var(--cream)" stroke="var(--ink)" stroke-width="2"/><rect x="80" y="30" width="24" height="10" fill="var(--warm)" stroke="var(--ink)" stroke-width="2"/></svg>
+              <div class="stats"><div class="stat"><div class="v">23</div><div class="l">posities</div></div><div class="stat"><div class="v">31</div><div class="l">mensen</div></div><div class="stat"><div class="v">3</div><div class="l">afdelingen</div></div></div></div>
+          </div></div></div>
+          <div class="why"><span class="pro">Voor:</span> kop matcht eindelijk de "Hulp-first"-lock. <span class="con">Tegen:</span> de telkaart blijft taakloos; minimale verandering.</div>
+        </div>
+
+        <div class="opt">
+          <div class="obar rec"><span class="tg">C ★</span> Hulp-kop + "Veelgevraagd"-kaart (top-taken)</div>
+          <div class="stage"><div class="hero"><div class="herогrid">
+            <div><div class="k">Hulp · vind het juiste</div><h3>Waarmee kunnen we je helpen<span class="dot">?</span></h3><div class="lead">Typ je vraag of een naam — of kies meteen een veelgestelde vraag.</div>
+              <div class="hsearch"><svg><use href="#i-search"/></svg><span class="ph">bv. "mijn kind is geblesseerd"…</span></div>
+              <div class="achips"><span class="achip">Ik ben ouder</span><span class="achip">Speler</span><span class="achip">Trainer</span><span class="achip">Nieuw lid</span></div></div>
+            <div class="veelcard"><div class="vt">Veelgevraagd</div>
+              <div class="vq"><svg><use href="#i-q"/></svg> Mijn kind inschrijven</div>
+              <div class="vq"><svg><use href="#i-q"/></svg> Geblesseerd — wat nu?</div>
+              <div class="vq"><svg><use href="#i-q"/></svg> Transfer aanvragen</div>
+              <div class="vq"><svg><use href="#i-q"/></svg> Sponsor worden</div></div>
+          </div></div></div>
+          <div class="why"><span class="pro">Voor:</span> NHS/Monday "top-taken"-patroon — de 3-4 échte vragen meteen tikbaar; de telkaart wordt nuttig. <span class="con">Tegen:</span> welke 4 "veelgevraagd" zijn = redactionele keuze (geen populariteitsdata; declaratie-volgorde).</div>
+        </div>
+
+        <div class="opt">
+          <div class="obar"><span class="tg">D</span> Hulp-kop + top-vraag-chips ONDER de zoekbalk</div>
+          <div class="stage"><div class="hero"><div style="position:relative;z-index:1">
+            <div class="k">Hulp · vind het juiste</div><h3>Waarmee kunnen we je helpen<span class="dot">?</span></h3>
+            <div class="hsearch" style="max-width:380px"><svg><use href="#i-search"/></svg><span class="ph">bv. "mijn kind is geblesseerd"…</span></div>
+            <div class="qchips"><span class="qchip">Inschrijven</span><span class="qchip">Blessure</span><span class="qchip">Transfer</span><span class="qchip">Sponsor</span></div>
+            <div class="achips"><span class="achip">Ik ben ouder</span><span class="achip">Speler</span><span class="achip">Trainer</span><span class="achip">Nieuw lid</span></div>
+          </div></div></div>
+          <div class="why"><span class="pro">Voor:</span> zoekbalk + top-vragen = één blok (geen rechterkaart); telkaart valt weg; mobiel-vriendelijkst (alles in één kolom). <span class="con">Tegen:</span> hero verliest de visuele "paper artefact" rechts → minder fanzine-rijk.</div>
+        </div>
+      </div>
+      <div class="legend"><h3>Beslissing 1</h3><p><span class="pill">C ★ voorstel</span> — hulp-kop + een "Veelgevraagd"-kaart vervangt de taakloze telkaart door de 3-4 échte top-vragen. Maar <b>A/B/D zijn echte keuzes</b>: A = niets wijzigen; B = enkel de kop hulp-forward; D = top-vragen als chips onder de zoekbalk (geen rechterkaart, mobiel-puurst). Kies de kop-stem <b>én</b> de rechter-/onderzone.</p></div>
+    </section>
+
+    <!-- ============ DECISION 2 — VERKENNER PROMINENCE ============ -->
+    <section class="dsec" id="d2">
+      <div class="dhead">
+        <div class="n">DECISION 2 / 4 · de Structuur-helft</div>
+        <h2>Hoe prominent is de fullscreen-verkenner?</h2>
+        <p>Org-chart-onderzoek + de competitieve review: een niet-technische ouder op mobiel wil "naam + nummer", niet een node-graph
+        pannen. Nu staat de verkenner als een grote co-sectie ("Volledig overzicht — De hele structuur in beeld"). Opties variëren
+        hoe prominent de verkenner is en of de directory een eigen filter/zoek krijgt.</p>
+      </div>
+      <div class="grid">
+        <div class="opt">
+          <div class="obar cur"><span class="tg">A</span> Huidig — verkenner als grote co-sectie</div>
+          <div class="stage">
+            <div class="sec-label">De structuur</div><div class="sec-h">Het organigram — <span class="dot">wie-is-wie</span></div>
+            <div class="pgrid"><div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div><div class="pcard"><div class="pa">KV</div><div class="pn">Kevin <i>V.R.</i></div><div class="pf">Secretaris</div></div><div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div><div class="pcard"><div class="pa">MK</div><div class="pn">Matthias <i>K.</i></div><div class="pf">Jeugdvz</div></div></div>
+            <div style="margin-top:14px"></div><div class="sec-label">Volledig overzicht</div><div class="sec-h" style="font-size:15px">De hele structuur in <span class="dot">beeld</span></div>
+            <div class="explorerbig"><div class="eb-h">▦ Interactief organigram</div><div class="eb-s">klik een node · pan · zoom · fullscreen verkenner</div></div>
+          </div>
+          <div class="why"><span class="con">Tegen:</span> de verkenner krijgt evenveel gewicht als de directory; voor de meeste ouders overkill; co-equal "sectie" suggereert dat je hem moet gebruiken.</div>
+        </div>
+
+        <div class="opt">
+          <div class="obar rec"><span class="tg">B ★</span> Directory-first + verkenner als stille link</div>
+          <div class="stage">
+            <div class="sec-label">De structuur</div><div class="sec-h">Wie-is-<span class="dot">wie</span></div>
+            <div class="pgrid"><div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div><div class="pcard"><div class="pa">KV</div><div class="pn">Kevin <i>V.R.</i></div><div class="pf">Secretaris</div></div><div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div><div class="pcard"><div class="pa">MK</div><div class="pn">Matthias <i>K.</i></div><div class="pf">Jeugdvz</div></div></div>
+            <div class="pgrid" style="margin-top:7px"><div class="pcard"><div class="pa">BV</div><div class="pn">Bram <i>V.Z.</i></div><div class="pf">Jeugdsecr.</div></div><div class="pcard"><div class="pa">JV</div><div class="pn">Jurgen <i>V.</i></div><div class="pf">Scheids.</div></div><div class="pcard"><div class="pa">DT</div><div class="pn">Dennis <i>T.</i></div><div class="pf">Materiaal</div></div><div class="pcard"><div class="pa">SS</div><div class="pn">Sven <i>D.S.</i></div><div class="pf">Kantine</div></div></div>
+            <div style="margin-top:12px"><span class="explorerlink"><svg width="13" height="13"><use href="#i-expand"/></svg> Bekijk het volledige organigram →</span></div>
+          </div>
+          <div class="why"><span class="pro">Voor:</span> directory (naam+functie+nummer) is het hoofdpad; de verkenner blijft, maar als bewuste secundaire keuze voor wie de hele boom wil. Matcht org-chart best-practice. <span class="con">Tegen:</span> de verkenner (gebouwd in #2054) wordt minder zichtbaar — minder "wow" op de pagina.</div>
+        </div>
+
+        <div class="opt">
+          <div class="obar"><span class="tg">C</span> Directory + eigen filter/zoek + stille verkenner-link</div>
+          <div class="stage">
+            <div class="sec-label">De structuur</div><div class="sec-h">Wie-is-<span class="dot">wie</span></div>
+            <div class="dirsearch"><svg><use href="#i-search"/></svg><span class="ph">Zoek in de structuur…</span></div>
+            <div class="dirfilter"><span class="ff on">Alle</span><span class="ff">Hoofdbestuur</span><span class="ff">Jeugdbestuur</span><span class="ff">Algemeen</span></div>
+            <div class="pgrid"><div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div><div class="pcard"><div class="pa">KV</div><div class="pn">Kevin <i>V.R.</i></div><div class="pf">Secretaris</div></div><div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div><div class="pcard"><div class="pa">MK</div><div class="pn">Matthias <i>K.</i></div><div class="pf">Jeugdvz</div></div></div>
+            <div style="margin-top:12px"><span class="explorerlink"><svg width="13" height="13"><use href="#i-expand"/></svg> Volledig organigram →</span></div>
+          </div>
+          <div class="why"><span class="pro">Voor:</span> "zoek/filter binnen de structuur" is de hoogst-gewaardeerde org-chart-feature; de unified hero-zoek vindt al personen, maar een lokale afdeling-filter helpt bladeren. <span class="con">Tegen:</span> tweede zoekveld op de pagina (naast de hero-zoek) — risico op "welke gebruik ik?" (de review waarschuwde hiervoor). Meer bouwwerk.</div>
+        </div>
+
+        <div class="opt">
+          <div class="obar"><span class="tg">D</span> Verkenner volledig schrappen (alleen directory)</div>
+          <div class="stage">
+            <div class="sec-label">De structuur</div><div class="sec-h">Wie-is-<span class="dot">wie</span></div>
+            <div class="dirfilter"><span class="ff on">Alle</span><span class="ff">Hoofdbestuur</span><span class="ff">Jeugdbestuur</span><span class="ff">Algemeen</span></div>
+            <div class="pgrid"><div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div><div class="pcard"><div class="pa">KV</div><div class="pn">Kevin <i>V.R.</i></div><div class="pf">Secretaris</div></div><div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div><div class="pcard"><div class="pa">MK</div><div class="pn">Matthias <i>K.</i></div><div class="pf">Jeugdvz</div></div></div>
+            <div class="why" style="padding:8px 0 0"><span class="con">Geen verkenner.</span> Enkel de platte, filterbare directory + het persoons-paneel.</div>
+          </div>
+          <div class="why"><span class="pro">Voor:</span> simpelst voor de persona; geen node-graph. <span class="con">Tegen:</span> gooit een gebouwde, gelockte feature (#2054, "2-D spotlight") weg — waarschijnlijk te ver; de owner vond het diagram-idee net waardevol.</div>
+        </div>
+      </div>
+      <div class="legend"><h3>Beslissing 2</h3><p><span class="pill">B ★ voorstel</span> — directory-first, verkenner blijft als stille "volledig organigram →"-link. <b>C</b> voegt een filter/zoek-in-de-structuur toe (krachtig, maar tweede zoekveld). <b>A</b> = niets wijzigen (verkenner co-equal). <b>D</b> = verkenner schrappen (wellicht te radicaal). Kies de prominentie.</p></div>
+    </section>
+
+    <!-- ============ DECISION 3 — VACANT CARDS ============ -->
+    <section class="dsec" id="d3">
+      <div class="dhead">
+        <div class="n">DECISION 3 / 4 · de directory</div>
+        <h2>Vacante ("deze plek is vrij") kaarten — hoe tonen?</h2>
+        <p>Nu staan lege/recruit-kaarten ("deze plek is vrij · Iets voor jou? →") op volle grootte tussen de echte personen. Voor wie
+        een contact zoekt is dat ruis; voor de club is het waardevolle werving. Opties balanceren beide.</p>
+      </div>
+      <div class="grid">
+        <div class="opt">
+          <div class="obar cur"><span class="tg">A</span> Huidig — volle peer-kaarten ertussen</div>
+          <div class="stage"><div class="pgrid">
+            <div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div>
+            <div class="pcard vacant"><div class="pa">+</div><div class="pn">deze plek is vrij</div><div class="pf">iets voor jou? →</div></div>
+            <div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div>
+            <div class="pcard vacant"><div class="pa">+</div><div class="pn">deze plek is vrij</div><div class="pf">iets voor jou? →</div></div>
+          </div></div>
+          <div class="why"><span class="con">Tegen:</span> bij het zoeken naar een persoon moet je de werf-kaarten wegscannen; ze krijgen even veel gewicht als echte mensen.</div>
+        </div>
+        <div class="opt">
+          <div class="obar rec"><span class="tg">B ★</span> Eén "N vacatures"-rij per afdeling (onderaan)</div>
+          <div class="stage"><div class="pgrid">
+            <div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div>
+            <div class="pcard"><div class="pa">KV</div><div class="pn">Kevin <i>V.R.</i></div><div class="pf">Secretaris</div></div>
+            <div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div>
+            <div class="pcard"><div class="pa">MK</div><div class="pn">Matthias <i>K.</i></div><div class="pf">Jeugdvz</div></div>
+            <div class="vacrow"><span>2 plekken vrij in Hoofdbestuur</span><span class="cta">Iets voor jou? →</span></div>
+          </div></div>
+          <div class="why"><span class="pro">Voor:</span> echte mensen eerst, werving behouden maar gebundeld onderaan de afdeling; nul fabricatie. <span class="con">Tegen:</span> individuele vacante functietitels verdwijnen (alleen een telling).</div>
+        </div>
+        <div class="opt">
+          <div class="obar"><span class="tg">C</span> Gedimd + achteraan gesorteerd</div>
+          <div class="stage"><div class="pgrid">
+            <div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div>
+            <div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div>
+            <div class="pcard vacant muted"><div class="pa">+</div><div class="pn">vrij: Sponsoring</div><div class="pf">iets voor jou? →</div></div>
+            <div class="pcard vacant muted"><div class="pa">+</div><div class="pn">vrij: Webmaster</div><div class="pf">iets voor jou? →</div></div>
+          </div></div>
+          <div class="why"><span class="pro">Voor:</span> behoudt de functietitel per vacature, maar visueel gedempt en achteraan → minder scan-ruis. <span class="con">Tegen:</span> nog steeds losse kaarten; "gedimd" kan ook "uitgeschakeld" lijken.</div>
+        </div>
+        <div class="opt">
+          <div class="obar"><span class="tg">D</span> Verbergen in de directory (enkel via "Word vrijwilliger")</div>
+          <div class="stage"><div class="pgrid">
+            <div class="pcard"><div class="pa">RB</div><div class="pn">Rudy <i>B.</i></div><div class="pf">Voorzitter</div></div>
+            <div class="pcard"><div class="pa">KV</div><div class="pn">Kevin <i>V.R.</i></div><div class="pf">Secretaris</div></div>
+            <div class="pcard"><div class="pa">IT</div><div class="pn">Ilona <i>T.</i></div><div class="pf">Penningm.</div></div>
+            <div class="pcard"><div class="pa">MK</div><div class="pn">Matthias <i>K.</i></div><div class="pf">Jeugdvz</div></div>
+          </div><div class="vacrow" style="margin-top:10px"><span>Zin om mee te helpen? Er zijn open plekken.</span><span class="cta">Word vrijwilliger →</span></div></div>
+          <div class="why"><span class="pro">Voor:</span> directory = puur "vind een persoon"; werving krijgt één duidelijke CTA los van het zoeken. <span class="con">Tegen:</span> de "deze functie is vacant"-transparantie (per positie) verdwijnt uit de structuur.</div>
+        </div>
+      </div>
+      <div class="legend"><h3>Beslissing 3</h3><p><span class="pill">B ★ voorstel</span> — gebundelde "N vacatures"-rij per afdeling. <b>C</b> behoudt per-vacature titels maar gedimd; <b>D</b> haalt werving uit de directory naar één CTA; <b>A</b> = niets wijzigen. Trade-off = werving-zichtbaarheid vs. zoek-helderheid.</p></div>
+    </section>
+
+    <!-- ============ DECISION 4 — SEARCH SIGNPOSTING ============ -->
+    <section class="dsec" id="d4">
+      <div class="dhead">
+        <div class="n">DECISION 4 / 4 · de zoekbalk</div>
+        <h2>Hoe leren we mensen de (semantische) zoek + bladeren?</h2>
+        <p>De zoek begrijpt natuurlijke taal ("mijn kind is geblesseerd"), maar de generieke placeholder leert dat niet. En een
+        ouder weet niet of die een <b>naam</b> of een <b>probleem</b> moet typen, of gewoon kan bladeren. Opties variëren de
+        placeholder en de "of blader hieronder"-brug naar de finder.</p>
+      </div>
+      <div class="grid">
+        <div class="opt">
+          <div class="obar cur"><span class="tg">A</span> Huidig — generieke placeholder, geen brug</div>
+          <div class="stage"><div class="ssbox"><div class="hsearch" style="box-shadow:3px 3px 0 0 var(--ink)"><svg><use href="#i-search"/></svg><span class="ph">Zoek een naam, functie of vraag…</span></div></div></div>
+          <div class="why"><span class="con">Tegen:</span> leert de natuurlijke-taal-kracht niet; lange placeholder kapt af op mobiel; geen signaal dat je ook kan bladeren.</div>
+        </div>
+        <div class="opt">
+          <div class="obar"><span class="tg">B</span> Voorbeeld-placeholder (roteert)</div>
+          <div class="stage"><div class="ssbox"><div class="hsearch" style="box-shadow:3px 3px 0 0 var(--ink)"><svg><use href="#i-search"/></svg><span class="ph"><i>bv. "mijn kind is geblesseerd"</i></span></div></div></div>
+          <div class="why"><span class="pro">Voor:</span> leert de gebruiker dat hij gewoon zijn vraag kan typen → meer semantisch gebruik. <span class="con">Tegen:</span> roterende placeholder kan afleiden; moet kort blijven voor mobiel.</div>
+        </div>
+        <div class="opt">
+          <div class="obar"><span class="tg">C</span> Generiek + "of blader hieronder ↓"-brug</div>
+          <div class="stage"><div class="ssbox"><div class="hsearch" style="box-shadow:3px 3px 0 0 var(--ink)"><svg><use href="#i-search"/></svg><span class="ph">Zoek een naam, functie of vraag…</span></div><span class="bridge"><svg><use href="#i-down"/></svg> of blader hieronder door de categorieën</span></div></div>
+          <div class="why"><span class="pro">Voor:</span> expliciet "zoeken OF bladeren" — neemt de "welke gebruik ik?"-twijfel weg. <span class="con">Tegen:</span> placeholder leert de natuurlijke-taal nog niet.</div>
+        </div>
+        <div class="opt">
+          <div class="obar rec"><span class="tg">D ★</span> Voorbeeld-placeholder + brug (B+C)</div>
+          <div class="stage"><div class="ssbox"><div class="hsearch" style="box-shadow:3px 3px 0 0 var(--ink)"><svg><use href="#i-search"/></svg><span class="ph"><i>bv. "mijn kind is geblesseerd"</i></span></div><span class="bridge"><svg><use href="#i-down"/></svg> of blader hieronder door de categorieën</span></div></div>
+          <div class="why"><span class="pro">Voor:</span> leert én de natuurlijke-taal-zoek én het bladeren-alternatief. <span class="con">Tegen:</span> iets meer chrome rond de zoekbalk.</div>
+        </div>
+      </div>
+      <div class="legend"><h3>Beslissing 4</h3><p><span class="pill">D ★ voorstel</span> — voorbeeld-placeholder + "of blader hieronder ↓". <b>B</b> = enkel placeholder; <b>C</b> = enkel de brug; <b>A</b> = niets. (NB: als DQ1 = C of D, staat het voorbeeld al in de hero-placeholder — dan dekt dit vooral de "blader"-brug.)</p></div>
+    </section>
+
+    <div class="endnote">
+      <b>Antwoord per beslissing</b> — bv. "1=C, 2=B, 3=B, 4=D" — of zoom in op één en we drillen verder. Daarna: implementeren + Storybook-checkpoint per stuk, de heldere fixes (a11y, cross-links, scrollspy, search→paneel) erbij, en de analytics-umbrella (#1974) bijwerken.
+    </div>
+  </body>
+</html>

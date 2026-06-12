@@ -5,6 +5,7 @@ import {
   getMembersWithResponsibilities,
   getCategoryInfo,
   buildResponsibilityUrl,
+  responsibilityPathsToFaqEntries,
 } from "./responsibility-utils";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
@@ -192,6 +193,35 @@ describe("responsibility-utils", () => {
       });
       expect(result).toContain("view=responsibilities");
       expect(result).toContain("responsibility=path-1");
+    });
+  });
+
+  describe("responsibilityPathsToFaqEntries", () => {
+    it("pairs each question with its summary (no steps)", () => {
+      const [entry] = responsibilityPathsToFaqEntries([mockPaths[0]]);
+      expect(entry).toEqual({
+        question: "test question 1",
+        answer: "Test summary 1",
+      });
+    });
+
+    it("appends step descriptions to the summary as one paragraph", () => {
+      const [entry] = responsibilityPathsToFaqEntries([mockPaths[1]]);
+      expect(entry.answer).toBe("Test summary 2 Step 1");
+    });
+
+    it("drops paths whose question or answer would be empty", () => {
+      const blank: ResponsibilityPath = {
+        ...mockPaths[0],
+        question: "   ",
+        summary: "",
+        steps: [],
+      };
+      expect(responsibilityPathsToFaqEntries([blank])).toEqual([]);
+    });
+
+    it("returns an empty array for no paths", () => {
+      expect(responsibilityPathsToFaqEntries([])).toEqual([]);
     });
   });
 });

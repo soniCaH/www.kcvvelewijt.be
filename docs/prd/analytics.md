@@ -72,13 +72,15 @@ All events use `snake_case`. Parameters follow GA4 conventions where possible.
 
 ### Organigram (Priority 3 — "how is the org chart used?")
 
-| Event Name                       | Trigger                        | Parameters                                                                                   |
-| -------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
-| `organigram_view_changed`        | User switches tab              | `view` ("cards" \| "chart" \| "responsibilities"), `source` ("tab" \| "swipe" \| "keyboard") |
-| `organigram_member_clicked`      | User clicks a member           | `member_id`, `view`                                                                          |
-| `organigram_search_used`         | User searches in chart         | `query_text`                                                                                 |
-| `organigram_department_filtered` | User changes department filter | `department`                                                                                 |
-| `organigram_export_png`          | User exports chart as PNG      | —                                                                                            |
+| Event Name                         | Trigger                                                 | Parameters                                                                                   |
+| ---------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `hub_view`                         | Unified `/hulp` hub page mount                          | —                                                                                            |
+| `organigram_view_changed`          | User switches tab                                       | `view` ("cards" \| "chart" \| "responsibilities"), `source` ("tab" \| "swipe" \| "keyboard") |
+| `organigram_member_clicked`        | User clicks a member                                    | `member_id`, `view`                                                                          |
+| `organigram_search_used`           | User searches in chart                                  | `query_text`                                                                                 |
+| `organigram_search_contact_escape` | User clicks "Contacteer de club" on a no-results search | `query_length`                                                                               |
+| `organigram_department_filtered`   | User changes department filter                          | `department`                                                                                 |
+| `organigram_export_png`            | User exports chart as PNG                               | —                                                                                            |
 
 ### Article detail (Priority 4 — "what do readers do on article pages?")
 

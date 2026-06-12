@@ -97,7 +97,7 @@ export const NavTrainingen: Story = {
 export const NavNoTag: Story = {
   args: {
     variant: "nav",
-    href: "/club/organigram",
+    href: "/hulp#structuur",
     tag: "",
     title: "Organigram",
     arrowText: "Bekijk",

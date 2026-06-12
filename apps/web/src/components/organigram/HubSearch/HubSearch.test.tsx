@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { HubSearch } from "./HubSearch";
 import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
@@ -27,6 +28,11 @@ const mockSemantic: {
 };
 vi.mock("@/hooks/useSemanticSearch", () => ({
   useSemanticSearch: () => mockSemantic,
+}));
+
+let mockPanel: { openMember: ReturnType<typeof vi.fn> } | null = null;
+vi.mock("@/components/organigram/HubMemberPanel", () => ({
+  useHubMemberPanel: () => mockPanel,
 }));
 
 function setSemantic(
@@ -69,12 +75,26 @@ describe("HubSearch", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.location.hash = "";
+    mockPanel = null;
     setSemantic({
       results: [],
       loading: false,
       error: null,
       executedQuery: "",
     });
+  });
+
+  it("opens the member panel when a person is chosen and a provider is present (F5)", async () => {
+    const openMember = vi.fn();
+    mockPanel = { openMember };
+    renderSearch();
+    typeQuery("in");
+    fireEvent.click(await screen.findByText("Inge De Wit"));
+    expect(openMember).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "secretaris" }),
+      expect.objectContaining({ view: "cards" }),
+    );
+    expect(window.location.hash).toBe("#structuur");
   });
 
   it("renders the search input", () => {
@@ -146,6 +166,54 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
+  it("drops a stale keyboard highlight when the result set recomposes (shimmer→answer-forward)", async () => {
+    // Shimmer first: a person query is highlighted while the answer lane resolves.
+    setSemantic({ results: [], executedQuery: "" });
+    const view = renderSearch();
+    const input = typeQuery("in");
+    await screen.findByText(/Slim zoeken/i);
+    fireEvent.keyDown(input, { key: "ArrowDown" }); // highlight the first member
+
+    // The answer lane settles with a strong answer-forward → navItems recompose
+    // (member at index 0 is now the answer card). The highlight must be dropped.
+    setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "in" });
+    view.rerender(
+      <HubSearch
+        members={HUB_SEARCH_MEMBERS}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+      />,
+    );
+    await screen.findByText(/Lees volledig antwoord/i);
+
+    // Enter now selects nothing (no stale index → no wrong-item navigation).
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(window.location.hash).toBe("");
+  });
+
+  it("drops a stale highlight on a settled→settled recompose (answer-forward changes, no shimmer)", async () => {
+    // Already settled with one answer-forward (no shimmer at any point).
+    setSemantic({ results: [hit("blessure", 0.82)], executedQuery: "x" });
+    const view = renderSearch();
+    const input = typeQuery("x");
+    await screen.findByText(/Lees volledig antwoord/i);
+    fireEvent.keyDown(input, { key: "ArrowDown" }); // highlight the answer-forward
+
+    // A fresh settle for the SAME query promotes a DIFFERENT answer-forward —
+    // showShimmer stays false throughout, so only a content-keyed reset catches it.
+    setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "x" });
+    view.rerender(
+      <HubSearch
+        members={HUB_SEARCH_MEMBERS}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+      />,
+    );
+    await screen.findByText("Hoe schrijf ik mijn kind in?");
+
+    // The highlight was dropped → Enter does not fire the newly-promoted answer.
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(window.location.hash).toBe("");
+  });
+
   it("falls back to keyword (no smart hint) when the endpoint errors", async () => {
     setSemantic({ error: "boom" });
     renderSearch();
@@ -183,11 +251,19 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
-  it("shows an empty state when nothing matches", async () => {
+  it("shows an empty state with a contact escape when nothing matches", async () => {
     setSemantic({ results: [], executedQuery: "zzzzz" });
     renderSearch();
     typeQuery("zzzzz");
     expect(await screen.findByText(/Geen resultaten voor/)).toBeInTheDocument();
+
+    const escape = screen.getByRole("link", { name: /Contacteer de club/ });
+    expect(escape).toHaveAttribute("href", "/club/contact");
+    fireEvent.click(escape);
+    expect(trackEvent).toHaveBeenCalledWith(
+      "organigram_search_contact_escape",
+      expect.objectContaining({ query_length: 5 }),
+    );
   });
 
   it("clears the query with the clear button", async () => {
@@ -197,5 +273,37 @@ describe("HubSearch", () => {
     await screen.findByText("Inge De Wit");
     fireEvent.click(screen.getByLabelText("Wissen"));
     expect(input.value).toBe("");
+  });
+
+  it("Escape closes the listbox but keeps focus in the input, and typing reopens it (S2)", async () => {
+    const user = userEvent.setup();
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    renderSearch();
+    const input = screen.getByLabelText(
+      "Zoek een persoon of hulpvraag",
+    ) as HTMLInputElement;
+    await user.click(input);
+    await user.type(input, "in");
+    await screen.findByText("Inge De Wit");
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    // Popup closed, but focus stays in the input (not blurred to <body>).
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(input).toHaveFocus();
+
+    // Typing reopens the popup (onChange re-sets isFocused).
+    await user.type(input, "g");
+    expect(await screen.findByRole("listbox")).toBeInTheDocument();
+  });
+
+  it("announces the result count to screen readers via a polite live region (S1)", async () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    renderSearch();
+    typeQuery("in");
+    await screen.findByText("Inge De Wit");
+    const status = screen.getByRole("status");
+    expect(status).toHaveAttribute("aria-live", "polite");
+    expect(status).toHaveTextContent(/\d+ resulta(at|ten)/);
   });
 });

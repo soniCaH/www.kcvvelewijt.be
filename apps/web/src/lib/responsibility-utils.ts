@@ -5,6 +5,7 @@
  */
 
 import type { Contact, ResponsibilityPath } from "@/types/responsibility";
+import type { FAQEntry } from "@/lib/seo/jsonld";
 
 /**
  * Check if a contact references the given staff member (through organigramNode members).
@@ -147,4 +148,30 @@ export function buildResponsibilityUrl(
 
   const queryString = params.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;
+}
+
+/**
+ * Flatten responsibility paths into Schema.org FAQ entries for the `/hulp`
+ * FAQPage JSON-LD (#2058): each path's `question` paired with its `summary` and
+ * step descriptions collapsed into a single plain-text answer paragraph (rich
+ * results want plain text, not markup). Paths whose question or answer is empty
+ * are dropped so the structured data never ships a blank Q&A.
+ *
+ * Typed as `FAQEntry` (a plain `{ question, answer }` DTO — a `import type`, so
+ * zero runtime coupling to the SEO layer) so the page can pass the result
+ * straight to `buildFAQPageJsonLd`, and the contract is compiler-enforced: a
+ * future field on `FAQEntry` becomes a type error here, not silent drift.
+ */
+export function responsibilityPathsToFaqEntries(
+  paths: ReadonlyArray<ResponsibilityPath>,
+): FAQEntry[] {
+  return paths
+    .map((path) => ({
+      question: path.question.trim(),
+      answer: [path.summary, ...path.steps.map((step) => step.description)]
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .join(" "),
+    }))
+    .filter((entry) => entry.question !== "" && entry.answer !== "");
 }

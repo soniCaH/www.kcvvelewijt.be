@@ -50,7 +50,12 @@ vi.mock("@/hooks/useResponsibilityAnalytics", () => ({
   }),
 }));
 
+// jsdom doesn't implement scrollIntoView — stub it so the finder's
+// scroll-into-view effects don't throw, and so we can assert them.
+const scrollIntoView = vi.fn();
 beforeEach(() => {
+  Element.prototype.scrollIntoView = scrollIntoView;
+  scrollIntoView.mockClear();
   mockReplace.mockClear();
   trackView.mockClear();
   trackContactClicked.mockClear();
@@ -76,7 +81,7 @@ describe("HulpFinder", () => {
     ).toBeInTheDocument();
   });
 
-  it('"Alle N →" opens that category\'s full list', () => {
+  it('"Alle N →" opens that category\'s full list and scrolls the finder into view', () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(
       screen.getByRole("button", { name: /alle 5 vragen in administratief/i }),
@@ -84,6 +89,11 @@ describe("HulpFinder", () => {
     expect(q(/fiscaal attest/i)).toBeInTheDocument();
     // Switching category hides the other categories' questions.
     expect(qMaybe(/mijn kind is geblesseerd/i)).not.toBeInTheDocument();
+    // The page got shorter — scroll the finder back to the top so the filtered
+    // list is in view (not stranded lower on the page).
+    expect(scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ block: "start" }),
+    );
   });
 
   it("a category chip filters to that category only", () => {

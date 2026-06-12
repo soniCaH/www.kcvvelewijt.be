@@ -90,6 +90,22 @@ describe("groupByDepartment", () => {
     expect(groups).toHaveLength(1);
     expect(groups[0]?.label).toBe("Jeugdbestuur");
   });
+
+  it("sorts vacant positions (0 members) last within an afdeling (7o9 · 3)", () => {
+    const groups = groupByDepartment([
+      position("vac1", "hoofdbestuur", { members: [] }),
+      position("filled1", "hoofdbestuur"),
+      position("vac2", "hoofdbestuur", { members: [] }),
+      position("filled2", "hoofdbestuur"),
+    ]);
+    // Filled keep their order, then vacant keep theirs — vacancies never lead.
+    expect(groups[0]?.nodes.map((n) => n.id)).toEqual([
+      "filled1",
+      "filled2",
+      "vac1",
+      "vac2",
+    ]);
+  });
 });
 
 describe("StructureDirectory", () => {

@@ -56,6 +56,15 @@ describe("next.config redirects", () => {
     }
   });
 
+  it("redirects the retired /club/organigram to the /hulp hub with 308 (#2058)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const match = redirects.find((r) => r.source === "/club/organigram");
+    expect(match, "Missing redirect for /club/organigram").toBeDefined();
+    expect(match!.destination).toBe("/hulp#structuur");
+    expect(match!.permanent).toBe(true);
+  });
+
   it("redirects /jeugd/:slug to /ploegen/:slug (excluding visie and medisch)", async () => {
     const redirects = await nextConfig.redirects!();
 

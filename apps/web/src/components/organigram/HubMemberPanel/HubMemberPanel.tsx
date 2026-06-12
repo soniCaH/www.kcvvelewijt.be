@@ -180,7 +180,13 @@ export function HubMemberPanel({
 
   return (
     <HubMemberPanelContext.Provider value={contextValue}>
-      <div ref={containerRef}>{children}</div>
+      {/* While the side-panel is open the whole page beneath it goes `inert`
+          (B1) — the panel is a sibling of this container, so it stays the only
+          interactive surface (belt-and-suspenders with the panel's focus trap).
+          Removed before the close effect restores focus to the launcher. */}
+      <div ref={containerRef} inert={open || undefined}>
+        {children}
+      </div>
       <MemberDetailPanel
         node={openNode}
         open={open}

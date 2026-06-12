@@ -21,6 +21,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   MagnifyingGlass,
@@ -32,6 +33,7 @@ import {
 import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import {
@@ -215,6 +217,9 @@ export function HubSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
+  // Null outside a `<HubMemberPanel>` (e.g. Storybook) → person-select falls back
+  // to a plain scroll to the directory.
+  const panel = useHubMemberPanel();
 
   // Debounce the people (keyword) lane (200ms — matches the legacy feel).
   useEffect(() => {
@@ -280,6 +285,25 @@ export function HubSearch({
   const navItems = showShimmer ? memberResults : items;
   const showResults = isFocused && trimmed.length > 0;
 
+  // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
+  // the list — the shimmer→settled flip, an answer-forward card sliding into
+  // position 0, the debounce reordering members — changes what a given index
+  // *means*. A stale highlight would then let Enter fire a row other than the
+  // one shown highlighted. Reset on every composition change (keyed on a content
+  // signature, NOT just the shimmer flag, so the async settle is covered too); a
+  // pure highlight move leaves the signature untouched, so hover/arrow persist.
+  const navItemsKey = navItems
+    .map((result) =>
+      result.type === "member"
+        ? `m:${result.member.id}`
+        : `a:${result.path.id}`,
+    )
+    .join("|");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync to async result recomposition (debounce/answer-lane settle) that no event handler observes
+    setSelectedIndex(-1);
+  }, [navItemsKey]);
+
   // Dismiss the dropdown on an outside click.
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
@@ -300,10 +324,19 @@ export function HubSearch({
     trackEvent("organigram_search_used", { query_length: value.length });
 
     if (typeof window !== "undefined") {
-      // A person scrolls to the directory (`#structuur`); an answer deep-links
-      // the finder accordion by its slug (#2056).
-      window.location.hash =
-        result.type === "member" ? "structuur" : result.path.id;
+      if (result.type === "member") {
+        // Open the person's panel directly (7o9 / F5) — the same destination as
+        // a directory card or the finder cross-link — and scroll to the
+        // directory behind it. Falls back to a plain scroll without a provider.
+        window.location.hash = "structuur";
+        panel?.openMember(result.member, {
+          view: "cards",
+          trigger: inputRef.current,
+        });
+      } else {
+        // An answer deep-links the finder accordion by its slug (#2056).
+        window.location.hash = result.path.id;
+      }
     }
     setValue(
       result.type === "member"
@@ -333,12 +366,24 @@ export function HubSearch({
         }
         break;
       case "Escape":
+        // APG combobox: close the popup but KEEP focus in the input (S2) — don't
+        // blur to <body>. Typing reopens it (onChange re-sets isFocused).
         event.preventDefault();
         setIsFocused(false);
-        inputRef.current?.blur();
         break;
     }
   };
+
+  // Announce result state to screen readers when the listbox is open (S1).
+  const statusMessage = !showResults
+    ? ""
+    : showShimmer
+      ? // Distinct from the visible "Slim zoeken…" hint so SR users hear a
+        // spoken sentence, not a clipped UI label (and the two never collide).
+        "Bezig met zoeken…"
+      : items.length > 0
+        ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
+        : "Geen resultaten";
 
   const isHero = variant === "hero";
   const boxShadow = isHero
@@ -422,6 +467,8 @@ export function HubSearch({
           onChange={(event) => {
             setValue(event.target.value);
             setSelectedIndex(-1);
+            // Typing reopens the popup after an Escape that closed it (S2).
+            setIsFocused(true);
           }}
           onFocus={() => setIsFocused(true)}
           onKeyDown={onKeyDown}
@@ -449,12 +496,19 @@ export function HubSearch({
               inputRef.current?.focus();
             }}
             aria-label="Wissen"
-            className="text-ink-muted hover:text-ink flex-shrink-0 transition-colors"
+            // Pull-back padding widens the tap target without shifting layout (B4).
+            className="text-ink-muted hover:text-ink -m-1.5 flex-shrink-0 p-1.5 transition-colors"
           >
             <X size={iconSize} aria-hidden />
           </button>
         )}
       </div>
+
+      {/* Screen-reader-only running status — announces result counts as the
+          listbox settles (S1), so a SR user knows what the live search found. */}
+      <span role="status" aria-live="polite" className="sr-only">
+        {statusMessage}
+      </span>
 
       {showResults && (
         <div
@@ -524,8 +578,23 @@ export function HubSearch({
                 Geen resultaten voor &ldquo;{value}&rdquo;
               </p>
               <p className="text-ink-muted mt-1 text-xs">
-                Probeer een andere zoekterm.
+                Probeer een andere zoekterm — of contacteer ons rechtstreeks.
               </p>
+              {/* Dead-end escape (#2058): a failed search always offers a human
+                  door. The click is its own conversion signal, separate from
+                  `organigram_search_used`. */}
+              <Link
+                href="/club/contact"
+                onClick={() =>
+                  trackEvent("organigram_search_contact_escape", {
+                    query_length: value.length,
+                  })
+                }
+                className="border-ink bg-warm text-ink shadow-paper-sm mt-3 inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              >
+                Contacteer de club
+                <ArrowRight size={12} aria-hidden />
+              </Link>
             </div>
           )}
         </div>

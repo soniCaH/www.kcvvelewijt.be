@@ -211,9 +211,12 @@ describe("MemberDetailPanel", () => {
         />,
       );
       expect(screen.getByText("Helpt met")).toBeInTheDocument();
-      expect(
-        screen.getByRole("link", { name: "Lid worden" }),
-      ).toBeInTheDocument();
+      // The chip deep-links the question's slug (7o9 / F10) so the finder opens
+      // that exact answer in view, not just a scroll to #hulp.
+      expect(screen.getByRole("link", { name: "Lid worden" })).toHaveAttribute(
+        "href",
+        "#lid-worden",
+      );
       // Els' responsibility must not leak into Luc's panel.
       expect(
         screen.queryByRole("link", { name: "Evenement aanvragen" }),
@@ -229,6 +232,55 @@ describe("MemberDetailPanel", () => {
         />,
       );
       expect(screen.queryByText("Helpt met")).not.toBeInTheDocument();
+    });
+
+    it("closes the panel when a 'Helpt met' chip is clicked (F10)", async () => {
+      const onClose = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <MemberDetailPanel
+          node={singleNode}
+          open
+          onClose={onClose}
+          responsibilityPaths={responsibilityPaths}
+        />,
+      );
+      await user.click(screen.getByRole("link", { name: "Lid worden" }));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it("closes a chip WITHOUT restoring focus to the launcher (F10 — hash nav owns the scroll)", async () => {
+      const user = userEvent.setup();
+      const launcher = document.createElement("button");
+      document.body.appendChild(launcher);
+      const returnFocusRef = { current: launcher as HTMLElement | null };
+      const onClose = vi.fn();
+      const { rerender } = render(
+        <MemberDetailPanel
+          node={singleNode}
+          open
+          onClose={onClose}
+          responsibilityPaths={responsibilityPaths}
+          returnFocusRef={returnFocusRef}
+        />,
+      );
+      await user.click(screen.getByRole("link", { name: "Lid worden" }));
+      // The return target is cleared so the close effect skips focus restore.
+      expect(returnFocusRef.current).toBeNull();
+
+      // Parent closes the panel; focus must NOT jump back to the launcher (which
+      // the hash navigation has scrolled away from).
+      rerender(
+        <MemberDetailPanel
+          node={singleNode}
+          open={false}
+          onClose={onClose}
+          responsibilityPaths={responsibilityPaths}
+          returnFocusRef={returnFocusRef}
+        />,
+      );
+      expect(launcher).not.toHaveFocus();
+      document.body.removeChild(launcher);
     });
   });
 

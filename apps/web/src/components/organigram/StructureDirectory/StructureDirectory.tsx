@@ -76,11 +76,17 @@ export function groupByDepartment(nodes: OrgChartNode[]): DirectoryGroup[] {
     buckets.set(dept, list);
   }
 
-  return DEPARTMENT_ORDER.map(({ key, label }) => ({
-    key,
-    label,
-    nodes: buckets.get(key) ?? [],
-  })).filter((group) => group.nodes.length > 0);
+  return DEPARTMENT_ORDER.map(({ key, label }) => {
+    const list = buckets.get(key) ?? [];
+    // Vacant positions (0 members) sort LAST within the afdeling (7o9 · 3) so
+    // real people lead the find-a-person scan; each vacancy stays visible (just
+    // dimmed, at the end) for recruitment. Stable within each partition.
+    const nodes = [
+      ...list.filter((node) => node.members.length > 0),
+      ...list.filter((node) => node.members.length === 0),
+    ];
+    return { key, label, nodes };
+  }).filter((group) => group.nodes.length > 0);
 }
 
 export function StructureDirectory({
@@ -117,6 +123,14 @@ export function StructureDirectory({
                 key={node.id}
                 node={node}
                 interactive={interactive}
+                // Dim vacant positions (7o9 · 3) — de-emphasised but reachable;
+                // brighten on hover/focus so recruitment stays a click away.
+                // (The interactive card's own `transition-all` eases the opacity.)
+                className={
+                  node.members.length === 0
+                    ? "opacity-65 focus-within:opacity-100 hover:opacity-100"
+                    : undefined
+                }
                 {...(vacantCtaHref ? { vacantCtaHref } : {})}
               />
             ))}

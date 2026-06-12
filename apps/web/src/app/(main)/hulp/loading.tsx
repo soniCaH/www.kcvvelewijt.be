@@ -3,7 +3,7 @@
  *
  * Cream-paper placeholder shaped like the hub (sticky two-door nav · dark hero
  * band · finder), shown for cold navigations before the RSC payload arrives.
- * Mirrors the hub shell (page.tsx) rather than the retired SectionStack layout.
+ * Mirrors the hub shell (page.tsx) rather than the retired section-stack layout.
  */
 export default function HulpLoading() {
   return (

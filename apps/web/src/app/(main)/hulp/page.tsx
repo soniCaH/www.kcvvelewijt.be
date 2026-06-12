@@ -22,7 +22,12 @@ import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import {
+  buildBreadcrumbJsonLd,
+  buildFAQPageJsonLd,
+  buildSportsClubJsonLd,
+} from "@/lib/seo/jsonld";
+import { responsibilityPathsToFaqEntries } from "@/lib/responsibility-utils";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import {
   CtaBand,
@@ -82,6 +87,7 @@ export default async function HulpHubPage() {
   );
 
   const structureIndex = deriveStructureIndex(members);
+  const faqEntries = responsibilityPathsToFaqEntries(responsibilityPaths);
 
   return (
     <>
@@ -92,16 +98,25 @@ export default async function HulpHubPage() {
           { name: "Hulp", url: `${SITE_CONFIG.siteUrl}/hulp` },
         ])}
       />
+      {/* Organization (multi-type SportsClub+Organization) + the hub's FAQ rich
+          results from the responsibility paths (#2058). The FAQPage is omitted
+          when no path yields a non-empty Q&A, so we never ship empty structured
+          data. */}
+      <JsonLd data={buildSportsClubJsonLd()} />
+      {faqEntries.length > 0 && (
+        <JsonLd data={buildFAQPageJsonLd(faqEntries)} />
+      )}
 
-      <OrganigramSectionNav
-        members={members}
-        responsibilityPaths={responsibilityPaths}
-      />
-
-      {/* One `<HubMemberPanel>` (7o5 / #2055) spans BOTH halves: the directory
-          cards open it by click-delegation, the verkenner via context, and the
-          finder's "Toon in structuur →" via `openMemberById` (7o6c · 4). */}
+      {/* One `<HubMemberPanel>` (7o5 / #2055) spans the nav + BOTH halves: the
+          directory cards open it by click-delegation, the verkenner via context,
+          the finder's "Toon in structuur →" via `openMemberById` (7o6c · 4), and
+          a person picked in either `<HubSearch>` opens it too (7o9 / F5) — so the
+          sticky-nav search needs the provider as well. */}
       <HubMemberPanel nodes={members} responsibilityPaths={responsibilityPaths}>
+        <OrganigramSectionNav
+          members={members}
+          responsibilityPaths={responsibilityPaths}
+        />
         <div className="mx-auto w-full max-w-[80rem] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <OrganigramHero
             members={members}
@@ -113,21 +128,21 @@ export default async function HulpHubPage() {
           <section
             id="hulp"
             aria-label="Hulp"
-            className="mt-12 scroll-mt-32 sm:mt-16"
+            tabIndex={-1}
+            className="mt-12 scroll-mt-32 focus:outline-none sm:mt-16"
           >
-            <MonoLabel variant="plain">De vraagvinder</MonoLabel>
             <EditorialHeading
               level={2}
               size="display-md"
-              emphasis={{ text: "helpen" }}
-              className="mt-2 mb-0"
+              emphasis={{ text: "vragen" }}
+              className="mb-0"
             >
-              Waarmee kunnen we je helpen
+              Veelgestelde vragen
             </EditorialHeading>
             <p className="text-ink-soft mt-3 max-w-[60ch] text-base leading-relaxed">
-              Zoek hierboven op een naam, functie of vraag — of kies hieronder
-              je rol en categorie. Elk antwoord geeft je de stappen én de juiste
-              contactpersoon.
+              Kies je rol of een categorie en blader door de antwoorden — elk
+              antwoord geeft je de stappen én de juiste contactpersoon. Of zoek
+              hierboven op een naam, functie of vraag.
             </p>
 
             {/* `<HulpFinder>` reads `?audience` via `useSearchParams`, so it must
@@ -151,7 +166,8 @@ export default async function HulpHubPage() {
           <section
             id="structuur"
             aria-label="Structuur"
-            className="scroll-mt-32 pb-4"
+            tabIndex={-1}
+            className="scroll-mt-32 pb-4 focus:outline-none"
           >
             <MonoLabel variant="plain">De structuur</MonoLabel>
             <EditorialHeading
@@ -170,32 +186,27 @@ export default async function HulpHubPage() {
               <StructureDirectory nodes={members} interactive />
             </div>
 
-            {/* Volledig organigram — the full reporting chart (click a node to
-                drill into the verkenner) + the one-A4 PDF. */}
-            <div className="mt-14">
-              <MonoLabel variant="plain">Volledig overzicht</MonoLabel>
-              <EditorialHeading
-                level={3}
-                size="display-sm"
-                emphasis={{ text: "in beeld" }}
-                className="mt-2 mb-6"
-              >
-                De hele structuur in beeld
-              </EditorialHeading>
-              <OrganigramOverview nodes={members} />
+            {/* Volledig organigram — demoted behind a quiet disclosure (7o9 · 2):
+                the directory leads; the full chart (+ its spotlight verkenner and
+                one-A4 PDF) is one deliberate click away. */}
+            <div className="mt-10">
+              <OrganigramOverview nodes={members} collapsible />
             </div>
           </section>
         </div>
-      </HubMemberPanel>
 
-      <CtaBand
-        ariaLabel="Contacteer de club"
-        heading="Niemand gevonden?"
-        emphasis={{ text: "gevonden", tone: "warm" }}
-        lead="Vind je niet meteen de juiste persoon? Stuur ons een bericht — we helpen je verder."
-        buttonLabel="Contacteer de club →"
-        href="/club/contact"
-      />
+        {/* Inside <HubMemberPanel> so it joins the page's `inert` subtree while a
+            member panel is open (B1) — the CTA must not stay focusable behind the
+            modal. Full-width: a sibling of the max-w content div, not inside it. */}
+        <CtaBand
+          ariaLabel="Contacteer de club"
+          heading="Niemand gevonden?"
+          emphasis={{ text: "gevonden", tone: "warm" }}
+          lead="Vind je niet meteen de juiste persoon? Stuur ons een bericht — we helpen je verder."
+          buttonLabel="Contacteer de club →"
+          href="/club/contact"
+        />
+      </HubMemberPanel>
     </>
   );
 }

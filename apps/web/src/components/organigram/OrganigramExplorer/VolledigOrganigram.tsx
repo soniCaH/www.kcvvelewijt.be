@@ -22,7 +22,7 @@ export interface VolledigOrganigramProps {
   nodes: OrgChartNode[];
   /** When provided, each node box becomes a button that drills into the explorer. */
   onNodeClick?: (id: string, trigger: HTMLElement) => void;
-  /** When provided, renders an "Open verkenner ⤢" button in the toolbar. */
+  /** When provided, renders a "Blader door het organigram ⤢" button in the toolbar. */
   onOpenExplorer?: (trigger: HTMLElement) => void;
   className?: string;
 }
@@ -167,7 +167,7 @@ export function VolledigOrganigram({
               className="border-ink bg-jersey-deep text-cream shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               <ArrowsOut size={16} aria-hidden />
-              Open verkenner ⤢
+              Blader door het organigram ⤢
             </button>
           )}
           <button
