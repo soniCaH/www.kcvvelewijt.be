@@ -21,6 +21,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   MagnifyingGlass,
@@ -558,8 +559,23 @@ export function HubSearch({
                 Geen resultaten voor &ldquo;{value}&rdquo;
               </p>
               <p className="text-ink-muted mt-1 text-xs">
-                Probeer een andere zoekterm.
+                Probeer een andere zoekterm — of contacteer ons rechtstreeks.
               </p>
+              {/* Dead-end escape (#2058): a failed search always offers a human
+                  door. The click is its own conversion signal, separate from
+                  `organigram_search_used`. */}
+              <Link
+                href="/club/contact"
+                onClick={() =>
+                  trackEvent("organigram_search_contact_escape", {
+                    query_length: value.length,
+                  })
+                }
+                className="border-ink bg-warm text-ink shadow-paper-sm mt-3 inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+              >
+                Contacteer de club
+                <ArrowRight size={12} aria-hidden />
+              </Link>
             </div>
           )}
         </div>

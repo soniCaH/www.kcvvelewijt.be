@@ -203,11 +203,19 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
-  it("shows an empty state when nothing matches", async () => {
+  it("shows an empty state with a contact escape when nothing matches", async () => {
     setSemantic({ results: [], executedQuery: "zzzzz" });
     renderSearch();
     typeQuery("zzzzz");
     expect(await screen.findByText(/Geen resultaten voor/)).toBeInTheDocument();
+
+    const escape = screen.getByRole("link", { name: /Contacteer de club/ });
+    expect(escape).toHaveAttribute("href", "/club/contact");
+    fireEvent.click(escape);
+    expect(trackEvent).toHaveBeenCalledWith(
+      "organigram_search_contact_escape",
+      expect.objectContaining({ query_length: 5 }),
+    );
   });
 
   it("clears the query with the clear button", async () => {

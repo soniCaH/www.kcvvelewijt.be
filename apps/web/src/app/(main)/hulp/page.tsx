@@ -22,7 +22,12 @@ import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import {
+  buildBreadcrumbJsonLd,
+  buildFAQPageJsonLd,
+  buildSportsClubJsonLd,
+} from "@/lib/seo/jsonld";
+import { responsibilityPathsToFaqEntries } from "@/lib/responsibility-utils";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import {
   CtaBand,
@@ -82,6 +87,7 @@ export default async function HulpHubPage() {
   );
 
   const structureIndex = deriveStructureIndex(members);
+  const faqEntries = responsibilityPathsToFaqEntries(responsibilityPaths);
 
   return (
     <>
@@ -92,6 +98,14 @@ export default async function HulpHubPage() {
           { name: "Hulp", url: `${SITE_CONFIG.siteUrl}/hulp` },
         ])}
       />
+      {/* Organization (multi-type SportsClub+Organization) + the hub's FAQ rich
+          results from the responsibility paths (#2058). The FAQPage is omitted
+          when no path yields a non-empty Q&A, so we never ship empty structured
+          data. */}
+      <JsonLd data={buildSportsClubJsonLd()} />
+      {faqEntries.length > 0 && (
+        <JsonLd data={buildFAQPageJsonLd(faqEntries)} />
+      )}
 
       {/* One `<HubMemberPanel>` (7o5 / #2055) spans the nav + BOTH halves: the
           directory cards open it by click-delegation, the verkenner via context,

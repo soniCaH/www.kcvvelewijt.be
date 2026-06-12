@@ -148,3 +148,28 @@ export function buildResponsibilityUrl(
   const queryString = params.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;
 }
+
+/**
+ * Flatten responsibility paths into Schema.org FAQ entries for the `/hulp`
+ * FAQPage JSON-LD (#2058): each path's `question` paired with its `summary` and
+ * step descriptions collapsed into a single plain-text answer paragraph (rich
+ * results want plain text, not markup). Paths whose question or answer is empty
+ * are dropped so the structured data never ships a blank Q&A.
+ *
+ * The return shape matches `FAQEntry` from `@/lib/seo/jsonld`, so the page can
+ * pass it straight to `buildFAQPageJsonLd` — kept structural (not an import) to
+ * keep this domain util free of SEO-layer coupling.
+ */
+export function responsibilityPathsToFaqEntries(
+  paths: ReadonlyArray<ResponsibilityPath>,
+): Array<{ question: string; answer: string }> {
+  return paths
+    .map((path) => ({
+      question: path.question.trim(),
+      answer: [path.summary, ...path.steps.map((step) => step.description)]
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .join(" "),
+    }))
+    .filter((entry) => entry.question !== "" && entry.answer !== "");
+}
