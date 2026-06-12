@@ -93,15 +93,16 @@ export default async function HulpHubPage() {
         ])}
       />
 
-      <OrganigramSectionNav
-        members={members}
-        responsibilityPaths={responsibilityPaths}
-      />
-
-      {/* One `<HubMemberPanel>` (7o5 / #2055) spans BOTH halves: the directory
-          cards open it by click-delegation, the verkenner via context, and the
-          finder's "Toon in structuur →" via `openMemberById` (7o6c · 4). */}
+      {/* One `<HubMemberPanel>` (7o5 / #2055) spans the nav + BOTH halves: the
+          directory cards open it by click-delegation, the verkenner via context,
+          the finder's "Toon in structuur →" via `openMemberById` (7o6c · 4), and
+          a person picked in either `<HubSearch>` opens it too (7o9 / F5) — so the
+          sticky-nav search needs the provider as well. */}
       <HubMemberPanel nodes={members} responsibilityPaths={responsibilityPaths}>
+        <OrganigramSectionNav
+          members={members}
+          responsibilityPaths={responsibilityPaths}
+        />
         <div className="mx-auto w-full max-w-[80rem] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
           <OrganigramHero
             members={members}
@@ -169,19 +170,11 @@ export default async function HulpHubPage() {
               <StructureDirectory nodes={members} interactive />
             </div>
 
-            {/* Volledig organigram — the full reporting chart (click a node to
-                drill into the verkenner) + the one-A4 PDF. */}
-            <div className="mt-14">
-              <MonoLabel variant="plain">Volledig overzicht</MonoLabel>
-              <EditorialHeading
-                level={3}
-                size="display-sm"
-                emphasis={{ text: "in beeld" }}
-                className="mt-2 mb-6"
-              >
-                De hele structuur in beeld
-              </EditorialHeading>
-              <OrganigramOverview nodes={members} />
+            {/* Volledig organigram — demoted behind a quiet disclosure (7o9 · 2):
+                the directory leads; the full chart (+ its spotlight verkenner and
+                one-A4 PDF) is one deliberate click away. */}
+            <div className="mt-10">
+              <OrganigramOverview nodes={members} collapsible />
             </div>
           </section>
         </div>

@@ -32,6 +32,7 @@ import {
 import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import {
@@ -215,6 +216,9 @@ export function HubSearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
+  // Null outside a `<HubMemberPanel>` (e.g. Storybook) → person-select falls back
+  // to a plain scroll to the directory.
+  const panel = useHubMemberPanel();
 
   // Debounce the people (keyword) lane (200ms — matches the legacy feel).
   useEffect(() => {
@@ -300,10 +304,19 @@ export function HubSearch({
     trackEvent("organigram_search_used", { query_length: value.length });
 
     if (typeof window !== "undefined") {
-      // A person scrolls to the directory (`#structuur`); an answer deep-links
-      // the finder accordion by its slug (#2056).
-      window.location.hash =
-        result.type === "member" ? "structuur" : result.path.id;
+      if (result.type === "member") {
+        // Open the person's panel directly (7o9 / F5) — the same destination as
+        // a directory card or the finder cross-link — and scroll to the
+        // directory behind it. Falls back to a plain scroll without a provider.
+        window.location.hash = "structuur";
+        panel?.openMember(result.member, {
+          view: "cards",
+          trigger: inputRef.current,
+        });
+      } else {
+        // An answer deep-links the finder accordion by its slug (#2056).
+        window.location.hash = result.path.id;
+      }
     }
     setValue(
       result.type === "member"

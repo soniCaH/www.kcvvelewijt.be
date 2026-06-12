@@ -29,6 +29,11 @@ vi.mock("@/hooks/useSemanticSearch", () => ({
   useSemanticSearch: () => mockSemantic,
 }));
 
+let mockPanel: { openMember: ReturnType<typeof vi.fn> } | null = null;
+vi.mock("@/components/organigram/HubMemberPanel", () => ({
+  useHubMemberPanel: () => mockPanel,
+}));
+
 function setSemantic(
   patch: Partial<Pick<typeof mockSemantic, "results" | "loading" | "error">> & {
     executedQuery?: string;
@@ -69,12 +74,26 @@ describe("HubSearch", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.location.hash = "";
+    mockPanel = null;
     setSemantic({
       results: [],
       loading: false,
       error: null,
       executedQuery: "",
     });
+  });
+
+  it("opens the member panel when a person is chosen and a provider is present (F5)", async () => {
+    const openMember = vi.fn();
+    mockPanel = { openMember };
+    renderSearch();
+    typeQuery("in");
+    fireEvent.click(await screen.findByText("Inge De Wit"));
+    expect(openMember).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "secretaris" }),
+      expect.objectContaining({ view: "cards" }),
+    );
+    expect(window.location.hash).toBe("#structuur");
   });
 
   it("renders the search input", () => {

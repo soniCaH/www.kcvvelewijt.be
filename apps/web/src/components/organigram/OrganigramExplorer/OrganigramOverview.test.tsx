@@ -42,4 +42,16 @@ describe("OrganigramOverview", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(launcher).toHaveFocus();
   });
+
+  it("collapsible: hides the chart behind a disclosure until opened (7o9 · 2)", async () => {
+    render(<OrganigramOverview nodes={explorerFixture} collapsible />);
+    // Chart (and its toolbar) hidden; only the quiet disclosure shows.
+    expect(screen.queryByTestId("volledig-organigram")).not.toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: /Bekijk het volledige organigram/,
+      }),
+    );
+    expect(screen.getByTestId("volledig-organigram")).toBeInTheDocument();
+  });
 });

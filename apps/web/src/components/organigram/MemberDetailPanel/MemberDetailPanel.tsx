@@ -50,12 +50,6 @@ export interface MemberDetailPanelProps {
   initialHolderId?: string;
   /** Element focus returns to on close (typically the launcher). */
   returnFocusRef?: RefObject<HTMLElement | null>;
-  /**
-   * Same-page anchor the "Helpt met" chips link into. Exact responsibility
-   * pre-selection inside the finder is deferred to 7o6 (#2056); for now the
-   * chips scroll to the finder section. Default `#hulp`.
-   */
-  hulpHref?: string;
   /** Where the vacant recruit CTA points. Default `/club/contact`. */
   vacantCtaHref?: string;
   /**
@@ -106,7 +100,6 @@ export function MemberDetailPanel({
   responsibilityPaths = [],
   initialHolderId,
   returnFocusRef,
-  hulpHref = "#hulp",
   vacantCtaHref = "/club/contact",
   onMemberShown,
 }: MemberDetailPanelProps) {
@@ -353,8 +346,12 @@ export function MemberDetailPanel({
                     <ul className="flex flex-wrap gap-1.5">
                       {holderResponsibilities.map((path) => (
                         <li key={path.id}>
+                          {/* Deep-link the question's slug (7o9 / F10) + close the
+                              panel, so the finder's hashchange `reveal()` opens
+                              that exact answer in view — not just scroll to #hulp. */}
                           <Link
-                            href={hulpHref}
+                            href={`#${path.id}`}
+                            onClick={onClose}
                             className="border-jersey-deep text-jersey-deep hover:bg-jersey-deep hover:text-cream inline-block border-[1.5px] px-2 py-1 font-mono text-[10px] tracking-[0.02em] uppercase transition-colors"
                           >
                             {path.question}
