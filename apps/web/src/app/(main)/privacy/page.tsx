@@ -1,19 +1,18 @@
 /**
  * Privacy Policy Page
  *
- * GDPR-compliant privacy policy for KCVV Elewijt. Wraps the legal copy in
- * the standard SectionStack + InteriorPageHero layout used across the redesigned
- * pages — compact dark hero followed by a single gray-100 prose section.
+ * GDPR-compliant privacy policy for KCVV Elewijt. Phase 8 (8p1) reskin:
+ * cream-minimal — no hero band. A mono kicker + serif `<EditorialHeading>`
+ * title + mono last-updated line + Freight Display intro lead introduce a
+ * single cream/ink prose column with a `<DottedDivider>` between H2 sections.
+ * Replaces the legacy `<InteriorPageHero>` + `<SectionStack>` diagonal +
+ * `prose prose-gray` composition (master design §7 line 587).
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DEFAULT_OG_IMAGE } from "@/lib/constants";
-import {
-  SectionStack,
-  type SectionConfig,
-} from "@/components/design-system/SectionStack/SectionStack";
-import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
+import { EditorialHeading, DottedDivider } from "@/components/design-system";
 
 /**
  * Last updated date for the privacy policy.
@@ -43,36 +42,58 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Cream/ink prose styling for the legal copy. Replaces the typography-plugin
+ * `prose prose-gray` treatment: H2s in Freight Display 700, body in Archivo
+ * (ink-soft), links jersey-deep, dotted section rules spaced via the
+ * `[role=separator]` child selector. No legacy `--color-kcvv-*` / gray / green
+ * classes.
+ */
+const proseClasses = [
+  "text-ink-soft",
+  "[&_[role=separator]]:my-7",
+  "[&_h2]:mt-0 [&_h2]:mb-2.5 [&_h2]:font-display [&_h2]:font-bold [&_h2]:text-ink",
+  "[&_h2]:text-[length:var(--text-display-sm)] [&_h2]:leading-[var(--text-display-sm--lh)]",
+  "[&_p]:mt-3 [&_p]:text-[length:var(--text-body-md)] [&_p]:leading-[var(--text-body-md--lh)]",
+  "[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5",
+  "[&_li]:text-[length:var(--text-body-md)] [&_li]:leading-[var(--text-body-md--lh)]",
+  "[&_a]:font-semibold [&_a]:text-jersey-deep [&_a]:underline-offset-2 [&_a:hover]:underline",
+  "[&_strong]:font-semibold [&_strong]:text-ink",
+].join(" ");
+
 export default function PrivacyPage() {
-  const sections: SectionConfig[] = [
-    {
-      key: "hero",
-      bg: "kcvv-black",
-      paddingTop: "pt-0",
-      paddingBottom: "pb-0",
-      content: (
-        <InteriorPageHero
-          size="compact"
-          gradient="dark"
-          label="Juridisch"
-          headline="Privacyverklaring"
-          body="Hoe wij omgaan met jouw gegevens."
-        />
-      ),
-      transition: { type: "diagonal", direction: "right", overlap: "full" },
-    },
-    {
-      key: "content",
-      bg: "gray-100",
-      content: (
-        <article className="prose prose-gray mx-auto max-w-2xl px-4 md:px-10">
-          <p>
+  return (
+    <div className="bg-cream">
+      <div className="mx-auto max-w-2xl px-4 py-16 md:px-10 md:py-20">
+        <header className="flex flex-col">
+          {/* Raw styled span rather than <MonoLabel>: the 8p1 lock calls for a
+              jersey-deep kicker, but MonoLabel's `plain` variant only supports
+              ink/cream tones. Reuses the canonical label-token kicker vocabulary
+              (cf. EditorialHubCard / MatchArticleLinkCard). */}
+          <span className="text-jersey-deep font-mono text-[length:var(--text-label)] font-semibold tracking-[var(--text-label--tracking)] uppercase">
+            Juridisch
+          </span>
+          <EditorialHeading
+            level={1}
+            size="display-2xl"
+            emphasis={{ text: "." }}
+            className="mt-3"
+          >
+            Privacyverklaring
+          </EditorialHeading>
+          <p className="text-ink-muted mt-3.5 font-mono text-[length:var(--text-mono-sm)] tracking-[0.04em]">
+            Laatst bijgewerkt · {LAST_UPDATED}
+          </p>
+          <p className="text-ink-soft font-display mt-5 max-w-[60ch] text-[length:var(--text-body-lg)] leading-[var(--text-body-lg--lh)]">
             KCVV Elewijt, gevestigd aan Driesstraat 30, 1982 Elewijt,
             respecteert je privacy en behandelt je persoonsgegevens
             vertrouwelijk. Deze privacyverklaring legt uit welke gegevens we
             verzamelen, waarom we dat doen en welke rechten je hebt.
           </p>
+        </header>
 
+        <div className={`mt-10 ${proseClasses}`}>
+          <DottedDivider color="paper-edge" />
           <h2>Contactgegevens</h2>
           <p>
             <strong>Verantwoordelijke:</strong> KCVV Elewijt vzw
@@ -86,6 +107,7 @@ export default function PrivacyPage() {
             <a href="mailto:kevin@kcvvelewijt.be">kevin@kcvvelewijt.be</a>
           </p>
 
+          <DottedDivider color="paper-edge" />
           <h2>Welke gegevens verzamelen we?</h2>
           <p>
             We verzamelen alleen gegevens die noodzakelijk zijn voor het
@@ -112,6 +134,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
+          <DottedDivider color="paper-edge" />
           <h2>Waarvoor gebruiken we je gegevens?</h2>
           <ul>
             <li>
@@ -126,6 +149,7 @@ export default function PrivacyPage() {
             <li>Voldoen aan wettelijke verplichtingen</li>
           </ul>
 
+          <DottedDivider color="paper-edge" />
           <h2>Rechtsgrond</h2>
           <p>We verwerken je gegevens op basis van:</p>
           <ul>
@@ -143,6 +167,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
+          <DottedDivider color="paper-edge" />
           <h2>Delen we je gegevens?</h2>
           <p>We verkopen je gegevens nooit. We delen alleen gegevens met:</p>
           <ul>
@@ -160,6 +185,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
+          <DottedDivider color="paper-edge" />
           <h2>Hoe lang bewaren we je gegevens?</h2>
           <ul>
             <li>
@@ -175,6 +201,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
+          <DottedDivider color="paper-edge" />
           <h2>Jouw rechten</h2>
           <p>Volgens de GDPR/AVG heb je volgende rechten:</p>
           <ul>
@@ -200,6 +227,7 @@ export default function PrivacyPage() {
             <a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a>.
           </p>
 
+          <DottedDivider color="paper-edge" />
           <h2>Cookiebeleid</h2>
           <p>
             Onze website gebruikt cookies om de gebruikerservaring te
@@ -217,6 +245,7 @@ export default function PrivacyPage() {
           </ul>
           <p>Je kan cookies beheren via je browserinstellingen.</p>
 
+          <DottedDivider color="paper-edge" />
           <h2>Beveiliging</h2>
           <p>
             We nemen passende technische en organisatorische maatregelen om je
@@ -225,6 +254,7 @@ export default function PrivacyPage() {
             opgeslagen op beveiligde servers.
           </p>
 
+          <DottedDivider color="paper-edge" />
           <h2>Wijzigingen</h2>
           <p>
             We kunnen deze privacyverklaring van tijd tot tijd aanpassen. De
@@ -232,6 +262,7 @@ export default function PrivacyPage() {
             bijgewerkt: {LAST_UPDATED}.
           </p>
 
+          <DottedDivider color="paper-edge" />
           <h2>Vragen over privacy?</h2>
           <p>
             Heb je vragen over hoe we met je gegevens omgaan? Neem gerust
@@ -239,10 +270,8 @@ export default function PrivacyPage() {
             stuur een e-mail naar{" "}
             <a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a>.
           </p>
-        </article>
-      ),
-    },
-  ];
-
-  return <SectionStack sections={sections} />;
+        </div>
+      </div>
+    </div>
+  );
 }

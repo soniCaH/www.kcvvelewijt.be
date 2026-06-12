@@ -6,8 +6,8 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PrivacyPage from "./page";
 
-describe("PrivacyPage", () => {
-  it("renders the InteriorPageHero with the Juridisch label and headline", () => {
+describe("PrivacyPage (Phase 8 cream-minimal reskin)", () => {
+  it("renders the jersey-deep mono kicker and the serif h1 title", () => {
     render(<PrivacyPage />);
     expect(screen.getByText("Juridisch")).toBeInTheDocument();
     expect(
@@ -15,12 +15,32 @@ describe("PrivacyPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the prose container inside the gray section", () => {
+  it("renders the mono last-updated line in the header", () => {
+    render(<PrivacyPage />);
+    expect(
+      screen.getByText(/laatst bijgewerkt · februari 2026/i),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the intro lead with the original privacy copy", () => {
+    render(<PrivacyPage />);
+    expect(
+      screen.getByText(
+        /respecteert je privacy en behandelt je persoonsgegevens vertrouwelijk/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("does not use the legacy gray prose treatment", () => {
     const { container } = render(<PrivacyPage />);
-    const prose = container.querySelector("article.prose");
-    expect(prose).not.toBeNull();
-    expect(prose).toHaveClass("max-w-2xl");
-    expect(prose).toHaveClass("mx-auto");
+    expect(container.querySelector(".prose")).toBeNull();
+    expect(container.querySelector(".prose-gray")).toBeNull();
+  });
+
+  it("places a dotted divider before each H2 section", () => {
+    render(<PrivacyPage />);
+    // 11 legal sections → one separator before each.
+    expect(screen.getAllByRole("separator").length).toBeGreaterThanOrEqual(11);
   });
 
   it("displays all required legal sections", () => {
@@ -96,7 +116,7 @@ describe("PrivacyPage", () => {
     expect(screen.getByText(/GDPR\/AVG/i)).toBeInTheDocument();
   });
 
-  it("displays the last updated date", () => {
+  it("displays the last updated date in the Wijzigingen section", () => {
     render(<PrivacyPage />);
     expect(
       screen.getByText(/laatst bijgewerkt:\s*februari 2026/i),
