@@ -60,7 +60,7 @@ describe("SearchInterface", () => {
 
       expect(screen.getByRole("textbox")).toBeInTheDocument();
       expect(
-        screen.getByRole("button", { name: /^zoek$/i }),
+        screen.getByRole("button", { name: /^zoeken$/i }),
       ).toBeInTheDocument();
     });
 
@@ -155,7 +155,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -179,7 +179,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -224,7 +224,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "  trimmed  ");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -251,7 +251,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       // Should show loading spinner
@@ -280,7 +280,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -302,7 +302,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -325,7 +325,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -342,7 +342,7 @@ describe("SearchInterface", () => {
       await user.type(input, "a");
 
       // Submit button should be disabled
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       expect(submitButton).toBeDisabled();
 
       // Attempt submission via Enter key (should be prevented by validation)
@@ -365,7 +365,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -400,7 +400,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -437,7 +437,7 @@ describe("SearchInterface", () => {
 
       render(<SearchInterface />);
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
 
       // First search - type directly (input is empty initially)
       const input = screen.getByRole("textbox");
@@ -479,7 +479,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       // Should not display error for aborted request
@@ -508,7 +508,7 @@ describe("SearchInterface", () => {
 
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -666,7 +666,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       // Input should be disabled
@@ -697,7 +697,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -718,7 +718,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -739,7 +739,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -781,7 +781,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -803,7 +803,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -850,7 +850,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "ab");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -873,7 +873,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -892,7 +892,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {
@@ -921,7 +921,7 @@ describe("SearchInterface", () => {
       await user.type(input, "football");
 
       // 2. Submit search
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       // 3. Wait for results
@@ -957,7 +957,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "first");
 
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
       await waitFor(() => {

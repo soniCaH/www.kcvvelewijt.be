@@ -17,6 +17,11 @@ describe("search/index exports", () => {
     expect(typeof SearchModule.SearchForm).toBe("function");
   });
 
+  it("should export SearchMasthead component", () => {
+    expect(SearchModule.SearchMasthead).toBeDefined();
+    expect(typeof SearchModule.SearchMasthead).toBe("function");
+  });
+
   it("should export SearchFilters component", () => {
     expect(SearchModule.SearchFilters).toBeDefined();
     expect(typeof SearchModule.SearchFilters).toBe("function");
@@ -38,6 +43,7 @@ describe("search/index exports", () => {
       "SearchFilters",
       "SearchForm",
       "SearchInterface",
+      "SearchMasthead",
       "SearchResult",
       "SearchResults",
     ]);

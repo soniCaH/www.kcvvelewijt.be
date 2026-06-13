@@ -14,7 +14,7 @@ const meta = {
   title: "Features/Search/SearchInterface",
   component: SearchInterface,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
   },
   tags: ["autodocs"],
 } satisfies Meta<typeof SearchInterface>;

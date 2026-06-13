@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchForm } from "./SearchForm";
+import { SearchMasthead } from "./SearchMasthead";
 import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
 import { Spinner } from "@/components/design-system";
@@ -255,90 +256,97 @@ export const SearchInterface = ({
   }, []);
 
   return (
-    <div className="space-y-8">
-      {/* Search Form */}
-      <SearchForm
-        initialValue={query}
-        onSearch={handleSearch}
-        isLoading={isLoading}
-      />
+    <>
+      {/* Dark search masthead — the field is the hero (8s1). */}
+      <SearchMasthead>
+        <SearchForm
+          initialValue={query}
+          onSearch={handleSearch}
+          isLoading={isLoading}
+        />
+      </SearchMasthead>
 
-      {/* Show results only if query is valid (>= 2 chars) */}
-      {query.trim().length >= 2 && (
-        <>
-          {/* Filters */}
-          <SearchFilters
-            activeType={activeType}
-            onFilterChange={handleFilterChange}
-            resultCounts={{
-              all: totalCount,
-              article: results.filter((r) => r.type === "article").length,
-              player: results.filter((r) => r.type === "player").length,
-              staff: results.filter((r) => r.type === "staff").length,
-              team: results.filter((r) => r.type === "team").length,
-            }}
-          />
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="flex justify-center py-12">
-              <Spinner size="lg" />
-            </div>
-          )}
-
-          {/* Error State */}
-          {error && !isLoading && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-              <p className="text-red-800">{error}</p>
-            </div>
-          )}
-
-          {/* Results */}
-          {!isLoading && !error && (
-            <SearchResults
-              results={results}
-              query={query}
+      {/* Results region on cream, below the band. */}
+      <div className="mx-auto max-w-5xl space-y-8 px-4 py-12">
+        {/* Show results only if query is valid (>= 2 chars) */}
+        {query.trim().length >= 2 && (
+          <>
+            {/* Filters */}
+            <SearchFilters
               activeType={activeType}
-              onResultClick={analytics.trackResultClicked}
+              onFilterChange={handleFilterChange}
+              resultCounts={{
+                all: totalCount,
+                article: results.filter((r) => r.type === "article").length,
+                player: results.filter((r) => r.type === "player").length,
+                staff: results.filter((r) => r.type === "staff").length,
+                team: results.filter((r) => r.type === "team").length,
+              }}
             />
-          )}
-        </>
-      )}
 
-      {/* Help Text - Show when query is too short */}
-      {query.trim().length < 2 && (
-        <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-          <h2 className="text-gray-blue mb-4 text-xl font-bold">
-            Wat wil je zoeken?
-          </h2>
-          <p className="text-gray-dark mb-6">
-            Typ minimaal 2 karakters om te zoeken naar nieuws, spelers, teams en
-            meer.
-          </p>
-          <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-lg bg-gray-50 p-4">
-              <h3 className="text-gray-blue mb-2 font-semibold">
-                📰 Nieuwsartikelen
-              </h3>
-              <p className="text-gray-dark text-sm">
-                Zoek op titel, inhoud of tags
-              </p>
-            </div>
-            <div className="rounded-lg bg-gray-50 p-4">
-              <h3 className="text-gray-blue mb-2 font-semibold">⚽ Spelers</h3>
-              <p className="text-gray-dark text-sm">
-                Vind spelers op naam of positie
-              </p>
-            </div>
-            <div className="rounded-lg bg-gray-50 p-4">
-              <h3 className="text-gray-blue mb-2 font-semibold">🏆 Teams</h3>
-              <p className="text-gray-dark text-sm">
-                Zoek teams op naam of leeftijdsgroep
-              </p>
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex justify-center py-12">
+                <Spinner size="lg" />
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && !isLoading && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
+                <p className="text-red-800">{error}</p>
+              </div>
+            )}
+
+            {/* Results */}
+            {!isLoading && !error && (
+              <SearchResults
+                results={results}
+                query={query}
+                activeType={activeType}
+                onResultClick={analytics.trackResultClicked}
+              />
+            )}
+          </>
+        )}
+
+        {/* Help Text - Show when query is too short */}
+        {query.trim().length < 2 && (
+          <div className="rounded-xl bg-white p-8 text-center shadow-sm">
+            <h2 className="text-gray-blue mb-4 text-xl font-bold">
+              Wat wil je zoeken?
+            </h2>
+            <p className="text-gray-dark mb-6">
+              Typ minimaal 2 karakters om te zoeken naar nieuws, spelers, teams
+              en meer.
+            </p>
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h3 className="text-gray-blue mb-2 font-semibold">
+                  📰 Nieuwsartikelen
+                </h3>
+                <p className="text-gray-dark text-sm">
+                  Zoek op titel, inhoud of tags
+                </p>
+              </div>
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h3 className="text-gray-blue mb-2 font-semibold">
+                  ⚽ Spelers
+                </h3>
+                <p className="text-gray-dark text-sm">
+                  Vind spelers op naam of positie
+                </p>
+              </div>
+              <div className="rounded-lg bg-gray-50 p-4">
+                <h3 className="text-gray-blue mb-2 font-semibold">🏆 Teams</h3>
+                <p className="text-gray-dark text-sm">
+                  Zoek teams op naam of leeftijdsgroep
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 };

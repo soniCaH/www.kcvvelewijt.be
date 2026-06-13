@@ -1,13 +1,18 @@
 /**
  * Search Page
- * Global search across articles, players, and teams
+ *
+ * Global search across articles, players, teams and staff. Phase 8 (8s1)
+ * reskin: a `jersey-deep-dark` `<SearchMasthead>` band wears the search field
+ * as its hero; results render on cream below. Replaces the legacy
+ * green-gradient hero (master design §7 line 587). Backend (bge-m3 / Vectorize,
+ * #2057) unchanged — presentation only.
  */
 
 import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Suspense } from "react";
+import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { SearchInterface } from "@/components/search";
-import { Spinner } from "@/components/design-system";
+import { SearchMastheadSkeleton } from "@/components/search/SearchMastheadSkeleton";
 
 export const metadata: Metadata = {
   title: "Zoeken | KCVV Elewijt",
@@ -23,35 +28,18 @@ export const metadata: Metadata = {
 };
 
 /**
- * Search page with client-side search interface
+ * Search page with client-side search interface.
+ *
+ * `<SearchInterface>` reads `useSearchParams`, so it sits behind a `<Suspense>`
+ * boundary; the fallback renders the masthead skeleton (heading + inert field)
+ * so the band and `<h1>` ship in the initial HTML with no layout shift.
  */
 export default function SearchPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white pb-[var(--footer-diagonal)]">
-      {/* Hero Section */}
-      <div className="from-green-main via-green-hover to-green-dark-hover bg-gradient-to-br px-4 py-16 text-white">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="font-title mb-4 text-4xl font-bold md:text-6xl">
-            Zoeken
-          </h1>
-          <p className="max-w-3xl text-xl text-white/90 md:text-2xl">
-            Vind nieuws, spelers, teams en meer
-          </p>
-        </div>
-      </div>
-
-      {/* Search Interface */}
-      <div className="mx-auto max-w-5xl px-4 py-12">
-        <Suspense
-          fallback={
-            <div className="flex justify-center py-12">
-              <Spinner size="lg" />
-            </div>
-          }
-        >
-          <SearchInterface />
-        </Suspense>
-      </div>
+    <div className="bg-cream min-h-screen pb-[var(--footer-diagonal)]">
+      <Suspense fallback={<SearchMastheadSkeleton />}>
+        <SearchInterface />
+      </Suspense>
     </div>
   );
 }
