@@ -133,7 +133,7 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/zoeken",
       Loading: ZoekenLoading,
-      expectedRootClass: "min-h-screen bg-gray-100",
+      expectedRootClass: "bg-cream min-h-screen pb-[var(--footer-diagonal)]",
     },
     {
       name: "/club/[slug]",

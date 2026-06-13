@@ -1,20 +1,32 @@
 /**
  * SearchForm Storybook Stories
+ *
+ * The 8s1 hard-shadow search field. Rendered on a `jersey-deep-dark` ground
+ * (its real context inside `<SearchMasthead>`); the cream input + warm-gold
+ * magnifier cell read against the dark band.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fn } from "storybook/test";
 import { SearchForm } from "./SearchForm";
 
 const meta = {
   title: "Features/Search/SearchForm",
   component: SearchForm,
   parameters: {
-    layout: "padded",
+    layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
-    onSearch: () => {},
+    onSearch: fn(),
   },
+  decorators: [
+    (Story) => (
+      <div className="bg-jersey-deep-dark p-8">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof SearchForm>;
 
 export default meta;
@@ -31,7 +43,7 @@ export const Default: Story = {
 };
 
 /**
- * With initial value
+ * With initial value (clear affordance visible)
  */
 export const WithInitialValue: Story = {
   args: {

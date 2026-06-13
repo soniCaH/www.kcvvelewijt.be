@@ -2,12 +2,17 @@
 
 /**
  * SearchForm Component
- * Search input field with submit button
+ *
+ * 8s1 "hard-shadow" search field: a cream input + warm-gold magnifier-icon
+ * submit cell inside a 2px-ink border with an offset paper shadow. Designed to
+ * sit on the `<SearchMasthead>` dark band (the input surface stays cream so it
+ * reads on any ground). No "ZOEK" word — the magnifier carries the action.
  */
 
 import { useState, FormEvent } from "react";
-import { Icon } from "@/components/design-system";
-import { Search, X } from "lucide-react";
+import { MagnifyingGlass, X } from "@/lib/icons.redesign";
+import { cn } from "@/lib/utils/cn";
+import { searchFieldShellClasses } from "./search-field-styles";
 
 export interface SearchFormProps {
   /**
@@ -29,7 +34,7 @@ export interface SearchFormProps {
 }
 
 /**
- * Search form with input and submit button
+ * Search form with input and magnifier submit button
  */
 export const SearchForm = ({
   initialValue = "",
@@ -58,53 +63,50 @@ export const SearchForm = ({
     onSearch("");
   };
 
+  const canSubmit = value.trim().length >= 2 && !isLoading;
+
   return (
-    <form onSubmit={handleSubmit} className="w-full">
-      <div className="relative">
-        {/* Search Icon */}
-        <div className="absolute top-1/2 left-5 -translate-y-1/2 text-gray-400">
-          <Icon icon={Search} size="md" />
-        </div>
-
-        {/* Input */}
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder={placeholder}
-          className="focus:border-green-main focus:ring-green-main/20 w-full rounded-lg border-2 border-gray-200 py-5 pr-28 pl-14 text-xl transition-colors focus:ring-2 focus:outline-none"
-          disabled={isLoading}
-          autoFocus
-        />
-
-        {/* Clear Button */}
-        {value.length > 0 && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute top-1/2 right-24 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
-            aria-label="Wis zoekopdracht"
-          >
-            <Icon icon={X} size="md" />
-          </button>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={isLoading || value.trim().length < 2}
-          className="bg-green-main hover:bg-green-hover absolute top-1/2 right-2 -translate-y-1/2 rounded-md px-5 py-3 text-base font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Zoek
-        </button>
-      </div>
-
-      {/* Hint Text */}
-      {value.trim().length > 0 && value.trim().length < 2 && (
-        <p className="mt-2 text-sm text-gray-500">
-          Typ minimaal 2 karakters om te zoeken
-        </p>
+    <form
+      onSubmit={handleSubmit}
+      className={cn(
+        searchFieldShellClasses,
+        "focus-within:ring-warm transition-shadow focus-within:ring-2",
       )}
+    >
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder={placeholder}
+        aria-label="Zoekterm"
+        className="text-ink placeholder:text-ink-muted bg-cream min-w-0 flex-1 px-4 py-4 text-[length:var(--text-body-lg)] outline-none focus:outline-hidden disabled:opacity-60 md:px-5"
+        disabled={isLoading}
+        autoFocus
+      />
+
+      {/* Clear — ghost cell blended into the cream input, left of the warm
+          magnifier cell. Always enabled (resets even while a fetch is in
+          flight and the input is disabled). */}
+      {value.length > 0 && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="text-ink-muted hover:text-ink bg-cream flex items-center px-2 transition-colors"
+          aria-label="Wis zoekopdracht"
+        >
+          <X className="h-5 w-5" aria-hidden />
+        </button>
+      )}
+
+      {/* Submit — warm-gold accent cell; magnifier replaces the "ZOEK" word. */}
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className="bg-warm text-ink border-ink flex items-center border-l-2 px-5 transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+        aria-label="Zoeken"
+      >
+        <MagnifyingGlass className="h-[23px] w-[23px]" aria-hidden />
+      </button>
     </form>
   );
 };

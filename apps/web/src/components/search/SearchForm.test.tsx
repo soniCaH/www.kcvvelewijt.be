@@ -19,7 +19,7 @@ describe("SearchForm", () => {
     it("should render submit button", () => {
       render(<SearchForm onSearch={vi.fn()} />);
 
-      const button = screen.getByRole("button", { name: /zoek/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).toBeInTheDocument();
     });
 
@@ -101,7 +101,7 @@ describe("SearchForm", () => {
     it("should disable submit button when input is empty", () => {
       render(<SearchForm onSearch={vi.fn()} />);
 
-      const button = screen.getByRole("button", { name: /zoek/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).toBeDisabled();
     });
 
@@ -112,7 +112,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "   ");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).toBeDisabled();
     });
 
@@ -123,7 +123,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "a");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).toBeDisabled();
     });
 
@@ -134,52 +134,8 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "ab");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).not.toBeDisabled();
-    });
-
-    it("should show hint text when input has 1 character", async () => {
-      const user = userEvent.setup();
-      render(<SearchForm onSearch={vi.fn()} />);
-
-      const input = screen.getByRole("textbox");
-      await user.type(input, "a");
-
-      expect(
-        screen.getByText("Typ minimaal 2 karakters om te zoeken"),
-      ).toBeInTheDocument();
-    });
-
-    it("should not show hint text when input is empty", () => {
-      render(<SearchForm onSearch={vi.fn()} />);
-
-      expect(
-        screen.queryByText("Typ minimaal 2 karakters om te zoeken"),
-      ).not.toBeInTheDocument();
-    });
-
-    it("should not show hint text when input has 2+ characters", async () => {
-      const user = userEvent.setup();
-      render(<SearchForm onSearch={vi.fn()} />);
-
-      const input = screen.getByRole("textbox");
-      await user.type(input, "abc");
-
-      expect(
-        screen.queryByText("Typ minimaal 2 karakters om te zoeken"),
-      ).not.toBeInTheDocument();
-    });
-
-    it("should not show hint text when input only has whitespace", async () => {
-      const user = userEvent.setup();
-      render(<SearchForm onSearch={vi.fn()} />);
-
-      const input = screen.getByRole("textbox");
-      await user.type(input, "  ");
-
-      expect(
-        screen.queryByText("Typ minimaal 2 karakters om te zoeken"),
-      ).not.toBeInTheDocument();
     });
   });
 
@@ -260,7 +216,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "  test query  ");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(button);
 
       expect(handleSearch).toHaveBeenCalledWith("test query");
@@ -286,7 +242,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "a");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       // Button should be disabled, so click won't work
       expect(button).toBeDisabled();
       expect(handleSearch).not.toHaveBeenCalled();
@@ -300,7 +256,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "   ");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       // Button should be disabled, so click won't work
       expect(button).toBeDisabled();
       expect(handleSearch).not.toHaveBeenCalled();
@@ -343,7 +299,7 @@ describe("SearchForm", () => {
         <SearchForm onSearch={vi.fn()} isLoading={true} initialValue="test" />,
       );
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).toBeDisabled();
     });
 
@@ -354,7 +310,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       expect(button).not.toBeDisabled();
     });
   });
@@ -387,7 +343,7 @@ describe("SearchForm", () => {
       await user.tab();
 
       // Next tab should focus the submit button
-      const submitButton = screen.getByRole("button", { name: /^zoek$/i });
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       expect(submitButton).toHaveFocus();
     });
 
@@ -399,7 +355,7 @@ describe("SearchForm", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
 
-      const button = screen.getByRole("button", { name: /^zoek$/i });
+      const button = screen.getByRole("button", { name: /^zoeken$/i });
       button.focus();
       await user.keyboard("{Enter}");
 
