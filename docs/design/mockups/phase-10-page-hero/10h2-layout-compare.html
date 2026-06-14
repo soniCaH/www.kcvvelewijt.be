@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · generic page-hero · 10h2: LAYOUT / IA compare (voice C locked)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; }
+      .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--cream-deep); color: var(--ink); border-bottom: 2px solid var(--ink); padding: 9px 28px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; }
+      .lockbar b { background: var(--jersey-deep); color: var(--cream); padding: 2px 8px; }
+      .direction-bar {
+        position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em;
+        text-transform: uppercase; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); flex-wrap: wrap;
+      }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 24px 28px 36px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 1180px; margin: 0 auto; }
+      .states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+      .statelabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 8px; }
+
+      /* ===== shared content kit ===== */
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); display: inline-block; }
+      .eh { font-family: var(--font-display); font-weight: 900; font-style: normal; line-height: 0.95; margin: 9px 0 0; letter-spacing: -0.01em; font-size: clamp(1.5rem, 3vw, 2.3rem); }
+      .eh .accent { font-style: italic; color: var(--jersey-deep); }
+      .eh .dot { color: var(--warm); }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; line-height: 1.38; font-size: clamp(0.95rem, 1.3vw, 1.1rem); margin: 12px 0 0; color: var(--ink-soft); }
+
+      /* card shell (voice C — locked) */
+      .card { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 26px 24px; }
+      .cardtape { position: absolute; top: -12px; left: 28px; width: 96px; height: 22px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .cardtape.c { left: 50%; transform: translateX(-50%) rotate(-2deg); }
+
+      /* taped figure */
+      .tfig { position: relative; border: 2px solid var(--ink); background: var(--cream-soft); padding: 6px; box-shadow: 3px 3px 0 0 var(--ink); }
+      .tfig .photo { display: block; width: 100%; background: linear-gradient(135deg, #6b8f7a 0%, #3f6b54 55%, #244536 100%); filter: sepia(0.32) saturate(0.82) contrast(1.02); }
+      .tfig .photo.r43 { aspect-ratio: 4/3; } .tfig .photo.wide { aspect-ratio: 16/7; }
+      .tape2 { position: absolute; top: -9px; right: 18px; width: 60px; height: 17px; background: var(--warm); border: 1.5px solid var(--ink); transform: rotate(3deg); }
+
+      /* α split */
+      .lay-split { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; align-items: center; }
+      .lay-split.solo { grid-template-columns: 1fr; }
+      /* β broadsheet */
+      .lay-broad .head { } .lay-broad .fig { margin-top: 16px; } .lay-broad .lead { max-width: 52ch; }
+      /* γ poster */
+      .lay-poster { text-align: center; } .lay-poster .kicker, .lay-poster .eh, .lay-poster .lead { } .lay-poster .lead { margin-left: auto; margin-right: auto; max-width: 46ch; } .lay-poster .fig { margin: 16px auto 0; max-width: 460px; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 40px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; }
+      .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; }
+      .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+      @media (max-width: 900px) { .states { grid-template-columns: 1fr; } .lay-split { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · Generic page-hero · 10h2 — LAYOUT / IA compare</h1>
+      <p>
+        Round 2 drills how the <b>cream paper-card</b> composes its real fields, using the genuine content of the 4 surfaces.
+        Columns are the three content states every surface degrades through: <b>① marquee</b> (image + lead — kalender),
+        <b>② motto</b> (no image, lead + one-word accent — club index), <b>③ bare</b> (no image, no lead — scheurkalender / a CMS title).
+        Pick the layout system; it must read well in all three.
+      </p>
+    </div>
+    <div class="lockbar">ROUND 1 LOCKED → <b>Voice C · cream paper-card</b> (TapedCard · ink border + hard shadow + tape · ink text · TapedFigure inset).</div>
+
+    <!-- ===== α SPLIT ===== -->
+    <div class="direction-bar"><span class="tag">α</span> Split &nbsp;<span class="note">text-left · TapedFigure right · no-image collapses to full-width text</span></div>
+    <div class="stage"><div class="wrap states">
+      <div><p class="statelabel">① marquee (kalender)</p>
+        <div class="card"><span class="cardtape"></span><div class="lay-split">
+          <div><span class="kicker">Kalender</span><h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1><p class="lead">Alle wedstrijden en activiteiten, seizoen na seizoen.</p></div>
+          <div class="tfig"><span class="tape2"></span><span class="photo r43"></span></div>
+        </div></div>
+      </div>
+      <div><p class="statelabel">② motto (club index)</p>
+        <div class="card"><span class="cardtape"></span><div class="lay-split solo">
+          <div><span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1><p class="lead">Er is maar één plezante compagnie.</p></div>
+        </div></div>
+      </div>
+      <div><p class="statelabel">③ bare (scheurkalender)</p>
+        <div class="card"><span class="cardtape"></span><div class="lay-split solo">
+          <div><span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1></div>
+        </div></div>
+      </div>
+    </div></div>
+
+    <!-- ===== β BROADSHEET ===== -->
+    <div class="direction-bar"><span class="tag">β</span> Broadsheet &nbsp;<span class="note">headline full-width top · wide TapedFigure band beneath · lead column</span></div>
+    <div class="stage"><div class="wrap states">
+      <div><p class="statelabel">① marquee (kalender)</p>
+        <div class="card"><span class="cardtape"></span><div class="lay-broad">
+          <div class="head"><span class="kicker">Kalender</span><h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1></div>
+          <div class="fig tfig"><span class="tape2"></span><span class="photo wide"></span></div>
+          <p class="lead">Alle wedstrijden en activiteiten, seizoen na seizoen.</p>
+        </div></div>
+      </div>
+      <div><p class="statelabel">② motto (club index)</p>
+        <div class="card"><span class="cardtape"></span><div class="lay-broad">
+          <div class="head"><span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1></div>
+          <p class="lead">Er is maar één plezante compagnie.</p>
+        </div></div>
+      </div>
+      <div><p class="statelabel">③ bare (scheurkalender)</p>
+        <div class="card"><span class="cardtape"></span><div class="lay-broad">
+          <div class="head"><span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1></div>
+        </div></div>
+      </div>
+    </div></div>
+
+    <!-- ===== γ POSTER ===== -->
+    <div class="direction-bar"><span class="tag">γ</span> Poster &nbsp;<span class="note">centered kicker + headline + lead · TapedFigure centered below</span></div>
+    <div class="stage"><div class="wrap states">
+      <div><p class="statelabel">① marquee (kalender)</p>
+        <div class="card"><span class="cardtape c"></span><div class="lay-poster">
+          <div><span class="kicker">Kalender</span><h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1><p class="lead">Alle wedstrijden en activiteiten, seizoen na seizoen.</p></div>
+          <div class="fig tfig"><span class="tape2"></span><span class="photo r43"></span></div>
+        </div></div>
+      </div>
+      <div><p class="statelabel">② motto (club index)</p>
+        <div class="card"><span class="cardtape c"></span><div class="lay-poster">
+          <span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1><p class="lead">Er is maar één plezante compagnie.</p>
+        </div></div>
+      </div>
+      <div><p class="statelabel">③ bare (scheurkalender)</p>
+        <div class="card"><span class="cardtape c"></span><div class="lay-poster">
+          <span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1>
+        </div></div>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>What's being decided</h3>
+      <ul>
+        <li><b>α Split</b> — asymmetric editorial; photo is a true hero partner. No-image cleanly collapses to full-width text. Long CMS titles get less width. Most like TeamHero/BoardHero IA.</li>
+        <li><b>β Broadsheet</b> — headline owns the full card width (best for long CMS titles + the motto); photo is a wide landscape band. No-image/no-lead states are very clean. Photo feels more "figure" than "hero partner".</li>
+        <li><b>γ Poster</b> — symmetrical, ceremonial; great for the club-index marquee. But centered editorial fights the left-aligned system used everywhere else in the redesign, and bare titles can look stranded.</li>
+      </ul>
+      <h3>Fields the hero exposes (same in all layouts)</h3>
+      <ul>
+        <li><code>kicker</code> (req) · <code>headline</code> + optional one-word <code>accent</code> + "." (req) · <code>lead</code> (opt, auto-hides) · <code>image</code> (opt) · <code>cta</code> (opt — none of the 4 pass it today, but kept for parity).</li>
+      </ul>
+      <div class="q"><b>ROUND 2 — pick the layout</b> (α split · β broadsheet · γ poster · or a note). Round 3 then drills per-element details: image aspect + tape, accent rules, compact size for utility/loading pages, CTA.</div>
+      <p class="micro">phase-10 · 10h2 · generic page-hero layout · voice C locked · real surface content</p>
+    </div>
+  </body>
+</html>

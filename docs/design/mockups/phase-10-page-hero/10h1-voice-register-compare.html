@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · generic page-hero · 10h1: VOICE / REGISTER compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--cream); color: var(--ink);
+        font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; }
+      .harness-head b { color: var(--warm); }
+      .direction-bar {
+        position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em;
+        text-transform: uppercase; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); flex-wrap: wrap;
+      }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 26px 28px 40px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 1080px; margin: 0 auto; }
+      .statelabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 8px; }
+      .two { display: grid; grid-template-columns: 1fr; gap: 26px; }
+
+      /* ===== shared content kit (maps to real primitives) ===== */
+      .kicker { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); display: inline-block; }
+      .kicker.cream { color: var(--cream); }
+      .eh { font-family: var(--font-display); font-weight: 900; font-style: normal; line-height: 0.94; margin: 12px 0 0; letter-spacing: -0.01em; font-size: clamp(2.4rem, 6vw, 4.2rem); }
+      .eh .accent { font-style: italic; color: var(--jersey-deep); font-weight: 900; }
+      .eh.cream { color: var(--cream); } .eh.cream .accent { color: var(--warm); }
+      .eh .dot { color: var(--warm); font-style: normal; }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; line-height: 1.4; font-size: clamp(1.05rem, 2vw, 1.4rem); margin: 16px 0 0; max-width: 40ch; color: var(--ink-soft); }
+      .lead.cream { color: rgba(245,241,230,0.85); }
+
+      /* taped figure (newsprint photo + tape) */
+      .tfig { position: relative; border: 2px solid var(--ink); background: var(--cream-soft); padding: 8px; box-shadow: 3px 4px 0 0 var(--ink); }
+      .tfig .photo { display: block; width: 100%; aspect-ratio: 4 / 3; background:
+        linear-gradient(135deg, #6b8f7a 0%, #3f6b54 55%, #244536 100%);
+        filter: sepia(0.32) saturate(0.82) contrast(1.02); }
+      .tfig.dark { background: var(--cream); }
+      .tape { position: absolute; top: -11px; left: 28px; width: 78px; height: 22px; background: var(--warm); border: 1.5px solid var(--ink); transform: rotate(-4deg); opacity: 0.92; }
+      .tape.r { left: auto; right: 30px; transform: rotate(3deg); }
+
+      /* ===== Variant A — cream-minimal ===== */
+      .vA { background: var(--cream); padding: 40px 34px; border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); }
+      .vA .belowfig { margin-top: 24px; max-width: 620px; }
+
+      /* ===== Variant B — dark band ===== */
+      .vB { background: var(--jersey-deep-dark); padding: 40px 34px; border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); position: relative; overflow: hidden; }
+      .vB::before { content: ""; position: absolute; inset: 0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E"); pointer-events: none; }
+      .vB .grid { position: relative; display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; align-items: center; }
+      .vB .grid.solo { grid-template-columns: 1fr; }
+      .vB .jersey-fallback { display: grid; place-items: center; aspect-ratio: 4/3; border: 2px solid var(--cream); background: var(--jersey-deep); }
+      .vB .jersey-fallback span { font-family: var(--font-display); font-weight: 900; font-size: 3rem; color: var(--cream); }
+
+      /* ===== Variant C — cream paper-card ===== */
+      .vC { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 7px 0 0 var(--ink); padding: 38px 34px; }
+      .vC .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 30px; align-items: center; }
+      .vC .grid.solo { grid-template-columns: 1fr; }
+      .vC .cardtape { position: absolute; top: -13px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 150px; height: 26px; background: var(--warm); border: 2px solid var(--ink); }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 40px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; }
+      .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; }
+      .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · Generic page-hero · 10h1 — VOICE / REGISTER compare</h1>
+      <p>
+        Replaces the legacy dark-gradient <b>&lt;InteriorPageHero&gt;</b> on /kalender, /club, /club/[slug], /scheurkalender.
+        Round 1 locks the <b>chrome register</b> only — fields, image rules and per-element details come in later rounds.
+        Same content kit in all three (mono <b>kicker</b> + Freight <b>EditorialHeading</b> with "." accent + italic
+        <b>lead</b> + <b>TapedFigure</b> newsprint photo). Each register is shown in its two real states:
+        <b>WITH image</b> (kalender marquee) and <b>NO image</b> (club-index motto, with a one-word accent).
+      </p>
+    </div>
+
+    <!-- ============ VARIANT A ============ -->
+    <div class="direction-bar">
+      <span class="tag">A</span> Cream-minimal
+      <span class="note">bg-cream · ink text · no band · photo drops to a TapedFigure below — the /privacy register</span>
+    </div>
+    <div class="stage"><div class="wrap two">
+      <div>
+        <p class="statelabel">State 1 · WITH image (kalender)</p>
+        <div class="vA">
+          <span class="kicker">Kalender</span>
+          <h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1>
+          <p class="lead">Alle wedstrijden en activiteiten van KCVV Elewijt, seizoen na seizoen.</p>
+          <div class="belowfig tfig"><span class="tape"></span><span class="photo"></span></div>
+        </div>
+      </div>
+      <div>
+        <p class="statelabel">State 2 · NO image (club index)</p>
+        <div class="vA">
+          <span class="kicker">Onze club</span>
+          <h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1>
+          <p class="lead">Er is maar één plezante compagnie.</p>
+        </div>
+      </div>
+    </div></div>
+
+    <!-- ============ VARIANT B ============ -->
+    <div class="direction-bar">
+      <span class="tag">B</span> Dark band
+      <span class="note">bg-jersey-deep-dark · cream text · warm "." · TapedFigure pops on dark / JerseyShirt fallback — the BoardHero register</span>
+    </div>
+    <div class="stage"><div class="wrap two">
+      <div>
+        <p class="statelabel">State 1 · WITH image (kalender)</p>
+        <div class="vB"><div class="grid">
+          <div>
+            <span class="kicker cream">Kalender</span>
+            <h1 class="eh cream">Wedstrijd&shy;kalender<span class="dot">.</span></h1>
+            <p class="lead cream">Alle wedstrijden en activiteiten van KCVV Elewijt, seizoen na seizoen.</p>
+          </div>
+          <div class="tfig dark"><span class="tape r"></span><span class="photo"></span></div>
+        </div></div>
+      </div>
+      <div>
+        <p class="statelabel">State 2 · NO image (club index → JerseyShirt fallback)</p>
+        <div class="vB"><div class="grid">
+          <div>
+            <span class="kicker cream">Onze club</span>
+            <h1 class="eh cream">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1>
+            <p class="lead cream">Er is maar één plezante compagnie.</p>
+          </div>
+          <div class="jersey-fallback"><span>KCVV</span></div>
+        </div></div>
+      </div>
+    </div></div>
+
+    <!-- ============ VARIANT C ============ -->
+    <div class="direction-bar">
+      <span class="tag">C</span> Cream paper-card
+      <span class="note">cream TapedCard · ink border + hard shadow + tape · TapedFigure inset — the memorabilia register</span>
+    </div>
+    <div class="stage"><div class="wrap two">
+      <div>
+        <p class="statelabel">State 1 · WITH image (kalender)</p>
+        <div class="vC"><span class="cardtape"></span><div class="grid">
+          <div>
+            <span class="kicker">Kalender</span>
+            <h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1>
+            <p class="lead">Alle wedstrijden en activiteiten van KCVV Elewijt, seizoen na seizoen.</p>
+          </div>
+          <div class="tfig"><span class="tape r"></span><span class="photo"></span></div>
+        </div></div>
+      </div>
+      <div>
+        <p class="statelabel">State 2 · NO image (club index)</p>
+        <div class="vC"><span class="cardtape"></span><div class="grid solo">
+          <div>
+            <span class="kicker">Onze club</span>
+            <h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1>
+            <p class="lead">Er is maar één plezante compagnie.</p>
+          </div>
+        </div></div>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Primitive mapping (no new vocabulary)</h3>
+      <ul>
+        <li><b>Kicker</b> → <code>&lt;MonoLabel variant="plain"&gt;</code> (jersey-deep raw label-token span on cream; cream on dark).</li>
+        <li><b>Headline</b> → <code>&lt;EditorialHeading level=1&gt;</code> — Freight, upright, italic jersey-deep/warm accent word + warm "." terminator.</li>
+        <li><b>Lead</b> → italic <code>font-display</code> (auto-hides when absent — see club/[slug] + scheurkalender).</li>
+        <li><b>Photo</b> → <code>&lt;TapedFigure&gt;</code> newsprint (colour, not greyscale) + one tape strip; <b>no photo</b> → text-only (A) / <code>&lt;JerseyShirt&gt;</code> (B) / text-only (C).</li>
+      </ul>
+      <h3>Trade-offs</h3>
+      <ul>
+        <li><b>A cream-minimal</b> — calmest, perfect for plain/CMS pages; but light presence on marquee pages, and the photo reads as "below the title" rather than part of the hero.</li>
+        <li><b>B dark band</b> — strongest marquee presence + best photo pop; but a dark band on <em>every</em> interior page (incl. utility ones) can feel heavy/repetitive, and it's the closest to the legacy dark hero it replaces.</li>
+        <li><b>C cream paper-card</b> — most retro-terrace character, one shape handles image/no-image; but a bordered card hero is the heaviest chrome and must not read as just another content card.</li>
+      </ul>
+      <div class="q">
+        <b>ROUND 1 — pick the voice.</b> Which chrome register should the generic page-hero adopt? (A cream-minimal · B dark band · C cream paper-card · or a hybrid — e.g. "C with a register prop that flips to B's dark fill for marquee pages".) Once locked, Round 2 drills the real fields + image rules.
+      </div>
+      <p class="micro">phase-10 · 10h1 · generic page-hero voice · placeholder content expected at this stage</p>
+    </div>
+  </body>
+</html>

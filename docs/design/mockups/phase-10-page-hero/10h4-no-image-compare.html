@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · generic page-hero · 10h4: NO-IMAGE rendering (C + split α + compact locked)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--cream-deep); color: var(--ink); border-bottom: 2px solid var(--ink); padding: 9px 28px; font-family: var(--font-mono); font-size: 12px; } .lockbar b { background: var(--jersey-deep); color: var(--cream); padding: 2px 8px; }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream); padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); flex-wrap: wrap; }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 24px 28px 36px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 1180px; margin: 0 auto; }
+      .two { display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; align-items: start; }
+      .statelabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 8px; }
+
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); display: inline-block; }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.95; margin: 9px 0 0; letter-spacing: -0.01em; }
+      .eh .accent { font-style: italic; color: var(--jersey-deep); } .eh .dot { color: var(--warm); }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; line-height: 1.38; margin: 12px 0 0; color: var(--ink-soft); }
+
+      .card { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 26px 24px; }
+      .card.compact { padding: 18px 20px; box-shadow: 4px 4px 0 0 var(--ink); }
+      .cardtape { position: absolute; top: -12px; left: 28px; width: 92px; height: 21px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .split { display: grid; grid-template-columns: 1.25fr 1fr; gap: 22px; align-items: center; }
+
+      /* n1 typographic — headline scales up, no slot */
+      .n1 .eh { font-size: clamp(2.4rem, 5.5vw, 4rem); }
+      .n1 .lead { font-size: 1.25rem; max-width: 36ch; }
+      .n1 .divider { margin-top: 18px; height: 0; border-top: 2px dotted var(--ink); width: 120px; }
+      .n1.compact .eh { font-size: clamp(1.7rem, 3vw, 2.2rem); }
+
+      /* n2 JerseyShirt fallback in the photo slot */
+      .jersey-slot { border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 3px 3px 0 0 var(--ink); aspect-ratio: 4/3; display: grid; place-items: center; position: relative; overflow: hidden; }
+      .jersey-slot svg { width: 62%; height: 62%; }
+      .n2 .eh { font-size: clamp(1.7rem, 3vw, 2.4rem); } .n2 .lead { font-size: 1.05rem; }
+
+      /* n3 paper ornament in the slot */
+      .ornament { border: 2px solid var(--ink); background: var(--jersey-deep); box-shadow: 3px 3px 0 0 var(--ink); aspect-ratio: 4/3; display: grid; place-items: center; position: relative; overflow: hidden; }
+      .ornament .glyph { font-family: var(--font-display); font-style: italic; font-weight: 900; font-size: 8rem; color: var(--warm); line-height: 0.6; }
+      .ornament .seam { position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background: repeating-linear-gradient(135deg, var(--ink) 0 8px, var(--cream) 8px 16px); border-top: 2px solid var(--ink); }
+      .n3 .eh { font-size: clamp(1.7rem, 3vw, 2.4rem); } .n3 .lead { font-size: 1.05rem; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 40px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; }
+      .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · Generic page-hero · 10h4 — NO-IMAGE rendering</h1>
+      <p>"If you don't have an image, what are you rendering anyway?" — 2 of 4 surfaces are usually image-less. Each option below is shown for the <b>club-index motto</b> (default size) and the <b>scheurkalender bare title</b> (compact). The locked split only applies when an image exists; this round decides what the no-image hero is.</p>
+    </div>
+    <div class="lockbar">LOCKED → <b>C cream paper-card</b> · <b>α split</b> (image only) · <b>m1</b> mobile · <b>compact</b> size for utility/loading.</div>
+
+    <!-- n1 -->
+    <div class="direction-bar"><span class="tag">n1</span> Typographic — headline owns the space <span class="note">no slot · headline scales up · dotted rule for texture</span></div>
+    <div class="stage"><div class="wrap two">
+      <div><p class="statelabel">club index · default</p>
+        <div class="card n1"><span class="cardtape"></span>
+          <span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1>
+          <p class="lead">Er is maar één plezante compagnie.</p><div class="divider"></div>
+        </div></div>
+      <div><p class="statelabel">scheurkalender · compact</p>
+        <div class="card compact n1"><span class="cardtape"></span>
+          <span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1>
+        </div></div>
+    </div></div>
+
+    <!-- n2 -->
+    <div class="direction-bar"><span class="tag">n2</span> JerseyShirt fallback <span class="note">keep the split · fill the slot with the &lt;JerseyShirt&gt; illustration</span></div>
+    <div class="stage"><div class="wrap two">
+      <div><p class="statelabel">club index · default</p>
+        <div class="card n2"><span class="cardtape"></span><div class="split">
+          <div><span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1><p class="lead">Er is maar één plezante compagnie.</p></div>
+          <div class="jersey-slot"><svg viewBox="0 0 100 110" aria-hidden="true"><g fill="var(--jersey-deep)"><ellipse cx="50" cy="20" rx="13" ry="14"/><path d="M20 44 L38 32 L62 32 L80 44 L72 60 L72 104 L28 104 L28 60 Z"/></g><g fill="none" stroke="var(--ink)" stroke-width="3"><path d="M20 44 L38 32 L62 32 L80 44 L72 60 L72 104 L28 104 L28 60 Z"/><path d="M44 33 L50 44 L56 33"/></g><g stroke="var(--ink)" stroke-width="2"><line x1="40" y1="46" x2="40" y2="104"/><line x1="50" y1="46" x2="50" y2="104"/><line x1="60" y1="46" x2="60" y2="104"/></g></svg></div>
+        </div></div></div>
+      <div><p class="statelabel">scheurkalender · compact (slot suppressed in compact)</p>
+        <div class="card compact n2"><span class="cardtape"></span>
+          <span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1>
+        </div></div>
+    </div></div>
+
+    <!-- n3 -->
+    <div class="direction-bar"><span class="tag">n3</span> Paper ornament <span class="note">fill the slot with a jersey-deep panel + oversized Freight quote glyph + seam</span></div>
+    <div class="stage"><div class="wrap two">
+      <div><p class="statelabel">club index · default</p>
+        <div class="card n3"><span class="cardtape"></span><div class="split">
+          <div><span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1><p class="lead">Er is maar één plezante compagnie.</p></div>
+          <div class="ornament"><span class="glyph">,,</span><span class="seam"></span></div>
+        </div></div></div>
+      <div><p class="statelabel">scheurkalender · compact (slot suppressed in compact)</p>
+        <div class="card compact n3"><span class="cardtape"></span>
+          <span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1>
+        </div></div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Trade-offs</h3>
+      <ul>
+        <li><b>n1 typographic</b> — honest + calm; the headline becomes the hero, no faux-filler. Scales perfectly to compact. Risk: a no-lead bare page is still quiet (but that's arguably correct for /scheurkalender).</li>
+        <li><b>n2 JerseyShirt</b> — keeps the split rhythm + adds the brand illustration. Risk: a jersey on /kalender or a CMS page can read as random/off-topic (JerseyShirt "means" player/team elsewhere).</li>
+        <li><b>n3 ornament</b> — adds paper character + colour pop without claiming to be a photo. Risk: an oversized quote glyph is decorative filler; needs a motif that doesn't feel arbitrary.</li>
+      </ul>
+      <div class="q"><b>ROUND 4 — pick the no-image rendering</b> (n1 / n2 / n3). After this the hero is fully locked; remaining micro-bits (image aspect 4:3, single tape strip, accent = one word italic jersey-deep + warm ".", optional CTA slot) I'll lock as defaults in the spec unless you flag one.</div>
+      <p class="micro">phase-10 · 10h4 · no-image rendering · C + α + compact locked</p>
+    </div>
+  </body>
+</html>

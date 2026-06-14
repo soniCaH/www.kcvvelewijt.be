@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · generic page-hero · LOCKED reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Archivo", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--jersey-deep); color: var(--cream); border-bottom: 2px solid var(--ink); padding: 10px 28px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; display: flex; gap: 10px; flex-wrap: wrap; }
+      .lockbar b { background: var(--warm); color: var(--ink); padding: 2px 8px; }
+      .stage { padding: 26px 28px 38px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 1180px; margin: 0 auto; }
+      .statelabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 10px; }
+      .statelabel b { color: var(--jersey-deep); }
+
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); display: inline-block; }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.95; margin: 9px 0 0; letter-spacing: -0.01em; }
+      .eh .accent { font-style: italic; color: var(--jersey-deep); } .eh .dot { color: var(--warm); }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; line-height: 1.38; margin: 14px 0 0; color: var(--ink-soft); }
+
+      .card { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 28px 26px; }
+      .card.compact { padding: 18px 20px; box-shadow: 4px 4px 0 0 var(--ink); }
+      .cardtape { position: absolute; top: -12px; left: 30px; width: 96px; height: 22px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .tfig { position: relative; border: 2px solid var(--ink); background: var(--cream-soft); padding: 6px; box-shadow: 3px 3px 0 0 var(--ink); }
+      .tfig .photo { display: block; width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, #6b8f7a 0%, #3f6b54 55%, #244536 100%); filter: sepia(0.32) saturate(0.82) contrast(1.02); }
+      .tape2 { position: absolute; top: -9px; right: 18px; width: 58px; height: 16px; background: var(--warm); border: 1.5px solid var(--ink); transform: rotate(3deg); }
+
+      .split { display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; align-items: center; }
+      .cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; border: 2px solid var(--ink); background: var(--jersey-deep); color: var(--cream); padding: 9px 15px; box-shadow: 3px 3px 0 0 var(--ink); }
+
+      /* no-image typographic */
+      .typo .eh { font-size: clamp(2.4rem, 5.5vw, 4rem); } .typo .lead { font-size: 1.25rem; max-width: 38ch; }
+      .typo .divider { margin-top: 18px; height: 0; border-top: 2px dotted var(--ink); width: 120px; }
+      /* with-image headline */
+      .withimg .eh { font-size: clamp(1.8rem, 3.2vw, 2.6rem); } .withimg .lead { font-size: 1.05rem; }
+      .compact .eh { font-size: clamp(1.5rem, 2.6vw, 2rem); }
+
+      .phone { width: 360px; max-width: 100%; } .phone .frame { border: 2px solid var(--ink); box-shadow: 4px 5px 0 0 var(--ink); background: var(--cream-soft); padding: 10px; }
+      .stackTP { display: flex; flex-direction: column; gap: 16px; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 40px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · Generic page-hero (#2120) — LOCKED reference</h1>
+      <p>The redesigned generic page-hero that replaces the legacy dark-gradient <b>&lt;InteriorPageHero&gt;</b> on /kalender, /club, /club/[slug], /scheurkalender. Canonical reference for implementation. Drill rounds: 10h1 (voice) → 10h2 (layout) → 10h3 (responsive+size) → 10h4 (no-image).</p>
+    </div>
+    <div class="lockbar">
+      <span><b>C</b> cream paper-card</span><span><b>α</b> split (image)</span><span><b>m1</b> mobile text→photo</span><span><b>compact</b> for utility</span><span><b>n1</b> typographic no-image</span>
+    </div>
+
+    <!-- 1. marquee with image -->
+    <div class="stage"><div class="wrap">
+      <p class="statelabel"><b>1 · /kalender</b> — image + lead (desktop split)</p>
+      <div class="card withimg"><span class="cardtape"></span><div class="split">
+        <div><span class="kicker">Kalender</span><h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1><p class="lead">Alle wedstrijden en activiteiten van KCVV Elewijt, seizoen na seizoen.</p></div>
+        <div class="tfig"><span class="tape2"></span><span class="photo"></span></div>
+      </div></div>
+    </div></div>
+
+    <!-- 2. motto no image -->
+    <div class="stage"><div class="wrap">
+      <p class="statelabel"><b>2 · /club</b> — no image, lead + one-word accent (n1 typographic)</p>
+      <div class="card typo"><span class="cardtape"></span>
+        <span class="kicker">Onze club</span><h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1>
+        <p class="lead">Er is maar één plezante compagnie.</p><div class="divider"></div>
+      </div>
+    </div></div>
+
+    <!-- 3. CMS title with optional image + CTA -->
+    <div class="stage"><div class="wrap">
+      <p class="statelabel"><b>3 · /club/[slug]</b> — CMS title, optional image, optional CTA slot</p>
+      <div class="card withimg"><span class="cardtape"></span><div class="split">
+        <div><span class="kicker">Club</span><h1 class="eh">Het verhaal van <span class="accent">de Klakkei</span><span class="dot">.</span></h1>
+          <a class="cta">Lees meer →</a></div>
+        <div class="tfig"><span class="tape2"></span><span class="photo"></span></div>
+      </div></div>
+    </div></div>
+
+    <!-- 4. bare compact -->
+    <div class="stage"><div class="wrap">
+      <p class="statelabel"><b>4 · /scheurkalender</b> (+ loading skeletons) — bare title, compact, no image</p>
+      <div class="card compact typo"><span class="cardtape"></span>
+        <span class="kicker">Kalender</span><h1 class="eh">Scheurkalender<span class="dot">.</span></h1>
+      </div>
+    </div></div>
+
+    <!-- 5. mobile -->
+    <div class="stage"><div class="wrap">
+      <p class="statelabel"><b>5 · mobile</b> — split collapses to m1 (text → photo)</p>
+      <div class="phone"><div class="frame"><div class="card withimg"><span class="cardtape"></span><div class="stackTP">
+        <div><span class="kicker">Kalender</span><h1 class="eh">Wedstrijd&shy;kalender<span class="dot">.</span></h1><p class="lead">Alle wedstrijden en activiteiten, seizoen na seizoen.</p></div>
+        <div class="tfig"><span class="tape2"></span><span class="photo"></span></div>
+      </div></div></div></div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Locked spec — primitive composition (no new vocabulary)</h3>
+      <ul>
+        <li><b>Shell</b> → <code>&lt;TapedCard&gt;</code> cream, <code>border-2 border-ink</code> + hard offset shadow + one <code>&lt;TapeStrip&gt;</code> (warm, top-left). Sharp corners.</li>
+        <li><b>Kicker</b> → <code>&lt;MonoLabel variant="plain"&gt;</code> (jersey-deep raw label-token span).</li>
+        <li><b>Headline</b> → <code>&lt;EditorialHeading level=1&gt;</code> Freight upright; optional one-word italic jersey-deep <b>accent</b>; warm "." terminator. Scales up in the no-image (typographic) state.</li>
+        <li><b>Lead</b> → italic <code>font-display</code>, auto-hides when absent.</li>
+        <li><b>Image</b> → <code>&lt;TapedFigure aspect="landscape-4-3"&gt;</code> newsprint (colour), single tape strip; desktop right column, mobile below (m1). Absent → typographic (n1): no slot, headline owns the card, <code>&lt;DottedDivider&gt;</code> for texture.</li>
+        <li><b>CTA</b> → optional <code>&lt;LinkButton&gt;</code> slot (parity with legacy; none of the 4 pass it today).</li>
+        <li><b>size</b> → <code>"default" | "compact"</code> (compact: tighter padding, smaller headline, image suppressed) for loading skeletons + utility pages.</li>
+      </ul>
+      <h3>Consumers to migrate (then delete &lt;InteriorPageHero&gt;)</h3>
+      <ul>
+        <li>/kalender (page + loading) · /club (getClubSections) · /club/[slug] (page + loading) · /scheurkalender (loading).</li>
+      </ul>
+      <p class="micro">phase-10 · 10h5 · generic page-hero LOCKED · all decisions resolved 2026-06-14</p>
+    </div>
+  </body>
+</html>
