@@ -37,6 +37,9 @@ const formatDate = (date: string) =>
     day: "numeric",
     month: "short",
     year: "numeric",
+    // Pin to the club's zone so a date renders identically on the UTC
+    // SSR/build host and a Belgian client (no off-by-one / hydration drift).
+    timeZone: "Europe/Brussels",
   });
 
 /**
