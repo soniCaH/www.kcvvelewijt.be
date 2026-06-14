@@ -26,17 +26,30 @@ import { TapedCard } from "../TapedCard";
 
 export type ErrorStateActionVariant = "primary" | "ghost";
 
-/**
- * A single call-to-action in the error page's action row. Exactly one of `href`
- * (renders a `<LinkButton>`) or `onClick` (renders a `<Button>`, e.g. the 500
- * `reset()`) is expected.
- */
-export interface ErrorStateAction {
+interface ErrorStateActionBase {
   label: string;
-  href?: string;
-  onClick?: () => void;
   variant?: ErrorStateActionVariant;
 }
+
+/** A navigation action — renders a `<LinkButton>` to `href`. */
+export interface ErrorStateLinkAction extends ErrorStateActionBase {
+  href: string;
+  onClick?: never;
+}
+
+/** A button action — renders a `<Button>` (e.g. the 500 `reset()`). */
+export interface ErrorStateButtonAction extends ErrorStateActionBase {
+  onClick: () => void;
+  href?: never;
+}
+
+/**
+ * A single call-to-action in the error page's action row. Exactly one of a
+ * `href` (link) or an `onClick` (button) — the mutually-exclusive `never`
+ * fields make "both" and "neither" compile errors, so the row can never render
+ * a no-op button or silently drop an `onClick`.
+ */
+export type ErrorStateAction = ErrorStateLinkAction | ErrorStateButtonAction;
 
 export interface ErrorStateProps {
   /** HTTP code, e.g. `"404"` — rendered as the jersey shirt number. */

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
-import { ErrorState } from "./ErrorState";
+import { ErrorState, type ErrorStateProps } from "./ErrorState";
 
 /**
  * Phase 8.4 — 404 / 500 error pages. The "centered" layout was chosen over the
@@ -19,18 +19,25 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const NOT_FOUND_ARGS = {
+  code: "404",
+  codeLine: "Fout 404 · pagina niet gevonden",
+  pun: "Buiten de lijnen",
+  body: "Deze pagina staat niet (meer) op het veld. Misschien is de link verplaatst of bestaat ze niet meer.",
+  actions: [
+    { label: "Naar de homepage", href: "/", variant: "primary" },
+    { label: "Zoeken", href: "/zoeken", variant: "ghost" },
+  ],
+} satisfies ErrorStateProps;
+
+/** Controls baseline — the shipped 404 composition. */
+export const Playground: Story = {
+  args: NOT_FOUND_ARGS,
+};
+
 export const NotFound404: Story = {
   name: "404 — Buiten de lijnen",
-  args: {
-    code: "404",
-    codeLine: "Fout 404 · pagina niet gevonden",
-    pun: "Buiten de lijnen",
-    body: "Deze pagina staat niet (meer) op het veld. Misschien is de link verplaatst of bestaat ze niet meer.",
-    actions: [
-      { label: "Naar de homepage", href: "/", variant: "primary" },
-      { label: "Zoeken", href: "/zoeken", variant: "ghost" },
-    ],
-  },
+  args: NOT_FOUND_ARGS,
 };
 
 export const ServerError500: Story = {
