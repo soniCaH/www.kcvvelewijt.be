@@ -29,6 +29,13 @@ export type ErrorStateActionVariant = "primary" | "ghost";
 interface ErrorStateActionBase {
   label: string;
   variant?: ErrorStateActionVariant;
+  /**
+   * Stable analytics slug rendered as `data-error-action` (e.g. `"home"` /
+   * `"search"` / `"retry"`). A page-level `<ErrorAnalytics>` wrapper delegates
+   * clicks off this marker into `error_action_click` — so the action row stays
+   * handler-free and server-renderable. Omit it to render no marker.
+   */
+  analyticsAction?: string;
 }
 
 /** A navigation action — renders a `<LinkButton>` to `href`. */
@@ -78,7 +85,12 @@ function ActionRow({ actions }: { actions: readonly ErrorStateAction[] }) {
       {actions.map((action) => {
         const variant = action.variant ?? "primary";
         return action.href !== undefined ? (
-          <LinkButton key={action.label} href={action.href} variant={variant}>
+          <LinkButton
+            key={action.label}
+            href={action.href}
+            variant={variant}
+            data-error-action={action.analyticsAction}
+          >
             {action.label}
           </LinkButton>
         ) : (
@@ -87,6 +99,7 @@ function ActionRow({ actions }: { actions: readonly ErrorStateAction[] }) {
             type="button"
             variant={variant}
             onClick={action.onClick}
+            data-error-action={action.analyticsAction}
           >
             {action.label}
           </Button>

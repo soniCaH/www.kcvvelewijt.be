@@ -63,18 +63,24 @@ legacy tokens with zero remaining consumers on these pages.
   hard-shadow search field (cream input, ink border), **magnifier-icon button**
   (Phosphor `MagnifyingGlass` Fill, warm-gold cell) — no "ZOEK" word. Results on
   cream below.
-- **Result rows (8s2):** **clean paper rows**, single column. White card, `1.5px`
-  ink border, **5px `jersey-deep` left edge**, `2px 2px` offset shadow, canonical
-  press-down hover. Mono micro-label (type · date), bold title, snippet, article
-  tags as mono chips, arrow right. **Uniform `64×64` square thumbnail** on every
-  type (article = square crop; player/staff = square photo; **team = `jersey-deep`
-  crest disc**; missing photo = same initial-disc fallback).
+- **Result rows (8s2 — shipped as the postmark-stamp card, #2106):** the original
+  8s2 lock ("clean paper rows") was overridden during the owner Storybook review.
+  Shipped: a `cream-soft` paper card, `2px` ink border + `shadow-paper-sm`, a
+  rotated `<StampBadge tone="jersey">` type badge in the top-right corner, serif
+  (Freight) title, mono date, `<MonoLabel pill-cream>` tag chips, canonical
+  press-down hover — **no green left edge, no separate micro-label row, no arrow
+  glyph.** **Uniform `64×64` square thumbnail** on every type (newsprint-toned
+  photo; **team / missing photo = `jersey-deep` initial disc**) carries over from
+  the 8s2 refinement. See `8s2-result-vocabulary-locked.md` build-time override.
 - **Filter row (8s3):** **reuse `<FilterTabs>`** as-is — no redesign.
 - **Empty states (8s4):** football voice. **Pre-search** = paper card,
   "Waar ben je naar op **zoek**?" + explainer + three mono type-hint chips.
   **No-results** = paper card + small taped `<JerseyShirt>` + **"Geen treffers."**
-  (8s4.1) + body naming the query + inline way-forward links (nieuws · ploegen ·
-  spelers). **Loading** = existing `<Spinner>`. **Error** = paper `<Alert>` reskin.
+  (8s4.1) + body naming the query + inline way-forward links (nieuws → `/nieuws`,
+  ploegen → `/ploegen`, spelers → `/ploegen` — players have no index route, they
+  live on team pages). **Loading** = existing `<Spinner>`. **Error** = paper
+  `<Alert>` reskin. (8s1 masthead `hint` was made optional and dropped from
+  `/zoeken` at build to kill the masthead/card/placeholder repetition, #2106.)
 
 ### `/privacy` (8p1)
 
@@ -106,13 +112,13 @@ meatier search + error work.
 
 ## 5. Phases (one issue = one worktree = one PR)
 
-| # | Issue | GitHub | Depends on |
-| - | ----- | ------ | ---------- |
-| 8.1 | **Tracer:** `/privacy` cream-minimal reskin | #2104 | — |
-| 8.2 | `/zoeken` dark masthead + page shell (SearchForm → hard-shadow + icon) | #2105 | #2104 |
-| 8.3 | `/zoeken` paper result rows + football-voice empty states | #2106 | #2105 |
-| 8.4 | 404/500 `<ErrorState>` — Storybook A/B, pick, wire-in, retire loser | #2107 | #2104 |
-| 8.5 | Phase 8 final pass — SEO/analytics/e2e/VR sweep + master-design closeout | #2108 | #2105, #2106, #2107 |
+| #   | Issue                                                                    | GitHub | Depends on          |
+| --- | ------------------------------------------------------------------------ | ------ | ------------------- |
+| 8.1 | **Tracer:** `/privacy` cream-minimal reskin                              | #2104  | —                   |
+| 8.2 | `/zoeken` dark masthead + page shell (SearchForm → hard-shadow + icon)   | #2105  | #2104               |
+| 8.3 | `/zoeken` paper result rows + football-voice empty states                | #2106  | #2105               |
+| 8.4 | 404/500 `<ErrorState>` — Storybook A/B, pick, wire-in, retire loser      | #2107  | #2104               |
+| 8.5 | Phase 8 final pass — SEO/analytics/e2e/VR sweep + master-design closeout | #2108  | #2105, #2106, #2107 |
 
 ## 6. Acceptance criteria per phase
 
@@ -144,9 +150,11 @@ meatier search + error work.
 
 ### 8.3 — `/zoeken` result rows + empty states
 
-- [ ] `SearchResult` reskinned per 8s2: paper row, jersey-deep left edge, uniform
-      `64×64` square thumb, crest-disc fallback for team / missing photo, mono
-      micro-label, tags, arrow, press-down hover. Lucide → Phosphor.
+- [x] `SearchResult` reskinned per 8s2-redux (postmark-stamp card, #2106):
+      `cream-soft` paper row, rotated `<StampBadge>` type badge, uniform `64×64`
+      newsprint thumb, jersey-deep initial-disc fallback for team / missing photo,
+      mono date, `<MonoLabel pill-cream>` tags, press-down hover. Lucide → Phosphor.
+      (Dropped vs the original 8s2 lock: green left edge, micro-label row, arrow.)
 - [ ] `SearchInterface` empty states per 8s4: pre-search paper card (replaces emoji
       help block), no-results card with `<JerseyShirt>` + "Geen treffers." + inline
       links, error `<Alert>` reskin, loading `<Spinner>` kept.
@@ -175,11 +183,13 @@ meatier search + error work.
 
 - [ ] SEO: titles/OG verified on all three surfaces; 404/500 carry `noindex` as
       appropriate; no JSON-LD entity needed (none represent a Schema.org entity).
-- [ ] Analytics: optional `error_view` event wired (see §7); search events
-      unchanged. Any new param/prefix appended to the GTM regex documented in the
-      PR body + tracked in #1974.
-- [ ] VR baselines for all new component stories committed; no unexpected diffs on
-      unrelated stories.
+- [x] Analytics (owner: wire both): `error_view` + `error_action_click` wired via
+      `<ErrorAnalytics>` on 404/500 (params `error_code`, `path`, `action`; see §7).
+      Search events unchanged. `error_` appended to the GTM trigger regex; DLVs +
+      GA4 dims documented in the PR body + tracked in #1974.
+- [x] VR: new stories `vr`-tagged; **baseline capture deferred** to the end-of-series
+      batch per the standing redesign decision (vr-tag now, batch-capture once the
+      series is done, never block on Docker) — not committed in this PR.
 - [ ] Grep: zero legacy `--color-kcvv-*` / `green-main` / `gray-*` / `prose-gray` /
       lucide on `/zoeken`, `/privacy`, `not-found.tsx`, `error.tsx`.
 - [ ] Master-design decision-log entry: "Phase 8 complete — search/privacy/errors
@@ -198,29 +208,40 @@ way-forward links can reuse `search_result_clicked` semantics or a small
 
 `/privacy` is static — no events.
 
-404/500 (new, user-facing): propose a light **`error_`** prefix —
-`error_view` (params `error_code` ∈ {404,500}, `path`) on mount, and
-`error_action_click` (param `action` ∈ {home, search, retry}). New prefix →
-append `error_` to the live GTM Custom-Event trigger regex; new params need DLVs +
-GA4 dimensions. **Manual GTM/GA4 wiring tracked in #1974** (call it out in the 8.5
-PR body — events do not reach GA4 until wired). If the owner deems error-page
-analytics unnecessary, drop this and note it.
+404/500 (new, user-facing — **owner decision: wire both**, #2108). A light
+**`error_`** prefix, fired by the `<ErrorAnalytics>` client wrapper (one native
+container listener delegating off `data-error-action` markers — the
+page-scoped-delegation pattern, so `<ErrorState>` stays presentational and
+server-renderable):
+
+- `error_view` on mount — params `error_code` ∈ {404, 500}, `path` (the URL hit,
+  read client-side at mount).
+- `error_action_click` on a recovery-button click — params `error_code`, `path`,
+  `action` ∈ {home, search, retry}.
+
+New prefix → `error_` appended to the live GTM Custom-Event trigger regex; the new
+params (`error_code`, `path`, `action`) need DLVs + GA4 dimensions. **Manual
+GTM/GA4 wiring tracked in #1974** (called out in the 8.5 PR body — events do not
+reach GA4 until wired).
 
 ## 8. VR baselines
 
-Per the master-design VR contract (every PR adding a `UI/*` or `Features/*` story
-captures baselines in Docker):
+**Capture is deferred to the end-of-series batch** (standing redesign decision:
+`vr`-tag now, batch-capture all redesign baselines once the series is complete,
+never block on Docker). The new Phase 8 stories carry the `vr` tag so they join
+that batch automatically; no baseline PNGs are committed in the Phase 8 PRs:
 
-- 8.3 — `Features/Search/*` (SearchResult + each SearchInterface state) acquire
-  `vr` tag + baselines.
-- 8.4 — the chosen `<ErrorState>` layout story acquires `vr` tag + baselines.
-- `Pages/Privacy` and `Pages/Search` are **not** VR-tagged (Pages/* are
+- 8.3 — `Features/Search/*` (`SearchResult` + each `SearchInterface` state) are
+  `vr`-tagged.
+- 8.4 — the shipped `<ErrorState>` (`UI/ErrorState`) story is `vr`-tagged.
+- `Pages/Privacy` and `Pages/Search` are **not** VR-tagged (Pages/\* are
   e2e-covered, per `docs/prd/page-level-testing-rework.md`).
 
 ## 9. Open questions
 
-- **Error-page analytics** (§7): wire `error_*`, or leave error pages
-  un-instrumented? Owner call at 8.5.
+- ~~**Error-page analytics** (§7): wire `error_*`, or leave error pages
+  un-instrumented?~~ **Resolved 2026-06-14 (#2108):** owner chose to wire **both**
+  `error_view` + `error_action_click` (see §7).
 - **404 search affordance**: a secondary `Zoeken` button vs. an inline body link
   vs. both — final at build (8.4); the lock allows either.
 

@@ -147,4 +147,36 @@ describe("ErrorState", () => {
     renderNotFound();
     expect(screen.getAllByRole("link")).toHaveLength(2);
   });
+
+  it("emits the analytics marker on link and button actions when supplied", () => {
+    render(
+      <ErrorState
+        code="500"
+        codeLine="Fout 500 · er ging iets mis"
+        pun="Technische panne"
+        body="Er ging iets mis aan onze kant."
+        actions={[
+          {
+            label: "Probeer opnieuw",
+            onClick: vi.fn(),
+            analyticsAction: "retry",
+          },
+          { label: "Naar de homepage", href: "/", analyticsAction: "home" },
+        ]}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Probeer opnieuw" }),
+    ).toHaveAttribute("data-error-action", "retry");
+    expect(
+      screen.getByRole("link", { name: "Naar de homepage" }),
+    ).toHaveAttribute("data-error-action", "home");
+  });
+
+  it("omits the analytics marker when an action does not supply one", () => {
+    renderNotFound();
+    expect(
+      screen.getByRole("link", { name: "Naar de homepage" }),
+    ).not.toHaveAttribute("data-error-action");
+  });
 });

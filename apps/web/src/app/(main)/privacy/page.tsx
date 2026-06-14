@@ -6,7 +6,7 @@
  * title + mono last-updated line + Freight Display intro lead introduce a
  * single cream/ink prose column with a `<DottedDivider>` between H2 sections.
  * Replaces the legacy `<InteriorPageHero>` + `<SectionStack>` diagonal +
- * `prose prose-gray` composition (master design §7 line 587).
+ * typography-plugin prose composition (master design §7 line 587).
  */
 
 import type { Metadata } from "next";
@@ -43,11 +43,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Cream/ink prose styling for the legal copy. Replaces the typography-plugin
- * `prose prose-gray` treatment: H2s in Freight Display 700, body in Archivo
- * (ink-soft), links jersey-deep, dotted section rules spaced via the
- * `[role=separator]` child selector. No legacy `--color-kcvv-*` / gray / green
- * classes.
+ * Cream/ink prose styling for the legal copy. Replaces the legacy
+ * typography-plugin prose treatment with design-system tokens only: H2s in
+ * Freight Display 700, body in Archivo (ink-soft), links jersey-deep, dotted
+ * section rules spaced via the `[role=separator]` child selector.
  */
 const proseClasses = [
   "text-ink-soft",
