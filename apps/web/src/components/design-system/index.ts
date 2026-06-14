@@ -126,6 +126,14 @@ export type {
   HighlighterStrokeColor,
 } from "./HighlighterStroke";
 
+// ErrorState
+export { ErrorState } from "./ErrorState";
+export type {
+  ErrorStateProps,
+  ErrorStateAction,
+  ErrorStateActionVariant,
+} from "./ErrorState";
+
 // JerseyShirt
 export { JerseyShirt } from "./JerseyShirt";
 export type { JerseyShirtProps } from "./JerseyShirt";
