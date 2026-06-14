@@ -10,6 +10,7 @@ import type {
   SearchResultType,
 } from "./SearchInterface";
 import { SearchResult } from "./SearchResult";
+import { SearchNoResultsCard } from "./SearchNoResultsCard";
 import { filterByActiveType } from "./search-filter-utils";
 
 export interface SearchResultsProps {
@@ -50,32 +51,21 @@ export const SearchResults = ({
   const filteredResults = filterByActiveType(results, activeType);
 
   if (filteredResults.length === 0) {
-    return (
-      <div className="rounded-xl bg-white p-12 text-center shadow-sm">
-        <div className="mb-4 text-6xl">🔍</div>
-        <h3 className="text-gray-blue mb-2 text-xl font-bold">
-          Geen resultaten gevonden
-        </h3>
-        <p className="text-gray-dark">
-          Probeer een andere zoekopdracht of pas de filters aan
-        </p>
-      </div>
-    );
+    return <SearchNoResultsCard query={query} />;
   }
 
   return (
     <div className="space-y-6">
-      {/* Results Count */}
-      <div className="text-gray-dark">
-        <span className="text-gray-blue font-semibold">
-          {filteredResults.length}
-        </span>{" "}
-        {filteredResults.length === 1 ? "resultaat" : "resultaten"} voor &quot;
-        <span className="text-gray-blue font-semibold">{query}</span>&quot;
-      </div>
+      {/* Results count — mono meta line (8s2). */}
+      <p className="text-ink-muted font-mono text-xs tracking-[0.04em]">
+        <span className="text-ink font-semibold">{filteredResults.length}</span>{" "}
+        {filteredResults.length === 1 ? "resultaat" : "resultaten"} voor &ldquo;
+        <span className="text-ink font-semibold">{query}</span>&rdquo;
+      </p>
 
-      {/* Results List */}
-      <div className="space-y-4">
+      {/* Results list — generous gap so the corner stamps don't crowd the row
+          above (postmark stamps overhang the top edge). */}
+      <div className="space-y-6">
         {filteredResults.map((result, index) => (
           <SearchResult
             key={`${result.type}:${result.id}`}

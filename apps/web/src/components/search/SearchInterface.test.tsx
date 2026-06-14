@@ -67,8 +67,9 @@ describe("SearchInterface", () => {
     it("should display help text initially when no query", () => {
       render(<SearchInterface />);
 
-      expect(screen.getByText(/wat wil je zoeken/i)).toBeInTheDocument();
-      expect(screen.getByText(/typ minimaal 2 karakters/i)).toBeInTheDocument();
+      expect(screen.getByText(/niet zeker waar te/i)).toBeInTheDocument();
+      // A type-hint chip, unique to the pre-search card.
+      expect(screen.getByText("Een spelersnaam")).toBeInTheDocument();
     });
 
     it("should not display filters initially", () => {
@@ -284,9 +285,7 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/er is een fout opgetreden/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
     });
 
@@ -306,9 +305,7 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/er is een fout opgetreden/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
     });
 
@@ -381,7 +378,7 @@ describe("SearchInterface", () => {
       // Results should be hidden, help text shown
       await waitFor(() => {
         expect(screen.queryByText(/resultaten voor/i)).not.toBeInTheDocument();
-        expect(screen.getByText(/wat wil je zoeken/i)).toBeInTheDocument();
+        expect(screen.getByText(/niet zeker waar te/i)).toBeInTheDocument();
       });
     });
   });
@@ -486,7 +483,7 @@ describe("SearchInterface", () => {
       await waitFor(
         () => {
           expect(
-            screen.queryByText(/er is een fout opgetreden/i),
+            screen.queryByText(/er ging iets mis/i),
           ).not.toBeInTheDocument();
         },
         { timeout: 1000 },
@@ -743,9 +740,7 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/er is een fout opgetreden/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
 
       // Second search succeeds
@@ -760,9 +755,7 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.queryByText(/er is een fout opgetreden/i),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
       });
     });
   });
@@ -823,7 +816,7 @@ describe("SearchInterface", () => {
     it("should show help text when query is empty", () => {
       render(<SearchInterface />);
 
-      expect(screen.getByText(/wat wil je zoeken/i)).toBeInTheDocument();
+      expect(screen.getByText(/niet zeker waar te/i)).toBeInTheDocument();
     });
 
     it("should show help text when query is 1 character", async () => {
@@ -834,7 +827,7 @@ describe("SearchInterface", () => {
       const input = screen.getByRole("textbox");
       await user.type(input, "a");
 
-      expect(screen.getByText(/wat wil je zoeken/i)).toBeInTheDocument();
+      expect(screen.getByText(/niet zeker waar te/i)).toBeInTheDocument();
     });
 
     it("should hide help text when query is 2+ characters", async () => {
@@ -855,7 +848,7 @@ describe("SearchInterface", () => {
 
       await waitFor(() => {
         expect(
-          screen.queryByText(/wat wil je zoeken/i),
+          screen.queryByText(/niet zeker waar te/i),
         ).not.toBeInTheDocument();
       });
     });
@@ -896,9 +889,7 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(
-          screen.getByText(/er is een fout opgetreden/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
 
       expect(screen.queryByText(/resultaten voor/i)).not.toBeInTheDocument();

@@ -40,14 +40,14 @@ describe("SearchMasthead", () => {
     expect(screen.getByTestId("field")).toBeInTheDocument();
   });
 
-  it("renders the persistent mono hint line", () => {
+  it("omits the hint line when no hint is provided", () => {
     render(
       <SearchMasthead>
         <div>field</div>
       </SearchMasthead>,
     );
 
-    expect(screen.getByText(/typ minstens 2 letters/i)).toBeInTheDocument();
+    expect(screen.queryByText(/typ minstens/i)).not.toBeInTheDocument();
   });
 
   it("supports custom heading, accent and hint", () => {

@@ -12,7 +12,12 @@ export interface SearchMastheadProps {
   heading?: string;
   /** Substring of `heading` rendered in the warm italic accent. */
   accent?: string;
-  /** Persistent mono hint line below the field. */
+  /**
+   * Optional mono hint line below the field. Omitted by default — the `/zoeken`
+   * page renders no hint (the pre-search card carries the guidance), so a
+   * persistent "Typ minstens 2 letters · …" line under the field read as
+   * redundant clutter (owner review #2106).
+   */
   hint?: string;
 }
 
@@ -21,14 +26,14 @@ export interface SearchMastheadProps {
  * a `jersey-deep-dark` full-bleed band (diagonal stripe texture + radial jersey
  * wash) wearing the search field as its hero. No mono kicker; a serif
  * `<EditorialHeading>` "Wat _zoek_ je?" with a **warm-gold** accent on "zoek"
- * (jersey-deep is invisible on the dark ground, 8s1.1); a persistent mono hint
+ * (jersey-deep is invisible on the dark ground, 8s1.1); an optional mono hint
  * line under the field. Results render on cream below the band (8s2/8s4).
  */
 export function SearchMasthead({
   children,
   heading = "Wat zoek je?",
   accent = "zoek",
-  hint = "Typ minstens 2 letters · nieuws · spelers · ploegen · staf",
+  hint,
 }: SearchMastheadProps) {
   return (
     <header className="bg-jersey-deep-dark border-ink relative overflow-hidden border-b-2">
@@ -64,9 +69,11 @@ export function SearchMasthead({
 
         {children}
 
-        <p className="text-cream/70 mt-3.5 font-mono text-[length:var(--text-mono-sm)] tracking-[0.03em]">
-          {hint}
-        </p>
+        {hint && (
+          <p className="text-cream/70 mt-3.5 font-mono text-[length:var(--text-mono-sm)] tracking-[0.03em]">
+            {hint}
+          </p>
+        )}
       </div>
     </header>
   );

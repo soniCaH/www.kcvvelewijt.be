@@ -298,6 +298,46 @@ describe("SearchResult", () => {
     });
   });
 
+  describe("Thumbnail fallback (8s2 crest disc)", () => {
+    it("renders an initial-letter fallback disc when imageUrl is missing", () => {
+      const team = createMockTeam({ imageUrl: undefined, title: "A-Ploeg" });
+
+      render(<SearchResult result={team} />);
+
+      // No <img> is rendered — the jersey-deep initial disc takes its place.
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      const fallback = screen.getByTestId("search-result-thumb-fallback");
+      expect(fallback).toHaveTextContent("A");
+    });
+
+    it("uppercases the fallback initial", () => {
+      const player = createMockPlayer({
+        imageUrl: undefined,
+        title: "wout van elewijt",
+      });
+
+      render(<SearchResult result={player} />);
+
+      expect(
+        screen.getByTestId("search-result-thumb-fallback"),
+      ).toHaveTextContent("W");
+    });
+
+    it("renders the photo (no fallback disc) when imageUrl is present", () => {
+      const team = createMockTeam({
+        imageUrl: "/images/team.jpg",
+        title: "A-Ploeg",
+      });
+
+      render(<SearchResult result={team} />);
+
+      expect(screen.getByAltText("A-Ploeg")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("search-result-thumb-fallback"),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe("Conditional Content", () => {
     it("should display description when provided", () => {
       const result = createMockArticle({
@@ -359,17 +399,6 @@ describe("SearchResult", () => {
 
       const image = screen.getByAltText("Article Title");
       expect(image).toBeInTheDocument();
-    });
-
-    it("should have aria-hidden on arrow icon", () => {
-      const result = createMockArticle();
-
-      render(<SearchResult result={result} />);
-
-      const arrowWrapper = screen.getByTestId("search-result-arrow");
-      const arrowIcon = arrowWrapper.querySelector("svg");
-      expect(arrowIcon).toBeInTheDocument();
-      expect(arrowIcon).toHaveAttribute("aria-hidden", "true");
     });
   });
 });

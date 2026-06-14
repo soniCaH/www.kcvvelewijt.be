@@ -26,9 +26,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * Default masthead — empty field, persistent hint line.
+ * Default masthead — empty field, no hint line (the `/zoeken` composition;
+ * guidance lives in the pre-search card below the band).
  */
 export const Default: Story = {};
+
+/**
+ * Optional hint line — opted into via the `hint` prop.
+ */
+export const WithHint: Story = {
+  args: {
+    hint: "Typ minstens 2 letters",
+  },
+};
 
 /**
  * Masthead with a populated query (clear affordance visible).

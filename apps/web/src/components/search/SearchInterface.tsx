@@ -11,7 +11,8 @@ import { SearchForm } from "./SearchForm";
 import { SearchMasthead } from "./SearchMasthead";
 import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
-import { Spinner } from "@/components/design-system";
+import { SearchPreSearchCard } from "./SearchPreSearchCard";
+import { Alert, Spinner } from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { filterByActiveType } from "./search-filter-utils";
 import type {
@@ -131,7 +132,7 @@ export const SearchInterface = ({
         return;
       }
 
-      setError("Er is een fout opgetreden bij het zoeken. Probeer opnieuw.");
+      setError("Er ging iets mis bij het zoeken — probeer opnieuw.");
       setResults([]);
       setTotalCount(0);
     } finally {
@@ -291,11 +292,11 @@ export const SearchInterface = ({
               </div>
             )}
 
-            {/* Error State */}
+            {/* Error State — paper ticket-stub Alert (8s4). */}
             {error && !isLoading && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-center">
-                <p className="text-red-800">{error}</p>
-              </div>
+              <Alert variant="error" title="Zoeken mislukt">
+                {error}
+              </Alert>
             )}
 
             {/* Results */}
@@ -310,42 +311,8 @@ export const SearchInterface = ({
           </>
         )}
 
-        {/* Help Text - Show when query is too short */}
-        {query.trim().length < 2 && (
-          <div className="rounded-xl bg-white p-8 text-center shadow-sm">
-            <h2 className="text-gray-blue mb-4 text-xl font-bold">
-              Wat wil je zoeken?
-            </h2>
-            <p className="text-gray-dark mb-6">
-              Typ minimaal 2 karakters om te zoeken naar nieuws, spelers, teams
-              en meer.
-            </p>
-            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="text-gray-blue mb-2 font-semibold">
-                  📰 Nieuwsartikelen
-                </h3>
-                <p className="text-gray-dark text-sm">
-                  Zoek op titel, inhoud of tags
-                </p>
-              </div>
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="text-gray-blue mb-2 font-semibold">
-                  ⚽ Spelers
-                </h3>
-                <p className="text-gray-dark text-sm">
-                  Vind spelers op naam of positie
-                </p>
-              </div>
-              <div className="rounded-lg bg-gray-50 p-4">
-                <h3 className="text-gray-blue mb-2 font-semibold">🏆 Teams</h3>
-                <p className="text-gray-dark text-sm">
-                  Zoek teams op naam of leeftijdsgroep
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Pre-search state — football-voice paper card (8s4). */}
+        {query.trim().length < 2 && <SearchPreSearchCard />}
       </div>
     </>
   );
