@@ -1,6 +1,17 @@
 # 8s2 — /zoeken result-card vocabulary · LOCKED
 
-**Decision:** A — **clean paper rows**, single column.
+> **Build-time override (#2106, shipped 2026-06-14):** during the owner Storybook
+> review the design moved off the "clean paper rows (A)" decision below to a
+> **postmark-stamp paper card**. Shipped `SearchResult.tsx`: a `cream-soft` paper
+> card with a `2px` ink border + `shadow-paper-sm`, a rotated `<StampBadge>` type
+> badge pressed into the top-right corner, the uniform `64×64` newsprint thumbnail
+> / jersey-deep initial disc fallback (unchanged from the refinement below), a
+> serif (Freight) title, mono date, and `<MonoLabel variant="pill-cream">` tag
+> chips. **No green left edge, no separate mono micro-label row, no arrow glyph.**
+> Canonical press-down hover is retained. The A-vs-B-vs-C rationale below is kept
+> as the historical record; the uniform-thumbnail refinement still holds verbatim.
+
+**Decision (superseded — see override above):** A — **clean paper rows**, single column.
 
 Each result: white card, `1.5px` ink border, **5px `jersey-deep` left edge**,
 `2px 2px` offset shadow, canonical press-down hover (`shadow-none` +
@@ -23,7 +34,7 @@ Mixed aspect ratios across result types look misaligned. **All result types use 
 single uniform thumbnail**: a fixed **square** (≈`64×64`), same shape on every row,
 so rows are equal height and the left edge stays clean.
 
-- **Article** → square *crop* of the article image (not 16:9 in-row).
+- **Article** → square _crop_ of the article image (not 16:9 in-row).
 - **Player / Staff** → square photo (`psdImage`), same box.
 - **Team** → square `jersey-deep` crest disc with the team initial (teams usually
   have no image — this is the locked fallback, not an empty box).

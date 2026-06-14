@@ -575,7 +575,7 @@ The redesign rolls out over ~9 phases. Per the rollout decision, each phase is a
 
 **Total elapsed effort estimate:** ~25–40 weeks of focused work, depending on how many design rounds each gated phase needs. The wider range than before reflects design-checkpoint time, which can iterate (the owner may push back on mockup options once or twice before approval). Brownfield site stays live throughout; mixed-state visual is acceptable per rollout decision.
 
-**Completed phases:** Phase 0 (#1519), Phase 1, Phase 2, Phase 3, Phase 4 / 4.5 (homepage), Phase 5 (article detail — closed 2026-05-21 via #1860).
+**Completed phases:** Phase 0 (#1519), Phase 1, Phase 2, Phase 3, Phase 4 / 4.5 (homepage), Phase 5 (article detail — closed 2026-05-21 via #1860), Phase 6 (player / match / team detail — 6.A–6.C), Phase 7 (club / jeugd / teams / sponsors landings), Phase 8 (search / privacy / errors — closed 2026-06-14 via #2108). Only Phase 9 cleanup (#1531) remains.
 
 ### Diagonal → striped-seam migration (per-phase)
 
@@ -770,6 +770,8 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
     - **Custom-authored escape hatch:** retained only for rare cases where Phase 2/3 components genuinely need an icon Phosphor doesn't have AND a typographic glyph can't replace it AND the shape is simple enough that AI authoring can produce an acceptable result. By exception, not by default.
 
     The exploratory comparison artefact at `docs/design/exploratory/phase-2-icons.html` is preserved for the record (now showing the 7 first-draft AI samples that informed the round-2 verdict). Phase 2 atom rework PRD will scope: install `@phosphor-icons/react`, refactor `src/lib/icons.ts` to re-export Phosphor `weight="fill"` variants, retire Lucide from redesign surfaces, update affected `Button` / `Alert` / `BrandedTabs` / `FilterTabs` consumers, capture VR baselines. (from owner decision 2026-04-28, finalized after round-2 review.)
+
+18. **Phase 8 complete — search / privacy / errors migrated; only Phase 9 cleanup (#1531) remains.** (2026-06-14) The three edge surfaces are on the retro-terrace-fanzine system: `/privacy` cream-minimal reskin (#2104), `/zoeken` dark masthead + page shell (#2105) and postmark-stamp result rows + football-voice empty states (#2106), and the shared `<ErrorState>` 404/500 pages (#2107). Closeout (#2108): error pages instrumented with `error_view` + `error_action_click` (owner chose to wire both; `error_` added to the GTM trigger regex, GA4/DLV wiring tracked in #1974); the 404 carries `metadata.robots` noindex (the 500 boundary relies on its status — Client Components can't export metadata). Two build-time deviations from the locked design are reconciled in the Phase 8 docs: the 8s2 result card shipped as a **postmark-stamp card** (rotated `<StampBadge>`, no green left edge), not the locked "clean rows"; and the 8s1 masthead `hint` was dropped from `/zoeken`. **VR baselines for the Phase 8 stories are `vr`-tagged but deferred to the end-of-series batch capture** (standing redesign decision — never block on Docker per-PR). Legacy `--color-kcvv-*` / `green-*` / `gray-*` / `prose-gray` / lucide usage is zero on all four surfaces.
 
 ### Open questions deferred to per-phase PRDs
 

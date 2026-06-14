@@ -1,6 +1,7 @@
 /**
  * SearchFilters Storybook Stories
- * Demonstrates filter states with Lucide icons
+ * Demonstrates filter states. Renders the canonical <FilterTabs> (8s3 reuse);
+ * no per-component icons.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
