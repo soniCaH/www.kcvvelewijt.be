@@ -169,7 +169,7 @@ describe("SearchResults", () => {
         <SearchResults results={results} query="test" activeType="player" />,
       );
 
-      expect(screen.getByText("Geen resultaten gevonden")).toBeInTheDocument();
+      expect(screen.getByText("Geen treffers")).toBeInTheDocument();
     });
   });
 
@@ -227,16 +227,14 @@ describe("SearchResults", () => {
     it("should display empty state when no results", () => {
       render(<SearchResults results={[]} query="nothing" activeType="all" />);
 
-      expect(screen.getByText("Geen resultaten gevonden")).toBeInTheDocument();
-      expect(
-        screen.getByText(/probeer een andere zoekopdracht/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Geen treffers")).toBeInTheDocument();
+      expect(screen.getByText(/niets gevonden voor/i)).toBeInTheDocument();
     });
 
-    it("should display empty state with emoji", () => {
+    it("should display the taped jersey artefact in the empty state", () => {
       render(<SearchResults results={[]} query="nothing" activeType="all" />);
 
-      expect(screen.getByText("🔍")).toBeInTheDocument();
+      expect(screen.getByLabelText("KCVV jersey")).toBeInTheDocument();
     });
 
     it("should not display count message when empty", () => {
@@ -252,7 +250,7 @@ describe("SearchResults", () => {
         <SearchResults results={results} query="test" activeType="player" />,
       );
 
-      expect(screen.getByText("Geen resultaten gevonden")).toBeInTheDocument();
+      expect(screen.getByText("Geen treffers")).toBeInTheDocument();
     });
   });
 
@@ -306,7 +304,7 @@ describe("SearchResults", () => {
     it("should handle empty array gracefully", () => {
       render(<SearchResults results={[]} query="test" activeType="all" />);
 
-      expect(screen.getByText("Geen resultaten gevonden")).toBeInTheDocument();
+      expect(screen.getByText("Geen treffers")).toBeInTheDocument();
     });
 
     it("should handle single result", () => {

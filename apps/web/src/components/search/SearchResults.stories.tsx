@@ -12,7 +12,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof SearchResults>;
 
 export default meta;
@@ -92,7 +92,7 @@ export const TeamsOnly: Story = {
 };
 
 /**
- * No results (empty state)
+ * No results — the 8s4 "Geen treffers." card (taped jersey + way-forward links).
  */
 export const NoResults: Story = {
   args: {

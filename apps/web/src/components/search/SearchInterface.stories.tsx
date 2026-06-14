@@ -16,7 +16,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof SearchInterface>;
 
 export default meta;
@@ -123,7 +123,7 @@ const SEARCH_NAVIGATION_PARAMS = {
 
 /**
  * Initial idle state — no query entered yet.
- * Shows the "Wat wil je zoeken?" help panel with category hints.
+ * Shows the "Waar ben je naar op zoek?" pre-search card with type hints (8s4).
  */
 export const Idle: Story = {
   args: {
