@@ -26,33 +26,33 @@ describe("Global Error page", () => {
     mockReset.mockReset();
   });
 
-  it("renders a Dutch error heading", () => {
+  it("renders the locked 500 pun heading", () => {
     render(<ErrorPage error={defaultError} reset={mockReset} />);
     expect(
-      screen.getByRole("heading", { name: /er ging iets mis/i }),
+      screen.getByRole("heading", { level: 1, name: /technische panne/i }),
     ).toBeInTheDocument();
   });
 
-  it("renders a description", () => {
+  it("renders the 500 body copy", () => {
     render(<ErrorPage error={defaultError} reset={mockReset} />);
     expect(
-      screen.getByText(/er is een onverwachte fout opgetreden/i),
+      screen.getByText(/er ging iets mis aan onze kant/i),
     ).toBeInTheDocument();
   });
 
-  it("renders a retry button that calls reset", async () => {
+  it("renders a retry button wired to reset()", async () => {
     const user = userEvent.setup();
     render(<ErrorPage error={defaultError} reset={mockReset} />);
     const retryButton = screen.getByRole("button", {
-      name: /probeer opnieuw/i,
+      name: "Probeer opnieuw",
     });
     await user.click(retryButton);
     expect(mockReset).toHaveBeenCalledOnce();
   });
 
-  it("renders a link to the homepage", () => {
+  it("renders a ghost link to the homepage", () => {
     render(<ErrorPage error={defaultError} reset={mockReset} />);
-    const homeLink = screen.getByRole("link", { name: /naar home/i });
+    const homeLink = screen.getByRole("link", { name: "Naar de homepage" });
     expect(homeLink).toHaveAttribute("href", "/");
   });
 

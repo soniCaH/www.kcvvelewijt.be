@@ -18,24 +18,30 @@ vi.mock("next/link", () => ({
 }));
 
 describe("Global NotFound page", () => {
-  it("renders a Dutch heading", () => {
+  it("renders the locked 404 pun heading", () => {
     render(<NotFound />);
     expect(
-      screen.getByRole("heading", { name: /pagina niet gevonden/i }),
+      screen.getByRole("heading", { level: 1, name: /buiten de lijnen/i }),
     ).toBeInTheDocument();
   });
 
-  it("renders a description", () => {
+  it("renders the 404 body copy", () => {
     render(<NotFound />);
     expect(
-      screen.getByText(/de pagina die je zoekt bestaat niet/i),
+      screen.getByText(/deze pagina staat niet \(meer\) op het veld/i),
     ).toBeInTheDocument();
   });
 
-  it("renders a link to the homepage", () => {
+  it("renders a primary link to the homepage", () => {
     render(<NotFound />);
-    const homeLink = screen.getByRole("link", { name: /naar home/i });
+    const homeLink = screen.getByRole("link", { name: "Naar de homepage" });
     expect(homeLink).toHaveAttribute("href", "/");
+  });
+
+  it("renders a secondary search affordance to /zoeken", () => {
+    render(<NotFound />);
+    const searchLink = screen.getByRole("link", { name: "Zoeken" });
+    expect(searchLink).toHaveAttribute("href", "/zoeken");
   });
 
   it("does not render header or footer landmarks", () => {
