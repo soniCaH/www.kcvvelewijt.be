@@ -52,10 +52,13 @@ describe("buildSportsClubJsonLd", () => {
     expect(result.address).toBeDefined();
     const address = result.address as {
       "@type": string;
+      streetAddress: string;
       addressLocality: string;
       addressCountry: string;
     };
     expect(address["@type"]).toBe("PostalAddress");
+    // Lock the canonical official address — was wrongly "Driesstraat 39".
+    expect(address.streetAddress).toBe("Driesstraat 32");
     expect(address.addressLocality).toBeDefined();
     expect(address.addressCountry).toBe("BE");
   });

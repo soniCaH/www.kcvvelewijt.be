@@ -142,7 +142,7 @@ export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
     sport: "Soccer",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Driesstraat 39",
+      streetAddress: "Driesstraat 32",
       addressLocality: "Elewijt",
       postalCode: "1982",
       addressCountry: "BE",

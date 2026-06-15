@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             Laatst bijgewerkt · {LAST_UPDATED}
           </p>
           <p className="text-ink-soft font-display mt-5 max-w-[60ch] text-[length:var(--text-body-lg)] leading-[var(--text-body-lg--lh)]">
-            KCVV Elewijt, gevestigd aan Driesstraat 30, 1982 Elewijt,
+            KCVV Elewijt, gevestigd aan Driesstraat 32, 1982 Elewijt,
             respecteert je privacy en behandelt je persoonsgegevens
             vertrouwelijk. Deze privacyverklaring legt uit welke gegevens we
             verzamelen, waarom we dat doen en welke rechten je hebt.
@@ -97,7 +97,7 @@ export default function PrivacyPage() {
           <p>
             <strong>Verantwoordelijke:</strong> KCVV Elewijt vzw
             <br />
-            <strong>Adres:</strong> Driesstraat 30, 1982 Elewijt
+            <strong>Adres:</strong> Driesstraat 32, 1982 Elewijt
             <br />
             <strong>E-mail:</strong>{" "}
             <a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a>

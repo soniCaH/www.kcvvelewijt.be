@@ -16,7 +16,7 @@ import { FooterSafeArea } from "@/components/design-system";
 export const metadata: Metadata = {
   title: "Contact | KCVV Elewijt",
   description:
-    "Contacteer KCVV Elewijt. Adres: Driesstraat 30, 1982 Elewijt. Vind de juiste contactpersoon voor algemene vragen, jeugdwerking, sponsoring en meer.",
+    "Contacteer KCVV Elewijt. Adres: Driesstraat 32, 1982 Elewijt. Vind de juiste contactpersoon voor algemene vragen, jeugdwerking, sponsoring en meer.",
   keywords: [
     "contact",
     "KCVV Elewijt",
