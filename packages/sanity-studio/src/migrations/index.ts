@@ -55,6 +55,8 @@ export type {
   LegacyImageBlock as ImageToArticleImageLegacyBlock,
 } from './image-to-articleimage'
 
+export {default as pageImageToArticleImageMigration} from './page-image-to-articleimage'
+
 export {
   default as dropPlayerUnusedFieldsMigration,
   migrateDropPlayerUnusedFields,

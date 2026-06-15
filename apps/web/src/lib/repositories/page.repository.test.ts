@@ -96,6 +96,39 @@ describe("PageRepository", () => {
       expect(page?.title).toBe("");
     });
 
+    it("passes through an articleImage block with its dereferenced asset", async () => {
+      // Post-#2122 the page body serves `articleImage` (not plain `image`);
+      // the GROQ projection dereferences `image.asset->` into the flat `asset`
+      // shape <ArticleBody>'s renderer consumes (url + caption + credit + dims).
+      const articleImage = {
+        _key: "img-1",
+        _type: "articleImage" as const,
+        width: "prose" as const,
+        fileUrl: null,
+        fileSize: null,
+        fileMimeType: null,
+        fileOriginalFilename: null,
+        asset: {
+          url: "https://cdn.sanity.io/images/proj/dataset/abc.jpg?w=800&q=80&fm=webp&fit=max",
+          title: null,
+          description: "De ingang van Sportpark Elewijt",
+          creditLine: null,
+          metadata: { dimensions: null, lqip: null },
+        },
+      };
+      const row = makePageRow({ body: [articleImage] });
+      mockFetch.mockResolvedValueOnce(row);
+
+      const page = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* PageRepository;
+          return yield* repo.findBySlug("praktische-info");
+        }),
+      );
+
+      expect(page?.body).toEqual([articleImage]);
+    });
+
     it("null body stays null (consumer handles with ?? [])", async () => {
       mockFetch.mockResolvedValueOnce(makePageRow({ body: null }));
 
