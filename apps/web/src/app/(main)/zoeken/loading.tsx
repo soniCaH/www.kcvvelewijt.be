@@ -9,7 +9,7 @@ import { SearchMastheadSkeleton } from "@/components/search/SearchMastheadSkelet
 
 export default function SearchLoading() {
   return (
-    <div className="bg-cream min-h-screen pb-[var(--footer-diagonal)]">
+    <div className="bg-cream min-h-screen">
       <span role="status" aria-live="polite" className="sr-only">
         Zoekpagina laden...
       </span>

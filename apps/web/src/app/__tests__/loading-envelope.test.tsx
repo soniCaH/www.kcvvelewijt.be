@@ -137,7 +137,7 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/zoeken",
       Loading: ZoekenLoading,
-      expectedRootClass: "bg-cream min-h-screen pb-[var(--footer-diagonal)]",
+      expectedRootClass: "bg-cream min-h-screen",
     },
     {
       name: "/club/[slug]",
@@ -199,8 +199,7 @@ describe("loading.tsx envelope drift guard", () => {
       Loading: TegenstanderLoading,
       // Phase 10 (#2141): reskinned to the cream-deep paper register, matching
       // the page's `bg-cream-deep` wrapper + footer-safe area.
-      expectedRootClass:
-        "bg-cream-deep min-h-screen pb-[var(--footer-diagonal)]",
+      expectedRootClass: "bg-cream-deep min-h-screen",
     },
     {
       name: "/wedstrijd/[matchId]",

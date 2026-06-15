@@ -190,40 +190,6 @@ describe("SectionStack", () => {
     expect(fromWrapper).not.toBeNull();
   });
 
-  it("reserves the footer-diagonal safe area on the last section by default", () => {
-    const { container } = render(
-      <SectionStack
-        sections={[
-          makeSection("gray-100", "A"),
-          makeSection("kcvv-black", "B"),
-        ]}
-      />,
-    );
-    const reserved = container.querySelectorAll(
-      ".pb-\\[var\\(--footer-diagonal\\)\\]",
-    );
-    // Exactly one wrapper extends the bg through the footer overlap zone.
-    expect(reserved).toHaveLength(1);
-    // It sits on the last section (its bg is kcvv-black here).
-    expect(reserved[0]!.classList.contains("bg-kcvv-black")).toBe(true);
-  });
-
-  it("skips the footer safe area when reserveFooterSafeArea is false", () => {
-    const { container } = render(
-      <SectionStack
-        reserveFooterSafeArea={false}
-        sections={[
-          makeSection("gray-100", "A"),
-          makeSection("kcvv-black", "B"),
-        ]}
-      />,
-    );
-    const reserved = container.querySelector(
-      ".pb-\\[var\\(--footer-diagonal\\)\\]",
-    );
-    expect(reserved).toBeNull();
-  });
-
   // Backdrop support (PRD §5.1, §5.6, §6 AC)
   describe("backdrop", () => {
     it("renders backdrop node with aria-hidden and pointer-events-none", () => {

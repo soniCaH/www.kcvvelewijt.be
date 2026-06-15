@@ -126,9 +126,8 @@ function shiftY(points: string, dy: number): string {
 }
 
 // DIAGONAL_HEIGHT is sourced from the `--footer-diagonal` custom property
-// in globals.css — the single source of truth consumed by this component,
-// and by `SectionStack`'s `reserveFooterSafeArea` behavior (last-section bg
-// extension). The browser resolves the var at render time inside inline
+// in globals.css — the single source of truth consumed by this component.
+// The browser resolves the var at render time inside inline
 // styles and `calc()` strings, so the
 // exported constant composes cleanly wherever the numeric value is used.
 // `DIAGONAL_HALF` is a local-only token used by `overlap="half"` and does

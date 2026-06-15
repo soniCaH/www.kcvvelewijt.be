@@ -36,7 +36,7 @@ export const metadata: Metadata = {
  */
 export default function SearchPage() {
   return (
-    <div className="bg-cream min-h-screen pb-[var(--footer-diagonal)]">
+    <div className="bg-cream min-h-screen">
       <Suspense fallback={<SearchMastheadSkeleton />}>
         <SearchInterface />
       </Suspense>
