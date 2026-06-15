@@ -41,6 +41,19 @@ describe("CookieConsentBanner", () => {
     expect(config.categories.analytics).toBeDefined();
   });
 
+  it("uses the box consent-modal layout in the bottom-left corner", () => {
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+    expect(config.guiOptions.consentModal.layout).toBe("box");
+    expect(config.guiOptions.consentModal.position).toBe("bottom left");
+  });
+
+  it("uses the locked 'Koekjes?' banner heading", () => {
+    render(<CookieConsentBanner />);
+    const config = mockRun.mock.calls[0][0];
+    expect(config.language.translations.nl.consentModal.title).toBe("Koekjes?");
+  });
+
   it("renders nothing visible", () => {
     const { container } = render(<CookieConsentBanner />);
     expect(container.firstChild).toBeNull();
