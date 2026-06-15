@@ -123,11 +123,14 @@ export function PageHero({
         {kicker}
       </span>
 
+      {/* `mb-0` neutralises the global base `h1–h6 { margin-bottom: 1em }`,
+          which at display-xl is ~72px of dead space — the hero owns its own
+          rhythm (the lead's `mt-3.5` / the divider's `mt-4`). */}
       <EditorialHeading
         level={1}
         size={headingSize}
         emphasis={emphasis}
-        className="mt-2"
+        className="mt-2 mb-0"
       >
         {headline}
       </EditorialHeading>

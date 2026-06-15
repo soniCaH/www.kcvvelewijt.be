@@ -182,7 +182,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
   return (
     <div className="bg-cream min-h-screen">
       {/* Hero */}
-      <div className="mx-auto max-w-5xl px-4 pt-10">
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
         <PageHero
           kicker="Club"
           headline="Contact"
