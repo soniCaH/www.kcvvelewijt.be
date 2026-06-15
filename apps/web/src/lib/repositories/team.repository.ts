@@ -31,7 +31,7 @@ export const TEAM_BY_SLUG_QUERY =
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[] { role, "member": member-> { _id, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" } }
+  staff[] { role, "member": member-> { _id, psdId, archived, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" } }
 }`);
 
 export const YOUTH_TEAMS_CONTACT_QUERY =
@@ -95,6 +95,13 @@ export interface StaffMemberVM {
   role: string;
   functionTitle?: string;
   imageUrl?: string;
+  /**
+   * Canonical staff-detail URL (`/staf/{psdId}`) — only set when a detail
+   * page exists for this member: a non-archived `staffMember` doc carrying a
+   * `psdId` (the `/staf/[slug]` route key). Absent → the card renders without
+   * a link.
+   */
+  href?: string;
 }
 
 export interface TeamDetailVM {
@@ -156,6 +163,10 @@ function toStaffMemberVM(
   row: NonNullable<TEAM_BY_SLUG_DETAIL["staff"]>[number],
 ): StaffMemberVM | null {
   if (!row.member) return null;
+  // A staff-detail page is reachable only for a non-archived member with a
+  // psdId (the `/staf/[slug]` route key + `generateStaticParams` filter).
+  const psdId = row.member.psdId != null ? String(row.member.psdId).trim() : "";
+  const hasDetailPage = psdId !== "" && row.member.archived !== true;
   return {
     id: row.member._id,
     firstName: row.member.firstName ?? "",
@@ -163,6 +174,7 @@ function toStaffMemberVM(
     role: row.role ?? row.member.functionTitle ?? "",
     functionTitle: row.member.functionTitle ?? undefined,
     imageUrl: row.member.photoUrl ?? undefined,
+    ...(hasDetailPage ? { href: `/staf/${psdId}` } : {}),
   };
 }
 

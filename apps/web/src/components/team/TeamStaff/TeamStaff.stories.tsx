@@ -66,3 +66,17 @@ export const WithPhotos: Story = {
 export const MonogramsOnly: Story = {
   args: { staff: monogramsOnly },
 };
+
+/**
+ * Reachable members link to their `/staf/{psdId}` profile (canonical paper
+ * press-down on hover); members without a detail page stay as plain cards.
+ */
+export const WithDetailLinks: Story = {
+  args: {
+    // First two members link to their detail page; the rest stay plain. Derived
+    // via map so the story never depends on hard-coded fixture indices.
+    staff: withPhotos.map((member, i) =>
+      i < 2 ? { ...member, href: `/staf/1111${i}` } : member,
+    ),
+  },
+};

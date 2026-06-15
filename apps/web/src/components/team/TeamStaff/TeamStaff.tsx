@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
 export interface TeamStaffMemberData {
@@ -11,6 +12,11 @@ export interface TeamStaffMemberData {
   role?: string | null;
   /** Round photo URL (newsprint-treated). Missing → monogram fallback. */
   imageUrl?: string | null;
+  /**
+   * Staff-detail URL (`/staf/{psdId}`). Set only when a detail page exists
+   * for this member; present → the card becomes a link to that profile.
+   */
+  href?: string | null;
 }
 
 export interface TeamStaffProps {
@@ -67,13 +73,18 @@ function StaffCard({ member }: { member: TeamStaffMemberData }) {
   const imageUrl = member.imageUrl?.trim() ?? "";
   const hasPhoto = imageUrl !== "";
   const fn = resolveFunctionLabel(member.functionTitle, member.role);
+  const href = member.href?.trim() ?? "";
+  const isLink = href !== "";
 
-  return (
-    <div
-      data-testid="team-staff-card"
-      data-state={hasPhoto ? "photo" : "monogram"}
-      className="border-ink bg-cream flex flex-col items-center border-2 p-3 text-center shadow-[3px_3px_0_0_var(--color-ink)]"
-    >
+  const cardClass = cn(
+    "border-ink bg-cream flex flex-col items-center border-2 p-3 text-center shadow-[3px_3px_0_0_var(--color-ink)]",
+    // Reachable members become links with the canonical paper press-down.
+    isLink &&
+      "transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 motion-safe:hover:shadow-none",
+  );
+
+  const content = (
+    <>
       {/* Round photo or monogram */}
       <div className="border-ink h-16 w-16 overflow-hidden rounded-full border-2">
         {hasPhoto ? (
@@ -108,6 +119,29 @@ function StaffCard({ member }: { member: TeamStaffMemberData }) {
       <p className="text-ink-muted mt-1 font-mono text-[9px] tracking-[0.06em] uppercase">
         {fn}
       </p>
+    </>
+  );
+
+  if (isLink) {
+    return (
+      <Link
+        href={href}
+        data-testid="team-staff-card"
+        data-state={hasPhoto ? "photo" : "monogram"}
+        className={cardClass}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div
+      data-testid="team-staff-card"
+      data-state={hasPhoto ? "photo" : "monogram"}
+      className={cardClass}
+    >
+      {content}
     </div>
   );
 }

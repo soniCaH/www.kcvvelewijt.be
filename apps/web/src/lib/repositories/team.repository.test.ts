@@ -151,6 +151,8 @@ describe("TeamRepository", () => {
             role: null,
             member: {
               _id: "staff-1",
+              psdId: null,
+              archived: null,
               firstName: "Piet",
               lastName: "Pieters",
               functionTitle: null,
@@ -197,7 +199,8 @@ describe("TeamRepository", () => {
       );
       expect(t.players[0].href).toBe("/spelers/42");
 
-      // Staff transformed to StaffMemberVM
+      // Staff transformed to StaffMemberVM — no psdId on the mock member, so
+      // no staff-detail link is emitted.
       expect(t.staff).toHaveLength(1);
       expect(t.staff[0]).toEqual<StaffMemberVM>({
         id: "staff-1",
@@ -206,6 +209,67 @@ describe("TeamRepository", () => {
         role: "",
         imageUrl: "https://cdn.sanity.io/photo.webp",
       });
+      expect(t.staff[0]?.href).toBeUndefined();
+    });
+
+    it("links a staff card to /staf/{psdId} when the member has a psdId and is not archived", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: "trainer",
+              member: {
+                _id: "staff-1",
+                psdId: "98765",
+                archived: false,
+                firstName: "Piet",
+                lastName: "Pieters",
+                functionTitle: "T1",
+                photoUrl: null,
+              },
+            },
+          ],
+        }),
+      );
+
+      const team = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(team!.staff[0]?.href).toBe("/staf/98765");
+    });
+
+    it("omits the staff-detail link when the member is archived", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: "trainer",
+              member: {
+                _id: "staff-1",
+                psdId: "98765",
+                archived: true,
+                firstName: "Piet",
+                lastName: "Pieters",
+                functionTitle: "T1",
+                photoUrl: null,
+              },
+            },
+          ],
+        }),
+      );
+
+      const team = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(team!.staff[0]?.href).toBeUndefined();
     });
 
     it("computes tagline fallback: tagline → divisionFull → division", async () => {
@@ -297,6 +361,8 @@ describe("TeamRepository", () => {
               role: "trainer",
               member: {
                 _id: "staff-2",
+                psdId: null,
+                archived: null,
                 firstName: "Jan",
                 lastName: "Janssens",
                 functionTitle: "T1",
@@ -326,6 +392,8 @@ describe("TeamRepository", () => {
               role: null,
               member: {
                 _id: "s1",
+                psdId: null,
+                archived: null,
                 firstName: "A",
                 lastName: "B",
                 functionTitle: null,
