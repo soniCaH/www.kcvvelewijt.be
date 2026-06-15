@@ -1,56 +1,55 @@
 /**
- * Staff Detail Page — Loading Skeleton
- * Mirrors the rebuilt page (#2124): person-profile hero (portrait + name +
- * pills + contact) → <StripedSeam> → bio prose column.
+ * Staff Detail Page — Loading Skeleton.
+ *
+ * Mirrors the `/spelers/[slug]` skeleton at the chrome level — a bare hero
+ * grid (figure on the LEFT for staff), a seam bar, and a bio paragraph
+ * footprint on a cream band — over the near-white page background. Bars stay
+ * sharp-cornered per the redesign vocabulary.
  */
-
-import { FooterSafeArea, StripedSeam } from "@/components/design-system";
 
 export default function StaffDetailLoading() {
   return (
-    <div className="bg-cream min-h-screen">
+    <div className="min-h-screen">
       <span role="status" aria-live="polite" className="sr-only">
         Stafprofiel laden...
       </span>
 
-      {/* Hero skeleton — the <StaffHero> TapedCard shell: portrait slot +
-          kicker / two-line name / role pills / contact row. */}
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
-        <div className="border-ink bg-cream shadow-paper-md border-2 p-8">
-          <div className="grid items-center gap-6 md:grid-cols-[0.7fr_1.3fr]">
-            <div className="border-ink bg-cream-soft shadow-paper-sm aspect-[3/4] w-full animate-pulse border-2" />
-            <div className="animate-pulse space-y-4">
-              <div className="bg-cream-soft h-3 w-16" />
-              <div className="space-y-2">
-                <div className="bg-cream-soft h-10 w-44" />
-                <div className="bg-cream-soft h-10 w-60" />
-              </div>
-              <div className="flex gap-2">
-                <div className="bg-cream-soft h-6 w-28" />
-                <div className="bg-cream-soft h-6 w-20" />
-              </div>
-              <div className="bg-cream-soft h-4 w-48" />
+      {/* Hero footprint — figure left, text right (mirrors PlayerHero). */}
+      <section
+        aria-hidden="true"
+        className="mx-auto w-full max-w-[var(--container-wide)] animate-pulse px-4 py-12 lg:px-8 lg:py-16"
+      >
+        <div className="grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[minmax(220px,320px)_1fr]">
+          <div className="bg-paper-edge aspect-[3/4] w-full max-w-[320px] justify-self-start" />
+          <div className="flex flex-col gap-5">
+            <div className="bg-paper-edge h-4 w-16" />
+            <div className="space-y-2">
+              <div className="bg-paper-edge h-12 w-3/4" />
+              <div className="bg-paper-edge h-10 w-2/3" />
             </div>
+            <div className="flex gap-2">
+              <div className="bg-paper-edge h-6 w-28" />
+              <div className="bg-paper-edge h-6 w-20" />
+            </div>
+            <div className="bg-paper-edge h-3 w-48" />
           </div>
         </div>
-      </div>
+      </section>
 
-      <StripedSeam colorPair="ink-cream" height="md" />
+      {/* Single seam bar (matches the page's lone post-hero seam). */}
+      <div aria-hidden="true" className="bg-paper-edge h-[18px] w-full" />
 
-      {/* Bio skeleton — mirrors the heading + <ArticleBody> prose column. */}
-      <div className="bg-cream w-full px-4 py-12 lg:px-0 lg:py-16">
-        <div
-          className="mx-auto w-full animate-pulse space-y-4"
-          style={{ maxWidth: "var(--container-prose)" }}
-        >
-          <div className="bg-cream-soft mb-6 h-8 w-40" />
-          <div className="bg-cream-soft h-5 w-full" />
-          <div className="bg-cream-soft h-5 w-full" />
-          <div className="bg-cream-soft h-5 w-4/5" />
+      {/* Bio footprint — cream band. */}
+      <section
+        aria-hidden="true"
+        className="bg-cream mx-auto w-full max-w-[var(--container-wide)] animate-pulse px-4 py-12 lg:px-8 lg:py-16"
+      >
+        <div className="space-y-3">
+          <div className="bg-paper-edge h-4 w-full" />
+          <div className="bg-paper-edge h-4 w-11/12" />
+          <div className="bg-paper-edge h-4 w-10/12" />
         </div>
-      </div>
-
-      <FooterSafeArea />
+      </section>
     </div>
   );
 }

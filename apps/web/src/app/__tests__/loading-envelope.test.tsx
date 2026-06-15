@@ -192,7 +192,7 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/staf/[slug]",
       Loading: StafDetailLoading,
-      expectedRootClass: "bg-cream min-h-screen",
+      expectedRootClass: "min-h-screen",
     },
     {
       name: "/tegenstander/[clubId]",

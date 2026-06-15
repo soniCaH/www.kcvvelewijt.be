@@ -2,32 +2,29 @@
 
 import type { ComponentType } from "react";
 import Image from "next/image";
-import { TapedCard } from "@/components/design-system/TapedCard";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { Envelope, Phone, type RedesignIconProps } from "@/lib/icons.redesign";
 
 /**
- * `<StaffHero>` — the locked person-profile hero (10f2 "hero B") for the
- * `/staf/[slug]` detail page. Shares the `<PageHero>` shell vocabulary
- * (a `<TapedCard bg="cream">` with one warm top-left `<TapeStrip>`), but
- * leads with a portrait `<TapedFigure>` + a two-line name rhythm rather
- * than a landscape image.
+ * `<StaffHero>` — person-profile hero for `/staf/[slug]`, built on the SAME
+ * bare two-column grid as `<PlayerHero>` so the two detail pages read as
+ * siblings. The figure is mirrored to the LEFT column (player keeps it right);
+ * everything else — container, name rhythm, mono kicker, single jersey
+ * `<TapeStrip>` at angle `b`, `padding="none"` newsprint photo — matches.
  *
- * Composition (retro-terrace-fanzine primitives only):
- *   - Portrait → `<TapedFigure aspect="portrait-3-4">` newsprint (colour)
- *     photo. No photo → a jersey-deep monogram (initials) inside the same
- *     framed slot (NOT the player-only jersey illustration).
- *   - Kicker → jersey-deep raw mono label-token span (the `<PageHero>`
- *     kicker idiom — `MonoLabel` plain only renders ink/cream tone).
- *   - Name → two `<h1>` lines: first upright `font-display-big` black, last
- *     italic `font-display` with a warm "." terminator.
+ * Staff carries different data, so the text column swaps the player's jersey
+ * number + ticket-stub for role pills + a contact row:
+ *   - Portrait → `<TapedFigure aspect="portrait-3-4" padding="none">`. No photo
+ *     → a jersey-deep monogram (initials) in the same framed slot (NOT the
+ *     player-only jersey illustration).
+ *   - Kicker → `<MonoLabel variant="plain">` (ink), as on the player hero.
+ *   - Name → first upright `font-display-big` black (`display-2xl`), last
+ *     italic `font-display` (`display-xl`) + period.
  *   - Roles → `<MonoLabel>` pills (first `pill-jersey-deep`, rest
  *     `pill-cream`). Auto-hides when empty.
- *   - Contact → mono row of mailto / tel links with plain Phosphor-Fill
- *     icons (jersey-deep). Auto-hides when neither is present.
- *
- * Design lock: `docs/design/mockups/phase-10-staf/10f2-staf-assembled.html` (#2124).
+ *   - Contact → mono row of mailto / tel links with plain Phosphor-Fill icons.
+ *     Auto-hides when neither is present.
  */
 
 export interface StaffHeroProps {
@@ -84,27 +81,21 @@ export function StaffHero({
   const showContact = Boolean(email || phone);
 
   return (
-    <TapedCard
-      as="section"
-      bg="cream"
-      padding="lg"
-      tape={{ color: "warm", position: "left", length: "lg" }}
-      dataAttrs={{
-        "data-testid": "staff-hero",
-        "data-state": hasPhoto ? "photo" : "monogram",
-      }}
+    <section
+      data-testid="staff-hero"
+      data-state={hasPhoto ? "photo" : "monogram"}
+      className="grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[minmax(220px,320px)_1fr]"
     >
-      <div className="grid items-center gap-6 md:grid-cols-[0.7fr_1.3fr]">
-        {/* Portrait or monogram — always a framed portrait-3-4 slot. The photo
-            runs flush to the border (`padding="none"`) with the same
-            newsprint + `object-cover` treatment as <PlayerHero>; mirrored to
-            the left column for staff. */}
+      {/* Figure — LEFT column (player mirrors this on the right). Same
+          `padding="none"` newsprint treatment + single jersey tape at angle b. */}
+      <div className="w-full max-w-[320px] justify-self-start">
         <TapedFigure
           aspect="portrait-3-4"
+          rotation="b"
+          tape={{ color: "jersey", length: "md" }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"
-          tape={{ color: "warm", position: "right", length: "md" }}
         >
           {hasPhoto ? (
             <Image
@@ -125,55 +116,52 @@ export function StaffHero({
             </span>
           )}
         </TapedFigure>
-
-        {/* Name + roles + contact. */}
-        <div>
-          <span className="text-jersey-deep font-mono text-[length:var(--text-label)] font-semibold tracking-[0.18em] uppercase">
-            Staf
-          </span>
-
-          {/* `mb-0` neutralises the global base `h1 { margin-bottom: 1em }`
-              so the role pills sit tight under the name. */}
-          <h1 className="mt-1 mb-0 tracking-tight">
-            <span className="font-display-big text-ink block text-[length:var(--text-display-lg)] leading-[0.9] font-black">
-              {firstName}
-            </span>
-            <span className="font-display text-ink block text-[length:var(--text-display-lg)] leading-[0.95] font-normal italic">
-              {lastName}
-              <span className="text-warm">.</span>
-            </span>
-          </h1>
-
-          {roles.length > 0 ? (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {roles.map((role, i) => (
-                <span key={`${role}-${i}`} data-testid="staff-hero-role">
-                  <MonoLabel
-                    variant={i === 0 ? "pill-jersey-deep" : "pill-cream"}
-                  >
-                    {role}
-                  </MonoLabel>
-                </span>
-              ))}
-            </div>
-          ) : null}
-
-          {showContact ? (
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-mono text-[length:var(--text-mono-sm)]">
-              {email ? (
-                <ContactLink
-                  href={`mailto:${email}`}
-                  icon={Envelope}
-                  label={email}
-                />
-              ) : null}
-              {phone ? (
-                <ContactLink href={`tel:${phone}`} icon={Phone} label={phone} />
-              ) : null}
-            </div>
-          ) : null}
-        </div>
       </div>
-    </TapedCard>
+
+      {/* Text column. */}
+      <div className="flex flex-col gap-5">
+        <span className="uppercase">
+          <MonoLabel variant="plain">Staf</MonoLabel>
+        </span>
+
+        <h1 className="text-ink m-0 flex flex-col leading-[0.9]">
+          <span className="font-display-big block text-[length:var(--text-display-2xl)] leading-[var(--text-display-2xl--lh)] font-black">
+            {firstName}
+          </span>
+          <span className="font-display block text-[length:var(--text-display-xl)] leading-[var(--text-display-xl--lh)] font-normal italic">
+            {lastName}.
+          </span>
+        </h1>
+
+        {roles.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {roles.map((role, i) => (
+              <span key={`${role}-${i}`} data-testid="staff-hero-role">
+                <MonoLabel
+                  variant={i === 0 ? "pill-jersey-deep" : "pill-cream"}
+                >
+                  {role}
+                </MonoLabel>
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        {showContact ? (
+          <div className="flex flex-wrap gap-x-5 gap-y-2 font-mono text-[length:var(--text-mono-sm)]">
+            {email ? (
+              <ContactLink
+                href={`mailto:${email}`}
+                icon={Envelope}
+                label={email}
+              />
+            ) : null}
+            {phone ? (
+              <ContactLink href={`tel:${phone}`} icon={Phone} label={phone} />
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 }

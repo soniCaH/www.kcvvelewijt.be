@@ -111,13 +111,15 @@ export default async function StafPage({ params }: StaffPageProps) {
   const hasRoles =
     member.organigramPositions.length > 0 ||
     member.responsibilityPaths.length > 0;
+  const hasContentBelowHero = hasBio || hasRoles || relatedArticles.length > 0;
 
   return (
-    // No `min-h-screen`: a short profile (no bio / roles / related) must not
-    // stretch a tall cream void between the hero and the footer — mirrors the
-    // bare-fragment root of `/spelers/[slug]`. The footer (root layout) follows
-    // the content directly.
-    <div className="bg-cream">
+    // Bare fragment on the near-white page background, mirroring
+    // `/spelers/[slug]`: the hero + role/related sections sit on the body bg
+    // while the bio renders as a cream band (<ArticleBody>). No page-level
+    // `min-h-screen` wrapper, so a short profile doesn't stretch a void before
+    // the footer (which lives in the root layout).
+    <>
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -149,12 +151,18 @@ export default async function StafPage({ params }: StaffPageProps) {
         />
       </section>
 
-      {/* Bio — <ArticleBody> (retires <SanityArticleBody>). Auto-hides when
-          empty. The heading rides the same prose column as the body; the
-          body's own top padding is trimmed so the two read as one block. */}
+      {/* A single full-bleed seam after the hero, matching `/spelers/[slug]`
+          (one seam, then sections flow — no per-section dividers). */}
+      {hasContentBelowHero ? (
+        <StripedSeam colorPair="ink-cream" height="md" />
+      ) : null}
+
+      {/* Bio — <ArticleBody> (retires <SanityArticleBody>). A cream band on the
+          near-white page. Auto-hides when empty. The heading rides the same
+          prose column as the body; the body's own top padding is trimmed so the
+          two read as one block. */}
       {hasBio ? (
         <>
-          <StripedSeam colorPair="ink-cream" height="md" />
           <div className="bg-cream w-full px-4 pt-12 lg:px-0">
             <div
               className="mx-auto w-full"
@@ -179,34 +187,28 @@ export default async function StafPage({ params }: StaffPageProps) {
 
       {/* Rol & verantwoordelijkheden — merged org positions + hulp links. */}
       {hasRoles ? (
-        <>
-          <StripedSeam colorPair="ink-cream" height="md" />
-          <StaffRoles
-            positions={member.organigramPositions.map((p) => ({
-              id: p._id,
-              title: p.title,
-              ...(p.roleCode ? { roleCode: p.roleCode } : {}),
-              ...(p.department ? { department: p.department } : {}),
-            }))}
-            responsibilities={member.responsibilityPaths}
-          />
-        </>
+        <StaffRoles
+          positions={member.organigramPositions.map((p) => ({
+            id: p._id,
+            title: p.title,
+            ...(p.roleCode ? { roleCode: p.roleCode } : {}),
+            ...(p.department ? { department: p.department } : {}),
+          }))}
+          responsibilities={member.responsibilityPaths}
+        />
       ) : null}
 
       {relatedArticles.length > 0 ? (
-        <>
-          <StripedSeam colorPair="ink-cream" height="md" />
-          <RelatedArticlesSection
-            articles={relatedArticles}
-            pageType="staff"
-            pageSlug={slug}
-            className="mx-auto max-w-5xl px-4 py-12"
-          />
-        </>
+        <RelatedArticlesSection
+          articles={relatedArticles}
+          pageType="staff"
+          pageSlug={slug}
+          className="mx-auto max-w-5xl px-4 py-12"
+        />
       ) : null}
 
       <FooterSafeArea />
-    </div>
+    </>
   );
 }
 
