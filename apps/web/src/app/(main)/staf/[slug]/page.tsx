@@ -2,10 +2,10 @@
  * Staff Member Detail Page
  * Displays individual staff member profiles from Sanity (slug = psdId).
  *
- * Rebuilt on the retro-terrace-fanzine system (#2124, lock `10f2`):
- *   hero (person-profile B) → bio (<ArticleBody>) → merged
- *   "Rol & verantwoordelijkheden." → related. Full-bleed <StripedSeam>
- *   between sections.
+ * Rebuilt on the retro-terrace-fanzine system (#2124, lock `10f2`) and aligned
+ * with `/spelers/[slug]`: bare fragment on the near-white body, a person-profile
+ * hero (figure left) → a single full-bleed <StripedSeam> → bio (<ArticleBody>
+ * cream band) → merged "Rol & verantwoordelijkheden." → related.
  */
 
 import { Effect } from "effect";
