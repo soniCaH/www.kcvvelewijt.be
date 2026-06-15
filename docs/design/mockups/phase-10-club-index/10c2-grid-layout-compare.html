@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · /club index · 10c2: grid layout compare (uniform vs featured)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--cream-deep); border-bottom: 2px solid var(--ink); padding: 9px 28px; font-family: var(--font-mono); font-size: 12px; } .lockbar b { background: var(--jersey-deep); color: var(--cream); padding: 2px 8px; }
+      .direction-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream); padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); flex-wrap: wrap; }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 9px; font-weight: 700; border: 1.5px solid var(--ink); } .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 24px 28px 38px; border-bottom: 1px dashed var(--paper-edge); }
+      .wrap { max-width: 1080px; margin: 0 auto; }
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.95; margin: 8px 0 20px; letter-spacing: -0.01em; font-size: clamp(1.8rem, 3.4vw, 2.4rem); } .eh .accent { font-style: italic; color: var(--jersey-deep); } .eh .dot { color: var(--warm); }
+
+      .hub { display: flex; flex-direction: column; border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 4px 4px 0 0 var(--ink); overflow: hidden; }
+      .hub .top { position: relative; aspect-ratio: 16/9; border-bottom: 2px solid var(--ink); }
+      .hub .top.news { background: linear-gradient(135deg, #6b8f7a 0%, #3f6b54 55%, #244536 100%); filter: sepia(0.3) saturate(0.82); }
+      .hub .top.nav { background: var(--jersey-deep); display: grid; place-items: center; }
+      .hub .top.nav .glyph { font-size: 2.2rem; color: var(--cream); }
+      .pill { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: 1.5px solid var(--ink); padding: 3px 8px; display: inline-block; }
+      .pill.deep { background: var(--jersey-deep); color: var(--cream); } .pill.cream { background: var(--cream); color: var(--ink); }
+      .hub .top .pillpos { position: absolute; top: 10px; left: 10px; z-index: 2; }
+      .hub .body { padding: 13px; display: flex; flex-direction: column; gap: 7px; }
+      .hub .title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 1.02rem; line-height: 1.15; color: var(--ink); }
+      .hub .arrow { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--jersey-deep); }
+
+      /* A uniform */
+      .gridA { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 860px) { .gridA { grid-template-columns: repeat(2, 1fr); } }
+
+      /* B featured bento */
+      .gridB { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; gap: 16px; }
+      .gridB .feat { grid-column: span 2; grid-row: span 2; }
+      .gridB .feat .top { aspect-ratio: auto; height: 100%; min-height: 300px; }
+      .gridB .feat .body { gap: 9px; } .gridB .feat .title { font-size: 1.5rem; }
+      .gridB .feat { position: relative; }
+      .gridB .feat .body.over { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(10,10,10,0.82), transparent); }
+      .gridB .feat .body.over .title { color: var(--cream); } .gridB .feat .body.over .arrow { color: var(--warm); }
+      @media (max-width: 860px) { .gridB { grid-template-columns: repeat(2, 1fr); } .gridB .feat { grid-column: span 2; grid-row: span 1; } .gridB .feat .top { min-height: 220px; } }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 44px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; } .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · /club index (#2121) · 10c2 — GRID LAYOUT compare</h1>
+      <p>Decision 2: the 6 nav cards (all <b>&lt;EditorialHubCard&gt;</b>) — laid out <b>uniform 3-up</b> (jeugd parity) or <b>featured bento</b> (Geschiedenis enlarged, legacy hierarchy). Same cards, same locked H2 header in both.</p>
+    </div>
+    <div class="lockbar">LOCKED → mission PullQuote + contact CTA <b>kept</b> · cards = EditorialHubCard. &nbsp;HEADER reopened (no "compagnie"/"club" repeat) — placeholder shown: "Waar wil je heen?"</div>
+
+    <!-- A -->
+    <div class="direction-bar"><span class="tag">A</span> Uniform 3-up <span class="note">all 6 cards equal · jeugd parity · cleanest, most even</span></div>
+    <div class="stage"><div class="wrap">
+      <span class="kicker">Ontdek onze club</span><h2 class="eh">Waar wil je <span class="accent">heen</span><span class="dot">?</span></h2>
+      <div class="gridA">
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Geschiedenis</span></span></div><div class="body"><span class="title">Meer dan een eeuw voetbalpassie</span><span class="arrow">Lees meer →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Bestuur</span></span><span class="glyph">★</span></div><div class="body"><span class="title">Het team achter het team</span><span class="arrow">Ontdek →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Organigram</span></span><span class="glyph">⌗</span></div><div class="body"><span class="title">Onze structuur</span><span class="arrow">Bekijk →</span></div></div>
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Ultras</span></span></div><div class="body"><span class="title">De 12de man</span><span class="arrow">Meer info →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Angels</span></span><span class="glyph">♥</span></div><div class="body"><span class="title">Onze engelen</span><span class="arrow">Meer info →</span></div></div>
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Aansluiten</span></span></div><div class="body"><span class="title">Word lid</span><span class="arrow">Schrijf je in →</span></div></div>
+      </div>
+    </div></div>
+
+    <!-- B -->
+    <div class="direction-bar"><span class="tag">B</span> Featured bento <span class="note">Geschiedenis enlarged (2×2, overlaid title) · legacy hierarchy · more editorial</span></div>
+    <div class="stage"><div class="wrap">
+      <span class="kicker">Ontdek onze club</span><h2 class="eh">Waar wil je <span class="accent">heen</span><span class="dot">?</span></h2>
+      <div class="gridB">
+        <div class="hub feat"><div class="top news"><span class="pillpos"><span class="pill deep">Geschiedenis</span></span></div><div class="body over"><span class="title">Meer dan een eeuw voetbalpassie in Elewijt</span><span class="arrow">Lees meer →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Bestuur</span></span><span class="glyph">★</span></div><div class="body"><span class="title">Het team achter het team</span><span class="arrow">Ontdek →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Organigram</span></span><span class="glyph">⌗</span></div><div class="body"><span class="title">Onze structuur</span><span class="arrow">Bekijk →</span></div></div>
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Ultras</span></span></div><div class="body"><span class="title">De 12de man</span><span class="arrow">Meer info →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Angels</span></span><span class="glyph">♥</span></div><div class="body"><span class="title">Onze engelen</span><span class="arrow">Meer info →</span></div></div>
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Aansluiten</span></span></div><div class="body"><span class="title">Word lid</span><span class="arrow">Schrijf je in →</span></div></div>
+      </div>
+    </div></div>
+
+    <div class="legend">
+      <h3>Trade-offs</h3>
+      <ul>
+        <li><b>A uniform</b> — even, calm, identical to the /jeugd hub (one shared grid component, zero new layout code). Every section reads as equal weight. Con: no visual hierarchy — Geschiedenis (the richest story) gets no more pull than "Angels".</li>
+        <li><b>B featured bento</b> — Geschiedenis leads as a big overlay-title card (keeps the legacy hierarchy), the rest tile around it. More magazine. Con: a bespoke grid (not the shared jeugd one), and the featured card uses an overlaid title rather than the standard below-image title.</li>
+      </ul>
+      <div class="q"><b>Decision 2 — pick A or B.</b> Then #2121 is fully locked (header H2 ✓ · mission+CTA ✓ · grid ?) and I'll write the spec.</div>
+      <p class="micro">phase-10 · 10c2 · /club grid layout · EditorialHubCard ×6</p>
+    </div>
+  </body>
+</html>

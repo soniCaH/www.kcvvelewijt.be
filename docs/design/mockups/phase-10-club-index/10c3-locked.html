@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · /club index · LOCKED reference</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--jersey-deep); color: var(--cream); border-bottom: 2px solid var(--ink); padding: 10px 28px; font-family: var(--font-mono); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; } .lockbar b { background: var(--warm); color: var(--ink); padding: 2px 8px; }
+      .page { max-width: 1080px; margin: 0 auto; padding: 30px 28px 0; }
+      .seam { height: 14px; margin: 36px 0; background: repeating-linear-gradient(135deg, var(--ink) 0 10px, var(--cream) 10px 20px); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.95; margin: 8px 0 0; letter-spacing: -0.01em; } .eh .accent { font-style: italic; color: var(--jersey-deep); } .eh .dot { color: var(--warm); }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--ink-soft); }
+
+      .hero { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 32px 28px; }
+      .hero .tape { position: absolute; top: -12px; left: 30px; width: 96px; height: 22px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .hero .eh { font-size: clamp(2.4rem, 5vw, 3.6rem); } .hero .lead { font-size: 1.15rem; max-width: 44ch; margin-top: 14px; } .hero .divider { margin-top: 18px; height: 0; border-top: 2px dotted var(--ink); width: 120px; }
+
+      .sec-head .eh { font-size: clamp(1.9rem, 3.6vw, 2.7rem); margin-bottom: 22px; }
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      @media (max-width: 860px) { .grid { grid-template-columns: repeat(2, 1fr); } } @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+      .hub { display: flex; flex-direction: column; border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 4px 4px 0 0 var(--ink); overflow: hidden; }
+      .hub .top { position: relative; aspect-ratio: 16/9; border-bottom: 2px solid var(--ink); }
+      .hub .top.news { background: linear-gradient(135deg, #6b8f7a 0%, #3f6b54 55%, #244536 100%); filter: sepia(0.3) saturate(0.82); }
+      .hub .top.nav { background: var(--jersey-deep); display: grid; place-items: center; } .hub .top.nav .glyph { font-size: 2.3rem; color: var(--cream); }
+      .pill { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: 1.5px solid var(--ink); padding: 3px 8px; display: inline-block; }
+      .pill.deep { background: var(--jersey-deep); color: var(--cream); } .pill.cream { background: var(--cream); color: var(--ink); }
+      .hub .top .pillpos { position: absolute; top: 10px; left: 10px; z-index: 2; }
+      .hub .body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+      .hub .title { font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 1.05rem; line-height: 1.15; color: var(--ink); }
+      .hub .arrow { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--jersey-deep); }
+
+      .pq { border: 2px solid var(--ink); background: var(--jersey-deep-dark); box-shadow: 5px 6px 0 0 var(--ink); padding: 34px 30px; text-align: center; }
+      .pq .q { font-family: var(--font-display); font-weight: 900; font-size: 3.4rem; color: var(--warm); line-height: 0.4; }
+      .pq .quote { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--cream); font-size: clamp(1.2rem, 2.4vw, 1.7rem); line-height: 1.4; margin: 14px auto 0; max-width: 48ch; }
+      .pq .attr { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(245,241,230,0.6); margin-top: 16px; }
+
+      .cta { border: 2px solid var(--ink); background: var(--cream); box-shadow: 5px 6px 0 0 var(--ink); padding: 26px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+      .cta .btn { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; border: 2px solid var(--ink); background: var(--jersey-deep); color: var(--cream); padding: 11px 18px; box-shadow: 3px 3px 0 0 var(--ink); white-space: nowrap; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); margin-top: 40px; padding: 24px 28px 44px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; } .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · /club index (#2121) · LOCKED reference</h1>
+      <p>The /club landing, rebuilt entirely from existing redesign primitives. Canonical implementation reference. Drill: 10c1 assembled → 10c2 grid → this lock.</p>
+    </div>
+    <div class="lockbar">
+      <span><b>PageHero</b> (locked)</span><span><b>EditorialHubCard</b> ×6 · uniform 3-up (A)</span><span>header <b>"Dit is KCVV."</b></span><span><b>PullQuote</b> mission</span><span>CTA kept</span><span><b>StripedSeam</b> seams</span>
+    </div>
+
+    <div class="page">
+      <div class="hero"><span class="tape"></span>
+        <span class="kicker">Onze club</span>
+        <h1 class="eh">De plezantste <span class="accent">compagnie</span><span class="dot">.</span></h1>
+        <p class="lead">Sinds 1909 de thuishaven voor voetballiefhebbers in Elewijt — van de allerkleinsten tot het eerste elftal.</p>
+        <div class="divider"></div>
+      </div>
+
+      <div class="seam"></div>
+
+      <div class="sec-head"><h2 class="eh">Dit is <span class="accent">KCVV</span><span class="dot">.</span></h2></div>
+      <div class="grid">
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Geschiedenis</span></span></div><div class="body"><span class="title">Meer dan een eeuw voetbalpassie</span><span class="arrow">Lees meer →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Bestuur</span></span><span class="glyph">★</span></div><div class="body"><span class="title">Het team achter het team</span><span class="arrow">Ontdek →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Organigram</span></span><span class="glyph">⌗</span></div><div class="body"><span class="title">Onze structuur</span><span class="arrow">Bekijk →</span></div></div>
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Ultras</span></span></div><div class="body"><span class="title">De 12de man</span><span class="arrow">Meer info →</span></div></div>
+        <div class="hub"><div class="top nav"><span class="pillpos"><span class="pill cream">Angels</span></span><span class="glyph">♥</span></div><div class="body"><span class="title">Onze engelen</span><span class="arrow">Meer info →</span></div></div>
+        <div class="hub"><div class="top news"><span class="pillpos"><span class="pill deep">Aansluiten</span></span></div><div class="body"><span class="title">Word lid</span><span class="arrow">Schrijf je in →</span></div></div>
+      </div>
+
+      <div class="seam"></div>
+
+      <div class="pq"><span class="q">&rdquo;</span>
+        <p class="quote">Wij zijn KCVV Elewijt. Een plek waar jong en oud wekelijks samenkomen voor hun passie.</p>
+        <p class="attr">— Sportpark Elewijt, sinds 1909</p>
+      </div>
+
+      <div class="seam"></div>
+
+      <div class="cta">
+        <div><span class="kicker">Contact</span><h2 class="eh" style="font-size:1.6rem; margin-top:6px">Vragen over de club<span class="dot">?</span></h2></div>
+        <span class="btn">Contacteer ons →</span>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>Locked spec — all reuse</h3>
+      <ul>
+        <li><b>Hero</b> → <code>&lt;PageHero&gt;</code> (no-image typographic). Kicker "Onze club" · headline "De plezantste <i>compagnie</i>." · lead "Sinds 1909…" (fixes the stale "75 jaar").</li>
+        <li><b>Section header</b> → <code>&lt;EditorialHeading&gt;</code> "Dit is <i>KCVV</i>." — no kicker.</li>
+        <li><b>Grid</b> → <code>&lt;EditorialHubCard&gt;</code> ×6, uniform 3-up (mirrors <code>&lt;JeugdEditorialGrid&gt;</code>). news = Geschiedenis / Ultras / Aansluiten; nav = Bestuur / Organigram / Angels. Retires <code>&lt;ClubEditorialGrid&gt;</code> + <code>&lt;EditorialCard&gt;</code>.</li>
+        <li><b>Mission</b> → <code>&lt;PullQuote&gt;</code> (jersey-deep-dark). <b>Contact</b> → CTA band. <b>Seams</b> → <code>&lt;StripedSeam&gt;</code> (unblocks #1701).</li>
+        <li><b>Nav glyphs</b> → real Phosphor via <code>&lt;NavGlyph&gt;</code> (placeholders ★ ⌗ ♥ here). <b>Copy</b>: Geschiedenis card "Meer dan een eeuw" (1909 = 117 yr) — final wording owner's to confirm.</li>
+      </ul>
+      <div class="q"><b>LOCKED 2026-06-15.</b> Header "Dit is KCVV." · mission "…jong en oud wekelijks samenkomen voor hun passie." · grid uniform 3-up · mission PullQuote + CTA kept. Ready for implementation.</div>
+      <p class="micro">phase-10 · 10c3 · /club index LOCKED · reuse PageHero + EditorialHubCard + PullQuote</p>
+    </div>
+  </body>
+</html>
