@@ -73,10 +73,10 @@ export const MonogramsOnly: Story = {
  */
 export const WithDetailLinks: Story = {
   args: {
-    staff: [
-      { ...withPhotos[0]!, href: "/staf/11111" },
-      { ...withPhotos[2]!, href: "/staf/22222" },
-      withPhotos[3]!, // no href → plain card
-    ],
+    // First two members link to their detail page; the rest stay plain. Derived
+    // via map so the story never depends on hard-coded fixture indices.
+    staff: withPhotos.map((member, i) =>
+      i < 2 ? { ...member, href: `/staf/1111${i}` } : member,
+    ),
   },
 };

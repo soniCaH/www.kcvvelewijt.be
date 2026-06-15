@@ -65,7 +65,7 @@ describe("StaffRoles", () => {
     render(<StaffRoles positions={[]} responsibilities={RESPONSIBILITIES} />);
     expect(screen.getByText(/Aanspreekpunt voor/i)).toBeInTheDocument();
     const link = screen.getByRole("link", { name: /Inschrijven A-ploeg/i });
-    expect(link).toHaveAttribute("href", "/hulp?pad=inschrijven-a");
+    expect(link).toHaveAttribute("href", "/hulp#inschrijven-a");
     expect(screen.getByText("Spelers")).toBeInTheDocument();
   });
 

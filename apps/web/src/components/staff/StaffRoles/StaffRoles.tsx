@@ -15,8 +15,10 @@ import { cn } from "@/lib/utils/cn";
  *   - Organigram positions → paper rows (roleCode `<MonoLabel>` pill + title +
  *     department). Static info, not links.
  *   - Responsibilities → an "Aanspreekpunt voor" mono sub-label followed by
- *     paper link cards that route to `/hulp?pad=<slug>` (the canonical
- *     press-down `<TapedCard interactive="press">` hover).
+ *     paper link cards that deep-link to `/hulp#<slug>` — the hash format
+ *     `<HulpFinder>` reads to reveal + open the matching responsibility card
+ *     (it does not read a `pad` query param) — with the canonical press-down
+ *     `<TapedCard interactive="press">` hover.
  *
  * Auto-hides entirely when both lists are empty. No section-header icon —
  * the heading carries the meaning (Lucide `Network`/`CircleHelp` retired).
@@ -33,7 +35,7 @@ export interface StaffRolePosition {
 
 export interface StaffResponsibility {
   title: string;
-  /** Routed to `/hulp?pad=<slug>`. */
+  /** Deep-links to `/hulp#<slug>` (the `<HulpFinder>` hash anchor). */
   slug: string;
   category?: string;
 }
@@ -98,7 +100,7 @@ export function StaffRoles({
             {responsibilities.map((resp) => (
               <Link
                 key={resp.slug}
-                href={`/hulp?pad=${resp.slug}`}
+                href={`/hulp#${encodeURIComponent(resp.slug)}`}
                 className="group block"
                 data-testid="staff-responsibility-card"
               >

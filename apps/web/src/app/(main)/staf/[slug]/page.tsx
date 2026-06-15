@@ -113,7 +113,11 @@ export default async function StafPage({ params }: StaffPageProps) {
     member.responsibilityPaths.length > 0;
 
   return (
-    <div className="bg-cream min-h-screen">
+    // No `min-h-screen`: a short profile (no bio / roles / related) must not
+    // stretch a tall cream void between the hero and the footer — mirrors the
+    // bare-fragment root of `/spelers/[slug]`. The footer (root layout) follows
+    // the content directly.
+    <div className="bg-cream">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
@@ -131,9 +135,10 @@ export default async function StafPage({ params }: StaffPageProps) {
         })}
       />
 
-      {/* Hero — person-profile (B). `pb-12` reserves the rhythm before the
-          full-bleed seam (StripedSeam carries no margin of its own). */}
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+      {/* Hero — person-profile (B). Container width + padding match the
+          `/spelers/[slug]` hero section; the bottom padding reserves the
+          rhythm before the full-bleed seam. */}
+      <section className="mx-auto w-full max-w-[var(--container-wide)] px-4 py-12 lg:px-8 lg:py-16">
         <StaffHero
           firstName={member.firstName}
           lastName={member.lastName}
@@ -142,7 +147,7 @@ export default async function StafPage({ params }: StaffPageProps) {
           email={member.email}
           phone={member.phone}
         />
-      </div>
+      </section>
 
       {/* Bio — <ArticleBody> (retires <SanityArticleBody>). Auto-hides when
           empty. The heading rides the same prose column as the body; the

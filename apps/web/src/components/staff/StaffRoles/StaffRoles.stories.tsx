@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { StaffRoles } from "./StaffRoles";
 
 const meta = {
-  title: "Staff/StaffRoles",
+  title: "Features/Staff/StaffRoles",
   component: StaffRoles,
   parameters: {
     layout: "fullscreen",
