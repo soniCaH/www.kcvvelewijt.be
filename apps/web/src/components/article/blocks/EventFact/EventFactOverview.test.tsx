@@ -26,7 +26,7 @@ describe("EventFactOverview", () => {
       />,
     );
     const section = container.querySelector("[data-testid='event-overview']");
-    expect(section).toHaveClass("bg-kcvv-gray-dark");
+    expect(section).toHaveClass("bg-ink");
     expect(section).toHaveClass("full-bleed");
   });
 

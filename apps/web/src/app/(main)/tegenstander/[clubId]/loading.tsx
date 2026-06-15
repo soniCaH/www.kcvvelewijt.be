@@ -7,7 +7,7 @@ export default function OpponentLoading() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Opponent header */}
-      <div className="bg-kcvv-dark-bg px-4 py-8 text-white">
+      <div className="bg-ink px-4 py-8 text-white">
         <div className="mx-auto flex max-w-3xl animate-pulse items-center gap-4">
           <div className="h-16 w-16 rounded-full bg-white/10" />
           <div className="space-y-2">

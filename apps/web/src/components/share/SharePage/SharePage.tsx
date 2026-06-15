@@ -356,13 +356,13 @@ export function SharePage({ matches, players }: SharePageProps) {
   };
 
   const inputClass =
-    "w-full border-2 border-gray-200 rounded-sm px-4 py-3 font-montserrat text-base focus:border-kcvv-green focus:outline-none";
+    "w-full border-2 border-gray-200 rounded-sm px-4 py-3 font-montserrat text-base focus:border-jersey-deep focus:outline-none";
   const labelClass =
-    "font-montserrat font-semibold text-sm uppercase tracking-wide text-kcvv-black";
+    "font-montserrat font-semibold text-sm uppercase tracking-wide text-ink-soft";
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
-      <h1 className="font-montserrat text-kcvv-black text-3xl font-black">
+      <h1 className="font-montserrat text-ink-soft text-3xl font-black">
         Story Generator
       </h1>
 
@@ -379,8 +379,8 @@ export function SharePage({ matches, players }: SharePageProps) {
               aria-pressed={selectedTemplateId === t.id}
               className={`font-montserrat flex min-h-[72px] flex-col items-center gap-1 rounded-sm border-2 p-3 text-sm font-semibold transition-colors ${
                 selectedTemplateId === t.id
-                  ? "border-kcvv-green bg-kcvv-green/10 text-kcvv-green"
-                  : "text-kcvv-black hover:border-kcvv-green/50 border-gray-200 bg-white"
+                  ? "border-jersey-deep bg-jersey-deep/10 text-jersey-deep"
+                  : "text-ink-soft hover:border-jersey-deep/50 border-gray-200 bg-white"
               }`}
             >
               <t.icon
@@ -486,8 +486,8 @@ export function SharePage({ matches, players }: SharePageProps) {
                 onClick={() => setSelectedPlayerId(p.id)}
                 className={`font-montserrat flex w-full items-center gap-3 px-4 py-2 text-left text-sm transition-colors ${
                   selectedPlayerId === p.id
-                    ? "bg-kcvv-green/10 text-kcvv-green"
-                    : "text-kcvv-black hover:bg-gray-50"
+                    ? "bg-jersey-deep/10 text-jersey-deep"
+                    : "text-ink-soft hover:bg-gray-50"
                 }`}
               >
                 <span className="min-w-[2rem] text-center text-lg font-bold">
@@ -564,7 +564,7 @@ export function SharePage({ matches, players }: SharePageProps) {
       <button
         onClick={handleGenerate}
         disabled={isGenerating}
-        className="bg-kcvv-green-bright hover:bg-kcvv-green-hover font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-jersey-deep font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-all duration-300 hover:translate-x-1 hover:translate-y-1 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isGenerating ? "Generating…" : "Genereer"}
       </button>
@@ -581,14 +581,14 @@ export function SharePage({ matches, players }: SharePageProps) {
           {canShareFiles ? (
             <button
               onClick={handleShare}
-              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-colors"
+              className="bg-jersey-deep font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-all duration-300 hover:translate-x-1 hover:translate-y-1"
             >
               Delen
             </button>
           ) : (
             <button
               onClick={handleDownload}
-              className="bg-kcvv-green-bright hover:bg-kcvv-green-hover font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-colors"
+              className="bg-jersey-deep font-montserrat rounded-sm px-10 py-4 text-lg font-bold text-white transition-all duration-300 hover:translate-x-1 hover:translate-y-1"
             >
               Download PNG
             </button>

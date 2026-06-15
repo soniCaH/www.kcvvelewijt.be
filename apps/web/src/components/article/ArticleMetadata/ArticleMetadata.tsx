@@ -40,7 +40,7 @@ const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
 const DEFAULT_AUTHOR = "KCVV Elewijt";
 
 /**
- * Design §7.6 — article metadata bar. Single row with 1px `kcvv-gray-light`
+ * Design §7.6 — article metadata bar. Single row with 1px `paper-edge`
  * rules above and below. Left cluster: date · author · reading time, mono
  * small-caps. Right cluster: share icons (Share2 for the Web Share API,
  * Facebook for direct sharing). No breadcrumb — that role belongs to the
@@ -103,14 +103,14 @@ export const ArticleMetadata = ({
   return (
     <nav
       aria-label="Artikelinfo"
-      className={cn("border-kcvv-gray-light w-full border-y py-3", className)}
+      className={cn("border-paper-edge w-full border-y py-3", className)}
     >
       <div className="max-w-inner-lg mx-auto flex w-full flex-wrap items-center justify-between gap-y-2 px-6">
-        <ul className="text-kcvv-gray flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+        <ul className="text-ink-muted flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
           {facts.map((fact, i) => (
             <li key={`${i}-${fact}`} className="flex items-center gap-x-3">
               {i > 0 && (
-                <span aria-hidden="true" className="text-kcvv-gray-light">
+                <span aria-hidden="true" className="text-paper-edge">
                   ·
                 </span>
               )}
@@ -125,7 +125,7 @@ export const ArticleMetadata = ({
               type="button"
               onClick={handleNativeShare}
               aria-label="Delen"
-              className="text-kcvv-gray-blue hover:text-kcvv-green-dark transition-colors"
+              className="text-ink-soft hover:text-jersey-deep transition-colors"
             >
               <Icon icon={Share2} size="xs" />
             </button>
@@ -135,7 +135,7 @@ export const ArticleMetadata = ({
               rel="noopener noreferrer"
               aria-label="Delen op Facebook"
               onClick={() => trackShare("facebook")}
-              className="text-kcvv-gray-blue hover:text-kcvv-green-dark transition-colors"
+              className="text-ink-soft hover:text-jersey-deep transition-colors"
             >
               <Icon icon={Facebook} size="xs" />
             </a>

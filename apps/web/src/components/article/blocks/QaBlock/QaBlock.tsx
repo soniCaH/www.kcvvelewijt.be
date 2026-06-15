@@ -150,7 +150,7 @@ function mapStandardRespondents(
  * Dispatches each qaPair to its Phase-5 renderer. Separator rules between
  * units:
  *   - Between two consecutive `standard` (QARow) pairs: 1 px
- *     `kcvv-gray-light` rule.
+ *     `paper-edge` rule.
  *   - Before/after `key`, `quote`, or `rapid-fire` units: no rule — those
  *     blocks provide their own visual boundary.
  */
@@ -173,10 +173,7 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
       rendered.push(
         <Fragment key={unit.pair._key ?? `std-${i}`}>
           {needsRule && (
-            <hr
-              aria-hidden="true"
-              className="border-kcvv-gray-light m-0 border-t"
-            />
+            <hr aria-hidden="true" className="border-paper-edge m-0 border-t" />
           )}
           <QARow
             question={unit.pair.question ?? ""}

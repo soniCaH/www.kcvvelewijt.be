@@ -23,10 +23,10 @@ export interface TransferFactOverviewProps {
  * "moment" treatment the interview qaBlock cream bands use, inverted.
  *
  * Colour rules per direction:
- *   - `incoming`  kicker + arrow = `kcvv-green-bright` (pops on dark).
- *   - `outgoing`  kicker + arrow = `kcvv-warning` (amber — reported, not
+ *   - `incoming`  kicker + arrow = `jersey` (bright — pops on dark).
+ *   - `outgoing`  kicker + arrow = `warm` (amber — reported, not
  *     alarmed).
- *   - `extension` kicker = `kcvv-green-bright`. No arrow — single KCVV
+ *   - `extension` kicker = `jersey`. No arrow — single KCVV
  *     row + `TOT {until}` status label on the right.
  */
 export const TransferFactOverview = ({
@@ -42,10 +42,8 @@ export const TransferFactOverview = ({
   ].filter((x): x is string => typeof x === "string" && x.length > 0);
 
   const isOutgoing = resolved.direction === "outgoing";
-  const accentClass = isOutgoing
-    ? "text-kcvv-warning"
-    : "text-kcvv-green-bright";
-  const accentBgClass = isOutgoing ? "bg-kcvv-warning" : "bg-kcvv-green-bright";
+  const accentClass = isOutgoing ? "text-warm" : "text-jersey";
+  const accentBgClass = isOutgoing ? "bg-warm" : "bg-jersey";
 
   const statusLabel =
     resolved.kind === "extension"
@@ -62,9 +60,9 @@ export const TransferFactOverview = ({
         // Break out of the 65 ch prose column so consecutive rows share
         // one continuous dark band. Each row uses the same `max-w-outer`
         // inner container, so the column grid aligns row-to-row.
-        "full-bleed not-prose bg-kcvv-gray-dark py-6",
-        // White-alpha top rule separates stacked rows without shouting.
-        "border-kcvv-white/10 border-t",
+        "full-bleed not-prose bg-ink py-6",
+        // Cream-alpha top rule separates stacked rows without shouting.
+        "border-cream/10 border-t",
         className,
       )}
     >
@@ -93,7 +91,7 @@ export const TransferFactOverview = ({
           {playerName && (
             <span
               data-testid="transfer-overview-name"
-              className="font-display text-kcvv-white text-xl font-bold"
+              className="font-display text-cream text-xl font-bold"
             >
               {playerName}
             </span>
@@ -101,15 +99,12 @@ export const TransferFactOverview = ({
           {metaParts.length > 0 && (
             <span
               data-testid="transfer-overview-meta"
-              className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
+              className="text-cream/60 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
             >
               {metaParts.map((part, i) => (
                 <span key={part}>
                   {i > 0 && (
-                    <span
-                      aria-hidden="true"
-                      className="text-kcvv-white/30 mx-2"
-                    >
+                    <span aria-hidden="true" className="text-cream/30 mx-2">
                       ·
                     </span>
                   )}
@@ -123,7 +118,7 @@ export const TransferFactOverview = ({
         {resolved.kind === "extension" ? (
           <div
             data-testid="transfer-overview-kcvv-only"
-            className="text-kcvv-white flex items-center gap-2 text-base"
+            className="text-cream flex items-center gap-2 text-base"
           >
             {resolved.kcvvOnly.logoUrl && (
               <Image
@@ -139,7 +134,7 @@ export const TransferFactOverview = ({
         ) : (
           <div
             data-testid="transfer-overview-clubs"
-            className="text-kcvv-white flex flex-wrap items-center gap-x-2 gap-y-1 text-base"
+            className="text-cream flex flex-wrap items-center gap-x-2 gap-y-1 text-base"
           >
             <span className="flex items-center gap-2">
               {resolved.from.logoUrl && (
@@ -171,7 +166,7 @@ export const TransferFactOverview = ({
 
         <p
           data-testid="transfer-overview-status"
-          className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase md:text-right"
+          className="text-cream/60 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase md:text-right"
         >
           {statusLabel}
         </p>

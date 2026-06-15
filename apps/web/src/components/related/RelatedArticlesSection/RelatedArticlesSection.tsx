@@ -46,7 +46,7 @@ export const RelatedArticlesSection = ({
           <Link
             key={article.id}
             href={`/nieuws/${article.slug}`}
-            className="group hover:border-kcvv-green-bright block overflow-hidden rounded-lg border border-gray-200 transition-colors"
+            className="group hover:border-jersey-deep block overflow-hidden rounded-lg border border-gray-200 transition-colors"
             onClick={() => {
               trackEvent("related_content_click", {
                 source: "reference",
@@ -70,7 +70,7 @@ export const RelatedArticlesSection = ({
               </div>
             )}
             <div className="p-3">
-              <h4 className="group-hover:text-kcvv-green-dark line-clamp-2 text-sm font-semibold transition-colors">
+              <h4 className="group-hover:text-jersey-deep line-clamp-2 text-sm font-semibold transition-colors">
                 {article.title}
               </h4>
               {article.publishedAt && (
