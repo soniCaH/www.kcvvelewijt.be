@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>10t1 — /tegenstander match-history treatment compare (#2141)</title>
+    <style>
+      :root {
+        --cream: #f5f1e6;
+        --cream-soft: #ede8da;
+        --cream-deep: #e1d7bf;
+        --ink: #0a0a0a;
+        --ink-soft: #1f1f1f;
+        --ink-muted: #6b6b6b;
+        --jersey: #4acf52;
+        --jersey-deep: #008755;
+        --jersey-deep-dark: #133d28;
+        --warm: #f0c264;
+        --paper-edge: #d9d2bd;
+        --alert: #b84a3a;
+        --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
+        --font-body: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+        --font-mono: "IBM Plex Mono", "Consolas", monospace;
+        --shadow-paper-sm: 4px 4px 0 0 var(--ink);
+        --shadow-paper-md: 6px 6px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--cream-deep);
+        font-family: var(--font-body);
+        color: var(--ink-soft);
+        line-height: 1.5;
+      }
+      .doc-head {
+        background: var(--ink);
+        color: var(--cream);
+        padding: 28px 24px;
+      }
+      .doc-head h1 {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 30px;
+        margin: 0 0 6px;
+      }
+      .doc-head p { margin: 4px 0; max-width: 70ch; font-size: 14px; color: var(--cream-soft); }
+      .doc-head code { background: rgba(255,255,255,.12); padding: 1px 5px; }
+      .variants {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(360px, 1fr));
+        gap: 0;
+      }
+      @media (max-width: 1180px) { .variants { grid-template-columns: 1fr; } }
+      .variant {
+        border-right: 2px dashed var(--ink);
+        padding: 24px 20px 48px;
+        background: var(--cream);
+      }
+      .variant:last-child { border-right: none; }
+      .variant > .label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--cream);
+        background: var(--jersey-deep);
+        display: inline-block;
+        padding: 4px 10px;
+        margin-bottom: 4px;
+      }
+      .variant > h2 {
+        font-family: var(--font-display);
+        font-weight: 900;
+        font-size: 22px;
+        margin: 8px 0 2px;
+        color: var(--ink);
+      }
+      .variant > .blurb { font-size: 12.5px; color: var(--ink-muted); margin: 0 0 4px; min-height: 54px; }
+      .variant > .prim { font-size: 11px; font-family: var(--font-mono); color: var(--jersey-deep); margin: 0 0 18px; }
+      .variant > .prim b { color: var(--ink-soft); }
+
+      /* ── Shared page skeleton (hero + summary) ─────────────────── */
+      .kicker {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--jersey-deep);
+      }
+      .hero {
+        position: relative;
+        background: var(--cream);
+        border: 2px solid var(--ink);
+        box-shadow: var(--shadow-paper-md);
+        padding: 24px 22px;
+        margin-bottom: 26px;
+      }
+      .hero .tape {
+        position: absolute; top: -11px; left: 26px; width: 86px; height: 20px;
+        background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg);
+      }
+      .hero .row { display: flex; align-items: center; gap: 16px; }
+      .crest {
+        width: 56px; height: 56px; border-radius: 999px; flex-shrink: 0;
+        border: 2px solid var(--ink); background: var(--cream-soft);
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-display); font-weight: 900; font-size: 20px; color: var(--jersey-deep);
+      }
+      .hero h1 {
+        font-family: var(--font-display); font-weight: 900; line-height: 0.95;
+        font-size: 34px; margin: 0; color: var(--ink); letter-spacing: -0.01em;
+      }
+      .hero h1 .dot { color: var(--warm); }
+      .hero .divider { margin-top: 14px; height: 0; border-top: 2px dotted var(--ink); width: 110px; }
+
+      .summary {
+        display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+        border: 2px solid var(--ink); box-shadow: var(--shadow-paper-sm);
+        background: var(--cream); margin-bottom: 26px;
+      }
+      .summary .cell { padding: 14px 6px; text-align: center; border-right: 2px solid var(--ink); }
+      .summary .cell:last-child { border-right: none; }
+      .summary .num { font-family: var(--font-display); font-weight: 900; font-size: 26px; line-height: 1; color: var(--ink); }
+      .summary .num.w { color: var(--jersey-deep); }
+      .summary .num.l { color: var(--alert); }
+      .summary .lab { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); margin-top: 6px; }
+
+      .sechead { font-family: var(--font-display); font-weight: 900; font-size: 19px; color: var(--ink); margin: 0 0 14px; }
+      .sechead .dot { color: var(--warm); }
+
+      /* ── Variant A: Agenda rows (TeamAgendaRow parity) ─────────── */
+      .agenda { display: flex; flex-direction: column; gap: 10px; }
+      .arow {
+        display: flex; align-items: stretch; border: 2px solid var(--ink);
+        background: var(--cream); box-shadow: 2px 2px 0 0 var(--ink); text-decoration: none;
+      }
+      .arow .datestub {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 8px 10px; background: rgba(225,215,191,.4); border-right: 2px dashed rgba(10,10,10,.3); flex-shrink: 0; min-width: 48px;
+      }
+      .arow .datestub .d { font-family: var(--font-display); font-weight: 900; font-size: 18px; line-height: 1; color: var(--ink); }
+      .arow .datestub .m { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin-top: 2px; }
+      .arow .body { display: flex; align-items: center; gap: 8px; padding: 8px 12px; width: 100%; }
+      .arow .side { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+      .arow .side.away { flex-direction: row-reverse; }
+      .arow .mini { width: 22px; height: 22px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--cream-soft); flex-shrink: 0; }
+      .arow .tn { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .arow .mid { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 4px; flex-shrink: 0; }
+      .arow .score { font-family: var(--font-display); font-weight: 900; font-size: 18px; line-height: 1; color: var(--ink); padding: 0 8px; font-variant-numeric: tabular-nums; }
+      .arow .score.win { box-shadow: inset 0 -9px 0 color-mix(in srgb, var(--jersey-deep) 34%, var(--cream)); }
+      .arow .score.loss { box-shadow: inset 0 -9px 0 color-mix(in srgb, var(--alert) 38%, var(--cream)); }
+      .arow .score.sched { font-size: 11px; font-family: var(--font-mono); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); box-shadow: none; }
+      .arow .comp { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+
+      /* ── Variant B: Result ledger (jersey-deep header band) ────── */
+      .ledger { border: 2px solid var(--ink); box-shadow: var(--shadow-paper-sm); background: var(--cream); }
+      .ledger .lhead {
+        display: grid; grid-template-columns: 46px 1fr 64px; gap: 8px;
+        background: var(--jersey-deep); color: var(--cream); padding: 8px 12px;
+        font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      }
+      .ledger .lhead .r { text-align: center; }
+      .lrow {
+        display: grid; grid-template-columns: 46px 1fr 64px; gap: 8px; align-items: center;
+        padding: 10px 12px; border-top: 1px solid var(--paper-edge); text-decoration: none;
+      }
+      .lrow:nth-child(even) { background: var(--cream-soft); }
+      .lrow .date { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); text-transform: uppercase; line-height: 1.2; }
+      .lrow .fix .t { font-size: 13px; font-weight: 600; color: var(--ink); }
+      .lrow .fix .c { font-family: var(--font-mono); font-size: 9px; color: var(--ink-muted); text-transform: uppercase; margin-top: 2px; }
+      .lrow .res { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+      .disc {
+        width: 22px; height: 22px; border-radius: 999px; border: 1.5px solid var(--ink);
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+      }
+      .disc.w { background: var(--jersey-deep); color: var(--cream); }
+      .disc.d { background: var(--cream); color: var(--ink-muted); }
+      .disc.l { background: var(--alert); color: var(--cream); }
+      .disc.s { background: var(--cream-soft); color: var(--ink-muted); border-style: dashed; }
+      .lrow .res .sc { font-family: var(--font-display); font-weight: 900; font-size: 14px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+      /* ── Variant C: Score tickets ──────────────────────────────── */
+      .tickets { display: flex; flex-direction: column; gap: 14px; }
+      .ticket {
+        position: relative; display: flex; align-items: center; gap: 14px;
+        border: 2px solid var(--ink); background: var(--cream); box-shadow: var(--shadow-paper-sm); padding: 14px 16px;
+      }
+      .ticket:nth-child(odd) { transform: rotate(-0.4deg); }
+      .ticket:nth-child(even) { transform: rotate(0.3deg); }
+      .ticket .bignum {
+        font-family: var(--font-display); font-weight: 900; font-size: 30px; line-height: 0.9;
+        color: var(--ink); flex-shrink: 0; padding: 2px 6px; font-variant-numeric: tabular-nums;
+      }
+      .ticket .bignum.win { box-shadow: inset 0 -10px 0 color-mix(in srgb, var(--jersey-deep) 34%, var(--cream)); }
+      .ticket .bignum.loss { box-shadow: inset 0 -10px 0 color-mix(in srgb, var(--alert) 38%, var(--cream)); }
+      .ticket .bignum.sched { font-size: 14px; font-family: var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); }
+      .ticket .meta .fx { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+      .ticket .meta .cap { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-muted); margin-top: 3px; }
+      .ticket .verdict {
+        margin-left: auto; font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+        letter-spacing: 0.1em; text-transform: uppercase; align-self: flex-start;
+      }
+      .ticket .verdict.w { color: var(--jersey-deep); }
+      .ticket .verdict.l { color: var(--alert); }
+      .ticket .verdict.d { color: var(--ink-muted); }
+    </style>
+  </head>
+  <body>
+    <div class="doc-head">
+      <h1>/tegenstander — match-history treatment (Round 1)</h1>
+      <p>
+        Issue <code>#2141</code> · Phase 10 reskin. The page already has the right colours (#2117) but
+        keeps pre-redesign chrome. <b>One decision this round:</b> how the opponent-history list renders.
+        The hero (<code>PageHero</code>) and W/D/L summary are <b>identical</b> across all three so only the
+        list treatment differs.
+      </p>
+      <p>Real data: <code>/tegenstander/746</code> — OHR Huldenberg (W3 · D2 · L1). Scores illustrative.</p>
+      <p>Status colours are already locked: win = <code>jersey-deep</code>, draw = neutral, loss = <code>--color-alert</code>. Sharp corners throughout; every element maps to a shipped primitive.</p>
+    </div>
+
+    <div class="variants">
+      <!-- ════════ VARIANT A ════════ -->
+      <section class="variant">
+        <span class="label">Variant A</span>
+        <h2>Agenda rows</h2>
+        <p class="blurb">1:1 reuse of the team-page <b>TeamAgendaRow</b>: symmetric scoreboard, date stub, score carries the inset result-underline. Maximum consistency with /ploegen.</p>
+        <p class="prim">primitives: <b>PageHero · TeamAgendaRow · paper card · OUTCOME_SHADOW</b></p>
+
+        <!-- shared hero -->
+        <div class="hero">
+          <span class="tape"></span>
+          <div class="row">
+            <div class="crest">OHR</div>
+            <div>
+              <span class="kicker">Onderlinge geschiedenis</span>
+              <h1>OHR Huldenberg<span class="dot">.</span></h1>
+            </div>
+          </div>
+          <div class="divider"></div>
+        </div>
+        <!-- shared summary -->
+        <div class="summary">
+          <div class="cell"><div class="num w">3</div><div class="lab">W</div></div>
+          <div class="cell"><div class="num">2</div><div class="lab">G</div></div>
+          <div class="cell"><div class="num l">1</div><div class="lab">V</div></div>
+          <div class="cell"><div class="num">11</div><div class="lab">DV</div></div>
+          <div class="cell"><div class="num">6</div><div class="lab">DT</div></div>
+        </div>
+
+        <h3 class="sechead">6 wedstrijden<span class="dot">.</span></h3>
+        <div class="agenda">
+          <a class="arow">
+            <div class="datestub"><span class="d">18</span><span class="m">mei</span></div>
+            <div class="body">
+              <div class="side"><span class="mini"></span><span class="tn">KCVV Elewijt</span></div>
+              <div class="mid"><span class="score win">3 – 1</span><span class="comp">3e Prov.</span></div>
+              <div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div>
+            </div>
+          </a>
+          <a class="arow">
+            <div class="datestub"><span class="d">09</span><span class="m">mrt</span></div>
+            <div class="body">
+              <div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div>
+              <div class="mid"><span class="score loss">3 – 1</span><span class="comp">3e Prov.</span></div>
+              <div class="side away"><span class="mini"></span><span class="tn">KCVV Elewijt</span></div>
+            </div>
+          </a>
+          <a class="arow">
+            <div class="datestub"><span class="d">24</span><span class="m">nov</span></div>
+            <div class="body">
+              <div class="side"><span class="mini"></span><span class="tn">KCVV Elewijt</span></div>
+              <div class="mid"><span class="score">2 – 2</span><span class="comp">Beker</span></div>
+              <div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div>
+            </div>
+          </a>
+          <a class="arow">
+            <div class="datestub"><span class="d">31</span><span class="m">aug</span></div>
+            <div class="body">
+              <div class="side"><span class="mini"></span><span class="tn">KCVV Elewijt</span></div>
+              <div class="mid"><span class="score sched">Gepland</span><span class="comp">3e Prov.</span></div>
+              <div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ════════ VARIANT B ════════ -->
+      <section class="variant">
+        <span class="label">Variant B</span>
+        <h2>Result ledger</h2>
+        <p class="blurb">A bordered record-book: jersey-deep header band, striped rows, result as a W/D/L disc. Densest — best when a club has 20+ meetings. Borrows the Phase-5 HtmlTableBlock header idiom.</p>
+        <p class="prim">primitives: <b>PageHero · HtmlTableBlock band · paper card · result disc</b></p>
+
+        <div class="hero">
+          <span class="tape"></span>
+          <div class="row">
+            <div class="crest">OHR</div>
+            <div>
+              <span class="kicker">Onderlinge geschiedenis</span>
+              <h1>OHR Huldenberg<span class="dot">.</span></h1>
+            </div>
+          </div>
+          <div class="divider"></div>
+        </div>
+        <div class="summary">
+          <div class="cell"><div class="num w">3</div><div class="lab">W</div></div>
+          <div class="cell"><div class="num">2</div><div class="lab">G</div></div>
+          <div class="cell"><div class="num l">1</div><div class="lab">V</div></div>
+          <div class="cell"><div class="num">11</div><div class="lab">DV</div></div>
+          <div class="cell"><div class="num">6</div><div class="lab">DT</div></div>
+        </div>
+
+        <h3 class="sechead">6 wedstrijden<span class="dot">.</span></h3>
+        <div class="ledger">
+          <div class="lhead"><span>Datum</span><span>Wedstrijd</span><span class="r">Uitslag</span></div>
+          <a class="lrow">
+            <div class="date">18<br />mei</div>
+            <div class="fix"><div class="t">KCVV — Huldenberg</div><div class="c">3e Provinciale</div></div>
+            <div class="res"><span class="disc w">W</span><span class="sc">3–1</span></div>
+          </a>
+          <a class="lrow">
+            <div class="date">09<br />mrt</div>
+            <div class="fix"><div class="t">Huldenberg — KCVV</div><div class="c">3e Provinciale</div></div>
+            <div class="res"><span class="disc l">V</span><span class="sc">3–1</span></div>
+          </a>
+          <a class="lrow">
+            <div class="date">24<br />nov</div>
+            <div class="fix"><div class="t">KCVV — Huldenberg</div><div class="c">Beker van Vlaanderen</div></div>
+            <div class="res"><span class="disc d">G</span><span class="sc">2–2</span></div>
+          </a>
+          <a class="lrow">
+            <div class="date">31<br />aug</div>
+            <div class="fix"><div class="t">KCVV — Huldenberg</div><div class="c">3e Provinciale</div></div>
+            <div class="res"><span class="disc s">·</span><span class="sc" style="font-size:10px;font-family:var(--font-mono);color:var(--ink-muted)">Gepland</span></div>
+          </a>
+        </div>
+      </section>
+
+      <!-- ════════ VARIANT C ════════ -->
+      <section class="variant">
+        <span class="label">Variant C</span>
+        <h2>Score tickets</h2>
+        <p class="blurb">Each meeting is its own paper stamp with a big Freight score + result underline + slight tilt. Most fanzine/editorial; strong per-match presence, heavier vertically for long histories.</p>
+        <p class="prim">primitives: <b>PageHero · TapedCard/TicketStub · big-display score · OUTCOME_SHADOW</b></p>
+
+        <div class="hero">
+          <span class="tape"></span>
+          <div class="row">
+            <div class="crest">OHR</div>
+            <div>
+              <span class="kicker">Onderlinge geschiedenis</span>
+              <h1>OHR Huldenberg<span class="dot">.</span></h1>
+            </div>
+          </div>
+          <div class="divider"></div>
+        </div>
+        <div class="summary">
+          <div class="cell"><div class="num w">3</div><div class="lab">W</div></div>
+          <div class="cell"><div class="num">2</div><div class="lab">G</div></div>
+          <div class="cell"><div class="num l">1</div><div class="lab">V</div></div>
+          <div class="cell"><div class="num">11</div><div class="lab">DV</div></div>
+          <div class="cell"><div class="num">6</div><div class="lab">DT</div></div>
+        </div>
+
+        <h3 class="sechead">6 wedstrijden<span class="dot">.</span></h3>
+        <div class="tickets">
+          <a class="ticket">
+            <span class="bignum win">3–1</span>
+            <div class="meta"><div class="fx">KCVV Elewijt — Huldenberg</div><div class="cap">18 mei · 3e Provinciale · thuis</div></div>
+            <span class="verdict w">Winst</span>
+          </a>
+          <a class="ticket">
+            <span class="bignum loss">1–3</span>
+            <div class="meta"><div class="fx">Huldenberg — KCVV Elewijt</div><div class="cap">09 mrt · 3e Provinciale · uit</div></div>
+            <span class="verdict l">Verlies</span>
+          </a>
+          <a class="ticket">
+            <span class="bignum">2–2</span>
+            <div class="meta"><div class="fx">KCVV Elewijt — Huldenberg</div><div class="cap">24 nov · Beker · thuis</div></div>
+            <span class="verdict d">Gelijk</span>
+          </a>
+          <a class="ticket">
+            <span class="bignum sched">vs</span>
+            <div class="meta"><div class="fx">KCVV Elewijt — Huldenberg</div><div class="cap">31 aug · 3e Provinciale · thuis</div></div>
+            <span class="verdict d">Gepland</span>
+          </a>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
