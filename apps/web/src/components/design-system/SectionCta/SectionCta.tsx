@@ -24,7 +24,7 @@ export function SectionCta({
   return (
     <div className="mx-auto max-w-[40rem] px-4 text-center md:px-10">
       <h2
-        className={`font-title mb-3 font-extrabold ${
+        className={`font-display mb-3 font-extrabold ${
           isDark ? "text-white" : "text-kcvv-black"
         }`}
         style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}

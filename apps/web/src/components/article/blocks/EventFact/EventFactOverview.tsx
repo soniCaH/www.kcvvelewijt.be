@@ -83,7 +83,7 @@ export const EventFactOverview = ({
             dateTime={range.date.dateIso}
             className="text-kcvv-white flex flex-col"
           >
-            <span className="font-title text-xl leading-[0.95] font-bold">
+            <span className="font-display text-xl leading-[0.95] font-bold">
               {range.date.day}{" "}
               <span className="uppercase">{range.date.monthShort}</span>
             </span>
@@ -97,7 +97,7 @@ export const EventFactOverview = ({
             data-testid="event-overview-date"
             className="text-kcvv-white flex flex-col"
           >
-            <span className="font-title text-xl leading-[0.95] font-bold">
+            <span className="font-display text-xl leading-[0.95] font-bold">
               <time dateTime={range.start.dateIso}>
                 {range.start.day}
                 {!range.sameMonth && (
@@ -138,7 +138,7 @@ export const EventFactOverview = ({
           {value.title && (
             <span
               data-testid="event-overview-title"
-              className="font-title text-kcvv-white text-lg font-bold"
+              className="font-display text-kcvv-white text-lg font-bold"
             >
               {value.title}
             </span>
@@ -175,7 +175,7 @@ export const EventFactOverview = ({
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "font-title inline-flex items-baseline gap-1 text-sm font-bold tracking-[var(--letter-spacing-caps)] uppercase",
+              "font-display inline-flex items-baseline gap-1 text-sm font-bold tracking-[var(--letter-spacing-caps)] uppercase",
               "text-kcvv-green-bright decoration-kcvv-green-bright underline decoration-1 underline-offset-4",
               "transition-[text-decoration-thickness] duration-150 hover:decoration-2",
             )}

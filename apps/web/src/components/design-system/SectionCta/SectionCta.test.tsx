@@ -34,11 +34,11 @@ describe("SectionCta", () => {
   });
 
   describe("Typography", () => {
-    it("should style heading with font-title font-extrabold text-kcvv-black", () => {
+    it("should style heading with font-display font-extrabold text-kcvv-black", () => {
       render(<SectionCta {...defaultProps} />);
       const heading = screen.getByRole("heading");
       expect(heading).toHaveClass(
-        "font-title",
+        "font-display",
         "font-extrabold",
         "text-kcvv-black",
       );
