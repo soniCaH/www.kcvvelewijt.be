@@ -113,4 +113,18 @@ describe("TeamStaff", () => {
     expect(last.tagName).toBe("EM");
     expect(last.className).toContain("italic");
   });
+
+  it("renders a card as a link to /staf/{psdId} when href is present", () => {
+    render(<TeamStaff staff={[{ ...STAFF[0]!, href: "/staf/12345" }]} />);
+    const card = screen.getByTestId("team-staff-card");
+    expect(card.tagName).toBe("A");
+    expect(card).toHaveAttribute("href", "/staf/12345");
+  });
+
+  it("renders a card as a plain div when href is absent", () => {
+    render(<TeamStaff staff={[STAFF[0]!]} />);
+    const card = screen.getByTestId("team-staff-card");
+    expect(card.tagName).toBe("DIV");
+    expect(card).not.toHaveAttribute("href");
+  });
 });

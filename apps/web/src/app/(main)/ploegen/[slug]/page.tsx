@@ -151,6 +151,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
     functionTitle: s.functionTitle,
     role: s.role,
     imageUrl: s.imageUrl,
+    href: s.href,
   }));
 
   const teamBody = team.body as PortableTextBlock[] | null;

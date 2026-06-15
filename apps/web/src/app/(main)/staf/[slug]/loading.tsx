@@ -1,70 +1,56 @@
 /**
  * Staff Detail Page — Loading Skeleton
- * Matches the hero + bio + positions + responsibilities + related articles layout
+ * Mirrors the rebuilt page (#2124): person-profile hero (portrait + name +
+ * pills + contact) → <StripedSeam> → bio prose column.
  */
+
+import { FooterSafeArea, StripedSeam } from "@/components/design-system";
 
 export default function StaffDetailLoading() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="bg-cream min-h-screen">
       <span role="status" aria-live="polite" className="sr-only">
         Stafprofiel laden...
       </span>
-      {/* Staff hero — photo + name + contact */}
-      <div className="from-kcvv-gray-light bg-gradient-to-br to-white">
-        <div className="mx-auto flex max-w-4xl animate-pulse flex-col items-center gap-8 px-4 py-12 sm:flex-row sm:items-start">
-          <div className="h-40 w-40 flex-shrink-0 rounded-full bg-gray-300" />
-          <div className="flex-1 space-y-4 text-center sm:text-left">
-            <div className="mx-auto h-8 w-48 rounded bg-gray-300 sm:mx-0" />
-            <div className="mx-auto h-5 w-32 rounded bg-gray-200 sm:mx-0" />
-            <div className="mt-4 flex justify-center gap-3 sm:justify-start">
-              <div className="h-8 w-8 rounded bg-gray-200" />
-              <div className="h-8 w-8 rounded bg-gray-200" />
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Bio section */}
-      <div className="mx-auto max-w-3xl animate-pulse space-y-4 px-4 py-8">
-        <div className="h-6 w-24 rounded bg-gray-200" />
-        <div className="h-5 w-full rounded bg-gray-200" />
-        <div className="h-5 w-full rounded bg-gray-200" />
-        <div className="h-5 w-3/4 rounded bg-gray-200" />
-      </div>
-
-      {/* Positions */}
-      <div className="mx-auto max-w-3xl animate-pulse px-4 py-4">
-        <div className="mb-4 h-6 w-32 rounded bg-gray-200" />
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div className="h-5 w-5 rounded bg-gray-200" />
-              <div className="h-4 w-48 rounded bg-gray-200" />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Related articles */}
-      <div className="mt-8 border-t border-gray-200 bg-gray-50">
-        <div className="mx-auto max-w-5xl animate-pulse px-4 py-8">
-          <div className="mb-4 h-6 w-40 rounded bg-gray-200" />
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="overflow-hidden rounded-sm border border-gray-200 bg-white shadow-sm"
-              >
-                <div className="aspect-[3/2] bg-gray-200" />
-                <div className="space-y-2 p-3">
-                  <div className="h-4 w-full rounded bg-gray-200" />
-                  <div className="h-3 w-1/2 rounded bg-gray-200" />
-                </div>
+      {/* Hero skeleton — the <StaffHero> TapedCard shell: portrait slot +
+          kicker / two-line name / role pills / contact row. */}
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+        <div className="border-ink bg-cream shadow-paper-md border-2 p-8">
+          <div className="grid items-center gap-6 md:grid-cols-[0.7fr_1.3fr]">
+            <div className="border-ink bg-cream-soft shadow-paper-sm aspect-[3/4] w-full animate-pulse border-2" />
+            <div className="animate-pulse space-y-4">
+              <div className="bg-cream-soft h-3 w-16" />
+              <div className="space-y-2">
+                <div className="bg-cream-soft h-10 w-44" />
+                <div className="bg-cream-soft h-10 w-60" />
               </div>
-            ))}
+              <div className="flex gap-2">
+                <div className="bg-cream-soft h-6 w-28" />
+                <div className="bg-cream-soft h-6 w-20" />
+              </div>
+              <div className="bg-cream-soft h-4 w-48" />
+            </div>
           </div>
         </div>
       </div>
+
+      <StripedSeam colorPair="ink-cream" height="md" />
+
+      {/* Bio skeleton — mirrors the heading + <ArticleBody> prose column. */}
+      <div className="bg-cream w-full px-4 py-12 lg:px-0 lg:py-16">
+        <div
+          className="mx-auto w-full animate-pulse space-y-4"
+          style={{ maxWidth: "var(--container-prose)" }}
+        >
+          <div className="bg-cream-soft mb-6 h-8 w-40" />
+          <div className="bg-cream-soft h-5 w-full" />
+          <div className="bg-cream-soft h-5 w-full" />
+          <div className="bg-cream-soft h-5 w-4/5" />
+        </div>
+      </div>
+
+      <FooterSafeArea />
     </div>
   );
 }
