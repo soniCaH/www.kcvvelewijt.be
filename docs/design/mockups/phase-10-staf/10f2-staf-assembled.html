@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · /staf/[slug] · 10f2: assembled (hero B locked)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--cream-deep); border-bottom: 2px solid var(--ink); padding: 9px 28px; font-family: var(--font-mono); font-size: 12px; } .lockbar b { background: var(--jersey-deep); color: var(--cream); padding: 2px 8px; }
+      .page { max-width: 880px; margin: 0 auto; padding: 30px 28px 0; }
+      .seam { height: 12px; margin: 30px 0; background: repeating-linear-gradient(135deg, var(--ink) 0 9px, var(--cream) 9px 18px); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .dot { color: var(--warm); }
+      .seclabel { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; margin: 0 0 16px; }
+      .ic { width: 16px; height: 16px; color: var(--jersey-deep); display: inline-flex; } .ic svg { width: 100%; height: 100%; }
+      .pill { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; border: 1.5px solid var(--ink); padding: 3px 9px; display: inline-block; }
+      .pill.deep { background: var(--jersey-deep); color: var(--cream); } .pill.cream { background: var(--cream); color: var(--ink); }
+
+      .card { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 26px; }
+      .tape { position: absolute; top: -12px; left: 30px; width: 92px; height: 21px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .tfig { position: relative; border: 2px solid var(--ink); background: var(--cream-soft); padding: 6px; box-shadow: 3px 3px 0 0 var(--ink); }
+      .tfig .photo { display: block; width: 100%; aspect-ratio: 3/4; background: linear-gradient(160deg, #8a9aa3 0%, #5d6b73 60%, #3a444a 100%); filter: sepia(0.3) saturate(0.8); }
+      .tfig .tape2 { position: absolute; top: -9px; right: 16px; width: 54px; height: 15px; background: var(--warm); border: 1.5px solid var(--ink); transform: rotate(3deg); }
+
+      /* hero B */
+      .hero .grid { display: grid; grid-template-columns: 0.7fr 1.3fr; gap: 26px; align-items: center; } @media(max-width:620px){ .hero .grid { grid-template-columns: 1fr; } }
+      .hero .first { font-family: var(--font-display); font-weight: 900; font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 0.9; }
+      .hero .last { font-family: var(--font-display); font-weight: 400; font-style: italic; font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 0.95; }
+      .hero .pills { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+      .contact { font-family: var(--font-mono); font-size: 12px; color: var(--ink-soft); display: flex; gap: 18px; flex-wrap: wrap; margin-top: 14px; }
+      .contact a { color: var(--jersey-deep); font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+
+      /* bio = ArticleBody */
+      .bio { max-width: 640px; } .bio p { font-size: 1.05rem; line-height: 1.7; color: var(--ink-soft); margin: 14px 0 0; } .bio p:first-child { margin-top: 0; }
+
+      /* positions = paper rows */
+      .poslist { display: flex; flex-direction: column; gap: 10px; }
+      .posrow { display: flex; align-items: center; gap: 12px; border: 2px solid var(--ink); background: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); padding: 12px 14px; }
+      .posrow .t { font-weight: 700; color: var(--ink); } .posrow .d { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); text-transform: uppercase; margin-left: auto; }
+
+      /* responsibilities = link cards */
+      .respgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; } @media(max-width:620px){ .respgrid { grid-template-columns: 1fr; } }
+      .respcard { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 2px solid var(--ink); background: var(--cream); box-shadow: 3px 3px 0 0 var(--ink); padding: 13px 15px; }
+      .respcard .t { font-weight: 700; color: var(--ink); } .respcard .c { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); text-transform: uppercase; margin-top: 2px; } .respcard .arrow { color: var(--jersey-deep); font-weight: 700; }
+
+      /* related (mini) */
+      .related { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; } @media(max-width:620px){ .related { grid-template-columns: 1fr; } }
+      .rc { border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 3px 3px 0 0 var(--ink); overflow: hidden; }
+      .rc .ph { aspect-ratio: 16/9; border-bottom: 2px solid var(--ink); background: linear-gradient(135deg,#6b8f7a,#3f6b54); filter: sepia(0.3) saturate(0.8); }
+      .rc .t { padding: 10px; font-family: var(--font-display); font-style: italic; font-weight: 800; font-size: 0.95rem; line-height: 1.15; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); margin-top: 36px; padding: 24px 28px 44px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; } .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <svg style="display:none"><defs>
+      <g id="i-mail"><path fill="currentColor" d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm9 7.2 7.4-4.7H4.6Z"/></g>
+      <g id="i-phone"><path fill="currentColor" d="M6.6 3H4.2A1.2 1.2 0 0 0 3 4.3 16.7 16.7 0 0 0 19.7 21a1.2 1.2 0 0 0 1.3-1.2v-2.4a1.2 1.2 0 0 0-1-1.2l-3-.5a1.2 1.2 0 0 0-1.1.4l-1 1.2A13 13 0 0 1 8.3 11l1.2-1a1.2 1.2 0 0 0 .4-1.2l-.5-3a1.2 1.2 0 0 0-1.2-1Z"/></g>
+    </defs></svg>
+
+    <div class="harness-head">
+      <h1>Phase 10 · /staf/[slug] (#2124) · 10f2 — assembled</h1>
+      <p>Full staff profile on the locked person-hero (B). Bio → <b>&lt;ArticleBody&gt;</b> (retires SanityArticleBody). Positions + responsibilities → paper rows/cards + Phosphor icons. Related → existing <b>&lt;RelatedArticlesSection&gt;</b>. Lucide retires.</p>
+    </div>
+    <div class="lockbar">LOCKED → hero <b>B person-profile</b> (portrait TapedFigure + name rhythm + role pills + contact · monogram fallback).</div>
+
+    <div class="page">
+      <!-- HERO B -->
+      <div class="card hero"><span class="tape"></span><div class="grid">
+        <div class="tfig"><span class="tape2"></span><span class="photo"></span></div>
+        <div>
+          <span class="kicker">Staf</span>
+          <div class="first">Marc</div><div class="last">De Coninck<span class="dot">.</span></div>
+          <div class="pills"><span class="pill deep">Hoofdtrainer</span><span class="pill cream">A-ploeg</span></div>
+          <div class="contact"><a><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>marc@kcvvelewijt.be</a><a><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-phone"/></svg></span>+32 478 12 34 56</a></div>
+        </div>
+      </div></div>
+
+      <div class="seam"></div>
+
+      <!-- BIO -->
+      <p class="seclabel">Over Marc<span class="dot">.</span></p>
+      <div class="bio">
+        <p>Marc staat sinds 2019 aan het roer van de A-ploeg. Als ex-speler kent hij de club door en door — hij debuteerde ooit zelf in het eerste elftal en bleef nadien plakken.</p>
+        <p>Zijn aanpak? Hard werken, plezier maken, en iedereen een eerlijke kans geven. "De derde helft hoort er voor mij net zo goed bij als de match zelf."</p>
+      </div>
+
+      <div class="seam"></div>
+
+      <!-- ROLE & RESPONSIBILITIES (merged) -->
+      <p class="seclabel">Rol &amp; verantwoordelijkheden<span class="dot">.</span></p>
+      <div class="poslist">
+        <div class="posrow"><span class="pill deep">T1</span><span class="t">Hoofdtrainer</span><span class="d">A-ploeg</span></div>
+        <div class="posrow"><span class="pill deep">T3</span><span class="t">Jeugdtrainer</span><span class="d">U15</span></div>
+      </div>
+      <p class="micro" style="margin:20px 0 8px">Aanspreekpunt voor</p>
+      <div class="respgrid">
+        <a class="respcard"><div><div class="t">Inschrijven A-ploeg</div><div class="c">Spelers</div></div><span class="arrow">→</span></a>
+        <a class="respcard"><div><div class="t">Trainingsschema opvragen</div><div class="c">Trainingen</div></div><span class="arrow">→</span></a>
+      </div>
+
+      <div class="seam"></div>
+
+      <!-- RELATED -->
+      <p class="seclabel">Gerelateerd nieuws<span class="dot">.</span></p>
+      <div class="related">
+        <div class="rc"><div class="ph"></div><div class="t">Marc verlengt contract tot 2027</div></div>
+        <div class="rc"><div class="ph"></div><div class="t">A-ploeg wint van Zemst</div></div>
+        <div class="rc"><div class="ph"></div><div class="t">Voorbereiding gestart</div></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>Composition</h3>
+      <ul>
+        <li><b>Hero</b> → person-profile (B). <b>Bio</b> → <code>&lt;ArticleBody&gt;</code> (retires <code>&lt;SanityArticleBody&gt;</code>; with #2122 the last consumer → delete in #1531). Auto-hides when empty.</li>
+        <li><b>Positions</b> → paper rows (roleCode pill + title + department). <b>Responsibilities</b> → paper link cards → <code>/hulp?pad=…</code>. <b>Headers</b> → <code>&lt;EditorialHeading&gt;</code> "." (Lucide <code>Network</code>/<code>CircleHelp</code> icons drop — headers carry the meaning).</li>
+        <li><b>Related</b> → existing <code>&lt;RelatedArticlesSection&gt;</code> (recoloured in #2117).</li>
+      </ul>
+      <h3>Decisions</h3>
+      <ul>
+        <li><b>1 · Positions + responsibilities</b> — keep as two sections (shown), or merge into one "Rol &amp; verantwoordelijkheden"? (They're different data — org roles vs hulp links.)</li>
+        <li><b>2 · Order</b> — shown: hero → bio → positions → responsibilities → related. Many staff have NO bio (auto-hides); is positions-before-bio better when both exist?</li>
+        <li><b>3 · Section header icons</b> — drop the old Lucide header icons (shown, headers only), or keep a small Phosphor glyph before each "." header?</li>
+      </ul>
+      <div class="q"><b>LOCKED 2026-06-15.</b> Hero B person-profile · bio → ArticleBody · positions + responsibilities MERGED under "Rol &amp; verantwoordelijkheden." (org rows + "Aanspreekpunt voor" links) · order hero→bio→role→related · no header icons · Lucide retires.</div>
+      <p class="micro">phase-10 · 10f2 · staff profile assembled · hero B locked</p>
+    </div>
+  </body>
+</html>
