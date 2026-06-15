@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · /club/contact · 10k1: assembled + card register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--cream-deep); border-bottom: 2px solid var(--ink); padding: 9px 28px; font-family: var(--font-mono); font-size: 12px; } .lockbar b { background: var(--jersey-deep); color: var(--cream); padding: 2px 8px; }
+      .page { max-width: 1020px; margin: 0 auto; padding: 30px 28px 0; }
+      .seam { height: 12px; margin: 28px 0; background: repeating-linear-gradient(135deg, var(--ink) 0 9px, var(--cream) 9px 18px); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.95; margin: 8px 0 0; letter-spacing: -0.01em; } .eh .accent { font-style: italic; color: var(--jersey-deep); } .eh .dot { color: var(--warm); }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--ink-soft); margin-top: 12px; font-size: 1.1rem; }
+      .seclabel { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem; margin: 0 0 16px; } .seclabel .dot { color: var(--warm); }
+
+      .hero { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 30px 26px; }
+      .hero .tape { position: absolute; top: -12px; left: 30px; width: 96px; height: 22px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .hero .eh { font-size: clamp(2.2rem, 4.5vw, 3.2rem); }
+
+      .card { background: var(--cream); border: 2px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); padding: 20px; }
+
+      /* plain Phosphor-Fill icon: NO box, jersey-deep, aligned with the title */
+      .hrow { display: flex; align-items: center; gap: 10px; }
+      .ic { width: 22px; height: 22px; flex: none; color: var(--jersey-deep); display: inline-flex; }
+      .ic svg { width: 100%; height: 100%; display: block; }
+      .ttl { font-weight: 700; color: var(--ink); font-size: 1.05rem; }
+      .sub { color: var(--ink-soft); font-size: 0.95rem; margin: 8px 0 0; line-height: 1.5; }
+      .lnk { color: var(--jersey-deep); font-weight: 600; font-size: 0.9rem; margin-top: 8px; display: inline-flex; align-items: center; gap: 5px; }
+      .mono-cap { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--jersey-deep); }
+      .stack > * + * { margin-top: 18px; }
+
+      .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; } @media (max-width: 800px){ .two { grid-template-columns: 1fr; } }
+      .three { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; } @media (max-width: 800px){ .three { grid-template-columns: 1fr 1fr; } }
+      .map { border: 2px solid var(--ink); box-shadow: 4px 4px 0 0 var(--ink); background: repeating-linear-gradient(45deg, #cdd6c8 0 12px, #c3cdbe 12px 24px); min-height: 240px; display: grid; place-items: center; color: var(--ink-muted); font-family: var(--font-mono); font-size: 11px; text-align: center; }
+      table.inkom { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin-top: 10px; }
+      table.inkom th { background: var(--jersey-deep); color: var(--cream); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; text-align: left; padding: 5px 8px; border: 1.5px solid var(--ink); }
+      table.inkom td { padding: 5px 8px; border: 1.5px solid var(--ink); color: var(--ink-soft); } table.inkom td.r { text-align: right; font-weight: 700; }
+      .crosslink { display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1.5px solid var(--ink); background: var(--cream-soft); padding: 10px 12px; margin-top: 10px; }
+      .crosslink .arrow { color: var(--jersey-deep); font-weight: 700; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); margin-top: 36px; padding: 24px 28px 44px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; } .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <!-- icon defs (plain Phosphor-Fill approximations, single jersey-deep path) -->
+    <svg style="display:none"><defs>
+      <g id="i-pin"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.6A2.6 2.6 0 1 1 14.6 9 2.6 2.6 0 0 1 12 11.6Z"/></g>
+      <g id="i-mail"><path fill="currentColor" d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm9 7.2 7.4-4.7H4.6Z"/></g>
+      <g id="i-car"><path fill="currentColor" d="M5.2 11 6.6 7.2A2 2 0 0 1 8.5 6h7a2 2 0 0 1 1.9 1.2L18.8 11H20a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-1.2v1a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H8.4v1a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1ZM7.4 16A1.5 1.5 0 1 0 5.9 14.5 1.5 1.5 0 0 0 7.4 16Zm9.2 0A1.5 1.5 0 1 0 15.1 14.5 1.5 1.5 0 0 0 16.6 16Z"/></g>
+      <g id="i-ticket"><path fill="currentColor" d="M3.5 7a1 1 0 0 1 1-1h15a1 1 0 0 1 1 1v3a2 2 0 0 0 0 4v3a1 1 0 0 1-1 1h-15a1 1 0 0 1-1-1v-3a2 2 0 0 0 0-4Z"/></g>
+      <g id="i-coffee"><path fill="currentColor" d="M4 7h12v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Zm12 1.5h1.5a2 2 0 0 1 0 4H16ZM4 19h12v1.5H4Z"/></g>
+      <g id="i-wheel"><path fill="currentColor" d="M10 4a2 2 0 1 1 2 2 2 2 0 0 1-2-2Zm1 4.2v3.3h3.1l2.2 4.1 1.6-.9-2.7-4.9H12.8V8.2Zm-1.2 2.4A4.8 4.8 0 1 0 16 16.4l-1.6.9a3 3 0 1 1-3.9-3.6Z"/></g>
+    </defs></svg>
+
+    <div class="harness-head">
+      <h1>Phase 10 · /club/contact (#2123) · 10k1 — assembled (icons fixed)</h1>
+      <p>Contact page in the paper-card system: locked <b>&lt;PageHero&gt;</b> + cream paper cards + <b>plain Phosphor-Fill icons</b> (jersey-deep, no box, aligned with titles) + Freight section headers + a jersey-deep prices table. Lucide + emojis gone.</p>
+    </div>
+    <div class="lockbar">REUSES → <b>PageHero</b> + paper cards · <b>plain Phosphor-Fill icons</b> (no box) · jersey-deep table band. Decision: card register + which sections stay.</div>
+
+    <div class="page">
+      <div class="hero"><span class="tape"></span>
+        <span class="kicker">Club</span><h1 class="eh">Contact<span class="dot">.</span></h1>
+        <p class="lead">Heb je een vraag? We helpen je graag verder.</p>
+      </div>
+
+      <div class="seam"></div>
+
+      <div class="two">
+        <div class="card">
+          <p class="seclabel">Clubgegevens<span class="dot">.</span></p>
+          <div class="stack">
+            <div>
+              <div class="hrow"><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-pin"/></svg></span><span class="ttl">Adres</span></div>
+              <p class="sub">Driesstraat 30<br/>1982 Elewijt (Zemst)</p>
+              <a class="lnk">Routebeschrijving →</a>
+            </div>
+            <div>
+              <div class="hrow"><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span><span class="ttl">E-mail</span></div>
+              <a class="lnk" style="margin-top:6px">info@kcvvelewijt.be</a>
+            </div>
+          </div>
+          <div class="crosslink"><div><p class="ttl" style="font-size:0.9rem">Weet je niet wie je moet contacteren?</p><p class="sub" style="font-size:0.8rem;margin-top:2px">Gebruik onze hulpvinder</p></div><span class="arrow">→</span></div>
+          <div class="crosslink"><div><p class="ttl" style="font-size:0.9rem">Bekijk het volledige organigram</p><p class="sub" style="font-size:0.8rem;margin-top:2px">Alle bestuursleden en contactgegevens</p></div><span class="arrow">→</span></div>
+        </div>
+        <div class="map">[ OpenStreetMap — &lt;MapEmbed&gt;, paper-framed ·<br/>pin on Driesstraat 30, 1982 Elewijt ]</div>
+      </div>
+
+      <div class="seam"></div>
+
+      <p class="seclabel">Contacteer ons<span class="dot">.</span></p>
+      <div class="three">
+        <div class="card"><p class="mono-cap">Voorzitter</p><p class="ttl" style="margin-top:4px">Jan Janssens</p><a class="lnk" style="margin-top:8px"><span class="ic" style="width:16px;height:16px"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>voorzitter@kcvvelewijt.be</a></div>
+        <div class="card"><p class="mono-cap">Secretaris</p><p class="ttl" style="margin-top:4px">Piet Peeters</p><a class="lnk" style="margin-top:8px"><span class="ic" style="width:16px;height:16px"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>secretaris@kcvvelewijt.be</a></div>
+        <div class="card"><p class="mono-cap">Jeugdcoördinator</p><p class="ttl" style="margin-top:4px">Marie Maes</p><a class="lnk" style="margin-top:8px"><span class="ic" style="width:16px;height:16px"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>jeugd@kcvvelewijt.be</a></div>
+        <div class="card"><p class="mono-cap">Algemeen</p><p class="ttl" style="margin-top:4px">Algemene vragen</p><p class="sub" style="margin-top:2px">Info over de club</p><a class="lnk" style="margin-top:8px"><span class="ic" style="width:16px;height:16px"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>info@kcvvelewijt.be</a></div>
+        <div class="card"><p class="mono-cap">Sponsoring</p><p class="ttl" style="margin-top:4px">Partnerschappen</p><p class="sub" style="margin-top:2px">Sponsormogelijkheden</p><a class="lnk" style="margin-top:8px"><span class="ic" style="width:16px;height:16px"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>sponsoring@kcvvelewijt.be</a></div>
+        <div class="card"><p class="mono-cap">Webmaster</p><p class="ttl" style="margin-top:4px">Website</p><p class="sub" style="margin-top:2px">Technische vragen</p><a class="lnk" style="margin-top:8px"><span class="ic" style="width:16px;height:16px"><svg viewBox="0 0 24 24"><use href="#i-mail"/></svg></span>kevin@kcvvelewijt.be</a></div>
+      </div>
+
+      <div class="seam"></div>
+
+      <p class="seclabel">Kom naar ons<span class="dot">.</span></p>
+      <div class="two">
+        <div class="card"><div class="hrow"><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-car"/></svg></span><span class="ttl">Parking</span></div><p class="sub">Parkeren kan aan het voetbalveld en rondom het Van Innis sportpark.</p></div>
+        <div class="card"><div class="hrow"><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-ticket"/></svg></span><span class="ttl">Inkom</span></div>
+          <table class="inkom"><thead><tr><th>Wedstrijd</th><th style="text-align:right">Prijs</th></tr></thead><tbody><tr><td>Jeugd</td><td class="r">€3</td></tr><tr><td>B-ploeg</td><td class="r">€5</td></tr><tr><td>A-ploeg</td><td class="r">€10</td></tr></tbody></table>
+        </div>
+        <div class="card"><div class="hrow"><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-coffee"/></svg></span><span class="ttl">Kantine</span></div><p class="sub">Open op trainingsdagen: woe &amp; vrij vanaf 18u, do vanaf 20u. Op wedstrijddagen geen vaste uren.</p></div>
+        <div class="card"><div class="hrow"><span class="ic"><svg viewBox="0 0 24 24"><use href="#i-wheel"/></svg></span><span class="ttl">Toegankelijkheid</span></div><p class="sub">Toegankelijk voor rolstoelgebruikers; 2 voorbehouden parkeerplaatsen.</p></div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>Composition</h3>
+      <ul>
+        <li><b>Icons</b> → plain Phosphor Fill via <code>@/lib/icons.redesign</code>, jersey-deep, no box, aligned with the title (MapPin · Envelope · Car · Ticket · Coffee · Wheelchair). Lucide + emoji retired.</li>
+        <li><b>Hero</b> → <code>&lt;PageHero&gt;</code>. <b>Headers</b> → <code>&lt;EditorialHeading&gt;</code>. <b>Prices</b> → jersey-deep table band. <b>Map</b> → <code>&lt;MapEmbed&gt;</code>, paper-framed — <b>fix the pin to Driesstraat 30, 1982 Elewijt</b> (currently off).</li>
+      </ul>
+      <h3>Decisions</h3>
+      <ul>
+        <li><b>1 · Card register</b> — paper-stamp (hard offset shadow, shown) vs softer functional chrome (<code>--shadow-soft</code>, no offset). Which for a utility contact page?</li>
+        <li><b>2 · Sections</b> — keep all four? "Snelle contacten" (key people) vs "Categorieën" (email buckets) overlap — merge or keep both?</li>
+        <li><b>3 · Hero kicker</b> — "Club" (shown) / "Contact" / none?</li>
+      </ul>
+      <div class="q"><b>LOCKED 2026-06-15.</b> Paper-stamp cards · plain Phosphor icons (no box) · "Snelle contacten" + categorieën merged into one "Contacteer ons." grid (dedupes jeugd@) · hero kicker "Club". Fix MapEmbed pin → Driesstraat 30.</div>
+      <p class="micro">phase-10 · 10k1 · /club/contact · plain Phosphor icons · paper cards</p>
+    </div>
+  </body>
+</html>
