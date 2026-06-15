@@ -23,6 +23,18 @@ export function CookieConsentBanner() {
     let isMounted = true;
 
     CookieConsent.run({
+      // Retro reskin (#2125): corner-box banner, bottom-left. Skin only — the
+      // category/consent behaviour is unchanged.
+      guiOptions: {
+        consentModal: {
+          layout: "box",
+          position: "bottom left",
+        },
+        preferencesModal: {
+          layout: "box",
+        },
+      },
+
       categories: {
         necessary: {
           enabled: true,
@@ -42,7 +54,7 @@ export function CookieConsentBanner() {
         translations: {
           nl: {
             consentModal: {
-              title: "Cookies op kcvvelewijt.be",
+              title: "Koekjes?",
               description:
                 'Wij gebruiken cookies om de website correct te laten werken en om anonieme bezoekersstatistieken bij te houden. Lees onze <a href="/privacy">privacyverklaring</a>.',
               acceptAllBtn: "Alles accepteren",
