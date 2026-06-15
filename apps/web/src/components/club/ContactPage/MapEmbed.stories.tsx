@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "OpenStreetMap embed for the club address (Driesstraat 30, 1982 Elewijt). No consent gate needed — OSM does not track users.",
+          "OpenStreetMap embed for the club address (Driesstraat 32, 1982 Elewijt). No consent gate needed — OSM does not track users.",
       },
     },
   },

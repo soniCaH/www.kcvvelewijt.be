@@ -14,11 +14,13 @@ import {
   ArrowRight as PhArrowRight,
   ArrowsOut as PhArrowsOut,
   Bus as PhBus,
+  Car as PhCar,
   CaretDown as PhCaretDown,
   CaretLeft as PhCaretLeft,
   CaretRight as PhCaretRight,
   CaretUp as PhCaretUp,
   CheckCircle as PhCheckCircle,
+  Coffee as PhCoffee,
   DownloadSimple as PhDownloadSimple,
   Envelope as PhEnvelope,
   Eye as PhEye,
@@ -30,16 +32,19 @@ import {
   Info as PhInfo,
   List as PhList,
   MagnifyingGlass as PhMagnifyingGlass,
+  MapPin as PhMapPin,
   Phone as PhPhone,
   Question as PhQuestion,
   ShieldCheck as PhShieldCheck,
   SoccerBall as PhSoccerBall,
   Sparkle as PhSparkle,
+  Ticket as PhTicket,
   TreeStructure as PhTreeStructure,
   User as PhUser,
   UsersThree as PhUsersThree,
   Warning as PhWarning,
   WarningCircle as PhWarningCircle,
+  Wheelchair as PhWheelchair,
   X as PhX,
   type Icon,
   type IconProps,
@@ -58,11 +63,13 @@ const fillWrapper = (PhIcon: ComponentType<IconProps>) => {
 export const ArrowRight = fillWrapper(PhArrowRight);
 export const ArrowsOut = fillWrapper(PhArrowsOut);
 export const Bus = fillWrapper(PhBus);
+export const Car = fillWrapper(PhCar);
 export const CaretDown = fillWrapper(PhCaretDown);
 export const CaretLeft = fillWrapper(PhCaretLeft);
 export const CaretRight = fillWrapper(PhCaretRight);
 export const CaretUp = fillWrapper(PhCaretUp);
 export const CheckCircle = fillWrapper(PhCheckCircle);
+export const Coffee = fillWrapper(PhCoffee);
 export const DownloadSimple = fillWrapper(PhDownloadSimple);
 export const Envelope = fillWrapper(PhEnvelope);
 export const Eye = fillWrapper(PhEye);
@@ -74,16 +81,19 @@ export const House = fillWrapper(PhHouse);
 export const Info = fillWrapper(PhInfo);
 export const List = fillWrapper(PhList);
 export const MagnifyingGlass = fillWrapper(PhMagnifyingGlass);
+export const MapPin = fillWrapper(PhMapPin);
 export const Phone = fillWrapper(PhPhone);
 export const Question = fillWrapper(PhQuestion);
 export const ShieldCheck = fillWrapper(PhShieldCheck);
 export const SoccerBall = fillWrapper(PhSoccerBall);
 export const Sparkle = fillWrapper(PhSparkle);
+export const Ticket = fillWrapper(PhTicket);
 export const TreeStructure = fillWrapper(PhTreeStructure);
 export const User = fillWrapper(PhUser);
 export const UsersThree = fillWrapper(PhUsersThree);
 export const Warning = fillWrapper(PhWarning);
 export const WarningCircle = fillWrapper(PhWarningCircle);
+export const Wheelchair = fillWrapper(PhWheelchair);
 export const X = fillWrapper(PhX);
 
 export type { Icon };

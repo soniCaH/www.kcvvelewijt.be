@@ -1,12 +1,15 @@
-const MAP_LAT = 50.9719161;
-const MAP_LON = 4.5001788;
-const MAP_BBOX = "4.4952,50.9694,4.5052,50.9744";
+// Driesstraat 32, 1982 Elewijt (Zemst) — the club ground. Coordinates from
+// OpenStreetMap (osm way 189062234, "KCVV Elewijt"); the legacy pin was ~150m
+// off and addressed to the wrong house number (30). See #2123.
+const MAP_LAT = 50.9705214;
+const MAP_LON = 4.5012206;
+const MAP_BBOX = "4.4962,50.9680,4.5062,50.9730";
 const MAP_SRC = `https://www.openstreetmap.org/export/embed.html?bbox=${MAP_BBOX}&layer=mapnik&marker=${MAP_LAT}%2C${MAP_LON}`;
-const MAP_TITLE = "Locatie KCVV Elewijt - Driesstraat 30, 1982 Elewijt";
+const MAP_TITLE = "Locatie KCVV Elewijt - Driesstraat 32, 1982 Elewijt";
 
 export function MapEmbed() {
   return (
-    <div className="min-h-[300px] overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+    <div className="border-ink shadow-paper-sm relative min-h-[300px] overflow-hidden border-2">
       <iframe
         title={MAP_TITLE}
         src={MAP_SRC}

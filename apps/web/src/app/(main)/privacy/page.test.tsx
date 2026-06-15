@@ -74,7 +74,7 @@ describe("PrivacyPage (Phase 8 cream-minimal reskin)", () => {
     render(<PrivacyPage />);
     expect(screen.getByText(/KCVV Elewijt vzw/i)).toBeInTheDocument();
     expect(
-      screen.getAllByText(/Driesstraat 30, 1982 Elewijt/i).length,
+      screen.getAllByText(/Driesstraat 32, 1982 Elewijt/i).length,
     ).toBeGreaterThan(0);
     expect(screen.getAllByText("info@kcvvelewijt.be").length).toBeGreaterThan(
       0,
