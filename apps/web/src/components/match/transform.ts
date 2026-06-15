@@ -1,17 +1,12 @@
-/**
- * Shared utilities for team detail pages
- *
- * BFF transform functions only — Sanity transforms are now in TeamRepository.
- */
-
 import type { Match } from "@/lib/effect/schemas";
-import type { ScheduleMatch, ScheduleTeam } from "@/components/match/types";
+import type { ScheduleMatch, ScheduleTeam } from "./types";
 
 /**
- * Transform a BFF Match into the `ScheduleMatch` shape consumed by the
- * Phase 6.C match-agenda components (`<TeamMatchesSection>` / `<TeamAgendaRow>`).
+ * Transform a BFF `Match` into the `ScheduleMatch` shape consumed by the
+ * match-agenda components (`<TeamMatchesSection>` / `<TeamAgendaRow>`). Shared
+ * by the team-detail pages and the opponent-history (`/tegenstander`) page.
  *
- * @param match - Match from PSD API via BFF
+ * @param match - Match from PSD API via the BFF
  * @returns ScheduleMatch object for display
  */
 export function transformMatchToSchedule(match: Match): ScheduleMatch {

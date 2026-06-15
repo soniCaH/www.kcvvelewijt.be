@@ -1,46 +1,76 @@
 /**
  * Opponent History Page — Loading Skeleton
- * Matches the opponent header + W/D/L summary + match history layout
+ *
+ * Paper-register skeleton mirroring the #2141 reskin: a light hero card, the
+ * five-cell summary, a striped seam, and a season-grouped row placeholder.
+ * Card chrome (borders + paper shadow) stays solid; only the gray content bars
+ * pulse.
  */
+
+import { StripedSeam } from "@/components/design-system";
 
 export default function OpponentLoading() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Opponent header */}
-      <div className="bg-ink px-4 py-8 text-white">
-        <div className="mx-auto flex max-w-3xl animate-pulse items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-white/10" />
-          <div className="space-y-2">
-            <div className="h-8 w-48 rounded bg-white/10" />
-            <div className="h-4 w-32 rounded bg-white/15" />
+    <div className="bg-cream-deep min-h-screen pb-[var(--footer-diagonal)]">
+      <div className="container mx-auto max-w-3xl px-4 pt-8 pb-8">
+        {/* Hero card */}
+        <div className="border-ink bg-cream shadow-paper-md border-2 p-6">
+          <div className="animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="bg-ink/10 h-16 w-16 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-3">
+                <div className="bg-ink/10 h-3 w-40" />
+                <div className="bg-ink/15 h-9 w-2/3" />
+              </div>
+            </div>
+            <div className="bg-ink/10 mt-4 h-3 w-3/4" />
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        {/* W/D/L/GF/GA summary */}
-        <div className="mb-8 grid animate-pulse grid-cols-5 gap-2">
+        {/* W/D/L summary */}
+        <div className="border-ink bg-cream shadow-paper-sm mt-7 grid grid-cols-5 border-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="space-y-2 rounded-sm border border-gray-200 bg-white p-4 text-center shadow-sm"
+              className="border-ink flex animate-pulse flex-col items-center gap-2 border-r-2 px-1.5 py-4 last:border-r-0"
             >
-              <div className="mx-auto h-8 w-8 rounded bg-gray-200" />
-              <div className="mx-auto h-3 w-16 rounded bg-gray-200" />
+              <div className="bg-ink/15 h-6 w-6" />
+              <div className="bg-ink/10 h-2 w-6" />
             </div>
           ))}
         </div>
 
-        {/* Match list */}
-        <div className="animate-pulse space-y-2">
-          {Array.from({ length: 8 }).map((_, i) => (
+        {/* Seam */}
+        <div className="mt-8 mb-5">
+          <StripedSeam height="sm" />
+        </div>
+
+        {/* List header */}
+        <div className="bg-ink/15 mb-4 h-6 w-44 animate-pulse" />
+
+        {/* Season band */}
+        <div className="mb-2.5 flex animate-pulse items-center gap-2.5">
+          <div className="bg-ink/15 h-5 w-28" />
+          <div className="border-ink/30 h-0 flex-1 border-t-2 border-dotted" />
+          <div className="bg-ink/10 h-2 w-16" />
+        </div>
+
+        {/* Rows */}
+        <div className="flex flex-col gap-2.5">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="flex items-center gap-4 rounded-sm border border-l-4 border-gray-200 border-l-gray-300 bg-white p-3 shadow-sm"
+              className="border-ink bg-cream flex items-stretch border-2 shadow-[2px_2px_0_0_var(--color-ink)]"
             >
-              <div className="h-4 w-20 rounded bg-gray-200" />
-              <div className="h-4 w-32 flex-1 rounded bg-gray-200" />
-              <div className="h-5 w-12 rounded bg-gray-200" />
+              <div className="border-ink/30 flex w-[56px] shrink-0 animate-pulse flex-col items-center justify-center gap-1 border-r-2 border-dashed py-3">
+                <div className="bg-ink/15 h-4 w-5" />
+                <div className="bg-ink/10 h-2 w-6" />
+              </div>
+              <div className="flex flex-1 animate-pulse items-center justify-between px-3 py-3">
+                <div className="bg-ink/10 h-3 w-24" />
+                <div className="bg-ink/15 h-5 w-10" />
+                <div className="bg-ink/10 h-3 w-24" />
+              </div>
             </div>
           ))}
         </div>

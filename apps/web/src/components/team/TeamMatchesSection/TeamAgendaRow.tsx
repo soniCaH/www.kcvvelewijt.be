@@ -39,6 +39,22 @@ export interface TeamAgendaRowProps {
    * `kalender_item_click` analytics) without re-implementing the row.
    */
   onNavigate?: () => void;
+  /**
+   * Optional jersey-deep label prepended to the competition caption (P2), e.g.
+   * the KCVV squad that played ("A-Ploeg" · 3e Prov.). Used by the
+   * opponent-history (`/tegenstander`) page, where one opponent can mix
+   * A-Ploeg / B-Ploeg / youth and the team must be named on the row. Distinct
+   * from `team.teamLabel` (the opponent's designation chip beside its name).
+   */
+  captionLabel?: string;
+  /**
+   * Label shown in the score slot for not-yet-played matches instead of the
+   * kickoff time (e.g. "Gepland" on the opponent-history page, where a precise
+   * future kickoff is irrelevant). Rendered in the mono caption register. When
+   * omitted, the kickoff time is shown — the team-detail default, where the
+   * next fixture's start time matters.
+   */
+  upcomingLabel?: string;
   className?: string;
 }
 
@@ -137,6 +153,8 @@ export function TeamAgendaRow({
   featured = false,
   showDateStub = true,
   onNavigate,
+  captionLabel,
+  upcomingLabel,
   className,
 }: TeamAgendaRowProps) {
   // Prefer match.is_home (provided by BFF); fall back to comparing kcvvTeamId
@@ -148,12 +166,31 @@ export function TeamAgendaRow({
   const outcome = computeOutcome(match, isHome);
   const isPlayed = isPlayedMatch(match.status);
 
-  const scoreOrTime =
+  // White on jersey-deep (4.56:1) passes WCAG AA; cream (#f5f1e6 → 4.04:1) does not.
+  const monoClass = featured ? "text-white" : "text-ink-muted";
+
+  const hasScoreline =
     isPlayed &&
     typeof match.homeScore === "number" &&
-    typeof match.awayScore === "number"
-      ? `${match.homeScore} – ${match.awayScore}`
+    typeof match.awayScore === "number";
+  // Show the upcoming label ("Gepland") only for not-yet-played matches when one
+  // was supplied. Gating on status (not merely the absence of a scoreline) keeps
+  // a finished match with missing scores on the kickoff time rather than wrongly
+  // reading "Gepland".
+  const showUpcomingLabel = !isPlayed && upcomingLabel != null;
+  const scoreOrTime = hasScoreline
+    ? `${match.homeScore} – ${match.awayScore}`
+    : showUpcomingLabel
+      ? upcomingLabel
       : formatKickoff(match);
+
+  // Scorelines and kickoff times use the big display face; the "Gepland" label
+  // drops to the mono caption register (cf. the mockup `.score.sched`).
+  const scoreToneClass = showUpcomingLabel
+    ? monoClass
+    : featured
+      ? "text-white"
+      : "text-ink";
 
   const outlineShadow = outcome ? OUTCOME_SHADOW[outcome] : undefined;
 
@@ -174,13 +211,30 @@ export function TeamAgendaRow({
     ? "border-r-2 border-dashed border-cream/40"
     : "border-r-2 border-dashed border-ink/30";
 
-  // White on jersey-deep (4.56:1) passes WCAG AA; cream (#f5f1e6 → 4.04:1) does not.
-  const monoClass = featured ? "text-white" : "text-ink-muted";
-
   const day = formatDay(match.date);
   const month = formatMonth(match.date);
 
   const matchLabel = `${match.homeTeam.name} – ${match.awayTeam.name}, ${day} ${month}`;
+
+  // Caption (P2) shared by both layouts: an optional jersey-deep squad label
+  // (e.g. "A-Ploeg") followed by the competition. Rendered once, reused below.
+  const captionContent =
+    captionLabel || match.competition ? (
+      <>
+        {captionLabel ? (
+          <span
+            className={cn(
+              "font-semibold",
+              featured ? "text-warm" : "text-jersey-deep",
+            )}
+          >
+            {captionLabel}
+          </span>
+        ) : null}
+        {captionLabel && match.competition ? " · " : null}
+        {match.competition}
+      </>
+    ) : null;
 
   return (
     <Link
@@ -242,8 +296,11 @@ export function TeamAgendaRow({
           <div className="flex shrink-0 flex-col items-center gap-0.5 px-3">
             <span
               className={cn(
-                "font-display-big text-[18px] leading-none tabular-nums",
-                featured ? "text-white" : "text-ink",
+                "leading-none",
+                showUpcomingLabel
+                  ? "font-mono text-[11px] font-semibold tracking-wider uppercase"
+                  : "font-display-big text-[18px] tabular-nums",
+                scoreToneClass,
               )}
               style={
                 outlineShadow
@@ -253,14 +310,14 @@ export function TeamAgendaRow({
             >
               {scoreOrTime}
             </span>
-            {match.competition ? (
+            {captionContent ? (
               <span
                 className={cn(
                   "font-mono text-[9px] tracking-wider uppercase",
                   monoClass,
                 )}
               >
-                {match.competition}
+                {captionContent}
               </span>
             ) : null}
           </div>
@@ -291,14 +348,14 @@ export function TeamAgendaRow({
                 <Crest name={opponent.name} logo={opponent.logo} />
                 <div className="min-w-0 flex-1" title={opponent.name}>
                   <TeamName team={opponent} featured={featured} bold />
-                  {match.competition ? (
+                  {captionContent ? (
                     <span
                       className={cn(
                         "font-mono text-[9px] tracking-wider uppercase",
                         monoClass,
                       )}
                     >
-                      {match.competition}
+                      {captionContent}
                     </span>
                   ) : null}
                 </div>
@@ -312,8 +369,11 @@ export function TeamAgendaRow({
                 />
                 <span
                   className={cn(
-                    "font-display-big shrink-0 text-[16px] leading-none tabular-nums",
-                    featured ? "text-white" : "text-ink",
+                    "shrink-0 leading-none",
+                    showUpcomingLabel
+                      ? "font-mono text-[11px] font-semibold tracking-wider uppercase"
+                      : "font-display-big text-[16px] tabular-nums",
+                    scoreToneClass,
                   )}
                   style={
                     outlineShadow

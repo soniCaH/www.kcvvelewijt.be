@@ -137,6 +137,23 @@ describe("PageHero", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
+  it("renders an adornment beside the heading when provided", () => {
+    render(
+      <PageHero
+        {...defaultProps}
+        adornment={<span data-testid="hero-adornment">crest</span>}
+      />,
+    );
+    expect(screen.getByTestId("hero-adornment")).toBeInTheDocument();
+    // The heading still renders alongside it.
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
+  });
+
+  it("does not render an adornment slot when the prop is omitted", () => {
+    render(<PageHero {...defaultProps} />);
+    expect(screen.queryByTestId("hero-adornment")).not.toBeInTheDocument();
+  });
+
   it("renders one warm shell tape strip in the typographic state", () => {
     const { container } = render(<PageHero {...defaultProps} />);
     const warmTapes = container.querySelectorAll('[data-color="warm"]');

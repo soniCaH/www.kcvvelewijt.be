@@ -23,3 +23,5 @@ export type {
   ScheduleMatch,
   ScheduleTeam,
 } from "./types";
+
+export { transformMatchToSchedule } from "./transform";

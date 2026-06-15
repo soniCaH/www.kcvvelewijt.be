@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Crest } from "@/components/design-system";
 import { PageHero } from "./PageHero";
 
 const meta = {
@@ -90,6 +91,22 @@ export const LongHeadline: Story = {
     lead: "Van de allerkleinsten tot het eerste elftal — bij KCVV is iedereen welkom.",
     image: "/images/youth-trainers.jpg",
     imageAlt: "KCVV jeugdtraining",
+  },
+};
+
+/** /tegenstander — typographic hero with an opponent crest adornment. */
+export const WithAdornment: Story = {
+  args: {
+    kicker: "Onderlinge geschiedenis",
+    headline: "OHR Huldenberg",
+    lead: "Alle onderlinge duels tussen KCVV Elewijt en deze tegenstander, per seizoen.",
+    adornment: (
+      <Crest
+        name="OHR Huldenberg"
+        size={64}
+        className="border-ink bg-cream-soft shadow-paper-sm rounded-full border-2"
+      />
+    ),
   },
 };
 

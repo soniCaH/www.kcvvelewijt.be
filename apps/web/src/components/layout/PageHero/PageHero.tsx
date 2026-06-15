@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { TapedCard } from "@/components/design-system/TapedCard";
@@ -56,6 +57,14 @@ export interface PageHeroProps {
   /** Optional CTA rendered as a primary `<LinkButton>`. */
   cta?: { label: string; href: string };
   /**
+   * Optional adornment rendered beside the kicker + headline (e.g. an opponent
+   * `<Crest>` on the `/tegenstander` hero). Sits left of the heading block in a
+   * centred flex row; the lead and divider stay full-width below. Primarily for
+   * the typographic state — pairs uneasily with an `image` and no consumer
+   * combines the two.
+   */
+  adornment?: ReactNode;
+  /**
    * `"default"` — full hero with optional image.
    * `"compact"` — tighter padding, smaller headline, image suppressed.
    *   Used by loading skeletons and bare utility pages.
@@ -72,6 +81,7 @@ export function PageHero({
   image,
   imageAlt = "",
   cta,
+  adornment,
   size = "default",
   className,
 }: PageHeroProps) {
@@ -100,7 +110,7 @@ export function PageHero({
       ? undefined
       : { text: ".", tone: "warm" };
 
-  const textColumn = (
+  const headingBlock = (
     <div>
       {/* Jersey-deep mono kicker as a raw label-token span — MonoLabel's plain
           variant only renders ink/cream tone. `tracking-[0.18em]` is the 10h5
@@ -121,6 +131,19 @@ export function PageHero({
       >
         {headline}
       </EditorialHeading>
+    </div>
+  );
+
+  const textColumn = (
+    <div>
+      {adornment ? (
+        <div className="flex items-center gap-4">
+          {adornment}
+          {headingBlock}
+        </div>
+      ) : (
+        headingBlock
+      )}
 
       {showLead ? (
         <p

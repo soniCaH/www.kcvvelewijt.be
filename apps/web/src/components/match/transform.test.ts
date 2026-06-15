@@ -1,9 +1,9 @@
 /**
- * Tests for team detail utility functions
+ * Tests for the shared Match → ScheduleMatch adapter.
  */
 
 import { describe, it, expect } from "vitest";
-import { transformMatchToSchedule } from "./utils";
+import { transformMatchToSchedule } from "./transform";
 import type { Match } from "@/lib/effect/schemas";
 
 // Mock Match factory
@@ -47,6 +47,13 @@ describe("transformMatchToSchedule", () => {
     expect(result.awayScore).toBe(1);
     expect(result.status).toBe("finished");
     expect(result.competition).toBe("3e Nationale");
+  });
+
+  it("carries the opponent team designation through as teamLabel", () => {
+    const match = createMockMatch({
+      away_team: { id: 2, name: "Opponent", team_label: "U23" },
+    });
+    expect(transformMatchToSchedule(match).awayTeam.teamLabel).toBe("U23");
   });
 
   it("handles scheduled match without scores", () => {
