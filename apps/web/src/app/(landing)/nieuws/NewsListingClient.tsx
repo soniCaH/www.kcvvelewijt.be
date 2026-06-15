@@ -217,7 +217,7 @@ export function NewsListingClient({
   return (
     <div className="w-full">
       {/* Sticky filter bar */}
-      <div className="bg-kcvv-dark-bg/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
+      <div className="bg-ink/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
         <div className="max-w-inner-lg mx-auto px-3 lg:px-0">
           <CategoryFilters
             categories={categories}
@@ -272,7 +272,7 @@ export function NewsListingClient({
             <p className="mb-2 text-red-400">{error.message}</p>
             <button
               type="button"
-              className="text-kcvv-green-bright text-sm underline hover:no-underline"
+              className="text-jersey-deep text-sm underline hover:no-underline"
               onClick={error.retry}
             >
               Opnieuw proberen
@@ -290,7 +290,7 @@ export function NewsListingClient({
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-center py-8" role="status">
-            <div className="border-kcvv-green-bright h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
+            <div className="border-jersey-deep h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
             <span className="sr-only">Laden...</span>
           </div>
         )}

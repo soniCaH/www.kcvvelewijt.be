@@ -7,7 +7,7 @@ export interface SectionCtaProps {
   buttonHref: string;
   /**
    * Visual variant. "light" (default) renders dark text on a light background.
-   * "dark" renders white text — use on dark sections (kcvv-black, kcvv-green-dark)
+   * "dark" renders white text — use on dark sections (ink, jersey-deep)
    * to keep the heading and body legible.
    */
   variant?: "light" | "dark";
@@ -25,7 +25,7 @@ export function SectionCta({
     <div className="mx-auto max-w-[40rem] px-4 text-center md:px-10">
       <h2
         className={`font-display mb-3 font-extrabold ${
-          isDark ? "text-white" : "text-kcvv-black"
+          isDark ? "text-white" : "text-ink-soft"
         }`}
         style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)" }}
       >
@@ -34,7 +34,7 @@ export function SectionCta({
 
       <p
         className={`mb-8 text-sm leading-relaxed ${
-          isDark ? "text-white/75" : "text-kcvv-gray"
+          isDark ? "text-white/75" : "text-ink-muted"
         }`}
       >
         {body}

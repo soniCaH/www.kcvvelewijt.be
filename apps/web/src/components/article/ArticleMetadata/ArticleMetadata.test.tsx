@@ -60,11 +60,11 @@ describe("ArticleMetadata", () => {
     expect(nav).toHaveAttribute("aria-label", "Artikelinfo");
   });
 
-  it("applies border-y kcvv-gray-light so rules appear above AND below", () => {
+  it("applies border-y border-paper-edge so rules appear above AND below", () => {
     const { container } = render(<ArticleMetadata {...defaultProps} />);
     const nav = container.querySelector("nav");
     expect(nav).toHaveClass("border-y");
-    expect(nav).toHaveClass("border-kcvv-gray-light");
+    expect(nav).toHaveClass("border-paper-edge");
   });
 
   it("applies custom className", () => {

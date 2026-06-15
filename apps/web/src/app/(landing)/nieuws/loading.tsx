@@ -7,7 +7,7 @@ export default function NewsLoading() {
   return (
     <div className="w-full">
       {/* Sticky filter bar skeleton */}
-      <div className="bg-kcvv-dark-bg/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
+      <div className="bg-ink/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
         <div className="max-w-inner-lg mx-auto flex gap-2 px-3 lg:px-0">
           {Array.from({ length: 5 }).map((_, i) => (
             <div

@@ -14,11 +14,11 @@ describe("TransferFactOverview", () => {
       />,
     );
     const kicker = screen.getByTestId("transfer-overview-kicker");
-    expect(kicker).toHaveClass("text-kcvv-green-bright");
+    expect(kicker).toHaveClass("text-jersey");
     expect(kicker).toHaveTextContent(/Inkomend/i);
   });
 
-  it("outgoing: kicker uses kcvv-warning (amber) — reported, not alarmed", () => {
+  it("outgoing: kicker uses warm (amber) — reported, not alarmed", () => {
     render(
       <TransferFactOverview
         value={{
@@ -29,8 +29,8 @@ describe("TransferFactOverview", () => {
       />,
     );
     const kicker = screen.getByTestId("transfer-overview-kicker");
-    expect(kicker).toHaveClass("text-kcvv-warning");
-    expect(kicker).not.toHaveClass("text-kcvv-green-bright");
+    expect(kicker).toHaveClass("text-warm");
+    expect(kicker).not.toHaveClass("text-jersey");
     expect(kicker).toHaveTextContent(/Uitgaand/i);
   });
 
@@ -47,7 +47,7 @@ describe("TransferFactOverview", () => {
     const section = container.querySelector(
       "[data-testid='transfer-overview']",
     );
-    expect(section).toHaveClass("bg-kcvv-gray-dark");
+    expect(section).toHaveClass("bg-ink");
     expect(section).toHaveClass("full-bleed");
   });
 

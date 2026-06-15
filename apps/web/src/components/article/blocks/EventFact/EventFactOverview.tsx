@@ -62,8 +62,8 @@ export const EventFactOverview = ({
         // Consecutive eventFact overviews fuse into one continuous
         // section via the sibling rules in globals.css (same pattern as
         // transferFact overview).
-        "full-bleed not-prose bg-kcvv-gray-dark py-6",
-        "border-kcvv-white/10 border-t",
+        "full-bleed not-prose bg-ink py-6",
+        "border-cream/10 border-t",
         className,
       )}
     >
@@ -81,13 +81,13 @@ export const EventFactOverview = ({
           <time
             data-testid="event-overview-date"
             dateTime={range.date.dateIso}
-            className="text-kcvv-white flex flex-col"
+            className="text-cream flex flex-col"
           >
             <span className="font-display text-xl leading-[0.95] font-bold">
               {range.date.day}{" "}
               <span className="uppercase">{range.date.monthShort}</span>
             </span>
-            <span className="text-kcvv-gray-light mt-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+            <span className="text-cream/60 mt-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
               {range.date.weekday}
             </span>
           </time>
@@ -95,7 +95,7 @@ export const EventFactOverview = ({
         {(range.kind === "range" || range.kind === "sessions") && (
           <div
             data-testid="event-overview-date"
-            className="text-kcvv-white flex flex-col"
+            className="text-cream flex flex-col"
           >
             <span className="font-display text-xl leading-[0.95] font-bold">
               <time dateTime={range.start.dateIso}>
@@ -104,7 +104,7 @@ export const EventFactOverview = ({
                   <span className="uppercase"> {range.start.monthShort}</span>
                 )}
               </time>
-              <span className="text-kcvv-white/40 mx-1">–</span>
+              <span className="text-cream/40 mx-1">–</span>
               <time dateTime={range.end.dateIso}>
                 {range.end.day}{" "}
                 <span className="uppercase">
@@ -114,7 +114,7 @@ export const EventFactOverview = ({
                 </span>
               </time>
             </span>
-            <span className="text-kcvv-gray-light mt-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+            <span className="text-cream/60 mt-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
               {/* 3-letter weekday abbreviations so ranges stay on one
                   line in the narrow date column (e.g. "vr – zo" vs
                   "vrijdag – zondag"). */}
@@ -126,9 +126,9 @@ export const EventFactOverview = ({
         {range.kind === "none" && (
           <div
             data-testid="event-overview-date"
-            className="text-kcvv-white flex flex-col"
+            className="text-cream flex flex-col"
           >
-            <span className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+            <span className="text-cream/60 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
               Datum volgt
             </span>
           </div>
@@ -138,7 +138,7 @@ export const EventFactOverview = ({
           {value.title && (
             <span
               data-testid="event-overview-title"
-              className="font-display text-kcvv-white text-lg font-bold"
+              className="font-display text-cream text-lg font-bold"
             >
               {value.title}
             </span>
@@ -146,7 +146,7 @@ export const EventFactOverview = ({
           {metaParts.length > 0 && (
             <span
               data-testid="event-overview-meta"
-              className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
+              className="text-cream/60 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
             >
               {metaParts.map((part, i) => (
                 // Composite key — two parts could collide on the same
@@ -154,10 +154,7 @@ export const EventFactOverview = ({
                 // duplicates a label).
                 <span key={`${i}-${part}`}>
                   {i > 0 && (
-                    <span
-                      aria-hidden="true"
-                      className="text-kcvv-white/30 mx-2"
-                    >
+                    <span aria-hidden="true" className="text-cream/30 mx-2">
                       ·
                     </span>
                   )}
@@ -176,7 +173,7 @@ export const EventFactOverview = ({
             rel="noopener noreferrer"
             className={cn(
               "font-display inline-flex items-baseline gap-1 text-sm font-bold tracking-[var(--letter-spacing-caps)] uppercase",
-              "text-kcvv-green-bright decoration-kcvv-green-bright underline decoration-1 underline-offset-4",
+              "text-jersey decoration-jersey underline decoration-1 underline-offset-4",
               "transition-[text-decoration-thickness] duration-150 hover:decoration-2",
             )}
           >

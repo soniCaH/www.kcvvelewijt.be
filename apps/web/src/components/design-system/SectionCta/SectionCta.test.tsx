@@ -34,20 +34,20 @@ describe("SectionCta", () => {
   });
 
   describe("Typography", () => {
-    it("should style heading with font-display font-extrabold text-kcvv-black", () => {
+    it("should style heading with font-display font-extrabold text-ink-soft", () => {
       render(<SectionCta {...defaultProps} />);
       const heading = screen.getByRole("heading");
       expect(heading).toHaveClass(
         "font-display",
         "font-extrabold",
-        "text-kcvv-black",
+        "text-ink-soft",
       );
     });
 
-    it("should style body with text-sm text-kcvv-gray leading-relaxed", () => {
+    it("should style body with text-sm text-ink-muted leading-relaxed", () => {
       render(<SectionCta {...defaultProps} />);
       const body = screen.getByText(defaultProps.body);
-      expect(body).toHaveClass("text-sm", "text-kcvv-gray", "leading-relaxed");
+      expect(body).toHaveClass("text-sm", "text-ink-muted", "leading-relaxed");
     });
   });
 
@@ -69,12 +69,12 @@ describe("SectionCta", () => {
   });
 
   describe("Variants", () => {
-    it("defaults to light variant — heading is text-kcvv-black, body is text-kcvv-gray", () => {
+    it("defaults to light variant — heading is text-ink-soft, body is text-ink-muted", () => {
       render(<SectionCta {...defaultProps} />);
       const heading = screen.getByRole("heading");
-      expect(heading).toHaveClass("text-kcvv-black");
+      expect(heading).toHaveClass("text-ink-soft");
       const body = screen.getByText(defaultProps.body);
-      expect(body).toHaveClass("text-kcvv-gray");
+      expect(body).toHaveClass("text-ink-muted");
     });
 
     it("dark variant uses white text for heading and white/75 for body", () => {
@@ -85,10 +85,10 @@ describe("SectionCta", () => {
       expect(body).toHaveClass("text-white/75");
     });
 
-    it("dark variant heading does NOT use the light text-kcvv-black class", () => {
+    it("dark variant heading does NOT use the light text-ink-soft class", () => {
       render(<SectionCta {...defaultProps} variant="dark" />);
       const heading = screen.getByRole("heading");
-      expect(heading).not.toHaveClass("text-kcvv-black");
+      expect(heading).not.toHaveClass("text-ink-soft");
     });
   });
 });

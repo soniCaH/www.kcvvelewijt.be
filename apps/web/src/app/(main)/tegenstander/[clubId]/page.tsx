@@ -49,9 +49,9 @@ function getMatchResult(match: Match): "win" | "draw" | "loss" | null {
 }
 
 const resultBorderClass: Record<"win" | "draw" | "loss", string> = {
-  win: "border-l-4 border-l-kcvv-success",
-  draw: "border-l-4 border-l-kcvv-warning",
-  loss: "border-l-4 border-l-kcvv-alert",
+  win: "border-l-4 border-l-jersey-deep",
+  draw: "border-l-4 border-l-transparent",
+  loss: "border-l-4 border-l-alert",
 };
 
 async function fetchOpponentData(clubId: number): Promise<{
@@ -157,34 +157,32 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
           />
         )}
         <div>
-          <p className="text-sm text-[var(--color-muted)]">Tegenstander</p>
+          <p className="text-ink-muted text-sm">Tegenstander</p>
           <h1 className="text-2xl font-bold">{opponentName}</h1>
         </div>
       </div>
 
       {/* W/D/L summary */}
-      <div className="mb-8 grid grid-cols-5 gap-2 rounded-xl bg-[var(--color-surface)] p-4 text-center">
+      <div className="bg-cream-soft mb-8 grid grid-cols-5 gap-2 rounded-xl p-4 text-center">
         <div>
-          <p className="text-kcvv-success text-2xl font-bold">{summary.wins}</p>
-          <p className="text-xs text-[var(--color-muted)]">W</p>
+          <p className="text-jersey-deep text-2xl font-bold">{summary.wins}</p>
+          <p className="text-ink-muted text-xs">W</p>
         </div>
         <div>
-          <p className="text-kcvv-warning text-2xl font-bold">
-            {summary.draws}
-          </p>
-          <p className="text-xs text-[var(--color-muted)]">G</p>
+          <p className="text-2xl font-bold">{summary.draws}</p>
+          <p className="text-ink-muted text-xs">G</p>
         </div>
         <div>
-          <p className="text-kcvv-alert text-2xl font-bold">{summary.losses}</p>
-          <p className="text-xs text-[var(--color-muted)]">V</p>
+          <p className="text-alert text-2xl font-bold">{summary.losses}</p>
+          <p className="text-ink-muted text-xs">V</p>
         </div>
         <div>
           <p className="text-2xl font-bold">{summary.goalsFor}</p>
-          <p className="text-xs text-[var(--color-muted)]">Doelpunten voor</p>
+          <p className="text-ink-muted text-xs">Doelpunten voor</p>
         </div>
         <div>
           <p className="text-2xl font-bold">{summary.goalsAgainst}</p>
-          <p className="text-xs text-[var(--color-muted)]">Doelpunten tegen</p>
+          <p className="text-ink-muted text-xs">Doelpunten tegen</p>
         </div>
       </div>
 
@@ -209,10 +207,10 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
             <li key={match.id}>
               <Link
                 href={`/wedstrijd/${match.id}`}
-                className={`flex items-center justify-between rounded-lg bg-[var(--color-surface)] px-4 py-3 transition-colors hover:bg-[var(--color-surface-hover)] ${borderClass}`}
+                className={`bg-cream-soft hover:bg-cream-deep flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${borderClass}`}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs text-[var(--color-muted)]">
+                  <span className="text-ink-muted text-xs">
                     {formatMatchDate(match.date)}
                     {match.competition ? ` · ${match.competition}` : ""}
                   </span>
@@ -220,7 +218,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
                     {match.home_team.name} vs {match.away_team.name}
                   </span>
                   {match.kcvv_team_label && (
-                    <span className="text-xs text-[var(--color-muted)]">
+                    <span className="text-ink-muted text-xs">
                       {match.kcvv_team_label}
                     </span>
                   )}
@@ -231,9 +229,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
                       {homeScore} – {awayScore}
                     </span>
                   ) : (
-                    <span className="text-sm text-[var(--color-muted)]">
-                      Gepland
-                    </span>
+                    <span className="text-ink-muted text-sm">Gepland</span>
                   )}
                 </div>
               </Link>
