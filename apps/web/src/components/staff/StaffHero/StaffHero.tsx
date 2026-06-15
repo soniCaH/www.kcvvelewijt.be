@@ -95,21 +95,25 @@ export function StaffHero({
       }}
     >
       <div className="grid items-center gap-6 md:grid-cols-[0.7fr_1.3fr]">
-        {/* Portrait or monogram — always a framed portrait-3-4 slot. */}
+        {/* Portrait or monogram — always a framed portrait-3-4 slot. The photo
+            runs flush to the border (`padding="none"`) with the same
+            newsprint + `object-cover` treatment as <PlayerHero>; mirrored to
+            the left column for staff. */}
         <TapedFigure
           aspect="portrait-3-4"
+          bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
+          padding="none"
           tape={{ color: "warm", position: "right", length: "md" }}
         >
           {hasPhoto ? (
             <Image
               src={photoUrl}
               alt={fullName}
-              fill
-              priority
+              width={400}
+              height={533}
               unoptimized
-              sizes="(min-width: 768px) 30vw, 60vw"
-              className="object-cover object-top"
+              className="block h-full w-full object-cover"
             />
           ) : (
             <span
