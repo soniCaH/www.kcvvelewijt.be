@@ -132,6 +132,23 @@ describe("TeamAgendaRow", () => {
         "15:00",
       );
     });
+
+    it("never shows the upcoming label for a finished match with missing scores", () => {
+      render(
+        <TeamAgendaRow
+          match={{
+            ...BASE,
+            status: "finished",
+            homeScore: undefined,
+            awayScore: undefined,
+          }}
+          upcomingLabel="Gepland"
+        />,
+      );
+      const row = screen.getByTestId("team-agenda-row");
+      expect(row.textContent).toContain("15:00");
+      expect(row.textContent).not.toContain("Gepland");
+    });
   });
 
   describe("Outcome underline (box-shadow)", () => {

@@ -173,9 +173,11 @@ export function TeamAgendaRow({
     isPlayed &&
     typeof match.homeScore === "number" &&
     typeof match.awayScore === "number";
-  // Show the upcoming label ("Gepland") only when one was supplied and there is
-  // no scoreline; otherwise fall back to the kickoff time (team-detail default).
-  const showUpcomingLabel = !hasScoreline && upcomingLabel != null;
+  // Show the upcoming label ("Gepland") only for not-yet-played matches when one
+  // was supplied. Gating on status (not merely the absence of a scoreline) keeps
+  // a finished match with missing scores on the kickoff time rather than wrongly
+  // reading "Gepland".
+  const showUpcomingLabel = !isPlayed && upcomingLabel != null;
   const scoreOrTime = hasScoreline
     ? `${match.homeScore} – ${match.awayScore}`
     : showUpcomingLabel
