@@ -41,7 +41,7 @@ export function ScheurkalenderPage({ days }: ScheurkalenderPageProps) {
       <div className="from-green-main via-green-hover to-green-dark-hover bg-linear-to-br px-4 py-10 text-white print:hidden">
         <div className="mx-auto flex max-w-3xl items-start justify-between gap-4">
           <div>
-            <h1 className="font-title mb-2 text-3xl font-bold md:text-5xl">
+            <h1 className="font-body mb-2 text-3xl font-bold md:text-5xl">
               Scheurkalender
             </h1>
             <p className="text-white/90">

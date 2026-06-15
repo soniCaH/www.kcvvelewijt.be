@@ -64,13 +64,13 @@ export const TransferFactOverview = ({
         // inner container, so the column grid aligns row-to-row.
         "full-bleed not-prose bg-kcvv-gray-dark py-6",
         // White-alpha top rule separates stacked rows without shouting.
-        "border-t border-kcvv-white/10",
+        "border-kcvv-white/10 border-t",
         className,
       )}
     >
       <div
         className={cn(
-          "mx-auto grid max-w-outer px-6",
+          "max-w-outer mx-auto grid px-6",
           "gap-x-6 gap-y-3",
           "md:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1.2fr)_auto] md:items-center md:gap-x-8",
         )}
@@ -78,7 +78,7 @@ export const TransferFactOverview = ({
         <div
           data-testid="transfer-overview-kicker"
           className={cn(
-            "flex items-center gap-2 text-xs font-semibold uppercase tracking-[var(--letter-spacing-label)]",
+            "flex items-center gap-2 text-xs font-semibold tracking-[var(--letter-spacing-label)] uppercase",
             accentClass,
           )}
         >
@@ -93,7 +93,7 @@ export const TransferFactOverview = ({
           {playerName && (
             <span
               data-testid="transfer-overview-name"
-              className="font-title font-bold text-xl text-kcvv-white"
+              className="font-display text-kcvv-white text-xl font-bold"
             >
               {playerName}
             </span>
@@ -101,14 +101,14 @@ export const TransferFactOverview = ({
           {metaParts.length > 0 && (
             <span
               data-testid="transfer-overview-meta"
-              className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray-light"
+              className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase"
             >
               {metaParts.map((part, i) => (
                 <span key={part}>
                   {i > 0 && (
                     <span
                       aria-hidden="true"
-                      className="mx-2 text-kcvv-white/30"
+                      className="text-kcvv-white/30 mx-2"
                     >
                       ·
                     </span>
@@ -123,7 +123,7 @@ export const TransferFactOverview = ({
         {resolved.kind === "extension" ? (
           <div
             data-testid="transfer-overview-kcvv-only"
-            className="flex items-center gap-2 text-base text-kcvv-white"
+            className="text-kcvv-white flex items-center gap-2 text-base"
           >
             {resolved.kcvvOnly.logoUrl && (
               <Image
@@ -139,7 +139,7 @@ export const TransferFactOverview = ({
         ) : (
           <div
             data-testid="transfer-overview-clubs"
-            className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base text-kcvv-white"
+            className="text-kcvv-white flex flex-wrap items-center gap-x-2 gap-y-1 text-base"
           >
             <span className="flex items-center gap-2">
               {resolved.from.logoUrl && (
@@ -171,7 +171,7 @@ export const TransferFactOverview = ({
 
         <p
           data-testid="transfer-overview-status"
-          className="font-mono text-xs uppercase tracking-[var(--letter-spacing-caps)] text-kcvv-gray-light md:text-right"
+          className="text-kcvv-gray-light font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase md:text-right"
         >
           {statusLabel}
         </p>
