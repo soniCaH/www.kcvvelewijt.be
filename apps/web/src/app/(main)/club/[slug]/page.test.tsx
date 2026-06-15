@@ -107,4 +107,74 @@ describe("/club/[slug] page", () => {
       "image",
     );
   });
+
+  it("renders the body through <ArticleBody>", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(makePage()));
+
+    const page = await DynamicClubPage({
+      params: Promise.resolve({ slug: "downloads" }),
+    });
+    const { container } = render(page);
+
+    // The Phase-5 body column renders the page body (first paragraph as the
+    // drop-cap), so the body text is on the page.
+    expect(screen.getByText("Page content")).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-article-body="true"]'),
+    ).toBeInTheDocument();
+  });
+
+  it("renders an articleImage body block as a captioned figure", async () => {
+    mockFindBySlug.mockReturnValue(
+      Effect.succeed(
+        makePage({
+          body: [
+            {
+              _key: "img-1",
+              _type: "articleImage" as const,
+              width: "prose" as const,
+              alt: "Sportpark Elewijt",
+              fileUrl: null,
+              fileSize: null,
+              fileMimeType: null,
+              fileOriginalFilename: null,
+              asset: {
+                url: "https://cdn.sanity.io/images/proj/dataset/ground.jpg?w=800&q=80&fm=webp&fit=max",
+                title: null,
+                description: "De ingang van Sportpark Elewijt",
+                creditLine: null,
+                metadata: { dimensions: null, lqip: null },
+              },
+            },
+          ],
+        }),
+      ),
+    );
+
+    const page = await DynamicClubPage({
+      params: Promise.resolve({ slug: "praktische-info" }),
+    });
+    const { container } = render(page);
+
+    const img = container.querySelector("img");
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute("alt", "Sportpark Elewijt");
+    // Caption pulled from `asset.description` by the <ArticleBody> renderer.
+    expect(
+      screen.getByText("De ingang van Sportpark Elewijt"),
+    ).toBeInTheDocument();
+  });
+
+  it("does not render SanityArticleBody / InteriorPageHero artefacts", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(makePage()));
+
+    const page = await DynamicClubPage({
+      params: Promise.resolve({ slug: "downloads" }),
+    });
+    const { container } = render(page);
+
+    // The legacy renderer wrapped the body in `.prose`; the new ArticleBody
+    // ships a `data-article-body` cream shell instead.
+    expect(container.querySelector(".prose")).not.toBeInTheDocument();
+  });
 });

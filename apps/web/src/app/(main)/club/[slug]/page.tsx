@@ -6,7 +6,8 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
 import { PageHero } from "@/components/layout/PageHero";
-import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
+import { ArticleBody } from "@/components/article/ArticleBody";
+import { FooterSafeArea, StripedSeam } from "@/components/design-system";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -54,9 +55,14 @@ export default async function DynamicClubPage({ params }: Props) {
 
   if (!page) return notFound();
 
+  const body = (page.body ?? []) as PortableTextBlock[];
+
   return (
     <div className="bg-cream min-h-screen">
-      <div className="mx-auto max-w-5xl px-4 pt-10">
+      {/* Hero — kicker "Club", headline = page.title, optional heroImage
+          (typographic state when absent). `pb-12` reserves the rhythm before
+          the full-bleed seam (StripedSeam carries no margin of its own). */}
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
         <PageHero
           kicker="Club"
           headline={page.title}
@@ -64,9 +70,18 @@ export default async function DynamicClubPage({ params }: Props) {
           imageAlt={page.title}
         />
       </div>
-      <div className="max-w-inner-lg content mx-auto px-4 pt-8 pb-[calc(2rem+var(--footer-diagonal))]">
-        <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
-      </div>
+
+      <StripedSeam colorPair="ink-cream" height="md" />
+
+      {/* Body — the Phase-5 editorial column (same vocabulary as
+          /nieuws/[slug]). <ArticleBody> ships its own `bg-cream w-full`
+          edge-to-edge shell + prose container + top/bottom padding, so it
+          renders bare here (no max-w wrapper would box the cream into a band). */}
+      {body.length > 0 ? (
+        <ArticleBody className="article-body" content={body} />
+      ) : null}
+
+      <FooterSafeArea />
     </div>
   );
 }

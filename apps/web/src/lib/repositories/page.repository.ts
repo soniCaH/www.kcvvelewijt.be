@@ -11,7 +11,7 @@ export const PAGE_BY_SLUG_QUERY =
   "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",
   metaDescription,
   "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),
-  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }) }
 }`);
 
 // ─── View Models ─────────────────────────────────────────────────────────────

@@ -615,14 +615,9 @@ export type Page = {
         _type: "block";
         _key: string;
       }
-    | {
-        asset?: SanityImageAssetReference;
-        media?: unknown;
-        hotspot?: SanityImageHotspot;
-        crop?: SanityImageCrop;
-        _type: "image";
+    | ({
         _key: string;
-      }
+      } & ArticleImage)
     | ({
         _key: string;
       } & FileAttachment)
@@ -2172,7 +2167,7 @@ export type JEUGD_LANDING_PAGE_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/page.repository.ts
 // Variable: PAGE_BY_SLUG_QUERY
-// Query: *[_type == "page" && slug.current == $slug][0] {  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",  metaDescription,  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }}
+// Query: *[_type == "page" && slug.current == $slug][0] {  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",  metaDescription,  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }) }}
 export type PAGE_BY_SLUG_QUERY_RESULT = {
   id: string;
   title: string | "";
@@ -2181,6 +2176,33 @@ export type PAGE_BY_SLUG_QUERY_RESULT = {
   metaDescription: string | null;
   ogImageUrl: string | null;
   body: Array<
+    | {
+        _key: string;
+        _type: "articleImage";
+        image?: {
+          asset?: SanityImageAssetReference;
+          media?: unknown;
+          hotspot?: SanityImageHotspot;
+          crop?: SanityImageCrop;
+          _type: "image";
+        };
+        alt?: string;
+        width?: "bleed" | "prose" | "wide";
+        fileUrl: null;
+        fileSize: null;
+        fileMimeType: null;
+        fileOriginalFilename: null;
+        asset: {
+          url: string | null;
+          title: string | null;
+          description: string | null;
+          creditLine: null;
+          metadata: {
+            dimensions: SanityImageDimensions | null;
+            lqip: string | null;
+          } | null;
+        } | null;
+      }
     | {
         children?: Array<{
           marks?: Array<string>;
@@ -2226,20 +2248,6 @@ export type PAGE_BY_SLUG_QUERY_RESULT = {
         fileMimeType: string | null;
         fileOriginalFilename: string | null;
         asset: null;
-      }
-    | {
-        asset: {
-          url: string | null;
-        } | null;
-        media?: unknown;
-        hotspot?: SanityImageHotspot;
-        crop?: SanityImageCrop;
-        _type: "image";
-        _key: string;
-        fileUrl: null;
-        fileSize: null;
-        fileMimeType: null;
-        fileOriginalFilename: null;
       }
   > | null;
 } | null;
@@ -2670,7 +2678,7 @@ declare module "@sanity/client" {
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "matchesSliderPlaceholder": matchesSliderPlaceholder {\n      nextSeasonKickoff,\n      announcementText,\n      announcementHref,\n      "highlightImage": highlightImage {\n        alt,\n        "asset": asset->{\n          _id,\n          url,\n          "lqip": metadata.lqip,\n          "dimensions": metadata.dimensions\n        }\n      }\n    }\n  }': HOMEPAGE_PLACEHOLDER_QUERY_RESULT;
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
-    '*[_type == "page" && slug.current == $slug][0] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  metaDescription,\n  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max" }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
+    '*[_type == "page" && slug.current == $slug][0] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  metaDescription,\n  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio,\n  "currentTeam": *[_type == "team" && archived != true && references(^._id)] | order(name asc)[0] {\n    name, season\n  }\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "player" && keeper == true && archived != true].psdId': KEEPER_PSD_IDS_QUERY_RESULT;
