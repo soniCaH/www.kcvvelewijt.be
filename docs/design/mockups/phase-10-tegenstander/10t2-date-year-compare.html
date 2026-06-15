@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>10t2 — /tegenstander date/year treatment (#2141, round 2)</title>
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --warm: #f0c264;
+        --paper-edge: #d9d2bd; --alert: #b84a3a;
+        --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
+        --font-body: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+        --font-mono: "IBM Plex Mono", "Consolas", monospace;
+        --shadow-paper-sm: 4px 4px 0 0 var(--ink);
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream-deep); font-family: var(--font-body); color: var(--ink-soft); line-height: 1.5; }
+      .doc-head { background: var(--ink); color: var(--cream); padding: 26px 24px; }
+      .doc-head h1 { font-family: var(--font-display); font-weight: 900; font-size: 28px; margin: 0 0 6px; }
+      .doc-head p { margin: 4px 0; max-width: 72ch; font-size: 14px; color: var(--cream-soft); }
+      .doc-head code { background: rgba(255,255,255,.12); padding: 1px 5px; }
+      .variants { display: grid; grid-template-columns: repeat(3, minmax(340px, 1fr)); }
+      @media (max-width: 1120px) { .variants { grid-template-columns: 1fr; } }
+      .variant { border-right: 2px dashed var(--ink); padding: 22px 18px 44px; background: var(--cream); }
+      .variant:last-child { border-right: none; }
+      .variant > .label { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cream); background: var(--jersey-deep); display: inline-block; padding: 4px 10px; }
+      .variant > h2 { font-family: var(--font-display); font-weight: 900; font-size: 21px; margin: 8px 0 2px; color: var(--ink); }
+      .variant > .blurb { font-size: 12.5px; color: var(--ink-muted); margin: 0 0 16px; min-height: 56px; }
+
+      .sechead { font-family: var(--font-display); font-weight: 900; font-size: 18px; color: var(--ink); margin: 0 0 12px; }
+      .sechead .dot { color: var(--warm); }
+
+      /* locked agenda-row base (from 10t1, Variant A) */
+      .agenda { display: flex; flex-direction: column; gap: 9px; }
+      .arow { display: flex; align-items: stretch; border: 2px solid var(--ink); background: var(--cream); box-shadow: 2px 2px 0 0 var(--ink); text-decoration: none; }
+      .arow .body { display: flex; align-items: center; gap: 8px; padding: 8px 12px; width: 100%; }
+      .arow .side { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+      .arow .side.away { flex-direction: row-reverse; }
+      .arow .mini { width: 22px; height: 22px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--cream-soft); flex-shrink: 0; }
+      .arow .tn { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .arow .mid { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 4px; flex-shrink: 0; }
+      .arow .score { font-family: var(--font-display); font-weight: 900; font-size: 18px; line-height: 1; color: var(--ink); padding: 0 8px; font-variant-numeric: tabular-nums; }
+      .arow .score.win { box-shadow: inset 0 -9px 0 color-mix(in srgb, var(--jersey-deep) 34%, var(--cream)); }
+      .arow .score.loss { box-shadow: inset 0 -9px 0 color-mix(in srgb, var(--alert) 38%, var(--cream)); }
+      .arow .comp { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); }
+
+      /* shared date-stub frame */
+      .arow .datestub { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 9px; background: rgba(225,215,191,.45); border-right: 2px dashed rgba(10,10,10,.3); flex-shrink: 0; min-width: 50px; }
+      .arow .datestub .d { font-family: var(--font-display); font-weight: 900; font-size: 17px; line-height: 1; color: var(--ink); }
+      .arow .datestub .m { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-muted); margin-top: 2px; }
+
+      /* ── A1: year as 3rd line in the stub ── */
+      .a1 .datestub .y { font-family: var(--font-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; color: var(--jersey-deep); margin-top: 3px; }
+
+      /* ── A2: season-grouped ── */
+      .seasonband { display: flex; align-items: center; gap: 10px; margin: 18px 0 9px; }
+      .seasonband:first-child { margin-top: 0; }
+      .seasonband .lab { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink); background: var(--warm); border: 2px solid var(--ink); padding: 2px 9px; }
+      .seasonband .rule { flex: 1; height: 0; border-top: 2px dotted var(--ink); }
+      .seasonband .cnt { font-family: var(--font-mono); font-size: 9px; color: var(--ink-muted); text-transform: uppercase; }
+
+      /* ── A3: inline mono dateline (no stub) ── */
+      .a3 .arow { flex-direction: column; align-items: stretch; }
+      .a3 .dateline { font-family: var(--font-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); padding: 6px 12px 0; }
+      .a3 .dateline b { color: var(--jersey-deep); font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div class="doc-head">
+      <h1>/tegenstander — date &amp; year on the agenda row (Round 2)</h1>
+      <p>Variant <b>A (Agenda rows)</b> is locked. This round: how to surface the <b>year</b>, since head-to-head history spans multiple seasons. Same rows, three date treatments. Data spans seasons 2024–25 &amp; 2025–26.</p>
+      <p>Locked status colours unchanged (win <code>jersey-deep</code> underline, draw none, loss <code>--color-alert</code>).</p>
+    </div>
+
+    <div class="variants">
+      <!-- A1 -->
+      <section class="variant a1">
+        <span class="label">A1 — Year in the stub</span>
+        <h2>Stub gains a year line</h2>
+        <p class="blurb">Smallest change: the date stub becomes day / month / <b>'26</b> (jersey-deep). Keeps the exact <code>TeamAgendaRow</code> shape; year on every row.</p>
+        <h3 class="sechead">6 wedstrijden<span class="dot">.</span></h3>
+        <div class="agenda">
+          <a class="arow"><div class="datestub"><span class="d">18</span><span class="m">mei</span><span class="y">'26</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">3 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">24</span><span class="m">nov</span><span class="y">'25</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score">2 – 2</span><span class="comp">Beker</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">20</span><span class="m">apr</span><span class="y">'25</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">4 – 0</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">02</span><span class="m">feb</span><span class="y">'25</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div><div class="mid"><span class="score loss">3 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">KCVV</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">06</span><span class="m">okt</span><span class="y">'24</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div><div class="mid"><span class="score">1 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">KCVV</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">25</span><span class="m">aug</span><span class="y">'24</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">2 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+        </div>
+      </section>
+
+      <!-- A2 -->
+      <section class="variant a2">
+        <span class="label">A2 — Season groups</span>
+        <h2>Grouped by season</h2>
+        <p class="blurb">Rows grouped under a warm season band (<code>Seizoen '25–'26</code>). Makes the "spans multiple seasons" point structural — you read it as a record per season. Year implied by the group.</p>
+        <h3 class="sechead">6 wedstrijden<span class="dot">.</span></h3>
+        <div class="seasonband"><span class="lab">Seizoen '25–'26</span><span class="rule"></span><span class="cnt">1W · 1G</span></div>
+        <div class="agenda">
+          <a class="arow"><div class="datestub"><span class="d">18</span><span class="m">mei</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">3 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">24</span><span class="m">nov</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score">2 – 2</span><span class="comp">Beker</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+        </div>
+        <div class="seasonband"><span class="lab">Seizoen '24–'25</span><span class="rule"></span><span class="cnt">2W · 1G · 1V</span></div>
+        <div class="agenda">
+          <a class="arow"><div class="datestub"><span class="d">20</span><span class="m">apr</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">4 – 0</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">02</span><span class="m">feb</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div><div class="mid"><span class="score loss">3 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">KCVV</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">06</span><span class="m">okt</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div><div class="mid"><span class="score">1 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">KCVV</span></div></div></a>
+          <a class="arow"><div class="datestub"><span class="d">25</span><span class="m">aug</span></div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">2 – 1</span><span class="comp">3e Prov.</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+        </div>
+      </section>
+
+      <!-- A3 -->
+      <section class="variant a3">
+        <span class="label">A3 — Inline dateline</span>
+        <h2>Full mono dateline</h2>
+        <p class="blurb">No boxed stub — each row leads with a full mono dateline <code>ZA 18 MEI 2026</code>. Year always spelled out; row reads top-to-bottom. Roomier, slightly taller rows.</p>
+        <h3 class="sechead">6 wedstrijden<span class="dot">.</span></h3>
+        <div class="agenda">
+          <a class="arow"><div class="dateline">za <b>18 mei 2026</b> · 3e provinciale</div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">3 – 1</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="dateline">zo <b>24 nov 2025</b> · beker van vlaanderen</div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score">2 – 2</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="dateline">zo <b>20 apr 2025</b> · 3e provinciale</div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">4 – 0</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+          <a class="arow"><div class="dateline">zo <b>02 feb 2025</b> · 3e provinciale</div><div class="body"><div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div><div class="mid"><span class="score loss">3 – 1</span></div><div class="side away"><span class="mini"></span><span class="tn">KCVV</span></div></div></a>
+          <a class="arow"><div class="dateline">zo <b>06 okt 2024</b> · 3e provinciale</div><div class="body"><div class="side"><span class="mini"></span><span class="tn">Huldenberg</span></div><div class="mid"><span class="score">1 – 1</span></div><div class="side away"><span class="mini"></span><span class="tn">KCVV</span></div></div></a>
+          <a class="arow"><div class="dateline">zo <b>25 aug 2024</b> · 3e provinciale</div><div class="body"><div class="side"><span class="mini"></span><span class="tn">KCVV</span></div><div class="mid"><span class="score win">2 – 1</span></div><div class="side away"><span class="mini"></span><span class="tn">Huldenberg</span></div></div></a>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
