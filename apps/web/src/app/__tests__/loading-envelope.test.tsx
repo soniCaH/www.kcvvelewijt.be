@@ -61,8 +61,11 @@ const sectionStackRoutes: SectionStackRoute[] = [
   {
     name: "/club",
     Loading: ClubLoading,
-    expectedTransitions: 3,
-    expectedBgClasses: ["bg-kcvv-black", "bg-gray-100", "bg-kcvv-green-dark"],
+    // Phase 10 (#2120): the cream PageHero hero section dropped its diagonal
+    // seam, so the factory now emits 2 transitions (editorial→mission,
+    // mission→contact) and the hero field is cream rather than kcvv-black.
+    expectedTransitions: 2,
+    expectedBgClasses: ["bg-cream", "bg-gray-100", "bg-kcvv-green-dark"],
   },
 ];
 
@@ -128,7 +131,8 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/scheurkalender",
       Loading: ScheurkalenderLoading,
-      expectedRootClass: "min-h-screen bg-gray-100",
+      // Phase 10 (#2120): cream paper field hosts the compact PageHero.
+      expectedRootClass: "bg-cream min-h-screen",
     },
     {
       name: "/zoeken",
@@ -138,7 +142,8 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/club/[slug]",
       Loading: ClubDetailLoading,
-      expectedRootClass: "min-h-screen bg-gray-100",
+      // Phase 10 (#2120): cream paper field hosts the compact PageHero.
+      expectedRootClass: "bg-cream min-h-screen",
     },
     {
       name: "/club/angels",

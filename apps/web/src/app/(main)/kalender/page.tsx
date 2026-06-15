@@ -14,7 +14,7 @@ import {
   type EventListItemVM,
 } from "@/lib/repositories/event.repository";
 import type { Match } from "@/lib/effect/schemas/match.schema";
-import { InteriorPageHero } from "@/components/layout";
+import { PageHero } from "@/components/layout";
 import { PageViewTracker } from "@/components/analytics";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildItemListJsonLd } from "@/lib/seo/jsonld";
@@ -164,14 +164,15 @@ export default async function CalendarPage() {
       {itemListEntries.length > 0 && (
         <JsonLd data={buildItemListJsonLd(itemListEntries)} />
       )}
-      <InteriorPageHero
-        image="/images/youth-trainers.jpg"
-        imageAlt="KCVV jeugdtraining"
-        label="Kalender"
-        headline="Wedstrijdkalender"
-        body="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
-        size="compact"
-      />
+      <div className="mx-auto max-w-5xl px-4 pt-10">
+        <PageHero
+          kicker="Kalender"
+          headline="Wedstrijdkalender"
+          lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
+          image="/images/youth-trainers.jpg"
+          imageAlt="KCVV jeugdtraining"
+        />
+      </div>
 
       <div className="mx-auto max-w-5xl px-4 py-10">
         <CalendarWidget feed={data.feed} teams={data.teams} />
