@@ -5,7 +5,7 @@
  * shimmered; the hero renders instantly (it carries no data).
  */
 
-import { StripedSeam, FooterSafeArea } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 
 export default function ClubLoading() {
@@ -44,8 +44,6 @@ export default function ClubLoading() {
           ))}
         </div>
       </div>
-
-      <FooterSafeArea />
     </div>
   );
 }

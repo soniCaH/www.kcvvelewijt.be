@@ -4,7 +4,6 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import {
   EditorialHeading,
-  FooterSafeArea,
   LinkButton,
   PullQuote,
   StripedSeam,
@@ -95,8 +94,6 @@ export default function ClubPage() {
           </div>
         </TapedCard>
       </div>
-
-      <FooterSafeArea />
     </div>
   );
 }
