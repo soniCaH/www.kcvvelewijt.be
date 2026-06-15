@@ -22,11 +22,7 @@ import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSect
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { StaffHero } from "@/components/staff/StaffHero";
 import { StaffRoles } from "@/components/staff/StaffRoles";
-import {
-  EditorialHeading,
-  FooterSafeArea,
-  StripedSeam,
-} from "@/components/design-system";
+import { EditorialHeading, StripedSeam } from "@/components/design-system";
 
 interface StaffPageProps {
   params: Promise<{ slug: string }>;
@@ -206,8 +202,6 @@ export default async function StafPage({ params }: StaffPageProps) {
           className="mx-auto max-w-5xl px-4 py-12"
         />
       ) : null}
-
-      <FooterSafeArea />
     </>
   );
 }

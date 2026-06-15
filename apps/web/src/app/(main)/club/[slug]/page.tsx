@@ -7,7 +7,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
 import { PageHero } from "@/components/layout/PageHero";
 import { ArticleBody } from "@/components/article/ArticleBody";
-import { FooterSafeArea, StripedSeam } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -80,8 +80,6 @@ export default async function DynamicClubPage({ params }: Props) {
       {body.length > 0 ? (
         <ArticleBody className="article-body" content={body} />
       ) : null}
-
-      <FooterSafeArea />
     </div>
   );
 }

@@ -2,7 +2,7 @@
  * Pages/* assembly story for `/spelers/[slug]` — a Phase 6.A design reference.
  *
  * Renders the visible composition (PlayerHero → StripedSeam → BioBlock →
- * QuotesBlock → FooterSafeArea) with fixture data. The server-only
+ * QuotesBlock) with fixture data. The server-only
  * `<MatchStripSlot>` and `<RelatedArticlesSection>` blocks are omitted
  * here because they require runtime BFF / Sanity fetches; functional
  * smoke for the assembled page lives in the Playwright suite
@@ -17,7 +17,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { BioBlock, PlayerHero, QuotesBlock } from "@/components/player";
-import { FooterSafeArea, StripedSeam } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
 
 function block(
   key: string,
@@ -86,7 +86,6 @@ function PlayerProfileAssembly({
       <StripedSeam colorPair="ink-cream" height="md" />
       <BioBlock bio={bio} playerName="Maxim Breugelmans" />
       <QuotesBlock bio={bio} playerName="Maxim Breugelmans" />
-      <FooterSafeArea />
     </>
   );
 }

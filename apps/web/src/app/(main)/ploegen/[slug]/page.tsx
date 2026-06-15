@@ -22,7 +22,6 @@ import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { StripedSeam } from "@/components/design-system/StripedSeam";
-import { FooterSafeArea } from "@/components/design-system";
 import { TeamHero } from "@/components/team/TeamHero";
 import { StandingsTable } from "@/components/team/StandingsTable";
 import { TeamMatchesSection } from "@/components/team/TeamMatchesSection";
@@ -306,7 +305,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
       />
 
       <SponsorsSection />
-      <FooterSafeArea />
     </>
   );
 }

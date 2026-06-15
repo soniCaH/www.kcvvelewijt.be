@@ -18,7 +18,6 @@ import { EventRepository } from "@/lib/repositories/event.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildEventJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
-import { FooterSafeArea } from "@/components/design-system";
 import { EventHero } from "@/components/event/EventHero";
 import { EventViewTracker } from "@/components/event/EventViewTracker";
 import { AndereEvents } from "@/components/event/AndereEvents";
@@ -156,8 +155,6 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
         <AndereEvents events={otherEvents} />
       </main>
-
-      <FooterSafeArea />
     </div>
   );
 }

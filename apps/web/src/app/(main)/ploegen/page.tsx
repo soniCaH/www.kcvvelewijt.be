@@ -18,7 +18,6 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PageViewTracker } from "@/components/analytics";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
-import { FooterSafeArea } from "@/components/design-system";
 import { TeamFlagship } from "@/components/team/TeamFlagship";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
@@ -114,8 +113,6 @@ export default async function TeamsPage() {
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />
       </div>
-
-      <FooterSafeArea />
     </>
   );
 }

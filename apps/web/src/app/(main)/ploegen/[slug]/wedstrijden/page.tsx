@@ -9,7 +9,6 @@ import type { Match } from "@kcvv/api-contract";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
-import { FooterSafeArea } from "@/components/design-system";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { transformMatchToSchedule } from "@/components/match";
@@ -213,8 +212,6 @@ export default async function WedstrijdenPage({
           </div>
         )}
       </div>
-
-      <FooterSafeArea />
     </>
   );
 }

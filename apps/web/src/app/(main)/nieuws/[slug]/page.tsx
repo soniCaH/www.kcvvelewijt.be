@@ -56,7 +56,6 @@ import {
 } from "@/components/article/blocks/EventDetailBlock";
 import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import type { RelatedContentItem } from "@/components/related/types";
-import { FooterSafeArea } from "@/components/design-system";
 import type { PortableTextBlock } from "@portabletext/react";
 import { resolveSubject } from "@/components/article/SubjectAttribution";
 import type { ArticleDetailVM } from "@/lib/repositories/article.repository";
@@ -77,7 +76,6 @@ interface ArticlePageProps {
  *   <EventDetailBlock isPast />               ← event variant only, when skip-condition passes
  *   <ArticleCredits />                        ← interview always; others when author/photographer
  *   <VerderLezenRow items />                  ← slider of related content
- *   <FooterSafeArea />
  *
  * The single `switch (article.articleType)` lives in `renderArticleHero`
  * so the data shape of `<EditorialHero>`'s per-variant prop unions stays
@@ -617,7 +615,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         pageSlug={article.slug}
         sourceArticleType={article.articleType}
       />
-      <FooterSafeArea />
     </div>
   );
 }
