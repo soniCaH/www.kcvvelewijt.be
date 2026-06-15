@@ -30,6 +30,6 @@ export { CookieConsentBanner } from "./CookieConsentBanner";
 // AccentStrip
 export { AccentStrip } from "./AccentStrip";
 
-// InteriorPageHero
-export { InteriorPageHero } from "./InteriorPageHero";
-export type { HeroGradient, InteriorPageHeroProps } from "./InteriorPageHero";
+// PageHero
+export { PageHero } from "./PageHero";
+export type { PageHeroProps, PageHeroSize } from "./PageHero";

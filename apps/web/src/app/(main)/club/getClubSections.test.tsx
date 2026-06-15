@@ -11,16 +11,13 @@ describe("getClubSections", () => {
 
     expect(sections).toHaveLength(4);
 
-    // Hero — always static InteriorPageHero, kcvv-black bg, diagonal right overlap full
+    // Hero — cream PageHero on a transparent section (own cream field), no
+    // diagonal seam (the legacy dark-gradient hero is retired in Phase 10).
     expect(sections[0].key).toBe("hero");
-    expect(sections[0].bg).toBe("kcvv-black");
+    expect(sections[0].bg).toBe("transparent");
     expect(sections[0].paddingTop).toBe("pt-0");
     expect(sections[0].paddingBottom).toBe("pb-0");
-    expect(sections[0].transition).toEqual({
-      type: "diagonal",
-      direction: "right",
-      overlap: "full",
-    });
+    expect(sections[0].transition).toBeUndefined();
 
     // Editorial — gray-100, caller-provided content
     expect(sections[1].key).toBe("editorial");

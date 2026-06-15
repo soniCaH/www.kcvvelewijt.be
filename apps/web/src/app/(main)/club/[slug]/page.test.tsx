@@ -65,7 +65,7 @@ describe("/club/[slug] page", () => {
     vi.clearAllMocks();
   });
 
-  it("renders InteriorPageHero with gradient when heroImage is not set", async () => {
+  it("renders the PageHero (typographic state) when heroImage is not set", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(makePage()));
 
     const page = await DynamicClubPage({
@@ -73,17 +73,18 @@ describe("/club/[slug] page", () => {
     });
     const { container } = render(page);
 
-    // InteriorPageHero renders the title and label even without image
+    // PageHero renders the title and kicker even without an image
     expect(screen.getByText("Downloads")).toBeInTheDocument();
     expect(screen.getByText("Club")).toBeInTheDocument();
-    // Should use gradient fallback (no img element)
+    // No hero image → typographic state (no img element)
     expect(container.querySelector("img")).not.toBeInTheDocument();
-    expect(
-      container.querySelector("[data-testid='hero-gradient']"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("page-hero")).toHaveAttribute(
+      "data-state",
+      "typographic",
+    );
   });
 
-  it("renders InteriorPageHero when heroImage is set", async () => {
+  it("renders the PageHero with an image when heroImage is set", async () => {
     mockFindBySlug.mockReturnValue(
       Effect.succeed(
         makePage({
@@ -98,8 +99,12 @@ describe("/club/[slug] page", () => {
     });
     render(page);
 
-    // InteriorPageHero renders the label
+    // PageHero renders the kicker, title, and the image (split state)
     expect(screen.getByText("Club")).toBeInTheDocument();
     expect(screen.getByText("Downloads")).toBeInTheDocument();
+    expect(screen.getByTestId("page-hero")).toHaveAttribute(
+      "data-state",
+      "image",
+    );
   });
 });

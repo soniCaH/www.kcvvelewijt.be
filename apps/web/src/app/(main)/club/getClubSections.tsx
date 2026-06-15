@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { SectionConfig } from "@/components/design-system/SectionStack/SectionStack";
-import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
+import { PageHero } from "@/components/layout/PageHero";
 
 interface ClubSectionsContent {
   editorial: ReactNode;
@@ -12,27 +12,25 @@ export function getClubSections(content: ClubSectionsContent): SectionConfig[] {
   return [
     {
       key: "hero",
-      bg: "kcvv-black",
+      // Cream paper-card hero on a cream field. The legacy dark-gradient hero
+      // section + diagonal seam is retired here; the rest of the /club index
+      // (editorial grid + mission + contact) stays legacy until #2121's full
+      // index redesign.
+      bg: "transparent",
       content: (
-        <InteriorPageHero
-          label="Onze club"
-          headline={
-            <>
-              De plezantste
-              <br />
-              <span className="text-kcvv-green">compagnie</span>
-            </>
-          }
-          body="Al meer dan 75 jaar de thuishaven voor voetballiefhebbers in Elewijt. Van de allerkleinsten tot het eerste elftal — bij KCVV is iedereen welkom."
-        />
+        <div className="bg-cream px-4 pt-10 pb-14 md:px-10">
+          <div className="mx-auto max-w-5xl">
+            <PageHero
+              kicker="Onze club"
+              headline="De plezantste compagnie"
+              accent="compagnie"
+              lead="Al meer dan 75 jaar de thuishaven voor voetballiefhebbers in Elewijt. Van de allerkleinsten tot het eerste elftal — bij KCVV is iedereen welkom."
+            />
+          </div>
+        </div>
       ),
       paddingTop: "pt-0",
       paddingBottom: "pb-0",
-      transition: {
-        type: "diagonal",
-        direction: "right",
-        overlap: "full",
-      },
     },
     {
       key: "editorial",

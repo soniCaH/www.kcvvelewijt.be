@@ -1,25 +1,28 @@
 /**
  * Calendar Page — Loading Skeleton
- * Matches the InteriorPageHero + reskinned CalendarWidget layout (Phase 6.D):
+ * Matches the PageHero + reskinned CalendarWidget layout (Phase 6.D):
  * by-type chips on top, then a paper/ink panel (toolbar = view toggle · shared
  * period nav · subscribe) over a month grid.
  *
  * Note: Unlike /club and /ploegen, this skeleton does not use the SectionStack
  * factory pattern because the calendar page itself uses a flat layout
- * (InteriorPageHero + single content div) rather than SectionStack sections.
+ * (PageHero + single content div) rather than SectionStack sections. The hero
+ * renders compact (no image) per the Phase 10 loading-skeleton lock.
  */
 
-import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
+import { PageHero } from "@/components/layout/PageHero";
 
 export default function CalendarLoading() {
   return (
     <div className="bg-cream min-h-screen">
-      <InteriorPageHero
-        label="Kalender"
-        headline="Wedstrijdkalender"
-        body="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
-        size="compact"
-      />
+      <div className="mx-auto max-w-5xl px-4 pt-10">
+        <PageHero
+          kicker="Kalender"
+          headline="Wedstrijdkalender"
+          lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
+          size="compact"
+        />
+      </div>
 
       <div className="mx-auto max-w-5xl px-4 py-10">
         {/* Matches CalendarWidget's root <div className="space-y-4"> */}

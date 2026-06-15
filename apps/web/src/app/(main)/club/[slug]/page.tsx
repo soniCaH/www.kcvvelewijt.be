@@ -5,7 +5,7 @@ import { Effect } from "effect";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
-import { InteriorPageHero } from "@/components/layout/InteriorPageHero";
+import { PageHero } from "@/components/layout/PageHero";
 import { SanityArticleBody } from "@/components/article/SanityArticleBody/SanityArticleBody";
 
 interface Props {
@@ -55,18 +55,18 @@ export default async function DynamicClubPage({ params }: Props) {
   if (!page) return notFound();
 
   return (
-    <>
-      <InteriorPageHero
-        image={page.heroImageUrl ?? undefined}
-        imageAlt={page.title}
-        label="Club"
-        headline={page.title}
-        body=""
-        size="compact"
-      />
+    <div className="bg-cream min-h-screen">
+      <div className="mx-auto max-w-5xl px-4 pt-10">
+        <PageHero
+          kicker="Club"
+          headline={page.title}
+          image={page.heroImageUrl ?? undefined}
+          imageAlt={page.title}
+        />
+      </div>
       <div className="max-w-inner-lg content mx-auto px-4 pt-8 pb-[calc(2rem+var(--footer-diagonal))]">
         <SanityArticleBody content={(page.body ?? []) as PortableTextBlock[]} />
       </div>
-    </>
+    </div>
   );
 }
