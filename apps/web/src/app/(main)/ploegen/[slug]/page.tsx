@@ -34,7 +34,7 @@ import { SponsorsSection } from "@/components/home/SponsorsSection";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { hasRenderableBioContent } from "@/lib/portable-text/findPullquoteText";
-import { transformMatchToSchedule } from "./utils";
+import { transformMatchToSchedule } from "@/components/match";
 import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
 
 interface TeamPageProps {

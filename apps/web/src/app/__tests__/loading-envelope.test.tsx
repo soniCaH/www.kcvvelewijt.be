@@ -197,7 +197,10 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/tegenstander/[clubId]",
       Loading: TegenstanderLoading,
-      expectedRootClass: "min-h-screen bg-gray-100",
+      // Phase 10 (#2141): reskinned to the cream-deep paper register, matching
+      // the page's `bg-cream-deep` wrapper + footer-safe area.
+      expectedRootClass:
+        "bg-cream-deep min-h-screen pb-[var(--footer-diagonal)]",
     },
     {
       name: "/wedstrijd/[matchId]",

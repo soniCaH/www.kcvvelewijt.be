@@ -12,7 +12,7 @@ import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { FooterSafeArea } from "@/components/design-system";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
-import { transformMatchToSchedule } from "../utils";
+import { transformMatchToSchedule } from "@/components/match";
 import type { ScheduleMatch } from "@/components/match/types";
 import { AgendaScrollToNext } from "./AgendaScrollToNext";
 

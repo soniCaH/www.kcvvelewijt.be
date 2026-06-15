@@ -1,21 +1,33 @@
 /**
  * Opponent History Page — /tegenstander/[clubId]
  *
- * Shows all historical KCVV senior-team matches against a specific opponent club,
- * with W/D/L summary and a chronological match list.
+ * Shows all historical KCVV senior-team matches against a specific opponent
+ * club, with a W/D/L summary and a season-grouped match list on the
+ * retro-terrace system (#2141).
  *
  * Not in navigation. Noindex — personal statistics/preview tool.
+ *
+ * Design lock: docs/design/mockups/phase-10-tegenstander/10t4-locked.html
  */
 
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { Match, OpponentHistory } from "@kcvv/api-contract";
+import {
+  Crest,
+  EditorialHeading,
+  StripedSeam,
+} from "@/components/design-system";
+import { PageHero } from "@/components/layout/PageHero";
+import { TeamAgendaRow } from "@/components/team/TeamMatchesSection";
+import { transformMatchToSchedule } from "@/components/match";
+import { getResultColor } from "@/lib/utils/match-display";
+import { groupBySeason } from "@/lib/utils/season";
+import { OpponentSummaryCard } from "./OpponentSummaryCard";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -25,34 +37,63 @@ interface OpponentPageProps {
   params: Promise<{ clubId: string }>;
 }
 
-/** Transform a Match from api-contract into display-ready values. */
-function formatMatchDate(date: Date | string): string {
-  return new Date(date).toLocaleDateString("nl-BE", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
-function getMatchResult(match: Match): "win" | "draw" | "loss" | null {
-  if (match.status !== "finished") return null;
-  if (match.is_home == null) return null;
+/**
+ * KCVV-perspective result of a single match. Finished matches only — the locked
+ * status vocabulary from #2117 (scheduled/postponed/… never count toward a
+ * tally). Mirrors the BFF summary computation so per-season tallies sum to the
+ * hero card totals.
+ */
+function getMatchOutcome(match: Match): "win" | "draw" | "loss" | null {
+  if (match.status !== "finished" || match.is_home == null) return null;
   const homeScore = match.home_team.score;
   const awayScore = match.away_team.score;
   if (homeScore == null || awayScore == null) return null;
-  const kcvvGoals = match.is_home ? homeScore : awayScore;
-  const oppGoals = match.is_home ? awayScore : homeScore;
-  if (kcvvGoals > oppGoals) return "win";
-  if (kcvvGoals < oppGoals) return "loss";
-  return "draw";
+  return getResultColor(homeScore, awayScore, match.is_home);
 }
 
-const resultBorderClass: Record<"win" | "draw" | "loss", string> = {
-  win: "border-l-4 border-l-jersey-deep",
-  draw: "border-l-4 border-l-transparent",
-  loss: "border-l-4 border-l-alert",
-};
+/** Per-season tally caption, e.g. `"2W · 1G"` or `"1 gepland"`. */
+function seasonTally(matches: readonly Match[]): string {
+  let wins = 0;
+  let draws = 0;
+  let losses = 0;
+  let scheduled = 0;
+  for (const match of matches) {
+    const outcome = getMatchOutcome(match);
+    if (outcome === "win") wins += 1;
+    else if (outcome === "draw") draws += 1;
+    else if (outcome === "loss") losses += 1;
+    else if (match.status === "scheduled") scheduled += 1;
+  }
+  const parts: string[] = [];
+  if (wins) parts.push(`${wins}W`);
+  if (draws) parts.push(`${draws}G`);
+  if (losses) parts.push(`${losses}V`);
+  if (scheduled) parts.push(`${scheduled} gepland`);
+  return parts.join(" · ");
+}
+
+/** Warm mono band that opens each season group. */
+function SeasonBand({ label, tally }: { label: string; tally: string }) {
+  return (
+    <div className="mb-2.5 flex items-center gap-2.5">
+      <span className="border-ink bg-warm text-ink border-2 px-2.5 py-1 font-mono text-[10px] font-bold tracking-[0.12em] uppercase">
+        {label}
+      </span>
+      {/* Raw dotted rule rather than <DottedDivider>: the divider hardcodes
+          role="separator" + full width and takes no flex-grow, which doesn't
+          fit this decorative chip · rule · tally row. */}
+      <span
+        aria-hidden="true"
+        className="border-ink h-0 flex-1 border-t-2 border-dotted"
+      />
+      {tally ? (
+        <span className="text-ink-muted font-mono text-[9px] tracking-wide uppercase">
+          {tally}
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 async function fetchOpponentData(clubId: number): Promise<{
   opponentName: string;
@@ -107,7 +148,7 @@ async function fetchOpponentData(clubId: number): Promise<{
         0,
       );
 
-      // Sort all matches descending by date
+      // Sort all matches descending by date (scheduled future matches surface first)
       const sortedMatches = [...allMatches].sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
@@ -140,103 +181,72 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
   if (!data) notFound();
 
   const { opponentName, opponentLogo, summary, matches } = data;
-  const totalPlayed = summary.wins + summary.draws + summary.losses;
+  const seasons = groupBySeason(matches, (m) => m.date);
+  const matchCountLabel = `${matches.length} ${
+    matches.length === 1 ? "wedstrijd" : "wedstrijden"
+  }`;
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 pt-8 pb-[calc(2rem+var(--footer-diagonal))]">
-      {/* Opponent header */}
-      <div className="mb-6 flex items-center gap-4">
-        {opponentLogo && (
-          <Image
-            src={opponentLogo}
-            alt={`Logo ${opponentName}`}
-            width={64}
-            height={64}
-            className="rounded-full object-contain"
-            unoptimized
-          />
+    <div className="bg-cream-deep min-h-screen pb-[var(--footer-diagonal)]">
+      <div className="container mx-auto max-w-3xl px-4 pt-8 pb-8">
+        <PageHero
+          kicker="Onderlinge geschiedenis"
+          headline={opponentName}
+          lead={`Alle onderlinge duels tussen KCVV Elewijt en ${opponentName}, per seizoen.`}
+          adornment={
+            <Crest
+              name={opponentName}
+              logo={opponentLogo}
+              size={64}
+              className="border-ink bg-cream-soft shadow-paper-sm rounded-full border-2"
+            />
+          }
+        />
+
+        <OpponentSummaryCard summary={summary} className="mt-7" />
+
+        <div className="mt-8 mb-5">
+          <StripedSeam height="sm" />
+        </div>
+
+        <EditorialHeading
+          level={2}
+          size="display-sm"
+          emphasis={{ text: ".", tone: "warm" }}
+          className="mb-4"
+        >
+          {matchCountLabel}
+        </EditorialHeading>
+
+        {seasons.length === 0 ? (
+          <p className="text-ink-muted font-display italic">
+            Nog geen onderlinge duels gespeeld.
+          </p>
+        ) : (
+          seasons.map((group) => (
+            <section
+              key={group.season.key}
+              aria-label={group.season.label}
+              className="mt-5 first:mt-0"
+            >
+              <SeasonBand
+                label={group.season.label}
+                tally={seasonTally(group.items)}
+              />
+              <div className="flex flex-col gap-2.5">
+                {group.items.map((match) => (
+                  <TeamAgendaRow
+                    key={match.id}
+                    match={transformMatchToSchedule(match)}
+                    captionLabel={match.kcvv_team_label}
+                    upcomingLabel="Gepland"
+                  />
+                ))}
+              </div>
+            </section>
+          ))
         )}
-        <div>
-          <p className="text-ink-muted text-sm">Tegenstander</p>
-          <h1 className="text-2xl font-bold">{opponentName}</h1>
-        </div>
       </div>
-
-      {/* W/D/L summary */}
-      <div className="bg-cream-soft mb-8 grid grid-cols-5 gap-2 rounded-xl p-4 text-center">
-        <div>
-          <p className="text-jersey-deep text-2xl font-bold">{summary.wins}</p>
-          <p className="text-ink-muted text-xs">W</p>
-        </div>
-        <div>
-          <p className="text-2xl font-bold">{summary.draws}</p>
-          <p className="text-ink-muted text-xs">G</p>
-        </div>
-        <div>
-          <p className="text-alert text-2xl font-bold">{summary.losses}</p>
-          <p className="text-ink-muted text-xs">V</p>
-        </div>
-        <div>
-          <p className="text-2xl font-bold">{summary.goalsFor}</p>
-          <p className="text-ink-muted text-xs">Doelpunten voor</p>
-        </div>
-        <div>
-          <p className="text-2xl font-bold">{summary.goalsAgainst}</p>
-          <p className="text-ink-muted text-xs">Doelpunten tegen</p>
-        </div>
-      </div>
-
-      {/* Match list */}
-      <h2 className="mb-3 text-lg font-semibold">
-        {totalPlayed === 0
-          ? "Alle wedstrijden"
-          : `${matches.length} wedstrijd${matches.length !== 1 ? "en" : ""}`}
-      </h2>
-      <ul className="space-y-2">
-        {matches.map((match) => {
-          const result = getMatchResult(match);
-          const homeScore = match.home_team.score;
-          const awayScore = match.away_team.score;
-          const hasScore =
-            match.status === "finished" &&
-            homeScore != null &&
-            awayScore != null;
-          const borderClass = result ? resultBorderClass[result] : "";
-
-          return (
-            <li key={match.id}>
-              <Link
-                href={`/wedstrijd/${match.id}`}
-                className={`bg-cream-soft hover:bg-cream-deep flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${borderClass}`}
-              >
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-ink-muted text-xs">
-                    {formatMatchDate(match.date)}
-                    {match.competition ? ` · ${match.competition}` : ""}
-                  </span>
-                  <span className="text-sm font-medium">
-                    {match.home_team.name} vs {match.away_team.name}
-                  </span>
-                  {match.kcvv_team_label && (
-                    <span className="text-ink-muted text-xs">
-                      {match.kcvv_team_label}
-                    </span>
-                  )}
-                </div>
-                <div className="text-right">
-                  {hasScore ? (
-                    <span className="text-lg font-bold tabular-nums">
-                      {homeScore} – {awayScore}
-                    </span>
-                  ) : (
-                    <span className="text-ink-muted text-sm">Gepland</span>
-                  )}
-                </div>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
     </div>
   );
 }

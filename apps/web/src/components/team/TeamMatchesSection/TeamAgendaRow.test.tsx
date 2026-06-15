@@ -111,6 +111,29 @@ describe("TeamAgendaRow", () => {
     });
   });
 
+  describe("upcomingLabel", () => {
+    it("shows the upcoming label instead of the kickoff time for a scheduled match", () => {
+      render(<TeamAgendaRow match={BASE} upcomingLabel="Gepland" />);
+      const row = screen.getByTestId("team-agenda-row");
+      expect(row.textContent).toContain("Gepland");
+      expect(row.textContent).not.toContain("15:00");
+    });
+
+    it("still shows the scoreline for a finished match even when set", () => {
+      render(<TeamAgendaRow match={FINISHED_WIN} upcomingLabel="Gepland" />);
+      const row = screen.getByTestId("team-agenda-row");
+      expect(row.textContent).toContain("3");
+      expect(row.textContent).not.toContain("Gepland");
+    });
+
+    it("falls back to the kickoff time when no upcoming label is given", () => {
+      render(<TeamAgendaRow match={BASE} />);
+      expect(screen.getByTestId("team-agenda-row").textContent).toContain(
+        "15:00",
+      );
+    });
+  });
+
   describe("Outcome underline (box-shadow)", () => {
     it("applies win shadow on the score span", () => {
       const { container } = render(<TeamAgendaRow match={FINISHED_WIN} />);
@@ -200,6 +223,49 @@ describe("TeamAgendaRow", () => {
       render(<TeamAgendaRow match={{ ...BASE, competition: undefined }} />);
       expect(screen.getByTestId("team-agenda-row").textContent).not.toContain(
         "Provinciale",
+      );
+    });
+  });
+
+  describe("captionLabel (KCVV squad in the caption, P2)", () => {
+    it("renders the caption label joined to the competition", () => {
+      render(<TeamAgendaRow match={BASE} captionLabel="A-Ploeg" />);
+      // Appears once per layout (desktop + mobile).
+      expect(screen.getAllByText("A-Ploeg").length).toBeGreaterThan(0);
+      const row = screen.getByTestId("team-agenda-row");
+      expect(row.textContent).toContain("A-Ploeg");
+      expect(row.textContent).toContain("·");
+      expect(row.textContent).toContain("3e Provinciale A");
+    });
+
+    it("renders the caption label in jersey-deep on a normal row", () => {
+      const { container } = render(
+        <TeamAgendaRow match={BASE} captionLabel="A-Ploeg" />,
+      );
+      const label = container.querySelector("span.text-jersey-deep");
+      expect(label).not.toBeNull();
+      expect(label).toHaveTextContent("A-Ploeg");
+    });
+
+    it("renders the caption label alone when there is no competition", () => {
+      render(
+        <TeamAgendaRow
+          match={{ ...BASE, competition: undefined }}
+          captionLabel="U21"
+        />,
+      );
+      const row = screen.getByTestId("team-agenda-row");
+      expect(row.textContent).toContain("U21");
+      expect(row.textContent).not.toContain("·");
+    });
+
+    it("renders only the competition when no caption label is given", () => {
+      const { container } = render(<TeamAgendaRow match={BASE} />);
+      expect(
+        container.querySelector("span.text-jersey-deep"),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("team-agenda-row").textContent).toContain(
+        "3e Provinciale A",
       );
     });
   });
