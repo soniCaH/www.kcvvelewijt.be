@@ -1179,11 +1179,15 @@
   background-color: var(--color-cream) !important;
 }
 
-/* Banner + preferences modal: ink border + hard offset shadow. */
+/* Banner + preferences modal: ink border + hard offset shadow.
+   box-shadow + overflow need !important: the library's own `#cc-main .cm`
+   rule has equal specificity and is imported *after* globals.css (dynamic
+   import in the client component), so it would otherwise win the cascade tie
+   (soft drop-shadow back, tape clipped). */
 #cc-main .cm,
 #cc-main .pm {
   border: 2px solid var(--color-ink);
-  box-shadow: var(--shadow-paper-md);
+  box-shadow: var(--shadow-paper-md) !important;
 }
 
 /* Warm tape strip, top-left of the consent banner. The banner is
@@ -1192,7 +1196,7 @@
    Intentionally a raw ::before (the React <TapeStrip> primitive can't reach the
    library DOM) with the solid-warm, -3deg dims locked by the 10ck1 mockup. */
 #cc-main .cm {
-  overflow: visible;
+  overflow: visible !important;
 }
 #cc-main .cm::before {
   content: "";
@@ -1228,8 +1232,11 @@
   border: 2px solid var(--color-ink);
   box-shadow: var(--shadow-paper-sm);
   /* Match the canonical paper-stamp curve (Tailwind transition-all duration-300
-     resolves to this timing function), not the CSS `ease` default. */
-  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+     resolves to this timing function), not the CSS `ease` default. !important
+     because the library's `#cc-main .cc--anim .cm__btn` rule has equal
+     specificity, loads after globals.css, and only transitions colour — so
+     without this the transform/box-shadow press-down fires instantly. */
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 #cc-main .cm__btn[data-role="all"]:hover,
 #cc-main .cm__btn[data-role="necessary"]:hover,
