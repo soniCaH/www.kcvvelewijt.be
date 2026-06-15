@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Phase 10 · /club/[slug] CMS · 10s1: assembled</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,900&family=Archivo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif; --font-body: "Archivo", system-ui, sans-serif; --font-mono: "IBM Plex Mono", monospace;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 96ch; } .harness-head b { color: var(--warm); }
+      .lockbar { background: var(--cream-deep); border-bottom: 2px solid var(--ink); padding: 9px 28px; font-family: var(--font-mono); font-size: 12px; } .lockbar b { background: var(--jersey-deep); color: var(--cream); padding: 2px 8px; }
+      .page { max-width: 1080px; margin: 0 auto; padding: 30px 28px 0; }
+      .seam { height: 14px; margin: 30px 0; background: repeating-linear-gradient(135deg, var(--ink) 0 10px, var(--cream) 10px 20px); border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+      .kicker { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--jersey-deep); }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.95; margin: 8px 0 0; letter-spacing: -0.01em; } .eh .accent { font-style: italic; color: var(--jersey-deep); } .eh .dot { color: var(--warm); }
+      .lead { font-family: var(--font-display); font-style: italic; font-weight: 400; color: var(--ink-soft); }
+
+      .hero { position: relative; background: var(--cream); border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 var(--ink); padding: 28px 26px; }
+      .hero .tape { position: absolute; top: -12px; left: 30px; width: 96px; height: 22px; background: var(--warm); border: 2px solid var(--ink); transform: rotate(-3deg); }
+      .hero .split { display: grid; grid-template-columns: 1.3fr 1fr; gap: 22px; align-items: center; }
+      .hero .eh { font-size: clamp(1.9rem, 3.6vw, 2.7rem); }
+      .tfig { position: relative; border: 2px solid var(--ink); background: var(--cream-soft); padding: 6px; box-shadow: 3px 3px 0 0 var(--ink); }
+      .tfig .photo { display: block; width: 100%; aspect-ratio: 4/3; background: linear-gradient(135deg, #6b8f7a 0%, #3f6b54 55%, #244536 100%); filter: sepia(0.32) saturate(0.82); }
+      .tape2 { position: absolute; top: -9px; right: 18px; width: 58px; height: 16px; background: var(--warm); border: 1.5px solid var(--ink); transform: rotate(3deg); }
+
+      /* article-body column (reuse /nieuws/[slug] vocabulary) */
+      .body { max-width: 680px; margin: 0 auto; }
+      .body h2 { font-family: var(--font-display); font-weight: 800; font-size: 1.7rem; color: var(--ink); margin: 30px 0 4px; }
+      .body h2 .dot { color: var(--warm); }
+      .body p { font-family: var(--font-body); font-size: 1.05rem; line-height: 1.7; color: var(--ink-soft); margin: 14px 0 0; }
+      .body .dd { border-top: 2px dotted var(--ink-muted); margin: 26px 0; }
+      .body ul { margin: 14px 0 0; padding-left: 20px; } .body li { font-size: 1.05rem; line-height: 1.7; color: var(--ink-soft); margin: 4px 0; }
+      .body .figure { margin: 22px 0 6px; } .body .figcap { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); margin-top: 8px; }
+      .dl { display: inline-flex; align-items: center; gap: 12px; border: 2px solid var(--ink); background: var(--cream-soft); box-shadow: 3px 3px 0 0 var(--ink); padding: 12px 16px; margin-top: 20px; }
+      .dl .ic { font-family: var(--font-mono); color: var(--jersey-deep); font-weight: 700; } .dl .t { font-family: var(--font-body); font-weight: 700; } .dl .m { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); text-transform: uppercase; }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); margin-top: 36px; padding: 24px 28px 44px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; } .legend .q { background: var(--ink); color: var(--cream); padding: 14px 18px; margin-top: 10px; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Phase 10 · /club/[slug] CMS pages (#2122) · 10s1 — assembled</h1>
+      <p>Generic CMS "page" docs (PageRepository). Pure reuse: locked <b>&lt;PageHero&gt;</b> + the Phase-5 editorial <b>body column</b> (same vocabulary as /nieuws/[slug]). Example shown: a "Praktische info" page with image + text + list + download.</p>
+    </div>
+    <div class="lockbar">REUSES → <b>PageHero</b> (locked) + Phase-5 body column. One implementation note: <b>page.body uses plain `image`</b>, ArticleBody serializes `articleImage` — see legend.</div>
+
+    <div class="page">
+      <div class="hero"><span class="tape"></span><div class="split">
+        <div><span class="kicker">Club</span><h1 class="eh">Praktische <span class="accent">info</span><span class="dot">.</span></h1></div>
+        <div class="tfig"><span class="tape2"></span><span class="photo"></span></div>
+      </div></div>
+
+      <div class="seam"></div>
+
+      <div class="body">
+        <p>Alles wat je moet weten voor een bezoek aan Sportpark Elewijt — van bereikbaarheid tot de kantine-uren. Heb je nog vragen? De mensen aan de toog helpen je graag verder.</p>
+
+        <h2>Bereikbaarheid<span class="dot">.</span></h2>
+        <p>Het sportpark ligt aan de Driesstraat in Elewijt. Parkeren kan gratis op het terrein. Met het openbaar vervoer neem je bus 285 tot halte Elewijt Dorp, op vijf minuten wandelen.</p>
+
+        <div class="figure"><div class="tfig"><span class="photo"></span></div><p class="figcap">De ingang van Sportpark Elewijt</p></div>
+
+        <h2>Kantine<span class="dot">.</span></h2>
+        <p>De kantine is open op wedstrijddagen en tijdens trainingen. Een greep uit het aanbod:</p>
+        <ul><li>Vers getapte pint en frisdrank</li><li>Croque, frikandel en de befaamde KCVV-hotdog</li><li>Koffie en taart op zondagvoormiddag</li></ul>
+
+        <div class="dd"></div>
+
+        <a class="dl"><span class="ic">⤓</span><span><span class="t">Wegbeschrijving (PDF)</span><br /><span class="m">PDF · 240 kB</span></span></a>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>Composition (reuse)</h3>
+      <ul>
+        <li><b>Hero</b> → <code>&lt;PageHero&gt;</code> — kicker "Club" · headline = <code>page.title</code> · image = <code>page.heroImage</code> (optional → typographic when absent).</li>
+        <li><b>Body</b> → the Phase-5 editorial body column (Freight h2 with "." · body paragraphs · <code>&lt;DottedDivider&gt;</code> · lists · <code>&lt;TapedFigure&gt;</code> images · <code>&lt;DownloadButton&gt;</code>). Same visual vocabulary as /nieuws/[slug]. Retires legacy <code>&lt;SanityArticleBody&gt;</code> here.</li>
+      </ul>
+      <h3>Implementation decision (technical — not visual)</h3>
+      <ul>
+        <li><b>page.body</b> = <code>[block, image (plain, hotspot), fileAttachment]</code>; <code>&lt;ArticleBody&gt;</code> serializes <code>articleImage</code> (with width/caption/credit), NOT plain <code>image</code>. So either:
+          <ul>
+            <li><b>(a) Align the schema</b> — change <code>page.body</code>'s <code>image</code> → <code>articleImage</code> (+ a small Sanity migration). One body vocabulary; ArticleBody drops in. <i>Recommended.</i></li>
+            <li><b>(b) Thin page-body renderer</b> — reuse ArticleBody's block/mark/fileAttachment serializers + a plain-<code>image</code>→<code>&lt;TapedFigure&gt;</code> serializer. No migration, slightly more code.</li>
+          </ul>
+        </li>
+      </ul>
+      <div class="q"><b>Confirm</b> the assembly (it's reuse) + pick the body approach <b>(a)</b> schema-align or <b>(b)</b> thin renderer. Then #2122 is locked.</div>
+      <p class="micro">phase-10 · 10s1 · /club/[slug] assembled · reuse PageHero + Phase-5 body</p>
+    </div>
+  </body>
+</html>
