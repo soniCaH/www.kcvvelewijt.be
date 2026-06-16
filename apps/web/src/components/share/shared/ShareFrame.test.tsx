@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ShareFrame, ShareTop, ShareFoot } from "./ShareFrame";
-import { Headline, Kicker, ShareName } from "./ShareElements";
+import { Headline, Kicker, Scoreline, ShareName } from "./ShareElements";
 
 /** Temporarily fake element width measurement (happy-dom has no layout). */
 function withMeasuredWidths(
@@ -78,6 +78,37 @@ describe("ShareName auto-fit", () => {
       expect(screen.getByText("Amirgan Bouakhounov")).toHaveStyle({
         fontSize: "185px",
       });
+    });
+  });
+
+  it("scores never wrap and scale down to fit", () => {
+    withMeasuredWidths(920, 1380, () => {
+      render(
+        <ShareFrame width={1080} height={1920} register="cream">
+          <Scoreline fontSize={460}>0 - 0</Scoreline>
+        </ShareFrame>,
+      );
+      const score = screen.getByText("0–0");
+      expect(score).toHaveStyle({ whiteSpace: "nowrap" });
+      // floor(460 * 920 / 1380) = 306
+      expect(score).toHaveStyle({ fontSize: "306px" });
+    });
+  });
+
+  it("result headline scales down to fit and stays a heading", () => {
+    withMeasuredWidths(920, 1200, () => {
+      render(
+        <ShareFrame width={1080} height={1920} register="dark">
+          <Headline punctuation="bang" fontSize={170}>
+            Gewonnen
+          </Headline>
+        </ShareFrame>,
+      );
+      const heading = screen.getByRole("heading", { name: /gewonnen/i });
+      expect(heading.textContent).toBe("Gewonnen!");
+      expect(heading).toHaveStyle({ whiteSpace: "nowrap" });
+      // floor(170 * 920 / 1200) = 130
+      expect(heading).toHaveStyle({ fontSize: "130px" });
     });
   });
 });
