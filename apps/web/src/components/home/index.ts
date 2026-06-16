@@ -1,9 +1,8 @@
-// Phase 4.D.1 (#1680) + Phase 4.5.C.1 (#1754) — the homepage has
+// Phase 4.D.1 (#1680) + Phase 4.5.C.1 (#1754) — the homepage
 // migrated to the new section ordering. Legacy `FeaturedArticles`,
 // `MatchWidget`, and the auto-rotating `HomepageHeroCarousel` (replaced
 // by a static `<EditorialHero>` + `<FeaturedUitgelichtRow>` per R1.B)
-// moved to `./_legacy/` for blame trace and are no longer re-exported
-// from this barrel. Deletion happens in Phase 9 cleanup.
+// were removed in Phase 9 cleanup (#1531).
 //
 // Phase 6.B (#1910) deleted `_legacy/MatchesSliderSection` +
 // `_legacy/MatchesSliderEmptyState` since they consumed `<MatchesSlider>`

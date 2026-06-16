@@ -4,9 +4,6 @@
  * Components for displaying player information, profiles, and rosters.
  */
 
-export { PlayerCard } from "./PlayerCard";
-export type { PlayerCardProps } from "./PlayerCard";
-
 export { BioBlock } from "./BioBlock";
 export type { BioBlockProps } from "./BioBlock";
 

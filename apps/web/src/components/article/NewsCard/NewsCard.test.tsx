@@ -203,47 +203,7 @@ describe("NewsCard", () => {
     });
   });
 
-  describe("Event card features", () => {
-    it("renders eventDate and eventTime when provided", () => {
-      render(
-        <NewsCard
-          title="Sponsorfeest"
-          href="/event/1"
-          variant="featured"
-          eventDate="15 apr"
-          eventTime="19:00"
-        />,
-      );
-      expect(screen.getByText("15 apr")).toBeInTheDocument();
-      expect(screen.getByText("19:00")).toBeInTheDocument();
-    });
-
-    it("renders countdown when provided", () => {
-      render(
-        <NewsCard
-          title="Sponsorfeest"
-          href="/event/1"
-          variant="featured"
-          countdown="over 33 dagen"
-        />,
-      );
-      expect(screen.getByText("over 33 dagen")).toBeInTheDocument();
-    });
-
-    it("opens external links in a new tab", () => {
-      render(
-        <NewsCard
-          title="Sponsorfeest"
-          href="https://facebook.com/event"
-          variant="featured"
-          isExternal
-        />,
-      );
-      const link = screen.getByRole("link");
-      expect(link).toHaveAttribute("target", "_blank");
-      expect(link).toHaveAttribute("rel", "noopener noreferrer");
-    });
-
+  describe("Interactivity", () => {
     it("renders as non-interactive (no link) when no href", () => {
       render(<NewsCard title="Sponsorfeest" variant="featured" />);
       expect(screen.queryByRole("link")).not.toBeInTheDocument();

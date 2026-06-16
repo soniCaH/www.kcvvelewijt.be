@@ -3,7 +3,7 @@
  *
  * SiteHeader → MatchStripSlot → TeamHero → sticky section-nav →
  * StandingsTable → TeamMatchesSection → SquadGrid → TeamStaff →
- * TeamEditorial → RelatedArticles → global SponsorsBlock → footer.
+ * TeamEditorial → VerderLezenRow → global SponsorsBlock → footer.
  * <StripedSeam> separates sections; every non-hero section auto-hides on
  * empty data (a U6 page degrades to hero + squad + staff).
  */

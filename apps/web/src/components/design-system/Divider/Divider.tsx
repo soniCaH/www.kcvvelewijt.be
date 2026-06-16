@@ -18,7 +18,7 @@ const COLOR_CLASS: Record<DividerColor, string> = {
   "paper-edge": "border-paper-edge",
 };
 
-export function Divider({
+function Divider({
   style = "solid",
   color = "ink",
   inset = false,
@@ -41,8 +41,4 @@ export const DottedDivider = (props: Omit<DividerProps, "style">) => (
 
 export const DashedDivider = (props: Omit<DividerProps, "style">) => (
   <Divider {...props} style="dashed" />
-);
-
-export const SolidDivider = (props: Omit<DividerProps, "style">) => (
-  <Divider {...props} style="solid" />
 );

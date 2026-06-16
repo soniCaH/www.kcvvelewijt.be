@@ -7,10 +7,9 @@
  * later, augmented by semantic search (Phase 6, #2057). People-search stays
  * keyword/structured; only the question intent gets the semantic upgrade.
  *
- * FUTURE: this is a deliberate copy of the still-live private ranking in
- * `components/organigram/shared/UnifiedSearchBar.tsx` (kept while its legacy
- * consumers exist). When that tree is retired (#2056 / #2058), delete the
- * original — this module is the surviving home.
+ * This ranking originated inside the former
+ * `components/organigram/shared/UnifiedSearchBar.tsx`; that legacy tree was
+ * retired in Phase 9 cleanup (#1531), so this pure module is now its sole home.
  */
 
 import type { OrgChartNode } from "@/types/organigram";
