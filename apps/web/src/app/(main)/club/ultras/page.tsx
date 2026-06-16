@@ -6,7 +6,6 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { getButtonClasses } from "@/components/design-system/Button/button-styles";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { PullQuote } from "@/components/design-system/PullQuote";
-import { FooterSafeArea } from "@/components/design-system";
 import { ULTRAS_KAMPIOEN, ULTRAS_SJR } from "@/lib/sanity/images";
 import { UltrasAnalytics } from "./UltrasAnalytics";
 import { UltrasHero } from "./UltrasHero";
@@ -169,8 +168,6 @@ export default function UltrasPage() {
             </div>
           </UltrasSection>
         </article>
-
-        <FooterSafeArea />
       </UltrasAnalytics>
     </>
   );

@@ -12,7 +12,6 @@ import {
   ScheurkalenderPage,
   type ScheurkalenderDay,
 } from "@/components/scheurkalender/ScheurkalenderPage";
-import { FooterSafeArea } from "@/components/design-system";
 
 export const metadata: Metadata = {
   title: "Scheurkalender | KCVV Elewijt",
@@ -82,7 +81,6 @@ export default async function ScheurkalenderPageRoute() {
   return (
     <>
       <ScheurkalenderPage days={days} />
-      <FooterSafeArea />
     </>
   );
 }

@@ -107,10 +107,6 @@ export type { BodyQuoteProps } from "./BodyQuote";
 export { BrandedTabs } from "./BrandedTabs";
 export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
 
-// FooterSafeArea
-export { FooterSafeArea } from "./FooterSafeArea";
-export type { FooterSafeAreaProps } from "./FooterSafeArea";
-
 // Divider
 export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
 export type { DividerProps, DividerStyle, DividerColor } from "./Divider";

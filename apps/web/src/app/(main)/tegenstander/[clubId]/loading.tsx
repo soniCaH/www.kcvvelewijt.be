@@ -11,7 +11,7 @@ import { StripedSeam } from "@/components/design-system";
 
 export default function OpponentLoading() {
   return (
-    <div className="bg-cream-deep min-h-screen pb-[var(--footer-diagonal)]">
+    <div className="bg-cream-deep min-h-screen">
       <div className="container mx-auto max-w-3xl px-4 pt-8 pb-8">
         {/* Hero card */}
         <div className="border-ink bg-cream shadow-paper-md border-2 p-6">

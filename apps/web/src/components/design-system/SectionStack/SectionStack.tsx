@@ -36,21 +36,9 @@ export interface SectionConfig {
 export interface SectionStackProps {
   sections: (SectionConfig | null | false | undefined)[];
   className?: string;
-  /**
-   * When true (default), the last section's outer wrapper reserves a
-   * footer-diagonal-sized safe area on its bottom so the section's bg
-   * extends through the `PageFooter`'s `overlap="full"` diagonal. Set
-   * to `false` when the stack is not the final element before the
-   * footer (e.g. a nested stack with content below). See #1360.
-   */
-  reserveFooterSafeArea?: boolean;
 }
 
-export function SectionStack({
-  sections,
-  className,
-  reserveFooterSafeArea = true,
-}: SectionStackProps) {
+export function SectionStack({ sections, className }: SectionStackProps) {
   const filtered = sections.filter(Boolean) as SectionConfig[];
 
   return (
@@ -75,7 +63,6 @@ export function SectionStack({
           prev !== undefined &&
           prev.transition !== undefined &&
           prev.bg !== section.bg;
-        const isLast = i === filtered.length - 1;
         // React's null-marker semantics: `false`, `null`, and `undefined`
         // all render as nothing. Treat them uniformly as "no backdrop" so
         // common patterns like `backdrop={cond && <Layer />}` (which yields
@@ -115,15 +102,7 @@ export function SectionStack({
           // affect when the NEXT section div starts, eliminating sub-pixel
           // seam gaps between sections.
           <Fragment key={section.key ?? i}>
-            <div
-              className={cn(
-                "relative w-full",
-                BG_CLASS[section.bg],
-                isLast &&
-                  reserveFooterSafeArea &&
-                  "pb-[var(--footer-diagonal)]",
-              )}
-            >
+            <div className={cn("relative w-full", BG_CLASS[section.bg])}>
               {/* Backdrop layer (§5.1 — z-0 within the section wrapper,
                   extends into adjacent transition strips via negative top /
                   bottom when a neighbor transition exists). Auto-propagation
@@ -168,9 +147,9 @@ export function SectionStack({
                 })()}
 
               {/* Section content wrapper — bg is owned by the outer
-                  wrapper so the last-section footer-safe-area padding
-                  sits inside the same colored surface. z-10 places
-                  content above the backdrop layer (§5.1). */}
+                  wrapper so the section's padding sits inside the same
+                  colored surface. z-10 places content above the backdrop
+                  layer (§5.1). */}
               <div
                 className={cn(
                   "w-full",

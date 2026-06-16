@@ -451,13 +451,6 @@ export default async function HomePage() {
         ])}
       />
       <SectionStack
-        // R4.B spine ends on `<ClubshopBanner>` (jersey-deep-dark
-        // full-bleed). The default footer safe-area padding paints with
-        // the SectionStack wrapper's `bg: "transparent"`, which would
-        // leave a white strip between the dark clubshop band and the
-        // footer's jersey-deep-dark background. Keeping the flag at
-        // `false` lets ClubshopBanner connect directly to the footer.
-        reserveFooterSafeArea={false}
         sections={[
           heroSection,
           uitgelichtSection,

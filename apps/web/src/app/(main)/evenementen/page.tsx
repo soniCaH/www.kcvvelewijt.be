@@ -54,7 +54,7 @@ export default async function EvenementenPage() {
   );
 
   return (
-    <div className="bg-jersey-deep-dark flex min-h-screen flex-col pb-[var(--footer-diagonal)]">
+    <div className="bg-jersey-deep-dark flex min-h-screen flex-col">
       <header className="mx-auto w-full max-w-3xl px-4 pt-12 pb-8">
         <MonoLabel tone="cream">KCVV Elewijt · Agenda</MonoLabel>
         <EditorialHeading

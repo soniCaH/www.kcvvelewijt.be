@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { PageViewTracker } from "@/components/analytics";
 import { StripedSeam } from "@/components/design-system/StripedSeam";
-import { FooterSafeArea } from "@/components/design-system";
 import {
   HeritageHero,
   TimelineImage,
@@ -566,8 +565,6 @@ export function HistoryContent() {
       <TimelineReveal>
         <TimelineContent />
       </TimelineReveal>
-
-      <FooterSafeArea />
     </>
   );
 }

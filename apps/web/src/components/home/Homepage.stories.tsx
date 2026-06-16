@@ -334,7 +334,6 @@ const Homepage = ({
 
   return (
     <SectionStack
-      reserveFooterSafeArea={false}
       sections={[
         heroSection,
         uitgelichtSection,

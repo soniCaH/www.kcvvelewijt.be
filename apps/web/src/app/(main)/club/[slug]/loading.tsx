@@ -1,11 +1,11 @@
 /**
  * Club Page (Dynamic) — Loading Skeleton
  * Mirrors the page: compact <PageHero> → <StripedSeam> → <ArticleBody>'s
- * cream shell + prose column → <FooterSafeArea>.
+ * cream shell + prose column.
  */
 
 import { PageHero } from "@/components/layout/PageHero";
-import { FooterSafeArea, StripedSeam } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
 
 export default function ClubPageLoading() {
   return (
@@ -32,8 +32,6 @@ export default function ClubPageLoading() {
           <div className="bg-cream-soft h-5 w-2/3 rounded" />
         </div>
       </div>
-
-      <FooterSafeArea />
     </div>
   );
 }

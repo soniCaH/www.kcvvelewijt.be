@@ -11,7 +11,6 @@
  *   BioBlock                    ← auto-hides on empty bio
  *   QuotesBlock                 ← auto-hides on < 2 pullquote-marked spans
  *   RelatedArticlesSection
- *   FooterSafeArea
  *
  * Deviations vs the issue AC, owner-approved at branch start:
  *  - `<PlayerShare>` removed entirely (component file deleted — never
@@ -41,7 +40,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { BioBlock, PlayerHero, QuotesBlock } from "@/components/player";
 import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
-import { FooterSafeArea, StripedSeam } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { findNthPullquoteText } from "@/lib/portable-text/findPullquoteText";
@@ -224,7 +223,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         pageSlug={slug}
         className="mx-auto max-w-4xl px-4 pb-8"
       />
-      <FooterSafeArea />
     </>
   );
 }

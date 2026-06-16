@@ -12,7 +12,6 @@
  *   <StripedSeam>                  ← only before the card when a body section rendered
  *   <MatchArticleLinkCard>         ← auto-hides; the matchPreview/matchRecap article
  *                                    linked to this match, in a <TrackInView> (#1914)
- *   <FooterSafeArea>
  *
  * Replaces the legacy `<MatchDetailView>` consumption (now orphaned;
  * retired by the #1913 cleanup ticket).
@@ -53,7 +52,7 @@ import {
   MatchArticleLinkCard,
   selectMatchArticle,
 } from "@/components/match/MatchArticleLinkCard";
-import { FooterSafeArea, StripedSeam } from "@/components/design-system";
+import { StripedSeam } from "@/components/design-system";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import {
@@ -346,8 +345,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
           />
         </TrackInView>
       )}
-
-      <FooterSafeArea />
     </>
   );
 }
