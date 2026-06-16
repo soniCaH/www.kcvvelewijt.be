@@ -1,56 +1,49 @@
 /**
- * Club Landing Page — Loading Skeleton
- *
- * Uses the shared getClubSections factory so the outer envelope (backgrounds,
- * padding, diagonal SectionTransitions) is identical to page.tsx. Only the
- * inner content per section is replaced with shimmer placeholders.
+ * `/club` index loading skeleton — mirrors the Phase 10 composition on cream
+ * (compact `<PageHero>` → seam → editorial nav grid). Replaces the legacy
+ * `SectionStack`/`getClubSections` envelope. Only the nav-hub grid is
+ * shimmered; the hero renders instantly (it carries no data).
  */
 
-import { SectionStack } from "@/components/design-system/SectionStack/SectionStack";
-import { getClubSections } from "./getClubSections";
-
-function EditorialSkeleton() {
-  return (
-    <div className="mx-auto max-w-5xl animate-pulse px-4">
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-12 aspect-[4/3] rounded-sm bg-gray-200 md:col-span-7" />
-        <div className="col-span-12 space-y-4 md:col-span-5">
-          <div className="aspect-[4/3] rounded-sm bg-gray-200" />
-          <div className="aspect-[4/3] rounded-sm bg-gray-200" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MissionSkeleton() {
-  return (
-    <div className="mx-auto max-w-3xl animate-pulse space-y-4 px-4 text-center">
-      <div className="mx-auto h-6 w-12 rounded bg-white/10" />
-      <div className="mx-auto h-8 w-96 max-w-full rounded bg-white/10" />
-      <div className="mx-auto h-4 w-48 rounded bg-white/15" />
-    </div>
-  );
-}
-
-function CtaSkeleton() {
-  return (
-    <div className="mx-auto max-w-3xl animate-pulse space-y-4 px-4 text-center">
-      <div className="mx-auto h-8 w-64 rounded bg-gray-200" />
-      <div className="mx-auto h-5 w-96 max-w-full rounded bg-gray-200" />
-      <div className="mx-auto mt-4 h-10 w-32 rounded bg-gray-200" />
-    </div>
-  );
-}
+import { StripedSeam } from "@/components/design-system";
+import { PageHero } from "@/components/layout/PageHero";
 
 export default function ClubLoading() {
   return (
-    <SectionStack
-      sections={getClubSections({
-        editorial: <EditorialSkeleton />,
-        mission: <MissionSkeleton />,
-        contact: <CtaSkeleton />,
-      })}
-    />
+    <div className="bg-cream min-h-screen">
+      {/* Hero — compact PageHero (typographic). */}
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+        <PageHero
+          size="compact"
+          kicker="Onze club"
+          headline="De plezantste compagnie"
+          accent="compagnie"
+        />
+      </div>
+
+      <StripedSeam colorPair="ink-cream" height="md" />
+
+      {/* Editorial nav hub — header + uniform 3-up grid. */}
+      <div className="mx-auto max-w-5xl px-4 py-12">
+        <div className="bg-ink/10 mb-8 h-10 w-72 max-w-full animate-pulse rounded" />
+        <div
+          data-testid="club-hub-skeleton"
+          className="grid animate-pulse grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="border-ink shadow-paper-sm bg-cream-soft flex h-full flex-col overflow-hidden border-2"
+            >
+              <div className="bg-ink/10 border-ink aspect-[16/9] border-b-2" />
+              <div className="flex flex-col gap-2 p-3.5">
+                <div className="bg-ink/10 h-5 w-3/4 rounded" />
+                <div className="bg-ink/10 h-3 w-1/3 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }

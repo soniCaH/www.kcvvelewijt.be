@@ -3,26 +3,24 @@ import { render, screen } from "@testing-library/react";
 import ClubLoading from "./loading";
 
 describe("ClubLoading", () => {
-  it("renders SectionTransition SVGs between sections", () => {
+  it("renders the compact PageHero", () => {
     render(<ClubLoading />);
-    const transitions = screen.getAllByTestId("section-transition");
-    // editorial→mission, mission→contact (2 transitions). The Phase 10 cream
-    // PageHero hero section no longer carries a diagonal seam.
-    // editorial→mission: different bg (gray-100 → kcvv-green-dark) ✓
-    // mission→contact: kcvv-green-dark → gray-100, different ✓
-    expect(transitions).toHaveLength(2);
+    const hero = screen.getByTestId("page-hero");
+    expect(hero).toHaveAttribute("data-size", "compact");
+    expect(screen.getByText("Onze club")).toBeInTheDocument();
   });
 
-  it("renders the getClubSections backgrounds via SectionStack", () => {
+  it("renders a full-bleed StripedSeam between hero and grid", () => {
     const { container } = render(<ClubLoading />);
-    // getClubSections defines: hero (transparent section, cream PageHero
-    // field), editorial (gray-100), mission (kcvv-green-dark), contact
-    // (gray-100). If a hand-rolled layout replaced SectionStack, at least one
-    // of these bg classes would be missing.
-    expect(container.querySelector(".bg-cream")).not.toBeNull();
-    expect(container.querySelector(".bg-kcvv-green-dark")).not.toBeNull();
     expect(
-      container.querySelectorAll(".bg-gray-100").length,
-    ).toBeGreaterThanOrEqual(2);
+      container.querySelectorAll("svg[data-direction]").length,
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("renders a six-card skeleton nav grid on the cream field", () => {
+    const { container } = render(<ClubLoading />);
+    const skeleton = screen.getByTestId("club-hub-skeleton");
+    expect(skeleton.children).toHaveLength(6);
+    expect(container.querySelector(".bg-cream")).not.toBeNull();
   });
 });

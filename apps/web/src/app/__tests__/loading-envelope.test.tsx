@@ -3,32 +3,24 @@
  *
  * Prevents loading.tsx skeletons from silently desyncing with their page.tsx
  * envelopes. Parametrized over all (main) and (landing) routes that have a
- * loading.tsx.
- *
- * - SectionStack routes: verifies loading.tsx renders via the shared factory
- *   by checking transition count and background classes.
- * - Non-SectionStack routes: verifies the root element className matches the
- *   declared envelope contract.
+ * loading.tsx — every skeleton is now a bespoke (non-SectionStack) envelope, so
+ * the guard verifies the root element className matches the declared contract.
  *
  * @see docs/prd/loading-skeleton-consistency.md — Phase 4
  */
 
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { globSync } from "node:fs";
 import { resolve } from "node:path";
 
 // ---------------------------------------------------------------------------
-// SectionStack loading components
+// Loading components
 // ---------------------------------------------------------------------------
 import ClubLoading from "../(main)/club/loading";
 import JeugdLoading from "../(landing)/jeugd/loading";
 import PloegenLoading from "../(main)/ploegen/loading";
-
-// ---------------------------------------------------------------------------
-// Non-SectionStack loading components
-// ---------------------------------------------------------------------------
 import HulpLoading from "../(main)/hulp/loading";
 import KalenderLoading from "../(main)/kalender/loading";
 import NieuwsLoading from "../(landing)/nieuws/loading";
@@ -46,56 +38,9 @@ import StafDetailLoading from "../(main)/staf/[slug]/loading";
 import TegenstanderLoading from "../(main)/tegenstander/[clubId]/loading";
 import WedstrijdLoading from "../(main)/wedstrijd/[matchId]/loading";
 
-// ---------------------------------------------------------------------------
-// SectionStack routes — shared factory envelope
-// ---------------------------------------------------------------------------
-
-interface SectionStackRoute {
-  name: string;
-  Loading: ComponentType;
-  expectedTransitions: number;
-  expectedBgClasses: string[];
-}
-
-const sectionStackRoutes: SectionStackRoute[] = [
-  {
-    name: "/club",
-    Loading: ClubLoading,
-    // Phase 10 (#2120): the cream PageHero hero section dropped its diagonal
-    // seam, so the factory now emits 2 transitions (editorial→mission,
-    // mission→contact) and the hero field is cream rather than kcvv-black.
-    expectedTransitions: 2,
-    expectedBgClasses: ["bg-cream", "bg-gray-100", "bg-kcvv-green-dark"],
-  },
-];
-
 describe("loading.tsx envelope drift guard", () => {
-  describe("SectionStack routes — shared factory", () => {
-    it.each(sectionStackRoutes)(
-      "$name loading renders via SectionStack with correct transitions",
-      ({ Loading, expectedTransitions }) => {
-        render(<Loading />);
-        const transitions = screen.getAllByTestId("section-transition");
-        expect(transitions).toHaveLength(expectedTransitions);
-      },
-    );
-
-    it.each(sectionStackRoutes)(
-      "$name loading renders all expected background classes",
-      ({ Loading, expectedBgClasses }) => {
-        const { container } = render(<Loading />);
-        for (const cls of expectedBgClasses) {
-          expect(
-            container.querySelector(`.${CSS.escape(cls)}`),
-            `expected .${cls} to be present in rendered output`,
-          ).not.toBeNull();
-        }
-      },
-    );
-  });
-
   // -------------------------------------------------------------------------
-  // Non-SectionStack routes — root className contract
+  // Root className contract
   // -------------------------------------------------------------------------
 
   interface NonSectionStackRoute {
@@ -105,6 +50,13 @@ describe("loading.tsx envelope drift guard", () => {
   }
 
   const nonSectionStackRoutes: NonSectionStackRoute[] = [
+    {
+      name: "/club",
+      Loading: ClubLoading,
+      // Phase 10 (#2121): rebuilt off SectionStack — cream paper field hosts the
+      // compact PageHero + StripedSeam + nav-hub skeleton grid.
+      expectedRootClass: "bg-cream min-h-screen",
+    },
     {
       name: "/hulp",
       Loading: HulpLoading,
@@ -230,9 +182,7 @@ describe("loading.tsx envelope drift guard", () => {
       ...globSync("(landing)/**/loading.tsx", { cwd: appDir }),
     ];
     const expectedRouteNames = new Set(
-      [...sectionStackRoutes, ...nonSectionStackRoutes].map(({ name }) =>
-        name.replace(/^\//, ""),
-      ),
+      nonSectionStackRoutes.map(({ name }) => name.replace(/^\//, "")),
     );
     const stripGroup = (file: string) =>
       file.replace(/^\((main|landing)\)\//, "").replace(/\/loading\.tsx$/, "");

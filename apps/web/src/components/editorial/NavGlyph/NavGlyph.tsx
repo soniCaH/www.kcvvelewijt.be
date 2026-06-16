@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/cn";
 import {
   Eye,
   FirstAid,
+  Heart,
   House,
   MagnifyingGlass,
   SoccerBall,
@@ -16,6 +17,7 @@ import {
 const NAV_GLYPHS = {
   Eye,
   FirstAid,
+  Heart,
   House,
   MagnifyingGlass,
   SoccerBall,
