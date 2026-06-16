@@ -12,6 +12,7 @@ import { formatArticleDate } from "@/lib/utils/dates";
 import type {
   RelatedArticleRef,
   ArticleDetailVM,
+  ArticleVM,
 } from "@/lib/repositories/article.repository";
 import type { RelatedItem } from "@kcvv/api-contract";
 
@@ -253,6 +254,33 @@ export function mergeRelatedItems(
 ): RelatedContentItem[] {
   const curatedIds = new Set(input.curated.map((c) => c.id));
   return [...input.curated, ...input.auto.filter((i) => !curatedIds.has(i.id))];
+}
+
+/**
+ * Adapt `ArticleVM[]` — the `ArticleRepository.findRelated()` output rendered
+ * on the player / staff / team detail pages — to `<VerderLezenRow>` cards.
+ *
+ * Builds `reference`-source article items and delegates to
+ * `mapRelatedToVerderLezen`, so the cards are shaped identically to the
+ * `/nieuws/[slug]` article slider AND the `related_content_*` analytics keep
+ * firing with `source: "reference"` / `target_type: "article"` — preserving
+ * the contract of the retired `<RelatedArticlesSection>`. Shared so the three
+ * detail pages don't each hand-roll the mapping.
+ */
+export function articleVMsToVerderLezenItems(
+  articles: ArticleVM[],
+): VerderLezenItem[] {
+  const related: RelatedArticleItem[] = articles.map((article) => ({
+    type: "article",
+    source: "reference",
+    id: article.id,
+    title: article.title,
+    slug: article.slug,
+    imageUrl: article.coverImageUrl ?? null,
+    date: article.publishedAt ?? null,
+    excerpt: null,
+  }));
+  return mapRelatedToVerderLezen(related);
 }
 
 /**

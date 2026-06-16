@@ -7,6 +7,7 @@ import {
   mapMentionedStaff,
   mapCuratedRelatedContent,
   mergeRelatedItems,
+  articleVMsToVerderLezenItems,
 } from "./article-related-items";
 import type {
   RelatedArticleItem,
@@ -15,6 +16,8 @@ import type {
   RelatedTeamItem,
   RelatedStaffItem,
 } from "@/components/related/types";
+import type { ArticleVM } from "@/lib/repositories/article.repository";
+import { formatArticleDate } from "@/lib/utils/dates";
 
 describe("mapEditorialArticles", () => {
   it("maps RelatedArticleRef[] to RelatedArticleItem[]", () => {
@@ -677,5 +680,69 @@ describe("mergeRelatedItems", () => {
       source: "editorial",
       id: sharedId,
     });
+  });
+});
+
+describe("articleVMsToVerderLezenItems", () => {
+  function makeArticle(
+    overrides: Partial<ArticleVM> & { id: string },
+  ): ArticleVM {
+    return {
+      title: `Artikel ${overrides.id}`,
+      slug: `artikel-${overrides.id}`,
+      publishedAt: "2026-05-01T10:00:00Z",
+      featured: false,
+      coverImageUrl: "https://cdn.example.com/cover.jpg",
+      tags: [],
+      articleType: null,
+      subjects: null,
+      firstTransferFact: null,
+      firstEventFact: null,
+      ...overrides,
+    };
+  }
+
+  it("maps ArticleVM[] to reference-source article cards (parity with the retired related grid)", () => {
+    const items = articleVMsToVerderLezenItems([
+      makeArticle({ id: "a1", title: "Eerste", slug: "eerste" }),
+    ]);
+
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      title: "Eerste",
+      href: "/nieuws/eerste",
+      imageUrl: "https://cdn.example.com/cover.jpg",
+      badge: "NIEUWS",
+      // Analytics parity with <RelatedArticlesSection>: source "reference",
+      // type "article", target_slug = the article slug.
+      analyticsSource: "reference",
+      analyticsType: "article",
+      analyticsTargetSlug: "eerste",
+      analyticsId: "a1",
+    });
+  });
+
+  it("formats publishedAt as the card display date", () => {
+    const [item] = articleVMsToVerderLezenItems([
+      makeArticle({ id: "a1", publishedAt: "2026-05-01T10:00:00Z" }),
+    ]);
+    expect(item?.date).toBe(formatArticleDate("2026-05-01T10:00:00Z"));
+  });
+
+  it("preserves source order across multiple articles", () => {
+    const items = articleVMsToVerderLezenItems([
+      makeArticle({ id: "a1", slug: "een" }),
+      makeArticle({ id: "a2", slug: "twee" }),
+      makeArticle({ id: "a3", slug: "drie" }),
+    ]);
+    expect(items.map((i) => i.href)).toEqual([
+      "/nieuws/een",
+      "/nieuws/twee",
+      "/nieuws/drie",
+    ]);
+  });
+
+  it("returns an empty array for no related articles (row auto-hides)", () => {
+    expect(articleVMsToVerderLezenItems([])).toEqual([]);
   });
 });

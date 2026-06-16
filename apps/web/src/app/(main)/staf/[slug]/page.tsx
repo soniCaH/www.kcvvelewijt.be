@@ -18,7 +18,8 @@ import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
-import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { VerderLezenRow } from "@/components/article/VerderLezenRow";
+import { articleVMsToVerderLezenItems } from "@/lib/utils/article-related-items";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { StaffHero } from "@/components/staff/StaffHero";
 import { StaffRoles } from "@/components/staff/StaffRoles";
@@ -194,14 +195,12 @@ export default async function StafPage({ params }: StaffPageProps) {
         />
       ) : null}
 
-      {relatedArticles.length > 0 ? (
-        <RelatedArticlesSection
-          articles={relatedArticles}
-          pageType="staff"
-          pageSlug={slug}
-          className="mx-auto max-w-5xl px-4 py-12"
-        />
-      ) : null}
+      {/* Full-bleed cream "Verder lezen." slider — auto-hides when empty. */}
+      <VerderLezenRow
+        items={articleVMsToVerderLezenItems(relatedArticles)}
+        pageType="staff"
+        pageSlug={slug}
+      />
     </>
   );
 }

@@ -3,7 +3,7 @@
  *
  * Renders the visible composition (PlayerHero → StripedSeam → BioBlock →
  * QuotesBlock) with fixture data. The server-only
- * `<MatchStripSlot>` and `<RelatedArticlesSection>` blocks are omitted
+ * `<MatchStripSlot>` and `<VerderLezenRow>` related blocks are omitted
  * here because they require runtime BFF / Sanity fetches; functional
  * smoke for the assembled page lives in the Playwright suite
  * (`apps/web/test/e2e/routes.spec.ts` → `/spelers/[slug]`).

@@ -10,7 +10,7 @@
  *   StripedSeam
  *   BioBlock                    ← auto-hides on empty bio
  *   QuotesBlock                 ← auto-hides on < 2 pullquote-marked spans
- *   RelatedArticlesSection
+ *   VerderLezenRow              ← full-bleed "Verder lezen." slider; auto-hides on empty
  *
  * Deviations vs the issue AC, owner-approved at branch start:
  *  - `<PlayerShare>` removed entirely (component file deleted — never
@@ -39,7 +39,8 @@ import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { BioBlock, PlayerHero, QuotesBlock } from "@/components/player";
-import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { VerderLezenRow } from "@/components/article/VerderLezenRow";
+import { articleVMsToVerderLezenItems } from "@/lib/utils/article-related-items";
 import { StripedSeam } from "@/components/design-system";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
@@ -217,11 +218,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           <QuotesBlock bio={bio} playerName={fullName} />
         </TrackInView>
       ) : null}
-      <RelatedArticlesSection
-        articles={relatedArticles}
+      {/* Full-bleed cream "Verder lezen." slider — auto-hides when empty. */}
+      <VerderLezenRow
+        items={articleVMsToVerderLezenItems(relatedArticles)}
         pageType="player"
         pageSlug={slug}
-        className="mx-auto max-w-4xl px-4 pb-8"
       />
     </>
   );
