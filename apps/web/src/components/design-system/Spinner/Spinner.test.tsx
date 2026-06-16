@@ -8,7 +8,7 @@
 
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Spinner, FullPageSpinner } from "./Spinner";
+import { Spinner } from "./Spinner";
 
 describe("Spinner", () => {
   describe("Rendering", () => {
@@ -175,55 +175,6 @@ describe("Spinner", () => {
         "kcvv-spinner-scarf--primary",
       );
       expect(wrapper).toHaveAttribute("aria-label", "Custom loading");
-    });
-  });
-});
-
-describe("FullPageSpinner", () => {
-  describe("Rendering", () => {
-    it("should render full page spinner overlay", () => {
-      const { container } = render(<FullPageSpinner />);
-      const overlay = container.firstChild as HTMLElement;
-      expect(overlay).toHaveClass("fixed", "inset-0", "z-50");
-    });
-
-    it("should contain a spinner", () => {
-      render(<FullPageSpinner />);
-      expect(screen.getByRole("status")).toBeInTheDocument();
-    });
-
-    it("should use xl size by default", () => {
-      const { container } = render(<FullPageSpinner />);
-      const scarf = container.querySelector(".kcvv-spinner-scarf");
-      expect(scarf).toHaveClass("kcvv-spinner-scarf--xl");
-    });
-
-    it("should accept custom size", () => {
-      const { container } = render(<FullPageSpinner size="md" />);
-      const scarf = container.querySelector(".kcvv-spinner-scarf");
-      expect(scarf).toHaveClass("kcvv-spinner-scarf--md");
-    });
-
-    it("should accept custom label", () => {
-      render(<FullPageSpinner label="Loading application..." />);
-      expect(screen.getByRole("status")).toHaveAttribute(
-        "aria-label",
-        "Loading application...",
-      );
-    });
-  });
-
-  describe("Styling", () => {
-    it("should be centered", () => {
-      const { container } = render(<FullPageSpinner />);
-      const overlay = container.firstChild as HTMLElement;
-      expect(overlay).toHaveClass("flex", "items-center", "justify-center");
-    });
-
-    it("should have high z-index", () => {
-      const { container } = render(<FullPageSpinner />);
-      const overlay = container.firstChild as HTMLElement;
-      expect(overlay).toHaveClass("z-50");
     });
   });
 });

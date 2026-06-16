@@ -12,21 +12,12 @@ export { Icon } from "./Icon";
 export type { IconProps, IconSize, IconColor } from "./Icon";
 
 // Spinner
-export { Spinner, FullPageSpinner } from "./Spinner";
-export type {
-  SpinnerProps,
-  SpinnerSize,
-  SpinnerVariant,
-  FullPageSpinnerProps,
-} from "./Spinner";
+export { Spinner } from "./Spinner";
+export type { SpinnerProps, SpinnerSize, SpinnerVariant } from "./Spinner";
 
 // FilterTabs
 export { FilterTabs } from "./FilterTabs";
 export type { FilterTabsProps, FilterTab } from "./FilterTabs";
-
-// SocialLinks
-export { SocialLinks } from "./SocialLinks";
-export type { SocialLinksProps } from "./SocialLinks";
 
 // Input
 export { Input } from "./Input";
@@ -103,12 +94,8 @@ export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";
 export { BodyQuote } from "./BodyQuote";
 export type { BodyQuoteProps } from "./BodyQuote";
 
-// BrandedTabs
-export { BrandedTabs } from "./BrandedTabs";
-export type { BrandedTab, BrandedTabsProps } from "./BrandedTabs";
-
 // Divider
-export { Divider, DashedDivider, DottedDivider, SolidDivider } from "./Divider";
+export { DashedDivider, DottedDivider } from "./Divider";
 export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 
 // EndMark
@@ -133,10 +120,6 @@ export type {
 // JerseyShirt
 export { JerseyShirt } from "./JerseyShirt";
 export type { JerseyShirtProps } from "./JerseyShirt";
-
-// PlayerFigure
-export { PlayerFigure } from "./PlayerFigure";
-export type { PlayerFigureProps, PlayerFigureTag } from "./PlayerFigure";
 
 // EditorialByline
 export { EditorialByline } from "./EditorialByline";
@@ -292,16 +275,6 @@ export type {
   StampBadgeTone,
   StampBadgePosition,
 } from "./StampBadge";
-
-// ShieldFigure
-// NOTE: partial geometry overlap with <StampBadge> — flag for post-Phase-3
-// unification (per issue #1641 acceptance criteria).
-export { ShieldFigure } from "./ShieldFigure";
-export type {
-  ShieldFigureProps,
-  ShieldFigureSize,
-  ShieldFigureVariant,
-} from "./ShieldFigure";
 
 // Crest
 export { Crest } from "./Crest";

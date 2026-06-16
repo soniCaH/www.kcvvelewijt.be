@@ -2,10 +2,5 @@
  * Spinner Component Exports
  */
 
-export { Spinner, FullPageSpinner } from "./Spinner";
-export type {
-  SpinnerProps,
-  SpinnerSize,
-  SpinnerVariant,
-  FullPageSpinnerProps,
-} from "./Spinner";
+export { Spinner } from "./Spinner";
+export type { SpinnerProps, SpinnerSize, SpinnerVariant } from "./Spinner";

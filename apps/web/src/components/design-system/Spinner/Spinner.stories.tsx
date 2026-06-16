@@ -6,7 +6,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Spinner, FullPageSpinner } from "./Spinner";
+import { Spinner } from "./Spinner";
 
 const meta = {
   title: "UI/Spinner",
@@ -199,22 +199,6 @@ export const CustomLabel: Story = {
     size: "lg",
     variant: "primary",
   },
-};
-
-/**
- * FullPageSpinner overlay — covers the viewport with a soft cream
- * backdrop while the page loads.
- */
-export const FullPage: Story = {
-  render: () => (
-    <div className="border-ink bg-cream relative h-64 w-96 overflow-hidden border-2">
-      <div className="p-4">
-        <h3 className="text-ink mb-2 font-bold">Page Content</h3>
-        <p className="text-ink-muted">This content is behind the overlay.</p>
-      </div>
-      <FullPageSpinner />
-    </div>
-  ),
 };
 
 /**

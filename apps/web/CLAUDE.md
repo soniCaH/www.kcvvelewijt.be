@@ -4,7 +4,7 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 ## Implemented Routes
 
-`/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/jeugd`, `/kalender`, `/wedstrijd/[matchId]`, `/events`, `/events/[slug]`, `/sponsors`, `/club/organigram`, `/club/geschiedenis`, `/hulp`, `/zoeken`, `/privacy`
+`/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/jeugd`, `/kalender`, `/wedstrijd/[matchId]`, `/events`, `/events/[slug]`, `/sponsors`, `/club/geschiedenis`, `/hulp`, `/zoeken`, `/privacy`
 
 `/nieuws/[slug]` shipped its Phase 5 redesign (Phase 5: article detail) — see `docs/prd/redesign-phase-5-article-detail.md`.
 
@@ -64,7 +64,7 @@ Phase 0 of the editorial-redesign series ("retro-terrace fanzine") added the fol
 
 - `<TapeStrip>` — diagonal washi-tape graphic for card corners.
 - `<StripedSeam>` — SVG-backed diagonal barber-pole horizontal section divider.
-- `<DottedDivider>`, `<DashedDivider>`, `<SolidDivider>` — thin row dividers (interview Q&A, table rows).
+- `<DottedDivider>`, `<DashedDivider>` — thin row dividers (interview Q&A, table rows).
 - `<QuoteMark>` — two stacked italic open-quote glyphs.
 - `<HighlighterStroke>` — hand-drawn marker underline beneath italic emphasis. Phase 1 added a `color: 'jersey' | 'jersey-deep' | 'ink' | 'cream'` prop (default `jersey`); previously fixed jersey green. Single-line CSS-bg SVG; multi-line wrapping is the deferred follow-up tracked in `docs/prd/redesign-phase-1.md` §11.1.
 - `<MonoLabel>` — tracked uppercase pill or plain label. Pill variants gained vertical padding in Phase 1 to read as proper badges.
@@ -93,8 +93,8 @@ A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--p
 - `<EditorialHero>` — Phase 3 hero shell + R1.5 per-articleType variants (`announcement` / `interview` / `event` / `transfer`). Two `placement`s: `"detail"` (default — no link wrapper) and `"homepage"` (wrapped in `<Link>`, requires `slug`). Homepage placement adds a `hoverStyle?: "press" | "tilt-photo"` prop — `"press"` is the canonical paper-stamp press-down used by the (retired) `<HomepageHeroCarousel>`; `"tilt-photo"` lets only the cover `<TapedFigure>` tilt + scale on hover, used by the static `/` hero where a 2px translate on a full-width block reads as a twitch.
 - `<FeaturedUitgelichtRow>` — R1.6.A equal-3-up featured row for the homepage spine. Drops itself when no featured articles are present and renders fewer cards rather than padding from the recent-articles pool.
 - `<ClubshopBanner>` — renamed from `<WebshopBanner>` per R6.C. Jersey-deep-dark full-bleed band with mirrored `<StripedSeam>` top + bottom, the new copy ("Onze clubkledij." + Brandsfit attribution), and a small `<JerseyShirt>` flourish.
-- `<JerseyShirt>` — new design-system primitive: paper-graphic jersey illustration (two-pass print, jersey-deep underprint + ink overprint, ink stripes; no Celtic green/white, no sponsors, no photo-realism). Composes with `<TapedFigure>` for the PlayerFigure no-photo fallback per `project_jersey_illustration_vocabulary`.
-- `<HomepageHeroCarousel>` — retired and moved to `apps/web/src/components/home/_legacy/`. Replaced on `/` by a static `<EditorialHero placement="homepage" hoverStyle="tilt-photo">` + `<FeaturedUitgelichtRow>` per R1.B.
+- `<JerseyShirt>` — new design-system primitive: paper-graphic jersey illustration (two-pass print, jersey-deep underprint + ink overprint, ink stripes; no Celtic green/white, no sponsors, no photo-realism) per `project_jersey_illustration_vocabulary`.
+- `<HomepageHeroCarousel>` — retired and removed in Phase 9 cleanup (#1531). Replaced on `/` by a static `<EditorialHero placement="homepage" hoverStyle="tilt-photo">` + `<FeaturedUitgelichtRow>` per R1.B.
 
 **New tokens (Phase 4.5, R9 photo-treatment system in `globals.css`):**
 
@@ -107,7 +107,7 @@ The R9-locked "layered hover Variant A" (photo `translateY(-2)` on parent `:hove
 
 **Phase 5 additions (article-detail redesign — `/nieuws/[slug]`):**
 
-- `<ArticleBody>` — Portable Text renderer for the new article body; wires the per-block serializers below and replaces the legacy `<SanityArticleBody>` on `/nieuws/[slug]`. `<SanityArticleBody>` still backs `/club/[slug]` and `/staf/[slug]` until Phases 6 and 7.
+- `<ArticleBody>` — Portable Text renderer for the article body; wires the per-block serializers below. Backs `/nieuws/[slug]`, `/club/[slug]`, and `/staf/[slug]` (the legacy `<SanityArticleBody>` it superseded has been removed).
 - `<QARow>` — single Q&A row primitive (speaker avatar + question + answer body). Replaces the retired `<QaPairStandard>` / `<QaPairKey>` / `<QaPairQuote>` trio.
 - `<QASection>` + `qaBlocksToTailSection` — groups trailing `groupAtTail`-tagged Q&A blocks into a single rapid-fire section under a tail-section header. Header composition locked to `<EditorialHeading size="display-xl" emphasis={{ text: "Q&A", highlight: true }}>` per `docs/design/mockups/phase-5-article-detail/tail-qa-header-locked.md` (#1874, supersedes the original `<MonoLabel>` from `interview-locked.md`).
 - `<ArticleCredits>` — long-form credit panel (Door / Met / Beeld / Gepubliceerd) at article footer. Replaces the legacy `<InterviewCredits>`; cross-variant — renders whenever `author`, `photographer`, or `subjects[]` is populated. Schema additions: `article.author` + `article.photographer` (both optional strings).
@@ -153,7 +153,7 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 - `<TeamHero>` — category-forward detail hero (`A-ploeg.` / `U13.` from the team name); kicker, division/season MonoLabel pills, italic tagline lead; landscape `<TapedFigure>` newsprint photo or `<JerseyShirt>` fallback + dashed season stub.
 - `<StandingsTable>` — classic retro standings; KCVV row tinted (`color-mix(jersey-deep 12%, cream)`) + jersey-deep left accent; no Vorm column; mobile drops `W·G·V`; auto-hides on empty.
 - `<TeamAgendaRow>` + `<TeamMatchesSection>` — responsive match row (desktop symmetric scoreboard / mobile KCVV-centric column); outcome as a flat colour underline on the score (win jersey-deep / draw none / loss brick `--color-alert`); teaser = featured next match + recent rows + "Volledige kalender →". `"use client"` (imports ESM-only Phosphor icons).
-- `<SquadGrid>` + `<PlayerCard>` — position-grouped squad (Doelmannen / Verdedigers / Middenvelders / Aanvallers + trailing "Spelers" catch-all); card = newsprint `<PlayerFigure>` vocabulary + jersey-deep number disc, links to `/spelers/[slug]`.
+- `<SquadGrid>` + `<PlayerCard>` — position-grouped squad (Doelmannen / Verdedigers / Middenvelders / Aanvallers + trailing "Spelers" catch-all); card = newsprint jersey-illustration vocabulary (`_jersey-paths.ts` / `<JerseyShirt>`) + jersey-deep number disc, links to `/spelers/[slug]`.
 - `<TeamStaff>` — compact centred staff cards; round newsprint photo or jersey-deep monogram; `resolveFunctionLabel` maps PSD codes (T1→Hoofdtrainer, …) with role-bucket fallback.
 - `<TeamEditorial>` — body / trainingSchedule / contactInfo blocks, each auto-hiding; reuses the 6.A `pullquote` decorator for a "Het verhaal" pull-quote. Schema delta: `pullquote` decorator added to `team.body` marks (no migration).
 - `<TeamFlagship>` — listing A+B paired mirrored flagships (A jersey-deep content-left/photo-right; B cream mirrored). `<YouthDirectory>` — Bovenbouw/Middenbouw/Onderbouw age-code cards. `<TeamSectionNav>` — sticky in-page section nav (auto-hide aware).

@@ -98,29 +98,3 @@ export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
 );
 
 Spinner.displayName = "Spinner";
-
-export interface FullPageSpinnerProps {
-  /**
-   * Accessible label for screen readers.
-   * @default 'Loading page...'
-   */
-  label?: string;
-  /**
-   * Size of the spinner.
-   * @default 'xl'
-   */
-  size?: SpinnerSize;
-}
-
-export const FullPageSpinner = ({
-  label = "Loading page...",
-  size = "xl",
-}: FullPageSpinnerProps) => {
-  return (
-    <div className="bg-cream/85 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
-      <Spinner size={size} label={label} />
-    </div>
-  );
-};
-
-FullPageSpinner.displayName = "FullPageSpinner";

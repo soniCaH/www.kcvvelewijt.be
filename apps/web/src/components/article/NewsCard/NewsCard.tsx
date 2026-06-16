@@ -2,7 +2,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import { Calendar, Clock, ExternalLink } from "@/lib/icons";
 import {
   TapedCard,
   type TapedCardBg,
@@ -35,21 +34,13 @@ export interface NewsCardProps {
    * preview/recap cards on the news index; omit on other types.
    */
   typeLabel?: string;
-  /** Display date for articles (shown in MonoLabel row when no event meta). */
+  /** Display date for articles (shown in MonoLabel row). */
   date?: string;
-  /** ISO datetime or formatted string for event date (shown with Calendar icon). */
-  eventDate?: string;
-  /** HH:MM time string for events (shown with Clock icon). */
-  eventTime?: string;
-  /** Countdown label shown in the footer chip (e.g. "over 33 dagen"). */
-  countdown?: string;
   /**
    * Optional lead/dek paragraph (article `lead` field). Falls back to nothing
    * when absent — cards with no lead still read correctly.
    */
   dek?: string;
-  /** When true, full-card link opens in a new tab with an ExternalLink indicator. */
-  isExternal?: boolean;
   variant?: NewsCardVariant;
   /**
    * Aspect ratio of the top image region. Defaults to 16:9 per the locked
@@ -167,11 +158,7 @@ export const NewsCard = ({
   badge,
   typeLabel,
   date,
-  eventDate,
-  eventTime,
-  countdown,
   dek,
-  isExternal,
   variant = "standard",
   aspectRatio = "landscape-16-9",
   rotation = "none",
@@ -187,8 +174,7 @@ export const NewsCard = ({
   const headingTone: EditorialHeadingTone = isDark ? "cream" : "ink";
   const headingSize = variant === "featured" ? "display-md" : "display-sm";
 
-  const hasFooterMeta =
-    Boolean(countdown) || Boolean(date && !eventDate && !eventTime);
+  const hasFooterMeta = Boolean(date);
 
   // Meta panel owns its padding (outer card is `padding="none"`). The
   // featured variant gets the larger lg-equivalent inset; standard +
@@ -286,9 +272,9 @@ export const NewsCard = ({
           metaPadding,
         )}
       >
-        {/* MonoLabel row — type kicker + badge + optional event meta. Truthy
-            check (not `??`) guards against empty-string CMS values. */}
-        {(typeLabel || badge || eventDate || eventTime) && (
+        {/* MonoLabel row — type kicker + badge. Truthy check (not `??`)
+            guards against empty-string CMS values. */}
+        {(typeLabel || badge) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {typeLabel && (
               <span
@@ -306,22 +292,6 @@ export const NewsCard = ({
               </span>
             )}
             {badge && <MonoLabel tone={labelTone}>{badge}</MonoLabel>}
-            {eventDate && (
-              <MonoLabel tone={labelTone}>
-                <span className="inline-flex items-center gap-1">
-                  <Calendar className="h-3 w-3 flex-shrink-0" aria-hidden />
-                  <time>{eventDate}</time>
-                </span>
-              </MonoLabel>
-            )}
-            {eventTime && (
-              <MonoLabel tone={labelTone}>
-                <span className="inline-flex items-center gap-1">
-                  <Clock className="h-3 w-3 flex-shrink-0" aria-hidden />
-                  {eventTime}
-                </span>
-              </MonoLabel>
-            )}
           </div>
         )}
 
@@ -362,12 +332,11 @@ export const NewsCard = ({
             )}
           >
             <div className="flex items-center gap-3 text-xs">
-              {date && !eventDate && !eventTime && (
+              {date && (
                 <MonoLabel tone={labelTone}>
                   <time>{date}</time>
                 </MonoLabel>
               )}
-              {countdown && <MonoLabel tone={labelTone}>{countdown}</MonoLabel>}
             </div>
             {href && (
               <span
@@ -389,14 +358,7 @@ export const NewsCard = ({
                   isDark ? "text-cream" : "text-jersey-deep",
                 )}
               >
-                {isExternal ? (
-                  <>
-                    Bekijk
-                    <ExternalLink className="h-3 w-3" aria-hidden />
-                  </>
-                ) : (
-                  <>Lees verder →</>
-                )}
+                Lees verder →
               </span>
             )}
           </div>
@@ -406,11 +368,7 @@ export const NewsCard = ({
       {href && (
         <Link
           href={href}
-          aria-label={
-            isExternal
-              ? `${title.trim() || "Nieuwsbericht"} (opent in nieuw venster)`
-              : title.trim() || "Nieuwsbericht"
-          }
+          aria-label={title.trim() || "Nieuwsbericht"}
           data-variant={variant}
           data-rotation={rotation}
           data-aspect={aspectRatio}
@@ -420,9 +378,6 @@ export const NewsCard = ({
             // Outline tone follows surface — ink outline disappears on bg=ink.
             isDark ? "focus-visible:outline-warm" : "focus-visible:outline-ink",
           )}
-          {...(isExternal
-            ? { target: "_blank", rel: "noopener noreferrer" }
-            : {})}
         />
       )}
     </TapedCard>
