@@ -429,6 +429,8 @@ export function SharePage({ matches, players }: SharePageProps) {
     uploadUrlRef.current = url;
     setUploadedImageUrl(url);
     clearPreview();
+    // Reset the input so re-picking the same file still fires onChange.
+    e.target.value = "";
   };
 
   useEffect(() => {

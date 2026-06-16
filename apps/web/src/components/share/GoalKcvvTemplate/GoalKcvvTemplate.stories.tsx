@@ -7,6 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof GoalKcvvTemplate>;
 
 export default meta;
@@ -19,8 +20,7 @@ export const WithImage: Story = {
     score: "1 - 0",
     matchName: "KCVV Elewijt — Eppegem",
     minute: "67",
-    imageUrl:
-      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
+    imageUrl: "/images/ultras.jpg",
   },
 };
 

@@ -7,6 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof SharePage>;
 
 export default meta;
@@ -40,8 +41,7 @@ export const Default: Story = {
         firstName: "Jan",
         lastName: "Janssen",
         number: 14,
-        celebrationImageUrl:
-          "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
+        celebrationImageUrl: "/images/ultras.jpg",
       },
       { id: "p2", firstName: "Piet", lastName: "Pieters", number: 9 },
       { id: "p3", firstName: "Ali", lastName: "Zengin", number: 7 },

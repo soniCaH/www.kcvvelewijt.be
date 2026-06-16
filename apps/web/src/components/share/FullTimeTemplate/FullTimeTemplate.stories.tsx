@@ -7,6 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof FullTimeTemplate>;
 
 export default meta;
@@ -38,7 +39,7 @@ export const Draw: Story = {
 export const Loss: Story = {
   args: {
     matchName: "Sporting Hasselt — KCVV Elewijt",
-    score: "1 - 3",
+    score: "3 - 1",
     mood: "loss",
     competition: "2e Provinciale",
     homeLogo: OPPONENT_CREST,
@@ -51,7 +52,6 @@ export const WinWithImage: Story = {
     score: "3 - 1",
     mood: "win",
     competition: "2e Provinciale",
-    imageUrl:
-      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
+    imageUrl: "/images/ultras.jpg",
   },
 };

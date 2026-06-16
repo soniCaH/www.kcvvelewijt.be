@@ -7,6 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof HalftimeTemplate>;
 
 export default meta;
@@ -29,8 +30,7 @@ export const WithImage: Story = {
     matchName: "KCVV Elewijt — Eppegem",
     score: "2 - 0",
     competition: "2e Provinciale",
-    imageUrl:
-      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
+    imageUrl: "/images/ultras.jpg",
   },
 };
 

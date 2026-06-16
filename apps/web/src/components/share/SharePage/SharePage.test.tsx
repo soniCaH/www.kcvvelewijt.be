@@ -632,4 +632,37 @@ describe("SharePage", () => {
       screen.getByRole("button", { name: /foto verwijderen/i }),
     ).toBeInTheDocument();
   });
+
+  // ─── No-op guards (re-selecting the active aspect / template) ──────────────
+
+  it("re-clicking the active Story aspect is a no-op (state stable)", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    const storyToggle = screen.getByRole("button", { name: /story · 9:16/i });
+    await user.click(storyToggle);
+
+    expect(storyToggle).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /goal kcvv/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("re-clicking the active template keeps it selected without churn", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    // Set a session field, then re-click the already-active template.
+    const scoreInput = screen.getByPlaceholderText(/2 - 0/i);
+    await user.clear(scoreInput);
+    await user.type(scoreInput, "3 - 1");
+
+    const goalKcvvBtn = screen.getByRole("button", { name: /goal kcvv/i });
+    await user.click(goalKcvvBtn);
+
+    expect(goalKcvvBtn).toHaveAttribute("aria-pressed", "true");
+    // The guard returns early, so session fields are untouched.
+    expect(screen.getByPlaceholderText(/2 - 0/i)).toHaveValue("3 - 1");
+  });
 });

@@ -25,6 +25,7 @@ const meta = {
   title: "Features/Share/_Primitives",
   component: ShareFrame,
   parameters: { layout: "fullscreen" },
+  tags: ["autodocs"],
 } satisfies Meta<typeof ShareFrame>;
 
 export default meta;
@@ -95,8 +96,7 @@ export const ImageRegister: Story = {
     ...base,
     register: "image",
     overlay: "shout",
-    imageUrl:
-      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
+    imageUrl: "/images/ultras.jpg",
     children: (
       <>
         <ShareTop />

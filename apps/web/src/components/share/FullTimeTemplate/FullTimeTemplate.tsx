@@ -52,19 +52,34 @@ export function FullTimeTemplate({
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
 
-  const accentBand =
-    mood === "draw" ? (
-      <Seam width="60%" style={{ margin: "8px 0 4px" }} />
-    ) : (
-      <HalftoneBand
-        width="64%"
-        color={
-          mood === "loss" ? "rgba(201,63,28,0.5)" : "rgba(245,241,230,0.5)"
-        }
-        height={46}
-        style={{ margin: "8px 0 4px" }}
-      />
-    );
+  // Per-mood accent under the result headline. Exhaustive switch over the
+  // result-mood union so a future mood is caught at compile time.
+  const accentBand = (() => {
+    switch (mood) {
+      case "draw":
+        return <Seam width="60%" style={{ margin: "8px 0 4px" }} />;
+      case "loss":
+        return (
+          <HalftoneBand
+            width="64%"
+            color="rgba(201,63,28,0.5)"
+            height={46}
+            style={{ margin: "8px 0 4px" }}
+          />
+        );
+      case "win":
+        return (
+          <HalftoneBand
+            width="64%"
+            color="rgba(245,241,230,0.5)"
+            height={46}
+            style={{ margin: "8px 0 4px" }}
+          />
+        );
+      default:
+        return mood satisfies never;
+    }
+  })();
 
   return (
     <ShareFrame

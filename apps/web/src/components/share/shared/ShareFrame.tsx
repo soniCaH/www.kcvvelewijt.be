@@ -71,6 +71,19 @@ export function ShareFrame({
   const palette = resolvePalette(register, sentiment);
   const surface = register === "dark" ? TOKENS.jerseyDeepDark : TOKENS.cream;
 
+  // Allowlist the photo scheme before it reaches an <img src>: a user-picked
+  // file (object URL) or a Sanity/CDN https URL is fine; reject anything that
+  // could smuggle markup (`data:` / `javascript:`). Guards CodeQL
+  // js/xss-through-dom and is genuine defence-in-depth for the upload path.
+  const photoUrl =
+    imageUrl &&
+    (imageUrl.startsWith("blob:") ||
+      imageUrl.startsWith("https://") ||
+      imageUrl.startsWith("http://") ||
+      imageUrl.startsWith("/"))
+      ? imageUrl
+      : undefined;
+
   return (
     <SharePaletteContext.Provider value={palette}>
       <div
@@ -85,11 +98,11 @@ export function ShareFrame({
           color: palette.text,
         }}
       >
-        {register === "image" && imageUrl && (
+        {register === "image" && photoUrl && (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageUrl}
+              src={photoUrl}
               alt=""
               aria-hidden="true"
               crossOrigin="anonymous"
