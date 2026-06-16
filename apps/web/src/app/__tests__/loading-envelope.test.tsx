@@ -198,7 +198,7 @@ describe("loading.tsx envelope drift guard", () => {
       name: "/tegenstander/[clubId]",
       Loading: TegenstanderLoading,
       // Phase 10 (#2141): reskinned to the cream-deep paper register, matching
-      // the page's `bg-cream-deep` wrapper + footer-safe area.
+      // the page's `bg-cream-deep` wrapper.
       expectedRootClass: "bg-cream-deep min-h-screen",
     },
     {
