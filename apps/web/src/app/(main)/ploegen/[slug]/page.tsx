@@ -30,7 +30,8 @@ import { TeamEnrolmentCta } from "@/components/team/TeamEnrolmentCta";
 import { TeamStaff } from "@/components/team/TeamStaff";
 import { TeamEditorial } from "@/components/team/TeamEditorial";
 import { SponsorsSection } from "@/components/home/SponsorsSection";
-import { RelatedArticlesSection } from "@/components/related/RelatedArticlesSection";
+import { VerderLezenRow } from "@/components/article/VerderLezenRow";
+import { articleVMsToVerderLezenItems } from "@/lib/utils/article-related-items";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { hasRenderableBioContent } from "@/lib/portable-text/findPullquoteText";
 import { transformMatchToSchedule } from "@/components/match";
@@ -297,11 +298,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
         </>
       ) : null}
 
-      <RelatedArticlesSection
-        articles={relatedArticles}
+      {/* Full-bleed cream "Verder lezen." slider — auto-hides when empty. */}
+      <VerderLezenRow
+        items={articleVMsToVerderLezenItems(relatedArticles)}
         pageType="team"
         pageSlug={slug}
-        className="mx-auto max-w-4xl px-4 pt-10 pb-8"
       />
 
       <SponsorsSection />
