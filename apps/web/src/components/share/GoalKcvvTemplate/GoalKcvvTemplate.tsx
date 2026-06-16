@@ -49,8 +49,8 @@ export function GoalKcvvTemplate({
   imageUrl,
 }: GoalKcvvTemplateProps) {
   const hasImage = Boolean(imageUrl);
+  const hasNumber = shirtNumber != null;
   const standScore = formatScore(score);
-  const numberLabel = shirtNumber ?? "—";
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
 
   if (hasImage) {
@@ -84,10 +84,13 @@ export function GoalKcvvTemplate({
               gap: "44px",
             }}
           >
-            <NumDisc size={185} fontSize={107}>
-              {numberLabel}
-            </NumDisc>
-            <div>
+            {hasNumber && (
+              <NumDisc size={185} fontSize={107}>
+                {shirtNumber}
+              </NumDisc>
+            )}
+            {/* flex + minWidth:0 bounds the column so the name auto-fits */}
+            <div style={{ flex: 1, minWidth: 0 }}>
               <ShareName fontSize={108}>{playerName}</ShareName>
               <Meta style={{ marginTop: "14px" }}>Stand {standScore}</Meta>
             </div>
@@ -106,12 +109,14 @@ export function GoalKcvvTemplate({
       decor={
         <>
           <PitchStripes />
-          <GhostNumeral
-            fontSize={1208}
-            style={{ right: "-90px", top: "-110px" }}
-          >
-            {numberLabel}
-          </GhostNumeral>
+          {hasNumber && (
+            <GhostNumeral
+              fontSize={1208}
+              style={{ right: "-90px", top: "-110px" }}
+            >
+              {shirtNumber}
+            </GhostNumeral>
+          )}
         </>
       }
     >
@@ -138,9 +143,11 @@ export function GoalKcvvTemplate({
               marginTop: "40px",
             }}
           >
-            <NumDisc size={163} fontSize={92}>
-              {numberLabel}
-            </NumDisc>
+            {hasNumber && (
+              <NumDisc size={163} fontSize={92}>
+                {shirtNumber}
+              </NumDisc>
+            )}
             <Meta>
               {minute}&apos; · Stand {standScore}
             </Meta>

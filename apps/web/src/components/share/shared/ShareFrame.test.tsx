@@ -66,6 +66,20 @@ describe("ShareName auto-fit", () => {
       expect(screen.getByText("Mertens")).toHaveStyle({ fontSize: "185px" });
     });
   });
+
+  it("keeps the base size when the DOM can't be measured (clientWidth 0)", () => {
+    withMeasuredWidths(0, 2000, () => {
+      render(
+        <ShareFrame width={1080} height={1920} register="cream">
+          <ShareName fontSize={185}>Amirgan Bouakhounov</ShareName>
+        </ShareFrame>,
+      );
+      // available <= 0 → guard returns early → base size retained
+      expect(screen.getByText("Amirgan Bouakhounov")).toHaveStyle({
+        fontSize: "185px",
+      });
+    });
+  });
 });
 
 describe("ShareFrame", () => {

@@ -1,6 +1,39 @@
 import { KCVV_LOGO, TOKENS } from "../constants";
 
 /**
+ * Hosts allowlisted in `next.config` `images.remotePatterns` — safe to route
+ * through the same-origin Next image optimizer.
+ */
+const OPTIMIZER_HOSTS = new Set([
+  "cdn.sanity.io",
+  "api.kcvvelewijt.be",
+  "dfaozfi7c7f3s.cloudfront.net",
+]);
+
+/**
+ * Route a remote image through the same-origin Next image optimizer so
+ * `html-to-image` can read it during capture. Cross-origin CDNs (e.g.
+ * `cdn.sanity.io`) send no `Access-Control-Allow-Origin` header, which taints
+ * the canvas and makes `toPng` fail with a CORS error. Local/blob/data URLs and
+ * non-allowlisted hosts pass through unchanged (the optimizer would 400 on a
+ * host that isn't in `remotePatterns`).
+ */
+export function toSameOriginImage(
+  url: string | undefined,
+  width: number,
+): string | undefined {
+  if (!url || !/^https?:\/\//i.test(url)) return url;
+  try {
+    if (OPTIMIZER_HOSTS.has(new URL(url).hostname)) {
+      return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=75`;
+    }
+  } catch {
+    // malformed URL → leave unchanged
+  }
+  return url;
+}
+
+/**
  * Voice register for a share card (locked design `sh4`):
  * - `cream` — register A, the calm/sober cream sheet.
  * - `dark`  — register B, the loud jersey-deep poster.

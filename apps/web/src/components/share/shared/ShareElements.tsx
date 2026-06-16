@@ -109,9 +109,17 @@ export function ShareName({
     // Measure intrinsic (single-line) width at the base size, then scale to fit.
     text.style.fontSize = `${fontSize}px`;
     const intrinsic = text.scrollWidth;
+    // Scale DOWN only: clamp to [minFontSize, fontSize] so a small base size
+    // (< minFontSize) is never upscaled.
     const next =
       intrinsic > available
-        ? Math.max(minFontSize, Math.floor((fontSize * available) / intrinsic))
+        ? Math.min(
+            fontSize,
+            Math.max(
+              minFontSize,
+              Math.floor((fontSize * available) / intrinsic),
+            ),
+          )
         : fontSize;
     setSize(next);
   }, [fontSize, children, minFontSize]);
