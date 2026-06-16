@@ -3,31 +3,33 @@ import { render, screen } from "@testing-library/react";
 import { YellowCardOpponentTemplate } from "./YellowCardOpponentTemplate";
 
 const defaultProps = {
-  matchName: "KCVV Elewijt - FC Opponent",
-  minute: "38",
+  matchName: "KCVV Elewijt — Eppegem",
+  minute: "60",
 };
 
 describe("YellowCardOpponentTemplate", () => {
-  it("renders a yellow card label", () => {
+  it("renders the gele kaart · tegenstander kicker", () => {
     render(<YellowCardOpponentTemplate {...defaultProps} />);
-    expect(screen.getByText(/yellow.?card|gele kaart/i)).toBeInTheDocument();
+    expect(screen.getByText("Gele kaart · tegenstander")).toBeInTheDocument();
   });
 
-  it("renders match name", () => {
+  it("names the opponent", () => {
     render(<YellowCardOpponentTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
+    expect(screen.getByText("Eppegem")).toBeInTheDocument();
   });
 
-  it("renders minute", () => {
+  it("renders the minute", () => {
     render(<YellowCardOpponentTemplate {...defaultProps} />);
-    expect(screen.getByText(/38/)).toBeInTheDocument();
+    expect(screen.getByText("60'")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
     const { container } = render(
       <YellowCardOpponentTemplate {...defaultProps} />,
     );
-    const template = container.firstChild as HTMLElement;
-    expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
+    expect(container.firstChild).toHaveStyle({
+      width: "1080px",
+      height: "1920px",
+    });
   });
 });

@@ -3,41 +3,47 @@ import { render, screen } from "@testing-library/react";
 import { YellowCardKcvvTemplate } from "./YellowCardKcvvTemplate";
 
 const defaultProps = {
-  playerName: "Kevin Van Ransbeeck",
-  shirtNumber: 10,
-  matchName: "KCVV Elewijt - FC Opponent",
-  minute: "55",
+  playerName: "De Smet",
+  shirtNumber: 4,
+  matchName: "KCVV Elewijt — Eppegem",
+  minute: "54",
 };
 
 describe("YellowCardKcvvTemplate", () => {
-  it("renders a yellow card label", () => {
+  it("renders the gele kaart · KCVV kicker", () => {
     render(<YellowCardKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText(/yellow.?card|gele kaart/i)).toBeInTheDocument();
+    expect(screen.getByText("Gele kaart · KCVV")).toBeInTheDocument();
   });
 
-  it("renders player name", () => {
+  it("renders the player name", () => {
     render(<YellowCardKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText("Kevin Van Ransbeeck")).toBeInTheDocument();
+    expect(screen.getByText("De Smet")).toBeInTheDocument();
   });
 
-  it("renders shirt number", () => {
+  it("renders the shirt number and minute on the meta line", () => {
     render(<YellowCardKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText("10")).toBeInTheDocument();
-  });
-
-  it("renders match name", () => {
-    render(<YellowCardKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
-  });
-
-  it("renders minute", () => {
-    render(<YellowCardKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText(/55/)).toBeInTheDocument();
+    expect(screen.getByText("Nr. 4 · 54'")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
     const { container } = render(<YellowCardKcvvTemplate {...defaultProps} />);
-    const template = container.firstChild as HTMLElement;
-    expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
+    expect(container.firstChild).toHaveStyle({
+      width: "1080px",
+      height: "1920px",
+    });
+  });
+
+  it("shows the full matchup in the footer for an away match", () => {
+    // Regression: the footer used `${home} — ${opponent}`, which collapsed to
+    // "Sporting Hasselt — Sporting Hasselt" when KCVV played away.
+    render(
+      <YellowCardKcvvTemplate
+        {...defaultProps}
+        matchName="Sporting Hasselt — KCVV Elewijt"
+      />,
+    );
+    expect(
+      screen.getByText("Sporting Hasselt — KCVV Elewijt"),
+    ).toBeInTheDocument();
   });
 });

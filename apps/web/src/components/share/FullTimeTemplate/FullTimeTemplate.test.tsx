@@ -3,40 +3,58 @@ import { render, screen } from "@testing-library/react";
 import { FullTimeTemplate } from "./FullTimeTemplate";
 
 const defaultProps = {
-  matchName: "KCVV Elewijt — FC Opponent",
-  score: "2 - 1",
+  matchName: "KCVV Elewijt — Eppegem",
+  score: "3 - 1",
   mood: "win" as const,
+  competition: "2e Provinciale",
 };
 
 describe("FullTimeTemplate", () => {
-  it("renders a full-time label", () => {
+  it("renders the Eindstand kicker", () => {
     render(<FullTimeTemplate {...defaultProps} />);
-    expect(screen.getByText(/full.?time|eindstand/i)).toBeInTheDocument();
+    expect(screen.getByText("Eindstand")).toBeInTheDocument();
   });
 
-  it("renders score", () => {
+  it("renders the score with a tight en-dash", () => {
     render(<FullTimeTemplate {...defaultProps} />);
-    expect(screen.getByText("2 - 1")).toBeInTheDocument();
+    expect(screen.getByText("3–1")).toBeInTheDocument();
   });
 
-  it("renders match name", () => {
+  it("renders the win headline with a warm bang", () => {
+    render(<FullTimeTemplate {...defaultProps} mood="win" />);
+    const heading = screen.getByRole("heading", { name: /gewonnen/i });
+    expect(heading.textContent).toBe("Gewonnen!");
+  });
+
+  it("renders the draw headline with a sober period", () => {
+    render(<FullTimeTemplate {...defaultProps} mood="draw" score="2 - 2" />);
+    const heading = screen.getByRole("heading", { name: /gelijkspel/i });
+    expect(heading.textContent).toBe("Gelijkspel.");
+  });
+
+  it("renders the loss headline with a sober period", () => {
+    render(<FullTimeTemplate {...defaultProps} mood="loss" score="1 - 3" />);
+    const heading = screen.getByRole("heading", { name: /verloren/i });
+    expect(heading.textContent).toBe("Verloren.");
+  });
+
+  it("shows the competition and the teams in the footer", () => {
     render(<FullTimeTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt — FC Opponent")).toBeInTheDocument();
+    expect(screen.getByText("2e Provinciale")).toBeInTheDocument();
+    expect(screen.getByText("KCVV Elewijt — Eppegem")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
     const { container } = render(<FullTimeTemplate {...defaultProps} />);
-    const template = container.firstChild as HTMLElement;
-    expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
+    expect(container.firstChild).toHaveStyle({
+      width: "1080px",
+      height: "1920px",
+    });
   });
 
-  it("renders draw mood headline", () => {
-    render(<FullTimeTemplate {...defaultProps} mood="draw" />);
-    expect(screen.getByText("GELIJKSPEL")).toBeInTheDocument();
-  });
-
-  it("renders loss mood headline", () => {
-    render(<FullTimeTemplate {...defaultProps} mood="loss" />);
-    expect(screen.getByText("VERLOREN")).toBeInTheDocument();
+  it("renders a fullscreen newsprint photo when an image is supplied", () => {
+    render(<FullTimeTemplate {...defaultProps} imageUrl="blob:ft" />);
+    const img = document.querySelector('img[src="blob:ft"]');
+    expect(img).toHaveAttribute("crossorigin", "anonymous");
   });
 });

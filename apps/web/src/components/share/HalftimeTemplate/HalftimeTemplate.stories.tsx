@@ -12,23 +12,33 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Leading: Story = {
+// Placeholder opponent crest for Storybook (real value: away_team.logo).
+const OPPONENT_CREST = "/images/logo-flat.png";
+
+export const NoImage: Story = {
   args: {
-    matchName: "KCVV Elewijt — FC Opponent",
-    score: "1 - 0",
+    matchName: "KCVV Elewijt — Eppegem",
+    score: "2 - 0",
+    competition: "2e Provinciale",
+    awayLogo: OPPONENT_CREST,
+  },
+};
+
+export const WithImage: Story = {
+  args: {
+    matchName: "KCVV Elewijt — Eppegem",
+    score: "2 - 0",
+    competition: "2e Provinciale",
+    imageUrl:
+      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
   },
 };
 
 export const Trailing: Story = {
   args: {
-    matchName: "KCVV Elewijt — FC Opponent",
+    matchName: "Sporting Hasselt — KCVV Elewijt",
     score: "0 - 1",
-  },
-};
-
-export const Level: Story = {
-  args: {
-    matchName: "KCVV Elewijt — Sporting Hasselt",
-    score: "1 - 1",
+    competition: "2e Provinciale",
+    homeLogo: OPPONENT_CREST,
   },
 };

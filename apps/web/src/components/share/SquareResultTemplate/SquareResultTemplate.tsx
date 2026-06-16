@@ -1,4 +1,4 @@
-import { CAPTURE_HEIGHT, CAPTURE_WIDTH } from "../constants";
+import { SQUARE_SIZE } from "../constants";
 import {
   ShareFrame,
   ShareFoot,
@@ -7,12 +7,10 @@ import {
 } from "../shared/ShareFrame";
 import {
   CrestMatchup,
-  HalftoneBand,
   Headline,
   Kicker,
   Meta,
   Scoreline,
-  Seam,
 } from "../shared/ShareElements";
 import {
   resolveCrests,
@@ -20,12 +18,10 @@ import {
   type ResultMood,
 } from "../shared/theme";
 
-export type FullTimeMood = ResultMood;
-
-export interface FullTimeTemplateProps {
+export interface SquareResultTemplateProps {
   matchName: string;
   score: string;
-  mood: FullTimeMood;
+  mood: ResultMood;
   competition?: string;
   /** Club crest URLs (KCVV's side falls back to the local crest). */
   homeLogo?: string;
@@ -35,11 +31,10 @@ export interface FullTimeTemplateProps {
 }
 
 /**
- * Eindstand (full-time) template — 1080×1920 Instagram Story. The score is the
- * hero. Win → loud register B; draw → calm cream; loss → sober cream/brick.
- * Register A/B by default, or a fullscreen newsprint photo when supplied.
+ * Result template — 1:1 (1080×1080) Instagram feed post. Score + result
+ * headline over the mood register, or a fullscreen newsprint photo.
  */
-export function FullTimeTemplate({
+export function SquareResultTemplate({
   matchName,
   score,
   mood,
@@ -47,29 +42,15 @@ export function FullTimeTemplate({
   homeLogo,
   awayLogo,
   imageUrl,
-}: FullTimeTemplateProps) {
+}: SquareResultTemplateProps) {
   const m = resolveResultMood(mood);
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
 
-  const accentBand =
-    mood === "draw" ? (
-      <Seam width="60%" style={{ margin: "8px 0 4px" }} />
-    ) : (
-      <HalftoneBand
-        width="64%"
-        color={
-          mood === "loss" ? "rgba(201,63,28,0.5)" : "rgba(245,241,230,0.5)"
-        }
-        height={46}
-        style={{ margin: "8px 0 4px" }}
-      />
-    );
-
   return (
     <ShareFrame
-      width={CAPTURE_WIDTH}
-      height={CAPTURE_HEIGHT}
+      width={SQUARE_SIZE}
+      height={SQUARE_SIZE}
       register={hasImage ? "image" : m.register}
       sentiment={m.sentiment}
       imageUrl={imageUrl}
@@ -80,30 +61,29 @@ export function FullTimeTemplate({
         {!hasImage && (
           <CrestMatchup
             crests={crests}
-            size={236}
-            style={{ marginBottom: "48px" }}
+            size={150}
+            style={{ marginBottom: "24px" }}
           />
         )}
         <Kicker>Eindstand</Kicker>
         <Scoreline
-          fontSize={460}
+          fontSize={286}
           style={{
-            marginTop: "20px",
-            textShadow: hasImage ? "10px 14px 0 rgba(0,0,0,0.45)" : undefined,
+            marginTop: "14px",
+            textShadow: hasImage ? "8px 12px 0 rgba(0,0,0,0.45)" : undefined,
           }}
         >
           {score}
         </Scoreline>
         <Headline
           punctuation={m.punctuation}
-          fontSize={170}
-          style={{ marginTop: "28px" }}
+          fontSize={116}
+          style={{ marginTop: "18px" }}
         >
           {m.headline}
         </Headline>
-        {!hasImage && accentBand}
         {competition && (
-          <Meta style={{ marginTop: "28px" }}>{competition}</Meta>
+          <Meta style={{ marginTop: "36px" }}>{competition}</Meta>
         )}
       </ShareMid>
       <ShareFoot left={matchName} align="center" />

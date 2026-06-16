@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { GoalOpponentTemplate } from "./GoalOpponentTemplate";
+import { SquarePreGameTemplate } from "./SquarePreGameTemplate";
 
 const meta = {
-  title: "Features/Share/GoalOpponentTemplate",
-  component: GoalOpponentTemplate,
+  title: "Features/Share/SquarePreGameTemplate",
+  component: SquarePreGameTemplate,
   parameters: {
     layout: "fullscreen",
   },
-} satisfies Meta<typeof GoalOpponentTemplate>;
+} satisfies Meta<typeof SquarePreGameTemplate>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -15,22 +15,21 @@ type Story = StoryObj<typeof meta>;
 // Placeholder opponent crest for Storybook (real value: away_team.logo).
 const OPPONENT_CREST = "/images/logo-flat.png";
 
-export const Default: Story = {
+export const NoImage: Story = {
   args: {
-    score: "2 - 1",
     matchName: "KCVV Elewijt — Eppegem",
-    minute: "78",
     competition: "2e Provinciale",
+    dateTime: "Zaterdag · 20:00",
     awayLogo: OPPONENT_CREST,
   },
 };
 
-export const EarlyGoal: Story = {
+export const WithImage: Story = {
   args: {
-    score: "0 - 1",
-    matchName: "KCVV Elewijt — Sporting Hasselt",
-    minute: "12",
+    matchName: "KCVV Elewijt — Eppegem",
     competition: "2e Provinciale",
-    awayLogo: OPPONENT_CREST,
+    dateTime: "Zaterdag · 20:00",
+    imageUrl:
+      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
   },
 };

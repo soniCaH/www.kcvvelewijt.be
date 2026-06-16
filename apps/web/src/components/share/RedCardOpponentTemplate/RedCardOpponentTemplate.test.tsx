@@ -3,29 +3,32 @@ import { render, screen } from "@testing-library/react";
 import { RedCardOpponentTemplate } from "./RedCardOpponentTemplate";
 
 const defaultProps = {
-  matchName: "KCVV Elewijt - FC Opponent",
-  minute: "82",
+  matchName: "KCVV Elewijt — Eppegem",
+  minute: "81",
 };
 
 describe("RedCardOpponentTemplate", () => {
-  it("renders a red card label", () => {
+  it("renders the rode kaart · tegenstander kicker", () => {
     render(<RedCardOpponentTemplate {...defaultProps} />);
-    expect(screen.getByText(/red.?card|rode kaart/i)).toBeInTheDocument();
+    expect(screen.getByText("Rode kaart · tegenstander")).toBeInTheDocument();
   });
 
-  it("renders match name", () => {
+  it("renders the Rood shout headline", () => {
     render(<RedCardOpponentTemplate {...defaultProps} />);
-    expect(screen.getByText("KCVV Elewijt - FC Opponent")).toBeInTheDocument();
+    const heading = screen.getByRole("heading", { name: /rood/i });
+    expect(heading.textContent).toBe("Rood!");
   });
 
-  it("renders minute", () => {
+  it("notes the opponent and minute on the meta line", () => {
     render(<RedCardOpponentTemplate {...defaultProps} />);
-    expect(screen.getByText(/82/)).toBeInTheDocument();
+    expect(screen.getByText("Eppegem · 81'")).toBeInTheDocument();
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
     const { container } = render(<RedCardOpponentTemplate {...defaultProps} />);
-    const template = container.firstChild as HTMLElement;
-    expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
+    expect(container.firstChild).toHaveStyle({
+      width: "1080px",
+      height: "1920px",
+    });
   });
 });
