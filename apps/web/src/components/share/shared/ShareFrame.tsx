@@ -72,15 +72,12 @@ export function ShareFrame({
   const surface = register === "dark" ? TOKENS.jerseyDeepDark : TOKENS.cream;
 
   // Allowlist the photo scheme before it reaches an <img src>: a user-picked
-  // file (object URL) or a Sanity/CDN https URL is fine; reject anything that
-  // could smuggle markup (`data:` / `javascript:`). Guards CodeQL
-  // js/xss-through-dom and is genuine defence-in-depth for the upload path.
+  // file (object URL), a Sanity/CDN https URL, or a same-origin path is fine;
+  // reject anything that could smuggle markup (`data:` / `javascript:`).
+  // Guards CodeQL js/xss-through-dom and is genuine defence-in-depth for the
+  // upload path. Single RegExp test so it reads as one sanitizer guard.
   const photoUrl =
-    imageUrl &&
-    (imageUrl.startsWith("blob:") ||
-      imageUrl.startsWith("https://") ||
-      imageUrl.startsWith("http://") ||
-      imageUrl.startsWith("/"))
+    imageUrl && /^(?:blob:|https?:\/\/|\/)/i.test(imageUrl)
       ? imageUrl
       : undefined;
 
