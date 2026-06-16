@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { DISPLAY_FONT, GRAIN_DATA_URL, MONO_FONT, TOKENS } from "../constants";
 import { useSharePalette } from "./ShareFrame";
-import { formatScore, type CrestEntry } from "./theme";
+import { formatScore, toSameOriginImage, type CrestEntry } from "./theme";
 
 /** Mono uppercase kicker label. */
 export function Kicker({
@@ -235,7 +235,9 @@ function CrestTile({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={logoUrl}
+        // Route + sanitize at the sink (same-origin optimizer for remote crests
+        // so html-to-image can capture them; js/xss-through-dom barrier).
+        src={toSameOriginImage(logoUrl, 384)}
         alt={alt}
         crossOrigin="anonymous"
         style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}

@@ -22,15 +22,23 @@ export function toSameOriginImage(
   url: string | undefined,
   width: number,
 ): string | undefined {
-  if (!url || !/^https?:\/\//i.test(url)) return url;
-  try {
-    if (OPTIMIZER_HOSTS.has(new URL(url).hostname)) {
-      return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=75`;
+  if (!url) return url;
+  // Every return path runs the user value through a recognized sanitizer
+  // (encodeURIComponent in the optimizer param, encodeURI otherwise) so this is
+  // safe to call directly at an <img src> sink (CodeQL js/xss-through-dom).
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      if (OPTIMIZER_HOSTS.has(new URL(url).hostname)) {
+        return `/_next/image?url=${encodeURIComponent(url)}&w=${width}&q=75`;
+      }
+    } catch {
+      // malformed URL → fall through to encodeURI
     }
-  } catch {
-    // malformed URL → leave unchanged
+    return encodeURI(url);
   }
-  return url;
+  // blob:/data:/relative are already same-origin; encodeURI is a no-op on these
+  // but keeps the sanitizer on every path.
+  return encodeURI(url);
 }
 
 /**

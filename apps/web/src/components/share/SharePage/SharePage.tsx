@@ -19,7 +19,7 @@ import {
   SQUARE_SIZE,
   TEMPLATE_SCALE,
 } from "../constants";
-import { toSameOriginImage, type ResultMood } from "../shared/theme";
+import type { ResultMood } from "../shared/theme";
 import { Button } from "@/components/design-system/Button/Button";
 import { Input } from "@/components/design-system/Input/Input";
 import { Select } from "@/components/design-system/Select/Select";
@@ -836,11 +836,11 @@ export function SharePage({ matches, players }: SharePageProps) {
               mood,
               competition: competition.trim() || undefined,
               dateTime: dateTime.trim() || undefined,
-              // Route remote (Sanity/CDN) images through the same-origin Next
-              // optimizer so html-to-image can capture them without CORS.
-              homeLogo: toSameOriginImage(selectedMatch?.homeLogo, 384),
-              awayLogo: toSameOriginImage(selectedMatch?.awayLogo, 384),
-              imageUrl: toSameOriginImage(resolvedImageUrl, 1080),
+              // Raw URLs — the templates route remote images through the
+              // same-origin optimizer + sanitize at the <img> sink.
+              homeLogo: selectedMatch?.homeLogo,
+              awayLogo: selectedMatch?.awayLogo,
+              imageUrl: resolvedImageUrl,
             })}
           </div>
         </div>

@@ -12,6 +12,7 @@ import {
 import {
   overlayGradient,
   resolvePalette,
+  toSameOriginImage,
   type SharePalette,
   type ShareOverlay,
   type ShareRegister,
@@ -99,11 +100,10 @@ export function ShareFrame({
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              // Same-origin paths we built (/_next/image, /images) are already
-              // correctly encoded — re-encoding would double-escape the optimizer
-              // query. For remote URLs, encodeURI is the recognised
-              // js/xss-through-dom sanitizer (escapes HTML meta-characters).
-              src={photoUrl.startsWith("/") ? photoUrl : encodeURI(photoUrl)}
+              // Route + sanitize at the sink: remote CDN images go through the
+              // same-origin Next optimizer (so html-to-image can read them),
+              // every path runs through a recognized sanitizer (js/xss-through-dom).
+              src={toSameOriginImage(photoUrl, 1080)}
               alt=""
               aria-hidden="true"
               crossOrigin="anonymous"
