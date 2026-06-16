@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { DISPLAY_FONT, GRAIN_DATA_URL, MONO_FONT, TOKENS } from "../constants";
 import { useSharePalette } from "./ShareFrame";
 import { formatScore, type CrestEntry } from "./theme";
@@ -72,34 +72,68 @@ export function Headline({
  * Freight Display italic name (player / club). Pass `accent` to colour it with
  * the register's emphasis hue (jersey-deep on cream, warm on dark/image) — used
  * for the opposing club so it reads correctly in every register.
+ *
+ * Names are arbitrary-length data, so the text auto-scales DOWN to fit its
+ * container on a single line (never wraps/clips) — a long name like
+ * "Amirgan Bouakhouf" shrinks instead of breaking. The scale is applied to the
+ * DOM before `html-to-image` captures it. Degrades to the base size where the
+ * DOM can't be measured (e.g. happy-dom in tests).
  */
 export function ShareName({
   children,
   fontSize,
   color,
   accent = false,
+  minFontSize = 56,
   style,
 }: {
   children: React.ReactNode;
   fontSize: number;
   color?: string;
   accent?: boolean;
+  /** Floor the auto-fit so names stay legible (default 56px). */
+  minFontSize?: number;
   style?: React.CSSProperties;
 }) {
   const palette = useSharePalette();
+  const outerRef = useRef<HTMLDivElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  const [size, setSize] = useState(fontSize);
+
+  useLayoutEffect(() => {
+    const outer = outerRef.current;
+    const text = textRef.current;
+    if (!outer || !text) return;
+    const available = outer.clientWidth;
+    if (available <= 0) return; // not measurable (e.g. happy-dom) → keep base
+    // Measure intrinsic (single-line) width at the base size, then scale to fit.
+    text.style.fontSize = `${fontSize}px`;
+    const intrinsic = text.scrollWidth;
+    const next =
+      intrinsic > available
+        ? Math.max(minFontSize, Math.floor((fontSize * available) / intrinsic))
+        : fontSize;
+    setSize(next);
+  }, [fontSize, children, minFontSize]);
+
   return (
-    <div
-      style={{
-        fontFamily: DISPLAY_FONT,
-        fontWeight: 900,
-        fontStyle: "italic",
-        lineHeight: 1,
-        fontSize: `${fontSize}px`,
-        color: color ?? (accent ? palette.emphasis : palette.text),
-        ...style,
-      }}
-    >
-      {children}
+    <div ref={outerRef} style={{ width: "100%", ...style }}>
+      <span
+        ref={textRef}
+        style={{
+          display: "inline-block",
+          maxWidth: "100%",
+          whiteSpace: "nowrap",
+          fontFamily: DISPLAY_FONT,
+          fontWeight: 900,
+          fontStyle: "italic",
+          lineHeight: 1,
+          fontSize: `${size}px`,
+          color: color ?? (accent ? palette.emphasis : palette.text),
+        }}
+      >
+        {children}
+      </span>
     </div>
   );
 }

@@ -1,7 +1,72 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ShareFrame, ShareTop, ShareFoot } from "./ShareFrame";
-import { Headline, Kicker } from "./ShareElements";
+import { Headline, Kicker, ShareName } from "./ShareElements";
+
+/** Temporarily fake element width measurement (happy-dom has no layout). */
+function withMeasuredWidths(
+  clientWidth: number,
+  scrollWidth: number,
+  fn: () => void,
+) {
+  const proto = HTMLElement.prototype;
+  const origClient = Object.getOwnPropertyDescriptor(proto, "clientWidth");
+  const origScroll = Object.getOwnPropertyDescriptor(proto, "scrollWidth");
+  Object.defineProperty(proto, "clientWidth", {
+    configurable: true,
+    get: () => clientWidth,
+  });
+  Object.defineProperty(proto, "scrollWidth", {
+    configurable: true,
+    get: () => scrollWidth,
+  });
+  try {
+    fn();
+  } finally {
+    if (origClient) Object.defineProperty(proto, "clientWidth", origClient);
+    else delete (proto as unknown as Record<string, unknown>).clientWidth;
+    if (origScroll) Object.defineProperty(proto, "scrollWidth", origScroll);
+    else delete (proto as unknown as Record<string, unknown>).scrollWidth;
+  }
+}
+
+describe("ShareName auto-fit", () => {
+  it("keeps long names on a single line (never wraps)", () => {
+    render(
+      <ShareFrame width={1080} height={1920} register="cream">
+        <ShareName fontSize={185}>Amirgan Bouakhouf</ShareName>
+      </ShareFrame>,
+    );
+    expect(screen.getByText("Amirgan Bouakhouf")).toHaveStyle({
+      whiteSpace: "nowrap",
+    });
+  });
+
+  it("scales a too-wide name down to fit its container", () => {
+    withMeasuredWidths(920, 2000, () => {
+      render(
+        <ShareFrame width={1080} height={1920} register="cream">
+          <ShareName fontSize={185}>Amirgan Bouakhouf</ShareName>
+        </ShareFrame>,
+      );
+      // floor(185 * 920 / 2000) = 85, still >= minFontSize (56)
+      expect(screen.getByText("Amirgan Bouakhouf")).toHaveStyle({
+        fontSize: "85px",
+      });
+    });
+  });
+
+  it("does not scale a name that already fits", () => {
+    withMeasuredWidths(920, 400, () => {
+      render(
+        <ShareFrame width={1080} height={1920} register="cream">
+          <ShareName fontSize={185}>Mertens</ShareName>
+        </ShareFrame>,
+      );
+      expect(screen.getByText("Mertens")).toHaveStyle({ fontSize: "185px" });
+    });
+  });
+});
 
 describe("ShareFrame", () => {
   it("renders at the requested pixel dimensions", () => {
