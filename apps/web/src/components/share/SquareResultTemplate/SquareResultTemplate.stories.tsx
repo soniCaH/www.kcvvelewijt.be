@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { FullTimeTemplate } from "./FullTimeTemplate";
+import { SquareResultTemplate } from "./SquareResultTemplate";
 
 const meta = {
-  title: "Features/Share/FullTimeTemplate",
-  component: FullTimeTemplate,
+  title: "Features/Share/SquareResultTemplate",
+  component: SquareResultTemplate,
   parameters: {
     layout: "fullscreen",
   },
   tags: ["autodocs"],
-} satisfies Meta<typeof FullTimeTemplate>;
+} satisfies Meta<typeof SquareResultTemplate>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -21,16 +21,6 @@ export const Win: Story = {
     matchName: "KCVV Elewijt — Eppegem",
     score: "3 - 1",
     mood: "win",
-    competition: "2e Provinciale",
-    awayLogo: OPPONENT_CREST,
-  },
-};
-
-export const Draw: Story = {
-  args: {
-    matchName: "KCVV Elewijt — Sporting Hasselt",
-    score: "2 - 2",
-    mood: "draw",
     competition: "2e Provinciale",
     awayLogo: OPPONENT_CREST,
   },

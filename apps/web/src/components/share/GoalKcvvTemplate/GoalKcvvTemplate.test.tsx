@@ -6,52 +6,61 @@ const defaultProps = {
   playerName: "Kevin Van Ransbeeck",
   shirtNumber: 10,
   score: "1 - 0",
-  matchName: "KCVV Elewijt — FC Opponent",
-  minute: "45",
+  matchName: "KCVV Elewijt — Eppegem",
+  minute: "67",
 };
 
 describe("GoalKcvvTemplate", () => {
-  it("renders the GOAL label", () => {
+  it("renders the Goal headline", () => {
     render(<GoalKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText(/goal/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /goal/i })).toBeInTheDocument();
   });
 
-  it("renders player name", () => {
+  it("renders the player name", () => {
     render(<GoalKcvvTemplate {...defaultProps} />);
     expect(screen.getByText("Kevin Van Ransbeeck")).toBeInTheDocument();
   });
 
-  it("renders shirt number", () => {
-    render(<GoalKcvvTemplate {...defaultProps} />);
-    // scope to the Nr. stats column to avoid matching the ghost aria-hidden element
-    const nrLabel = screen.getByText("Nr.");
-    expect(within(nrLabel.parentElement!).getByText("10")).toBeInTheDocument();
+  it("renders the current stand with a tight en-dash", () => {
+    render(<GoalKcvvTemplate {...defaultProps} imageUrl="blob:goal" />);
+    expect(screen.getByText("Stand 1–0")).toBeInTheDocument();
   });
 
-  it("renders score", () => {
-    render(<GoalKcvvTemplate {...defaultProps} />);
-    expect(screen.getByText("1 - 0")).toBeInTheDocument();
+  it("renders the shirt number in the disc on the image variant", () => {
+    render(<GoalKcvvTemplate {...defaultProps} imageUrl="blob:goal" />);
+    // image variant has no ghost numeral, so the disc is the only "10"
+    expect(screen.getByText("10")).toBeInTheDocument();
   });
 
-  it("renders match name", () => {
+  it("renders the minute on the filled (no-photo) variant", () => {
     render(<GoalKcvvTemplate {...defaultProps} />);
-    // matchName is split on em-dash; both halves appear in the footer section
-    expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
-    expect(screen.getByText("FC Opponent")).toBeInTheDocument();
+    expect(screen.getByText(/67' · Stand 1–0/)).toBeInTheDocument();
+  });
+
+  it("shows the crest matchup on the filled (no-photo) variant", () => {
+    render(<GoalKcvvTemplate {...defaultProps} awayLogo="/opp.png" />);
+    expect(screen.getByAltText("Eppegem")).toHaveAttribute("src", "/opp.png");
   });
 
   it("renders at 1080x1920 pixel dimensions", () => {
     const { container } = render(<GoalKcvvTemplate {...defaultProps} />);
-    const template = container.firstChild as HTMLElement;
-    expect(template).toHaveStyle({ width: "1080px", height: "1920px" });
+    expect(container.firstChild).toHaveStyle({
+      width: "1080px",
+      height: "1920px",
+    });
   });
 
-  it("sets crossOrigin=anonymous on the celebration image for canvas export", () => {
-    render(
-      <GoalKcvvTemplate {...defaultProps} celebrationImageUrl="some-url" />,
-    );
-    // target the celebration image by its alt text; KCVV logos are also present
-    const img = screen.getByAltText("Kevin Van Ransbeeck celebration");
+  it("sets crossOrigin on the fullscreen photo for canvas export", () => {
+    render(<GoalKcvvTemplate {...defaultProps} imageUrl="https://cdn/x.png" />);
+    const img = document.querySelector('img[src="https://cdn/x.png"]');
     expect(img).toHaveAttribute("crossorigin", "anonymous");
+  });
+
+  it("shows the match name in the footer", () => {
+    render(<GoalKcvvTemplate {...defaultProps} />);
+    const foot = screen.getByText("KCVVELEWIJT.BE").parentElement!;
+    expect(
+      within(foot).getByText("KCVV Elewijt — Eppegem"),
+    ).toBeInTheDocument();
   });
 });

@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Share cards · sh3: FULL VARIANT DECK (every template state)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Montserrat", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+        --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--font-body); background-image: var(--grain); }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0 0 6px; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 108ch; }
+      .harness-head b { color: var(--warm); } .harness-head .ok { color: #8fd0ad; }
+      .group-bar { position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream); padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em; text-transform: uppercase; display: flex; gap: 14px; align-items: baseline; border-bottom: 2px solid var(--ink); border-top: 2px solid var(--ink); flex-wrap: wrap; }
+      .group-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 10px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .group-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 26px 28px; display: flex; gap: 30px 26px; flex-wrap: wrap; justify-content: center; }
+      .col { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+      .seqlabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted); text-align: center; max-width: 304px; line-height: 1.4; }
+      .seqlabel b { color: var(--ink); } .seqlabel .cmp { color: var(--jersey-deep); }
+      .reg { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 1px 6px; border: 1px solid var(--ink); }
+      .reg.a { background: var(--cream-soft); color: var(--ink); } .reg.b { background: var(--jersey-deep-dark); color: var(--cream); }
+
+      .story { width: 304px; height: 540px; position: relative; overflow: hidden; border: 2px solid var(--ink); box-shadow: 6px 7px 0 0 var(--ink); display: flex; flex-direction: column; padding: 18px 20px 15px; font-family: var(--font-body); }
+      .sq { width: 320px; height: 320px; }
+      .top { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+      .foot { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .mid { flex: 1 1 auto; min-height: 0; position: relative; display: flex; flex-direction: column; }
+      .mid.center { justify-content: center; align-items: center; text-align: center; }
+      .crest { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; font-size: 11px; border: 2px solid currentColor; flex-shrink: 0; }
+      .handle { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; }
+      .kicker { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+      .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.86; letter-spacing: -0.015em; margin: 0; }
+      .eh .ital { font-style: italic; } .eh .dot { font-style: normal; } .eh .bang { font-style: normal; }
+      .scoreline { font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em; line-height: 0.86; }
+      .meta { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+      .name { font-family: var(--font-display); font-weight: 900; font-style: italic; line-height: 1; }
+      .num-disc { width: 52px; height: 52px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; font-size: 30px; line-height: 1; flex-shrink: 0; }
+      .figframe { border: 2px solid var(--ink); padding: 6px; box-shadow: 3px 4px 0 0 var(--ink); position: relative; }
+      .photo { display: block; width: 100%; height: 100%; background: linear-gradient(135deg, #7a9a86 0%, #3f6b54 52%, #1f3a2c 100%); filter: sepia(0.34) saturate(0.85) contrast(1.04); }
+      .tape { position: absolute; width: 58px; height: 18px; background: var(--warm); border: 1.5px solid var(--ink); opacity: 0.94; z-index: 6; }
+      .seam { height: 13px; background-image: repeating-linear-gradient(-52deg, var(--jersey-deep) 0 8px, var(--cream) 8px 16px); border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+      .halftone { background-image: radial-gradient(currentColor 1.05px, transparent 1.15px); background-size: 8px 8px; }
+      .cardgfx { width: 62px; height: 88px; border: 2px solid var(--ink); box-shadow: 3px 4px 0 0 rgba(0,0,0,0.35); }
+
+      .vA { background: var(--cream); background-image: var(--grain); color: var(--ink); }
+      .vA .crest, .vA .handle, .vA .foot { color: var(--ink); }
+      .vA .kicker { color: var(--jersey-deep); }
+      .vA .eh { color: var(--ink); } .vA .eh .ital { color: var(--jersey-deep); } .vA .eh .dot, .vA .eh .bang { color: var(--warm); }
+      .vA .num-disc { background: var(--jersey-deep); color: var(--cream); }
+      .vA .figframe { background: var(--cream-soft); }
+      .vA .scoreline { color: var(--ink); }
+      .vA.neg .kicker { color: var(--brick); } .vA.neg .eh .ital { color: var(--ink-soft); } .vA.neg .eh .dot, .vA.neg .eh .bang { color: var(--brick); }
+      .vA.neg .num-disc { background: var(--brick); color: var(--cream); }
+      .vA.pos .kicker { color: var(--jersey-deep); } .vA.pos .eh .ital { color: var(--jersey-deep); } .vA.pos .eh .bang { color: var(--jersey-deep); }
+
+      .vB { background: var(--jersey-deep-dark); color: var(--cream); }
+      .vB::after { content: ""; position: absolute; inset: 0; background-image: var(--grain); pointer-events: none; }
+      .vB > * { position: relative; z-index: 1; }
+      .vB .crest, .vB .handle, .vB .foot { color: var(--cream); }
+      .vB .kicker { color: var(--warm); }
+      .vB .eh { color: var(--cream); } .vB .eh .ital { color: var(--warm); } .vB .eh .dot, .vB .eh .bang { color: var(--warm); }
+      .vB .num-disc { background: var(--warm); color: var(--ink); }
+      .vB .figframe { background: var(--jersey-deep); border-color: var(--cream); box-shadow: 3px 4px 0 0 rgba(0,0,0,0.5); }
+      .vB .scoreline { color: var(--cream); }
+
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 48px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 18px 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; } .legend h3:first-child { margin-top: 0; }
+      .legend b { color: var(--jersey-deep); } .legend code { background: var(--cream); border: 1px solid var(--paper-edge); padding: 0 4px; }
+      .legend ol { margin: 6px 0 14px; padding-left: 22px; } .legend li { margin-bottom: 3px; }
+      .legend .q { background: var(--ink); color: var(--cream); padding: 16px 20px; margin-top: 12px; line-height: 1.65; } .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Share cards · sh3 — FULL VARIANT DECK · every template state</h1>
+      <p>
+        Voice locked (<b>A+B hybrid</b>), sequence-variety locked, headline now <b>Goal!</b> (warm <b>!</b> on the loud shouts,
+        sober events keep the <b>.</b>). This is the complete catalogue — <b>all 9 Story templates × their sub-states + the 1:1 square pair (now with a with-image option)</b>.
+        Each card is labelled with its real component name so feedback maps straight to the file.
+      </p>
+      <p class="ok">
+        Give feedback <b>per card by number</b> (e.g. "#8 make it dark", "#3 number too big"). Nothing overlaps — flex column, size-capped text. Placeholder data.
+      </p>
+    </div>
+
+    <!-- ===================== GROUP 1 — MATCH FLOW ===================== -->
+    <div class="group-bar"><span class="tag">G1</span> Match flow <span class="note">cream · neutral · structural moments</span></div>
+    <div class="stage">
+
+      <!-- 1 · KickoffTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#1 Aftrap</b> · <span class="cmp">KickoffTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Aftrap · 2e Provinciale</span>
+            <div class="name" style="font-size:37px; margin-top:18px;">KCVV Elewijt</div>
+            <div class="meta" style="color:var(--ink-muted); margin:11px 0;">tegen</div>
+            <div class="name" style="font-size:37px; color:var(--jersey-deep);">Eppegem</div>
+            <div class="seam" style="width:78%; margin:24px 0 16px;"></div>
+            <div class="meta">Zaterdag · 20:00 · Terrein A</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 2 · HalftimeTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#2 Rust</b> · <span class="cmp">HalftimeTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Rust</span>
+            <div class="scoreline" style="font-size:128px; margin-top:8px;">2&ndash;0</div>
+            <div class="seam" style="width:58%; margin:24px 0 16px;"></div>
+            <div class="name" style="font-size:25px;">KCVV Elewijt</div>
+            <div class="meta" style="color:var(--ink-muted); margin-top:8px;">Eppegem · 2e Prov.</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GROUP 2 — GOALS ===================== -->
+    <div class="group-bar"><span class="tag">G2</span> Goals <span class="note">KCVV goal = dark poster (loud) · conceded = cream sober</span></div>
+    <div class="stage">
+
+      <!-- 3 · GoalKcvvTemplate WITH image -->
+      <div class="col">
+        <p class="seqlabel"><b>#3 Goal KCVV · met foto</b> · <span class="cmp">GoalKcvvTemplate</span> <span class="reg b">B</span></p>
+        <div class="story vB">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid">
+            <span class="kicker">Doelpunt</span>
+            <h1 class="eh" style="font-size:70px; margin-top:2px;"><span class="ital">Goal</span><span class="bang">!</span></h1>
+            <div class="figframe" style="margin-top:13px; height:164px; transform:rotate(1.2deg);">
+              <span class="tape" style="top:-9px; right:24px; transform:rotate(4deg);"></span>
+              <span class="photo"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:13px; margin-top:auto;">
+              <span class="num-disc">9</span>
+              <div>
+                <div class="name" style="font-size:24px; color:var(--cream);">Mertens</div>
+                <div class="meta" style="color:rgba(245,241,230,0.7); margin-top:4px;">67' · Stand 1&ndash;0</div>
+              </div>
+            </div>
+          </div>
+          <div class="foot"><span>KCVV &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 4 · GoalKcvvTemplate WITHOUT image -->
+      <div class="col">
+        <p class="seqlabel"><b>#4 Goal KCVV · zonder foto</b> · <span class="cmp">GoalKcvvTemplate</span> <span class="reg b">B</span></p>
+        <div class="story vB">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid" style="overflow:hidden;">
+            <div style="position:absolute; right:-22px; top:-24px; font-family:var(--font-display); font-weight:900; font-size:300px; line-height:1; color:rgba(245,241,230,0.07); z-index:0;">14</div>
+            <span class="kicker" style="z-index:1;">Doelpunt</span>
+            <h1 class="eh" style="font-size:78px; margin-top:2px; z-index:1;"><span class="ital">Goal</span><span class="bang">!</span></h1>
+            <div style="margin-top:auto; z-index:1;">
+              <div class="name" style="font-size:44px; color:var(--cream);">Janssen</div>
+              <div class="meta" style="color:var(--warm); margin-top:10px;">73' · Stand 2&ndash;0</div>
+              <div class="meta halftone" style="color:rgba(245,241,230,0.5); height:14px; margin-top:16px;"></div>
+            </div>
+          </div>
+          <div class="foot"><span>KCVV &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 5 · GoalOpponentTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#5 Tegendoelpunt</b> · <span class="cmp">GoalOpponentTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA neg">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid">
+            <span class="kicker">Tegendoelpunt</span>
+            <h1 class="eh" style="font-size:64px; margin-top:2px;"><span class="ital">Goal</span><span class="dot">.</span></h1>
+            <div style="margin-top:auto;">
+              <div style="display:flex; align-items:flex-end; gap:14px;">
+                <div class="scoreline" style="font-size:94px; color:var(--ink);">2&ndash;1</div>
+                <div class="meta" style="color:var(--brick); padding-bottom:14px;">78'</div>
+              </div>
+              <div class="meta" style="color:var(--ink-muted); margin-top:14px; border-top:2px solid var(--paper-edge); padding-top:12px;">Doelpunt Eppegem · KCVV Elewijt &mdash; Eppegem</div>
+            </div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GROUP 3 — CARDS ===================== -->
+    <div class="group-bar"><span class="tag">G3</span> Cards <span class="note">card graphic = real referee colour · accent = sentiment (brick = our card · jersey = their card)</span></div>
+    <div class="stage">
+
+      <!-- 6 · YellowCardKcvvTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#6 Geel · KCVV</b> · <span class="cmp">YellowCardKcvvTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA neg">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Gele kaart · KCVV</span>
+            <div class="cardgfx" style="background:var(--warm); margin:20px 0; transform:rotate(7deg);"></div>
+            <h1 class="eh" style="font-size:50px;"><span class="ital">Geel</span><span class="dot">.</span></h1>
+            <div class="name" style="font-size:24px; color:var(--ink); margin-top:14px;">De Smet</div>
+            <div class="meta" style="color:var(--ink-muted); margin-top:8px;">Nr. 4 · 54'</div>
+          </div>
+          <div class="foot"><span>KCVV &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 7 · YellowCardOpponentTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#7 Geel · tegenstander</b> · <span class="cmp">YellowCardOpponentTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA pos">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Gele kaart · tegenstander</span>
+            <div class="cardgfx" style="background:var(--warm); margin:20px 0; transform:rotate(-7deg);"></div>
+            <h1 class="eh" style="font-size:50px;"><span class="ital">Geel</span><span class="dot">.</span></h1>
+            <div class="meta" style="color:var(--ink-muted); margin-top:16px;">Eppegem · 60'</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 8 · RedCardKcvvTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#8 Rood · KCVV</b> · <span class="cmp">RedCardKcvvTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA neg">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Rode kaart · KCVV</span>
+            <div class="cardgfx" style="background:var(--brick); margin:20px 0; transform:rotate(7deg);"></div>
+            <h1 class="eh" style="font-size:50px;"><span class="ital">Rood</span><span class="dot">.</span></h1>
+            <div class="name" style="font-size:24px; color:var(--ink); margin-top:14px;">Peeters</div>
+            <div class="meta" style="color:var(--ink-muted); margin-top:8px;">Nr. 6 · 70'</div>
+          </div>
+          <div class="foot"><span>KCVV &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 9 · RedCardOpponentTemplate -->
+      <div class="col">
+        <p class="seqlabel"><b>#9 Rood · tegenstander</b> · <span class="cmp">RedCardOpponentTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA pos">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Rode kaart · tegenstander</span>
+            <div class="cardgfx" style="background:var(--brick); margin:20px 0; transform:rotate(-7deg);"></div>
+            <h1 class="eh" style="font-size:50px;"><span class="ital">Rood</span><span class="bang">!</span></h1>
+            <div class="meta" style="color:var(--ink-muted); margin-top:16px;">Eppegem · 81' · KCVV met een man meer</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GROUP 4 — RESULTS ===================== -->
+    <div class="group-bar"><span class="tag">G4</span> Results (Eindstand) <span class="note">win = dark poster · draw/loss = cream sober · one template, 3 moods</span></div>
+    <div class="stage">
+
+      <!-- 10 · FullTimeTemplate · win -->
+      <div class="col">
+        <p class="seqlabel"><b>#10 Eindstand · winst</b> · <span class="cmp">FullTimeTemplate</span> <span class="reg b">B</span></p>
+        <div class="story vB">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:130px; margin-top:6px; text-shadow:4px 5px 0 rgba(0,0,0,0.4);">3&ndash;1</div>
+            <h1 class="eh" style="font-size:56px; margin-top:14px;"><span class="ital">Gewonnen</span><span class="bang">!</span></h1>
+            <div class="meta halftone" style="color:rgba(245,241,230,0.5); height:14px; width:68%; margin:18px 0 12px;"></div>
+            <div class="meta" style="color:rgba(245,241,230,0.78);">KCVV Elewijt &mdash; Eppegem</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 11 · FullTimeTemplate · draw -->
+      <div class="col">
+        <p class="seqlabel"><b>#11 Eindstand · gelijk</b> · <span class="cmp">FullTimeTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:128px; margin-top:6px; color:var(--ink);">2&ndash;2</div>
+            <h1 class="eh" style="font-size:50px; margin-top:14px;"><span class="ital">Gelijkspel</span><span class="dot">.</span></h1>
+            <div class="seam" style="width:60%; margin:18px 0 12px;"></div>
+            <div class="meta" style="color:var(--ink-muted);">KCVV Elewijt &mdash; Eppegem</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 12 · FullTimeTemplate · loss -->
+      <div class="col">
+        <p class="seqlabel"><b>#12 Eindstand · verlies</b> · <span class="cmp">FullTimeTemplate</span> <span class="reg a">A</span></p>
+        <div class="story vA neg">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:128px; margin-top:6px; color:var(--ink);">1&ndash;3</div>
+            <h1 class="eh" style="font-size:54px; margin-top:14px;"><span class="ital">Verloren</span><span class="dot">.</span></h1>
+            <div class="meta" style="color:var(--ink-muted); margin-top:20px;">KCVV Elewijt &mdash; Eppegem · 2e Prov.</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== GROUP 5 — SQUARE 1:1 ===================== -->
+    <div class="group-bar"><span class="tag">G5</span> 1:1 Square — feed posts <span class="note">pre-game + result · each in no-image and with-image</span></div>
+    <div class="stage">
+
+      <!-- 13 · square pre-game no image -->
+      <div class="col">
+        <p class="seqlabel"><b>#13 Pre-game · zonder foto</b> <span class="reg a">A</span></p>
+        <div class="story sq vA">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Vandaag · 2e Provinciale</span>
+            <div class="name" style="font-size:33px; margin-top:12px;">KCVV Elewijt</div>
+            <div class="meta" style="color:var(--ink-muted); margin:7px 0;">tegen</div>
+            <div class="name" style="font-size:33px; color:var(--jersey-deep);">Eppegem</div>
+            <div class="meta" style="margin-top:14px;">Zaterdag · 20:00</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 14 · square pre-game WITH image -->
+      <div class="col">
+        <p class="seqlabel"><b>#14 Pre-game · met foto</b> <span class="reg a">A</span></p>
+        <div class="story sq vA" style="padding:0;">
+          <div style="height:150px; position:relative; border-bottom:2px solid var(--ink); overflow:hidden;">
+            <span class="photo"></span>
+            <span class="tape" style="top:-9px; left:24px; transform:rotate(-5deg);"></span>
+            <span class="crest" style="position:absolute; top:12px; left:14px; color:var(--cream); background:rgba(0,0,0,0.3);">K</span>
+            <span class="handle" style="position:absolute; top:18px; right:14px; color:var(--cream);">@KCVVELEWIJT</span>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:12px 18px;">
+            <span class="kicker">Vandaag · 2e Provinciale</span>
+            <div class="name" style="font-size:27px; margin-top:8px;">KCVV Elewijt</div>
+            <div class="meta" style="color:var(--ink-muted); margin:4px 0;">tegen</div>
+            <div class="name" style="font-size:27px; color:var(--jersey-deep);">Eppegem</div>
+            <div class="meta" style="margin-top:10px;">Zaterdag · 20:00 · KCVVELEWIJT.BE</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 15 · square result win no image -->
+      <div class="col">
+        <p class="seqlabel"><b>#15 Result · winst · zonder foto</b> <span class="reg b">B</span></p>
+        <div class="story sq vB">
+          <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div class="mid center">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:104px; margin-top:4px; text-shadow:3px 4px 0 rgba(0,0,0,0.4);">3&ndash;1</div>
+            <h1 class="eh" style="font-size:44px; margin-top:10px;"><span class="ital">Gewonnen</span><span class="bang">!</span></h1>
+            <div class="meta" style="color:rgba(245,241,230,0.78); margin-top:14px;">KCVV Elewijt &mdash; Eppegem</div>
+          </div>
+          <div class="foot"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <!-- 16 · square result win WITH image -->
+      <div class="col">
+        <p class="seqlabel"><b>#16 Result · winst · met foto</b> <span class="reg b">B</span></p>
+        <div class="story sq vB" style="padding:0;">
+          <span class="photo" style="position:absolute; inset:0; opacity:0.9;"></span>
+          <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(19,61,40,0.55) 0%, rgba(19,61,40,0.35) 40%, rgba(10,30,20,0.9) 100%); z-index:1;"></div>
+          <div style="position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:space-between; padding:18px 20px 15px;">
+            <div class="top"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+            <div class="center" style="display:flex; flex-direction:column; align-items:center;">
+              <span class="kicker">Eindstand</span>
+              <div class="scoreline" style="font-size:96px; margin-top:2px; text-shadow:3px 4px 0 rgba(0,0,0,0.6);">3&ndash;1</div>
+              <h1 class="eh" style="font-size:42px; margin-top:8px;"><span class="ital">Gewonnen</span><span class="bang">!</span></h1>
+            </div>
+            <div class="foot"><span>KCVV &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>The 16 variants &amp; their components</h3>
+      <ol>
+        <li><b>#1</b> Aftrap · <code>KickoffTemplate</code> — fixture / VS</li>
+        <li><b>#2</b> Rust · <code>HalftimeTemplate</code> — scoreboard</li>
+        <li><b>#3</b> Goal KCVV met foto · <code>GoalKcvvTemplate</code> (photo state)</li>
+        <li><b>#4</b> Goal KCVV zonder foto · <code>GoalKcvvTemplate</code> (ghost-number state)</li>
+        <li><b>#5</b> Tegendoelpunt · <code>GoalOpponentTemplate</code></li>
+        <li><b>#6</b> Geel KCVV · <code>YellowCardKcvvTemplate</code></li>
+        <li><b>#7</b> Geel tegenstander · <code>YellowCardOpponentTemplate</code></li>
+        <li><b>#8</b> Rood KCVV · <code>RedCardKcvvTemplate</code></li>
+        <li><b>#9</b> Rood tegenstander · <code>RedCardOpponentTemplate</code></li>
+        <li><b>#10–12</b> Eindstand winst / gelijk / verlies · <code>FullTimeTemplate</code> (mood prop)</li>
+        <li><b>#13–16</b> Square: pre-game ±foto, result ±foto (new 1:1 surface)</li>
+      </ol>
+      <h3>Punctuation = sentiment</h3>
+      <p>Warm <b>!</b> on KCVV-positive shouts (#3 #4 Goal! · #9 Rood! · #10 Gewonnen! · #15 #16). Sober <b>.</b> everywhere else (#5 #6 #7 #8 #11 #12).</p>
+      <div class="q">
+        <b>ROUND 3 — comb through the deck.</b> Feedback per card by number. Open questions I'd especially like a call on:
+        <b>(a) #8 Rood · KCVV</b> — keep it cream-sober, or make our own red card go <b>dark/dramatic</b> (register B)?
+        <b>(b) #6/#7 yellow cards</b> — is the difference (brick vs jersey accent, ± player) clear enough, or too subtle?
+        <b>(c) #14/#16 with-image squares</b> — photo placement working?
+        <b>(d)</b> anything to flip in the A/B + punctuation rule.
+        Once the deck is signed off, I'll write the per-template detail spec (Round "details") + the html-to-image capture notes, then <code>/spec</code> #2156 ready.
+      </div>
+    </div>
+  </body>
+</html>

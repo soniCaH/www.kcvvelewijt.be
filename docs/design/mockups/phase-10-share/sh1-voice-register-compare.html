@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Share cards · sh1: VOICE / FRAME REGISTER compare</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,400;1,9..144,600;1,9..144,900&family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,600&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-soft: #1f1f1f; --ink-muted: #6b6b6b;
+        --jersey: #4acf52; --jersey-deep: #008755; --jersey-deep-dark: #133d28;
+        --warm: #f0c264; --brick: #c93f1c; --paper-edge: #d9d2bd;
+        /* Fraunces stands in for Freight Display Pro (Adobe kit, can't load in a file:// mock) */
+        --font-display: "Fraunces", georgia, serif;
+        --font-body: "Montserrat", system-ui, sans-serif;
+        --font-mono: "IBM Plex Mono", monospace;
+        --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--cream); color: var(--ink);
+        font-family: var(--font-body); background-image: var(--grain);
+      }
+      .harness-head { background: var(--ink); color: var(--cream); padding: 22px 28px; font-family: var(--font-mono); }
+      .harness-head h1 { margin: 0 0 6px; font-size: 15px; letter-spacing: 0.04em; text-transform: uppercase; }
+      .harness-head p { margin: 0 0 6px; font-size: 13px; color: #b9b9b9; line-height: 1.6; max-width: 104ch; }
+      .harness-head b { color: var(--warm); }
+      .harness-head .assume { color: #8fd0ad; }
+      .direction-bar {
+        position: sticky; top: 0; z-index: 50; background: var(--jersey-deep); color: var(--cream);
+        padding: 11px 28px; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.05em;
+        text-transform: uppercase; display: flex; gap: 14px; align-items: baseline;
+        border-bottom: 2px solid var(--ink); flex-wrap: wrap;
+      }
+      .direction-bar .tag { background: var(--warm); color: var(--ink); padding: 2px 10px; font-weight: 700; border: 1.5px solid var(--ink); }
+      .direction-bar .note { color: #cfeede; text-transform: none; letter-spacing: 0; font-size: 12px; }
+      .stage { padding: 28px; border-bottom: 1px dashed var(--paper-edge); display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+      .col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+      .statelabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-muted); }
+
+      /* ============ 9:16 Instagram Story frame ============ */
+      .story {
+        width: 304px; height: 540px; /* 9:16 */
+        position: relative; overflow: hidden;
+        box-shadow: 6px 7px 0 0 var(--ink); border: 2px solid var(--ink);
+        font-family: var(--font-body);
+      }
+      .story .crest { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+        font-family: var(--font-display); font-weight: 900; font-size: 11px; border: 2px solid currentColor; flex-shrink: 0; }
+      .story .topbar { position: absolute; top: 18px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: space-between; z-index: 8; }
+      .story .handle { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; }
+      .story .kicker { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; }
+      .story .eh { font-family: var(--font-display); font-weight: 900; line-height: 0.86; letter-spacing: -0.015em; margin: 0; }
+      .story .eh .ital { font-style: italic; }
+      .story .eh .dot { font-style: normal; }
+      .story .footer { position: absolute; bottom: 16px; left: 20px; right: 20px; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; z-index: 8; }
+      .story .num-disc { width: 58px; height: 58px; display: grid; place-items: center; font-family: var(--font-display); font-weight: 900; font-size: 34px; line-height: 1; flex-shrink: 0; }
+      .story .meta-row { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; display: flex; gap: 8px; align-items: center; }
+      .story .scoreline { font-family: var(--font-display); font-weight: 900; letter-spacing: -0.02em; line-height: 0.9; }
+
+      /* taped newsprint photo */
+      .photo { display: block; width: 100%; height: 100%;
+        background: linear-gradient(135deg, #7a9a86 0%, #3f6b54 52%, #1f3a2c 100%);
+        filter: sepia(0.34) saturate(0.85) contrast(1.04); }
+      .tape { position: absolute; width: 64px; height: 19px; background: var(--warm); border: 1.5px solid var(--ink); opacity: 0.94; z-index: 6; }
+
+      /* striped seam (barber-pole) */
+      .seam { background-image: repeating-linear-gradient(-52deg, var(--jersey-deep) 0 9px, var(--cream) 9px 18px); }
+      .seam.warm { background-image: repeating-linear-gradient(-52deg, var(--warm) 0 9px, var(--ink) 9px 18px); }
+
+      /* halftone / dot field */
+      .halftone { background-image: radial-gradient(var(--cream) 1.1px, transparent 1.2px); background-size: 9px 9px; }
+
+      /* jersey-stripe ground */
+      .stripes { background-color: var(--jersey-deep);
+        background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.16) 0 14px, transparent 14px 28px); }
+
+      /* ───────── VARIANT A — cream fanzine sheet ───────── */
+      .vA { background: var(--cream); background-image: var(--grain); color: var(--ink); }
+      .vA .crest, .vA .handle, .vA .footer { color: var(--ink); }
+      .vA .kicker { color: var(--jersey-deep); }
+      .vA .eh { color: var(--ink); }
+      .vA .eh .ital { color: var(--jersey-deep); }
+      .vA .eh .dot { color: var(--warm); }
+      .vA .num-disc { background: var(--jersey-deep); color: var(--cream); }
+      .vA .figframe { position: absolute; border: 2px solid var(--ink); background: var(--cream-soft); padding: 6px; box-shadow: 3px 4px 0 0 var(--ink); }
+
+      /* ───────── VARIANT B — jersey-deep poster ───────── */
+      .vB { background: var(--jersey-deep-dark); color: var(--cream); }
+      .vB::after { content: ""; position: absolute; inset: 0; background-image: var(--grain); pointer-events: none; z-index: 1; }
+      .vB .crest, .vB .handle, .vB .footer { color: var(--cream); }
+      .vB .kicker { color: var(--warm); }
+      .vB .eh { color: var(--cream); }
+      .vB .eh .ital { color: var(--warm); }
+      .vB .eh .dot { color: var(--warm); }
+      .vB .num-disc { background: var(--warm); color: var(--ink); }
+      .vB .figframe { position: absolute; border: 2px solid var(--cream); background: var(--jersey-deep); padding: 6px; box-shadow: 3px 4px 0 0 rgba(0,0,0,0.5); }
+      .vB .scoreline { color: var(--cream); }
+
+      /* ───────── VARIANT C — pinned memorabilia TapedCard ───────── */
+      .vC { background-color: var(--jersey-deep); color: var(--ink); }
+      .vC .card { position: absolute; inset: 22px 20px; background: var(--cream); background-image: var(--grain);
+        border: 2px solid var(--ink); box-shadow: 5px 6px 0 0 rgba(0,0,0,0.55); padding: 16px; overflow: hidden; }
+      .vC .crest, .vC .handle, .vC .footer { color: var(--ink); }
+      .vC .kicker { color: var(--jersey-deep); }
+      .vC .eh { color: var(--ink); }
+      .vC .eh .ital { color: var(--jersey-deep); }
+      .vC .eh .dot { color: var(--warm); }
+      .vC .num-disc { background: var(--jersey-deep); color: var(--cream); }
+      .vC .figframe { position: absolute; border: 2px solid var(--ink); background: var(--cream-soft); padding: 5px; box-shadow: 2px 3px 0 0 var(--ink); }
+      .vC .cardtape { position: absolute; top: 12px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 96px; height: 20px; background: var(--warm); border: 2px solid var(--ink); z-index: 9; }
+
+      /* ───────── VARIANT D — diagonal-seam programme ───────── */
+      .vD { background: var(--cream); background-image: var(--grain); color: var(--ink); }
+      .vD .top-zone { position: absolute; top: 0; left: 0; right: 0; height: 47%; background: var(--jersey-deep); overflow: hidden; }
+      .vD .seam-band { position: absolute; left: -10%; right: -10%; top: 43%; height: 26px; transform: rotate(-4deg); z-index: 5; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+      .vD .crest, .vD .handle { color: var(--cream); }
+      .vD .kicker { color: var(--warm); }
+      .vD .eh { color: var(--cream); }
+      .vD .eh .ital { color: var(--warm); }
+      .vD .eh .dot { color: var(--warm); }
+      .vD .num-disc { background: var(--jersey-deep); color: var(--cream); }
+      .vD .footer { color: var(--ink); }
+      .vD .figframe { position: absolute; border: 2px solid var(--cream); background: var(--jersey-deep); padding: 5px; box-shadow: 3px 4px 0 0 rgba(0,0,0,0.45); }
+
+      /* legend */
+      .legend { background: var(--cream-deep); border-top: 2px solid var(--ink); padding: 24px 28px 48px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; }
+      .legend h3 { margin: 18px 0 8px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .legend h3:first-child { margin-top: 0; }
+      .legend b { color: var(--jersey-deep); }
+      .legend ul { margin: 6px 0 14px; padding-left: 18px; }
+      .legend code { background: var(--cream); border: 1px solid var(--paper-edge); padding: 0 4px; }
+      .legend .q { background: var(--ink); color: var(--cream); padding: 16px 20px; margin-top: 12px; line-height: 1.65; }
+      .legend .q b { color: var(--warm); }
+      .micro { font-family: var(--font-mono); font-size: 10px; color: var(--ink-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-top: 14px; }
+    </style>
+  </head>
+  <body>
+    <div class="harness-head">
+      <h1>Share cards · sh1 — VOICE / FRAME REGISTER compare</h1>
+      <p>
+        Reskins the 9 <b>/share</b> Instagram match-moment graphics (goal · cards · kickoff/halftime/fulltime) from the legacy
+        torn-polygon, <b>#008755 + #4acf52 + Quasimoda</b> vocabulary onto the retro-terrace-fanzine system.
+        These are <b>full-bleed standalone graphics</b> — no surrounding page — so the "card floating on cream" idiom doesn't
+        transfer directly; Round 1 locks the <b>frame voice</b> only. Headline casing, per-event sentiment encoding,
+        and exact fields come in later rounds.
+      </p>
+      <p class="assume">
+        ASSUMPTIONS (correct me): output stays <b>1080×1920 (9:16 Story)</b> — the proven format, captured client-side via
+        html-to-image; all <b>9 event templates</b> kept. Same content shown in every variant: a <b>Goal KCVV</b> (with celebration
+        photo) + a <b>Full-Time</b> (no photo) so you see both the photo and no-photo state. Data is placeholder.
+      </p>
+    </div>
+
+    <!-- ============ VARIANT A ============ -->
+    <div class="direction-bar">
+      <span class="tag">A</span> Cream fanzine sheet
+      <span class="note">full-bleed bg-cream + paper-grain · ink text · jersey-deep accents · taped newsprint polaroid · a torn-out matchday zine page</span>
+    </div>
+    <div class="stage">
+      <div class="col">
+        <span class="statelabel">Goal KCVV · with photo</span>
+        <div class="story vA">
+          <div class="topbar"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div style="position:absolute; top:62px; left:20px;">
+            <span class="kicker">Doelpunt</span>
+            <h1 class="eh" style="font-size:74px; margin-top:4px;"><span class="ital">Goal</span><span class="dot">.</span></h1>
+          </div>
+          <div class="figframe" style="top:148px; left:20px; right:20px; height:210px; transform:rotate(-1.4deg);">
+            <span class="tape" style="top:-9px; left:24px; transform:rotate(-5deg);"></span>
+            <span class="photo"></span>
+          </div>
+          <div style="position:absolute; top:380px; left:20px; right:20px; display:flex; align-items:center; gap:14px;">
+            <span class="num-disc">9</span>
+            <div>
+              <div style="font-family:var(--font-display); font-weight:900; font-style:italic; font-size:26px; line-height:1;">Mertens</div>
+              <div class="meta-row" style="margin-top:5px; color:var(--ink-muted);">67' · 2&ndash;0</div>
+            </div>
+          </div>
+          <div style="position:absolute; left:20px; right:20px; bottom:52px; height:14px;" class="seam"></div>
+          <div class="footer"><span>KCVV Elewijt &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="statelabel">Full-Time · no photo</span>
+        <div class="story vA">
+          <div class="topbar"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div style="position:absolute; top:84px; left:20px; right:20px; text-align:center;">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:150px; color:var(--ink); margin-top:6px;">2&ndash;1</div>
+          </div>
+          <div style="position:absolute; top:312px; left:20px; right:20px; text-align:center;">
+            <h1 class="eh" style="font-size:62px;"><span class="ital">Gewonnen</span><span class="dot">.</span></h1>
+          </div>
+          <div style="position:absolute; left:20px; right:20px; bottom:90px; height:14px;" class="seam"></div>
+          <div style="position:absolute; left:20px; right:20px; bottom:52px; text-align:center;" class="meta-row"><span style="width:100%; color:var(--ink-muted); justify-content:center; display:flex;">KCVV Elewijt &mdash; Eppegem · 2e Prov.</span></div>
+          <div class="footer"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT B ============ -->
+    <div class="direction-bar">
+      <span class="tag">B</span> Jersey-deep poster
+      <span class="note">full-bleed bg-jersey-deep-dark + halftone · cream text · warm "." · taped photo pops on dark · the boldest feed presence, heir to the current dark templates</span>
+    </div>
+    <div class="stage">
+      <div class="col">
+        <span class="statelabel">Goal KCVV · with photo</span>
+        <div class="story vB">
+          <div class="topbar"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div style="position:absolute; top:62px; left:20px; z-index:3;">
+            <span class="kicker">Doelpunt</span>
+            <h1 class="eh" style="font-size:76px; margin-top:4px; text-shadow:3px 4px 0 rgba(0,0,0,0.4);"><span class="ital">Goal</span><span class="dot">.</span></h1>
+          </div>
+          <div class="figframe" style="top:150px; left:20px; right:20px; height:208px; transform:rotate(1.2deg); z-index:3;">
+            <span class="tape" style="top:-9px; right:26px; transform:rotate(4deg);"></span>
+            <span class="photo"></span>
+          </div>
+          <div style="position:absolute; top:382px; left:20px; right:20px; display:flex; align-items:center; gap:14px; z-index:3;">
+            <span class="num-disc">9</span>
+            <div>
+              <div style="font-family:var(--font-display); font-weight:900; font-style:italic; font-size:26px; line-height:1; color:var(--cream);">Mertens</div>
+              <div class="meta-row" style="margin-top:5px; color:rgba(245,241,230,0.7);">67' · 2&ndash;0</div>
+            </div>
+          </div>
+          <div style="position:absolute; left:0; right:0; bottom:48px; height:14px; z-index:3;" class="halftone"></div>
+          <div class="footer" style="z-index:3;"><span>KCVV Elewijt &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="statelabel">Full-Time · no photo</span>
+        <div class="story vB">
+          <div class="topbar"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div style="position:absolute; top:84px; left:20px; right:20px; text-align:center; z-index:3;">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:154px; margin-top:6px; text-shadow:4px 5px 0 rgba(0,0,0,0.4);">2&ndash;1</div>
+          </div>
+          <div style="position:absolute; top:316px; left:20px; right:20px; text-align:center; z-index:3;">
+            <h1 class="eh" style="font-size:62px;"><span class="ital">Gewonnen</span><span class="dot">.</span></h1>
+          </div>
+          <div style="position:absolute; left:0; right:0; bottom:86px; height:16px; z-index:3;" class="halftone"></div>
+          <div style="position:absolute; left:20px; right:20px; bottom:52px; text-align:center; z-index:3;" class="meta-row"><span style="width:100%; color:rgba(245,241,230,0.72); justify-content:center; display:flex;">KCVV Elewijt &mdash; Eppegem · 2e Prov.</span></div>
+          <div class="footer" style="z-index:3;"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT C ============ -->
+    <div class="direction-bar">
+      <span class="tag">C</span> Pinned memorabilia card
+      <span class="note">a cream &lt;TapedCard&gt; (ink border + hard shadow + tape) inset on a jersey-stripe ground · reads as a polaroid/ticket pinned to a terrace wall</span>
+    </div>
+    <div class="stage">
+      <div class="col">
+        <span class="statelabel">Goal KCVV · with photo</span>
+        <div class="story vC stripes">
+          <span class="cardtape"></span>
+          <div class="card">
+            <div style="display:flex; align-items:center; justify-content:space-between;"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+            <span class="kicker" style="display:block; margin-top:14px;">Doelpunt</span>
+            <h1 class="eh" style="font-size:62px; margin-top:2px;"><span class="ital">Goal</span><span class="dot">.</span></h1>
+            <div class="figframe" style="position:relative; margin-top:12px; height:160px; transform:rotate(-1deg);">
+              <span class="tape" style="top:-9px; left:22px; transform:rotate(-5deg);"></span>
+              <span class="photo"></span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-top:14px;">
+              <span class="num-disc" style="width:50px; height:50px; font-size:30px;">9</span>
+              <div>
+                <div style="font-family:var(--font-display); font-weight:900; font-style:italic; font-size:23px; line-height:1;">Mertens</div>
+                <div class="meta-row" style="margin-top:4px; color:var(--ink-muted);">67' · 2&ndash;0</div>
+              </div>
+            </div>
+            <div class="footer" style="position:absolute; left:16px; right:16px; bottom:14px;"><span>KCVV &mdash; Eppegem</span><span>KCVVELEWIJT.BE</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="statelabel">Full-Time · no photo</span>
+        <div class="story vC stripes">
+          <span class="cardtape"></span>
+          <div class="card">
+            <div style="display:flex; align-items:center; justify-content:space-between;"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+            <span class="kicker" style="display:block; margin-top:30px; text-align:center;">Eindstand</span>
+            <div class="scoreline" style="font-size:128px; color:var(--ink); text-align:center; margin-top:6px;">2&ndash;1</div>
+            <h1 class="eh" style="font-size:52px; text-align:center; margin-top:14px;"><span class="ital">Gewonnen</span><span class="dot">.</span></h1>
+            <div class="meta-row" style="justify-content:center; color:var(--ink-muted); margin-top:18px;">KCVV Elewijt &mdash; Eppegem</div>
+            <div class="footer" style="position:absolute; left:16px; right:16px; bottom:14px;"><span>2e Prov.</span><span>KCVVELEWIJT.BE</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ VARIANT D ============ -->
+    <div class="direction-bar">
+      <span class="tag">D</span> Diagonal-seam programme
+      <span class="note">&lt;StripedSeam&gt; splits a jersey-deep masthead zone from a cream data zone · the direct retro heir to the legacy torn-polygon two-zone rhythm fans already recognise</span>
+    </div>
+    <div class="stage">
+      <div class="col">
+        <span class="statelabel">Goal KCVV · with photo</span>
+        <div class="story vD">
+          <div class="top-zone">
+            <span class="photo" style="position:absolute; inset:0; opacity:0.85;"></span>
+            <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(19,61,40,0.78) 0%, rgba(19,61,40,0.25) 55%, rgba(0,135,85,0.85) 100%);"></div>
+          </div>
+          <div class="topbar"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div style="position:absolute; top:96px; left:20px; z-index:6;">
+            <span class="kicker">Doelpunt</span>
+            <h1 class="eh" style="font-size:78px; margin-top:4px; text-shadow:3px 4px 0 rgba(0,0,0,0.45);"><span class="ital">Goal</span><span class="dot">.</span></h1>
+          </div>
+          <div class="seam-band seam"></div>
+          <div style="position:absolute; top:300px; left:20px; right:20px; display:flex; align-items:center; gap:14px;">
+            <span class="num-disc">9</span>
+            <div>
+              <div style="font-family:var(--font-display); font-weight:900; font-style:italic; font-size:27px; line-height:1; color:var(--ink);">Mertens</div>
+              <div class="meta-row" style="margin-top:5px; color:var(--ink-muted);">67' · Stand 2&ndash;0</div>
+            </div>
+          </div>
+          <div style="position:absolute; top:380px; left:20px; right:20px; border-top:2px solid var(--paper-edge); padding-top:12px;">
+            <div style="font-family:var(--font-display); font-weight:900; font-size:30px; color:var(--ink); line-height:1;">KCVV Elewijt</div>
+            <div class="meta-row" style="margin-top:6px; color:var(--jersey-deep);">&mdash; Eppegem · 2e Prov.</div>
+          </div>
+          <div class="footer"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="statelabel">Full-Time · no photo</span>
+        <div class="story vD">
+          <div class="top-zone halftone" style="background:var(--jersey-deep);"></div>
+          <div class="topbar"><span class="crest">K</span><span class="handle">@KCVVELEWIJT</span></div>
+          <div style="position:absolute; top:80px; left:20px; right:20px; z-index:6; text-align:center;">
+            <span class="kicker">Eindstand</span>
+            <div class="scoreline" style="font-size:138px; color:var(--cream); margin-top:2px; text-shadow:3px 4px 0 rgba(0,0,0,0.4);">2&ndash;1</div>
+          </div>
+          <div class="seam-band seam"></div>
+          <div style="position:absolute; top:312px; left:20px; right:20px; text-align:center;">
+            <h1 class="eh" style="font-size:60px; color:var(--ink);"><span class="ital" style="color:var(--jersey-deep);">Gewonnen</span><span class="dot">.</span></h1>
+            <div class="meta-row" style="justify-content:center; color:var(--ink-muted); margin-top:16px;">KCVV Elewijt &mdash; Eppegem · 2e Prov.</div>
+          </div>
+          <div class="footer"><span></span><span>KCVVELEWIJT.BE</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <h3>Primitive mapping (no net-new vocabulary)</h3>
+      <ul>
+        <li><b>Kicker</b> → <code>&lt;MonoLabel variant="plain"&gt;</code> — IBM Plex Mono, jersey-deep on cream / warm on dark.</li>
+        <li><b>Headline</b> → <code>&lt;EditorialHeading&gt;</code> — Freight Display, italic accent + warm "." terminator (replaces Quasimoda all-caps).</li>
+        <li><b>Score / shirt number</b> → <code>&lt;NumberDisplay&gt;</code> — big Freight numerals; number in a jersey-deep / warm disc.</li>
+        <li><b>Photo</b> → <code>&lt;TapedFigure&gt;</code> newsprint (<b>colour</b>, not greyscale) + one <code>&lt;TapeStrip&gt;</code>.</li>
+        <li><b>Seam</b> → <code>&lt;StripedSeam&gt;</code> barber-pole band (A footer accent · B halftone · D the zone split).</li>
+        <li>Square corners throughout; ink borders + hard offset shadow on every framed element; paper-grain texture overlay.</li>
+      </ul>
+      <h3>Trade-offs</h3>
+      <ul>
+        <li><b>A cream fanzine sheet</b> — calmest, most "fanzine", photo reads as a pasted-in polaroid; but lightest feed presence and the least like a bold match-moment shout.</li>
+        <li><b>B jersey-deep poster</b> — strongest feed/stories presence, best photo pop, closest heir to today's dark cards; but a dark frame on <em>every</em> moment can feel heavy, and is the furthest from the cream-paper redesign elsewhere.</li>
+        <li><b>C pinned memorabilia card</b> — purest retro-terrace character, one shape handles every event, looks like a collectible; but the inset margin spends scarce Story real-estate and shrinks the content area.</li>
+        <li><b>D diagonal-seam programme</b> — keeps the two-zone rhythm fans recognise from today's torn cards, re-expressed in retro vocabulary; but it's the most structurally constrained and the seam angle must survive html-to-image capture cleanly.</li>
+      </ul>
+      <h3>Sentiment note (deferred to Round 2)</h3>
+      <p>Today's cards encode good-news vs bad-news (KCVV goal vs opponent goal; our card vs their card) via palette — bright green vs muted/dark.
+        The retro re-encoding (warm/jersey-deep = positive, ink/brick = sober) is a <b>Round 2</b> decision; Round 1 shows positive moments only so the frame is the only variable.</p>
+      <div class="q">
+        <b>ROUND 1 — pick the frame voice.</b> Which register should every /share match-moment graphic adopt?
+        <b>A</b> cream fanzine sheet · <b>B</b> jersey-deep poster · <b>C</b> pinned memorabilia card · <b>D</b> diagonal-seam programme —
+        or a hybrid (e.g. "<b>B</b>'s dark poster for the loud moments, <b>A</b>'s cream sheet for the quiet ones"). Also confirm:
+        keep <b>9:16 Story</b> only, or also add a <b>1:1 square</b> post variant? Once locked, Round 2 drills per-event fields + sentiment.
+      </div>
+      <p class="micro">share cards · sh1 · voice/frame register · Fraunces stands in for Freight · placeholder data expected at this stage</p>
+    </div>
+  </body>
+</html>

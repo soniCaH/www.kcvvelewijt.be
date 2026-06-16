@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CAPTURE_WIDTH, CAPTURE_HEIGHT } from "../constants";
+import { CAPTURE_WIDTH, CAPTURE_HEIGHT, SQUARE_SIZE } from "../constants";
 import type { PlayerForShare, MatchOption } from "./SharePage";
 
 // Mock html-to-image — browser canvas API not available in happy-dom
@@ -544,5 +544,125 @@ describe("SharePage", () => {
 
     // Resolve to let the component settle
     resolveToPng("data:image/png;base64,ABC");
+  });
+
+  // ─── Aspect toggle (Story / Square) ───────────────────────────────────────
+
+  it("defaults to the Story aspect with 9 story templates", () => {
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    expect(
+      screen.getByRole("button", { name: /story · 9:16/i }),
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(
+      screen.getByRole("button", { name: /goal kcvv/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("switching to Square shows only the two square templates", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
+
+    expect(
+      screen.getByRole("button", { name: /pre-game/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /goal kcvv/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /rust/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("captures the square at 1080x1080 in Square aspect", async () => {
+    const { toPng } = await import("html-to-image");
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
+    await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+    expect(toPng).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        width: SQUARE_SIZE,
+        height: SQUARE_SIZE,
+        pixelRatio: 1,
+      }),
+    );
+  });
+
+  // ─── Competition + photo upload ───────────────────────────────────────────
+
+  it("shows the competition field for eindstand but not goal-kcvv", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    expect(
+      screen.queryByPlaceholderText(/2e provinciale/i),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /eindstand/i }));
+
+    expect(screen.getByPlaceholderText(/2e provinciale/i)).toBeInTheDocument();
+  });
+
+  it("shows the photo upload for image-capable templates only", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    // goal-kcvv is image-capable
+    expect(screen.getByLabelText(/foto uploaden/i)).toBeInTheDocument();
+
+    // goal-opponent is not
+    await user.click(screen.getByRole("button", { name: /goal teg/i }));
+    expect(screen.queryByLabelText(/foto uploaden/i)).not.toBeInTheDocument();
+  });
+
+  it("creates an object URL when a photo is uploaded", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    const file = new File(["x"], "goal.png", { type: "image/png" });
+    await user.upload(screen.getByLabelText(/foto uploaden/i), file);
+
+    expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(file);
+    expect(
+      screen.getByRole("button", { name: /foto verwijderen/i }),
+    ).toBeInTheDocument();
+  });
+
+  // ─── No-op guards (re-selecting the active aspect / template) ──────────────
+
+  it("re-clicking the active Story aspect is a no-op (state stable)", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    const storyToggle = screen.getByRole("button", { name: /story · 9:16/i });
+    await user.click(storyToggle);
+
+    expect(storyToggle).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /goal kcvv/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+
+  it("re-clicking the active template keeps it selected without churn", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    // Set a session field, then re-click the already-active template.
+    const scoreInput = screen.getByPlaceholderText(/2 - 0/i);
+    await user.clear(scoreInput);
+    await user.type(scoreInput, "3 - 1");
+
+    const goalKcvvBtn = screen.getByRole("button", { name: /goal kcvv/i });
+    await user.click(goalKcvvBtn);
+
+    expect(goalKcvvBtn).toHaveAttribute("aria-pressed", "true");
+    // The guard returns early, so session fields are untouched.
+    expect(screen.getByPlaceholderText(/2 - 0/i)).toHaveValue("3 - 1");
   });
 });

@@ -7,6 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof RedCardOpponentTemplate>;
 
 export default meta;
@@ -14,14 +15,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    matchName: "KCVV Elewijt — FC Opponent",
-    minute: "82",
+    matchName: "KCVV Elewijt — Eppegem",
+    minute: "81",
   },
 };
 
 export const EarlyExpulsion: Story = {
   args: {
-    matchName: "KCVV Elewijt — Sporting Hasselt",
+    matchName: "Sporting Hasselt — KCVV Elewijt",
     minute: "34",
   },
 };

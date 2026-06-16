@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+function formatDateTime(match: Match): string | undefined {
+  const weekday = new Date(match.date).toLocaleDateString("nl-BE", {
+    weekday: "long",
+    timeZone: "Europe/Brussels",
+  });
+  const capitalised = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  return match.time ? `${capitalised} · ${match.time}` : capitalised;
+}
+
 function toMatchOption(match: Match): MatchOption {
   const home = match.home_team.name;
   const away = match.away_team.name;
@@ -26,6 +35,10 @@ function toMatchOption(match: Match): MatchOption {
     id: match.id,
     label: `${home} - ${away}${teamLabel}`,
     matchName: `${home} — ${away}`,
+    competition: match.competition,
+    dateTime: formatDateTime(match),
+    homeLogo: match.home_team.logo,
+    awayLogo: match.away_team.logo,
   };
 }
 
@@ -67,6 +80,7 @@ async function fetchSharePageData(): Promise<{
         lastName: p.lastName,
         number: p.number,
         celebrationImageUrl: p.celebrationImageUrl,
+        psdImageUrl: p.imageUrl,
       }));
 
       return { matches, players };

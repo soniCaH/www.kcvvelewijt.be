@@ -7,6 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof RedCardKcvvTemplate>;
 
 export default meta;
@@ -14,10 +15,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    playerName: "Kevin Van Ransbeeck",
-    shirtNumber: 10,
-    matchName: "KCVV Elewijt — FC Opponent",
-    minute: "67",
+    playerName: "Peeters",
+    shirtNumber: 6,
+    matchName: "KCVV Elewijt — Eppegem",
+    minute: "70",
   },
 };
 

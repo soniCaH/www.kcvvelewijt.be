@@ -7,30 +7,32 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  tags: ["autodocs"],
 } satisfies Meta<typeof GoalKcvvTemplate>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const WithCelebrationImage: Story = {
+export const WithImage: Story = {
   args: {
-    playerName: "Kevin Van Ransbeeck",
-    shirtNumber: 10,
+    playerName: "Mertens",
+    shirtNumber: 9,
     score: "1 - 0",
-    matchName: "KCVV Elewijt — FC Opponent",
-    minute: "45",
-    celebrationImageUrl:
-      "https://api.kcvvelewijt.be/sites/default/files/player-picture/chiel.png",
+    matchName: "KCVV Elewijt — Eppegem",
+    minute: "67",
+    imageUrl: "/images/ultras.jpg",
   },
 };
 
-export const WithoutCelebrationImage: Story = {
+export const FilledNoImage: Story = {
   args: {
-    playerName: "Kevin Van Ransbeeck",
-    shirtNumber: 10,
-    score: "2 - 1",
-    matchName: "KCVV Elewijt — FC Opponent",
-    minute: "78",
+    playerName: "Janssen",
+    shirtNumber: 14,
+    score: "2 - 0",
+    matchName: "KCVV Elewijt — Eppegem",
+    minute: "73",
+    // Placeholder opponent crest for Storybook (real value: away_team.logo).
+    awayLogo: "/images/logo-flat.png",
   },
 };
 
