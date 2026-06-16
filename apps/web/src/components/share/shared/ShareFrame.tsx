@@ -99,10 +99,11 @@ export function ShareFrame({
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              // encodeURI escapes any HTML meta-characters before the URL hits
-              // the DOM (the recognised js/xss-through-dom sanitizer); real
-              // blob:/https:/relative URLs pass through unchanged.
-              src={encodeURI(photoUrl)}
+              // Same-origin paths we built (/_next/image, /images) are already
+              // correctly encoded — re-encoding would double-escape the optimizer
+              // query. For remote URLs, encodeURI is the recognised
+              // js/xss-through-dom sanitizer (escapes HTML meta-characters).
+              src={photoUrl.startsWith("/") ? photoUrl : encodeURI(photoUrl)}
               alt=""
               aria-hidden="true"
               crossOrigin="anonymous"

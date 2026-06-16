@@ -22,6 +22,9 @@ describe("toSameOriginImage", () => {
 
   it("passes blob, data and relative URLs through unchanged", () => {
     expect(toSameOriginImage("blob:abc", 1080)).toBe("blob:abc");
+    expect(toSameOriginImage("data:image/png;base64,iVBORw0K", 1080)).toBe(
+      "data:image/png;base64,iVBORw0K",
+    );
     expect(toSameOriginImage("/images/ultras.jpg", 384)).toBe(
       "/images/ultras.jpg",
     );
@@ -31,6 +34,11 @@ describe("toSameOriginImage", () => {
     expect(toSameOriginImage("https://example.com/a.png", 384)).toBe(
       "https://example.com/a.png",
     );
+  });
+
+  it("passes a malformed URL through unchanged (catch branch)", () => {
+    // matches the http(s) prefix but `new URL()` throws → caught → returned as-is
+    expect(toSameOriginImage("https://", 1080)).toBe("https://");
   });
 
   it("returns undefined for undefined", () => {
