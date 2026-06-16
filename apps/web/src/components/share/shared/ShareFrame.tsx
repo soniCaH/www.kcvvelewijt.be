@@ -99,7 +99,10 @@ export function ShareFrame({
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={photoUrl}
+              // encodeURI escapes any HTML meta-characters before the URL hits
+              // the DOM (the recognised js/xss-through-dom sanitizer); real
+              // blob:/https:/relative URLs pass through unchanged.
+              src={encodeURI(photoUrl)}
               alt=""
               aria-hidden="true"
               crossOrigin="anonymous"
