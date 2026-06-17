@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { useUltrasAnalytics } from "@/hooks/useUltrasAnalytics";
+import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 
 export interface UltrasAnalyticsProps {
   children: ReactNode;
@@ -22,20 +23,10 @@ export function UltrasAnalytics({ children }: UltrasAnalyticsProps) {
     trackUltrasView();
   }, [trackUltrasView]);
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target?.closest("[data-ultras-join]")) {
-        trackUltrasJoinClick();
-      }
-    };
-
-    node.addEventListener("click", handleClick);
-    return () => node.removeEventListener("click", handleClick);
-  }, [trackUltrasJoinClick]);
+  useDelegatedClick(ref, {
+    selector: "[data-ultras-join]",
+    onMatch: () => trackUltrasJoinClick(),
+  });
 
   return <div ref={ref}>{children}</div>;
 }

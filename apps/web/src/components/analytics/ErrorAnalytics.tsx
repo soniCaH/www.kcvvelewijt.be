@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 
 export interface ErrorAnalyticsProps {
   /** HTTP error code as a string, e.g. `"404"` | `"500"`. */
@@ -24,6 +25,9 @@ export interface ErrorAnalyticsProps {
  */
 export function ErrorAnalytics({ code, children }: ErrorAnalyticsProps) {
   const ref = useRef<HTMLDivElement>(null);
+  // `path` is read once at mount (the URL the visitor hit) and shared with the
+  // delegated click handler below, which fires after mount.
+  const pathRef = useRef("");
 
   useEffect(() => {
     // `pathname` only (never `search`) — a page-path identifier, the same field
@@ -32,23 +36,23 @@ export function ErrorAnalytics({ code, children }: ErrorAnalyticsProps) {
     // (lowercase + truncate-50) and would corrupt long 404 URLs — the very data
     // this event exists to capture — without redacting anything.
     const path = window.location.pathname;
+    pathRef.current = path;
     trackEvent("error_view", { error_code: code, path });
+  }, [code]);
 
-    const node = ref.current;
-    if (!node) return;
-
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const el = target?.closest<HTMLElement>("[data-error-action]");
-      const action = el?.dataset.errorAction;
+  useDelegatedClick(ref, {
+    selector: "[data-error-action]",
+    onMatch: (el) => {
+      const action = el.dataset.errorAction;
       if (!action) return;
 
-      trackEvent("error_action_click", { error_code: code, path, action });
-    };
-
-    node.addEventListener("click", handleClick);
-    return () => node.removeEventListener("click", handleClick);
-  }, [code]);
+      trackEvent("error_action_click", {
+        error_code: code,
+        path: pathRef.current,
+        action,
+      });
+    },
+  });
 
   return <div ref={ref}>{children}</div>;
 }

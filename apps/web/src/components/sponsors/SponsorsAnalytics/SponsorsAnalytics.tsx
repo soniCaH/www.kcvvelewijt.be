@@ -5,6 +5,7 @@ import {
   useSponsorAnalytics,
   type SponsorTier,
 } from "@/hooks/useSponsorAnalytics";
+import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 
 export interface SponsorsAnalyticsProps {
   children: ReactNode;
@@ -36,17 +37,9 @@ export function SponsorsAnalytics({ children }: SponsorsAnalyticsProps) {
     trackSponsorView();
   }, [trackSponsorView]);
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const el = target?.closest<HTMLElement>(
-        "[data-sponsor-id], [data-sponsor-cta]",
-      );
-      if (!el) return;
-
+  useDelegatedClick(ref, {
+    selector: "[data-sponsor-id], [data-sponsor-cta]",
+    onMatch: (el) => {
       if (el.hasAttribute("data-sponsor-cta")) {
         trackSponsorCtaClick();
         return;
@@ -63,11 +56,8 @@ export function SponsorsAnalytics({ children }: SponsorsAnalyticsProps) {
       } else {
         trackSponsorClick({ sponsorId, tier });
       }
-    };
-
-    node.addEventListener("click", handleClick);
-    return () => node.removeEventListener("click", handleClick);
-  }, [trackSponsorClick, trackSponsorFeaturedClick, trackSponsorCtaClick]);
+    },
+  });
 
   return <div ref={ref}>{children}</div>;
 }

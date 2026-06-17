@@ -13,6 +13,7 @@ import {
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { useOrganigramAnalytics } from "@/hooks/useOrganigramAnalytics";
+import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 import { MemberDetailPanel } from "@/components/organigram/MemberDetailPanel";
 
 /**
@@ -133,21 +134,16 @@ export function HubMemberPanel({
   }, []);
 
   // Directory delegation: one listener, target only `data-member-card` cards.
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const onClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const card = target?.closest<HTMLElement>("[data-member-card]");
-      const id = card?.dataset.nodeId;
+  useDelegatedClick(containerRef, {
+    selector: "[data-member-card]",
+    onMatch: (card) => {
+      const id = card.dataset.nodeId;
       if (!id) return;
       const node = nodeById.get(id);
       if (!node) return;
       openMember(node, { trigger: card, view: "cards" });
-    };
-    el.addEventListener("click", onClick);
-    return () => el.removeEventListener("click", onClick);
-  }, [nodeById, openMember]);
+    },
+  });
 
   // Deep-link restore on first mount: a one-time read of the URL (an external
   // system) — the panel is closed during SSR and opens after hydration when

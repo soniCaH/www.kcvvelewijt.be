@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 
 export interface EditorialHubAnalyticsProps {
   /** Event fired on a card click, e.g. `jeugd_card_click`. */
@@ -29,15 +30,9 @@ export function EditorialHubAnalytics({
 }: EditorialHubAnalyticsProps) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const card = target?.closest<HTMLElement>("[data-card-type]");
-      if (!card) return;
-
+  useDelegatedClick(ref, {
+    selector: "[data-card-type]",
+    onMatch: (card) => {
       const cardType = card.dataset.cardType;
       if (!cardType) return;
 
@@ -47,11 +42,8 @@ export function EditorialHubAnalytics({
         tag: card.dataset.tag ?? "",
         ...(articleIdHashed ? { article_id_hashed: articleIdHashed } : {}),
       });
-    };
-
-    node.addEventListener("click", handleClick);
-    return () => node.removeEventListener("click", handleClick);
-  }, [eventName]);
+    },
+  });
 
   return (
     <div ref={ref} className={className}>
