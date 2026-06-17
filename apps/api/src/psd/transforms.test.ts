@@ -460,6 +460,30 @@ describe("transformPsdGame — competition label + team designation", () => {
     );
   });
 
+  it("surfaces the normalized competitionType from the season-games object form", () => {
+    // League play carries a division name in `competition` (not "Competitie"),
+    // so list consumers must gate on the structured `competitionType` instead.
+    const league = makePsdGame({
+      competitionType: {
+        id: 5,
+        name: "3de Nationale",
+        type: "OFFICIAL",
+      } as PsdGame["competitionType"],
+    });
+    const leagueMatch = transformPsdGame(league);
+    expect(leagueMatch.competition).toBe("3de Nationale");
+    expect(leagueMatch.competitionType).toBe("league");
+
+    const cup = makePsdGame({
+      competitionType: {
+        id: 9,
+        name: null,
+        type: "CUP",
+      } as PsdGame["competitionType"],
+    });
+    expect(transformPsdGame(cup).competitionType).toBe("cup");
+  });
+
   it("attaches the opponent team designation, omitting the own numeric code", () => {
     // KCVV (home, code "1") vs opponent away "U23"
     const match = transformPsdGame(
