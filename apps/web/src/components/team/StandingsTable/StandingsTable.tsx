@@ -26,7 +26,7 @@ export function StandingsTable({
           <tr className="border-ink border-b-2">
             <th
               scope="col"
-              className="text-ink-muted py-2 pr-2 text-left tracking-wider uppercase"
+              className="text-ink-muted py-2 pr-2 pl-4 text-left tracking-wider uppercase"
             >
               #
             </th>
@@ -69,7 +69,7 @@ export function StandingsTable({
             </th>
             <th
               scope="col"
-              className="text-ink-muted py-2 text-right tracking-wider uppercase"
+              className="text-ink-muted py-2 pr-4 text-right tracking-wider uppercase"
             >
               Ptn
             </th>
@@ -89,7 +89,7 @@ export function StandingsTable({
                 )}
               >
                 {/* Position */}
-                <td className="text-ink-muted py-2 pr-2 tabular-nums">
+                <td className="text-ink-muted py-2 pr-2 pl-4 tabular-nums">
                   {entry.position}
                 </td>
 
@@ -137,7 +137,7 @@ export function StandingsTable({
                 </td>
 
                 {/* Points — display-big black */}
-                <td className="font-display-big text-ink py-2 text-right font-black tabular-nums">
+                <td className="font-display-big text-ink py-2 pr-4 text-right font-black tabular-nums">
                   {entry.points}
                 </td>
               </tr>

@@ -39,7 +39,7 @@ import {
   ArticleRepository,
   type MatchArticleVM,
 } from "@/lib/repositories/article.repository";
-import type { MatchDetail, MatchEvent } from "@kcvv/api-contract";
+import type { MatchDetail, MatchEvent, RankingEntry } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildBreadcrumbJsonLd,
@@ -48,6 +48,7 @@ import {
 import { MatchHero } from "@/components/match/MatchHero";
 import { MatchLineupSection } from "@/components/match/MatchLineupSection";
 import { MatchEventsSection } from "@/components/match/MatchEventsSection";
+import { MatchStandingsSection } from "@/components/match/MatchStandingsSection";
 import {
   MatchArticleLinkCard,
   selectMatchArticle,
@@ -226,6 +227,30 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const articleSelection = selectMatchArticle(linkedArticles, match.status);
   const hasArticle = articleSelection !== null;
 
+  // Match-day standings (#2162) — league matches only. A cup/friendly/other
+  // match has no meaningful league table, so we gate on the BFF-surfaced
+  // structured `competitionType` (never on string-matching the Dutch label) and
+  // a resolved `kcvv_team_id`; anything else triggers no ranking fetch at all.
+  // Resilient: a BFF failure degrades to an empty table (auto-hidden), never a
+  // 500 — mirrors the `/ploegen/[slug]` standings fetch.
+  let standings: readonly RankingEntry[] = [];
+  if (match.competitionType === "league" && match.kcvv_team_id != null) {
+    const standingsTeamId = match.kcvv_team_id;
+    standings = await runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff
+          .getRanking(standingsTeamId)
+          .pipe(
+            Effect.catchAll(() =>
+              Effect.succeed([] as readonly RankingEntry[]),
+            ),
+          );
+      }),
+    );
+  }
+  const hasStandings = standings.length > 0;
+
   const matchLabel = formatMatchTitle(match);
 
   const analyticsParams = {
@@ -272,7 +297,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         kcvvTeamLabel={match.kcvv_team_label}
       />
 
-      {(hasLineup || hasEvents || hasArticle) && (
+      {(hasLineup || hasEvents || hasStandings || hasArticle) && (
         <StripedSeam colorPair="ink-cream" height="md" />
       )}
 
@@ -309,9 +334,31 @@ export default async function MatchPage({ params }: MatchPageProps) {
         </TrackInView>
       )}
 
+      {/* Seam before the standings when a body section preceded it. */}
+      {hasStandings && (hasLineup || hasEvents) && (
+        <StripedSeam colorPair="ink-cream" height="md" />
+      )}
+
+      {/* Match-day standings (#2162) — league matches only; <TrackInView> only
+          mounts when the section renders, so `match_standings_in_view` never
+          fires on the auto-hide (cup/friendly/off-season) branch. */}
+      {hasStandings && (
+        <TrackInView
+          eventName="match_standings_in_view"
+          params={analyticsParams}
+        >
+          <MatchStandingsSection
+            entries={standings}
+            homeClubId={match.home_team.id}
+            awayClubId={match.away_team.id}
+            highlightTeamId={match.kcvv_team_id}
+          />
+        </TrackInView>
+      )}
+
       {/* Seam before the article card when a body section preceded it, so the
-          card isn't flush against the lineup/events block. */}
-      {hasArticle && (hasLineup || hasEvents) && (
+          card isn't flush against the lineup/events/standings block. */}
+      {hasArticle && (hasLineup || hasEvents || hasStandings) && (
         <StripedSeam colorPair="ink-cream" height="md" />
       )}
 

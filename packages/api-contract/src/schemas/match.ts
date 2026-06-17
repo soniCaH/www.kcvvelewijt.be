@@ -130,10 +130,26 @@ export class MatchEvent extends S.Class<MatchEvent>("MatchEvent")({
   isOwnGoal: S.optional(S.Boolean),
 }) {}
 
+/**
+ * Normalized league/cup/friendly classification for a match.
+ *
+ * Surfaced so consumers can gate behaviour on the *structured* competition type
+ * instead of string-matching the Dutch `competition` label. Derived by the BFF
+ * from PSD's `competitionType.type` (`OFFICIAL`/`LEAGUE` → `"league"`,
+ * `CUP` → `"cup"`, `FRIENDLY` → `"friendly"`, anything else → `"other"`).
+ *
+ * Lives on `MatchDetail` only (not `BaseMatchFields`) — per "only declare the
+ * fields you use", the match list / share autocomplete don't need it.
+ */
+export const CompetitionType = S.Literal("league", "cup", "friendly", "other");
+export type CompetitionType = S.Schema.Type<typeof CompetitionType>;
+
 /** Normalized match detail (extended Match with lineup and events) */
 export class MatchDetail extends S.Class<MatchDetail>("MatchDetail")({
   ...BaseMatchFields,
   lineup: S.optional(MatchLineup),
   events: S.optional(S.Array(MatchEvent)),
   hasReport: S.Boolean,
+  /** League/cup/friendly classification. Absent when the BFF can't resolve it. */
+  competitionType: S.optional(CompetitionType),
 }) {}

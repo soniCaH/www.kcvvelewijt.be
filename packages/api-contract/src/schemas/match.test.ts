@@ -133,4 +133,26 @@ describe("MatchDetail schema", () => {
   it("throws on missing hasReport", () => {
     expect(() => S.decodeUnknownSync(MatchDetail)(validMatch)).toThrow();
   });
+
+  it("decodes an optional competitionType", () => {
+    const result = S.decodeUnknownSync(MatchDetail)({
+      ...validDetail,
+      competitionType: "league",
+    });
+    expect(result.competitionType).toBe("league");
+  });
+
+  it("leaves competitionType undefined when absent", () => {
+    const result = S.decodeUnknownSync(MatchDetail)(validDetail);
+    expect(result.competitionType).toBeUndefined();
+  });
+
+  it("rejects an unknown competitionType literal", () => {
+    expect(() =>
+      S.decodeUnknownSync(MatchDetail)({
+        ...validDetail,
+        competitionType: "playoff",
+      }),
+    ).toThrow();
+  });
 });
