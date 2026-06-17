@@ -117,6 +117,10 @@ export type {
   ErrorStateActionVariant,
 } from "./ErrorState";
 
+// JerseyIllustration
+export { JerseyIllustration } from "./JerseyIllustration";
+export type { JerseyIllustrationProps } from "./JerseyIllustration";
+
 // JerseyShirt
 export { JerseyShirt } from "./JerseyShirt";
 export type { JerseyShirtProps } from "./JerseyShirt";

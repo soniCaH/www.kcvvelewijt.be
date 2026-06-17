@@ -1,19 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
-import {
-  JERSEY_FIGURE_VIEWBOX,
-  JERSEY_HEAD_ELLIPSE,
-  JERSEY_SHOULDER_BUMP_LEFT_PATH,
-  JERSEY_SHOULDER_BUMP_RIGHT_PATH,
-  JERSEY_TORSO_FILL_PATH,
-  JERSEY_TORSO_OUTLINE_PATH,
-  JERSEY_V_COLLAR_PATH,
-  JERSEY_VERTICAL_STRIPE_PATHS,
-} from "@/components/design-system/_jersey-paths";
-
-const STRIPE_STROKE_WIDTH = 2;
-const OUTLINE_STROKE_WIDTH = 3;
+import { JerseyIllustration } from "@/components/design-system/JerseyIllustration";
 
 export interface PlayerCardProps {
   firstName: string;
@@ -26,54 +14,6 @@ export interface PlayerCardProps {
   /** Detail-page href. When absent the card is not a link. */
   href?: string;
   className?: string;
-}
-
-/** Canonical jersey illustration fill — shared with <PlayerHero> / <PlayerFigure>. */
-function CardIllustration() {
-  return (
-    <div
-      data-testid="player-card-illustration"
-      aria-hidden="true"
-      className="bg-cream-soft absolute inset-0"
-    >
-      <div className="absolute inset-0 opacity-95 mix-blend-multiply">
-        <svg
-          viewBox={JERSEY_FIGURE_VIEWBOX}
-          preserveAspectRatio="xMidYMid meet"
-          className="block h-full w-full"
-        >
-          <g fill="var(--color-jersey-deep)">
-            <ellipse {...JERSEY_HEAD_ELLIPSE} />
-            <path d={JERSEY_TORSO_FILL_PATH} />
-            <path d={JERSEY_SHOULDER_BUMP_LEFT_PATH} />
-            <path d={JERSEY_SHOULDER_BUMP_RIGHT_PATH} />
-          </g>
-        </svg>
-      </div>
-      <div className="absolute inset-0 translate-x-[2px] translate-y-[1px]">
-        <svg
-          viewBox={JERSEY_FIGURE_VIEWBOX}
-          preserveAspectRatio="xMidYMid meet"
-          className="block h-full w-full"
-        >
-          <g
-            fill="none"
-            stroke="var(--color-ink)"
-            strokeWidth={OUTLINE_STROKE_WIDTH}
-            strokeLinejoin="miter"
-            strokeLinecap="square"
-          >
-            <ellipse {...JERSEY_HEAD_ELLIPSE} />
-            <path d={JERSEY_TORSO_OUTLINE_PATH} />
-            <path d={JERSEY_V_COLLAR_PATH} />
-            {JERSEY_VERTICAL_STRIPE_PATHS.map((d) => (
-              <path key={d} d={d} strokeWidth={STRIPE_STROKE_WIDTH} />
-            ))}
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
 }
 
 export function PlayerCard({
@@ -112,7 +52,10 @@ export function PlayerCard({
             style={{ filter: "var(--filter-photo-newsprint)" }}
           />
         ) : (
-          <CardIllustration />
+          <JerseyIllustration
+            variant="card"
+            data-testid="player-card-illustration"
+          />
         )}
 
         {jerseyNumber !== undefined ? (
