@@ -1,106 +1,83 @@
 /**
  * ScheurkalenderPage Stories
  *
- * Print-friendly upcoming-matches calendar, grouped by date.
- * The print layout (print: classes) is visible when using the browser's
- * print preview; the screen layout is shown by default in Storybook.
+ * Private (noindex, unlinked) full-season A + B league fixture table — the data
+ * source the club screenshots into the A2 InDesign season poster. Treatment A:
+ * a print-clean white sheet (Montserrat), date·time·home·away with the KCVV side
+ * bolded and the squad label inline, grouped per weekend. See #2137.
+ *
+ * Pages/* stories are design references and are not VR-tested (page composition
+ * is the e2e suite's concern).
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   ScheurkalenderPage,
-  type ScheurkalenderDay,
+  type ScheurkalenderMatch,
 } from "./ScheurkalenderPage";
 import ScheurkalenderLoading from "@/app/(main)/scheurkalender/loading";
 
 // ---------------------------------------------------------------------------
-// Mock data
+// Mock data — real fixtures (subset of the locked mock), A + B league across
+// several weekends, mixing home/away for each squad.
 // ---------------------------------------------------------------------------
 
-function daysFromNow(n: number): Date {
-  const d = new Date();
-  d.setDate(d.getDate() + n);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function toKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function toLabel(date: Date): string {
-  return date.toLocaleDateString("nl-BE", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-const day1 = daysFromNow(3);
-const day2 = daysFromNow(7);
-const day3 = daysFromNow(14);
-
-const mockDays: ScheurkalenderDay[] = [
+const seasonFixtures: ScheurkalenderMatch[] = [
   {
-    key: toKey(day1),
-    label: toLabel(day1),
-    matches: [
-      {
-        id: 1,
-        time: "15:00",
-        squadLabel: "A-Ploeg",
-        homeTeam: { name: "KCVV Elewijt" },
-        awayTeam: { name: "Strombeek" },
-      },
-      {
-        id: 2,
-        time: "11:00",
-        squadLabel: "U15A",
-        homeTeam: { name: "KCVV Elewijt U15" },
-        awayTeam: { name: "FC Kampenhout U15" },
-      },
-    ],
+    id: 1,
+    date: "2025-08-30",
+    time: "20:00",
+    opponent: "Fc Zemst Sportief",
+    kcvvLabel: "B",
+    kcvvIsHome: true,
   },
   {
-    key: toKey(day2),
-    label: toLabel(day2),
-    matches: [
-      {
-        id: 3,
-        time: "15:00",
-        squadLabel: "A-Ploeg",
-        homeTeam: { name: "Racing Mechelen" },
-        awayTeam: { name: "KCVV Elewijt" },
-      },
-      {
-        id: 4,
-        time: "10:00",
-        squadLabel: "U13B",
-        homeTeam: { name: "KCVV Elewijt U13" },
-        awayTeam: { name: "Diegem Sport U13" },
-      },
-      {
-        id: 5,
-        time: "14:00",
-        squadLabel: "U17A",
-        homeTeam: { name: "Jeugd Zemst U17" },
-        awayTeam: { name: "KCVV Elewijt U17" },
-      },
-    ],
+    id: 2,
+    date: "2025-08-31",
+    time: "15:00",
+    opponent: "Sc City Pirates Antwerpen",
+    kcvvLabel: "A",
+    kcvvIsHome: true,
   },
   {
-    key: toKey(day3),
-    label: toLabel(day3),
-    matches: [
-      {
-        id: 6,
-        time: "15:00",
-        squadLabel: "A-Ploeg",
-        homeTeam: { name: "KCVV Elewijt" },
-        awayTeam: { name: "FC Kampenhout" },
-      },
-    ],
+    id: 3,
+    date: "2025-09-07",
+    time: "20:00",
+    opponent: "As Verbroedering Geel",
+    kcvvLabel: "A",
+    kcvvIsHome: false,
+  },
+  {
+    id: 4,
+    date: "2025-09-13",
+    time: "14:30",
+    opponent: "Peutie Fc",
+    kcvvLabel: "B",
+    kcvvIsHome: true,
+  },
+  {
+    id: 5,
+    date: "2025-09-14",
+    time: "15:00",
+    opponent: "Herleving Red Star Haasdonk",
+    kcvvLabel: "A",
+    kcvvIsHome: true,
+  },
+  {
+    id: 6,
+    date: "2025-09-20",
+    time: "19:30",
+    opponent: "Ksc Keerbergen",
+    kcvvLabel: "B",
+    kcvvIsHome: false,
+  },
+  {
+    id: 7,
+    date: "2025-09-21",
+    time: "15:00",
+    opponent: "Fc Turkse Rangers Waterschei",
+    kcvvLabel: "A",
+    kcvvIsHome: false,
   },
 ];
 
@@ -116,10 +93,11 @@ const meta = {
     docs: {
       description: {
         component:
-          "Print-friendly upcoming-matches calendar for /scheurkalender. Matches are grouped by date. The green header and back link are hidden on print; a minimal print header with the current date is shown instead.",
+          "Private InDesign-poster data source for /scheurkalender. Full-season A + B league fixtures grouped per weekend; KCVV side bolded with the squad label inline. The screen toolbar (print button) is hidden on print; the white sheet composites cleanly into the poster screenshot.",
       },
     },
   },
+  args: { season: "25/26" },
   tags: ["autodocs"],
 } satisfies Meta<typeof ScheurkalenderPage>;
 
@@ -130,32 +108,24 @@ type Story = StoryObj<typeof meta>;
 // Stories
 // ---------------------------------------------------------------------------
 
-/**
- * Upcoming matches across three match days.
- */
+/** Full-season A + B league table across several weekends. */
 export const Default: Story = {
-  args: { days: mockDays },
+  args: { matches: seasonFixtures },
 };
 
-/**
- * Single match day.
- */
-export const SingleDay: Story = {
-  args: { days: mockDays.slice(0, 1) },
+/** A single weekend (two fixtures). */
+export const SingleWeekend: Story = {
+  args: { matches: seasonFixtures.slice(0, 2) },
 };
 
-/**
- * No matches — empty state.
- */
+/** No published league fixtures — empty state. */
 export const NoMatches: Story = {
-  args: { days: [] },
+  args: { matches: [] },
 };
 
-/**
- * Mobile viewport.
- */
+/** Mobile viewport. */
 export const MobileViewport: Story = {
-  args: { days: mockDays },
+  args: { matches: seasonFixtures },
   globals: { viewport: { value: "kcvvMobile" } },
 };
 

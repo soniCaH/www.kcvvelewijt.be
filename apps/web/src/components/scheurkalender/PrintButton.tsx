@@ -5,7 +5,7 @@ export function PrintButton() {
     <button
       type="button"
       onClick={() => window.print()}
-      className="text-green-main shrink-0 rounded-lg bg-white px-5 py-2.5 font-semibold transition-colors hover:bg-gray-50 print:hidden"
+      className="border-ink text-ink hover:bg-cream-soft shrink-0 border-2 bg-white px-5 py-2 font-mono text-xs font-semibold tracking-wider uppercase transition-colors print:hidden"
     >
       Afdrukken
     </button>
