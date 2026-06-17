@@ -5,6 +5,7 @@ import type {
   MatchLineupPlayer,
   RankingEntry,
   CardType,
+  CompetitionType,
   OpponentHistory,
   MatchEvent,
 } from "@kcvv/api-contract";
@@ -95,6 +96,37 @@ function resolveCompetitionLabel(
   const specific = competitionLabels?.[ct.id];
   if (specific) return specific;
   return mapCompetitionLabel(ct.type ?? "UNKNOWN", ct.name);
+}
+
+/**
+ * Resolve a PSD competitionType field to the normalized league/cup/friendly
+ * classification used by the UI gate (e.g. match-day standings).
+ *
+ * Only the **object** form carries a reliable `.type`. The match-detail
+ * endpoint (`/games/{id}/info`) inlines a display *string* (e.g. "Croky Cup"),
+ * which can't be classified without string-matching Dutch labels (banned) — so
+ * the string and null forms fall through to `"other"`. The match-detail page
+ * therefore sources a reliable type from the season-games object form via the
+ * match-team index, not from `/games/{id}/info` directly.
+ *
+ * PSD uses `type: "OFFICIAL"` (Dutch "Competitie") for league play; `"LEAGUE"`
+ * is accepted as a forward-compat synonym.
+ */
+export function resolveCompetitionType(
+  ct: PsdCompetitionType | string | null | undefined,
+): CompetitionType {
+  if (ct == null || typeof ct === "string") return "other";
+  switch (ct.type.toUpperCase()) {
+    case "OFFICIAL":
+    case "LEAGUE":
+      return "league";
+    case "CUP":
+      return "cup";
+    case "FRIENDLY":
+      return "friendly";
+    default:
+      return "other";
+  }
 }
 
 /**

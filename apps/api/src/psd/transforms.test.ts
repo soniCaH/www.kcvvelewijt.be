@@ -3,6 +3,7 @@ import {
   mapGameStatus,
   isUnknownGameStatus,
   mapCompetitionLabel,
+  resolveCompetitionType,
   buildCompetitionLabelMap,
   deriveMatchTeamLabel,
   deriveOwnClubId,
@@ -11,6 +12,40 @@ import {
   psdGameToMs,
 } from "./transforms";
 import type { PsdGame, PsdCompetition } from "./schemas";
+
+describe("resolveCompetitionType", () => {
+  const obj = (type: string): PsdGame["competitionType"] =>
+    ({ id: 1, name: null, type }) as PsdGame["competitionType"];
+
+  it("maps OFFICIAL (PSD's league code) to 'league'", () => {
+    expect(resolveCompetitionType(obj("OFFICIAL"))).toBe("league");
+  });
+
+  it("maps LEAGUE synonym to 'league'", () => {
+    expect(resolveCompetitionType(obj("LEAGUE"))).toBe("league");
+  });
+
+  it("maps CUP to 'cup' and FRIENDLY to 'friendly'", () => {
+    expect(resolveCompetitionType(obj("CUP"))).toBe("cup");
+    expect(resolveCompetitionType(obj("FRIENDLY"))).toBe("friendly");
+  });
+
+  it("maps an unknown object type to 'other'", () => {
+    expect(resolveCompetitionType(obj("TOURNAMENT"))).toBe("other");
+  });
+
+  it("maps a plain-string (inlined match-detail label) to 'other'", () => {
+    // The /games/{id}/info endpoint returns a resolved display string like
+    // "Croky Cup"/"Competitie" — unclassifiable without banned label-matching.
+    expect(resolveCompetitionType("Competitie")).toBe("other");
+    expect(resolveCompetitionType("Croky Cup")).toBe("other");
+  });
+
+  it("maps null/undefined to 'other'", () => {
+    expect(resolveCompetitionType(null)).toBe("other");
+    expect(resolveCompetitionType(undefined)).toBe("other");
+  });
+});
 
 describe("mapGameStatus", () => {
   it("returns 'finished' for status 0 with goals", () => {

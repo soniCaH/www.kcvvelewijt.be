@@ -31,10 +31,15 @@ function makeEnvLayer() {
 }
 
 const cacheMock: KvCacheInterface = {
-  // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
-  // does not insert a /competitions fetch into the order-based fetch mocks.
+  // Seed empty maps so getCompetitionLabels() and the getMatchDetail match-team
+  // index both cache-hit, keeping the order-based fetch mocks free of extra
+  // /competitions, /teams and season-games requests.
   get: (key: string) =>
-    Effect.succeed(key === "psd:competition-labels" ? "{}" : null),
+    Effect.succeed(
+      key === "psd:competition-labels" || key === "psd:match-team-index"
+        ? "{}"
+        : null,
+    ),
   set: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
 };
@@ -1506,6 +1511,100 @@ describe("PsdService.getPlayerStats", () => {
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("ResourceNotFound");
+    }
+  });
+});
+
+describe("PsdService.getMatchDetail - competition/team enrichment", () => {
+  it("enriches kcvv_team_id + competitionType from a cached index", async () => {
+    const idx = {
+      "123": { teamId: 1, competitionType: "league" },
+    };
+    const kvMock: KvCacheInterface = {
+      get: (key: string) =>
+        Effect.succeed(
+          key === "psd:match-team-index" ? JSON.stringify(idx) : null,
+        ),
+      set: () => Effect.succeed(undefined),
+      increment: () => Effect.succeed(undefined),
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailWithGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock,
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.kcvv_team_id).toBe(1);
+      expect(result.right.competitionType).toBe("league");
+      // kcvv_team_label is deliberately NOT enriched (keeps MatchHero unchanged).
+      expect(result.right.kcvv_team_label).toBeUndefined();
+    }
+  });
+
+  it("leaves the detail unchanged when the match is absent from the index", async () => {
+    // Default cacheMock seeds the index as "{}" → no entry for 123.
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailWithGoal,
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.kcvv_team_id).toBeUndefined();
+      expect(result.right.kcvv_team_label).toBeUndefined();
+      expect(result.right.competitionType).toBeUndefined();
+    }
+  });
+
+  it("builds the index from season games (OFFICIAL → league) when uncached", async () => {
+    const officialGame123 = {
+      id: 123,
+      status: 0,
+      date: "2025-03-15 15:00",
+      time: "15:00",
+      homeClub: { id: 1235, name: "KCVV Elewijt" },
+      awayClub: { id: 200, name: "Opponent FC" },
+      goalsHomeTeam: 1,
+      goalsAwayTeam: 0,
+      competitionType: { id: 1, name: null, type: "OFFICIAL" },
+    };
+    const kvMock: KvCacheInterface = {
+      get: (key: string) =>
+        Effect.succeed(
+          key === "psd:current-season-id"
+            ? JSON.stringify(seasons[0])
+            : key === "psd:competition-labels"
+              ? "{}"
+              : null, // psd:match-team-index → null → force a build
+        ),
+      set: () => Effect.succeed(undefined),
+      increment: () => Effect.succeed(undefined),
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => rawDetailWithGoal }) // /info
+      .mockResolvedValueOnce({ ok: true, json: async () => rawTeams }) // /teams
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [officialGame123] }),
+      }) // team 1 season games
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ content: [] }) }); // team 23 season games
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock,
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.kcvv_team_id).toBe(1);
+      expect(result.right.competitionType).toBe("league");
+      expect(result.right.kcvv_team_label).toBeUndefined();
     }
   });
 });

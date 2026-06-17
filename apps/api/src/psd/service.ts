@@ -12,6 +12,7 @@ import {
 import type {
   Match,
   MatchDetail,
+  CompetitionType,
   RankingEntry,
   OpponentHistory,
   PlayerSeasonStats,
@@ -34,6 +35,7 @@ import {
   transformPsdGame,
   buildCompetitionLabelMap,
   type CompetitionLabelMap,
+  resolveCompetitionType,
   transformFootbalistoMatchDetail,
   matchDetailToMatch,
   transformFootbalistoRankingEntry,
@@ -287,6 +289,108 @@ export const PsdServiceLive = Layer.effect(
         FootbalistoMatchDetailResponse,
       );
 
+    // ─── Match → team/competition index ───────────────────────────────────────
+    // The match-detail endpoint (`/games/{id}/info`, queried by match id) carries
+    // NEITHER a reliable competition type (it inlines a display string) NOR a team
+    // id. Both live only on the per-team season-games endpoint. We build a
+    // `matchId → {teamId, competitionType}` index from every team's
+    // current-season games and reuse it to enrich `getMatchDetail`.
+    //
+    // Caching is deliberate (owner-flagged PSD + Workers-KV quota): the build
+    // fans out one fetch per team, so the whole index is cached as a SINGLE KV
+    // entry with a long TTL. Match→team assignments change at most weekly
+    // (new/rescheduled fixtures), and the index is independent of standings
+    // freshness (that's `getRanking`'s concern) — so a long TTL costs nothing in
+    // live-site accuracy while keeping us far under quota.
+    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index";
+    const MATCH_TEAM_INDEX_TTL = 60 * 60 * 12; // 12h
+
+    interface MatchTeamIndexEntry {
+      teamId: number;
+      competitionType: CompetitionType;
+    }
+    type MatchTeamIndex = Record<string, MatchTeamIndexEntry>;
+
+    const buildMatchTeamIndex = (): Effect.Effect<MatchTeamIndex, BffError> =>
+      Effect.gen(function* () {
+        const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+        const season = yield* getCurrentSeason();
+
+        const perTeam = yield* Effect.all(
+          teams.map((team) =>
+            countedFetch(
+              `${base}/games/team/${team.id}/seasons/${season.id}`,
+              PsdMatchListSchema,
+            ).pipe(
+              Effect.map((data) => ({ team, content: data.content })),
+              // A single failed team must not sink the whole index (mirrors
+              // getNextMatches' per-team resilience).
+              Effect.catchAll((e) =>
+                Effect.log(
+                  `buildMatchTeamIndex: team ${team.id} failed: ${String(e)}`,
+                ).pipe(Effect.as({ team, content: [] as readonly unknown[] })),
+              ),
+            ),
+          ),
+          { concurrency: 5 },
+        );
+
+        const index: MatchTeamIndex = {};
+        for (const { team, content } of perTeam) {
+          for (const item of content) {
+            const decoded = S.decodeUnknownOption(PsdGame)(item);
+            if (Option.isNone(decoded)) continue;
+            const game = decoded.value;
+            const key = String(game.id);
+            // First write wins — deterministic for the rare KCVV-internal match
+            // that appears in two teams' lists (always a friendly → no standings).
+            if (index[key]) continue;
+            index[key] = {
+              teamId: team.id,
+              competitionType: resolveCompetitionType(game.competitionType),
+            };
+          }
+        }
+        return index;
+      });
+
+    const getMatchTeamIndex = (): Effect.Effect<MatchTeamIndex, never> =>
+      Effect.gen(function* () {
+        const cached = yield* cache.get(MATCH_TEAM_INDEX_CACHE_KEY);
+        if (cached) {
+          const parsed = yield* Effect.try({
+            try: () => JSON.parse(cached) as MatchTeamIndex,
+            catch: () => null,
+          }).pipe(Effect.option);
+          if (
+            Option.isSome(parsed) &&
+            parsed.value !== null &&
+            typeof parsed.value === "object"
+          ) {
+            return parsed.value;
+          }
+        }
+
+        // Best-effort: any build failure (typed error OR defect) yields an empty
+        // index, so enrichment becomes a no-op and `getMatchDetail` behaves
+        // exactly as before — the match page must never degrade on index trouble.
+        const built = yield* buildMatchTeamIndex().pipe(
+          Effect.catchAllCause((cause) =>
+            Effect.log(
+              `getMatchTeamIndex: build failed: ${String(cause)}`,
+            ).pipe(Effect.as({} as MatchTeamIndex)),
+          ),
+        );
+        if (Object.keys(built).length > 0) {
+          yield* cache.set(
+            MATCH_TEAM_INDEX_CACHE_KEY,
+            JSON.stringify(built),
+            MATCH_TEAM_INDEX_TTL,
+          );
+        }
+        return built;
+      });
+
     return {
       getTeamMatches: (teamId: number) =>
         Effect.gen(function* () {
@@ -421,6 +525,23 @@ export const PsdServiceLive = Layer.effect(
       getMatchDetail: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
           Effect.map(transformFootbalistoMatchDetail),
+          // Enrich with the team id + structured competition type that
+          // `/games/{id}/info` cannot provide (see the match-team index above).
+          // Strictly additive: an index miss/failure leaves the detail exactly
+          // as transformed (incl. `is_home` — keeper enrichment is unaffected).
+          Effect.flatMap((detail) =>
+            getMatchTeamIndex().pipe(
+              Effect.map((index) => {
+                const entry = index[String(matchId)];
+                if (!entry) return detail;
+                return {
+                  ...detail,
+                  kcvv_team_id: entry.teamId,
+                  competitionType: entry.competitionType,
+                };
+              }),
+            ),
+          ),
         ),
 
       getRanking: (teamId: number, logoCdnUrl: string) =>
