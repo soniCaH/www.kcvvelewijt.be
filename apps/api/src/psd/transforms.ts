@@ -596,6 +596,7 @@ export function transformFootbalistoRankingEntry(
   return {
     position: entry.rank,
     team_id: entry.team.id,
+    club_id: entry.team.club.id,
     team_name: teamName,
     team_logo: `${cdn}/extra_groot/${entry.team.club.id}.png`,
     played: entry.matchesPlayed,

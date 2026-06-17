@@ -17,6 +17,9 @@ function entry(
   return {
     position,
     team_id,
+    // Mock: club_id mirrors team_id so the head-to-head filter (by club id) and
+    // the KCVV highlight (by team id) line up on the same numbers.
+    club_id: team_id,
     team_name,
     played,
     won,
@@ -53,14 +56,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** League match — full division with the KCVV row tinted. */
+/**
+ * League match KCVV (6th) vs VK Weerde (3rd) — the full division is passed but
+ * only the two teams playing render, each at its real position; KCVV tinted.
+ */
 export const Default: Story = {
-  args: { entries: fullDivision, highlightTeamId: 1235 },
+  args: {
+    entries: fullDivision,
+    homeClubId: 1235,
+    awayClubId: 103,
+    highlightTeamId: 1235,
+  },
 };
 
-/** Without a highlight (e.g. team id unresolved) — no row is tinted. */
+/** Without a highlight (e.g. team id unresolved) — neither row is tinted. */
 export const NoHighlight: Story = {
-  args: { entries: fullDivision },
+  args: { entries: fullDivision, homeClubId: 1235, awayClubId: 103 },
 };
 
 /**
@@ -68,6 +79,6 @@ export const NoHighlight: Story = {
  * story renders nothing. Tagged `vr-skip` since there's no visual to capture.
  */
 export const EmptyAutoHides: Story = {
-  args: { entries: [] },
+  args: { entries: [], homeClubId: 1235, awayClubId: 103 },
   tags: ["vr-skip"],
 };

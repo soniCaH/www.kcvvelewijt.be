@@ -4,8 +4,13 @@ import { cn } from "@/lib/utils/cn";
 import { StandingsTable } from "@/components/team/StandingsTable";
 
 export interface MatchStandingsSectionProps {
-  /** League-table rows for the KCVV team's competition. */
+  /** Full league-table rows for the competition. Filtered to the two teams
+   * playing this match (a match-day head-to-head snapshot). */
   entries: readonly RankingEntry[];
+  /** PSD club id of the home side (`match.home_team.id`). */
+  homeClubId: number;
+  /** PSD club id of the away side (`match.away_team.id`). */
+  awayClubId: number;
   /** PSD team id of the KCVV side, so its row tints in the table. */
   highlightTeamId?: number;
   className?: string;
@@ -16,21 +21,33 @@ export interface MatchStandingsSectionProps {
  * restores the match-day standings snapshot dropped in the #1913 redesign,
  * **league matches only** (the page gates on `competitionType === "league"`).
  *
+ * Shows **only the two teams playing this match** — a head-to-head standings
+ * snapshot (the legacy behaviour), matched by club id against the full ranking
+ * and keeping each team's real league position. Not the whole division.
+ *
  * Mirrors the `<MatchLineupSection>` / `<MatchEventsSection>` chrome: mono caps
  * kicker (`KLASSEMENT`) + display-md italic heading (`In de stand.`) + paper
  * container, around the already-redesigned `<StandingsTable>` (KCVV row tinted
  * via `highlightTeamId`).
  *
- * Auto-hide: returns `null` when there are no entries (off-season / empty
- * ranking). The caller mounts this unconditionally; this component owns the
- * "render or not" decision (`<StandingsTable>` also no-ops on empty).
+ * Auto-hide: returns `null` when neither team is found in the ranking
+ * (off-season / empty ranking). The caller mounts this unconditionally; this
+ * component owns the "render or not" decision.
  */
 export function MatchStandingsSection({
   entries,
+  homeClubId,
+  awayClubId,
   highlightTeamId,
   className,
 }: MatchStandingsSectionProps) {
-  if (entries.length === 0) return null;
+  // `.filter` returns a fresh array, so the in-place `.sort` never mutates the
+  // caller's `entries`.
+  const involved = entries
+    .filter((e) => e.club_id === homeClubId || e.club_id === awayClubId)
+    .sort((a, b) => a.position - b.position);
+
+  if (involved.length === 0) return null;
 
   return (
     <section
@@ -48,7 +65,7 @@ export function MatchStandingsSection({
         In de stand.
       </EditorialHeading>
 
-      <StandingsTable entries={entries} highlightTeamId={highlightTeamId} />
+      <StandingsTable entries={involved} highlightTeamId={highlightTeamId} />
     </section>
   );
 }

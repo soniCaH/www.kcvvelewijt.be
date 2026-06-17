@@ -304,6 +304,10 @@ export const PsdServiceLive = Layer.effect(
     // live-site accuracy while keeping us far under quota.
     const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index";
     const MATCH_TEAM_INDEX_TTL = 60 * 60 * 12; // 12h
+    // Negative-cache an empty index briefly so a partial upstream outage (e.g.
+    // /info ok but the per-team fetches fail) can't trigger a ~20-fetch rebuild
+    // on every request, while still recovering within minutes once PSD heals.
+    const MATCH_TEAM_INDEX_EMPTY_TTL = 120; // 2m
 
     interface MatchTeamIndexEntry {
       teamId: number;
@@ -381,13 +385,16 @@ export const PsdServiceLive = Layer.effect(
             ).pipe(Effect.as({} as MatchTeamIndex)),
           ),
         );
-        if (Object.keys(built).length > 0) {
-          yield* cache.set(
-            MATCH_TEAM_INDEX_CACHE_KEY,
-            JSON.stringify(built),
-            MATCH_TEAM_INDEX_TTL,
-          );
-        }
+        // Always cache — a non-empty index for 12h, an empty one (build failure)
+        // only briefly, so we never re-fan-out the full build on every request
+        // during an incident yet recover quickly afterwards.
+        yield* cache.set(
+          MATCH_TEAM_INDEX_CACHE_KEY,
+          JSON.stringify(built),
+          Object.keys(built).length > 0
+            ? MATCH_TEAM_INDEX_TTL
+            : MATCH_TEAM_INDEX_EMPTY_TTL,
+        );
         return built;
       });
 

@@ -5,6 +5,9 @@ import { DateFromStringOrDate } from "./common";
 export class RankingEntry extends S.Class<RankingEntry>("RankingEntry")({
   position: S.Number,
   team_id: S.Number,
+  /** PSD club id (e.g. 1235 for KCVV). Lets consumers match a ranking row to a
+   * match side, whose home/away ids are club ids — not PSD team ids. */
+  club_id: S.optional(S.Number),
   team_name: S.String,
   team_logo: S.optional(S.String),
   played: S.Number,

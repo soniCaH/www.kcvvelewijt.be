@@ -349,6 +349,8 @@ export default async function MatchPage({ params }: MatchPageProps) {
         >
           <MatchStandingsSection
             entries={standings}
+            homeClubId={match.home_team.id}
+            awayClubId={match.away_team.id}
             highlightTeamId={match.kcvv_team_id}
           />
         </TrackInView>
