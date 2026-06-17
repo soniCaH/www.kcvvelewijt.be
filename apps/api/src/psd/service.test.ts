@@ -813,7 +813,7 @@ describe("PsdService.getMatchesWindow", () => {
     }
   });
 
-  it("flattens in-window games across teams and sorts by kickoff ascending", async () => {
+  it("flattens in-window games across teams and sorts by kickoff (incl. same-day time)", async () => {
     const teamB = {
       id: 2,
       name: "KCVV Elewijt B",
@@ -822,9 +822,15 @@ describe("PsdService.getMatchesWindow", () => {
       footbelId: null,
       active: true,
     };
-    const teamAList = { content: [upcomingThisWeekGame] }; // 2026-06-20
+    const teamAList = { content: [upcomingThisWeekGame] }; // 2026-06-20 15:00
+    // Two same-day games (2026-06-18), deliberately stored later-then-earlier so
+    // the sort must reorder by *time*, not just date — a date-only comparator
+    // would leave them as [302, 301] and fail this assertion.
     const teamBList = {
-      content: [game({ id: 302, date: "2026-06-18 14:30", time: "14:30" })], // 2026-06-18
+      content: [
+        game({ id: 302, date: "2026-06-18 14:30", time: "14:30" }),
+        game({ id: 301, date: "2026-06-18 11:00", time: "11:00" }),
+      ],
     };
 
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
@@ -850,10 +856,11 @@ describe("PsdService.getMatchesWindow", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      // 2026-06-18 (team B, 302) before 2026-06-20 (team A, 202).
-      expect(result.right.map((m) => m.id)).toEqual([302, 202]);
+      // 06-18 11:00 (301) < 06-18 14:30 (302) < 06-20 15:00 (202).
+      expect(result.right.map((m) => m.id)).toEqual([301, 302, 202]);
       expect(result.right[0]?.kcvv_team_label).toBe("B-Ploeg");
-      expect(result.right[1]?.kcvv_team_label).toBe("A-Ploeg");
+      expect(result.right[1]?.kcvv_team_label).toBe("B-Ploeg");
+      expect(result.right[2]?.kcvv_team_label).toBe("A-Ploeg");
     }
   });
 
