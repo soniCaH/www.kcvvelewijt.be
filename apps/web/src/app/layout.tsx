@@ -100,17 +100,17 @@ export default async function RootLayout({
       className={`${montserrat.variable} ${ibmPlexMono.variable}`}
     >
       <head>
-        {/* Adobe Typekit Fonts — deferred (only serves quasimoda + stenciletta) */}
+        {/* Adobe Typekit (Adobe Fonts) — serves Freight Display + Quasimoda.
+            Loaded async (non-blocking): an injected <script> fetches the kit and
+            calls Typekit.load() in its own onload, so load() never races ahead
+            of the kit defining `Typekit` (the prior two-script form did, logging
+            "Typekit is not defined"). If Adobe is slow/down the page is
+            unaffected — display text falls back to the serif stack, and body
+            (Montserrat) + mono (IBM Plex Mono) are self-hosted via next/font. */}
         {typekitId && (
-          <>
-            <Script
-              src={`https://use.typekit.net/${typekitId}.js`}
-              strategy="afterInteractive"
-            />
-            <Script id="typekit-init" strategy="afterInteractive">
-              {`try{Typekit.load({ async: true });}catch(e){console.error('Typekit load error:', e);}`}
-            </Script>
-          </>
+          <Script id="typekit-init" strategy="afterInteractive">
+            {`(function(d){var s=d.createElement("script");s.src="https://use.typekit.net/${typekitId}.js";s.async=true;s.onload=function(){try{Typekit.load({async:true});}catch(e){console.error("Typekit load error:",e);}};d.head.appendChild(s);})(document);`}
+          </Script>
         )}
       </head>
       <body suppressHydrationWarning>
