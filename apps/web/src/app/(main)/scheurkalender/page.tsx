@@ -80,8 +80,12 @@ async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
         (team) => team.age === "A" && team.psdId !== null,
       );
 
-      // Full-season fixtures per team, in parallel. One team failing degrades
-      // to an empty list rather than taking down the whole table.
+      // Full-season fixtures per team, in parallel. Catch broadly (the
+      // CLAUDE.md "broader catch when necessary" exception): this ISR page is
+      // prerendered at build, where the BFF can be unreachable — a transport
+      // error (not just HttpNotFound) must degrade to an empty sheet rather
+      // than fail the build. ISR self-heals once the BFF recovers on the next
+      // revalidation. Errors are still logged via tapError above.
       const matchArrays = yield* Effect.all(
         seniorTeams.map((team) =>
           bff.getMatches(Number(team.psdId)).pipe(
@@ -121,15 +125,7 @@ async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
       );
 
       return { matches, season };
-    }).pipe(
-      Effect.catchAll((error) => {
-        console.error("[Scheurkalender] Failed to build fixture table:", error);
-        return Effect.succeed({
-          matches: [],
-          season: seasonLabel(DateTime.now().setZone(TZ).toISODate()!),
-        } satisfies ScheurkalenderData);
-      }),
-    ),
+    }),
   );
 }
 
