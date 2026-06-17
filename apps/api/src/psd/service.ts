@@ -51,6 +51,7 @@ export interface PsdServiceInterface {
     teamId: number,
   ) => Effect.Effect<readonly Match[], BffError>;
   readonly getNextMatches: () => Effect.Effect<readonly Match[], BffError>;
+  readonly getMatchesWindow: () => Effect.Effect<readonly Match[], BffError>;
   readonly getMatchById: (matchId: number) => Effect.Effect<Match, BffError>;
   readonly getMatchDetail: (
     matchId: number,
@@ -520,6 +521,124 @@ export const PsdServiceLive = Layer.effect(
               });
             }
           }
+          return matches;
+        }),
+
+      getMatchesWindow: () =>
+        Effect.gen(function* () {
+          const visiblePsdIds = yield* getVisibleTeamIds();
+          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+          const season = yield* getCurrentSeason();
+          const competitionLabels = yield* getCompetitionLabels();
+
+          // Window: [start of today (Brussels), now + 7 days].
+          // The lower bound is the start of the current Brussels calendar day,
+          // expressed in the same wall-clock-as-UTC space psdGameToMs uses
+          // (PSD stores wall-clock times as plain "YYYY-MM-DD HH:MM" strings),
+          // so a match that already kicked off earlier today still qualifies —
+          // the key difference from getNextMatches, which drops it once
+          // psdGameToMs(m) < now. The 7-day upper bound covers pre-game posts;
+          // a couple of hours of timezone fuzz at its far edge is immaterial.
+          const now = Date.now();
+          const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+          const brusselsToday = new Date(now).toLocaleDateString("en-CA", {
+            timeZone: "Europe/Brussels",
+          });
+          const [ty, tm, td] = brusselsToday.split("-").map(Number);
+          const startOfTodayMs = Date.UTC(ty!, tm! - 1, td!, 0, 0, 0);
+          const windowEndMs = now + SEVEN_DAYS_MS;
+
+          const visibleTeams = visiblePsdIds
+            ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
+            : teams;
+
+          const teamWindowMatches = yield* Effect.all(
+            visibleTeams.map((team) =>
+              countedFetch(
+                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                PsdMatchListSchema,
+              ).pipe(
+                Effect.flatMap((data) =>
+                  Effect.gen(function* () {
+                    const [errors, games] = yield* Effect.partition(
+                      data.content,
+                      (item) =>
+                        S.decodeUnknown(PsdGame)(item).pipe(
+                          Effect.mapError((parseError) => ({
+                            id: extractId(item),
+                            parseError,
+                          })),
+                        ),
+                    );
+
+                    if (errors.length > 0) {
+                      const ids = errors.map((e) => e.id).join(", ");
+                      yield* Effect.log(
+                        `getMatchesWindow(${team.id}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
+                      );
+                    }
+
+                    const ownClubId = deriveOwnClubId(games);
+                    return games
+                      .filter((m) => {
+                        const ms = psdGameToMs(m);
+                        return ms >= startOfTodayMs && ms <= windowEndMs;
+                      })
+                      .map((game) =>
+                        transformPsdGame(
+                          { ...game, teamId: team.id },
+                          { ownClubId, competitionLabels },
+                        ),
+                      );
+                  }),
+                ),
+                Effect.map((windowed) => ({
+                  _tag: "ok" as const,
+                  matches: windowed,
+                })),
+                Effect.catchAll((e) =>
+                  Effect.log(
+                    `getMatchesWindow: team ${team.id} failed: ${String(e)}`,
+                  ).pipe(
+                    Effect.as({
+                      _tag: "failed" as const,
+                      matches: [] as Match[],
+                    }),
+                  ),
+                ),
+              ),
+            ),
+            { concurrency: 5 },
+          );
+
+          const allFailed =
+            visibleTeams.length > 0 &&
+            teamWindowMatches.every((r) => r._tag === "failed");
+
+          if (allFailed) {
+            return yield* Effect.fail(
+              new UpstreamUnavailableError({
+                message: `getMatchesWindow: all ${visibleTeams.length} team fetches failed`,
+              }),
+            );
+          }
+
+          // Flatten all in-window games across teams, tagging each with its
+          // KCVV team label, then sort by kickoff ascending.
+          const matches: Match[] = [];
+          for (let i = 0; i < teamWindowMatches.length; i++) {
+            const entry = teamWindowMatches[i]!;
+            if (entry._tag === "ok") {
+              const team = visibleTeams[i]!;
+              const label = derivePsdTeamLabel(team.name, team.age);
+              for (const match of entry.matches) {
+                matches.push({ ...match, kcvv_team_label: label });
+              }
+            }
+          }
+          matches.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+          );
           return matches;
         }),
 

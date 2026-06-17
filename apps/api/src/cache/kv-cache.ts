@@ -5,6 +5,7 @@ import { WorkerEnvTag } from "../env";
 export const TTL = {
   MATCHES_TEAM: 60 * 60 * 24, // 24 hours — season schedule rarely changes mid-week
   NEXT_MATCHES: 60 * 60 * 4, // 4 hours — no live scores, schedule is stable for hours
+  MATCHES_WINDOW: 60 * 60 * 4, // 4 hours — matchday picker; in-window matches stay listed regardless of refresh
   MATCH_DETAIL_PAST: 60 * 60 * 24 * 7, // 7 days — historical, never changes
   MATCH_DETAIL_DEFAULT: 60 * 60 * 24, // 24 hours — upcoming/recent matches
   RANKING: 60 * 60 * 24, // 24 hours — updates only after a match day

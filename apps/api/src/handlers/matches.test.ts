@@ -3,6 +3,7 @@ import { Effect, Layer, Schema as S } from "effect";
 import {
   getMatchesByTeamHandler,
   getNextMatchesHandler,
+  getMatchesWindowHandler,
   getMatchByIdHandler,
   getMatchDetailHandler,
   getPlayerStatsHandler,
@@ -50,6 +51,7 @@ function makeServiceMock(
   return {
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
     getNextMatches: () => Effect.succeed([baseMatch]),
+    getMatchesWindow: () => Effect.succeed([baseMatch]),
     getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
@@ -143,6 +145,35 @@ describe("getNextMatchesHandler", () => {
       Effect.either(
         provide(getNextMatchesHandler(), {
           getNextMatches: () =>
+            Effect.fail(
+              new UpstreamUnavailableError({
+                message: "All teams failed",
+                status: 503,
+              }),
+            ),
+        }),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+});
+
+describe("getMatchesWindowHandler", () => {
+  it("returns windowed matches from PsdService", async () => {
+    const result = await Effect.runPromise(provide(getMatchesWindowHandler()));
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe(1);
+    expect(() => S.decodeUnknownSync(MatchesArray)(result)).not.toThrow();
+  });
+
+  it("propagates UpstreamUnavailableError from service", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        provide(getMatchesWindowHandler(), {
+          getMatchesWindow: () =>
             Effect.fail(
               new UpstreamUnavailableError({
                 message: "All teams failed",

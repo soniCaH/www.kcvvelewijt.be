@@ -60,6 +60,26 @@ export const getNextMatchesHandler = (): Effect.Effect<
   );
 };
 
+export const getMatchesWindowHandler = (): Effect.Effect<
+  readonly Match[],
+  BffError,
+  PsdService | KvCacheService | WorkerEnvTag
+> => {
+  const cacheKey = "matches:window";
+  const fetchMatches = Effect.gen(function* () {
+    const service = yield* PsdService;
+    return yield* service.getMatchesWindow();
+  });
+
+  return matchesCache.getOrFetch(
+    cacheKey,
+    fetchMatches,
+    TTL.MATCHES_WINDOW,
+    undefined,
+    { shouldServeStale },
+  );
+};
+
 export const getMatchByIdHandler = (
   matchId: number,
 ): Effect.Effect<Match, BffError, PsdService> =>
@@ -134,6 +154,9 @@ export const MatchesApiLive = HttpApiBuilder.group(
         withErrorMapping(getMatchesByTeamHandler(teamId)),
       )
       .handle("getNextMatches", () => withErrorMapping(getNextMatchesHandler()))
+      .handle("getMatchesWindow", () =>
+        withErrorMapping(getMatchesWindowHandler()),
+      )
       .handle("getMatchById", ({ path: { matchId } }) =>
         withErrorMapping(getMatchByIdHandler(matchId)),
       )
