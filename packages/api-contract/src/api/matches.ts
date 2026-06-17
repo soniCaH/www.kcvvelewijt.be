@@ -25,6 +25,16 @@ export class MatchesApi extends HttpApiGroup.make("matches")
       .addError(HttpNotFound),
   )
   .add(
+    // Matches with kickoff in a window around now ([start of today, now + 7d],
+    // Brussels) — includes already-started/finished matches, unlike
+    // getNextMatches. Powers the matchday-aware /share autocomplete.
+    HttpApiEndpoint.get("getMatchesWindow", "/matches/window")
+      .addSuccess(MatchesArray)
+      .addError(HttpServiceUnavailable)
+      .addError(HttpBadGateway)
+      .addError(HttpNotFound),
+  )
+  .add(
     HttpApiEndpoint.get("getMatchById", "/match/:matchId")
       .setPath(S.Struct({ matchId: S.NumberFromString }))
       .addSuccess(Match)

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer, Logger, Schema as S } from "effect";
 import { PsdService, PsdServiceLive } from "./service";
 import { Match, MatchDetail, RankingEntry } from "@kcvv/api-contract";
@@ -680,6 +680,272 @@ describe("PsdService.getNextMatches", () => {
 
     // Sanity should NOT be called when KV has cached data
     expect(sanityCallCount).toBe(0);
+  });
+});
+
+describe("PsdService.getMatchesWindow", () => {
+  // Pin "now" to a fixed instant so the [start of today, now + 7d] window is
+  // deterministic. Fake only `Date` (timers stay real) so Effect's fiber
+  // scheduler is unaffected. Brussels in June is UTC+2, so 14:00Z is the same
+  // calendar day in both UTC and Brussels.
+  const NOW = "2026-06-17T14:00:00.000Z";
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(NOW));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // Self-contained season covering the pinned NOW — independent of the real
+  // clock, unlike the module-level `seasons` fixture.
+  const windowSeasons = [
+    {
+      id: 42,
+      name: "2026-2027",
+      start: "2026-06-01T00:00:00.000Z",
+      end: "2026-12-31T00:00:00.000Z",
+    },
+  ];
+
+  const game = (overrides: {
+    id: number;
+    date: string;
+    time: string;
+    goalsHomeTeam?: number | null;
+    goalsAwayTeam?: number | null;
+  }) => ({
+    status: 0,
+    homeClub: { id: 123, name: "KCVV Elewijt" },
+    awayClub: { id: 456, name: "Opponent FC" },
+    goalsHomeTeam: null,
+    goalsAwayTeam: null,
+    competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
+    ...overrides,
+  });
+
+  // Relative to NOW (2026-06-17 14:00Z):
+  const yesterdayGame = game({
+    id: 200,
+    date: "2026-06-16 15:00",
+    time: "15:00",
+  }); // before today — excluded
+  const startedTodayGame = game({
+    id: 201,
+    date: "2026-06-17 11:00", // kicked off 3h before now — getNextMatches drops it
+    time: "11:00",
+    goalsHomeTeam: 1,
+    goalsAwayTeam: 0,
+  });
+  const upcomingThisWeekGame = game({
+    id: 202,
+    date: "2026-06-20 15:00",
+    time: "15:00",
+  }); // +3d — in window
+  const farFutureGame = game({
+    id: 203,
+    date: "2026-06-30 15:00",
+    time: "15:00",
+  }); // +13d — excluded
+
+  const windowFixtureList = {
+    content: [
+      yesterdayGame,
+      startedTodayGame,
+      upcomingThisWeekGame,
+      farFutureGame,
+    ],
+  };
+
+  it("includes an already-started match from today and excludes out-of-window matches", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => windowFixtureList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const result = await runService((svc) => svc.getMatchesWindow());
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // started-today (201) is the key regression vs getNextMatches; upcoming
+      // (202) is in window; yesterday (200) and far-future (203) are excluded.
+      // Sorted by kickoff ascending → [201, 202].
+      expect(result.right.map((m) => m.id)).toEqual([201, 202]);
+      expect(result.right[0]?.kcvv_team_id).toBe(1);
+      expect(result.right[0]?.kcvv_team_label).toBe("A-Ploeg");
+      for (const match of result.right) {
+        expect(() => S.decodeUnknownSync(Match)(match)).not.toThrow();
+      }
+    }
+  });
+
+  it("getNextMatches drops the already-started match that getMatchesWindow keeps", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => windowFixtureList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const next = await runService((svc) => svc.getNextMatches());
+
+    expect(next._tag).toBe("Right");
+    if (next._tag === "Right") {
+      // Only the next upcoming fixture (>= now) survives — the started-today
+      // match (201) is gone, leaving the +3d fixture (202).
+      expect(next.right.map((m) => m.id)).toEqual([202]);
+    }
+  });
+
+  it("flattens in-window games across teams and sorts by kickoff ascending", async () => {
+    const teamB = {
+      id: 2,
+      name: "KCVV Elewijt B",
+      age: "A",
+      gender: "mannen",
+      footbelId: null,
+      active: true,
+    };
+    const teamAList = { content: [upcomingThisWeekGame] }; // 2026-06-20
+    const teamBList = {
+      content: [game({ id: 302, date: "2026-06-18 14:30", time: "14:30" })], // 2026-06-18
+    };
+
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/1/")) {
+        return Promise.resolve({ ok: true, json: async () => teamAList });
+      }
+      if (url.includes("/games/team/2/")) {
+        return Promise.resolve({ ok: true, json: async () => teamBList });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => [rawTeams[0], teamB],
+      });
+    });
+
+    const result = await runService((svc) => svc.getMatchesWindow(), {
+      sanityMock: makeSanityMock(["1", "2"]),
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // 2026-06-18 (team B, 302) before 2026-06-20 (team A, 202).
+      expect(result.right.map((m) => m.id)).toEqual([302, 202]);
+      expect(result.right[0]?.kcvv_team_label).toBe("B-Ploeg");
+      expect(result.right[1]?.kcvv_team_label).toBe("A-Ploeg");
+    }
+  });
+
+  it("does not fail the whole list when a single team fetch fails", async () => {
+    const teamB = {
+      id: 2,
+      name: "KCVV Elewijt B",
+      age: "A",
+      gender: "mannen",
+      footbelId: null,
+      active: true,
+    };
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/1/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => windowFixtureList,
+        });
+      }
+      if (url.includes("/games/team/2/")) {
+        return Promise.resolve({
+          ok: false,
+          status: 503,
+          statusText: "Service Unavailable",
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => [rawTeams[0], teamB],
+      });
+    });
+
+    const result = await runService((svc) => svc.getMatchesWindow(), {
+      sanityMock: makeSanityMock(["1", "2"]),
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // Team 2 failed, team 1's in-window matches still returned.
+      expect(result.right.map((m) => m.id)).toEqual([201, 202]);
+    }
+  });
+
+  it("fails with UpstreamUnavailableError when all team fetches fail", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: false,
+          status: 503,
+          statusText: "Service Unavailable",
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const result = await runService((svc) => svc.getMatchesWindow());
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+
+  it("returns an empty list when no matches fall in the window", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ content: [yesterdayGame, farFutureGame] }),
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const result = await runService((svc) => svc.getMatchesWindow());
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right).toHaveLength(0);
+    }
   });
 });
 

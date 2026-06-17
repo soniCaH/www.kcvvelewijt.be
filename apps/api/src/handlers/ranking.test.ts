@@ -31,6 +31,7 @@ function makeServiceMock(
   return {
     getTeamMatches: () => Effect.fail(new Error("not needed") as never),
     getNextMatches: () => Effect.fail(new Error("not needed") as never),
+    getMatchesWindow: () => Effect.fail(new Error("not needed") as never),
     getMatchById: () => Effect.fail(new Error("not needed") as never),
     getMatchDetail: () => Effect.fail(new Error("not needed") as never),
     getRanking: () => Effect.succeed(rankingEntries),

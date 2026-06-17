@@ -51,28 +51,21 @@ async function fetchSharePageData(): Promise<{
       const bff = yield* BffService;
       const playerRepo = yield* PlayerRepository;
 
-      const [nextMatches, allPlayers] = yield* Effect.all(
+      const [windowMatches, allPlayers] = yield* Effect.all(
         [
+          // Matchday-aware window: includes matches that already kicked off /
+          // finished today (for goal/HT/FT/card posts) plus the next 7 days
+          // (for pre-game posts). Replaces the old getNextMatches + today-only
+          // filter, which dropped a match the moment it started (#2160).
           bff
-            .getNextMatches()
+            .getMatchesWindow()
             .pipe(Effect.catchTag("HttpNotFound", () => Effect.succeed([]))),
           playerRepo.findAll(),
         ],
         { concurrency: 2 },
       );
 
-      // en-CA locale gives YYYY-MM-DD format for reliable string comparison
-      const brusselsDate = new Date().toLocaleDateString("en-CA", {
-        timeZone: "Europe/Brussels",
-      });
-      const todayMatches = nextMatches.filter((m) => {
-        const kickoffDate = new Date(m.date).toLocaleDateString("en-CA", {
-          timeZone: "Europe/Brussels",
-        });
-        return kickoffDate === brusselsDate;
-      });
-
-      const matches = todayMatches.map(toMatchOption);
+      const matches = windowMatches.map(toMatchOption);
 
       const players: PlayerForShare[] = allPlayers.map((p) => ({
         id: p.id,
