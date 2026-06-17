@@ -314,6 +314,10 @@ export function transformPsdGame(
       game.competitionType,
       options?.competitionLabels,
     ),
+    // Normalized league/cup/friendly classification — the season-games object
+    // form carries a reliable `.type`, so this is the canonical league gate for
+    // list consumers (the `competition` label is a division name, not "Competitie").
+    competitionType: resolveCompetitionType(game.competitionType),
     kcvv_team_id: game.teamId ?? undefined,
     is_home: isHome,
   };

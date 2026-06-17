@@ -1,150 +1,179 @@
 /**
  * ScheurkalenderPage Component Tests
+ *
+ * Treatment A (#2137): weekend grouping, inline A/B + bold KCVV side,
+ * no-year date, single weekend rule (no boundary doubling), empty state.
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import {
   ScheurkalenderPage,
-  type ScheurkalenderDay,
+  type ScheurkalenderMatch,
 } from "./ScheurkalenderPage";
 
-vi.mock("next/image", () => ({
-  default: ({ src, alt }: { src: string; alt: string }) => (
-    <img src={src} alt={alt} />
-  ),
-}));
-
-vi.mock("next/link", () => ({
-  default: ({
-    children,
-    href,
-  }: {
-    children: React.ReactNode;
-    href: string;
-  }) => <a href={href}>{children}</a>,
-}));
-
-const mockDays: ScheurkalenderDay[] = [
+// Real fixtures (subset of the locked mock). Three weekends (ISO weeks):
+//   wk 35: za 30/08 + zo 31/08   wk 36: zo 07/09   wk 37: za 13/09
+const fixtures: ScheurkalenderMatch[] = [
   {
-    key: "2026-03-15",
-    label: "zondag 15 maart 2026",
-    matches: [
-      {
-        id: 1,
-        time: "15:00",
-        squadLabel: "A-Ploeg",
-        homeTeam: { name: "KCVV Elewijt", logo: "/kcvv.png" },
-        awayTeam: { name: "Strombeek" },
-      },
-      {
-        id: 2,
-        time: "11:00",
-        squadLabel: "U15A",
-        homeTeam: { name: "KCVV Elewijt U15" },
-        awayTeam: { name: "FC Kampenhout U15" },
-      },
-    ],
+    id: 1,
+    date: "2025-08-30",
+    time: "20:00",
+    opponent: "Fc Zemst Sportief",
+    kcvvLabel: "B",
+    kcvvIsHome: true,
   },
   {
-    key: "2026-03-22",
-    label: "zondag 22 maart 2026",
-    matches: [
-      {
-        id: 3,
-        homeTeam: { name: "Racing Mechelen" },
-        awayTeam: { name: "KCVV Elewijt" },
-      },
-    ],
+    id: 2,
+    date: "2025-08-31",
+    time: "15:00",
+    opponent: "Sc City Pirates Antwerpen",
+    kcvvLabel: "A",
+    kcvvIsHome: true,
+  },
+  {
+    id: 3,
+    date: "2025-09-07",
+    time: "20:00",
+    opponent: "As Verbroedering Geel",
+    kcvvLabel: "A",
+    kcvvIsHome: false,
+  },
+  {
+    id: 4,
+    date: "2025-09-13",
+    time: "14:30",
+    opponent: "Peutie Fc",
+    kcvvLabel: "B",
+    kcvvIsHome: false,
   },
 ];
 
 describe("ScheurkalenderPage", () => {
-  describe("empty state", () => {
-    it("renders empty state message when no days", () => {
-      render(<ScheurkalenderPage days={[]} />);
-      expect(
-        screen.getByText("Geen aankomende wedstrijden gevonden."),
-      ).toBeInTheDocument();
-    });
-
-    it("does not render day sections when no days", () => {
-      render(<ScheurkalenderPage days={[]} />);
-      expect(
-        screen.queryByText("zondag 15 maart 2026"),
-      ).not.toBeInTheDocument();
-    });
-  });
-
-  describe("day sections", () => {
-    it("renders a section for each day", () => {
-      render(<ScheurkalenderPage days={mockDays} />);
-      expect(screen.getByText("zondag 15 maart 2026")).toBeInTheDocument();
-      expect(screen.getByText("zondag 22 maart 2026")).toBeInTheDocument();
-    });
-
-    it("renders all matches across all days", () => {
-      render(<ScheurkalenderPage days={mockDays} />);
-      expect(screen.getAllByText("KCVV Elewijt").length).toBeGreaterThanOrEqual(
-        1,
+  describe("masthead", () => {
+    it("renders the season + A & B subtitle", () => {
+      render(<ScheurkalenderPage matches={fixtures} season="25/26" />);
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
+        "KCVV Elewijt — Competitie 25/26",
       );
-      expect(screen.getByText("Strombeek")).toBeInTheDocument();
-      expect(screen.getByText("FC Kampenhout U15")).toBeInTheDocument();
-      expect(screen.getByText("Racing Mechelen")).toBeInTheDocument();
+      expect(screen.getByText("A & B · Wedstrijdkalender")).toBeInTheDocument();
     });
   });
 
-  describe("match rows", () => {
-    it("renders match time when provided", () => {
-      render(<ScheurkalenderPage days={[mockDays[0]]} />);
-      expect(screen.getByText("15:00")).toBeInTheDocument();
-      expect(screen.getByText("11:00")).toBeInTheDocument();
-    });
-
-    it("renders em-dash when no time provided", () => {
-      render(<ScheurkalenderPage days={[mockDays[1]]} />);
-      expect(screen.getByText("—")).toBeInTheDocument();
-    });
-
-    it("renders squad label badge when squadLabel is provided", () => {
-      render(<ScheurkalenderPage days={[mockDays[0]]} />);
-      expect(screen.getByText("A-Ploeg")).toBeInTheDocument();
-      expect(screen.getByText("U15A")).toBeInTheDocument();
-    });
-
-    it("does not render squad label badge when squadLabel is absent", () => {
-      render(<ScheurkalenderPage days={[mockDays[1]]} />);
-      expect(screen.queryByText("A-Ploeg")).not.toBeInTheDocument();
-    });
-
-    it("renders home team logo when provided", () => {
-      const { container } = render(<ScheurkalenderPage days={[mockDays[0]]} />);
-      // First match has a home logo (alt="" → role="presentation")
-      const images = container.querySelectorAll("img");
-      expect(images.length).toBeGreaterThanOrEqual(1);
-      expect(images[0]).toHaveAttribute("src", "/kcvv.png");
-    });
-
-    it("does not render away team logo when absent", () => {
-      const { container } = render(<ScheurkalenderPage days={[mockDays[0]]} />);
-      // Only the home logo of match 1 is present; away has no logo
-      const images = container.querySelectorAll("img");
-      expect(images).toHaveLength(1);
+  describe("empty state", () => {
+    it("renders the empty message and no table when there are no fixtures", () => {
+      render(<ScheurkalenderPage matches={[]} season="25/26" />);
+      expect(
+        screen.getByText("Geen competitiewedstrijden gevonden."),
+      ).toBeInTheDocument();
+      expect(screen.queryByRole("table")).not.toBeInTheDocument();
     });
   });
 
-  describe("chrome elements", () => {
+  describe("weekend grouping", () => {
+    it("buckets fixtures per weekend (ISO week) into separate <tbody>s", () => {
+      const { container } = render(
+        <ScheurkalenderPage matches={fixtures} season="25/26" />,
+      );
+      const tbodies = container.querySelectorAll("tbody");
+      expect(tbodies).toHaveLength(3);
+      expect(tbodies[0].querySelectorAll("tr")).toHaveLength(2); // 30+31 Aug
+      expect(tbodies[1].querySelectorAll("tr")).toHaveLength(1); // 7 Sep
+      expect(tbodies[2].querySelectorAll("tr")).toHaveLength(1); // 13 Sep
+    });
+
+    it("renders a single 2px rule between weekends with no hairline doubling", () => {
+      const { container } = render(
+        <ScheurkalenderPage matches={fixtures} season="25/26" />,
+      );
+      const tbodies = container.querySelectorAll("tbody");
+
+      // First weekend's first row has no top rule (no doubling at the very top).
+      const firstWeekendRows = tbodies[0].querySelectorAll("tr");
+      firstWeekendRows[0]
+        .querySelectorAll("td")
+        .forEach((td) => expect(td.className).not.toContain("border-t-2"));
+
+      // Last row of a weekend drops its bottom hairline (no doubling at the seam).
+      firstWeekendRows[firstWeekendRows.length - 1]
+        .querySelectorAll("td")
+        .forEach((td) => expect(td.className).not.toContain("border-b"));
+
+      // Each subsequent weekend opens with the single 2px ink rule.
+      tbodies[1]
+        .querySelectorAll("tr")[0]
+        .querySelectorAll("td")
+        .forEach((td) => expect(td.className).toContain("border-t-2"));
+    });
+  });
+
+  describe("rows", () => {
+    it("formats dates as Dutch weekday + DD/MM with no year", () => {
+      const { container } = render(
+        <ScheurkalenderPage matches={fixtures} season="25/26" />,
+      );
+      expect(screen.getByText("za 30/08")).toBeInTheDocument();
+      expect(screen.getByText("zo 31/08")).toBeInTheDocument();
+      expect(screen.getByText("zo 07/09")).toBeInTheDocument();
+      expect(screen.getByText("za 13/09")).toBeInTheDocument();
+      // No 4-digit year anywhere in the fixture table.
+      const table = container.querySelector("table");
+      expect(table?.textContent).not.toMatch(/20\d{2}/);
+    });
+
+    it("renders kickoff times", () => {
+      render(<ScheurkalenderPage matches={fixtures} season="25/26" />);
+      expect(screen.getAllByText("20:00")).toHaveLength(2); // ids 1 & 3
+      expect(screen.getByText("14:30")).toBeInTheDocument();
+    });
+
+    it("renders the KCVV squad inline (A/B) from the queried team", () => {
+      render(<ScheurkalenderPage matches={fixtures} season="25/26" />);
+      expect(screen.getAllByText("KCVV Elewijt A")).toHaveLength(2);
+      expect(screen.getAllByText("KCVV Elewijt B")).toHaveLength(2);
+    });
+
+    it("bolds the KCVV side and leaves the opponent unbolded", () => {
+      render(<ScheurkalenderPage matches={fixtures} season="25/26" />);
+      screen
+        .getAllByText(/^KCVV Elewijt [AB]$/)
+        .forEach((cell) => expect(cell.className).toContain("font-extrabold"));
+      expect(screen.getByText("Fc Zemst Sportief").className).not.toContain(
+        "font-extrabold",
+      );
+      expect(screen.getByText("As Verbroedering Geel").className).not.toContain(
+        "font-extrabold",
+      );
+    });
+
+    it("places KCVV in the home column when home, away column when away", () => {
+      const { container } = render(
+        <ScheurkalenderPage matches={fixtures} season="25/26" />,
+      );
+      const rows = container.querySelectorAll("tbody tr");
+      // Match 1: KCVV B home → home cell (3rd <td>) is the KCVV cell.
+      expect(rows[0].querySelectorAll("td")[2]).toHaveTextContent(
+        "KCVV Elewijt B",
+      );
+      // Match 3 (weekend 2, first row): KCVV A away → away cell (4th <td>).
+      expect(rows[2].querySelectorAll("td")[3]).toHaveTextContent(
+        "KCVV Elewijt A",
+      );
+    });
+
+    it("renders no logos, squad pills, or scores", () => {
+      const { container } = render(
+        <ScheurkalenderPage matches={fixtures} season="25/26" />,
+      );
+      expect(container.querySelectorAll("img")).toHaveLength(0);
+    });
+  });
+
+  describe("chrome", () => {
     it("renders the print button", () => {
-      render(<ScheurkalenderPage days={mockDays} />);
+      render(<ScheurkalenderPage matches={fixtures} season="25/26" />);
       expect(
         screen.getByRole("button", { name: "Afdrukken" }),
       ).toBeInTheDocument();
-    });
-
-    it("renders the back link to /kalender", () => {
-      render(<ScheurkalenderPage days={mockDays} />);
-      expect(
-        screen.getByRole("link", { name: /terug naar kalender/i }),
-      ).toHaveAttribute("href", "/kalender");
     });
   });
 });
