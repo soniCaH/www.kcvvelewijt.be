@@ -836,6 +836,8 @@ export function SharePage({ matches, players }: SharePageProps) {
               mood,
               competition: competition.trim() || undefined,
               dateTime: dateTime.trim() || undefined,
+              // Raw URLs — the templates route remote images through the
+              // same-origin optimizer + sanitize at the <img> sink.
               homeLogo: selectedMatch?.homeLogo,
               awayLogo: selectedMatch?.awayLogo,
               imageUrl: resolvedImageUrl,

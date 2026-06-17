@@ -5,7 +5,46 @@ import {
   overlayGradient,
   resolvePalette,
   splitMatchName,
+  toSameOriginImage,
 } from "./theme";
+
+describe("toSameOriginImage", () => {
+  it("routes an allowlisted CDN host through the Next optimizer", () => {
+    expect(
+      toSameOriginImage(
+        "https://cdn.sanity.io/images/x/y-350x350.jpg?w=400",
+        1080,
+      ),
+    ).toBe(
+      "/_next/image?url=https%3A%2F%2Fcdn.sanity.io%2Fimages%2Fx%2Fy-350x350.jpg%3Fw%3D400&w=1080&q=75",
+    );
+  });
+
+  it("passes blob, data and relative URLs through unchanged", () => {
+    expect(toSameOriginImage("blob:abc", 1080)).toBe("blob:abc");
+    expect(toSameOriginImage("data:image/png;base64,iVBORw0K", 1080)).toBe(
+      "data:image/png;base64,iVBORw0K",
+    );
+    expect(toSameOriginImage("/images/ultras.jpg", 384)).toBe(
+      "/images/ultras.jpg",
+    );
+  });
+
+  it("passes non-allowlisted hosts through unchanged (optimizer would 400)", () => {
+    expect(toSameOriginImage("https://example.com/a.png", 384)).toBe(
+      "https://example.com/a.png",
+    );
+  });
+
+  it("passes a malformed URL through unchanged (catch branch)", () => {
+    // matches the http(s) prefix but `new URL()` throws → caught → returned as-is
+    expect(toSameOriginImage("https://", 1080)).toBe("https://");
+  });
+
+  it("returns undefined for undefined", () => {
+    expect(toSameOriginImage(undefined, 1080)).toBeUndefined();
+  });
+});
 
 describe("resolvePalette", () => {
   it("uses the loud (cream + warm) palette for the dark register", () => {

@@ -1,7 +1,59 @@
-import React from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { DISPLAY_FONT, GRAIN_DATA_URL, MONO_FONT, TOKENS } from "../constants";
 import { useSharePalette } from "./ShareFrame";
-import { formatScore, type CrestEntry } from "./theme";
+import { formatScore, toSameOriginImage, type CrestEntry } from "./theme";
+
+/**
+ * Shrink a single-line text element's font size until it fits its container, so
+ * arbitrary-length names / scores / headlines never wrap or clip. Measures the
+ * element's intrinsic (nowrap) width against its parent, scales down only
+ * (clamped to `[minFontSize, fontSize]`), and RE-MEASURES once webfonts finish
+ * loading (Freight arrives via Typekit async, so the first measure would
+ * otherwise use the fallback font and then overflow when Freight swaps in).
+ * No-ops where the DOM can't be measured (happy-dom in tests) → keeps base.
+ */
+function useAutoFit<T extends HTMLElement>(
+  fontSize: number,
+  minFontSize: number,
+  dep: React.ReactNode,
+) {
+  const ref = useRef<T>(null);
+  const [size, setSize] = useState(fontSize);
+
+  useLayoutEffect(() => {
+    let cancelled = false;
+    const fit = () => {
+      const el = ref.current;
+      const parent = el?.parentElement;
+      if (!el || !parent) return;
+      const available = parent.clientWidth;
+      if (available <= 0) return; // not measurable → keep base
+      el.style.fontSize = `${fontSize}px`;
+      const intrinsic = el.scrollWidth;
+      const next =
+        intrinsic > available
+          ? Math.min(
+              fontSize,
+              Math.max(
+                minFontSize,
+                Math.floor((fontSize * available) / intrinsic),
+              ),
+            )
+          : fontSize;
+      if (!cancelled) setSize(next);
+    };
+    fit();
+    const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+    if (fonts?.ready) {
+      fonts.ready.then(() => !cancelled && fit()).catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [fontSize, minFontSize, dep]);
+
+  return { ref, size };
+}
 
 /** Mono uppercase kicker label. */
 export function Kicker({
@@ -37,22 +89,33 @@ export function Headline({
   children,
   punctuation,
   fontSize,
+  minFontSize = 80,
   style,
 }: {
   children: React.ReactNode;
   punctuation: "bang" | "dot" | "none";
   fontSize: number;
+  /** Floor the auto-fit so the shout stays loud (default 80px). */
+  minFontSize?: number;
   style?: React.CSSProperties;
 }) {
   const palette = useSharePalette();
   const mark = punctuation === "bang" ? "!" : punctuation === "dot" ? "." : "";
+  const { ref, size } = useAutoFit<HTMLHeadingElement>(
+    fontSize,
+    minFontSize,
+    `${children}${mark}`,
+  );
   return (
     <h1
+      ref={ref}
       style={{
+        display: "inline-block",
+        whiteSpace: "nowrap",
         fontFamily: DISPLAY_FONT,
         fontWeight: 900,
         fontStyle: "normal",
-        fontSize: `${fontSize}px`,
+        fontSize: `${size}px`,
         lineHeight: 0.86,
         letterSpacing: "-0.015em",
         margin: 0,
@@ -72,29 +135,46 @@ export function Headline({
  * Freight Display italic name (player / club). Pass `accent` to colour it with
  * the register's emphasis hue (jersey-deep on cream, warm on dark/image) — used
  * for the opposing club so it reads correctly in every register.
+ *
+ * Names are arbitrary-length data, so the text auto-scales DOWN to fit its
+ * container on a single line (never wraps/clips) — a long name like
+ * "Amirgan Bouakhouf" shrinks instead of breaking. The scale is applied to the
+ * DOM before `html-to-image` captures it. Degrades to the base size where the
+ * DOM can't be measured (e.g. happy-dom in tests).
  */
 export function ShareName({
   children,
   fontSize,
   color,
   accent = false,
+  minFontSize = 56,
   style,
 }: {
   children: React.ReactNode;
   fontSize: number;
   color?: string;
   accent?: boolean;
+  /** Floor the auto-fit so names stay legible (default 56px). */
+  minFontSize?: number;
   style?: React.CSSProperties;
 }) {
   const palette = useSharePalette();
+  const { ref, size } = useAutoFit<HTMLDivElement>(
+    fontSize,
+    minFontSize,
+    children,
+  );
   return (
     <div
+      ref={ref}
       style={{
+        display: "inline-block",
+        whiteSpace: "nowrap",
         fontFamily: DISPLAY_FONT,
         fontWeight: 900,
         fontStyle: "italic",
         lineHeight: 1,
-        fontSize: `${fontSize}px`,
+        fontSize: `${size}px`,
         color: color ?? (accent ? palette.emphasis : palette.text),
         ...style,
       }}
@@ -108,22 +188,33 @@ export function ShareName({
 export function Scoreline({
   children,
   fontSize,
+  minFontSize = 140,
   style,
 }: {
   children: string;
   fontSize: number;
+  /** Floor the auto-fit so the score stays the hero (default 140px). */
+  minFontSize?: number;
   style?: React.CSSProperties;
 }) {
   const palette = useSharePalette();
   const display = formatScore(children);
+  const { ref, size } = useAutoFit<HTMLDivElement>(
+    fontSize,
+    minFontSize,
+    display,
+  );
   return (
     <div
+      ref={ref}
       style={{
+        display: "inline-block",
+        whiteSpace: "nowrap",
         fontFamily: DISPLAY_FONT,
         fontWeight: 900,
         letterSpacing: "-0.02em",
         lineHeight: 0.86,
-        fontSize: `${fontSize}px`,
+        fontSize: `${size}px`,
         color: palette.scoreline,
         ...style,
       }}
@@ -193,7 +284,9 @@ function CrestTile({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={logoUrl}
+        // Route + sanitize at the sink (same-origin optimizer for remote crests
+        // so html-to-image can capture them; js/xss-through-dom barrier).
+        src={toSameOriginImage(logoUrl, 384)}
         alt={alt}
         crossOrigin="anonymous"
         style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}

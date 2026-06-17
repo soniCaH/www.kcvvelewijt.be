@@ -42,6 +42,16 @@ describe("GoalKcvvTemplate", () => {
     expect(screen.getByAltText("Eppegem")).toHaveAttribute("src", "/opp.png");
   });
 
+  it("omits the number badge and ghost numeral when the player has no number", () => {
+    const { shirtNumber: _omit, ...noNumber } = defaultProps;
+    render(<GoalKcvvTemplate {...noNumber} />);
+    // no "—" fallback dash anywhere (the giant ghost dash was the band bug)
+    expect(screen.queryByText("—")).not.toBeInTheDocument();
+    // name + meta still render
+    expect(screen.getByText("Kevin Van Ransbeeck")).toBeInTheDocument();
+    expect(screen.getByText(/67' · Stand 1–0/)).toBeInTheDocument();
+  });
+
   it("renders at 1080x1920 pixel dimensions", () => {
     const { container } = render(<GoalKcvvTemplate {...defaultProps} />);
     expect(container.firstChild).toHaveStyle({
