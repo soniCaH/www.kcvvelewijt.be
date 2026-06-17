@@ -10,8 +10,8 @@
  * - **6.d2 — Hero figure:** `<TapedFigure aspect="portrait-3-4">`. When
  *   `photoUrl` is present, renders the photo inside the polaroid frame
  *   with the global newsprint filter + paper-grain. When missing, renders
- *   the canonical `<PlayerFigure>` illustration paths (head + torso +
- *   V-collar + 4 stripes) from `_jersey-paths.ts`. Never a hybrid — see
+ *   the shared `<JerseyIllustration variant="hero">` fallback (head + torso +
+ *   V-collar + 4 stripes, from `_jersey-paths.ts`). Never a hybrid — see
  *   `[[feedback_playerfigure_no_hybrid]]`.
  * - **6.d3 — NIEUW badge dropped:** no `<MonoLabel>NIEUW</MonoLabel>` here.
  * - **6.d9 — Cross-age meta row:** `position · birthDate` only. Adults
@@ -46,20 +46,9 @@ import { cn } from "@/lib/utils/cn";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { NumberDisplay } from "@/components/design-system/NumberDisplay";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
-import {
-  JERSEY_FIGURE_VIEWBOX,
-  JERSEY_HEAD_ELLIPSE,
-  JERSEY_SHOULDER_BUMP_LEFT_PATH,
-  JERSEY_SHOULDER_BUMP_RIGHT_PATH,
-  JERSEY_TORSO_FILL_PATH,
-  JERSEY_TORSO_OUTLINE_PATH,
-  JERSEY_V_COLLAR_PATH,
-  JERSEY_VERTICAL_STRIPE_PATHS,
-} from "@/components/design-system/_jersey-paths";
+import { JerseyIllustration } from "@/components/design-system/JerseyIllustration";
 
 const ADULT_AGE_THRESHOLD = 18;
-const STRIPE_STROKE_WIDTH = 2;
-const OUTLINE_STROKE_WIDTH = 3;
 
 export interface PlayerHeroProps {
   firstName: string;
@@ -134,53 +123,6 @@ function formatAgeGradedBirthDate(iso: string, now: Date): string | undefined {
   }
   const yy = pad2(birth.getUTCFullYear() % 100);
   return `${age} jaar · '${yy}`;
-}
-
-function HeroIllustration() {
-  return (
-    <div
-      data-testid="player-hero-illustration"
-      aria-hidden="true"
-      className="bg-cream-soft relative h-full w-full"
-    >
-      <div className="absolute inset-0 opacity-95 mix-blend-multiply">
-        <svg
-          viewBox={JERSEY_FIGURE_VIEWBOX}
-          preserveAspectRatio="xMidYMid meet"
-          className="block h-full w-full"
-        >
-          <g fill="var(--color-jersey-deep)">
-            <ellipse {...JERSEY_HEAD_ELLIPSE} />
-            <path d={JERSEY_TORSO_FILL_PATH} />
-            <path d={JERSEY_SHOULDER_BUMP_LEFT_PATH} />
-            <path d={JERSEY_SHOULDER_BUMP_RIGHT_PATH} />
-          </g>
-        </svg>
-      </div>
-      <div className="absolute inset-0 translate-x-[3px] translate-y-[2px]">
-        <svg
-          viewBox={JERSEY_FIGURE_VIEWBOX}
-          preserveAspectRatio="xMidYMid meet"
-          className="block h-full w-full"
-        >
-          <g
-            fill="none"
-            stroke="var(--color-ink)"
-            strokeWidth={OUTLINE_STROKE_WIDTH}
-            strokeLinejoin="miter"
-            strokeLinecap="square"
-          >
-            <ellipse {...JERSEY_HEAD_ELLIPSE} />
-            <path d={JERSEY_TORSO_OUTLINE_PATH} />
-            <path d={JERSEY_V_COLLAR_PATH} />
-            {JERSEY_VERTICAL_STRIPE_PATHS.map((d) => (
-              <path key={d} d={d} strokeWidth={STRIPE_STROKE_WIDTH} />
-            ))}
-          </g>
-        </svg>
-      </div>
-    </div>
-  );
 }
 
 export function PlayerHero({
@@ -300,7 +242,10 @@ export function PlayerHero({
               className="block h-full w-full object-cover"
             />
           ) : (
-            <HeroIllustration />
+            <JerseyIllustration
+              variant="hero"
+              data-testid="player-hero-illustration"
+            />
           )}
         </TapedFigure>
       </div>
