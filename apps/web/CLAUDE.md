@@ -584,17 +584,20 @@ applies: if the failure mode is visual-structural rather than
 data-presentational, propose adding the component to Phase 3 in the same
 PR (doc edit + tag + baselines).
 
-### Foundation MDX wrappers
+### Foundation MDX docs
 
-`@storybook/test-runner` filters out entries whose `type === "docs"`, so MDX
-files registered via `<Meta title=...>` cannot be baselined directly. Each
-`src/stories/foundation/<Name>.mdx` is paired with a sibling `.stories.tsx`
-that imports the MDX as a React component and renders it as a single
-`Reference` story tagged `vr`. The MDX itself is excluded from Storybook's
-stories glob (see `apps/web/.storybook/main.ts`) so it does not register a
-docs entry — only the wrapper story renders it. To document a new Foundation
-page, add both files: the MDX with no `<Meta>` block, and a wrapper following
-the same pattern.
+Foundation docs are authored as plain MDX under `src/stories/foundation/<Name>.mdx`
+and register **directly as native Docs pages** via an explicit
+`<Meta title="Foundation/<Name>" />` at the top of each file (import `Meta` from
+`@storybook/addon-docs/blocks`). There are **no `.stories.tsx` wrappers** — to add
+a new Foundation page, add a single `.mdx` with its `<Meta>` block.
+
+These docs are **not** visual-regression tested: `@storybook/test-runner` skips
+`type === "docs"` entries, and Foundation pages are documentation rather than
+shipped UI (the real tokens are VR-covered through the component stories that
+consume them). The previous "sibling `.stories.tsx` VR wrapper" pattern was
+removed in #2155 because it double-registered every topic in the sidebar (once
+as `Foundation/<Name>` and once as an auto-titled `stories/foundation/<Name>`).
 
 ### Determinism stubs (Phase 2)
 
