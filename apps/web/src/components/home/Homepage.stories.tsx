@@ -292,7 +292,7 @@ const Homepage = ({
 
   const youthSection: SectionConfig = {
     key: "youth",
-    bg: "kcvv-green-dark",
+    bg: "jersey-deep",
     content: <YouthSection />,
     backdrop: <YouthBackdrop />,
     // Match the page composition: StripedSeam sits flush at the top.

@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Design §7.6 article metadata bar: single row, 1px kcvv-gray-light rules top + bottom, mono small-caps facts cluster on the left, Share2 + Facebook icons on the right.",
+          "Design §7.6 article metadata bar: single row, 1px paper-edge rules top + bottom, mono small-caps facts cluster on the left, Share2 + Facebook icons on the right.",
       },
     },
   },

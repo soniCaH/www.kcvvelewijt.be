@@ -24,7 +24,7 @@ Audit/spec generators sometimes flag features as "missing" because no top-level 
 ### When to update UI stories
 
 - **New design system component** (`src/components/design-system/<Name>/`) → create `<Name>.stories.tsx` alongside with title `UI/<Name>`, add `tags: ["autodocs"]`, write a Playground + all variant stories. Also add to barrel `src/components/design-system/index.ts`.
-- **New icon** added to `src/lib/icons.ts` → add to the `Foundation/Spacing & Icons` icon grid in `src/stories/foundation/SpacingAndIcons.mdx`.
+- **New icon** added to `src/lib/icons.redesign.ts` (Phosphor Fill wrappers — the single icon source; Lucide was retired in #2154) → add a `fillWrapper` export there AND a `vi.mock` factory entry + import + wrappers-array row in `icons.redesign.test.tsx` (skipping the test sync makes `fillWrapper(undefined)` throw at module load → the whole file fails with 0 tests), and add it to the `Foundation/Spacing & Icons` icon grid in `src/stories/foundation/SpacingAndIcons.mdx`.
 - **Existing component changed** (new variant, new prop) → update the corresponding story and test files.
 
 ### When to update Foundation MDX
@@ -78,7 +78,7 @@ A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--p
 - `<TapedFigure>` — editorial photo + caption primitive. Caller supplies the image element via `children` (works with `next/image`, plain `<img>`, `<SanityImage>`, etc.); aspect-ratio is enforced by the frame.
 - `<MonoLabelRow>` — inline row of `<MonoLabel>` items with a configurable divider glyph. The default `·` divider is rendered as a CSS circle so it centres optically against uppercase labels.
 - `<EditorialHeading>` — period-terminated heading with two mutually-exclusive emphasis modes: **accent** (italic + jersey-deep colour, default) or **marker** (italic + `<HighlighterStroke>`, opt-in via `emphasis.highlight=true`).
-- `<PullQuote>` — taped quote block (`<TapedCard>` + heavy Quasimoda `"` glyph + italic display body + attribution row). Three tones (cream / ink / jersey). Emphasis applies a `<HighlighterStroke>` only — body font stays italic.
+- `<PullQuote>` — taped quote block (`<TapedCard>` + heavy `<QuoteMark>` glyph + italic display body + attribution row). Three tones (cream / ink / jersey). Emphasis applies a `<HighlighterStroke>` only — body font stays italic.
 - `<NumberDisplay>` — big serif number with optional prefix (`#` rendered in mono; other prefixes in italic Freight Display) / suffix / mono label.
 - `<DropCapParagraph>` — lead paragraph with oversized first letter rendered via the W3C `initial-letter` CSS property (Chrome 110+ / Safari / Firefox 132+; graceful fallback on older browsers).
 
@@ -173,7 +173,7 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 | Component stories | `src/components/design-system/<Name>/<Name>.stories.tsx` (title: `UI/<Name>`) |
 | Component tests   | `src/components/design-system/<Name>/<Name>.test.tsx`                         |
 | Barrel export     | `src/components/design-system/index.ts`                                       |
-| Icons             | `src/lib/icons.ts`                                                            |
+| Icons             | `src/lib/icons.redesign.ts` (Phosphor Fill — `"use client"`)                  |
 | Foundation docs   | `src/stories/foundation/`                                                     |
 | Design tokens     | `src/app/globals.css` (`@theme {}`)                                           |
 

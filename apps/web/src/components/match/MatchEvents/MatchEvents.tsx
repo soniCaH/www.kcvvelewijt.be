@@ -13,7 +13,7 @@
 
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
-import { ArrowLeftRight } from "lucide-react";
+import { Swap } from "@/lib/icons.redesign";
 import { CardGlyph } from "../CardGlyph";
 
 function assertNever(value: never): never {
@@ -192,11 +192,7 @@ function EventGlyph({ type }: { type: MatchEvent["type"] }) {
       return <CardGlyph type="red" size={14} />;
     case "substitution":
       return (
-        <ArrowLeftRight
-          aria-label="Wissel"
-          className="text-ink h-[18px] w-[18px]"
-          strokeWidth={2}
-        />
+        <Swap aria-label="Wissel" className="text-ink h-[18px] w-[18px]" />
       );
     default:
       return assertNever(type);

@@ -56,7 +56,6 @@ const proseClasses = [
   "[&_p]:mt-3 [&_p]:text-[length:var(--text-body-md)] [&_p]:leading-[var(--text-body-md--lh)]",
   "[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5",
   "[&_li]:text-[length:var(--text-body-md)] [&_li]:leading-[var(--text-body-md--lh)]",
-  "[&_a]:font-semibold [&_a]:text-jersey-deep [&_a]:underline-offset-2 [&_a:hover]:underline",
   "[&_strong]:font-semibold [&_strong]:text-ink",
 ].join(" ");
 
@@ -100,10 +99,14 @@ export default function PrivacyPage() {
             <strong>Adres:</strong> Driesstraat 32, 1982 Elewijt
             <br />
             <strong>E-mail:</strong>{" "}
-            <a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a>
+            <a href="mailto:info@kcvvelewijt.be" className="prose-link">
+              info@kcvvelewijt.be
+            </a>
             <br />
             <strong>E-mail (webmaster):</strong>{" "}
-            <a href="mailto:kevin@kcvvelewijt.be">kevin@kcvvelewijt.be</a>
+            <a href="mailto:kevin@kcvvelewijt.be" className="prose-link">
+              kevin@kcvvelewijt.be
+            </a>
           </p>
 
           <DottedDivider color="paper-edge" />
@@ -223,7 +226,10 @@ export default function PrivacyPage() {
           </ul>
           <p>
             Om deze rechten uit te oefenen, contacteer ons via{" "}
-            <a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a>.
+            <a href="mailto:info@kcvvelewijt.be" className="prose-link">
+              info@kcvvelewijt.be
+            </a>
+            .
           </p>
 
           <DottedDivider color="paper-edge" />
@@ -265,9 +271,15 @@ export default function PrivacyPage() {
           <h2>Vragen over privacy?</h2>
           <p>
             Heb je vragen over hoe we met je gegevens omgaan? Neem gerust
-            contact met ons op via de <Link href="/hulp">hulppagina</Link> of
-            stuur een e-mail naar{" "}
-            <a href="mailto:info@kcvvelewijt.be">info@kcvvelewijt.be</a>.
+            contact met ons op via de{" "}
+            <Link href="/hulp" className="prose-link">
+              hulppagina
+            </Link>{" "}
+            of stuur een e-mail naar{" "}
+            <a href="mailto:info@kcvvelewijt.be" className="prose-link">
+              info@kcvvelewijt.be
+            </a>
+            .
           </p>
         </div>
       </div>

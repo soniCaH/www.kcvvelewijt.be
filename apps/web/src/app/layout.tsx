@@ -100,7 +100,7 @@ export default async function RootLayout({
       className={`${montserrat.variable} ${ibmPlexMono.variable}`}
     >
       <head>
-        {/* Adobe Typekit (Adobe Fonts) — serves Freight Display + Quasimoda.
+        {/* Adobe Typekit (Adobe Fonts) — serves Freight Display Pro / Freight Big Pro.
             Loaded async (non-blocking): an injected <script> fetches the kit and
             calls Typekit.load() in its own onload, so load() never races ahead
             of the kit defining `Typekit` (the prior two-script form did, logging

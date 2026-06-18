@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Facebook, Instagram } from "@/lib/icons";
+import { FacebookLogo, InstagramLogo } from "@/lib/icons.redesign";
 import { EXTERNAL_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 import { CookiePreferencesButton } from "./CookiePreferencesButton";
@@ -93,7 +93,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   aria-label="KCVV Elewijt op Facebook"
                   className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors"
                 >
-                  <Facebook className="h-3 w-3" aria-hidden="true" />
+                  <FacebookLogo className="h-3 w-3" aria-hidden="true" />
                 </a>
               </li>
               <li>
@@ -104,7 +104,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   aria-label="KCVV Elewijt op Instagram"
                   className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors"
                 >
-                  <Instagram className="h-3 w-3" aria-hidden="true" />
+                  <InstagramLogo className="h-3 w-3" aria-hidden="true" />
                 </a>
               </li>
             </ul>

@@ -29,42 +29,62 @@ export const SwatchRow = ({ items }) => (
 All color values live in `src/app/globals.css` inside `@theme {}`.
 The swatches below read directly from the live CSS custom properties — no hard-coded duplicates.
 
+The legacy `--color-kcvv-*`, `--color-green--*` digital palette was retired in
+the redesign (#2154). The site now ships a single retro cream-on-ink surface
+vocabulary — the tokens below are the canonical set.
+
 ---
 
-## Green (Brand Primary)
+## Cream Surface (page backgrounds)
 
-The KCVV Elewijt brand green. `kcvv-green-bright` is the primary action color used on buttons,
-links, and interactive elements throughout the site.
-
-<SwatchRow items={[
-  { name: 'kcvv-green / kcvv-green-bright', variable: '--color-kcvv-green-bright', hex: '#4acf52' },
-  { name: 'kcvv-green-hover', variable: '--color-kcvv-green-hover', hex: '#41b147' },
-  { name: 'kcvv-green-dark (section bg)', variable: '--color-kcvv-green-dark', hex: '#008755' },
-  { name: 'kcvv-green-hover-dark', variable: '--color-kcvv-green-hover-dark', hex: '#006b43' },
-]} />
-
-### Green alpha variants
-
-Used for backgrounds, overlays, and subtle highlights.
+The default page surface. Layered cards step down from `cream` → `cream-soft`
+→ `cream-deep`.
 
 <SwatchRow items={[
-  { name: 'kcvv-green-100 (25%)', variable: '--color-kcvv-green-100', hex: 'rgba(74,207,82,0.25)' },
+  { name: 'cream (default page bg)', variable: '--color-cream', hex: '#f5f1e6' },
+  { name: 'cream-soft (layered cards)', variable: '--color-cream-soft', hex: '#ede8da' },
+  { name: 'cream-deep (deepest section bg)', variable: '--color-cream-deep', hex: '#e1d7bf' },
 ]} />
 
 ---
 
-## Neutral
+## Ink (text + dark interludes)
 
-The gray palette for text, backgrounds, and borders.
+`ink` is the primary text colour on cream and the fill for dark interlude
+panels. `ink-muted` is bylines / metadata / dividers.
 
 <SwatchRow items={[
-  { name: 'kcvv-black', variable: '--color-kcvv-black', hex: '#1E2024' },
-  { name: 'kcvv-dark-blue (nav card overlay)', variable: '--color-kcvv-dark-blue', hex: '#1E2836' },
-  { name: 'kcvv-gray-blue', variable: '--color-kcvv-gray-blue', hex: '#31404b' },
-  { name: 'kcvv-gray-dark', variable: '--color-kcvv-gray-dark', hex: '#292c31' },
-  { name: 'kcvv-gray', variable: '--color-kcvv-gray', hex: '#62656A' },
-  { name: 'kcvv-gray-light', variable: '--color-kcvv-gray-light', hex: '#CCCCCC' },
-  { name: 'kcvv-white', variable: '--color-kcvv-white', hex: '#fefefe' },
+  { name: 'ink (primary text + dark bg)', variable: '--color-ink', hex: '#0a0a0a' },
+  { name: 'ink-soft (layered dark surfaces)', variable: '--color-ink-soft', hex: '#1f1f1f' },
+  { name: 'ink-muted (byline, dividers)', variable: '--color-ink-muted', hex: '#6b6b6b' },
+]} />
+
+---
+
+## Jersey (brand green)
+
+The brand green. `jersey` is decorative/accent only (never text on cream);
+`jersey-deep` is for large headings and primary CTAs; `jersey-bright` is green
+text on dark interludes; `jersey-deep-dark` is the desaturated deep-green used
+in dark gradients.
+
+<SwatchRow items={[
+  { name: 'jersey (decorative / accents)', variable: '--color-jersey', hex: '#4acf52' },
+  { name: 'jersey-deep (headings / CTAs)', variable: '--color-jersey-deep', hex: '#008755' },
+  { name: 'jersey-bright (green text on ink)', variable: '--color-jersey-bright', hex: '#22c55e' },
+  { name: 'jersey-deep-dark (dark gradients)', variable: '--color-jersey-deep-dark', hex: '#133d28' },
+]} />
+
+---
+
+## Warm + Paper Edge
+
+`warm` is the aged-poster yellow used for tape strips and warm highlights;
+`paper-edge` is the card outline / divider colour on cream.
+
+<SwatchRow items={[
+  { name: 'warm (tape / poster yellow)', variable: '--color-warm', hex: '#f0c264' },
+  { name: 'paper-edge (card outline / divider)', variable: '--color-paper-edge', hex: '#d9d2bd' },
 ]} />
 
 ---
@@ -93,14 +113,18 @@ Semantic colors for HTML table rendering (used in article body table blocks).
 
 ---
 
-## Semantic
+## Semantic (alert / warning / success)
 
-Status and feedback colors.
+Print-tuned status tones. Each is paired with a `-soft` body tint. See the
+detailed contrast notes in the [Redesign / Semantic](#redesign--semantic--alert--warning--success) section below.
 
 <SwatchRow items={[
-  { name: 'kcvv-success', variable: '--color-kcvv-success', hex: '#3adb76' },
-  { name: 'kcvv-warning', variable: '--color-kcvv-warning', hex: '#ffae00' },
-  { name: 'kcvv-alert', variable: '--color-kcvv-alert', hex: '#cc4b37' },
+  { name: 'alert (dusty brick)', variable: '--color-alert', hex: '#b84a3a' },
+  { name: 'alert-soft (body / shadow tint)', variable: '--color-alert-soft', hex: '#e8d5cf' },
+  { name: 'warning (aged mustard)', variable: '--color-warning', hex: '#c68b2c' },
+  { name: 'warning-soft (body tint)', variable: '--color-warning-soft', hex: '#ecddb8' },
+  { name: 'success-soft (sage body tint)', variable: '--color-success-soft', hex: '#d8e7d0' },
+  { name: 'card-red (CANC severity)', variable: '--color-card-red', hex: '#c93f1c' },
 ]} />
 
 ---
@@ -109,23 +133,16 @@ Status and feedback colors.
 
 ```tsx
 // Tailwind utility classes (most common)
-<div className="bg-kcvv-green text-kcvv-gray-blue">…</div>
-<button className="bg-kcvv-green hover:bg-kcvv-green-hover">…</button>
+<div className="bg-cream text-ink">…</div>
+<button className="bg-jersey-deep text-cream hover:bg-jersey">…</button>
 
 // CSS custom property (when Tailwind class not available)
-<div style={{ color: 'var(--color-kcvv-gray-dark)' }}>…</div>
+<div style={{ color: 'var(--color-ink-muted)' }}>…</div>
 ```
 
 ---
 
 ## Redesign / Phase 0 — Cream Surface
-
-The redesign introduces a cream-on-ink surface palette alongside the existing
-brand greens. Both vocabularies coexist — legacy `--color-kcvv-*` tokens remain
-valid until the Phase 9 cleanup, so feature work landing during Phases 1–8 may
-read either set without aliasing. Pick the cream surface for new redesign
-primitives; keep `--color-kcvv-*` for components that have not yet been
-restyled.
 
 Each row below renders the live token via `var(--color-...)` so the swatch and
 the contrast notes always reflect what `globals.css` ships today. Contrast
@@ -226,8 +243,8 @@ interludes, not on the cream surface.
 
 ## Redesign / Semantic — Alert / Warning / Success
 
-Print-tuned semantic tones replacing the digital `--color-kcvv-warning` /
-`--color-kcvv-alert` on redesign surfaces. Each tone is paired with a `-soft`
+Print-tuned semantic tones that replaced the retired digital warning/alert
+palette (#2154) on redesign surfaces. Each tone is paired with a `-soft`
 body tint used as the alert/warning/success body fill (and as the offset
 shadow on form-field error states).
 

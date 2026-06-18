@@ -7,10 +7,6 @@
 export { Button } from "./Button";
 export type { ButtonProps, ButtonVariant, ButtonSize } from "./Button";
 
-// Icon
-export { Icon } from "./Icon";
-export type { IconProps, IconSize, IconColor } from "./Icon";
-
 // Spinner
 export { Spinner } from "./Spinner";
 export type { SpinnerProps, SpinnerSize, SpinnerVariant } from "./Spinner";
@@ -54,7 +50,6 @@ export { SectionTransition } from "./SectionTransition";
 export type {
   SectionTransitionProps,
   SectionBg,
-  TransitionOverlap,
   SectionTransitionConfig,
 } from "./SectionTransition";
 

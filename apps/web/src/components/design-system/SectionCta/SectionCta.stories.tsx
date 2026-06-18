@@ -68,8 +68,8 @@ export const Playground: Story = {
 };
 
 /**
- * Dark variant — white heading and body. Use this on `kcvv-black` or
- * `kcvv-green-dark` section backgrounds. The default light variant becomes
+ * Dark variant — white heading and body. Use this on `ink` or
+ * `jersey-deep` section backgrounds. The default light variant becomes
  * unreadable (dark text on dark background) in those contexts.
  */
 export const Dark: Story = {
@@ -82,7 +82,7 @@ export const Dark: Story = {
   },
   decorators: [
     (Story) => (
-      <div className="bg-kcvv-green-dark py-16">
+      <div className="bg-jersey-deep py-16">
         <Story />
       </div>
     ),

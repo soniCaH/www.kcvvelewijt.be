@@ -5,7 +5,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Input } from "./Input";
 import { Label } from "../Label";
-import { Search, Mail } from "lucide-react";
+import { MagnifyingGlass, PaperPlaneTilt } from "@/lib/icons.redesign";
 
 const meta = {
   title: "UI/Input",
@@ -128,14 +128,17 @@ export const AllSizes: Story = {
 };
 
 export const WithLeadingIcon: Story = {
-  args: { placeholder: "Zoeken...", leadingIcon: <Search size={16} /> },
+  args: {
+    placeholder: "Zoeken...",
+    leadingIcon: <MagnifyingGlass size={16} />,
+  },
 };
 
 export const WithTrailingIcon: Story = {
   args: {
     type: "email",
     placeholder: "je@email.be",
-    trailingIcon: <Mail size={16} />,
+    trailingIcon: <PaperPlaneTilt size={16} />,
   },
 };
 
@@ -189,7 +192,7 @@ export const ContactFormExample: Story = {
           type="email"
           defaultValue="geen-geldig"
           error="Vul een geldig e-mailadres in."
-          trailingIcon={<Mail size={16} />}
+          trailingIcon={<PaperPlaneTilt size={16} />}
         />
       </div>
       <div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { DownloadSimple } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 
 export interface DownloadButtonProps {
@@ -207,7 +207,7 @@ export const DownloadButton = ({
             {formatFileSize(fileSize)}
           </span>
         )}
-        <Download
+        <DownloadSimple
           size={14}
           aria-hidden="true"
           className="text-ink-muted shrink-0"
@@ -294,7 +294,7 @@ export const DownloadButton = ({
             "shadow-paper-sm",
           )}
         >
-          <Download size={12} aria-hidden="true" />
+          <DownloadSimple size={12} aria-hidden="true" />
           Download
         </span>
       </div>

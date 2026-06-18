@@ -9,10 +9,10 @@ const meta = {
   },
   tags: ["autodocs", "vr"],
   decorators: [
-    // Near-white page background (matches the real `/staf/[slug]` body) — the
+    // Cream page background (matches the real `/staf/[slug]` body) — the
     // section's cream paper cards pop against it, as on the live page.
     (Story) => (
-      <div className="min-h-screen bg-[var(--color-kcvv-white)]">
+      <div className="bg-cream min-h-screen">
         <Story />
       </div>
     ),

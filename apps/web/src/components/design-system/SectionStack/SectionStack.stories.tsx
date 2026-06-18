@@ -34,101 +34,71 @@ function MockSection({
   );
 }
 
+// ─── Shared section configs ───────────────────────────────────────────────────
+
+const heroSection: SectionConfig = {
+  bg: "jersey-deep",
+  content: (
+    <MockSection label="FeaturedArticles — Hero (jersey-deep)" height="h-48" />
+  ),
+  paddingTop: "pt-0",
+  paddingBottom: "pb-0",
+  transition: {
+    type: "striped-seam",
+    height: "xl",
+    colorPair: "cream-jersey-deep",
+  },
+};
+const matchWidgetSection: SectionConfig = {
+  bg: "gray-100",
+  content: <MockSection label="MatchWidget (gray-100)" />,
+  paddingTop: "pt-12",
+  transition: { type: "striped-seam", height: "md", colorPair: "ink-cream" },
+};
+const latestNewsSection: SectionConfig = {
+  bg: "white",
+  content: <MockSection label="LatestNews (white)" />,
+  transition: { type: "striped-seam", height: "md", colorPair: "ink-cream" },
+};
+const bannerSlotBSection: SectionConfig = {
+  bg: "white",
+  content: <MockSection label="BannerSlot B (white)" />,
+  transition: { type: "striped-seam", height: "md", colorPair: "ink-cream" },
+};
+const matchesSliderSection: SectionConfig = {
+  bg: "jersey-deep",
+  content: <MockSection label="MatchesSlider (jersey-deep)" />,
+  paddingTop: "pt-10",
+  transition: {
+    type: "striped-seam",
+    height: "lg",
+    colorPair: "cream-jersey-deep",
+  },
+};
+const youthSection: SectionConfig = {
+  bg: "gray-100",
+  content: <MockSection label="YouthSection (gray-100)" />,
+  paddingTop: "pt-10",
+  transition: { type: "striped-seam", height: "md", colorPair: "ink-cream" },
+};
+const sponsorsSection: SectionConfig = {
+  bg: "white",
+  content: <MockSection label="SponsorsSection (white)" />,
+};
+
 // ─── Stories ─────────────────────────────────────────────────────────────────
 
 export const Playground: Story = {
   args: {
     sections: [
-      {
-        bg: "kcvv-black",
-        content: <MockSection label="Hero (kcvv-black)" height="h-48" />,
-        paddingTop: "pt-0",
-        paddingBottom: "pb-0",
-        transition: {
-          type: "double-diagonal",
-          direction: "right",
-          via: "white",
-          overlap: "half",
-        },
-      },
-      {
-        bg: "kcvv-green-dark",
-        content: <MockSection label="Match Widget (kcvv-green-dark)" />,
-        paddingTop: "pt-12",
-        transition: { type: "diagonal", direction: "left" },
-      },
-      {
-        bg: "gray-100",
-        content: <MockSection label="Latest News (gray-100)" />,
-        transition: { type: "diagonal", direction: "left" },
-      },
-      {
-        bg: "kcvv-black",
-        content: <MockSection label="Matches Slider (kcvv-black)" />,
-        paddingTop: "pt-10",
-        transition: { type: "diagonal", direction: "right" },
-      },
-      {
-        bg: "kcvv-green-dark",
-        content: <MockSection label="Youth (kcvv-green-dark)" />,
-        paddingTop: "pt-10",
-        transition: { type: "diagonal", direction: "left" },
-      },
-      {
-        bg: "gray-100",
-        content: <MockSection label="Sponsors (gray-100)" />,
-      },
+      heroSection,
+      matchWidgetSection,
+      latestNewsSection,
+      matchesSliderSection,
+      youthSection,
+      sponsorsSection,
     ],
   },
-};
-
-// ─── Shared section configs ───────────────────────────────────────────────────
-
-const heroSection: SectionConfig = {
-  bg: "kcvv-black",
-  content: (
-    <MockSection label="FeaturedArticles — Hero (kcvv-black)" height="h-48" />
-  ),
-  paddingTop: "pt-0",
-  paddingBottom: "pb-0",
-  transition: {
-    type: "double-diagonal",
-    direction: "right",
-    via: "white",
-    overlap: "half",
-  },
-};
-const matchWidgetSection: SectionConfig = {
-  bg: "kcvv-green-dark",
-  content: <MockSection label="MatchWidget (kcvv-green-dark)" />,
-  paddingTop: "pt-12",
-  transition: { type: "diagonal", direction: "left" },
-};
-const latestNewsSection: SectionConfig = {
-  bg: "gray-100",
-  content: <MockSection label="LatestNews (gray-100)" />,
-  transition: { type: "diagonal", direction: "left" },
-};
-const bannerSlotBSection: SectionConfig = {
-  bg: "gray-100",
-  content: <MockSection label="BannerSlot B (gray-100)" />,
-  transition: { type: "diagonal", direction: "left" },
-};
-const matchesSliderSection: SectionConfig = {
-  bg: "kcvv-black",
-  content: <MockSection label="MatchesSlider (kcvv-black)" />,
-  paddingTop: "pt-10",
-  transition: { type: "diagonal", direction: "right" },
-};
-const youthSection: SectionConfig = {
-  bg: "kcvv-green-dark",
-  content: <MockSection label="YouthSection (kcvv-green-dark)" />,
-  paddingTop: "pt-10",
-  transition: { type: "diagonal", direction: "left" },
-};
-const sponsorsSection: SectionConfig = {
-  bg: "gray-100",
-  content: <MockSection label="SponsorsSection (gray-100)" />,
 };
 
 export const HomepageFullStack: Story = {
@@ -198,7 +168,7 @@ export const BannerSlotBPresent: Story = {
       heroSection,
       matchWidgetSection,
       latestNewsSection,
-      bannerSlotBSection, // same-bg gray-100: skip fires between LatestNews and BannerSlot B
+      bannerSlotBSection, // same-bg white: skip fires between LatestNews and BannerSlot B
       matchesSliderSection,
       youthSection,
       sponsorsSection,
@@ -226,36 +196,48 @@ export const StraightEdges: Story = {
   args: {
     sections: [
       {
-        bg: "kcvv-black",
-        content: <MockSection label="Section 1 (kcvv-black)" />,
+        bg: "jersey-deep",
+        content: <MockSection label="Section 1 (jersey-deep)" />,
       },
       { bg: "gray-100", content: <MockSection label="Section 2 (gray-100)" /> },
       {
-        bg: "kcvv-green-dark",
-        content: <MockSection label="Section 3 (kcvv-green-dark)" />,
+        bg: "white",
+        content: <MockSection label="Section 3 (white)" />,
       },
     ],
   },
 };
 
-export const AlternatingDirections: Story = {
-  name: "Alternating left/right diagonal directions",
+export const AlternatingColorPairs: Story = {
+  name: "Alternating seam colour pairs",
   args: {
     sections: [
       {
-        bg: "kcvv-black",
-        content: <MockSection label="A (kcvv-black)" />,
-        transition: { type: "diagonal", direction: "left" },
+        bg: "jersey-deep",
+        content: <MockSection label="A (jersey-deep)" />,
+        transition: {
+          type: "striped-seam",
+          height: "lg",
+          colorPair: "cream-jersey-deep",
+        },
       },
       {
         bg: "gray-100",
         content: <MockSection label="B (gray-100)" />,
-        transition: { type: "diagonal", direction: "right" },
+        transition: {
+          type: "striped-seam",
+          height: "md",
+          colorPair: "ink-cream",
+        },
       },
       {
-        bg: "kcvv-green-dark",
-        content: <MockSection label="C (kcvv-green-dark)" />,
-        transition: { type: "diagonal", direction: "left" },
+        bg: "white",
+        content: <MockSection label="C (white)" />,
+        transition: {
+          type: "striped-seam",
+          height: "md",
+          colorPair: "jersey-cream",
+        },
       },
       {
         bg: "gray-100",
@@ -268,20 +250,24 @@ export const AlternatingDirections: Story = {
 // ─── Backdrop story ───────────────────────────────────────────────────────────
 //
 // A single backdropped section flanked by plain siblings, so reviewers can
-// verify the backdrop extends into both adjacent diagonal strips. The mock
+// verify the backdrop extends into both adjacent striped-seam strips. The mock
 // visual is shared with `UI/SectionTransition` via `../storybook-mocks`.
 
 export const BackdroppedSection: Story = {
-  name: "Backdrop — single section flanked by plain siblings (§5.1, §5.6)",
+  name: "Backdrop — single section flanked by plain siblings",
   args: {
     sections: [
       {
         bg: "gray-100",
         content: <MockSection label="Plain section (gray-100)" />,
-        transition: { type: "diagonal", direction: "left" },
+        transition: {
+          type: "striped-seam",
+          height: "lg",
+          colorPair: "ink-cream",
+        },
       },
       {
-        bg: "kcvv-green-dark",
+        bg: "jersey-deep",
         backdrop: <MockBackdrop />,
         content: (
           <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-white md:px-8">
@@ -292,14 +278,17 @@ export const BackdroppedSection: Story = {
               Content sits at z-10 above the backdrop
             </span>
             <span className="text-sm opacity-80">
-              The gradient visible in the diagonal strips above and below this
-              section is the <code>backdrop</code> extending past its own
-              wrapper into adjacent <code>SectionTransition</code> areas via
-              auto-propagated <code>revealFrom</code> / <code>revealTo</code>.
+              The backdrop extends past its own wrapper into the adjacent
+              <code> StripedSeam</code> strips above and below, bleeding through
+              the transparent seam SVG.
             </span>
           </div>
         ),
-        transition: { type: "diagonal", direction: "left" },
+        transition: {
+          type: "striped-seam",
+          height: "lg",
+          colorPair: "cream-jersey-deep",
+        },
       },
       {
         bg: "gray-100",
