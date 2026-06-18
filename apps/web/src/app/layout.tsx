@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Montserrat, IBM_Plex_Mono } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AccentStrip } from "@/components/layout/AccentStrip";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -14,13 +14,6 @@ import {
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
 import { BRAND, SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
-
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-montserrat",
-});
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
@@ -97,16 +90,16 @@ export default async function RootLayout({
       lang="nl"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={`${montserrat.variable} ${ibmPlexMono.variable}`}
+      className={ibmPlexMono.variable}
     >
       <head>
-        {/* Adobe Typekit (Adobe Fonts) — serves Freight Display Pro / Freight Big Pro.
-            Loaded async (non-blocking): an injected <script> fetches the kit and
-            calls Typekit.load() in its own onload, so load() never races ahead
-            of the kit defining `Typekit` (the prior two-script form did, logging
-            "Typekit is not defined"). If Adobe is slow/down the page is
-            unaffected — display text falls back to the serif stack, and body
-            (Montserrat) + mono (IBM Plex Mono) are self-hosted via next/font. */}
+        {/* Adobe Typekit (Adobe Fonts) — serves Freight Display/Big Pro + Freight
+            Sans Pro (the body font as of #2174). Loaded async (non-blocking): an
+            injected <script> fetches the kit and calls Typekit.load() in its own
+            onload, so load() never races ahead of the kit defining `Typekit`. If
+            Adobe is slow/down the page is unaffected — text falls back to the
+            metric-matched fallback stacks (`Freight Sans/Display Fallback` in
+            globals.css); mono (IBM Plex Mono) is self-hosted via next/font. */}
         {typekitId && (
           <Script id="typekit-init" strategy="afterInteractive">
             {`(function(d){var s=d.createElement("script");s.src="https://use.typekit.net/${typekitId}.js";s.async=true;s.onload=function(){try{Typekit.load({async:true});}catch(e){console.error("Typekit load error:",e);}};d.head.appendChild(s);})(document);`}

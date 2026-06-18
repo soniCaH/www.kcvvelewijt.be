@@ -5,7 +5,8 @@
  * `docs/design/mockups/phase-10-scheurkalender/sk1-poster-table-compare.html`.
  *
  * Renders the full-season A + B *league* fixture table the club screenshots
- * into the A2 season poster: a print-clean white sheet, Montserrat, columns
+ * into the A2 season poster: a print-clean white sheet in the body font
+ * (Freight Sans Pro as of #2174 — inherits `--font-family-body`), columns
  * date·time·home·away with the KCVV side bolded and the squad label inline,
  * fixtures grouped per weekend (ISO week) with a single 2px rule between groups.
  * No logos, no squad pills, no scores.

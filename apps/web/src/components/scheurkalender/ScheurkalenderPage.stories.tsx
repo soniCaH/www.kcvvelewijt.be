@@ -3,7 +3,7 @@
  *
  * Private (noindex, unlinked) full-season A + B league fixture table — the data
  * source the club screenshots into the A2 InDesign season poster. Treatment A:
- * a print-clean white sheet (Montserrat), date·time·home·away with the KCVV side
+ * a print-clean white sheet (body font — Freight Sans Pro as of #2174), date·time·home·away with the KCVV side
  * bolded and the squad label inline, grouped per weekend. See #2137.
  *
  * Pages/* stories are design references and are not VR-tested (page composition

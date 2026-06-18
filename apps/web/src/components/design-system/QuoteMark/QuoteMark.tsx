@@ -12,7 +12,7 @@ const COLOR_CLASS: Record<QuoteMarkColor, string> = {
 
 // Heavy sans-serif right-double-quotation-mark glyph (U+201D) rendered as a
 // single typographic mark — the font renders it as the bulb-and-tail double
-// shape per the owner's reference. Montserrat (font-body) at black weight
+// shape per the owner's reference. Freight Sans (font-body) at black weight
 // gives the solid stroke. Tight letter-spacing pulls the two parts of the
 // double-mark glyph closer together. Negative bottom margin tucks the mark
 // up so its tail sits above the quote body.
