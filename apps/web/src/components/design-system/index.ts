@@ -77,10 +77,6 @@ export type { DownloadButtonProps } from "./DownloadButton";
 export { LinkButton } from "./LinkButton";
 export type { LinkButtonProps } from "./LinkButton";
 
-// SectionCta
-export { SectionCta } from "./SectionCta";
-export type { SectionCtaProps } from "./SectionCta";
-
 // ScrollHint
 export { useScrollHint, ScrollArrowButton } from "./ScrollHint";
 export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";
