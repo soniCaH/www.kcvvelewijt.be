@@ -7,7 +7,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Input } from "./Input";
-import { Search } from "lucide-react";
+import { MagnifyingGlass } from "@/lib/icons.redesign";
 
 describe("Input", () => {
   describe("Rendering", () => {
@@ -153,8 +153,8 @@ describe("Input", () => {
     it("renders leading and trailing icons", () => {
       render(
         <Input
-          leadingIcon={<Search data-testid="li" size={16} />}
-          trailingIcon={<Search data-testid="ti" size={16} />}
+          leadingIcon={<MagnifyingGlass data-testid="li" size={16} />}
+          trailingIcon={<MagnifyingGlass data-testid="ti" size={16} />}
         />,
       );
       expect(screen.getByTestId("li")).toBeInTheDocument();
@@ -165,19 +165,22 @@ describe("Input", () => {
       const { rerender } = render(
         <Input
           size="sm"
-          leadingIcon={<Search size={14} />}
+          leadingIcon={<MagnifyingGlass size={14} />}
           data-testid="input"
         />,
       );
       expect(screen.getByTestId("input")).toHaveClass("pl-9");
       rerender(
-        <Input leadingIcon={<Search size={16} />} data-testid="input" />,
+        <Input
+          leadingIcon={<MagnifyingGlass size={16} />}
+          data-testid="input"
+        />,
       );
       expect(screen.getByTestId("input")).toHaveClass("pl-11");
       rerender(
         <Input
           size="lg"
-          leadingIcon={<Search size={20} />}
+          leadingIcon={<MagnifyingGlass size={20} />}
           data-testid="input"
         />,
       );

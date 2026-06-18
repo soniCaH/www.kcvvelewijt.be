@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Overview variant of the `transferFact` body block (design §8.1). Single horizontal row with four slots: accent kicker (`INKOMEND` / `UITGAAND` / `VERLENGD`) · player name + age/position meta · clubs inline · mono status label on the right (`TRANSFER` or `TOT {until}`). Outgoing kicker + arrow use `kcvv-warning` (amber — reported without alarm).",
+          "Overview variant of the `transferFact` body block (design §8.1). Single horizontal row with four slots: accent kicker (`INKOMEND` / `UITGAAND` / `VERLENGD`) · player name + age/position meta · clubs inline · mono status label on the right (`TRANSFER` or `TOT {until}`). Outgoing kicker + arrow use `warm` (amber — reported without alarm).",
       },
     },
   },

@@ -5,8 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Button, getButtonClasses } from "@/components/design-system/Button";
-import { List } from "@/lib/icons.redesign";
-import { Search } from "@/lib/icons";
+import { List, MagnifyingGlass } from "@/lib/icons.redesign";
 import {
   buildMenuItems,
   buildSeniorMenuItem,
@@ -117,7 +116,7 @@ function SiteHeaderInner({
             aria-label="Zoeken"
             className="text-ink hover:text-jersey-deep inline-flex h-11 w-11 items-center justify-center transition-colors"
           >
-            <Search size={20} strokeWidth={1.5} aria-hidden="true" />
+            <MagnifyingGlass size={20} aria-hidden="true" />
           </Link>
         </div>
 
@@ -175,7 +174,7 @@ function SiteHeaderInner({
               aria-label="Zoeken"
               className="text-ink hover:text-jersey-deep inline-flex items-center transition-colors"
             >
-              <Search size={18} strokeWidth={1.5} aria-hidden="true" />
+              <MagnifyingGlass size={18} aria-hidden="true" />
             </Link>
             <Link
               href="/club/inschrijven"

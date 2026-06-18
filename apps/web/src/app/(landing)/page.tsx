@@ -392,7 +392,7 @@ export default async function HomePage() {
 
   const youthSection: SectionConfig = {
     key: "youth",
-    bg: "kcvv-green-dark",
+    bg: "jersey-deep",
     content: <YouthSection />,
     backdrop: <YouthBackdrop />,
     // R5.B `<StripedSeam>` lock — the seam is the first child of

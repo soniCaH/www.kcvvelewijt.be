@@ -1,7 +1,6 @@
 "use client";
 
-import { Icon } from "@/components/design-system";
-import { Facebook, Share2 } from "@/lib/icons";
+import { FacebookLogo, ShareNetwork } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 
@@ -127,7 +126,7 @@ export const ArticleMetadata = ({
               aria-label="Delen"
               className="text-ink-soft hover:text-jersey-deep transition-colors"
             >
-              <Icon icon={Share2} size="xs" />
+              <ShareNetwork size={16} />
             </button>
             <a
               href={`${FACEBOOK_SHARER}${encodeURIComponent(shareConfig.url)}`}
@@ -137,7 +136,7 @@ export const ArticleMetadata = ({
               onClick={() => trackShare("facebook")}
               className="text-ink-soft hover:text-jersey-deep transition-colors"
             >
-              <Icon icon={Facebook} size="xs" />
+              <FacebookLogo size={16} />
             </a>
           </div>
         )}

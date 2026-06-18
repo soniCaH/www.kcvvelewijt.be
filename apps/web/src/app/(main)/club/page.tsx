@@ -23,9 +23,10 @@ export const metadata: Metadata = {
  * `docs/design/mockups/phase-10-club-index/10c3-locked.html`, #2121). Pure
  * reuse of redesign primitives: `<PageHero>` (typographic) → `<ClubEditorialHub>`
  * (uniform 3-up nav grid) → `<PullQuote>` mission → cream contact CTA band,
- * separated by full-bleed `<StripedSeam>`s. Retires the legacy `<SectionStack>`
- * + `diagonal` `<SectionTransition>` composition (the last `diagonal` consumer,
- * unblocking #1701) and the banned legacy club motto.
+ * separated by full-bleed `<StripedSeam>`s. Composes striped-seam
+ * `<SectionStack>` transitions — the legacy diagonal `<SectionTransition>`
+ * feature is gone (#2154, closing out #1701) — and drops the banned legacy
+ * club motto.
  */
 export default function ClubPage() {
   return (

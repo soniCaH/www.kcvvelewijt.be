@@ -14,7 +14,7 @@
  */
 
 import { cn } from "@/lib/utils/cn";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown } from "@/lib/icons.redesign";
 import type { CardType } from "@/lib/effect/schemas/match.schema";
 import { CardGlyph } from "../CardGlyph";
 

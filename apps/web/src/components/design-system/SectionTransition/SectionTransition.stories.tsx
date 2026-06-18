@@ -8,59 +8,20 @@ const meta = {
   // `vr` opts this file into VR — see apps/web/.storybook/test-runner.ts.
   tags: ["autodocs", "vr"],
   args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-    overlap: "none",
+    type: "striped-seam",
+    direction: "horizontal",
+    height: "md",
+    colorPair: "ink-cream",
   },
   argTypes: {
-    from: {
-      control: "select",
-      options: [
-        "white",
-        "gray-100",
-        "kcvv-black",
-        "kcvv-green-dark",
-        "transparent",
-      ],
-    },
-    to: {
-      control: "select",
-      options: [
-        "white",
-        "gray-100",
-        "kcvv-black",
-        "kcvv-green-dark",
-        "transparent",
-      ],
-    },
-    type: {
-      control: "select",
-      options: ["diagonal", "double-diagonal", "striped-seam"],
-    },
-    // `direction` accepts diagonal's "left" | "right" AND striped-seam's
-    // "horizontal" | "vertical" — picker is union-wide; the renderer
-    // ignores irrelevant values per variant.
     direction: {
       control: "select",
-      options: ["left", "right", "horizontal", "vertical"],
-    },
-    overlap: { control: "select", options: ["none", "half", "full"] },
-    via: {
-      control: "select",
-      options: [
-        "white",
-        "gray-100",
-        "kcvv-black",
-        "kcvv-green-dark",
-        "transparent",
-      ],
+      options: ["horizontal", "vertical"],
     },
     height: {
       control: "select",
       options: ["sm", "md", "lg", "xl"],
-      description: "Striped-seam only — forwarded to <StripedSeam>.",
+      description: "Forwarded to <StripedSeam>.",
     },
     colorPair: {
       control: "select",
@@ -70,7 +31,7 @@ const meta = {
         "jersey-tonal-dark",
         "cream-jersey-deep",
       ],
-      description: "Striped-seam only — forwarded to <StripedSeam>.",
+      description: "Forwarded to <StripedSeam>.",
     },
   },
   decorators: [
@@ -87,353 +48,10 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
-export const SingleDiagonalLeft: Story = {
-  name: "Single — Left (↙)",
-  args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-  },
-};
+// ─── Horizontal seams ─────────────────────────────────────────────────────────
 
-export const SingleDiagonalRight: Story = {
-  name: "Single — Right (↘)",
-  args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "right",
-  },
-};
-
-export const DarkToLight: Story = {
-  name: "kcvv-black → gray-100",
-  args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-  },
-};
-
-export const DarkToDarkGreen: Story = {
-  name: "kcvv-black → kcvv-green-dark",
-  args: {
-    from: "kcvv-black",
-    to: "kcvv-green-dark",
-    type: "diagonal",
-    direction: "right",
-  },
-};
-
-export const GreenDarkToLight: Story = {
-  name: "kcvv-green-dark → gray-100",
-  args: {
-    from: "kcvv-green-dark",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-  },
-};
-
-export const GreenDarkToDark: Story = {
-  name: "kcvv-green-dark → kcvv-black",
-  args: {
-    from: "kcvv-green-dark",
-    to: "kcvv-black",
-    type: "diagonal",
-    direction: "right",
-  },
-};
-
-export const LightToDark: Story = {
-  name: "gray-100 → kcvv-black",
-  args: {
-    from: "gray-100",
-    to: "kcvv-black",
-    type: "diagonal",
-    direction: "left",
-  },
-};
-
-export const ViaWhiteToDark: Story = {
-  name: "white → kcvv-black (via color for double-diagonal sandwich)",
-  args: {
-    from: "white",
-    to: "kcvv-black",
-    type: "diagonal",
-    direction: "right",
-  },
-};
-
-export const DoubleDiagonalRightViaWhite: Story = {
-  name: "Double — Right, via white (hero usage)",
-  args: {
-    from: "kcvv-black",
-    to: "kcvv-green-dark",
-    type: "double-diagonal",
-    direction: "right",
-    via: "white",
-  },
-};
-
-export const DoubleDiagonalLeftViaGray: Story = {
-  name: "Double — Left, via gray-100",
-  args: {
-    from: "kcvv-black",
-    to: "kcvv-black",
-    type: "double-diagonal",
-    direction: "left",
-    via: "gray-100",
-  },
-};
-
-export const OverlapNone: Story = {
-  name: "Overlap — None (default)",
-  decorators: [
-    (Story) => (
-      <div>
-        <div className="bg-kcvv-black h-32 w-full" />
-        <Story />
-        <div className="h-32 w-full bg-gray-100" />
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-    overlap: "none",
-  },
-};
-
-export const OverlapHalf: Story = {
-  name: "Overlap — Half (bites into FROM section)",
-  decorators: [
-    (Story) => (
-      <div className="relative">
-        <div className="bg-kcvv-black relative z-0 h-32 w-full" />
-        <Story />
-        <div className="h-32 w-full bg-gray-100" />
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-    overlap: "half",
-  },
-};
-
-export const OverlapFull: Story = {
-  name: "Overlap — Full (entirely inside FROM section)",
-  decorators: [
-    (Story) => (
-      <div className="relative">
-        <div className="bg-kcvv-black relative z-0 h-32 w-full" />
-        <Story />
-        <div className="h-32 w-full bg-gray-100" />
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-black",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-    overlap: "full",
-  },
-};
-
-// ─── Reveal flags (backdrop support) ──────────────────────────────────────────
-//
-// These stories render a mock patterned backdrop in the section BELOW and/or
-// ABOVE the transition so the effect of revealFrom / revealTo is visually
-// verifiable. Consumers should not set these flags manually; `SectionStack`
-// derives them from neighbor `backdrop` presence. The stories wire them
-// explicitly so the primitive is reviewable in isolation. The mock visual is
-// shared with `UI/SectionStack` via `../storybook-mocks`.
-//
-// Each backdrop is wrapped in an absolutely-positioned overflow layer that
-// extends INTO the transition area, mirroring what `SectionStack` does in
-// production. Without this, the transparent reveal triangle would reveal the
-// page background instead of the gradient — which makes the reveal effect
-// invisible. The `+ 1px` mirrors the `SectionStack` seam-guard fix that
-// compensates for `SectionTransition`'s `marginBottom: -1px`.
-//
-// Extension distance:
-//  - Single diagonal: `var(--footer-diagonal)` (the full transition height).
-//  - Double-diagonal: `var(--footer-diagonal) * 2` (both halves) so the
-//    backdrop reaches the opposite section's top — both halves of the
-//    transition can render their reveal/via composition over the gradient.
-
-const SINGLE_OVERFLOW = "calc(-1 * var(--footer-diagonal) + 1px)";
-const DOUBLE_OVERFLOW = "calc(-1 * var(--footer-diagonal) * 2 + 1px)";
-
-export const BackgroundedFrom: Story = {
-  name: "Reveal — FROM (previous section has backdrop)",
-  decorators: [
-    (Story) => (
-      <div>
-        <div className="bg-kcvv-green-dark relative h-40 w-full">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 z-0"
-            style={{ bottom: SINGLE_OVERFLOW }}
-          >
-            <MockBackdrop label="backdrop above" />
-          </div>
-        </div>
-        <Story />
-        <div className="h-24 w-full bg-gray-100" />
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-green-dark",
-    to: "gray-100",
-    type: "diagonal",
-    direction: "left",
-    revealFrom: true,
-  },
-};
-
-export const BackgroundedTo: Story = {
-  name: "Reveal — TO (next section has backdrop)",
-  decorators: [
-    (Story) => (
-      <div>
-        <div className="bg-kcvv-black h-24 w-full" />
-        <Story />
-        <div className="bg-kcvv-green-dark relative h-40 w-full">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
-            style={{ top: SINGLE_OVERFLOW }}
-          >
-            <MockBackdrop label="backdrop below" />
-          </div>
-        </div>
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-black",
-    to: "kcvv-green-dark",
-    type: "diagonal",
-    direction: "left",
-    revealTo: true,
-  },
-};
-
-export const BackgroundedBoth: Story = {
-  name: "Reveal — FROM + TO (two consecutive backdropped sections)",
-  decorators: [
-    (Story) => (
-      <div>
-        <div className="bg-kcvv-green-dark relative h-40 w-full">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 z-0"
-            style={{ bottom: SINGLE_OVERFLOW }}
-          >
-            <MockBackdrop label="backdrop above" />
-          </div>
-        </div>
-        <Story />
-        <div className="bg-kcvv-black relative h-40 w-full">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
-            style={{ top: SINGLE_OVERFLOW }}
-          >
-            <MockBackdrop label="backdrop below" />
-          </div>
-        </div>
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-green-dark",
-    to: "kcvv-black",
-    type: "diagonal",
-    direction: "left",
-    revealFrom: true,
-    revealTo: true,
-  },
-};
-
-export const DoubleDiagonalBackgroundedFrom: Story = {
-  name: "Reveal — double-diagonal, FROM only (via stays opaque)",
-  decorators: [
-    (Story) => (
-      <div>
-        <div className="bg-kcvv-black relative h-40 w-full">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 z-0"
-            style={{ bottom: DOUBLE_OVERFLOW }}
-          >
-            <MockBackdrop label="backdrop above" />
-          </div>
-        </div>
-        <Story />
-        <div className="bg-kcvv-green-dark h-24 w-full" />
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-black",
-    to: "kcvv-green-dark",
-    type: "double-diagonal",
-    direction: "right",
-    via: "white",
-    revealFrom: true,
-  },
-};
-
-export const DoubleDiagonalBackgroundedTo: Story = {
-  name: "Reveal — double-diagonal, TO only (via stays opaque)",
-  decorators: [
-    (Story) => (
-      <div>
-        <div className="bg-kcvv-black h-24 w-full" />
-        <Story />
-        <div className="bg-kcvv-green-dark relative h-40 w-full">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 z-0"
-            style={{ top: DOUBLE_OVERFLOW }}
-          >
-            <MockBackdrop label="backdrop below" />
-          </div>
-        </div>
-      </div>
-    ),
-  ],
-  args: {
-    from: "kcvv-black",
-    to: "kcvv-green-dark",
-    type: "double-diagonal",
-    direction: "right",
-    via: "white",
-    revealTo: true,
-  },
-};
-
-// ─── Striped-seam variant (#1701) ───────────────────────────────────────────
-//
-// Option α extension — `<SectionTransition>` composes `<StripedSeam>`
-// when `type: "striped-seam"`. Per-consumer migrations of the 10
-// legacy diagonal call sites stay phase-bound (NOT in this PR).
-//
-
-export const StripedSeamDefault: Story = {
-  name: "Striped Seam — Default (horizontal · cream-jersey-deep · xl)",
+export const HorizontalDefault: Story = {
+  name: "Horizontal — ink-cream · md",
   decorators: [
     (Story) => (
       <div className="flex flex-col">
@@ -444,22 +62,58 @@ export const StripedSeamDefault: Story = {
     ),
   ],
   args: {
-    from: "transparent",
-    to: "transparent",
     type: "striped-seam",
-    height: "xl",
-    colorPair: "cream-jersey-deep",
     direction: "horizontal",
+    height: "md",
+    colorPair: "ink-cream",
   },
 };
 
-export const StripedSeamBetweenBackdrops: Story = {
-  name: "Striped Seam — Between Backdrops",
+export const HorizontalCreamJerseyXl: Story = {
+  name: "Horizontal — cream-jersey-deep · xl",
+  decorators: [
+    (Story) => (
+      <div className="flex flex-col">
+        <div className="bg-cream h-32 w-full" />
+        <Story />
+        <div className="bg-jersey-deep h-32 w-full" />
+      </div>
+    ),
+  ],
+  args: {
+    type: "striped-seam",
+    direction: "horizontal",
+    height: "xl",
+    colorPair: "cream-jersey-deep",
+  },
+};
+
+export const HorizontalJerseyTonalDark: Story = {
+  name: "Horizontal — jersey-tonal-dark · lg (clubshop frame)",
+  decorators: [
+    (Story) => (
+      <div className="flex flex-col">
+        <div className="bg-jersey-deep-dark h-32 w-full" />
+        <Story />
+        <div className="bg-jersey-deep h-32 w-full" />
+      </div>
+    ),
+  ],
+  args: {
+    type: "striped-seam",
+    direction: "horizontal",
+    height: "lg",
+    colorPair: "jersey-tonal-dark",
+  },
+};
+
+export const BetweenBackdrops: Story = {
+  name: "Between backdrops (transparent SVG bleeds through)",
   parameters: {
     docs: {
       description: {
         story:
-          "`<StripedSeam>` is transparent SVG so neighbour-section backdrops bleed through naturally — no polygon-fill juggling like the diagonal variant needs. `revealFrom` / `revealTo` are accepted on the striped-seam config for prop-shape parity but render as no-ops; the story omits them to confirm the bleed-through is geometry-driven, not flag-driven.",
+          "`<StripedSeam>` is a transparent SVG, so neighbour-section backdrops bleed through the seam naturally — no per-side fill juggling. The bleed-through is geometry-driven, not flag-driven. The mock visual is shared with `UI/SectionStack` via `../storybook-mocks`.",
       },
     },
   },
@@ -477,17 +131,17 @@ export const StripedSeamBetweenBackdrops: Story = {
     ),
   ],
   args: {
-    from: "transparent",
-    to: "transparent",
     type: "striped-seam",
+    direction: "horizontal",
     height: "lg",
     colorPair: "ink-cream",
-    direction: "horizontal",
   },
 };
 
-export const StripedSeamVertical: Story = {
-  name: "Striped Seam — Vertical (column seam)",
+// ─── Vertical seam (column divider) ─────────────────────────────────────────────
+
+export const Vertical: Story = {
+  name: "Vertical — jersey-cream · md (column seam)",
   decorators: [
     (Story) => (
       <div className="flex h-[200px] flex-row">
@@ -498,11 +152,9 @@ export const StripedSeamVertical: Story = {
     ),
   ],
   args: {
-    from: "transparent",
-    to: "transparent",
     type: "striped-seam",
+    direction: "vertical",
     height: "md",
     colorPair: "jersey-cream",
-    direction: "vertical",
   },
 };

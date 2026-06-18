@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "3px kcvv-green brand accent bar fixed to the top of the viewport. " +
+          "3px jersey brand accent bar fixed to the top of the viewport. " +
           "Sits above the nav (z-[51]). Purely decorative — aria-hidden.",
       },
     },
@@ -45,10 +45,7 @@ export const OnDarkBackground: Story = {
     },
   },
   render: () => (
-    <div
-      className="bg-kcvv-black min-h-[80px]"
-      style={{ transform: "translateX(0)" }}
-    >
+    <div className="bg-ink min-h-[80px]" style={{ transform: "translateX(0)" }}>
       <AccentStrip />
     </div>
   ),

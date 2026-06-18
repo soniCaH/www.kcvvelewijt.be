@@ -6,52 +6,14 @@
    ======================================================================== */
 
 :root {
-  /* KCVV Brand Colors */
-  --color-kcvv-green-bright: #4acf52;
-  --color-kcvv-green-bright-hover: #41b147;
-  --color-kcvv-green-dark: #008755;
-  --color-kcvv-green-dark-hover: #006b43;
-
-  /* Neutral Colors */
-  --color-kcvv-black: #1e2024;
-  --color-kcvv-gray-blue: #31404b;
-  --color-kcvv-gray-dark: #292c31;
-  --color-kcvv-gray: #62656a;
-  --color-kcvv-gray-light: #ccc;
-  --color-kcvv-white: #fefefe;
-
   /* Foundation Grays */
   --color-foundation-gray-light: #edeff4;
-
-  /* Semantic Colors */
-  --color-kcvv-success: #3adb76;
-  --color-kcvv-warning: #ffae00;
-  --color-kcvv-alert: #cc4b37;
-
-  /* Legacy CSS Variables (for compatibility) */
-  --color-green--bright: #4acf52;
-  --color-green--bright--dark: #41b147;
-  --color-green--bright--alpha--50: rgba(74, 207, 82, 0.5);
-  --color-green--bright--alpha--75: rgba(74, 207, 82, 0.75);
-  --color-green--bright--alpha--25: rgba(74, 207, 82, 0.25);
-  --color-green--dark: #008755;
-  --color-black: #1e2024;
-  --color-gray--light: #ccc;
-  --color-gray--medium: #62656a;
-  --color-gray--dark: #292c31;
-  --color-gray-blue: #31404b;
-  --color-green: #bada55;
-  --color-green-dark-hover: #006b43;
 
   /* Layout Variables */
   --max-width--outer: 90rem;
   --max-width--inner: 60rem;
   --padding--mobile: 0.75rem;
   --padding--desktop: 2.5rem;
-
-  /* Single source of truth for the diagonal seam used by SectionTransition
-     and reserved as the page-bottom safe area by the root <main> wrapper. */
-  --footer-diagonal: clamp(2rem, 6vw, 5rem);
 }
 
 /* ===== Spinner — scarf barber-pole + compact dot pulse (Phase 2.B.1) =====
@@ -296,26 +258,6 @@
 @theme {
   /* ===== Color Palette ===== */
 
-  /* KCVV Brand Colors */
-  --color-kcvv-green: #4acf52;
-  --color-kcvv-green-bright: #4acf52;
-  --color-kcvv-green-dark: #008755;
-  --color-kcvv-green-hover: #41b147;
-  --color-kcvv-green-hover-dark: #006b43;
-  --color-kcvv-green-100: rgba(74, 207, 82, 0.25);
-
-  /* Ring Colors for Focus States */
-  --color-ring-kcvv-green: #4acf52;
-
-  /* Neutral Colors */
-  --color-kcvv-black: #1e2024;
-  --color-kcvv-dark-blue: #1e2836;
-  --color-kcvv-gray-blue: #31404b;
-  --color-kcvv-gray-dark: #292c31;
-  --color-kcvv-gray: #62656a;
-  --color-kcvv-gray-light: #ccc;
-  --color-kcvv-white: #fefefe;
-
   /* Foundation Grays */
   --color-gray-100: #f3f4f6;
   --color-foundation-gray-light: #edeff4;
@@ -326,25 +268,15 @@
   --color-table-border-header: #d1d5db;
   --color-table-row-even: #f9fafb;
 
-  /* Semantic Colors */
-  --color-kcvv-success: #3adb76;
-  --color-kcvv-warning: #ffae00;
-  --color-kcvv-alert: #cc4b37;
-
   /* ===== Typography ===== */
 
   /* Font Families
-     - Montserrat & IBM Plex Mono: self-hosted via next/font/google (CSS vars injected on <html>)
-     - Quasimoda & Stenciletta: loaded via Adobe Typekit (afterInteractive) */
-  --font-family-title:
-    quasimoda, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI",
-    "Roboto", "Helvetica Neue", "Arial", sans-serif;
+     - Montserrat & IBM Plex Mono: self-hosted via next/font/google (CSS vars injected on <html>).
+     - Freight Display (`--font-display` / `--font-display-big`, below) rides the
+       Adobe Typekit kit. Quasimoda (title) & Stenciletta (alt) were retired in #2154. */
   --font-family-body:
     var(--font-montserrat), -apple-system, system-ui, "BlinkMacSystemFont",
     "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
-  --font-family-alt:
-    stenciletta, -apple-system, system-ui, "BlinkMacSystemFont", "Segoe UI",
-    "Roboto", "Helvetica Neue", "Arial", sans-serif;
   --font-family-mono:
     var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", "Courier",
     monospace;
@@ -420,7 +352,6 @@
     0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   --shadow-md: 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 0 10px rgba(0, 0, 0, 0.7);
-  --shadow-green: 0 0 6px 1px rgba(74, 207, 82, 0.5);
   --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.15); /* soft elevated card hover */
   --shadow-input: inset 0 1px 2px rgba(0, 0, 0, 0.1);
   --shadow-input-focus: 0 0 5px #cacaca;
@@ -461,10 +392,11 @@
 
   /* ===== Redesign / Typography (Phase 0) ===== */
 
-  /* Font families — Freight already loaded via existing Adobe Typekit kit */
+  /* Font families — Freight Display rides the existing Adobe Typekit kit;
+     `--font-family-body` (Montserrat) + `--font-family-mono` (IBM Plex) are
+     defined above. Quasimoda (title) & Stenciletta (alt) were retired in #2154. */
   --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
   --font-display-big: "freight-big-pro", georgia, "Times New Roman", serif;
-  /* --font-body and --font-mono are existing — Quasimoda flips title→body in Phase 9 cleanup */
 
   /* Type scale (fluid via clamp) */
   --text-display-2xl: clamp(3.5rem, 1.5rem + 8vw, 6rem);
@@ -607,10 +539,9 @@
   );
 
   /* ===== Redesign / Retro semantic palette (Phase 2) =====
-     Replaces digital --color-kcvv-warning / --color-kcvv-alert on redesign
-     surfaces. Tones tuned for fanzine print feel: alert = dusty brick red,
-     warning = aged mustard ochre. Legacy kcvv-* equivalents stay defined
-     for components still on the legacy vocabulary. */
+     The site-wide semantic palette (the legacy digital warning / alert brand
+     tokens were retired in #2154). Tones tuned for fanzine print feel:
+     alert = dusty brick red, warning = aged mustard ochre. */
   --color-alert: #b84a3a;
   --color-alert-soft: #e8d5cf;
   --color-warning: #c68b2c;
@@ -654,8 +585,8 @@
   }
 
   body {
-    background: var(--color-kcvv-white);
-    color: var(--color-kcvv-gray-dark);
+    background: var(--color-cream);
+    color: var(--color-ink);
     font-family: var(--font-family-body);
     font-size: var(--font-size-base);
     line-height: var(--line-height-loose);
@@ -668,11 +599,10 @@
   h4,
   h5,
   h6 {
-    font-family: var(--font-family-title);
+    font-family: var(--font-display);
     font-weight: var(--font-weight-bold);
-    color: var(--color-kcvv-gray-blue);
+    color: var(--color-ink);
     line-height: var(--line-height-tight);
-    margin-bottom: 1em;
   }
 
   /* Mobile Heading Sizes */
@@ -732,41 +662,17 @@
   }
 
   /* Link Styles */
-  /* Apply green link color only to content links, not navigation */
+  /* Inline content links — brand jersey-deep; navigation links style themselves */
   main a,
-  article a,
-  .content a {
-    color: var(--color-kcvv-green-bright);
+  article a {
+    color: var(--color-jersey-deep);
     text-decoration: none;
     transition: color 0.3s ease;
   }
 
   main a:hover,
-  article a:hover,
-  .content a:hover {
-    color: var(--color-kcvv-green-hover);
-  }
-
-  /* Content link — native underline with skip-ink for inline article links */
-  .content-link {
-    color: var(--color-kcvv-green-dark);
-    text-decoration-line: underline;
-    text-decoration-color: color-mix(
-      in srgb,
-      var(--color-kcvv-green-bright) 30%,
-      transparent
-    );
-    text-decoration-skip-ink: auto;
-    text-underline-offset: 2px;
-    text-decoration-thickness: 1px;
-    transition:
-      color 0.3s ease,
-      text-decoration-color 0.3s ease;
-  }
-
-  .content-link:hover {
-    color: var(--color-kcvv-green-bright);
-    text-decoration-color: var(--color-kcvv-green-bright);
+  article a:hover {
+    color: var(--color-jersey-deep-dark);
   }
 
   /* Ensure navigation links stay white (override any default link styles) */
@@ -775,45 +681,58 @@
   }
 }
 
-/* In-body article links: no underline by default, underline on hover
-   (except .content-link which uses native text-decoration with
-   text-decoration-skip-ink). Kept unlayered so it beats @tailwindcss/typography. */
-.prose a:not(.content-link) {
-  text-decoration: none;
-}
-
-.prose a:not(.content-link):hover {
-  text-decoration: underline;
-}
-
-/* Blockquote Styles (from design system) */
-/* Scoped to .prose to beat typography plugin's .prose :where(blockquote) specificity */
-.prose blockquote {
-  font-size: var(--font-size-3xl);
-  font-weight: var(--font-weight-medium);
-  font-style: normal;
-  line-height: var(--line-height-snug);
-  color: var(--color-kcvv-gray-dark);
-  border: 0;
-  margin: 2rem 0;
-  padding: 0 0 0 6rem;
-  overflow: hidden;
+/* ===== Canonical inline body-text link (#2154) =====
+   The single treatment for inline links inside long-form body copy — article
+   bodies, CMS pages, hulp answers, legal copy. jersey-deep text with a
+   hand-pulled, match-score-tint highlighter that sweeps in left→right on hover
+   (revealed via clip-path so the slab is fixed-size and its ends never drift),
+   overshooting the text ~4px each side so it reads like a hand-drawn marker.
+   `isolation: isolate` keeps the `::after` marker behind the text but above the
+   page surface. UI / affordance links (nav, CTA, mono "→" links) keep their own
+   styling — this is body copy only. Unlayered so it beats the typography plugin
+   and the `main a` colour fallback. */
+.prose-link {
   position: relative;
+  isolation: isolate;
+  color: var(--color-jersey-deep);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.prose blockquote > p:first-child {
-  margin-top: 0;
+.prose-link::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -4px;
+  right: -4px;
+  bottom: 0.02em;
+  height: 0.42em;
+  background-color: color-mix(in srgb, var(--color-jersey-deep) 40%, transparent);
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z' fill='black'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z' fill='black'/></svg>");
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-clip-path: inset(0 100% 0 0);
+  clip-path: inset(0 100% 0 0);
+  transition:
+    -webkit-clip-path 320ms ease-out,
+    clip-path 320ms ease-out;
+  pointer-events: none;
 }
 
-.prose blockquote::before {
-  content: "\201C";
-  color: var(--color-kcvv-green-bright);
-  font-size: 15rem;
-  line-height: 0.8;
-  float: left;
-  margin-bottom: -6rem;
-  margin-left: -6.5rem;
-  overflow: hidden;
+.prose-link:hover::after,
+.prose-link:focus-visible::after {
+  -webkit-clip-path: inset(0 0 0 0);
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose-link::after {
+    transition: none;
+  }
 }
 
 /* Full-bleed breakout utility — pulls an element to viewport width */
@@ -841,29 +760,6 @@
 }
 .eventfact-polaroid:nth-of-type(3n) {
   transform: rotate(-0.3deg);
-}
-
-/* Utility Classes */
-.featured-border::before {
-  content: "";
-  display: block;
-  width: 4rem;
-  border-top: 2px solid var(--color-kcvv-green-bright);
-  margin-bottom: 10px;
-}
-
-.after-border {
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.after-border::after {
-  border-top: 2px solid var(--color-kcvv-green-bright);
-  position: absolute;
-  width: 4rem;
-  bottom: -8px;
-  left: 0;
-  content: "";
 }
 
 /* ===== Article body — announcement / interview / transfer / event templates =====
@@ -1020,7 +916,11 @@
 
 /* Improve tap responsiveness on iOS */
 * {
-  -webkit-tap-highlight-color: rgba(74, 207, 82, 0.1);
+  -webkit-tap-highlight-color: color-mix(
+    in srgb,
+    var(--color-jersey) 10%,
+    transparent
+  );
 }
 
 /* ===== Carousel Progress Indicator ===== */

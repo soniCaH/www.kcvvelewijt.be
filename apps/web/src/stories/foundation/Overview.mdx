@@ -14,7 +14,7 @@ and consumed by both **Tailwind CSS v4** (in production) and **Storybook** (via 
 ## How tokens flow
 
 ```
-src/app/globals.css   →   Tailwind CSS v4 (@theme)   →   Component classes (bg-kcvv-green, text-kcvv-gray-blue, …)
+src/app/globals.css   →   Tailwind CSS v4 (@theme)   →   Component classes (bg-cream, text-ink, bg-jersey-deep, …)
          ↓
   Storybook preview.ts imports globals.css
          ↓
@@ -30,7 +30,7 @@ No duplication. No drift.
 <table>
   <thead><tr><th>Section</th><th>What's documented</th></tr></thead>
   <tbody>
-    <tr><td>[Colors](?path=/docs/foundation-colors--docs)</td><td>Full color palette — greens, neutrals, semantic, foundation grays</td></tr>
+    <tr><td>[Colors](?path=/docs/foundation-colors--docs)</td><td>Full color palette — cream surfaces, ink, jersey greens, semantic tones, foundation grays</td></tr>
     <tr><td>[Typography](?path=/docs/foundation-typography--docs)</td><td>Font families, type scale (xs → 6xl), weights, line heights</td></tr>
     <tr><td>[Spacing & Icons](?path=/docs/foundation-spacing-icons--docs)</td><td>Custom spacing, breakpoints, max widths, shadows, icon catalogue</td></tr>
   </tbody>
@@ -40,7 +40,7 @@ No duplication. No drift.
 
 ## Brand identity
 
-- **Primary colour:** `#4acf52` (kcvv-green-bright) — vibrant grass green
-- **Dark accent:** `#4B9B48` (kcvv-green-dark) — used for headings and hover states
-- **Text:** `#31404b` (kcvv-gray-blue) — headings; `#292c31` (kcvv-gray-dark) — body
-- **Fonts:** [Quasimoda](https://fonts.adobe.com/) (headings) · Montserrat (body) via Adobe Typekit
+- **Primary colour:** `#4acf52` (jersey) — vibrant grass green, decorative accents
+- **Dark accent:** `#008755` (jersey-deep) — large headings, primary CTAs
+- **Text:** `#0a0a0a` (ink) on `#f5f1e6` (cream) — the retro cream-on-ink surface
+- **Fonts:** [Freight Display](https://fonts.adobe.com/) (headings, via `--font-display`) · Montserrat (body) · IBM Plex Mono (labels/scores)

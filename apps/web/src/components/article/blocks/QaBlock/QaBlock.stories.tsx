@@ -138,7 +138,7 @@ export const SinglePair: Story = {
           respondents: [
             {
               answer: answer(
-                "Precies. Het 1 px `kcvv-gray-light` lijntje valt weg na de laatste pair.",
+                "Precies. Het 1 px `paper-edge` lijntje valt weg na de laatste pair.",
               ),
             },
           ],

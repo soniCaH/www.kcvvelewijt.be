@@ -9,10 +9,10 @@ const meta = {
   },
   tags: ["autodocs", "vr"],
   decorators: [
-    // Near-white page background (matches the real `/staf/[slug]` body) so the
+    // Cream page background (matches the real `/staf/[slug]` body) so the
     // cream photo card + ink text read in their true context.
     (Story) => (
-      <div className="min-h-screen bg-[var(--color-kcvv-white)] px-4 py-10 md:px-10">
+      <div className="bg-cream min-h-screen px-4 py-10 md:px-10">
         <div className="mx-auto max-w-[var(--container-wide)]">
           <Story />
         </div>

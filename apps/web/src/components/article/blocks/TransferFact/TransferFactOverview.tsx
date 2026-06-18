@@ -1,6 +1,5 @@
 import Image from "next/image";
-import { ArrowRight } from "@/lib/icons";
-import { Icon } from "@/components/design-system";
+import { ArrowRight } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 import { resolveTransfer, type TransferFactValue } from "./types";
 
@@ -148,7 +147,7 @@ export const TransferFactOverview = ({
               )}
               {resolved.from.name}
             </span>
-            <Icon icon={ArrowRight} size="xs" className={accentClass} />
+            <ArrowRight size={16} className={accentClass} />
             <span className="flex items-center gap-2">
               {resolved.to.logoUrl && (
                 <Image

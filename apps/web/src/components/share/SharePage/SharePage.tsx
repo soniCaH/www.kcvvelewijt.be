@@ -23,8 +23,15 @@ import type { ResultMood } from "../shared/theme";
 import { Button } from "@/components/design-system/Button/Button";
 import { Input } from "@/components/design-system/Input/Input";
 import { Select } from "@/components/design-system/Select/Select";
-import type { LucideIcon } from "@/lib/icons";
-import { CircleDot, Play, Timer, Flag, Square } from "@/lib/icons";
+import {
+  type RedesignIconProps,
+  SoccerBall,
+  Play,
+  Timer,
+  Flag,
+  Square,
+} from "@/lib/icons.redesign";
+import type { ComponentType } from "react";
 
 export type Aspect = "story" | "square";
 
@@ -67,7 +74,7 @@ export interface MatchOption {
 interface TemplateMeta {
   id: TemplateId;
   label: string;
-  icon: LucideIcon;
+  icon: ComponentType<RedesignIconProps>;
   iconClassName?: string;
   aspect: Aspect;
   requiresPlayer: boolean;
@@ -92,7 +99,7 @@ const F = {
 function meta(
   id: TemplateId,
   label: string,
-  icon: LucideIcon,
+  icon: ComponentType<RedesignIconProps>,
   aspect: Aspect,
   flags: Partial<typeof F>,
   iconClassName?: string,
@@ -115,13 +122,13 @@ function meta(
 }
 
 const TEMPLATES: TemplateMeta[] = [
-  meta("goal-kcvv", "Goal KCVV", CircleDot, "story", {
+  meta("goal-kcvv", "Goal KCVV", SoccerBall, "story", {
     player: true,
     score: true,
     minute: true,
     image: true,
   }),
-  meta("goal-opponent", "Goal Teg.", CircleDot, "story", {
+  meta("goal-opponent", "Goal Teg.", SoccerBall, "story", {
     score: true,
     minute: true,
     competition: true,

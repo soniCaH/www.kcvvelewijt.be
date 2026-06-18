@@ -1,28 +1,11 @@
 import {
-  Menu, X, Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  ArrowRight, ExternalLink, Check, CircleHelp,
-  Info, CheckCircle, AlertTriangle, XCircle, ThumbsUp, ThumbsDown,
-  Share2,
-  FileText, Clipboard, ClipboardList, Newspaper, Tag, Calendar, CalendarDays, Clock,
-  Mail, Phone, Smartphone, MessageCircle,
-  User, Users, UserPlus, GraduationCap,
-  MapPin, CircleParking,
-  Accessibility,
-  Ticket, Coffee,
-  Trophy, Activity, CircleDot, Flag, Timer, RectangleVertical, Square,
-  Heart, Shield,
-  Handshake, LayoutGrid, Network,
-  Pause, Play,
-  ZoomIn, ZoomOut, Maximize2, Minimize2, Expand, Minimize,
-  Download,
-  Plus, Zap,
-} from 'lucide-react';
-// Facebook + Instagram brand logos — shipped inline via BrandIcons since
-// Lucide v1 dropped brand-logo exports for trademark reasons.
-import {
-  FacebookBrandIcon as Facebook,
-  InstagramBrandIcon as Instagram,
-} from '../../components/design-system/Icon/BrandIcons';
+  MagnifyingGlass, X, List, CaretDown, ArrowRight, ArrowSquareOut, CheckCircle,
+  Info, Warning,
+  House, Envelope, Phone, MapPin,
+  User, UsersThree,
+  Heart, Handshake, SoccerBall, Ticket,
+  FacebookLogo, InstagramLogo, ShareNetwork, DownloadSimple,
+} from '@/lib/icons.redesign';
 
 
 export const SpacingRow = ({ token, value, px }) => (
@@ -30,7 +13,7 @@ export const SpacingRow = ({ token, value, px }) => (
     <div style={{ width: '120px', flexShrink: 0, fontSize: '12px', fontFamily: 'monospace', color: '#9a9da2' }}>{token}</div>
     <div style={{ width: '60px', flexShrink: 0, fontSize: '12px', color: '#9a9da2' }}>{value}</div>
     <div style={{ width: '50px', flexShrink: 0, fontSize: '12px', color: '#9a9da2' }}>{px}</div>
-    <div style={{ height: '16px', background: 'var(--color-kcvv-green-bright)', borderRadius: '2px', width: px, maxWidth: '200px' }} />
+    <div style={{ height: '16px', background: 'var(--color-jersey)', borderRadius: '2px', width: px, maxWidth: '200px' }} />
   </div>
 );
 
@@ -68,12 +51,9 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
   <SpacingRow token="spacing-15" value="3.75rem" px="60px" />
   <SpacingRow token="spacing-17_5" value="4.375rem" px="70px" />
   <SpacingRow token="spacing-22_5" value="5.625rem" px="90px" />
-  <SpacingRow token="--footer-diagonal" value="clamp(2rem, 6vw, 5rem)" px="80px" />
 </div>
 
 > `spacing-35` (35rem) is the hero image height — too wide to show inline.
->
-> `--footer-diagonal` is a responsive CSS custom property (`clamp(2rem, 6vw, 5rem)` → 32–80px). The bar shows its maximum. Used as `var(--footer-diagonal)` by `SectionTransition` to set the diagonal transition height.
 
 ---
 
@@ -126,119 +106,51 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
 
 ## Icon Catalogue
 
-All icons are from [Lucide React](https://lucide.dev) and exported from `src/lib/icons.ts`.
-Use the `<Icon>` component or import directly from `@/lib/icons`.
+Icons are [Phosphor](https://phosphoricons.com) glyphs, rendered fill-weight
+through the wrapper module `@/lib/icons.redesign`. Each wrapper defaults
+`weight="fill"` and accepts `size` (number or string), `className`, `color`,
+`aria-label`, and `aria-hidden`. Import the glyph you need by name from that
+module — there is no string-name lookup or `<Icon>` wrapper component.
+
+The grids below show a representative subset; see `src/lib/icons.redesign.ts`
+for the full export list.
 
 <IconGrid label="Navigation & UI" icons={[
-  { Icon: Menu, name: 'menu' },
-  { Icon: X, name: 'x' },
-  { Icon: Search, name: 'search' },
-  { Icon: ChevronDown, name: 'chevron-down' },
-  { Icon: ChevronUp, name: 'chevron-up' },
-  { Icon: ChevronLeft, name: 'chevron-left' },
-  { Icon: ChevronRight, name: 'chevron-right' },
-  { Icon: ArrowRight, name: 'arrow-right' },
-  { Icon: ExternalLink, name: 'external-link' },
-  { Icon: Check, name: 'check' },
-  { Icon: CircleHelp, name: 'circle-help' },
+  { Icon: MagnifyingGlass, name: 'MagnifyingGlass' },
+  { Icon: X, name: 'X' },
+  { Icon: List, name: 'List' },
+  { Icon: CaretDown, name: 'CaretDown' },
+  { Icon: ArrowRight, name: 'ArrowRight' },
+  { Icon: ArrowSquareOut, name: 'ArrowSquareOut' },
 ]} />
 
 <IconGrid label="Status & Feedback" icons={[
-  { Icon: Info, name: 'info' },
-  { Icon: CheckCircle, name: 'check-circle' },
-  { Icon: AlertTriangle, name: 'alert-triangle' },
-  { Icon: XCircle, name: 'x-circle' },
-  { Icon: ThumbsUp, name: 'thumbs-up' },
-  { Icon: ThumbsDown, name: 'thumbs-down' },
+  { Icon: Info, name: 'Info' },
+  { Icon: CheckCircle, name: 'CheckCircle' },
+  { Icon: Warning, name: 'Warning' },
 ]} />
 
-<IconGrid label="Social" icons={[
-  { Icon: Facebook, name: 'facebook' },
-  { Icon: Instagram, name: 'instagram' },
-  { Icon: Share2, name: 'share' },
+<IconGrid label="Social & Sharing" icons={[
+  { Icon: FacebookLogo, name: 'FacebookLogo' },
+  { Icon: InstagramLogo, name: 'InstagramLogo' },
+  { Icon: ShareNetwork, name: 'ShareNetwork' },
+  { Icon: DownloadSimple, name: 'DownloadSimple' },
 ]} />
 
-<IconGrid label="Content & Document" icons={[
-  { Icon: FileText, name: 'file-text' },
-  { Icon: Clipboard, name: 'clipboard' },
-  { Icon: ClipboardList, name: 'clipboard-list' },
-  { Icon: Newspaper, name: 'newspaper' },
-  { Icon: Tag, name: 'tag' },
-  { Icon: Calendar, name: 'calendar' },
-  { Icon: CalendarDays, name: 'calendar-days' },
-  { Icon: Clock, name: 'clock' },
-  { Icon: Ticket, name: 'ticket' },
-  { Icon: Coffee, name: 'coffee' },
+<IconGrid label="Contact & Location" icons={[
+  { Icon: House, name: 'House' },
+  { Icon: Envelope, name: 'Envelope' },
+  { Icon: Phone, name: 'Phone' },
+  { Icon: MapPin, name: 'MapPin' },
 ]} />
 
-<IconGrid label="Communication" icons={[
-  { Icon: Mail, name: 'mail' },
-  { Icon: Phone, name: 'phone' },
-  { Icon: Smartphone, name: 'smartphone' },
-  { Icon: MessageCircle, name: 'message-circle' },
-]} />
-
-<IconGrid label="People & Organization" icons={[
-  { Icon: User, name: 'user' },
-  { Icon: Users, name: 'users' },
-  { Icon: UserPlus, name: 'user-plus' },
-  { Icon: GraduationCap, name: 'graduation-cap' },
-]} />
-
-<IconGrid label="Location & Measurement" icons={[
-  { Icon: MapPin, name: 'map-pin' },
-  { Icon: CircleParking, name: 'circle-parking' },
-]} />
-
-<IconGrid label="Accessibility" icons={[
-  { Icon: Accessibility, name: 'accessibility' },
-]} />
-
-<IconGrid label="Sports & Activities" icons={[
-  { Icon: Trophy, name: 'trophy' },
-  { Icon: Activity, name: 'activity' },
-  { Icon: CircleDot, name: 'circle-dot' },
-  { Icon: Flag, name: 'flag' },
-  { Icon: Timer, name: 'timer' },
-  { Icon: RectangleVertical, name: 'rectangle-vertical' },
-  { Icon: Square, name: 'square' },
-]} />
-
-<IconGrid label="Medical & Safety" icons={[
-  { Icon: Heart, name: 'heart' },
-  { Icon: Shield, name: 'shield' },
-]} />
-
-<IconGrid label="Business" icons={[
-  { Icon: Handshake, name: 'handshake' },
-]} />
-
-<IconGrid label="Layout & Views" icons={[
-  { Icon: LayoutGrid, name: 'layout-grid' },
-  { Icon: Network, name: 'network' },
-]} />
-
-<IconGrid label="Media Controls" icons={[
-  { Icon: Pause, name: 'pause' },
-  { Icon: Play, name: 'play' },
-]} />
-
-<IconGrid label="Zoom & Viewport" icons={[
-  { Icon: ZoomIn, name: 'zoom-in' },
-  { Icon: ZoomOut, name: 'zoom-out' },
-  { Icon: Maximize2, name: 'maximize2' },
-  { Icon: Minimize2, name: 'minimize2' },
-  { Icon: Expand, name: 'expand' },
-  { Icon: Minimize, name: 'minimize' },
-]} />
-
-<IconGrid label="Actions" icons={[
-  { Icon: Download, name: 'download' },
-]} />
-
-<IconGrid label="Misc" icons={[
-  { Icon: Plus, name: 'plus' },
-  { Icon: Zap, name: 'zap' },
+<IconGrid label="People & Club" icons={[
+  { Icon: User, name: 'User' },
+  { Icon: UsersThree, name: 'UsersThree' },
+  { Icon: Heart, name: 'Heart' },
+  { Icon: Handshake, name: 'Handshake' },
+  { Icon: SoccerBall, name: 'SoccerBall' },
+  { Icon: Ticket, name: 'Ticket' },
 ]} />
 
 ---
@@ -246,13 +158,11 @@ Use the `<Icon>` component or import directly from `@/lib/icons`.
 ## Usage in code
 
 ```tsx
-// Named import from @/lib/icons
-import { Trophy, MapPin } from "@/lib/icons";
-<Trophy className="w-5 h-5 text-kcvv-green" />
+// Named import from the Phosphor wrapper module @/lib/icons.redesign
+import { SoccerBall, MapPin } from "@/lib/icons.redesign";
 
-// Via Icon component (design-system wrapper)
-import { Icon } from "@/components/design-system/Icon";
-<Icon name="trophy" size="md" color="primary" />
+<SoccerBall size={20} className="text-jersey-deep" />
+<MapPin size={16} aria-label="Locatie" />
 ```
 
 ---

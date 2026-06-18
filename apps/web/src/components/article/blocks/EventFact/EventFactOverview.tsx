@@ -1,4 +1,4 @@
-import { ExternalLink } from "@/lib/icons";
+import { ArrowSquareOut } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 import {
   DEFAULT_TICKET_LABEL,
@@ -178,7 +178,7 @@ export const EventFactOverview = ({
             )}
           >
             {ticketLabel}
-            <ExternalLink
+            <ArrowSquareOut
               aria-hidden="true"
               className="ml-0.5 inline-block align-baseline opacity-60"
               size="0.75em"

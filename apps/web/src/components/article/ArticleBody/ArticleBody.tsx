@@ -5,7 +5,7 @@ import type {
 } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink as ExternalLinkIcon } from "lucide-react";
+import { ArrowSquareOut as ExternalLinkIcon } from "@/lib/icons.redesign";
 import type { ReactNode } from "react";
 import { BodyQuote } from "@/components/design-system/BodyQuote";
 import { DropCapParagraph } from "@/components/design-system/DropCapParagraph";
@@ -616,10 +616,9 @@ function buildComponents({
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noopener noreferrer" : undefined}
             data-article-link={isExternal ? "external" : "internal"}
-            // Phase 5 cream-surface link styling — jersey-deep underline,
-            // 2px offset, full-opacity on hover. Mirrors the locked
-            // article-body link vocabulary from the cream redesign.
-            className="text-jersey-deep decoration-jersey-deep/40 hover:decoration-jersey-deep underline underline-offset-[3px] hover:decoration-2"
+            // Canonical inline body-text link — animated highlighter marker
+            // (`.prose-link` in globals.css), shared with every body surface.
+            className="prose-link"
           >
             {children}
             {isExternal ? (
@@ -644,11 +643,7 @@ function buildComponents({
       }) => {
         const href = resolveInternalLinkHref(value?.reference);
         return (
-          <Link
-            href={href}
-            data-article-link="internal"
-            className="text-jersey-deep decoration-jersey-deep/40 hover:decoration-jersey-deep underline underline-offset-[3px] hover:decoration-2"
-          >
+          <Link href={href} data-article-link="internal" className="prose-link">
             {children}
           </Link>
         );

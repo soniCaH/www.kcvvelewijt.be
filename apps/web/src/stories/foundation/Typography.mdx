@@ -29,16 +29,20 @@ All type tokens are defined in `src/app/globals.css`.
 <table>
   <thead><tr><th>Font</th><th>Source</th><th>Weights</th><th>Usage</th></tr></thead>
   <tbody>
+    <tr><td><strong>Freight Display Pro</strong></td><td>Adobe Typekit (deferred)</td><td>700, 900</td><td>Editorial headlines, hero display lines (<code>--font-display</code>)</td></tr>
+    <tr><td><strong>Freight Big Pro</strong></td><td>Adobe Typekit (deferred)</td><td>900</td><td>Oversized magazine display (<code>--font-display-big</code>)</td></tr>
     <tr><td><strong>Montserrat</strong></td><td><code>next/font/google</code> (self-hosted)</td><td>400, 500, 600, 700</td><td>Body text, UI labels, buttons</td></tr>
     <tr><td><strong>IBM Plex Mono</strong></td><td><code>next/font/google</code> (self-hosted)</td><td>400, 600, 700</td><td>Scores, timestamps, keyboard shortcuts</td></tr>
-    <tr><td><strong>Quasimoda</strong></td><td>Adobe Typekit (deferred)</td><td>700</td><td>All headings h1–h6</td></tr>
-    <tr><td><strong>Stenciletta</strong></td><td>Adobe Typekit (deferred)</td><td>400</td><td>Accent / display numbers</td></tr>
   </tbody>
 </table>
 
 Montserrat and IBM Plex Mono are preloaded and self-hosted via `next/font/google` with `display: 'swap'`.
-Quasimoda and Stenciletta load via Adobe Typekit with `afterInteractive` strategy — they are not
-render-blocking. System-safe fallbacks are specified for all families.
+Freight Display Pro / Freight Big Pro load via Adobe Typekit with `afterInteractive` strategy — they are
+not render-blocking. System-safe serif fallbacks (Georgia) are specified for the display families.
+
+> The legacy Quasimoda (headings) and Stenciletta (accent/display) Typekit
+> families were retired in #2154. Headings now use Freight Display via
+> `--font-display`; body stays on Montserrat (`--font-family-body`).
 
 ---
 
@@ -46,10 +50,10 @@ render-blocking. System-safe fallbacks are specified for all families.
 
 The samples below render live from the CSS variables.
 
-<FontSample label="font-title" cssVar="--font-family-title" size="2rem" weight={700} sample="KCVV Elewijt Football Club" note="All headings h1–h6" />
-<FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text" />
-<FontSample label="font-alt" cssVar="--font-family-alt" size="2.5rem" weight={400} sample="KCVV" note="Accent / display (stenciletta)" />
-<FontSample label="font-mono" cssVar="--font-family-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts" />
+<FontSample label="font-display" cssVar="--font-display" size="2.5rem" weight={900} sample="Laatste nieuws." note="Editorial headlines, hero display lines (Freight Display Pro)" />
+<FontSample label="font-display-big" cssVar="--font-display-big" size="2.5rem" weight={900} sample="KCVV" note="Oversized magazine display (Freight Big Pro)" />
+<FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text (Montserrat)" />
+<FontSample label="font-mono" cssVar="--font-family-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts (IBM Plex Mono)" />
 
 ---
 
@@ -141,9 +145,9 @@ Headings are set globally in CSS — no per-component overrides needed.
 ## Special utilities
 
 ```tsx
-<h2 className="font-title font-bold leading-tight">Heading text</h2>
+<h2 className="font-display font-black leading-tight">Heading text</h2>
 <p className="font-body leading-loose">Body text</p>
-<span className="font-alt text-4xl">KCVV</span>        {/* stenciletta accent */}
+<span className="font-display-big text-4xl">KCVV</span>      {/* oversized magazine display */}
 <span className="font-mono font-bold text-3xl">2 — 1</span>  {/* scores, times, countdowns */}
 ```
 
@@ -152,18 +156,18 @@ Headings are set globally in CSS — no per-component overrides needed.
 ## Redesign / Phase 0 — Editorial Type Scale
 
 The redesign introduces a fluid editorial type scale built on Freight Display
-Pro for headlines, Quasimoda for running text, and IBM Plex Mono for labels
+Pro for headlines, Montserrat for running text, and IBM Plex Mono for labels
 and timing data. Display sizes use `clamp()` so they breathe between mobile
 and desktop without manual breakpoints.
 
-Quasimoda's role flips from title to body in the Phase 9 cleanup; today both
-`--font-family-title` (legacy) and `--font-body` (new) reference Quasimoda.
-Treat the new `--font-display` / `--font-body` / `--font-mono` tokens as the
-target vocabulary for redesign primitives.
+The legacy Quasimoda / Stenciletta Typekit families were retired in #2154 —
+headings now set in Freight Display via `--font-display`. The
+`--font-display` / `--font-display-big` / `--font-family-body` / `--font-family-mono`
+tokens are the canonical vocabulary for every primitive.
 
 ### Visual samples
 
-The four samples below mix Freight Display, Quasimoda, and IBM Plex Mono so
+The four samples below mix Freight Display, Montserrat, and IBM Plex Mono so
 the contrast between editorial display, running text, and label voice is
 visible at a glance. Dutch diacritics (`é`, `ï`) and italic emphasis are
 exercised on the display rows.

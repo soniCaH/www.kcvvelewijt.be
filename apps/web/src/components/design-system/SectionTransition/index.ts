@@ -1,11 +1,10 @@
 export {
   SectionTransition,
-  DIAGONAL_HEIGHT,
-  BG_COLOR,
+  BG_CLASS,
+  getTransitionBleed,
 } from "./SectionTransition";
 export type {
   SectionTransitionProps,
   SectionBg,
-  TransitionOverlap,
   SectionTransitionConfig,
 } from "./SectionTransition";
