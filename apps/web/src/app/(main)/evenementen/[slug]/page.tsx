@@ -18,6 +18,7 @@ import { EventRepository } from "@/lib/repositories/event.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildEventJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { PageContainer } from "@/components/design-system";
 import { EventHero } from "@/components/event/EventHero";
 import { EventViewTracker } from "@/components/event/EventViewTracker";
 import { AndereEvents } from "@/components/event/AndereEvents";
@@ -119,7 +120,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
       <EventViewTracker eventSlug={event.slug} eventType={event.eventType} />
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-12">
+      <PageContainer as="main" className="py-12">
         <EventHero
           title={event.title}
           eventType={event.eventType}
@@ -154,7 +155,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
         />
 
         <AndereEvents events={otherEvents} />
-      </main>
+      </PageContainer>
     </div>
   );
 }

@@ -12,7 +12,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DEFAULT_OG_IMAGE } from "@/lib/constants";
-import { EditorialHeading, DottedDivider } from "@/components/design-system";
+import {
+  EditorialHeading,
+  DottedDivider,
+  PageContainer,
+} from "@/components/design-system";
 
 /**
  * Last updated date for the privacy policy.
@@ -61,8 +65,8 @@ const proseClasses = [
 
 export default function PrivacyPage() {
   return (
-    <div className="bg-cream px-4 py-16 md:px-10 md:py-20">
-      <div className="mx-auto max-w-2xl">
+    <div className="bg-cream py-16 md:py-20">
+      <PageContainer width="prose">
         <header className="flex flex-col">
           {/* Raw styled span rather than <MonoLabel>: the 8p1 lock calls for a
               jersey-deep kicker, but MonoLabel's `plain` variant only supports
@@ -282,7 +286,7 @@ export default function PrivacyPage() {
             .
           </p>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

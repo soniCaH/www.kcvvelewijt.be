@@ -28,12 +28,6 @@
 :root {
   /* Foundation Grays */
   --color-foundation-gray-light: #edeff4;
-
-  /* Layout Variables */
-  --max-width--outer: 90rem;
-  --max-width--inner: 60rem;
-  --padding--mobile: 0.75rem;
-  --padding--desktop: 2.5rem;
 }
 
 /* ===== Spinner — scarf barber-pole + compact dot pulse (Phase 2.B.1) =====
@@ -358,7 +352,6 @@
 
   --max-width-inner: 60rem; /* 960px */
   --max-width-inner-lg: 70rem; /* 1120px */
-  --max-width-outer: 90rem; /* 1440px */
 
   /* ===== Border Radius ===== */
 
@@ -457,11 +450,9 @@
 
   /* ===== Redesign / Layout & Motion (Phase 0) ===== */
 
-  --container-prose: 680px;
-  --container-wide: 1040px;
-  --container-page: 1120px;
-  --container-default: 1200px;
-  /* --max-width-outer (1440px) already exists — reuse for full-bleed */
+  --container-prose: 680px; /* reading column, forms, legal (PageContainer width="prose") */
+  --container-wide: 1040px; /* canonical body — detail pages (PageContainer default) */
+  --container-page: 1120px; /* legacy — VerderLezenRow flush-edge row only */
 
   /* Pool tuned twice on 2026-04-29 per owner feedback. Original master
      design pool (-2.5/-1.5/1/2) produced "seasick" rendering when applied

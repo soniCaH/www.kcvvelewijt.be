@@ -12,7 +12,7 @@ import { SearchMasthead } from "./SearchMasthead";
 import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
 import { SearchPreSearchCard } from "./SearchPreSearchCard";
-import { Alert, Spinner } from "@/components/design-system";
+import { Alert, PageContainer, Spinner } from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { filterByActiveType } from "./search-filter-utils";
 import type {
@@ -268,7 +268,7 @@ export const SearchInterface = ({
       </SearchMasthead>
 
       {/* Results region on cream, below the band. */}
-      <div className="mx-auto max-w-5xl space-y-8 px-4 py-12">
+      <PageContainer width="index" className="space-y-8 py-12">
         {/* Show results only if query is valid (>= 2 chars) */}
         {query.trim().length >= 2 && (
           <>
@@ -313,7 +313,7 @@ export const SearchInterface = ({
 
         {/* Pre-search state — football-voice paper card (8s4). */}
         {query.trim().length < 2 && <SearchPreSearchCard />}
-      </div>
+      </PageContainer>
     </>
   );
 };

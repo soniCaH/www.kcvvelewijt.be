@@ -80,9 +80,8 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
 <table>
   <thead><tr><th>Token</th><th>Value</th><th>px</th><th>Usage</th></tr></thead>
   <tbody>
-    <tr><td><code>max-w-inner</code></td><td>60rem</td><td>960px</td><td>Article content, narrow layouts</td></tr>
-    <tr><td><code>max-w-inner-lg</code></td><td>70rem</td><td>1120px</td><td>Wide content areas</td></tr>
-    <tr><td><code>max-w-outer</code></td><td>90rem</td><td>1440px</td><td>Full-bleed container cap</td></tr>
+    <tr><td><code>max-w-inner</code></td><td>60rem</td><td>960px</td><td>Legacy — being retired for <code>&lt;PageContainer&gt;</code> (see Container widths)</td></tr>
+    <tr><td><code>max-w-inner-lg</code></td><td>70rem</td><td>1120px</td><td>Legacy — being retired for <code>&lt;PageContainer&gt;</code></td></tr>
   </tbody>
 </table>
 
@@ -177,20 +176,24 @@ typical interactions. All values are defined in `src/app/globals.css`.
 
 ### Container widths
 
-`--container-prose` (680px) caps long-form article text at a comfortable
-measure; `--container-wide` (1040px) widens editorial media (article images,
-video) beyond prose while staying clearly bounded; `--container-default`
-(1200px) is the standard page-content width between the cream surface
-gutters. `--max-width-outer` (1440px) — already present from earlier work
-— remains the full-bleed cap.
+Page bodies use the shared **`<PageContainer>`** primitive — one centered
+container (`mx-auto w-full px-4 md:px-8`) at a role-based max-width. Pick by the
+page's role; never hand-roll `mx-auto max-w-… px-…`:
+
+- **`width="index"`** → 1280px (`max-w-7xl`) — card-grid index / listing / landing pages (incl. the homepage)
+- **default** → 1040px (`--container-wide`) — detail / single-subject pages
+- **`width="prose"`** → 680px (`--container-prose`) — long-form reading text, forms, legal
+
+Full-bleed elements (`<StripedSeam>`, heroes, `<CtaBand>`, coloured bands) are
+never wrapped — they span the viewport as siblings.
 
 <div style={{ marginBottom: '24px' }}>
-  <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-prose · 680px (article body cap)</div>
-  <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-wide)', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-wide · 1040px (wide editorial media)</div>
-  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-default)', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>--container-default · 1200px (standard page content)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>prose · 680px (--container-prose)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-wide)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>default · 1040px (--container-wide)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: '80rem', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>index · 1280px (max-w-7xl)</div>
 </div>
 
 ### Rotation pool

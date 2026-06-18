@@ -1,4 +1,8 @@
-import { EditorialHeading, MonoLabelRow } from "@/components/design-system";
+import {
+  EditorialHeading,
+  MonoLabelRow,
+  PageContainer,
+} from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { MatchEvents, type MatchEvent } from "../MatchEvents/MatchEvents";
 
@@ -33,12 +37,9 @@ export function MatchEventsSection({
   if (events.length === 0) return null;
 
   return (
-    <section
-      data-component="match-events-section"
-      className={cn(
-        "bg-cream mx-auto w-full max-w-[var(--container-wide)] px-4 py-10 md:py-14",
-        className,
-      )}
+    <PageContainer
+      as="section"
+      className={cn("bg-cream py-10 md:py-14", className)}
     >
       <MonoLabelRow
         items={[{ label: "WEDSTRIJDVERLOOP" }]}
@@ -55,6 +56,6 @@ export function MatchEventsSection({
         awayTeamLogo={awayTeamLogo}
         events={events}
       />
-    </section>
+    </PageContainer>
   );
 }

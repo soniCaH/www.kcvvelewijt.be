@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils/cn";
+import { PageContainer } from "@/components/design-system";
 
 export interface TeamSectionNavItem {
   /** Anchor target id (matches the section's `id`). */
@@ -29,7 +30,7 @@ export function TeamSectionNav({ items }: TeamSectionNavProps) {
         "overflow-x-auto",
       )}
     >
-      <ul className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-2">
+      <PageContainer as="ul" className="flex items-center gap-1 py-2">
         {items.map((item) => (
           <li key={item.id}>
             <a
@@ -40,7 +41,7 @@ export function TeamSectionNav({ items }: TeamSectionNavProps) {
             </a>
           </li>
         ))}
-      </ul>
+      </PageContainer>
     </nav>
   );
 }

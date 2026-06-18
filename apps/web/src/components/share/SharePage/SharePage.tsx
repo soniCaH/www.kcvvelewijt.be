@@ -23,6 +23,7 @@ import type { ResultMood } from "../shared/theme";
 import { Button } from "@/components/design-system/Button/Button";
 import { Input } from "@/components/design-system/Input/Input";
 import { Select } from "@/components/design-system/Select/Select";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import {
   type RedesignIconProps,
   SoccerBall,
@@ -537,7 +538,7 @@ export function SharePage({ matches, players }: SharePageProps) {
   const previewHeight = captureHeight * TEMPLATE_SCALE;
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-8">
+    <PageContainer width="prose" className="flex flex-col gap-6 py-8">
       <h1 className="font-display text-ink text-4xl font-black">
         Story Generator
       </h1>
@@ -883,6 +884,6 @@ export function SharePage({ matches, players }: SharePageProps) {
           )}
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

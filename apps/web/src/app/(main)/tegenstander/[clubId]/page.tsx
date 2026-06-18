@@ -20,6 +20,7 @@ import type { Match, OpponentHistory } from "@kcvv/api-contract";
 import {
   Crest,
   EditorialHeading,
+  PageContainer,
   StripedSeam,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
@@ -188,7 +189,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
 
   return (
     <div className="bg-cream-deep min-h-screen">
-      <div className="container mx-auto max-w-3xl px-4 pt-8 pb-8">
+      <PageContainer className="pt-8 pb-8">
         <PageHero
           kicker="Onderlinge geschiedenis"
           headline={opponentName}
@@ -246,7 +247,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
             </section>
           ))
         )}
-      </div>
+      </PageContainer>
     </div>
   );
 }

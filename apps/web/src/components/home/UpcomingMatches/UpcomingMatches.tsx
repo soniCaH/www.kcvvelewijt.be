@@ -27,7 +27,7 @@ export const UpcomingMatches = ({
       aria-label="Komende wedstrijden"
       className="bg-cream-soft py-16 md:py-20"
     >
-      <div className="mx-auto max-w-5xl px-4 md:px-8">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
         <TapedCard
           rotation="b"
           bg="cream"

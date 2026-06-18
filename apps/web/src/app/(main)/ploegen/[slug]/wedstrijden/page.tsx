@@ -9,6 +9,7 @@ import type { Match } from "@kcvv/api-contract";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { transformMatchToSchedule } from "@/components/match";
@@ -153,7 +154,7 @@ export default async function WedstrijdenPage({
 
       <AgendaScrollToNext nextMatchId={nextMatch?.id ?? null} />
 
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
+      <PageContainer className="py-8 sm:py-12">
         {/* Page header */}
         <div className="mb-8">
           <p className="text-ink-muted font-mono text-xs tracking-widest uppercase">
@@ -211,7 +212,7 @@ export default async function WedstrijdenPage({
             ))}
           </div>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }

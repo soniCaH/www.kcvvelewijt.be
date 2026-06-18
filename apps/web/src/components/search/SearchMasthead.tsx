@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EditorialHeading } from "@/components/design-system";
+import { EditorialHeading, PageContainer } from "@/components/design-system";
 
 export interface SearchMastheadProps {
   /**
@@ -56,7 +56,7 @@ export function SearchMasthead({
         }}
       />
 
-      <div className="relative mx-auto max-w-5xl px-4 py-12 md:py-14">
+      <PageContainer width="index" className="relative py-12 md:py-14">
         <EditorialHeading
           level={1}
           size="display-xl"
@@ -74,7 +74,7 @@ export function SearchMasthead({
             {hint}
           </p>
         )}
-      </div>
+      </PageContainer>
     </header>
   );
 }

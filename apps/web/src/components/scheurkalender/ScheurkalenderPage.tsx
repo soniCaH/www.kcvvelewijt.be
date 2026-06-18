@@ -13,6 +13,7 @@
  */
 
 import { DateTime } from "luxon";
+import { PageContainer } from "@/components/design-system";
 import { PrintButton } from "./PrintButton";
 import { PrintDate } from "./PrintDate";
 
@@ -80,11 +81,11 @@ export function ScheurkalenderPage({
   return (
     <div className="bg-cream min-h-screen print:bg-white">
       {/* Screen-only toolbar — hidden on print and cropped out of poster screenshots. */}
-      <div className="mx-auto flex max-w-3xl justify-end px-4 pt-6 print:hidden">
+      <PageContainer className="flex justify-end pt-6 print:hidden">
         <PrintButton />
-      </div>
+      </PageContainer>
 
-      <div className="mx-auto max-w-3xl px-4 pt-4 pb-12 print:p-0">
+      <PageContainer className="pt-4 pb-12 print:p-0">
         {/* The "sheet" — this is what gets screenshotted into the InDesign poster. */}
         <div className="border-ink border-2 bg-white print:border-0">
           {/* Masthead */}
@@ -160,7 +161,7 @@ export function ScheurkalenderPage({
         <p className="text-ink-muted mt-4 hidden text-center font-mono text-[10px] uppercase print:block">
           KCVV Elewijt · Competitie {season} · afgedrukt op <PrintDate />
         </p>
-      </div>
+      </PageContainer>
     </div>
   );
 }

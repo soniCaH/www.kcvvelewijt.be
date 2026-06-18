@@ -81,6 +81,10 @@ export type { LinkButtonProps } from "./LinkButton";
 export { useScrollHint, ScrollArrowButton } from "./ScrollHint";
 export type { UseScrollHintReturn, ScrollArrowButtonProps } from "./ScrollHint";
 
+// PageContainer
+export { PageContainer } from "./PageContainer";
+export type { PageContainerProps, PageContainerWidth } from "./PageContainer";
+
 // BodyQuote
 export { BodyQuote } from "./BodyQuote";
 export type { BodyQuoteProps } from "./BodyQuote";

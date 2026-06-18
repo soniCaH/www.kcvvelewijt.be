@@ -1,5 +1,9 @@
 import type { RankingEntry } from "@kcvv/api-contract";
-import { EditorialHeading, MonoLabelRow } from "@/components/design-system";
+import {
+  EditorialHeading,
+  MonoLabelRow,
+  PageContainer,
+} from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { StandingsTable } from "@/components/team/StandingsTable";
 
@@ -50,12 +54,9 @@ export function MatchStandingsSection({
   if (involved.length === 0) return null;
 
   return (
-    <section
-      data-component="match-standings-section"
-      className={cn(
-        "bg-cream mx-auto w-full max-w-[var(--container-wide)] px-4 py-10 md:py-14",
-        className,
-      )}
+    <PageContainer
+      as="section"
+      className={cn("bg-cream py-10 md:py-14", className)}
     >
       <MonoLabelRow
         items={[{ label: "KLASSEMENT" }]}
@@ -66,6 +67,6 @@ export function MatchStandingsSection({
       </EditorialHeading>
 
       <StandingsTable entries={involved} highlightTeamId={highlightTeamId} />
-    </section>
+    </PageContainer>
   );
 }
