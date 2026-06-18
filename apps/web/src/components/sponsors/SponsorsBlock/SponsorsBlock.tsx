@@ -23,7 +23,7 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
       aria-label="Onze sponsors"
       className={cn("bg-cream-deep py-16 md:py-20", className)}
     >
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
         <SectionHeader title="Met dank aan onze sponsors" />
 
         <ul className={cn("mt-8", SPONSOR_TILE_GRID_CLASS)}>

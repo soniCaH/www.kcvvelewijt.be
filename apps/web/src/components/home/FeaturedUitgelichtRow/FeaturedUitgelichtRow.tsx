@@ -83,7 +83,7 @@ export const FeaturedUitgelichtRow = ({
 
   return (
     <section className={className}>
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
         <EditorialHeading
           level={2}
           size="display-md"

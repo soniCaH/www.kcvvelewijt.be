@@ -26,7 +26,7 @@ export const YouthSection = ({ className }: YouthSectionProps) => (
       <StripedSeam height="xl" colorPair="cream-jersey-deep" />
     </div>
 
-    <div className="mx-auto max-w-7xl px-4 md:px-8">
+    <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
       <div className="mb-4">
         <MonoLabel size="md" tone="cream">
           Word jeugdspeler

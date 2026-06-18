@@ -109,7 +109,7 @@ export const FeaturedEventBand = ({
       data-testid="featured-event-band"
       className="bg-jersey-deep text-cream py-12 md:py-16"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch gap-8 px-4 md:grid-cols-[1fr_1.4fr] md:gap-12 md:px-8">
+      <div className="mx-auto grid max-w-[var(--container-index)] grid-cols-1 items-stretch gap-8 px-4 md:grid-cols-[1fr_1.4fr] md:gap-12 md:px-8">
         <TapedFigure
           aspect="landscape-16-9"
           rotation="a"

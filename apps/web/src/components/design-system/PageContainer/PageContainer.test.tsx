@@ -22,7 +22,9 @@ describe("PageContainer", () => {
 
   it("supports the index width (card-grid listings)", () => {
     render(<PageContainer width="index">index</PageContainer>);
-    expect(screen.getByText("index").className).toContain("max-w-7xl");
+    expect(screen.getByText("index").className).toContain(
+      "max-w-[var(--container-index)]",
+    );
   });
 
   it("forwards an id for in-page nav anchors", () => {

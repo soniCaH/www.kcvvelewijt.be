@@ -9,7 +9,7 @@ const WIDTH_CLASS: Record<PageContainerWidth, string> = {
   // Narrow column — article/CMS reading text AND forms / legal prose.
   prose: "max-w-[var(--container-prose)]", // 680px
   // Card-grid index / listing / landing pages (matches the homepage).
-  index: "max-w-7xl", // 1280px
+  index: "max-w-[var(--container-index)]", // 1280px
 };
 
 export interface PageContainerProps {
@@ -18,7 +18,7 @@ export interface PageContainerProps {
    * Body width by role:
    * - `prose` (680, `--container-prose`) — long-form reading, forms, legal
    * - `default` (1040, `--container-wide`) — detail / single-subject pages
-   * - `index` (1280, `max-w-7xl`) — card-grid index / listing / landing pages
+   * - `index` (1280, `--container-index`) — card-grid index / listing / landing pages
    */
   width?: PageContainerWidth;
   /** Element to render — defaults to `<div>`; pass `"section"` for page sections. */

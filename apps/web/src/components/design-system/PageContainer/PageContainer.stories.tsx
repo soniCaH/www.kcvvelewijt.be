@@ -29,7 +29,7 @@ export const Index: Story = {
   args: {
     width: "index",
     children: (
-      <Demo label="width=index · 1280px (max-w-7xl) · card-grid listings + homepage" />
+      <Demo label="width=index · 1280px (--container-index) · card-grid listings + homepage" />
     ),
   },
 };

@@ -272,7 +272,7 @@ export default async function HomePage() {
 
   if (articles.length === 0 && matches.length === 0) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center md:px-8">
+      <div className="mx-auto max-w-[var(--container-index)] px-4 py-16 text-center md:px-8">
         <h1 className="text-jersey-deep mb-4 text-3xl font-bold lg:text-4xl">
           Welkom bij KCVV Elewijt
         </h1>
@@ -292,7 +292,7 @@ export default async function HomePage() {
         key: "hero",
         bg: "transparent",
         content: (
-          <div className="mx-auto max-w-7xl px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
+          <div className="mx-auto max-w-[var(--container-index)] px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
             <EditorialHero {...heroProps} />
           </div>
         ),

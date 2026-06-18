@@ -169,15 +169,15 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 
 Every page wraps its content in `<PageContainer>` (`@/components/design-system`). It is the single centered body container — `mx-auto w-full px-4 md:px-8` + a role-based max-width. Pick the width by the page's role; do **not** hand-roll `mx-auto max-w-… px-…` containers:
 
-| `width`     | Max-width                 | Use for                                                    |
-| ----------- | ------------------------- | ---------------------------------------------------------- |
-| `"index"`   | 1280 (`max-w-7xl`)        | Card-grid index / listing / landing pages (incl. homepage) |
-| _(default)_ | 1040 (`--container-wide`) | Detail / single-subject pages                              |
-| `"prose"`   | 680 (`--container-prose`) | Long-form reading, forms, legal                            |
+| `width`     | Max-width                  | Use for                                                    |
+| ----------- | -------------------------- | ---------------------------------------------------------- |
+| `"index"`   | 1280 (`--container-index`) | Card-grid index / listing / landing pages (incl. homepage) |
+| _(default)_ | 1040 (`--container-wide`)  | Detail / single-subject pages                              |
+| `"prose"`   | 680 (`--container-prose`)  | Long-form reading, forms, legal                            |
 
-- Vertical rhythm (`py-*`, `scroll-mt-*`, …) goes on the consuming section via `className`; pass `as="section"` for sections and `id="…"` for in-page nav anchors. Heroes/bespoke grid layouts that can't wrap cleanly may apply the same width **loosely** (`max-w-[var(--container-wide)]` / `max-w-7xl`) — but only one of the three values.
+- Vertical rhythm (`py-*`, `scroll-mt-*`, …) goes on the consuming section via `className`; pass `as="section"` for sections and `id="…"` for in-page nav anchors. Heroes/bespoke grid layouts that can't wrap cleanly may apply the same width **loosely** (`max-w-[var(--container-wide)]` / `max-w-[var(--container-index)]`) — but only one of the three values.
 - **A content container may use no other width.** Three exemptions, which are NOT content containers: (1) **chrome** — `<SiteHeader>`/`<SiteFooter>` use `max-w-[1440px]` (global nav/footer span wider than content; the only width above 1280, chrome-only); (2) **element-sizing** — a photo, illustration, reading-measure/quote/divider width, or scaled diagram (e.g. the organigram tree) keeps its own `max-w-[…]`; (3) **full-bleed** — `<StripedSeam>`, hero band backgrounds, `<CtaBand>`, coloured section bands span the viewport and are never wrapped.
-- There are only **two** custom width tokens (`--container-wide` 1040, `--container-prose` 680); `index` reuses Tailwind's `max-w-7xl`. The legacy `--max-width-inner*`/`--container-page`/`--container-default`/`--max-width-outer` tokens were all removed in #2155.
+- All three are named custom tokens: `--container-prose` (680), `--container-wide` (1040), `--container-index` (1280). The legacy `--max-width-inner*`/`--container-page`/`--container-default`/`--max-width-outer` tokens were all removed in #2155.
 
 ### Design system locations
 

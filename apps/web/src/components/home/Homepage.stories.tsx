@@ -201,7 +201,7 @@ const Homepage = ({
         key: "hero",
         bg: "transparent",
         content: (
-          <div className="mx-auto max-w-7xl px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
+          <div className="mx-auto max-w-[var(--container-index)] px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
             <EditorialHero {...heroProps} />
           </div>
         ),

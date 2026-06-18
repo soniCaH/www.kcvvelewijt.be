@@ -447,6 +447,7 @@
 
   --container-prose: 680px; /* reading column, forms, legal (PageContainer width="prose") */
   --container-wide: 1040px; /* canonical body — detail pages (PageContainer default) */
+  --container-index: 1280px; /* card-grid index / listing / landing pages (PageContainer width="index") */
 
   /* Pool tuned twice on 2026-04-29 per owner feedback. Original master
      design pool (-2.5/-1.5/1/2) produced "seasick" rendering when applied
