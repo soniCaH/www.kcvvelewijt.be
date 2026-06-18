@@ -89,11 +89,11 @@ describe("<VerderLezenRow>", () => {
   });
 
   describe("container width", () => {
-    it("renders at --container-page width", () => {
+    it("renders at --container-wide width", () => {
       const { container } = render(<VerderLezenRow items={[item(1)]} />);
       const row = container.firstElementChild as HTMLElement;
       const inner = row.firstElementChild as HTMLElement;
-      expect(inner.style.maxWidth).toBe("var(--container-page)");
+      expect(inner.style.maxWidth).toBe("var(--container-wide)");
     });
   });
 });

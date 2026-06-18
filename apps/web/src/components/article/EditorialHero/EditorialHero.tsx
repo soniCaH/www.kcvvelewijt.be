@@ -542,11 +542,11 @@ export function EditorialHero(props: EditorialHeroProps) {
         aria-label={serializeTitle(title)}
       >
         {body}
-        {/* The shell renders an `mx-auto max-w-[1120px]` <section> with a
-            bottom divider line; pin "Lees verder" inside the same inner
+        {/* The shell renders an `mx-auto max-w-[var(--container-wide)]` <section> with
+            a bottom divider line; pin "Lees verder" inside the same inner
             container so it aligns flush with the divider's right edge
             rather than the outer link's wrapper-padded edge. */}
-        <div className="mx-auto mt-2 flex max-w-[1120px] justify-end">
+        <div className="mx-auto mt-2 flex max-w-[var(--container-wide)] justify-end px-4 md:px-8">
           <span
             aria-hidden="true"
             className="text-jersey-deep pointer-events-none font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"

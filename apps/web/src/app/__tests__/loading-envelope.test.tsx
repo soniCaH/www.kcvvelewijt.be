@@ -116,20 +116,23 @@ describe("loading.tsx envelope drift guard", () => {
       name: "/jeugd",
       Loading: JeugdLoading,
       // Phase 7 (#2038): cream tracer composition (header + nav grid + youth
-      // directory), no SectionStack envelope.
-      expectedRootClass: "mx-auto w-full max-w-[70rem] px-4 py-10 sm:py-14",
+      // directory), no SectionStack envelope. Outer container is a
+      // `<PageContainer width="index">` (matches the page's index width).
+      expectedRootClass: "mx-auto w-full px-4 md:px-8 max-w-7xl py-10 sm:py-14",
     },
     {
       name: "/ploegen",
       Loading: PloegenLoading,
-      expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
+      // Outer container is a `<PageContainer width="index">` (page's index width).
+      expectedRootClass: "mx-auto w-full px-4 md:px-8 max-w-7xl py-10 sm:py-14",
     },
     {
       name: "/sponsors",
       Loading: SponsorsLoading,
       // Phase 7 (#2033): cream editorial header + SponsorTile grid skeleton,
-      // mirroring the rebuilt /sponsors page (no SectionStack envelope).
-      expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
+      // mirroring the rebuilt /sponsors page (no SectionStack envelope). Outer
+      // container is a `<PageContainer width="index">` (page's index width).
+      expectedRootClass: "mx-auto w-full px-4 md:px-8 max-w-7xl py-10 sm:py-14",
     },
     {
       name: "/ploegen/[slug]",

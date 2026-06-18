@@ -3,13 +3,15 @@
  * Matches the BestuurPage layout: team header + member grid + staff list
  */
 
+import { PageContainer } from "@/components/design-system";
+
 export default function BoardLoading() {
   return (
     <div className="min-h-screen space-y-12">
       {/* Team header */}
       <div className="relative h-48 animate-pulse bg-gray-200 md:h-64">
         <div className="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black/60 to-transparent p-6">
-          <div className="max-w-inner-lg mx-auto space-y-2">
+          <div className="mx-auto max-w-[var(--container-wide)] space-y-2">
             <div className="h-8 w-48 rounded bg-white/10" />
             <div className="h-4 w-64 rounded bg-white/15" />
           </div>
@@ -17,7 +19,7 @@ export default function BoardLoading() {
       </div>
 
       {/* Member grid */}
-      <div className="max-w-inner-lg mx-auto px-4 py-12">
+      <PageContainer className="py-12">
         <div className="mb-6 h-6 w-24 animate-pulse rounded bg-gray-200" />
         <div className="grid animate-pulse grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -33,10 +35,10 @@ export default function BoardLoading() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
 
       {/* Staff list */}
-      <div className="max-w-inner-lg mx-auto animate-pulse px-4 py-4">
+      <PageContainer className="animate-pulse py-4">
         <div className="mb-4 h-6 w-16 rounded bg-gray-200" />
         <div className="space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -64,7 +66,7 @@ export default function BoardLoading() {
           </div>
           <div className="h-10 w-36 shrink-0 rounded-lg bg-gray-300" />
         </section>
-      </div>
+      </PageContainer>
     </div>
   );
 }

@@ -5,10 +5,12 @@
  * `SectionStack`/`getJeugdSections` envelope.
  */
 
+import { PageContainer } from "@/components/design-system";
+
 export default function JeugdLoading() {
   return (
     <>
-      <div className="mx-auto w-full max-w-[70rem] px-4 py-10 sm:py-14">
+      <PageContainer width="index" className="py-10 sm:py-14">
         {/* Split hero — text column + photo */}
         <div className="grid animate-pulse items-center gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
           <div className="flex flex-col gap-4">
@@ -50,11 +52,11 @@ export default function JeugdLoading() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
 
       {/* CTA band (full-bleed) */}
       <div className="bg-jersey-deep-dark border-ink animate-pulse border-y-2">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-4 px-4 py-12 sm:py-16">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-12 sm:py-16 md:px-8">
           <div className="bg-cream/15 h-8 w-72 max-w-full rounded" />
           <div className="bg-cream/15 h-4 w-96 max-w-full rounded" />
           <div className="bg-cream/15 h-11 w-40 rounded" />

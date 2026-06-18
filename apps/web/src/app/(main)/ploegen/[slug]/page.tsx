@@ -208,7 +208,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         season={team.season}
         tagline={team.tagline}
         teamImageUrl={team.teamImageUrl}
-        className="mx-auto max-w-5xl px-4 py-8 sm:py-12"
+        className="mx-auto max-w-[var(--container-wide)] px-4 py-8 sm:py-12 md:px-8"
       />
 
       <TeamSectionNav items={navItems} />

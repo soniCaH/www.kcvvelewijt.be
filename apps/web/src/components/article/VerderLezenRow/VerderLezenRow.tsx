@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils/cn";
  *
  * Renders the "Verder lezen." row at the article footer as a horizontal
  * scroller (using the canonical `<HorizontalSlider>` primitive) of
- * `<NewsCard>` (Phase 4.5 R10 flush-edge) at `--container-page` width.
+ * `<NewsCard>` (Phase 4.5 R10 flush-edge) at `--container-wide` width.
  * At desktop the first ~3 cards sit in-frame; the rest reveal via
  * paper-chrome scroll arrows + drag. At narrow viewports 1–1.5 cards
  * show at a time. Per-`articleType` card backgrounds (Phase 4.5 R3
@@ -255,7 +255,7 @@ export function VerderLezenRow({
     >
       <div
         className="mx-auto w-full"
-        style={{ maxWidth: "var(--container-page)" }}
+        style={{ maxWidth: "var(--container-wide)" }}
       >
         <EditorialHeading
           level={2}

@@ -3,13 +3,15 @@
  * Generic hero + content shimmer for the Phase 6.C single-scroll team page.
  */
 
+import { PageContainer } from "@/components/design-system";
+
 export default function TeamDetailLoading() {
   return (
     <div className="min-h-screen">
       {/* Team header skeleton — full-width image placeholder */}
       <div className="relative h-64 animate-pulse bg-gray-200 md:h-80">
         <div className="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black/60 to-transparent p-6">
-          <div className="mx-auto max-w-4xl space-y-2">
+          <div className="mx-auto max-w-[var(--container-wide)] space-y-2">
             <div className="h-8 w-48 rounded bg-white/10" />
             <div className="h-4 w-32 rounded bg-white/15" />
           </div>
@@ -18,7 +20,7 @@ export default function TeamDetailLoading() {
 
       {/* Tab navigation skeleton */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-4xl gap-4 px-4 py-3">
+        <div className="mx-auto flex max-w-[var(--container-wide)] gap-4 px-4 py-3 md:px-8">
           {["w-16", "w-24", "w-24", "w-20"].map((w, i) => (
             <div
               key={i}
@@ -29,7 +31,7 @@ export default function TeamDetailLoading() {
       </div>
 
       {/* Content area skeleton — roster grid */}
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <PageContainer className="py-8">
         <div className="grid animate-pulse grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {Array.from({ length: 12 }).map((_, i) => (
             <div
@@ -44,7 +46,7 @@ export default function TeamDetailLoading() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

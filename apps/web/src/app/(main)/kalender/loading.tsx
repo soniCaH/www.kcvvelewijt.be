@@ -11,20 +11,21 @@
  */
 
 import { PageHero } from "@/components/layout/PageHero";
+import { PageContainer } from "@/components/design-system";
 
 export default function CalendarLoading() {
   return (
     <div className="bg-cream min-h-screen">
-      <div className="mx-auto max-w-5xl px-4 pt-10">
+      <PageContainer width="index" className="pt-10">
         <PageHero
           kicker="Kalender"
           headline="Wedstrijdkalender"
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
           size="compact"
         />
-      </div>
+      </PageContainer>
 
-      <div className="mx-auto max-w-5xl px-4 py-10">
+      <PageContainer width="index" className="py-10">
         {/* Matches CalendarWidget's root <div className="space-y-4"> */}
         <div className="space-y-4">
           {/* Type filter chips — pill placeholders matching KalenderFilterBar
@@ -96,7 +97,7 @@ export default function CalendarLoading() {
             </div>
           </div>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

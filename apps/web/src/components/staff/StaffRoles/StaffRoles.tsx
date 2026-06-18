@@ -4,6 +4,7 @@ import Link from "next/link";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { PageContainer } from "@/components/design-system";
 import { ArrowRight } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 
@@ -54,7 +55,7 @@ export function StaffRoles({
   if (positions.length === 0 && responsibilities.length === 0) return null;
 
   return (
-    <section className={cn("mx-auto max-w-5xl px-4 py-12", className)}>
+    <PageContainer as="section" className={cn("py-12", className)}>
       <EditorialHeading
         level={2}
         size="display-md"
@@ -132,6 +133,6 @@ export function StaffRoles({
           </div>
         </>
       ) : null}
-    </section>
+    </PageContainer>
   );
 }

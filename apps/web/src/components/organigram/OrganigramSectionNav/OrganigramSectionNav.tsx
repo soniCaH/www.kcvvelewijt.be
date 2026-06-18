@@ -94,7 +94,7 @@ export function OrganigramSectionNav({
         className,
       )}
     >
-      <div className="mx-auto flex max-w-[80rem] items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2 md:px-8">
         <ul className="flex items-center gap-2">
           {SECTIONS.map((section) => {
             const isActive = active === section.id;

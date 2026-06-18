@@ -272,7 +272,7 @@ export default async function HomePage() {
 
   if (articles.length === 0 && matches.length === 0) {
     return (
-      <div className="max-w-inner-lg mx-auto px-3 py-16 text-center lg:px-0">
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center md:px-8">
         <h1 className="text-jersey-deep mb-4 text-3xl font-bold lg:text-4xl">
           Welkom bij KCVV Elewijt
         </h1>

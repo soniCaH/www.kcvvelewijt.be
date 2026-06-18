@@ -175,9 +175,9 @@ Every page wraps its content in `<PageContainer>` (`@/components/design-system`)
 | _(default)_ | 1040 (`--container-wide`) | Detail / single-subject pages                              |
 | `"prose"`   | 680 (`--container-prose`) | Long-form reading, forms, legal                            |
 
-- Vertical rhythm (`py-*`, `scroll-mt-*`, …) goes on the consuming section via `className`; pass `as="section"` for sections and `id="…"` for in-page nav anchors.
-- **Full-bleed elements are never wrapped** — `<StripedSeam>`, heroes, `<CtaBand>`/`*CtaBand`, and coloured section bands span the viewport as siblings of the container.
-- There are only **two** custom width tokens (`--container-wide` 1040, `--container-prose` 680); `index` reuses Tailwind's `max-w-7xl`. The legacy `--max-width-inner`/`-inner-lg`/`--container-page` tokens are retired except where explicitly noted.
+- Vertical rhythm (`py-*`, `scroll-mt-*`, …) goes on the consuming section via `className`; pass `as="section"` for sections and `id="…"` for in-page nav anchors. Heroes/bespoke grid layouts that can't wrap cleanly may apply the same width **loosely** (`max-w-[var(--container-wide)]` / `max-w-7xl`) — but only one of the three values.
+- **A content container may use no other width.** Three exemptions, which are NOT content containers: (1) **chrome** — `<SiteHeader>`/`<SiteFooter>` use `max-w-[1440px]` (global nav/footer span wider than content; the only width above 1280, chrome-only); (2) **element-sizing** — a photo, illustration, reading-measure/quote/divider width, or scaled diagram (e.g. the organigram tree) keeps its own `max-w-[…]`; (3) **full-bleed** — `<StripedSeam>`, hero band backgrounds, `<CtaBand>`, coloured section bands span the viewport and are never wrapped.
+- There are only **two** custom width tokens (`--container-wide` 1040, `--container-prose` 680); `index` reuses Tailwind's `max-w-7xl`. The legacy `--max-width-inner*`/`--container-page`/`--container-default`/`--max-width-outer` tokens were all removed in #2155.
 
 ### Design system locations
 

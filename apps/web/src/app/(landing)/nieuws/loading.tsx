@@ -3,22 +3,24 @@
  * Matches the featured split (2fr|1fr) + 3-column grid layout
  */
 
+import { PageContainer } from "@/components/design-system";
+
 export default function NewsLoading() {
   return (
     <div className="w-full">
       {/* Sticky filter bar skeleton */}
       <div className="bg-ink/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
-        <div className="max-w-inner-lg mx-auto flex gap-2 px-3 lg:px-0">
+        <PageContainer width="index" className="flex gap-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
               className="h-8 w-20 animate-pulse rounded-full bg-white/10"
             />
           ))}
-        </div>
+        </PageContainer>
       </div>
 
-      <div className="max-w-inner-lg mx-auto px-3 py-6 lg:px-0">
+      <PageContainer width="index" className="py-6">
         {/* Featured split: 2fr | 1fr */}
         <section className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Main featured card — 2fr */}
@@ -66,7 +68,7 @@ export default function NewsLoading() {
             </div>
           ))}
         </section>
-      </div>
+      </PageContainer>
     </div>
   );
 }

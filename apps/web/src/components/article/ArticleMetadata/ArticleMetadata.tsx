@@ -104,7 +104,7 @@ export const ArticleMetadata = ({
       aria-label="Artikelinfo"
       className={cn("border-paper-edge w-full border-y py-3", className)}
     >
-      <div className="max-w-inner-lg mx-auto flex w-full flex-wrap items-center justify-between gap-y-2 px-6">
+      <div className="mx-auto flex w-full max-w-[var(--container-wide)] flex-wrap items-center justify-between gap-y-2 px-4 md:px-8">
         <ul className="text-ink-muted flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
           {facts.map((fact, i) => (
             <li key={`${i}-${fact}`} className="flex items-center gap-x-3">

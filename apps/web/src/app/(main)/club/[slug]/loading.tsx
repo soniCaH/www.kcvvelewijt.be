@@ -5,14 +5,14 @@
  */
 
 import { PageHero } from "@/components/layout/PageHero";
-import { StripedSeam } from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 
 export default function ClubPageLoading() {
   return (
     <div className="bg-cream min-h-screen">
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+      <PageContainer className="pt-10 pb-12">
         <PageHero kicker="Club" headline="Laden…" size="compact" />
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 

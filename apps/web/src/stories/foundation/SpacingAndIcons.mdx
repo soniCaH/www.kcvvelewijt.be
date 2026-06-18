@@ -77,13 +77,11 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
 
 ## Max Widths
 
-<table>
-  <thead><tr><th>Token</th><th>Value</th><th>px</th><th>Usage</th></tr></thead>
-  <tbody>
-    <tr><td><code>max-w-inner</code></td><td>60rem</td><td>960px</td><td>Legacy — being retired for <code>&lt;PageContainer&gt;</code> (see Container widths)</td></tr>
-    <tr><td><code>max-w-inner-lg</code></td><td>70rem</td><td>1120px</td><td>Legacy — being retired for <code>&lt;PageContainer&gt;</code></td></tr>
-  </tbody>
-</table>
+Container widths are catalogued under **Container widths** below: page content
+uses the three `<PageContainer>` variants (prose 680 / default 1040 / index
+1280); global header/footer chrome uses `max-w-[1440px]`. The legacy
+`--max-width-inner` / `--max-width-inner-lg` tokens were removed in the
+container convergence (#2155).
 
 ---
 
@@ -176,16 +174,29 @@ typical interactions. All values are defined in `src/app/globals.css`.
 
 ### Container widths
 
-Page bodies use the shared **`<PageContainer>`** primitive — one centered
-container (`mx-auto w-full px-4 md:px-8`) at a role-based max-width. Pick by the
-page's role; never hand-roll `mx-auto max-w-… px-…`:
+**These three are the only widths a content container may use.** Page and
+section bodies use the shared **`<PageContainer>`** primitive (one centered
+container: `mx-auto w-full px-4 md:px-8` + a role-based max-width). Pick by role;
+never hand-roll `mx-auto max-w-… px-…`. Heroes and bespoke grid layouts that
+can't wrap cleanly in the component may apply the same width **loosely** (the
+`--container-*` var or `max-w-7xl`) — but still only one of these three values:
 
-- **`width="index"`** → 1280px (`max-w-7xl`) — card-grid index / listing / landing pages (incl. the homepage)
-- **default** → 1040px (`--container-wide`) — detail / single-subject pages
-- **`width="prose"`** → 680px (`--container-prose`) — long-form reading text, forms, legal
+<table>
+  <thead>
+    <tr><th>Role</th><th><code>width</code> prop</th><th>Value</th><th>Token / class</th><th>Use for</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Reading</td><td><code>"prose"</code></td><td>680px</td><td><code>--container-prose</code></td><td>Long-form article / CMS text, forms, legal</td></tr>
+    <tr><td>Detail</td><td><em>(default)</em></td><td>1040px</td><td><code>--container-wide</code></td><td>Detail / single-subject pages + hero content</td></tr>
+    <tr><td>Index</td><td><code>"index"</code></td><td>1280px</td><td><code>max-w-7xl</code></td><td>Card-grid index / listing / landing pages (incl. homepage)</td></tr>
+  </tbody>
+</table>
 
-Full-bleed elements (`<StripedSeam>`, heroes, `<CtaBand>`, coloured bands) are
-never wrapped — they span the viewport as siblings.
+**Not a content container — exempt from the rule above:**
+
+- **Chrome** — `<SiteHeader>` / `<SiteFooter>` use `max-w-[1440px]`. The global nav and footer intentionally span wider than page content; this is the only width above 1280, and it is reserved for chrome.
+- **Element-sizing** — a photo, jersey illustration, a paragraph's reading measure / quote / divider / error-message width, or a scaled diagram (e.g. the organigram tree). These size a single visual element, not a page column, and keep their own `max-w-[…]`.
+- **Full-bleed** — `<StripedSeam>`, hero band backgrounds, `<CtaBand>`, and coloured section bands span the viewport and are never wrapped.
 
 <div style={{ marginBottom: '24px' }}>
   <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
@@ -193,7 +204,9 @@ never wrapped — they span the viewport as siblings.
   <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-wide)', maxWidth: '100%', marginBottom: '4px' }} />
   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>default · 1040px (--container-wide)</div>
   <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: '80rem', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>index · 1280px (max-w-7xl)</div>
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>index · 1280px (max-w-7xl)</div>
+  <div style={{ height: '8px', background: 'var(--color-ink-muted)', width: '90rem', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>chrome · 1440px (max-w-[1440px]) — header / footer only, NOT page content</div>
 </div>
 
 ### Rotation pool

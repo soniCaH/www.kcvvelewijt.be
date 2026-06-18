@@ -29,7 +29,7 @@ export function BoardHero({ name, tagline, imageUrl }: BoardHeroProps) {
 
   return (
     <header className="bg-jersey-deep-dark">
-      <div className="mx-auto grid max-w-5xl gap-8 px-4 py-14 sm:py-20 md:grid-cols-[1fr_auto] md:items-center">
+      <div className="mx-auto grid max-w-[var(--container-wide)] gap-8 px-4 py-14 sm:py-20 md:grid-cols-[1fr_auto] md:items-center md:px-8">
         <div className="flex flex-col gap-4">
           <span>
             <MonoLabel variant="plain" tone="cream">

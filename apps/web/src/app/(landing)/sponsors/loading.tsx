@@ -7,10 +7,11 @@
  */
 
 import { SPONSOR_TILE_GRID_CLASS } from "@/components/sponsors/SponsorTile";
+import { PageContainer } from "@/components/design-system";
 
 export default function SponsorsLoading() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
+    <PageContainer width="index" className="py-10 sm:py-14">
       <div className="mb-10 grid animate-pulse items-start gap-8 sm:mb-12 lg:grid-cols-[1fr_minmax(280px,360px)] lg:gap-12">
         <div className="flex flex-col gap-3">
           <div className="bg-ink/10 h-3 w-24 rounded" />
@@ -27,6 +28,6 @@ export default function SponsorsLoading() {
           </li>
         ))}
       </ul>
-    </div>
+    </PageContainer>
   );
 }

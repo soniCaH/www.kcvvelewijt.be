@@ -5,26 +5,26 @@
  * shimmered; the hero renders instantly (it carries no data).
  */
 
-import { StripedSeam } from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 
 export default function ClubLoading() {
   return (
     <div className="bg-cream min-h-screen">
       {/* Hero — compact PageHero (typographic). */}
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+      <PageContainer width="index" className="pt-10 pb-12">
         <PageHero
           size="compact"
           kicker="Onze club"
           headline="De plezantste compagnie"
           accent="compagnie"
         />
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Editorial nav hub — header + uniform 3-up grid. */}
-      <div className="mx-auto max-w-5xl px-4 py-12">
+      <PageContainer width="index" className="py-12">
         <div className="bg-ink/10 mb-8 h-10 w-72 max-w-full animate-pulse rounded" />
         <div
           data-testid="club-hub-skeleton"
@@ -43,7 +43,7 @@ export default function ClubLoading() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

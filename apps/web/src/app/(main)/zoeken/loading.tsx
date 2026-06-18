@@ -6,6 +6,7 @@
  */
 
 import { SearchMastheadSkeleton } from "@/components/search/SearchMastheadSkeleton";
+import { PageContainer } from "@/components/design-system";
 
 export default function SearchLoading() {
   return (
@@ -16,7 +17,7 @@ export default function SearchLoading() {
 
       <SearchMastheadSkeleton />
 
-      <div className="mx-auto max-w-5xl px-4 py-12">
+      <PageContainer width="index" className="py-12">
         {/* Filter chips */}
         <div className="flex animate-pulse gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -43,7 +44,7 @@ export default function SearchLoading() {
             </div>
           ))}
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

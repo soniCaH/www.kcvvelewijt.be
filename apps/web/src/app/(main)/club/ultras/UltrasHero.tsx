@@ -46,7 +46,7 @@ export function UltrasHero({ joinHref }: UltrasHeroProps) {
         style={{ backgroundImage: "var(--pattern-jersey-stripes)" }}
       />
 
-      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-24 text-center sm:py-32">
+      <div className="relative z-10 mx-auto flex max-w-[var(--container-wide)] flex-col items-center gap-6 px-4 py-24 text-center sm:py-32 md:px-8">
         <MonoLabel variant="plain" tone="cream">
           Supporters · KCVV Ultra&apos;s 55
         </MonoLabel>

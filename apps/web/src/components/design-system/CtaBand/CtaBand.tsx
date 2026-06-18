@@ -59,7 +59,7 @@ export function CtaBand({
         aria-label={ariaLabel}
         className="bg-jersey-deep-dark border-ink border-y-2"
       >
-        <div className="mx-auto max-w-5xl px-4 py-12 text-center sm:py-16">
+        <div className="mx-auto max-w-[var(--container-wide)] px-4 py-12 text-center sm:py-16 md:px-8">
           <EditorialHeading
             level={2}
             size="display-lg"
