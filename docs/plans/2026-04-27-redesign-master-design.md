@@ -784,6 +784,12 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
     - **New primitive — `.prose-link`** (owner-requested mid-deep-dive): one canonical inline body-text link across article bodies + CMS pages + legal copy — a hand-pulled match-score-tint highlighter that sweeps in left→right on hover (clip-path reveal, ~4px overshoot), replacing the prior inconsistent per-surface link styles.
     - **Manual follow-up (owner):** trim **Quasimoda + Stenciletta** from the Adobe Fonts (Typekit) dashboard — the kit stays (Freight Display rides it). No code depends on them anymore.
 
+21. **Body font switched Montserrat → Freight Sans Pro (#2174) — reverses entry 19's "Montserrat is kept".** (2026-06-18) Follow-up to #2154 after a hands-on dev-server review of Freight on the body: the owner adopted **Freight Sans Pro** (Adobe Typekit) as `--font-family-body`, removing the self-hosted `next/font/google` Montserrat entirely. Decisions:
+    - **Reverses entry 19's body-font lock.** All running text is now Freight Sans (one type family across the site bar IBM Plex Mono for labels/scores). The Typekit kit was trimmed by the owner to exactly three families: `freight-sans-pro`, `freight-display-pro`, `freight-big-pro`.
+    - **FOUT tradeoff accepted + mitigated.** Body text now loads async via Typekit (vs instant self-hosted next/font). Mitigated by metric-matched (`size-adjust` + ascent/descent overrides) fallback `@font-face`s — `Freight Sans Fallback` (body) and `Freight Display Fallback` (display) — so the swap doesn't shift layout (the owner flagged the prior Georgia substitute as "way too big"). size-adjust values are first-pass, tuned on the dev server.
+    - **Figures:** Freight Sans **defaults to oldstyle** figures, which reads editorially in prose for free. Stat surfaces (`NumberDisplay`, scores, standings) opt into **tabular lining** (`tabular-nums lining-nums`). The OpenType investigation found no heading-level feature win (Freight Display's `dlig`/`swsh` aren't in the font).
+    - **a11y:** introduced `--color-jersey-link` (#007c46, ~4.6:1 on cream) for inline links — `--color-jersey-deep` was only ~4.05:1, below WCAG AA 4.5:1 (CodeRabbit, PR #2173). Tuned to stay ≥3:1 vs body ink so links remain distinguishable by colour (WCAG 1.4.1).
+
 ### Open questions deferred to per-phase PRDs
 
 1. **Match strip behaviour when no upcoming match exists.** Skip entirely? Show last result? Show "GEEN MATCH DEZE WEEK" placeholder? Decide in Phase 3.

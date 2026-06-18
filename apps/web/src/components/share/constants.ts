@@ -33,9 +33,10 @@ export const TOKENS = {
 export const DISPLAY_FONT: React.CSSProperties["fontFamily"] =
   '"freight-display-pro", georgia, "Times New Roman", serif';
 
-/** Montserrat body stack (next/font `--font-montserrat`). */
+/** Freight Sans Pro body stack — loaded via the Adobe Typekit kit (#2174,
+ *  replaced the retired Montserrat `--font-montserrat`). */
 export const BODY_FONT: React.CSSProperties["fontFamily"] =
-  'var(--font-montserrat), "Helvetica Neue", Arial, sans-serif';
+  '"freight-sans-pro", "Helvetica Neue", Arial, sans-serif';
 
 /** IBM Plex Mono stack (next/font `--font-ibm-plex-mono`) for mono labels. */
 export const MONO_FONT: React.CSSProperties["fontFamily"] =

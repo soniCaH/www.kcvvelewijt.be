@@ -31,18 +31,22 @@ All type tokens are defined in `src/app/globals.css`.
   <tbody>
     <tr><td><strong>Freight Display Pro</strong></td><td>Adobe Typekit (deferred)</td><td>700, 900</td><td>Editorial headlines, hero display lines (<code>--font-display</code>)</td></tr>
     <tr><td><strong>Freight Big Pro</strong></td><td>Adobe Typekit (deferred)</td><td>900</td><td>Oversized magazine display (<code>--font-display-big</code>)</td></tr>
-    <tr><td><strong>Montserrat</strong></td><td><code>next/font/google</code> (self-hosted)</td><td>400, 500, 600, 700</td><td>Body text, UI labels, buttons</td></tr>
+    <tr><td><strong>Freight Sans Pro</strong></td><td>Adobe Typekit (deferred)</td><td>400, 500, 600, 700</td><td>Body text, UI labels, buttons (<code>--font-family-body</code>)</td></tr>
     <tr><td><strong>IBM Plex Mono</strong></td><td><code>next/font/google</code> (self-hosted)</td><td>400, 600, 700</td><td>Scores, timestamps, keyboard shortcuts</td></tr>
   </tbody>
 </table>
 
-Montserrat and IBM Plex Mono are preloaded and self-hosted via `next/font/google` with `display: 'swap'`.
-Freight Display Pro / Freight Big Pro load via Adobe Typekit with `afterInteractive` strategy — they are
-not render-blocking. System-safe serif fallbacks (Georgia) are specified for the display families.
+All three Freight families load via Adobe Typekit (`afterInteractive`, not render-blocking); IBM Plex Mono is
+preloaded and self-hosted via `next/font/google` with `display: 'swap'`. Because the Freight families load
+async, each is backed by a metric-matched (`size-adjust`) fallback — `Freight Sans Fallback` (body) and
+`Freight Display Fallback` (display) in `globals.css` — so the swap doesn't shift layout.
 
 > The legacy Quasimoda (headings) and Stenciletta (accent/display) Typekit
-> families were retired in #2154. Headings now use Freight Display via
-> `--font-display`; body stays on Montserrat (`--font-family-body`).
+> families were retired in #2154. Headings use Freight Display via
+> `--font-display`; **body moved from Montserrat to Freight Sans Pro in #2174**
+> (`--font-family-body`), reversing master-design decision-log entry 19.
+> Freight Sans defaults to oldstyle figures in prose; stat surfaces opt into
+> tabular lining figures (`tabular-nums lining-nums`).
 
 ---
 
@@ -52,7 +56,7 @@ The samples below render live from the CSS variables.
 
 <FontSample label="font-display" cssVar="--font-display" size="2.5rem" weight={900} sample="Laatste nieuws." note="Editorial headlines, hero display lines (Freight Display Pro)" />
 <FontSample label="font-display-big" cssVar="--font-display-big" size="2.5rem" weight={900} sample="KCVV" note="Oversized magazine display (Freight Big Pro)" />
-<FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text (Montserrat)" />
+<FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text (Freight Sans Pro)" />
 <FontSample label="font-mono" cssVar="--font-family-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts (IBM Plex Mono)" />
 
 ---
@@ -156,9 +160,9 @@ Headings are set globally in CSS — no per-component overrides needed.
 ## Redesign / Phase 0 — Editorial Type Scale
 
 The redesign introduces a fluid editorial type scale built on Freight Display
-Pro for headlines, Montserrat for running text, and IBM Plex Mono for labels
-and timing data. Display sizes use `clamp()` so they breathe between mobile
-and desktop without manual breakpoints.
+Pro for headlines, Freight Sans Pro for running text, and IBM Plex Mono for
+labels and timing data. Display sizes use `clamp()` so they breathe between
+mobile and desktop without manual breakpoints.
 
 The legacy Quasimoda / Stenciletta Typekit families were retired in #2154 —
 headings now set in Freight Display via `--font-display`. The
@@ -167,7 +171,7 @@ tokens are the canonical vocabulary for every primitive.
 
 ### Visual samples
 
-The four samples below mix Freight Display, Montserrat, and IBM Plex Mono so
+The four samples below mix Freight Display, Freight Sans, and IBM Plex Mono so
 the contrast between editorial display, running text, and label voice is
 visible at a glance. Dutch diacritics (`é`, `ï`) and italic emphasis are
 exercised on the display rows.

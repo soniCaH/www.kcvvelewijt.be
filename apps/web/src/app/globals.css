@@ -5,6 +5,26 @@
    KCVV Elewijt Design System - Tailwind CSS v4 Configuration
    ======================================================================== */
 
+/* ===== Metric-matched webfont fallbacks (#2174) =====
+   The Freight families load async via Adobe Typekit, so there's a brief flash
+   of fallback before they swap in. These `size-adjust` faces shrink a local
+   system font to ≈ the Freight family's apparent size, so the fallback occupies
+   the same footprint and the swap doesn't jolt (the "way too big" substitute).
+   size-adjust values are a first pass — fine-tune visually on the dev server.
+   Older browsers without `size-adjust` ignore it and fall through to the stack. */
+@font-face {
+  font-family: "Freight Sans Fallback";
+  src:
+    local("Arial"), local("Helvetica Neue"), local("Liberation Sans"),
+    local("Segoe UI");
+  size-adjust: 94%;
+}
+@font-face {
+  font-family: "Freight Display Fallback";
+  src: local("Georgia"), local("Times New Roman"), local("Liberation Serif");
+  size-adjust: 90%;
+}
+
 :root {
   /* Foundation Grays */
   --color-foundation-gray-light: #edeff4;
@@ -270,12 +290,13 @@
 
   /* ===== Typography ===== */
 
-  /* Font Families
-     - Montserrat & IBM Plex Mono: self-hosted via next/font/google (CSS vars injected on <html>).
-     - Freight Display (`--font-display` / `--font-display-big`, below) rides the
-       Adobe Typekit kit. Quasimoda (title) & Stenciletta (alt) were retired in #2154. */
+  /* Font Families — all three Freight families ride the Adobe Typekit kit;
+     IBM Plex Mono is self-hosted via next/font/google. Body is Freight Sans Pro
+     (#2174 — replaced Montserrat, reversing master-design decision-log entry 19),
+     backed by the metric-matched "Freight Sans Fallback" so the async swap
+     doesn't jolt. Quasimoda (title) & Stenciletta (alt) were retired in #2154. */
   --font-family-body:
-    var(--font-montserrat), -apple-system, system-ui, "BlinkMacSystemFont",
+    "freight-sans-pro", "Freight Sans Fallback", -apple-system, system-ui,
     "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
   --font-family-mono:
     var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", "Courier",
@@ -376,6 +397,12 @@
      and any darker-jersey accent (e.g. <TapeStrip warm> story border).
      Locked at #133d28 (not the brand-darker #005a39) by #1700 round-8c.B. */
   --color-jersey-deep-dark: #133d28;
+  /* Inline-link green (#2174). Jersey-deep (#008755) is only ~4.05:1 on cream —
+     below WCAG AA 4.5:1 for body text. This darker jersey is ~4.6:1 on cream
+     (AA) while staying ≥3:1 against ink / ink-soft body text, so links remain
+     distinguishable by colour at rest (the `.prose-link` marker only shows on
+     hover). Used by `.prose-link` + the cookie-banner link. */
+  --color-jersey-link: #007c46;
 
   /* Warm yellow — accent text (#1698), tape (`--tape-warm`), button stripes.
      Single source of truth for the hue; alpha variants derive via color-mix. */
@@ -392,11 +419,16 @@
 
   /* ===== Redesign / Typography (Phase 0) ===== */
 
-  /* Font families — Freight Display rides the existing Adobe Typekit kit;
-     `--font-family-body` (Montserrat) + `--font-family-mono` (IBM Plex) are
-     defined above. Quasimoda (title) & Stenciletta (alt) were retired in #2154. */
-  --font-display: "freight-display-pro", georgia, "Times New Roman", serif;
-  --font-display-big: "freight-big-pro", georgia, "Times New Roman", serif;
+  /* Font families — Freight Display/Big ride the Adobe Typekit kit. Each is
+     backed by the metric-matched "Freight Display Fallback" (size-adjusted
+     Georgia) so the async swap doesn't jolt (#2174). `--font-family-body`
+     (Freight Sans) + `--font-family-mono` (IBM Plex) are defined above. */
+  --font-display:
+    "freight-display-pro", "Freight Display Fallback", georgia,
+    "Times New Roman", serif;
+  --font-display-big:
+    "freight-big-pro", "Freight Display Fallback", georgia, "Times New Roman",
+    serif;
 
   /* Type scale (fluid via clamp) */
   --text-display-2xl: clamp(3.5rem, 1.5rem + 8vw, 6rem);
@@ -694,7 +726,7 @@
 .prose-link {
   position: relative;
   isolation: isolate;
-  color: var(--color-jersey-deep);
+  color: var(--color-jersey-link);
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s ease;
@@ -973,7 +1005,7 @@
   --cc-secondary-color: var(--color-ink-muted);
 
   /* Links */
-  --cc-link-color: var(--color-jersey-deep);
+  --cc-link-color: var(--color-jersey-link);
 
   /* Primary button — jersey-deep + cream text */
   --cc-btn-primary-bg: var(--color-jersey-deep);

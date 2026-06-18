@@ -49,7 +49,9 @@ export function NumberDisplay({
   const numberSection = (
     <span
       className={cn(
-        "font-display-big inline-flex items-baseline gap-1.5 font-black",
+        // Tabular lining figures (#2174): equal-width, full-height digits so
+        // stat numbers read uniformly (vs the oldstyle default used in prose).
+        "font-display-big inline-flex items-baseline gap-1.5 font-black lining-nums tabular-nums",
         SIZE_CLASS[size],
         TONE_CLASS[tone],
       )}
