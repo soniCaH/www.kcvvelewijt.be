@@ -104,14 +104,9 @@ export const PsdTeamClientLive = Layer.effect(
       "Content-Type": "application/json",
     };
 
-    const todayKey = () => {
-      const d = new Date();
-      return `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
-    };
-
     const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
       fetchJson(url, schema, psdHeaders).pipe(
-        Effect.ensuring(cache.increment(todayKey())),
+        Effect.ensuring(cache.increment()),
       );
 
     const fetchPaginatedTeamPeople = (

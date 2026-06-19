@@ -7,6 +7,7 @@ import {
   SanityMutationError,
 } from "./mutation";
 import { WorkerEnvTag } from "../env";
+import { KvCacheLive } from "../cache/kv-cache";
 
 // ─── Mock Sanity client ──────────────────────────────────────────────────────
 
@@ -52,27 +53,27 @@ vi.mock("@sanity/client", () => ({
 // ─── Test layer ──────────────────────────────────────────────────────────────
 
 function makeTestLayer() {
+  const envLayer = Layer.succeed(WorkerEnvTag, {
+    PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
+    PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
+    FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
+    PSD_API_KEY: "test-key",
+    PSD_API_CLUB: "test-club",
+    PSD_API_AUTH: "test-auth",
+    PSD_CACHE: {
+      get: vi.fn().mockResolvedValue(null),
+      put: vi.fn().mockResolvedValue(undefined),
+    } as unknown as KVNamespace,
+    SANITY_PROJECT_ID: "test-project",
+    SANITY_DATASET: "test",
+    SANITY_API_TOKEN: "test-token",
+    SANITY_WEBHOOK_SECRET: "",
+    AI: {} as Ai,
+    SEARCH_INDEX: {} as VectorizeIndex,
+  });
   return SanityMutationLive.pipe(
-    Layer.provide(
-      Layer.succeed(WorkerEnvTag, {
-        PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
-        PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
-        FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
-        PSD_API_KEY: "test-key",
-        PSD_API_CLUB: "test-club",
-        PSD_API_AUTH: "test-auth",
-        PSD_CACHE: {
-          get: vi.fn().mockResolvedValue(null),
-          put: vi.fn().mockResolvedValue(undefined),
-        } as unknown as KVNamespace,
-        SANITY_PROJECT_ID: "test-project",
-        SANITY_DATASET: "test",
-        SANITY_API_TOKEN: "test-token",
-        SANITY_WEBHOOK_SECRET: "",
-        AI: {} as Ai,
-        SEARCH_INDEX: {} as VectorizeIndex,
-      }),
-    ),
+    Layer.provide(KvCacheLive),
+    Layer.provide(envLayer),
   );
 }
 

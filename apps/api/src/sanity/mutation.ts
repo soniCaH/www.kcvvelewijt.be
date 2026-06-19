@@ -1,6 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
+import { KvCacheService } from "../cache/kv-cache";
 import { sanityClientConfig } from "./config";
 
 /**
@@ -119,6 +120,7 @@ export const SanityMutationLive = Layer.effect(
   SanityMutation,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
+    const cache = yield* KvCacheService;
     const client = createClient({
       ...sanityClientConfig(env),
       useCdn: false,
@@ -191,17 +193,14 @@ export const SanityMutationLive = Layer.effect(
             );
           }
 
-          // Fetch image from PSD with timeout and daily call counter
+          // Fetch image from PSD with timeout. Image downloads use fetch()
+          // directly so they bypass countedFetch — the daily PSD-call counter
+          // is incremented via Effect.ensuring below, so it ticks even on
+          // timeout/network error.
           const response = yield* Effect.tryPromise({
             try: async () => {
               const psdAbort = new AbortController();
               const psdTimeout = setTimeout(() => psdAbort.abort(), 10_000);
-
-              // Count this PSD request in the daily counter (same logic as countedFetch).
-              // Image downloads use fetch() directly so they bypass countedFetch — track them here.
-              // Counter runs in finally so it increments even on timeout/network error.
-              const d = new Date();
-              const counterKey = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 
               try {
                 // The profilePictureURL already embeds a per-member profileAccessKey
@@ -215,17 +214,6 @@ export const SanityMutationLive = Layer.effect(
                 });
               } finally {
                 clearTimeout(psdTimeout);
-                await env.PSD_CACHE.get(counterKey)
-                  .then((current) => {
-                    const parsed = parseInt(String(current ?? "0"), 10);
-                    const currentNumber = Number.isFinite(parsed) ? parsed : 0;
-                    return env.PSD_CACHE.put(
-                      counterKey,
-                      String(currentNumber + 1),
-                      { expirationTtl: 60 * 60 * 48 },
-                    );
-                  })
-                  .catch(() => undefined);
               }
             },
             catch: (cause) =>
@@ -233,7 +221,7 @@ export const SanityMutationLive = Layer.effect(
                 `Failed to upload image for player ${psdId}`,
                 cause,
               ),
-          });
+          }).pipe(Effect.ensuring(cache.increment()));
 
           yield* Effect.log(
             `[uploadPlayerImage] player=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,

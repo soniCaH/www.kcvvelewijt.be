@@ -1,6 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Effect } from "effect";
 import { WorkerEnvTag } from "../env";
+import { sanityClientConfig } from "../sanity/config";
 import { EmbeddingService } from "./embedding";
 import {
   buildArticleIndexText,
@@ -82,10 +83,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     let _sanityClient: ReturnType<typeof createClient> | undefined;
     const sanityClient = () =>
       (_sanityClient ??= createClient({
-        projectId: env.SANITY_PROJECT_ID,
-        dataset: env.SANITY_DATASET,
-        apiVersion: "2024-01-01",
-        token: env.SANITY_API_TOKEN,
+        ...sanityClientConfig(env),
         useCdn: false,
         perspective: "published",
       }));
