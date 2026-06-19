@@ -139,7 +139,7 @@ function buildDocumentIndex(
   return typeDescriptors[_type].buildIndex(doc);
 }
 
-export function queryForType(type: AllowedType): string {
+function queryForType(type: AllowedType): string {
   return typeDescriptors[type].query;
 }
 

@@ -956,42 +956,6 @@ describe("PsdService.getMatchesWindow", () => {
   });
 });
 
-describe("PsdService.getMatchById", () => {
-  it("returns normalized Match (no lineup) from mocked HTTP response", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: true,
-      json: async () => rawDetailResponse,
-    });
-
-    const result = await runService((svc) => svc.getMatchById(99));
-
-    expect(result._tag).toBe("Right");
-    if (result._tag === "Right") {
-      expect(result.right.id).toBe(99);
-      expect(result.right.status).toBe("finished");
-      expect(result.right.home_team.name).toBe("KCVV Elewijt");
-      expect("lineup" in result.right).toBe(false);
-      // Contract boundary: validate transform output against api-contract schema
-      expect(() => S.decodeUnknownSync(Match)(result.right)).not.toThrow();
-    }
-  });
-
-  it("fails with ResourceNotFoundError when match detail fetch returns HTTP 404", async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-      ok: false,
-      status: 404,
-      statusText: "Not Found",
-    });
-
-    const result = await runService((svc) => svc.getMatchById(99));
-
-    expect(result._tag).toBe("Left");
-    if (result._tag === "Left") {
-      expect(result.left._tag).toBe("ResourceNotFound");
-    }
-  });
-});
-
 const rawRankingCompetitions = [
   {
     name: "Beker van Brabant",

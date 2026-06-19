@@ -24,7 +24,9 @@ src/
 ├── handlers/
 │   ├── matches.ts            ← MatchesApi HttpApiGroup
 │   ├── ranking.ts            ← RankingApi HttpApiGroup
-│   └── stats.ts              ← StatsApi HttpApiGroup
+│   ├── opponent.ts           ← OpponentApi HttpApiGroup
+│   ├── related.ts            ← RelatedApi HttpApiGroup
+│   └── search.ts             ← SearchApi HttpApiGroup
 └── sync/
     ├── psd-team-client.ts    ← PsdTeamClient (teams/members/staff fetch for sync)
     └── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync

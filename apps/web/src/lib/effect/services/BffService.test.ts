@@ -153,23 +153,6 @@ describe("BffService", () => {
     expect(result[0]?.team_name).toBe("KCVV Elewijt");
   });
 
-  it("getMatchById calls /match/:matchId and returns decoded match", async () => {
-    mockFetchWith(sampleMatch);
-
-    const result = await Effect.runPromise(
-      Effect.gen(function* () {
-        const bff = yield* BffService;
-        return yield* bff.getMatchById(42);
-      }).pipe(Effect.provide(BffServiceLive)),
-    );
-
-    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
-      expect.objectContaining({ href: expect.stringContaining("/match/42") }),
-      expect.any(Object),
-    );
-    expect(result.id).toBe(1);
-  });
-
   it("propagates errors as Effect failures (not exceptions)", async () => {
     vi.stubGlobal(
       "fetch",

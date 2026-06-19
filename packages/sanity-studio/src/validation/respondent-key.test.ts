@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {validateRespondentKey} from './respondent-key'
+import {validateRespondentKey} from '@kcvv/sanity-schemas'
 
 describe('validateRespondentKey', () => {
   const interviewDoc = (subjectKeys: string[]) => ({

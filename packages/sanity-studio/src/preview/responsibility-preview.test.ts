@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {prepareResponsibilityPreview} from './responsibility-preview'
+import {prepareResponsibilityPreview} from '@kcvv/sanity-schemas'
 
 describe('responsibility preview', () => {
   it('shows organigramNode title for position type', () => {

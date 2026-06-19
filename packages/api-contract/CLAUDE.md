@@ -10,12 +10,14 @@ src/
 │   ├── common.ts     ← DateFromStringOrDate
 │   ├── match.ts      ← Match, MatchDetail, MatchTeam, MatchStatus, MatchLineup, MatchLineupPlayer, CardType
 │   ├── ranking.ts    ← RankingEntry, RankingArray, RankingResponse
-│   ├── stats.ts      ← PlayerStats, TeamStats
+│   ├── player-stats.ts ← PlayerSeasonStats, PlayerTeamStats
 │   └── index.ts      ← barrel
 ├── api/
 │   ├── matches.ts    ← MatchesApi HttpApiGroup
 │   ├── ranking.ts    ← RankingApi HttpApiGroup
-│   ├── stats.ts      ← StatsApi HttpApiGroup
+│   ├── opponent.ts   ← OpponentApi HttpApiGroup
+│   ├── related.ts    ← RelatedApi HttpApiGroup
+│   ├── search.ts     ← SearchApi HttpApiGroup
 │   └── index.ts      ← PsdApi root export
 └── index.ts          ← re-exports everything
 ```

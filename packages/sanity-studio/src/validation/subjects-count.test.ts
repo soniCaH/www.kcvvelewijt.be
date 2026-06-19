@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {validateSubjectsCount} from './subjects-count'
+import {validateSubjectsCount} from '@kcvv/sanity-schemas'
 
 describe('validateSubjectsCount', () => {
   const interviewDoc = {articleType: 'interview'} as const

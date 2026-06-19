@@ -30,12 +30,7 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
  * "cancelled" is distinct from "postponed": cancelled matches will not be played,
  * postponed matches may be rescheduled.
  */
-/**
- * Canonical runtime tuple of all MatchStatus literals — single source of truth.
- * Use this for Storybook argTypes, parameterized tests, or anywhere a runtime
- * iterable is needed. The type is derived from this tuple.
- */
-export const MATCH_STATUS_VALUES = [
+const MATCH_STATUS_VALUES = [
   "scheduled",
   "finished",
   "forfeited",

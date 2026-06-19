@@ -37,7 +37,6 @@ import {
   type CompetitionLabelMap,
   resolveCompetitionType,
   transformFootbalistoMatchDetail,
-  matchDetailToMatch,
   transformFootbalistoRankingEntry,
   extractId,
   computeOpponentSummary,
@@ -52,7 +51,6 @@ export interface PsdServiceInterface {
   ) => Effect.Effect<readonly Match[], BffError>;
   readonly getNextMatches: () => Effect.Effect<readonly Match[], BffError>;
   readonly getMatchesWindow: () => Effect.Effect<readonly Match[], BffError>;
-  readonly getMatchById: (matchId: number) => Effect.Effect<Match, BffError>;
   readonly getMatchDetail: (
     matchId: number,
   ) => Effect.Effect<MatchDetail, BffError>;
@@ -641,12 +639,6 @@ export const PsdServiceLive = Layer.effect(
           );
           return matches;
         }),
-
-      getMatchById: (matchId: number) =>
-        fetchRawMatchDetail(matchId).pipe(
-          Effect.map(transformFootbalistoMatchDetail),
-          Effect.map(matchDetailToMatch),
-        ),
 
       getMatchDetail: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(

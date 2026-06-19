@@ -576,20 +576,6 @@ export function transformFootbalistoMatchDetail(
 
 // ─── Ranking transforms ──────────────────────────────────────────────────────
 
-/** Strip lineup from a MatchDetail to produce a basic Match */
-export function matchDetailToMatch(detail: MatchDetail): Match {
-  return {
-    id: detail.id,
-    date: detail.date,
-    time: detail.time,
-    venue: detail.venue,
-    home_team: detail.home_team,
-    away_team: detail.away_team,
-    status: detail.status,
-    competition: detail.competition,
-  };
-}
-
 export function transformFootbalistoRankingEntry(
   entry: FootbalistoRankingEntry,
   logoCdnUrl: string,
