@@ -1,7 +1,12 @@
 import {defineConfig} from 'sanity'
 import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
-import {LinkToPsdAction, launcherTool, responsibilityTemplates} from '@kcvv/sanity-studio'
+import {
+  LinkToPsdAction,
+  launcherTool,
+  responsibilityTemplates,
+  articleTemplates,
+} from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
 
@@ -22,7 +27,7 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
-    templates: (prev) => [...prev, ...responsibilityTemplates],
+    templates: (prev) => [...prev, ...responsibilityTemplates, ...articleTemplates],
   },
 
   document: {

@@ -19,5 +19,5 @@ export {responsibilityStructure} from './structure/responsibility'
 // `useTemplates` hook for any consumer importing from `@kcvv/sanity-studio`.
 // Internal callers reach them via the `./tools/launcher` subpath instead.
 export {launcherTool} from './tools/launcher'
-export {responsibilityTemplates} from './templates'
+export {responsibilityTemplates, articleTemplates} from './templates'
 export type {LauncherTemplate} from './templates'
