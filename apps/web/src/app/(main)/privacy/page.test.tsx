@@ -1,7 +1,3 @@
-/**
- * @vitest-environment jsdom
- */
-
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import PrivacyPage from "./page";
@@ -10,8 +6,11 @@ describe("PrivacyPage (Phase 8 cream-minimal reskin)", () => {
   it("renders the jersey-deep mono kicker and the serif h1 title", () => {
     render(<PrivacyPage />);
     expect(screen.getByText("Juridisch")).toBeInTheDocument();
+    // EditorialHeading splits the emphasis word into separate inline nodes
+    // ("Privacy" + <em>verklaring</em> + styled period), so the accessible
+    // name has inter-node spaces under happy-dom ("Privacy verklaring .").
     expect(
-      screen.getByRole("heading", { name: /privacyverklaring/i, level: 1 }),
+      screen.getByRole("heading", { name: /privacy\s*verklaring/i, level: 1 }),
     ).toBeInTheDocument();
   });
 

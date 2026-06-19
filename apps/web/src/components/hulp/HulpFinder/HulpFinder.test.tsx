@@ -1,7 +1,3 @@
-/**
- * @vitest-environment jsdom
- */
-
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { HulpFinder } from "./HulpFinder";
@@ -50,7 +46,7 @@ vi.mock("@/hooks/useResponsibilityAnalytics", () => ({
   }),
 }));
 
-// jsdom doesn't implement scrollIntoView — stub it so the finder's
+// happy-dom doesn't implement scrollIntoView — stub it so the finder's
 // scroll-into-view effects don't throw, and so we can assert them.
 const scrollIntoView = vi.fn();
 beforeEach(() => {
