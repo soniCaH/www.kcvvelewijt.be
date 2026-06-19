@@ -20,22 +20,6 @@ export const SITE_CONFIG = {
   stamnummer: 55,
 } as const;
 
-// Revalidation Intervals (in seconds)
-export const REVALIDATE = {
-  articles: 60, // 1 minute
-  teams: 300, // 5 minutes
-  players: 3600, // 1 hour
-  matches: 60, // 1 minute
-  rankings: 300, // 5 minutes
-  staticPages: 3600, // 1 hour
-} as const;
-
-// Pagination
-export const PAGINATION = {
-  articlesPerPage: 18,
-  playersPerPage: 24,
-} as const;
-
 // Default Open Graph image — used as fallback in page metadata to prevent
 // Next.js shallow-merge from losing the root openGraph.images.
 export const DEFAULT_OG_IMAGE = {
@@ -63,11 +47,4 @@ export const EXTERNAL_LINKS = {
   psdDashboard: "https://kcvv.prosoccerdata.com/dashboard",
   facebook: "https://facebook.com/KCVVElewijt/",
   instagram: "https://www.instagram.com/kcvve",
-} as const;
-
-// Image Aspect Ratios
-export const IMAGE_RATIOS = {
-  article: 1.5, // 3:2
-  player: 1, // 1:1
-  hero: 2.5, // 5:2
 } as const;

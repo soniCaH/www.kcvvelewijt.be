@@ -125,7 +125,7 @@ describe("NavTakeover", () => {
   });
 });
 
-describe("NavTakeover.Item", () => {
+describe("NavTakeoverItem", () => {
   it("renders a leaf link with the given href", () => {
     render(<NavTakeoverItem label="Home" href="/" />);
     const link = screen.getByRole("link", { name: "Home" });
