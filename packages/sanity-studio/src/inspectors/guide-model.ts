@@ -38,3 +38,14 @@ export function buildGuideModel(
     }))
   return {intro: entry.intro, outstanding}
 }
+
+/**
+ * A brand-new draft has only system (`_`-prefixed) keys and Sanity has not yet
+ * produced validation markers for it — so "no outstanding errors" must NOT be
+ * read as "publish-ready". This distinguishes an untouched doc from a complete
+ * one so the panel can show "begin met invullen" instead of a false green tick.
+ */
+export function isDocEmpty(value: Record<string, unknown> | null | undefined): boolean {
+  if (!value) return true
+  return Object.keys(value).every((key) => key.startsWith('_'))
+}

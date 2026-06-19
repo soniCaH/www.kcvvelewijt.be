@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest'
 import type {ValidationMarker} from 'sanity'
-import {buildGuideModel, type GuideEntry} from './guide-model'
+import {buildGuideModel, isDocEmpty, type GuideEntry} from './guide-model'
 
 const entry: GuideEntry = {intro: 'waarom dit telt'}
 const markers = (m: Partial<ValidationMarker>[]) => m as ValidationMarker[]
@@ -33,5 +33,17 @@ describe('buildGuideModel', () => {
   it('tolerates a marker with no path', () => {
     const model = buildGuideModel(markers([{level: 'error', message: 'Ongeldig'}]), entry)
     expect(model.outstanding).toEqual([{path: '', message: 'Ongeldig'}])
+  })
+})
+
+describe('isDocEmpty', () => {
+  it('treats null/undefined and system-only docs as empty', () => {
+    expect(isDocEmpty(null)).toBe(true)
+    expect(isDocEmpty(undefined)).toBe(true)
+    expect(isDocEmpty({_id: 'drafts.x', _type: 'responsibility', _rev: 'a'})).toBe(true)
+  })
+
+  it('treats a doc with any content field as non-empty', () => {
+    expect(isDocEmpty({_id: 'x', _type: 'responsibility', title: 'AED'})).toBe(false)
   })
 })
