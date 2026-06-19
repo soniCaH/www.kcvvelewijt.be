@@ -68,7 +68,7 @@ import { cn } from "@/lib/utils/cn";
  *   - `articleImage` routes through `<TapedFigure>` with caption + credit
  *     pulled from `asset.description` + `asset.creditLine` (5.d-img lock).
  *   - `videoBlock` routes to `<VideoBlock>` (5.d-vid lock).
- *   - `fileAttachment` routes to `<DownloadButton variant="card">`
+ *   - `fileAttachment` routes to `<DownloadButton>`
  *     (fileattachment-htmltable-locked §5.1).
  *   - `htmlTable` routes to `<HtmlTableBlock>` (§5.2).
  *   - `link` / `internalLink` marks ship cream-surface Phase 5 styling.
@@ -586,7 +586,6 @@ function buildComponents({
               mimeType={value.fileMimeType}
               fileSize={value.fileSize}
               fileName={value.fileOriginalFilename}
-              variant="card"
             />
           </div>
         );

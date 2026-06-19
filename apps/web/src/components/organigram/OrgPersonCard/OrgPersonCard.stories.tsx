@@ -95,15 +95,3 @@ export const SharedThreePlus: Story = {
 export const Vacant: Story = {
   args: { node: vacant },
 };
-
-/** The smaller explorer-leaf chrome (Phase 3) — identical idiom at node scale. */
-export const NodeScale: Story = {
-  args: { node: single, scale: "node" },
-  decorators: [
-    (Story) => (
-      <div className="bg-cream w-[150px] p-2">
-        <Story />
-      </div>
-    ),
-  ],
-};

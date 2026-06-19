@@ -11,6 +11,7 @@ import {
 } from "@/components/event/event-type-style";
 import type { MatchStatus, ScheduleMatch } from "@/components/match/types";
 import { getScoreDisplay, type ScoreDisplay } from "@/lib/utils/match-display";
+import { capitalize } from "@/lib/utils/capitalize";
 import type { ItemListEntry } from "@/lib/seo/jsonld";
 export type { ScoreDisplay } from "@/lib/utils/match-display";
 
@@ -372,13 +373,6 @@ export function calendarMatchToScheduleMatch(
   };
 }
 
-/** Capitalise the first letter (Dutch weekday/month headings render uppercase). */
-function capitalizeFirst(value: string): string {
-  return value.length === 0
-    ? value
-    : value.charAt(0).toUpperCase() + value.slice(1);
-}
-
 /**
  * Day-detail / agenda day heading — `"Zaterdag 12 september"` (weekday
  * capitalised, club locale). Used by the grid's selected-day detail and the
@@ -387,7 +381,7 @@ function capitalizeFirst(value: string): string {
 export function formatDayDetailHeading(day: string): string {
   const dt = DateTime.fromISO(day, { zone: TIMEZONE });
   if (!dt.isValid) return day;
-  return capitalizeFirst(
+  return capitalize(
     dt.toLocaleString(
       { weekday: "long", day: "numeric", month: "long" },
       { locale: "nl-BE" },
@@ -428,7 +422,7 @@ export function formatMonthNavLabel(year: number, month: number): string {
     { month: "long" },
     { locale: "nl-BE" },
   );
-  return `${capitalizeFirst(monthName)} '${String(year).slice(-2)}`;
+  return `${capitalize(monthName)} '${String(year).slice(-2)}`;
 }
 
 /**
