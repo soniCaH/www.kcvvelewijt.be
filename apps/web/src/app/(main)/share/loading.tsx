@@ -8,8 +8,10 @@ import { PageContainer } from "@/components/design-system";
  */
 export default function ShareLoading() {
   return (
-    <div className="bg-cream min-h-screen" role="status" aria-busy="true">
-      <span className="sr-only">Deelafbeelding-tool laden…</span>
+    <div className="bg-cream min-h-screen">
+      <span role="status" aria-busy="true" className="sr-only">
+        Deelafbeelding-tool laden…
+      </span>
 
       <PageContainer width="prose" className="flex flex-col gap-6 py-8">
         {/* Header */}

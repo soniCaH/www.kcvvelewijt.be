@@ -33,14 +33,14 @@ export function BoardPageLoading({ label }: { label: string }) {
 
       {/* BoardHero — jersey-deep-dark band: kicker + headline beside group photo. */}
       <header aria-hidden="true" className="bg-jersey-deep-dark">
-        <div className="mx-auto grid max-w-[var(--container-wide)] animate-pulse gap-8 px-4 py-14 sm:py-20 md:grid-cols-[1fr_auto] md:items-center md:px-8">
+        <PageContainer className="grid animate-pulse gap-8 py-14 sm:py-20 md:grid-cols-[1fr_auto] md:items-center">
           <div className="flex flex-col gap-4">
             <div className="bg-cream/20 h-3 w-24" />
             <div className="bg-cream/25 h-12 w-2/3" />
             <div className="bg-cream/15 h-5 w-1/2" />
           </div>
           <div className="border-ink bg-cream-soft shadow-paper-md aspect-[3/2] w-full border-2 md:w-[24rem]" />
-        </div>
+        </PageContainer>
       </header>
 
       <StripedSeam colorPair="ink-cream" height="md" />
@@ -68,11 +68,11 @@ export function BoardPageLoading({ label }: { label: string }) {
         aria-hidden="true"
         className="bg-jersey-deep-dark border-ink border-y-2"
       >
-        <div className="mx-auto max-w-[var(--container-wide)] animate-pulse px-4 py-12 text-center sm:py-16 md:px-8">
+        <PageContainer className="animate-pulse py-12 text-center sm:py-16">
           <div className="bg-cream/25 mx-auto mb-4 h-9 w-64" />
           <div className="bg-cream/15 mx-auto mb-7 h-4 w-80 max-w-full" />
           <div className="bg-warm/60 mx-auto h-11 w-48" />
-        </div>
+        </PageContainer>
       </section>
     </div>
   );

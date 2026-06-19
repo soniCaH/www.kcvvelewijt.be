@@ -5,6 +5,7 @@ import {
 } from "../EditorialHeading";
 import { LinkButton } from "../LinkButton";
 import { StripedSeam } from "../StripedSeam";
+import { PageContainer } from "../PageContainer";
 import { getButtonClasses } from "../Button/button-styles";
 
 const EXTERNAL_HREF = /^(https?:|mailto:|tel:)/i;
@@ -59,7 +60,7 @@ export function CtaBand({
         aria-label={ariaLabel}
         className="bg-jersey-deep-dark border-ink border-y-2"
       >
-        <div className="mx-auto max-w-[var(--container-wide)] px-4 py-12 text-center sm:py-16 md:px-8">
+        <PageContainer className="py-12 text-center sm:py-16">
           <EditorialHeading
             level={2}
             size="display-lg"
@@ -100,7 +101,7 @@ export function CtaBand({
               </LinkButton>
             )}
           </div>
-        </div>
+        </PageContainer>
       </section>
     </>
   );

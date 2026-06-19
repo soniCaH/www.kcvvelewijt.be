@@ -1,6 +1,7 @@
 import {
   EditorialHeading,
   MonoLabel,
+  PageContainer,
   TapedCard,
 } from "@/components/design-system";
 import type { UpcomingMatch } from "@/components/match/types";
@@ -27,7 +28,7 @@ export const UpcomingMatches = ({
       aria-label="Komende wedstrijden"
       className="bg-cream-soft py-16 md:py-20"
     >
-      <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
+      <PageContainer width="index">
         <TapedCard
           rotation="b"
           bg="cream"
@@ -49,7 +50,7 @@ export const UpcomingMatches = ({
             initialExpanded={initialExpanded}
           />
         </TapedCard>
-      </div>
+      </PageContainer>
     </section>
   );
 };

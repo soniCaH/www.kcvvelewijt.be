@@ -198,18 +198,20 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
       <MatchStripSlot />
 
-      <TeamHero
-        name={team.name}
-        age={team.age}
-        teamType={team.teamType}
-        ageGroup={team.ageGroup}
-        division={team.division}
-        divisionFull={team.divisionFull}
-        season={team.season}
-        tagline={team.tagline}
-        teamImageUrl={team.teamImageUrl}
-        className="mx-auto max-w-[var(--container-wide)] px-4 py-8 sm:py-12 md:px-8"
-      />
+      <PageContainer>
+        <TeamHero
+          name={team.name}
+          age={team.age}
+          teamType={team.teamType}
+          ageGroup={team.ageGroup}
+          division={team.division}
+          divisionFull={team.divisionFull}
+          season={team.season}
+          tagline={team.tagline}
+          teamImageUrl={team.teamImageUrl}
+          className="py-8 sm:py-12"
+        />
+      </PageContainer>
 
       <TeamSectionNav items={navItems} />
 

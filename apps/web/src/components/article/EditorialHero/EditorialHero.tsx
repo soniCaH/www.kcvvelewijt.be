@@ -28,6 +28,7 @@ import {
   EditorialHeroShell,
   EditorialKicker,
   EditorialLead,
+  PageContainer,
   PRESS_DOWN_CLASSES,
   type MonoLabelRowItem,
 } from "@/components/design-system";
@@ -535,14 +536,14 @@ export function EditorialHero(props: EditorialHeroProps) {
             a bottom divider line; pin "Lees verder" inside the same inner
             container so it aligns flush with the divider's right edge
             rather than the outer link's wrapper-padded edge. */}
-        <div className="mx-auto mt-2 flex max-w-[var(--container-wide)] justify-end px-4 md:px-8">
+        <PageContainer className="mt-2 flex justify-end">
           <span
             aria-hidden="true"
             className="text-jersey-deep pointer-events-none font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
           >
             ★ Lees verder →
           </span>
-        </div>
+        </PageContainer>
       </Link>
     );
   }

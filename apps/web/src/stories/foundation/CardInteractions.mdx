@@ -4,14 +4,14 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 export const CardDemo = ({ label, reveal, bg = "cream", soft = false, children }) => (
   <div
-    className={`group relative border-2 border-ink ${soft ? "shadow-paper-sm-soft" : "shadow-paper-sm"} transition-all duration-300 hover:shadow-none hover:translate-x-1 hover:translate-y-1 cursor-pointer`}
+    className={`group relative border-2 border-ink ${soft ? "shadow-paper-sm-soft" : "shadow-paper-sm"} transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 cursor-pointer`}
     style={{ width: '220px', minHeight: '128px', background: `var(--color-${bg})` }}
   >
     <div className="p-4" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: bg === 'cream' ? 'var(--color-ink-muted)' : 'rgba(245,241,230,0.7)', marginBottom: '8px' }}>{label}</div>
       <div style={{ fontSize: '13px', color: bg === 'cream' ? 'var(--color-ink)' : 'var(--color-cream)', flex: 1 }}>{children}</div>
       {reveal && (
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ fontFamily: 'var(--font-family-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-jersey-deep)' }}>Lees verder →</div>
+        <div className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300" style={{ fontFamily: 'var(--font-family-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-jersey-deep)' }}>Lees verder →</div>
       )}
     </div>
   </div>

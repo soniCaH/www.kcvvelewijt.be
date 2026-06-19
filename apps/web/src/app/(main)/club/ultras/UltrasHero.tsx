@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import { getButtonClasses } from "@/components/design-system/Button/button-styles";
 
 /**
@@ -46,7 +47,7 @@ export function UltrasHero({ joinHref }: UltrasHeroProps) {
         style={{ backgroundImage: "var(--pattern-jersey-stripes)" }}
       />
 
-      <div className="relative z-10 mx-auto flex max-w-[var(--container-wide)] flex-col items-center gap-6 px-4 py-24 text-center sm:py-32 md:px-8">
+      <PageContainer className="relative z-10 flex flex-col items-center gap-6 py-24 text-center sm:py-32">
         <MonoLabel variant="plain" tone="cream">
           Supporters · KCVV Ultra&apos;s 55
         </MonoLabel>
@@ -73,7 +74,7 @@ export function UltrasHero({ joinHref }: UltrasHeroProps) {
         >
           Word lid via Facebook ↗
         </a>
-      </div>
+      </PageContainer>
     </header>
   );
 }

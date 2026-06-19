@@ -31,7 +31,7 @@ export default function TeamDetailLoading() {
       {/* TeamHero — wide (1040): words column + taped team figure. */}
       <section
         aria-hidden="true"
-        className="mx-auto grid w-full max-w-[var(--container-wide)] animate-pulse grid-cols-1 items-start gap-x-10 gap-y-8 px-4 py-8 sm:grid-cols-[1fr_minmax(300px,420px)] sm:py-12 md:px-8"
+        className="mx-auto grid w-full max-w-[var(--container-wide)] grid-cols-1 items-start gap-x-10 gap-y-8 px-4 py-8 motion-safe:animate-pulse sm:grid-cols-[1fr_minmax(300px,420px)] sm:py-12 md:px-8"
       >
         <div className="order-last flex flex-col gap-4 sm:order-first">
           <div className="bg-paper-edge h-3 w-28" />
@@ -47,7 +47,7 @@ export default function TeamDetailLoading() {
 
       {/* TeamSectionNav — sticky border-y-2 ink pill bar. */}
       <div aria-hidden="true" className="border-ink bg-cream border-y-2">
-        <PageContainer className="flex animate-pulse items-center gap-2 py-2">
+        <PageContainer className="flex items-center gap-2 py-2 motion-safe:animate-pulse">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-paper-edge h-5 w-20" />
           ))}
@@ -58,7 +58,7 @@ export default function TeamDetailLoading() {
 
       {/* SquadGrid — position-grouped: auto-fill minmax(140px,1fr) ink cards. */}
       <PageContainer as="section" className="py-10">
-        <div className="flex animate-pulse flex-col gap-8">
+        <div className="flex flex-col gap-8 motion-safe:animate-pulse">
           {Array.from({ length: 2 }).map((_, group) => (
             <div key={group}>
               <div className="border-paper-edge mb-3 border-b pb-1.5">

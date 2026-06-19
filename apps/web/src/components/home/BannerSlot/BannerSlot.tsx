@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
+import { PageContainer } from "@/components/design-system";
 
 export interface BannerSlotProps {
   /** Banner image URL */
@@ -46,23 +47,25 @@ export const BannerSlot = ({
   if (href) {
     return (
       <div className="bg-cream">
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group mx-auto block max-w-[var(--container-index)] px-4 py-8 transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 md:px-8"
-        >
-          {inner}
-        </a>
+        <PageContainer width="index" className="py-8">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group block transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+          >
+            {inner}
+          </a>
+        </PageContainer>
       </div>
     );
   }
 
   return (
     <div className="bg-cream">
-      <div className="mx-auto max-w-[var(--container-index)] px-4 py-8 md:px-8">
+      <PageContainer width="index" className="py-8">
         {inner}
-      </div>
+      </PageContainer>
     </div>
   );
 };

@@ -224,17 +224,19 @@ const contactInfo: PortableTextBlock[] = [
 function TeamDetailAssembly() {
   return (
     <>
-      <TeamHero
-        name="KCVV Elewijt A"
-        age="A"
-        teamType="senior"
-        divisionFull="Eerste Elftal A – 3e Nat. A"
-        division="3NA"
-        season="25/26"
-        tagline="Sterk, gedreven, één ploeg."
-        teamImageUrl={PHOTOS.a}
-        className="mx-auto max-w-[var(--container-wide)] px-4 py-8 sm:py-12 md:px-8"
-      />
+      <PageContainer>
+        <TeamHero
+          name="KCVV Elewijt A"
+          age="A"
+          teamType="senior"
+          divisionFull="Eerste Elftal A – 3e Nat. A"
+          division="3NA"
+          season="25/26"
+          tagline="Sterk, gedreven, één ploeg."
+          teamImageUrl={PHOTOS.a}
+          className="py-8 sm:py-12"
+        />
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
       <PageContainer as="section" className="py-10">

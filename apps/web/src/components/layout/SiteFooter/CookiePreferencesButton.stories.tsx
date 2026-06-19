@@ -36,7 +36,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof CookiePreferencesButton>;
 
 export default meta;

@@ -29,7 +29,7 @@ export default function EventDetailLoading() {
         {/* EventHero — centred 680 footprint. */}
         <article
           aria-hidden="true"
-          className="mx-auto flex max-w-[680px] flex-col items-center gap-3 px-4 text-center motion-safe:animate-pulse"
+          className="mx-auto flex max-w-[var(--container-prose)] flex-col items-center gap-3 px-4 text-center motion-safe:animate-pulse"
         >
           <div className="bg-paper-edge h-6 w-28" />
           <div className="bg-paper-edge h-3 w-40" />
