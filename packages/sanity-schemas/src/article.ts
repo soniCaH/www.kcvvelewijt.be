@@ -19,11 +19,22 @@ export const article = defineType({
       by: [{ field: "publishedAt", direction: "asc" }],
     },
   ],
+  // Editor-UX rework groups (#1501). `type` is the default tab — the editor
+  // picks the article type first, which drives which conditional fields show.
+  groups: [
+    { name: "type", title: "Type", default: true },
+    { name: "inhoud", title: "Inhoud" },
+    { name: "publicatie", title: "Publicatie" },
+    { name: "gerelateerd", title: "Gerelateerd" },
+  ],
   fields: [
     defineField({
       name: "articleType",
       title: "Article type",
       type: "string",
+      group: "type",
+      description:
+        "Bepaalt de vorm van het artikel: welke velden verschijnen en hoe de pagina rendert. Interview toont portretten + Q&A; Transfer en Event vragen een fact-blok in de inhoud; Match preview/recap koppelt aan een wedstrijd. Kies dit eerst — de rest van het formulier past zich erop aan.",
       options: {
         list: [
           { title: "Interview", value: "interview" },
@@ -36,12 +47,18 @@ export const article = defineType({
         layout: "radio",
       },
       initialValue: "announcement",
-      validation: (r) => r.required(),
+      validation: (r) =>
+        r
+          .required()
+          .error(
+            "Verplicht. Zonder type weet de site niet hoe het artikel gerenderd moet worden en welke velden nodig zijn.",
+          ),
     }),
     defineField({
       name: "linkedMatch",
       title: "Linked match (preview/recap only)",
       type: "string",
+      group: "type",
       description:
         "PSD-wedstrijd-id — kopieer het uit de /wedstrijd/[matchId] URL. Verplicht voor match preview- en match recap-artikels.",
       hidden: ({ parent }) =>
@@ -68,9 +85,10 @@ export const article = defineType({
       name: "subjects",
       title: "Subjects (interview only)",
       type: "array",
+      group: "type",
       of: [{ type: "subject" }],
       description:
-        "Persons the interview is about. For duo/panel interviews, list 2–4. Drives the hero layout (N=1 single portrait / N=2 side-by-side / N=3 trio / N=4 2×2 grid), per-pair attribution on `key` and `quote` pairs, and JSON-LD metadata.",
+        "Personen waarover het interview gaat. Voor duo-/panelinterviews voeg je er 2–4 toe. Bepaalt de hero-lay-out (1 = enkel portret, 2 = naast elkaar, 3 = trio, 4 = 2×2-raster), de attributie per persoon op 'key'- en 'quote'-paren, en de JSON-LD-metadata.",
       hidden: ({ parent }) => parent?.articleType !== "interview",
       validation: (r) =>
         r.custom((subjects, ctx) =>
@@ -83,6 +101,7 @@ export const article = defineType({
       name: "title",
       title: "Title",
       type: "array",
+      group: "inhoud",
       description:
         "Houd de titel kort en krachtig (richtlijn: ~60 tekens). Selecteer één woord en klik op 'Accent' voor de groene cursief. Op de homepagina wordt de titel na 3 regels afgekapt met een ellipsis.",
       // Constrained Portable Text — single block, no styles, no
@@ -104,6 +123,9 @@ export const article = defineType({
       validation: (r) =>
         r
           .required()
+          .error(
+            "Verplicht. Zonder titel heeft het artikel geen kop op de pagina en kan er geen slug gegenereerd worden.",
+          )
           .max(1)
           .custom((blocks) => {
             const arr = blocks as
@@ -118,6 +140,7 @@ export const article = defineType({
       name: "lead",
       title: "Lead",
       type: "string",
+      group: "inhoud",
       description:
         "Korte samenvatting boven het artikel — toont op homepage, news cards, hero, social shares. Laat leeg om de eerste alinea van de body te gebruiken. Richtlijn: ~280 tekens.",
       validation: (r) => r.max(280),
@@ -126,6 +149,7 @@ export const article = defineType({
       name: "author",
       title: "Auteur (Door)",
       type: "string",
+      group: "inhoud",
       description:
         "Naam van de schrijver. Wordt getoond in de byline boven het artikel en in het ArticleCredits-blok onderaan. Optioneel — bij interviews en lange stukken aanbevolen.",
     }),
@@ -133,6 +157,7 @@ export const article = defineType({
       name: "photographer",
       title: "Fotograaf (Beeld)",
       type: "string",
+      group: "inhoud",
       description:
         "Naam van de fotograaf. Wordt getoond in het ArticleCredits-blok onderaan. Optioneel — bij interviews, evenementenverslagen en toekomstige fotogalerijen vermelden.",
     }),
@@ -140,34 +165,64 @@ export const article = defineType({
       name: "slug",
       title: "Slug",
       type: "slug",
+      group: "publicatie",
+      description:
+        "De URL van het artikel (bijv. /nieuws/jouw-titel). Klik 'Generate' om hem uit de titel te maken. Wijzig hem niet meer nadat het artikel gepubliceerd en gedeeld is — bestaande links breken anders.",
       options: { source: "title" },
-      validation: (r) => r.required(),
+      validation: (r) =>
+        r
+          .required()
+          .error(
+            "Verplicht. Zonder slug heeft het artikel geen URL en is het niet bereikbaar op de site.",
+          ),
     }),
-    defineField({ name: "publishedAt", title: "Published at", type: "datetime" }),
+    defineField({
+      name: "publishedAt",
+      title: "Published at",
+      type: "datetime",
+      group: "publicatie",
+      description:
+        "Publicatiedatum en -tijd. Bepaalt de volgorde in nieuwsoverzichten (nieuwste eerst) en de datum in de byline. Laat leeg tot je effectief wil publiceren.",
+    }),
     defineField({
       name: "unpublishAt",
       title: "Unpublish at",
       type: "datetime",
+      group: "publicatie",
+      description:
+        "Optioneel: datum waarop het artikel automatisch van de site verdwijnt. Handig voor tijdelijke aankondigingen. Laat leeg om het artikel online te houden.",
     }),
     defineField({
       name: "featured",
       title: "Featured",
       type: "boolean",
+      group: "publicatie",
+      description:
+        "Zet aan om dit artikel uit te lichten (groter op de homepage / bovenaan overzichten). Gebruik spaarzaam — als alles uitgelicht is, valt niets meer op.",
       initialValue: false,
     }),
     defineField({
       name: "coverImage",
       title: "Cover image",
       type: "image",
+      group: "inhoud",
       description:
         "Verplichte cover-afbeelding (16:9 landschap). Wordt overal gebruikt — homepage, news cards, hero, social shares. Eén upload per artikel.",
       options: { hotspot: true },
-      validation: (r) => r.required(),
+      validation: (r) =>
+        r
+          .required()
+          .error(
+            "Verplicht. De cover-afbeelding wordt overal getoond (homepage, kaarten, hero, social shares) — zonder cover oogt het artikel onaf.",
+          ),
     }),
     defineField({
       name: "tags",
       title: "Tags",
       type: "array",
+      group: "inhoud",
+      description:
+        "Trefwoorden voor filtering en gerelateerde artikels (bijv. 'eerste elftal', 'jeugd'). Typ een woord en druk op Enter. Optioneel, maar helpt lezers verwante artikels te vinden.",
       of: [{ type: "string" }],
       options: { layout: "tags" },
     }),
@@ -175,6 +230,9 @@ export const article = defineType({
       name: "body",
       title: "Body",
       type: "array",
+      group: "inhoud",
+      description:
+        "De volledige inhoud van het artikel. Gebruik het + menu om naast tekst ook beelden, video, Q&A en tabellen toe te voegen. Een event-artikel heeft minstens één Event-fact nodig, een transfer-artikel minstens één Transfer-fact; bij interviews structureer je met Q&A-paren en -secties.",
       // articleType=event requires ≥1 eventFact block, articleType=transfer
       // requires ≥1 transferFact block. Hero has nothing to render without
       // it. Spec: fields.md Ask 6.
@@ -260,12 +318,16 @@ export const article = defineType({
       name: "relatedArticles",
       title: "Related articles",
       type: "array",
+      group: "gerelateerd",
+      description:
+        "Optioneel: artikels die je expliciet onderaan wil tonen als 'lees ook'. Voor een bredere mix (spelers, teams, evenementen) gebruik je 'Related content' hieronder.",
       of: [{ type: "reference", to: [{ type: "article" }] }],
     }),
     defineField({
       name: "metaDescription",
       title: "Meta description",
       type: "string",
+      group: "publicatie",
       description: "Overschrijving voor SEO meta-omschrijving en OG-omschrijving (max. 160 tekens).",
       validation: (r) => r.max(160),
     }),
@@ -273,12 +335,14 @@ export const article = defineType({
       name: "ogImage",
       title: "OG image",
       type: "image",
+      group: "publicatie",
       description: "Optionele overschrijving voor de Open Graph-afbeelding. Valt terug op de omslagafbeelding.",
       options: { hotspot: true },
     }),
     defineField({
       name: "relatedContent",
       title: "Related content",
+      group: "gerelateerd",
       description:
         "Curated mix van gerelateerde items naast het artikel. Pick artikels, spelers, teams, staf of evenementen die je expliciet wil tonen. Curated picks winnen van automatisch afgeleide vermeldingen uit de body (geen dubbele kaarten). Houd het kort — max 8.",
       type: "array",
