@@ -95,7 +95,12 @@ export function MatchArticleLinkCard({
         interactive="press"
         tape={[
           { color: "warm", length: "lg", position: "left", rotation: "a" },
-          { color: "jersey", length: "lg", position: "right", rotation: "c" },
+          {
+            color: "jersey-deep",
+            length: "lg",
+            position: "right",
+            rotation: "c",
+          },
         ]}
         className="group relative flex flex-col"
       >

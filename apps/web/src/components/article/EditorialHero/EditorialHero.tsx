@@ -214,7 +214,7 @@ function EditorialHeroCover({
     <TapedFigure
       aspect={aspect}
       rotation="b"
-      tape={{ color: "jersey", length: "md" }}
+      tape={{ color: "jersey-deep", length: "md" }}
       className={cn(
         "relative max-w-[440px]",
         tiltOnHover &&

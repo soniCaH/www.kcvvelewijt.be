@@ -257,7 +257,7 @@ describe("NewsCard", () => {
       expect(container.querySelector('[data-position="right"]')).toBeNull();
     });
 
-    it("opts back into the warm TL + jersey TR pair with tapeCount={2}", () => {
+    it("opts back into the warm TL + jersey-deep TR pair with tapeCount={2}", () => {
       const { container } = render(
         <NewsCard {...defaultProps} tapeCount={2} />,
       );
@@ -267,7 +267,9 @@ describe("NewsCard", () => {
         container.querySelector('[data-position="left"][data-color="warm"]'),
       ).not.toBeNull();
       expect(
-        container.querySelector('[data-position="right"][data-color="jersey"]'),
+        container.querySelector(
+          '[data-position="right"][data-color="jersey-deep"]',
+        ),
       ).not.toBeNull();
     });
 

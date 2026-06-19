@@ -107,7 +107,7 @@ const DARK_BGS: ReadonlySet<TapedCardBg> = new Set(["ink", "jersey-deep"]);
 // the `tapeColors` prop for per-slot cycling per the R10 lock.
 const DEFAULT_TAPE_COLORS: readonly [TapeStripColor, TapeStripColor] = [
   "warm",
-  "jersey",
+  "jersey-deep",
 ];
 
 // Four rotation pool entries, in the order applied by `--rotate-tape-*`
@@ -243,6 +243,7 @@ export const NewsCard = ({
             alt={imageAlt ?? title}
             fill
             className="object-cover"
+            style={{ filter: "var(--filter-photo-newsprint)" }}
             sizes={
               variant === "featured"
                 ? "(max-width: 768px) 100vw, 66vw"

@@ -1,6 +1,11 @@
 import type { CSSProperties } from "react";
 
-export type TapeStripColor = "jersey" | "ink" | "cream" | "warm";
+export type TapeStripColor =
+  | "jersey"
+  | "jersey-deep"
+  | "ink"
+  | "cream"
+  | "warm";
 export type TapeStripLength = "sm" | "md" | "lg";
 
 /**
@@ -64,6 +69,7 @@ const LENGTH_CLASS: Record<TapeStripLength, string> = {
 
 const COLOR_CLASS: Record<TapeStripColor, string> = {
   jersey: "bg-jersey",
+  "jersey-deep": "bg-jersey-deep",
   ink: "bg-ink",
   // Cream + warm use inline background-color sourced from tape-specific
   // tokens (`--color-tape-cream`, `--tape-warm`). Both tokens live on :root

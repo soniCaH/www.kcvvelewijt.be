@@ -319,7 +319,7 @@ export function EventDetailBlock({
     >
       <TapedCard
         bg="cream"
-        tape={[{ color: "jersey", length: "md" }]}
+        tape={[{ color: "warm", length: "md" }]}
         padding="lg"
         className={cn("w-full", className)}
       >

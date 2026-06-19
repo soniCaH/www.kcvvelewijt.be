@@ -92,7 +92,7 @@ export function StaffHero({
         <TapedFigure
           aspect="portrait-3-4"
           rotation="b"
-          tape={{ color: "jersey", length: "md" }}
+          tape={{ color: "jersey-deep", length: "md" }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"
