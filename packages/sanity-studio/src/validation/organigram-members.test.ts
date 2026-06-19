@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest'
-import {validateOrganigramMember} from './organigram-members'
+import {validateOrganigramMember} from '@kcvv/sanity-schemas'
 
 describe('validateOrganigramMember', () => {
   const makeContext = (doc: Record<string, unknown> | null) => ({

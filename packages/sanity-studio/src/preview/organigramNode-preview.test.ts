@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {prepareOrganigramNodePreview} from './organigramNode-preview'
+import {prepareOrganigramNodePreview} from '@kcvv/sanity-schemas'
 
 describe('organigramNode preview', () => {
   it('shows member names as subtitle when members exist', () => {

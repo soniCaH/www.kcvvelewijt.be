@@ -1,45 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Schema as S, Effect } from "effect";
-import { RelatedRequest, RelatedItem } from "./related";
-
-describe("RelatedRequest", () => {
-  it("accepts valid request with default limit", async () => {
-    const result = await Effect.runPromise(
-      S.decodeUnknown(RelatedRequest)({ id: "doc-abc123" }),
-    );
-    expect(result.id).toBe("doc-abc123");
-    expect(result.limit).toBe(3);
-  });
-
-  it("accepts request with explicit limit", async () => {
-    const result = await Effect.runPromise(
-      S.decodeUnknown(RelatedRequest)({ id: "doc-abc123", limit: 5 }),
-    );
-    expect(result.limit).toBe(5);
-  });
-
-  it("rejects empty id", async () => {
-    await expect(
-      Effect.runPromise(S.decodeUnknown(RelatedRequest)({ id: "" })),
-    ).rejects.toThrow();
-  });
-
-  it("rejects limit above 5", async () => {
-    await expect(
-      Effect.runPromise(
-        S.decodeUnknown(RelatedRequest)({ id: "doc-abc", limit: 6 }),
-      ),
-    ).rejects.toThrow();
-  });
-
-  it("rejects limit below 1", async () => {
-    await expect(
-      Effect.runPromise(
-        S.decodeUnknown(RelatedRequest)({ id: "doc-abc", limit: 0 }),
-      ),
-    ).rejects.toThrow();
-  });
-});
+import { RelatedItem } from "./related";
 
 describe("RelatedItem", () => {
   it("rejects responsibility type (responsibility paths are excluded from related items)", async () => {

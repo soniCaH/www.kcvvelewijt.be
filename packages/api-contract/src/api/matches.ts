@@ -1,6 +1,6 @@
 import { HttpApiEndpoint, HttpApiGroup } from "@effect/platform";
 import { Schema as S } from "effect";
-import { Match, MatchDetail, MatchesArray } from "../schemas/match";
+import { MatchDetail, MatchesArray } from "../schemas/match";
 import { PlayerSeasonStats } from "../schemas/player-stats";
 import {
   HttpServiceUnavailable,
@@ -30,14 +30,6 @@ export class MatchesApi extends HttpApiGroup.make("matches")
     // getNextMatches. Powers the matchday-aware /share autocomplete.
     HttpApiEndpoint.get("getMatchesWindow", "/matches/window")
       .addSuccess(MatchesArray)
-      .addError(HttpServiceUnavailable)
-      .addError(HttpBadGateway)
-      .addError(HttpNotFound),
-  )
-  .add(
-    HttpApiEndpoint.get("getMatchById", "/match/:matchId")
-      .setPath(S.Struct({ matchId: S.NumberFromString }))
-      .addSuccess(Match)
       .addError(HttpServiceUnavailable)
       .addError(HttpBadGateway)
       .addError(HttpNotFound),

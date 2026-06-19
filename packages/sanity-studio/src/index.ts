@@ -14,23 +14,10 @@ export {schemaTypes} from './schema-types'
 // Studio at module load. Import migrations via `@kcvv/sanity-studio/migrations`.
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
-export {
-  organigramNodePreviewSelect,
-  prepareOrganigramNodePreview,
-} from './preview/organigramNode-preview'
-export {
-  responsibilityPreviewSelect,
-  prepareResponsibilityPreview,
-} from './preview/responsibility-preview'
-export {validateOrganigramMember} from './validation/organigram-members'
-export {validateSubjectsCount} from './validation/subjects-count'
-export type {SubjectsCountContext} from './validation/subjects-count'
-export {validateRespondentKey} from './validation/respondent-key'
-export type {RespondentKeyContext} from './validation/respondent-key'
 // Public LauncherTool surface. `useTemplates` and `filterLauncherTemplates`
 // are intentionally NOT re-exported — they would shadow Sanity's own
 // `useTemplates` hook for any consumer importing from `@kcvv/sanity-studio`.
 // Internal callers reach them via the `./tools/launcher` subpath instead.
 export {launcherTool} from './tools/launcher'
 export {responsibilityTemplates} from './templates'
-export type {LauncherTemplate, LauncherTemplateUi} from './templates'
+export type {LauncherTemplate} from './templates'

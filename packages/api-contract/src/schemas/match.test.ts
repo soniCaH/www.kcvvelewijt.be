@@ -1,12 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Schema as S } from "effect";
-import {
-  Match,
-  MatchDetail,
-  MatchesArray,
-  MatchStatus,
-  MATCH_STATUS_VALUES,
-} from "./match";
+import { Match, MatchDetail, MatchesArray, MatchStatus } from "./match";
 
 const validMatchTeam = { id: 1, name: "KCVV Elewijt", logo: "/logo.png", score: 2 };
 const validAwayTeam = { id: 2, name: "FC Opponent", score: 1 };
@@ -78,7 +72,14 @@ describe("Match schema", () => {
 });
 
 describe("MatchStatus schema", () => {
-  it.each(MATCH_STATUS_VALUES)("accepts '%s'", (status) => {
+  it.each([
+    "scheduled",
+    "finished",
+    "forfeited",
+    "postponed",
+    "cancelled",
+    "stopped",
+  ] as const)("accepts '%s'", (status) => {
     expect(() => S.decodeUnknownSync(MatchStatus)(status)).not.toThrow();
   });
 

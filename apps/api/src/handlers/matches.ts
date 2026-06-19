@@ -80,14 +80,6 @@ export const getMatchesWindowHandler = (): Effect.Effect<
   );
 };
 
-export const getMatchByIdHandler = (
-  matchId: number,
-): Effect.Effect<Match, BffError, PsdService> =>
-  Effect.gen(function* () {
-    const service = yield* PsdService;
-    return yield* service.getMatchById(matchId);
-  });
-
 export const getMatchDetailHandler = (
   matchId: number,
 ): Effect.Effect<
@@ -156,9 +148,6 @@ export const MatchesApiLive = HttpApiBuilder.group(
       .handle("getNextMatches", () => withErrorMapping(getNextMatchesHandler()))
       .handle("getMatchesWindow", () =>
         withErrorMapping(getMatchesWindowHandler()),
-      )
-      .handle("getMatchById", ({ path: { matchId } }) =>
-        withErrorMapping(getMatchByIdHandler(matchId)),
       )
       .handle("getMatchDetail", ({ path: { matchId } }) =>
         withErrorMapping(getMatchDetailHandler(matchId)),

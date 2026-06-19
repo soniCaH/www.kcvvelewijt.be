@@ -4,7 +4,6 @@ import {
   getMatchesByTeamHandler,
   getNextMatchesHandler,
   getMatchesWindowHandler,
-  getMatchByIdHandler,
   getMatchDetailHandler,
   getPlayerStatsHandler,
 } from "./matches";
@@ -16,7 +15,6 @@ import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
 import {
-  Match,
   MatchesArray,
   MatchDetail,
   PlayerSeasonStats,
@@ -52,7 +50,6 @@ function makeServiceMock(
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
     getNextMatches: () => Effect.succeed([baseMatch]),
     getMatchesWindow: () => Effect.succeed([baseMatch]),
-    getMatchById: (_matchId) => Effect.succeed({ ...baseMatch, id: 99 }),
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
     getOpponentHistory: () => Effect.die("not needed"),
@@ -271,19 +268,6 @@ describe("getMatchDetailHandler", () => {
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("ResourceNotFound");
     }
-  });
-});
-
-describe("getMatchByIdHandler", () => {
-  it("returns a basic Match (no lineup)", async () => {
-    const result = await Effect.runPromise(
-      getMatchByIdHandler(99).pipe(
-        Effect.provide(Layer.succeed(PsdService, makeServiceMock())),
-      ),
-    );
-    expect(result.id).toBe(99);
-    expect("lineup" in result).toBe(false);
-    expect(() => S.decodeUnknownSync(Match)(result)).not.toThrow();
   });
 });
 
