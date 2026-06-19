@@ -278,3 +278,6 @@ export type {
 // Crest
 export { Crest } from "./Crest";
 export type { CrestProps } from "./Crest";
+
+// Press-down (canonical paper press-down hover)
+export { PRESS_DOWN_CLASSES } from "./press-down";

@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import { EVENT_TYPE_FILL } from "@/components/event/event-type-style";
 import { trackKalenderItemClick } from "../calendar-analytics";
@@ -76,7 +77,10 @@ function WeekMatchCard({ match }: { match: CalendarMatch }) {
       href={`/wedstrijd/${match.id}`}
       data-match
       onClick={() => trackKalenderItemClick("match")}
-      className="border-ink bg-cream shadow-paper-sm block border-2 p-1.5 transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+      className={cn(
+        "border-ink bg-cream shadow-paper-sm block border-2 p-1.5",
+        PRESS_DOWN_CLASSES,
+      )}
     >
       {body}
     </Link>
@@ -134,7 +138,10 @@ export function CalendarWeek({
                     key={event.id}
                     href={event.href}
                     onClick={() => trackKalenderItemClick(event.source)}
-                    className="border-ink bg-cream shadow-paper-sm block border-2 p-1.5 transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+                    className={cn(
+                      "border-ink bg-cream shadow-paper-sm block border-2 p-1.5",
+                      PRESS_DOWN_CLASSES,
+                    )}
                   >
                     <div className="flex items-start gap-1">
                       <span
