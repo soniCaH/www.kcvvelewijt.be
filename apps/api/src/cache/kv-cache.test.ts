@@ -469,4 +469,51 @@ describe("KvCacheService", () => {
       expirationTtl: 60,
     });
   });
+
+  const runIncrement = (mockKv: ReturnType<typeof makeMockKv>, by?: number) =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const cache = yield* KvCacheService;
+        yield* cache.increment(by);
+      }).pipe(
+        Effect.provide(KvCacheLive),
+        Effect.provide(makeEnvLayer(mockKv)),
+      ),
+    );
+
+  const DAILY_KEY = /^psd:calls:\d{4}-\d{2}-\d{2}$/;
+
+  it("starts today's counter at 1 on a cache miss", async () => {
+    const mockKv = makeMockKv();
+    await runIncrement(mockKv);
+    expect(mockKv.put).toHaveBeenCalledWith(
+      expect.stringMatching(DAILY_KEY),
+      "1",
+      { expirationTtl: 60 * 60 * 48 },
+    );
+  });
+
+  it("adds `by` to an existing numeric counter", async () => {
+    const mockKv = makeMockKv();
+    mockKv.get = vi.fn(async () => "5");
+    await runIncrement(mockKv, 3);
+    expect(mockKv.put).toHaveBeenCalledWith(
+      expect.stringMatching(DAILY_KEY),
+      "8",
+      { expirationTtl: 60 * 60 * 48 },
+    );
+  });
+
+  it("recovers from a malformed counter value instead of persisting NaN", async () => {
+    const mockKv = makeMockKv();
+    // A non-numeric value would make parseInt return NaN, which must not be
+    // written back as the string "NaN" (that would wedge the counter for 48h).
+    mockKv.get = vi.fn(async () => "NaN");
+    await runIncrement(mockKv);
+    expect(mockKv.put).toHaveBeenCalledWith(
+      expect.stringMatching(DAILY_KEY),
+      "1",
+      { expirationTtl: 60 * 60 * 48 },
+    );
+  });
 });

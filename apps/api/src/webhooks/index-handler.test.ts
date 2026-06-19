@@ -5,7 +5,12 @@ import type { WorkerEnv } from "../env";
 import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 import { EmbeddingService } from "../search/embedding";
 import { VectorizeService } from "../search/vectorize";
-import { WebhookSanityClient } from "./sanity-client";
+
+// Mock @sanity/client so the inlined webhook fetch returns controlled docs.
+const mockSanityFetch = vi.fn();
+vi.mock("@sanity/client", () => ({
+  createClient: () => ({ fetch: mockSanityFetch }),
+}));
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
@@ -73,16 +78,8 @@ function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
 const upsertSpy = vi.fn<(vectors: unknown[]) => void>();
 const deleteByIdsSpy = vi.fn<(ids: string[]) => void>();
 
-function makeTestLayer(
-  fetchDocument: (
-    id: string,
-    query: string,
-  ) => Effect.Effect<Record<string, unknown> | null>,
-): WebhookLayer {
+function makeTestLayer(): WebhookLayer {
   return Layer.mergeAll(
-    Layer.succeed(WebhookSanityClient, {
-      fetchDocument,
-    }),
     Layer.succeed(EmbeddingService, {
       embed: () => Effect.succeed(FAKE_VECTOR),
     }),
@@ -107,9 +104,11 @@ describe("handleIndexWebhook", () => {
   beforeEach(() => {
     upsertSpy.mockClear();
     deleteByIdsSpy.mockClear();
+    mockSanityFetch.mockReset();
+    mockSanityFetch.mockResolvedValue(null);
   });
 
-  const defaultLayer = makeTestLayer(() => Effect.succeed(null));
+  const defaultLayer = makeTestLayer();
 
   it("returns 401 for missing SVIX headers", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
@@ -172,7 +171,7 @@ describe("handleIndexWebhook", () => {
       category: "algemeen",
     };
 
-    const layer = makeTestLayer(() => Effect.succeed(sanityDoc));
+    mockSanityFetch.mockResolvedValue(sanityDoc);
 
     const body = JSON.stringify({
       _id: "resp-123",
@@ -180,7 +179,7 @@ describe("handleIndexWebhook", () => {
     });
     const request = await makeSignedRequest(body);
 
-    const response = await handleIndexWebhook(request, makeEnv(), layer);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -206,9 +205,9 @@ describe("handleIndexWebhook", () => {
     });
     const request = await makeSignedRequest(body);
 
-    const layer = makeTestLayer(() => Effect.succeed(null));
+    mockSanityFetch.mockResolvedValue(null);
 
-    const response = await handleIndexWebhook(request, makeEnv(), layer);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
 
     expect(response.status).toBe(200);
     const json = await response.json();
@@ -224,12 +223,12 @@ describe("handleIndexWebhook", () => {
       bodyText: "KCVV won met 3-1.",
     };
 
-    const layer = makeTestLayer(() => Effect.succeed(articleDoc));
+    mockSanityFetch.mockResolvedValue(articleDoc);
 
     const body = JSON.stringify({ _id: "article-001", _type: "article" });
     const request = await makeSignedRequest(body);
 
-    const response = await handleIndexWebhook(request, makeEnv(), layer);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
 
     expect(response.status).toBe(200);
     expect(upsertSpy).toHaveBeenCalledWith([
@@ -253,12 +252,12 @@ describe("handleIndexWebhook", () => {
       imageUrl: "https://cdn.example.com/cover.jpg",
     };
 
-    const layer = makeTestLayer(() => Effect.succeed(articleDoc));
+    mockSanityFetch.mockResolvedValue(articleDoc);
 
     const body = JSON.stringify({ _id: "article-001", _type: "article" });
     const request = await makeSignedRequest(body);
 
-    await handleIndexWebhook(request, makeEnv(), layer);
+    await handleIndexWebhook(request, makeEnv(), defaultLayer);
 
     expect(upsertSpy).toHaveBeenCalledWith([
       expect.objectContaining({
@@ -278,12 +277,12 @@ describe("handleIndexWebhook", () => {
       bodyText: "KCVV won met 3-1.",
     };
 
-    const layer = makeTestLayer(() => Effect.succeed(articleDoc));
+    mockSanityFetch.mockResolvedValue(articleDoc);
 
     const body = JSON.stringify({ _id: "article-001", _type: "article" });
     const request = await makeSignedRequest(body);
 
-    await handleIndexWebhook(request, makeEnv(), layer);
+    await handleIndexWebhook(request, makeEnv(), defaultLayer);
 
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     const call = upsertSpy.mock.calls[0]![0]![0] as {
@@ -300,12 +299,12 @@ describe("handleIndexWebhook", () => {
       bodyText: "KCVV Elewijt is een voetbalclub.",
     };
 
-    const layer = makeTestLayer(() => Effect.succeed(pageDoc));
+    mockSanityFetch.mockResolvedValue(pageDoc);
 
     const body = JSON.stringify({ _id: "page-001", _type: "page" });
     const request = await makeSignedRequest(body);
 
-    const response = await handleIndexWebhook(request, makeEnv(), layer);
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
 
     expect(response.status).toBe(200);
     expect(upsertSpy).toHaveBeenCalledWith([

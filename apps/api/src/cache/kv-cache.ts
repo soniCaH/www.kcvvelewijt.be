@@ -21,8 +21,8 @@ export interface KvCacheInterface {
     value: string,
     ttl: number,
   ) => Effect.Effect<void>;
-  /** Increment a daily counter by n (default 1). Key format: psd:calls:YYYY-MM-DD. */
-  readonly increment: (key: string, by?: number) => Effect.Effect<void>;
+  /** Increment today's PSD-call counter by n (default 1). Owns the daily key (psd:calls:YYYY-MM-DD). */
+  readonly increment: (by?: number) => Effect.Effect<void>;
 }
 
 export class KvCacheService extends Context.Tag("KvCacheService")<
@@ -153,11 +153,17 @@ export const KvCacheLive = Layer.effect(
           try: () => env.PSD_CACHE.put(key, value, { expirationTtl: ttl }),
           catch: () => undefined,
         }).pipe(Effect.orElseSucceed(() => undefined)),
-      increment: (key: string, by = 1) =>
+      increment: (by = 1) =>
         Effect.tryPromise({
           try: async () => {
+            const d = new Date();
+            const key = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
             const current = await env.PSD_CACHE.get(key);
-            const next = (current ? parseInt(current, 10) : 0) + by;
+            // Guard against a malformed cached value: parseInt on a
+            // non-numeric string yields NaN, which would persist as "NaN"
+            // and break every future increment until the 48 h TTL expires.
+            const parsed = current ? parseInt(current, 10) : 0;
+            const next = (Number.isFinite(parsed) ? parsed : 0) + by;
             // Keep counter for 48 h so yesterday's value stays visible
             await env.PSD_CACHE.put(key, String(next), {
               expirationTtl: 60 * 60 * 48,

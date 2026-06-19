@@ -1,6 +1,8 @@
+import { createClient } from "@sanity/client";
 import { Effect, Layer, Schema as S } from "effect";
 import type { WorkerEnv } from "../env";
 import { WorkerEnvTag } from "../env";
+import { sanityClientConfig } from "../sanity/config";
 import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
 import {
   buildArticleIndexText,
@@ -8,7 +10,6 @@ import {
   buildResponsibilityIndexText,
 } from "../search/index-text";
 import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
-import { WebhookSanityClient, WebhookSanityClientLive } from "./sanity-client";
 import { WebhookPayload } from "./schemas";
 import { verifySvixSignature } from "./svix-verify";
 
@@ -171,7 +172,7 @@ const toErrorResponse = (
 
 const webhookEffect = (request: Request, webhookSecret: string) =>
   Effect.gen(function* () {
-    const sanityClient = yield* WebhookSanityClient;
+    const env = yield* WorkerEnvTag;
     const embedding = yield* EmbeddingService;
     const vectorize = yield* VectorizeService;
 
@@ -230,14 +231,19 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
     }
 
     // 8. Fetch document from Sanity
-    const doc = yield* sanityClient
-      .fetchDocument(_id, queryForType(docType))
-      .pipe(
-        Effect.mapError(
-          (err) =>
-            new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
+    const sanityClient = createClient({
+      ...sanityClientConfig(env),
+      useCdn: false,
+    });
+    const doc = yield* Effect.tryPromise({
+      try: () =>
+        sanityClient.fetch<Record<string, unknown> | null>(
+          queryForType(docType),
+          { id: _id },
         ),
-      );
+      catch: (err) =>
+        new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
+    });
 
     if (!doc) {
       return Response.json({ ok: true, action: "skipped_not_found" });
@@ -277,9 +283,7 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
 
 // ─── Public handler ────────────────────────────────────────────────────────
 
-export type WebhookLayer = Layer.Layer<
-  WebhookSanityClient | EmbeddingService | VectorizeService
->;
+export type WebhookLayer = Layer.Layer<EmbeddingService | VectorizeService>;
 
 export async function handleIndexWebhook(
   request: Request,
@@ -288,12 +292,7 @@ export async function handleIndexWebhook(
 ): Promise<Response> {
   const envLayer = Layer.succeed(WorkerEnvTag, env);
   const serviceLayer =
-    layer ??
-    Layer.mergeAll(
-      WebhookSanityClientLive,
-      EmbeddingServiceLive,
-      VectorizeServiceLive,
-    );
+    layer ?? Layer.mergeAll(EmbeddingServiceLive, VectorizeServiceLive);
 
   return Effect.runPromise(
     webhookEffect(request, env.SANITY_WEBHOOK_SECRET).pipe(
