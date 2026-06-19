@@ -3,7 +3,7 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { EventDetailBlock } from "./EventDetailBlock";
 
 const meta = {
-  title: "Article/EventDetailBlock",
+  title: "Features/Articles/Blocks/EventDetailBlock",
   component: EventDetailBlock,
   tags: ["autodocs", "vr"],
   parameters: {
@@ -109,7 +109,7 @@ export const UpcomingWithSessions: Story = {
 // + meta + note remain visible (historical record).
 export const Past: Story = {
   args: {
-    ...UpcomingWithSessions.args!,
+    ...(UpcomingWithSessions.args ?? {}),
     isPast: true,
   },
   parameters: {

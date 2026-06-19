@@ -11,12 +11,14 @@ describe("HistoryContent", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the timeline content inside the max-w-5xl container", () => {
+  it("renders the timeline content inside the page body container", () => {
     render(<HistoryContent />);
-    // Anchor on actual timeline content — the hero also uses max-w-5xl, so a
-    // bare `.max-w-5xl` query would pass even if the timeline wrapper regressed.
+    // Anchor on actual timeline content. Both hero and timeline now use
+    // <PageContainer> (max-w-[var(--container-wide)]); match its width token.
     const firstTimelineDate = screen.getByText("1909 - 1935");
-    expect(firstTimelineDate.closest(".max-w-5xl")).not.toBeNull();
+    expect(
+      firstTimelineDate.closest('[class*="--container-wide"]'),
+    ).not.toBeNull();
   });
 
   it("renders the first and last timeline dates as chips", () => {

@@ -3,6 +3,7 @@
 import { useMemo, useRef } from "react";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
+import { PRESS_DOWN_CLASSES } from "@/components/design-system";
 import { deriveCardState } from "@/components/organigram/OrgPersonCard";
 import { ArrowsOut, DownloadSimple } from "@/lib/icons.redesign";
 import { holderLabel } from "./SpotlightNodeCard";
@@ -45,8 +46,7 @@ function OrgBranch({
   const boxClass = cn(
     "border-ink inline-flex min-w-[64px] flex-col border-2 px-2 py-1 text-center",
     state === "vacant" ? "bg-warm" : "bg-cream",
-    onNodeClick &&
-      "cursor-pointer transition-transform hover:-translate-y-0.5 motion-reduce:transition-none",
+    onNodeClick && `cursor-pointer ${PRESS_DOWN_CLASSES}`,
   );
   const content = (
     <>

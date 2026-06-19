@@ -44,7 +44,7 @@ describe("StampBadge", () => {
       const { container } = render(<StampBadge tone={tone}>X</StampBadge>);
       const el = container.firstChild as HTMLElement;
       expect(el.className).toMatch(/border-ink/);
-      expect(el.className).toMatch(/shadow-\[4px_4px_0_0_var\(--color-ink\)\]/);
+      expect(el.className).toContain("shadow-paper-sm");
     }
   });
 

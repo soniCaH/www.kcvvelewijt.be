@@ -7,7 +7,7 @@ import {
 } from "../HubSearch/hub-search.fixture";
 
 const meta = {
-  title: "Organigram/OrganigramHero",
+  title: "Features/Organigram/OrganigramHero",
   component: OrganigramHero,
   tags: ["autodocs", "vr"],
   parameters: {

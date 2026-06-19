@@ -1,153 +1,140 @@
+import { Meta } from "@storybook/addon-docs/blocks";
 
+<Meta title="Foundation/Card Interactions" />
 
-export const CardDemo = ({ label, hasAccent, children }) => (
-  <div className="group relative overflow-hidden rounded-card bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover cursor-pointer" style={{ width: '200px', height: '120px' }}>
-    {hasAccent && (
-      <div className="absolute top-0 inset-x-0 h-[3px] bg-jersey z-20 pointer-events-none [clip-path:inset(0_50%)] group-hover:[clip-path:inset(0_0%)] transition-[clip-path] duration-300 ease-out" aria-hidden="true" />
-    )}
-    <div className="p-4">
-      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: '#9a9da2', marginBottom: '8px' }}>{label}</div>
-      {children}
+export const CardDemo = ({ label, reveal, bg = "cream", soft = false, children }) => (
+  <div
+    className={`group relative border-2 border-ink ${soft ? "shadow-paper-sm-soft" : "shadow-paper-sm"} transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 cursor-pointer`}
+    style={{ width: '220px', minHeight: '128px', background: `var(--color-${bg})` }}
+  >
+    <div className="p-4" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.14em', color: bg === 'cream' ? 'var(--color-ink-muted)' : 'rgba(245,241,230,0.7)', marginBottom: '8px' }}>{label}</div>
+      <div style={{ fontSize: '13px', color: bg === 'cream' ? 'var(--color-ink)' : 'var(--color-cream)', flex: 1 }}>{children}</div>
+      {reveal && (
+        <div className="opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300" style={{ fontFamily: 'var(--font-family-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--color-jersey-deep)' }}>Lees verder →</div>
+      )}
     </div>
   </div>
 );
 
 # Card Interactions
 
-All cards across the site share a common set of interaction tokens to create a consistent, tactile feel. Hover any demo below to see the effect in action.
+Cards across the site share one tactile idiom from the **retro-terrace fanzine** language: a **square-cornered paper card** (`border-2 border-ink`) sitting on a hard **offset shadow**, that **presses *down* into its shadow on hover**. There is no rounding, no soft blur, and no upward lift. Hover any demo below to feel it.
+
+The primitive is [`<TapedCard>`](?path=/docs/ui-tapedcard--docs); most cards either are a `<TapedCard>` or reuse the same class recipe directly (e.g. `getButtonClasses`).
 
 ---
 
-## Token Reference
+## The press-down model
+
+At rest a card casts a hard, un-blurred offset shadow (`shadow-paper-sm` = `4px 4px 0 0 var(--color-ink)`). On hover the shadow is removed and the card translates `+1`/`+1` (`translate-x-1 translate-y-1` = +4px each) — so it visibly sinks into the space the shadow occupied. This is the single canonical interaction for every paper-stamped surface (cards, buttons, filter tabs, scroll arrows, cookie banner).
 
 <table>
   <thead>
-    <tr>
-      <th>Token</th>
-      <th>Class</th>
-      <th>Value</th>
-      <th>Purpose</th>
-    </tr>
+    <tr><th>Concern</th><th>Class</th><th>Value</th></tr>
   </thead>
   <tbody>
     <tr>
-      <td>Border radius</td>
-      <td><code>rounded-card</code></td>
-      <td>4px</td>
-      <td>All cards</td>
+      <td>Border</td>
+      <td><code>border-2 border-ink</code></td>
+      <td>2px solid ink, sharp corners (<code>rounded-none</code> — never rounded)</td>
     </tr>
     <tr>
-      <td>Hover shadow</td>
-      <td><code>hover:shadow-card-hover</code></td>
-      <td><code>0 12px 32px rgba(0,0,0,0.15)</code></td>
-      <td>Soft elevation on hover</td>
+      <td>Rest shadow (on cream)</td>
+      <td><code>shadow-paper-sm</code></td>
+      <td><code>4px 4px 0 0 var(--color-ink)</code> (also <code>-md</code> 6px, <code>-lift</code> 8px)</td>
     </tr>
     <tr>
-      <td>Hover lift</td>
-      <td><code>hover:-translate-y-1</code></td>
-      <td>-4px translateY</td>
-      <td>Subtle upward lift</td>
+      <td>Rest shadow (on ink / dark)</td>
+      <td><code>shadow-paper-sm-soft</code></td>
+      <td>ink-muted offset — keeps the card from disappearing on dark surfaces</td>
+    </tr>
+    <tr>
+      <td>Hover</td>
+      <td><code>hover:shadow-none hover:translate-x-1 hover:translate-y-1</code></td>
+      <td>shadow removed, card sinks +4px / +4px into it</td>
     </tr>
     <tr>
       <td>Transition</td>
       <td><code>transition-all duration-300</code></td>
-      <td>300ms all properties</td>
-      <td>Consistent timing</td>
+      <td>300ms, all properties (the one canonical timing)</td>
     </tr>
     <tr>
-      <td>Image zoom</td>
-      <td><code>group-hover:scale-105 duration-500</code></td>
-      <td>1.05x scale, 500ms</td>
-      <td>Background/cover images</td>
+      <td>Motion safety</td>
+      <td><code>motion-safe:</code> / <code>motion-reduce:</code></td>
+      <td>`<TapedCard>`-driven motion is gated so reduced-motion users get no transform</td>
     </tr>
   </tbody>
 </table>
 
 ---
 
-## Green Accent Bar
+## `<TapedCard>` — the card primitive
 
-Navigation cards display a green accent bar that expands from center on hover using a `clip-path` animation. The bar sits at the top of the card and is purely decorative.
+`<TapedCard>` owns the chrome above and exposes an `interactive` prop:
 
-**Markup:**
-
-```html
-<div
-  className="absolute top-0 inset-x-0 h-[3px] bg-jersey z-20
-    pointer-events-none [clip-path:inset(0_50%)]
-    group-hover:[clip-path:inset(0_0%)] transition-[clip-path]
-    duration-300 ease-out"
-  aria-hidden="true"
-/>
-```
-
-The parent card must have `group` and `relative overflow-hidden` for this to work. At rest the bar is clipped to zero width (`inset(0 50%)`); on hover it expands to full width (`inset(0 0%)`).
+<table>
+  <thead>
+    <tr><th><code>interactive</code></th><th>Behaviour</th><th>Used by</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>false</code> (default)</td><td>Static paper card, no hover motion</td><td>Info panels, static figures</td></tr>
+    <tr><td><code>"press"</code></td><td>The canonical press-down above</td><td>Navigation cards (NewsCard, PlayerCard, …)</td></tr>
+    <tr><td><code>"tilt"</code></td><td>Slight rotate + shadow lift on hover (historical default)</td><td>`<BioBlock>` player photo</td></tr>
+  </tbody>
+</table>
 
 ---
 
-## Card Catalogue
+## Navigation affordance — the "Lees verder →" reveal
 
-Hover any card below to see the interaction tokens in action.
-
-### Navigation Cards (with accent bar)
-
-These cards navigate the user to a detail page. They use the full interaction set: lift, shadow, and accent bar.
+There is **no green accent bar** (the old `clip-path` bar was removed). Navigation cards instead reveal a mono "Lees verder →" cue on hover/focus while the whole card presses down. Hover the card below:
 
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px', marginBottom: '32px' }}>
-  <CardDemo label="NewsCard" hasAccent>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Article teaser</div>
-  </CardDemo>
-  <CardDemo label="EditorialCard" hasAccent>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Editorial block</div>
-  </CardDemo>
-  <CardDemo label="PlayerCard" hasAccent>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Player profile</div>
-  </CardDemo>
-  <CardDemo label="EventCard" hasAccent>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Calendar event</div>
-  </CardDemo>
-  <CardDemo label="SearchResult" hasAccent>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Search hit</div>
+  <CardDemo label="NewsCard" reveal>
+    <div>Artikel-teaser.</div>
   </CardDemo>
 </div>
 
-### Info Cards (no accent bar)
+---
 
-These cards present information but are not primary navigation targets. They use lift and shadow but no accent bar.
+## Card catalogue
+
+Every card below uses `interactive="press"` (press-down on hover). Hover to see it.
 
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px', marginBottom: '32px' }}>
-  <CardDemo label="ContactCard" hasAccent={false}>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Contact info</div>
-  </CardDemo>
-  <CardDemo label="SponsorsTier" hasAccent={false}>
-    <div style={{ fontSize: '13px', color: '#31404b' }}>Sponsor group</div>
-  </CardDemo>
+  <CardDemo label="NewsCard" reveal><div>Article teaser</div></CardDemo>
+  <CardDemo label="PlayerCard"><div>Player profile</div></CardDemo>
+  <CardDemo label="SearchResult"><div>Search hit</div></CardDemo>
+  <CardDemo label="MatchArticleLinkCard"><div>Match → article link</div></CardDemo>
+  <CardDemo label="StaffRoles"><div>Staff role card</div></CardDemo>
+  <CardDemo label="YouthDirectory"><div>Youth division card</div></CardDemo>
+</div>
+
+On a dark / ink surface the same card uses the **soft** shadow so it stays visible:
+
+<div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '16px', marginBottom: '32px', background: 'var(--color-jersey-deep-dark)', padding: '24px' }}>
+  <CardDemo label="Card on ink" bg="cream" soft><div>shadow-paper-sm-soft</div></CardDemo>
 </div>
 
 ---
 
 ## Exceptions
 
-Not every card follows the standard recipe. These are the documented deviations:
-
 <table>
   <thead>
-    <tr>
-      <th>Component</th>
-      <th>Deviation</th>
-      <th>Reason</th>
-    </tr>
+    <tr><th>Component</th><th>Deviation</th><th>Reason</th></tr>
   </thead>
   <tbody>
     <tr>
-      <td><code>SponsorTile</code></td>
-      <td>Grayscale toggle on hover — no shadow, no lift</td>
-      <td>Sponsor logos use a grayscale-to-color treatment as their primary interaction</td>
+      <td><code>SponsorTile</code> (unframed)</td>
+      <td>Grayscale → colour on hover; no shadow, no press</td>
+      <td>Sponsor logos use a newsprint grayscale-to-colour reveal as their interaction (homepage strip)</td>
     </tr>
     <tr>
-      <td><code>ContactCard</code></td>
-      <td>No accent bar</td>
-      <td>Information card, not a navigation target — accent bar reserved for navigational cards</td>
+      <td><code>SponsorTile</code> (framed + linked)</td>
+      <td>Presses down like a normal card</td>
+      <td>When framed and clickable it joins the canonical press-down model</td>
     </tr>
   </tbody>
 </table>

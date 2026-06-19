@@ -47,7 +47,7 @@ import {
   EditorialHero,
   type EditorialHeroProps,
 } from "@/components/article/EditorialHero";
-import { SectionStack } from "@/components/design-system";
+import { PageContainer, SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
 import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
@@ -102,13 +102,6 @@ function nullsToUndefined<T extends object>(
 function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
   const shared = {
     placement: "homepage" as const,
-    // Phase 4.5.C.1 (#1754) — the static homepage hero spans the full
-    // inner width, so the canonical 2px paper-stamp press-down reads
-    // as a twitch instead of a press. Use the `tilt-photo` treatment:
-    // only the framed cover image tilts + scales on hover; the
-    // editorial column stays still and the "★ Lees verder →" reveal
-    // signals the link affordance.
-    hoverStyle: "tilt-photo" as const,
     slug: article.slug,
     title: article.title,
     coverImage: article.coverImageUrl
@@ -272,14 +265,14 @@ export default async function HomePage() {
 
   if (articles.length === 0 && matches.length === 0) {
     return (
-      <div className="max-w-inner-lg mx-auto px-3 py-16 text-center lg:px-0">
+      <PageContainer width="index" className="py-16 text-center">
         <h1 className="text-jersey-deep mb-4 text-3xl font-bold lg:text-4xl">
           Welkom bij KCVV Elewijt
         </h1>
         <p className="text-lg text-gray-600">
           Inhoud kan momenteel niet worden geladen. Probeer het later opnieuw.
         </p>
-      </div>
+      </PageContainer>
     );
   }
 
@@ -292,9 +285,9 @@ export default async function HomePage() {
         key: "hero",
         bg: "transparent",
         content: (
-          <div className="mx-auto max-w-7xl px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
+          <PageContainer width="index" className="pt-10 pb-4 md:pt-14 md:pb-6">
             <EditorialHero {...heroProps} />
-          </div>
+          </PageContainer>
         ),
         paddingTop: "pt-0",
         paddingBottom: "pb-0",

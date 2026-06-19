@@ -1,9 +1,14 @@
 
 
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundation/Overview" />
+
 # KCVV Elewijt — Design Foundation
 
 This section documents the design tokens that drive every component on the KCVV Elewijt website.
-All tokens are defined in [`src/app/globals.css`](../../app/globals.css) inside the `@theme {}` block
+Most tokens are defined in [`src/app/globals.css`](../../app/globals.css) inside the `@theme {}` block
+(a few layout/foundation vars and component rules such as `.taped-figure` live elsewhere in the same file)
 and consumed by both **Tailwind CSS v4** (in production) and **Storybook** (via this documentation).
 
 > **Single source of truth** — edit a value in `globals.css` and it updates everywhere:
@@ -40,7 +45,7 @@ No duplication. No drift.
 
 ## Brand identity
 
-- **Primary colour:** `#4acf52` (jersey) — vibrant grass green, decorative accents
-- **Dark accent:** `#008755` (jersey-deep) — large headings, primary CTAs
-- **Text:** `#0a0a0a` (ink) on `#f5f1e6` (cream) — the retro cream-on-ink surface
-- **Fonts:** [Freight Display](https://fonts.adobe.com/) (headings, via `--font-display`) · Freight Sans (body, via `--font-family-body`) · IBM Plex Mono (labels/scores)
+- **Primary / brand green:** `#008755` (jersey-deep, `--color-jersey-deep`) — large headings and primary CTAs. Inline body links use `#007c46` (`--color-jersey-link`) because jersey-deep is only ~4.05:1 on cream (below AA for body text).
+- **Decorative accent:** `#4acf52` (jersey, `--color-jersey`) — bright grass green for jersey-stripe patterns and tape strips only; never a surface or body-text colour.
+- **Text:** `#0a0a0a` (ink) on `#f5f1e6` (cream) — dark ink on a cream paper surface (ink-on-cream).
+- **Fonts:** [Freight Display](https://fonts.adobe.com/) (headings, via `--font-display`) · Freight Big (display headings, via `--font-display-big`) · Freight Sans (body, via `--font-family-body`) · IBM Plex Mono (labels/scores) — all three Freight families ride one Adobe Typekit kit.

@@ -5,6 +5,7 @@ import {
   EditorialHeading,
   JerseyShirt,
   LinkButton,
+  PageContainer,
   StripedSeam,
 } from "@/components/design-system";
 import { EXTERNAL_LINKS } from "@/lib/constants";
@@ -40,7 +41,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
           section on the homepage with both edges framed. */}
       <StripedSeam height="md" colorPair="jersey-tonal-dark" />
 
-      <div className="mx-auto max-w-7xl px-4 py-12 md:px-8 md:py-16">
+      <PageContainer width="index" className="py-12 md:py-16">
         <div className="relative">
           {/* Corner-anchored jersey illustration. ~140px (Tailwind v4
               `w-35 h-35` = 35 × 0.25rem = 140px). Centered vertically
@@ -83,7 +84,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
             </LinkButton>
           </div>
         </div>
-      </div>
+      </PageContainer>
 
       <StripedSeam height="md" colorPair="jersey-tonal-dark" flip />
     </section>

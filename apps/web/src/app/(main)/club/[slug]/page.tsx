@@ -7,7 +7,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
 import { PageHero } from "@/components/layout/PageHero";
 import { ArticleBody } from "@/components/article/ArticleBody";
-import { StripedSeam } from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -62,14 +62,14 @@ export default async function DynamicClubPage({ params }: Props) {
       {/* Hero — kicker "Club", headline = page.title, optional heroImage
           (typographic state when absent). `pb-12` reserves the rhythm before
           the full-bleed seam (StripedSeam carries no margin of its own). */}
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+      <PageContainer className="pt-10 pb-12">
         <PageHero
           kicker="Club"
           headline={page.title}
           image={page.heroImageUrl ?? undefined}
           imageAlt={page.title}
         />
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 

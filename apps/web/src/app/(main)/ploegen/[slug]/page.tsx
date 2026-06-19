@@ -22,6 +22,7 @@ import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { StripedSeam } from "@/components/design-system/StripedSeam";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import { TeamHero } from "@/components/team/TeamHero";
 import { StandingsTable } from "@/components/team/StandingsTable";
 import { TeamMatchesSection } from "@/components/team/TeamMatchesSection";
@@ -177,7 +178,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
   ].filter((x): x is TeamSectionNavItem => x !== false);
 
   const analyticsParams = { team_slug: slug };
-  const sectionClass = "mx-auto w-full max-w-5xl scroll-mt-16 px-4 py-10";
 
   return (
     <>
@@ -198,18 +198,20 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
       <MatchStripSlot />
 
-      <TeamHero
-        name={team.name}
-        age={team.age}
-        teamType={team.teamType}
-        ageGroup={team.ageGroup}
-        division={team.division}
-        divisionFull={team.divisionFull}
-        season={team.season}
-        tagline={team.tagline}
-        teamImageUrl={team.teamImageUrl}
-        className="mx-auto max-w-5xl px-4 py-8 sm:py-12"
-      />
+      <PageContainer>
+        <TeamHero
+          name={team.name}
+          age={team.age}
+          teamType={team.teamType}
+          ageGroup={team.ageGroup}
+          division={team.division}
+          divisionFull={team.divisionFull}
+          season={team.season}
+          tagline={team.tagline}
+          teamImageUrl={team.teamImageUrl}
+          className="py-8 sm:py-12"
+        />
+      </PageContainer>
 
       <TeamSectionNav items={navItems} />
 
@@ -220,12 +222,16 @@ export default async function TeamPage({ params }: TeamPageProps) {
             eventName="team_standings_in_view"
             params={analyticsParams}
           >
-            <section id="klassement" className={sectionClass}>
+            <PageContainer
+              as="section"
+              id="klassement"
+              className="scroll-mt-16 py-10"
+            >
               <StandingsTable
                 entries={standings}
                 highlightTeamId={bffData?.teamId}
               />
-            </section>
+            </PageContainer>
           </TrackInView>
         </>
       ) : null}
@@ -237,13 +243,17 @@ export default async function TeamPage({ params }: TeamPageProps) {
             eventName="team_matches_in_view"
             params={analyticsParams}
           >
-            <section id="wedstrijden" className={sectionClass}>
+            <PageContainer
+              as="section"
+              id="wedstrijden"
+              className="scroll-mt-16 py-10"
+            >
               <TeamMatchesSection
                 matches={scheduleMatches}
                 teamSlug={slug}
                 kcvvTeamId={bffData?.teamId}
               />
-            </section>
+            </PageContainer>
           </TrackInView>
         </>
       ) : null}
@@ -252,9 +262,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
           <TrackInView eventName="team_squad_in_view" params={analyticsParams}>
-            <section id="spelers" className={sectionClass}>
+            <PageContainer
+              as="section"
+              id="spelers"
+              className="scroll-mt-16 py-10"
+            >
               <SquadGrid players={team.players} />
-            </section>
+            </PageContainer>
           </TrackInView>
         </>
       ) : null}
@@ -266,35 +280,35 @@ export default async function TeamPage({ params }: TeamPageProps) {
       {team.teamType === "youth" ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <section className={sectionClass}>
+          <PageContainer as="section" className="scroll-mt-16 py-10">
             <TeamEnrolmentCta
               teamType={team.teamType}
               teamSlug={slug}
               ageGroup={team.ageGroup}
             />
-          </section>
+          </PageContainer>
         </>
       ) : null}
 
       {showStaff ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <section id="staf" className={sectionClass}>
+          <PageContainer as="section" id="staf" className="scroll-mt-16 py-10">
             <TeamStaff staff={staff} />
-          </section>
+          </PageContainer>
         </>
       ) : null}
 
       {showEditorial ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <section id="info" className={sectionClass}>
+          <PageContainer as="section" id="info" className="scroll-mt-16 py-10">
             <TeamEditorial
               body={teamBody}
               trainingSchedule={team.trainingSchedule}
               contactInfo={teamContact}
             />
-          </section>
+          </PageContainer>
         </>
       ) : null}
 

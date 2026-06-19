@@ -173,8 +173,9 @@ describe("NewsCard", () => {
     it("interactive cards wire press-mode hover via TapedCard primitive", () => {
       // The press-down idiom is now centralised in <TapedCard
       // interactive="press">, which sets `--card-press-{x,y}` on hover
-      // and collapses the offset shadow. Motion-reduce safety is
-      // inherited from the `motion-safe:` Tailwind prefix.
+      // and collapses the offset shadow. The translate is motion-safe-gated
+      // (movement); the shadow collapse always fires so reduced-motion users
+      // keep the pressable affordance (translate-gated-only canonical).
       const { container } = render(<NewsCard {...defaultProps} />);
       const article = container.querySelector("article");
       expect(article).toHaveAttribute("data-interactive", "press");
@@ -184,7 +185,8 @@ describe("NewsCard", () => {
       expect(article?.className).toMatch(
         /motion-safe:hover:\[--card-press-y:1px\]/,
       );
-      expect(article?.className).toMatch(/motion-safe:hover:shadow-none/);
+      expect(article?.className).toMatch(/hover:shadow-none/);
+      expect(article?.className).not.toMatch(/motion-safe:hover:shadow-none/);
     });
 
     it("non-interactive cards (no href) opt out of press-mode hover", () => {
@@ -257,7 +259,7 @@ describe("NewsCard", () => {
       expect(container.querySelector('[data-position="right"]')).toBeNull();
     });
 
-    it("opts back into the warm TL + jersey TR pair with tapeCount={2}", () => {
+    it("opts back into the warm TL + jersey-deep TR pair with tapeCount={2}", () => {
       const { container } = render(
         <NewsCard {...defaultProps} tapeCount={2} />,
       );
@@ -267,7 +269,9 @@ describe("NewsCard", () => {
         container.querySelector('[data-position="left"][data-color="warm"]'),
       ).not.toBeNull();
       expect(
-        container.querySelector('[data-position="right"][data-color="jersey"]'),
+        container.querySelector(
+          '[data-position="right"][data-color="jersey-deep"]',
+        ),
       ).not.toBeNull();
     });
 

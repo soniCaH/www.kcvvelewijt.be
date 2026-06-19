@@ -64,7 +64,7 @@ const TYPE_ORDER = Object.keys(TYPE_CHIP_STYLE) as EventType[];
 export const EVENT_CHIP_BASE =
   "inline-flex items-center rounded-full border-2 px-3.5 py-1.5 font-mono font-medium uppercase " +
   "text-[length:var(--text-label)] tracking-[var(--text-label--tracking)] " +
-  "cursor-pointer transition-colors duration-200 " +
+  "cursor-pointer transition-colors duration-150 " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
 
 export interface EventFilterBarProps {

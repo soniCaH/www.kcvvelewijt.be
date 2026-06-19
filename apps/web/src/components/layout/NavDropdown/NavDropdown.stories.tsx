@@ -14,7 +14,7 @@ import {
 const STORY_ID = "story-dropdown";
 
 const meta = {
-  title: "UI/NavDropdown",
+  title: "Layout/NavDropdown",
   component: NavDropdown,
   tags: ["autodocs", "vr"],
   parameters: {

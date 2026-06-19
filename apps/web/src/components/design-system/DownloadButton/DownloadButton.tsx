@@ -2,6 +2,7 @@
 
 import { DownloadSimple } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
+import { PRESS_DOWN_CLASSES } from "../press-down";
 
 export interface DownloadButtonProps {
   /** File download URL */
@@ -153,10 +154,6 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
-// Canonical paper press-down (feedback_canonical_press_down_hover).
-const PRESS_DOWN_CLASSES =
-  "transition-all duration-300 hover:shadow-none hover:translate-x-1 hover:translate-y-1";
 
 export const DownloadButton = ({
   href,

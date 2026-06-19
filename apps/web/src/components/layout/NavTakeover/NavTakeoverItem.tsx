@@ -29,7 +29,7 @@ const PARENT_ROW =
   "border-paper-edge flex w-full items-center justify-between border-b py-4 text-left font-display text-[22px] italic font-bold leading-tight transition-colors";
 
 const CHILD_ROW =
-  "group/child relative flex w-full items-center py-2 pl-6 text-left font-mono text-[11px] font-semibold tracking-[0.08em] uppercase leading-none transition-all duration-200";
+  "group/child relative flex w-full items-center py-2 pl-6 text-left font-mono text-[11px] font-semibold tracking-[0.08em] uppercase leading-none transition-all duration-150";
 
 export function NavTakeoverItem({
   label,
@@ -63,7 +63,7 @@ export function NavTakeoverItem({
           <span
             aria-hidden="true"
             className={cn(
-              "font-mono text-sm transition-transform duration-200",
+              "font-mono text-sm transition-transform duration-150",
               expanded && "rotate-180",
             )}
           >
@@ -100,7 +100,7 @@ export function NavTakeoverItem({
       <span className="flex-1">{label}</span>
       <span
         aria-hidden="true"
-        className="text-jersey-deep -translate-x-1 pr-2 opacity-0 transition-all duration-200 group-hover/child:translate-x-0 group-hover/child:opacity-100"
+        className="text-jersey-deep -translate-x-1 pr-2 opacity-0 transition-all duration-150 group-hover/child:translate-x-0 group-hover/child:opacity-100"
       >
         →
       </span>

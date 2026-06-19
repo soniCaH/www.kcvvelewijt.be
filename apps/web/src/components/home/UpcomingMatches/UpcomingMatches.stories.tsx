@@ -7,7 +7,7 @@ import {
 } from "./UpcomingMatches.mocks";
 
 const meta = {
-  title: "Features/Homepage/UpcomingMatches",
+  title: "Features/Home/UpcomingMatches",
   component: UpcomingMatches,
   tags: ["autodocs", "vr"],
   parameters: {

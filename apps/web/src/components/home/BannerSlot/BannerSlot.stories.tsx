@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BannerSlot } from "./BannerSlot";
 
 const meta = {
-  title: "Features/Homepage/BannerSlot",
+  title: "Features/Home/BannerSlot",
   component: BannerSlot,
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },

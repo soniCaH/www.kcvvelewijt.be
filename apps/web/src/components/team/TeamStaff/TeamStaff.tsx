@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { TapedCard } from "@/components/design-system/TapedCard";
 
 export interface TeamStaffMemberData {
   id: string;
@@ -76,13 +77,6 @@ function StaffCard({ member }: { member: TeamStaffMemberData }) {
   const href = member.href?.trim() ?? "";
   const isLink = href !== "";
 
-  const cardClass = cn(
-    "border-ink bg-cream flex flex-col items-center border-2 p-3 text-center shadow-[3px_3px_0_0_var(--color-ink)]",
-    // Reachable members become links with the canonical paper press-down.
-    isLink &&
-      "transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 motion-safe:hover:shadow-none",
-  );
-
   const content = (
     <>
       {/* Round photo or monogram */}
@@ -122,28 +116,40 @@ function StaffCard({ member }: { member: TeamStaffMemberData }) {
     </>
   );
 
+  const card = (
+    <TapedCard
+      bg="cream"
+      shadow="sm"
+      padding="sm"
+      interactive={isLink ? "press" : false}
+      className="flex flex-col items-center text-center"
+      dataAttrs={
+        isLink
+          ? undefined
+          : {
+              "data-testid": "team-staff-card",
+              "data-state": hasPhoto ? "photo" : "monogram",
+            }
+      }
+    >
+      {content}
+    </TapedCard>
+  );
+
   if (isLink) {
     return (
       <Link
         href={href}
         data-testid="team-staff-card"
         data-state={hasPhoto ? "photo" : "monogram"}
-        className={cardClass}
+        className="block"
       >
-        {content}
+        {card}
       </Link>
     );
   }
 
-  return (
-    <div
-      data-testid="team-staff-card"
-      data-state={hasPhoto ? "photo" : "monogram"}
-      className={cardClass}
-    >
-      {content}
-    </div>
-  );
+  return card;
 }
 
 export function TeamStaff({ staff }: TeamStaffProps) {

@@ -178,7 +178,7 @@ function SiteHeaderInner({
             </Link>
             <Link
               href="/club/inschrijven"
-              className="border-ink text-ink hover:border-jersey-deep hover:text-jersey-deep inline-flex items-center border px-2.5 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors duration-200 xl:px-3.5 xl:py-2 xl:text-[13px] 2xl:text-[14px]"
+              className="border-ink text-ink hover:border-jersey-deep hover:text-jersey-deep inline-flex items-center border px-2.5 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors duration-150 xl:px-3.5 xl:py-2 xl:text-[13px] 2xl:text-[14px]"
             >
               Word lid
             </Link>

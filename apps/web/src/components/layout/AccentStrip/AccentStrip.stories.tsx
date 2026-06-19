@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AccentStrip } from "./AccentStrip";
 
 const meta = {
-  title: "Layout/AccentStrip",
+  title: "UI/AccentStrip",
   component: AccentStrip,
   parameters: {
     layout: "fullscreen",

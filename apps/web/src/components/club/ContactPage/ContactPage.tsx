@@ -35,6 +35,7 @@ import {
 } from "@/lib/icons.redesign";
 import {
   EditorialHeading,
+  PageContainer,
   StripedSeam,
   TapedCard,
 } from "@/components/design-system";
@@ -110,7 +111,6 @@ const INLINE_LINK =
 const CARD_BODY = "text-ink-soft text-[0.95rem] leading-relaxed";
 const CROSS_LINK =
   "group border-ink bg-cream-soft hover:bg-cream-deep flex items-center justify-between gap-3 border p-3 transition-colors";
-const SECTION = "mx-auto max-w-5xl px-4 py-12";
 
 function SectionHeading({ children }: { children: string }) {
   return (
@@ -182,18 +182,18 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
   return (
     <div className="bg-cream min-h-screen">
       {/* Hero */}
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+      <PageContainer className="pt-10 pb-12">
         <PageHero
           kicker="Club"
           headline="Contact"
           lead="Heb je een vraag? We helpen je graag verder."
         />
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Clubgegevens + map */}
-      <div className={SECTION}>
+      <PageContainer className="py-12">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <TapedCard bg="cream" shadow="sm" padding="lg">
             <EditorialHeading
@@ -264,12 +264,12 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
           {/* OpenStreetMap, no consent needed — paper-framed */}
           <MapEmbed />
         </div>
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Contacteer ons — merged + deduped grid */}
-      <div className={SECTION}>
+      <PageContainer className="py-12">
         <SectionHeading>Contacteer ons</SectionHeading>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {contactCards.map((card) => (
@@ -290,12 +290,12 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
             </TapedCard>
           ))}
         </div>
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Kom naar ons — venue & matchday info */}
-      <div className={SECTION}>
+      <PageContainer className="py-12">
         <SectionHeading>Kom naar ons</SectionHeading>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Parking */}
@@ -369,7 +369,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
             </p>
           </TapedCard>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

@@ -1,5 +1,9 @@
 
 
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundation/Colors" />
+
 export const Swatch = ({ name, variable, hex, textDark = false }) => (
   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
     <div style={{
@@ -71,6 +75,7 @@ in dark gradients.
 <SwatchRow items={[
   { name: 'jersey (decorative / accents)', variable: '--color-jersey', hex: '#4acf52' },
   { name: 'jersey-deep (headings / CTAs)', variable: '--color-jersey-deep', hex: '#008755' },
+  { name: 'jersey-link (inline body links — AA on cream)', variable: '--color-jersey-link', hex: '#007c46' },
   { name: 'jersey-bright (green text on ink)', variable: '--color-jersey-bright', hex: '#22c55e' },
   { name: 'jersey-deep-dark (dark gradients)', variable: '--color-jersey-deep-dark', hex: '#133d28' },
 ]} />

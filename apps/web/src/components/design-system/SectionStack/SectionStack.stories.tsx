@@ -25,7 +25,7 @@ function MockSection({
 }) {
   return (
     <div
-      className={`mx-auto flex max-w-7xl items-center px-4 md:px-8 ${height}`}
+      className={`mx-auto flex max-w-[var(--container-index)] items-center px-4 md:px-8 ${height}`}
     >
       <span className="text-sm font-bold tracking-widest uppercase opacity-50">
         {label}
@@ -270,7 +270,7 @@ export const BackdroppedSection: Story = {
         bg: "jersey-deep",
         backdrop: <MockBackdrop />,
         content: (
-          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-8 text-white md:px-8">
+          <div className="mx-auto flex max-w-[var(--container-index)] flex-col gap-2 px-4 py-8 text-white md:px-8">
             <span className="text-xs font-bold tracking-widest uppercase opacity-70">
               Backdropped section
             </span>

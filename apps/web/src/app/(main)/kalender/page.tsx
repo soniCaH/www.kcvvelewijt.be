@@ -15,6 +15,7 @@ import {
 } from "@/lib/repositories/event.repository";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { PageHero } from "@/components/layout";
+import { PageContainer } from "@/components/design-system";
 import { PageViewTracker } from "@/components/analytics";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildItemListJsonLd } from "@/lib/seo/jsonld";
@@ -159,7 +160,7 @@ export default async function CalendarPage() {
       {itemListEntries.length > 0 && (
         <JsonLd data={buildItemListJsonLd(itemListEntries)} />
       )}
-      <div className="mx-auto max-w-5xl px-4 pt-10">
+      <PageContainer width="index" className="pt-10">
         <PageHero
           kicker="Kalender"
           headline="Wedstrijdkalender"
@@ -167,11 +168,11 @@ export default async function CalendarPage() {
           image="/images/youth-trainers.jpg"
           imageAlt="KCVV jeugdtraining"
         />
-      </div>
+      </PageContainer>
 
-      <div className="mx-auto max-w-5xl px-4 py-10">
+      <PageContainer width="index" className="py-10">
         <CalendarWidget feed={data.feed} teams={data.teams} />
-      </div>
+      </PageContainer>
     </div>
   );
 }

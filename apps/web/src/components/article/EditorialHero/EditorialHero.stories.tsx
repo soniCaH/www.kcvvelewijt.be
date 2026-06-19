@@ -3,7 +3,7 @@ import { EditorialHero, type EditorialHeroProps } from "./EditorialHero";
 import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
-  title: "Article/EditorialHero",
+  title: "Features/Articles/EditorialHero",
   component: EditorialHero,
   tags: ["autodocs", "vr"],
   parameters: {
@@ -92,15 +92,15 @@ export const AnnouncementHomepage: AnnouncementStory = {
   },
 };
 
-// Phase 4.5.C.1 (#1754) — the static homepage hero swaps the canonical
-// 2px paper-stamp press-down for the `tilt-photo` treatment: only the
-// framed cover image tilts + scales on hover; the editorial column
-// stays still. Hover/focus the story to see the cover tilt.
-export const AnnouncementHomepageTiltPhoto: AnnouncementStory = {
+// Homepage hero hover treatment — the canonical paper press-down, same as
+// every other interactive paper surface (e.g. /jeugd's cards). Hover/focus
+// the story: the whole hero translates +1/+1 (motion-safe-gated) while the
+// cover figure collapses its offset shadow, and "★ Lees verder →" reveals
+// at the bottom-right.
+export const AnnouncementHomepagePressDown: AnnouncementStory = {
   args: {
     variant: "announcement",
     placement: "homepage",
-    hoverStyle: "tilt-photo",
     slug: "kampioen-58-punten",
     title: "Kampioen! 58 punten en titel in eerste provinciale.",
     lead: "Met een laatste-speeldagzege wordt de A-ploeg kampioen van de reeks. Zaterdag wordt gevierd op het sportpark.",
@@ -113,7 +113,7 @@ export const AnnouncementHomepageTiltPhoto: AnnouncementStory = {
     docs: {
       description: {
         story:
-          'Static homepage hero hover treatment. Used on `/` from #1754 onward — the full-width hero spans the inner content column, so the canonical 2px press-down reads as a twitch. `hoverStyle="tilt-photo"` lets the framed `<TapedFigure>` tilt -1° + scale 1.02× on group-hover instead; the editorial column stays still and "★ Lees verder →" reveals at the bottom-right.',
+          'Static homepage hero hover. The whole `<Link>` presses down with the canonical `PRESS_DOWN_CLASSES` (translate +1/+1, motion-safe-gated) while the cover `<TapedFigure>` collapses its offset shadow on group-hover — matching every other interactive paper surface. "★ Lees verder →" reveals at the bottom-right.',
       },
     },
   },

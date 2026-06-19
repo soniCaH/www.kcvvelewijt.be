@@ -5,6 +5,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import {
   EditorialHeading,
   LinkButton,
+  PageContainer,
   PullQuote,
   StripedSeam,
   TapedCard,
@@ -39,26 +40,26 @@ export default function ClubPage() {
       />
 
       {/* Hero — typographic PageHero (no image). */}
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-12">
+      <PageContainer width="index" className="pt-10 pb-12">
         <PageHero
           kicker="Onze club"
           headline="De plezantste compagnie"
           accent="compagnie"
           lead="Sinds 1909 de thuishaven voor voetballiefhebbers in Elewijt — van de allerkleinsten tot het eerste elftal."
         />
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Editorial nav hub. */}
-      <div className="mx-auto max-w-5xl px-4 py-12">
+      <PageContainer width="index" className="py-12">
         <ClubEditorialHub />
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Mission. */}
-      <div className="mx-auto max-w-5xl px-4 py-12">
+      <PageContainer width="index" className="py-12">
         <PullQuote
           tone="ink"
           attribution={{ name: "Sportpark Elewijt", source: "sinds 1909" }}
@@ -66,12 +67,12 @@ export default function ClubPage() {
           Wij zijn KCVV Elewijt. Een plek waar jong en oud wekelijks samenkomen
           voor hun passie.
         </PullQuote>
-      </div>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Contact CTA band. */}
-      <div className="mx-auto max-w-5xl px-4 py-12">
+      <PageContainer width="index" className="py-12">
         <TapedCard bg="cream" padding="lg">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>
@@ -94,7 +95,7 @@ export default function ClubPage() {
             </LinkButton>
           </div>
         </TapedCard>
-      </div>
+      </PageContainer>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { NewsCard, CategoryFilters } from "@/components/article";
-import { EditorialHeading } from "@/components/design-system";
+import { EditorialHeading, PageContainer } from "@/components/design-system";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { matchTypeCardLabel } from "@/lib/utils/article-type-label";
 import type { PaginatedArticles } from "./utils";
@@ -218,7 +218,7 @@ export function NewsListingClient({
     <div className="w-full">
       {/* Sticky filter bar */}
       <div className="bg-ink/95 sticky top-0 z-30 border-b border-white/10 py-3 backdrop-blur-sm">
-        <div className="max-w-inner-lg mx-auto px-3 lg:px-0">
+        <PageContainer width="index">
           <CategoryFilters
             categories={categories}
             activeCategory={
@@ -227,10 +227,10 @@ export function NewsListingClient({
             renderAsLinks={false}
             onChange={handleCategoryChange}
           />
-        </div>
+        </PageContainer>
       </div>
 
-      <div className="max-w-inner-lg mx-auto px-3 py-6 lg:px-0">
+      <PageContainer width="index" className="py-6">
         {/* Featured row — symmetrical 3-up of equal 16:9 featured cards,
             mirroring the homepage <FeaturedUitgelichtRow> treatment (#2027).
             Every card holds its locked 16:9 aspect; no height-matching (the
@@ -299,7 +299,7 @@ export function NewsListingClient({
         {hasMore && !isLoading && !error && (
           <div ref={setSentinelNode} className="h-4" aria-hidden="true" />
         )}
-      </div>
+      </PageContainer>
     </div>
   );
 }

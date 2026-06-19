@@ -44,13 +44,13 @@ Audit/spec generators sometimes flag features as "missing" because no top-level 
 
 Use these top-level groups — enforced by `storySort` in `.storybook/preview.ts`:
 
-| Group         | What goes here                                                                                                                                   | title prefix         |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
-| `Foundation/` | Design tokens only — Colors, Typography, Spacing, Icons (MDX docs, no component stories)                                                         | `Foundation/`        |
-| `UI/`         | Pure design system primitives with zero domain knowledge — could ship as a standalone package                                                    | `UI/`                |
-| `Features/`   | Domain components that require KCVV data types (Articles, Calendar, Home, Matches, Organigram, Players, Responsibility, Search, Sponsors, Teams) | `Features/<Domain>/` |
-| `Layout/`     | Page infrastructure — PageHeader, PageFooter                                                                                                     | `Layout/`            |
-| `Pages/`      | Full-page compositions                                                                                                                           | `Pages/`             |
+| Group         | What goes here                                                                                                                                                                                       | title prefix         |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `Foundation/` | Design tokens only — Colors, Typography, Spacing, Icons (MDX docs, no component stories)                                                                                                             | `Foundation/`        |
+| `UI/`         | Pure design system primitives with zero domain knowledge — could ship as a standalone package                                                                                                        | `UI/`                |
+| `Features/`   | Domain components that require KCVV data types (Articles, Calendar, Club, Contact, Editorial, Events, Forms, Home, Hulp, Jeugd, Matches, Organigram, Players, Search, Share, Sponsors, Staff, Teams) | `Features/<Domain>/` |
+| `Layout/`     | Page infrastructure — PageHeader, PageFooter                                                                                                                                                         | `Layout/`            |
+| `Pages/`      | Full-page compositions                                                                                                                                                                               | `Pages/`             |
 
 **Rule:** If a new component knows about `MatchResult`, `Player`, `Sponsor`, or any other KCVV domain type → it goes in `Features/<Domain>/`. If it's a generic primitive → `UI/`. Never nest domain components directly at the top level.
 
@@ -164,6 +164,20 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 ## Design Conventions
 
 **Storybook is the authoritative design system reference.** Check `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` stories for all design tokens (colors, spacing, border-radius, typography). Do not hardcode values not defined there.
+
+### Page layout — `<PageContainer>` and the three body widths
+
+Every page wraps its content in `<PageContainer>` (`@/components/design-system`). It is the single centered body container — `mx-auto w-full px-4 md:px-8` + a role-based max-width. Pick the width by the page's role; do **not** hand-roll `mx-auto max-w-… px-…` containers:
+
+| `width`     | Max-width                  | Use for                                                    |
+| ----------- | -------------------------- | ---------------------------------------------------------- |
+| `"index"`   | 1280 (`--container-index`) | Card-grid index / listing / landing pages (incl. homepage) |
+| _(default)_ | 1040 (`--container-wide`)  | Detail / single-subject pages                              |
+| `"prose"`   | 680 (`--container-prose`)  | Long-form reading, forms, legal                            |
+
+- Vertical rhythm (`py-*`, `scroll-mt-*`, …) goes on the consuming section via `className`; pass `as="section"` for sections and `id="…"` for in-page nav anchors. Heroes/bespoke grid layouts that can't wrap cleanly may apply the same width **loosely** (`max-w-[var(--container-wide)]` / `max-w-[var(--container-index)]`) — but only one of the three values.
+- **A content container may use no other width.** Three exemptions, which are NOT content containers: (1) **chrome** — `<SiteHeader>`/`<SiteFooter>` use `max-w-[1440px]` (global nav/footer span wider than content; the only width above 1280, chrome-only); (2) **element-sizing** — a photo, illustration, reading-measure/quote/divider width, or scaled diagram (e.g. the organigram tree) keeps its own `max-w-[…]`; (3) **full-bleed** — `<StripedSeam>`, hero band backgrounds, `<CtaBand>`, coloured section bands span the viewport and are never wrapped.
+- All three are named custom tokens: `--container-prose` (680), `--container-wide` (1040), `--container-index` (1280). The legacy `--max-width-inner*`/`--container-page`/`--container-default`/`--max-width-outer` tokens were all removed in #2155.
 
 ### Design system locations
 
@@ -584,17 +598,20 @@ applies: if the failure mode is visual-structural rather than
 data-presentational, propose adding the component to Phase 3 in the same
 PR (doc edit + tag + baselines).
 
-### Foundation MDX wrappers
+### Foundation MDX docs
 
-`@storybook/test-runner` filters out entries whose `type === "docs"`, so MDX
-files registered via `<Meta title=...>` cannot be baselined directly. Each
-`src/stories/foundation/<Name>.mdx` is paired with a sibling `.stories.tsx`
-that imports the MDX as a React component and renders it as a single
-`Reference` story tagged `vr`. The MDX itself is excluded from Storybook's
-stories glob (see `apps/web/.storybook/main.ts`) so it does not register a
-docs entry — only the wrapper story renders it. To document a new Foundation
-page, add both files: the MDX with no `<Meta>` block, and a wrapper following
-the same pattern.
+Foundation docs are authored as plain MDX under `src/stories/foundation/<Name>.mdx`
+and register **directly as native Docs pages** via an explicit
+`<Meta title="Foundation/<Name>" />` at the top of each file (import `Meta` from
+`@storybook/addon-docs/blocks`). There are **no `.stories.tsx` wrappers** — to add
+a new Foundation page, add a single `.mdx` with its `<Meta>` block.
+
+These docs are **not** visual-regression tested: `@storybook/test-runner` skips
+`type === "docs"` entries, and Foundation pages are documentation rather than
+shipped UI (the real tokens are VR-covered through the component stories that
+consume them). The previous "sibling `.stories.tsx` VR wrapper" pattern was
+removed in #2155 because it double-registered every topic in the sidebar (once
+as `Foundation/<Name>` and once as an auto-titled `stories/foundation/<Name>`).
 
 ### Determinism stubs (Phase 2)
 

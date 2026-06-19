@@ -501,7 +501,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             return (
               // Phase 5.C cream-shell composition: <ArticleBody> ships its
               // own `bg-cream w-full` outer wrapper that's meant to bleed
-              // edge-to-edge. Wrapping it in `max-w-inner-lg mx-auto px-6`
+              // edge-to-edge. Wrapping it in a centered `max-w-… mx-auto px-…`
               // (the legacy <SanityArticleBody> width gate) would box the
               // cream into a narrow centered band. The prose container
               // inside ArticleBody handles centering; the page just gets

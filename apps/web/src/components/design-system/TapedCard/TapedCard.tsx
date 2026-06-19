@@ -143,10 +143,13 @@ export function TapedCard({
         interactiveMode === "tilt" &&
           "motion-safe:hover:shadow-paper-lift transition-[transform,box-shadow] duration-300 motion-safe:hover:[--card-hover-delta:1deg]",
         interactiveMode === "press" &&
-          // Canonical paper press-down: card translates +1/+1 and the offset
-          // shadow collapses to flush. Tape strips are children so they
-          // translate with the card frame (R9 §7: "anchored to card frame").
-          "transition-[transform,box-shadow] duration-300 motion-safe:hover:shadow-none motion-safe:hover:[--card-press-x:1px] motion-safe:hover:[--card-press-y:1px]",
+          // Canonical paper press-down (feedback_canonical_press_down_hover):
+          // the card translates +1/+1 and the offset shadow collapses to flush.
+          // The translate is motion-safe-gated (it's movement); the shadow
+          // collapse always fires so reduced-motion users keep the pressable
+          // affordance — matching PRESS_DOWN_CLASSES. Tape strips are children
+          // so they translate with the card frame (R9 §7: "anchored to frame").
+          "transition-[transform,box-shadow] duration-300 hover:shadow-none motion-safe:hover:[--card-press-x:1px] motion-safe:hover:[--card-press-y:1px]",
         className,
       )}
     >

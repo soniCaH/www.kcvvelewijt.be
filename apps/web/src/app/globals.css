@@ -28,12 +28,6 @@
 :root {
   /* Foundation Grays */
   --color-foundation-gray-light: #edeff4;
-
-  /* Layout Variables */
-  --max-width--outer: 90rem;
-  --max-width--inner: 60rem;
-  --padding--mobile: 0.75rem;
-  --padding--desktop: 2.5rem;
 }
 
 /* ===== Spinner — scarf barber-pole + compact dot pulse (Phase 2.B.1) =====
@@ -354,12 +348,6 @@
   --breakpoint-xl: 1280px; /* Tailwind xl - Foundation xlarge */
   --breakpoint-2xl: 1536px; /* Tailwind 2xl */
 
-  /* ===== Max Widths ===== */
-
-  --max-width-inner: 60rem; /* 960px */
-  --max-width-inner-lg: 70rem; /* 1120px */
-  --max-width-outer: 90rem; /* 1440px */
-
   /* ===== Border Radius ===== */
 
   --radius-DEFAULT: 0.25rem;
@@ -457,11 +445,9 @@
 
   /* ===== Redesign / Layout & Motion (Phase 0) ===== */
 
-  --container-prose: 680px;
-  --container-wide: 1040px;
-  --container-page: 1120px;
-  --container-default: 1200px;
-  /* --max-width-outer (1440px) already exists — reuse for full-bleed */
+  --container-prose: 680px; /* reading column, forms, legal (PageContainer width="prose") */
+  --container-wide: 1040px; /* canonical body — detail pages (PageContainer default) */
+  --container-index: 1280px; /* card-grid index / listing / landing pages (PageContainer width="index") */
 
   /* Pool tuned twice on 2026-04-29 per owner feedback. Original master
      design pool (-2.5/-1.5/1/2) produced "seasick" rendering when applied
@@ -1247,7 +1233,7 @@
    node's FLIP travel transform, applied imperatively via the Web Animations
    API in the component. */
 .spotlight-pop {
-  animation: spotlight-pop 200ms ease-out both;
+  animation: spotlight-pop 240ms ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .spotlight-pop {

@@ -1,13 +1,17 @@
 
 
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Foundation/Typography" />
+
 export const metaBase = { fontSize: '11px', color: '#cacaca', fontFamily: 'monospace' };
 
-export const TypeSample = ({ token, size, px, weight = 400, sample = 'KCVV Elewijt Football Club' }) => (
+export const TypeSample = ({ token, size, px, weight = 400, font = 'var(--font-family-body)', sample = 'KCVV Elewijt Football Club' }) => (
   <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', padding: '8px 0', borderBottom: '1px solid #edeff4' }}>
     <div style={{ width: '96px', flexShrink: 0, fontSize: '11px', color: '#9a9da2', fontFamily: 'monospace' }}>{token}</div>
     <div style={{ width: '64px', flexShrink: 0, fontSize: '11px', color: '#9a9da2', fontFamily: 'monospace' }}>{size}</div>
     <div style={{ width: '48px', flexShrink: 0, fontSize: '11px', color: '#9a9da2' }}>{px}</div>
-    <div style={{ fontSize: `var(${token})`, fontFamily: 'var(--font-family-body)', fontWeight: weight, color: '#31404b', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sample}</div>
+    <div style={{ fontSize: `var(${token})`, fontFamily: font, fontWeight: weight, color: '#31404b', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sample}</div>
   </div>
 );
 
@@ -59,6 +63,8 @@ The samples below render live from the CSS variables.
 <FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text (Freight Sans Pro)" />
 <FontSample label="font-mono" cssVar="--font-family-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts (IBM Plex Mono)" />
 
+> **Display vs Big — when to use which.** `--font-display` (Freight Display) is the default heading serif for all heading *text* — editorial headlines, section titles, hero lines, the italic accent word, and global `h1–h6` (weights 600–700). `--font-display-big` (Freight Big) is the heavier poster cut, **always `font-black` (900)**, reserved for the single largest heading tier (`<EditorialHeading size="display-2xl">`) and every big **number** — `<NumberDisplay>`, match scores, standings points, jersey-number discs, and monogram badges (numbers add `tabular-nums`).
+
 ---
 
 ## Type Scale
@@ -75,13 +81,13 @@ The samples below render live from the CSS variables.
   <TypeSample token="--font-size-base" size="1rem" px="16px" sample="Default body text" />
   <TypeSample token="--font-size-lg" size="1.125rem" px="18px" sample="Lead paragraph / intro text" />
   <TypeSample token="--font-size-xl" size="1.25rem" px="20px" sample="Card titles / section labels" />
-  <TypeSample token="--font-size-2xl" size="1.375rem" px="22px" sample="Sub-headings (mobile h2)" />
-  <TypeSample token="--font-size-3xl" size="1.5rem" px="24px" sample="Section headings (desktop h3)" />
-  <TypeSample token="--font-size-4xl" size="1.75rem" px="28px" sample="Page title (mobile h1)" />
-  <TypeSample token="--font-size-5xl" size="2rem" px="32px" sample="Feature headings (desktop h2)" />
-  <TypeSample token="--font-size-stat" size="2.5rem" px="40px" sample="Stats / large numbers" />
-  <TypeSample token="--font-size-6xl" size="3rem" px="48px" sample="Hero title (desktop h1)" />
-  <TypeSample token="--font-size-hero" size="clamp(3rem, 7vw, 5.5rem)" px="48–88px" sample="Hero heading (responsive)" />
+  <TypeSample token="--font-size-2xl" size="1.375rem" px="22px" weight={700} font="var(--font-display)" sample="Sub-headings (mobile h2)" />
+  <TypeSample token="--font-size-3xl" size="1.5rem" px="24px" weight={700} font="var(--font-display)" sample="Section headings (desktop h3)" />
+  <TypeSample token="--font-size-4xl" size="1.75rem" px="28px" weight={700} font="var(--font-display)" sample="Page title (mobile h1)" />
+  <TypeSample token="--font-size-5xl" size="2rem" px="32px" weight={700} font="var(--font-display)" sample="Feature headings (desktop h2)" />
+  <TypeSample token="--font-size-stat" size="2.5rem" px="40px" weight={900} font="var(--font-display-big)" sample="Stats / large numbers" />
+  <TypeSample token="--font-size-6xl" size="3rem" px="48px" weight={700} font="var(--font-display)" sample="Hero title (desktop h1)" />
+  <TypeSample token="--font-size-hero" size="clamp(3rem, 7vw, 5.5rem)" px="48–88px" weight={700} font="var(--font-display)" sample="Hero heading (responsive)" />
 </div>
 
 ---

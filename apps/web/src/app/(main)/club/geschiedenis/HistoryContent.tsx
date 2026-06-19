@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PageViewTracker } from "@/components/analytics";
+import { PageContainer } from "@/components/design-system";
 import { StripedSeam } from "@/components/design-system/StripedSeam";
 import {
   HeritageHero,
@@ -23,7 +24,7 @@ const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
 function TimelineContent() {
   return (
-    <div className="mx-auto max-w-5xl px-4 md:px-10">
+    <PageContainer>
       {/* 1909 - 1941 */}
       <TimelineSection>
         <TimelineItem date="1909 - 1935" side="left">
@@ -547,7 +548,7 @@ function TimelineContent() {
           de geschiedenis van KCVV Elewijt!
         </p>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

@@ -3,6 +3,8 @@
  * editorial header → two flagship blocks → youth grid.
  */
 
+import { PageContainer } from "@/components/design-system";
+
 function FlagshipSkeleton() {
   return (
     <div className="border-ink grid animate-pulse grid-cols-1 border-2 sm:grid-cols-[1.25fr_1fr]">
@@ -19,7 +21,7 @@ function FlagshipSkeleton() {
 
 export default function TeamsLoading() {
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
+    <PageContainer width="index" className="py-10 sm:py-14">
       <div className="mb-10 flex animate-pulse flex-col gap-3">
         <div className="bg-paper-edge h-3 w-24 rounded" />
         <div className="bg-paper-edge h-12 w-72 rounded" />
@@ -47,6 +49,6 @@ export default function TeamsLoading() {
           </div>
         ))}
       </div>
-    </div>
+    </PageContainer>
   );
 }

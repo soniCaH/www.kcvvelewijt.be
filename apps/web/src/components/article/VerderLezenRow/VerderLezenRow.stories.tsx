@@ -3,7 +3,7 @@ import { fixtureImage } from "@test-fixtures/images";
 import { VerderLezenRow, type VerderLezenItem } from "./VerderLezenRow";
 
 const meta = {
-  title: "Article/VerderLezenRow",
+  title: "Features/Articles/VerderLezenRow",
   component: VerderLezenRow,
   tags: ["autodocs", "vr"],
   parameters: {
@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Net-new Phase 5 footer primitive (5.d4 lock, slider variant ratified during #1800 implementation review). Horizontal scroller of `<NewsCard>` at `--container-page` (1120px) width. At desktop the first ~3 cards sit in-frame; the rest reveal via paper-chrome scroll arrows + drag. Per-`articleType` card backgrounds (R3 lookup) tint each card. Items include articles + mentioned players / teams / staff / events.",
+          "Net-new Phase 5 footer primitive (5.d4 lock, slider variant ratified during #1800 implementation review). Horizontal scroller of `<NewsCard>` at `--container-wide` (1040px) width. At desktop the first ~3 cards sit in-frame; the rest reveal via paper-chrome scroll arrows + drag. Per-`articleType` card backgrounds (R3 lookup) tint each card. Items include articles + mentioned players / teams / staff / events.",
       },
     },
   },

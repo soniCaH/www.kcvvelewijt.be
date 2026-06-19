@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 
@@ -23,7 +24,7 @@ import { TapedFigure } from "@/components/design-system/TapedFigure";
  */
 export function HeritageHero() {
   return (
-    <header className="mx-auto flex w-full max-w-5xl flex-col gap-3 px-4 pt-10 sm:pt-14">
+    <PageContainer as="header" className="flex flex-col gap-3 pt-10 sm:pt-14">
       <span>
         <MonoLabel variant="plain">De club · sinds 1909</MonoLabel>
       </span>
@@ -39,7 +40,7 @@ export function HeritageHero() {
         Van de Jonge Footbalclub in 1909 tot het nationale voetbal vandaag — de
         rijke geschiedenis van één plezante compagnie.
       </p>
-    </header>
+    </PageContainer>
   );
 }
 

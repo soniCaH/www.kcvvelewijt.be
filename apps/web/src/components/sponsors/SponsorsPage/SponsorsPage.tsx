@@ -10,6 +10,7 @@
  */
 
 import { StripedSeam } from "@/components/design-system/StripedSeam";
+import { PageContainer } from "@/components/design-system";
 import { SponsorHero } from "../SponsorHero";
 import { SponsorTiers } from "../SponsorTiers";
 import { SponsorEmptyState } from "../SponsorEmptyState";
@@ -29,7 +30,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
 
   return (
     <SponsorsAnalytics>
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
+      <PageContainer width="index" className="py-10 sm:py-14">
         <SponsorHero featured={featured} />
 
         {hasSponsors ? (
@@ -42,7 +43,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
         ) : (
           <SponsorEmptyState />
         )}
-      </div>
+      </PageContainer>
 
       <SponsorCtaBand />
     </SponsorsAnalytics>

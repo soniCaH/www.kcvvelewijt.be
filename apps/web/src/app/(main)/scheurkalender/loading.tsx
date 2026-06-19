@@ -3,10 +3,12 @@
  * Mirrors the Treatment A sheet: masthead bar + weekend fixture rows.
  */
 
+import { PageContainer } from "@/components/design-system";
+
 export default function ScheurkalenderLoading() {
   return (
     <div className="bg-cream min-h-screen">
-      <div className="mx-auto max-w-3xl px-4 pt-12 pb-12">
+      <PageContainer className="pt-12 pb-12">
         <div className="border-ink border-2 bg-white">
           {/* Masthead */}
           <div className="border-ink flex items-baseline justify-between gap-4 border-b-2 px-4 py-3.5">
@@ -25,7 +27,7 @@ export default function ScheurkalenderLoading() {
             ))}
           </div>
         </div>
-      </div>
+      </PageContainer>
     </div>
   );
 }

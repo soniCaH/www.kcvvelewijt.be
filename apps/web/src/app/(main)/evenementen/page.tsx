@@ -20,7 +20,11 @@ import { Effect } from "effect";
 import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
 import { EventRepository } from "@/lib/repositories/event.repository";
-import { EditorialHeading, MonoLabel } from "@/components/design-system";
+import {
+  EditorialHeading,
+  MonoLabel,
+  PageContainer,
+} from "@/components/design-system";
 import { EventsBrowser } from "@/components/event/EventsBrowser";
 
 export const metadata: Metadata = {
@@ -55,7 +59,7 @@ export default async function EvenementenPage() {
 
   return (
     <div className="bg-jersey-deep-dark flex min-h-screen flex-col">
-      <header className="mx-auto w-full max-w-3xl px-4 pt-12 pb-8">
+      <PageContainer as="header" width="index" className="pt-12 pb-8">
         <MonoLabel tone="cream">KCVV Elewijt · Agenda</MonoLabel>
         <EditorialHeading
           level={1}
@@ -65,11 +69,11 @@ export default async function EvenementenPage() {
         >
           Evenementen
         </EditorialHeading>
-      </header>
+      </PageContainer>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-16">
+      <PageContainer as="main" width="index" className="flex-1 pb-16">
         <EventsBrowser events={events} />
-      </main>
+      </PageContainer>
     </div>
   );
 }

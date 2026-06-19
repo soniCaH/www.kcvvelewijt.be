@@ -55,8 +55,8 @@ const DIRECTION_CHIP: Record<
 };
 
 const TAPE_COLOR: Record<TransferDirection, TapeStripProps["color"]> = {
-  incoming: "jersey",
-  extension: "jersey",
+  incoming: "jersey-deep",
+  extension: "jersey-deep",
   outgoing: "warm",
 };
 

@@ -62,7 +62,7 @@ const renderEventHero = ({
 };
 
 const meta = {
-  title: "Features/Calendar/EventHero",
+  title: "Features/Events/EventHero",
   component: EventHero,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs", "vr"],

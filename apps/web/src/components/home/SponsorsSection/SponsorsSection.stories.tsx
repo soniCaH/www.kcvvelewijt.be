@@ -8,7 +8,7 @@ import { mockSponsors } from "@/components/sponsors/Sponsors.mocks";
  * (hoofd + sponsor tiers — the homepage subset).
  */
 const meta = {
-  title: "Features/Homepage/SponsorsSection",
+  title: "Features/Home/SponsorsSection",
   tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
   render: () => {

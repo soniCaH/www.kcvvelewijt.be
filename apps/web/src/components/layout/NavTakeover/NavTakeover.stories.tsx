@@ -4,7 +4,7 @@ import { NavTakeoverItem } from "./NavTakeoverItem";
 import { Button } from "@/components/design-system/Button";
 
 const meta = {
-  title: "UI/NavTakeover",
+  title: "Layout/NavTakeover",
   component: NavTakeover,
   tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },

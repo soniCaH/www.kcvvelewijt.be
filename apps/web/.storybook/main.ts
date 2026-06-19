@@ -6,12 +6,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const config: StorybookConfig = {
   stories: [
+    // Foundation docs are authored as MDX with an explicit `<Meta title="Foundation/…" />`
+    // and register directly as native Docs pages (no `.stories.tsx` wrappers).
     "../src/**/*.mdx",
-    // Foundation MDX is rendered via sibling .stories.tsx wrappers so the
-    // test-runner (which excludes type=docs entries) can baseline them. The
-    // wrappers import each .mdx as a React component — see
-    // src/stories/foundation/<Name>.stories.tsx.
-    "!../src/stories/foundation/**/*.mdx",
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [

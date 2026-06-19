@@ -132,12 +132,12 @@ describe("TicketStub", () => {
     expect(screen.getByText(/Meer details/i)).toBeInTheDocument();
   });
 
-  it("resets the hover tilt under reduced motion", () => {
+  it("gates the hover press-down behind motion-safe", () => {
     render(<TicketStub {...baseProps} />);
 
     const card = screen.getByTestId("ticket-stub-card");
-    expect(card.className).toMatch(/motion-reduce:/);
-    expect(card.className).toMatch(/group-hover:scale-\[1\.02\]/);
-    expect(card.className).toMatch(/group-hover:-rotate-1/);
+    expect(card.className).toContain("hover:shadow-none");
+    expect(card.className).toContain("motion-safe:hover:translate-x-1");
+    expect(card.className).toContain("motion-safe:group-hover:translate-x-1");
   });
 });

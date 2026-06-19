@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchHero } from "./MatchHero";
+import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Features/Matches/MatchHero",
@@ -20,10 +21,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const KCVV_LOGO =
-  "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1";
-const OPPONENT_LOGO =
-  "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1";
+const KCVV_LOGO = fixtureImage("sponsor-logo", 0);
+const OPPONENT_LOGO = fixtureImage("sponsor-logo", 1);
 
 const defaultHomeTeam = {
   name: "KCVV Elewijt",

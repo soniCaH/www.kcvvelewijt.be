@@ -4,7 +4,7 @@ import type { UpcomingMatch } from "@/components/match/types";
 import { KCVV_CLUB_ID } from "@/lib/constants";
 
 const meta = {
-  title: "UI/MatchStrip",
+  title: "Features/Matches/MatchStrip",
   component: MatchStripView,
   tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },

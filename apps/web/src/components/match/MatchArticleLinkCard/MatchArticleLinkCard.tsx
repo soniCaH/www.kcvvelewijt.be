@@ -5,6 +5,7 @@ import {
   TapedCard,
   MonoLabelRow,
   EditorialHeading,
+  PageContainer,
 } from "@/components/design-system";
 
 /**
@@ -74,14 +75,14 @@ export function MatchArticleLinkCard({
   const lead = article.lead?.trim() || undefined;
 
   return (
-    <section
-      data-component="match-article-link-card"
+    <PageContainer
+      as="section"
       className={cn(
         // `bg-cream` matches the sibling <MatchLineupSection> /
         // <MatchEventsSection> bands so the page reads as one continuous cream
         // column on the white body — and so the `ink-cream` <StripedSeam> above
         // it terminates against cream, not white (no visible seam break).
-        "bg-cream mx-auto w-full max-w-[var(--container-wide)] px-4 py-10 md:py-14",
+        "bg-cream py-10 md:py-14",
         className,
       )}
     >
@@ -94,7 +95,12 @@ export function MatchArticleLinkCard({
         interactive="press"
         tape={[
           { color: "warm", length: "lg", position: "left", rotation: "a" },
-          { color: "jersey", length: "lg", position: "right", rotation: "c" },
+          {
+            color: "jersey-deep",
+            length: "lg",
+            position: "right",
+            rotation: "c",
+          },
         ]}
         className="group relative flex flex-col"
       >
@@ -169,6 +175,6 @@ export function MatchArticleLinkCard({
           {secondary.label} →
         </Link>
       )}
-    </section>
+    </PageContainer>
   );
 }

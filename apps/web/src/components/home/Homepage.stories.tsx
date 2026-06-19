@@ -42,7 +42,7 @@ import { fixtureImage } from "@test-fixtures/images";
 // page (Playwright e2e covers the integration smoke).
 
 const meta = {
-  title: "Pages/Homepage",
+  title: "Pages/Home",
   // Keep the `vr` tag so discovery picks the story up; the
   // `parameters.vr.disable = true` below suppresses screenshot
   // capture per the "Defer consumer baselines via vr.disable" rule
@@ -73,7 +73,6 @@ type Story = StoryObj<typeof meta>;
 const mockHeroProps: EditorialHeroProps = {
   variant: "announcement",
   placement: "homepage",
-  hoverStyle: "tilt-photo",
   slug: "kampioen-58-punten",
   title: "Kampioen! 58 punten en titel in eerste provinciale.",
   lead: "Met een laatste-speeldagzege wordt de A-ploeg kampioen van de reeks. Zaterdag wordt gevierd op het sportpark.",
@@ -201,7 +200,7 @@ const Homepage = ({
         key: "hero",
         bg: "transparent",
         content: (
-          <div className="mx-auto max-w-7xl px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
+          <div className="mx-auto max-w-[var(--container-index)] px-4 pt-10 pb-4 md:px-8 md:pt-14 md:pb-6">
             <EditorialHero {...heroProps} />
           </div>
         ),

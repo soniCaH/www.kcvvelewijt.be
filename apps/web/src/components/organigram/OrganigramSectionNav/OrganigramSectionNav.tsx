@@ -94,7 +94,7 @@ export function OrganigramSectionNav({
         className,
       )}
     >
-      <div className="mx-auto flex max-w-[80rem] items-center gap-3 px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-[var(--container-index)] items-center gap-3 px-4 py-2 md:px-8">
         <ul className="flex items-center gap-2">
           {SECTIONS.map((section) => {
             const isActive = active === section.id;
@@ -114,7 +114,7 @@ export function OrganigramSectionNav({
                       ?.focus({ preventScroll: true });
                   }}
                   className={cn(
-                    "border-ink inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-all duration-200",
+                    "border-ink inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-all duration-150",
                     isActive
                       ? "bg-jersey-deep text-cream"
                       : "bg-cream text-ink hover:bg-cream-soft shadow-[1px_1px_0_0_var(--color-ink)]",

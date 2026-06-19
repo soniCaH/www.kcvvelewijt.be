@@ -4,6 +4,7 @@ import JeugdLoading from "./loading";
 const meta = {
   title: "Pages/Jeugd/JeugdLandingSkeleton",
   component: JeugdLoading,
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof JeugdLoading>;
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
-import { SectionHeader } from "@/components/design-system";
+import { PageContainer, SectionHeader } from "@/components/design-system";
 import { SponsorTile, SPONSOR_TILE_GRID_CLASS } from "../SponsorTile";
 import { sortByTierThenName } from "../sortByTierThenName";
 import type { Sponsor } from "../Sponsors";
@@ -23,7 +23,7 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
       aria-label="Onze sponsors"
       className={cn("bg-cream-deep py-16 md:py-20", className)}
     >
-      <div className="mx-auto max-w-7xl px-4 md:px-8">
+      <PageContainer width="index">
         <SectionHeader title="Met dank aan onze sponsors" />
 
         <ul className={cn("mt-8", SPONSOR_TILE_GRID_CLASS)}>
@@ -42,7 +42,7 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
             Alle sponsors &amp; sympathisanten →
           </Link>
         </div>
-      </div>
+      </PageContainer>
     </section>
   );
 };

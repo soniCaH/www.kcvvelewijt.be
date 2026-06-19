@@ -11,7 +11,7 @@
  */
 import Link from "next/link";
 import { DateTime } from "luxon";
-import { Crest } from "@/components/design-system";
+import { Crest, PRESS_DOWN_CLASSES } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { getResultColor, isPlayedMatch } from "@/lib/utils/match-display";
 import { House, Bus } from "@/lib/icons.redesign";
@@ -196,8 +196,8 @@ export function TeamAgendaRow({
 
   const cardBase = cn(
     "flex items-stretch gap-0",
-    "border-2 transition-all duration-300",
-    "hover:-translate-y-0 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+    "border-2",
+    PRESS_DOWN_CLASSES,
     featured
       ? // Soft ink-muted offset (the design-system dark-card shadow, cf.
         // `--shadow-paper-sm-soft`) — a cream shadow vanished against the cream

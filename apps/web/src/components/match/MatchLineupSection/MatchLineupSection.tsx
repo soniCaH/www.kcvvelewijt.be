@@ -1,4 +1,8 @@
-import { EditorialHeading, MonoLabelRow } from "@/components/design-system";
+import {
+  EditorialHeading,
+  MonoLabelRow,
+  PageContainer,
+} from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { MatchLineup, type LineupPlayer } from "../MatchLineup/MatchLineup";
 
@@ -30,12 +34,9 @@ export function MatchLineupSection({
   if (homeLineup.length === 0 && awayLineup.length === 0) return null;
 
   return (
-    <section
-      data-component="match-lineup-section"
-      className={cn(
-        "bg-cream mx-auto w-full max-w-[var(--container-wide)] px-4 py-10 md:py-14",
-        className,
-      )}
+    <PageContainer
+      as="section"
+      className={cn("bg-cream py-10 md:py-14", className)}
     >
       <MonoLabelRow
         items={[{ label: "OPSTELLINGEN" }]}
@@ -51,6 +52,6 @@ export function MatchLineupSection({
         homeLineup={[...homeLineup]}
         awayLineup={[...awayLineup]}
       />
-    </section>
+    </PageContainer>
   );
 }

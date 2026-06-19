@@ -18,7 +18,7 @@ import {
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
-import { StripedSeam } from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
 import { JeugdVisie } from "@/components/jeugd/JeugdVisie/JeugdVisie";
@@ -110,7 +110,7 @@ export default async function JeugdPage() {
         ])}
       />
 
-      <div className="mx-auto w-full max-w-[70rem] px-4 py-10 sm:py-14">
+      <PageContainer width="index" className="py-10 sm:py-14">
         <JeugdHero />
 
         <div className="my-10 sm:my-12">
@@ -127,7 +127,7 @@ export default async function JeugdPage() {
         </EditorialHubAnalytics>
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />
-      </div>
+      </PageContainer>
 
       <JeugdCtaBand />
     </>

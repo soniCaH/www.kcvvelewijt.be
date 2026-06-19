@@ -3,7 +3,7 @@ import { MatchGoalsBlock } from "./MatchGoalsBlock";
 import type { MatchEvent } from "@/components/match/MatchEvents";
 
 const meta = {
-  title: "Article/Blocks/MatchGoalsBlock",
+  title: "Features/Articles/Blocks/MatchGoalsBlock",
   component: MatchGoalsBlock,
   tags: ["autodocs", "vr"],
   parameters: {

@@ -73,7 +73,7 @@ describe("Alert", () => {
       expect(alert).toHaveClass("border-2");
       expect(alert).toHaveClass("border-ink");
       expect(alert).toHaveClass("rounded-none");
-      expect(alert.className).toContain("shadow-[var(--shadow-paper-sm)]");
+      expect(alert.className).toContain("shadow-paper-sm");
     });
 
     it("renders the perforated notch column via kcvv-stub-notch utility", () => {

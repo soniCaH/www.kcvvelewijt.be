@@ -1,3 +1,4 @@
+import { Meta } from "@storybook/addon-docs/blocks";
 import {
   MagnifyingGlass, X, List, CaretDown, ArrowRight, ArrowSquareOut, CheckCircle,
   Info, Warning,
@@ -6,6 +7,8 @@ import {
   Heart, Handshake, SoccerBall, Ticket,
   FacebookLogo, InstagramLogo, ShareNetwork, DownloadSimple,
 } from '@/lib/icons.redesign';
+
+<Meta title="Foundation/Spacing & Icons" />
 
 
 export const SpacingRow = ({ token, value, px }) => (
@@ -47,7 +50,6 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
     <div>Visual</div>
   </div>
   <SpacingRow token="spacing-0_75" value="0.75rem" px="12px" />
-  <SpacingRow token="spacing-2_5" value="2.5rem" px="40px" />
   <SpacingRow token="spacing-15" value="3.75rem" px="60px" />
   <SpacingRow token="spacing-17_5" value="4.375rem" px="70px" />
   <SpacingRow token="spacing-22_5" value="5.625rem" px="90px" />
@@ -75,14 +77,11 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
 
 ## Max Widths
 
-<table>
-  <thead><tr><th>Token</th><th>Value</th><th>px</th><th>Usage</th></tr></thead>
-  <tbody>
-    <tr><td><code>max-w-inner</code></td><td>60rem</td><td>960px</td><td>Article content, narrow layouts</td></tr>
-    <tr><td><code>max-w-inner-lg</code></td><td>70rem</td><td>1120px</td><td>Wide content areas</td></tr>
-    <tr><td><code>max-w-outer</code></td><td>90rem</td><td>1440px</td><td>Full-bleed container cap</td></tr>
-  </tbody>
-</table>
+Container widths are catalogued under **Container widths** below: page content
+uses the three `<PageContainer>` variants (prose 680 / default 1040 / index
+1280); global header/footer chrome uses `max-w-[1440px]`. The legacy
+`--max-width-inner` / `--max-width-inner-lg` tokens were removed in the
+container convergence (#2155).
 
 ---
 
@@ -95,8 +94,7 @@ These extend Tailwind's default spacing scale. All values are defined in `src/ap
     <tr><td><code>shadow</code></td><td>Default card shadow</td></tr>
     <tr><td><code>shadow-md</code></td><td>Raised elements</td></tr>
     <tr><td><code>shadow-lg</code></td><td>Modals, overlays</td></tr>
-    <tr><td><code>shadow-card-hover</code></td><td>Card hover state (<code>0 12px 32px rgba(0,0,0,0.15)</code>)</td></tr>
-    <tr><td><code>shadow-green</code></td><td>Focus glow (<code>0 0 6px 1px rgba(74,207,82,0.5)</code>)</td></tr>
+    <tr><td><code>shadow-card-hover</code></td><td>Legacy — pre-redesign card hover. Redesign cards use the press-down model (see the Paper shadows section below); not used by current cards.</td></tr>
     <tr><td><code>shadow-input</code></td><td>Form input inset</td></tr>
     <tr><td><code>shadow-input-focus</code></td><td>Form input focus state</td></tr>
   </tbody>
@@ -170,26 +168,45 @@ import { SoccerBall, MapPin } from "@/lib/icons.redesign";
 ## Redesign / Phase 0 — Layout, Rotation, Shadow, Motion
 
 The redesign introduces four new groups of layout primitives: container widths
-for prose vs. default content, a four-step rotation pool for taped-card looks,
+(prose / default / index), a four-step rotation pool for taped-card looks,
 hard-edged paper shadows for the cream surface, and motion durations for
 typical interactions. All values are defined in `src/app/globals.css`.
 
 ### Container widths
 
-`--container-prose` (680px) caps long-form article text at a comfortable
-measure; `--container-wide` (1040px) widens editorial media (article images,
-video) beyond prose while staying clearly bounded; `--container-default`
-(1200px) is the standard page-content width between the cream surface
-gutters. `--max-width-outer` (1440px) — already present from earlier work
-— remains the full-bleed cap.
+**These three are the only widths a content container may use.** Page and
+section bodies use the shared **`<PageContainer>`** primitive (one centered
+container: `mx-auto w-full px-4 md:px-8` + a role-based max-width). Pick by role;
+never hand-roll `mx-auto max-w-… px-…`. Heroes and bespoke grid layouts that
+can't wrap cleanly in the component may apply the same width **loosely** (the
+matching `--container-*` var) — but still only one of these three values:
+
+<table>
+  <thead>
+    <tr><th>Role</th><th><code>width</code> prop</th><th>Value</th><th>Token / class</th><th>Use for</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Reading</td><td><code>"prose"</code></td><td>680px</td><td><code>--container-prose</code></td><td>Long-form article / CMS text, forms, legal</td></tr>
+    <tr><td>Detail</td><td><em>(default)</em></td><td>1040px</td><td><code>--container-wide</code></td><td>Detail / single-subject pages + hero content</td></tr>
+    <tr><td>Index</td><td><code>"index"</code></td><td>1280px</td><td><code>--container-index</code></td><td>Card-grid index / listing / landing pages (incl. homepage)</td></tr>
+  </tbody>
+</table>
+
+**Not a content container — exempt from the rule above:**
+
+- **Chrome** — `<SiteHeader>` / `<SiteFooter>` use `max-w-[1440px]`. The global nav and footer intentionally span wider than page content; this is the only width above 1280, and it is reserved for chrome.
+- **Element-sizing** — a photo, jersey illustration, a paragraph's reading measure / quote / divider / error-message width, or a scaled diagram (e.g. the organigram tree). These size a single visual element, not a page column, and keep their own `max-w-[…]`.
+- **Full-bleed** — `<StripedSeam>`, hero band backgrounds, `<CtaBand>`, and coloured section bands span the viewport and are never wrapped.
 
 <div style={{ marginBottom: '24px' }}>
-  <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-prose · 680px (article body cap)</div>
-  <div style={{ height: '8px', background: 'var(--color-jersey)', width: 'var(--container-wide)', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>--container-wide · 1040px (wide editorial media)</div>
-  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-default)', maxWidth: '100%', marginBottom: '4px' }} />
-  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>--container-default · 1200px (standard page content)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-prose)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>prose · 680px (--container-prose)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-wide)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>default · 1040px (--container-wide)</div>
+  <div style={{ height: '8px', background: 'var(--color-jersey-deep)', width: 'var(--container-index)', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginBottom: '12px' }}>index · 1280px (--container-index)</div>
+  <div style={{ height: '8px', background: 'var(--color-ink-muted)', width: '90rem', maxWidth: '100%', marginBottom: '4px' }} />
+  <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>chrome · 1440px (max-w-[1440px]) — header / footer only, NOT page content</div>
 </div>
 
 ### Rotation pool
@@ -200,19 +217,19 @@ grid. The pool is intentionally narrow so the page never tips into chaos.
 
 <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '24px', padding: '32px 16px', background: 'var(--color-cream)', borderRadius: '8px', border: '1px solid var(--color-paper-edge)' }}>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-a))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-2.5°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-a))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-0.5°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-a</div>
   </div>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-b))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-1.5°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-b))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-0.25°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-b</div>
   </div>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-c))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>1°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-c))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>0.25°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-c</div>
   </div>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-d))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>2°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-d))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>0.5°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-d</div>
   </div>
 </div>

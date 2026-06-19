@@ -3,7 +3,7 @@ import type { IndexedSubject } from "@/components/article/SubjectAttribution";
 import { ArticleCredits } from "./ArticleCredits";
 
 const meta = {
-  title: "Article/ArticleCredits",
+  title: "Features/Articles/ArticleCredits",
   component: ArticleCredits,
   tags: ["autodocs", "vr"],
   parameters: {

@@ -5,7 +5,7 @@ import type { UitgelichtArticle } from "./FeaturedUitgelichtRow";
 import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
-  title: "Features/Homepage/FeaturedUitgelichtRow",
+  title: "Features/Home/FeaturedUitgelichtRow",
   component: FeaturedUitgelichtRow,
   tags: ["autodocs", "vr"],
   parameters: {

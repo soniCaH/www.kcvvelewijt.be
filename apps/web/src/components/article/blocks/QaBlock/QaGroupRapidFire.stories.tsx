@@ -21,7 +21,7 @@ const LARS = {
 };
 
 const meta = {
-  title: "Features/Articles/QaBlock/QaGroupRapidFire",
+  title: "Features/Articles/Blocks/QaGroupRapidFire",
   component: QaGroupRapidFire,
   parameters: {
     layout: "padded",

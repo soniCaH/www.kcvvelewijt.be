@@ -18,7 +18,7 @@ function ev(
 }
 
 const meta = {
-  title: "Features/Calendar/EventMonthList",
+  title: "Features/Events/EventMonthList",
   component: EventMonthList,
   parameters: { layout: "fullscreen" },
   // VR-tagged like its sibling list-shell stories (EventsBrowser / EventFilterBar

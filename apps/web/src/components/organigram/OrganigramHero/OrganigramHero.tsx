@@ -46,7 +46,7 @@ export function OrganigramHero({
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(120% 80% at 72% 0%, rgba(74,207,82,0.14), transparent 60%)",
+            "radial-gradient(120% 80% at 72% 0%, color-mix(in srgb, var(--color-jersey-deep) 14%, transparent), transparent 60%)",
         }}
       />
 

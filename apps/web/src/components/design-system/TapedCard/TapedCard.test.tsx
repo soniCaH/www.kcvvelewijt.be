@@ -135,7 +135,10 @@ describe("TapedCard", () => {
     expect(el).toHaveAttribute("data-interactive", "press");
     expect(el.className).toMatch(/motion-safe:hover:\[--card-press-x:1px\]/);
     expect(el.className).toMatch(/motion-safe:hover:\[--card-press-y:1px\]/);
-    expect(el.className).toMatch(/motion-safe:hover:shadow-none/);
+    // Shadow collapse is NOT motion-safe-gated: reduced-motion users keep the
+    // pressable affordance (translate-gated-only canonical, PRESS_DOWN_CLASSES).
+    expect(el.className).toMatch(/hover:shadow-none/);
+    expect(el.className).not.toMatch(/motion-safe:hover:shadow-none/);
     // Tilt-specific class must NOT be applied in press mode.
     expect(el.className).not.toMatch(/--card-hover-delta/);
   });

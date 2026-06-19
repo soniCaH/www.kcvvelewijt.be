@@ -3,7 +3,7 @@ import { Crest } from "@/components/design-system";
 import { PageHero } from "./PageHero";
 
 const meta = {
-  title: "Layout/PageHero",
+  title: "UI/PageHero",
   component: PageHero,
   parameters: {
     layout: "fullscreen",

@@ -1,5 +1,3 @@
-export { EventFactOverview } from "./EventFactOverview";
-export type { EventFactOverviewProps } from "./EventFactOverview";
 export {
   resolveEventDate,
   resolveEventRange,

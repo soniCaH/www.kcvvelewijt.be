@@ -18,6 +18,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { PageViewTracker } from "@/components/analytics";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import { TeamFlagship } from "@/components/team/TeamFlagship";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
@@ -66,7 +67,7 @@ export default async function TeamsPage() {
       />
       <PageViewTracker eventName="team_list_view" />
 
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:py-14">
+      <PageContainer width="index" className="py-10 sm:py-14">
         {/* Page header */}
         <header className="mb-10 flex flex-col gap-3">
           <span>
@@ -112,7 +113,7 @@ export default async function TeamsPage() {
         </div>
 
         <YouthDirectory divisions={youthByDivision} className="mt-16" />
-      </div>
+      </PageContainer>
     </>
   );
 }

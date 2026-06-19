@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 
 export type EditorialHubCardVariant = "news" | "nav";
 
@@ -82,8 +83,10 @@ export function EditorialHubCard({
       className={cn(
         "group border-ink shadow-paper-sm bg-cream-soft flex h-full flex-col overflow-hidden border-2",
         // Canonical press-down on hover AND keyboard focus (parity with
-        // <SponsorTile>): the card shifts into its shadow on both.
-        "transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+        // <SponsorTile>): the card shifts into its shadow on both. The hover
+        // translate is motion-safe-gated via PRESS_DOWN_CLASSES; the
+        // focus-visible press always moves so keyboard focus stays locatable.
+        PRESS_DOWN_CLASSES,
         "focus-visible:outline-jersey-deep focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2",
       )}
     >
@@ -132,7 +135,7 @@ export function EditorialHubCard({
           {arrowText}
           <span
             aria-hidden="true"
-            className="transition-transform duration-200 group-hover:translate-x-0.5"
+            className="transition-transform duration-150 group-hover:translate-x-0.5"
           >
             →
           </span>

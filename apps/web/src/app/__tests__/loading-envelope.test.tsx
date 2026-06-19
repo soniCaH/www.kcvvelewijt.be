@@ -37,6 +37,15 @@ import SpelersDetailLoading from "../(main)/spelers/[slug]/loading";
 import StafDetailLoading from "../(main)/staf/[slug]/loading";
 import TegenstanderLoading from "../(main)/tegenstander/[clubId]/loading";
 import WedstrijdLoading from "../(main)/wedstrijd/[matchId]/loading";
+import HomepageLoading from "../(landing)/loading";
+import ContactLoading from "../(main)/club/contact/loading";
+import GeschiedenisLoading from "../(main)/club/geschiedenis/loading";
+import UltrasLoading from "../(main)/club/ultras/loading";
+import EvenementenLoading from "../(main)/evenementen/loading";
+import EvenementDetailLoading from "../(main)/evenementen/[slug]/loading";
+import WedstrijdenLoading from "../(main)/ploegen/[slug]/wedstrijden/loading";
+import PrivacyLoading from "../(main)/privacy/loading";
+import ShareLoading from "../(main)/share/loading";
 
 describe("loading.tsx envelope drift guard", () => {
   // -------------------------------------------------------------------------
@@ -116,20 +125,26 @@ describe("loading.tsx envelope drift guard", () => {
       name: "/jeugd",
       Loading: JeugdLoading,
       // Phase 7 (#2038): cream tracer composition (header + nav grid + youth
-      // directory), no SectionStack envelope.
-      expectedRootClass: "mx-auto w-full max-w-[70rem] px-4 py-10 sm:py-14",
+      // directory), no SectionStack envelope. Outer container is a
+      // `<PageContainer width="index">` (matches the page's index width).
+      expectedRootClass:
+        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] py-10 sm:py-14",
     },
     {
       name: "/ploegen",
       Loading: PloegenLoading,
-      expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
+      // Outer container is a `<PageContainer width="index">` (page's index width).
+      expectedRootClass:
+        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] py-10 sm:py-14",
     },
     {
       name: "/sponsors",
       Loading: SponsorsLoading,
       // Phase 7 (#2033): cream editorial header + SponsorTile grid skeleton,
-      // mirroring the rebuilt /sponsors page (no SectionStack envelope).
-      expectedRootClass: "mx-auto w-full max-w-5xl px-4 py-10 sm:py-14",
+      // mirroring the rebuilt /sponsors page (no SectionStack envelope). Outer
+      // container is a `<PageContainer width="index">` (page's index width).
+      expectedRootClass:
+        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] py-10 sm:py-14",
     },
     {
       name: "/ploegen/[slug]",
@@ -158,6 +173,51 @@ describe("loading.tsx envelope drift guard", () => {
       Loading: WedstrijdLoading,
       expectedRootClass: "min-h-screen",
     },
+    {
+      name: "/",
+      Loading: HomepageLoading,
+      expectedRootClass: "bg-cream min-h-screen",
+    },
+    {
+      name: "/club/contact",
+      Loading: ContactLoading,
+      expectedRootClass: "bg-cream min-h-screen",
+    },
+    {
+      name: "/club/geschiedenis",
+      Loading: GeschiedenisLoading,
+      expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/club/ultras",
+      Loading: UltrasLoading,
+      expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/evenementen",
+      Loading: EvenementenLoading,
+      expectedRootClass: "bg-jersey-deep-dark flex min-h-screen flex-col",
+    },
+    {
+      name: "/evenementen/[slug]",
+      Loading: EvenementDetailLoading,
+      expectedRootClass: "bg-cream",
+    },
+    {
+      name: "/ploegen/[slug]/wedstrijden",
+      Loading: WedstrijdenLoading,
+      expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/privacy",
+      Loading: PrivacyLoading,
+      expectedRootClass: "bg-cream py-16 md:py-20",
+    },
+    {
+      name: "/share",
+      Loading: ShareLoading,
+      expectedRootClass: "bg-cream min-h-screen",
+    },
   ];
 
   describe("Non-SectionStack routes — root className contract", () => {
@@ -184,7 +244,7 @@ describe("loading.tsx envelope drift guard", () => {
       nonSectionStackRoutes.map(({ name }) => name.replace(/^\//, "")),
     );
     const stripGroup = (file: string) =>
-      file.replace(/^\((main|landing)\)\//, "").replace(/\/loading\.tsx$/, "");
+      file.replace(/^\((main|landing)\)\//, "").replace(/\/?loading\.tsx$/, "");
     const onDiskRouteNames = new Set(loadingFiles.map(stripGroup));
     const missingFiles = loadingFiles
       .filter((f) => !expectedRouteNames.has(stripGroup(f)))

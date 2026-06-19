@@ -33,6 +33,7 @@ import {
   CtaBand,
   EditorialHeading,
   MonoLabel,
+  PageContainer,
   StripedSeam,
 } from "@/components/design-system";
 import { OrganigramSectionNav } from "@/components/organigram/OrganigramSectionNav";
@@ -117,7 +118,7 @@ export default async function HulpHubPage() {
           members={members}
           responsibilityPaths={responsibilityPaths}
         />
-        <div className="mx-auto w-full max-w-[80rem] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+        <PageContainer width="index" className="py-10 sm:py-14">
           <OrganigramHero
             members={members}
             responsibilityPaths={responsibilityPaths}
@@ -193,7 +194,7 @@ export default async function HulpHubPage() {
               <OrganigramOverview nodes={members} collapsible />
             </div>
           </section>
-        </div>
+        </PageContainer>
 
         {/* Inside <HubMemberPanel> so it joins the page's `inert` subtree while a
             member panel is open (B1) — the CTA must not stay focusable behind the

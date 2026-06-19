@@ -53,7 +53,7 @@ export function RemovableChip({
         type="button"
         onClick={onRemove}
         aria-label={`${removeLabel} ${label.trim() || "selectie"}`}
-        className="focus-visible:outline-jersey-deep flex h-4 w-4 items-center justify-center text-sm leading-none transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="focus-visible:outline-jersey-deep flex h-4 w-4 items-center justify-center text-sm leading-none transition-opacity duration-150 hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2"
       >
         <span aria-hidden="true">×</span>
       </button>

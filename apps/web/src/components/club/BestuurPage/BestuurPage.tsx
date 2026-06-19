@@ -17,7 +17,11 @@ import {
   type PortableTextBlock,
   type PortableTextComponents,
 } from "@portabletext/react";
-import { EditorialHeading, StripedSeam } from "@/components/design-system";
+import {
+  EditorialHeading,
+  PageContainer,
+  StripedSeam,
+} from "@/components/design-system";
 import {
   TeamStaff,
   type TeamStaffMemberData,
@@ -70,15 +74,15 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {showDescription ? (
-        <section className="mx-auto max-w-5xl px-4 pt-12">
+        <PageContainer as="section" className="pt-12">
           <div className="border-jersey-deep text-ink font-body max-w-3xl border-l-4 pl-6 text-base leading-relaxed [&_p]:mb-4 [&_p:last-child]:mb-0">
             <PortableText value={body} components={bodyComponents} />
           </div>
-        </section>
+        </PageContainer>
       ) : null}
 
       {hasMembers ? (
-        <section className="mx-auto max-w-5xl px-4 py-12">
+        <PageContainer as="section" className="py-12">
           <EditorialHeading
             level={2}
             size="display-md"
@@ -88,7 +92,7 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
             De leden
           </EditorialHeading>
           <TeamStaff staff={staff} />
-        </section>
+        </PageContainer>
       ) : null}
 
       <BoardCtaBand />

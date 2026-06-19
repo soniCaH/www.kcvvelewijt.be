@@ -6,6 +6,7 @@ import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { getButtonClasses } from "@/components/design-system/Button/button-styles";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { PullQuote } from "@/components/design-system/PullQuote";
+import { PageContainer } from "@/components/design-system/PageContainer";
 import { ULTRAS_KAMPIOEN, ULTRAS_SJR } from "@/lib/sanity/images";
 import { UltrasAnalytics } from "./UltrasAnalytics";
 import { UltrasHero } from "./UltrasHero";
@@ -42,7 +43,7 @@ export default function UltrasPage() {
       <UltrasAnalytics>
         <UltrasHero joinHref={FACEBOOK_URL} />
 
-        <article className="mx-auto w-full max-w-3xl px-4 py-12 sm:py-16">
+        <PageContainer as="article" className="py-12 sm:py-16">
           <UltrasSection kicker="Ons verhaal" heading="Wie zijn we" accent=".">
             <p>
               De naam KCVV Ultras werd enkele jaren geleden op facebook in het
@@ -167,7 +168,7 @@ export default function UltrasPage() {
               </a>
             </div>
           </UltrasSection>
-        </article>
+        </PageContainer>
       </UltrasAnalytics>
     </>
   );

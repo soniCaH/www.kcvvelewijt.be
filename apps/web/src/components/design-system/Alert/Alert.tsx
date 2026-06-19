@@ -141,7 +141,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
       className={cn(
         "relative grid grid-cols-[72px_1fr] items-stretch overflow-hidden",
         "border-ink rounded-none border-2",
-        "shadow-[var(--shadow-paper-sm)]",
+        "shadow-paper-sm",
         config.bg,
         className,
       )}
@@ -175,7 +175,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
             aria-label="Sluit melding"
             className={cn(
               "absolute top-2 right-2 inline-flex h-6 w-6 items-center justify-center",
-              "rounded p-0.5 transition-colors",
+              "rounded-none p-0.5 transition-colors duration-150",
               "text-ink/60 hover:text-ink hover:bg-ink/5",
               "focus-visible:ring-jersey-deep focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
             )}

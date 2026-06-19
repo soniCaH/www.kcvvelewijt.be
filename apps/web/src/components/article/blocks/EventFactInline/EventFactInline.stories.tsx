@@ -16,7 +16,7 @@ const BASE: EventFactValue = {
 };
 
 const meta = {
-  title: "Features/Articles/EventFactInline",
+  title: "Features/Articles/Blocks/EventFactInline",
   component: EventFactInline,
   parameters: {
     layout: "padded",

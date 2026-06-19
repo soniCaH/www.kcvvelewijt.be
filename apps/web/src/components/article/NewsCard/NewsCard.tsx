@@ -61,7 +61,7 @@ export interface NewsCardProps {
   bg?: NewsCardBg;
   /**
    * Per-slot corner tape colours `[topLeft, topRight]`. Defaults to the
-   * R10 canonical pairing `["warm", "jersey"]`. `<NewsGrid>` (and any
+   * R10 canonical pairing `["warm", "jersey-deep"]`. `<NewsGrid>` (and any
    * future per-slot consumer) can pass a slot-derived pair so corner
    * tapes cycle across the grid instead of reading identical on every
    * card. Pass two entries; the second drops on cards that want a
@@ -107,7 +107,7 @@ const DARK_BGS: ReadonlySet<TapedCardBg> = new Set(["ink", "jersey-deep"]);
 // the `tapeColors` prop for per-slot cycling per the R10 lock.
 const DEFAULT_TAPE_COLORS: readonly [TapeStripColor, TapeStripColor] = [
   "warm",
-  "jersey",
+  "jersey-deep",
 ];
 
 // Four rotation pool entries, in the order applied by `--rotate-tape-*`
@@ -243,6 +243,7 @@ export const NewsCard = ({
             alt={imageAlt ?? title}
             fill
             className="object-cover"
+            style={{ filter: "var(--filter-photo-newsprint)" }}
             sizes={
               variant === "featured"
                 ? "(max-width: 768px) 100vw, 66vw"

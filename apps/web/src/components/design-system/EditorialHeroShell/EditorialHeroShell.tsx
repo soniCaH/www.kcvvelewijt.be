@@ -31,7 +31,7 @@ export function EditorialHeroShell({
   coverFirstOnMobile = false,
 }: EditorialHeroShellProps) {
   return (
-    <section className="mx-auto grid w-full max-w-[1120px] grid-cols-1 gap-x-12 gap-y-8 pt-12 pb-6 lg:grid-cols-[60fr_40fr]">
+    <section className="mx-auto grid w-full max-w-[var(--container-wide)] grid-cols-1 gap-x-12 gap-y-8 px-4 pt-12 pb-6 md:px-8 lg:grid-cols-[60fr_40fr]">
       {/* `min-w-0` on each grid child stops a long unbreakable token in the
           headline (e.g. "doorzettingsvermogen") from blowing out the
           `60fr_40fr` ratio — default grid-item `min-width: auto` resolves to

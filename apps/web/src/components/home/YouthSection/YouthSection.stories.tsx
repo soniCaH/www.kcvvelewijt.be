@@ -3,7 +3,7 @@ import { YouthSection } from "./YouthSection";
 import { YouthBackdrop } from "./YouthBackdrop";
 
 const meta = {
-  title: "Features/Homepage/YouthSection",
+  title: "Features/Home/YouthSection",
   component: YouthSection,
   tags: ["autodocs", "vr"],
   parameters: {

@@ -22,7 +22,7 @@ const answer = (text: string): PortableTextBlock[] => [
 ];
 
 const meta = {
-  title: "Features/Articles/QaBlock",
+  title: "Features/Articles/Blocks/QABlock",
   component: QaBlock,
   parameters: {
     layout: "padded",

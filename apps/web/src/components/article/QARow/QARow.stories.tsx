@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { QARow } from "./QARow";
 
 const meta = {
-  title: "Article/QARow",
+  title: "Features/Articles/QARow",
   component: QARow,
   tags: ["autodocs", "vr"],
   parameters: {
