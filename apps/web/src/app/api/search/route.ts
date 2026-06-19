@@ -148,12 +148,35 @@ const searchStaff = (query: string) =>
 
     debugLog(`[Search API] Found ${filtered.length} staff matches`);
 
-    return filtered.map(
-      ({ member, roleCode }): SearchResult => ({
+    // A staff member can sit in several org-chart nodes (one per role they
+    // hold). Without dedup that yields one near-identical /staf/{psdId} row per
+    // node (#2140). Group by member.id, keeping the first occurrence's canonical
+    // fields and combining the distinct roleCodes (in GROQ node order) into the
+    // description.
+    const byMember = new Map<
+      string,
+      { member: (typeof filtered)[number]["member"]; roles: string[] }
+    >();
+    for (const { member, roleCode } of filtered) {
+      const existing = byMember.get(member.id);
+      if (existing) {
+        if (roleCode && !existing.roles.includes(roleCode)) {
+          existing.roles.push(roleCode);
+        }
+      } else {
+        byMember.set(member.id, {
+          member,
+          roles: roleCode ? [roleCode] : [],
+        });
+      }
+    }
+
+    return Array.from(byMember.values()).map(
+      ({ member, roles }): SearchResult => ({
         id: member.id,
         type: "staff",
         title: member.name,
-        description: roleCode,
+        description: roles.join(" · ") || undefined,
         url: member.href,
         imageUrl: member.imageUrl,
       }),
