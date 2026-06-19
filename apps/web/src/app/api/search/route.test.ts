@@ -404,6 +404,68 @@ describe("GET /api/search", () => {
       expect(body.query).toBe("test");
       expect(Array.isArray(body.results)).toBe(true);
     });
+
+    it("should dedupe a member appearing in multiple org-nodes into one result with combined roles", async () => {
+      // Regression for #2140: a staff member referenced by N organigramNodes
+      // produced N near-identical /staf/{psdId} rows (one per role). The fix
+      // dedupes by member.id and combines the roleCodes into one description.
+      // The third node repeats "PRES" to assert duplicate roleCodes are dropped.
+      const member = {
+        id: "staff-1",
+        name: "Jan Janssens",
+        imageUrl: "https://cdn.sanity.io/jan.webp",
+        email: null,
+        phone: null,
+        psdId: "123",
+      };
+      mockSanityFetch.mockResolvedValue([
+        {
+          _id: "node-1",
+          title: "Voorzitter",
+          roleCode: "PRES",
+          department: "hoofdbestuur",
+          parentId: null,
+          description: null,
+          members: [member],
+        },
+        {
+          _id: "node-2",
+          title: "Secretaris",
+          roleCode: "SEC",
+          department: "hoofdbestuur",
+          parentId: null,
+          description: null,
+          members: [member],
+        },
+        {
+          _id: "node-3",
+          title: "Voorzitter (duplicate role)",
+          roleCode: "PRES",
+          department: "hoofdbestuur",
+          parentId: null,
+          description: null,
+          members: [member],
+        },
+      ]);
+
+      const request = createRequest("/api/search?q=jan&type=staff");
+      const response = await GET(request);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.count).toBe(1);
+      expect(body.results).toHaveLength(1);
+      expect(body.results[0]).toEqual(
+        expect.objectContaining({
+          id: "staff-1",
+          type: "staff",
+          title: "Jan Janssens",
+          description: "PRES · SEC",
+          url: "/staf/123",
+          imageUrl: "https://cdn.sanity.io/jan.webp",
+        }),
+      );
+    });
   });
 
   describe("Error Handling", () => {
