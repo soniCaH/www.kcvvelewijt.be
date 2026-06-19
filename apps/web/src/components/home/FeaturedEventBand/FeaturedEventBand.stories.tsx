@@ -5,7 +5,7 @@ import { FeaturedEventBand } from "./FeaturedEventBand";
 import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
-  title: "Features/Homepage/FeaturedEventBand",
+  title: "Features/Home/FeaturedEventBand",
   component: FeaturedEventBand,
   tags: ["autodocs", "vr"],
   parameters: {

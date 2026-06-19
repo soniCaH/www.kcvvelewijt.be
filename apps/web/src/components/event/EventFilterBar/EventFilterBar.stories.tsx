@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import { EventFilterBar } from "./EventFilterBar";
 
 const meta = {
-  title: "Features/Calendar/EventFilterBar",
+  title: "Features/Events/EventFilterBar",
   component: EventFilterBar,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs", "vr"],

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TransferFactCard } from "./TransferFactCard";
 
 const meta = {
-  title: "Article/TransferFactCard",
+  title: "Features/Articles/Blocks/TransferFactCard",
   component: TransferFactCard,
   tags: ["autodocs", "vr"],
   parameters: {

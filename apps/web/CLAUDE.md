@@ -44,13 +44,13 @@ Audit/spec generators sometimes flag features as "missing" because no top-level 
 
 Use these top-level groups — enforced by `storySort` in `.storybook/preview.ts`:
 
-| Group         | What goes here                                                                                                                                   | title prefix         |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------- |
-| `Foundation/` | Design tokens only — Colors, Typography, Spacing, Icons (MDX docs, no component stories)                                                         | `Foundation/`        |
-| `UI/`         | Pure design system primitives with zero domain knowledge — could ship as a standalone package                                                    | `UI/`                |
-| `Features/`   | Domain components that require KCVV data types (Articles, Calendar, Home, Matches, Organigram, Players, Responsibility, Search, Sponsors, Teams) | `Features/<Domain>/` |
-| `Layout/`     | Page infrastructure — PageHeader, PageFooter                                                                                                     | `Layout/`            |
-| `Pages/`      | Full-page compositions                                                                                                                           | `Pages/`             |
+| Group         | What goes here                                                                                                                                                                                       | title prefix         |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `Foundation/` | Design tokens only — Colors, Typography, Spacing, Icons (MDX docs, no component stories)                                                                                                             | `Foundation/`        |
+| `UI/`         | Pure design system primitives with zero domain knowledge — could ship as a standalone package                                                                                                        | `UI/`                |
+| `Features/`   | Domain components that require KCVV data types (Articles, Calendar, Club, Contact, Editorial, Events, Forms, Home, Hulp, Jeugd, Matches, Organigram, Players, Search, Share, Sponsors, Staff, Teams) | `Features/<Domain>/` |
+| `Layout/`     | Page infrastructure — PageHeader, PageFooter                                                                                                                                                         | `Layout/`            |
+| `Pages/`      | Full-page compositions                                                                                                                                                                               | `Pages/`             |
 
 **Rule:** If a new component knows about `MatchResult`, `Player`, `Sponsor`, or any other KCVV domain type → it goes in `Features/<Domain>/`. If it's a generic primitive → `UI/`. Never nest domain components directly at the top level.
 

@@ -232,8 +232,7 @@ export const WidthBleed: Story = {
 // dependency is introduced. Same provenance, different aspect.
 const SAMPLE_MP4_CINEMATIC =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4";
-const SAMPLE_POSTER_CINEMATIC =
-  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/Sintel.jpg";
+const SAMPLE_POSTER_CINEMATIC = fixtureImage("match-action", 1);
 
 // VR captures run pre-play (no autoplay), so the visible aspect is driven
 // by the poster — the deliberately 1:1 local fixture exercises the auto

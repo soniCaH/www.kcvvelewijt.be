@@ -1,11 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchEventsSection } from "./MatchEventsSection";
 import type { MatchEvent } from "../MatchEvents/MatchEvents";
+import { fixtureImage } from "@test-fixtures/images";
 
-const KCVV_LOGO =
-  "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/1235.png?v=1";
-const OPPONENT_LOGO =
-  "https://dfaozfi7c7f3s.cloudfront.net/logos/extra_groot/59.png?v=1";
+const KCVV_LOGO = fixtureImage("sponsor-logo", 0);
+const OPPONENT_LOGO = fixtureImage("sponsor-logo", 1);
 
 const events: MatchEvent[] = [
   {

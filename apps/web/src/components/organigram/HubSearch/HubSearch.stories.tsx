@@ -56,7 +56,7 @@ const heroBand = (node: ReactNode) => (
 );
 
 const meta = {
-  title: "Organigram/HubSearch",
+  title: "Features/Organigram/HubSearch",
   component: HubSearch,
   tags: ["autodocs", "vr"],
   args: {

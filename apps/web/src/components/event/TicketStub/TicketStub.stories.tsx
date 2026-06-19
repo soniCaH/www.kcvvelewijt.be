@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TicketStub } from "./TicketStub";
 
 const meta = {
-  title: "Features/Calendar/TicketStub",
+  title: "Features/Events/TicketStub",
   component: TicketStub,
   parameters: { layout: "padded" },
   tags: ["autodocs", "vr"],

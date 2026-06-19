@@ -45,7 +45,7 @@ const EVENTS: EventListItemVM[] = [
 ];
 
 const meta = {
-  title: "Features/Calendar/EventsBrowser",
+  title: "Features/Events/EventsBrowser",
   component: EventsBrowser,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs", "vr"],

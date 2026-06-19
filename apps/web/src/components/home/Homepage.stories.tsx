@@ -42,7 +42,7 @@ import { fixtureImage } from "@test-fixtures/images";
 // page (Playwright e2e covers the integration smoke).
 
 const meta = {
-  title: "Pages/Homepage",
+  title: "Pages/Home",
   // Keep the `vr` tag so discovery picks the story up; the
   // `parameters.vr.disable = true` below suppresses screenshot
   // capture per the "Defer consumer baselines via vr.disable" rule

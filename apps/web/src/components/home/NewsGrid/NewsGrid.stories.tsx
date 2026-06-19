@@ -12,7 +12,7 @@ const SLOT_SHAPES = [
 ] as const;
 
 const meta = {
-  title: "Features/Homepage/NewsGrid",
+  title: "Features/Home/NewsGrid",
   component: NewsGrid,
   tags: ["autodocs", "vr"],
   parameters: {

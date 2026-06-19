@@ -4,6 +4,7 @@ import ArticleDetailLoading from "./loading";
 const meta = {
   title: "Pages/News/ArticleDetailSkeleton",
   component: ArticleDetailLoading,
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof ArticleDetailLoading>;
 

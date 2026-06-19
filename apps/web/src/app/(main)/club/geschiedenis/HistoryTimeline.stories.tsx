@@ -12,7 +12,7 @@ import {
  * event lives in `<HistoryContent>` and is out of scope for these stories.
  */
 const meta = {
-  title: "Pages/Geschiedenis/Timeline",
+  title: "Features/Club/HistoryTimeline",
   tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },
   decorators: [

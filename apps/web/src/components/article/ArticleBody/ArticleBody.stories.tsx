@@ -5,7 +5,7 @@ import { ArticleBody } from "./ArticleBody";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 
 const meta = {
-  title: "Article/ArticleBody",
+  title: "Features/Articles/ArticleBody",
   component: ArticleBody,
   tags: ["autodocs", "vr"],
   parameters: {

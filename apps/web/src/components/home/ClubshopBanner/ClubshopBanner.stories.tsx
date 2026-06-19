@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ClubshopBanner } from "./ClubshopBanner";
 
 const meta = {
-  title: "Features/Homepage/ClubshopBanner",
+  title: "Features/Home/ClubshopBanner",
   component: ClubshopBanner,
   tags: ["autodocs", "vr"],
   parameters: {

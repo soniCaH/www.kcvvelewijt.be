@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { OpponentSummaryCard } from "./OpponentSummaryCard";
 
 const meta = {
-  title: "Pages/Opponent/OpponentSummaryCard",
+  title: "Features/Matches/OpponentSummaryCard",
   component: OpponentSummaryCard,
   parameters: { layout: "padded" },
-  tags: ["vr"],
+  tags: ["vr", "autodocs"],
   decorators: [
     (Story) => (
       <div className="bg-cream-deep mx-auto max-w-2xl p-8">

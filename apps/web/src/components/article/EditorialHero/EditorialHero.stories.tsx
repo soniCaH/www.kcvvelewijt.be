@@ -3,7 +3,7 @@ import { EditorialHero, type EditorialHeroProps } from "./EditorialHero";
 import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
-  title: "Article/EditorialHero",
+  title: "Features/Articles/EditorialHero",
   component: EditorialHero,
   tags: ["autodocs", "vr"],
   parameters: {

@@ -3,7 +3,7 @@ import { fixtureImage } from "@test-fixtures/images";
 import { VerderLezenRow, type VerderLezenItem } from "./VerderLezenRow";
 
 const meta = {
-  title: "Article/VerderLezenRow",
+  title: "Features/Articles/VerderLezenRow",
   component: VerderLezenRow,
   tags: ["autodocs", "vr"],
   parameters: {

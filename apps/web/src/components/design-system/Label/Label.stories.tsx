@@ -27,7 +27,7 @@ const meta = {
 } satisfies Meta<typeof Label>;
 
 export default meta;
-type Story = StoryObj<typeof Label>;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: { children: "E-mailadres" },

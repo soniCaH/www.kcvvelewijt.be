@@ -60,7 +60,7 @@ const NO_THEAD_TABLE_HTML = `
 `;
 
 const meta = {
-  title: "Features/Articles/HtmlTableBlock",
+  title: "Features/Articles/Blocks/HtmlTableBlock",
   component: HtmlTableBlock,
   parameters: {
     layout: "padded",

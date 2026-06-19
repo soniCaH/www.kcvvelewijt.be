@@ -29,7 +29,7 @@ const meta = {
 } satisfies Meta<typeof Select>;
 
 export default meta;
-type Story = StoryObj<typeof Select>;
+type Story = StoryObj<typeof meta>;
 
 const teamOptions = (
   <>

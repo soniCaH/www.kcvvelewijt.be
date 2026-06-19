@@ -18,7 +18,7 @@ function ev(overrides: Partial<EventVM> & { id: string }): EventVM {
 }
 
 const meta = {
-  title: "Features/Calendar/AndereEvents",
+  title: "Features/Events/AndereEvents",
   component: AndereEvents,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs", "vr"],

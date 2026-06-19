@@ -8,7 +8,7 @@ import {
 } from "./SponsorsBlock.mocks";
 
 const meta = {
-  title: "Features/Homepage/SponsorsBlock",
+  title: "Features/Sponsors/SponsorsBlock",
   component: SponsorsBlock,
   tags: ["autodocs", "vr"],
   parameters: {

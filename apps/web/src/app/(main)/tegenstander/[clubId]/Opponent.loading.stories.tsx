@@ -4,6 +4,7 @@ import OpponentLoading from "./loading";
 const meta = {
   title: "Pages/Opponent/OpponentSkeleton",
   component: OpponentLoading,
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof OpponentLoading>;
 

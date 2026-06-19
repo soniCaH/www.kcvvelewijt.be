@@ -75,7 +75,7 @@ function PageShell({ match }: { match: UpcomingMatch | null }) {
 }
 
 const meta = {
-  title: "Layout/MatchStripInContext",
+  title: "Features/Matches/MatchStripInContext",
   component: PageShell,
   tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },
