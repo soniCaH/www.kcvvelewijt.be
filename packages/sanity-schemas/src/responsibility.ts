@@ -1,38 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './preview/responsibility-preview'
-
-const hasContent = (value: unknown): boolean =>
-  typeof value === 'string' && value.trim().length > 0
-
-/**
- * Shared validation for both `primaryContact` and `solutionStep.contact`
- * — single source of truth for the contact-type discriminator branches
- * and their teaching messages. The two validators differ only in
- * whether `contactType` is required: primary contact is mandatory on
- * the parent document; per-step contact is optional and short-circuits
- * to `true` when no `contactType` was picked.
- */
-function validateContactFields(
-  contact: Record<string, unknown> | undefined,
-  required: boolean,
-): true | string {
-  if (!contact?.contactType) return required ? 'Kies een type contact' : true
-  switch (contact.contactType) {
-    case 'position':
-      return contact.organigramNode ? true : 'Kies een organigram-positie'
-    case 'team-role':
-      return contact.teamRole ? true : 'Kies een teamrol'
-    case 'manual':
-      return hasContent(contact.email) ||
-        hasContent(contact.phone) ||
-        hasContent(contact.role) ||
-        hasContent(contact.department)
-        ? true
-        : 'Vul minstens één van: rol, email, telefoon, afdeling in'
-    default:
-      return 'Ongeldig type contact'
-  }
-}
+import {validateContactFields} from './validation/contact-fields'
 
 const contactFields = [
   defineField({
