@@ -102,13 +102,6 @@ function nullsToUndefined<T extends object>(
 function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
   const shared = {
     placement: "homepage" as const,
-    // Phase 4.5.C.1 (#1754) — the static homepage hero spans the full
-    // inner width, so the canonical 2px paper-stamp press-down reads
-    // as a twitch instead of a press. Use the `tilt-photo` treatment:
-    // only the framed cover image tilts + scales on hover; the
-    // editorial column stays still and the "★ Lees verder →" reveal
-    // signals the link affordance.
-    hoverStyle: "tilt-photo" as const,
     slug: article.slug,
     title: article.title,
     coverImage: article.coverImageUrl

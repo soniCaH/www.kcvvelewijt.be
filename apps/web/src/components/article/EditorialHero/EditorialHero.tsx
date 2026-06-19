@@ -28,6 +28,7 @@ import {
   EditorialHeroShell,
   EditorialKicker,
   EditorialLead,
+  PRESS_DOWN_CLASSES,
   type MonoLabelRowItem,
 } from "@/components/design-system";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
@@ -110,21 +111,6 @@ interface HomepagePlacementProps {
   placement: "homepage";
   /** Required for homepage placement — builds the link target. */
   slug: string;
-  /**
-   * Hover treatment on the wrapping link.
-   *
-   * - `"press"` (default) — paper-stamp press-down: translate by 2px +
-   *   shadow shift on the whole hero. Used by the (retired)
-   *   `<HomepageHeroCarousel>` where each slide is a small card; the
-   *   press registers without feeling oversized.
-   * - `"tilt-photo"` — keep the link affordance + the "★ Lees verder →"
-   *   reveal at the bottom-right, but skip the whole-block translate.
-   *   Instead, the cover `<TapedFigure>` tilts a fraction of a degree
-   *   and scales up by ~2% — the framed photo gets "noticed" without
-   *   the giant editorial column twitching. Used by the Phase 4.5.C.1
-   *   static homepage hero (#1754).
-   */
-  hoverStyle?: "press" | "tilt-photo";
 }
 
 type PlacementProps = DetailPlacementProps | HomepagePlacementProps;
@@ -197,18 +183,18 @@ interface EditorialHeroCoverProps {
    *  `position: relative` is already set on the inner figure container;
    *  consumers position themselves. */
   overlay?: React.ReactNode;
-  /** When `true`, the figure adds a `group-hover` rotate + scale so
-   *  the framed photo tilts on hover. Only used by the homepage
-   *  placement when `hoverStyle === "tilt-photo"`. The wrapping
-   *  `<Link>` already carries the `group` class. */
-  tiltOnHover?: boolean;
+  /** When `true`, the framed photo's offset shadow collapses on
+   *  `group-hover` / `group-focus-visible` so the canonical press-down
+   *  reads on the cover figure as the wrapping `<Link>` translates into
+   *  it. Only used by the homepage placement (the link carries `group`). */
+  pressOnHover?: boolean;
 }
 
 function EditorialHeroCover({
   coverImage,
   aspect,
   overlay,
-  tiltOnHover,
+  pressOnHover,
 }: EditorialHeroCoverProps) {
   return (
     <TapedFigure
@@ -217,8 +203,12 @@ function EditorialHeroCover({
       tape={{ color: "jersey-deep", length: "md" }}
       className={cn(
         "relative max-w-[440px]",
-        tiltOnHover &&
-          "transition-transform duration-300 group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0 motion-reduce:group-focus-visible:scale-100 motion-reduce:group-focus-visible:rotate-0",
+        // Canonical press-down (feedback_canonical_press_down_hover): the
+        // shadow collapse always fires, the link's translate is motion-safe-
+        // gated via PRESS_DOWN_CLASSES — so reduced-motion users still get
+        // the shadow cue.
+        pressOnHover &&
+          "transition-[box-shadow] duration-300 group-hover:shadow-none group-focus-visible:shadow-none",
       )}
     >
       <Image
@@ -496,8 +486,10 @@ export function EditorialHero(props: EditorialHeroProps) {
     }
   }
 
-  const tiltOnHover =
-    placement === "homepage" && (props.hoverStyle ?? "press") === "tilt-photo";
+  // Homepage hero is one tappable card: the whole link presses into its
+  // shadow on hover (canonical press-down), so the cover figure collapses
+  // its offset shadow in step.
+  const pressOnHover = placement === "homepage";
 
   const shell = (
     <EditorialHeroShell
@@ -509,7 +501,7 @@ export function EditorialHero(props: EditorialHeroProps) {
             coverImage={coverImage}
             aspect={coverAspect}
             overlay={coverOverlay}
-            tiltOnHover={tiltOnHover}
+            pressOnHover={pressOnHover}
           />
         ) : undefined
       }
@@ -527,18 +519,15 @@ export function EditorialHero(props: EditorialHeroProps) {
     // `slug` is enforced by the discriminated union — TypeScript
     // guarantees it's a non-empty string here. No runtime guard needed.
     // Below-hero strips (Event) render inside the click target so the
-    // whole composition reads as one tappable card.
-    const hoverStyle = props.hoverStyle ?? "press";
-    const pressClasses =
-      "transition-all duration-300 hover:-translate-x-[2px] hover:-translate-y-[2px] hover:[--editorial-hover-shadow:8px_8px_0_0_var(--color-ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0";
-    // The tilt-photo treatment moves only the cover figure (handled
-    // inside `<EditorialHeroCover tiltOnHover />`); the outer Link stays
-    // still apart from the bottom-right "Lees verder" reveal.
-    const tiltPhotoClasses = "transition-colors duration-300";
+    // whole composition reads as one tappable card. Canonical paper
+    // press-down: the whole hero translates +1/+1 on hover while the cover
+    // figure collapses its offset shadow (PRESS_DOWN_CLASSES + the
+    // `pressOnHover` shadow collapse on <EditorialHeroCover>), matching
+    // every other interactive paper surface (e.g. /jeugd's cards).
     return (
       <Link
         href={`/nieuws/${slug}`}
-        className={`group block ${hoverStyle === "press" ? pressClasses : tiltPhotoClasses}`}
+        className={cn("group block", PRESS_DOWN_CLASSES)}
         aria-label={serializeTitle(title)}
       >
         {body}

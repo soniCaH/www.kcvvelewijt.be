@@ -73,7 +73,6 @@ type Story = StoryObj<typeof meta>;
 const mockHeroProps: EditorialHeroProps = {
   variant: "announcement",
   placement: "homepage",
-  hoverStyle: "tilt-photo",
   slug: "kampioen-58-punten",
   title: "Kampioen! 58 punten en titel in eerste provinciale.",
   lead: "Met een laatste-speeldagzege wordt de A-ploeg kampioen van de reeks. Zaterdag wordt gevierd op het sportpark.",

@@ -80,7 +80,7 @@ describe("EditorialHero — shell + placement", () => {
     );
   });
 
-  it("applies the press-down translate classes on the wrapping link by default (hoverStyle='press')", () => {
+  it("presses the wrapping link down with the canonical PRESS_DOWN_CLASSES (translate motion-safe-gated, shadow always collapses)", () => {
     const { container } = render(
       <EditorialHero
         variant="announcement"
@@ -90,33 +90,34 @@ describe("EditorialHero — shell + placement", () => {
       />,
     );
     const link = container.querySelector("a");
-    expect(link?.className).toContain("hover:-translate-x-[2px]");
-    expect(link?.className).toContain("hover:-translate-y-[2px]");
+    // Canonical press-down — same as /jeugd's cards, no bespoke lift/tilt.
+    expect(link?.className).toContain("motion-safe:hover:translate-x-1");
+    expect(link?.className).toContain("motion-safe:hover:translate-y-1");
+    expect(link?.className).toContain("hover:shadow-none");
+    // The old bespoke lift (negative translate + shadow grow) is gone.
+    expect(link?.className).not.toContain("hover:-translate-x-[2px]");
   });
 
-  it("swaps to the tilt-photo treatment when hoverStyle='tilt-photo': link drops the translate, cover figure gets group-hover rotate+scale", () => {
+  it("collapses the cover figure's offset shadow on group-hover so it presses with the link", () => {
     const { container } = render(
       <EditorialHero
         variant="announcement"
         {...SHARED}
         placement="homepage"
         slug="zomer-2026"
-        hoverStyle="tilt-photo"
         coverImage={{
           url: "/test-cover.jpg",
           alt: "Spelers vieren een doelpunt",
         }}
       />,
     );
-    const link = container.querySelector("a");
-    expect(link?.className).not.toContain("hover:-translate-x-[2px]");
-    expect(link?.className).not.toContain("hover:-translate-y-[2px]");
-
     const figure = container.querySelector("figure");
     expect(figure).not.toBeNull();
-    expect(figure?.className).toContain("group-hover:-rotate-1");
-    expect(figure?.className).toContain("group-hover:scale-[1.02]");
-    expect(figure?.className).toContain("motion-reduce:group-hover:rotate-0");
+    expect(figure?.className).toContain("group-hover:shadow-none");
+    expect(figure?.className).toContain("group-focus-visible:shadow-none");
+    // The old tilt+scale treatment is gone.
+    expect(figure?.className).not.toContain("group-hover:scale-[1.02]");
+    expect(figure?.className).not.toContain("group-hover:-rotate-1");
   });
 });
 
