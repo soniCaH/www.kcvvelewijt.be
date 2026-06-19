@@ -159,7 +159,11 @@ export const KvCacheLive = Layer.effect(
             const d = new Date();
             const key = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
             const current = await env.PSD_CACHE.get(key);
-            const next = (current ? parseInt(current, 10) : 0) + by;
+            // Guard against a malformed cached value: parseInt on a
+            // non-numeric string yields NaN, which would persist as "NaN"
+            // and break every future increment until the 48 h TTL expires.
+            const parsed = current ? parseInt(current, 10) : 0;
+            const next = (Number.isFinite(parsed) ? parsed : 0) + by;
             // Keep counter for 48 h so yesterday's value stays visible
             await env.PSD_CACHE.put(key, String(next), {
               expirationTtl: 60 * 60 * 48,
