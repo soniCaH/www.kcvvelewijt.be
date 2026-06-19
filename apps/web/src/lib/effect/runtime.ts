@@ -68,35 +68,6 @@ export const runPromise = <A, E>(
   >,
 ) => runtime.runPromise(effect);
 
-export const runPromiseWithLogging = <A, E>(
-  effect: Effect.Effect<
-    A,
-    E,
-    | BffService
-    | PlayerRepository
-    | TeamRepository
-    | ArticleRepository
-    | SponsorRepository
-    | StaffRepository
-    | HomepageRepository
-    | EventRepository
-    | ResponsibilityRepository
-    | PageRepository
-  >,
-) =>
-  runtime.runPromise(
-    effect.pipe(
-      Effect.tapError((error) =>
-        Effect.sync(() => {
-          console.error("[Effect Error]", error);
-        }),
-      ),
-    ),
-  );
-
-export const provideServices = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
-  Effect.provide(effect, AppLayer);
-
 export {
   BffService,
   PlayerRepository,

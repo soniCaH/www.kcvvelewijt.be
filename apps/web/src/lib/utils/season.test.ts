@@ -1,38 +1,44 @@
 import { describe, it, expect } from "vitest";
-import { deriveSeason, groupBySeason } from "./season";
+import { groupBySeason, type Season } from "./season";
 
-describe("deriveSeason", () => {
+// `deriveSeason` is module-private (only `groupBySeason` consumes it), so we
+// assert its boundary + label behaviour through the public API: a single-item
+// group's `.season` is exactly what `deriveSeason` produced for that date.
+const seasonOf = (date: Date): Season =>
+  groupBySeason([date], (d) => d)[0]!.season;
+
+describe("season derivation (via groupBySeason)", () => {
   it("places a spring match (Jan–Jun) in the season that started the prior July", () => {
-    expect(deriveSeason(new Date(2026, 4, 18))).toEqual({
+    expect(seasonOf(new Date(2026, 4, 18))).toEqual({
       key: "2025-2026",
       label: "Seizoen '25–'26",
     });
   });
 
   it("places an autumn match (Jul–Dec) in the season that starts that July", () => {
-    expect(deriveSeason(new Date(2025, 10, 24))).toEqual({
+    expect(seasonOf(new Date(2025, 10, 24))).toEqual({
       key: "2025-2026",
       label: "Seizoen '25–'26",
     });
   });
 
   it("treats July as the start of the new season (boundary)", () => {
-    expect(deriveSeason(new Date(2025, 6, 1)).key).toBe("2025-2026");
+    expect(seasonOf(new Date(2025, 6, 1)).key).toBe("2025-2026");
   });
 
   it("treats June as still belonging to the prior season (boundary)", () => {
-    expect(deriveSeason(new Date(2025, 5, 30)).key).toBe("2024-2025");
+    expect(seasonOf(new Date(2025, 5, 30)).key).toBe("2024-2025");
   });
 
   it("lands an August cup match in the upcoming season", () => {
-    expect(deriveSeason(new Date(2026, 7, 5))).toEqual({
+    expect(seasonOf(new Date(2026, 7, 5))).toEqual({
       key: "2026-2027",
       label: "Seizoen '26–'27",
     });
   });
 
   it("formats the label with two-digit years and an en-dash", () => {
-    expect(deriveSeason(new Date(2024, 8, 1)).label).toBe("Seizoen '24–'25");
+    expect(seasonOf(new Date(2024, 8, 1)).label).toBe("Seizoen '24–'25");
   });
 });
 

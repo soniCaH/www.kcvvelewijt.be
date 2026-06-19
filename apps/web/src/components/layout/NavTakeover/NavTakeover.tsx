@@ -9,7 +9,6 @@ import {
 import { cn } from "@/lib/utils/cn";
 import { Button } from "@/components/design-system/Button";
 import { X } from "@/lib/icons.redesign";
-import { NavTakeoverItem } from "./NavTakeoverItem";
 
 export interface NavTakeoverProps {
   open: boolean;
@@ -19,7 +18,7 @@ export interface NavTakeoverProps {
    */
   wordmark: ReactNode;
   /**
-   * Composed nav items + hero CTA via `<NavTakeover.Item>` + `<Button>`.
+   * Composed nav items + hero CTA via `<NavTakeoverItem>` + `<Button>`.
    */
   children: ReactNode;
   /**
@@ -129,5 +128,3 @@ export const NavTakeover = ({
     </div>
   );
 };
-
-NavTakeover.Item = NavTakeoverItem;

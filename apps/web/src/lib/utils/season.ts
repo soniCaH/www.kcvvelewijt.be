@@ -24,7 +24,7 @@ function twoDigit(year: number): string {
  * is month ≥ 7 (July) → the *new* season: an August Beker match lands in the
  * upcoming season rather than the one that just ended.
  */
-export function deriveSeason(date: Date): Season {
+function deriveSeason(date: Date): Season {
   const { year, month } = DateTime.fromJSDate(date);
   const startYear = month >= 7 ? year : year - 1;
   const endYear = startYear + 1;
