@@ -37,6 +37,15 @@ import SpelersDetailLoading from "../(main)/spelers/[slug]/loading";
 import StafDetailLoading from "../(main)/staf/[slug]/loading";
 import TegenstanderLoading from "../(main)/tegenstander/[clubId]/loading";
 import WedstrijdLoading from "../(main)/wedstrijd/[matchId]/loading";
+import HomepageLoading from "../(landing)/loading";
+import ContactLoading from "../(main)/club/contact/loading";
+import GeschiedenisLoading from "../(main)/club/geschiedenis/loading";
+import UltrasLoading from "../(main)/club/ultras/loading";
+import EvenementenLoading from "../(main)/evenementen/loading";
+import EvenementDetailLoading from "../(main)/evenementen/[slug]/loading";
+import WedstrijdenLoading from "../(main)/ploegen/[slug]/wedstrijden/loading";
+import PrivacyLoading from "../(main)/privacy/loading";
+import ShareLoading from "../(main)/share/loading";
 
 describe("loading.tsx envelope drift guard", () => {
   // -------------------------------------------------------------------------
@@ -164,6 +173,51 @@ describe("loading.tsx envelope drift guard", () => {
       Loading: WedstrijdLoading,
       expectedRootClass: "min-h-screen",
     },
+    {
+      name: "/",
+      Loading: HomepageLoading,
+      expectedRootClass: "bg-cream min-h-screen",
+    },
+    {
+      name: "/club/contact",
+      Loading: ContactLoading,
+      expectedRootClass: "bg-cream min-h-screen",
+    },
+    {
+      name: "/club/geschiedenis",
+      Loading: GeschiedenisLoading,
+      expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/club/ultras",
+      Loading: UltrasLoading,
+      expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/evenementen",
+      Loading: EvenementenLoading,
+      expectedRootClass: "bg-jersey-deep-dark flex min-h-screen flex-col",
+    },
+    {
+      name: "/evenementen/[slug]",
+      Loading: EvenementDetailLoading,
+      expectedRootClass: "bg-cream",
+    },
+    {
+      name: "/ploegen/[slug]/wedstrijden",
+      Loading: WedstrijdenLoading,
+      expectedRootClass: "min-h-screen",
+    },
+    {
+      name: "/privacy",
+      Loading: PrivacyLoading,
+      expectedRootClass: "bg-cream py-16 md:py-20",
+    },
+    {
+      name: "/share",
+      Loading: ShareLoading,
+      expectedRootClass: "bg-cream min-h-screen",
+    },
   ];
 
   describe("Non-SectionStack routes — root className contract", () => {
@@ -190,7 +244,7 @@ describe("loading.tsx envelope drift guard", () => {
       nonSectionStackRoutes.map(({ name }) => name.replace(/^\//, "")),
     );
     const stripGroup = (file: string) =>
-      file.replace(/^\((main|landing)\)\//, "").replace(/\/loading\.tsx$/, "");
+      file.replace(/^\((main|landing)\)\//, "").replace(/\/?loading\.tsx$/, "");
     const onDiskRouteNames = new Set(loadingFiles.map(stripGroup));
     const missingFiles = loadingFiles
       .filter((f) => !expectedRouteNames.has(stripGroup(f)))
