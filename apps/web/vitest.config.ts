@@ -30,8 +30,6 @@ export default defineConfig({
       "**/dist/**",
       "**/.next/**",
       "**/test/e2e/**",
-      "**/tests/e2e/**",
-      "**/tests/visual/**",
       "**/playwright-report/**",
       "**/test-results/**",
     ],
@@ -41,8 +39,6 @@ export default defineConfig({
       exclude: [
         "node_modules/",
         "test/e2e/",
-        "tests/e2e/",
-        "tests/visual/",
         "*.config.ts",
         "*.config.js",
         ".next/",
