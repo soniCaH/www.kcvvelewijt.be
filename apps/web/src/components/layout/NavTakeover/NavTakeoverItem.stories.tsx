@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NavTakeoverItem } from "./NavTakeoverItem";
 
 const meta = {
-  title: "UI/NavTakeover/Item",
+  title: "Layout/NavTakeover/Item",
   component: NavTakeoverItem,
   tags: ["autodocs", "vr"],
   parameters: { layout: "padded" },
