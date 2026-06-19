@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { JerseyShirt } from "@/components/design-system/JerseyShirt";
+import { TapedCard } from "@/components/design-system/TapedCard";
 
 export interface TeamFlagshipProps {
   /**
@@ -121,29 +122,36 @@ export function TeamFlagship({
       data-testid="team-flagship"
       data-variant={variant}
       aria-label={`${category} — bekijk ploeg`}
-      className={cn(
-        "group border-ink grid grid-cols-1 border-2",
-        // Photo is always the 1fr column, content the 1.25fr column. A puts
-        // content left; B mirrors to photo left — so the track order flips.
-        isA ? "sm:grid-cols-[1.25fr_1fr]" : "sm:grid-cols-[1fr_1.25fr]",
-        "shadow-[5px_5px_0_0_var(--color-ink)]",
-        isA ? "bg-jersey-deep text-cream" : "bg-cream text-ink",
-        className,
-      )}
+      className={cn("group block", className)}
     >
-      {isA ? (
-        <>
-          {content}
-          {photo}
-        </>
-      ) : (
-        <>
-          {/* Mirrored: photo-left / content-right. Source order keeps photo
-              first; on mobile (single column) photo stays on top for both. */}
-          {photo}
-          {content}
-        </>
-      )}
+      <TapedCard
+        as="div"
+        bg={isA ? "jersey-deep" : "cream"}
+        // Original literal offset was 5px; `md` (6px) is the nearest token.
+        shadow="md"
+        padding="none"
+        interactive={false}
+        className={cn(
+          "grid grid-cols-1",
+          // Photo is always the 1fr column, content the 1.25fr column. A puts
+          // content left; B mirrors to photo left — so the track order flips.
+          isA ? "sm:grid-cols-[1.25fr_1fr]" : "sm:grid-cols-[1fr_1.25fr]",
+        )}
+      >
+        {isA ? (
+          <>
+            {content}
+            {photo}
+          </>
+        ) : (
+          <>
+            {/* Mirrored: photo-left / content-right. Source order keeps photo
+                first; on mobile (single column) photo stays on top for both. */}
+            {photo}
+            {content}
+          </>
+        )}
+      </TapedCard>
     </Link>
   );
 }

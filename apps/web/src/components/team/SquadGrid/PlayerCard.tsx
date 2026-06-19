@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { TapedCard } from "@/components/design-system/TapedCard";
 import { JerseyIllustration } from "@/components/design-system/JerseyIllustration";
 
 export interface PlayerCardProps {
@@ -26,12 +27,6 @@ export function PlayerCard({
   className,
 }: PlayerCardProps) {
   const hasPhoto = photoUrl !== undefined && photoUrl !== "";
-
-  const cardClass = cn(
-    "border-ink bg-cream block border-2 p-2 pb-3 shadow-[4px_4px_0_0_var(--color-ink)]",
-    "transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 hover:shadow-none",
-    className,
-  );
 
   const inner = (
     <>
@@ -82,22 +77,31 @@ export function PlayerCard({
     </>
   );
 
+  const card = (
+    <TapedCard
+      bg="cream"
+      shadow="sm"
+      padding="none"
+      interactive={href ? "press" : false}
+      className={cn("p-2 pb-3", className)}
+      dataAttrs={href ? undefined : { "data-testid": "player-card" }}
+    >
+      {inner}
+    </TapedCard>
+  );
+
   if (href) {
     return (
       <Link
         href={href}
         data-testid="player-card"
         aria-label={`${firstName} ${lastName} — ${position}`}
-        className={cardClass}
+        className="block"
       >
-        {inner}
+        {card}
       </Link>
     );
   }
 
-  return (
-    <div data-testid="player-card" className={cardClass}>
-      {inner}
-    </div>
-  );
+  return card;
 }
