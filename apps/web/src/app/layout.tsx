@@ -5,6 +5,7 @@ import "./globals.css";
 import { AccentStrip } from "@/components/layout/AccentStrip";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoader";
 import { Effect } from "effect";
@@ -111,6 +112,7 @@ export default async function RootLayout({
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','wait_for_update':500});`}
         </Script>
         <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+        <ScrollToTop />
         <AccentStrip />
         <SiteHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
         <main>{children}</main>
