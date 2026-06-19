@@ -114,7 +114,7 @@ export function OrganigramSectionNav({
                       ?.focus({ preventScroll: true });
                   }}
                   className={cn(
-                    "border-ink inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-all duration-200",
+                    "border-ink inline-block border px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.06em] uppercase transition-all duration-150",
                     isActive
                       ? "bg-jersey-deep text-cream"
                       : "bg-cream text-ink hover:bg-cream-soft shadow-[1px_1px_0_0_var(--color-ink)]",

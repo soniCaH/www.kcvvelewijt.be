@@ -1233,7 +1233,7 @@
    node's FLIP travel transform, applied imperatively via the Web Animations
    API in the component. */
 .spotlight-pop {
-  animation: spotlight-pop 200ms ease-out both;
+  animation: spotlight-pop 240ms ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
   .spotlight-pop {

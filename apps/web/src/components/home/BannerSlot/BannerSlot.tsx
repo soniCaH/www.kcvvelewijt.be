@@ -14,8 +14,9 @@ export interface BannerSlotProps {
 
 /**
  * Optional editorial/campaign banner.
- * Contained (not full-bleed), rounded corners, subtle shadow.
- * Hidden when no banner is configured (call site handles conditional rendering).
+ * Contained (not full-bleed), square corners with a paper offset shadow and a
+ * 2px ink border. Hidden when no banner is configured (call site handles
+ * conditional rendering).
  */
 export const BannerSlot = ({
   image,
@@ -26,7 +27,7 @@ export const BannerSlot = ({
   const inner = (
     <div
       className={cn(
-        "relative w-full overflow-hidden rounded shadow-sm",
+        "border-ink shadow-paper-sm relative w-full overflow-hidden rounded-none border-2 transition-all duration-300 group-hover:shadow-none",
         "aspect-[6/1] min-h-[60px]",
         className,
       )}
@@ -44,12 +45,12 @@ export const BannerSlot = ({
 
   if (href) {
     return (
-      <div className="bg-gray-100">
+      <div className="bg-cream">
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="mx-auto block max-w-[var(--container-index)] px-4 py-8 md:px-8"
+          className="group mx-auto block max-w-[var(--container-index)] px-4 py-8 transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 md:px-8"
         >
           {inner}
         </a>
@@ -58,7 +59,7 @@ export const BannerSlot = ({
   }
 
   return (
-    <div className="bg-gray-100">
+    <div className="bg-cream">
       <div className="mx-auto max-w-[var(--container-index)] px-4 py-8 md:px-8">
         {inner}
       </div>

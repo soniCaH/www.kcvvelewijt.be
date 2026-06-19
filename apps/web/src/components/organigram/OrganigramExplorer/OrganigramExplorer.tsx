@@ -203,7 +203,7 @@ export function OrganigramExplorer({
         { transform: `translate(${dx}px, ${dy}px) scale(${scale})` },
         { transform: "none" },
       ],
-      { duration: 320, easing: "cubic-bezier(0.2, 0, 0, 1)" },
+      { duration: 300, easing: "cubic-bezier(0.2, 0, 0, 1)" },
     );
   }, [open, focusId]);
 
@@ -339,7 +339,7 @@ export function OrganigramExplorer({
           role="tree"
           aria-label="Organisatiestructuur"
           style={{ transform: `scale(${SCALE_STEPS[scaleStep]})` }}
-          className="mx-auto flex max-w-[60rem] origin-top flex-col items-center gap-5 transition-transform duration-200"
+          className="mx-auto flex max-w-[60rem] origin-top flex-col items-center gap-5 transition-transform duration-[240ms]"
         >
           <div
             key={focusId}
@@ -508,7 +508,7 @@ export function OrganigramExplorer({
                       data-node-id={child.id}
                       onClick={() => navigate(child.id)}
                       aria-label={`Naar ${child.title}`}
-                      className="transition-transform hover:-translate-y-0.5 motion-reduce:transition-none"
+                      className="transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
                     >
                       <SpotlightNodeCard node={child} variant="node" />
                     </button>

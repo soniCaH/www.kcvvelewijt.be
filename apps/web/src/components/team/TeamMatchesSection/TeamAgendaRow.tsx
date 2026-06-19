@@ -197,7 +197,7 @@ export function TeamAgendaRow({
   const cardBase = cn(
     "flex items-stretch gap-0",
     "border-2 transition-all duration-300",
-    "hover:-translate-y-0 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+    "motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 hover:shadow-none",
     featured
       ? // Soft ink-muted offset (the design-system dark-card shadow, cf.
         // `--shadow-paper-sm-soft`) — a cream shadow vanished against the cream

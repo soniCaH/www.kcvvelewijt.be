@@ -46,7 +46,7 @@ function OrgBranch({
     "border-ink inline-flex min-w-[64px] flex-col border-2 px-2 py-1 text-center",
     state === "vacant" ? "bg-warm" : "bg-cream",
     onNodeClick &&
-      "cursor-pointer transition-transform hover:-translate-y-0.5 motion-reduce:transition-none",
+      "cursor-pointer transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1",
   );
   const content = (
     <>

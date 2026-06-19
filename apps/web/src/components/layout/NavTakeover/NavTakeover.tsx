@@ -103,7 +103,7 @@ export const NavTakeover = ({
       onKeyDown={handleTabTrap}
       className={cn(
         "bg-cream fixed inset-0 z-[60] flex flex-col",
-        "animate-in fade-in duration-200",
+        "animate-in fade-in duration-150 motion-reduce:animate-none",
       )}
     >
       {/* Top bar — same height as the closed header */}

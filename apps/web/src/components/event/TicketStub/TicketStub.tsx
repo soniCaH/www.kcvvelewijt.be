@@ -37,14 +37,14 @@ export interface TicketStubProps {
 const MONO_LABEL_CLASS =
   "font-mono text-[length:var(--text-label)] tracking-[var(--text-label--tracking)]";
 
-// Mirrors the <EditorialHero> featured-image hover idiom (PRD §6e2): the whole
-// ticket tilts + scales on hover/focus and reveals a "Meer details →" cue, with
-// every transform reset under reduced-motion.
+// Canonical press-down (the paper-stamped interactive idiom): the resting
+// ticket sits on its offset shadow and presses into the page on hover/focus,
+// with the transform gated behind motion-safe and a "Meer details →" cue.
 const CARD_CLASS =
-  "border-ink bg-cream text-ink shadow-paper-sm relative flex border-2 transition-transform duration-300 " +
-  "group-hover:scale-[1.02] group-hover:-rotate-1 group-focus-visible:scale-[1.02] group-focus-visible:-rotate-1 " +
-  "motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-hover:rotate-0 " +
-  "motion-reduce:group-focus-visible:scale-100 motion-reduce:group-focus-visible:rotate-0";
+  "border-ink bg-cream text-ink shadow-paper-sm relative flex border-2 transition-all duration-300 " +
+  "hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 " +
+  "group-hover:shadow-none motion-safe:group-hover:translate-x-1 motion-safe:group-hover:translate-y-1 " +
+  "motion-safe:group-focus-visible:translate-x-1 motion-safe:group-focus-visible:translate-y-1 group-focus-visible:shadow-none";
 
 // The locale's trailing period on abbreviated months is dropped so styling
 // owns the casing.

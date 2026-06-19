@@ -29,7 +29,7 @@ export function PlayerCard({
 
   const cardClass = cn(
     "border-ink bg-cream block border-2 p-2 pb-3 shadow-[4px_4px_0_0_var(--color-ink)]",
-    "transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+    "transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 hover:shadow-none",
     className,
   );
 

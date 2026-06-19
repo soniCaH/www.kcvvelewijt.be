@@ -76,7 +76,7 @@ export function QuestionCard({
           <CaretDown
             size={18}
             aria-hidden
-            className={`flex-shrink-0 transition-transform duration-200 ${
+            className={`flex-shrink-0 transition-transform duration-150 ${
               open ? "text-jersey-deep rotate-180" : "text-ink-muted"
             }`}
           />

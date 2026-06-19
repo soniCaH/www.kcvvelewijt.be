@@ -27,7 +27,6 @@ const SHORT_DAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 function WeekMatchCard({ match }: { match: CalendarMatch }) {
   const isHome = getMatchDotType(match) === "home";
   const opponent = isHome ? match.awayTeam : match.homeTeam;
-  const hasDetail = match.status !== "scheduled";
 
   const body = (
     <>
@@ -68,24 +67,19 @@ function WeekMatchCard({ match }: { match: CalendarMatch }) {
     </>
   );
 
-  const cardClass = cn(
-    "border-paper-edge bg-cream block border p-1.5 transition-all duration-300",
-    hasDetail && "hover:border-ink hover:shadow-[2px_2px_0_0_var(--color-ink)]",
-  );
-
-  return hasDetail ? (
+  // Every match links to its detail page — scheduled matches render a
+  // VOORBESCHOUWING preview there (matching CalendarAgenda / CalendarMonth /
+  // the homepage UpcomingMatches, which all link unconditionally). Same raised
+  // paper press-down card as the event tile so the two read as one system.
+  return (
     <Link
       href={`/wedstrijd/${match.id}`}
       data-match
       onClick={() => trackKalenderItemClick("match")}
-      className={cardClass}
+      className="border-ink bg-cream shadow-paper-sm block border-2 p-1.5 transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
     >
       {body}
     </Link>
-  ) : (
-    <div data-match className={cardClass}>
-      {body}
-    </div>
   );
 }
 
@@ -140,7 +134,7 @@ export function CalendarWeek({
                     key={event.id}
                     href={event.href}
                     onClick={() => trackKalenderItemClick(event.source)}
-                    className="border-ink bg-cream block border p-1.5 transition-all duration-300 hover:shadow-[2px_2px_0_0_var(--color-ink)]"
+                    className="border-ink bg-cream shadow-paper-sm block border-2 p-1.5 transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
                   >
                     <div className="flex items-start gap-1">
                       <span
@@ -150,7 +144,7 @@ export function CalendarWeek({
                           EVENT_TYPE_FILL[event.eventType],
                         )}
                       />
-                      <span className="font-display text-ink line-clamp-2 text-[11px] leading-tight font-bold italic">
+                      <span className="text-ink line-clamp-2 text-xs leading-tight font-semibold">
                         {event.title}
                       </span>
                     </div>

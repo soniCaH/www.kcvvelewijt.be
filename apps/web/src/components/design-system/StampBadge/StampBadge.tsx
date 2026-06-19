@@ -50,7 +50,7 @@ export function StampBadge({
       style={{ transform: `rotate(${rotation}deg)` } as CSSProperties}
       className={cn(
         "absolute z-[2] inline-block px-3.5 py-1.5",
-        "border-ink border-[1.5px] shadow-[4px_4px_0_0_var(--color-ink)]",
+        "border-ink shadow-paper-sm border-[1.5px]",
         "font-mono text-[11px] font-bold tracking-[0.1em] uppercase",
         TONE_CLASS[tone],
         POSITION_CLASS[position],

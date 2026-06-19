@@ -80,7 +80,7 @@ export const EditorialLink = ({
       {showArrow && (
         <span
           aria-hidden="true"
-          className="inline-block transition-transform group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transition-none"
+          className="inline-block transition-transform duration-300 group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transition-none"
         >
           →
         </span>
