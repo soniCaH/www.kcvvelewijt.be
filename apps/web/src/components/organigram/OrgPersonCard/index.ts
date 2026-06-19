@@ -4,8 +4,4 @@ export {
   splitDisplayName,
   monogramInitials,
 } from "./OrgPersonCard";
-export type {
-  OrgPersonCardProps,
-  OrgPersonCardState,
-  OrgPersonCardScale,
-} from "./OrgPersonCard";
+export type { OrgPersonCardProps, OrgPersonCardState } from "./OrgPersonCard";

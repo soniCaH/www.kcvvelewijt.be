@@ -7,10 +7,7 @@ import { GoalOpponentTemplate } from "../GoalOpponentTemplate/GoalOpponentTempla
 import { KickoffTemplate } from "../KickoffTemplate/KickoffTemplate";
 import { HalftimeTemplate } from "../HalftimeTemplate/HalftimeTemplate";
 import { FullTimeTemplate } from "../FullTimeTemplate/FullTimeTemplate";
-import { RedCardKcvvTemplate } from "../RedCardKcvvTemplate/RedCardKcvvTemplate";
-import { RedCardOpponentTemplate } from "../RedCardOpponentTemplate/RedCardOpponentTemplate";
-import { YellowCardKcvvTemplate } from "../YellowCardKcvvTemplate/YellowCardKcvvTemplate";
-import { YellowCardOpponentTemplate } from "../YellowCardOpponentTemplate/YellowCardOpponentTemplate";
+import { DisciplinaryCard } from "../shared/DisciplinaryCard";
 import { SquarePreGameTemplate } from "../SquarePreGameTemplate/SquarePreGameTemplate";
 import { SquareResultTemplate } from "../SquareResultTemplate/SquareResultTemplate";
 import {
@@ -285,7 +282,9 @@ function renderTemplate(id: TemplateId, o: RenderOpts): React.ReactNode {
       );
     case "red-card-kcvv":
       return (
-        <RedCardKcvvTemplate
+        <DisciplinaryCard
+          kind="red"
+          side="kcvv"
           matchName={o.matchName}
           minute={o.minute}
           playerName={playerName}
@@ -294,11 +293,18 @@ function renderTemplate(id: TemplateId, o: RenderOpts): React.ReactNode {
       );
     case "red-card-opponent":
       return (
-        <RedCardOpponentTemplate matchName={o.matchName} minute={o.minute} />
+        <DisciplinaryCard
+          kind="red"
+          side="opponent"
+          matchName={o.matchName}
+          minute={o.minute}
+        />
       );
     case "yellow-card-kcvv":
       return (
-        <YellowCardKcvvTemplate
+        <DisciplinaryCard
+          kind="yellow"
+          side="kcvv"
           matchName={o.matchName}
           minute={o.minute}
           playerName={playerName}
@@ -307,7 +313,12 @@ function renderTemplate(id: TemplateId, o: RenderOpts): React.ReactNode {
       );
     case "yellow-card-opponent":
       return (
-        <YellowCardOpponentTemplate matchName={o.matchName} minute={o.minute} />
+        <DisciplinaryCard
+          kind="yellow"
+          side="opponent"
+          matchName={o.matchName}
+          minute={o.minute}
+        />
       );
     case "square-pre-game":
       return (

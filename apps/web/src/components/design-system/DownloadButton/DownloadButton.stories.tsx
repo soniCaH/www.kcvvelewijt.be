@@ -9,7 +9,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 5 redesign (#1849) — `card` (TapedCard + stenciled corner stamp + jersey-deep CTA) and `inline` (chip) variants per `fileattachment-htmltable-locked.md §5.1`. Press-down hover on the whole anchor.",
+          "Phase 5 redesign (#1849) — TapedCard + stenciled corner stamp + jersey-deep CTA per `fileattachment-htmltable-locked.md §5.1`. Press-down hover on the whole anchor.",
       },
     },
   },
@@ -22,10 +22,6 @@ const meta = {
     ),
   ],
   argTypes: {
-    variant: {
-      control: "select",
-      options: ["card", "inline"],
-    },
     fileSize: { control: "number" },
     mimeType: { control: "text" },
   },
@@ -40,11 +36,10 @@ export const Playground: Story = {
     label: "Trainingsschema seizoen 2025-2026",
     mimeType: "application/pdf",
     fileSize: 1_400_000,
-    variant: "card",
   },
 };
 
-// ─── Card variant — file-type palette ─────────────────────────────────────
+// ─── File-type palette ─────────────────────────────────────────────────────
 
 export const CardPdf: Story = {
   name: "Card — PDF",
@@ -53,7 +48,6 @@ export const CardPdf: Story = {
     label: "Aangifte Jeugd 2024-2025",
     mimeType: "application/pdf",
     fileSize: 245_600,
-    variant: "card",
   },
 };
 
@@ -65,7 +59,6 @@ export const CardWord: Story = {
     mimeType:
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     fileSize: 98_304,
-    variant: "card",
   },
 };
 
@@ -77,7 +70,6 @@ export const CardExcel: Story = {
     mimeType:
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     fileSize: 512_000,
-    variant: "card",
   },
 };
 
@@ -88,7 +80,6 @@ export const CardAudio: Story = {
     label: "Clubpodcast Aflevering 3",
     mimeType: "audio/mpeg",
     fileSize: 8_400_000,
-    variant: "card",
   },
 };
 
@@ -99,7 +90,6 @@ export const CardVideo: Story = {
     label: "Wedstrijdhighlights",
     mimeType: "video/mp4",
     fileSize: 25_600_000,
-    variant: "card",
   },
 };
 
@@ -110,7 +100,6 @@ export const CardZip: Story = {
     label: "Foto's jeugdtornooi",
     mimeType: "application/zip",
     fileSize: 4_200_000,
-    variant: "card",
   },
 };
 
@@ -119,7 +108,6 @@ export const CardOther: Story = {
   args: {
     href: "https://files.example.com/bijlage-g7h8i9j0.dat",
     label: "Onbekend bestand",
-    variant: "card",
   },
 };
 
@@ -129,7 +117,6 @@ export const CardNoSize: Story = {
     href: "https://files.example.com/document-h8i9j0k1.pdf",
     label: "Document zonder grootte-info",
     mimeType: "application/pdf",
-    variant: "card",
   },
 };
 
@@ -141,7 +128,6 @@ export const CardWithDescription: Story = {
     mimeType: "application/pdf",
     fileSize: 245_600,
     description: "Inschrijvingsformulier voor nieuwe jeugdspelers.",
-    variant: "card",
   },
 };
 
@@ -153,99 +139,7 @@ export const CardLongLabel: Story = {
       "Dit is een heel lang label dat meer dan zestig karakters bevat om te testen of de truncatie correct werkt op smalle viewports",
     mimeType: "application/pdf",
     fileSize: 1_200_000,
-    variant: "card",
   },
-};
-
-// ─── Inline variant — file-type palette ───────────────────────────────────
-
-export const InlinePdf: Story = {
-  name: "Inline — PDF",
-  args: {
-    href: "https://files.example.com/reglement-k1l2m3n4.pdf",
-    label: "huishoudelijk reglement",
-    mimeType: "application/pdf",
-    fileSize: 1_200_000,
-    variant: "inline",
-  },
-};
-
-export const InlineWord: Story = {
-  name: "Inline — Word",
-  args: {
-    href: "https://files.example.com/lidmaatschap-l2m3n4o5.docx",
-    label: "lidmaatschapsformulier",
-    mimeType:
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    variant: "inline",
-  },
-};
-
-export const InlineExcel: Story = {
-  name: "Inline — Excel",
-  args: {
-    href: "https://files.example.com/agenda-m3n4o5p6.xlsx",
-    label: "kalender 2025",
-    mimeType:
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    fileSize: 96_000,
-    variant: "inline",
-  },
-};
-
-export const InlineAudio: Story = {
-  name: "Inline — Audio",
-  args: {
-    href: "https://files.example.com/clubpodcast-n4o5p6q7.mp3",
-    label: "clubpodcast",
-    mimeType: "audio/mpeg",
-    fileSize: 6_400_000,
-    variant: "inline",
-  },
-};
-
-export const InlineZip: Story = {
-  name: "Inline — ZIP",
-  args: {
-    href: "https://files.example.com/fotos-o5p6q7r8.zip",
-    label: "tornooifoto's",
-    mimeType: "application/zip",
-    fileSize: 4_200_000,
-    variant: "inline",
-  },
-};
-
-export const InlineLongFilename: Story = {
-  name: "Inline — long filename (truncates)",
-  args: {
-    href: "https://files.example.com/dossier-p6q7r8s9.pdf",
-    label:
-      "complete dossierbundel voor het seizoen 2025-2026 inclusief alle bijlagen",
-    mimeType: "application/pdf",
-    fileSize: 2_100_000,
-    variant: "inline",
-  },
-};
-
-export const InlineWithinParagraph: Story = {
-  name: "Inline — composed in prose",
-  args: {
-    href: "https://files.example.com/reglement-q7r8s9t0.pdf",
-    variant: "inline",
-  },
-  render: () => (
-    <p className="text-ink font-serif text-[16px] leading-[1.55]">
-      Raadpleeg het{" "}
-      <DownloadButton
-        href="https://files.example.com/reglement-q7r8s9t0.pdf"
-        label="huishoudelijk reglement"
-        mimeType="application/pdf"
-        fileSize={1_200_000}
-        variant="inline"
-      />{" "}
-      voor meer informatie over de clubregels.
-    </p>
-  ),
 };
 
 export const CardGroup: Story = {
@@ -290,7 +184,6 @@ export const CardMobileNarrow: Story = {
     label: "Aangifte Jeugd 2024-2025",
     mimeType: "application/pdf",
     fileSize: 245_600,
-    variant: "card",
   },
   parameters: { viewport: { defaultViewport: "mobile1" } },
 };

@@ -15,14 +15,8 @@ export interface DownloadButtonProps {
   fileSize?: number;
   /** Original filename — used for type detection fallback + download attribute */
   fileName?: string;
-  /** Optional description shown below the label (card variant only) */
+  /** Optional description shown below the label */
   description?: string;
-  /**
-   * Visual variant per fileattachment-htmltable-locked.md §5.1:
-   * - `card` (default): TapedCard + stenciled corner stamp + jersey-deep CTA.
-   * - `inline`: compact chip for in-prose references — file-type pill + label + size.
-   */
-  variant?: "card" | "inline";
   className?: string;
 }
 
@@ -162,58 +156,13 @@ export const DownloadButton = ({
   fileSize,
   fileName,
   description,
-  variant = "card",
   className,
 }: DownloadButtonProps) => {
   const fileType = detectFileType(mimeType, href, fileName);
   const displayLabel = label ?? extractLabelFromUrl(href) ?? fileType.subtitle;
   const safeHref = isSafeHref(href) ? href : undefined;
 
-  if (variant === "inline") {
-    return (
-      <a
-        href={safeHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-download-variant="inline"
-        className={cn(
-          "group inline-flex h-10 max-w-full items-center gap-2.5 align-baseline",
-          "border-ink bg-cream border px-2.5",
-          "shadow-paper-sm",
-          "no-underline",
-          PRESS_DOWN_CLASSES,
-          className,
-        )}
-      >
-        <span
-          data-testid="file-type-pill"
-          aria-hidden="true"
-          className="text-cream inline-flex h-[22px] items-center px-[7px] font-mono text-[9px] leading-none font-medium tracking-[0.16em] uppercase"
-          style={{ backgroundColor: fileType.color }}
-        >
-          {fileType.stampLabel}
-        </span>
-        <span className="font-display text-ink max-w-[40ch] truncate text-[16px] italic">
-          {displayLabel}
-        </span>
-        {fileSize != null && (
-          <span
-            data-testid="file-size"
-            className="text-ink-muted font-mono text-[11px] tracking-[0.1em] uppercase"
-          >
-            {formatFileSize(fileSize)}
-          </span>
-        )}
-        <DownloadSimple
-          size={14}
-          aria-hidden="true"
-          className="text-ink-muted shrink-0"
-        />
-      </a>
-    );
-  }
-
-  // Card variant — TapedCard + stenciled corner stamp + jersey-deep CTA.
+  // TapedCard + stenciled corner stamp + jersey-deep CTA.
   // Composes its own paper frame so the press-down hover applies to the
   // whole anchor (the locked spec keeps the offset shadow on the anchor,
   // not the inner TapedCard).

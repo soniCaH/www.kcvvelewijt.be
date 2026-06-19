@@ -1,4 +1,5 @@
 import { parseEventDateTime } from "@/lib/utils/event-datetime";
+import { capitalize } from "@/lib/utils/capitalize";
 
 export interface EventMonthGroup<T> {
   /** Stable `yyyy-MM` key for React keys and tests. */
@@ -10,9 +11,6 @@ export interface EventMonthGroup<T> {
   label: string;
   events: T[];
 }
-
-const capitalize = (s: string): string =>
-  s.length > 0 ? s.charAt(0).toUpperCase() + s.slice(1) : s;
 
 /**
  * Group upcoming events into chronological month buckets for the

@@ -3,6 +3,7 @@ import { TapedCard } from "@/components/design-system/TapedCard";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { getButtonClasses } from "@/components/design-system/Button";
 import { cn } from "@/lib/utils/cn";
+import { capitalize } from "@/lib/utils/capitalize";
 import {
   DEFAULT_TICKET_LABEL,
   formatTimeRange,
@@ -41,10 +42,6 @@ function safeExternalHref(raw: string | undefined | null): string | null {
   } catch {
     return null;
   }
-}
-
-function capitalize(input: string): string {
-  return input ? input.charAt(0).toUpperCase() + input.slice(1) : input;
 }
 
 function formatDateLine(range: ResolvedEventRange): string | null {

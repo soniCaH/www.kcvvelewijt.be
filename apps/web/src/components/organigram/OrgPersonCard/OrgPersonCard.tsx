@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils/cn";
  *
  * Extends the 6.C `<TeamStaff>` idiom (round newsprint photo OR jersey-deep
  * monogram · first-semibold + last-italic name · mono function label) and
- * parameterises it by **occupancy state** and **scale**:
+ * parameterises it by **occupancy state**:
  *
  *  - `single`  — one holder: photo/monogram · person name · the position as the
  *                mono function label.
@@ -27,16 +27,10 @@ import { cn } from "@/lib/utils/cn";
  */
 
 export type OrgPersonCardState = "single" | "shared" | "vacant";
-export type OrgPersonCardScale = "directory" | "node";
 
 export interface OrgPersonCardProps {
   /** The organigram position this card represents. */
   node: OrgChartNode;
-  /**
-   * Render scale. `directory` (default) is the 64px-avatar browse card;
-   * `node` is the smaller explorer-leaf chrome (Phase 3, #2054).
-   */
-  scale?: OrgPersonCardScale;
   /**
    * Where the vacant-recruit CTA points. Defaults to the club contact page —
    * the same destination the hub's closing `<CtaBand>` uses (7o4: "to
@@ -119,29 +113,16 @@ interface ScaleConfig {
   nameClass: string;
 }
 
-const SCALE_CONFIG: Record<OrgPersonCardScale, ScaleConfig> = {
-  directory: {
-    avatarPx: 64,
-    avatarClass: "h-16 w-16",
-    monoClass: "text-2xl",
-    dualWrapClass: "h-16 w-[78px]",
-    dualCirclePx: 52,
-    dualCircleClass: "h-[52px] w-[52px]",
-    dualMonoClass: "text-lg",
-    plusNClass: "h-[30px] w-[30px] text-[11px]",
-    nameClass: "text-base",
-  },
-  node: {
-    avatarPx: 48,
-    avatarClass: "h-12 w-12",
-    monoClass: "text-xl",
-    dualWrapClass: "h-12 w-[60px]",
-    dualCirclePx: 40,
-    dualCircleClass: "h-10 w-10",
-    dualMonoClass: "text-sm",
-    plusNClass: "h-6 w-6 text-[9px]",
-    nameClass: "text-sm",
-  },
+const CARD_CONFIG: ScaleConfig = {
+  avatarPx: 64,
+  avatarClass: "h-16 w-16",
+  monoClass: "text-2xl",
+  dualWrapClass: "h-16 w-[78px]",
+  dualCirclePx: 52,
+  dualCircleClass: "h-[52px] w-[52px]",
+  dualMonoClass: "text-lg",
+  plusNClass: "h-[30px] w-[30px] text-[11px]",
+  nameClass: "text-base",
 };
 
 // ─── Sub-parts ───────────────────────────────────────────────────────────────
@@ -293,13 +274,12 @@ const SUBLABEL =
 
 export function OrgPersonCard({
   node,
-  scale = "directory",
   vacantCtaHref = "/club/contact",
   interactive = false,
   className,
 }: OrgPersonCardProps) {
   const state = deriveCardState(node.members.length);
-  const cfg = SCALE_CONFIG[scale];
+  const cfg = CARD_CONFIG;
 
   const baseCard =
     "border-ink relative flex flex-col items-center border-2 p-3 text-center";

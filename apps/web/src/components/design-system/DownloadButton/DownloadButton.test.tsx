@@ -72,33 +72,6 @@ describe("DownloadButton", () => {
     expect(stamp.textContent).toContain("XLSX");
   });
 
-  it("inline variant: renders a file-type pill instead of the stamp + CTA", () => {
-    render(
-      <DownloadButton
-        href="https://example.com/file.pdf"
-        label="Reglement"
-        variant="inline"
-      />,
-    );
-    expect(screen.getByTestId("file-type-pill")).toBeInTheDocument();
-    expect(screen.queryByTestId("file-type-stamp")).toBeNull();
-    expect(screen.queryByTestId("download-cta")).toBeNull();
-  });
-
-  it("inline variant: pill uses file-type colour for the background", () => {
-    render(
-      <DownloadButton
-        href="https://example.com/file.pdf"
-        label="Reglement"
-        mimeType="application/pdf"
-        variant="inline"
-      />,
-    );
-    const pill = screen.getByTestId("file-type-pill");
-    expect(pill).toHaveStyle({ backgroundColor: "#c0392b" });
-    expect(pill.textContent).toBe("PDF");
-  });
-
   it("card variant: renders description below the label", () => {
     render(
       <DownloadButton
