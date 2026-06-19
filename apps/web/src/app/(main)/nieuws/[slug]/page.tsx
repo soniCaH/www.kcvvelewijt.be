@@ -80,8 +80,8 @@ interface ArticlePageProps {
  * The single `switch (article.articleType)` lives in `renderArticleHero`
  * so the data shape of `<EditorialHero>`'s per-variant prop unions stays
  * inside one function. Variant-specific post-body blocks
- * (EventDetailBlock today; later MatchRecapStats at #1799) live as
- * straight conditional renders in the page body.
+ * (EventDetailBlock for events; MatchGoalsBlock + match CTA for the
+ * match variants) live as straight conditional renders in the page body.
  */
 interface RenderArticleHeroArgs {
   article: ArticleDetailVM;
