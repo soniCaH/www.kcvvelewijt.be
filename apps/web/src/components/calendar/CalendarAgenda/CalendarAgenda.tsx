@@ -98,7 +98,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
 
 /**
  * One event row — tinted (jersey-deep wash) so it never gets buried in the match
- * stack (the labelled-wall's one rescue, 6.D lock). Title in italic display +
+ * stack (the labelled-wall's one rescue, 6.D lock). Title in body sans +
  * its type tag.
  */
 function AgendaEventRow({ event }: { event: CalendarEvent }) {
@@ -111,7 +111,7 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
       className="border-paper-edge bg-jersey-deep/6 hover:bg-jersey-deep/12 grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 no-underline transition-colors last:border-b-0"
     >
       <span className="text-ink-muted font-mono text-[11px]">{when}</span>
-      <span className="font-display text-ink min-w-0 truncate text-[15px] font-bold italic">
+      <span className="text-ink min-w-0 truncate text-[15px] font-semibold">
         {event.title}
       </span>
       <EventTypeTag eventType={event.eventType} />

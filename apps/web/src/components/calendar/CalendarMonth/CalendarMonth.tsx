@@ -32,8 +32,8 @@ export interface CalendarMonthProps {
 const DAY_HEADERS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
 
 /**
- * Dense-day cell body (6.D lock / 6d3-v2): events first as full-width italic
- * display titles + a type-colour dot (rare + high-value, never hidden), then a
+ * Dense-day cell body (6.D lock / 6d3-v2): events first as full-width body-sans
+ * titles + a type-colour dot (rare + high-value, never hidden), then a
  * row of match pips below — `card-red` filled = thuis, `card-red` ring = uit.
  * No count badge; the pip row is the volume signal.
  */
@@ -65,7 +65,7 @@ function DayCellBody({
                   EVENT_TYPE_FILL[event.eventType],
                 )}
               />
-              <span className="font-display text-ink line-clamp-2 text-[11px] leading-tight font-bold italic">
+              <span className="text-ink line-clamp-2 text-[11px] leading-tight font-semibold">
                 {event.title}
               </span>
             </div>
@@ -166,7 +166,7 @@ function SelectedDayDetail({
                     {time}
                   </span>
                 )}
-                <span className="font-display min-w-0 flex-1 truncate text-base font-bold italic">
+                <span className="text-ink min-w-0 flex-1 truncate text-base font-semibold">
                   {event.title}
                 </span>
                 <EventTypeTag eventType={event.eventType} />
