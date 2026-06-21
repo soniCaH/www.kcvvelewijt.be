@@ -5,6 +5,7 @@ import {
   LinkToPsdAction,
   launcherTool,
   launcherTemplates,
+  curatedNewDocumentOptions,
   guidedSidebarInspectors,
 } from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
@@ -28,6 +29,7 @@ export default defineConfig({
 
   document: {
     actions: (prev) => [...prev, LinkToPsdAction],
+    newDocumentOptions: curatedNewDocumentOptions,
     inspectors: guidedSidebarInspectors,
   },
 })

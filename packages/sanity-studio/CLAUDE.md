@@ -63,10 +63,12 @@ The `ui.icon` is a **Lucide icon name string** (kebab-case, e.g. `'mic'`, `'help
 
 **Filtering rules** (enforced by `filterLauncherTemplates`):
 
-- Templates without a `ui` block are ignored — Sanity's auto-generated and third-party templates still work via the default `+ Create` button. Coexistence is the design contract.
+- Templates without a `ui` block are ignored by the launcher grid — third-party and not-yet-curated types still create via the default `+ Create` button. (For launcher-backed types, that default is hidden from `+ Create` by the curated-menu resolver below; the curated card creates them instead.)
 - Templates whose `schemaType` is not registered in the workspace schema are ignored and a single console warning is logged per unknown type per render.
 
 The pure filter (`filterLauncherTemplates`) lives in its own file separate from the React hook so vitest can import it without dragging Sanity's runtime CSS bundle into the module graph. Keep new pure helpers in their own files for the same reason.
+
+**Curated `+ Create` menu** (`curatedNewDocumentOptions`, wired in both studios' `document.newDocumentOptions`): Sanity surfaces every type's auto-generated **default** template in the global `+` menu (and structure / reference create menus), which would show a bare `+ Type` beside our curated `+ Nieuwe type`. The resolver hides the default for any type that has a launcher template, so only curated cards remain. Types **without** a launcher template keep their default and stay creatable — the menu converges to fully-curated as more types earn a card. It reads the `launcherTemplates` aggregate, so a new type needs no extra wiring here. (Sanity ids a type's default template after the type itself, so the pure `curateDefaultTemplateItems` drops items whose `templateId` is a launcher-backed schema type; curated templates use compound ids like `sponsor-new` and survive.) This `document.newDocumentOptions` wiring is one-time infra (like `actions` / `inspectors`), not a per-doc-type step.
 
 ## Custom Inputs
 
