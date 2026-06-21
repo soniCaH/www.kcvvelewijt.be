@@ -75,4 +75,47 @@ export const guideContent: Record<string, GuideEntry> = {
       'De placeholder verschijnt enkel wanneer er geen aankomende wedstrijden zijn.',
     ],
   },
+  organigramNode: {
+    intro:
+      'Een organigram-node is één positie in de clubstructuur (bijv. "Voorzitter" of "TVJO"). Je koppelt er de staffleden aan die de functie bekleden.',
+    placement:
+      'Verschijnt in het organigram op de clubpagina. De positie is bovendien herbruikbaar als contactpersoon in info-paden (via "Organigram positie").',
+    tips: [
+      '"Rapporteert aan" bepaalt de hiërarchie — leeg laten voor een positie op het hoogste niveau.',
+      'Meerdere leden = gedeelde positie; geen leden = vacante positie.',
+      'Gebruik "Sortering" om de volgorde binnen eenzelfde niveau te sturen (lagere waarde eerst).',
+    ],
+  },
+  jeugdLandingPage: {
+    intro:
+      'De jeugd-landingspagina stelt het kaartenraster bovenaan de jeugdpagina samen. Het is een singleton — je past het ene exemplaar aan, je maakt geen nieuwe.',
+    placement:
+      'Verschijnt als kaartenraster bovenaan `/jeugd`. Navigatiekaarten linken door; artikelkaarten vullen zich automatisch met de recentste jeugd-artikels.',
+    tips: [
+      'Kies per kaart een rasterpositie (Featured / Medium / Third) en een type (Navigatie of Dynamisch artikel).',
+      'Artikelkaarten negeren de tekstvelden — die worden automatisch ingevuld vanuit Sanity.',
+      'Max. 12 kaarten voor een nette layout.',
+    ],
+  },
+  staffMember: {
+    intro:
+      'Een staflid is een persoon binnen de clubwerking (bestuur, trainer, vrijwilliger). Een deel van de gegevens komt automatisch uit PSD.',
+    placement:
+      "Verschijnt op de staf- en clubpagina's en is koppelbaar als lid van een organigram-positie.",
+    tips: [
+      'De PSD-velden (functietitel, PSD-ID, gearchiveerd) worden gesynchroniseerd — niet handmatig bewerken.',
+      'Voeg een foto en bio toe voor een vollediger profiel op de site.',
+    ],
+  },
+  event: {
+    intro:
+      'Een evenement is een activiteit met datum (clubfeest, supportersactiviteit, jeugdwerking …). Het type bepaalt de kleurcode in de agenda.',
+    placement:
+      'Verschijnt in de evenementenkalender en op de detailpagina. "Featured on homepage" plaatst het in de uitgelichte slot van de nieuwssectie op de homepage.',
+    tips: [
+      'Vul een einddatum in voor meerdaagse evenementen; laat leeg voor een evenement op één moment.',
+      'Laat het type leeg voor "Andere".',
+      'Gebruik de externe link voor een inschrijvings- of ticketpagina.',
+    ],
+  },
 }

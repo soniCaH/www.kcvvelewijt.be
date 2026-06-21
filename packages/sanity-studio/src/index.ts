@@ -20,7 +20,15 @@ export {membershipApplicationStructure} from './structure/membershipApplication'
 // `useTemplates` hook for any consumer importing from `@kcvv/sanity-studio`.
 // Internal callers reach them via the `./tools/launcher` subpath instead.
 export {launcherTool, curatedNewDocumentOptions} from './tools/launcher'
-export {launcherTemplates, responsibilityTemplates, articleTemplates, sponsorTemplates, pageTemplates} from './templates'
+export {
+  launcherTemplates,
+  organigramNodeTemplates,
+  responsibilityTemplates,
+  articleTemplates,
+  sponsorTemplates,
+  eventTemplates,
+  pageTemplates,
+} from './templates'
 export type {LauncherTemplate} from './templates'
 export {guidedSidebarInspectors, guidedSidebarInspector} from './inspectors'
 export type {GuideEntry} from './inspectors'
