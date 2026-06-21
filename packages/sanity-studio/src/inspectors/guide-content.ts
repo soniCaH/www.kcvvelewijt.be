@@ -118,4 +118,15 @@ export const guideContent: Record<string, GuideEntry> = {
       'Gebruik de externe link voor een inschrijvings- of ticketpagina.',
     ],
   },
+  player: {
+    intro:
+      'Een speler is een lid van een ploeg. De identiteit (naam, geboortedatum, foto) komt automatisch uit PSD; jij verrijkt het profiel met bio, foto\'s en de positie.',
+    placement:
+      'Verschijnt in de ploegoverzichten en op het spelersprofiel. De transparante foto vervangt de PSD-foto op de site.',
+    tips: [
+      'De velden onder "Identiteit (PSD)" zijn gesynchroniseerd en alleen-lezen — wijzig ze in PSD, niet hier.',
+      'Vul onder "Redactioneel" de bio, een transparante foto en de positie in — PSD levert die niet aan voor KCVV.',
+      'Het redactionele "Position"-veld is wat op de site verschijnt; "Position (PSD)" is voor KCVV vaak leeg.',
+    ],
+  },
 }
