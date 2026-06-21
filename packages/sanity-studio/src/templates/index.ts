@@ -2,12 +2,14 @@ import type {LauncherTemplate} from './types'
 import {responsibilityTemplates} from './responsibility-templates'
 import {articleTemplates} from './article-templates'
 import {sponsorTemplates} from './sponsor-templates'
+import {pageTemplates} from './page-templates'
 
 export type {LauncherTemplate, LauncherTemplateUi} from './types'
 export {isLauncherTemplate} from './types'
 export {responsibilityTemplates} from './responsibility-templates'
 export {articleTemplates} from './article-templates'
 export {sponsorTemplates} from './sponsor-templates'
+export {pageTemplates} from './page-templates'
 
 /**
  * Every launcher manifest, concatenated. Both studios register the launcher
@@ -19,4 +21,5 @@ export const launcherTemplates: LauncherTemplate[] = [
   ...responsibilityTemplates,
   ...articleTemplates,
   ...sponsorTemplates,
+  ...pageTemplates,
 ]
