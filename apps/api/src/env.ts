@@ -14,6 +14,8 @@ export interface WorkerEnv {
   readonly AI: Ai; // Workers AI binding
   readonly SEARCH_INDEX: VectorizeIndex; // Vectorize vector store
   readonly SANITY_WEBHOOK_SECRET: string; // SVIX signing secret — wrangler secret
+  readonly RESEND_API_KEY?: string; // Resend transactional email — wrangler secret (absent locally → email dispatch is a no-op)
+  readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent locally → verification is skipped)
   readonly CACHE_LONG_TTL?: string; // "true" on staging — overrides hardTtl to 365 days
 }
 

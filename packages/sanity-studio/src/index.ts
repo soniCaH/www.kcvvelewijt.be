@@ -14,6 +14,7 @@ export {schemaTypes} from './schema-types'
 // Studio at module load. Import migrations via `@kcvv/sanity-studio/migrations`.
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
+export {membershipApplicationStructure} from './structure/membershipApplication'
 // Public LauncherTool surface. `useTemplates` and `filterLauncherTemplates`
 // are intentionally NOT re-exported — they would shadow Sanity's own
 // `useTemplates` hook for any consumer importing from `@kcvv/sanity-studio`.

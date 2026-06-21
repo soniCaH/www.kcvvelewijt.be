@@ -19,6 +19,7 @@ function makeSanityMock(
     archiveStaff: () => Effect.succeed(undefined),
     archiveTeams: () => Effect.succeed(undefined),
     writeFeedback: writeFeedbackImpl ?? (() => Effect.succeed(undefined)),
+    writeMembershipApplication: () => Effect.succeed(undefined),
   };
 }
 

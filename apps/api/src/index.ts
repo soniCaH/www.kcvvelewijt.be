@@ -26,6 +26,8 @@ import { OpponentApiLive } from "./handlers/opponent";
 import { RankingApiLive } from "./handlers/ranking";
 import { RelatedApiLive } from "./handlers/related";
 import { SearchApiLive } from "./handlers/search";
+import { FormsApiLive } from "./handlers/forms";
+import { EmailTransportLive } from "./email/resend";
 import { EmbeddingServiceLive } from "./search/embedding";
 import { VectorizeServiceLive } from "./search/vectorize";
 import { AiAnswerServiceLive } from "./search/ai-answer";
@@ -60,6 +62,8 @@ function buildAppLayer(env: WorkerEnv) {
     Layer.provide(RankingApiLive),
     Layer.provide(RelatedApiLive),
     Layer.provide(SearchApiLive),
+    Layer.provide(FormsApiLive),
+    Layer.provide(EmailTransportLive),
     Layer.provide(EmbeddingServiceLive),
     Layer.provide(VectorizeServiceLive),
     Layer.provide(AiAnswerServiceLive),

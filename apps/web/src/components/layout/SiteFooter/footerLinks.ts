@@ -22,7 +22,7 @@ export const FOOTER_COLUMNS: ReadonlyArray<FooterColumn> = [
   {
     heading: "Aansluiten",
     links: [
-      { label: "Als speler", href: "/club/inschrijven" },
+      { label: "Als speler", href: "/club/word-lid" },
       { label: "Als vrijwilliger", href: "/club/vrijwilliger" },
       { label: "Als sponsor", href: "/sponsors" },
     ],

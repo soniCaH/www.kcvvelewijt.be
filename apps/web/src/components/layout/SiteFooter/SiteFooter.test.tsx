@@ -63,7 +63,7 @@ describe("SiteFooter", () => {
     render(<SiteFooter />);
     expect(screen.getByRole("link", { name: "Als speler" })).toHaveAttribute(
       "href",
-      "/club/inschrijven",
+      "/club/word-lid",
     );
     expect(
       screen.getByRole("link", { name: "Als vrijwilliger" }),

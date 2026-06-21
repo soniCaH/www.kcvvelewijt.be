@@ -42,6 +42,7 @@ const sanityMock: SanityProjectionInterface = {
   getActiveTeamPsdIds: () => Effect.succeed([]),
   getVisibleTeamPsdIds: () => Effect.succeed([]),
   getProtectedStaffPsdIds: () => Effect.succeed([]),
+  getFormRoutingConfig: () => Effect.succeed(null),
 };
 
 const seasons = [

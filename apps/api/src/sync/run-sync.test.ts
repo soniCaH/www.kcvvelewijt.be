@@ -47,6 +47,9 @@ function makeSanityMocks() {
   const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
   const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
   const writeFeedback = vi.fn(() => Effect.succeed(undefined as void));
+  const writeMembershipApplication = vi.fn(() =>
+    Effect.succeed(undefined as void),
+  );
 
   // Read methods (SanityProjection)
   const getPlayersImageState = vi.fn(() =>
@@ -59,6 +62,7 @@ function makeSanityMocks() {
   const getActiveTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getVisibleTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getProtectedStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
+  const getFormRoutingConfig = vi.fn(() => Effect.succeed(null));
 
   const writerMock: SanityMutationInterface = {
     upsertPlayer,
@@ -69,6 +73,7 @@ function makeSanityMocks() {
     archiveStaff,
     archiveTeams,
     writeFeedback,
+    writeMembershipApplication,
   };
 
   const readerMock: SanityProjectionInterface = {
@@ -78,6 +83,7 @@ function makeSanityMocks() {
     getActiveTeamPsdIds,
     getVisibleTeamPsdIds,
     getProtectedStaffPsdIds,
+    getFormRoutingConfig,
   };
 
   return {
@@ -367,6 +373,9 @@ describe("runSync", () => {
       archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
       archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
       writeFeedback: vi.fn(() => Effect.succeed(undefined as void)),
+      writeMembershipApplication: vi.fn(() =>
+        Effect.succeed(undefined as void),
+      ),
     };
     const readerMock: SanityProjectionInterface = {
       getPlayersImageState: vi.fn(() =>
@@ -382,6 +391,7 @@ describe("runSync", () => {
       getActiveTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getVisibleTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getProtectedStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
+      getFormRoutingConfig: vi.fn(() => Effect.succeed(null)),
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],

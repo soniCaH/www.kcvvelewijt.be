@@ -177,7 +177,7 @@ function SiteHeaderInner({
               <MagnifyingGlass size={18} aria-hidden="true" />
             </Link>
             <Link
-              href="/club/inschrijven"
+              href="/club/word-lid"
               className="border-ink text-ink hover:border-jersey-deep hover:text-jersey-deep inline-flex items-center border px-2.5 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors duration-150 xl:px-3.5 xl:py-2 xl:text-[13px] 2xl:text-[14px]"
             >
               Word lid
@@ -226,7 +226,7 @@ function SiteHeaderInner({
         })}
         <div className="mt-6">
           <Link
-            href="/club/inschrijven"
+            href="/club/word-lid"
             onClick={handleClose}
             className={getButtonClasses({
               variant: "primary",

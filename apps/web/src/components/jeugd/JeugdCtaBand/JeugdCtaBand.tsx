@@ -2,9 +2,9 @@ import { CtaBand } from "@/components/design-system";
 
 export interface JeugdCtaBandProps {
   /**
-   * Where "Schrijf je in +" links. Defaults to `/hulp` until the membership
-   * intake form (#1473) ships (PRD redesign-phase-7-jeugd §7). A `mailto:` or
-   * external href renders a plain styled `<a>`.
+   * Where "Schrijf je in +" links. Defaults to the membership intake form
+   * `/club/word-lid` (#1473). A `mailto:` or external href renders a plain
+   * styled `<a>`.
    */
   href?: string;
 }
@@ -14,7 +14,7 @@ export interface JeugdCtaBandProps {
  * `<CtaBand>` with youth copy: "Interesse in onze jeugd?" + a `warm` paper-stamp
  * "Schrijf je in +". Render full-bleed as the page's last element.
  */
-export function JeugdCtaBand({ href = "/hulp" }: JeugdCtaBandProps) {
+export function JeugdCtaBand({ href = "/club/word-lid" }: JeugdCtaBandProps) {
   return (
     <CtaBand
       ariaLabel="Schrijf je in"
