@@ -129,4 +129,15 @@ export const guideContent: Record<string, GuideEntry> = {
       'Het redactionele "Position"-veld is wat op de site verschijnt; "Position (PSD)" is voor KCVV vaak leeg.',
     ],
   },
+  team: {
+    intro:
+      'Een ploeg is een team binnen de club. De identiteit (naam, leeftijdsgroep, spelers) komt uit PSD; jij verrijkt ze met beschrijving, foto, trainingen en staf.',
+    placement:
+      'Verschijnt in de ploegoverzichten en op de ploegpagina `/ploegen/{slug}`. "Show in navigation" bepaalt of de ploeg in de navigatie verschijnt.',
+    tips: [
+      'De velden onder "Identiteit" (naam, leeftijd, spelers, seizoen) zijn gesynchroniseerd vanuit PSD en alleen-lezen — beheer ze in PSD.',
+      'Division en Division (full) zijn wél redactioneel — vul de competitiecode en -naam zelf in.',
+      'Koppel onder "Staf" de trainers/afgevaardigden en voeg onder "Trainingen" de trainingsmomenten toe.',
+    ],
+  },
 }
