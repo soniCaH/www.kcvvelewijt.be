@@ -47,8 +47,11 @@ All events use `snake_case`. Parameters follow GA4 conventions where possible.
 > dimensions). `scripts/create-ga4-dimensions.mjs` registers the `params` as GA4
 > custom dimensions and `scripts/sync-gtm.mjs` pushes the trigger RegEx, Data Layer
 > Variables, and GA4 Event-tag rows to GTM. Both import the taxonomy, so the regex
-> below (§8), the GA4 dimensions, and the live GTM container cannot drift. The tables
-> in this section are the human-readable reference; the taxonomy module is authoritative.
+> below (§8), the GA4 dimensions, and the live GTM container stay reconciled by
+> `scripts/sync-gtm.mjs` (it overwrites the trigger RegEx and upserts the DLVs/tag
+> rows on each run; manual GTM edits between runs can still diverge until the next
+> sync). The tables in this section are the human-readable reference; the taxonomy
+> module is authoritative.
 
 ### Responsibility Finder (Priority 1 — "did the user find the right person?")
 

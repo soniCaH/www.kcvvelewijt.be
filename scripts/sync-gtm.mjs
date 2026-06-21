@@ -14,9 +14,10 @@
  *               exit WITHOUT writing anything.
  *   --dump      Read-only: print the live trigger, GA4 tag, and DLVs as JSON,
  *               so the exact resource shapes can be confirmed. No writes.
- *   Abort       If the live trigger RegEx contains a token NOT in the taxonomy,
- *               the script aborts (non-zero) instead of dropping it — reconcile
- *               the taxonomy first, then re-run.
+ *   Abort       A real run aborts (non-zero) if the live trigger RegEx contains a
+ *               token NOT in the taxonomy, instead of dropping it. --dry-run only
+ *               warns. --force-regex overwrites the RegEx with the canonical one
+ *               (use once the orphan tokens are confirmed stale).
  *   Orphans     Live DLV keys / tag param rows / regex tokens the taxonomy no
  *               longer contains are PRINTED (read-only) and never auto-deleted.
  *
@@ -37,7 +38,7 @@
  *   GTM_WORKSPACE_ID=10       (Default Workspace; or a fresh workspace's id)
  *   GTM_TRIGGER_NAME  (default "Custom Event — KCVV Analytics")
  *   GTM_TAG_NAME      (default "GA4 Event — KCVV Custom Events")
- *   GTM_DLV_PREFIX    (default "DLV - ")  — name convention for created DLVs
+ *   GTM_DLV_PREFIX    (default "dlv - ")  — matches the live container convention
  *
  * Usage:
  *   node scripts/sync-gtm.mjs --dump
@@ -50,13 +51,16 @@ import { params, buildTriggerRegex } from "./analytics-taxonomy.mjs";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 const DUMP = process.argv.includes("--dump");
+// Overwrite the live trigger RegEx even if it carries tokens absent from the
+// taxonomy (e.g. stale/superseded ones). Without it, a real run aborts on those.
+const FORCE_REGEX = process.argv.includes("--force-regex");
 
 const ACCOUNT_ID = reqEnv("GTM_ACCOUNT_ID");
 const CONTAINER_ID = reqEnv("GTM_CONTAINER_ID");
 const WORKSPACE_ID = reqEnv("GTM_WORKSPACE_ID");
 const TRIGGER_NAME = process.env.GTM_TRIGGER_NAME ?? "Custom Event — KCVV Analytics";
 const TAG_NAME = process.env.GTM_TAG_NAME ?? "GA4 Event — KCVV Custom Events";
-const DLV_PREFIX = process.env.GTM_DLV_PREFIX ?? "DLV - ";
+const DLV_PREFIX = process.env.GTM_DLV_PREFIX ?? "dlv - ";
 
 const API = "https://tagmanager.googleapis.com/tagmanager/v2";
 const WS = `${API}/accounts/${ACCOUNT_ID}/containers/${CONTAINER_ID}/workspaces/${WORKSPACE_ID}`;
@@ -85,7 +89,9 @@ function getToken() {
   }
 }
 
-async function api(method, url, body) {
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function api(method, url, body, attempt = 0) {
   const res = await fetch(url, {
     method,
     headers: {
@@ -93,7 +99,16 @@ async function api(method, url, body) {
       ...(body ? { "Content-Type": "application/json" } : {}),
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
+    signal: AbortSignal.timeout(30_000),
   });
+  // GTM API v2 has a low per-minute write quota; back off + retry on 429/5xx.
+  if ((res.status === 429 || res.status >= 500) && attempt < 6) {
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const waitMs = retryAfter > 0 ? retryAfter * 1000 : Math.min(2000 * 2 ** attempt, 30000);
+    console.warn(`  …${res.status} on ${method} ${url.split("/").pop()}; retrying in ${Math.round(waitMs / 1000)}s`);
+    await sleep(waitMs);
+    return api(method, url, body, attempt + 1);
+  }
   const text = await res.text();
   const json = text ? JSON.parse(text) : {};
   if (!res.ok) {
@@ -196,15 +211,19 @@ async function main() {
     .split("|")
     .filter(Boolean);
   const unknownTokens = liveTokens.filter((t) => !canonicalTokens.includes(t));
-  if (unknownTokens.length > 0) {
-    console.error(
-      `ABORT: the live trigger RegEx contains token(s) absent from the taxonomy:\n` +
-        `  ${unknownTokens.join(", ")}\n` +
-        `Add them to scripts/analytics-taxonomy.mjs (or remove them from the trigger), then re-run.`,
-    );
-    process.exit(2);
-  }
   const regexNeedsUpdate = liveRegex !== canonical;
+  if (unknownTokens.length > 0) {
+    const msg =
+      `live trigger RegEx carries token(s) absent from the taxonomy: ${unknownTokens.join(", ")}\n` +
+      `  → if stale/superseded, rerun with --force-regex to overwrite; if a real manual\n` +
+      `    addition, add it to scripts/analytics-taxonomy.mjs first.`;
+    if (DRY_RUN || FORCE_REGEX) {
+      console.warn(`WARNING: ${msg}`);
+    } else {
+      console.error(`ABORT: ${msg}`);
+      process.exit(2);
+    }
+  }
 
   // ── 2. DLVs to create (deduped by dataLayer key) ──────────────────────
   const dlvsToCreate = params.map((p) => p.parameterName).filter((k) => !liveDlvByKey.has(k));
@@ -227,6 +246,7 @@ async function main() {
   console.log(`DLVs to create (${dlvsToCreate.length}): ${dlvsToCreate.join(", ") || "—"}`);
   console.log(`GA4 tag param rows to add (${tagRowsToAdd.length}): ${tagRowsToAdd.join(", ") || "—"}`);
   console.log("── Orphan report (read-only; nothing deleted) ─────");
+  console.log(`  regex tokens not in taxonomy (${unknownTokens.length}): ${unknownTokens.join(", ") || "—"}`);
   console.log(`  DLV keys not in taxonomy (${orphanDlvs.length}): ${orphanDlvs.join(", ") || "—"}`);
   console.log(`  tag param rows not in taxonomy (${orphanTagParams.length}): ${orphanTagParams.join(", ") || "—"}`);
 
@@ -242,8 +262,10 @@ async function main() {
     if (param) {
       param.value = canonical;
     } else {
-      // Live trigger has no matchRegex filter yet — construct one.
+      // Live trigger has no matchRegex filter yet — append one, preserving any
+      // other existing filter conditions on the trigger.
       updated.customEventFilter = [
+        ...(updated.customEventFilter ?? []),
         {
           type: "matchRegex",
           parameter: [
