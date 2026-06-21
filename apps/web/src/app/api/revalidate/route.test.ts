@@ -57,6 +57,26 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).not.toHaveBeenCalled();
   });
 
+  it("returns 400 on invalid JSON (signature valid)", async () => {
+    const res = await POST(
+      new Request("http://localhost:3000/api/revalidate", {
+        method: "POST",
+        headers: { "sanity-webhook-signature": "sig" },
+        body: "{not valid json",
+      }),
+    );
+    expect(res.status).toBe(400);
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(revalidateTag).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when _type is missing", async () => {
+    const res = await POST(makeRequest({ slug: "x" }));
+    expect(res.status).toBe(400);
+    expect(revalidatePath).not.toHaveBeenCalled();
+    expect(revalidateTag).not.toHaveBeenCalled();
+  });
+
   it("revalidates article path + tag on a valid payload", async () => {
     const res = await POST(makeRequest({ _type: "article", slug: "hello" }));
     expect(res.status).toBe(200);

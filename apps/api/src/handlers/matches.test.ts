@@ -315,6 +315,46 @@ describe("matchDetailTtl", () => {
       TTL.MATCH_DETAIL_DEFAULT,
     );
   });
+
+  // Exact tier cutoffs — guard the < vs >= comparisons against off-by-one.
+  it("48h-finished cutoff (>= is PAST)", () => {
+    expect(matchDetailTtl(at(-48 * H), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_PAST, // exactly 48h ago → immutable
+    );
+    expect(matchDetailTtl(at(-48 * H - 1), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_PAST, // just over 48h → immutable
+    );
+    expect(matchDetailTtl(at(-48 * H + 1), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK, // just under 48h → not yet immutable, ~48h distance
+    );
+  });
+
+  it("3h cutoff (< is LIVE)", () => {
+    expect(matchDetailTtl(at(3 * H - 1), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_LIVE,
+    );
+    expect(matchDetailTtl(at(3 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+
+  it("24h cutoff (< is MATCHDAY)", () => {
+    expect(matchDetailTtl(at(24 * H - 1), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(matchDetailTtl(at(24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK,
+    );
+  });
+
+  it("7d cutoff (< is WEEK)", () => {
+    expect(matchDetailTtl(at(7 * 24 * H - 1), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK,
+    );
+    expect(matchDetailTtl(at(7 * 24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_DEFAULT,
+    );
+  });
 });
 
 describe("getPlayerStatsHandler", () => {
