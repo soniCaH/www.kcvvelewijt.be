@@ -51,11 +51,15 @@ Custom Studio Tools live under `src/tools/<name>/`. Each Tool exports:
 
 The `✨ Create` card grid in the top nav. Reads launcher-eligible templates from the workspace via `useTemplates()` and dispatches `router.navigateIntent('create', { type, template })` when an editor picks a card. Sanity routes the intent to a new draft seeded by the template's `value`.
 
+**When a doc type earns a launcher card (IVT):** add one only when there is **shape variation worth seeding** — a field whose value changes which groups/fields the form shows (e.g. `article`'s `articleType` → 4 cards), or a single zero-prefill card that is the teaching on-ramp for a hand-created type (e.g. `responsibility`). **Skip** singletons (`homePage`, `jeugdLandingPage`) and data-driven / rarely-created types (`matchPreview`/`matchRecap` are generated from match data) — those keep working through Sanity's default `+ Create` button.
+
 **Adding a launcher card** for an existing schema type:
 
-1. Create or edit `src/templates/<schemaType>-templates.ts` and export a `<schemaType>Templates: LauncherTemplate[]` constant. Each entry needs `id`, `title`, `schemaType`, `value` (zero-prefill `{}` unless seeding form-shape fields like `articleType`), and a `ui` block (`icon`, Dutch ≤100-char `description`, `group`).
-2. Re-export the manifest from `src/templates/index.ts` and from the package barrel.
-3. Wire it into both studios' `sanity.config.ts` via `schema.templates: (prev) => [...prev, ...<schemaType>Templates]`.
+1. Create or edit `src/templates/<schemaType>-templates.ts` and export a `<schemaType>Templates: LauncherTemplate[]` constant. Each entry needs `id`, `title`, `schemaType`, `value` (zero-prefill `{}` unless seeding form-shape fields like `articleType` — per design decision D6, **never** prefill editorial content), and a `ui` block (`icon`, Dutch ≤100-char `description`, `group`).
+2. Re-export the manifest from `src/templates/index.ts`, **append it to the `launcherTemplates` aggregate** in that same file, and re-export it from the package barrel.
+3. **No `sanity.config.ts` edit.** Both studios register the grid once via `schema.templates: (prev) => [...prev, ...launcherTemplates]`, so appending to the aggregate (step 2) is the only registration step.
+
+The `ui.icon` is a **Lucide icon name string** (kebab-case, e.g. `'mic'`, `'help-circle'`, `'arrow-left-right'`) — the same vocabulary the public site uses. It is currently stored on the template but not yet rendered on the card (the icon slot lands with the icon-name registry); set it correctly now so cards light up when it ships. Do **not** use `@sanity/icons` PascalCase component names here — those are for Tool/Action `icon` slots (e.g. `launcherTool`'s `ComposeSparklesIcon`), not the launcher card `ui.icon`.
 
 **Filtering rules** (enforced by `filterLauncherTemplates`):
 
@@ -67,8 +71,10 @@ The pure filter (`filterLauncherTemplates`) lives in its own file separate from 
 ## Custom Inputs
 
 - One input component per file in `src/inputs/`
-- Pair each component with an `apply-<input>.ts` file that exports the `components` patch used in `defineField` — keeps registration decoupled from the component
+- Pair each component with an `apply-<input>.ts` helper that takes `schemaTypes` and returns a copy with the component grafted onto a specific field's `components.input` — non-mutating, a safe no-op when the target type/field is absent. This keeps `@kcvv/sanity-schemas` React-free: the schema declares a plain field, the graft happens in `src/schema-types.ts` where all `apply-*` helpers compose (`applyRespondentPicker(applyArticleTagsInput(baseSchemaTypes, …), …)`).
 - Export both the component and the apply helper from `src/inputs/index.ts`, then re-export from the package barrel
+
+**Person / contact references:** reuse **`RespondentPicker`** instead of a raw `reference` input. It is grafted onto the target field via `applyRespondentPicker` in `schema-types.ts` (see above) — the schema keeps a plain field, so no React leaks into `@kcvv/sanity-schemas` and no per-studio config edit is needed.
 
 ## Structure Builders
 
@@ -100,6 +106,27 @@ Everything public is exported by name from `src/index.ts`. Rules:
 - Export types with `export type { ... }` to avoid runtime leakage
 - No default exports from the barrel — named only
 - **Migrations are an exception**: they live in the separate `src/migrations/index.ts` sub-barrel (consumed as `@kcvv/sanity-studio/migrations`). See the **Migrations** section below for why mixing them into the root barrel breaks the deployed Studio
+
+## Editor-UX Rework — Adding a New Doc Type (Checklist)
+
+Used verbatim by the Phase 5+ propagation issues (#1503–#1511, #2181). Everything below lands **once** in `@kcvv/sanity-schemas` / `@kcvv/sanity-studio` and applies to **both** studios — there is **no** per-studio `sanity.config.ts` step. Copy the shipped `responsibility` / `article` types as the reference.
+
+**Schema** (`packages/sanity-schemas/src/<type>.ts` — see that package's CLAUDE.md "Editor-UX Convention"):
+
+1. [ ] Declare `groups` with exactly one `default: true`; assign every field a `group`.
+2. [ ] Give every non-obvious field a 1–3 sentence Dutch teaching `description` (what + concrete example + public-site impact).
+3. [ ] Give every `Rule.required()` a teaching `.error('Verplicht. …')` stating what breaks on the site without it.
+4. [ ] For person/contact references, leave the field plain — it gets the `RespondentPicker` graft (step 6), not a raw `reference` input.
+
+**Studio** (`packages/sanity-studio/`):
+
+5. [ ] **Launcher card (only if earned):** if the type has shape variation worth seeding (or is a hand-created singleton-on-ramp), add `src/templates/<type>-templates.ts`, re-export it from `src/templates/index.ts`, **append it to the `launcherTemplates` aggregate**, and re-export from the barrel. `value` seeds only form-shape fields (never editorial content); `ui.icon` is a Lucide name string. Skip for singletons / data-driven types.
+6. [ ] **Custom inputs (if any):** graft via an `apply-<input>.ts` helper composed in `src/schema-types.ts` (reuse `RespondentPicker` for contacts). Schema stays React-free.
+
+**Verify:**
+
+7. [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass.
+8. [ ] Manual smoke against the staging dataset: create the type (via launcher if it has a card), confirm groups/descriptions/errors render, publish.
 
 ## No Duplication With Root CLAUDE.md
 
