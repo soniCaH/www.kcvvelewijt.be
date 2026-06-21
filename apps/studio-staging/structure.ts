@@ -47,6 +47,13 @@ export const structure: StructureResolver = (S) =>
         .title('Events')
         .child(S.documentTypeList('event').title('Events')),
       S.listItem()
+        .title('Photo galleries')
+        .child(
+          S.documentTypeList('photoGallery')
+            .title('Photo galleries')
+            .defaultOrdering([{field: 'publishedAt', direction: 'desc'}]),
+        ),
+      S.listItem()
         .title('Pages')
         .child(S.documentTypeList('page').title('Pages')),
       S.divider(),

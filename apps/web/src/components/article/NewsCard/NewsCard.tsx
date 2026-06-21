@@ -26,6 +26,12 @@ export interface NewsCardProps {
   href?: string;
   imageUrl?: string;
   imageAlt?: string;
+  /**
+   * Sanity `metadata.lqip` data-URI for a `next/image` blur placeholder.
+   * Omitted → no placeholder (the historical default). Used by gallery cards
+   * (#1471) where the cover is a CMS photo with an LQIP.
+   */
+  imageLqip?: string | null;
   /** Single category label — shown in the MonoLabel row above the title. */
   badge?: string;
   /**
@@ -41,6 +47,11 @@ export interface NewsCardProps {
    * when absent — cards with no lead still read correctly.
    */
   dek?: string;
+  /**
+   * Footer call-to-action label (revealed on hover/focus). Defaults to
+   * "Lees verder"; gallery cards (#1471) override with "Bekijk galerij".
+   */
+  cta?: string;
   variant?: NewsCardVariant;
   /**
    * Aspect ratio of the top image region. Defaults to 16:9 per the locked
@@ -155,10 +166,12 @@ export const NewsCard = ({
   href,
   imageUrl,
   imageAlt,
+  imageLqip,
   badge,
   typeLabel,
   date,
   dek,
+  cta,
   variant = "standard",
   aspectRatio = "landscape-16-9",
   rotation = "none",
@@ -249,6 +262,8 @@ export const NewsCard = ({
                 ? "(max-width: 768px) 100vw, 66vw"
                 : "(max-width: 768px) 100vw, 33vw"
             }
+            placeholder={imageLqip ? "blur" : "empty"}
+            blurDataURL={imageLqip ?? undefined}
           />
         ) : (
           <div
@@ -359,7 +374,7 @@ export const NewsCard = ({
                   isDark ? "text-cream" : "text-jersey-deep",
                 )}
               >
-                Lees verder →
+                {cta ?? "Lees verder"} →
               </span>
             )}
           </div>

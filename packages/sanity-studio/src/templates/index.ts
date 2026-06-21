@@ -4,6 +4,7 @@ import {responsibilityTemplates} from './responsibility-templates'
 import {articleTemplates} from './article-templates'
 import {sponsorTemplates} from './sponsor-templates'
 import {eventTemplates} from './event-templates'
+import {photoGalleryTemplates} from './photoGallery-templates'
 import {pageTemplates} from './page-templates'
 
 export type {LauncherTemplate, LauncherTemplateUi} from './types'
@@ -13,6 +14,7 @@ export {responsibilityTemplates} from './responsibility-templates'
 export {articleTemplates} from './article-templates'
 export {sponsorTemplates} from './sponsor-templates'
 export {eventTemplates} from './event-templates'
+export {photoGalleryTemplates} from './photoGallery-templates'
 export {pageTemplates} from './page-templates'
 
 /**
@@ -27,5 +29,6 @@ export const launcherTemplates: LauncherTemplate[] = [
   ...articleTemplates,
   ...sponsorTemplates,
   ...eventTemplates,
+  ...photoGalleryTemplates,
   ...pageTemplates,
 ]

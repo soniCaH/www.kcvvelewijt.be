@@ -36,6 +36,10 @@ import {
   PageRepository,
   PageRepositoryLive,
 } from "../repositories/page.repository";
+import {
+  PhotoGalleryRepository,
+  PhotoGalleryRepositoryLive,
+} from "../repositories/photoGallery.repository";
 
 export const AppLayer = Layer.mergeAll(
   BffServiceLive,
@@ -48,6 +52,7 @@ export const AppLayer = Layer.mergeAll(
   EventRepositoryLive,
   ResponsibilityRepositoryLive,
   PageRepositoryLive,
+  PhotoGalleryRepositoryLive,
 );
 export const runtime = ManagedRuntime.make(AppLayer);
 
@@ -65,6 +70,7 @@ export const runPromise = <A, E>(
     | EventRepository
     | ResponsibilityRepository
     | PageRepository
+    | PhotoGalleryRepository
   >,
 ) => runtime.runPromise(effect);
 
@@ -79,4 +85,5 @@ export {
   EventRepository,
   ResponsibilityRepository,
   PageRepository,
+  PhotoGalleryRepository,
 };

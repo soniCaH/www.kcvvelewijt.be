@@ -21,6 +21,48 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type FormRoutingConfig = {
+  _id: string;
+  _type: "formRoutingConfig";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  speler?: string;
+  jeugdspeler?: string;
+  vrijwilliger?: string;
+  trainer?: string;
+  scheidsrechter?: string;
+};
+
+export type MembershipApplication = {
+  _id: string;
+  _type: "membershipApplication";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  role?:
+    | "speler"
+    | "jeugdspeler"
+    | "vrijwilliger"
+    | "trainer"
+    | "scheidsrechter";
+  firstName?: string;
+  lastName?: string;
+  birthDate?: string;
+  isMinor?: boolean;
+  gender?: "m" | "f" | "x";
+  municipality?: string;
+  email?: string;
+  priorClub?: string;
+  parentEmail?: string;
+  parentalConsent?: boolean;
+  medicalCertAcknowledged?: boolean;
+  privacyAccepted?: boolean;
+  submittedAt?: string;
+  status?: "new" | "contacted" | "approved" | "rejected";
+  notes?: string;
+};
+
 export type SanityImageAssetReference = {
   _ref: string;
   _type: "reference";
@@ -153,6 +195,64 @@ export type FileAttachment = {
   label?: string;
 };
 
+export type EventReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "event";
+};
+
+export type PhotoGallery = {
+  _id: string;
+  _type: "photoGallery";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  title?: string;
+  slug?: Slug;
+  publishedAt?: string;
+  description?: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
+    listItem?: "bullet" | "number";
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }>;
+  defaultCredit?: string;
+  images?: Array<{
+    image?: {
+      asset?: SanityImageAssetReference;
+      media?: unknown;
+      hotspot?: SanityImageHotspot;
+      crop?: SanityImageCrop;
+      _type: "image";
+    };
+    caption?: string;
+    credit?: string;
+    _type: "galleryImage";
+    _key: string;
+  }>;
+  linkedMatch?: string;
+  linkedEvent?: EventReference;
+};
+
+export type Slug = {
+  _type: "slug";
+  current?: string;
+  source?: string;
+};
+
 export type Event = {
   _id: string;
   _type: "event";
@@ -162,9 +262,6 @@ export type Event = {
   title?: string;
   slug?: Slug;
   eventType?: "Clubevent" | "Supportersactiviteit" | "Jeugdwerking" | "Andere";
-  dateStart?: string;
-  dateEnd?: string;
-  location?: string;
   coverImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -172,11 +269,14 @@ export type Event = {
     crop?: SanityImageCrop;
     _type: "image";
   };
+  dateStart?: string;
+  dateEnd?: string;
+  location?: string;
+  featuredOnHome?: boolean;
   externalLink?: {
     url?: string;
     label?: string;
   };
-  featuredOnHome?: boolean;
   metaDescription?: string;
   ogImage?: {
     asset?: SanityImageAssetReference;
@@ -185,12 +285,6 @@ export type Event = {
     crop?: SanityImageCrop;
     _type: "image";
   };
-};
-
-export type Slug = {
-  _type: "slug";
-  current?: string;
-  source?: string;
 };
 
 export type Sponsor = {
@@ -207,12 +301,12 @@ export type Sponsor = {
     crop?: SanityImageCrop;
     _type: "image";
   };
-  url?: string;
   tier?: "hoofdsponsor" | "sponsor" | "sympathisant";
   featured?: boolean;
+  active?: boolean;
   description?: string;
   type?: "crossing" | "training" | "white" | "green" | "panel" | "other";
-  active?: boolean;
+  url?: string;
   metaDescription?: string;
   ogImage?: {
     asset?: SanityImageAssetReference;
@@ -430,13 +524,6 @@ export type PageReference = {
   _type: "reference";
   _weak?: boolean;
   [internalGroqTypeReferenceTo]?: "page";
-};
-
-export type EventReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "event";
 };
 
 export type Article = {
@@ -749,15 +836,16 @@ export type Team = {
   age?: string;
   gender?: string;
   footbelId?: number;
-  division?: string;
-  divisionFull?: string;
   season?: string;
   players?: Array<
     {
       _key: string;
     } & PlayerReference
   >;
+  division?: string;
+  divisionFull?: string;
   showInNavigation?: boolean;
+  archived?: boolean;
   tagline?: string;
   body?: Array<{
     children?: Array<{
@@ -812,7 +900,6 @@ export type Team = {
     role?: "trainer" | "afgevaardigde";
     _key: string;
   }>;
-  archived?: boolean;
   metaDescription?: string;
   ogImage?: {
     asset?: SanityImageAssetReference;
@@ -831,10 +918,6 @@ export type StaffMember = {
   _rev: string;
   firstName?: string;
   lastName?: string;
-  email?: string;
-  phone?: string;
-  birthDate?: string;
-  joinDate?: string;
   photo?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -842,6 +925,10 @@ export type StaffMember = {
     crop?: SanityImageCrop;
     _type: "image";
   };
+  email?: string;
+  phone?: string;
+  birthDate?: string;
+  joinDate?: string;
   bio?: Array<{
     children?: Array<{
       marks?: Array<string>;
@@ -877,9 +964,6 @@ export type Player = {
   birthDate?: string;
   keeper?: boolean;
   positionPsd?: string;
-  archived?: boolean;
-  jerseyNumber?: number;
-  psdImageUrl?: string;
   psdImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -887,6 +971,7 @@ export type Player = {
     crop?: SanityImageCrop;
     _type: "image";
   };
+  jerseyNumber?: number;
   transparentImage?: {
     asset?: SanityImageAssetReference;
     media?: unknown;
@@ -920,6 +1005,8 @@ export type Player = {
     _type: "block";
     _key: string;
   }>;
+  psdImageUrl?: string;
+  archived?: boolean;
 };
 
 export type SanityImagePaletteSwatch = {
@@ -1020,6 +1107,8 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | FormRoutingConfig
+  | MembershipApplication
   | SanityImageAssetReference
   | MatchesSliderPlaceholder
   | JeugdLandingPage
@@ -1032,8 +1121,10 @@ export type AllSanitySchemaTypes =
   | HtmlTable
   | SanityFileAssetReference
   | FileAttachment
-  | Event
+  | EventReference
+  | PhotoGallery
   | Slug
+  | Event
   | Sponsor
   | PlayerReference
   | StaffMemberReference
@@ -1049,7 +1140,6 @@ export type AllSanitySchemaTypes =
   | TeamReference
   | ArticleReference
   | PageReference
-  | EventReference
   | Article
   | Page
   | OrganigramNodeReference
@@ -2252,6 +2342,74 @@ export type PAGE_BY_SLUG_QUERY_RESULT = {
   > | null;
 } | null;
 
+// Source: ../web/src/lib/repositories/photoGallery.repository.ts
+// Variable: GALLERIES_QUERY
+// Query: *[_type == "photoGallery" && defined(slug.current)] | order(publishedAt desc) {  "id": _id,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "publishedAt": coalesce(publishedAt, ""),  "imageCount": coalesce(count(images), 0),  "coverUrl": images[0].image.asset->url,  "coverLqip": images[0].image.asset->metadata.lqip,  "coverAlt": coalesce(images[0].caption, title, "")}
+export type GALLERIES_QUERY_RESULT = Array<{
+  id: string;
+  title: string | "";
+  slug: string | "";
+  publishedAt: string | "";
+  imageCount: number | 0;
+  coverUrl: string | null;
+  coverLqip: string | null;
+  coverAlt: string | "";
+}>;
+
+// Source: ../web/src/lib/repositories/photoGallery.repository.ts
+// Variable: GALLERY_BY_SLUG_QUERY
+// Query: *[_type == "photoGallery" && slug.current == $slug][0] {  "id": _id,  "updatedAt": _updatedAt,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "publishedAt": coalesce(publishedAt, ""),  "descriptionText": pt::text(description),  "images": images[]{    "url": image.asset->url,    "lqip": image.asset->metadata.lqip,    "caption": coalesce(caption, ""),    "credit": coalesce(credit, ^.defaultCredit, "")  }}
+export type GALLERY_BY_SLUG_QUERY_RESULT = {
+  id: string;
+  updatedAt: string;
+  title: string | "";
+  slug: string | "";
+  publishedAt: string | "";
+  descriptionText: string;
+  images: Array<{
+    url: string | null;
+    lqip: string | null;
+    caption: string | "";
+    credit: string | "";
+  }> | null;
+} | null;
+
+// Source: ../web/src/lib/repositories/photoGallery.repository.ts
+// Variable: GALLERY_SLUGS_QUERY
+// Query: *[_type == "photoGallery" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }
+export type GALLERY_SLUGS_QUERY_RESULT = Array<{
+  slug: string | "";
+  updatedAt: string;
+}>;
+
+// Source: ../web/src/lib/repositories/photoGallery.repository.ts
+// Variable: GALLERIES_BY_MATCH_QUERY
+// Query: *[_type == "photoGallery" && linkedMatch == $matchId && defined(slug.current)] | order(publishedAt asc) {  "id": _id,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "publishedAt": coalesce(publishedAt, ""),  "imageCount": coalesce(count(images), 0),  "coverUrl": images[0].image.asset->url,  "coverLqip": images[0].image.asset->metadata.lqip,  "coverAlt": coalesce(images[0].caption, title, "")}
+export type GALLERIES_BY_MATCH_QUERY_RESULT = Array<{
+  id: string;
+  title: string | "";
+  slug: string | "";
+  publishedAt: string | "";
+  imageCount: number | 0;
+  coverUrl: string | null;
+  coverLqip: string | null;
+  coverAlt: string | "";
+}>;
+
+// Source: ../web/src/lib/repositories/photoGallery.repository.ts
+// Variable: GALLERIES_BY_EVENT_QUERY
+// Query: *[_type == "photoGallery" && linkedEvent._ref == $eventId && defined(slug.current)] | order(publishedAt asc) {  "id": _id,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "publishedAt": coalesce(publishedAt, ""),  "imageCount": coalesce(count(images), 0),  "coverUrl": images[0].image.asset->url,  "coverLqip": images[0].image.asset->metadata.lqip,  "coverAlt": coalesce(images[0].caption, title, "")}
+export type GALLERIES_BY_EVENT_QUERY_RESULT = Array<{
+  id: string;
+  title: string | "";
+  slug: string | "";
+  publishedAt: string | "";
+  imageCount: number | 0;
+  coverUrl: string | null;
+  coverLqip: string | null;
+  coverAlt: string | "";
+}>;
+
 // Source: ../web/src/lib/repositories/player.repository.ts
 // Variable: PLAYERS_QUERY
 // Query: *[_type == "player" && archived != true] | order(lastName asc) {  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,  birthDate,  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  bio}
@@ -2681,6 +2839,11 @@ declare module "@sanity/client" {
     '*[_type == "homePage"][0] {\n    "matchesSliderPlaceholder": matchesSliderPlaceholder {\n      nextSeasonKickoff,\n      announcementText,\n      announcementHref,\n      "highlightImage": highlightImage {\n        alt,\n        "asset": asset->{\n          _id,\n          url,\n          "lqip": metadata.lqip,\n          "dimensions": metadata.dimensions\n        }\n      }\n    }\n  }': HOMEPAGE_PLACEHOLDER_QUERY_RESULT;
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  metaDescription,\n  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
+    '*[_type == "photoGallery" && defined(slug.current)] | order(publishedAt desc) {\n  "id": _id,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "imageCount": coalesce(count(images), 0),\n  "coverUrl": images[0].image.asset->url,\n  "coverLqip": images[0].image.asset->metadata.lqip,\n  "coverAlt": coalesce(images[0].caption, title, "")\n}': GALLERIES_QUERY_RESULT;
+    '*[_type == "photoGallery" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "descriptionText": pt::text(description),\n  "images": images[]{\n    "url": image.asset->url,\n    "lqip": image.asset->metadata.lqip,\n    "caption": coalesce(caption, ""),\n    "credit": coalesce(credit, ^.defaultCredit, "")\n  }\n}': GALLERY_BY_SLUG_QUERY_RESULT;
+    '*[_type == "photoGallery" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }': GALLERY_SLUGS_QUERY_RESULT;
+    '*[_type == "photoGallery" && linkedMatch == $matchId && defined(slug.current)] | order(publishedAt asc) {\n  "id": _id,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "imageCount": coalesce(count(images), 0),\n  "coverUrl": images[0].image.asset->url,\n  "coverLqip": images[0].image.asset->metadata.lqip,\n  "coverAlt": coalesce(images[0].caption, title, "")\n}': GALLERIES_BY_MATCH_QUERY_RESULT;
+    '*[_type == "photoGallery" && linkedEvent._ref == $eventId && defined(slug.current)] | order(publishedAt asc) {\n  "id": _id,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "imageCount": coalesce(count(images), 0),\n  "coverUrl": images[0].image.asset->url,\n  "coverLqip": images[0].image.asset->metadata.lqip,\n  "coverAlt": coalesce(images[0].caption, title, "")\n}': GALLERIES_BY_EVENT_QUERY_RESULT;
     '*[_type == "player" && archived != true] | order(lastName asc) {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio\n}': PLAYERS_QUERY_RESULT;
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio,\n  "currentTeam": *[_type == "team" && archived != true && references(^._id)] | order(name asc)[0] {\n    name, season\n  }\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "player" && keeper == true && archived != true].psdId': KEEPER_PSD_IDS_QUERY_RESULT;
