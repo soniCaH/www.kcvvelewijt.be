@@ -22,7 +22,7 @@ import {
  * Last updated date for the privacy policy.
  * NOTE: Maintainers must update this constant whenever the privacy policy content changes.
  */
-const LAST_UPDATED = "februari 2026";
+const LAST_UPDATED = "juni 2026";
 
 export const metadata: Metadata = {
   title: "Privacyverklaring | KCVV Elewijt",
@@ -139,6 +139,36 @@ export default function PrivacyPage() {
               toestemming)
             </li>
           </ul>
+
+          <DottedDivider color="paper-edge" />
+          <h2>Inschrijvingsformulier (Word lid)</h2>
+          <p>
+            Wanneer je je inschrijft via{" "}
+            <Link href="/club/word-lid" className="prose-link">
+              /club/word-lid
+            </Link>
+            , verwerken we enkel de gegevens die nodig zijn om je inschrijving
+            op te volgen:
+          </p>
+          <ul>
+            <li>Voornaam en achternaam</li>
+            <li>Geboortedatum (om te bepalen of je minderjarig bent)</li>
+            <li>Geslacht</li>
+            <li>Gemeente</li>
+            <li>E-mailadres</li>
+            <li>Vorige club (optioneel)</li>
+            <li>
+              E-mailadres van een ouder/voogd (enkel bij minderjarigen, samen
+              met hun toestemming)
+            </li>
+          </ul>
+          <p>
+            We vragen géén telefoonnummer, volledig adres, rijksregisternummer,
+            nationaliteit of school via dit formulier. De ingediende
+            inschrijvingen worden bewaard tot maximaal 1 jaar na de laatste
+            opvolging, tenzij ze leiden tot een effectief lidmaatschap — dan
+            geldt de bewaartermijn voor leden hieronder.
+          </p>
 
           <DottedDivider color="paper-edge" />
           <h2>Waarvoor gebruiken we je gegevens?</h2>

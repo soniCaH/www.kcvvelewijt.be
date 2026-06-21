@@ -56,6 +56,10 @@ test.describe("static routes", () => {
     await smokeTest(page, { path: "/club/bestuur" });
   });
 
+  test("/club/word-lid", async ({ page }) => {
+    await smokeTest(page, { path: "/club/word-lid" });
+  });
+
   test("/club/jeugdbestuur", async ({ page }) => {
     await smokeTest(page, { path: "/club/jeugdbestuur" });
   });

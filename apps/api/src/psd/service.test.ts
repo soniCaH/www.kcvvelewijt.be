@@ -54,6 +54,7 @@ function makeSanityMock(
     getActiveTeamPsdIds: () => Effect.succeed([]),
     getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
     getProtectedStaffPsdIds: () => Effect.succeed([]),
+    getFormRoutingConfig: () => Effect.succeed(null),
   };
 }
 

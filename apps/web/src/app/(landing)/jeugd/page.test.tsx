@@ -80,7 +80,7 @@ describe("/jeugd page — cream tracer composition", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders the closing JeugdCtaBand linking to /hulp", async () => {
+  it("renders the closing JeugdCtaBand linking to /club/word-lid", async () => {
     const JeugdPage = (await import("./page")).default;
     render(await JeugdPage());
 
@@ -93,7 +93,7 @@ describe("/jeugd page — cream tracer composition", () => {
     ).toBeInTheDocument();
     expect(
       within(cta).getByRole("link", { name: /schrijf je in/i }),
-    ).toHaveAttribute("href", "/hulp");
+    ).toHaveAttribute("href", "/club/word-lid");
   });
 
   it("fires jeugd_view on page view", async () => {

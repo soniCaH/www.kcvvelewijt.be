@@ -41,10 +41,10 @@ describe("YouthSection", () => {
     expect(link).toHaveAttribute("href", "/jeugd");
   });
 
-  it("renders the secondary CTA 'Schrijf je in' → /club/inschrijven (R5.B)", () => {
+  it("renders the secondary CTA 'Schrijf je in' → /club/word-lid (R5.B)", () => {
     render(<YouthSection />);
     const link = screen.getByRole("link", { name: /schrijf je in/i });
-    expect(link).toHaveAttribute("href", "/club/inschrijven");
+    expect(link).toHaveAttribute("href", "/club/word-lid");
   });
 
   it("shifts heading emphasis to 'Elewijt' (R5.B brief §8)", () => {

@@ -4,8 +4,9 @@ import { OpponentApi } from "./opponent";
 import { RankingApi } from "./ranking";
 import { RelatedApi } from "./related";
 import { SearchApi } from "./search";
+import { FormsApi } from "./forms";
 
-export { MatchesApi, OpponentApi, RankingApi, RelatedApi, SearchApi };
+export { MatchesApi, OpponentApi, RankingApi, RelatedApi, SearchApi, FormsApi };
 
 /** Root API definition — implemented by apps/api (Cloudflare Worker), consumed by apps/web */
 export class PsdApi extends HttpApi.make("psd")
@@ -13,4 +14,5 @@ export class PsdApi extends HttpApi.make("psd")
   .add(OpponentApi)
   .add(RankingApi)
   .add(RelatedApi)
-  .add(SearchApi) {}
+  .add(SearchApi)
+  .add(FormsApi) {}

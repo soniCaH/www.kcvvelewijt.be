@@ -17,3 +17,13 @@ export class HttpNotFound extends S.TaggedError<HttpNotFound>()(
   { error: S.String },
   { status: 404 },
 ) {}
+
+export class HttpBadRequest extends S.TaggedError<HttpBadRequest>()(
+  "HttpBadRequest",
+  {
+    error: S.String,
+    /** Optional per-field validation messages, keyed by field name. */
+    fields: S.optional(S.Record({ key: S.String, value: S.String })),
+  },
+  { status: 400 },
+) {}

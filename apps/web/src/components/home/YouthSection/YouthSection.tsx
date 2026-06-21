@@ -59,14 +59,14 @@ export const YouthSection = ({ className }: YouthSectionProps) => (
       </div>
 
       {/* Dual-CTA row — primary "Ontdek onze jeugd" → /jeugd, secondary
-          "Schrijf je in" → the existing /club/inschrijven route
+          "Schrijf je in" → the existing /club/word-lid route
           (mirrors the SiteHeader "Word lid" link target). Wraps to a
           vertical stack on narrow viewports via `flex-wrap`. */}
       <div className="flex flex-wrap items-center gap-3.5">
         <LinkButton href="/jeugd" variant="primary" withArrow>
           Ontdek onze jeugd
         </LinkButton>
-        <LinkButton href="/club/inschrijven" variant="inverted" withArrow>
+        <LinkButton href="/club/word-lid" variant="inverted" withArrow>
           Schrijf je in
         </LinkButton>
       </div>

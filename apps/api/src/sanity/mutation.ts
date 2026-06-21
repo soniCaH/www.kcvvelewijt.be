@@ -48,6 +48,24 @@ export interface SanityStaffDoc {
   functionTitle: string | null; // from PSD functionTitle; null clears the stored value
 }
 
+/** Public membership-intake submission, persisted before email dispatch. */
+export interface SanityMembershipApplicationDoc {
+  role: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string; // "YYYY-MM-DD"
+  gender: string;
+  municipality: string;
+  email: string;
+  priorClub?: string;
+  isMinor: boolean;
+  parentEmail?: string;
+  parentalConsent: boolean;
+  medicalCertAcknowledged: boolean;
+  privacyAccepted: boolean;
+  submittedAt: string; // ISO timestamp set by the BFF
+}
+
 // ─── Error ────────────────────────────────────────────────────────────────────
 
 export class SanityMutationError extends Error {
@@ -101,6 +119,10 @@ export interface SanityMutationInterface {
     pathTitle: string;
     vote: "up" | "down";
   }) => Effect.Effect<void, SanityMutationError>;
+  /** Create a membershipApplication document (status defaults to "new"). */
+  readonly writeMembershipApplication: (
+    doc: SanityMembershipApplicationDoc,
+  ) => Effect.Effect<void, SanityMutationError>;
 }
 
 export class SanityMutation extends Context.Tag("SanityMutation")<
@@ -463,6 +485,34 @@ export const SanityMutationLive = Layer.effect(
             }),
           catch: (cause) =>
             new SanityMutationError("Failed to write search feedback", cause),
+        }).pipe(Effect.asVoid),
+
+      writeMembershipApplication: (doc) =>
+        Effect.tryPromise({
+          try: () =>
+            client.create({
+              _type: "membershipApplication",
+              status: "new",
+              role: doc.role,
+              firstName: doc.firstName,
+              lastName: doc.lastName,
+              birthDate: doc.birthDate,
+              gender: doc.gender,
+              municipality: doc.municipality,
+              email: doc.email,
+              ...(doc.priorClub ? { priorClub: doc.priorClub } : {}),
+              isMinor: doc.isMinor,
+              ...(doc.parentEmail ? { parentEmail: doc.parentEmail } : {}),
+              parentalConsent: doc.parentalConsent,
+              medicalCertAcknowledged: doc.medicalCertAcknowledged,
+              privacyAccepted: doc.privacyAccepted,
+              submittedAt: doc.submittedAt,
+            }),
+          catch: (cause) =>
+            new SanityMutationError(
+              "Failed to write membership application",
+              cause,
+            ),
         }).pipe(Effect.asVoid),
     };
   }),

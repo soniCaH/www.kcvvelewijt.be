@@ -30,6 +30,8 @@ export {banner} from './banner'
 export {homePage} from './homePage'
 export {jeugdLandingPage} from './jeugdLandingPage'
 export {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
+export {membershipApplication} from './membershipApplication'
+export {formRoutingConfig} from './formRoutingConfig'
 
 import {player} from './player'
 import {team, trainingDay} from './team'
@@ -54,6 +56,8 @@ import {banner} from './banner'
 import {homePage} from './homePage'
 import {jeugdLandingPage} from './jeugdLandingPage'
 import {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
+import {membershipApplication} from './membershipApplication'
+import {formRoutingConfig} from './formRoutingConfig'
 
 export const schemaTypes = [
   player,
@@ -82,4 +86,6 @@ export const schemaTypes = [
   homePage,
   jeugdLandingPage,
   matchesSliderPlaceholder,
+  membershipApplication,
+  formRoutingConfig,
 ]

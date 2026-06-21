@@ -1,5 +1,9 @@
 import type {StructureResolver} from 'sanity/structure'
-import {staffStructure, responsibilityStructure} from '@kcvv/sanity-studio'
+import {
+  staffStructure,
+  responsibilityStructure,
+  membershipApplicationStructure,
+} from '@kcvv/sanity-studio'
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -65,9 +69,18 @@ export const structure: StructureResolver = (S) =>
             .documentId('jeugdLandingPage')
             .title('Jeugd landing page configuratie'),
         ),
+      S.listItem()
+        .title('Form routing config')
+        .child(
+          S.document()
+            .schemaType('formRoutingConfig')
+            .documentId('formRoutingConfig')
+            .title('Form routing config'),
+        ),
       S.divider(),
       responsibilityStructure(S),
       S.divider(),
+      membershipApplicationStructure(S),
       S.listItem()
         .title('📊 Feedback')
         .child(

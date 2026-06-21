@@ -15,11 +15,11 @@ import { cn } from "@/lib/utils/cn";
  *
  * A standalone fanzine section that sits between <SquadGrid> and <TeamStaff>
  * (no section-nav anchor — it's a CTA, not navigable content) and links to the
- * static `/club/inschrijven` route. Out-of-PRD addition on top of the shipped
+ * static `/club/word-lid` route. Out-of-PRD addition on top of the shipped
  * Phase 6.C page; design locked in `enrolment-cta-locked.md` (#1949).
  *
  * Youth-only: returns `null` for senior teams. Senior recruitment runs via
- * trials/contact, and `/club/inschrijven` is in practice the youth enrolment
+ * trials/contact, and `/club/word-lid` is in practice the youth enrolment
  * route (target of `/jeugd`, the homepage `YouthSection`, `JeugdEditorialGrid`,
  * `ResponsibilityBlock`).
  *
@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils/cn";
  * and a corner `<JerseyShirt>` carrying the team's age group as chest letter.
  */
 
-const ENROLMENT_HREF = "/club/inschrijven";
+const ENROLMENT_HREF = "/club/word-lid";
 
 export interface TeamEnrolmentCtaProps {
   /** Render only for youth teams; senior returns `null`. */

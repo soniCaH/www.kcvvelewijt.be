@@ -23,10 +23,10 @@ describe("JeugdCtaBand", () => {
     expect(heading.textContent).not.toContain("?.");
   });
 
-  it('renders the "Schrijf je in" CTA linking to /hulp by default', () => {
+  it('renders the "Schrijf je in" CTA linking to /club/word-lid by default', () => {
     render(<JeugdCtaBand />);
     const link = screen.getByRole("link", { name: /schrijf je in/i });
-    expect(link).toHaveAttribute("href", "/hulp");
+    expect(link).toHaveAttribute("href", "/club/word-lid");
   });
 
   it("honours a custom href", () => {

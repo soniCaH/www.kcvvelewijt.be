@@ -2,7 +2,7 @@
  * TeamEnrolmentCta unit tests.
  *
  * Covers:
- *  - Youth → renders, heading + CTA link to /club/inschrijven
+ *  - Youth → renders, heading + CTA link to /club/word-lid
  *  - Senior → renders null
  *  - Youth without an age group → still renders (jersey just has no letter)
  *  - Click → fires team_enrolment_cta_click with the team_slug param
@@ -40,7 +40,7 @@ describe("TeamEnrolmentCta", () => {
     vi.mocked(trackEvent).mockClear();
   });
 
-  it("renders the youth CTA linking to the static /club/inschrijven route", () => {
+  it("renders the youth CTA linking to the static /club/word-lid route", () => {
     render(
       <TeamEnrolmentCta
         teamType="youth"
@@ -52,7 +52,7 @@ describe("TeamEnrolmentCta", () => {
       /sluit je aan bij de jeugd van elewijt/i,
     );
     const link = screen.getByRole("link", { name: "Word lid" });
-    expect(link).toHaveAttribute("href", "/club/inschrijven");
+    expect(link).toHaveAttribute("href", "/club/word-lid");
   });
 
   it("returns null for a senior team", () => {
@@ -66,7 +66,7 @@ describe("TeamEnrolmentCta", () => {
     render(<TeamEnrolmentCta teamType="youth" teamSlug="kcvv-elewijt-jeugd" />);
     expect(screen.getByRole("link", { name: "Word lid" })).toHaveAttribute(
       "href",
-      "/club/inschrijven",
+      "/club/word-lid",
     );
   });
 

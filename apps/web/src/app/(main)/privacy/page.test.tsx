@@ -17,7 +17,7 @@ describe("PrivacyPage (Phase 8 cream-minimal reskin)", () => {
   it("renders the mono last-updated line in the header", () => {
     render(<PrivacyPage />);
     expect(
-      screen.getByText(/laatst bijgewerkt · februari 2026/i),
+      screen.getByText(/laatst bijgewerkt · juni 2026/i),
     ).toBeInTheDocument();
   });
 
@@ -118,7 +118,7 @@ describe("PrivacyPage (Phase 8 cream-minimal reskin)", () => {
   it("displays the last updated date in the Wijzigingen section", () => {
     render(<PrivacyPage />);
     expect(
-      screen.getByText(/laatst bijgewerkt:\s*februari 2026/i),
+      screen.getByText(/laatst bijgewerkt:\s*juni 2026/i),
     ).toBeInTheDocument();
   });
 });

@@ -64,11 +64,11 @@ describe("SiteHeader", () => {
     });
   });
 
-  it("renders Word lid link to /club/inschrijven on desktop", () => {
+  it("renders Word lid link to /club/word-lid on desktop", () => {
     render(<SiteHeader />);
     const wordLid = screen.getAllByRole("link", { name: /word lid/i });
     expect(wordLid.length).toBeGreaterThan(0);
-    expect(wordLid[0]).toHaveAttribute("href", "/club/inschrijven");
+    expect(wordLid[0]).toHaveAttribute("href", "/club/word-lid");
   });
 
   it("opens the drawer when the hamburger is clicked", async () => {

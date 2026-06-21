@@ -46,6 +46,7 @@ const sanityProjectionMock: SanityProjectionInterface = {
   getActiveTeamPsdIds: () => Effect.succeed([]),
   getVisibleTeamPsdIds: () => Effect.succeed([]),
   getProtectedStaffPsdIds: () => Effect.succeed([]),
+  getFormRoutingConfig: () => Effect.succeed(null),
 };
 
 function runService<A>(

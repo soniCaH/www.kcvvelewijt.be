@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The `/jeugd` closing CTA band (Phase 7). The shared `<CtaBand>` with youth copy: "Interesse in onze jeugd?" + a warm paper-stamp "Schrijf je in +" → /hulp (until the membership form #1473 ships).',
+          'The `/jeugd` closing CTA band (Phase 7). The shared `<CtaBand>` with youth copy: "Interesse in onze jeugd?" + a warm paper-stamp "Schrijf je in +" → /club/word-lid (the #1473 membership form).',
       },
     },
   },

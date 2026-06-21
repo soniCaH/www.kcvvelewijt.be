@@ -17,6 +17,15 @@ export class SanityQueryError extends Error {
   }
 }
 
+/** Per-role admin-notification recipients from the formRoutingConfig singleton. */
+export interface FormRoutingConfig {
+  speler: string | null;
+  jeugdspeler: string | null;
+  vrijwilliger: string | null;
+  trainer: string | null;
+  scheidsrechter: string | null;
+}
+
 // ─── Service ──────────────────────────────────────────────────────────────────
 
 export interface SanityProjectionInterface {
@@ -45,6 +54,11 @@ export interface SanityProjectionInterface {
   /** Fetch PSD IDs of staff members referenced by active organigramNode or responsibility documents. */
   readonly getProtectedStaffPsdIds: () => Effect.Effect<
     string[],
+    SanityQueryError
+  >;
+  /** Fetch the formRoutingConfig singleton (null per-role field → no override). */
+  readonly getFormRoutingConfig: () => Effect.Effect<
+    FormRoutingConfig | null,
     SanityQueryError
   >;
 }
@@ -163,6 +177,16 @@ export const SanityProjectionLive = Layer.effect(
               "Failed to fetch protected staff PSD IDs",
               cause,
             ),
+        }),
+
+      getFormRoutingConfig: () =>
+        Effect.tryPromise({
+          try: () =>
+            client.fetch<FormRoutingConfig | null>(
+              `*[_type == "formRoutingConfig"][0]{ speler, jeugdspeler, vrijwilliger, trainer, scheidsrechter }`,
+            ),
+          catch: (cause) =>
+            new SanityQueryError("Failed to fetch form routing config", cause),
         }),
     };
   }),
