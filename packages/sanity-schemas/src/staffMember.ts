@@ -95,6 +95,7 @@ export const staffMember = defineType({
       group: 'meta',
       description:
         'Automatisch gezet door de sync wanneer het lid niet meer in PSD voorkomt. Alleen-lezen — niet handmatig bewerken.',
+      initialValue: false,
       readOnly: true,
       hidden: true,
     }),
