@@ -1,4 +1,4 @@
-import type {TemplateItem} from 'sanity'
+import type {NewDocumentOptionsContext, TemplateItem} from 'sanity'
 
 import {launcherTemplates} from '../../templates'
 
@@ -35,9 +35,14 @@ const CURATED_SCHEMA_TYPES: ReadonlySet<string> = new Set(launcherTemplates.map(
  * type. Reads the `launcherTemplates` aggregate, so a new type needs no extra
  * wiring here — only its manifest in the aggregate.
  *
- * The `context` arg is ignored: defaults are hidden in every creation context
- * (global / structure / reference) for a consistent curated experience.
+ * Signature matches Sanity's `NewDocumentOptionsResolver` contract. The
+ * `_context` arg (underscore-prefixed per the lint rule) is intentionally
+ * unused: defaults are hidden in every creation context (global / structure /
+ * reference) for a consistent curated experience.
  */
-export function curatedNewDocumentOptions(prev: TemplateItem[]): TemplateItem[] {
+export function curatedNewDocumentOptions(
+  prev: TemplateItem[],
+  _context: NewDocumentOptionsContext,
+): TemplateItem[] {
   return curateDefaultTemplateItems(prev, CURATED_SCHEMA_TYPES)
 }
