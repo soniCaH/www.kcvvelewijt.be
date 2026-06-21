@@ -1,9 +1,11 @@
 import {describe, expect, it} from 'vitest'
 import {
   launcherTemplates,
+  organigramNodeTemplates,
   responsibilityTemplates,
   articleTemplates,
   sponsorTemplates,
+  eventTemplates,
   pageTemplates,
   isLauncherTemplate,
 } from './index'
@@ -11,9 +13,11 @@ import {
 describe('launcherTemplates aggregate', () => {
   it('contains every per-schema manifest so both studios register templates with one spread', () => {
     expect(launcherTemplates).toEqual([
+      ...organigramNodeTemplates,
       ...responsibilityTemplates,
       ...articleTemplates,
       ...sponsorTemplates,
+      ...eventTemplates,
       ...pageTemplates,
     ])
   })
