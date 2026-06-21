@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type { SPONSORS_QUERY_RESULT } from "../sanity/sanity.types";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
@@ -35,5 +36,9 @@ export class SponsorRepository extends Context.Tag("SponsorRepository")<
 >() {}
 
 export const SponsorRepositoryLive = Layer.succeed(SponsorRepository, {
-  findAll: () => fetchGroq<SPONSORS_QUERY_RESULT>(SPONSORS_QUERY),
+  findAll: () =>
+    fetchGroq<SPONSORS_QUERY_RESULT>(SPONSORS_QUERY, undefined, {
+      revalidate: SANITY_LIST_REVALIDATE,
+      tags: [SANITY_TAGS.sponsors],
+    }),
 });

@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   ARTICLES_QUERY_RESULT,
   ARTICLES_PAGINATED_QUERY_RESULT,
@@ -366,7 +367,11 @@ export class ArticleRepository extends Context.Tag("ArticleRepository")<
 >() {}
 
 export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
-  findAll: () => fetchGroq<ARTICLES_QUERY_RESULT>(ARTICLES_QUERY),
+  findAll: () =>
+    fetchGroq<ARTICLES_QUERY_RESULT>(ARTICLES_QUERY, undefined, {
+      revalidate: SANITY_LIST_REVALIDATE,
+      tags: [SANITY_TAGS.articles],
+    }),
   findBySlug: (slug) =>
     fetchGroq<ARTICLE_BY_SLUG_QUERY_RESULT>(ARTICLE_BY_SLUG_QUERY, {
       slug,
@@ -390,9 +395,11 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
     // to `MatchArticleVM` with a type-guard `filter` rather than a bare cast —
     // it drops any anomalous row (e.g. a null `articleType`) instead of
     // mislabeling it, and mirrors the other repository mappers.
-    fetchGroq<MATCH_ARTICLES_QUERY_RESULT>(MATCH_ARTICLES_QUERY, {
-      matchId,
-    }).pipe(
+    fetchGroq<MATCH_ARTICLES_QUERY_RESULT>(
+      MATCH_ARTICLES_QUERY,
+      { matchId },
+      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
+    ).pipe(
       Effect.map((rows) =>
         rows.filter(
           (row): row is MatchArticleVM =>

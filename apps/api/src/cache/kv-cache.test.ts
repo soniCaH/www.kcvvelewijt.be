@@ -63,11 +63,13 @@ describe("TTL constants", () => {
     expect(TTL.RANKING).toBe(60 * 60 * 24);
   });
 
-  it("MATCH_DETAIL_LIVE does not exist", () => {
-    expect("MATCH_DETAIL_LIVE" in TTL).toBe(false);
+  it("match-detail proximity tiers (live / matchday / week)", () => {
+    expect(TTL.MATCH_DETAIL_LIVE).toBe(60);
+    expect(TTL.MATCH_DETAIL_MATCHDAY).toBe(60 * 5);
+    expect(TTL.MATCH_DETAIL_WEEK).toBe(60 * 60);
   });
 
-  it("MATCH_DETAIL_DEFAULT is 24 hours", () => {
+  it("MATCH_DETAIL_DEFAULT is 24 hours (distant)", () => {
     expect(TTL.MATCH_DETAIL_DEFAULT).toBe(60 * 60 * 24);
   });
 

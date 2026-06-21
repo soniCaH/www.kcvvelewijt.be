@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   PLAYERS_QUERY_RESULT,
   PLAYER_BY_PSD_ID_QUERY_RESULT,
@@ -136,9 +137,10 @@ export class PlayerRepository extends Context.Tag("PlayerRepository")<
 
 export const PlayerRepositoryLive = Layer.succeed(PlayerRepository, {
   findAll: () =>
-    fetchGroq<PLAYERS_QUERY_RESULT>(PLAYERS_QUERY).pipe(
-      Effect.map((rows) => rows.map(toPlayerVM)),
-    ),
+    fetchGroq<PLAYERS_QUERY_RESULT>(PLAYERS_QUERY, undefined, {
+      revalidate: SANITY_LIST_REVALIDATE,
+      tags: [SANITY_TAGS.players],
+    }).pipe(Effect.map((rows) => rows.map(toPlayerVM))),
   findByPsdId: (psdId) =>
     fetchGroq<PLAYER_BY_PSD_ID_QUERY_RESULT>(PLAYER_BY_PSD_ID_QUERY, {
       psdId,

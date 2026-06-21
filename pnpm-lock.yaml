@@ -172,6 +172,9 @@ importers:
       "@sanity/client":
         specifier: 7.22.1
         version: 7.22.1
+      "@sanity/webhook":
+        specifier: 4.0.4
+        version: 4.0.4
       "@tailwindcss/typography":
         specifier: 0.5.20
         version: 0.5.20(tailwindcss@4.3.0)
@@ -5943,6 +5946,13 @@ packages:
     peerDependenciesMeta:
       "@sanity/types":
         optional: true
+
+  "@sanity/webhook@4.0.4":
+    resolution:
+      {
+        integrity: sha512-c8LmzR5Wx93zJ10ohhp0XlmPrTNSFyvPcLbNY/sN45Wj5VOngz4FbBMbX9j64sSQLt+676U6OhiVfjs1yw3YCw==,
+      }
+    engines: { node: ">=20.0.0" }
 
   "@sanity/worker-channels@2.0.0":
     resolution:
@@ -19534,6 +19544,8 @@ snapshots:
       "@sanity/client": 7.22.1
     optionalDependencies:
       "@sanity/types": 5.30.0(@types/react@19.2.17)
+
+  "@sanity/webhook@4.0.4": {}
 
   "@sanity/worker-channels@2.0.0": {}
 
