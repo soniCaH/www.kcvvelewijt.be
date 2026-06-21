@@ -6,6 +6,7 @@ import {
   launcherTool,
   responsibilityTemplates,
   articleTemplates,
+  guidedSidebarInspectors,
 } from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
@@ -32,5 +33,6 @@ export default defineConfig({
 
   document: {
     actions: (prev) => [...prev, LinkToPsdAction],
+    inspectors: guidedSidebarInspectors,
   },
 })
