@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   GALLERIES_QUERY_RESULT,
   GALLERY_BY_SLUG_QUERY_RESULT,
@@ -114,7 +115,11 @@ export class PhotoGalleryRepository extends Context.Tag(
 export const PhotoGalleryRepositoryLive = Layer.succeed(
   PhotoGalleryRepository,
   {
-    findAll: () => fetchGroq<GALLERIES_QUERY_RESULT>(GALLERIES_QUERY),
+    findAll: () =>
+      fetchGroq<GALLERIES_QUERY_RESULT>(GALLERIES_QUERY, undefined, {
+        revalidate: SANITY_LIST_REVALIDATE,
+        tags: [SANITY_TAGS.galleries],
+      }),
     findBySlug: (slug) =>
       fetchGroq<GALLERY_BY_SLUG_QUERY_RESULT>(GALLERY_BY_SLUG_QUERY, {
         slug,
@@ -122,12 +127,16 @@ export const PhotoGalleryRepositoryLive = Layer.succeed(
     findAllSlugs: () =>
       fetchGroq<GALLERY_SLUGS_QUERY_RESULT>(GALLERY_SLUGS_QUERY),
     findByLinkedMatch: (matchId) =>
-      fetchGroq<GALLERIES_BY_MATCH_QUERY_RESULT>(GALLERIES_BY_MATCH_QUERY, {
-        matchId,
-      }),
+      fetchGroq<GALLERIES_BY_MATCH_QUERY_RESULT>(
+        GALLERIES_BY_MATCH_QUERY,
+        { matchId },
+        { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.galleries] },
+      ),
     findByLinkedEvent: (eventId) =>
-      fetchGroq<GALLERIES_BY_EVENT_QUERY_RESULT>(GALLERIES_BY_EVENT_QUERY, {
-        eventId,
-      }),
+      fetchGroq<GALLERIES_BY_EVENT_QUERY_RESULT>(
+        GALLERIES_BY_EVENT_QUERY,
+        { eventId },
+        { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.galleries] },
+      ),
   },
 );

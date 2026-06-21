@@ -428,7 +428,12 @@ export default async function MatchPage({ params }: MatchPageProps) {
 }
 
 /**
- * Enable ISR with 5 minute revalidation for match data
- * (shorter than team pages since match data changes more frequently).
+ * ISR at 5 minutes. Kept modest (not lengthened like the other routes) so the
+ * page picks up fresh BFF match data promptly. Proximity-aware throttling of
+ * the rate-limited PSD hop lives in the BFF's match-detail KV TTL
+ * (`apps/api` `matchDetailTtl`): distant/finished matches are served from KV
+ * for hours/days, so frequent ISR here is cheap. The page's own Sanity reads
+ * (linked articles/galleries) are tag-cached (Scope B), so re-running this
+ * render does not re-hit the Sanity CDN.
  */
 export const revalidate = 300;

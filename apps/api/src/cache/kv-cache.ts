@@ -7,7 +7,10 @@ export const TTL = {
   NEXT_MATCHES: 60 * 60 * 4, // 4 hours — no live scores, schedule is stable for hours
   MATCHES_WINDOW: 60 * 60 * 4, // 4 hours — matchday picker; in-window matches stay listed regardless of refresh
   MATCH_DETAIL_PAST: 60 * 60 * 24 * 7, // 7 days — historical, never changes
-  MATCH_DETAIL_DEFAULT: 60 * 60 * 24, // 24 hours — upcoming/recent matches
+  MATCH_DETAIL_DEFAULT: 60 * 60 * 24, // 24 hours — distant (kickoff >7d away)
+  MATCH_DETAIL_LIVE: 60, // <3h from kickoff — live, refresh aggressively
+  MATCH_DETAIL_MATCHDAY: 60 * 5, // <24h from kickoff — matchday
+  MATCH_DETAIL_WEEK: 60 * 60, // <7d from kickoff — this week
   RANKING: 60 * 60 * 24, // 24 hours — updates only after a match day
   RELATED: 60 * 60 * 6, // 6 hours — related content changes infrequently
   OPPONENT_HISTORY: 60 * 60 * 24 * 7, // 7 days — historical match data doesn't change

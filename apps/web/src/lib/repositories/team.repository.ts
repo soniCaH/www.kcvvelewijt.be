@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   TEAMS_QUERY_RESULT,
   TEAM_BY_SLUG_QUERY_RESULT,
@@ -272,9 +273,10 @@ export class TeamRepository extends Context.Tag("TeamRepository")<
 
 export const TeamRepositoryLive = Layer.succeed(TeamRepository, {
   findAll: () =>
-    fetchGroq<TEAMS_QUERY_RESULT>(TEAMS_QUERY).pipe(
-      Effect.map((rows) => rows.map(toTeamNavVM)),
-    ),
+    fetchGroq<TEAMS_QUERY_RESULT>(TEAMS_QUERY, undefined, {
+      revalidate: SANITY_LIST_REVALIDATE,
+      tags: [SANITY_TAGS.teams],
+    }).pipe(Effect.map((rows) => rows.map(toTeamNavVM))),
   findBySlug: (slug) =>
     fetchGroq<TEAM_BY_SLUG_QUERY_RESULT>(TEAM_BY_SLUG_QUERY, { slug }).pipe(
       Effect.map((row) => (row ? toTeamDetailVM(row) : null)),

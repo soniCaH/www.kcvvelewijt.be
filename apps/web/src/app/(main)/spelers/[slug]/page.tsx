@@ -228,4 +228,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
   );
 }
 
-export const revalidate = 3600;
+// 24h ISR — player data is PSD-synced + editor-published; on-demand
+// revalidation keeps it fresh via /api/revalidate (revalidateTag 'players').
+export const revalidate = 86400;

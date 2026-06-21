@@ -619,4 +619,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   );
 }
 
-export const revalidate = 3600;
+// 24h ISR — article publishes invalidate on demand via /api/revalidate
+// (revalidatePath '/nieuws/<slug>' + revalidateTag 'articles').
+export const revalidate = 86400;

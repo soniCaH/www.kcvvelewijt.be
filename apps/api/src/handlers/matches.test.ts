@@ -6,8 +6,9 @@ import {
   getMatchesWindowHandler,
   getMatchDetailHandler,
   getPlayerStatsHandler,
+  matchDetailTtl,
 } from "./matches";
-import { HARD_TTL_DEFAULT } from "../cache/kv-cache";
+import { HARD_TTL_DEFAULT, TTL } from "../cache/kv-cache";
 import { PsdService, type PsdServiceInterface } from "../psd/service";
 import type { BffError } from "../psd/errors";
 import { UpstreamUnavailableError, ResourceNotFoundError } from "../psd/errors";
@@ -268,6 +269,91 @@ describe("getMatchDetailHandler", () => {
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("ResourceNotFound");
     }
+  });
+});
+
+describe("matchDetailTtl", () => {
+  const now = new Date("2025-06-01T12:00:00.000Z").getTime();
+  const at = (offsetMs: number) => new Date(now + offsetMs);
+  const H = 60 * 60 * 1000;
+
+  it("settled ≥48h ago → 7 days (immutable)", () => {
+    expect(matchDetailTtl(at(-3 * 24 * H), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_PAST,
+    );
+    expect(matchDetailTtl(at(-3 * 24 * H), "forfeited", now)).toBe(
+      TTL.MATCH_DETAIL_PAST,
+    );
+  });
+
+  it("within 3h of kickoff → live (60s), even when just finished", () => {
+    expect(matchDetailTtl(at(0), "in_progress", now)).toBe(
+      TTL.MATCH_DETAIL_LIVE,
+    );
+    expect(matchDetailTtl(at(-1 * H), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_LIVE,
+    );
+  });
+
+  it("3h–24h from kickoff → matchday (300s)", () => {
+    expect(matchDetailTtl(at(10 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+
+  it("1d–7d from kickoff → this week (3600s)", () => {
+    expect(matchDetailTtl(at(3 * 24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK,
+    );
+  });
+
+  it("beyond 7d (past or future) → distant (24h)", () => {
+    expect(matchDetailTtl(at(10 * 24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_DEFAULT,
+    );
+    expect(matchDetailTtl(at(-10 * 24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_DEFAULT,
+    );
+  });
+
+  // Exact tier cutoffs — guard the < vs >= comparisons against off-by-one.
+  it("48h-finished cutoff (>= is PAST)", () => {
+    expect(matchDetailTtl(at(-48 * H), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_PAST, // exactly 48h ago → immutable
+    );
+    expect(matchDetailTtl(at(-48 * H - 1), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_PAST, // just over 48h → immutable
+    );
+    expect(matchDetailTtl(at(-48 * H + 1), "finished", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK, // just under 48h → not yet immutable, ~48h distance
+    );
+  });
+
+  it("3h cutoff (< is LIVE)", () => {
+    expect(matchDetailTtl(at(3 * H - 1), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_LIVE,
+    );
+    expect(matchDetailTtl(at(3 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+
+  it("24h cutoff (< is MATCHDAY)", () => {
+    expect(matchDetailTtl(at(24 * H - 1), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(matchDetailTtl(at(24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK,
+    );
+  });
+
+  it("7d cutoff (< is WEEK)", () => {
+    expect(matchDetailTtl(at(7 * 24 * H - 1), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_WEEK,
+    );
+    expect(matchDetailTtl(at(7 * 24 * H), "scheduled", now)).toBe(
+      TTL.MATCH_DETAIL_DEFAULT,
+    );
   });
 });
 

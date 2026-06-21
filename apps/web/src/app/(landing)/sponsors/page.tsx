@@ -75,4 +75,6 @@ export default async function SponsorsPageRoute() {
   );
 }
 
-export const revalidate = 3600;
+// 24h ISR — sponsor list changes rarely; editor publishes invalidate on
+// demand via /api/revalidate (revalidateTag 'sponsors').
+export const revalidate = 86400;

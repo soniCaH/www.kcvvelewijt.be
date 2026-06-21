@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   HOMEPAGE_BANNERS_QUERY_RESULT,
   HOMEPAGE_PLACEHOLDER_QUERY_RESULT,
@@ -132,9 +133,14 @@ export class HomepageRepository extends Context.Tag("HomepageRepository")<
 
 export const HomepageRepositoryLive = Layer.succeed(HomepageRepository, {
   getBanners: () =>
-    fetchGroq<HOMEPAGE_BANNERS_QUERY_RESULT>(HOMEPAGE_BANNERS_QUERY).pipe(
-      Effect.map(toBannersVM),
-    ),
+    fetchGroq<HOMEPAGE_BANNERS_QUERY_RESULT>(
+      HOMEPAGE_BANNERS_QUERY,
+      undefined,
+      {
+        revalidate: SANITY_LIST_REVALIDATE,
+        tags: [SANITY_TAGS.banners],
+      },
+    ).pipe(Effect.map(toBannersVM)),
   getPlaceholder: () =>
     fetchGroq<HOMEPAGE_PLACEHOLDER_QUERY_RESULT>(
       HOMEPAGE_PLACEHOLDER_QUERY,

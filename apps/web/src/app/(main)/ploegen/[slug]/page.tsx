@@ -324,4 +324,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
   );
 }
 
-export const revalidate = 3600;
+// 6h ISR — rosters change rarely; editor publishes invalidate on demand via
+// /api/revalidate (revalidateTag 'teams').
+export const revalidate = 21600;

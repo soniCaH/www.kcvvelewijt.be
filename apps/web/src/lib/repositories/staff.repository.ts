@@ -1,6 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq } from "../sanity/fetch-groq";
+import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   ORGANIGRAM_NODES_QUERY_RESULT,
   STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT,
@@ -208,7 +209,14 @@ export class StaffRepository extends Context.Tag("StaffRepository")<
 
 export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
   findAll: () =>
-    fetchGroq<ORGANIGRAM_NODES_QUERY_RESULT>(ORGANIGRAM_NODES_QUERY).pipe(
+    fetchGroq<ORGANIGRAM_NODES_QUERY_RESULT>(
+      ORGANIGRAM_NODES_QUERY,
+      undefined,
+      {
+        revalidate: SANITY_LIST_REVALIDATE,
+        tags: [SANITY_TAGS.staff],
+      },
+    ).pipe(
       Effect.map((nodes) => [CLUB_ROOT_NODE, ...nodes.map(toOrgChartNode)]),
     ),
   findByPsdId: (psdId) =>

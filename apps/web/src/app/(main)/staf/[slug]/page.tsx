@@ -205,4 +205,6 @@ export default async function StafPage({ params }: StaffPageProps) {
   );
 }
 
-export const revalidate = 3600;
+// 24h ISR — staff data is PSD-synced + editor-published; on-demand
+// revalidation keeps it fresh via /api/revalidate (revalidateTag 'staff').
+export const revalidate = 86400;

@@ -47,7 +47,9 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 300;
+// 1h ISR — events listing; on-demand revalidation via /api/revalidate
+// (revalidatePath '/evenementen') makes new/edited events appear sooner.
+export const revalidate = 3600;
 
 export default async function EvenementenPage() {
   const events = await runPromise(

@@ -80,6 +80,36 @@ export const getMatchesWindowHandler = (): Effect.Effect<
   );
 };
 
+const HOUR_MS = 60 * 60 * 1000;
+
+/**
+ * Soft cache TTL (seconds) for a match-detail response, derived from kickoff
+ * proximity. The rate-limited PSD hop is then refreshed often only when it
+ * matters (live / matchday) and rarely for distant or settled matches.
+ *
+ *   finished ≥48h ago → 7d   (immutable)
+ *   |kickoff − now| < 3h → 60s   (live)
+ *                   < 24h → 300s  (matchday)
+ *                   < 7d  → 3600s (this week)
+ *   else              → 24h  (distant)
+ */
+export function matchDetailTtl(
+  date: Date,
+  status: string,
+  now: number = Date.now(),
+): number {
+  const kickoff = new Date(date).getTime();
+  const finished = status === "finished" || status === "forfeited";
+
+  if (finished && now - kickoff >= 48 * HOUR_MS) return TTL.MATCH_DETAIL_PAST;
+
+  const distanceMs = Math.abs(kickoff - now);
+  if (distanceMs < 3 * HOUR_MS) return TTL.MATCH_DETAIL_LIVE;
+  if (distanceMs < 24 * HOUR_MS) return TTL.MATCH_DETAIL_MATCHDAY;
+  if (distanceMs < 7 * 24 * HOUR_MS) return TTL.MATCH_DETAIL_WEEK;
+  return TTL.MATCH_DETAIL_DEFAULT;
+}
+
 export const getMatchDetailHandler = (
   matchId: number,
 ): Effect.Effect<
@@ -93,20 +123,10 @@ export const getMatchDetailHandler = (
     return yield* service.getMatchDetail(matchId);
   });
 
-  // Finished ≥48h ago → 7 days (immutable). All other cases → 24h.
-  const FORTY_EIGHT_HOURS_MS = 48 * 60 * 60 * 1000;
   return matchDetailCache.getOrFetch(
     cacheKey,
     fetchDetail,
-    (detail) => {
-      const isFinished =
-        detail.status === "finished" || detail.status === "forfeited";
-      const isOldEnough =
-        Date.now() - new Date(detail.date).getTime() >= FORTY_EIGHT_HOURS_MS;
-      return isFinished && isOldEnough
-        ? TTL.MATCH_DETAIL_PAST
-        : TTL.MATCH_DETAIL_DEFAULT;
-    },
+    (detail) => matchDetailTtl(detail.date, detail.status),
     undefined,
     { shouldServeStale },
   );
