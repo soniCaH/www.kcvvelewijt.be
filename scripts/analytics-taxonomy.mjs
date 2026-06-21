@@ -76,11 +76,11 @@ export const params = [
   { parameterName: "contact_type", displayName: "Contact type" },
   { parameterName: "dwell_seconds", displayName: "Dwell seconds" },
   { parameterName: "step_index", displayName: "Step index" },
-  { parameterName: "node_id", displayName: "Node ID (hashed)" },
+  { parameterName: "node_id", displayName: "Node ID hashed" },
   { parameterName: "view", displayName: "View" },
   { parameterName: "source", displayName: "Interaction source" },
   { parameterName: "department", displayName: "Department" },
-  { parameterName: "member_id", displayName: "Member ID (hashed)" },
+  { parameterName: "member_id", displayName: "Member ID hashed" },
   // ── Related content ─────────────────────────────────────────────────────
   { parameterName: "target_type", displayName: "Target type" },
   { parameterName: "target_slug", displayName: "Target slug" },
@@ -90,13 +90,13 @@ export const params = [
   { parameterName: "page_slug", displayName: "Page slug" },
   // ── Articles ────────────────────────────────────────────────────────────
   { parameterName: "article_type", displayName: "Article type" },
-  { parameterName: "article_id_hashed", displayName: "Article ID (hashed)" },
+  { parameterName: "article_id_hashed", displayName: "Article ID hashed" },
   { parameterName: "article_slug", displayName: "Article slug" },
   { parameterName: "has_subject", displayName: "Has subject" },
   { parameterName: "subject_kind", displayName: "Subject kind" },
   { parameterName: "subject_count", displayName: "Subject count" },
   { parameterName: "channel", displayName: "Share channel" },
-  { parameterName: "related_article_id_hashed", displayName: "Related article ID (hashed)" },
+  { parameterName: "related_article_id_hashed", displayName: "Related article ID hashed" },
   // ── Article video ───────────────────────────────────────────────────────
   { parameterName: "video_source", displayName: "Video source" },
   { parameterName: "video_provider", displayName: "Video provider" },
@@ -119,7 +119,7 @@ export const params = [
   { parameterName: "teams_count", displayName: "Teams count" },
   { parameterName: "side", displayName: "Match side" },
   // ── Sponsors ────────────────────────────────────────────────────────────
-  { parameterName: "sponsor_id", displayName: "Sponsor ID (hashed)" },
+  { parameterName: "sponsor_id", displayName: "Sponsor ID hashed" },
   { parameterName: "tier", displayName: "Sponsor tier" },
   // ── Jeugd nav hub ───────────────────────────────────────────────────────
   { parameterName: "card_type", displayName: "Card type" },
