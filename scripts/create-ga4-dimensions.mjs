@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 /**
- * Creates all 27 KCVV custom dimensions in GA4 via the Analytics Admin API.
+ * Creates the KCVV GA4 custom dimensions via the Analytics Admin API.
+ *
+ * The dimension list is imported from `analytics-taxonomy.mjs` (single source
+ * of truth, shared with `sync-gtm.mjs`) — do not hardcode params here.
  *
  * Prerequisites:
  *   1. gcloud CLI installed and authenticated:
@@ -15,6 +18,7 @@
  */
 
 import { execSync } from "child_process";
+import { params as dimensions } from "./analytics-taxonomy.mjs";
 
 const PROPERTY_ID = process.env.PROPERTY_ID ?? process.argv[2];
 if (!PROPERTY_ID) {
@@ -24,46 +28,6 @@ if (!PROPERTY_ID) {
   process.exit(1);
 }
 const BASE_URL = `https://analyticsadmin.googleapis.com/v1beta/properties/${PROPERTY_ID}/customDimensions`;
-
-const dimensions = [
-  { parameterName: "role",               displayName: "Role" },
-  { parameterName: "query_text",         displayName: "Query text" },
-  { parameterName: "query_length",       displayName: "Query length" },
-  { parameterName: "results_count",      displayName: "Results count" },
-  { parameterName: "path_id",            displayName: "Path ID" },
-  { parameterName: "category",           displayName: "Category" },
-  { parameterName: "position",           displayName: "Position" },
-  { parameterName: "contact_type",       displayName: "Contact type" },
-  { parameterName: "dwell_seconds",      displayName: "Dwell seconds" },
-  { parameterName: "had_results",        displayName: "Had results" },
-  { parameterName: "filter_type",        displayName: "Filter type" },
-  { parameterName: "result_type",        displayName: "Result type" },
-  { parameterName: "result_title",       displayName: "Result title" },
-  { parameterName: "view",               displayName: "Organigram view" },
-  { parameterName: "source",             displayName: "Interaction source" },
-  { parameterName: "department",         displayName: "Department" },
-  { parameterName: "member_id",          displayName: "Member ID" },
-  { parameterName: "target_type",        displayName: "Target type" },
-  { parameterName: "target_id",          displayName: "Target ID" },
-  { parameterName: "source_entity_type", displayName: "Source entity type" },
-  { parameterName: "match_id",          displayName: "Match ID" },
-  { parameterName: "match_status",      displayName: "Match status" },
-  { parameterName: "destination",       displayName: "Destination" },
-  { parameterName: "video_source",      displayName: "Video source" },
-  { parameterName: "video_provider",    displayName: "Video provider" },
-  { parameterName: "video_position",    displayName: "Video position" },
-  { parameterName: "event_type",        displayName: "Event type" },
-  // Phase 6.D /kalender (#1992/#1995). `view` + `source` reuse the existing
-  // params above. `kalender_type` is registered SEPARATELY from `event_type`:
-  // it is a superset ("Wedstrijden" ∪ the 4 eventType values), not an eventType.
-  { parameterName: "kalender_type",      displayName: "Kalender type" },
-  { parameterName: "teams_count",        displayName: "Teams count" },
-  { parameterName: "side",               displayName: "Match side" },
-  // Phase 7 /jeugd nav hub (#2042) — jeugd_card_click.
-  { parameterName: "card_type",          displayName: "Card type" },
-  { parameterName: "tag",                displayName: "Card tag" },
-  { parameterName: "article_id_hashed",  displayName: "Article ID (hashed)" },
-];
 
 let token;
 try {
