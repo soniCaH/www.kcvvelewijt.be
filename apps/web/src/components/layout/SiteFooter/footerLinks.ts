@@ -15,6 +15,7 @@ export const FOOTER_COLUMNS: ReadonlyArray<FooterColumn> = [
       { label: "Nieuws", href: "/nieuws" },
       { label: "Kalender", href: "/kalender" },
       { label: "Evenementen", href: "/evenementen" },
+      { label: "Galerij", href: "/galerij" },
       { label: "Onze ploegen", href: "/ploegen" },
       { label: "Jeugdwerking", href: "/jeugd" },
     ],
