@@ -2,8 +2,8 @@ import type {GuideEntry} from './guide-model'
 
 /**
  * Per-document-type editor guidance. Add an entry here to opt a document type
- * into the GuidedSidebar inspector; types without an entry are left with
- * Sanity's default document pane.
+ * into the always-visible guide panel at the top of its document form (see
+ * `GuideFormInput`); types without an entry are left with Sanity's default form.
  *
  * Each entry helps the editor get the document into the right configuration
  * and spot: `intro` (what it is / why it matters), `placement` (where it shows

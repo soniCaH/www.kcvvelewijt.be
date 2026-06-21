@@ -6,7 +6,7 @@ import {
   launcherTool,
   launcherTemplates,
   curatedNewDocumentOptions,
-  guidedSidebarInspectors,
+  GuideFormInput,
 } from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
@@ -34,6 +34,9 @@ export default defineConfig({
   document: {
     actions: (prev) => [...prev, LinkToPsdAction],
     newDocumentOptions: curatedNewDocumentOptions,
-    inspectors: guidedSidebarInspectors,
+  },
+
+  form: {
+    components: {input: GuideFormInput},
   },
 })

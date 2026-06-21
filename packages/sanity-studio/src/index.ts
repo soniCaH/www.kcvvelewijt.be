@@ -30,5 +30,5 @@ export {
   pageTemplates,
 } from './templates'
 export type {LauncherTemplate} from './templates'
-export {guidedSidebarInspectors, guidedSidebarInspector} from './inspectors'
+export {GuideFormInput} from './inspectors'
 export type {GuideEntry} from './inspectors'
