@@ -46,8 +46,14 @@ function GuidedSidebar({documentId, documentType}: DocumentInspectorProps): JSX.
             <Text size={1} weight="semibold">
               Nog in te vullen
             </Text>
-            {outstanding.map((item, i) => (
-              <Card key={`${item.path}-${i}`} padding={3} radius={2} shadow={1} tone="caution">
+            {outstanding.map((item) => (
+              <Card
+                key={`${item.path}-${item.message}`}
+                padding={3}
+                radius={2}
+                shadow={1}
+                tone="caution"
+              >
                 <Text size={1}>{item.message}</Text>
               </Card>
             ))}
