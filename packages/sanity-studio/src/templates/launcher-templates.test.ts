@@ -4,12 +4,18 @@ import {
   responsibilityTemplates,
   articleTemplates,
   sponsorTemplates,
+  pageTemplates,
   isLauncherTemplate,
 } from './index'
 
 describe('launcherTemplates aggregate', () => {
   it('contains every per-schema manifest so both studios register templates with one spread', () => {
-    expect(launcherTemplates).toEqual([...responsibilityTemplates, ...articleTemplates, ...sponsorTemplates])
+    expect(launcherTemplates).toEqual([
+      ...responsibilityTemplates,
+      ...articleTemplates,
+      ...sponsorTemplates,
+      ...pageTemplates,
+    ])
   })
 
   it('exposes only launcher-eligible templates', () => {
