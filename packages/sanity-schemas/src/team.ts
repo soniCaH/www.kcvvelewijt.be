@@ -9,6 +9,7 @@ export const trainingDay = defineType({
       name: 'day',
       title: 'Day',
       type: 'string',
+      description: 'Dag van de training.',
       options: {
         list: ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
       },
@@ -17,18 +18,19 @@ export const trainingDay = defineType({
       name: 'time',
       title: 'Time',
       type: 'string',
-      description: 'e.g. 19:30',
+      description: 'Aanvangsuur (bijv. "19:30").',
     }),
     defineField({
       name: 'location',
       title: 'Location',
       type: 'string',
-      description: 'e.g. Sportpark Elewijt - Veld 1',
+      description: 'Locatie van de training (bijv. "Sportpark Elewijt - Veld 1").',
     }),
     defineField({
       name: 'type',
       title: 'Type',
       type: 'string',
+      description: 'Soort training.',
       options: {
         list: ['Training', 'Fysiek', 'Tactisch', 'Keeperstraining', 'Andere'],
       },
@@ -40,87 +42,136 @@ export const team = defineType({
   name: 'team',
   title: 'Team',
   type: 'document',
+  // Editor-UX rework groups (#1504). `identiteit` holds the PSD-synced identity
+  // (plus the editable competition/visibility config); the rest is editorial.
+  groups: [
+    {name: 'identiteit', title: 'Identiteit', default: true},
+    {name: 'redactioneel', title: 'Redactioneel'},
+    {name: 'trainingen', title: 'Trainingen'},
+    {name: 'staf', title: 'Staf'},
+    {name: 'seo', title: 'SEO'},
+  ],
   fields: [
-    // PSD-synced
+    // ── Identiteit — PSD-synced (read-only) + editable competition/visibility ─
     defineField({
       name: 'psdId',
       title: 'PSD ID',
       type: 'string',
+      group: 'identiteit',
+      description: 'Unieke identifier uit PSD. Gesynchroniseerd — alleen-lezen.',
       readOnly: true,
     }),
     defineField({
       name: 'name',
       title: 'Name',
       type: 'string',
+      group: 'identiteit',
+      description: 'Naam van de ploeg, gesynchroniseerd vanuit PSD. Alleen-lezen — wijzig dit in PSD, niet hier.',
       readOnly: true,
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
+      group: 'identiteit',
       options: {source: 'name'},
+      description: 'URL-pad van de ploegpagina (`/ploegen/{slug}`), gesynchroniseerd vanuit de naam. Alleen-lezen.',
       readOnly: true,
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) =>
+        Rule.required().error(
+          'Verplicht. De slug bepaalt de URL van de ploeg en wordt gesynchroniseerd vanuit PSD — als hij ontbreekt, liep de sync mis.',
+        ),
     }),
     defineField({
       name: 'age',
       title: 'Age group',
       type: 'string',
+      group: 'identiteit',
+      description: 'Leeftijdsgroep (bijv. "A", "U17", "U15"), gesynchroniseerd vanuit PSD. Alleen-lezen.',
       readOnly: true,
-      description: 'e.g. "A", "U17", "U15"',
     }),
     defineField({
       name: 'gender',
       title: 'Gender',
       type: 'string',
+      group: 'identiteit',
+      description: 'Geslacht van de ploeg, gesynchroniseerd vanuit PSD. Alleen-lezen.',
       readOnly: true,
     }),
     defineField({
       name: 'footbelId',
       title: 'Footbel ID',
       type: 'number',
+      group: 'identiteit',
+      description: 'Footbel-identifier, gesynchroniseerd vanuit PSD. Alleen-lezen.',
       readOnly: true,
-    }),
-    defineField({
-      name: 'division',
-      title: 'Division',
-      type: 'string',
-      description: 'Korte competitiecode, bv. "3NA".',
-    }),
-    defineField({
-      name: 'divisionFull',
-      title: 'Division (full)',
-      type: 'string',
-      description:
-        "Volledige naam, bv. 'Eerste Elftal A - 3e Nationale A' of 'U9 - Wit'",
     }),
     defineField({
       name: 'season',
       title: 'Season',
       type: 'string',
+      group: 'identiteit',
+      description: 'Seizoen, gesynchroniseerd vanuit PSD. Alleen-lezen.',
       readOnly: true,
     }),
     defineField({
       name: 'players',
       title: 'Players',
       type: 'array',
+      group: 'identiteit',
       of: [{type: 'reference', to: [{type: 'player'}]}],
+      description: 'De spelers van de ploeg, gesynchroniseerd vanuit PSD. Alleen-lezen — beheer de selectie in PSD.',
       readOnly: true,
     }),
-    // Editorial
+    defineField({
+      name: 'division',
+      title: 'Division',
+      type: 'string',
+      group: 'identiteit',
+      description: 'Korte competitiecode (bijv. "3NA"). Redactioneel — vul zelf in.',
+    }),
+    defineField({
+      name: 'divisionFull',
+      title: 'Division (full)',
+      type: 'string',
+      group: 'identiteit',
+      description:
+        'Volledige competitienaam (bijv. "Eerste Elftal A - 3e Nationale A" of "U9 - Wit"). Redactioneel — getoond op de ploegpagina.',
+    }),
     defineField({
       name: 'showInNavigation',
       title: 'Show in navigation',
       type: 'boolean',
+      group: 'identiteit',
       description:
-        'Uncheck to hide this team from the website navigation and team listings. Use for external/opponent teams or teams with their own nav item.',
+        'Zet uit om deze ploeg te verbergen uit de navigatie en de ploegoverzichten (bijv. voor externe/tegenstander-ploegen). Standaard aan.',
       initialValue: true,
     }),
-    defineField({name: 'tagline', title: 'Tagline', type: 'string'}),
+    defineField({
+      name: 'archived',
+      title: 'Archived',
+      type: 'boolean',
+      group: 'identiteit',
+      description:
+        'Automatisch gezet door de sync wanneer de ploeg niet meer in PSD voorkomt. Alleen-lezen — niet handmatig bewerken.',
+      initialValue: false,
+      readOnly: true,
+      hidden: true,
+    }),
+    // ── Redactioneel — editor-owned ─────────────────────────────────────────
+    defineField({
+      name: 'tagline',
+      title: 'Tagline',
+      type: 'string',
+      group: 'redactioneel',
+      description: 'Korte slogan onder de ploegnaam. Redactioneel — optioneel.',
+    }),
     defineField({
       name: 'body',
       title: 'Description',
       type: 'array',
+      group: 'redactioneel',
+      description: 'Beschrijving / het verhaal van de ploeg in vrije tekst. Gebruik de "Pullquote"-stijl voor een uitgelichte quote. Redactioneel.',
       of: [
         {
           type: 'block',
@@ -144,24 +195,34 @@ export const team = defineType({
       name: 'contactInfo',
       title: 'Contact info',
       type: 'array',
+      group: 'redactioneel',
+      description: 'Contactgegevens voor deze ploeg (vrije tekst). Redactioneel — optioneel.',
       of: [{type: 'block'}],
     }),
     defineField({
       name: 'teamImage',
       title: 'Team image',
       type: 'image',
+      group: 'redactioneel',
       options: {hotspot: true},
+      description: 'Ploegfoto, in kleur getoond bovenaan de ploegpagina. Redactioneel.',
     }),
+    // ── Trainingen ──────────────────────────────────────────────────────────
     defineField({
       name: 'trainingSchedule',
       title: 'Training schedule',
       type: 'array',
+      group: 'trainingen',
+      description: 'Trainingsmomenten van de ploeg. Voeg per training dag, uur, locatie en type toe. Getoond op de ploegpagina.',
       of: [{type: 'trainingSession'}],
     }),
+    // ── Staf ────────────────────────────────────────────────────────────────
     defineField({
       name: 'staff',
       title: 'Staff',
       type: 'array',
+      group: 'staf',
+      description: 'De staf van de ploeg. Koppel een staflid en kies zijn rol (trainer of afgevaardigde) voor déze ploeg.',
       of: [
         {
           type: 'object',
@@ -171,12 +232,13 @@ export const team = defineType({
               title: 'Staff member',
               type: 'reference',
               to: [{type: 'staffMember'}],
+              description: 'Het gekoppelde staflid.',
             }),
             defineField({
               name: 'role',
               title: 'Role',
               type: 'string',
-              description: 'Editorial role for this team (e.g. trainer, afgevaardigde)',
+              description: 'De rol van dit staflid binnen deze ploeg.',
               options: {
                 list: [
                   {title: 'Trainer', value: 'trainer'},
@@ -201,27 +263,21 @@ export const team = defineType({
         },
       ],
     }),
-    defineField({
-      name: 'archived',
-      title: 'Archived',
-      type: 'boolean',
-      description:
-        'Set automatically by sync when team is no longer in PSD. Do not edit manually.',
-      readOnly: true,
-      hidden: true,
-    }),
+    // ── SEO ─────────────────────────────────────────────────────────────────
     defineField({
       name: 'metaDescription',
       title: 'Meta description',
       type: 'string',
-      description: 'Override for SEO meta description and OG description (max 160 characters).',
+      group: 'seo',
+      description: 'Optionele SEO-omschrijving (max. 160 tekens). Verschijnt in Google-resultaten en bij delen op sociale media. Laat leeg om automatisch terug te vallen.',
       validation: (r) => r.max(160),
     }),
     defineField({
       name: 'ogImage',
       title: 'OG image',
       type: 'image',
-      description: 'Optional override for the Open Graph image. Falls back to the team image.',
+      group: 'seo',
+      description: 'Optionele afbeelding voor het delen op sociale media (Open Graph). Valt terug op de ploegfoto als dit leeg blijft.',
       options: {hotspot: true},
     }),
   ],
