@@ -4,8 +4,7 @@ import {guidedSidebarInspector} from './guided-sidebar'
 
 export {guidedSidebarInspector} from './guided-sidebar'
 export {guideContent} from './guide-content'
-export {buildGuideModel} from './guide-model'
-export type {GuideEntry, GuideModel, GuideOutstandingItem} from './guide-model'
+export type {GuideEntry} from './guide-model'
 
 /**
  * `document.inspectors` resolver: adds the GuidedSidebar inspector for document

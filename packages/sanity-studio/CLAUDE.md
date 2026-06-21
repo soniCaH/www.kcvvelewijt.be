@@ -122,13 +122,14 @@ Used verbatim by the Phase 5+ propagation issues (#1503–#1511, #2181). Everyth
 
 **Studio** (`packages/sanity-studio/`):
 
-5. [ ] **Launcher card (only if earned):** if the type has shape variation worth seeding (or is a hand-created singleton-on-ramp), add `src/templates/<type>-templates.ts`, re-export it from `src/templates/index.ts`, **append it to the `launcherTemplates` aggregate**, and re-export from the barrel. `value` seeds only form-shape fields (never editorial content); `ui.icon` is a Lucide name string. Skip for singletons / data-driven types.
-6. [ ] **Custom inputs (if any):** graft via an `apply-<input>.ts` helper composed in `src/schema-types.ts` (reuse `RespondentPicker` for contacts). Schema stays React-free.
+5. [ ] **Guide entry (required for every editor-authored type):** add a `guideContent['<type>']` entry in `src/inspectors/guide-content.ts` with `intro` (intention), `placement` (where it surfaces on the site), and optional `tips` (config guidance for non-obvious choices). The GuidedSidebar inspector then appears automatically (the `Gids` toggle). It is a pure curation aid — it does **not** show a publish-readiness list; Sanity's native validation owns "what's still outstanding". Match the `responsibility` reference; plain Dutch. Skip only for system/non-editor types (e.g. `searchFeedback`).
+6. [ ] **Launcher card (only if earned):** if the type has shape variation worth seeding (or is a hand-created singleton-on-ramp), add `src/templates/<type>-templates.ts`, re-export it from `src/templates/index.ts`, **append it to the `launcherTemplates` aggregate**, and re-export from the barrel. `value` seeds only form-shape fields (never editorial content); `ui.icon` is a Lucide name string. Skip for singletons / data-driven types.
+7. [ ] **Custom inputs (if any):** graft via an `apply-<input>.ts` helper composed in `src/schema-types.ts` (reuse `RespondentPicker` for contacts). Schema stays React-free.
 
 **Verify:**
 
-7. [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass.
-8. [ ] Manual smoke against the staging dataset: create the type (via launcher if it has a card), confirm groups/descriptions/errors render, publish.
+8. [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass.
+9. [ ] Manual smoke against the staging dataset: create the type (via launcher if it has a card), confirm groups/descriptions/errors + the guide sidebar render, publish.
 
 ## No Duplication With Root CLAUDE.md
 
