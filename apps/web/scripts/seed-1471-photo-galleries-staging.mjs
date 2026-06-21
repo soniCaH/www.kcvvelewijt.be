@@ -177,9 +177,10 @@ async function run() {
   } else {
     console.log("No event found to link — seed events first (#1965) to demo the event section.");
   }
-  console.log(
-    "View (branch preview): https://kcvv-nextjs-git-feat-issue-1471-sonicahs-projects.vercel.app/galerij",
-  );
+  // Base URL is operator-supplied (the per-branch preview host changes); fall
+  // back to the bare path so the hint never points at a stale/dead deployment.
+  const base = process.env.SEED_PREVIEW_BASE_URL ?? "";
+  console.log(`View: ${base}/galerij`);
 }
 
 run().catch((err) => {
