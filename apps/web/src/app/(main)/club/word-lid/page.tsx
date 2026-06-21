@@ -2,11 +2,13 @@
  * Word lid — membership intake
  *
  * Static sibling under `club/` that beats the `club/[slug]` CMS catch-all.
- * Replaces the external Google Forms / placeholder `/club/inschrijven` links.
- * The page is static; the form POSTs client-side to `/api/membership`.
+ * The structured membership-signup entry point, reached from the "Word lid"
+ * CTAs. The CMS "Praktische Informatie" page (`/club/inschrijven`) stays as the
+ * practical-info hub. The page is static; the form POSTs to `/api/membership`.
  */
 
 import type { Metadata } from "next";
+import Link from "next/link";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
@@ -27,6 +29,7 @@ export const metadata: Metadata = {
     "vrijwilliger",
     "Elewijt",
   ],
+  alternates: { canonical: `${SITE_CONFIG.siteUrl}/club/word-lid` },
   openGraph: {
     title: "Word lid van KCVV Elewijt",
     description:
@@ -63,6 +66,11 @@ export default function WordLidPage() {
             Speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter — vul
             het formulier in en we nemen binnenkort contact met je op. Het
             lidgeld regelen we samen nadat we je gecontacteerd hebben.
+          </p>
+          <p className="mt-4 text-[length:var(--text-body-md)]">
+            <Link href="/club/inschrijven" className="prose-link">
+              Praktische info — lidgeld, terugbetalingen &amp; ProSoccerData →
+            </Link>
           </p>
         </header>
 

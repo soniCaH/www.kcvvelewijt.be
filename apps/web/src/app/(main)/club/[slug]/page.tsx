@@ -7,7 +7,19 @@ import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
 import { PageHero } from "@/components/layout/PageHero";
 import { ArticleBody } from "@/components/article/ArticleBody";
-import { PageContainer, StripedSeam } from "@/components/design-system";
+import {
+  CtaBand,
+  PageContainer,
+  StripedSeam,
+} from "@/components/design-system";
+
+/**
+ * Slug of the CMS "Praktische Informatie" page — gets a closing CTA to the
+ * membership form. ponytail: a single stable, load-bearing slug (also driving
+ * the nav link + /club/register redirect); promote to a CMS field if a second
+ * page ever needs a form CTA.
+ */
+const MEMBERSHIP_INFO_SLUG = "inschrijven";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -79,6 +91,21 @@ export default async function DynamicClubPage({ params }: Props) {
           renders bare here (no max-w wrapper would box the cream into a band). */}
       {body.length > 0 ? (
         <ArticleBody className="article-body" content={body} />
+      ) : null}
+
+      {slug === MEMBERSHIP_INFO_SLUG ? (
+        <CtaBand
+          ariaLabel="Schrijf je in"
+          heading="Klaar om lid te worden?"
+          emphasis={{ text: "lid te worden", tone: "warm" }}
+          lead="Schrijf je online in via ons inschrijvingsformulier — we nemen daarna contact met je op."
+          buttonLabel={
+            <>
+              Schrijf je in <span aria-hidden="true">+</span>
+            </>
+          }
+          href="/club/word-lid"
+        />
       ) : null}
     </div>
   );

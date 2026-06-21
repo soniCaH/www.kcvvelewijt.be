@@ -45,6 +45,7 @@ export function TurnstileWidget({
 
     let cancelled = false;
     let widgetId: string | null = null;
+    let scriptEl: HTMLScriptElement | null = null;
 
     const render = () => {
       if (cancelled || !ref.current || !window.turnstile) return;
@@ -62,18 +63,19 @@ export function TurnstileWidget({
       const existing = document.querySelector<HTMLScriptElement>(
         `script[src="${SCRIPT_SRC}"]`,
       );
-      const script = existing ?? document.createElement("script");
+      scriptEl = existing ?? document.createElement("script");
       if (!existing) {
-        script.src = SCRIPT_SRC;
-        script.async = true;
-        script.defer = true;
-        document.head.appendChild(script);
+        scriptEl.src = SCRIPT_SRC;
+        scriptEl.async = true;
+        scriptEl.defer = true;
+        document.head.appendChild(scriptEl);
       }
-      script.addEventListener("load", render);
+      scriptEl.addEventListener("load", render);
     }
 
     return () => {
       cancelled = true;
+      if (scriptEl) scriptEl.removeEventListener("load", render);
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };
   }, [onToken]);

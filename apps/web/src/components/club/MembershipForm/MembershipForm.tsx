@@ -433,7 +433,12 @@ export function MembershipForm({
             error={fieldErrors.privacyAccepted}
           >
             Ik aanvaard de{" "}
-            <a href="/privacy" className="prose-link underline" target="_blank">
+            <a
+              href="/privacy"
+              className="prose-link underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               privacyverklaring
             </a>
             .

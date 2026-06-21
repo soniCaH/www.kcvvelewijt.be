@@ -28,6 +28,7 @@ export const verifyTurnstile = (
       try: async () => {
         const response = await fetch(SITEVERIFY_URL, {
           method: "POST",
+          signal: AbortSignal.timeout(5000),
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             secret: env.TURNSTILE_SECRET,

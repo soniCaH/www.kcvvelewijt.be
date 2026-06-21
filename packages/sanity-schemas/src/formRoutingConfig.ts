@@ -7,12 +7,15 @@ const roleRecipient = (name: string, title: string, helper: string) =>
     name,
     title,
     type: 'string',
+    group: 'ontvangers',
     initialValue: DEFAULT_RECIPIENT,
     description: helper,
     validation: (Rule) =>
       Rule.required()
         .email()
-        .error('Vul een geldig e-mailadres in — hierheen gaan de meldingen van nieuwe inschrijvingen.'),
+        .error(
+          'Verplicht. Naar dit adres sturen we de melding van elke nieuwe inschrijving voor deze rol — een leeg of ongeldig adres betekent dat niemand de aanvraag te zien krijgt.',
+        ),
   })
 
 /**
@@ -26,6 +29,7 @@ export const formRoutingConfig = defineType({
   type: 'document',
   // @ts-expect-error __experimental_actions is not in the public type yet
   __experimental_actions: ['update', 'publish'],
+  groups: [{name: 'ontvangers', title: 'Ontvangers', default: true}],
   fields: [
     roleRecipient('speler', 'Speler', 'Ontvanger van inschrijvingen als senior speler.'),
     roleRecipient('jeugdspeler', 'Jeugdspeler', 'Ontvanger van jeugd-inschrijvingen.'),

@@ -61,7 +61,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/club/register",
-        destination: "/club/word-lid",
+        destination: "/club/inschrijven",
         permanent: true,
       },
       // #1002 — Dutch URL for staff member detail pages

@@ -22,7 +22,7 @@ import {
  * Last updated date for the privacy policy.
  * NOTE: Maintainers must update this constant whenever the privacy policy content changes.
  */
-const LAST_UPDATED = "februari 2026";
+const LAST_UPDATED = "juni 2026";
 
 export const metadata: Metadata = {
   title: "Privacyverklaring | KCVV Elewijt",

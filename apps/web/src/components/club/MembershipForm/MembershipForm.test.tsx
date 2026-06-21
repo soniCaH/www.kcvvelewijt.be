@@ -31,8 +31,10 @@ describe("MembershipForm", () => {
     render(<MembershipForm />);
     expect(screen.queryByText(/Minderjarig/i)).not.toBeInTheDocument();
 
+    // Born ~10 years ago — always a minor regardless of when the test runs.
+    const minorYear = new Date().getFullYear() - 10;
     fireEvent.change(screen.getByLabelText(/Geboortedatum/), {
-      target: { value: "2014-05-01" },
+      target: { value: `${minorYear}-05-01` },
     });
     expect(screen.getByLabelText(/E-mail ouder\/voogd/i)).toBeInTheDocument();
     expect(screen.getByText(/geef toestemming/i)).toBeInTheDocument();

@@ -165,6 +165,38 @@ describe("/club/[slug] page", () => {
     ).toBeInTheDocument();
   });
 
+  it("adds a 'Schrijf je in' CTA to /club/word-lid on the inschrijven (Praktische Informatie) page", async () => {
+    mockFindBySlug.mockReturnValue(
+      Effect.succeed(
+        makePage({ slug: "inschrijven", title: "Praktische Informatie" }),
+      ),
+    );
+
+    const page = await DynamicClubPage({
+      params: Promise.resolve({ slug: "inschrijven" }),
+    });
+    render(page);
+
+    expect(
+      screen.getByRole("link", { name: /schrijf je in/i }),
+    ).toHaveAttribute("href", "/club/word-lid");
+  });
+
+  it("does not add the membership CTA on other club pages", async () => {
+    mockFindBySlug.mockReturnValue(
+      Effect.succeed(makePage({ slug: "downloads" })),
+    );
+
+    const page = await DynamicClubPage({
+      params: Promise.resolve({ slug: "downloads" }),
+    });
+    render(page);
+
+    expect(
+      screen.queryByRole("link", { name: /schrijf je in/i }),
+    ).not.toBeInTheDocument();
+  });
+
   it("does not render SanityArticleBody / InteriorPageHero artefacts", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(makePage()));
 

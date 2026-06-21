@@ -29,7 +29,7 @@ describe("next.config redirects", () => {
       { source: "/teams", destination: "/ploegen" },
       { source: "/team/:slug", destination: "/ploegen/:slug" },
       { source: "/club/history", destination: "/club/geschiedenis" },
-      { source: "/club/register", destination: "/club/word-lid" },
+      { source: "/club/register", destination: "/club/inschrijven" },
     ];
 
     for (const { source, destination } of expected) {

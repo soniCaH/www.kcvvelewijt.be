@@ -65,6 +65,7 @@ export const EmailTransportLive = Layer.effect(
             try: () =>
               fetch("https://api.resend.com/emails", {
                 method: "POST",
+                signal: AbortSignal.timeout(8000),
                 headers: {
                   Authorization: `Bearer ${env.RESEND_API_KEY}`,
                   "Content-Type": "application/json",
