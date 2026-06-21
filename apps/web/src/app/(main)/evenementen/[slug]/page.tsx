@@ -15,6 +15,10 @@ import { Effect } from "effect";
 
 import { runPromise } from "@/lib/effect/runtime";
 import { EventRepository } from "@/lib/repositories/event.repository";
+import {
+  PhotoGalleryRepository,
+  type GalleryCardVM,
+} from "@/lib/repositories/photoGallery.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildEventJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
@@ -22,6 +26,7 @@ import { PageContainer } from "@/components/design-system";
 import { EventHero } from "@/components/event/EventHero";
 import { EventViewTracker } from "@/components/event/EventViewTracker";
 import { AndereEvents } from "@/components/event/AndereEvents";
+import { GallerySection } from "@/components/gallery/GallerySection/GallerySection";
 
 import { EventDetailCtas } from "./EventDetailCtas";
 
@@ -80,13 +85,21 @@ export async function generateMetadata({
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
-  const { event, upcoming } = await runPromise(
+  const { event, upcoming, galleries } = await runPromise(
     Effect.gen(function* () {
       const repo = yield* EventRepository;
       const event = yield* repo.findBySlug(slug);
       // Skip the (upcoming-only) feed fetch for a missing event — the page 404s.
       const upcoming = event ? yield* repo.findAll() : [];
-      return { event, upcoming };
+      // Photo galleries linked to this event (#1471), chronological. Resilient:
+      // a Sanity hiccup degrades to "no galleries" rather than failing the page.
+      const galleries: GalleryCardVM[] = event
+        ? yield* PhotoGalleryRepository.pipe(
+            Effect.flatMap((repo) => repo.findByLinkedEvent(event.id)),
+            Effect.catchAllCause(() => Effect.succeed<GalleryCardVM[]>([])),
+          )
+        : [];
+      return { event, upcoming, galleries };
     }),
   );
 
@@ -156,6 +169,9 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
         <AndereEvents events={otherEvents} />
       </PageContainer>
+
+      {/* Photo galleries linked to this event (#1471) — auto-hides on empty. */}
+      <GallerySection galleries={galleries} kicker="KCVV Elewijt · Beelden" />
     </div>
   );
 }

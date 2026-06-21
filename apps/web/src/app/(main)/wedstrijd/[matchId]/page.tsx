@@ -39,6 +39,10 @@ import {
   ArticleRepository,
   type MatchArticleVM,
 } from "@/lib/repositories/article.repository";
+import {
+  PhotoGalleryRepository,
+  type GalleryCardVM,
+} from "@/lib/repositories/photoGallery.repository";
 import type { MatchDetail, MatchEvent, RankingEntry } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
@@ -54,6 +58,7 @@ import {
   selectMatchArticle,
 } from "@/components/match/MatchArticleLinkCard";
 import { StripedSeam } from "@/components/design-system";
+import { GallerySection } from "@/components/gallery/GallerySection/GallerySection";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import {
@@ -227,6 +232,25 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const articleSelection = selectMatchArticle(linkedArticles, match.status);
   const hasArticle = articleSelection !== null;
 
+  // Photo galleries linked to this match (#1471). A match can have several
+  // (warmup / match / viering); the repo returns them chronologically. Resilient:
+  // a Sanity outage degrades to "no galleries" rather than 500-ing the page.
+  const galleries: GalleryCardVM[] = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* PhotoGalleryRepository;
+      return yield* repo.findByLinkedMatch(matchId);
+    }).pipe(
+      Effect.catchAllCause((cause) => {
+        console.warn(
+          "[wedstrijd/[matchId]] gallery lookup failed; rendering without galleries.",
+          { cause },
+        );
+        return Effect.succeed<GalleryCardVM[]>([]);
+      }),
+    ),
+  );
+  const hasGallery = galleries.length > 0;
+
   // Match-day standings (#2162) — league matches only. A cup/friendly/other
   // match has no meaningful league table, so we gate on the BFF-surfaced
   // structured `competitionType` (never on string-matching the Dutch label) and
@@ -297,7 +321,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         kcvvTeamLabel={match.kcvv_team_label}
       />
 
-      {(hasLineup || hasEvents || hasStandings || hasArticle) && (
+      {(hasLineup || hasEvents || hasStandings || hasArticle || hasGallery) && (
         <StripedSeam colorPair="ink-cream" height="md" />
       )}
 
@@ -392,6 +416,13 @@ export default async function MatchPage({ params }: MatchPageProps) {
           />
         </TrackInView>
       )}
+
+      {/* Photo galleries linked to this match (#1471). Seam only when a body
+          section preceded it; <GallerySection> auto-hides on empty. */}
+      {hasGallery && (hasLineup || hasEvents || hasStandings || hasArticle) && (
+        <StripedSeam colorPair="ink-cream" height="md" />
+      )}
+      <GallerySection galleries={galleries} kicker="KCVV Elewijt · Beelden" />
     </>
   );
 }

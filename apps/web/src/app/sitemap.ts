@@ -11,6 +11,7 @@ const staticRoutes: Array<{
   { path: "/ploegen", priority: 0.8, changeFrequency: "weekly" },
   { path: "/jeugd", priority: 0.8, changeFrequency: "weekly" },
   { path: "/sponsors", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/galerij", priority: 0.6, changeFrequency: "monthly" },
   { path: "/hulp", priority: 0.7, changeFrequency: "monthly" },
   { path: "/kalender", priority: 0.8, changeFrequency: "daily" },
   { path: "/zoeken", priority: 0.5, changeFrequency: "monthly" },
@@ -37,6 +38,14 @@ interface SlugRow {
   slug: string;
 }
 
+interface GallerySitemapRow {
+  slug: string;
+  /** Gallery publish date — drives `lastmod`. */
+  publishedAt: string | null;
+  /** Cover (first) image URL, or null when unresolved. */
+  image: string | null;
+}
+
 interface TeamSitemapRow {
   slug: string;
   psdId: string | null;
@@ -56,6 +65,12 @@ const EVENT_SITEMAP_QUERY = `*[_type == "event" && defined(slug.current) && coal
   "slug": slug.current,
   "updatedAt": _updatedAt,
   "image": coalesce(ogImage.asset->url, coverImage.asset->url) + "?w=1200&h=630&fit=crop&fm=webp&q=80"
+}`;
+
+const GALLERY_SITEMAP_QUERY = `*[_type == "photoGallery" && defined(slug.current)] | order(publishedAt desc) {
+  "slug": slug.current,
+  "publishedAt": publishedAt,
+  "image": images[0].image.asset->url + "?w=1200&h=630&fit=crop&fm=webp&q=80"
 }`;
 
 const PLAYER_SITEMAP_QUERY = `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] {
@@ -153,18 +168,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const [articles, events, players, staff, teams] = await Promise.all([
-    fetchFromSanity<ArticleSitemapRow>(
-      ARTICLE_SITEMAP_QUERY,
-      "fetchArticleSlugs",
-    ),
-    fetchFromSanity<EventSitemapRow>(EVENT_SITEMAP_QUERY, "fetchEventSlugs", {
-      cutoff: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    }),
-    fetchFromSanity<SlugRow>(PLAYER_SITEMAP_QUERY, "fetchPlayerSlugs"),
-    fetchFromSanity<SlugRow>(STAFF_SITEMAP_QUERY, "fetchStaffSlugs"),
-    fetchFromSanity<TeamSitemapRow>(TEAM_SITEMAP_QUERY, "fetchTeamSlugs"),
-  ]);
+  const [articles, events, galleries, players, staff, teams] =
+    await Promise.all([
+      fetchFromSanity<ArticleSitemapRow>(
+        ARTICLE_SITEMAP_QUERY,
+        "fetchArticleSlugs",
+      ),
+      fetchFromSanity<EventSitemapRow>(EVENT_SITEMAP_QUERY, "fetchEventSlugs", {
+        cutoff: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      }),
+      fetchFromSanity<GallerySitemapRow>(
+        GALLERY_SITEMAP_QUERY,
+        "fetchGallerySlugs",
+      ),
+      fetchFromSanity<SlugRow>(PLAYER_SITEMAP_QUERY, "fetchPlayerSlugs"),
+      fetchFromSanity<SlugRow>(STAFF_SITEMAP_QUERY, "fetchStaffSlugs"),
+      fetchFromSanity<TeamSitemapRow>(TEAM_SITEMAP_QUERY, "fetchTeamSlugs"),
+    ]);
 
   const articleEntries = articles.map((article) => ({
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
@@ -180,6 +200,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
     // Google image-sitemap extension — only when the event has a cover/OG image.
     ...(event.image ? { images: [event.image] } : {}),
+  }));
+
+  const galleryEntries = galleries.map((gallery) => ({
+    url: `${SITE_CONFIG.siteUrl}/galerij/${gallery.slug}`,
+    lastModified: gallery.publishedAt
+      ? new Date(gallery.publishedAt)
+      : lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.5,
+    // Google image-sitemap extension — only when the cover image resolved.
+    ...(gallery.image ? { images: [gallery.image] } : {}),
   }));
 
   const playerEntries = players.map((p) => ({
@@ -218,6 +249,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticEntries,
     ...articleEntries,
     ...eventEntries,
+    ...galleryEntries,
     ...playerEntries,
     ...staffEntries,
     ...teamEntries,

@@ -22,6 +22,7 @@ export {eventFact} from './eventFact'
 export {subject} from './subject'
 export {sponsor} from './sponsor'
 export {event} from './event'
+export {photoGallery} from './photoGallery'
 export {page} from './page'
 export {fileAttachment} from './fileAttachment'
 export {htmlTable} from './htmlTable'
@@ -48,6 +49,7 @@ import {eventFact} from './eventFact'
 import {subject} from './subject'
 import {sponsor} from './sponsor'
 import {event} from './event'
+import {photoGallery} from './photoGallery'
 import {page} from './page'
 import {fileAttachment} from './fileAttachment'
 import {htmlTable} from './htmlTable'
@@ -78,6 +80,7 @@ export const schemaTypes = [
   subject,
   sponsor,
   event,
+  photoGallery,
   page,
   fileAttachment,
   htmlTable,

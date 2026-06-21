@@ -20,13 +20,13 @@ describe("sitemap.ts", () => {
 
     const result = await sitemap();
 
-    // Should contain all 13 static routes
+    // Should contain all 14 static routes
     const staticEntries = result.filter(
       (e) =>
         !e.url.includes("/nieuws/") ||
         e.url === "https://www.kcvvelewijt.be/nieuws",
     );
-    expect(staticEntries).toHaveLength(13);
+    expect(staticEntries).toHaveLength(14);
 
     // Verify homepage entry
     const homepage = result.find(
@@ -51,6 +51,14 @@ describe("sitemap.ts", () => {
     expect(privacy).toBeDefined();
     expect(privacy!.priority).toBe(0.3);
     expect(privacy!.changeFrequency).toBe("yearly");
+
+    // Verify galerij list (#1471)
+    const galerij = result.find(
+      (e) => e.url === "https://www.kcvvelewijt.be/galerij",
+    );
+    expect(galerij).toBeDefined();
+    expect(galerij!.priority).toBe(0.6);
+    expect(galerij!.changeFrequency).toBe("monthly");
 
     // All entries should have lastModified as a Date
     for (const entry of result) {
@@ -94,6 +102,6 @@ describe("sitemap.ts", () => {
     const result = await sitemap();
 
     // Should still return static routes
-    expect(result).toHaveLength(13);
+    expect(result).toHaveLength(14);
   });
 });

@@ -43,6 +43,17 @@ export const guideContent: Record<string, GuideEntry> = {
       'Zet "Active" uit om een sponsor tijdelijk te verbergen (bijv. aflopend contract) zonder hem te verwijderen.',
     ],
   },
+  photoGallery: {
+    intro:
+      "Een fotogalerij is een reeks foto's van een wedstrijd, evenement of clubmoment. De eerste foto is automatisch de cover van de galerij.",
+    placement:
+      'Verschijnt in het galerijoverzicht `/galerij` en op de detailpagina `/galerij/{slug}` met lightbox. Een koppeling aan een wedstrijd of evenement toont de galerij bovendien onderaan die detailpagina.',
+    tips: [
+      'Sleep de foto\'s in de juiste volgorde — de eerste is de cover en de deelafbeelding.',
+      'Vul een standaard-credit in voor de hele reeks; overschrijf hem per foto waar nodig.',
+      'Koppel een PSD-wedstrijd-id of een evenement om de galerij op die pagina te laten verschijnen.',
+    ],
+  },
   page: {
     intro:
       'Een pagina is een vrije infopagina (bijv. praktische info of clubgeschiedenis) — voor inhoud die niet in nieuws, ploegen of evenementen past.',
