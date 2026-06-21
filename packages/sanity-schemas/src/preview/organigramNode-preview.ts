@@ -1,41 +1,33 @@
 /**
  * Sanity preview select + prepare for organigramNode.
- * Selects up to 3 members' names via `members[N]->firstName/lastName`.
+ *
+ * Subtitle shows the member count, not the member names: Sanity's preview store
+ * cannot dereference array elements by numeric index (`members[0]->firstName`),
+ * which stalls the whole preview subscription — leaving blank rows in lists and
+ * a "New Organigram node" fallback title. Reading the raw `members` array (no
+ * deref) resolves cleanly; we count it instead.
  */
 
-const MAX_MEMBERS = 3
-
-export const organigramNodePreviewSelect: Record<string, string> = {
+export const organigramNodePreviewSelect = {
   title: 'title',
   roleCode: 'roleCode',
-  member0FirstName: 'members[0]->firstName',
-  member0LastName: 'members[0]->lastName',
-  member1FirstName: 'members[1]->firstName',
-  member1LastName: 'members[1]->lastName',
-  member2FirstName: 'members[2]->firstName',
-  member2LastName: 'members[2]->lastName',
+  members: 'members',
 }
 
 interface OrganigramNodePreviewSelection {
   title?: string
   roleCode?: string
-  [key: string]: string | undefined
+  members?: unknown[]
 }
 
 export function prepareOrganigramNodePreview(selection: OrganigramNodePreviewSelection) {
-  const {title, roleCode} = selection
+  const {title, roleCode, members} = selection
 
-  const names: string[] = []
-  for (let i = 0; i < MAX_MEMBERS; i++) {
-    const first = selection[`member${i}FirstName`]
-    const last = selection[`member${i}LastName`]
-    const name = [first, last].filter(Boolean).join(' ')
-    if (name) names.push(name)
-  }
-
+  const count = Array.isArray(members) ? members.length : 0
   const badge = roleCode ? `[${roleCode}]` : ''
+
   return {
     title: [badge, title].filter(Boolean).join(' '),
-    subtitle: names.length > 0 ? names.join(', ') : 'Vacant',
+    subtitle: count > 0 ? `${count} ${count === 1 ? 'lid' : 'leden'}` : 'Vacant',
   }
 }
