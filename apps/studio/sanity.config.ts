@@ -4,8 +4,7 @@ import {visionTool} from '@sanity/vision'
 import {
   LinkToPsdAction,
   launcherTool,
-  responsibilityTemplates,
-  articleTemplates,
+  launcherTemplates,
   guidedSidebarInspectors,
 } from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
@@ -24,7 +23,7 @@ export default defineConfig({
 
   schema: {
     types: schemaTypes,
-    templates: (prev) => [...prev, ...responsibilityTemplates, ...articleTemplates],
+    templates: (prev) => [...prev, ...launcherTemplates],
   },
 
   document: {

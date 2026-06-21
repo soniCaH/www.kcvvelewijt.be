@@ -66,6 +66,56 @@ New schemas must adopt the closest semantic match from this list. Never invent a
 - Write `description` for any field whose purpose or constraints aren't obvious from name + type
 - Write descriptions in Dutch when they are editor-facing UI copy; write in English for developer-facing intent
 
+## Editor-UX Convention (Editor-UX Rework)
+
+The editor-UX rework (`docs/prd/sanity-studio-editor-ux-rework.md`) gives every reworked document type three schema-side ingredients. The pattern shipped on `responsibility` (#1499/#1500) and `article` (#1501); copy from `responsibility.ts` when reworking a new type. There are **no** `withPlaceholder` / `sectionIntro` / `*-guidance.ts` abstractions — guidance lives entirely in inline `description` + `.error(...)` copy. (The optional guided inspector is a separate, layered feature — see `packages/sanity-studio` `GuidedSidebar` / #2180 — not a schema concern.)
+
+### 1. Field groups — one `default: true`
+
+Declare `groups` on the document and assign every field a `group`. Exactly one group is `default: true` — make it the tab the editor should land on first (often the one whose value drives `hidden:` conditions, e.g. `responsibility` defaults to `vraag`, `article` to `type`).
+
+```typescript
+groups: [
+  {name: 'vraag', title: 'Vraag', default: true},
+  {name: 'antwoord', title: 'Antwoord'},
+  {name: 'meta', title: 'Meta'},
+],
+```
+
+### 2. Teaching `description` — 1–3 Dutch sentences
+
+Every field whose purpose isn't self-evident gets a Dutch `description` of **1–3 sentences** covering: **what** the field is, a **concrete example**, and the **public-site impact** of the choice. This is editor-facing UI copy, so it is always Dutch (English is for developer-facing intent only — see `Descriptions` above).
+
+### 3. Teaching `.error(...)` on required rules
+
+Every `Rule.required()` carries an `.error('…')` written to teach, not to scold: state that it's required **and why** / what breaks on the site without it. Start with `Verplicht.` and follow with the consequence.
+
+### Good / bad example pair
+
+```typescript
+// GOOD — group, teaching description (what + example + site impact), teaching error
+defineField({
+  name: "question",
+  title: "Question",
+  type: "string",
+  group: "vraag",
+  description:
+    'De vraag in spreektaal, zoals een gebruiker hem zou typen (bijv. "heb een ongeval op training"). Lowercase, geen punt op het einde. Dit is de tekst die getoond wordt in zoekresultaten op de site.',
+  validation: (Rule) =>
+    Rule.required().error(
+      "Verplicht. Zonder vraag verschijnt dit info-pad niet in zoekresultaten — gebruikers kunnen het dan niet vinden.",
+    ),
+});
+
+// BAD — no group, no description, generic non-teaching error
+defineField({
+  name: "question",
+  title: "Question",
+  type: "string",
+  validation: (Rule) => Rule.required(),
+});
+```
+
 ## Documents vs Objects
 
 - `type: "document"` — top-level content a Studio user creates/manages directly (article, player, team, sponsor, event, page…)
