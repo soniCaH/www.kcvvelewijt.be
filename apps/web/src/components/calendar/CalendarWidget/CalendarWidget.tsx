@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils/cn";
@@ -56,10 +56,34 @@ function parseView(raw: string | null): ViewMode {
   return raw === "week" || raw === "agenda" ? raw : "month";
 }
 
+/**
+ * `true` once mounted on a sub-`md` (phone) viewport. Starts `false` so the
+ * server and the first client render agree on the desktop default (month); a
+ * phone corrects to the agenda default after mount (mirrors the Week tab's
+ * `hidden md:inline-flex`). `addEventListener` keeps it live across rotation.
+ */
+function useIsPhoneViewport(): boolean {
+  const [isPhone, setIsPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+  return isPhone;
+}
+
 export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const view = parseView(searchParams.get("view"));
+  // No explicit `?view=` → branch the default on the md breakpoint: agenda on
+  // phones, month on tablet/desktop. An explicit choice (incl. tapping a tab,
+  // which sets `?view=`) always wins.
+  const rawView = searchParams.get("view");
+  const isPhone = useIsPhoneViewport();
+  const view: ViewMode =
+    rawView != null ? parseView(rawView) : isPhone ? "agenda" : "month";
 
   // By-type filter (Phase 6.D Phase 2, #1992). An unknown `?type=` falls to "all".
   const rawType = searchParams.get("type");
@@ -199,7 +223,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
               type="button"
               onClick={handlePrev}
               aria-label={view === "week" ? "Vorige week" : "Vorige maand"}
-              className="border-ink bg-cream hover:bg-cream-soft flex h-8 w-8 items-center justify-center border-2 font-mono transition-colors"
+              className="border-ink bg-cream hover:bg-cream-soft flex h-11 w-11 items-center justify-center border-2 font-mono transition-colors md:h-8 md:w-8"
             >
               ‹
             </button>
@@ -213,7 +237,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
               type="button"
               onClick={handleNext}
               aria-label={view === "week" ? "Volgende week" : "Volgende maand"}
-              className="border-ink bg-cream hover:bg-cream-soft flex h-8 w-8 items-center justify-center border-2 font-mono transition-colors"
+              className="border-ink bg-cream hover:bg-cream-soft flex h-11 w-11 items-center justify-center border-2 font-mono transition-colors md:h-8 md:w-8"
             >
               ›
             </button>

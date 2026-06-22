@@ -91,7 +91,7 @@ export const SearchForm = ({
         <button
           type="button"
           onClick={handleClear}
-          className="text-ink-muted hover:text-ink bg-cream flex items-center px-2 transition-colors"
+          className="text-ink-muted hover:text-ink bg-cream flex min-w-[44px] items-center justify-center px-2 transition-colors"
           aria-label="Wis zoekopdracht"
         >
           <X className="h-5 w-5" aria-hidden />
@@ -102,7 +102,7 @@ export const SearchForm = ({
       <button
         type="submit"
         disabled={!canSubmit}
-        className="bg-warm text-ink border-ink flex items-center border-l-2 px-5 transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
+        className="bg-warm text-ink border-ink flex min-w-[44px] items-center justify-center border-l-2 px-5 transition-[filter] hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Zoeken"
       >
         <MagnifyingGlass className="h-[23px] w-[23px]" aria-hidden />

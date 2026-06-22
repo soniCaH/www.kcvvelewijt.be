@@ -131,6 +131,41 @@ describe("CalendarWidget", () => {
       expect(screen.getByTestId("month-grid")).toBeInTheDocument();
     });
 
+    it("defaults to agenda view on phone viewports (no ?view=)", () => {
+      // Stub the md-breakpoint media query as matching (phone). The default
+      // (no ?view=) must then resolve to agenda, not month. An effect flips the
+      // view after mount, so render() (wrapped in act) settles on agenda.
+      const original = window.matchMedia;
+      window.matchMedia = vi.fn().mockReturnValue({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as MediaQueryList);
+      try {
+        render(<CalendarWidget {...defaultProps} />);
+        expect(screen.getByTestId("calendar-agenda")).toBeInTheDocument();
+        expect(screen.queryByTestId("month-grid")).not.toBeInTheDocument();
+      } finally {
+        window.matchMedia = original;
+      }
+    });
+
+    it("explicit ?view=month wins over the phone agenda default", () => {
+      mockSearchParams = new URLSearchParams("view=month");
+      const original = window.matchMedia;
+      window.matchMedia = vi.fn().mockReturnValue({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as MediaQueryList);
+      try {
+        render(<CalendarWidget {...defaultProps} />);
+        expect(screen.getByTestId("month-grid")).toBeInTheDocument();
+      } finally {
+        window.matchMedia = original;
+      }
+    });
+
     it("shows week view when ?view=week", () => {
       mockSearchParams = new URLSearchParams("view=week");
       render(<CalendarWidget {...defaultProps} />);
