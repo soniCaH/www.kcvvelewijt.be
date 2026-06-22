@@ -98,7 +98,7 @@ function buildMeta(
  * with a type-coloured tear-off date block (colour + text pill, never
  * colour-only — WCAG 1.4.1), display-serif title, and a mono `time · location`
  * meta. Consumed by the month-grouped `/evenementen` list and the detail
- * page's "Andere events" grid.
+ * page's "Andere evenementen" grid.
  */
 export function TicketStub({
   title,

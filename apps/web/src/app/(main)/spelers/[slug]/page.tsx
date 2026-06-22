@@ -41,7 +41,7 @@ import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { BioBlock, PlayerHero, QuotesBlock } from "@/components/player";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 import { articleVMsToVerderLezenItems } from "@/lib/utils/article-related-items";
-import { StripedSeam } from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { findNthPullquoteText } from "@/lib/portable-text/findPullquoteText";
@@ -181,7 +181,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         params={analyticsParams}
       />
       <MatchStripSlot />
-      <section className="mx-auto w-full max-w-[var(--container-wide)] px-4 py-12 lg:px-8 lg:py-16">
+      <PageContainer as="section" className="py-12 lg:py-16">
         <PlayerHero
           firstName={player.firstName}
           lastName={player.lastName}
@@ -192,7 +192,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           teamLabel={player.teamLabel}
           season={player.season}
         />
-      </section>
+      </PageContainer>
       <StripedSeam colorPair="ink-cream" height="md" />
       {hasBioPullquote ? (
         // High threshold so the event approximates "the right-column

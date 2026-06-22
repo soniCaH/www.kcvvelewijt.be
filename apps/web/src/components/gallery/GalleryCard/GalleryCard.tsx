@@ -31,7 +31,7 @@ export interface GalleryCardProps {
  * Retro-terrace gallery card. A thin adapter over `<NewsCard>` — the cover (in
  * colour newsprint), MonoLabel count, title, date, press-down hover and paper
  * shell are all the shared card vocabulary; this only maps gallery fields onto
- * it (photo count → badge, "Bekijk galerij" CTA, LQIP cover blur).
+ * it (photo count → badge, "Bekijk de foto's" CTA, LQIP cover blur).
  */
 export const GalleryCard = ({
   title,
@@ -54,7 +54,7 @@ export const GalleryCard = ({
     imageLqip={coverLqip}
     badge={formatImageCount(imageCount)}
     date={date}
-    cta="Bekijk galerij"
+    cta="Bekijk de foto's"
     rotation={rotation}
     bg={bg}
     as={as}

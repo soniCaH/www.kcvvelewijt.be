@@ -109,7 +109,7 @@ describe("FeaturedEventBand", () => {
           now={NOW}
         />,
       );
-      const cta = screen.getByRole("link", { name: /Meer info/i });
+      const cta = screen.getByRole("link", { name: /Lees verder/i });
       expect(cta).toHaveAttribute("href", "/evenementen/sponsorfeest-2026");
       expect(cta).not.toHaveAttribute("target");
     });
@@ -124,7 +124,7 @@ describe("FeaturedEventBand", () => {
           now={NOW}
         />,
       );
-      const cta = screen.getByRole("link", { name: /Meer info/i });
+      const cta = screen.getByRole("link", { name: /Lees verder/i });
       expect(cta).toHaveAttribute("href", "https://example.com");
     });
   });

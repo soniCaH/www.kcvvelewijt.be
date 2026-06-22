@@ -48,7 +48,7 @@ export const SearchFilters = ({
       { value: "article", label: "Nieuws", count: resultCounts.article },
       { value: "player", label: "Spelers", count: resultCounts.player },
       { value: "staff", label: "Staf", count: resultCounts.staff },
-      { value: "team", label: "Teams", count: resultCounts.team },
+      { value: "team", label: "Ploegen", count: resultCounts.team },
     ],
     [resultCounts],
   );
@@ -65,7 +65,7 @@ export const SearchFilters = ({
       size="md"
       showCounts={true}
       renderAsLinks={false}
-      ariaLabel="Filter search results by type"
+      ariaLabel="Filter zoekresultaten op type"
     />
   );
 };

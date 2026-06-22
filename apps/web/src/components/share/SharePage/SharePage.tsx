@@ -502,7 +502,9 @@ export function SharePage({ matches, players }: SharePageProps) {
       setPreviewUrl(url);
     } catch (err) {
       setExportError(
-        err instanceof Error ? err.message : "Export failed. Please try again.",
+        err instanceof Error
+          ? err.message
+          : "Exporteren mislukt. Probeer opnieuw.",
       );
     } finally {
       isGeneratingRef.current = false;
@@ -530,7 +532,7 @@ export function SharePage({ matches, players }: SharePageProps) {
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") return;
       setExportError(
-        err instanceof Error ? err.message : "Share failed. Please try again.",
+        err instanceof Error ? err.message : "Delen mislukt. Probeer opnieuw.",
       );
     }
   };
@@ -880,7 +882,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewUrl}
-            alt="Generated preview"
+            alt="Gegenereerde preview"
             className="border-ink self-center border-2"
           />
 

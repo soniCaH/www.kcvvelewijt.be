@@ -54,8 +54,8 @@ describe("GalleryCard", () => {
     expect(screen.getByTestId("newscard-image-fallback")).toBeInTheDocument();
   });
 
-  it('renders the "Bekijk galerij" call-to-action', () => {
+  it('renders the "Bekijk de foto\'s" call-to-action', () => {
     render(<GalleryCard {...defaultProps} />);
-    expect(screen.getByText("Bekijk galerij →")).toBeInTheDocument();
+    expect(screen.getByText("Bekijk de foto's →")).toBeInTheDocument();
   });
 });

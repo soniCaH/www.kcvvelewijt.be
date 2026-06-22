@@ -97,7 +97,7 @@ export const FeaturedEventBand = ({
 
   const location = event.location?.trim() || "Kantine";
   const ctaUrl = event.externalLink?.url || `/evenementen/${event.slug}`;
-  const ctaLabel = event.externalLink?.label || "Meer info";
+  const ctaLabel = event.externalLink?.label || "Lees verder";
   const isExternal = Boolean(event.externalLink?.url);
   // Locked spec: warm-yellow accent on the first word of the title.
   // Skip emphasis when the title starts with whitespace or is empty so

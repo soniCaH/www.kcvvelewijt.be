@@ -38,7 +38,7 @@ describe("AndereEvents", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: /Andere events/i }),
+      screen.getByRole("heading", { name: /Andere evenementen/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("Spaghetti-avond")).toBeInTheDocument();
 

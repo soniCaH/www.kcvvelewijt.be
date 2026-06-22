@@ -21,7 +21,7 @@ describe("Spinner", () => {
       render(<Spinner />);
       expect(screen.getByRole("status")).toHaveAttribute(
         "aria-label",
-        "Loading...",
+        "Laden…",
       );
     });
 
