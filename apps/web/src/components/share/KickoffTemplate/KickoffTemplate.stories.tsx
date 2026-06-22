@@ -7,7 +7,7 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof KickoffTemplate>;
 
 export default meta;

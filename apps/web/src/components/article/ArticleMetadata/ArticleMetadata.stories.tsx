@@ -13,7 +13,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     author: { control: "text" },
     date: { control: "text" },

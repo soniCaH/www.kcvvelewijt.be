@@ -30,7 +30,7 @@ const IMAGES: GalleryLightboxImage[] = [
 const meta = {
   title: "Features/Gallery/GalleryLightbox",
   component: GalleryLightbox,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   parameters: {
     layout: "padded",
     docs: {

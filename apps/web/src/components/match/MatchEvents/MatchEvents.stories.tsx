@@ -13,7 +13,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-2xl">

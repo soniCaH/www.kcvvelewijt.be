@@ -72,12 +72,13 @@ jobs:
     name: Update baselines
     needs: trigger-check
     runs-on: ubuntu-latest
-    # Steady-state run: ~5 min (storybook build ~30 s, install ~1 min,
-    # test-runner with -u ~1 min for 5 stories, commit/push <30 s). 15 min
-    # gives ~3× headroom for cold caches and network blips while still failing
-    # fast on hangs (default GitHub timeout is 6 h — orders of magnitude too
-    # long for a baseline regeneration).
-    timeout-minutes: 15
+    # Steady-state drift update is ~5 min (storybook build ~30 s, install ~1 min,
+    # test-runner with -u ~1 min for a handful of stories, commit/push <30 s).
+    # A full from-empty regen (e.g. #1376 reset) captures the entire vr-tagged
+    # set in one pass — comparable cost to the `visual-regression` verify job —
+    # so allow 30 min of headroom while still failing fast on a genuine hang
+    # (default GitHub timeout is 6 h, orders of magnitude too long).
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: write

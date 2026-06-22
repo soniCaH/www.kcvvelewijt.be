@@ -15,7 +15,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof MatchStripSkeleton>;
 
 export default meta;

@@ -263,6 +263,21 @@ Determinism work happens once in this phase for the whole repo:
 
 ### Phase 3 — Selective `Features/*`
 
+> **Superseded by #1376 (2026-06-22) — over-tag policy.** When VR was re-enabled
+> post-redesign, the owner directed an _over-tagging_ stance: prefer redundant
+> coverage over any chance of missing future drift. The "include only if
+> visual-structural, exclude data-presentational" criterion below is retained as
+> the original rationale but is now a **floor, not a ceiling** — all visual
+> `UI/*`/`Features/*`/`Layout/*` leaves keep `vr`, and deterministic stories that
+> were untagged were _added_ (e.g. the `Features/Share/*` image templates). The
+> only deliberate exclusions are genuinely non-deterministic stories (external
+> embeds: `Features/Contact/MapEmbed`, `Features/Home/BannerSlot`). Two
+> route-level compositions previously mistitled under `Features/` —
+> `SponsorsPage` and `SharePage` — were retitled to `Pages/Sponsors` /
+> `Pages/Share` so they fall under the `Pages/*` exclusion (their constituent
+> leaves carry their own VR). The `Pages/*` exclusion below still holds. The
+> 36-file Include appendix is kept as the historical Phase 3 record.
+
 Scope: `UI/*`, `Features/*`, `Layout/*` only. **`Pages/*` are explicitly out of
 scope** — page-level composition coverage moved to the Playwright e2e suite at
 `apps/web/test/e2e/` per
