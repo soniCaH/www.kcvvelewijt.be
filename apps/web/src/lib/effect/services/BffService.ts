@@ -1,17 +1,18 @@
-import { Context, Effect, Layer, type Cause } from "effect";
+import { Context, Effect, Layer, Schema as S, type Cause } from "effect";
+import { unstable_cache } from "next/cache";
 import { HttpApiClient, FetchHttpClient } from "@effect/platform";
 import type { HttpApiError, HttpClientError } from "@effect/platform";
 import type { ParseError } from "effect/ParseResult";
 import {
   PsdApi,
+  Match,
+  RankingEntry,
   type HttpServiceUnavailable,
   type HttpBadGateway,
   type HttpNotFound,
-  type Match,
   type MatchDetail,
   type OpponentHistory,
   type PlayerSeasonStats,
-  type RankingEntry,
   type RelatedItem,
 } from "@kcvv/api-contract";
 
@@ -50,6 +51,50 @@ export class BffService extends Context.Tag("BffService")<
 
 const DEFAULT_TIMEOUT = "30 seconds";
 
+// Hot-read cache windows. Fixtures/results shift around match days; standings
+// move ~weekly. Tunable — paired with `tags` so a future PSD-sync webhook can
+// `revalidateTag(...)` on write instead of waiting out the TTL.
+const MATCHES_REVALIDATE = 300; // 5 min
+const RANKING_REVALIDATE = 3600; // 1 h
+
+const MatchArray = S.Array(Match);
+const RankingArray = S.Array(RankingEntry);
+
+/**
+ * Wrap a hot BFF read in Next's data cache. On a cache miss the client Effect
+ * (R = never) is run to a Promise inside `unstable_cache`; its decoded result is
+ * re-encoded to a JSON-safe shape before storage, so `Date` fields (`Match.date`,
+ * `RankingEntry.last_updated` — both `DateFromStringOrDate`) survive the cache's
+ * JSON round-trip and decode back to `Date` on read.
+ *
+ * Failures are never cached (the cache fn rejects). Crucially, on any rejection
+ * we fall back to running the RAW `effect` so its TYPED failure survives — a
+ * Promise round-trip would otherwise flatten e.g. `HttpNotFound` into an opaque
+ * `FiberFailure`, breaking call sites that `catchTag("HttpNotFound")` →
+ * `notFound()` (getMatches @ ploegen/[slug]/wedstrijden, and getMatchDetail).
+ * That fallback costs one extra BFF call on the rare error path. (#2213)
+ */
+function cachedRead<A, I>(
+  schema: S.Schema<A, I>,
+  keyParts: readonly string[],
+  tags: readonly string[],
+  revalidate: number,
+  effect: Effect.Effect<A, BffError>,
+): Effect.Effect<A, BffError> {
+  const loadCached = unstable_cache(
+    async (): Promise<I> =>
+      S.encodeSync(schema)(await Effect.runPromise(effect)),
+    [...keyParts],
+    { revalidate, tags: [...tags] },
+  );
+  return Effect.tryPromise(() => loadCached()).pipe(
+    Effect.flatMap((encoded) => S.decodeUnknown(schema)(encoded)),
+    // Cache-fn rejection (BFF failed — never cached) or a stray decode error:
+    // re-run the raw effect so the original typed error reaches the call site.
+    Effect.catchAll(() => effect),
+  );
+}
+
 export const BffServiceLive = Layer.effect(
   BffService,
   Effect.gen(function* () {
@@ -61,23 +106,48 @@ export const BffServiceLive = Layer.effect(
     const client = yield* HttpApiClient.make(PsdApi, { baseUrl: bffUrl });
     return {
       getMatches: (teamId: number) =>
-        client.matches
-          .getMatchesByTeam({ path: { teamId } })
-          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        cachedRead(
+          MatchArray,
+          ["bff", "matches", String(teamId)],
+          ["bff:matches", `bff:matches:${teamId}`],
+          MATCHES_REVALIDATE,
+          client.matches
+            .getMatchesByTeam({ path: { teamId } })
+            .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        ),
       getNextMatches: () =>
-        client.matches.getNextMatches({}).pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        cachedRead(
+          MatchArray,
+          ["bff", "next-matches"],
+          ["bff:matches", "bff:next-matches"],
+          MATCHES_REVALIDATE,
+          client.matches
+            .getNextMatches({})
+            .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        ),
       getMatchesWindow: () =>
         client.matches
           .getMatchesWindow({})
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+      // NOT wrapped in cachedRead — by freshness, not capability: match detail
+      // is the live in-progress score source, so a 5-min TTL would lag scores
+      // during a match. It's also per-id + already ISR-cached at the route, so
+      // the upstream-relief win is small. (Staleness window is a product call;
+      // cachedRead now preserves its typed HttpNotFound if we ever cache it.) (#2213)
       getMatchDetail: (matchId: number) =>
         client.matches
           .getMatchDetail({ path: { matchId } })
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
       getRanking: (teamId: number) =>
-        client.ranking
-          .getRanking({ path: { teamId } })
-          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        cachedRead(
+          RankingArray,
+          ["bff", "ranking", String(teamId)],
+          ["bff:ranking", `bff:ranking:${teamId}`],
+          RANKING_REVALIDATE,
+          client.ranking
+            .getRanking({ path: { teamId } })
+            .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        ),
       getRelated: (id: string, limit?: number) =>
         client.related
           .getRelated({ urlParams: { id, limit } })

@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect } from "effect";
 import { BffService, BffServiceLive } from "./BffService";
 
+// `cachedRead` wraps the hot reads in `unstable_cache`; there's no Next request
+// scope in vitest, so stub it to a pass-through. The encode/decode round-trip
+// inside `cachedRead` still runs — see the `Date`-restoration assertion below.
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
+}));
+
 // Minimal fixture that satisfies the Match schema from @kcvv/api-contract.
 // date/time must be ISO strings because JSON.stringify converts Date objects.
 const sampleMatch = {
@@ -72,6 +79,10 @@ describe("BffService", () => {
     );
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
+    // Date survives the cachedRead encode→(JSON cache)→decode round-trip
+    // (Match.date is DateFromStringOrDate; a naive unstable_cache wrap would
+    // leave it a string).
+    expect(result[0]?.date).toBeInstanceOf(Date);
   });
 
   it("getNextMatches calls /matches/next", async () => {
@@ -151,6 +162,35 @@ describe("BffService", () => {
     );
     expect(result).toHaveLength(1);
     expect(result[0]?.team_name).toBe("KCVV Elewijt");
+  });
+
+  it("preserves the raw error's _tag through the cache wrap (call-site catchTag still fires)", async () => {
+    // A BFF failure rejects the cache fn; cachedRead falls back to the RAW
+    // effect, so the original *tagged* error reaches the call site. This guards
+    // the ploegen/[slug]/wedstrijden `catchTag("HttpNotFound") → notFound()`
+    // path. We assert on the specific tag (not catchAll): a naive Promise
+    // round-trip flattens the error to an opaque UnknownException, so catchTag
+    // would miss and this would fall through to "flattened" — i.e. the test
+    // FAILS against the bug, not just passes against the fix. (A 500 is an
+    // undeclared status → the client surfaces a tagged ResponseError.)
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getMatches(1).pipe(
+          Effect.catchTag("ResponseError", () =>
+            Effect.succeed("typed-survived" as const),
+          ),
+          Effect.catchAll(() => Effect.succeed("flattened" as const)),
+        );
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(result).toBe("typed-survived");
   });
 
   it("propagates errors as Effect failures (not exceptions)", async () => {

@@ -108,6 +108,14 @@ export default async function RootLayout({
         )}
       </head>
       <body suppressHydrationWarning>
+        {/* WCAG 2.1-A skip link — first focusable element, visible only on
+            keyboard focus. Retro register (sharp corners, ink border, mono). */}
+        <a
+          href="#main-content"
+          className="focus:border-ink focus:bg-cream focus:text-ink focus:shadow-paper-sm sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border-2 focus:px-4 focus:py-2 focus:font-mono focus:text-sm focus:font-semibold focus:tracking-wide focus:uppercase focus:outline-none"
+        >
+          Naar de inhoud
+        </a>
         <Script id="gtm-consent-default" strategy="beforeInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','wait_for_update':500});`}
         </Script>
@@ -115,7 +123,9 @@ export default async function RootLayout({
         <ScrollToTop />
         <AccentStrip />
         <SiteHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
-        <main>{children}</main>
+        <main id="main-content" tabIndex={-1}>
+          {children}
+        </main>
         <SiteFooter />
         <CookieConsentBanner />
       </body>

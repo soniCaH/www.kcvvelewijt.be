@@ -361,11 +361,21 @@ export async function GET(request: NextRequest) {
 
     debugLog(`[Search API] Returning ${sorted.length} sorted results`);
 
-    return NextResponse.json({
-      query,
-      count: sorted.length,
-      results: sorted,
-    });
+    // Public, CDN-cacheable per query: repeated/popular terms hit the edge
+    // instead of re-running the Sanity+BFF fan-out. Short TTL + SWR keeps
+    // freshly-published content surfacing quickly. Errors stay uncached.
+    return NextResponse.json(
+      {
+        query,
+        count: sorted.length,
+        results: sorted,
+      },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        },
+      },
+    );
   } catch (error) {
     // Log full error server-side for debugging
     console.error("[Search API] Error:", error);
