@@ -1068,6 +1068,14 @@
   box-shadow: var(--shadow-paper-md) !important;
 }
 
+/* Safe-area: lift the bottom-anchored consent banner clear of the iOS home
+   indicator / gesture bar. `viewportFit: "cover"` (layout.tsx) exposes the
+   inset; the banner is bottom-positioned so margin-bottom pushes it up by the
+   inset (0 on devices without one). #2210 — pm is centred, so cm only. */
+#cc-main .cm {
+  margin-bottom: env(safe-area-inset-bottom, 0);
+}
+
 /* Warm tape strip, top-left of the consent banner. The banner is
    position:fixed (its own containing block) so the tape anchors to it;
    override the library's overflow:hidden so the strip clears the top edge.

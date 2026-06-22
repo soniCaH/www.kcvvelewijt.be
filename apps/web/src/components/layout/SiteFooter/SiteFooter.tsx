@@ -64,8 +64,10 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
         </div>
       </div>
 
-      {/* Ink bottom bar — colofon */}
-      <div className="bg-ink text-cream">
+      {/* Ink bottom bar — colofon. `pb-safe` extends the ink through the iOS
+          home-indicator inset (viewportFit: "cover") so the colofon clears the
+          gesture bar; the inner row keeps its own py-3.5 (#2210). */}
+      <div className="bg-ink text-cream pb-safe">
         <div className="mx-auto flex max-w-[1440px] flex-col items-start gap-3 px-6 py-3.5 leading-none md:flex-row md:items-center md:justify-between md:gap-6 md:px-10">
           <p className="m-0 flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase md:text-[10.5px]">
             <span>
