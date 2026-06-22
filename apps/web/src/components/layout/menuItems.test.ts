@@ -46,7 +46,7 @@ describe("staticMenuItems", () => {
     const praktisch = deClub.childGroups!.find((g) => g.label === "Praktisch")!;
     const labels = praktisch.items.map((i) => i.label);
     expect(labels).toEqual([
-      "Praktische Info",
+      "Praktische info",
       "Word vrijwilliger",
       "Cashless clubkaart",
       "Contact",
@@ -157,9 +157,9 @@ describe("buildSeniorMenuItem", () => {
     );
     expect(hrefs).toEqual({
       Info: "/ploegen/a-ploeg",
-      "Spelers & Staff": "/ploegen/a-ploeg#spelers",
+      "Spelers & staf": "/ploegen/a-ploeg#spelers",
       Wedstrijden: "/ploegen/a-ploeg#wedstrijden",
-      Stand: "/ploegen/a-ploeg#klassement",
+      Klassement: "/ploegen/a-ploeg#klassement",
     });
     // No legacy tab query params survive.
     for (const child of item!.children ?? []) {

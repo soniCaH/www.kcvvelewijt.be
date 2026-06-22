@@ -33,6 +33,11 @@ export const metadata: Metadata = {
   },
 };
 
+// ISR — the page fetches key staff contacts at request time; refresh hourly so
+// contact changes in Sanity surface without a redeploy (matches the other
+// club/* fetching pages' cadence).
+export const revalidate = 3600;
+
 export default async function ContactPageRoute() {
   const keyContacts = await runPromise(
     Effect.gen(function* () {

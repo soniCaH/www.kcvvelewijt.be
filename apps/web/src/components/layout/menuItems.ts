@@ -38,7 +38,7 @@ export const staticMenuItems: MenuItem[] = [
       {
         label: "Praktisch",
         items: [
-          { label: "Praktische Info", href: "/club/inschrijven" },
+          { label: "Praktische info", href: "/club/inschrijven" },
           { label: "Word vrijwilliger", href: "/club/vrijwilliger" },
           { label: "Cashless clubkaart", href: "/club/cashless" },
           { label: "Contact", href: "/club/contact" },
@@ -100,16 +100,16 @@ export const buildSeniorMenuItem = (
     href,
     children: [
       { label: "Info", href },
-      { label: "Spelers & Staff", href: `${href}#spelers` },
+      { label: "Spelers & staf", href: `${href}#spelers` },
       { label: "Wedstrijden", href: `${href}#wedstrijden` },
-      { label: "Stand", href: `${href}#klassement` },
+      { label: "Klassement", href: `${href}#klassement` },
     ],
   };
 };
 
 export const seniorNavLabel = (name: string): string => {
   const lastWord = name.trim().split(/\s+/).at(-1) ?? name;
-  return /^[A-Z]$/.test(lastWord) ? `${lastWord}-Ploeg` : name;
+  return /^[A-Z]$/.test(lastWord) ? `${lastWord}-ploeg` : name;
 };
 
 export const buildJeugdItem = (youthTeams?: TeamNavVM[]): MenuItem => {

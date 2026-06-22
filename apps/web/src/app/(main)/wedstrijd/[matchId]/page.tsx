@@ -57,7 +57,7 @@ import {
   MatchArticleLinkCard,
   selectMatchArticle,
 } from "@/components/match/MatchArticleLinkCard";
-import { StripedSeam } from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 import { GallerySection } from "@/components/gallery/GallerySection/GallerySection";
 import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
@@ -310,16 +310,18 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
       <MatchStripSlot />
 
-      <MatchHero
-        homeTeam={homeTeam}
-        awayTeam={awayTeam}
-        date={match.date}
-        time={time}
-        venue={match.venue}
-        status={match.status}
-        competition={match.competition}
-        kcvvTeamLabel={match.kcvv_team_label}
-      />
+      <PageContainer className="py-12 lg:py-16">
+        <MatchHero
+          homeTeam={homeTeam}
+          awayTeam={awayTeam}
+          date={match.date}
+          time={time}
+          venue={match.venue}
+          status={match.status}
+          competition={match.competition}
+          kcvvTeamLabel={match.kcvv_team_label}
+        />
+      </PageContainer>
 
       {(hasLineup || hasEvents || hasStandings || hasArticle || hasGallery) && (
         <StripedSeam colorPair="ink-cream" height="md" />

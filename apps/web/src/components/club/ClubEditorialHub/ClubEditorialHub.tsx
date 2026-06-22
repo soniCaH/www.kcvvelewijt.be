@@ -78,7 +78,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
   {
     variant: "news",
     tag: "Aansluiten",
-    href: "/club/aansluiten",
+    href: "/club/word-lid",
     title: "Word lid",
     arrowText: "Schrijf je in",
     imageUrl: "/images/youth-trainers.jpg",
