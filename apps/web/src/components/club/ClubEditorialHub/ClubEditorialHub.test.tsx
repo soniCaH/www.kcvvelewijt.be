@@ -64,7 +64,7 @@ describe("ClubEditorialHub", () => {
     );
     expect(screen.getByRole("link", { name: /word lid/i })).toHaveAttribute(
       "href",
-      "/club/aansluiten",
+      "/club/word-lid",
     );
   });
 
