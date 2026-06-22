@@ -8,7 +8,7 @@ export interface AndereEventsProps {
 }
 
 /**
- * "Andere events" section below `<EventHero>` on `/evenementen/[slug]` (design
+ * "Andere evenementen" section below `<EventHero>` on `/evenementen/[slug]` (design
  * lock 6e5 §"Below the hero"): a `<StripedSeam>` heading + a single column of
  * the locked `<TicketStub>` for the other upcoming events — full-width to match
  * the main list (a 2-up grid squashed the date-block + title). Renders nothing
@@ -21,7 +21,7 @@ export function AndereEvents({ events }: AndereEventsProps) {
     <section className="mt-16">
       <header className="mb-5">
         <EditorialHeading level={2} size="display-md">
-          Andere events
+          Andere evenementen
         </EditorialHeading>
         <StripedSeam height="sm" colorPair="ink-cream" />
       </header>

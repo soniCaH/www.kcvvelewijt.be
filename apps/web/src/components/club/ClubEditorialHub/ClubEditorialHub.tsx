@@ -40,7 +40,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     tag: "Geschiedenis",
     href: "/club/geschiedenis",
     title: "Meer dan een eeuw voetbalpassie",
-    arrowText: "Lees meer",
+    arrowText: "Lees verder",
     imageUrl: HISTORY_24_25_CARD,
   },
   {
@@ -56,7 +56,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     tag: "Organigram",
     href: "/hulp#structuur",
     title: "Onze structuur",
-    arrowText: "Bekijk",
+    arrowText: "Zoek het op",
     iconName: "TreeStructure",
   },
   {
@@ -64,7 +64,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     tag: "Ultras",
     href: "/club/ultras",
     title: "De 12de man",
-    arrowText: "Meer info",
+    arrowText: "Ontdek",
     imageUrl: ULTRAS_HEADER_CARD,
   },
   {
@@ -72,7 +72,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     tag: "Angels",
     href: "/club/angels",
     title: "Onze engelen",
-    arrowText: "Meer info",
+    arrowText: "Ontdek",
     iconName: "Heart",
   },
   {

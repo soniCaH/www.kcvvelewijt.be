@@ -65,7 +65,9 @@ describe("JeugdEditorialGrid", () => {
       .getAllByRole("link")
       .map((link) => link.getAttribute("href"));
 
-    // Repointed (7j0b): word lid + medisch → /hulp, jeugdvisie → #visie anchor.
+    // Repointed: word lid → /club/word-lid (#2206); medisch + hulp → /hulp;
+    // jeugdvisie → #visie anchor.
+    expect(hrefs).toContain("/club/word-lid");
     expect(hrefs).toContain("/hulp");
     expect(hrefs).toContain("/jeugd#visie");
     expect(hrefs).toContain("/nieuws/prosoccerdata");

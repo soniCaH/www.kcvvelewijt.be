@@ -27,7 +27,7 @@ describe("SearchForm", () => {
       render(<SearchForm onSearch={vi.fn()} />);
 
       const input = screen.getByPlaceholderText(
-        "Zoek nieuws, spelers, teams...",
+        "Zoek nieuws, spelers, ploegen…",
       );
       expect(input).toBeInTheDocument();
     });

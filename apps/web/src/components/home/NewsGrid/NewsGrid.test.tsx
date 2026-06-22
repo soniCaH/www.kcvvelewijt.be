@@ -57,7 +57,7 @@ describe("NewsGrid", () => {
   describe("View All link", () => {
     it("renders view all link by default", () => {
       render(<NewsGrid articles={sixArticles} />);
-      const link = screen.getByRole("link", { name: /Alle berichten/i });
+      const link = screen.getByRole("link", { name: /Al het nieuws/i });
       expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute("href", "/nieuws");
     });
@@ -65,14 +65,14 @@ describe("NewsGrid", () => {
     it("hides view all link when showViewAll is false", () => {
       render(<NewsGrid articles={sixArticles} showViewAll={false} />);
       expect(
-        screen.queryByRole("link", { name: /Alle berichten/i }),
+        screen.queryByRole("link", { name: /Al het nieuws/i }),
       ).not.toBeInTheDocument();
     });
 
     it("uses custom viewAllHref", () => {
       render(<NewsGrid articles={sixArticles} viewAllHref="/archief" />);
       expect(
-        screen.getByRole("link", { name: /Alle berichten/i }),
+        screen.getByRole("link", { name: /Al het nieuws/i }),
       ).toHaveAttribute("href", "/archief");
     });
   });
@@ -166,7 +166,7 @@ describe("NewsGrid", () => {
       expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
     });
 
-    it("N=8 caps at the first 6 — overflow flows through the 'Alle berichten →' link", () => {
+    it("N=8 caps at the first 6 — overflow flows through the 'Al het nieuws →' link", () => {
       const eight = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => makeArticle(n));
       render(<NewsGrid articles={eight} />);
       expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
@@ -174,7 +174,7 @@ describe("NewsGrid", () => {
       // it disappears (e.g. showViewAll regression) overflow becomes
       // inaccessible from the homepage.
       expect(
-        screen.getByRole("link", { name: /Alle berichten/i }),
+        screen.getByRole("link", { name: /Al het nieuws/i }),
       ).toBeInTheDocument();
     });
   });

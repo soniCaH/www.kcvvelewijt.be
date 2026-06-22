@@ -30,7 +30,7 @@ describe("SearchFilters", () => {
       expect(screen.getByRole("tab", { name: /nieuws/i })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: /spelers/i })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: /staf/i })).toBeInTheDocument();
-      expect(screen.getByRole("tab", { name: /teams/i })).toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: /ploegen/i })).toBeInTheDocument();
     });
 
     it("should render with correct ARIA label", () => {
@@ -43,7 +43,7 @@ describe("SearchFilters", () => {
       );
 
       const tablist = screen.getByRole("tablist", {
-        name: /filter search results by type/i,
+        name: /filter zoekresultaten op type/i,
       });
       expect(tablist).toBeInTheDocument();
     });
@@ -79,7 +79,7 @@ describe("SearchFilters", () => {
       expect(screen.getByText("Nieuws")).toBeInTheDocument();
       expect(screen.getByText("Spelers")).toBeInTheDocument();
       expect(screen.getByText("Staf")).toBeInTheDocument();
-      expect(screen.getByText("Teams")).toBeInTheDocument();
+      expect(screen.getByText("Ploegen")).toBeInTheDocument();
     });
 
     it("should display count badges for each tab", () => {
@@ -96,7 +96,7 @@ describe("SearchFilters", () => {
       const articleTab = screen.getByRole("tab", { name: /nieuws/i });
       const playerTab = screen.getByRole("tab", { name: /spelers/i });
       const staffTab = screen.getByRole("tab", { name: /staf/i });
-      const teamTab = screen.getByRole("tab", { name: /teams/i });
+      const teamTab = screen.getByRole("tab", { name: /ploegen/i });
 
       expect(within(allTab).getByText("10")).toBeInTheDocument();
       expect(within(articleTab).getByText("5")).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe("SearchFilters", () => {
         />,
       );
 
-      const teamTab = screen.getByRole("tab", { name: /teams/i });
+      const teamTab = screen.getByRole("tab", { name: /ploegen/i });
       expect(teamTab).toHaveAttribute("aria-selected", "true");
     });
 
@@ -263,7 +263,7 @@ describe("SearchFilters", () => {
         />,
       );
 
-      const teamTab = screen.getByRole("tab", { name: /teams/i });
+      const teamTab = screen.getByRole("tab", { name: /ploegen/i });
       await user.click(teamTab);
 
       expect(handleFilterChange).toHaveBeenCalledWith("team");

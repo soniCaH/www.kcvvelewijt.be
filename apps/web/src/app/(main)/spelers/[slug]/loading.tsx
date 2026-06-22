@@ -8,13 +8,12 @@
  * skeleton can't accurately predict what will render.
  */
 
+import { PageContainer } from "@/components/design-system";
+
 export default function PlayerDetailLoading() {
   return (
-    <div className="min-h-screen">
-      <section
-        aria-hidden="true"
-        className="mx-auto w-full max-w-[var(--container-wide)] animate-pulse px-4 py-12 lg:px-8 lg:py-16"
-      >
+    <div className="min-h-screen" aria-hidden="true">
+      <PageContainer as="section" className="animate-pulse py-12 lg:py-16">
         <div className="grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[1fr_minmax(220px,320px)]">
           <div className="flex flex-col gap-5">
             <div className="bg-paper-edge h-4 w-24 rounded" />
@@ -28,18 +27,18 @@ export default function PlayerDetailLoading() {
           </div>
           <div className="bg-paper-edge aspect-[3/4] w-full max-w-[320px] justify-self-start rounded sm:justify-self-end" />
         </div>
-      </section>
-      <div aria-hidden="true" className="bg-paper-edge h-[18px] w-full" />
-      <section
-        aria-hidden="true"
-        className="bg-cream mx-auto w-full max-w-[var(--container-wide)] animate-pulse px-4 py-12 lg:px-8 lg:py-16"
+      </PageContainer>
+      <div className="bg-paper-edge h-[18px] w-full" />
+      <PageContainer
+        as="section"
+        className="bg-cream animate-pulse py-12 lg:py-16"
       >
         <div className="space-y-3">
           <div className="bg-paper-edge h-4 w-full rounded" />
           <div className="bg-paper-edge h-4 w-11/12 rounded" />
           <div className="bg-paper-edge h-4 w-10/12 rounded" />
         </div>
-      </section>
+      </PageContainer>
     </div>
   );
 }

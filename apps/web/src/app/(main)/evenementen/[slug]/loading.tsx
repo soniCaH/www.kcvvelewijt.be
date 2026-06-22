@@ -4,7 +4,7 @@
  * Mirrors `EventDetailPage` (`/evenementen/[slug]`):
  *   <EventHero> (centred 680: type pill → date kicker → display title →
  *     location → CTAs → optional taped cover figure)
- *     → <AndereEvents> ("Andere events" heading + seam + single-column
+ *     → <AndereEvents> ("Andere evenementen" heading + seam + single-column
  *       full-width `<TicketStub>` list)
  *
  * Cream page; default container (1040) with the hero capped at 680. Canonical
@@ -42,7 +42,7 @@ export default function EventDetailLoading() {
           <div className="border-ink bg-cream-soft shadow-paper-md mt-6 aspect-[16/9] w-full border-2" />
         </article>
 
-        {/* Andere events — heading + seam + single-column ticket list. */}
+        {/* Andere evenementen — heading + seam + single-column ticket list. */}
         <section aria-hidden="true" className="mt-16 motion-safe:animate-pulse">
           <div className="mb-5">
             <div className="bg-paper-edge mb-4 h-8 w-48" />

@@ -27,7 +27,7 @@ const NAV_CARDS: NavCardConfig[] = [
     tag: "Aansluiten",
     title: "Word lid van KCVV",
     arrowText: "Schrijf je in",
-    href: "/hulp",
+    href: "/club/word-lid",
     iconName: "UsersThree",
   },
   {
@@ -40,14 +40,14 @@ const NAV_CARDS: NavCardConfig[] = [
   {
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
-    arrowText: "Meer info",
+    arrowText: "Lees verder",
     href: "/nieuws/prosoccerdata",
     iconName: "SoccerBall",
   },
   {
     tag: "Structuur",
     title: "Organigram",
-    arrowText: "Bekijk",
+    arrowText: "Zoek het op",
     href: "/hulp#structuur",
     iconName: "TreeStructure",
   },
@@ -61,7 +61,7 @@ const NAV_CARDS: NavCardConfig[] = [
   {
     tag: "Medisch",
     title: "Blessure of afmelding?",
-    arrowText: "Lees meer",
+    arrowText: "Zoek het op",
     href: "/hulp",
     iconName: "FirstAid",
   },
@@ -107,7 +107,7 @@ function renderArticleCard(article: ArticleVM): React.ReactNode {
       // is NOT read for article slots.
       tag={article.tags[0] ?? "Jeugd"}
       title={article.title}
-      arrowText="Lees meer"
+      arrowText="Lees verder"
       imageUrl={article.coverImageUrl ?? undefined}
       // Hashed id for `jeugd_card_click` analytics (no PII / no raw id in DOM).
       articleIdHashed={hashMemberId(article.id)}
@@ -147,7 +147,7 @@ function buildItemsFromConfig(
             // Sanity nav cards: CMS `tag` when set, else an empty pill (7j3).
             tag={entry.tag ?? ""}
             title={entry.title}
-            arrowText={entry.arrowText ?? "Meer info"}
+            arrowText={entry.arrowText ?? "Ontdek"}
             icon={<NavGlyph name={DEFAULT_NAV_GLYPH} />}
           />
         ),

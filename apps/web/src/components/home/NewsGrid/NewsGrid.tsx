@@ -41,7 +41,7 @@ export interface NewsGridProps {
    * 0–6 articles in chronological order. N=0 returns null; 1..5
    * render in a 3-col grid with the last row partially filled;
    * 6 fills the full 3×2; 7+ silently caps at the first 6 — overflow
-   * accessible via the section header's "Alle berichten →" link.
+   * accessible via the section header's "Al het nieuws →" link.
    */
   articles: NewsGridArticle[];
   title?: string;
@@ -87,7 +87,7 @@ export const NewsGrid = ({
   }
 
   // Cap at 6 per the R2.B geometry. Overflow flows through the
-  // "Alle berichten →" link, not the grid.
+  // "Al het nieuws →" link, not the grid.
   const cards = articles.slice(0, 6);
 
   return (
@@ -96,7 +96,7 @@ export const NewsGrid = ({
         {showViewAll ? (
           <SectionHeader
             title={title}
-            linkText="Alle berichten"
+            linkText="Al het nieuws"
             linkHref={viewAllHref}
           />
         ) : (

@@ -23,7 +23,11 @@ import { articleVMsToVerderLezenItems } from "@/lib/utils/article-related-items"
 import { ArticleBody } from "@/components/article/ArticleBody";
 import { StaffHero } from "@/components/staff/StaffHero";
 import { StaffRoles } from "@/components/staff/StaffRoles";
-import { EditorialHeading, StripedSeam } from "@/components/design-system";
+import {
+  EditorialHeading,
+  PageContainer,
+  StripedSeam,
+} from "@/components/design-system";
 
 interface StaffPageProps {
   params: Promise<{ slug: string }>;
@@ -137,7 +141,7 @@ export default async function StafPage({ params }: StaffPageProps) {
       {/* Hero — person-profile (B). Container width + padding match the
           `/spelers/[slug]` hero section; the bottom padding reserves the
           rhythm before the full-bleed seam. */}
-      <section className="mx-auto w-full max-w-[var(--container-wide)] px-4 py-12 lg:px-8 lg:py-16">
+      <PageContainer as="section" className="py-12 lg:py-16">
         <StaffHero
           firstName={member.firstName}
           lastName={member.lastName}
@@ -146,7 +150,7 @@ export default async function StafPage({ params }: StaffPageProps) {
           email={member.email}
           phone={member.phone}
         />
-      </section>
+      </PageContainer>
 
       {/* A single full-bleed seam after the hero, matching `/spelers/[slug]`
           (one seam, then sections flow — no per-section dividers). */}

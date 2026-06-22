@@ -36,7 +36,7 @@ export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
   variant?: SpinnerVariant;
   /**
    * Accessible label for screen readers.
-   * @default 'Loading...'
+   * @default 'Laden…'
    */
   label?: string;
   /**
@@ -47,13 +47,7 @@ export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
 
 export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
   (
-    {
-      size = "md",
-      variant = "primary",
-      label = "Loading...",
-      className,
-      ...props
-    },
+    { size = "md", variant = "primary", label = "Laden…", className, ...props },
     ref,
   ) => {
     if (variant === "compact") {

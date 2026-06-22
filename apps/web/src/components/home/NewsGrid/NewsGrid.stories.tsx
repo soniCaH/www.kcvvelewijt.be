@@ -164,7 +164,7 @@ export const Sparse1: Story = {
 };
 
 // N=0 returns null. VR captures the deliberately empty viewport to assert
-// the section never renders chrome (heading, "Alle berichten" link, etc.)
+// the section never renders chrome (heading, "Al het nieuws" link, etc.)
 // when there are no articles.
 export const Empty: Story = {
   args: { ...Balanced.args, articles: [] },

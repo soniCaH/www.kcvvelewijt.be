@@ -3,7 +3,7 @@
  *
  * The editorial, cream counterpoint to the dark ticket-wall list (design lock
  * 6e5 — variant D "Editoriaal"): a centred `<EventHero>` with the Reserveer /
- * "Zet in agenda" CTAs, followed by an "Andere events" `<TicketStub>` grid.
+ * "Zet in agenda" CTAs, followed by an "Andere evenementen" `<TicketStub>` grid.
  * `event_view` fires client-side via `<EventViewTracker>`; the CTAs fire
  * `event_detail_cta_click`. `/events/[slug]` 301s here (see `next.config.ts`).
  */

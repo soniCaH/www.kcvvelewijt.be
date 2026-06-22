@@ -40,7 +40,7 @@ export const SearchForm = ({
   initialValue = "",
   onSearch,
   isLoading = false,
-  placeholder = "Zoek nieuws, spelers, teams...",
+  placeholder = "Zoek nieuws, spelers, ploegen…",
 }: SearchFormProps) => {
   const [value, setValue] = useState(initialValue);
   const [prevInitialValue, setPrevInitialValue] = useState(initialValue);

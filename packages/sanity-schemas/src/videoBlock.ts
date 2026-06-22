@@ -53,13 +53,13 @@ export const videoBlock = defineType({
   fields: [
     defineField({
       name: 'uploadedFile',
-      title: 'Video file',
+      title: 'Videobestand',
       type: 'file',
       options: {
         accept: 'video/mp4,video/webm',
       },
       description:
-        'Upload een MP4 of WebM (H.264 1080p ~2–3 Mbps aanbevolen). Gebruik dit OF "Embed URL" — niet beide.',
+        'Upload een MP4 of WebM (H.264 1080p ~2–3 Mbps aanbevolen). Gebruik dit óf "Embed URL" — niet beide.',
       // Soft-warning size guard. The validator returns {level: 'warning'}
       // so the editor can still save / publish — bandwidth-heavy uploads
       // are flagged, not blocked. Size lives on the asset document, so
@@ -83,7 +83,7 @@ export const videoBlock = defineType({
             return {
               level: 'warning',
               message:
-                'Dit bestand is erg groot. Encodeer naar 1080p H.264 ~2–3 Mbps voor je uploadt.',
+                'Dit bestand is erg groot. Encodeer naar 1080p H.264 ~2–3 Mbps voordat je uploadt.',
             }
           }
           return true
@@ -94,7 +94,7 @@ export const videoBlock = defineType({
       title: 'Embed URL',
       type: 'url',
       description:
-        'Plak een YouTube of Vimeo link. Gebruik dit OF "Video file" — niet beide. Toegestaan: youtube.com, youtu.be, vimeo.com (altijd https).',
+        'Plak een YouTube of Vimeo link. Gebruik dit óf "Videobestand" — niet beide. Toegestaan: youtube.com, youtu.be, vimeo.com (altijd https).',
       validation: (r) =>
         r.uri({
           scheme: ['https'],

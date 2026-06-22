@@ -49,7 +49,7 @@ export interface NewsCardProps {
   dek?: string;
   /**
    * Footer call-to-action label (revealed on hover/focus). Defaults to
-   * "Lees verder"; gallery cards (#1471) override with "Bekijk galerij".
+   * "Lees verder"; gallery cards (#1471) override with "Bekijk de foto's".
    */
   cta?: string;
   variant?: NewsCardVariant;
