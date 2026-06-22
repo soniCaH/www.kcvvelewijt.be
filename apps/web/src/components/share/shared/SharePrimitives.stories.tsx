@@ -25,7 +25,7 @@ const meta = {
   title: "Features/Share/_Primitives",
   component: ShareFrame,
   parameters: { layout: "fullscreen" },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
 } satisfies Meta<typeof ShareFrame>;
 
 export default meta;

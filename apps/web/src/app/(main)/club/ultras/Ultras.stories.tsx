@@ -5,13 +5,14 @@ import { RaffleCallout } from "./RaffleCallout";
 import { PullQuote } from "@/components/design-system/PullQuote";
 
 /**
- * VR coverage for the reskinned `/club/ultras` page (Phase 7, design contracts
- * 7u1 + 7u2). The hero photo is the committed local asset `/images/ultras.jpg`
- * (served by Storybook `staticDirs`), so the hero baseline stays deterministic.
+ * Storybook doc story for the reskinned `/club/ultras` page (Phase 7, design
+ * contracts 7u1 + 7u2). Page-level visual coverage moves to the Playwright e2e
+ * suite (docs/prd/page-level-testing-rework.md); the hero + sections carry
+ * their own VR via their component stories.
  */
 const meta = {
   title: "Pages/Ultras",
-  tags: ["autodocs", "vr"],
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta;
 

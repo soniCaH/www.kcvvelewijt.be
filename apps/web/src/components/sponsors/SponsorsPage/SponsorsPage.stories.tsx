@@ -3,8 +3,10 @@
  *
  * Split `<SponsorHero>` → `<StripedSeam>` → `<SponsorTiers>` (Hoofdsponsors grid
  * + unlabelled wall) → `<SponsorCtaBand>`; 0 sponsors collapses to a
- * `<SponsorEmptyState>` + band. Not `vr`-tagged: the hero, marquee card, hoofd
- * tile, tile, tiers, empty state and CTA band each carry their own VR coverage.
+ * `<SponsorEmptyState>` + band. Page-level composition for the /sponsors route —
+ * not `vr`-tagged (page coverage is the Playwright e2e suite's job); the hero,
+ * marquee card, hoofd tile, tile, tiers, empty state and CTA band each carry
+ * their own VR coverage.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -16,7 +18,7 @@ import SponsorsLoading from "@/app/(landing)/sponsors/loading";
 const ordered = [...mockSponsors].sort(sortByTierThenName);
 
 const meta = {
-  title: "Features/Sponsors/SponsorsPage",
+  title: "Pages/Sponsors",
   component: SponsorsPage,
   parameters: {
     layout: "fullscreen",

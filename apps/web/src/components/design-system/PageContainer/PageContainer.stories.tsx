@@ -4,7 +4,7 @@ import { PageContainer } from "./PageContainer";
 const meta = {
   title: "UI/PageContainer",
   component: PageContainer,
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof PageContainer>;
 

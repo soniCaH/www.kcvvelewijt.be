@@ -43,27 +43,12 @@ import { fixtureImage } from "@test-fixtures/images";
 
 const meta = {
   title: "Pages/Home",
-  // Keep the `vr` tag so discovery picks the story up; the
-  // `parameters.vr.disable = true` below suppresses screenshot
-  // capture per the "Defer consumer baselines via vr.disable" rule
-  // in `apps/web/CLAUDE.md`. Pages/* stories assemble many
-  // already-baselined components; baselining the whole composition
-  // doubles the matrix without adding regression signal beyond what
-  // the component-level baselines + Playwright `/` smoke already cover.
-  tags: ["autodocs", "vr"],
+  // Page-level composition: visual coverage lives in the Playwright `/` e2e
+  // spec, not Storybook VR (docs/prd/page-level-testing-rework.md). The
+  // assembled sections carry their own VR via their component stories.
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
-    // vr.disable: Page-level composition story. Component-level VR
-    // baselines plus the Playwright `/` integration spec cover
-    // regression at finer granularity; capturing a full-page
-    // composite here would re-baseline the entire matrix on every
-    // section tweak, slowing PRs without catching anything the
-    // component baselines miss.
-    // Repro: discovery picks the story up via the `vr` tag, but
-    // postVisit skips capture because of this flag.
-    // Approved by: @climacon / https://github.com/soniCaH/www.kcvvelewijt.be/issues/1754
-    // Re-evaluate: 2026-08-01 (Phase 9 cleanup window)
-    vr: { disable: true },
   },
 } satisfies Meta;
 

@@ -2,11 +2,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SharePage } from "./SharePage";
 
 const meta = {
-  title: "Features/Share/SharePage",
+  title: "Pages/Share",
   component: SharePage,
   parameters: {
     layout: "fullscreen",
   },
+  // Page-level composition for the /share route — not VR-tagged (page coverage
+  // is the Playwright e2e suite's job). Its constituent Features/Share/* image
+  // templates are each individually vr-tagged.
   tags: ["autodocs"],
 } satisfies Meta<typeof SharePage>;
 

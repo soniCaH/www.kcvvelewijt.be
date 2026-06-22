@@ -13,7 +13,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   args: {
     onFilterChange: () => {},
   },

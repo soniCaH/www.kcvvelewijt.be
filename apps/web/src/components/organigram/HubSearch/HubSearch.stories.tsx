@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { within, userEvent } from "storybook/test";
+import { within, userEvent, waitFor } from "storybook/test";
 import { useEffect, type ReactNode } from "react";
 import { HubSearch } from "./HubSearch";
 import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
@@ -85,6 +85,20 @@ const typePlay =
     const input = canvas.getByLabelText("Zoek een persoon of hulpvraag");
     await userEvent.click(input);
     await userEvent.type(input, text);
+    // The people lane debounces (200ms) and the semantic answer lane debounces
+    // + fetches before the dropdown settles. Without waiting, the VR screenshot
+    // races the debounce and captures the "Bezig met zoeken…" shimmer instead
+    // of the settled results. The `role="status"` region announces the final
+    // state ("N resultaten" / "Geen resultaten"), so wait for that.
+    await waitFor(
+      () => {
+        const status = canvas.getByRole("status");
+        if (!/resulta(at|ten)/.test(status.textContent ?? "")) {
+          throw new Error("HubSearch results not settled");
+        }
+      },
+      { timeout: 5000 },
+    );
   };
 
 /** Hero variant — the prominent box on the dark band it lives in. */

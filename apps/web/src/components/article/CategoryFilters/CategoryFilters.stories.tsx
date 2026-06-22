@@ -8,7 +8,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     activeCategory: {
       control: "text",

@@ -238,7 +238,7 @@ Used within match detail pages to show team lineups.
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "vr"],
   argTypes: {
     homeTeamName: { control: "text", description: "Home team name" },
     awayTeamName: { control: "text", description: "Away team name" },
