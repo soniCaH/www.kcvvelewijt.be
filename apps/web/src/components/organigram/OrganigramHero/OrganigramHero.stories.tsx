@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { within, userEvent } from "storybook/test";
+import { within, userEvent, waitFor } from "storybook/test";
 import { OrganigramHero } from "./OrganigramHero";
 import {
   HUB_SEARCH_MEMBERS,
@@ -53,5 +53,18 @@ export const SearchOpen: Story = {
     const input = canvas.getByLabelText("Zoek een persoon of hulpvraag");
     await userEvent.click(input);
     await userEvent.type(input, "in");
+    // Wait for the debounced + semantic search to settle before the screenshot
+    // — otherwise the VR capture races the "Bezig met zoeken…" shimmer (the
+    // flake that produced the search-open diff). The `role="status"` region
+    // announces the settled count.
+    await waitFor(
+      () => {
+        const status = canvas.getByRole("status");
+        if (!/resulta(at|ten)/.test(status.textContent ?? "")) {
+          throw new Error("OrganigramHero search not settled");
+        }
+      },
+      { timeout: 5000 },
+    );
   },
 };
