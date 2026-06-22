@@ -6,11 +6,11 @@ import type { ParseError } from "effect/ParseResult";
 import {
   PsdApi,
   Match,
+  MatchDetail,
   RankingEntry,
   type HttpServiceUnavailable,
   type HttpBadGateway,
   type HttpNotFound,
-  type MatchDetail,
   type OpponentHistory,
   type PlayerSeasonStats,
   type RelatedItem,
@@ -129,15 +129,20 @@ export const BffServiceLive = Layer.effect(
         client.matches
           .getMatchesWindow({})
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
-      // NOT wrapped in cachedRead — by freshness, not capability: match detail
-      // is the live in-progress score source, so a 5-min TTL would lag scores
-      // during a match. It's also per-id + already ISR-cached at the route, so
-      // the upstream-relief win is small. (Staleness window is a product call;
-      // cachedRead now preserves its typed HttpNotFound if we ever cache it.) (#2213)
+      // Cached: results are pre/post only (no live in-progress scores), so the
+      // pre→post transition is a one-time flip a 5-min TTL handles fine.
+      // cachedRead's raw-effect fallback preserves the typed HttpNotFound that
+      // wedstrijd/[matchId] turns into notFound() (#2213).
       getMatchDetail: (matchId: number) =>
-        client.matches
-          .getMatchDetail({ path: { matchId } })
-          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        cachedRead(
+          MatchDetail,
+          ["bff", "match-detail", String(matchId)],
+          ["bff:match-detail", `bff:match-detail:${matchId}`],
+          MATCHES_REVALIDATE,
+          client.matches
+            .getMatchDetail({ path: { matchId } })
+            .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+        ),
       getRanking: (teamId: number) =>
         cachedRead(
           RankingArray,

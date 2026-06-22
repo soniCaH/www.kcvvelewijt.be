@@ -131,7 +131,7 @@ describe("BffService", () => {
     };
     mockFetchWith(sampleDetail);
 
-    await Effect.runPromise(
+    const result = await Effect.runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getMatchDetail(42);
@@ -144,6 +144,8 @@ describe("BffService", () => {
       }),
       expect.any(Object),
     );
+    // Date survives the cachedRead round-trip (getMatchDetail is cached too).
+    expect(result.date).toBeInstanceOf(Date);
   });
 
   it("getRanking calls /ranking/:teamId and returns decoded entries", async () => {
