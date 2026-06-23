@@ -17,10 +17,10 @@ describe("ClubLoading", () => {
     ).toBeGreaterThanOrEqual(1);
   });
 
-  it("renders a six-card skeleton nav grid on the cream field", () => {
+  it("renders a nine-card skeleton nav grid on the cream field", () => {
     const { container } = render(<ClubLoading />);
     const skeleton = screen.getByTestId("club-hub-skeleton");
-    expect(skeleton.children).toHaveLength(6);
+    expect(skeleton.children).toHaveLength(9);
     expect(container.querySelector(".bg-cream")).not.toBeNull();
   });
 });

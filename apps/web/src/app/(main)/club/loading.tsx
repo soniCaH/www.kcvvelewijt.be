@@ -30,7 +30,7 @@ export default function ClubLoading() {
           data-testid="club-hub-skeleton"
           className="grid animate-pulse grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3"
         >
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: 9 }).map((_, i) => (
             <div
               key={i}
               className="border-ink shadow-paper-sm bg-cream-soft flex h-full flex-col overflow-hidden border-2"
