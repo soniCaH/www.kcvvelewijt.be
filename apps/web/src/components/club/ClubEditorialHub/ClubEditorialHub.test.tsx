@@ -36,10 +36,10 @@ describe("ClubEditorialHub", () => {
     expect(heading).toBeInTheDocument();
   });
 
-  it("renders all six club nav-hub cards as links in the uniform grid", () => {
+  it("renders all nine club nav-hub cards as links in the uniform grid", () => {
     render(<ClubEditorialHub />);
-    expect(screen.getAllByRole("link")).toHaveLength(6);
-    expect(screen.getByTestId("club-editorial-hub").children).toHaveLength(6);
+    expect(screen.getAllByRole("link")).toHaveLength(9);
+    expect(screen.getByTestId("club-editorial-hub").children).toHaveLength(9);
   });
 
   it("links each card to its mapped /club destination", () => {
@@ -66,6 +66,15 @@ describe("ClubEditorialHub", () => {
       "href",
       "/club/word-lid",
     );
+    expect(
+      screen.getByRole("link", { name: /de digitale clubkaart/i }),
+    ).toHaveAttribute("href", "/club/cashless");
+    expect(
+      screen.getByRole("link", { name: /documenten & formulieren/i }),
+    ).toHaveAttribute("href", "/club/downloads");
+    expect(
+      screen.getByRole("link", { name: /alles wat je moet weten/i }),
+    ).toHaveAttribute("href", "/club/praktische-informatie");
   });
 
   it("renders the three news covers as images", () => {
@@ -75,9 +84,9 @@ describe("ClubEditorialHub", () => {
     expect(container.querySelectorAll("img")).toHaveLength(3);
   });
 
-  it("exposes a 6-card config of three news + three nav cards", () => {
-    expect(CLUB_HUB_CARDS).toHaveLength(6);
+  it("exposes a 9-card config of three news + six nav cards", () => {
+    expect(CLUB_HUB_CARDS).toHaveLength(9);
     expect(CLUB_HUB_CARDS.filter((c) => c.variant === "news")).toHaveLength(3);
-    expect(CLUB_HUB_CARDS.filter((c) => c.variant === "nav")).toHaveLength(3);
+    expect(CLUB_HUB_CARDS.filter((c) => c.variant === "nav")).toHaveLength(6);
   });
 });

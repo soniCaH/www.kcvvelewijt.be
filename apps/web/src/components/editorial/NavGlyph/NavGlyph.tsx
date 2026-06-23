@@ -3,24 +3,30 @@
 import type { ComponentType } from "react";
 import { cn } from "@/lib/utils/cn";
 import {
+  DownloadSimple,
   Eye,
   FirstAid,
   Heart,
   House,
+  Info,
   MagnifyingGlass,
   SoccerBall,
+  Ticket,
   TreeStructure,
   UsersThree,
   type RedesignIconProps,
 } from "@/lib/icons.redesign";
 
 const NAV_GLYPHS = {
+  DownloadSimple,
   Eye,
   FirstAid,
   Heart,
   House,
+  Info,
   MagnifyingGlass,
   SoccerBall,
+  Ticket,
   TreeStructure,
   UsersThree,
 } satisfies Record<string, ComponentType<RedesignIconProps>>;

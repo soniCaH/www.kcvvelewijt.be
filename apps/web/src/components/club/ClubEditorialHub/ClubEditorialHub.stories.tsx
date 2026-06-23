@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The /club index nav hub (design lock 10c3): a uniform 3-up grid of 16:9 `<EditorialHubCard>`s under a 'Dit is KCVV.' header. Three news cards (newsprint-colour cover, jersey-deep tag) — Geschiedenis · Ultras · Aansluiten — and three nav cards (jersey-deep glyph panel, cream tag) — Bestuur · Organigram · Angels.",
+          "The /club index nav hub (design lock 10c3 + #2208): a uniform 3×3 grid of 16:9 `<EditorialHubCard>`s under a 'Dit is KCVV.' header. Three news cards (newsprint-colour cover, jersey-deep tag) — Geschiedenis · Ultras · Aansluiten — and six nav cards (jersey-deep glyph panel, cream tag) — Bestuur · Organigram · Angels · Cashless · Downloads · Praktisch.",
       },
     },
   },
@@ -39,7 +39,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** The full six-card hub with local cover assets for deterministic VR. */
+/** The full nine-card hub with local cover assets for deterministic VR. */
 export const Default: Story = {
   args: {
     cards: vrCards,

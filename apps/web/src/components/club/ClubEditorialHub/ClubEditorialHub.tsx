@@ -29,10 +29,12 @@ interface ClubHubNavCard {
 export type ClubHubCard = ClubHubNewsCard | ClubHubNavCard;
 
 /**
- * The six pinned `/club` index cards (design lock 10c3). Three `news` cards
- * carry a newsprint cover photo (Geschiedenis · Ultras · Aansluiten); three
- * `nav` cards carry a Phosphor-fill glyph panel (Bestuur · Organigram ·
- * Angels). Source order = render order.
+ * The nine pinned `/club` index cards (3×3, design lock 10c3 + #2208). Three
+ * `news` cards carry a newsprint cover photo (Geschiedenis · Ultras ·
+ * Aansluiten); six `nav` cards carry a Phosphor-fill glyph panel (Bestuur ·
+ * Organigram · Angels · Cashless · Downloads · Praktisch). Source order =
+ * render order. Cashless + Downloads were previously nav-dropdown-only; the
+ * Praktische info card lands as the 9th (#2208).
  */
 export const CLUB_HUB_CARDS: ClubHubCard[] = [
   {
@@ -82,6 +84,30 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     title: "Word lid",
     arrowText: "Schrijf je in",
     imageUrl: "/images/youth-trainers.jpg",
+  },
+  {
+    variant: "nav",
+    tag: "Cashless",
+    href: "/club/cashless",
+    title: "De digitale clubkaart",
+    arrowText: "Ontdek",
+    iconName: "Ticket",
+  },
+  {
+    variant: "nav",
+    tag: "Downloads",
+    href: "/club/downloads",
+    title: "Documenten & formulieren",
+    arrowText: "Ontdek",
+    iconName: "DownloadSimple",
+  },
+  {
+    variant: "nav",
+    tag: "Praktisch",
+    href: "/club/praktische-informatie",
+    title: "Alles wat je moet weten",
+    arrowText: "Ontdek",
+    iconName: "Info",
   },
 ];
 
