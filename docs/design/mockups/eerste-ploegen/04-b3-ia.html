@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eerste ploegen — B3 IA: split links + score orientation</title>
+    <style>
+      :root {
+        --cream: #f5f1e6; --cream-soft: #ede8da; --cream-deep: #e1d7bf;
+        --ink: #0a0a0a; --ink-muted: #6b6b6b;
+        --jersey-deep: #008755; --jersey-deep-dark: #133d28; --warm: #f0c264; --alert: #b84a3a;
+        --paper-edge: #d9d2bd;
+        --shadow-paper-sm: 4px 4px 0 0 var(--ink);
+        --shadow-paper-sm-soft: 4px 4px 0 0 var(--ink-muted);
+        --display: "freight-display-pro", Georgia, "Times New Roman", serif;
+        --display-big: "freight-big-pro", Georgia, "Times New Roman", serif;
+        --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        --body: "freight-sans-pro", -apple-system, system-ui, sans-serif;
+        --win: color-mix(in srgb, var(--jersey-deep) 78%, var(--cream));
+        --loss: color-mix(in srgb, var(--alert) 64%, var(--cream));
+      }
+      * { box-sizing: border-box; border-radius: 0 !important; margin: 0; }
+      body { background: var(--cream); color: var(--ink); font-family: var(--body); }
+      .page { max-width: 1140px; margin: 0 auto; padding: 0 16px 80px; }
+      h1.doc { font-family: var(--mono); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); padding: 28px 0 6px; font-weight: 600; }
+      p.doc { font-family: var(--mono); font-size: 12px; color: var(--ink-muted); max-width: 80ch; line-height: 1.6; }
+      .tag { display: inline-block; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--cream); padding: 6px 12px; margin: 46px 0 6px; }
+      .note { font-family: var(--mono); font-size: 11px; color: var(--ink-muted); margin: 4px 0 14px; max-width: 86ch; line-height: 1.55; }
+      .hint { font-family: var(--mono); font-size: 11px; color: var(--jersey-deep); margin: 0 0 12px; }
+
+      .kicker { font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+      .eh { font-family: var(--display); font-weight: 700; line-height: 1.08; letter-spacing: -.01em; }
+      .mono-cap { font-family: var(--mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+      .crest { width: 26px; height: 26px; border: 2px solid var(--ink); background: var(--cream); display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-weight: 700; font-size: 10px; color: var(--ink); flex: 0 0 auto; }
+      .score { font-family: var(--display-big); font-weight: 700; line-height: 1; color: var(--cream); }
+      a.cal { font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--warm); text-decoration: none; }
+
+      .band { background: var(--jersey-deep-dark); }
+      .seam { height: 22px; background: repeating-linear-gradient(45deg, var(--jersey-deep) 0 14px, var(--cream) 14px 28px, var(--ink) 28px 30px, var(--cream) 30px 44px); }
+      .inner { padding: 24px 22px 28px; }
+      .bhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+      .bhead .eh { color: var(--cream); font-size: 2.1rem; }
+      .bhead .kicker { color: var(--warm); }
+
+      /* row: [team] [result card] [fixture card] — two press targets */
+      .frow { display: grid; grid-template-columns: 0.72fr 1.25fr 1.25fr; gap: 16px; align-items: stretch; padding: 16px 0; border-top: 1px solid color-mix(in srgb, var(--cream) 20%, transparent); }
+      .frow:first-of-type { border-top: 0; }
+      .teamcol { display: flex; flex-direction: column; justify-content: center; }
+      .teamcol .nm { font-family: var(--display); font-weight: 700; color: var(--cream); font-size: 1.4rem; line-height: 1.05; }
+      .teamcol .mono-cap { color: color-mix(in srgb, var(--cream) 66%, transparent); margin-top: 4px; }
+
+      a.cell { text-decoration: none; color: inherit; transition: all .3s; display: block; position: relative; }
+      a.cell:link, a.cell:visited { color: inherit; }
+      a.cell .pd { transition: all .3s; height: 100%; }
+      a.cell:hover .pd { box-shadow: none !important; transform: translate(4px, 4px); }
+      a.cell .arrow { position: absolute; top: 8px; right: 10px; font-family: var(--mono); font-size: 13px; opacity: .5; transition: opacity .3s; }
+      a.cell:hover .arrow { opacity: 1; }
+
+      /* result card (dark) */
+      .rc { border: 2px solid var(--cream); background: var(--jersey-deep-dark); box-shadow: var(--shadow-paper-sm-soft); padding: 12px 14px 13px; }
+      .rc .arrow { color: var(--cream); }
+      .rc .ok { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--cream); }
+      .rc .ok.win { color: color-mix(in srgb, var(--win) 75%, var(--cream)); }
+      .rc .ok.loss { color: color-mix(in srgb, var(--loss) 80%, var(--cream)); }
+      .rc .line { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+      .rc .hero { font-size: 2.6rem; }
+      .rc .hero.win { box-shadow: inset 0 -9px 0 var(--win); }
+      .rc .hero.loss { box-shadow: inset 0 -9px 0 var(--loss); }
+      .rc .opp { color: color-mix(in srgb, var(--cream) 80%, transparent); font-weight: 600; font-size: 13px; }
+      .rc .meta { color: color-mix(in srgb, var(--cream) 64%, transparent); margin-top: 5px; }
+
+      /* fixture card (cream stub) */
+      .fc { border: 2px solid var(--ink); background: var(--cream); box-shadow: var(--shadow-paper-sm); display: flex; height: 100%; }
+      .fc .date { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 13px; border-right: 2px dashed color-mix(in srgb, var(--ink) 35%, transparent); }
+      .fc .date .d { font-family: var(--display); font-weight: 700; font-size: 21px; line-height: 1; }
+      .fc .date .m, .fc .date .w { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-muted); }
+      .fc .b { display: flex; align-items: center; gap: 9px; padding: 8px 13px; flex: 1; }
+      .fc .b .nm { font-weight: 600; font-size: 13px; color: var(--ink); }
+      .fc .b .meta { font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--ink-muted); }
+      .fc .b .time { font-family: var(--display); font-weight: 700; font-size: 18px; margin-left: auto; }
+      .fc .arrow { color: var(--ink); }
+      @media (max-width: 760px){ .frow { grid-template-columns: 1fr; gap: 10px; } }
+
+      /* skip states */
+      .skip { border: 2px dashed color-mix(in srgb, var(--cream) 40%, transparent); padding: 12px 14px; display: flex; align-items: center; justify-content: center; color: color-mix(in srgb, var(--cream) 66%, transparent); font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1 class="doc">Eerste ploegen — B3 IA · split links + score orientation</h1>
+      <p class="doc">Locked: B3 dark full-width rows; each row = <b>team label</b> · <b>result card →/wedstrijd/{resultId}</b> · <b>fixture card →/wedstrijd/{fixtureId}</b> (two press targets). <span class="hint">↳ hover each card to feel the two separate press-down targets.</span> Open question below: how is the scoreline oriented?</p>
+
+      <!-- Orientation A: KCVV-centric -->
+      <span class="tag">Orientation A — KCVV-centric (our goals first)</span>
+      <p class="note">The hero number is always KCVV’s tally first, so “3–1” / “0–2” reads instantly even in isolation. Opponent + home/away sit in the meta line. Outcome word + underline confirm W/V/G.</p>
+      <div class="band">
+        <div class="seam"></div>
+        <div class="inner">
+          <div class="bhead"><div><span class="kicker">Eerste ploegen</span><div class="eh" style="margin-top:6px;">Dit weekend.</div></div><a class="cal" href="#">Volledige kalender →</a></div>
+          <!-- A row -->
+          <div class="frow">
+            <div class="teamcol"><span class="nm">A-ploeg</span><span class="mono-cap">3de Nationale</span></div>
+            <a class="cell" href="#"><div class="pd rc"><span class="arrow">→</span>
+              <span class="ok win">Gewonnen · thuis</span>
+              <div class="line"><span class="score hero win">3–1</span><span class="opp">vs SK Londerzeel</span></div>
+              <div class="meta mono-cap">za 21 jun</div>
+            </div></a>
+            <a class="cell" href="#"><div class="pd fc"><span class="arrow">→</span>
+              <div class="date"><span class="w">zo</span><span class="d">29</span><span class="m">jun</span></div>
+              <div class="b"><span class="crest">SH</span><div><div class="nm">Sporting Hasselt</div><div class="meta">uit · 3de Nat.</div></div><span class="time">15:00</span></div>
+            </div></a>
+          </div>
+          <!-- B row -->
+          <div class="frow">
+            <div class="teamcol"><span class="nm">B-ploeg</span><span class="mono-cap">2de Provinciale</span></div>
+            <a class="cell" href="#"><div class="pd rc"><span class="arrow">→</span>
+              <span class="ok loss">Verloren · uit</span>
+              <div class="line"><span class="score hero loss">0–2</span><span class="opp">vs Tempo Overijse</span></div>
+              <div class="meta mono-cap">zo 22 jun</div>
+            </div></a>
+            <a class="cell" href="#"><div class="pd fc"><span class="arrow">→</span>
+              <div class="date"><span class="w">za</span><span class="d">28</span><span class="m">jun</span></div>
+              <div class="b"><span class="crest">VK</span><div><div class="nm">VK Liedekerke</div><div class="meta">thuis · 2de Prov.</div></div><span class="time">19:30</span></div>
+            </div></a>
+          </div>
+        </div>
+        <div class="seam"></div>
+      </div>
+
+      <!-- Orientation B: Official home–away -->
+      <span class="tag">Orientation B — Official home–away (scoreboard convention)</span>
+      <p class="note">The scoreline matches the official board: home–away, KCVV bolded wherever it sits. Same convention as TeamAgendaRow elsewhere on the site. Needs the crests/names L↔R to read who’s who.</p>
+      <div class="band">
+        <div class="seam"></div>
+        <div class="inner">
+          <div class="bhead"><div><span class="kicker">Eerste ploegen</span><div class="eh" style="margin-top:6px;">Dit weekend.</div></div><a class="cal" href="#">Volledige kalender →</a></div>
+          <div class="frow">
+            <div class="teamcol"><span class="nm">A-ploeg</span><span class="mono-cap">3de Nationale</span></div>
+            <a class="cell" href="#"><div class="pd rc"><span class="arrow">→</span>
+              <span class="ok win">Gewonnen</span>
+              <div class="line" style="gap:8px;"><span class="crest">KV</span><span class="score hero win" style="font-size:2.2rem;">3–1</span><span class="crest">SL</span><span class="opp" style="font-size:12px;">KCVV — Londerzeel</span></div>
+              <div class="meta mono-cap">thuis · za 21 jun</div>
+            </div></a>
+            <a class="cell" href="#"><div class="pd fc"><span class="arrow">→</span>
+              <div class="date"><span class="w">zo</span><span class="d">29</span><span class="m">jun</span></div>
+              <div class="b"><span class="crest">SH</span><div><div class="nm">Sporting Hasselt</div><div class="meta">uit · 3de Nat.</div></div><span class="time">15:00</span></div>
+            </div></a>
+          </div>
+          <div class="frow">
+            <div class="teamcol"><span class="nm">B-ploeg</span><span class="mono-cap">2de Provinciale</span></div>
+            <a class="cell" href="#"><div class="pd rc"><span class="arrow">→</span>
+              <span class="ok loss">Verloren</span>
+              <div class="line" style="gap:8px;"><span class="crest">TO</span><span class="score hero loss" style="font-size:2.2rem;">2–0</span><span class="crest">KV</span><span class="opp" style="font-size:12px;">Overijse — KCVV B</span></div>
+              <div class="meta mono-cap">uit · zo 22 jun</div>
+            </div></a>
+            <a class="cell" href="#"><div class="pd fc"><span class="arrow">→</span>
+              <div class="date"><span class="w">za</span><span class="d">28</span><span class="m">jun</span></div>
+              <div class="b"><span class="crest">VK</span><div><div class="nm">VK Liedekerke</div><div class="meta">thuis · 2de Prov.</div></div><span class="time">19:30</span></div>
+            </div></a>
+          </div>
+        </div>
+        <div class="seam"></div>
+      </div>
+
+      <!-- Skip states -->
+      <span class="tag">Graceful skip — edge states (shown KCVV-centric)</span>
+      <p class="note">Each card is independent, so a missing side just drops its own card. Whole row only disappears if a team has neither.</p>
+      <div class="band">
+        <div class="seam"></div>
+        <div class="inner">
+          <!-- no result -->
+          <div class="frow">
+            <div class="teamcol"><span class="nm">A-ploeg</span><span class="mono-cap">geen recente uitslag</span></div>
+            <div class="skip">Nog geen uitslag</div>
+            <a class="cell" href="#"><div class="pd fc"><span class="arrow">→</span><div class="date"><span class="w">zo</span><span class="d">29</span><span class="m">jun</span></div><div class="b"><span class="crest">SH</span><div><div class="nm">Sporting Hasselt</div><div class="meta">uit · 3de Nat.</div></div><span class="time">15:00</span></div></div></a>
+          </div>
+          <!-- no fixture -->
+          <div class="frow">
+            <div class="teamcol"><span class="nm">B-ploeg</span><span class="mono-cap">seizoenseinde</span></div>
+            <a class="cell" href="#"><div class="pd rc"><span class="arrow">→</span><span class="ok loss">Verloren · uit</span><div class="line"><span class="score hero loss">0–2</span><span class="opp">vs Tempo Overijse</span></div><div class="meta mono-cap">zo 22 jun</div></div></a>
+            <div class="skip">Geen geplande wedstrijd</div>
+          </div>
+        </div>
+        <div class="seam"></div>
+      </div>
+    </div>
+  </body>
+</html>

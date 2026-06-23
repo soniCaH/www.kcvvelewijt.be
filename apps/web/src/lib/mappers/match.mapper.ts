@@ -13,7 +13,7 @@ import type { UpcomingMatch } from "@/components/match/types";
  * @param name - Team name from API
  * @returns Team name with proper capitalization
  */
-function normalizeTeamName(name: string): string {
+export function normalizeTeamName(name: string): string {
   return name.replace(/^Kcvv\b/i, "KCVV");
 }
 
