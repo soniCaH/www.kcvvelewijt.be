@@ -3,8 +3,6 @@
  * Full-season matches across all KCVV teams + events, with month/week views
  */
 
-import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
@@ -19,6 +17,7 @@ import { PageContainer } from "@/components/design-system";
 import { PageViewTracker } from "@/components/analytics";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildItemListJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { SITE_CONFIG } from "@/lib/constants";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import {
@@ -32,10 +31,14 @@ import type {
   CalendarTeamInfo,
 } from "./utils";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Kalender | KCVV Elewijt",
   description:
     "Alle wedstrijden én clubactiviteiten van KCVV Elewijt op één kalender — A-ploeg, B-ploeg en jeugd. Bekijk per maand, week of als agenda, of abonneer je op je ploeg.",
+  path: "/kalender",
+  ogTitle: "Kalender — KCVV Elewijt",
+  ogDescription:
+    "Alle wedstrijden én clubactiviteiten van KCVV Elewijt op één kalender.",
   keywords: [
     "wedstrijden",
     "kalender",
@@ -47,14 +50,7 @@ export const metadata: Metadata = {
     "jeugd",
     "KCVV Elewijt",
   ],
-  openGraph: {
-    title: "Kalender — KCVV Elewijt",
-    description:
-      "Alle wedstrijden én clubactiviteiten van KCVV Elewijt op één kalender.",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 interface CalendarData {
   feed: CalendarFeedItem[];

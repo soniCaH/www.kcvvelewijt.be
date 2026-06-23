@@ -1,13 +1,15 @@
-import type { Metadata } from "next";
-import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { HistoryContent } from "./HistoryContent";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Geschiedenis | KCVV Elewijt",
   description:
     "Tijdslijn van de rijkgevulde geschiedenis van KCVV Elewijt van 1909 tot nu!",
+  path: "/club/geschiedenis",
+  ogTitle: "Geschiedenis - KCVV Elewijt",
   keywords: [
     "geschiedenis",
     "history",
@@ -15,14 +17,7 @@ export const metadata: Metadata = {
     "tijdslijn",
     "Crossing Elewijt",
   ],
-  openGraph: {
-    title: "Geschiedenis - KCVV Elewijt",
-    description:
-      "Tijdslijn van de rijkgevulde geschiedenis van KCVV Elewijt van 1909 tot nu!",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 export default function HistoryPage() {
   return (

@@ -8,24 +8,20 @@
  * #2057) unchanged — presentation only.
  */
 
-import type { Metadata } from "next";
 import { Suspense } from "react";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { SearchInterface } from "@/components/search";
 import { SearchMastheadSkeleton } from "@/components/search/SearchMastheadSkeleton";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Zoeken | KCVV Elewijt",
   description:
     "Doorzoek nieuws, spelers, teams en meer op de website van KCVV Elewijt",
+  path: "/zoeken",
+  ogTitle: "Zoeken - KCVV Elewijt",
+  ogDescription: "Doorzoek de website van KCVV Elewijt",
   keywords: ["zoeken", "search", "nieuws", "spelers", "teams", "KCVV Elewijt"],
-  openGraph: {
-    title: "Zoeken - KCVV Elewijt",
-    description: "Doorzoek de website van KCVV Elewijt",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 /**
  * Search page with client-side search interface.

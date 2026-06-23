@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
 import Image from "next/image";
-import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { getButtonClasses } from "@/components/design-system/Button/button-styles";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { PullQuote } from "@/components/design-system/PullQuote";
@@ -16,18 +16,15 @@ import { RaffleCallout } from "./RaffleCallout";
 const FACEBOOK_URL = "https://www.facebook.com/KCVV.ULTRAS.55/";
 const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "KCVV Ultras | KCVV Elewijt",
   description:
     "Supportersclub van KCVV Elewijt: De Ultra's! Positief aanmoedigen van onze ploeg.",
+  path: "/club/ultras",
+  ogTitle: "KCVV Ultra's 55 - KCVV Elewijt",
+  ogDescription: "Supportersclub van KCVV Elewijt: De Ultra's!",
   keywords: ["ultras", "supporters", "KCVV Elewijt", "sfeeracties"],
-  openGraph: {
-    title: "KCVV Ultra's 55 - KCVV Elewijt",
-    description: "Supportersclub van KCVV Elewijt: De Ultra's!",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 export default function UltrasPage() {
   return (

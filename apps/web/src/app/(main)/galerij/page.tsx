@@ -8,12 +8,14 @@
  * webhook map lands (see PR notes).
  */
 
-import type { Metadata } from "next";
 import { Effect } from "effect";
 
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
 import { PhotoGalleryRepository } from "@/lib/repositories/photoGallery.repository";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import {
   EditorialHeading,
   MonoLabel,
@@ -21,18 +23,15 @@ import {
 } from "@/components/design-system";
 import { GalleryCardGrid } from "@/components/gallery/GalleryCardGrid/GalleryCardGrid";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Fotogalerij | KCVV Elewijt",
   description:
     "Foto's van wedstrijden, evenementen en clubmomenten van KCVV Elewijt.",
+  path: "/galerij",
+  ogTitle: "Fotogalerij - KCVV Elewijt",
+  ogDescription: "Foto's van wedstrijden, evenementen en clubmomenten",
   keywords: ["foto's", "galerij", "fotogalerij", "beelden", "KCVV Elewijt"],
-  openGraph: {
-    title: "Fotogalerij - KCVV Elewijt",
-    description: "Foto's van wedstrijden, evenementen en clubmomenten",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 // Galleries change rarely — 24h ISR (align with #1921).
 export const revalidate = 86400;
@@ -47,6 +46,12 @@ export default async function GalerijPage() {
 
   return (
     <div className="bg-cream flex min-h-screen flex-col">
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Galerij", url: `${SITE_CONFIG.siteUrl}/galerij` },
+        ])}
+      />
       <PageContainer as="header" width="index" className="pt-12 pb-8">
         <MonoLabel tone="ink">KCVV Elewijt · Beelden</MonoLabel>
         <EditorialHeading

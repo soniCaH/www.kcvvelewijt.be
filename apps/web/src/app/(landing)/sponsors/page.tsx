@@ -7,7 +7,6 @@
  */
 
 import { Effect } from "effect";
-import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   SponsorRepository,
@@ -16,14 +15,16 @@ import {
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import type { Sponsor } from "@/components/sponsors/Sponsors";
 import { sortByTierThenName } from "@/components/sponsors/sortByTierThenName";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Sponsors | KCVV Elewijt",
   description: "Overzicht van de sponsors die KCVV Elewijt steunen.",
-};
+  path: "/sponsors",
+});
 
 function mapToSponsor(s: SponsorVM): Sponsor {
   return {

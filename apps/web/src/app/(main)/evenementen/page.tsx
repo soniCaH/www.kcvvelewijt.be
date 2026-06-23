@@ -14,12 +14,14 @@
  * `<EventsBrowser>` client shell; this server page only fetches the feed.
  */
 
-import type { Metadata } from "next";
 import { Effect } from "effect";
 
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
 import { EventRepository } from "@/lib/repositories/event.repository";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import {
   EditorialHeading,
   MonoLabel,
@@ -27,10 +29,13 @@ import {
 } from "@/components/design-system";
 import { EventsBrowser } from "@/components/event/EventsBrowser";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Evenementen | KCVV Elewijt",
   description:
     "Alle aankomende evenementen van KCVV Elewijt — clubactiviteiten, jeugdevenementen en supportersuitjes.",
+  path: "/evenementen",
+  ogTitle: "Evenementen - KCVV Elewijt",
+  ogDescription: "Alle aankomende evenementen van KCVV Elewijt",
   keywords: [
     "evenementen",
     "agenda",
@@ -39,13 +44,7 @@ export const metadata: Metadata = {
     "jeugd",
     "KCVV Elewijt",
   ],
-  openGraph: {
-    title: "Evenementen - KCVV Elewijt",
-    description: "Alle aankomende evenementen van KCVV Elewijt",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 // 1h ISR — events listing; on-demand revalidation via /api/revalidate
 // (revalidatePath '/evenementen') makes new/edited events appear sooner.
@@ -61,6 +60,12 @@ export default async function EvenementenPage() {
 
   return (
     <div className="bg-jersey-deep-dark flex min-h-screen flex-col">
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Evenementen", url: `${SITE_CONFIG.siteUrl}/evenementen` },
+        ])}
+      />
       <PageContainer as="header" width="index" className="pt-12 pb-8">
         <MonoLabel tone="cream">KCVV Elewijt · Agenda</MonoLabel>
         <EditorialHeading

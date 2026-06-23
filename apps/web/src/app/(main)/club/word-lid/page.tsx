@@ -7,18 +7,22 @@
  * practical-info hub. The page is static; the form POSTs to `/api/membership`.
  */
 
-import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { EditorialHeading, PageContainer } from "@/components/design-system";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Word lid | KCVV Elewijt",
   description:
     "Schrijf je in bij KCVV Elewijt — als speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter. Vul het inschrijfformulier in en we nemen contact met je op.",
+  path: "/club/word-lid",
+  ogTitle: "Word lid van KCVV Elewijt",
+  ogDescription:
+    "Schrijf je in bij KCVV Elewijt — speler, jeugd, vrijwilliger, trainer of scheidsrechter.",
   keywords: [
     "word lid",
     "inschrijven",
@@ -29,15 +33,7 @@ export const metadata: Metadata = {
     "vrijwilliger",
     "Elewijt",
   ],
-  alternates: { canonical: `${SITE_CONFIG.siteUrl}/club/word-lid` },
-  openGraph: {
-    title: "Word lid van KCVV Elewijt",
-    description:
-      "Schrijf je in bij KCVV Elewijt — speler, jeugd, vrijwilliger, trainer of scheidsrechter.",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 export default function WordLidPage() {
   return (

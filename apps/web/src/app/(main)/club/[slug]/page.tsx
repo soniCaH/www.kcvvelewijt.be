@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { PageRepository } from "@/lib/repositories/page.repository";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { PageHero } from "@/components/layout/PageHero";
 import { ArticleBody } from "@/components/article/ArticleBody";
 import {
@@ -45,18 +48,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? { url: page.ogImageUrl, alt: page.title }
     : page.heroImageUrl
       ? { url: page.heroImageUrl, alt: page.title }
-      : DEFAULT_OG_IMAGE;
+      : undefined;
 
-  return {
+  return buildPageMetadata({
     title: `${page.title} | KCVV Elewijt`,
     description,
-    openGraph: {
-      title: `${page.title} - KCVV Elewijt`,
-      description,
-      type: "website",
-      images: [ogImage],
-    },
-  };
+    path: `/club/${slug}`,
+    ogTitle: `${page.title} - KCVV Elewijt`,
+    ogImage,
+  });
 }
 
 export const revalidate = 3600;
@@ -71,6 +71,13 @@ export default async function DynamicClubPage({ params }: Props) {
 
   return (
     <div className="bg-cream min-h-screen">
+      <JsonLd
+        data={buildBreadcrumbJsonLd([
+          { name: "Home", url: SITE_CONFIG.siteUrl },
+          { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+          { name: page.title, url: `${SITE_CONFIG.siteUrl}/club/${slug}` },
+        ])}
+      />
       {/* Hero — kicker "Club", headline = page.title, optional heroImage
           (typographic state when absent). `pb-12` reserves the rhythm before
           the full-bleed seam (StripedSeam carries no margin of its own). */}
