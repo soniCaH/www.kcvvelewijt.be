@@ -31,12 +31,23 @@ test.describe("/evenementen", () => {
     page,
   }) => {
     await expect(page.locator("h1").first()).toContainText("Evenementen");
-    await expect(
-      page.getByRole("group", { name: /Filter evenementen op type/i }),
-    ).toBeVisible();
 
-    const tickets = page.locator(TICKET_SELECTOR);
-    expect(await tickets.count()).toBeGreaterThan(0);
+    // The feed is upcoming-only, so an empty dataset (off-season / none seeded)
+    // is a valid state — `<EventsBrowser>` then renders a centred empty message
+    // with NO filter row. Wait for whichever terminal state rendered, then
+    // assert against it (mirrors the `test.skip(allCount === 0)` guard the other
+    // two specs use). `.count()` doesn't auto-wait, so settle on a visible state
+    // first to avoid racing hydration into a false-empty read.
+    const filterBar = page.getByRole("group", {
+      name: /Filter evenementen op type/i,
+    });
+    const emptyState = page.getByText(/Geen evenementen gepland/i);
+    await expect(filterBar.or(emptyState)).toBeVisible();
+
+    if (await emptyState.isVisible()) return;
+
+    await expect(filterBar).toBeVisible();
+    expect(await page.locator(TICKET_SELECTOR).count()).toBeGreaterThan(0);
   });
 
   test("a type filter narrows the feed (or shows the per-type empty state)", async ({
