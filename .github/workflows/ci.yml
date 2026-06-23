@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.8
@@ -139,7 +139,7 @@ jobs:
       visual: ${{ steps.filter.outputs.visual }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Detect visual paths
         id: filter
@@ -187,7 +187,7 @@ jobs:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.8
@@ -234,7 +234,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
         with:
           token: ${{ secrets.KCVV_VR_BOT_TOKEN }}
           fetch-depth: 0
@@ -331,7 +331,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.8
@@ -370,7 +370,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6.0.3
+        uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6.0.8
