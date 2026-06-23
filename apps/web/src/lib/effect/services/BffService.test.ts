@@ -166,15 +166,15 @@ describe("BffService", () => {
     expect(result[0]?.team_name).toBe("KCVV Elewijt");
   });
 
-  it("preserves the raw error's _tag through the cache wrap (call-site catchTag still fires)", async () => {
-    // A BFF failure rejects the cache fn; cachedRead falls back to the RAW
-    // effect, so the original *tagged* error reaches the call site. This guards
-    // the ploegen/[slug]/wedstrijden `catchTag("HttpNotFound") → notFound()`
-    // path. We assert on the specific tag (not catchAll): a naive Promise
-    // round-trip flattens the error to an opaque UnknownException, so catchTag
-    // would miss and this would fall through to "flattened" — i.e. the test
-    // FAILS against the bug, not just passes against the fix. (A 500 is an
-    // undeclared status → the client surfaces a tagged ResponseError.)
+  it("preserves the error's _tag through the cache wrap, with no extra BFF call", async () => {
+    // A BFF failure is captured as a Cause (runPromiseExit) and re-raised via
+    // failCause, so the original *tagged* error reaches the call site without a
+    // re-run — guarding the ploegen/[slug]/wedstrijden
+    // `catchTag("HttpNotFound") → notFound()` path. We assert on the specific tag
+    // (not catchAll): a naive Promise round-trip flattens the error to an opaque
+    // UnknownException, so catchTag would miss and fall through to "flattened" —
+    // i.e. the test FAILS against the bug, not just passes against the fix. (A
+    // 500 is decoded against the declared error union and fails as a ParseError.)
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 500 })),
@@ -184,7 +184,7 @@ describe("BffService", () => {
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getMatches(1).pipe(
-          Effect.catchTag("ResponseError", () =>
+          Effect.catchTag("ParseError", () =>
             Effect.succeed("typed-survived" as const),
           ),
           Effect.catchAll(() => Effect.succeed("flattened" as const)),
@@ -193,6 +193,9 @@ describe("BffService", () => {
     );
 
     expect(result).toBe("typed-survived");
+    // The failed effect runs once inside the cache fn and is re-raised from its
+    // captured Cause — no raw-effect re-run, so the BFF is hit exactly once.
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
   });
 
   it("propagates errors as Effect failures (not exceptions)", async () => {

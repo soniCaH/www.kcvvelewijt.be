@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Schema as S, type Cause } from "effect";
+import { Cause, Context, Data, Effect, Exit, Layer, Schema as S } from "effect";
 import { unstable_cache } from "next/cache";
 import { HttpApiClient, FetchHttpClient } from "@effect/platform";
 import type { HttpApiError, HttpClientError } from "@effect/platform";
@@ -61,18 +61,29 @@ const MatchArray = S.Array(Match);
 const RankingArray = S.Array(RankingEntry);
 
 /**
+ * Internal carrier that ferries a failed effect's original `Cause` across the
+ * `unstable_cache` Promise boundary. Thrown inside the cache fn (so failures are
+ * never cached) and unwrapped right after the boundary via `Effect.failCause`,
+ * so the original TYPED error survives instead of flattening into an opaque
+ * `FiberFailure`. Never escapes `cachedRead`.
+ */
+class CachedReadEffectFailure extends Data.TaggedError(
+  "CachedReadEffectFailure",
+)<{ readonly cause: Cause.Cause<BffError> }> {}
+
+/**
  * Wrap a hot BFF read in Next's data cache. On a cache miss the client Effect
- * (R = never) is run to a Promise inside `unstable_cache`; its decoded result is
- * re-encoded to a JSON-safe shape before storage, so `Date` fields (`Match.date`,
+ * (R = never) is run inside `unstable_cache`; its decoded result is re-encoded to
+ * a JSON-safe shape before storage, so `Date` fields (`Match.date`,
  * `RankingEntry.last_updated` — both `DateFromStringOrDate`) survive the cache's
  * JSON round-trip and decode back to `Date` on read.
  *
- * Failures are never cached (the cache fn rejects). Crucially, on any rejection
- * we fall back to running the RAW `effect` so its TYPED failure survives — a
- * Promise round-trip would otherwise flatten e.g. `HttpNotFound` into an opaque
- * `FiberFailure`, breaking call sites that `catchTag("HttpNotFound")` →
- * `notFound()` (getMatches @ ploegen/[slug]/wedstrijden, and getMatchDetail).
- * That fallback costs one extra BFF call on the rare error path. (#2213)
+ * Failures are never cached and their TYPED error is preserved: the effect is run
+ * with `runPromiseExit`, and on failure the `Cause` is carried out via
+ * `CachedReadEffectFailure` and re-raised with `failCause` — so call sites that
+ * `catchTag("HttpNotFound")` → `notFound()` (getMatches @
+ * ploegen/[slug]/wedstrijden, getMatchDetail @ wedstrijd/[matchId]) still fire,
+ * with NO extra BFF call on the error path. (#2213)
  */
 function cachedRead<A, I>(
   schema: S.Schema<A, I>,
@@ -82,16 +93,33 @@ function cachedRead<A, I>(
   effect: Effect.Effect<A, BffError>,
 ): Effect.Effect<A, BffError> {
   const loadCached = unstable_cache(
-    async (): Promise<I> =>
-      S.encodeSync(schema)(await Effect.runPromise(effect)),
+    async (): Promise<I> => {
+      // runPromiseExit captures a typed failure as a Cause instead of rejecting,
+      // so the error type isn't lost crossing the Promise boundary.
+      const exit = await Effect.runPromiseExit(effect);
+      if (Exit.isSuccess(exit)) return S.encodeSync(schema)(exit.value);
+      // Throw so unstable_cache never stores the failure; carry the Cause out.
+      throw new CachedReadEffectFailure({ cause: exit.cause });
+    },
     [...keyParts],
     { revalidate, tags: [...tags] },
   );
-  return Effect.tryPromise(() => loadCached()).pipe(
+  return Effect.tryPromise({
+    try: () => loadCached(),
+    // The raw throw arrives as `unknown` here (pre-Effect boundary), so this one
+    // check must stay `instanceof`. Anything other than our carrier (an
+    // encode/infra throw) is genuinely unexpected → a defect.
+    catch: (e) =>
+      e instanceof CachedReadEffectFailure
+        ? e
+        : new CachedReadEffectFailure({ cause: Cause.die(e) }),
+  }).pipe(
     Effect.flatMap((encoded) => S.decodeUnknown(schema)(encoded)),
-    // Cache-fn rejection (BFF failed — never cached) or a stray decode error:
-    // re-run the raw effect so the original typed error reaches the call site.
-    Effect.catchAll(() => effect),
+    // Re-raise the original typed error from its Cause — no re-run. A decode
+    // ParseError (already a BffError member) flows through untouched.
+    Effect.catchTag("CachedReadEffectFailure", (e) =>
+      Effect.failCause(e.cause),
+    ),
   );
 }
 
