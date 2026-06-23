@@ -30,6 +30,11 @@ import {
 } from "@/lib/repositories/event.repository";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
+  TeamRepository,
+  type TeamNavVM,
+} from "@/lib/repositories/team.repository";
+import type { Match } from "@/lib/effect/schemas";
+import {
   BannerSlot,
   FeaturedEventBand,
   FeaturedUitgelichtRow,
@@ -39,6 +44,9 @@ import {
   NewsGrid,
   SponsorsSection,
   UpcomingMatches,
+  FirstTeamsBlock,
+  deriveFirstTeamVM,
+  firstTeamLabel,
   ClubshopBanner,
   YouthBackdrop,
   YouthSection,
@@ -205,62 +213,113 @@ function toFeaturedEventBandEvent(
 }
 
 export default async function HomePage() {
-  const [articlesResult, matchesResult, bannersResult, featuredEventResult] =
-    await Promise.all([
-      runPromise(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          const all = yield* repo.findAll();
-          // Slice [0..10] per the R1.B + R2.B + R1.6 spine:
-          //   • position 1 (index 0) feeds the static <EditorialHero>.
-          //   • positions 2..4 (index 1..3) fill <FeaturedUitgelichtRow>.
-          //   • positions 5..10 (index 4..9) fill the 3×2 <NewsGrid>.
-          return all.slice(0, 10);
-        }).pipe(Effect.catchAll(() => Effect.succeed<ArticleVM[]>([]))),
+  const [
+    articlesResult,
+    matchesResult,
+    bannersResult,
+    featuredEventResult,
+    teamsResult,
+  ] = await Promise.all([
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* ArticleRepository;
+        const all = yield* repo.findAll();
+        // Slice [0..10] per the R1.B + R2.B + R1.6 spine:
+        //   • position 1 (index 0) feeds the static <EditorialHero>.
+        //   • positions 2..4 (index 1..3) fill <FeaturedUitgelichtRow>.
+        //   • positions 5..10 (index 4..9) fill the 3×2 <NewsGrid>.
+        return all.slice(0, 10);
+      }).pipe(Effect.catchAll(() => Effect.succeed<ArticleVM[]>([]))),
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getNextMatches();
+      }).pipe(
+        Effect.catchAll((error) => {
+          console.error("[HomePage] Failed to fetch matches:", error);
+          return Effect.succeed([]);
+        }),
       ),
-      runPromise(
-        Effect.gen(function* () {
-          const bff = yield* BffService;
-          return yield* bff.getNextMatches();
-        }).pipe(
-          Effect.catchAll((error) => {
-            console.error("[HomePage] Failed to fetch matches:", error);
-            return Effect.succeed([]);
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* HomepageRepository;
+        return yield* repo.getBanners();
+      }).pipe(
+        Effect.catchAll(() =>
+          Effect.succeed({
+            bannerSlotA: null,
+            bannerSlotB: null,
+            bannerSlotC: null,
           }),
         ),
       ),
-      runPromise(
-        Effect.gen(function* () {
-          const repo = yield* HomepageRepository;
-          return yield* repo.getBanners();
-        }).pipe(
-          Effect.catchAll(() =>
-            Effect.succeed({
-              bannerSlotA: null,
-              bannerSlotB: null,
-              bannerSlotC: null,
-            }),
-          ),
-        ),
-      ),
-      runPromise(
-        Effect.gen(function* () {
-          const repo = yield* EventRepository;
-          return yield* repo.findNextFeatured();
-        }).pipe(Effect.catchAll(() => Effect.succeed<EventVM | null>(null))),
-      ),
-    ]);
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* EventRepository;
+        return yield* repo.findNextFeatured();
+      }).pipe(Effect.catchAll(() => Effect.succeed<EventVM | null>(null))),
+    ),
+    runPromise(
+      Effect.gen(function* () {
+        const repo = yield* TeamRepository;
+        return yield* repo.findAll();
+      }).pipe(Effect.catchAll(() => Effect.succeed<TeamNavVM[]>([]))),
+    ),
+  ]);
 
   const articles = articlesResult;
   const matches = matchesResult;
   const banners = bannersResult;
   const featuredEvent = featuredEventResult;
 
+  // Senior teams (A/B) — drive the "Eerste ploegen" block and are de-duplicated
+  // out of the generic "Komende wedstrijden" agenda below (#2211). The senior
+  // nav set = non-youth teams (age not "U*"); a psdId is required to fetch their
+  // matches feed. Sorted by slug so a-ploeg renders before b-ploeg.
+  const seniorTeams = teamsResult
+    .filter((t) => t.psdId && !(t.age ?? "").toUpperCase().startsWith("U"))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
+
+  const firstTeamsMatches = await Promise.all(
+    seniorTeams.map((team) =>
+      runPromise(
+        Effect.gen(function* () {
+          const bff = yield* BffService;
+          return yield* bff.getMatches(Number(team.psdId));
+        }).pipe(Effect.catchAll(() => Effect.succeed<readonly Match[]>([]))),
+      ),
+    ),
+  );
+
+  const now = new Date();
+  const firstTeamVMs = seniorTeams.map((team, i) => {
+    const division = team.divisionFull ?? team.division ?? undefined;
+    return deriveFirstTeamVM(
+      {
+        label: firstTeamLabel(team.slug, team.name),
+        slug: team.slug,
+        ...(division ? { division } : {}),
+      },
+      firstTeamsMatches[i] ?? [],
+      now,
+    );
+  });
+  const seniorPsdIds = new Set(seniorTeams.map((t) => Number(t.psdId)));
+
   const heroArticle = articles[0];
   const heroProps = heroArticle ? toEditorialHeroProps(heroArticle) : null;
   const uitgelichtArticles = articles.slice(1, 4).map(toUitgelichtArticle);
   const newsGridArticles = toHomepageArticles(articles.slice(4, 10));
-  const upcomingMatches = mapMatchesToUpcomingMatches(matches);
+  // A/B now live in the "Eerste ploegen" block, so the agenda becomes the
+  // other-teams agenda (#2211). Matches with no team id stay (can't classify).
+  const upcomingMatches = mapMatchesToUpcomingMatches(
+    matches.filter(
+      (m) => m.kcvv_team_id == null || !seniorPsdIds.has(m.kcvv_team_id),
+    ),
+  );
   const featuredEventBandEvent = toFeaturedEventBandEvent(featuredEvent);
 
   if (articles.length === 0 && matches.length === 0) {
@@ -313,6 +372,21 @@ export default async function HomePage() {
           paddingBottom: "pb-0",
         }
       : null;
+
+  // "Eerste ploegen" — A/B last result + next fixture, carrying the
+  // result→next-fixture transition. Self-contained dark band (own StripedSeam
+  // top/bottom + padding), so the SectionStack wrapper stays flush (#2211).
+  const firstTeamsSection: SectionConfig | null = firstTeamVMs.some(
+    (t) => t.result || t.fixture,
+  )
+    ? {
+        key: "first-teams",
+        bg: "transparent",
+        content: <FirstTeamsBlock teams={firstTeamVMs} />,
+        paddingTop: "pt-0",
+        paddingBottom: "pb-0",
+      }
+    : null;
 
   const featuredEventSection: SectionConfig | null = featuredEventBandEvent
     ? {
@@ -447,6 +521,7 @@ export default async function HomePage() {
         sections={[
           heroSection,
           uitgelichtSection,
+          firstTeamsSection,
           featuredEventSection,
           bannerSlotASection,
           latestNewsSection,

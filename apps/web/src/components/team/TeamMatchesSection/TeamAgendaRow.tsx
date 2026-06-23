@@ -13,7 +13,11 @@ import Link from "next/link";
 import { DateTime } from "luxon";
 import { Crest, PRESS_DOWN_CLASSES } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
-import { getResultColor, isPlayedMatch } from "@/lib/utils/match-display";
+import {
+  getResultColor,
+  isPlayedMatch,
+  OUTCOME_UNDERLINE,
+} from "@/lib/utils/match-display";
 import { House, Bus } from "@/lib/icons.redesign";
 import type { ScheduleMatch } from "@/components/match/types";
 
@@ -91,12 +95,6 @@ function formatKickoff(match: ScheduleMatch): string {
   if (match.time) return match.time;
   return DateTime.fromJSDate(match.date).setLocale("nl").toFormat("HH:mm");
 }
-
-const OUTCOME_SHADOW: Record<"win" | "draw" | "loss", string | undefined> = {
-  win: "inset 0 -9px 0 color-mix(in srgb, var(--color-jersey-deep) 34%, var(--color-cream))",
-  draw: undefined,
-  loss: "inset 0 -9px 0 color-mix(in srgb, var(--color-alert) 38%, var(--color-cream))",
-};
 
 /**
  * Team name with an optional designation suffix ("A" / "B" / "U23"). The club
@@ -192,7 +190,7 @@ export function TeamAgendaRow({
       ? "text-white"
       : "text-ink";
 
-  const outlineShadow = outcome ? OUTCOME_SHADOW[outcome] : undefined;
+  const outlineShadow = outcome ? OUTCOME_UNDERLINE[outcome] : undefined;
 
   const cardBase = cn(
     "flex items-stretch gap-0",
