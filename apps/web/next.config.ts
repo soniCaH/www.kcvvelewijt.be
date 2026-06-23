@@ -61,7 +61,14 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/club/register",
-        destination: "/club/inschrijven",
+        destination: "/club/praktische-informatie",
+        permanent: true,
+      },
+      // #2207 — CMS practical-info hub re-slugged (was wrongly "inschrijven",
+      // which reads as "sign up"; the signup is /club/word-lid).
+      {
+        source: "/club/inschrijven",
+        destination: "/club/praktische-informatie",
         permanent: true,
       },
       // #1002 — Dutch URL for staff member detail pages

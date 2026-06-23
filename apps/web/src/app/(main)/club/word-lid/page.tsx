@@ -3,7 +3,7 @@
  *
  * Static sibling under `club/` that beats the `club/[slug]` CMS catch-all.
  * The structured membership-signup entry point, reached from the "Word lid"
- * CTAs. The CMS "Praktische Informatie" page (`/club/inschrijven`) stays as the
+ * CTAs. The CMS "Praktische Informatie" page (`/club/praktische-informatie`) stays as the
  * practical-info hub. The page is static; the form POSTs to `/api/membership`.
  */
 
@@ -64,12 +64,13 @@ export default function WordLidPage() {
           </EditorialHeading>
           <p className="text-ink-soft font-display mt-5 max-w-[60ch] text-[length:var(--text-body-lg)] leading-[var(--text-body-lg--lh)]">
             Speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter — vul
-            het formulier in en we nemen binnenkort contact met je op. Het
-            lidgeld regelen we samen nadat we je gecontacteerd hebben.
+            het formulier in en we nemen binnenkort contact met je op. Dit is
+            een aanvraag: sommige ploegen zitten vol, dus een plekje is niet
+            altijd gegarandeerd.
           </p>
           <p className="mt-4 text-[length:var(--text-body-md)]">
-            <Link href="/club/inschrijven" className="prose-link">
-              Praktische info — lidgeld, terugbetalingen &amp; ProSoccerData →
+            <Link href="/club/praktische-informatie" className="prose-link">
+              Praktische info →
             </Link>
           </p>
         </header>

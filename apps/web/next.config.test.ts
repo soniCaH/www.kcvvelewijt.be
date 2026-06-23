@@ -29,7 +29,12 @@ describe("next.config redirects", () => {
       { source: "/teams", destination: "/ploegen" },
       { source: "/team/:slug", destination: "/ploegen/:slug" },
       { source: "/club/history", destination: "/club/geschiedenis" },
-      { source: "/club/register", destination: "/club/inschrijven" },
+      { source: "/club/register", destination: "/club/praktische-informatie" },
+      // #2207 — practical-info hub re-slugged inschrijven → praktische-informatie
+      {
+        source: "/club/inschrijven",
+        destination: "/club/praktische-informatie",
+      },
     ];
 
     for (const { source, destination } of expected) {

@@ -34,7 +34,7 @@ export const FOOTER_COLUMNS: ReadonlyArray<FooterColumn> = [
       { label: "Geschiedenis", href: "/club/geschiedenis" },
       { label: "Bestuur", href: "/club/bestuur" },
       { label: "Contact", href: "/club/contact" },
-      { label: "Praktische info", href: "/club" },
+      { label: "Praktische info", href: "/club/praktische-informatie" },
     ],
   },
 ];
