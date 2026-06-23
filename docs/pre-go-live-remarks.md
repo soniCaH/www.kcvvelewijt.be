@@ -213,10 +213,10 @@ breakpoints — relevant to sticky offsets.)
 
 ### High
 
-- ☐ **MOB-1** `[bug]` **MatchStrip fixture row overflows on phones** → horizontal page scroll site-wide. `MatchStripView.tsx:40` row has no `min-w-0`, so the `truncate` on `<TeamName>` (`:88`) is inert; long opponent names blow out the band. Add `min-w-0` to the row + each name span (optionally `max-w-[40%]`).
-- ☐ **MOB-2** `[bug]` **Team-detail sticky section nav hides under the sticky header.** `TeamSectionNav.tsx:29` pins `top-0` like the header → invisible when scrolled. Use `sticky top-16`; bump section anchor `scroll-mt-16` → ~`scroll-mt-[6.5rem]` (`ploegen/[slug]/page.tsx` ~228/249/268/283/296/305). _(Same class as PLAYER-6.)_
-- ☐ **MOB-3** `[layout]` **ClippedCard form padding not responsive** — hard `px-10 pt-9 pb-7` (`ClippedCard.tsx:38`) leaves ~248px usable at 360px for the membership form. Make responsive, e.g. `px-5 pt-7 pb-6 md:px-10 …`.
-- ☐ **MOB-4** `[layout]` **Organigram verkenner A++ scale clips on phones** — `scale(1.3)` on the tree (`OrganigramExplorer.tsx:341`) can push the centre card under sibling carets at 360px. Cap scale steps to `[1, 1.15]` on small viewports or wrap in `overflow-x-auto`. (Full org tree `VolledigOrganigram` already handles overflow.)
+- ☐ **MOB-1** `[bug]` **MatchStrip fixture row overflows on phones** → horizontal page scroll site-wide. `apps/web/src/components/layout/MatchStrip/MatchStripView.tsx:40` row has no `min-w-0`, so the `truncate` on `<TeamName>` (`:88`) is inert; long opponent names blow out the band. Add `min-w-0` to the row + each name span (optionally `max-w-[40%]`).
+- ☐ **MOB-2** `[bug]` **Team-detail sticky section nav hides under the sticky header.** `apps/web/src/app/(main)/ploegen/[slug]/TeamSectionNav.tsx:29` (route-co-located, not under `components/`) pins `top-0` like the header → invisible when scrolled. Use `sticky top-16`; bump section anchor `scroll-mt-16` → ~`scroll-mt-[6.5rem]` (`apps/web/src/app/(main)/ploegen/[slug]/page.tsx` ~228/249/268/283/296/305). _(Same class as PLAYER-6.)_
+- ☐ **MOB-3** `[layout]` **ClippedCard form padding not responsive** — hard `px-10 pt-9 pb-7` (`apps/web/src/components/design-system/ClippedCard/ClippedCard.tsx:38`) leaves ~248px usable at 360px for the membership form. Make responsive, e.g. `px-5 pt-7 pb-6 md:px-10 …`.
+- ☐ **MOB-4** `[layout]` **Organigram verkenner A++ scale clips on phones** — `scale(1.3)` on the tree (`apps/web/src/components/organigram/OrganigramExplorer/OrganigramExplorer.tsx:84` `SCALE_STEPS`, applied at `:341`) can push the centre card under sibling carets at 360px. Cap scale steps to `[1, 1.15]` on small viewports or wrap in `overflow-x-auto`. (Full org tree `VolledigOrganigram` already handles overflow.)
 
 ### Medium
 
