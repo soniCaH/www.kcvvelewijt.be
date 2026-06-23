@@ -46,6 +46,7 @@ import {
   UpcomingMatches,
   FirstTeamsBlock,
   deriveFirstTeamVM,
+  firstTeamLabel,
   ClubshopBanner,
   YouthBackdrop,
   YouthSection,
@@ -298,7 +299,7 @@ export default async function HomePage() {
     const division = team.divisionFull ?? team.division ?? undefined;
     return deriveFirstTeamVM(
       {
-        label: team.slug.charAt(0).toUpperCase() + team.slug.slice(1),
+        label: firstTeamLabel(team.slug, team.name),
         slug: team.slug,
         ...(division ? { division } : {}),
       },

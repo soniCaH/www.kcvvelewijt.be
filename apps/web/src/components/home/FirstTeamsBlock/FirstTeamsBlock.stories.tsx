@@ -1,7 +1,7 @@
 // apps/web/src/components/home/FirstTeamsBlock/FirstTeamsBlock.stories.tsx
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FirstTeamsBlock } from "./FirstTeamsBlock";
-import type { FirstTeamVM } from "./first-teams";
+import type { FirstTeamVM, FirstTeamResultVM } from "./first-teams";
 
 const meta = {
   title: "Features/Home/FirstTeamsBlock",
@@ -28,21 +28,24 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Fixed dates → deterministic VR (the band reads no `now`; it renders the VMs).
+// Hoisted so the Outcomes story can spread it without a non-null assertion.
+const aResult: FirstTeamResultVM = {
+  matchId: 101,
+  home: { name: "KCVV Elewijt" },
+  away: { name: "SK Londerzeel" },
+  homeScore: 3,
+  awayScore: 1,
+  isHome: true,
+  outcome: "win",
+  date: new Date("2026-06-21T15:00:00Z"),
+  competition: "3de Nationale",
+};
+
 const aTeam: FirstTeamVM = {
   label: "A-ploeg",
   slug: "a-ploeg",
   division: "3de Nationale",
-  result: {
-    matchId: 101,
-    home: { name: "KCVV Elewijt" },
-    away: { name: "SK Londerzeel" },
-    homeScore: 3,
-    awayScore: 1,
-    isHome: true,
-    outcome: "win",
-    date: new Date("2026-06-21T15:00:00Z"),
-    competition: "3de Nationale",
-  },
+  result: aResult,
   fixture: {
     matchId: 102,
     opponent: { name: "Sporting Hasselt" },
@@ -89,7 +92,7 @@ export const Outcomes: Story = {
       {
         ...aTeam,
         result: {
-          ...aTeam.result!,
+          ...aResult,
           homeScore: 1,
           awayScore: 1,
           outcome: "draw",

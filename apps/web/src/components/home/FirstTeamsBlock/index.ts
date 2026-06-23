@@ -1,6 +1,6 @@
 export { FirstTeamsBlock } from "./FirstTeamsBlock";
 export type { FirstTeamsBlockProps } from "./FirstTeamsBlock";
-export { deriveFirstTeamVM } from "./first-teams";
+export { deriveFirstTeamVM, firstTeamLabel } from "./first-teams";
 export type {
   FirstTeamVM,
   FirstTeamInput,

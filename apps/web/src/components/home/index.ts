@@ -33,7 +33,11 @@ export type { BannerSlotProps } from "./BannerSlot";
 export { UpcomingMatches } from "./UpcomingMatches";
 export type { UpcomingMatchesProps } from "./UpcomingMatches";
 
-export { FirstTeamsBlock, deriveFirstTeamVM } from "./FirstTeamsBlock";
+export {
+  FirstTeamsBlock,
+  deriveFirstTeamVM,
+  firstTeamLabel,
+} from "./FirstTeamsBlock";
 export type { FirstTeamsBlockProps, FirstTeamVM } from "./FirstTeamsBlock";
 
 export { YouthSection, YouthBackdrop } from "./YouthSection";

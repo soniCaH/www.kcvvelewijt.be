@@ -3,6 +3,20 @@ import { trackEvent } from "@/lib/analytics/track-event";
 /** Which card in a first-teams row was clicked. */
 export type FirstTeamsCardKind = "result" | "fixture";
 
+/** `source` param value per card kind. Exhaustive — a new kind fails to compile. */
+function sourceForKind(kind: FirstTeamsCardKind): string {
+  switch (kind) {
+    case "result":
+      return "first_teams_result";
+    case "fixture":
+      return "first_teams_fixture";
+    default: {
+      const _exhaustive: never = kind;
+      throw new Error(`Unhandled FirstTeamsCardKind: ${String(_exhaustive)}`);
+    }
+  }
+}
+
 /**
  * Fire `match_card_click` when a homepage "Eerste ploegen" card is clicked
  * through to its match detail. Reuses the existing `match_` event family +
@@ -17,7 +31,6 @@ export function trackFirstTeamsCardClick(args: {
   trackEvent("match_card_click", {
     team_slug: args.teamSlug,
     match_id: args.matchId,
-    source:
-      args.kind === "result" ? "first_teams_result" : "first_teams_fixture",
+    source: sourceForKind(args.kind),
   });
 }

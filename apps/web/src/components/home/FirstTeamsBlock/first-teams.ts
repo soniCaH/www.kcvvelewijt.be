@@ -57,6 +57,17 @@ export interface FirstTeamVM extends FirstTeamInput {
   fixture?: FirstTeamFixtureVM;
 }
 
+/**
+ * Short row label for a first team. The A/B sides carry a trailing single-letter
+ * segment in their slug (`eerste-elftallen-a` → "A-ploeg"); anything else falls
+ * back to the CMS `name`. Avoids title-casing the whole slug, which produced
+ * "Eerste-elftallen-a".
+ */
+export function firstTeamLabel(slug: string, name: string): string {
+  const tail = slug.split("-").pop() ?? "";
+  return /^[a-z]$/i.test(tail) ? `${tail.toUpperCase()}-ploeg` : name;
+}
+
 function pickLastResult(
   matches: readonly Match[],
   now: Date,
