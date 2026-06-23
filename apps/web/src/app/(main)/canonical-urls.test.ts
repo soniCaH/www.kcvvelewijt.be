@@ -136,6 +136,52 @@ describe("Canonical URLs on dynamic routes", () => {
   });
 });
 
+describe("Canonical URLs backfilled via buildPageMetadata", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("static page (/privacy) includes canonical URL", async () => {
+    const { metadata } = await import("./privacy/page");
+    expect(metadata).toHaveProperty(
+      "alternates.canonical",
+      `${SITE_CONFIG.siteUrl}/privacy`,
+    );
+  });
+
+  it("/club/[slug] includes canonical URL", async () => {
+    mockRunPromise.mockResolvedValueOnce({
+      title: "Praktische Informatie",
+      metaDescription: null,
+      ogImageUrl: null,
+      heroImageUrl: null,
+      body: [],
+    });
+    const clubSlug = await import("./club/[slug]/page");
+    const metadata = await clubSlug.generateMetadata({
+      params: Promise.resolve({ slug: "inschrijven" }),
+    });
+    expect(metadata).toHaveProperty(
+      "alternates.canonical",
+      `${SITE_CONFIG.siteUrl}/club/inschrijven`,
+    );
+  });
+
+  it("board page (/club/bestuur) includes canonical URL", async () => {
+    mockRunPromise.mockResolvedValueOnce({
+      name: "Bestuur",
+      tagline: null,
+      teamImageUrl: null,
+    });
+    const bestuur = await import("./club/bestuur/page");
+    const metadata = await bestuur.generateMetadata();
+    expect(metadata).toHaveProperty(
+      "alternates.canonical",
+      `${SITE_CONFIG.siteUrl}/club/bestuur`,
+    );
+  });
+});
+
 describe("Noindex routes do NOT have canonical URLs", () => {
   it("/tegenstander/[clubId] has robots noindex and no canonical", async () => {
     const { metadata } = await import("./tegenstander/[clubId]/page");

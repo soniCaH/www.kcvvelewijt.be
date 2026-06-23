@@ -7,10 +7,13 @@
 
 import type { Metadata } from "next";
 import type { PortableTextBlock } from "@portabletext/react";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { BestuurPage } from "@/components/club/BestuurPage/BestuurPage";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { PageViewTracker } from "@/components/analytics";
@@ -66,18 +69,15 @@ export function createBoardPage({
         ? `${team.name} — ${team.tagline}`
         : fallbackDescription;
 
-      return {
+      return buildPageMetadata({
         title: `${team.name} | KCVV Elewijt`,
         description,
-        openGraph: {
-          title: team.name,
-          description,
-          type: "website",
-          images: team.teamImageUrl
-            ? [{ url: team.teamImageUrl, alt: `${team.name} foto` }]
-            : [DEFAULT_OG_IMAGE],
-        },
-      };
+        path: `/club/${slug}`,
+        ogTitle: team.name,
+        ogImage: team.teamImageUrl
+          ? { url: team.teamImageUrl, alt: `${team.name} foto` }
+          : undefined,
+      });
     } catch (error) {
       const digest = (error as { digest?: string }).digest;
       if (
@@ -87,10 +87,11 @@ export function createBoardPage({
       ) {
         throw error;
       }
-      return {
+      return buildPageMetadata({
         title: `${fallbackTitle} | KCVV Elewijt`,
         description: fallbackDescription,
-      };
+        path: `/club/${slug}`,
+      });
     }
   }
 
@@ -99,6 +100,13 @@ export function createBoardPage({
 
     return (
       <>
+        <JsonLd
+          data={buildBreadcrumbJsonLd([
+            { name: "Home", url: SITE_CONFIG.siteUrl },
+            { name: "Club", url: `${SITE_CONFIG.siteUrl}/club` },
+            { name: team.name, url: `${SITE_CONFIG.siteUrl}/club/${slug}` },
+          ])}
+        />
         {/* `board` slug is non-PII (bestuur / jeugdbestuur / angels). */}
         <PageViewTracker eventName="board_view" params={{ board: slug }} />
         <BestuurPage

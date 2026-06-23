@@ -1,5 +1,4 @@
 import { Effect } from "effect";
-import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import {
@@ -15,9 +14,10 @@ import {
   groupTeamsForLanding,
   type TeamLandingItem,
 } from "@/lib/utils/group-teams";
-import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { PageContainer, StripedSeam } from "@/components/design-system";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { JeugdHero } from "@/components/jeugd/JeugdHero/JeugdHero";
@@ -27,18 +27,12 @@ import { EditorialHubAnalytics } from "@/components/editorial/EditorialHubAnalyt
 import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Jeugdopleiding | KCVV Elewijt",
   description:
     "Ontdek de jeugdopleiding van KCVV Elewijt. Van U6 tot U21: ploegen, nieuws, trainingsinfo en meer.",
-  openGraph: {
-    title: "Jeugdopleiding | KCVV Elewijt",
-    description:
-      "Ontdek de jeugdopleiding van KCVV Elewijt. Van U6 tot U21: ploegen, nieuws, trainingsinfo en meer.",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+  path: "/jeugd",
+});
 
 async function fetchTeams(): Promise<TeamLandingItem[]> {
   try {

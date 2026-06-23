@@ -3,19 +3,22 @@
  * Club contact information and categorized email contacts
  */
 
-import type { Metadata } from "next";
 import { Effect } from "effect";
-import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ContactPage } from "@/components/club/ContactPage/ContactPage";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Contact | KCVV Elewijt",
   description:
     "Contacteer KCVV Elewijt. Adres: Driesstraat 32, 1982 Elewijt. Vind de juiste contactpersoon voor algemene vragen, jeugdwerking, sponsoring en meer.",
+  path: "/club/contact",
+  ogTitle: "Contact - KCVV Elewijt",
+  ogDescription: "Contacteer KCVV Elewijt voor al je vragen",
   keywords: [
     "contact",
     "KCVV Elewijt",
@@ -25,13 +28,7 @@ export const metadata: Metadata = {
     "sponsoring",
     "Elewijt",
   ],
-  openGraph: {
-    title: "Contact - KCVV Elewijt",
-    description: "Contacteer KCVV Elewijt voor al je vragen",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 // ISR — the page fetches key staff contacts at request time; refresh hourly so
 // contact changes in Sanity surface without a redeploy (matches the other

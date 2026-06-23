@@ -9,9 +9,8 @@
  * typography-plugin prose composition (master design §7 line 587).
  */
 
-import type { Metadata } from "next";
 import Link from "next/link";
-import { DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import {
   EditorialHeading,
   DottedDivider,
@@ -24,10 +23,14 @@ import {
  */
 const LAST_UPDATED = "juni 2026";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Privacyverklaring | KCVV Elewijt",
   description:
     "Privacyverklaring en cookiebeleid van KCVV Elewijt. Lees hoe we omgaan met jouw persoonsgegevens conform de GDPR wetgeving.",
+  path: "/privacy",
+  ogTitle: "Privacyverklaring - KCVV Elewijt",
+  ogDescription:
+    "Privacyverklaring en cookiebeleid van KCVV Elewijt conform GDPR",
   keywords: [
     "privacy",
     "privacyverklaring",
@@ -37,14 +40,7 @@ export const metadata: Metadata = {
     "cookies",
     "KCVV Elewijt",
   ],
-  openGraph: {
-    title: "Privacyverklaring - KCVV Elewijt",
-    description:
-      "Privacyverklaring en cookiebeleid van KCVV Elewijt conform GDPR",
-    type: "website",
-    images: [DEFAULT_OG_IMAGE],
-  },
-};
+});
 
 /**
  * Cream/ink prose styling for the legal copy. Replaces the legacy
