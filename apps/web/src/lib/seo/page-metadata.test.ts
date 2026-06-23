@@ -50,15 +50,19 @@ describe("buildPageMetadata", () => {
   });
 
   it("honours tailored ogTitle/ogDescription overrides", () => {
+    // ogDescription is deliberately distinct from description so the
+    // assertion proves the override is used, not the default fallback.
     const meta = buildPageMetadata({
       title: "KCVV Ultras | KCVV Elewijt",
-      description: "Supportersclub van KCVV Elewijt: De Ultra's!",
+      description:
+        "Supportersclub van KCVV Elewijt: De Ultra's! Positief aanmoedigen van onze ploeg.",
       path: "/club/ultras",
       ogTitle: "KCVV Ultra's 55 - KCVV Elewijt",
       ogDescription: "Supportersclub van KCVV Elewijt: De Ultra's!",
     });
-    const og = meta.openGraph as { title?: string };
+    const og = meta.openGraph as { title?: string; description?: string };
     expect(og.title).toBe("KCVV Ultra's 55 - KCVV Elewijt");
+    expect(og.description).toBe("Supportersclub van KCVV Elewijt: De Ultra's!");
   });
 
   it("omits keywords unless provided", () => {
