@@ -94,7 +94,7 @@ describe("SiteFooter", () => {
     );
     expect(
       screen.getByRole("link", { name: "Praktische info" }),
-    ).toHaveAttribute("href", "/club");
+    ).toHaveAttribute("href", "/club/praktische-informatie");
   });
 
   it("renders copyright with founding year 1909 and current year", () => {

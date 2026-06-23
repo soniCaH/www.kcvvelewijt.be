@@ -38,7 +38,7 @@ export const staticMenuItems: MenuItem[] = [
       {
         label: "Praktisch",
         items: [
-          { label: "Praktische info", href: "/club/inschrijven" },
+          { label: "Praktische info", href: "/club/praktische-informatie" },
           { label: "Word vrijwilliger", href: "/club/vrijwilliger" },
           { label: "Cashless clubkaart", href: "/club/cashless" },
           { label: "Contact", href: "/club/contact" },
