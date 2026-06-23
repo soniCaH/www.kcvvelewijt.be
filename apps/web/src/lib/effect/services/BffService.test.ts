@@ -2,6 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect } from "effect";
 import { BffService, BffServiceLive } from "./BffService";
 
+// `cachedRead` wraps the hot reads in `unstable_cache`; there's no Next request
+// scope in vitest, so stub it to a pass-through. The encode/decode round-trip
+// inside `cachedRead` still runs — see the `Date`-restoration assertion below.
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: (...args: unknown[]) => unknown) => fn,
+}));
+
 // Minimal fixture that satisfies the Match schema from @kcvv/api-contract.
 // date/time must be ISO strings because JSON.stringify converts Date objects.
 const sampleMatch = {
@@ -72,6 +79,10 @@ describe("BffService", () => {
     );
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
+    // Date survives the cachedRead encode→(JSON cache)→decode round-trip
+    // (Match.date is DateFromStringOrDate; a naive unstable_cache wrap would
+    // leave it a string).
+    expect(result[0]?.date).toBeInstanceOf(Date);
   });
 
   it("getNextMatches calls /matches/next", async () => {
@@ -120,7 +131,7 @@ describe("BffService", () => {
     };
     mockFetchWith(sampleDetail);
 
-    await Effect.runPromise(
+    const result = await Effect.runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getMatchDetail(42);
@@ -133,6 +144,8 @@ describe("BffService", () => {
       }),
       expect.any(Object),
     );
+    // Date survives the cachedRead round-trip (getMatchDetail is cached too).
+    expect(result.date).toBeInstanceOf(Date);
   });
 
   it("getRanking calls /ranking/:teamId and returns decoded entries", async () => {
@@ -151,6 +164,38 @@ describe("BffService", () => {
     );
     expect(result).toHaveLength(1);
     expect(result[0]?.team_name).toBe("KCVV Elewijt");
+  });
+
+  it("preserves the error's _tag through the cache wrap, with no extra BFF call", async () => {
+    // A BFF failure is captured as a Cause (runPromiseExit) and re-raised via
+    // failCause, so the original *tagged* error reaches the call site without a
+    // re-run — guarding the ploegen/[slug]/wedstrijden
+    // `catchTag("HttpNotFound") → notFound()` path. We assert on the specific tag
+    // (not catchAll): a naive Promise round-trip flattens the error to an opaque
+    // UnknownException, so catchTag would miss and fall through to "flattened" —
+    // i.e. the test FAILS against the bug, not just passes against the fix. (A
+    // 500 is decoded against the declared error union and fails as a ParseError.)
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getMatches(1).pipe(
+          Effect.catchTag("ParseError", () =>
+            Effect.succeed("typed-survived" as const),
+          ),
+          Effect.catchAll(() => Effect.succeed("flattened" as const)),
+        );
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(result).toBe("typed-survived");
+    // The failed effect runs once inside the cache fn and is re-raised from its
+    // captured Cause — no raw-effect re-run, so the BFF is hit exactly once.
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
   });
 
   it("propagates errors as Effect failures (not exceptions)", async () => {
