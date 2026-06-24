@@ -5,7 +5,7 @@
  * of the real CalendarWidget toolbar, preventing layout shift on hydration.
  *
  * The reskinned layout (Phase 6.D, #1994) is:
- * 1. KalenderFilterBar (pill-shaped by-type colour chips) on top
+ * 1. KalenderFilterBar (square by-type colour chips) on top
  * 2. A paper/ink panel whose toolbar row = view toggle (3-way segmented) +
  *    shared period nav + subscribe button
  * 3. Calendar grid inside the panel
@@ -42,7 +42,7 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
     expect(subscribeBtn).not.toBeNull();
   });
 
-  it("renders filter tabs skeleton with multiple pill-shaped placeholders", () => {
+  it("renders filter tabs skeleton with multiple square placeholders", () => {
     const { container } = render(<CalendarLoading />);
 
     const filterTabs = container.querySelector(
@@ -50,7 +50,7 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
     );
     expect(filterTabs).not.toBeNull();
 
-    // Should have at least 3 pill placeholders (Alles + Wedstrijden + event types)
+    // Should have at least 3 chip placeholders (Alles + Wedstrijden + event types)
     const pills = filterTabs!.querySelectorAll("[data-testid='skeleton-pill']");
     expect(pills.length).toBeGreaterThanOrEqual(3);
   });

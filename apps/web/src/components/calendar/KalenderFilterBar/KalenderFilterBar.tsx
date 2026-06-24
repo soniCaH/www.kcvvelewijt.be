@@ -96,7 +96,7 @@ export interface KalenderFilterBarProps {
 
 /**
  * Colour-coded by-type filter chips for `/kalender` (Phase 6.D Phase 2, #1992).
- * Reuses `/evenementen`'s chip vocabulary — the `EVENT_CHIP_BASE` pill shape +
+ * Reuses `/evenementen`'s chip vocabulary — the `EVENT_CHIP_BASE` square shape +
  * `EVENT_TYPE_FILL` colours — extended with a `Wedstrijden` chip for matches, so
  * the filter row doubles as a colour legend. Single-select, "Alles" default. The
  * locked set: `Alles · Wedstrijden · Clubevent · Supportersactiviteit ·

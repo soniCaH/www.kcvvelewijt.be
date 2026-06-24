@@ -4,15 +4,15 @@
  * Mirrors `EvenementenPage` (`/evenementen`):
  *   jersey-deep-dark header band (mono kicker + display headline)
  *     → <EventsBrowser>: colour-coded filter chip row above a single-column,
- *       month-grouped `<TicketStub>` list (each month: display heading + seam
- *       rule + ticket rows)
+ *       month-grouped `<TicketStub>` list (each month: display heading + ticket
+ *       rows)
  *
  * Index width (1280) on the dark field. Placeholder bars use translucent cream
  * fills (on-dark equivalent of `paper-edge`); chips/tickets keep square corners
  * and ink/cream borders.
  */
 
-import { PageContainer, StripedSeam } from "@/components/design-system";
+import { PageContainer } from "@/components/design-system";
 
 export default function EvenementenLoading() {
   return (
@@ -54,8 +54,7 @@ export default function EvenementenLoading() {
             {Array.from({ length: 2 }).map((_, m) => (
               <section key={m}>
                 <div className="bg-cream/25 mb-4 h-9 w-48" />
-                <StripedSeam colorPair="cream-jersey-deep" height="sm" />
-                <ul className="mt-4 flex flex-col gap-4">
+                <ul className="flex flex-col gap-4">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <li
                       key={i}

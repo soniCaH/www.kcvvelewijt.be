@@ -36,6 +36,22 @@ describe("EventMonthList", () => {
     ]);
   });
 
+  it("accents the month name (warm italic emphasis on the dark field)", () => {
+    render(
+      <EventMonthList
+        events={[makeEvent({ id: "a", dateStart: "2026-09-12T12:00:00Z" })]}
+      />,
+    );
+
+    const heading = screen.getByRole("heading", { level: 2 });
+    const em = heading.querySelector("em");
+    expect(em).not.toBeNull();
+    expect(em?.textContent).toBe("September");
+    expect(em?.className).toContain("text-warm");
+    // The trailing period stays unaccented (outside the <em>).
+    expect(heading.textContent).toBe("September.");
+  });
+
   it("links each ticket to the item's resolved href — event docs and event articles alike", () => {
     render(
       <EventMonthList

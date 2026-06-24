@@ -59,10 +59,12 @@ const TYPE_ORDER = Object.keys(TYPE_CHIP_STYLE) as EventType[];
 
 /**
  * Shared chip shape (also used by the `/evenementen` filtered-to-zero reset
- * button), so the pills stay visually identical across the surface.
+ * button + the `/kalender` `KalenderFilterBar`), so the chips stay visually
+ * identical across the surface. Square corners (`rounded-none`) to match the
+ * design system — no page carries rounded filter controls (#2239 KAL-1).
  */
 export const EVENT_CHIP_BASE =
-  "inline-flex items-center rounded-full border-2 px-3.5 py-1.5 font-mono font-medium uppercase " +
+  "inline-flex items-center rounded-none border-2 px-3.5 py-1.5 font-mono font-medium uppercase " +
   "text-[length:var(--text-label)] tracking-[var(--text-label--tracking)] " +
   "cursor-pointer transition-colors duration-150 " +
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
