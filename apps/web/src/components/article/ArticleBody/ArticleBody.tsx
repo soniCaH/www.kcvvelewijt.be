@@ -258,13 +258,18 @@ function socialBrandFor(
 ): { Icon: typeof FacebookLogo; label: string } | null {
   let host: string;
   try {
-    host = new URL(href).hostname.replace(/^www\./, "").toLowerCase();
+    host = new URL(href).hostname.toLowerCase();
   } catch {
     return null; // relative / malformed href → not a social affordance
   }
-  if (host === "facebook.com" || host === "fb.com" || host === "fb.me")
+  // Match a registrable domain OR any of its subdomains (www., m., web.,
+  // business., l. …) — the `.` prefix on the suffix check rejects look-alikes
+  // like notfacebook.com.
+  const isHost = (domains: string[]) =>
+    domains.some((d) => host === d || host.endsWith(`.${d}`));
+  if (isHost(["facebook.com", "fb.com", "fb.me", "fb.watch"]))
     return { Icon: FacebookLogo, label: "Facebook" };
-  if (host === "instagram.com")
+  if (isHost(["instagram.com", "instagr.am"]))
     return { Icon: InstagramLogo, label: "Instagram" };
   return null;
 }

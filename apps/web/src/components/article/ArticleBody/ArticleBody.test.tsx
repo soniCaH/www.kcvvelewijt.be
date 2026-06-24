@@ -167,6 +167,29 @@ describe("<ArticleBody>", () => {
       expect(link?.textContent).toContain("Volg ons");
     });
 
+    it("recognises social subdomains (m.facebook.com) but not look-alikes", () => {
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithLink("Mobiel", "https://m.facebook.com/KCVVElewijt"),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(
+        container.querySelector('a[data-article-link="social"]'),
+      ).toBeTruthy();
+
+      const lookalike = render(
+        <ArticleBody
+          content={[
+            paragraph("First paragraph, plain (DropCap target)."),
+            paragraphWithLink("Nep", "https://notfacebook.com/x"),
+          ]}
+        />,
+      );
+      expect(
+        lookalike.container.querySelector('a[data-article-link="social"]'),
+      ).toBeNull();
+    });
+
     it("keeps the .prose-link marker for non-social external links", () => {
       const content = [
         paragraph("First paragraph, plain (DropCap target)."),
