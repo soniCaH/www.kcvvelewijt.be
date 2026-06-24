@@ -714,9 +714,19 @@
   color: var(--color-jersey-link);
   text-decoration: none;
   font-weight: 500;
+  /* 4px breathing room each side so the marker overshoots the text like the
+     hand-drawn original (the old `::after` used left/right: -4px); the matching
+     negative margin cancels it from inline layout so surrounding copy never
+     shifts. With box-decoration-break: clone the overshoot is restored on every
+     fragment of a wrapped link. */
+  padding-inline: 4px;
+  margin-inline: -4px;
   /* #008755 (--color-jersey-deep) @ 40% baked into the fill — a CSS var can't
-     be referenced inside a data-URI SVG. */
-  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z' fill='%23008755' fill-opacity='0.4'/></svg>");
+     be referenced inside a data-URI SVG. The marker's left/right ink edges sit
+     at x=0/100 (not 1/99); left-anchored at background-position-x:0 the start
+     stays pinned ~4px before the word and never creeps right as background-size
+     animates the reveal. */
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 0 4.7 L 50 4.3 L 100 4.0 L 100 10.8 L 50 11.1 L 0 11.0 Z' fill='%23008755' fill-opacity='0.4'/></svg>");
   background-repeat: no-repeat;
   background-position: 0 100%;
   background-size: 0% 0.42em;
