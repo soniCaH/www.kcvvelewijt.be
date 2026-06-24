@@ -64,12 +64,12 @@ export async function generateMetadata({
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!event) return { title: "Evenement niet gevonden | KCVV Elewijt" };
+  if (!event) return { title: "Evenement niet gevonden" };
 
   const description = `${event.title} — Evenement van KCVV Elewijt`;
 
   return {
-    title: `${event.title} | KCVV Elewijt`,
+    title: event.title,
     description,
     alternates: { canonical: `${SITE_CONFIG.siteUrl}/evenementen/${slug}` },
     openGraph: {

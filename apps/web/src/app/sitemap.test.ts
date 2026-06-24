@@ -20,13 +20,13 @@ describe("sitemap.ts", () => {
 
     const result = await sitemap();
 
-    // Should contain all 14 static routes
+    // Should contain all 19 static routes
     const staticEntries = result.filter(
       (e) =>
         !e.url.includes("/nieuws/") ||
         e.url === "https://www.kcvvelewijt.be/nieuws",
     );
-    expect(staticEntries).toHaveLength(14);
+    expect(staticEntries).toHaveLength(19);
 
     // Verify homepage entry
     const homepage = result.find(
@@ -102,6 +102,6 @@ describe("sitemap.ts", () => {
     const result = await sitemap();
 
     // Should still return static routes
-    expect(result).toHaveLength(14);
+    expect(result).toHaveLength(19);
   });
 });

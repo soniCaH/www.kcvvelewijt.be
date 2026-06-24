@@ -13,7 +13,7 @@ import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ContactPage } from "@/components/club/ContactPage/ContactPage";
 
 export const metadata = buildPageMetadata({
-  title: "Contact | KCVV Elewijt",
+  title: "Contact",
   description:
     "Contacteer KCVV Elewijt. Adres: Driesstraat 32, 1982 Elewijt. Vind de juiste contactpersoon voor algemene vragen, jeugdwerking, sponsoring en meer.",
   path: "/club/contact",

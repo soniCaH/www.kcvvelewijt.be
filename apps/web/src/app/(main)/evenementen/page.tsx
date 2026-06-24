@@ -30,7 +30,7 @@ import {
 import { EventsBrowser } from "@/components/event/EventsBrowser";
 
 export const metadata = buildPageMetadata({
-  title: "Evenementen | KCVV Elewijt",
+  title: "Evenementen",
   description:
     "Alle aankomende evenementen van KCVV Elewijt — clubactiviteiten, jeugdevenementen en supportersuitjes.",
   path: "/evenementen",

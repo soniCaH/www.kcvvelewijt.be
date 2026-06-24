@@ -12,13 +12,20 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: BRAND.primaryColor,
     icons: [
       {
-        src: "/icon.png",
-        sizes: "512x512",
+        src: "/icon-192.png",
+        sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
         src: "/icon.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      // Dedicated safe-zone artwork so Android's mask never crops the crest.
+      {
+        src: "/icon-maskable.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",

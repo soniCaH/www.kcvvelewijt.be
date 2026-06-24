@@ -14,7 +14,7 @@ import type {
 } from "@/components/share/SharePage/SharePage";
 
 export const metadata: Metadata = {
-  title: "Story Generator | KCVV Elewijt",
+  title: "Story Generator",
   robots: { index: false, follow: false },
 };
 

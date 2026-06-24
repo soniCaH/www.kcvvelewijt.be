@@ -16,7 +16,7 @@ import { EditorialHeading, PageContainer } from "@/components/design-system";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
 
 export const metadata = buildPageMetadata({
-  title: "Word lid | KCVV Elewijt",
+  title: "Word lid",
   description:
     "Schrijf je in bij KCVV Elewijt — als speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter. Vul het inschrijfformulier in en we nemen contact met je op.",
   path: "/club/word-lid",

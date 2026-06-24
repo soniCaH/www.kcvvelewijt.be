@@ -32,7 +32,7 @@ import type {
 } from "./utils";
 
 export const metadata = buildPageMetadata({
-  title: "Kalender | KCVV Elewijt",
+  title: "Kalender",
   description:
     "Alle wedstrijden én clubactiviteiten van KCVV Elewijt op één kalender — A-ploeg, B-ploeg en jeugd. Bekijk per maand, week of als agenda, of abonneer je op je ploeg.",
   path: "/kalender",

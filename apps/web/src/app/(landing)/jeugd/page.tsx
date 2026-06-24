@@ -28,7 +28,7 @@ import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
 export const metadata = buildPageMetadata({
-  title: "Jeugdopleiding | KCVV Elewijt",
+  title: "Jeugdopleiding",
   description:
     "Ontdek de jeugdopleiding van KCVV Elewijt. Van U6 tot U21: ploegen, nieuws, trainingsinfo en meer.",
   path: "/jeugd",

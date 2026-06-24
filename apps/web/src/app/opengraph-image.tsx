@@ -2,7 +2,9 @@
  * Default Open Graph Image
  *
  * Generates a fallback OG image (1200x630) for pages that don't define their own.
- * Black-to-dark-green (#008755) gradient background with the club logo centered.
+ * Ink-to-jersey-deep gradient (brand tokens #0a0a0a → #008755) with the club logo
+ * centered. Hex values mirror globals.css `--color-ink` / `--color-jersey-deep`
+ * (Satori can't read CSS custom properties).
  */
 
 import { ImageResponse } from "next/og";
@@ -32,7 +34,7 @@ export default async function Image() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #000000 0%, #008755 100%)",
+        background: "linear-gradient(135deg, #0a0a0a 0%, #008755 100%)",
       }}
     >
       <img src={logoBase64} alt="" width={280} height={280} />

@@ -24,7 +24,7 @@ import {
 import { GalleryCardGrid } from "@/components/gallery/GalleryCardGrid/GalleryCardGrid";
 
 export const metadata = buildPageMetadata({
-  title: "Fotogalerij | KCVV Elewijt",
+  title: "Fotogalerij",
   description:
     "Foto's van wedstrijden, evenementen en clubmomenten van KCVV Elewijt.",
   path: "/galerij",

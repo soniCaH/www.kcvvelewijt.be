@@ -58,14 +58,13 @@ export async function generateMetadata({
         return yield* repo.findByPsdId(slug);
       }),
     );
-    if (!member)
-      return { title: "Stafmedewerker niet gevonden | KCVV Elewijt" };
+    if (!member) return { title: "Stafmedewerker niet gevonden" };
 
     const fullName = `${member.firstName} ${member.lastName}`.trim() || "Staf";
     const description = "KCVV Elewijt stafmedewerker";
 
     return {
-      title: `${fullName} | KCVV Elewijt`,
+      title: fullName,
       description,
       alternates: { canonical: `${SITE_CONFIG.siteUrl}/staf/${slug}` },
       openGraph: {
@@ -80,7 +79,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Stafmedewerker niet gevonden | KCVV Elewijt" };
+    return { title: "Stafmedewerker niet gevonden" };
   }
 }
 

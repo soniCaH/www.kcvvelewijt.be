@@ -22,7 +22,7 @@ import { PageContainer } from "@/components/design-system/PageContainer";
 import { TeamFlagship } from "@/components/team/TeamFlagship";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
 
-const PLOEGEN_TITLE = "Onze ploegen | KCVV Elewijt";
+const PLOEGEN_TITLE = "Onze ploegen";
 const PLOEGEN_DESCRIPTION =
   "Alle ploegen van KCVV Elewijt: eerste ploeg, tweede ploeg en jeugd van U6 tot U21.";
 

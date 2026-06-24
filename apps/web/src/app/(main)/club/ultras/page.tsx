@@ -17,7 +17,7 @@ const FACEBOOK_URL = "https://www.facebook.com/KCVV.ULTRAS.55/";
 const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
 export const metadata = buildPageMetadata({
-  title: "KCVV Ultras | KCVV Elewijt",
+  title: "KCVV Ultras",
   description:
     "Supportersclub van KCVV Elewijt: De Ultra's! Positief aanmoedigen van onze ploeg.",
   path: "/club/ultras",

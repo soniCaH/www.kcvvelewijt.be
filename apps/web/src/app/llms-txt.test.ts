@@ -9,7 +9,7 @@ describe("llms.txt", () => {
     expect(llmsTxt).toContain("KCVV Elewijt");
     expect(llmsTxt).toContain("stamnummer 55");
     expect(llmsTxt).toContain("Er is maar één plezante compagnie");
-    expect(llmsTxt).toContain("1924");
+    expect(llmsTxt).toContain("1909");
   });
 
   it("contains factual summary", () => {

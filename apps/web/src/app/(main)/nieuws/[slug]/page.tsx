@@ -264,7 +264,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!article) return { title: "Artikel niet gevonden | KCVV Elewijt" };
+  if (!article) return { title: "Artikel niet gevonden" };
 
   const description =
     article.metaDescription?.trim() ||
@@ -276,7 +276,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       : DEFAULT_OG_IMAGE;
 
   return {
-    title: `${article.title} | KCVV Elewijt`,
+    title: article.title,
     description,
     alternates: { canonical: `${SITE_CONFIG.siteUrl}/nieuws/${slug}` },
     openGraph: {

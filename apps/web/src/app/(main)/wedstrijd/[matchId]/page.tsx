@@ -90,7 +90,7 @@ export async function generateMetadata({
 
   if (isNaN(numericId)) {
     return {
-      title: "Wedstrijd niet gevonden | KCVV Elewijt",
+      title: "Wedstrijd niet gevonden",
     };
   }
 
@@ -106,7 +106,7 @@ export async function generateMetadata({
     const description = formatMatchDescription(match);
 
     return {
-      title: `${title} | KCVV Elewijt`,
+      title,
       description,
       alternates: { canonical: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}` },
       openGraph: {
@@ -118,7 +118,7 @@ export async function generateMetadata({
     };
   } catch {
     return {
-      title: "Wedstrijd niet gevonden | KCVV Elewijt",
+      title: "Wedstrijd niet gevonden",
     };
   }
 }

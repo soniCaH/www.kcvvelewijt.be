@@ -21,7 +21,7 @@ import {
 } from "@/components/scheurkalender/ScheurkalenderPage";
 
 export const metadata: Metadata = {
-  title: "Scheurkalender | KCVV Elewijt",
+  title: "Scheurkalender",
   description:
     "Interne wedstrijdkalender (competitie A + B) — bron voor de seizoensposter.",
   // Private tool: keep it out of search indexes (also unlinked everywhere).
