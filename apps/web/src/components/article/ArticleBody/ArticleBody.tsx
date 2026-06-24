@@ -5,7 +5,11 @@ import type {
 } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowSquareOut as ExternalLinkIcon } from "@/lib/icons.redesign";
+import {
+  ArrowSquareOut as ExternalLinkIcon,
+  FacebookLogo,
+  InstagramLogo,
+} from "@/lib/icons.redesign";
 import type { ReactNode } from "react";
 import { BodyQuote } from "@/components/design-system/BodyQuote";
 import { DropCapParagraph } from "@/components/design-system/DropCapParagraph";
@@ -242,6 +246,32 @@ function resolveInternalLinkHref(ref?: InternalLinkReference): string {
     default:
       return "#";
   }
+}
+
+/**
+ * Known social hosts → the brand icon that turns a plain body link into a
+ * recognisable affordance (CMS-2). Returns null for everything else, so
+ * ordinary external links keep the canonical `.prose-link` highlighter marker.
+ */
+function socialBrandFor(
+  href: string,
+): { Icon: typeof FacebookLogo; label: string } | null {
+  let host: string;
+  try {
+    host = new URL(href).hostname.toLowerCase();
+  } catch {
+    return null; // relative / malformed href → not a social affordance
+  }
+  // Match a registrable domain OR any of its subdomains (www., m., web.,
+  // business., l. …) — the `.` prefix on the suffix check rejects look-alikes
+  // like notfacebook.com.
+  const isHost = (domains: string[]) =>
+    domains.some((d) => host === d || host.endsWith(`.${d}`));
+  if (isHost(["facebook.com", "fb.com", "fb.me", "fb.watch"]))
+    return { Icon: FacebookLogo, label: "Facebook" };
+  if (isHost(["instagram.com", "instagr.am"]))
+    return { Icon: InstagramLogo, label: "Instagram" };
+  return null;
 }
 
 /**
@@ -609,6 +639,28 @@ function buildComponents({
       }) => {
         const href = value?.href ?? "#";
         const isExternal = href.startsWith("http");
+        const social = isExternal ? socialBrandFor(href) : null;
+        if (social) {
+          const { Icon, label } = social;
+          return (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-article-link="social"
+              // Social links read as a bordered icon affordance (CMS-2), reusing
+              // the footer's square brand-button idiom on the cream body surface.
+              className="border-jersey-deep/40 text-jersey-deep hover:border-jersey-deep hover:bg-jersey-deep/5 inline-flex items-center gap-1.5 border px-2 py-0.5 align-baseline font-medium no-underline transition-colors"
+            >
+              <Icon
+                aria-hidden="true"
+                className="inline-block size-[1em] shrink-0"
+              />
+              {children}
+              <span className="sr-only"> ({label}, opens in new tab)</span>
+            </a>
+          );
+        }
         return (
           <a
             href={href}

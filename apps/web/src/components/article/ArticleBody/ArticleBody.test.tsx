@@ -60,6 +60,16 @@ function paragraphWithAccent(
   } as PortableTextBlock;
 }
 
+function paragraphWithLink(text: string, href: string): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: "link-block",
+    style: "normal",
+    children: [{ _type: "span", _key: "lc", text, marks: ["lk"] }],
+    markDefs: [{ _type: "link", _key: "lk", href }],
+  } as PortableTextBlock;
+}
+
 describe("<ArticleBody>", () => {
   describe("DropCap injection", () => {
     it("wraps the first normal paragraph in <DropCapParagraph>", () => {
@@ -136,6 +146,60 @@ describe("<ArticleBody>", () => {
       ).toBeNull();
       const dropcap = container.querySelector('[data-tone="ink"]');
       expect(dropcap?.textContent).toBe("Een groene cursief");
+    });
+  });
+
+  describe("social link affordance (CMS-2)", () => {
+    it("renders a Facebook link as a bordered icon affordance, not .prose-link", () => {
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithLink("Volg ons", "https://facebook.com/KCVVElewijt/"),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const link = container.querySelector('a[data-article-link="social"]');
+      expect(link).toBeTruthy();
+      expect(link?.getAttribute("href")).toBe(
+        "https://facebook.com/KCVVElewijt/",
+      );
+      expect(link?.getAttribute("target")).toBe("_blank");
+      expect(link?.className).not.toContain("prose-link");
+      expect(link?.querySelector("svg")).toBeTruthy(); // brand icon present
+      expect(link?.textContent).toContain("Volg ons");
+    });
+
+    it("recognises social subdomains (m.facebook.com) but not look-alikes", () => {
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithLink("Mobiel", "https://m.facebook.com/KCVVElewijt"),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(
+        container.querySelector('a[data-article-link="social"]'),
+      ).toBeTruthy();
+
+      const lookalike = render(
+        <ArticleBody
+          content={[
+            paragraph("First paragraph, plain (DropCap target)."),
+            paragraphWithLink("Nep", "https://notfacebook.com/x"),
+          ]}
+        />,
+      );
+      expect(
+        lookalike.container.querySelector('a[data-article-link="social"]'),
+      ).toBeNull();
+    });
+
+    it("keeps the .prose-link marker for non-social external links", () => {
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithLink("Bekijk", "https://www.voetbalvlaanderen.be"),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(
+        container.querySelector('a[data-article-link="social"]'),
+      ).toBeNull();
+      expect(container.querySelector("a.prose-link")).toBeTruthy();
     });
   });
 
