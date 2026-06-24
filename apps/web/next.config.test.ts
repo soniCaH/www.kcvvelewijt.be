@@ -6,7 +6,6 @@ describe("next.config redirects", () => {
     const redirects = await nextConfig.redirects!();
 
     const expected = [
-      { source: "/players/:slug", destination: "/spelers/:slug" },
       { source: "/news", destination: "/nieuws" },
       { source: "/news/:slug", destination: "/nieuws/:slug" },
       { source: "/game/:matchId", destination: "/wedstrijd/:matchId" },
@@ -70,13 +69,36 @@ describe("next.config redirects", () => {
     expect(match!.permanent).toBe(true);
   });
 
-  it("redirects /jeugd/:slug to /ploegen/:slug (excluding visie and medisch)", async () => {
+  it("redirects retired Gatsby routes to the nearest page with 308 (#2227 SEO-9)", async () => {
     const redirects = await nextConfig.redirects!();
 
-    const match = redirects.find((r) => r.source.startsWith("/jeugd/"));
-    expect(match).toBeDefined();
-    expect(match!.source).toBe("/jeugd/:slug((?!visie|medisch).*)");
-    expect(match!.destination).toBe("/ploegen/:slug");
-    expect(match!.permanent).toBe(true);
+    const expected = [
+      { source: "/club/cashless", destination: "/club/praktische-informatie" },
+      {
+        source: "/club/cashless/voorwaarden",
+        destination: "/club/praktische-informatie",
+      },
+      { source: "/club/downloads", destination: "/club" },
+      { source: "/kiosk", destination: "/kalender" },
+      { source: "/kiosk/:path*", destination: "/kalender" },
+    ];
+
+    for (const { source, destination } of expected) {
+      const match = redirects.find((r) => r.source === source);
+      expect(match, `Missing redirect for ${source}`).toBeDefined();
+      expect(match!.destination).toBe(destination);
+      expect(match!.permanent).toBe(true);
+    }
+  });
+
+  it("drops the broken static player/staff/youth renames now handled by resolver routes (#2227)", async () => {
+    const redirects = await nextConfig.redirects!();
+    const sources = redirects.map((r) => r.source);
+    // These passed a name-slug / bare age token to psdId-/slug-keyed targets and
+    // 404'd. Resolution now lives in src/app/{player,players,staff}/[slug] and
+    // src/app/(landing)/jeugd/[slug].
+    expect(sources).not.toContain("/players/:slug");
+    expect(sources).not.toContain("/staff/:slug");
+    expect(sources.some((source) => source.startsWith("/jeugd/"))).toBe(false);
   });
 });

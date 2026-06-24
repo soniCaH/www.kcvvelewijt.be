@@ -3,21 +3,14 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
 
-  // Redirects for old /jeugd/* URLs to /ploegen/*
-  // This ensures SEO preservation for any indexed youth team pages
+  // Static SEO redirects for renamed/retired routes. Dynamic legacy resolvers
+  // that need a CMS lookup (player/staff name-slug → psdId, youth age → team
+  // slug) are routes under src/app/{player,players,staff}/[slug] and
+  // src/app/(landing)/jeugd/[slug] instead — a static prefix redirect there
+  // would 404 against the psdId-/slug-keyed targets (#2227).
   async redirects() {
     return [
-      {
-        source: "/jeugd/:slug((?!visie|medisch).*)",
-        destination: "/ploegen/:slug",
-        permanent: true, // 308 redirect for SEO
-      },
       // #819 — Dutch URL renames
-      {
-        source: "/players/:slug",
-        destination: "/spelers/:slug",
-        permanent: true,
-      },
       {
         source: "/news",
         destination: "/nieuws",
@@ -71,12 +64,6 @@ const nextConfig: NextConfig = {
         destination: "/club/praktische-informatie",
         permanent: true,
       },
-      // #1002 — Dutch URL for staff member detail pages
-      {
-        source: "/staff/:slug",
-        destination: "/staf/:slug",
-        permanent: true,
-      },
       // #1964 — Phase 6.E events route rename /events → /evenementen.
       // `permanent: true` emits a 308 (matching every rename above); the
       // issue's "301" is shorthand for a permanent redirect.
@@ -100,6 +87,34 @@ const nextConfig: NextConfig = {
       {
         source: "/club/organigram",
         destination: "/hulp#structuur",
+        permanent: true,
+      },
+      // #2227 (SEO-9) — retired Gatsby routes with no direct equivalent →
+      // nearest live page (owner decision on the issue).
+      {
+        source: "/club/cashless",
+        destination: "/club/praktische-informatie",
+        permanent: true,
+      },
+      {
+        source: "/club/cashless/voorwaarden",
+        destination: "/club/praktische-informatie",
+        permanent: true,
+      },
+      {
+        source: "/club/downloads",
+        destination: "/club",
+        permanent: true,
+      },
+      // Internal kiosk displays (a, b, previous, upcoming, ranking/*) → calendar.
+      {
+        source: "/kiosk",
+        destination: "/kalender",
+        permanent: true,
+      },
+      {
+        source: "/kiosk/:path*",
+        destination: "/kalender",
         permanent: true,
       },
     ];
