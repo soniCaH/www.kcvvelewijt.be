@@ -43,9 +43,29 @@ function useAutoFit<T extends HTMLElement>(
       if (!cancelled) setSize(next);
     };
     fit();
+    const refit = () => !cancelled && fit();
     const fonts = typeof document !== "undefined" ? document.fonts : undefined;
-    if (fonts?.ready) {
-      fonts.ready.then(() => !cancelled && fit()).catch(() => {});
+    if (fonts) {
+      // Re-measure once webfonts settle. Adobe Typekit injects its @font-face
+      // ASYNCHRONOUSLY, so `fonts.ready` can resolve BEFORE Freight is even
+      // pending — the first measure then uses the narrower fallback metrics, a
+      // long name "fits", and it overflows when the wider Freight swaps in
+      // (SHARE-1). `fonts.load()` for the element's own computed font forces and
+      // awaits that specific face, so the re-fit runs against real metrics.
+      const el = ref.current;
+      if (el && typeof fonts.load === "function") {
+        const cs = getComputedStyle(el);
+        const font = `${cs.fontStyle} ${cs.fontWeight} ${fontSize}px ${cs.fontFamily}`;
+        try {
+          fonts
+            .load(font, el.textContent ?? "")
+            .then(refit)
+            .catch(() => {});
+        } catch {
+          // happy-dom / malformed shorthand → skip the targeted reload
+        }
+      }
+      fonts.ready?.then(refit).catch(() => {});
     }
     return () => {
       cancelled = true;

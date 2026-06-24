@@ -87,7 +87,7 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
         {hasPullquote ? (
           <aside
             data-testid="bioblock-pullquote"
-            className="self-start lg:sticky lg:top-8"
+            className="self-start lg:sticky lg:top-24"
           >
             <PullQuote
               tone="jersey"

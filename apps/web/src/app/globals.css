@@ -702,54 +702,39 @@
 /* ===== Canonical inline body-text link (#2154) =====
    The single treatment for inline links inside long-form body copy — article
    bodies, CMS pages, hulp answers, legal copy. jersey-deep text with a
-   hand-pulled, match-score-tint highlighter that sweeps in left→right on hover
-   (revealed via clip-path so the slab is fixed-size and its ends never drift),
-   overshooting the text ~4px each side so it reads like a hand-drawn marker.
-   `isolation: isolate` keeps the `::after` marker behind the text but above the
-   page surface. UI / affordance links (nav, CTA, mono "→" links) keep their own
-   styling — this is body copy only. Unlayered so it beats the typography plugin
-   and the `main a` colour fallback. */
+   hand-pulled, match-score-tint highlighter that sweeps in left→right on hover.
+   The marker is a per-fragment `background-image` (not an absolutely-positioned
+   `::after`) so it covers EVERY line of a wrapped link: `box-decoration-break:
+   clone` repaints the background on each line fragment, and `background-size`
+   width animates the reveal (an absolute `::after` only ever covers one line
+   box — the CMS-1 wrapped-link bug). UI / affordance links (nav, CTA, mono "→"
+   links) keep their own styling — this is body copy only. Unlayered so it beats
+   the typography plugin and the `main a` colour fallback. */
 .prose-link {
-  position: relative;
-  isolation: isolate;
   color: var(--color-jersey-link);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.prose-link::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: -4px;
-  right: -4px;
-  bottom: 0.02em;
-  height: 0.42em;
-  background-color: color-mix(in srgb, var(--color-jersey-deep) 40%, transparent);
-  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z' fill='black'/></svg>");
-  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z' fill='black'/></svg>");
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-clip-path: inset(0 100% 0 0);
-  clip-path: inset(0 100% 0 0);
+  /* #008755 (--color-jersey-deep) @ 40% baked into the fill — a CSS var can't
+     be referenced inside a data-URI SVG. */
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z' fill='%23008755' fill-opacity='0.4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 0.42em;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   transition:
-    -webkit-clip-path 320ms ease-out,
-    clip-path 320ms ease-out;
-  pointer-events: none;
+    color 0.3s ease,
+    background-size 320ms ease-out;
 }
 
-.prose-link:hover::after,
-.prose-link:focus-visible::after {
-  -webkit-clip-path: inset(0 0 0 0);
-  clip-path: inset(0 0 0 0);
+.prose-link:hover,
+.prose-link:focus-visible {
+  background-size: 100% 0.42em;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .prose-link::after {
-    transition: none;
+  .prose-link {
+    transition: color 0.3s ease;
   }
 }
 
