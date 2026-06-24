@@ -21,7 +21,7 @@ import { sortByTierThenName } from "@/components/sponsors/sortByTierThenName";
 import { SponsorsPage } from "@/components/sponsors/SponsorsPage/SponsorsPage";
 
 export const metadata = buildPageMetadata({
-  title: "Sponsors | KCVV Elewijt",
+  title: "Sponsors",
   description: "Overzicht van de sponsors die KCVV Elewijt steunen.",
   path: "/sponsors",
 });

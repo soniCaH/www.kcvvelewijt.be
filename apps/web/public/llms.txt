@@ -1,6 +1,6 @@
 # KCVV Elewijt
 
-> KCVV Elewijt (stamnummer 55) is een Belgische voetbalclub uit Elewijt, deelgemeente van Zemst in Vlaams-Brabant. Opgericht in 1924. Clubmotto: "Er is maar één plezante compagnie". Clubkleuren: groen en wit.
+> KCVV Elewijt (stamnummer 55) is een Belgische voetbalclub uit Elewijt, deelgemeente van Zemst in Vlaams-Brabant. Opgericht in 1909. Clubmotto: "Er is maar één plezante compagnie". Clubkleuren: groen en wit.
 
 ## Over de club
 
@@ -24,7 +24,7 @@ De officiële website van KCVV Elewijt: https://www.kcvvelewijt.be
 - /sponsors — Overzicht van clubsponsors
 - /club — Informatie over de club
 - /club/geschiedenis — Clubgeschiedenis
-- /club/organigram — Bestuursstructuur
+- /hulp — Hulp & wie-is-wie: clubmedewerkers en contactpersonen
 - /club/contact — Contactgegevens
 - /club/word-lid — Lid worden (online inschrijvingsformulier)
 - /club/inschrijven — Praktische info (lidgeld, terugbetalingen, ProSoccerData)

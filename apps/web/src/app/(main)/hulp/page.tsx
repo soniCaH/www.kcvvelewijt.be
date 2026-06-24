@@ -51,7 +51,7 @@ export const revalidate = 3600;
 export async function generateMetadata(): Promise<Metadata> {
   const canonical = `${SITE_CONFIG.siteUrl}/hulp`;
   return {
-    title: "Hulp & wie-is-wie | KCVV Elewijt",
+    title: "Hulp & wie-is-wie",
     description:
       "Vind snel de juiste persoon of het juiste antwoord bij KCVV Elewijt. Typ een naam, functie of vraag, of blader door de structuur en de hulpvragen.",
     keywords: [

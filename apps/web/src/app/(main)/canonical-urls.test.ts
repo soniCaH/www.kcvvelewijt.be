@@ -182,6 +182,35 @@ describe("Canonical URLs backfilled via buildPageMetadata", () => {
   });
 });
 
+describe("Static listing canonicals (#2228)", () => {
+  it("/ (homepage) canonicalizes to the site root", async () => {
+    const home = await import("../(landing)/page");
+    const metadata = await home.generateMetadata();
+    expect(metadata).toHaveProperty(
+      "alternates.canonical",
+      SITE_CONFIG.siteUrl,
+    );
+  });
+
+  it("/nieuws canonicalizes to /nieuws, including ?categorie views", async () => {
+    const nieuws = await import("../(landing)/nieuws/page");
+    const base = await nieuws.generateMetadata({
+      searchParams: Promise.resolve({}),
+    });
+    expect(base).toHaveProperty(
+      "alternates.canonical",
+      `${SITE_CONFIG.siteUrl}/nieuws`,
+    );
+    const filtered = await nieuws.generateMetadata({
+      searchParams: Promise.resolve({ categorie: "Jeugd" }),
+    });
+    expect(filtered).toHaveProperty(
+      "alternates.canonical",
+      `${SITE_CONFIG.siteUrl}/nieuws`,
+    );
+  });
+});
+
 describe("Noindex routes do NOT have canonical URLs", () => {
   it("/tegenstander/[clubId] has robots noindex and no canonical", async () => {
     const { metadata } = await import("./tegenstander/[clubId]/page");

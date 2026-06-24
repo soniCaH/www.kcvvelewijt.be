@@ -5,7 +5,7 @@ import { buildPageMetadata } from "./page-metadata";
 describe("buildPageMetadata", () => {
   it("sets the absolute canonical URL from path", () => {
     const meta = buildPageMetadata({
-      title: "Contact | KCVV Elewijt",
+      title: "Contact",
       description: "Contacteer KCVV Elewijt.",
       path: "/club/contact",
     });
@@ -40,12 +40,12 @@ describe("buildPageMetadata", () => {
 
   it("defaults openGraph title/description to the page title/description", () => {
     const meta = buildPageMetadata({
-      title: "Zoeken | KCVV Elewijt",
+      title: "Zoeken",
       description: "Doorzoek de website.",
       path: "/zoeken",
     });
     const og = meta.openGraph as { title?: string; description?: string };
-    expect(og.title).toBe("Zoeken | KCVV Elewijt");
+    expect(og.title).toBe("Zoeken");
     expect(og.description).toBe("Doorzoek de website.");
   });
 
@@ -53,7 +53,7 @@ describe("buildPageMetadata", () => {
     // ogDescription is deliberately distinct from description so the
     // assertion proves the override is used, not the default fallback.
     const meta = buildPageMetadata({
-      title: "KCVV Ultras | KCVV Elewijt",
+      title: "KCVV Ultras",
       description:
         "Supportersclub van KCVV Elewijt: De Ultra's! Positief aanmoedigen van onze ploeg.",
       path: "/club/ultras",

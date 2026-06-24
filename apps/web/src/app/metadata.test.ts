@@ -14,4 +14,18 @@ describe("root layout metadata", () => {
     expect(og.images).toHaveLength(1);
     expect(og.images![0]).toEqual(DEFAULT_OG_IMAGE);
   });
+
+  // #2228 SEO-1: the " | KCVV Elewijt" suffix lives ONLY in the root title
+  // template. Pages that also hardcode it produce a doubled "<x> | KCVV Elewijt
+  // | KCVV Elewijt" <title>.
+  it("owns the brand suffix centrally via the title template", () => {
+    const title = metadata.title as { template?: string };
+    expect(title.template).toBe("%s | KCVV Elewijt");
+  });
+
+  it("static pages do not hardcode the brand suffix in their title", async () => {
+    const { metadata: privacy } = await import("./(main)/privacy/page");
+    expect(privacy.title).toBe("Privacyverklaring");
+    expect(String(privacy.title)).not.toContain("| KCVV Elewijt");
+  });
 });

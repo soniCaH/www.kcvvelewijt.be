@@ -14,11 +14,16 @@ const staticRoutes: Array<{
   { path: "/galerij", priority: 0.6, changeFrequency: "monthly" },
   { path: "/hulp", priority: 0.7, changeFrequency: "monthly" },
   { path: "/kalender", priority: 0.8, changeFrequency: "daily" },
+  { path: "/evenementen", priority: 0.7, changeFrequency: "weekly" },
   { path: "/zoeken", priority: 0.5, changeFrequency: "monthly" },
   { path: "/club", priority: 0.7, changeFrequency: "monthly" },
   { path: "/club/geschiedenis", priority: 0.6, changeFrequency: "yearly" },
   { path: "/club/ultras", priority: 0.6, changeFrequency: "monthly" },
   { path: "/club/contact", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/club/word-lid", priority: 0.7, changeFrequency: "monthly" },
+  { path: "/club/bestuur", priority: 0.5, changeFrequency: "monthly" },
+  { path: "/club/jeugdbestuur", priority: 0.5, changeFrequency: "monthly" },
+  { path: "/club/angels", priority: 0.5, changeFrequency: "monthly" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
 ];
 

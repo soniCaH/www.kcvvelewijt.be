@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : undefined;
 
   return buildPageMetadata({
-    title: `${page.title} | KCVV Elewijt`,
+    title: page.title,
     description,
     path: `/club/${slug}`,
     ogTitle: `${page.title} - KCVV Elewijt`,

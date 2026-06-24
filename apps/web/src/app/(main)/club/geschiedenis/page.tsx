@@ -5,7 +5,7 @@ import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { HistoryContent } from "./HistoryContent";
 
 export const metadata = buildPageMetadata({
-  title: "Geschiedenis | KCVV Elewijt",
+  title: "Geschiedenis",
   description:
     "Tijdslijn van de rijkgevulde geschiedenis van KCVV Elewijt van 1909 tot nu!",
   path: "/club/geschiedenis",

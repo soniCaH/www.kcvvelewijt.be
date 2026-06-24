@@ -3,10 +3,12 @@
  */
 
 // Brand tokens — single source of truth for values used in both CSS and JS/TS contexts
-// (CSS custom properties can't be read server-side, so we duplicate the primary here)
+// (CSS custom properties can't be read server-side, so we duplicate them here).
+// Mirrors globals.css: `--color-jersey-deep` (#008755) and `--color-cream` (#f5f1e6).
+// The retired bright jersey (#4acf52) is no longer the brand primary.
 export const BRAND = {
-  primaryColor: "#4acf52",
-  backgroundColor: "#fefefe",
+  primaryColor: "#008755", // jersey-deep
+  backgroundColor: "#f5f1e6", // cream
 } as const;
 
 // Site Configuration
@@ -23,7 +25,7 @@ export const SITE_CONFIG = {
 // Default Open Graph image — used as fallback in page metadata to prevent
 // Next.js shallow-merge from losing the root openGraph.images.
 export const DEFAULT_OG_IMAGE = {
-  url: "/opengraph-image.png",
+  url: "/opengraph-image",
   width: 1200,
   height: 630,
   alt: "KCVV Elewijt",

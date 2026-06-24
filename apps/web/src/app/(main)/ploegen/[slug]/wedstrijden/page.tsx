@@ -34,9 +34,9 @@ export async function generateMetadata({
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
+  if (!team) return { title: "Team niet gevonden" };
 
-  const title = `Wedstrijden — ${team.name} | KCVV Elewijt`;
+  const title = `Wedstrijden — ${team.name}`;
   const description = `Volledig wedstrijdschema van ${team.name}.`;
   const url = `${SITE_CONFIG.siteUrl}/ploegen/${slug}/wedstrijden`;
 

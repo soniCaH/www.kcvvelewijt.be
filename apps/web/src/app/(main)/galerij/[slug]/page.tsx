@@ -64,14 +64,14 @@ export async function generateMetadata({
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!gallery) return { title: "Galerij niet gevonden | KCVV Elewijt" };
+  if (!gallery) return { title: "Galerij niet gevonden" };
 
   const description =
     gallery.descriptionText || `Foto's van ${gallery.title} — KCVV Elewijt`;
   const og = ogImageUrl(gallery.images?.[0]?.url);
 
   return {
-    title: `${gallery.title} | KCVV Elewijt`,
+    title: gallery.title,
     description,
     alternates: { canonical: `${SITE_CONFIG.siteUrl}/galerij/${slug}` },
     openGraph: {

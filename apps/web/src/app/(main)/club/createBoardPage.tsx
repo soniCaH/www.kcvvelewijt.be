@@ -70,7 +70,7 @@ export function createBoardPage({
         : fallbackDescription;
 
       return buildPageMetadata({
-        title: `${team.name} | KCVV Elewijt`,
+        title: team.name,
         description,
         path: `/club/${slug}`,
         ogTitle: team.name,
@@ -88,7 +88,7 @@ export function createBoardPage({
         throw error;
       }
       return buildPageMetadata({
-        title: `${fallbackTitle} | KCVV Elewijt`,
+        title: fallbackTitle,
         description: fallbackDescription,
         path: `/club/${slug}`,
       });

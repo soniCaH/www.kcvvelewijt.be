@@ -64,13 +64,14 @@ import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Er is maar één plezante compagnie | KCVV Elewijt";
+  const title = "Er is maar één plezante compagnie";
   const description = "Startpagina van stamnummer 00055: KCVV Elewijt.";
   return {
     title,
     description,
     keywords:
       "KCVV, Voetbal, Elewijt, Crossing, KCVVE, Zemst, 00055, 55, 1982, 1980",
+    alternates: { canonical: SITE_CONFIG.siteUrl },
     openGraph: {
       title,
       description,

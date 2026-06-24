@@ -14,7 +14,7 @@ import { SearchInterface } from "@/components/search";
 import { SearchMastheadSkeleton } from "@/components/search/SearchMastheadSkeleton";
 
 export const metadata = buildPageMetadata({
-  title: "Zoeken | KCVV Elewijt",
+  title: "Zoeken",
   description:
     "Doorzoek nieuws, spelers, teams en meer op de website van KCVV Elewijt",
   path: "/zoeken",

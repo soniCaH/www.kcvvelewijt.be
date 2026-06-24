@@ -92,13 +92,13 @@ export async function generateMetadata({
         return yield* repo.findByPsdId(slug);
       }),
     );
-    if (!player) return { title: "Speler niet gevonden | KCVV Elewijt" };
+    if (!player) return { title: "Speler niet gevonden" };
 
     const fullName =
       `${player.firstName} ${player.lastName}`.trim() || "Speler";
 
     return {
-      title: `${fullName} | KCVV Elewijt`,
+      title: fullName,
       description: `${player.position} bij KCVV Elewijt`,
       alternates: { canonical: `${SITE_CONFIG.siteUrl}/spelers/${slug}` },
       openGraph: {
@@ -113,7 +113,7 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Speler niet gevonden | KCVV Elewijt" };
+    return { title: "Speler niet gevonden" };
   }
 }
 

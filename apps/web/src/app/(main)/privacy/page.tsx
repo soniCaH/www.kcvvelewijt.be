@@ -24,7 +24,7 @@ import {
 const LAST_UPDATED = "juni 2026";
 
 export const metadata = buildPageMetadata({
-  title: "Privacyverklaring | KCVV Elewijt",
+  title: "Privacyverklaring",
   description:
     "Privacyverklaring en cookiebeleid van KCVV Elewijt. Lees hoe we omgaan met jouw persoonsgegevens conform de GDPR wetgeving.",
   path: "/privacy",

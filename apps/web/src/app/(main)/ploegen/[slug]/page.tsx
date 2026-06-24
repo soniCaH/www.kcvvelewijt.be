@@ -58,7 +58,7 @@ export async function generateMetadata({
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!team) return { title: "Team niet gevonden | KCVV Elewijt" };
+  if (!team) return { title: "Team niet gevonden" };
 
   const typeLabel = team.teamType === "youth" ? "Jeugdploeg" : "Ploeg";
   const description = team.tagline
@@ -66,7 +66,7 @@ export async function generateMetadata({
     : `${team.name} - KCVV Elewijt ${typeLabel}`;
 
   return {
-    title: `${team.name} | KCVV Elewijt`,
+    title: team.name,
     description,
     alternates: { canonical: `${SITE_CONFIG.siteUrl}/ploegen/${slug}` },
     openGraph: {

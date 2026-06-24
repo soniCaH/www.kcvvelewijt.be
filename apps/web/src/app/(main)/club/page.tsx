@@ -14,7 +14,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ClubEditorialHub } from "@/components/club/ClubEditorialHub/ClubEditorialHub";
 
 export const metadata = buildPageMetadata({
-  title: "Onze club | KCVV Elewijt",
+  title: "Onze club",
   description:
     "Alles over KCVV Elewijt: geschiedenis, bestuur, organigram en hoe je kan aansluiten.",
   path: "/club",
