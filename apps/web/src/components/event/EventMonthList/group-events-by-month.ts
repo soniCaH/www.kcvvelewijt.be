@@ -9,6 +9,11 @@ export interface EventMonthGroup<T> {
    * than one calendar year (design lock 6e3 year-boundary rule).
    */
   label: string;
+  /**
+   * Bare capitalised month name (no year), so the heading can accent just the
+   * month token even when `label` carries a trailing year (#2239 EVT-2).
+   */
+  month: string;
   events: T[];
 }
 
@@ -43,6 +48,7 @@ export function groupEventsByMonth<T extends { dateStart: string }>(
       group = {
         key,
         label: spansYears ? `${month} ${dt.year}` : month,
+        month,
         events: [],
       };
       byKey.set(key, group);

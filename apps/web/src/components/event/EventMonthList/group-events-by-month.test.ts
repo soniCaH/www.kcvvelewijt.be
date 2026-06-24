@@ -33,6 +33,18 @@ describe("groupEventsByMonth", () => {
     expect(sep?.label).toBe("September");
   });
 
+  it("exposes the bare month name for heading emphasis, year or not", () => {
+    const single = groupEventsByMonth([ev("a", "2026-09-12T12:00:00Z")]);
+    expect(single[0]?.month).toBe("September");
+
+    const spanning = groupEventsByMonth([
+      ev("a", "2026-12-20T12:00:00Z"),
+      ev("b", "2027-01-10T12:00:00Z"),
+    ]);
+    // `month` stays bare even when the label gains a year suffix.
+    expect(spanning.map((g) => g.month)).toEqual(["December", "Januari"]);
+  });
+
   it("adds the year to every label when the list spans more than one year", () => {
     const groups = groupEventsByMonth([
       ev("a", "2026-12-20T12:00:00Z"),

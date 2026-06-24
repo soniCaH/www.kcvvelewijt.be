@@ -28,9 +28,9 @@ export default function CalendarLoading() {
       <PageContainer width="index" className="py-10">
         {/* Matches CalendarWidget's root <div className="space-y-4"> */}
         <div className="space-y-4">
-          {/* Type filter chips — pill placeholders matching KalenderFilterBar
+          {/* Type filter chips — square placeholders matching KalenderFilterBar
               (Alles · Wedstrijden · Clubevent · Supportersactiviteit ·
-              Jeugdwerking · Andere) */}
+              Jeugdwerking · Andere); square corners per #2239 KAL-1 */}
           <div
             className="flex flex-wrap gap-2"
             data-testid="calendar-skeleton-filter-tabs"
@@ -38,7 +38,7 @@ export default function CalendarLoading() {
             {["w-16", "w-28", "w-24", "w-44", "w-28", "w-20"].map((w, i) => (
               <div
                 key={i}
-                className={`${w} border-paper-edge bg-cream-soft h-[32px] animate-pulse rounded-full border-2`}
+                className={`${w} border-paper-edge bg-cream-soft h-[32px] animate-pulse rounded-none border-2`}
                 data-testid="skeleton-pill"
               />
             ))}
