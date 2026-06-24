@@ -1,7 +1,7 @@
 /**
  * NewsListingClient Story
  * The redesigned /news page with featured split (2fr|1fr), 3-column grid,
- * sticky category filter bar, and infinite scroll.
+ * sticky category filter bar, and a load-more button.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -96,7 +96,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Redesigned news listing page with featured 2fr|1fr split at top, 3-column grid with infinite scroll, and sticky category filter bar.",
+          "Redesigned news listing page with featured 2fr|1fr split at top, 3-column grid with a load-more button, and sticky category filter bar.",
       },
     },
   },

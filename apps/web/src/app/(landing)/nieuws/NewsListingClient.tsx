@@ -3,7 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { NewsCard, CategoryFilters } from "@/components/article";
-import { EditorialHeading, PageContainer } from "@/components/design-system";
+import {
+  Button,
+  EditorialHeading,
+  PageContainer,
+} from "@/components/design-system";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { matchTypeCardLabel } from "@/lib/utils/article-type-label";
 import type { PaginatedArticles } from "./utils";
@@ -47,7 +51,6 @@ export function NewsListingClient({
     message: string;
     retry: () => void;
   } | null>(null);
-  const [sentinelNode, setSentinelNode] = useState<HTMLDivElement | null>(null);
   const categoryRequestId = useRef(0);
   const isLoadingRef = useRef(false);
   const featuredIdsRef = useRef(new Set(initialFeatured.map((a) => a.id)));
@@ -105,24 +108,6 @@ export function NewsListingClient({
       }
     }
   }, [hasMore, activeCategory, fetchArticles]);
-
-  // Intersection Observer for infinite scroll — reattaches whenever the
-  // sentinel DOM node changes (remount via hasMore/isLoading/error toggling).
-  useEffect(() => {
-    if (!sentinelNode) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      { rootMargin: "200px" },
-    );
-
-    observer.observe(sentinelNode);
-    return () => observer.unobserve(sentinelNode);
-  }, [sentinelNode, loadMore]);
 
   // Category change handler
   const handleCategoryChange = useCallback(
@@ -287,7 +272,8 @@ export function NewsListingClient({
           </p>
         )}
 
-        {/* Loading indicator */}
+        {/* Loading indicator — shown while a load-more or category switch
+            is in flight. */}
         {isLoading && (
           <div className="flex justify-center py-8" role="status">
             <div className="border-jersey-deep h-8 w-8 animate-spin rounded-full border-4 border-t-transparent" />
@@ -295,9 +281,14 @@ export function NewsListingClient({
           </div>
         )}
 
-        {/* Intersection Observer sentinel */}
+        {/* Load-more button (NEWS-1, #2237) — replaces the old infinite
+            scroll. Appends BATCH_SIZE more articles per click. */}
         {hasMore && !isLoading && !error && (
-          <div ref={setSentinelNode} className="h-4" aria-hidden="true" />
+          <div className="flex justify-center pt-2 pb-4">
+            <Button variant="secondary" size="md" onClick={loadMore}>
+              Meer nieuws laden
+            </Button>
+          </div>
         )}
       </PageContainer>
     </div>

@@ -1,6 +1,6 @@
 /**
  * News Listing Page
- * Featured split at top (2fr|1fr), 3-column grid below with infinite scroll,
+ * Featured split at top (2fr|1fr), 3-column grid below with a load-more button,
  * sticky category filter bar.
  */
 

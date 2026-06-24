@@ -251,7 +251,13 @@ export function VerderLezenRow({
     <section
       data-verder-lezen-row="true"
       aria-label="Verder lezen"
-      className={cn("bg-cream w-full px-4 py-16 lg:py-24", className)}
+      // ART-1 (#2237): asymmetric padding — a tighter top closes the
+      // oversized gap after the <EndMark>/<ArticleCredits> block while the
+      // generous bottom keeps the row off the footer.
+      className={cn(
+        "bg-cream w-full px-4 pt-8 pb-16 lg:pt-10 lg:pb-24",
+        className,
+      )}
     >
       <div
         className="mx-auto w-full"
@@ -265,7 +271,9 @@ export function VerderLezenRow({
         >
           {heading}
         </EditorialHeading>
-        <HorizontalSlider>
+        {/* ART-2 (#2237): a roomier gap than the slider's default `gap-3`
+            so the related cards no longer read as cramped. */}
+        <HorizontalSlider trackClassName="gap-6 md:gap-8">
           {items.map((item, i) => (
             <div
               key={item.href}

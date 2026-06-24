@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup,
+} from "@testing-library/react";
 import type { ImageProps } from "next/image";
 import { NewsListingClient } from "./NewsListingClient";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
@@ -40,27 +46,12 @@ const categories = [
 ];
 
 describe("NewsListingClient", () => {
-  let intersectionCallback:
-    | ((entries: Array<{ isIntersecting: boolean }>) => void)
-    | null = null;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    intersectionCallback = null;
-    // Mock IntersectionObserver with a class
-    class MockIntersectionObserver {
-      constructor(
-        callback: (entries: Array<{ isIntersecting: boolean }>) => void,
-      ) {
-        intersectionCallback = callback;
-      }
-      observe = vi.fn();
-      unobserve = vi.fn();
-      disconnect = vi.fn();
-    }
-    window.IntersectionObserver =
-      MockIntersectionObserver as unknown as typeof IntersectionObserver;
   });
+
+  const clickLoadMore = () =>
+    fireEvent.click(screen.getByRole("button", { name: "Meer nieuws laden" }));
 
   it("renders featured articles in the top section", () => {
     const featuredArticles = [
@@ -166,6 +157,36 @@ describe("NewsListingClient", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows the load-more button only when there are more articles (NEWS-1)", () => {
+    render(
+      <NewsListingClient
+        featuredArticles={[makeArticle()]}
+        initialArticles={[makeArticle({ id: "g1" })]}
+        categories={categories}
+        hasMore={true}
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Meer nieuws laden" }),
+    ).toBeInTheDocument();
+
+    cleanup();
+
+    render(
+      <NewsListingClient
+        featuredArticles={[makeArticle()]}
+        initialArticles={[makeArticle({ id: "g1" })]}
+        categories={categories}
+        hasMore={false}
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Meer nieuws laden" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("renders category filter tabs as buttons", () => {
     render(
       <NewsListingClient
@@ -238,10 +259,8 @@ describe("NewsListingClient", () => {
       />,
     );
 
-    // Trigger the IntersectionObserver
-    if (intersectionCallback) {
-      intersectionCallback([{ isIntersecting: true }]);
-    }
+    // Click the load-more button (replaces the old infinite-scroll trigger).
+    clickLoadMore();
 
     // New articles should appear, duplicates should not create extra DOM nodes.
     // EditorialHeading appends a period, so match by heading role with optional `.`.
@@ -338,10 +357,8 @@ describe("NewsListingClient", () => {
       />,
     );
 
-    // Trigger the IntersectionObserver callback
-    if (intersectionCallback) {
-      intersectionCallback([{ isIntersecting: true }]);
-    }
+    // Click the load-more button to start the fetch.
+    clickLoadMore();
 
     await waitFor(() => {
       expect(screen.getByRole("status")).toBeInTheDocument();

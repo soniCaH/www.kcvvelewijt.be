@@ -237,7 +237,27 @@ describe("EditorialHero — event variant", () => {
     expect(overlay).toHaveTextContent("15/6");
   });
 
-  it("renders the compressed event strip below the hero with location · date · time", () => {
+  it("renders the compressed event strip below the homepage teaser card with location · date · time", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "Sportpark Elewijt",
+          startTime: "09:00",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip).toHaveTextContent("Sportpark Elewijt");
+    expect(strip).toHaveTextContent("09:00–17:00");
+  });
+
+  it("omits the compressed event strip on the detail placement (the contained panel renders instead, #2237)", () => {
     render(
       <EditorialHero
         variant="event"
@@ -250,9 +270,9 @@ describe("EditorialHero — event variant", () => {
         }}
       />,
     );
-    const strip = screen.getByTestId("hero-compressed-event-strip");
-    expect(strip).toHaveTextContent("Sportpark Elewijt");
-    expect(strip).toHaveTextContent("09:00–17:00");
+    expect(
+      screen.queryByTestId("hero-compressed-event-strip"),
+    ).not.toBeInTheDocument();
   });
 });
 

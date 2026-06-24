@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import { PortableText, type PortableTextBlock } from "@portabletext/react";
 import { TapedCard } from "@/components/design-system";
+import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { getButtonClasses } from "@/components/design-system/Button";
 import {
   DEFAULT_TICKET_LABEL,
@@ -11,6 +12,7 @@ import {
   type ResolvedEventRange,
   type ResolvedSession,
 } from "../EventFact/types";
+import { formatWidgetDate } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
 
 export interface EventDetailBlockProps {
@@ -20,23 +22,35 @@ export interface EventDetailBlockProps {
 }
 
 /**
- * True when the eventFact carries detail beyond what the locked
- * `<EventStrip>` shows in the hero: a multi-day schedule, a venue
- * address, a capacity ceiling, or an editor-authored note.
+ * True when the eventFact carries anything worth surfacing in the
+ * contained panel — a place, a date, a time, a schedule, a capacity, a
+ * note, or a title. The panel replaces the old full-bleed hero strip
+ * (#2237 ART-3), so it now renders for *every* event with content, not
+ * just those with extra detail beyond the strip.
  */
-export function shouldRenderEventDetailBlock(value: EventFactValue): boolean {
-  const hasSessions =
-    Array.isArray(value.sessions) && value.sessions.some((s) => s.date?.trim());
-  const hasAddress = !!value.address?.trim();
+export function hasEventFactContent(value: EventFactValue): boolean {
+  const hasDate =
+    !!value.date?.trim() ||
+    (Array.isArray(value.sessions) &&
+      value.sessions.some((s) => s.date?.trim()));
+  const hasTime = !!value.startTime?.trim() || !!value.endTime?.trim();
+  const hasPlace = !!value.location?.trim() || !!value.address?.trim();
   const hasCapacity = typeof value.capacity === "number" && value.capacity > 0;
   const hasNote = Array.isArray(value.note) && value.note.length > 0;
-  return hasSessions || hasAddress || hasCapacity || hasNote;
+  return (
+    hasDate ||
+    hasTime ||
+    hasPlace ||
+    hasCapacity ||
+    hasNote ||
+    !!value.title?.trim()
+  );
 }
 
 /**
  * `endDate ?? latestSession ?? date < today` — events without a valid
  * date are treated as upcoming so an editor draft still surfaces the
- * CTA. Pure function so callers can pass `now` for testability.
+ * CTAs. Pure function so callers can pass `now` for testability.
  *
  * Server Components should pass an explicit `now` (e.g. derived at
  * request time) to keep the comparison deterministic per ISR cache
@@ -86,28 +100,97 @@ function safeExternalHref(raw: string | undefined | null): string | null {
   }
 }
 
-interface HeadDateParts {
-  monthLabel: string;
-  dayLabel: string;
-  weekdayLabel: string;
+/** Compact `19 sep 2026` head date — start of the range. */
+function formatCompactDate(range: ResolvedEventRange): string | null {
+  if (range.kind === "none") return null;
+  const start = range.kind === "single" ? range.date : range.start;
+  return `${start.day} ${start.monthShort} ${start.year}`;
 }
 
-function resolveHeadDateParts(range: ResolvedEventRange): HeadDateParts | null {
-  if (range.kind === "none") {
-    return { monthLabel: "", dayLabel: "—", weekdayLabel: "Datum volgt" };
+/** Long `Za 19 september 2026` / span `25 – 27 september 2026` Datum cell. */
+function formatDatumCell(range: ResolvedEventRange): string {
+  if (range.kind === "none") return "Datum volgt";
+  if (range.kind === "single") {
+    // Reuse the canonical Dutch `ccc d MMMM` formatter + append the year.
+    return `${formatWidgetDate(range.date.dateIso)} ${range.date.year}`;
   }
-  const start = range.kind === "single" ? range.date : range.start;
-  const end = range.kind === "single" ? null : range.end;
-  return {
-    monthLabel:
-      end && start.monthShort !== end.monthShort
-        ? `${start.monthShort}–${end.monthShort}`
-        : start.monthShort,
-    dayLabel: start.day,
-    weekdayLabel: end
-      ? `${weekdayAbbrev(start)}–${weekdayAbbrev(end)}`
-      : weekdayAbbrev(start),
-  };
+  const { start, end, sameMonth, sameYear } = range;
+  if (sameMonth) {
+    return `${start.day} – ${end.day} ${start.monthLong} ${start.year}`;
+  }
+  if (sameYear) {
+    return `${start.day} ${start.monthShort} – ${end.day} ${end.monthShort} ${start.year}`;
+  }
+  return `${start.day} ${start.monthShort} ${start.year} – ${end.day} ${end.monthShort} ${end.year}`;
+}
+
+/**
+ * Tijd cell — a single range for single/continuous events, "Zie schema"
+ * when per-day sessions carry their own hours (the schedule renders
+ * below), "—" when no time is set.
+ *
+ * ponytail: single-session events lose their per-session time here
+ * because `resolveEventRange` collapses one session to `kind: "single"`
+ * and drops its hours; reading `value.startTime` covers the common case.
+ * Promote session times into the resolver if single-session events grow
+ * a time of their own.
+ */
+function formatTijdCell(range: ResolvedEventRange, value: EventFactValue) {
+  if (range.kind === "sessions") return "Zie schema";
+  return formatTimeRange(value.startTime, value.endTime) ?? "—";
+}
+
+/**
+ * Google Calendar template link for the "Zet in agenda" CTA. Times are
+ * Europe/Brussels → UTC; an event without a start time becomes an
+ * all-day entry (end date exclusive, hence `+1 day`).
+ *
+ * ponytail: a Google Calendar URL is the zero-dependency option; swap
+ * for an `.ics` download if non-Google users ask for it.
+ */
+function buildGoogleCalendarUrl(
+  value: EventFactValue,
+  range: ResolvedEventRange,
+): string | null {
+  if (range.kind === "none") return null;
+  const startIso =
+    range.kind === "single" ? range.date.dateIso : range.start.dateIso;
+  const endIso =
+    range.kind === "single" ? range.date.dateIso : range.end.dateIso;
+  const zone = "Europe/Brussels";
+
+  // Per-day sessions carry their own hours (the panel shows "Zie schema"),
+  // so the top-level start/end don't describe the whole span — model the
+  // calendar entry as all-day. Otherwise use the single daily time range,
+  // defaulting to a 2h block when only a start time is set (mirrors the
+  // match-feed ical convention).
+  const start = range.kind === "sessions" ? undefined : value.startTime?.trim();
+  let dates: string;
+  if (start) {
+    const startDt = DateTime.fromISO(`${startIso}T${start}`, { zone });
+    const end = value.endTime?.trim();
+    const endDt = end
+      ? DateTime.fromISO(`${endIso}T${end}`, { zone })
+      : startDt.plus({ hours: 2 });
+    if (!startDt.isValid || !endDt.isValid) return null;
+    dates = `${startDt.toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'")}/${endDt
+      .toUTC()
+      .toFormat("yyyyMMdd'T'HHmmss'Z'")}`;
+  } else {
+    const startDay = DateTime.fromISO(startIso, { zone });
+    const endDay = DateTime.fromISO(endIso, { zone }).plus({ days: 1 });
+    if (!startDay.isValid || !endDay.isValid) return null;
+    dates = `${startDay.toFormat("yyyyMMdd")}/${endDay.toFormat("yyyyMMdd")}`;
+  }
+
+  const params = new URLSearchParams({
+    action: "TEMPLATE",
+    text: value.title?.trim() || "KCVV Elewijt — Evenement",
+    dates,
+  });
+  const location = value.address?.trim() || value.location?.trim();
+  if (location) params.set("location", location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
 function Pill({ label, muted }: { label: string; muted: boolean }) {
@@ -123,6 +206,22 @@ function Pill({ label, muted }: { label: string; muted: boolean }) {
     >
       {label}
     </span>
+  );
+}
+
+function FactCell({ label, value }: { label: string; value: string }) {
+  return (
+    <div
+      data-event-detail-fact={label.toLowerCase()}
+      className="flex flex-col gap-1.5"
+    >
+      <span className="text-jersey-deep">
+        <MonoLabel size="sm">{label}</MonoLabel>
+      </span>
+      <span className="text-ink font-serif text-[18px] leading-snug font-medium italic">
+        {value}
+      </span>
+    </div>
   );
 }
 
@@ -180,16 +279,11 @@ function MetaList({ rows }: { rows: MetaRow[] }) {
   );
 }
 
-function buildMetaRows(value: EventFactValue): MetaRow[] {
+/** Address (only when it's not already standing in as the Locatie cell)
+ *  + capacity, rendered as a compact secondary dl below the fact grid. */
+function buildExtraRows(value: EventFactValue): MetaRow[] {
   const rows: MetaRow[] = [];
-  if (value.location?.trim()) {
-    rows.push({
-      key: "location",
-      label: "Locatie",
-      value: value.location.trim(),
-    });
-  }
-  if (value.address?.trim()) {
+  if (value.address?.trim() && value.location?.trim()) {
     rows.push({ key: "address", label: "Adres", value: value.address.trim() });
   }
   if (typeof value.capacity === "number" && value.capacity > 0) {
@@ -200,74 +294,6 @@ function buildMetaRows(value: EventFactValue): MetaRow[] {
     });
   }
   return rows;
-}
-
-/**
- * Date-block — three-line typographic anchor (month / day / weekday).
- * The italic 36px day carries optical whitespace above its glyph;
- * `-2px` on the day closes the top gap and `+3px` on the weekday opens
- * the bottom so the vertical rhythm reads as evenly distributed.
- */
-function DateBlock({ dateParts }: { dateParts: HeadDateParts | null }) {
-  return (
-    <div className="text-ink flex w-[56px] flex-col items-center text-center leading-none">
-      <span
-        data-event-detail-head-month="true"
-        className="text-ink-muted font-mono text-[9px] tracking-[0.16em] uppercase"
-      >
-        {dateParts?.monthLabel ?? ""}
-      </span>
-      <span
-        data-event-detail-head-day="true"
-        className="font-display mt-[-2px] text-[36px] font-black italic"
-      >
-        {dateParts?.dayLabel ?? "—"}
-      </span>
-      <span
-        data-event-detail-head-weekday="true"
-        className="text-ink-muted mt-[3px] font-mono text-[9px] tracking-[0.16em] uppercase"
-      >
-        {dateParts?.weekdayLabel ?? ""}
-      </span>
-    </div>
-  );
-}
-
-/**
- * Head row — left date-block + right pill/title stack, both vertically
- * centered as units so the column geometries balance regardless of how
- * many lines the title wraps to.
- */
-function Head({
-  dateParts,
-  pillLabel,
-  isPast,
-  title,
-}: {
-  dateParts: HeadDateParts | null;
-  pillLabel?: string;
-  isPast: boolean;
-  title?: string;
-}) {
-  return (
-    <header
-      data-event-detail-head="true"
-      className="border-ink-muted flex items-center gap-x-5 border-b border-dotted pb-3"
-    >
-      <DateBlock dateParts={dateParts} />
-      <div className="flex flex-1 flex-col gap-1.5">
-        {pillLabel ? <Pill label={pillLabel} muted={isPast} /> : null}
-        {title ? (
-          <p
-            data-event-detail-title="true"
-            className="text-ink m-0 font-serif text-[22px] leading-[1.15] font-black italic"
-          >
-            {title}
-          </p>
-        ) : null}
-      </div>
-    </header>
-  );
 }
 
 function Note({ blocks }: { blocks: PortableTextBlock[] }) {
@@ -282,80 +308,142 @@ function Note({ blocks }: { blocks: PortableTextBlock[] }) {
 }
 
 /**
- * <EventDetailBlock> — full event-detail card placed between `<EndMark>`
- * and `<ArticleCredits>` per the 5.d-evt lock (Option A).
+ * <EventDetailBlock> — the contained event-fact panel (ART-3 Variant B,
+ * locked `go-live-art3-event-hero-strip/locked.md`). Rendered between the
+ * event hero and the article body on `articleType="event"`, replacing the
+ * old full-bleed `HeroCompressedEventStrip`.
  *
- * Skip-condition: returns `null` when none of `sessions[]` / `address` /
- * `capacity` / `note` are populated — simple events whose strip already
- * carries everything readers need don't get a redundant body block.
+ * Taped index-card: one washi tape, optional tag pill + compact date,
+ * title, a 3-column Locatie / Datum / Tijd fact grid (MonoLabel kicker
+ * over each value), then folded detail (per-day schedule, address,
+ * capacity, note) and a CTA row — Reserveer (jersey-deep) + Zet in
+ * agenda. Contained to `--container-wide`, never full-bleed.
  *
- * Past-event behaviour: the tag pill is replaced with a muted
- * `Afgelopen` pill and the CTA is hidden; the rest of the card remains
- * visible as a historical record. `isPast` is computed page-level via
- * `deriveIsPast` so the renderer stays pure.
+ * Past-event behaviour: the tag pill becomes a muted `Afgelopen`, the
+ * whole card greyscales, and the CTA row is hidden. `isPast` is computed
+ * page-level via `deriveIsPast` so this stays a pure renderer.
  */
 export function EventDetailBlock({
   value,
   isPast,
   className,
 }: EventDetailBlockProps) {
-  if (!shouldRenderEventDetailBlock(value)) return null;
+  if (!hasEventFactContent(value)) return null;
 
   const range = resolveEventRange(value.date, value.endDate, value.sessions);
   const title = value.title?.trim();
   const tag = value.competitionTag?.trim();
   const pillLabel = isPast ? "Afgelopen" : tag;
-  const ticketUrl = !isPast ? safeExternalHref(value.ticketUrl) : null;
+  const compactDate = formatCompactDate(range);
+
+  const locationValue = value.location?.trim() || value.address?.trim() || "—";
+  const datumValue = formatDatumCell(range);
+  const tijdValue = formatTijdCell(range, value);
+
+  const ticketUrl = isPast ? null : safeExternalHref(value.ticketUrl);
   const ticketLabel = value.ticketLabel?.trim() || DEFAULT_TICKET_LABEL;
-  const metaRows = buildMetaRows(value);
+  const calendarUrl = isPast ? null : buildGoogleCalendarUrl(value, range);
+
+  const sessions = range.kind === "sessions" ? range.sessions : null;
+  const extraRows = buildExtraRows(value);
   const note =
     Array.isArray(value.note) && value.note.length > 0 ? value.note : null;
-  const sessions = range.kind === "sessions" ? range.sessions : null;
 
   return (
-    <div
-      className="mx-auto my-10 w-full"
-      style={{ maxWidth: "var(--container-prose)" }}
-    >
-      <TapedCard
-        bg="cream"
-        tape={[{ color: "warm", length: "md" }]}
-        padding="lg"
-        className={cn("w-full", className)}
+    <div className="bg-cream w-full px-4 pt-6 pb-2 md:px-8">
+      <div
+        className="mx-auto w-full"
+        style={{ maxWidth: "var(--container-wide)" }}
       >
-        <section
-          data-event-detail-block="true"
-          data-is-past={isPast ? "true" : "false"}
-          className="flex flex-col gap-[14px]"
+        <TapedCard
+          bg="cream"
+          tape={[{ color: "warm", length: "md" }]}
+          padding="lg"
+          rotation={-0.4}
+          className={cn(isPast && "opacity-90 grayscale-[0.35]", className)}
         >
-          <Head
-            dateParts={resolveHeadDateParts(range)}
-            pillLabel={pillLabel}
-            isPast={isPast}
-            title={title}
-          />
-          {sessions ? <SessionsGrid sessions={sessions} /> : null}
-          {metaRows.length > 0 ? <MetaList rows={metaRows} /> : null}
-          {note ? <Note blocks={note} /> : null}
-          {ticketUrl ? (
-            <a
-              href={ticketUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              data-event-detail-cta="true"
-              className={cn(
-                getButtonClasses({ variant: "primary", size: "md" }),
-                "w-fit",
-              )}
+          <section
+            data-event-detail-block="true"
+            data-is-past={isPast ? "true" : "false"}
+            className="flex flex-col gap-4"
+          >
+            {pillLabel || compactDate ? (
+              <div
+                data-event-detail-head="true"
+                className="flex flex-wrap items-center gap-x-3 gap-y-2"
+              >
+                {pillLabel ? <Pill label={pillLabel} muted={isPast} /> : null}
+                {compactDate ? (
+                  <span className="text-ink-muted font-mono text-[11px] tracking-[0.08em] uppercase">
+                    {compactDate}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+
+            {title ? (
+              <p
+                data-event-detail-title="true"
+                className="text-ink m-0 font-serif text-[24px] leading-[1.08] font-black italic"
+              >
+                {title}
+              </p>
+            ) : null}
+
+            <div
+              data-event-detail-factgrid="true"
+              className="border-ink-muted grid grid-cols-1 gap-x-[22px] gap-y-4 border-y border-dotted py-[18px] sm:grid-cols-3"
             >
-              {ticketLabel}
-              <span aria-hidden="true" className="ml-1">
-                →
-              </span>
-            </a>
-          ) : null}
-        </section>
-      </TapedCard>
+              <FactCell label="Locatie" value={locationValue} />
+              <FactCell label="Datum" value={datumValue} />
+              <FactCell label="Tijd" value={tijdValue} />
+            </div>
+
+            {sessions ? <SessionsGrid sessions={sessions} /> : null}
+            {extraRows.length > 0 ? <MetaList rows={extraRows} /> : null}
+            {note ? <Note blocks={note} /> : null}
+
+            {ticketUrl || calendarUrl ? (
+              <div
+                data-event-detail-cta-row="true"
+                className="flex flex-wrap gap-3 pt-1"
+              >
+                {ticketUrl ? (
+                  <a
+                    href={ticketUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-event-detail-cta="ticket"
+                    className={cn(
+                      getButtonClasses({ variant: "primary", size: "md" }),
+                      "w-fit",
+                    )}
+                  >
+                    {ticketLabel}
+                    <span aria-hidden="true" className="ml-1">
+                      →
+                    </span>
+                  </a>
+                ) : null}
+                {calendarUrl ? (
+                  <a
+                    href={calendarUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-event-detail-cta="calendar"
+                    className={cn(
+                      getButtonClasses({ variant: "secondary", size: "md" }),
+                      "w-fit",
+                    )}
+                  >
+                    Zet in agenda
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
+        </TapedCard>
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import type { EventFactValue } from "../EventFact/types";
 import {
   EventDetailBlock,
   deriveIsPast,
-  shouldRenderEventDetailBlock,
+  hasEventFactContent,
 } from "./EventDetailBlock";
 
 const note: PortableTextBlock[] = [
@@ -43,49 +43,48 @@ function eventFact(overrides: Partial<EventFactValue> = {}): EventFactValue {
   };
 }
 
-describe("shouldRenderEventDetailBlock", () => {
-  it("returns true when sessions[] has at least one dated entry", () => {
-    expect(
-      shouldRenderEventDetailBlock({
-        sessions: [{ date: "2026-09-25" }],
-      }),
-    ).toBe(true);
+// A plain single-day event whose facts the panel must surface on its own
+// (it now replaces the old always-present hero strip).
+function singleDay(overrides: Partial<EventFactValue> = {}): EventFactValue {
+  return {
+    _key: "ef2",
+    _type: "eventFact",
+    title: "Eetfestijn & opendeurdag",
+    date: "2026-09-25",
+    location: "Sportpark Driesput, Elewijt",
+    startTime: "10:00",
+    endTime: "17:00",
+    competitionTag: "Clubfeest",
+    ...overrides,
+  };
+}
+
+describe("hasEventFactContent", () => {
+  it.each([
+    ["location only", { location: "Sportpark Elewijt" }],
+    ["date only", { date: "2026-04-12" }],
+    ["startTime only", { startTime: "10:00" }],
+    ["address only", { address: "Driesstraat 14" }],
+    ["capacity > 0", { capacity: 50 }],
+    ["a note block", { note }],
+    ["a dated session", { sessions: [{ date: "2026-09-25" }] }],
+    ["a title only", { title: "Wafelverkoop" }],
+  ])("returns true for %s", (_label, value) => {
+    expect(hasEventFactContent(value as EventFactValue)).toBe(true);
   });
 
-  it("returns true when address is populated", () => {
-    expect(shouldRenderEventDetailBlock({ address: "Driesstraat 14" })).toBe(
-      true,
+  it("returns false for an empty eventFact", () => {
+    expect(hasEventFactContent({})).toBe(false);
+  });
+
+  it("returns false when capacity is 0 and nothing else is set", () => {
+    expect(hasEventFactContent({ capacity: 0 })).toBe(false);
+  });
+
+  it("returns false when sessions[] has no dated entries", () => {
+    expect(hasEventFactContent({ sessions: [{ startTime: "10:00" }] })).toBe(
+      false,
     );
-  });
-
-  it("returns true when capacity > 0", () => {
-    expect(shouldRenderEventDetailBlock({ capacity: 50 })).toBe(true);
-  });
-
-  it("returns true when note has at least one block", () => {
-    expect(shouldRenderEventDetailBlock({ note })).toBe(true);
-  });
-
-  it("returns false for an eventFact with only date + location (covered by strip)", () => {
-    expect(
-      shouldRenderEventDetailBlock({
-        title: "Wafelverkoop",
-        date: "2026-04-12",
-        location: "Sportpark Elewijt",
-      }),
-    ).toBe(false);
-  });
-
-  it("returns false when sessions[] is present but has no dated entries", () => {
-    expect(
-      shouldRenderEventDetailBlock({
-        sessions: [{ startTime: "10:00" }],
-      }),
-    ).toBe(false);
-  });
-
-  it("returns false when capacity is 0", () => {
-    expect(shouldRenderEventDetailBlock({ capacity: 0 })).toBe(false);
   });
 });
 
@@ -129,14 +128,20 @@ describe("deriveIsPast", () => {
 });
 
 describe("<EventDetailBlock>", () => {
-  it("returns null when the skip-condition is met (no sessions/address/capacity/note)", () => {
+  it("returns null when the eventFact has no content", () => {
     const { container } = render(
-      <EventDetailBlock
-        value={{ title: "Wafelverkoop", date: "2026-04-12" }}
-        isPast={false}
-      />,
+      <EventDetailBlock value={{}} isPast={false} />,
     );
     expect(container.firstElementChild).toBeNull();
+  });
+
+  it("is contained to the wide container, never full-bleed", () => {
+    const { container } = render(
+      <EventDetailBlock value={singleDay()} isPast={false} />,
+    );
+    expect(
+      container.querySelector('[style*="--container-wide"]'),
+    ).not.toBeNull();
   });
 
   it("renders the title and the competitionTag pill for upcoming events", () => {
@@ -151,6 +156,121 @@ describe("<EventDetailBlock>", () => {
     expect(pill?.textContent).toBe("Clubfeest");
   });
 
+  it("renders the Locatie / Datum / Tijd fact grid", () => {
+    const { container } = render(
+      <EventDetailBlock value={singleDay()} isPast={false} />,
+    );
+    expect(
+      container.querySelector('[data-event-detail-fact="locatie"]')
+        ?.textContent,
+    ).toContain("Sportpark Driesput");
+    const datum = container.querySelector(
+      '[data-event-detail-fact="datum"]',
+    )?.textContent;
+    expect(datum).toContain("25");
+    expect(datum).toContain("september");
+    expect(datum).toContain("2026");
+    expect(
+      container.querySelector('[data-event-detail-fact="tijd"]')?.textContent,
+    ).toContain("10:00 - 17:00");
+  });
+
+  it("summarises Tijd as 'Zie schema' when per-day sessions exist", () => {
+    const { container } = render(
+      <EventDetailBlock value={eventFact()} isPast={false} />,
+    );
+    expect(
+      container.querySelector('[data-event-detail-fact="tijd"]')?.textContent,
+    ).toContain("Zie schema");
+  });
+
+  it("shows 'Datum volgt' and no calendar CTA when no date is set", () => {
+    const { container } = render(
+      <EventDetailBlock
+        value={{ title: "Nog te plannen", location: "Sportpark Elewijt" }}
+        isPast={false}
+      />,
+    );
+    expect(
+      container.querySelector('[data-event-detail-fact="datum"]')?.textContent,
+    ).toContain("Datum volgt");
+    expect(
+      container.querySelector('[data-event-detail-cta="calendar"]'),
+    ).toBeNull();
+  });
+
+  it("renders the Reserveer CTA with the configured ticketLabel on upcoming events", () => {
+    const { container } = render(
+      <EventDetailBlock value={eventFact()} isPast={false} />,
+    );
+    const cta = container.querySelector('[data-event-detail-cta="ticket"]');
+    expect(cta).not.toBeNull();
+    expect(cta?.textContent).toContain("Bestel je tafel");
+    expect(cta?.getAttribute("href")).toBe("https://example.com/tickets");
+    expect(cta?.getAttribute("target")).toBe("_blank");
+    expect(cta?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("renders a 'Zet in agenda' Google Calendar CTA on upcoming dated events", () => {
+    const { container } = render(
+      <EventDetailBlock value={singleDay()} isPast={false} />,
+    );
+    const cta = container.querySelector('[data-event-detail-cta="calendar"]');
+    expect(cta).not.toBeNull();
+    expect(cta?.textContent).toContain("Zet in agenda");
+    expect(cta?.getAttribute("href")).toContain(
+      "calendar.google.com/calendar/render",
+    );
+    expect(cta?.getAttribute("href")).toContain("action=TEMPLATE");
+  });
+
+  const calendarDates = (container: HTMLElement): string | null => {
+    const href = container
+      .querySelector('[data-event-detail-cta="calendar"]')
+      ?.getAttribute("href");
+    return href ? new URL(href).searchParams.get("dates") : null;
+  };
+
+  it("encodes a timed single-day event as a UTC range (Europe/Brussels → UTC)", () => {
+    // singleDay() is 25 Sep 2026, CEST (UTC+2): 10:00→08:00Z, 17:00→15:00Z.
+    const { container } = render(
+      <EventDetailBlock value={singleDay()} isPast={false} />,
+    );
+    expect(calendarDates(container)).toBe("20260925T080000Z/20260925T150000Z");
+  });
+
+  it("defaults to a 2h block when only a start time is set", () => {
+    const { container } = render(
+      <EventDetailBlock
+        value={singleDay({ endTime: undefined })}
+        isPast={false}
+      />,
+    );
+    // 10:00 CEST (08:00Z) + 2h → 12:00 CEST (10:00Z).
+    expect(calendarDates(container)).toBe("20260925T080000Z/20260925T100000Z");
+  });
+
+  it("encodes a timeless event as an all-day entry (end date exclusive)", () => {
+    const { container } = render(
+      <EventDetailBlock
+        value={{ title: "Opendeur", date: "2026-09-19", location: "Elewijt" }}
+        isPast={false}
+      />,
+    );
+    expect(calendarDates(container)).toBe("20260919/20260920");
+  });
+
+  it("encodes a per-day sessions event as an all-day span (ignores top-level times)", () => {
+    const { container } = render(
+      <EventDetailBlock
+        value={eventFact({ startTime: "18:00", endTime: "22:00" })}
+        isPast={false}
+      />,
+    );
+    // sessions span 25→27 Sep; all-day end is exclusive (28th).
+    expect(calendarDates(container)).toBe("20260925/20260928");
+  });
+
   it("replaces the tag pill with an 'Afgelopen' muted pill on past events", () => {
     const { container } = render(
       <EventDetailBlock value={eventFact()} isPast={true} />,
@@ -160,102 +280,103 @@ describe("<EventDetailBlock>", () => {
     expect(pill?.textContent).toBe("Afgelopen");
   });
 
-  it("hides the CTA on past events even when ticketUrl is populated", () => {
+  it("hides the whole CTA row on past events even when ticketUrl is populated", () => {
     const { container } = render(
       <EventDetailBlock value={eventFact()} isPast={true} />,
     );
     expect(
-      container.querySelector('[data-event-detail-cta="true"]'),
+      container.querySelector('[data-event-detail-cta-row="true"]'),
     ).toBeNull();
+    expect(container.querySelector("[data-event-detail-cta]")).toBeNull();
   });
 
-  it("renders the CTA with the configured ticketLabel on upcoming events", () => {
-    const { container } = render(
-      <EventDetailBlock value={eventFact()} isPast={false} />,
-    );
-    const cta = container.querySelector('[data-event-detail-cta="true"]');
-    expect(cta).not.toBeNull();
-    expect(cta?.textContent).toContain("Bestel je tafel");
-    expect(cta?.getAttribute("href")).toBe("https://example.com/tickets");
-    // External link safety: must open in a new tab without leaking the
-    // current window via window.opener.
-    expect(cta?.getAttribute("target")).toBe("_blank");
-    expect(cta?.getAttribute("rel")).toBe("noopener noreferrer");
-  });
-
-  it("drops the CTA when ticketUrl uses a non-http(s) scheme", () => {
+  it("drops the Reserveer CTA when ticketUrl uses a non-http(s) scheme (calendar stays)", () => {
     const { container } = render(
       <EventDetailBlock
-        value={eventFact({ ticketUrl: "javascript:alert(1)" })}
+        value={singleDay({ ticketUrl: "javascript:alert(1)" })}
         isPast={false}
       />,
     );
     expect(
-      container.querySelector('[data-event-detail-cta="true"]'),
+      container.querySelector('[data-event-detail-cta="ticket"]'),
     ).toBeNull();
+    expect(
+      container.querySelector('[data-event-detail-cta="calendar"]'),
+    ).not.toBeNull();
   });
 
-  it("drops the CTA when ticketUrl is malformed (URL constructor throws)", () => {
+  it("drops the Reserveer CTA when ticketUrl is malformed (URL constructor throws)", () => {
     const { container } = render(
       <EventDetailBlock
-        value={eventFact({ ticketUrl: "not a url" })}
+        value={singleDay({ ticketUrl: "not a url" })}
         isPast={false}
       />,
     );
     expect(
-      container.querySelector('[data-event-detail-cta="true"]'),
+      container.querySelector('[data-event-detail-cta="ticket"]'),
     ).toBeNull();
   });
 
   it("falls back to DEFAULT_TICKET_LABEL when ticketLabel is empty", () => {
     const { container } = render(
       <EventDetailBlock
-        value={eventFact({ ticketLabel: "" })}
+        value={singleDay({ ticketUrl: "https://x.test/t", ticketLabel: "" })}
         isPast={false}
       />,
     );
     expect(
-      container.querySelector('[data-event-detail-cta="true"]')?.textContent,
+      container.querySelector('[data-event-detail-cta="ticket"]')?.textContent,
     ).toContain("Inschrijven");
   });
 
-  it("renders the sessions 3-col grid when sessions[] is populated", () => {
+  it("renders the sessions schedule when sessions[] is populated", () => {
     const { container } = render(
       <EventDetailBlock value={eventFact()} isPast={false} />,
     );
     const grid = container.querySelector('[data-event-detail-sessions="true"]');
     expect(grid).not.toBeNull();
-    // Each session is a `display: contents` div wrapping 3 cells (key /
-    // val / hours), so 3 sessions render as 3 wrapper divs.
     const wrappers = grid?.querySelectorAll(":scope > div");
     expect(wrappers?.length).toBe(3);
   });
 
-  it("omits the sessions grid when sessions[] is empty (single-day event)", () => {
+  it("omits the sessions schedule for a single-day event", () => {
     const { container } = render(
-      <EventDetailBlock
-        value={eventFact({ sessions: undefined, endDate: undefined })}
-        isPast={false}
-      />,
+      <EventDetailBlock value={singleDay()} isPast={false} />,
     );
     expect(
       container.querySelector('[data-event-detail-sessions="true"]'),
     ).toBeNull();
   });
 
-  it("renders meta rows only for fields that are populated", () => {
-    const { container } = render(
+  it("renders an Adres extra row only when both location and address are set", () => {
+    const withBoth = render(
+      <EventDetailBlock value={eventFact()} isPast={false} />,
+    );
+    expect(
+      withBoth.container.querySelector('[data-event-detail-meta="true"]')
+        ?.textContent,
+    ).toContain("Adres");
+
+    const addressOnly = render(
       <EventDetailBlock
-        value={eventFact({ address: undefined, capacity: undefined })}
+        value={singleDay({ location: undefined, address: "Driesstraat 14" })}
         isPast={false}
       />,
     );
+    // address stands in as the Locatie cell, so no duplicate Adres row.
+    const meta = addressOnly.container.querySelector(
+      '[data-event-detail-meta="true"]',
+    );
+    expect(meta?.textContent ?? "").not.toContain("Adres");
+  });
+
+  it("renders a Capaciteit extra row when capacity > 0", () => {
+    const { container } = render(
+      <EventDetailBlock value={eventFact()} isPast={false} />,
+    );
     const meta = container.querySelector('[data-event-detail-meta="true"]');
-    // location is still populated → 1 row.
-    const rows = meta?.querySelectorAll(":scope > div");
-    expect(rows?.length).toBe(1);
-    expect(meta?.textContent).toContain("Locatie");
-    expect(meta?.textContent).toContain("Sportpark Elewijt");
+    expect(meta?.textContent).toContain("Capaciteit");
+    expect(meta?.textContent).toContain("Max 250 plaatsen");
   });
 
   it("renders the note PortableText when populated", () => {
@@ -270,7 +391,7 @@ describe("<EventDetailBlock>", () => {
   it("hides the head pill entirely when neither tag nor past flag yields a label", () => {
     const { container } = render(
       <EventDetailBlock
-        value={eventFact({ competitionTag: undefined })}
+        value={singleDay({ competitionTag: undefined })}
         isPast={false}
       />,
     );

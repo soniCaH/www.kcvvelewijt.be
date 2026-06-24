@@ -1,6 +1,6 @@
 export {
   EventDetailBlock,
   deriveIsPast,
-  shouldRenderEventDetailBlock,
+  hasEventFactContent,
   type EventDetailBlockProps,
 } from "./EventDetailBlock";

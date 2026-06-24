@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Per-articleType editorial hero (R1.5, #1749). Four variants share a 50/50 shell + landscape cover but render variant-specific kicker, below-H1 (interview credit chips, transfer meta line), and below-hero (event compressed strip) artefacts. `placement` controls whether the hero wraps in a `<Link>` (homepage) or renders bare (detail).",
+          "Per-articleType editorial hero (R1.5, #1749). Four variants share a 50/50 shell + landscape cover but render variant-specific kicker, below-H1 (interview credit chips, transfer meta line), and below-hero (event compressed strip — homepage placement only) artefacts. `placement` controls whether the hero wraps in a `<Link>` (homepage) or renders bare (detail). On the event detail page the compressed strip is replaced by the contained `<EventDetailBlock>` panel (#2237).",
       },
     },
   },
