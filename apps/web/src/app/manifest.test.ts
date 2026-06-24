@@ -14,6 +14,16 @@ describe("manifest.ts", () => {
     );
   });
 
+  it("ships a 512×512 any icon", () => {
+    expect(result.icons).toContainEqual(
+      expect.objectContaining({
+        src: "/icon.png",
+        sizes: "512x512",
+        purpose: "any",
+      }),
+    );
+  });
+
   it("uses dedicated maskable artwork, not the any icon", () => {
     const maskable = (result.icons ?? []).filter((i) =>
       i.purpose?.includes("maskable"),
