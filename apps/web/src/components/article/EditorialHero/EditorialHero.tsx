@@ -464,12 +464,23 @@ export function EditorialHero(props: EditorialHeroProps) {
       const eventStripDate = eventStartIso
         ? formatArticleDate(eventStartIso)
         : (date ?? null);
+      // Session-based events keep their hours per-session (top-level
+      // start/end are empty), so the strip time comes from the earliest
+      // dated session — same start day as `eventStripDate` — and falls back
+      // to the top-level times for plain single/range events.
+      const startSession = (props.feature?.sessions ?? [])
+        .filter((s) => s.date?.trim())
+        .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))[0];
+      const stripStartTime =
+        startSession?.startTime?.trim() || props.feature?.startTime || null;
+      const stripEndTime =
+        startSession?.endTime?.trim() || props.feature?.endTime || null;
       belowHero = (
         <HeroCompressedEventStrip
           location={props.feature?.location ?? null}
           date={eventStripDate}
-          startTime={props.feature?.startTime ?? null}
-          endTime={props.feature?.endTime ?? null}
+          startTime={stripStartTime}
+          endTime={stripEndTime}
         />
       );
     }

@@ -122,6 +122,21 @@ describe("deriveIsPast", () => {
     ).toBe(true);
   });
 
+  it("follows the resolved range (sessions), not a stale top-level endDate", () => {
+    // endDate is already past, but the sessions run later → still upcoming,
+    // matching the dates the panel actually shows.
+    expect(
+      deriveIsPast(
+        {
+          date: "2026-09-20",
+          endDate: "2026-09-20",
+          sessions: [{ date: "2026-09-25" }, { date: "2026-09-27" }],
+        },
+        reference,
+      ),
+    ).toBe(false);
+  });
+
   it("returns false when no reference date is present (draft state)", () => {
     expect(deriveIsPast({}, reference)).toBe(false);
   });

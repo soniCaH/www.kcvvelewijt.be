@@ -48,9 +48,12 @@ export function hasEventFactContent(value: EventFactValue): boolean {
 }
 
 /**
- * `endDate ?? latestSession ?? date < today` — events without a valid
- * date are treated as upcoming so an editor draft still surfaces the
- * CTAs. Pure function so callers can pass `now` for testability.
+ * Past when the *resolved* event range ends before today (Europe/Brussels).
+ * Uses `resolveEventRange` as the single source of truth so a session-based
+ * event is never marked past by a stale top-level `endDate` that disagrees
+ * with the dates the panel actually shows. Events with no usable date are
+ * treated as upcoming so an editor draft still surfaces the CTAs. Pure
+ * function so callers can pass `now` for testability.
  *
  * Server Components should pass an explicit `now` (e.g. derived at
  * request time) to keep the comparison deterministic per ISR cache
@@ -66,16 +69,13 @@ export function deriveIsPast(
   // calendar dates, so the only zone that matters is the club's.
   const today = DateTime.fromJSDate(now).setZone("Europe/Brussels").toISODate();
   if (!today) return false;
+  const range = resolveEventRange(value.date, value.endDate, value.sessions);
   const reference =
-    value.endDate?.trim() ||
-    (Array.isArray(value.sessions)
-      ? value.sessions
-          .map((s) => s.date?.trim())
-          .filter((d): d is string => Boolean(d))
-          .sort()
-          .at(-1)
-      : undefined) ||
-    value.date?.trim();
+    range.kind === "none"
+      ? undefined
+      : range.kind === "single"
+        ? range.date.dateIso
+        : range.end.dateIso;
   if (!reference) return false;
   return reference < today;
 }
