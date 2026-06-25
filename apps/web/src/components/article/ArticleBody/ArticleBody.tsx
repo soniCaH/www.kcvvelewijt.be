@@ -273,8 +273,9 @@ function socialBrandFor(
   if (isHost(["instagram.com", "instagr.am"]))
     return { Icon: InstagramLogo, label: "Instagram" };
   // X (formerly Twitter) — Phosphor has no brand glyph in this version, so the
-  // plain `X` mark stands in (the brand is literally an X).
-  if (isHost(["x.com", "twitter.com", "t.co"])) return { Icon: X, label: "X" };
+  // plain `X` mark stands in (the brand is literally an X). `t.co` is excluded:
+  // it's Twitter's shortener for ALL outbound links, so it can point anywhere.
+  if (isHost(["x.com", "twitter.com"])) return { Icon: X, label: "X" };
   return null;
 }
 
