@@ -60,7 +60,11 @@ export function deriveIsPast(
   value: EventFactValue,
   now: Date = new Date(),
 ): boolean {
-  const today = DateTime.fromJSDate(now).setZone("utc").toISODate();
+  // Compare against the Belgian calendar day, not UTC — otherwise an
+  // event flips to "past" up to ~2h early around the UTC midnight
+  // boundary (Brussels is UTC+1/+2). The reference dates are timezone-less
+  // calendar dates, so the only zone that matters is the club's.
+  const today = DateTime.fromJSDate(now).setZone("Europe/Brussels").toISODate();
   if (!today) return false;
   const reference =
     value.endDate?.trim() ||
@@ -127,17 +131,17 @@ function formatDatumCell(range: ResolvedEventRange): string {
 /**
  * Tijd cell — a single range for single/continuous events, "Zie schema"
  * when per-day sessions carry their own hours (the schedule renders
- * below), "—" when no time is set.
- *
- * ponytail: single-session events lose their per-session time here
- * because `resolveEventRange` collapses one session to `kind: "single"`
- * and drops its hours; reading `value.startTime` covers the common case.
- * Promote session times into the resolver if single-session events grow
- * a time of their own.
+ * below), "—" when no time is set. `startTime`/`endTime` are the effective
+ * times resolved by the caller (which recovers a lone session's hours that
+ * `resolveEventRange` drops when it collapses to `kind: "single"`).
  */
-function formatTijdCell(range: ResolvedEventRange, value: EventFactValue) {
+function formatTijdCell(
+  range: ResolvedEventRange,
+  startTime?: string,
+  endTime?: string,
+) {
   if (range.kind === "sessions") return "Zie schema";
-  return formatTimeRange(value.startTime, value.endTime) ?? "—";
+  return formatTimeRange(startTime, endTime) ?? "—";
 }
 
 /**
@@ -151,6 +155,8 @@ function formatTijdCell(range: ResolvedEventRange, value: EventFactValue) {
 function buildGoogleCalendarUrl(
   value: EventFactValue,
   range: ResolvedEventRange,
+  startTime?: string,
+  endTime?: string,
 ): string | null {
   if (range.kind === "none") return null;
   const startIso =
@@ -161,14 +167,15 @@ function buildGoogleCalendarUrl(
 
   // Per-day sessions carry their own hours (the panel shows "Zie schema"),
   // so the top-level start/end don't describe the whole span — model the
-  // calendar entry as all-day. Otherwise use the single daily time range,
-  // defaulting to a 2h block when only a start time is set (mirrors the
-  // match-feed ical convention).
-  const start = range.kind === "sessions" ? undefined : value.startTime?.trim();
+  // calendar entry as all-day. Otherwise use the effective daily time range
+  // (which includes a lone session's recovered hours), defaulting to a 2h
+  // block when only a start time is set (mirrors the match-feed ical
+  // convention).
+  const start = range.kind === "sessions" ? undefined : startTime?.trim();
   let dates: string;
   if (start) {
     const startDt = DateTime.fromISO(`${startIso}T${start}`, { zone });
-    const end = value.endTime?.trim();
+    const end = endTime?.trim();
     const endDt = end
       ? DateTime.fromISO(`${endIso}T${end}`, { zone })
       : startDt.plus({ hours: 2 });
@@ -336,13 +343,27 @@ export function EventDetailBlock({
   const pillLabel = isPast ? "Afgelopen" : tag;
   const compactDate = formatCompactDate(range);
 
+  // resolveEventRange collapses a lone dated session to kind:"single" and
+  // drops its hours — recover them so the Tijd cell + calendar keep the
+  // real times instead of falling back to the (often empty) top-level
+  // fields (#2237 review).
+  const datedSessions = (value.sessions ?? []).filter((s) => s.date?.trim());
+  const loneSession =
+    range.kind === "single" && datedSessions.length === 1
+      ? datedSessions[0]
+      : undefined;
+  const startTime = loneSession?.startTime?.trim() || value.startTime;
+  const endTime = loneSession?.endTime?.trim() || value.endTime;
+
   const locationValue = value.location?.trim() || value.address?.trim() || "—";
   const datumValue = formatDatumCell(range);
-  const tijdValue = formatTijdCell(range, value);
+  const tijdValue = formatTijdCell(range, startTime, endTime);
 
   const ticketUrl = isPast ? null : safeExternalHref(value.ticketUrl);
   const ticketLabel = value.ticketLabel?.trim() || DEFAULT_TICKET_LABEL;
-  const calendarUrl = isPast ? null : buildGoogleCalendarUrl(value, range);
+  const calendarUrl = isPast
+    ? null
+    : buildGoogleCalendarUrl(value, range, startTime, endTime);
 
   const sessions = range.kind === "sessions" ? range.sessions : null;
   const extraRows = buildExtraRows(value);

@@ -271,6 +271,33 @@ describe("<EventDetailBlock>", () => {
     expect(calendarDates(container)).toBe("20260925/20260928");
   });
 
+  it("recovers a lone session's hours for the Tijd cell + calendar (no top-level times)", () => {
+    // resolveEventRange collapses a single dated session to kind:"single"
+    // and drops its hours — the panel must still surface them.
+    const { container } = render(
+      <EventDetailBlock
+        value={{
+          title: "Algemene vergadering",
+          location: "Kantine",
+          sessions: [
+            {
+              _key: "s1",
+              date: "2026-09-25",
+              startTime: "18:00",
+              endTime: "22:00",
+            },
+          ],
+        }}
+        isPast={false}
+      />,
+    );
+    expect(
+      container.querySelector('[data-event-detail-fact="tijd"]')?.textContent,
+    ).toContain("18:00 - 22:00");
+    // 18:00 CEST (16:00Z) → 22:00 CEST (20:00Z), not an all-day fallback.
+    expect(calendarDates(container)).toBe("20260925T160000Z/20260925T200000Z");
+  });
+
   it("replaces the tag pill with an 'Afgelopen' muted pill on past events", () => {
     const { container } = render(
       <EventDetailBlock value={eventFact()} isPast={true} />,

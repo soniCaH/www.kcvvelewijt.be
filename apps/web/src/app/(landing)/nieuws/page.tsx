@@ -1,7 +1,7 @@
 /**
  * News Listing Page
- * Featured split at top (2fr|1fr), 3-column grid below with a load-more button,
- * sticky category filter bar.
+ * Symmetric 3-up featured row at top, 3-column grid below with a load-more
+ * button, sticky category filter bar.
  */
 
 import { Effect } from "effect";

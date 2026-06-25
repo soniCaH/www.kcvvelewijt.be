@@ -48,7 +48,7 @@ Excluded: **HULP-2** (organigram — owner-handled).
 
 ### `/nieuws` (news listing)
 
-- ☑ **NEWS-1** `[feature]` Replace truly-infinite scroll with a "load more" button. Initial batch 24 or 36, then +12 per click. _(#2237: initial 24, then +12/click.)_
+- ☑ **NEWS-1** `[feature]` Replace truly-infinite scroll with a "load more" button. Initial batch 24, then +12 per click. _(#2237: initial 24, then +12/click.)_
 
 ### `/nieuws/[slug]` (article detail)
 

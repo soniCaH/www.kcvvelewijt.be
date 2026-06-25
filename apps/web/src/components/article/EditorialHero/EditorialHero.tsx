@@ -42,7 +42,10 @@ import {
   resolveTransfer,
   type TransferFactValue,
 } from "@/components/article/blocks/TransferFact/types";
-import type { EventFactValue } from "@/components/article/blocks/EventFact/types";
+import {
+  resolveEventRange,
+  type EventFactValue,
+} from "@/components/article/blocks/EventFact/types";
 import { serializeTitle } from "@/lib/utils/serialize-title";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
@@ -441,13 +444,25 @@ export function EditorialHero(props: EditorialHeroProps) {
     // Compressed strip only on the homepage teaser card. On the detail
     // page the contained <EventDetailBlock> panel (ART-3 Variant B, #2237)
     // renders between the hero and the body instead, so the strip would be
-    // redundant there. The strip's date comes from the event's own
-    // `feature.date` (the day the event happens), NOT from the article's
-    // publishedAt; fall back to the article-level `date` only when no
-    // structured event date is set (rare partial-content case).
+    // redundant there. The strip's date comes from the resolved event range
+    // — the same source the detail panel uses — so a sessions-only event
+    // shows its first session date, not the article's publishedAt. Fall
+    // back to the article-level `date` only when no structured event date
+    // exists (rare partial-content case).
     if (placement === "homepage") {
-      const eventStripDate = props.feature?.date
-        ? formatArticleDate(props.feature.date)
+      const eventRange = resolveEventRange(
+        props.feature?.date,
+        props.feature?.endDate,
+        props.feature?.sessions,
+      );
+      const eventStartIso =
+        eventRange.kind === "none"
+          ? undefined
+          : eventRange.kind === "single"
+            ? eventRange.date.dateIso
+            : eventRange.start.dateIso;
+      const eventStripDate = eventStartIso
+        ? formatArticleDate(eventStartIso)
         : (date ?? null);
       belowHero = (
         <HeroCompressedEventStrip
