@@ -347,10 +347,13 @@ export default async function HomePage() {
     ? {
         key: "hero",
         bg: "transparent",
+        // HP-3: no outer container — <EditorialHero>'s shell now owns the
+        // index-width container (px-4 md:px-8) so the hero aligns flush with the
+        // Uitgelicht grid below. The wrapper keeps only the vertical rhythm.
         content: (
-          <PageContainer width="index" className="pt-10 pb-4 md:pt-14 md:pb-6">
+          <div className="pt-10 pb-4 md:pt-14 md:pb-6">
             <EditorialHero {...heroProps} />
-          </PageContainer>
+          </div>
         ),
         paddingTop: "pt-0",
         paddingBottom: "pb-0",

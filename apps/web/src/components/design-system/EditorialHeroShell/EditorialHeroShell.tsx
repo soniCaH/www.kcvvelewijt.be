@@ -23,15 +23,28 @@ export interface EditorialHeroShellProps {
    * keeps the canonical editorial-first stacking.
    */
   coverFirstOnMobile?: boolean;
+  /**
+   * Max content width. `wide` (1040) for article detail pages; `index` (1280)
+   * on the homepage so the hero aligns flush with the Uitgelicht grid (HP-3).
+   */
+  width?: "wide" | "index";
 }
 
 export function EditorialHeroShell({
   editorial,
   cover,
   coverFirstOnMobile = false,
+  width = "wide",
 }: EditorialHeroShellProps) {
   return (
-    <section className="mx-auto grid w-full max-w-[var(--container-wide)] grid-cols-1 gap-x-12 gap-y-8 px-4 pt-12 pb-6 md:px-8 lg:grid-cols-[60fr_40fr]">
+    <section
+      className={cn(
+        "mx-auto grid w-full grid-cols-1 gap-x-12 gap-y-8 px-4 pt-12 pb-6 md:px-8 lg:grid-cols-[60fr_40fr]",
+        width === "index"
+          ? "max-w-[var(--container-index)]"
+          : "max-w-[var(--container-wide)]",
+      )}
+    >
       {/* `min-w-0` on each grid child stops a long unbreakable token in the
           headline (e.g. "doorzettingsvermogen") from blowing out the
           `60fr_40fr` ratio — default grid-item `min-width: auto` resolves to

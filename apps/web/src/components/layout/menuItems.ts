@@ -112,11 +112,14 @@ export const seniorNavLabel = (name: string): string => {
   return /^[A-Z]$/.test(lastWord) ? `${lastWord}-ploeg` : name;
 };
 
+/** Reserves team (PSD id) — surfaced under Jeugd, not the senior nav (NAV-1). */
+export const RESERVEN_PSD_ID = "34";
+
 export const buildJeugdItem = (youthTeams?: TeamNavVM[]): MenuItem => {
   const children = youthTeams
-    ?.filter((t) => t.age != null)
+    ?.filter((t) => t.age != null || t.psdId === RESERVEN_PSD_ID)
     .map((t) => ({
-      label: t.age!,
+      label: t.psdId === RESERVEN_PSD_ID ? "Reserven" : t.age!,
       href: `/ploegen/${t.slug}`,
     }));
   return {

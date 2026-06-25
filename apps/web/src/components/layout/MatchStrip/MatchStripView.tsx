@@ -54,16 +54,20 @@ export function MatchStripView({ match }: MatchStripViewProps) {
           {aftrap}
         </span>
 
-        {/* HP-2: date/Aftrap (+Terrein) left, Competitie right. */}
-        <dl className="hidden lg:flex lg:w-full lg:items-stretch lg:justify-between">
-          <div className="lg:divide-ink/15 flex lg:items-stretch lg:divide-x">
-            <MetaCell caption="Aftrap" value={aftrap} />
-            {match.venue ? (
-              <MetaCell caption="Terrein" value={match.venue} />
-            ) : null}
-          </div>
+        {/* HP-2: same cells + divider as before — only the text alignment
+            within each cell changes so Aftrap and Competitie hug the divider
+            (Aftrap right-aligned, Competitie left-aligned). */}
+        <dl className="lg:divide-ink/15 hidden lg:flex lg:items-stretch lg:divide-x">
+          <MetaCell caption="Aftrap" value={aftrap} align="right" />
           {match.competition ? (
-            <MetaCell caption="Competitie" value={match.competition} />
+            <MetaCell
+              caption="Competitie"
+              value={match.competition}
+              align="left"
+            />
+          ) : null}
+          {match.venue ? (
+            <MetaCell caption="Terrein" value={match.venue} />
           ) : null}
         </dl>
       </div>
@@ -124,9 +128,26 @@ function TeamMark({ name, logoUrl }: { name: string; logoUrl?: string }) {
   );
 }
 
-function MetaCell({ caption, value }: { caption: string; value: string }) {
+function MetaCell({
+  caption,
+  value,
+  align = "center",
+}: {
+  caption: string;
+  value: string;
+  align?: "left" | "center" | "right";
+}) {
   return (
-    <div className="flex flex-col items-center justify-center gap-0.5 px-4">
+    <div
+      className={cn(
+        "flex flex-col justify-center gap-0.5 px-4",
+        align === "right"
+          ? "items-end text-right"
+          : align === "left"
+            ? "items-start text-left"
+            : "items-center",
+      )}
+    >
       <dt>
         <MonoLabel size="sm">{caption}</MonoLabel>
       </dt>
