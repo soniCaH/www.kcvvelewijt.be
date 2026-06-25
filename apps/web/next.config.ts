@@ -132,6 +132,15 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
       { protocol: "https", hostname: "cdn.sanity.io", pathname: "/**" },
     ],
+    // PERF-2 (#2235): serve optimizer-transformed heroes as AVIF (best
+    // compression) with WebP fallback, and cache optimized variants for a
+    // day so repeat views skip re-optimization. Most photos already arrive
+    // as pre-transformed Sanity CDN URLs; this only governs the optimizer-
+    // served path. `picsum.photos`/`placehold.co` remotePatterns are used
+    // exclusively by Storybook stories + `*.mocks.ts` — confirmed not
+    // referenced by any production render path.
+    formats: ["image/avif", "image/webp"],
+    minimumCacheTTL: 86400,
     // SVG Security Configuration
     // Current analysis (2025-01-05):
     // - Drupal API serves standard image formats: JPEG, PNG, GIF, WebP

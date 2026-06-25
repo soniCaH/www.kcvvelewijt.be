@@ -119,6 +119,9 @@ function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
     date: article.publishedAt
       ? formatArticleDate(article.publishedAt)
       : undefined,
+    // PERF-1 (#2235): the homepage hero cover is the LCP element — eager-load
+    // it. Only this call site sets `priority`; below-fold rows stay lazy.
+    priority: true,
   };
 
   const variant = article.articleType ?? "announcement";
