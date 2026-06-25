@@ -64,6 +64,29 @@ describe("EditorialHero — shell + placement", () => {
     ).toBeInTheDocument();
   });
 
+  it("eager-loads the cover image when priority is set (PERF-1), else lazy-loads", () => {
+    const cover = {
+      url: "https://example.com/cover.jpg",
+      alt: "Cover",
+    };
+    const { rerender } = render(
+      <EditorialHero variant="announcement" {...SHARED} coverImage={cover} />,
+    );
+    // Default: below-fold consumers keep next/image's lazy-loading.
+    expect(screen.getByAltText("Cover")).toHaveAttribute("loading", "lazy");
+
+    rerender(
+      <EditorialHero
+        variant="announcement"
+        {...SHARED}
+        coverImage={cover}
+        priority
+      />,
+    );
+    // priority → next/image drops lazy-loading for the LCP hero.
+    expect(screen.getByAltText("Cover")).not.toHaveAttribute("loading", "lazy");
+  });
+
   it("wraps the hero in an <a href='/nieuws/{slug}'> for placement='homepage'", () => {
     const { container } = render(
       <EditorialHero

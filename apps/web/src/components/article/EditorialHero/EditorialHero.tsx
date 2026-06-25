@@ -94,6 +94,13 @@ interface EditorialHeroSharedProps {
   /** Cover image artefact rendered in the right column (40fr). */
   coverImage?: EditorialHeroCoverImage;
   /**
+   * Mark the cover image as the LCP element (eager-load + high fetch
+   * priority, no lazy-loading). Set ONLY by the homepage hero call site
+   * — below-fold consumers (detail page, featured rows) leave it off so
+   * they keep lazy-loading. PERF-1 (#2235).
+   */
+  priority?: boolean;
+  /**
    * Optional pre-formatted Dutch date string appended to the kicker
    * (e.g. `"15 mei 2026"`). Per variant the kicker reads:
    * - announcement → `Aankondiging · ${category} · ${date}`
@@ -192,6 +199,8 @@ interface EditorialHeroCoverProps {
    *  reads on the cover figure as the wrapping `<Link>` translates into
    *  it. Only used by the homepage placement (the link carries `group`). */
   pressOnHover?: boolean;
+  /** Forwarded to `next/image` — eager-loads the LCP hero (PERF-1). */
+  priority?: boolean;
 }
 
 function EditorialHeroCover({
@@ -199,6 +208,7 @@ function EditorialHeroCover({
   aspect,
   overlay,
   pressOnHover,
+  priority,
 }: EditorialHeroCoverProps) {
   return (
     <TapedFigure
@@ -219,6 +229,7 @@ function EditorialHeroCover({
         src={coverImage.url}
         alt={coverImage.alt}
         fill
+        priority={priority}
         sizes="(min-width: 1024px) 440px, 100vw"
         className="object-cover"
       />
@@ -397,7 +408,8 @@ function renderMatchEditorial(
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function EditorialHero(props: EditorialHeroProps) {
-  const { title, lead, author, coverImage, placement, slug, date } = props;
+  const { title, lead, author, coverImage, placement, slug, date, priority } =
+    props;
 
   // Variant-specific editorial slot, cover aspect, cover overlay, and
   // below-hero strip. All branches share the placement + link wrapper
@@ -533,6 +545,7 @@ export function EditorialHero(props: EditorialHeroProps) {
             aspect={coverAspect}
             overlay={coverOverlay}
             pressOnHover={pressOnHover}
+            priority={priority}
           />
         ) : undefined
       }
