@@ -42,7 +42,10 @@ import {
   resolveTransfer,
   type TransferFactValue,
 } from "@/components/article/blocks/TransferFact/types";
-import type { EventFactValue } from "@/components/article/blocks/EventFact/types";
+import {
+  resolveEventRange,
+  type EventFactValue,
+} from "@/components/article/blocks/EventFact/types";
 import { serializeTitle } from "@/lib/utils/serialize-title";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
@@ -438,22 +441,49 @@ export function EditorialHero(props: EditorialHeroProps) {
         );
       }
     }
-    // The compressed strip's date comes from the event's own
-    // `feature.date` (the day the event happens), NOT from the
-    // article's publishedAt. Format the ISO date into Dutch when
-    // present; fall back to the article-level `date` only when no
-    // structured event date is set (rare partial-content case).
-    const eventStripDate = props.feature?.date
-      ? formatArticleDate(props.feature.date)
-      : (date ?? null);
-    belowHero = (
-      <HeroCompressedEventStrip
-        location={props.feature?.location ?? null}
-        date={eventStripDate}
-        startTime={props.feature?.startTime ?? null}
-        endTime={props.feature?.endTime ?? null}
-      />
-    );
+    // Compressed strip only on the homepage teaser card. On the detail
+    // page the contained <EventDetailBlock> panel (ART-3 Variant B, #2237)
+    // renders between the hero and the body instead, so the strip would be
+    // redundant there. The strip's date comes from the resolved event range
+    // — the same source the detail panel uses — so a sessions-only event
+    // shows its first session date, not the article's publishedAt. Fall
+    // back to the article-level `date` only when no structured event date
+    // exists (rare partial-content case).
+    if (placement === "homepage") {
+      const eventRange = resolveEventRange(
+        props.feature?.date,
+        props.feature?.endDate,
+        props.feature?.sessions,
+      );
+      const eventStartIso =
+        eventRange.kind === "none"
+          ? undefined
+          : eventRange.kind === "single"
+            ? eventRange.date.dateIso
+            : eventRange.start.dateIso;
+      const eventStripDate = eventStartIso
+        ? formatArticleDate(eventStartIso)
+        : (date ?? null);
+      // Session-based events keep their hours per-session (top-level
+      // start/end are empty), so the strip time comes from the earliest
+      // dated session — same start day as `eventStripDate` — and falls back
+      // to the top-level times for plain single/range events.
+      const startSession = (props.feature?.sessions ?? [])
+        .filter((s) => s.date?.trim())
+        .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))[0];
+      const stripStartTime =
+        startSession?.startTime?.trim() || props.feature?.startTime || null;
+      const stripEndTime =
+        startSession?.endTime?.trim() || props.feature?.endTime || null;
+      belowHero = (
+        <HeroCompressedEventStrip
+          location={props.feature?.location ?? null}
+          date={eventStripDate}
+          startTime={stripStartTime}
+          endTime={stripEndTime}
+        />
+      );
+    }
   } else if (props.variant === "transfer") {
     coverAspect = "landscape-3-2";
     editorial = renderTransferEditorial(

@@ -237,7 +237,51 @@ describe("EditorialHero — event variant", () => {
     expect(overlay).toHaveTextContent("15/6");
   });
 
-  it("renders the compressed event strip below the hero with location · date · time", () => {
+  it("renders the compressed event strip below the homepage teaser card with location · date · time", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "Sportpark Elewijt",
+          startTime: "09:00",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip).toHaveTextContent("Sportpark Elewijt");
+    expect(strip).toHaveTextContent("09:00–17:00");
+  });
+
+  it("derives the homepage strip date + time from the session schedule when top-level times are absent", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="steakfestijn-2026"
+        feature={{
+          title: "Steakfestijn",
+          location: "Sportpark Elewijt",
+          sessions: [
+            // Deliberately out of chronological order — the strip must pick
+            // the EARLIEST session (25 Sep) for both the date and the hours.
+            { date: "2026-09-27", startTime: "11:30", endTime: "15:00" },
+            { date: "2026-09-25", startTime: "18:00", endTime: "22:00" },
+          ],
+        }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip).toHaveTextContent("25 september 2026");
+    expect(strip).toHaveTextContent("18:00–22:00");
+  });
+
+  it("omits the compressed event strip on the detail placement (the contained panel renders instead, #2237)", () => {
     render(
       <EditorialHero
         variant="event"
@@ -250,9 +294,9 @@ describe("EditorialHero — event variant", () => {
         }}
       />,
     );
-    const strip = screen.getByTestId("hero-compressed-event-strip");
-    expect(strip).toHaveTextContent("Sportpark Elewijt");
-    expect(strip).toHaveTextContent("09:00–17:00");
+    expect(
+      screen.queryByTestId("hero-compressed-event-strip"),
+    ).not.toBeInTheDocument();
   });
 });
 

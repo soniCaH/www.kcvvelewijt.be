@@ -52,7 +52,6 @@ import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 import {
   EventDetailBlock,
   deriveIsPast,
-  shouldRenderEventDetailBlock,
 } from "@/components/article/blocks/EventDetailBlock";
 import { ArticleViewTracker } from "@/components/article/ArticleViewTracker";
 import type { RelatedContentItem } from "@/components/related/types";
@@ -480,6 +479,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         heroMatch,
       })}
 
+      {/* Contained event-fact panel (ART-3 Variant B, #2237) — replaces the
+          old full-bleed hero strip. Sits between the hero and the article
+          body; the component self-skips when the eventFact has no content. */}
+      {article.articleType === "event" && firstEventFact ? (
+        <EventDetailBlock
+          value={firstEventFact}
+          isPast={deriveIsPast(firstEventFact)}
+        />
+      ) : null}
+
       <ArticleMetadata
         date={publishedDate}
         readingTime={readingTime}
@@ -498,6 +507,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             // `interview-locked.md`).
             const { inFlow, tailBlocks } = qaBlocksToTailSection(body);
             const hasTail = tailBlocks.length > 0;
+            // The first eventFact on an event article is hoisted into the
+            // <EventDetailBlock> panel above the body (ArticleBody's
+            // docstring defers this absorption to the page) — drop it from
+            // the in-flow body so it doesn't also render as an inline
+            // polaroid. Later eventFacts stay inline. (#2237)
+            const hoistedEventKey =
+              article.articleType === "event"
+                ? firstEventFact?._key
+                : undefined;
+            const bodyInFlow = hoistedEventKey
+              ? inFlow.filter((b) => b._key !== hoistedEventKey)
+              : inFlow;
             return (
               // Phase 5.C cream-shell composition: <ArticleBody> ships its
               // own `bg-cream w-full` outer wrapper that's meant to bleed
@@ -510,7 +531,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                 <ArticleBodyMotion>
                   <ArticleBody
                     className="article-body"
-                    content={inFlow}
+                    content={bodyInFlow}
                     subjects={article.subjects ?? null}
                     articleSlug={article.slug}
                     articleType={article.articleType}
@@ -589,15 +610,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             </div>
           </div>
         </div>
-      ) : null}
-
-      {article.articleType === "event" &&
-      firstEventFact &&
-      shouldRenderEventDetailBlock(firstEventFact) ? (
-        <EventDetailBlock
-          value={firstEventFact}
-          isPast={deriveIsPast(firstEventFact)}
-        />
       ) : null}
 
       {shouldRenderArticleCredits(article) ? (

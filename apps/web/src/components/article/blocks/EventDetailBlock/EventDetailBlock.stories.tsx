@@ -11,13 +11,13 @@ const meta = {
     docs: {
       description: {
         component:
-          "Full event-detail card placed between `<EndMark>` and `<ArticleCredits>` per the 5.d-evt lock (Option A). Renders only when the eventFact carries detail beyond what the hero `<EventStrip>` already shows: a multi-day schedule, an address, a capacity ceiling, or an editor-authored note. Past events keep the card visible as a historical record but swap the tag pill for `Afgelopen` and hide the CTA. `isPast` is computed at the page-level Server Component via `deriveIsPast` so this component stays a pure renderer.",
+          'Contained event-fact panel (ART-3 Variant B, locked `go-live-art3-event-hero-strip/locked.md`). Rendered between the event hero and the article body on `articleType="event"`, replacing the old full-bleed `HeroCompressedEventStrip`. A taped index-card: one washi tape, optional tag pill + compact date, title, a 3-column Locatie / Datum / Tijd fact grid, then folded detail (per-day schedule, address, capacity, note) and a CTA row — Reserveer (jersey-deep) + Zet in agenda. Contained to `--container-wide`. Past events keep the card as a historical record but swap the tag pill for a muted `Afgelopen` and hide the CTA row. `isPast` is computed page-level via `deriveIsPast` so this stays a pure renderer.',
       },
     },
   },
   decorators: [
     (Story) => (
-      <div className="bg-cream w-full px-6 py-12">
+      <div className="bg-cream w-full py-12">
         <Story />
       </div>
     ),
@@ -44,26 +44,9 @@ const STEAK_NOTE: PortableTextBlock[] = [
   } as PortableTextBlock,
 ];
 
-const TORNOOI_NOTE: PortableTextBlock[] = [
-  {
-    _type: "block",
-    _key: "n2",
-    style: "normal",
-    children: [
-      {
-        _type: "span",
-        _key: "n2-c",
-        text: "Inschrijvingen sluiten 15 mei. Maximaal twee teams per club.",
-        marks: [],
-      },
-    ],
-    markDefs: [],
-  } as PortableTextBlock,
-];
-
-// Upcoming multi-day event with sessions — the canonical Option A
-// rendering: head with date-block + tag pill + title, sessions grid,
-// meta dl (Locatie / Adres / Capaciteit), note, jersey-deep CTA.
+// Canonical upcoming event: tag pill + compact date, title, the
+// Locatie / Datum / Tijd grid, a folded per-day schedule + capacity +
+// note, and both CTAs (Reserveer + Zet in agenda).
 export const UpcomingWithSessions: Story = {
   args: {
     isPast: false,
@@ -104,9 +87,35 @@ export const UpcomingWithSessions: Story = {
   },
 };
 
-// Past event — same data shape as `UpcomingWithSessions` but `isPast`
-// flips the tag pill to a muted `Afgelopen` and hides the CTA. Sessions
-// + meta + note remain visible (historical record).
+// Single-day event, no extra detail — the panel now carries it on its own
+// (this is the case the old hero strip used to handle full-bleed).
+export const Minimal: Story = {
+  args: {
+    isPast: false,
+    value: {
+      _key: "evt-2",
+      _type: "eventFact",
+      title: "Eetfestijn & opendeurdag",
+      date: "2026-09-19",
+      location: "Sportpark Driesput, Elewijt",
+      startTime: "10:00",
+      endTime: "17:00",
+      competitionTag: "Clubfeest",
+      ticketUrl: "https://kcvvelewijt.be/tickets/eetfestijn",
+      ticketLabel: "Reserveer",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Required fields only (date + location + time). The 3-column grid still scans; both CTAs render.",
+      },
+    },
+  },
+};
+
+// Past event — muted `Afgelopen` pill, greyscaled card, CTA row hidden.
 export const Past: Story = {
   args: {
     ...(UpcomingWithSessions.args ?? {}),
@@ -116,106 +125,51 @@ export const Past: Story = {
     docs: {
       description: {
         story:
-          "Past event with `isPast={true}`. Tag pill swaps to a muted `Afgelopen`; CTA disappears; rest of the card stays readable so the page works as a historical record.",
+          "Past event with `isPast={true}`. Tag pill swaps to a muted `Afgelopen`; the card greyscales; the CTA row disappears; the rest stays readable as a historical record.",
       },
     },
   },
 };
 
-// Single-day event with capacity + note but no sessions. The sessions
-// grid is omitted; meta dl + note + CTA still render.
-export const SingleDayWithCapacity: Story = {
-  args: {
-    isPast: false,
-    value: {
-      _key: "evt-2",
-      _type: "eventFact",
-      title: "Algemene vergadering",
-      date: "2026-06-12",
-      location: "Sportpark Elewijt — Kantine",
-      address: "Driesstraat 14, Elewijt",
-      capacity: 80,
-      competitionTag: "Bestuur",
-      note: [
-        {
-          _type: "block",
-          _key: "n3",
-          style: "normal",
-          children: [
-            {
-              _type: "span",
-              _key: "n3-c",
-              text: "Stemrecht voor alle aangesloten leden. Aanmelden vooraf niet vereist.",
-              marks: [],
-            },
-          ],
-          markDefs: [],
-        } as PortableTextBlock,
-      ],
-    },
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Single-day event — no sessions grid. The body card still adds value over the strip via address + capacity + note. No `ticketUrl` set → no CTA.",
-      },
-    },
-  },
-};
-
-// Multi-day continuous range (endDate set, no sessions). The date-block
-// shows the start day; the weekday line reads as a span (e.g. "VR–ZO").
-// Useful for tournaments without per-day schedules.
-export const MultiDayWithNote: Story = {
+// No ticket link and no resolvable date → no CTA row at all (an event
+// whose date is still to be announced).
+export const CtaLess: Story = {
   args: {
     isPast: false,
     value: {
       _key: "evt-3",
       _type: "eventFact",
-      title: "Lentetornooi U13",
-      date: "2026-05-09",
-      endDate: "2026-05-10",
-      location: "Sportpark Elewijt — Veld B",
-      address: "Driesstraat 14, Elewijt",
-      competitionTag: "Tornooi",
-      ticketUrl: "https://kcvvelewijt.be/jeugd/lentetornooi",
-      ticketLabel: "Schrijf je team in",
-      note: TORNOOI_NOTE,
+      title: "Quiz van het jaar",
+      location: "Sportpark Elewijt — Kantine",
+      competitionTag: "Clubfeest",
+      note: STEAK_NOTE,
     },
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Continuous multi-day range (`endDate` set, no `sessions[]`). The head's weekday line reads the span via two-letter abbreviations (`ZA–ZO`); no per-day schedule renders.",
+          "No `ticketUrl` and no date → `Datum volgt`, no calendar link, so the CTA row is omitted entirely.",
       },
     },
   },
 };
 
-// Skip-condition: nothing beyond what the strip shows. The component
-// returns `null` — Storybook renders an empty frame so the consumer
-// can confirm "block doesn't render" is the expected behaviour. Tagged
-// `vr-skip` so the null-rendered story doesn't produce noisy
-// always-empty VR baselines.
-export const SkipConditionMet: Story = {
-  tags: ["vr-skip"],
-  args: {
-    isPast: false,
-    value: {
-      _key: "evt-4",
-      _type: "eventFact",
-      title: "Wafelverkoop",
-      date: "2026-04-12",
-      location: "Sportpark Elewijt",
-    },
-  },
+// Mobile — the 3-column fact grid stacks to a single column under `sm`.
+export const Mobile: Story = {
+  args: { ...(UpcomingWithSessions.args ?? {}) },
+  decorators: [
+    (Story) => (
+      <div className="bg-cream w-full max-w-[390px] py-10">
+        <Story />
+      </div>
+    ),
+  ],
   parameters: {
     docs: {
       description: {
         story:
-          "Minimal eventFact whose strip already covers everything (date + location only). The block returns `null` — the article body ends at `<EndMark>` and goes straight to `<ArticleCredits>`.",
+          "Narrow viewport — the Locatie / Datum / Tijd grid collapses to one column and the CTAs wrap.",
       },
     },
   },

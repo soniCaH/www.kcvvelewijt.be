@@ -53,6 +53,9 @@ export interface HorizontalSliderProps {
   theme?: "light" | "dark";
   /** Additional CSS classes */
   className?: string;
+  /** Extra classes merged onto the inner flex track — e.g. a wider
+   *  `gap-*` than the default `gap-3` for roomier card rows. */
+  trackClassName?: string;
 }
 
 const DARK_ARROW_OVERRIDE = "shadow-paper-sm-soft";
@@ -84,6 +87,7 @@ export const HorizontalSlider = ({
   title,
   theme,
   className,
+  trackClassName,
 }: HorizontalSliderProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -151,7 +155,9 @@ export const HorizontalSlider = ({
           className={cn("overflow-x-auto scroll-smooth pb-2", fadeMask)}
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          <div className="flex min-w-max gap-3">{children}</div>
+          <div className={cn("flex min-w-max gap-3", trackClassName)}>
+            {children}
+          </div>
         </div>
 
         {canScrollRight && (

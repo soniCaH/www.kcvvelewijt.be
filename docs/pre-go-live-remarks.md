@@ -48,13 +48,13 @@ Excluded: **HULP-2** (organigram — owner-handled).
 
 ### `/nieuws` (news listing)
 
-- ☐ **NEWS-1** `[feature]` Replace truly-infinite scroll with a "load more" button. Initial batch 24 or 36, then +12 per click.
+- ☑ **NEWS-1** `[feature]` Replace truly-infinite scroll with a "load more" button. Initial batch 24, then +12 per click. _(#2237: initial 24, then +12/click.)_
 
 ### `/nieuws/[slug]` (article detail)
 
-- ☐ **ART-1** `[layout]` Huge vertical gap between the "Einde artikel" divider and the "Verder lezen" section — tighten.
-- ☐ **ART-2** `[layout]` "Verder lezen" related-articles grid is cramped — give cards more breathing room.
-- ☐ **ART-3** `[design]` **Event articleType needs design love.** Specifically the hoisted event-fact bar between hero and body (`EventDetailBlock` / `EventFactInline`, e.g. `SPORTPARK DRIESPUT … · 19 SEPTEMBER 2026 · 10:00–17:00`) is full-bleed with no container — wrap it + redesign pass.
+- ☑ **ART-1** `[layout]` Huge vertical gap between the "Einde artikel" divider and the "Verder lezen" section — tighten. _(#2237: `<VerderLezenRow>` top padding cut to `pt-8 lg:pt-10`.)_
+- ☑ **ART-2** `[layout]` "Verder lezen" related-articles grid is cramped — give cards more breathing room. _(#2237: slider track gap widened to `gap-6 md:gap-8`.)_
+- ☑ **ART-3** `[design]` **Event articleType needs design love.** Specifically the hoisted event-fact bar between hero and body (`EventDetailBlock` / `EventFactInline`, e.g. `SPORTPARK DRIESPUT … · 19 SEPTEMBER 2026 · 10:00–17:00`) is full-bleed with no container — wrap it + redesign pass. _(#2237: the full-bleed `HeroCompressedEventStrip` is replaced on the detail page by the contained `<EventDetailBlock>` Variant B taped index-card; the strip stays homepage-only.)_
 
 ### `/ploegen` (teams listing)
 
