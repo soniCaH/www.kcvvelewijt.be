@@ -44,7 +44,12 @@ export const eventFact = defineType({
       title: 'Start date',
       type: 'date',
       description: 'De kalenderdag waarop het evenement start.',
-      validation: (r) => r.required(),
+      validation: (r) =>
+        r
+          .required()
+          .error(
+            'Verplicht. Zonder startdatum kan het evenement niet in de agenda geplaatst en gesorteerd worden.',
+          ),
     }),
     defineField({
       name: 'endDate',
