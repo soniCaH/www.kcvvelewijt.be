@@ -86,6 +86,7 @@ export function TimelineItem({
       className="relative mb-10 md:flex md:items-start md:justify-between"
     >
       <div
+        data-timeline-card
         className={cn(
           "w-full md:w-[45%]",
           side === "right" && "hidden md:invisible md:block",
@@ -94,13 +95,16 @@ export function TimelineItem({
         {side === "left" && card}
       </div>
 
-      {/* Node marker — decorative; cream ring masks the dashed line behind it. */}
+      {/* Node marker — decorative; cream ring masks the dashed line behind it.
+          HIST-1: stays anchored and colours in (see globals.css timeline rules). */}
       <div
+        data-timeline-bullet
         className="bg-jersey-deep border-ink absolute top-2 left-1/2 hidden h-4 w-4 -translate-x-1/2 rounded-full border-2 shadow-[0_0_0_4px_var(--color-cream)] md:block"
         aria-hidden="true"
       />
 
       <div
+        data-timeline-card
         className={cn(
           "w-full md:w-[45%]",
           side === "left" && "hidden md:invisible md:block",

@@ -53,10 +53,10 @@ export default function WordLidPage() {
           <EditorialHeading
             level={1}
             size="display-xl"
-            emphasis={{ text: "compagnie." }}
-            className="mt-3 mb-0 break-words hyphens-auto"
+            emphasis={{ text: "mee." }}
+            className="mt-3 mb-0"
           >
-            Er is maar één plezante
+            Doe
           </EditorialHeading>
           <p className="text-ink-soft font-display mt-5 max-w-[60ch] text-[length:var(--text-body-lg)] leading-[var(--text-body-lg--lh)]">
             Speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter — vul

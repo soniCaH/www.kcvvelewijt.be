@@ -9,7 +9,7 @@
  * reads on any ground). No "ZOEK" word — the magnifier carries the action.
  */
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { MagnifyingGlass, X } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 import { searchFieldShellClasses } from "./search-field-styles";
@@ -63,6 +63,18 @@ export const SearchForm = ({
     onSearch("");
   };
 
+  // ZOEK-2: debounced auto-search (typeahead). Fires 350ms after typing stops
+  // once there are 2+ chars; submit (Enter / magnifier) stays the instant path.
+  // Skips the value already reflected in the URL so mount + result-driven
+  // `initialValue` syncs don't re-fire.
+  useEffect(() => {
+    const trimmed = value.trim();
+    if (trimmed === initialValue.trim()) return;
+    if (trimmed.length === 1) return;
+    const id = setTimeout(() => onSearch(trimmed), 350);
+    return () => clearTimeout(id);
+  }, [value, initialValue, onSearch]);
+
   const canSubmit = value.trim().length >= 2 && !isLoading;
 
   return (
@@ -79,8 +91,10 @@ export const SearchForm = ({
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label="Zoekterm"
-        className="text-ink placeholder:text-ink-muted bg-cream min-w-0 flex-1 px-4 py-4 text-[length:var(--text-body-lg)] outline-none focus:outline-hidden disabled:opacity-60 md:px-5"
-        disabled={isLoading}
+        className="text-ink placeholder:text-ink-muted bg-cream min-w-0 flex-1 px-4 py-4 text-[length:var(--text-body-lg)] outline-none focus:outline-hidden md:px-5"
+        // ZOEK-2: never disable the field — auto-search sets `isLoading` mid-type,
+        // and disabling the input blurs it (the typeahead would lose focus on
+        // every keystroke). In-flight requests are aborted in <SearchInterface>.
         autoFocus
       />
 

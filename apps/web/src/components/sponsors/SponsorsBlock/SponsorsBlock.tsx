@@ -24,7 +24,10 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
       className={cn("bg-cream-deep py-16 md:py-20", className)}
     >
       <PageContainer width="index">
-        <SectionHeader title="Met dank aan onze sponsors" />
+        <SectionHeader
+          title="Met dank aan onze sponsors"
+          emphasis={{ text: "sponsors" }}
+        />
 
         <ul className={cn("mt-8", SPONSOR_TILE_GRID_CLASS)}>
           {visible.map((sponsor) => (
@@ -34,7 +37,7 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
           ))}
         </ul>
 
-        <div className="mt-10">
+        <div className="mt-10 flex justify-end">
           <Link
             href="/sponsors"
             className="text-ink hover:text-jersey-deep inline-flex items-center gap-1 font-mono text-sm font-bold tracking-wide uppercase underline-offset-4 hover:underline"

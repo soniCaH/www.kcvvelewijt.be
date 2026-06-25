@@ -28,6 +28,13 @@ import type {
 
 export interface FirstTeamsBlockProps {
   teams: FirstTeamVM[];
+  /**
+   * Section heading. The homepage passes a fixture-aware label (HP-4) —
+   * "Dit weekend." only when a fixture is actually within the coming week,
+   * a calmer "Volgende wedstrijd." when the next match is weeks out
+   * (pre-season). Defaults to "Dit weekend." so stories/tests stay stable.
+   */
+  heading?: string;
 }
 
 const OUTCOME_WORD: Record<"win" | "draw" | "loss", string> = {
@@ -204,7 +211,10 @@ function FirstTeamRow({ team }: { team: FirstTeamVM }) {
  * Render the "Eerste ploegen" band. Teams with neither a result nor a fixture
  * are dropped; the whole block renders nothing when no team has any match.
  */
-export function FirstTeamsBlock({ teams }: FirstTeamsBlockProps) {
+export function FirstTeamsBlock({
+  teams,
+  heading = "Dit weekend.",
+}: FirstTeamsBlockProps) {
   const rows = teams.filter((t) => t.result || t.fixture);
   if (rows.length === 0) return null;
 
@@ -223,7 +233,7 @@ export function FirstTeamsBlock({ teams }: FirstTeamsBlockProps) {
               tone="cream"
               className="mt-2"
             >
-              Dit weekend.
+              {heading}
             </EditorialHeading>
           </div>
           <Link

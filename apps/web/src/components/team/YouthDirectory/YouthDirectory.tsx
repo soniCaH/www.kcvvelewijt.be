@@ -90,6 +90,15 @@ export function YouthDirectory({ divisions, className }: YouthDirectoryProps) {
                   <p className="font-display-big text-jersey-deep mt-2 text-center text-2xl font-black tabular-nums">
                     {team.age}
                   </p>
+                  {/* TEAMS-2 / JEUGD-1: same-age teams (U9 wit/groen/prov)
+                      need a distinguisher — show the full division/name when
+                      it adds detail beyond the age. */}
+                  {(team.divisionFull ?? team.name).toLowerCase() !==
+                  team.age.toLowerCase() ? (
+                    <p className="text-ink-soft mt-0.5 text-center font-mono text-[10px] leading-tight tracking-[0.08em] uppercase">
+                      {team.divisionFull ?? team.name}
+                    </p>
+                  ) : null}
                 </TapedCard>
               </Link>
             ))}

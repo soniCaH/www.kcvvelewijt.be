@@ -37,9 +37,7 @@ export function SponsorHero({ featured }: SponsorHeroProps) {
           column taller than the marquee card, so the columns are top-aligned. */}
       <div>
         <span className="mb-4 block">
-          <MonoLabel variant="plain">
-            Er is maar één plezante compagnie
-          </MonoLabel>
+          <MonoLabel variant="plain">Sponsors &amp; sympathisanten</MonoLabel>
         </span>
         <EditorialHeading
           level={1}

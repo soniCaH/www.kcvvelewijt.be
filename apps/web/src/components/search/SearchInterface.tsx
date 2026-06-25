@@ -311,8 +311,14 @@ export const SearchInterface = ({
           </>
         )}
 
-        {/* Pre-search state — football-voice paper card (8s4). */}
-        {query.trim().length < 2 && <SearchPreSearchCard />}
+        {/* Pre-search state — football-voice paper card (8s4). Centred in the
+            available space (ZOEK-1) so the empty state doesn't strand a gap
+            between the masthead and the footer. */}
+        {query.trim().length < 2 ? (
+          <div className="flex min-h-[45vh] items-center justify-center">
+            <SearchPreSearchCard />
+          </div>
+        ) : null}
       </PageContainer>
     </>
   );

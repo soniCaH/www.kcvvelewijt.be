@@ -104,13 +104,17 @@ export default async function JeugdPage() {
         ])}
       />
 
-      <PageContainer width="index" className="py-10 sm:py-14">
+      <PageContainer width="index" className="pt-10 sm:pt-14">
         <JeugdHero />
+      </PageContainer>
 
-        <div className="my-10 sm:my-12">
-          <StripedSeam colorPair="ink-cream" height="md" />
-        </div>
+      {/* Full-bleed seam — a sibling of the container (not wrapped) so it spans
+          the viewport like the seams elsewhere on the site. */}
+      <div className="my-10 sm:my-12">
+        <StripedSeam colorPair="ink-cream" height="md" />
+      </div>
 
+      <PageContainer width="index" className="pb-10 sm:pb-14">
         <JeugdVisie />
 
         <EditorialHubAnalytics eventName="jeugd_card_click" className="mt-16">

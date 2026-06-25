@@ -4,6 +4,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { AccentStrip } from "@/components/layout/AccentStrip";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { RESERVEN_PSD_ID } from "@/components/layout/menuItems";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
@@ -80,11 +81,14 @@ export default async function RootLayout({
 
   const isYouthAge = (age: string | null): age is string =>
     age != null && age.startsWith("U");
-  const seniorTeams = allTeams.filter((t) => !isYouthAge(t.age));
+  // NAV-1: the reserves team (psdId 34) belongs under Jeugd, not the senior nav.
+  const isUnderJeugd = (t: (typeof allTeams)[number]) =>
+    isYouthAge(t.age) || t.psdId === RESERVEN_PSD_ID;
+  const seniorTeams = allTeams.filter((t) => !isUnderJeugd(t));
   const parseAge = (age: string) => parseInt(age.replace(/\D/g, "")) || 0;
   const youthTeams = allTeams
-    .filter((t) => isYouthAge(t.age))
-    .sort((a, b) => parseAge(b.age!) - parseAge(a.age!));
+    .filter(isUnderJeugd)
+    .sort((a, b) => parseAge(b.age ?? "") - parseAge(a.age ?? ""));
 
   return (
     <html
@@ -107,7 +111,7 @@ export default async function RootLayout({
           </Script>
         )}
       </head>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className="flex min-h-screen flex-col">
         {/* WCAG 2.1-A skip link — first focusable element, visible only on
             keyboard focus. Retro register (sharp corners, ink border, mono). */}
         <a
@@ -123,7 +127,9 @@ export default async function RootLayout({
         <ScrollToTop />
         <AccentStrip />
         <SiteHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
-        <main id="main-content" tabIndex={-1}>
+        {/* flex-1 column so a short page's footer sticks to the viewport
+            bottom (ZOEK-1 / TEGEN-1) instead of floating up or leaving a gap. */}
+        <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col">
           {children}
         </main>
         <SiteFooter />

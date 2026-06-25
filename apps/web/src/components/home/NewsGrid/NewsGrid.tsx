@@ -45,6 +45,8 @@ export interface NewsGridProps {
    */
   articles: NewsGridArticle[];
   title?: string;
+  /** Optional emphasis accent on the section heading (HP-5). */
+  emphasis?: { text: string };
   showViewAll?: boolean;
   viewAllHref?: string;
   className?: string;
@@ -78,6 +80,7 @@ const SLOT_ROTATIONS: NewsCardRotation[] = ["a", "b", "c", "d", "a", "b"];
 export const NewsGrid = ({
   articles,
   title = "Laatste nieuws",
+  emphasis,
   showViewAll = true,
   viewAllHref = "/nieuws",
   className,
@@ -96,11 +99,12 @@ export const NewsGrid = ({
         {showViewAll ? (
           <SectionHeader
             title={title}
+            emphasis={emphasis}
             linkText="Al het nieuws"
             linkHref={viewAllHref}
           />
         ) : (
-          <SectionHeader title={title} />
+          <SectionHeader title={title} emphasis={emphasis} />
         )}
 
         {/* 3×2 chronological grid — R2.B (`newsgrid-revisit-locked.md`).

@@ -133,7 +133,7 @@ export default function UltrasPage() {
               rotation="b"
               tape={{
                 color: "warm",
-                length: "sm",
+                length: "lg",
                 position: "right",
                 rotation: "b",
               }}

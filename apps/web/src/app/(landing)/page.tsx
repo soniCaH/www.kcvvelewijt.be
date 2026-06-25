@@ -347,10 +347,13 @@ export default async function HomePage() {
     ? {
         key: "hero",
         bg: "transparent",
+        // HP-3: no outer container — <EditorialHero>'s shell now owns the
+        // index-width container (px-4 md:px-8) so the hero aligns flush with the
+        // Uitgelicht grid below. The wrapper keeps only the vertical rhythm.
         content: (
-          <PageContainer width="index" className="pt-10 pb-4 md:pt-14 md:pb-6">
+          <div className="pt-10 pb-4 md:pt-14 md:pb-6">
             <EditorialHero {...heroProps} />
-          </PageContainer>
+          </div>
         ),
         paddingTop: "pt-0",
         paddingBottom: "pb-0",
@@ -380,13 +383,28 @@ export default async function HomePage() {
   // "Eerste ploegen" — A/B last result + next fixture, carrying the
   // result→next-fixture transition. Self-contained dark band (own StripedSeam
   // top/bottom + padding), so the SectionStack wrapper stays flush (#2211).
+  // HP-4: "Dit weekend." only when a fixture is actually within the coming
+  // week; otherwise a calmer label so pre-season (next match ~weeks out)
+  // doesn't read oddly.
+  const soonestFixtureMs = Math.min(
+    ...firstTeamVMs.map(
+      (t) => t.fixture?.date.getTime() ?? Number.POSITIVE_INFINITY,
+    ),
+  );
+  const firstTeamsHeading =
+    Number.isFinite(soonestFixtureMs) &&
+    soonestFixtureMs - now.getTime() <= 7 * 24 * 60 * 60 * 1000
+      ? "Dit weekend."
+      : "Volgende wedstrijd.";
   const firstTeamsSection: SectionConfig | null = firstTeamVMs.some(
     (t) => t.result || t.fixture,
   )
     ? {
         key: "first-teams",
         bg: "transparent",
-        content: <FirstTeamsBlock teams={firstTeamVMs} />,
+        content: (
+          <FirstTeamsBlock teams={firstTeamVMs} heading={firstTeamsHeading} />
+        ),
         paddingTop: "pt-0",
         paddingBottom: "pb-0",
       }
@@ -427,6 +445,7 @@ export default async function HomePage() {
             <NewsGrid
               articles={newsGridArticles}
               title="Laatste nieuws"
+              emphasis={{ text: "nieuws" }}
               showViewAll
               viewAllHref="/nieuws"
             />

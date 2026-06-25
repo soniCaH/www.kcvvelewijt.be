@@ -113,6 +113,14 @@ function StaffCard({ member }: { member: TeamStaffMemberData }) {
       <p className="text-ink-muted mt-1 font-mono text-[9px] tracking-[0.06em] uppercase">
         {fn}
       </p>
+
+      {/* BEST-1: only clickable cards (with a detail page) get a visible
+          affordance, so clickable vs non-clickable no longer read identically. */}
+      {isLink ? (
+        <span className="text-jersey-deep mt-1.5 font-mono text-[9px] font-semibold tracking-[0.1em] uppercase">
+          Bekijk →
+        </span>
+      ) : null}
     </>
   );
 

@@ -538,6 +538,7 @@ export function EditorialHero(props: EditorialHeroProps) {
     <EditorialHeroShell
       editorial={editorial}
       coverFirstOnMobile={coverFirstOnMobile}
+      width={placement === "homepage" ? "index" : "wide"}
       cover={
         coverImage !== undefined ? (
           <EditorialHeroCover
@@ -579,7 +580,7 @@ export function EditorialHero(props: EditorialHeroProps) {
             a bottom divider line; pin "Lees verder" inside the same inner
             container so it aligns flush with the divider's right edge
             rather than the outer link's wrapper-padded edge. */}
-        <PageContainer className="mt-2 flex justify-end">
+        <PageContainer width="index" className="mt-2 flex justify-end">
           <span
             aria-hidden="true"
             className="text-jersey-deep pointer-events-none font-mono text-xs leading-none font-bold uppercase opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"

@@ -188,7 +188,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
   }`;
 
   return (
-    <div className="bg-cream-deep min-h-screen">
+    <div className="bg-cream-deep flex-1">
       <PageContainer className="pt-8 pb-8">
         <PageHero
           kicker="Onderlinge geschiedenis"
