@@ -9,6 +9,7 @@ import {
   ArrowSquareOut as ExternalLinkIcon,
   FacebookLogo,
   InstagramLogo,
+  X,
 } from "@/lib/icons.redesign";
 import type { ReactNode } from "react";
 import { BodyQuote } from "@/components/design-system/BodyQuote";
@@ -271,6 +272,9 @@ function socialBrandFor(
     return { Icon: FacebookLogo, label: "Facebook" };
   if (isHost(["instagram.com", "instagr.am"]))
     return { Icon: InstagramLogo, label: "Instagram" };
+  // X (formerly Twitter) — Phosphor has no brand glyph in this version, so the
+  // plain `X` mark stands in (the brand is literally an X).
+  if (isHost(["x.com", "twitter.com", "t.co"])) return { Icon: X, label: "X" };
   return null;
 }
 
@@ -650,7 +654,7 @@ function buildComponents({
               data-article-link="social"
               // Social links read as a bordered icon affordance (CMS-2), reusing
               // the footer's square brand-button idiom on the cream body surface.
-              className="border-jersey-deep/40 text-jersey-deep hover:border-jersey-deep hover:bg-jersey-deep/5 inline-flex items-center gap-1.5 border px-2 py-0.5 align-baseline font-medium no-underline transition-colors"
+              className="border-jersey-deep/40 text-jersey-deep hover:border-jersey-deep hover:bg-jersey-deep/5 my-1 inline-flex items-center gap-1.5 border px-2 py-0.5 align-baseline font-medium no-underline transition-colors"
             >
               <Icon
                 aria-hidden="true"
