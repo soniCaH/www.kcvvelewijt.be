@@ -684,6 +684,36 @@ describe("SearchInterface", () => {
       });
     });
 
+    it("keeps the search field focused while a debounced auto-search loads (ZOEK-2)", async () => {
+      const user = userEvent.setup();
+      // Every fetch hangs so isLoading stays true through the typing window.
+      const pending = new Promise(() => {});
+      fetchMock.mockReturnValue(pending);
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      // Typing focuses the field; the SearchForm debounce (350ms) then fires the
+      // auto-search, flipping isLoading WHILE the field is focused — and crucially
+      // without a click that would hand focus off to a button.
+      await user.type(input, "test");
+      expect(input).toHaveFocus();
+
+      // The debounced auto-search fires a request.
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+      // Regression guard (ZOEK-2): during loading the field must stay enabled AND
+      // keep focus — disabling it (the old behaviour) blurred the typeahead
+      // mid-type. This fails if focus is lost during the isLoading transition.
+      expect(input).not.toBeDisabled();
+      expect(input).toHaveFocus();
+
+      // …and the user can keep typing without interruption.
+      await user.type(input, "x");
+      expect(input).toHaveValue("testx");
+      expect(input).toHaveFocus();
+    });
+
     it("should show spinner during loading", async () => {
       const user = userEvent.setup();
       // Promise intentionally left unresolved - AbortController cleanup
