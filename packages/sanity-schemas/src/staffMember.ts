@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {editorialBioOf, PULLQUOTE_BIO_HELP} from './blocks/editorial-marks'
 
 export const staffMember = defineType({
   name: 'staffMember',
@@ -18,6 +19,7 @@ export const staffMember = defineType({
       type: 'string',
       group: 'identiteit',
       description: 'De voornaam van het staflid, zoals getoond op de staf- en clubpagina\'s.',
+      validation: (r) => r.required().error('Verplicht. Zonder voornaam heeft het profiel geen naam op de site.'),
     }),
     defineField({
       name: 'lastName',
@@ -25,6 +27,7 @@ export const staffMember = defineType({
       type: 'string',
       group: 'identiteit',
       description: 'De familienaam van het staflid, zoals getoond op de staf- en clubpagina\'s.',
+      validation: (r) => r.required().error('Verplicht. Zonder familienaam heeft het profiel geen naam op de site.'),
     }),
     defineField({
       name: 'photo',
@@ -67,8 +70,11 @@ export const staffMember = defineType({
       title: 'Bio',
       type: 'array',
       group: 'redactioneel',
-      of: [{type: 'block'}],
-      description: 'Korte voorstelling van het staflid in vrije tekst. Getoond op het detailprofiel op de site.',
+      // Parity with player.bio (STAFF-1/2): shared `editorialBioOf()` — same
+      // pullquote decorator, same Normal-only lock. Renders via <BioBlock> on
+      // the site, so the old default H2 ("act divider") no longer applies.
+      of: editorialBioOf(),
+      description: `Korte voorstelling van het staflid in vrije tekst. Getoond op het detailprofiel op de site. ${PULLQUOTE_BIO_HELP}`,
     }),
     defineField({
       name: 'functionTitle',

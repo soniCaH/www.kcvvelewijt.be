@@ -57,6 +57,7 @@ export const EVENT_BY_SLUG_QUERY =
   dateEnd,
   location,
   "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",
+  "coverImageAlt": coverImage.alt,
   externalLink
 }`);
 

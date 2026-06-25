@@ -8,8 +8,10 @@
  */
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
+import { PortableText, type PortableTextComponents } from "@portabletext/react";
 
 import { runPromise } from "@/lib/effect/runtime";
 import { PhotoGalleryRepository } from "@/lib/repositories/photoGallery.repository";
@@ -35,6 +37,36 @@ export const revalidate = 86400;
 function ogImageUrl(url: string | null | undefined): string | null {
   return url ? `${url}?w=1200&h=630&fit=crop&auto=format` : null;
 }
+
+/** Minimal serializers for the gallery intro — paragraphs + links only. */
+const descriptionComponents: PortableTextComponents = {
+  marks: {
+    link: ({
+      children,
+      value,
+    }: {
+      children?: ReactNode;
+      value?: { href?: string };
+    }) => {
+      const href =
+        typeof value?.href === "string" && value.href.length > 0
+          ? value.href
+          : "#";
+      const external = href.startsWith("http");
+      return (
+        <a
+          href={href}
+          className="text-jersey-deep underline underline-offset-2"
+          {...(external
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+        >
+          {children}
+        </a>
+      );
+    },
+  },
+};
 
 export async function generateStaticParams() {
   try {
@@ -78,7 +110,9 @@ export async function generateMetadata({
       title: gallery.title,
       description,
       type: "website",
-      images: og ? [{ url: og, alt: gallery.title }] : [DEFAULT_OG_IMAGE],
+      images: og
+        ? [{ url: og, alt: gallery.images?.[0]?.alt || gallery.title }]
+        : [DEFAULT_OG_IMAGE],
     },
   };
 }
@@ -130,10 +164,13 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
               </MonoLabel>
             </p>
           )}
-          {gallery.descriptionText && (
-            <p className="text-body-md text-ink-soft mt-6 max-w-prose">
-              {gallery.descriptionText}
-            </p>
+          {gallery.descriptionRich && gallery.descriptionRich.length > 0 && (
+            <div className="text-body-md text-ink-soft mt-6 max-w-prose space-y-3">
+              <PortableText
+                value={gallery.descriptionRich}
+                components={descriptionComponents}
+              />
+            </div>
           )}
         </header>
 

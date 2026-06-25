@@ -11,7 +11,8 @@ export const htmlTable = defineType({
       name: 'html',
       title: 'Table HTML',
       type: 'text',
-      description: 'Raw HTML table imported from Drupal. Edit the surrounding article text, but leave this block for table data.',
+      description:
+        'Verouderd blok: een ruwe HTML-tabel overgenomen uit Drupal (gesaneerd, enkel <table>). Niet bedoeld voor nieuwe artikels — bewerk de omliggende tekst, maar laat dit blok ongemoeid voor de tabelgegevens.',
       validation: (Rule) => Rule.required(),
     }),
   ],

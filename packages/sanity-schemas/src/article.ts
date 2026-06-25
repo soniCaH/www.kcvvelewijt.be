@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {LinkIcon, UserIcon} from '@sanity/icons'
+import {accentTitleOf} from './blocks/editorial-marks'
 import {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 import {validateSubjectsCount} from './validation/subjects-count'
 
@@ -105,21 +106,12 @@ export const article = defineType({
       description:
         "Houd de titel kort en krachtig (richtlijn: ~60 tekens). Selecteer één woord en klik op 'Accent' voor de groene cursief. Op de homepagina wordt de titel na 3 regels afgekapt met een ellipsis.",
       // Constrained Portable Text — single block, no styles, no
-      // annotations, ONE custom decorator named `accent`. Editor selects
-      // a word + clicks Accent → that span renders italic + jersey-deep
+      // annotations, ONE custom decorator named `accent` (shared
+      // `accentTitleOf()`, which adds the toolbar icon). Editor selects a
+      // word + clicks Accent → that span renders italic + jersey-deep
       // via <EditorialHeading>.
       // Spec: docs/design/mockups/phase-3-b-editorial-hero/fields.md Ask 9.
-      of: [
-        {
-          type: "block",
-          styles: [{ title: "Normal", value: "normal" }],
-          lists: [],
-          marks: {
-            decorators: [{ title: "Accent", value: "accent" }],
-            annotations: [],
-          },
-        },
-      ],
+      of: accentTitleOf(),
       validation: (r) =>
         r
           .required()

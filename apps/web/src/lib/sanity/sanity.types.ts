@@ -218,8 +218,8 @@ export type PhotoGallery = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -238,6 +238,7 @@ export type PhotoGallery = {
       crop?: SanityImageCrop;
       _type: "image";
     };
+    alt?: string;
     caption?: string;
     credit?: string;
     _type: "galleryImage";
@@ -267,6 +268,7 @@ export type Event = {
     media?: unknown;
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
+    alt?: string;
     _type: "image";
   };
   dateStart?: string;
@@ -683,15 +685,7 @@ export type Page = {
           _type: "span";
           _key: string;
         }>;
-        style?:
-          | "normal"
-          | "h1"
-          | "h2"
-          | "h3"
-          | "h4"
-          | "h5"
-          | "h6"
-          | "blockquote";
+        style?: "normal" | "h2" | "blockquote";
         listItem?: "bullet" | "number";
         markDefs?: Array<{
           href?: string;
@@ -854,8 +848,8 @@ export type Team = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -936,8 +930,8 @@ export type StaffMember = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -994,8 +988,8 @@ export type Player = {
       _type: "span";
       _key: string;
     }>;
-    style?: "normal" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "blockquote";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -2147,7 +2141,7 @@ export type NEXT_FEATURED_EVENT_QUERY_RESULT = {
 
 // Source: ../web/src/lib/repositories/event.repository.ts
 // Variable: EVENT_BY_SLUG_QUERY
-// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  "updatedAt": _updatedAt,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  eventType,  "dateStart": coalesce(dateStart, ""),  dateEnd,  location,  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",  externalLink}
+// Query: *[_type == "event" && slug.current == $slug][0] {  "id": _id,  "updatedAt": _updatedAt,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  eventType,  "dateStart": coalesce(dateStart, ""),  dateEnd,  location,  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",  "coverImageAlt": coverImage.alt,  externalLink}
 export type EVENT_BY_SLUG_QUERY_RESULT = {
   id: string;
   updatedAt: string;
@@ -2163,6 +2157,7 @@ export type EVENT_BY_SLUG_QUERY_RESULT = {
   dateEnd: string | null;
   location: string | null;
   coverImageUrl: string | null;
+  coverImageAlt: string | null;
   externalLink: {
     url?: string;
     label?: string;
@@ -2300,15 +2295,7 @@ export type PAGE_BY_SLUG_QUERY_RESULT = {
           _type: "span";
           _key: string;
         }>;
-        style?:
-          | "blockquote"
-          | "h1"
-          | "h2"
-          | "h3"
-          | "h4"
-          | "h5"
-          | "h6"
-          | "normal";
+        style?: "blockquote" | "h2" | "normal";
         listItem?: "bullet" | "number";
         markDefs?: Array<{
           href?: string;
@@ -2358,7 +2345,7 @@ export type GALLERIES_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/photoGallery.repository.ts
 // Variable: GALLERY_BY_SLUG_QUERY
-// Query: *[_type == "photoGallery" && slug.current == $slug][0] {  "id": _id,  "updatedAt": _updatedAt,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "publishedAt": coalesce(publishedAt, ""),  "descriptionText": pt::text(description),  "images": images[]{    "url": image.asset->url,    "lqip": image.asset->metadata.lqip,    "caption": coalesce(caption, ""),    "credit": coalesce(credit, ^.defaultCredit, "")  }}
+// Query: *[_type == "photoGallery" && slug.current == $slug][0] {  "id": _id,  "updatedAt": _updatedAt,  "title": coalesce(title, ""),  "slug": coalesce(slug.current, ""),  "publishedAt": coalesce(publishedAt, ""),  "descriptionText": pt::text(description),  "descriptionRich": description,  "images": images[]{    "url": image.asset->url,    "lqip": image.asset->metadata.lqip,    "alt": coalesce(alt, caption, ""),    "caption": coalesce(caption, ""),    "credit": coalesce(credit, ^.defaultCredit, "")  }}
 export type GALLERY_BY_SLUG_QUERY_RESULT = {
   id: string;
   updatedAt: string;
@@ -2366,9 +2353,28 @@ export type GALLERY_BY_SLUG_QUERY_RESULT = {
   slug: string | "";
   publishedAt: string | "";
   descriptionText: string;
+  descriptionRich: Array<{
+    children?: Array<{
+      marks?: Array<string>;
+      text?: string;
+      _type: "span";
+      _key: string;
+    }>;
+    style?: "normal";
+    listItem?: never;
+    markDefs?: Array<{
+      href?: string;
+      _type: "link";
+      _key: string;
+    }>;
+    level?: number;
+    _type: "block";
+    _key: string;
+  }> | null;
   images: Array<{
     url: string | null;
     lqip: string | null;
+    alt: string | "";
     caption: string | "";
     credit: string | "";
   }> | null;
@@ -2439,8 +2445,8 @@ export type PLAYERS_QUERY_RESULT = Array<{
       _type: "span";
       _key: string;
     }>;
-    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -2481,8 +2487,8 @@ export type PLAYER_BY_PSD_ID_QUERY_RESULT = {
       _type: "span";
       _key: string;
     }>;
-    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -2629,8 +2635,8 @@ export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
       _type: "span";
       _key: string;
     }>;
-    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -2709,8 +2715,8 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
       _type: "span";
       _key: string;
     }>;
-    style?: "blockquote" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "normal";
-    listItem?: "bullet" | "number";
+    style?: "normal";
+    listItem?: never;
     markDefs?: Array<{
       href?: string;
       _type: "link";
@@ -2832,7 +2838,7 @@ declare module "@sanity/client" {
     '*[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {\n  "id": _id, "updatedAt": _updatedAt,\n  "title": coalesce(pt::text(title), title, ""),\n  "titleRich": title,\n  "lead": coalesce(lead, ""),\n  "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,\n  // PSD match id for matchPreview/matchRecap variants (#1470). String, not a\n  // Sanity reference \u2014 matches are BFF/PSD-native. The page fetches the match\n  // via BffService.getMatchDetail to feed the hero score bar + Doelpunten.\n  linkedMatch,\n  // 5.B.int (#1795) \u2014 author + photographer drive <EditorialByline>\'s\n  // "Door {author}" line (fallback "Door redactie") and the\n  // <ArticleCredits> Door / Beeld rows. Both fields are optional on\n  // the schema; coalesce to empty string so downstream consumers can\n  // trim-and-check without nullable guards.\n  "author": coalesce(author, ""),\n  "photographer": coalesce(photographer, ""),\n  metaDescription,\n  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n  // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The\n  // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;\n  // passing crop=focalpoint alone silently falls back to centre crop.\n  // Coalesce to 0.5 so images without a set hotspot degrade to centre.\n  "coverImagePortraitUrl": coverImage.asset->url + "?w=800&h=1000&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  // Multi-subject interviews (#1358): subjects[] replaces the single\n  // subject object. Array items carry _key so qaPair.respondentKey can\n  // match against them client-side in SanityArticleBody. Projection\n  // shape per-item matches the former subject projection exactly.\n  subjects[]{\n    _key,\n    kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber,\n      // position + psdId are reserved for Phase 3 (#1329): interview hero\n      // kicker + byline link. Unused by Phase 2 attribution components.\n      position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName,\n    customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },\n  relatedArticles[]-> { "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },\n  relatedContent[]->{\n    _type,\n    _id,\n    ...select(_type == "article" => {\n      "title": coalesce(pt::text(title), title, ""),\n      "slug": coalesce(slug.current, ""),\n      publishedAt,\n      unpublishAt,\n      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n    }),\n    ...select(_type == "player" => {\n      firstName,\n      lastName,\n      position,\n      "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n      psdId\n    }),\n    ...select(_type == "team" => {\n      name,\n      "slug": slug.current,\n      "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n      tagline\n    }),\n    ...select(_type == "staffMember" => {\n      firstName,\n      lastName,\n      "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",\n      "role": functionTitle\n    }),\n    ...select(_type == "event" => {\n      "title": coalesce(pt::text(title), title, ""),\n      "slug": coalesce(slug.current, ""),\n      "dateStart": coalesce(dateStart, ""),\n      dateEnd,\n      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"\n    })\n  },\n  "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {\n    _id, firstName, lastName, position,\n    "imageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    psdId\n  },\n  "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {\n    _id, name, tagline,\n    "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "slug": slug.current\n  },\n  "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {\n    _id, firstName, lastName,\n    "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "role": functionTitle\n  }\n}': ARTICLE_BY_SLUG_QUERY_RESULT;
     '*[_type == "event" && coalesce(dateEnd, dateStart) >= now()] | order(dateStart asc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": false,\n  "href": coalesce(externalLink.url, "#"),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n}': EVENTS_QUERY_RESULT;
     '\n  coalesce(\n    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    },\n    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {\n      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),\n      "href": coalesce(externalLink.url, "#"),\n      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"\n    }\n  )\n': NEXT_FEATURED_EVENT_QUERY_RESULT;
-    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  eventType,\n  "dateStart": coalesce(dateStart, ""),\n  dateEnd,\n  location,\n  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  externalLink\n}': EVENT_BY_SLUG_QUERY_RESULT;
+    '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  eventType,\n  "dateStart": coalesce(dateStart, ""),\n  dateEnd,\n  location,\n  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  "coverImageAlt": coverImage.alt,\n  externalLink\n}': EVENT_BY_SLUG_QUERY_RESULT;
     '*[_type == "event" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }': EVENT_SLUGS_QUERY_RESULT;
     '*[_type == "article" && articleType == "event" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today] {\n  "id": _id,\n  "title": coalesce(pt::text(title), title, ""),\n  "slug": coalesce(slug.current, ""),\n  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType }\n}': EVENT_ARTICLES_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      alt,\n      href\n    }\n  }': HOMEPAGE_BANNERS_QUERY_RESULT;
@@ -2840,7 +2846,7 @@ declare module "@sanity/client" {
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "page" && slug.current == $slug][0] {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "heroImageUrl": heroImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",\n  metaDescription,\n  "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }) }\n}': PAGE_BY_SLUG_QUERY_RESULT;
     '*[_type == "photoGallery" && defined(slug.current)] | order(publishedAt desc) {\n  "id": _id,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "imageCount": coalesce(count(images), 0),\n  "coverUrl": images[0].image.asset->url,\n  "coverLqip": images[0].image.asset->metadata.lqip,\n  "coverAlt": coalesce(images[0].caption, title, "")\n}': GALLERIES_QUERY_RESULT;
-    '*[_type == "photoGallery" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "descriptionText": pt::text(description),\n  "images": images[]{\n    "url": image.asset->url,\n    "lqip": image.asset->metadata.lqip,\n    "caption": coalesce(caption, ""),\n    "credit": coalesce(credit, ^.defaultCredit, "")\n  }\n}': GALLERY_BY_SLUG_QUERY_RESULT;
+    '*[_type == "photoGallery" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "descriptionText": pt::text(description),\n  "descriptionRich": description,\n  "images": images[]{\n    "url": image.asset->url,\n    "lqip": image.asset->metadata.lqip,\n    "alt": coalesce(alt, caption, ""),\n    "caption": coalesce(caption, ""),\n    "credit": coalesce(credit, ^.defaultCredit, "")\n  }\n}': GALLERY_BY_SLUG_QUERY_RESULT;
     '*[_type == "photoGallery" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }': GALLERY_SLUGS_QUERY_RESULT;
     '*[_type == "photoGallery" && linkedMatch == $matchId && defined(slug.current)] | order(publishedAt asc) {\n  "id": _id,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "imageCount": coalesce(count(images), 0),\n  "coverUrl": images[0].image.asset->url,\n  "coverLqip": images[0].image.asset->metadata.lqip,\n  "coverAlt": coalesce(images[0].caption, title, "")\n}': GALLERIES_BY_MATCH_QUERY_RESULT;
     '*[_type == "photoGallery" && linkedEvent._ref == $eventId && defined(slug.current)] | order(publishedAt asc) {\n  "id": _id,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  "publishedAt": coalesce(publishedAt, ""),\n  "imageCount": coalesce(count(images), 0),\n  "coverUrl": images[0].image.asset->url,\n  "coverLqip": images[0].image.asset->metadata.lqip,\n  "coverAlt": coalesce(images[0].caption, title, "")\n}': GALLERIES_BY_EVENT_QUERY_RESULT;

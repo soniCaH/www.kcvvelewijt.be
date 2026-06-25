@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {editorialBioOf, PULLQUOTE_BIO_HELP} from './blocks/editorial-marks'
 
 export const player = defineType({
   name: 'player',
@@ -110,22 +111,8 @@ export const player = defineType({
       title: 'Bio',
       type: 'array',
       group: 'redactioneel',
-      description: 'Korte voorstelling van de speler in vrije tekst. Redactioneel — getoond op het spelersprofiel.',
-      of: [
-        {
-          type: 'block',
-          marks: {
-            decorators: [
-              {title: 'Strong', value: 'strong'},
-              {title: 'Emphasis', value: 'em'},
-              {title: 'Code', value: 'code'},
-              {title: 'Underline', value: 'underline'},
-              {title: 'Strike', value: 'strike-through'},
-              {title: 'Pullquote', value: 'pullquote'},
-            ],
-          },
-        },
-      ],
+      description: `Korte voorstelling van de speler in vrije tekst. Redactioneel — getoond op het spelersprofiel. ${PULLQUOTE_BIO_HELP}`,
+      of: editorialBioOf(),
     }),
     // ── Meta — hidden sync plumbing ─────────────────────────────────────────
     defineField({

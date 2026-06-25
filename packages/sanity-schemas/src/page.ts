@@ -47,9 +47,25 @@ export const page = defineType({
       title: 'Body',
       type: 'array',
       group: 'inhoud',
-      of: [{type: 'block'}, {type: 'articleImage'}, {type: 'fileAttachment'}],
+      // Styles locked to what <ArticleBody> intentionally styles (STUDIO-2):
+      // Normal, H2 (the green "act divider") and Blockquote. H1/H3–H6 are
+      // dropped from the dropdown because <ArticleBody> only overrides h2 +
+      // blockquote — the rest fall through to the default serializer as bare,
+      // unstyled heading tags. Lists keep their defaults.
+      of: [
+        {
+          type: 'block',
+          styles: [
+            {title: 'Normaal', value: 'normal'},
+            {title: 'Tussentitel (groene divider)', value: 'h2'},
+            {title: 'Citaat', value: 'blockquote'},
+          ],
+        },
+        {type: 'articleImage'},
+        {type: 'fileAttachment'},
+      ],
       description:
-        'De inhoud van de pagina: opgemaakte tekst, afbeeldingen en bijlagen (bijv. een PDF met reglement). Dit is wat bezoekers als hoofdtekst lezen.',
+        'De inhoud van de pagina: opgemaakte tekst, afbeeldingen en bijlagen (bijv. een PDF met reglement). Dit is wat bezoekers als hoofdtekst lezen. "Tussentitel" toont een groene divider.',
     }),
     defineField({
       name: 'metaDescription',

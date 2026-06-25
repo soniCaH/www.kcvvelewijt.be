@@ -63,7 +63,7 @@ export const transferFact = defineType({
       name: 'otherClubName',
       title: 'Other club name',
       type: 'string',
-      description: 'Required for incoming/outgoing; leave empty for extension.',
+      description: 'Verplicht voor inkomende/uitgaande transfers; laat leeg bij een verlenging.',
       hidden: ({parent}) => parent?.direction === 'extension',
       validation: (r) =>
         r.custom((value, ctx) => {
@@ -74,7 +74,7 @@ export const transferFact = defineType({
             direction !== 'extension' &&
             (typeof value !== 'string' || !value.trim())
           ) {
-            return 'Other club name is required for incoming and outgoing transfers.'
+            return 'Naam van de andere club is verplicht bij inkomende en uitgaande transfers.'
           }
           return true
         }),
@@ -90,7 +90,7 @@ export const transferFact = defineType({
       title: 'Other club context',
       type: 'string',
       description:
-        'Short free-text context rendered beneath the other club name on the van/naar strip — e.g. "Jupiler Pro League · U23".',
+        'Korte vrije tekst onder de naam van de andere club op de van/naar-strip — bijv. "Jupiler Pro League · U23".',
       hidden: ({parent}) => parent?.direction === 'extension',
     }),
     defineField({
@@ -98,14 +98,14 @@ export const transferFact = defineType({
       title: 'KCVV context',
       type: 'string',
       description:
-        'Short free-text context rendered beneath the KCVV row — e.g. "Derde Amateur · A-ploeg · #8". Used by the hero strip; overview rows stay compact.',
+        'Korte vrije tekst onder de KCVV-rij — bijv. "Derde Amateur · A-ploeg · #8". Gebruikt door de hero-strip; overzichtsrijen blijven compact.',
     }),
     defineField({
       name: 'until',
       title: 'Until (extension only)',
       type: 'string',
       description:
-        'Display string for extensions, e.g. "2028" or "einde seizoen 2027-28". Shown only on extensions.',
+        'Weergavetekst bij verlengingen, bijv. "2028" of "einde seizoen 2027-28". Enkel getoond bij verlengingen.',
       hidden: ({parent}) => parent?.direction !== 'extension',
     }),
     defineField({
@@ -115,14 +115,14 @@ export const transferFact = defineType({
       rows: 2,
       validation: (r) => r.max(140),
       description:
-        'Optional colour line rendered as a pull-quote in the hero (first transferFact only). Max 140 chars.',
+        'Optionele sfeerregel, getoond als pull-quote in de hero (enkel de eerste transferFact). Max. 140 tekens.',
     }),
     defineField({
       name: 'noteAttribution',
       title: 'Note attribution',
       type: 'string',
       description:
-        'Optional override for the pull-quote byline (e.g. a coach or board quote). Defaults to `playerName` when empty.',
+        'Optionele override voor de pull-quote-byline (bijv. een uitspraak van een trainer of bestuurslid). Valt terug op `playerName` indien leeg.',
     }),
   ],
   preview: {

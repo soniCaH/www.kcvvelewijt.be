@@ -36,7 +36,7 @@ export const subject = defineType({
       validation: (r) =>
         r.custom((val, ctx) => {
           const parent = ctx.parent as {kind?: string} | undefined
-          return parent?.kind === 'player' && !val ? 'Required' : true
+          return parent?.kind === 'player' && !val ? 'Verplicht' : true
         }),
     }),
 
@@ -49,7 +49,7 @@ export const subject = defineType({
       validation: (r) =>
         r.custom((val, ctx) => {
           const parent = ctx.parent as {kind?: string} | undefined
-          return parent?.kind === 'staff' && !val ? 'Required' : true
+          return parent?.kind === 'staff' && !val ? 'Verplicht' : true
         }),
     }),
 
@@ -61,7 +61,7 @@ export const subject = defineType({
       validation: (r) =>
         r.custom((val, ctx) => {
           const parent = ctx.parent as {kind?: string} | undefined
-          return parent?.kind === 'custom' && !val ? 'Required' : true
+          return parent?.kind === 'custom' && !val ? 'Verplicht' : true
         }),
     }),
     defineField({
@@ -74,7 +74,7 @@ export const subject = defineType({
         r.custom((val, ctx) => {
           const parent = ctx.parent as {kind?: string} | undefined
           return parent?.kind === 'custom' && !val
-            ? 'A photo is required for custom subjects — QaPairKey renders a portrait column that would otherwise be empty.'
+            ? 'Een foto is verplicht voor aangepaste personen — QaPairKey toont een portretkolom die anders leeg blijft.'
             : true
         }),
     }),
@@ -82,7 +82,7 @@ export const subject = defineType({
       name: 'customRole',
       title: 'Role',
       type: 'string',
-      description: 'E.g. "Trainer tegenstander", "Supporter", "Oud-speler"',
+      description: 'Bijv. "Trainer tegenstander", "Supporter", "Oud-speler"',
       hidden: ({parent}) => parent?.kind !== 'custom',
     }),
   ],

@@ -55,6 +55,16 @@ export const event = defineType({
       group: 'inhoud',
       options: {hotspot: true},
       description: 'Sfeerbeeld bovenaan de detailpagina, in kleur getoond. Dient ook als deelafbeelding als er geen aparte OG-afbeelding is.',
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Alt text',
+          type: 'string',
+          description: 'Beschrijf de afbeelding voor toegankelijkheid (schermlezers) en SEO.',
+          validation: (r) =>
+            r.required().warning('Geef een beschrijvende alt-tekst voor toegankelijkheid.'),
+        }),
+      ],
     }),
     defineField({
       name: 'dateStart',

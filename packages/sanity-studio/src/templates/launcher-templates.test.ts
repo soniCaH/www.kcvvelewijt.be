@@ -6,6 +6,7 @@ import {
   articleTemplates,
   sponsorTemplates,
   eventTemplates,
+  photoGalleryTemplates,
   pageTemplates,
   isLauncherTemplate,
 } from './index'
@@ -18,6 +19,7 @@ describe('launcherTemplates aggregate', () => {
       ...articleTemplates,
       ...sponsorTemplates,
       ...eventTemplates,
+      ...photoGalleryTemplates,
       ...pageTemplates,
     ])
   })

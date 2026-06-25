@@ -15,6 +15,8 @@ import { trackEvent } from "@/lib/analytics/track-event";
 export interface GalleryLightboxImage {
   url: string | null;
   lqip?: string | null;
+  /** Editor-provided alt text (STUDIO-8); falls back to caption. */
+  alt?: string | null;
   caption?: string | null;
   credit?: string | null;
 }
@@ -53,7 +55,7 @@ export const GalleryLightbox = ({
 
   const slides = usable.map((img) => ({
     src: sized(img.url, 1600),
-    alt: img.caption || undefined,
+    alt: img.alt || img.caption || undefined,
     title: img.caption || undefined,
     description: img.credit || undefined,
   }));
@@ -71,7 +73,7 @@ export const GalleryLightbox = ({
             >
               <Image
                 src={sized(img.url, 600)}
-                alt={img.caption || `Foto ${i + 1}`}
+                alt={img.alt || img.caption || `Foto ${i + 1}`}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 style={{ filter: "var(--filter-photo-newsprint)" }}

@@ -16,8 +16,9 @@ export const articleImage = defineType({
       name: 'alt',
       title: 'Alt text',
       type: 'string',
-      description: 'Describe the image for accessibility',
-      validation: (r) => r.required().warning('Provide descriptive alt text for accessibility'),
+      description: 'Beschrijf de afbeelding voor toegankelijkheid (schermlezers) en SEO.',
+      validation: (r) =>
+        r.required().warning('Geef een beschrijvende alt-tekst voor toegankelijkheid.'),
     }),
     defineField({
       name: 'width',
