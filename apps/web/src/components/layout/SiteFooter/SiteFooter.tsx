@@ -93,9 +93,13 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="KCVV Elewijt op Facebook"
-                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream relative inline-flex h-6 w-6 items-center justify-center border transition-colors before:absolute before:-inset-2.5 before:content-['']"
+                  className="group/social inline-flex h-11 w-11 items-center justify-center"
                 >
-                  <FacebookLogo className="h-3 w-3" aria-hidden="true" />
+                  {/* 44px tap target (MOB-5); the 24px bordered box stays the
+                      visual so the dense colofon is unchanged. */}
+                  <span className="border-cream/85 text-cream/85 group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
+                    <FacebookLogo className="h-3 w-3" aria-hidden="true" />
+                  </span>
                 </a>
               </li>
               <li>
@@ -104,9 +108,13 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="KCVV Elewijt op Instagram"
-                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream relative inline-flex h-6 w-6 items-center justify-center border transition-colors before:absolute before:-inset-2.5 before:content-['']"
+                  className="group/social inline-flex h-11 w-11 items-center justify-center"
                 >
-                  <InstagramLogo className="h-3 w-3" aria-hidden="true" />
+                  {/* 44px tap target (MOB-5); the 24px bordered box stays the
+                      visual so the dense colofon is unchanged. */}
+                  <span className="border-cream/85 text-cream/85 group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
+                    <InstagramLogo className="h-3 w-3" aria-hidden="true" />
+                  </span>
                 </a>
               </li>
             </ul>
