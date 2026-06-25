@@ -91,8 +91,10 @@ export const SearchForm = ({
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label="Zoekterm"
-        className="text-ink placeholder:text-ink-muted bg-cream min-w-0 flex-1 px-4 py-4 text-[length:var(--text-body-lg)] outline-none focus:outline-hidden disabled:opacity-60 md:px-5"
-        disabled={isLoading}
+        className="text-ink placeholder:text-ink-muted bg-cream min-w-0 flex-1 px-4 py-4 text-[length:var(--text-body-lg)] outline-none focus:outline-hidden md:px-5"
+        // ZOEK-2: never disable the field — auto-search sets `isLoading` mid-type,
+        // and disabling the input blurs it (the typeahead would lose focus on
+        // every keystroke). In-flight requests are aborted in <SearchInterface>.
         autoFocus
       />
 

@@ -441,9 +441,10 @@ describe("SearchInterface", () => {
       await user.type(input, "first");
       await user.click(submitButton);
 
-      // Wait for input to be disabled (loading starts)
+      // Wait for the submit button to disable (loading started) — the input
+      // itself stays enabled now (ZOEK-2 typeahead).
       await waitFor(() => {
-        expect(input).toBeDisabled();
+        expect(submitButton).toBeDisabled();
       });
 
       // Clear via clear button and type second query
@@ -649,7 +650,7 @@ describe("SearchInterface", () => {
   });
 
   describe("Loading States", () => {
-    it("should disable form during loading", async () => {
+    it("disables the submit button during loading; the input stays enabled (ZOEK-2)", async () => {
       const user = userEvent.setup();
       let resolvePromise: (value: unknown) => void;
       const promise = new Promise((resolve) => {
@@ -666,10 +667,12 @@ describe("SearchInterface", () => {
       const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
-      // Input should be disabled
+      // Submit disables during the fetch, but the input must stay enabled so a
+      // debounced typeahead doesn't blur the field mid-type.
       await waitFor(() => {
-        expect(input).toBeDisabled();
+        expect(submitButton).toBeDisabled();
       });
+      expect(input).not.toBeDisabled();
 
       resolvePromise!({
         ok: true,
@@ -677,7 +680,7 @@ describe("SearchInterface", () => {
       });
 
       await waitFor(() => {
-        expect(input).not.toBeDisabled();
+        expect(submitButton).not.toBeDisabled();
       });
     });
 

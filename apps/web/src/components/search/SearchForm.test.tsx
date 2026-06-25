@@ -74,11 +74,12 @@ describe("SearchForm", () => {
       expect(input).toHaveValue("second");
     });
 
-    it("should be disabled when isLoading is true", () => {
+    it("stays enabled when isLoading is true (typeahead — ZOEK-2)", () => {
       render(<SearchForm onSearch={vi.fn()} isLoading={true} />);
 
       const input = screen.getByRole("textbox");
-      expect(input).toBeDisabled();
+      // Disabling the input mid-type blurs it; the typeahead must stay usable.
+      expect(input).not.toBeDisabled();
     });
 
     it("should not be disabled by default", () => {
@@ -287,11 +288,11 @@ describe("SearchForm", () => {
   });
 
   describe("Loading State", () => {
-    it("should disable input when isLoading is true", () => {
+    it("keeps the input enabled while loading (ZOEK-2)", () => {
       render(<SearchForm onSearch={vi.fn()} isLoading={true} />);
 
       const input = screen.getByRole("textbox");
-      expect(input).toBeDisabled();
+      expect(input).not.toBeDisabled();
     });
 
     it("should disable submit button when isLoading is true", () => {
