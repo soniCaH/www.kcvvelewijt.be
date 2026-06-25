@@ -43,15 +43,20 @@ export const eventFact = defineType({
       name: 'date',
       title: 'Start date',
       type: 'date',
-      description: 'Calendar day the event starts.',
-      validation: (r) => r.required(),
+      description: 'De kalenderdag waarop het evenement start.',
+      validation: (r) =>
+        r
+          .required()
+          .error(
+            'Verplicht. Zonder startdatum kan het evenement niet in de agenda geplaatst en gesorteerd worden.',
+          ),
     }),
     defineField({
       name: 'endDate',
       title: 'End date',
       type: 'date',
       description:
-        'Optional. Fill only for multi-day events (weekend tornooi, school-holiday camp). Must be on or after the start date.',
+        'Optioneel. Enkel invullen voor meerdaagse evenementen (weekendtornooi, vakantiekamp). Moet op of na de startdatum vallen.',
       validation: (r) =>
         r.custom((value, ctx) => {
           if (typeof value !== 'string' || value.length === 0) return true
@@ -60,7 +65,7 @@ export const eventFact = defineType({
           if (typeof start !== 'string' || start.length === 0) return true
           return value >= start
             ? true
-            : 'End date must be on or after the start date.'
+            : 'De einddatum moet op of na de startdatum vallen.'
         }),
     }),
     defineField({
@@ -68,14 +73,14 @@ export const eventFact = defineType({
       title: 'Start time',
       type: 'string',
       description:
-        'HH:mm (e.g. "10:00"). Use for simple single-day or continuous multi-day events. Leave empty when `sessions` (per-day schedule) is filled.',
+        'UU:mm (bijv. "10:00"). Gebruik voor eenvoudige eendaagse of doorlopende meerdaagse evenementen. Laat leeg wanneer `sessions` (dagschema) is ingevuld.',
     }),
     defineField({
       name: 'endTime',
       title: 'End time',
       type: 'string',
       description:
-        'HH:mm (e.g. "17:00"). Use for simple single-day or continuous multi-day events. Leave empty when `sessions` (per-day schedule) is filled.',
+        'UU:mm (bijv. "17:00"). Gebruik voor eenvoudige eendaagse of doorlopende meerdaagse evenementen. Laat leeg wanneer `sessions` (dagschema) is ingevuld.',
     }),
     defineField({
       name: 'sessions',
@@ -96,12 +101,12 @@ export const eventFact = defineType({
             defineField({
               name: 'startTime',
               type: 'string',
-              description: 'HH:mm',
+              description: 'UU:mm',
             }),
             defineField({
               name: 'endTime',
               type: 'string',
-              description: 'HH:mm',
+              description: 'UU:mm',
             }),
           ],
           preview: {
@@ -125,54 +130,54 @@ export const eventFact = defineType({
       name: 'location',
       title: 'Location',
       type: 'string',
-      description: 'Short venue name, e.g. "Sportpark Elewijt".',
+      description: 'Korte locatienaam, bijv. "Sportpark Elewijt".',
     }),
     defineField({
       name: 'address',
       title: 'Address',
       type: 'string',
-      description: 'Street + town, e.g. "Driesstraat 14, Elewijt".',
+      description: 'Straat + gemeente, bijv. "Driesstraat 14, Elewijt".',
     }),
     defineField({
       name: 'ageGroup',
       title: 'Age group',
       type: 'string',
       description:
-        'Free text, e.g. "U13", "Senioren", "Alle jeugd". Drives the hero kicker when present.',
+        'Vrije tekst, bijv. "U13", "Senioren", "Alle jeugd". Bepaalt de hero-kicker indien ingevuld.',
     }),
     defineField({
       name: 'competitionTag',
       title: 'Competition tag',
       type: 'string',
       description:
-        'Free text, e.g. "Tornooi", "Clubfeest", "Training". Fallback for the hero kicker when `ageGroup` is empty.',
+        'Vrije tekst, bijv. "Tornooi", "Clubfeest", "Training". Terugval voor de hero-kicker wanneer `ageGroup` leeg is.',
     }),
     defineField({
       name: 'ticketUrl',
       title: 'Ticket URL',
       type: 'url',
       description:
-        'Optional. When set, the strip + overview rows render a CTA link. When absent, the CTA is hidden.',
+        'Optioneel. Indien ingevuld tonen de strip + overzichtsrijen een CTA-link. Zonder waarde blijft de CTA verborgen.',
     }),
     defineField({
       name: 'ticketLabel',
       title: 'Ticket CTA label',
       type: 'string',
-      description: 'Free text, defaults to "Inschrijven" when empty.',
+      description: 'Vrije tekst, valt terug op "Inschrijven" indien leeg.',
       initialValue: 'Inschrijven',
     }),
     defineField({
       name: 'capacity',
       title: 'Capacity',
       type: 'number',
-      description: 'Optional. Displayed only when set (e.g. "Max 24 spelers").',
+      description: 'Optioneel. Enkel getoond indien ingevuld (bijv. "Max 24 spelers").',
     }),
     defineField({
       name: 'note',
       title: 'Note',
       type: 'array',
       of: [{type: 'block', styles: [{title: 'Normal', value: 'normal'}], lists: []}],
-      description: 'Optional short prose — one or two paragraphs of context.',
+      description: 'Optionele korte tekst — één of twee alinea\'s context.',
     }),
   ],
   preview: {

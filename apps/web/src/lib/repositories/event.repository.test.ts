@@ -93,6 +93,7 @@ function makeEventDetailRow(
     dateEnd: "2026-04-15T22:00:00Z",
     location: "Sportpark Driesput, Elewijt",
     coverImageUrl: "https://cdn.sanity.io/event.webp",
+    coverImageAlt: null,
     externalLink: { url: "https://tickets.example.com", label: "Tickets" },
     ...overrides,
   };

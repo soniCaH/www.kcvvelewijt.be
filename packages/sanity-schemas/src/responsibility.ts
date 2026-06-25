@@ -239,10 +239,12 @@ export const responsibility = defineType({
             defineField({
               name: 'link',
               title: 'Link',
-              type: 'string',
+              // `url` (not `string`) so `.uri()` is properly typed — mirrors
+              // article.ts internalLink href (STUDIO-11). `allowRelative`
+              // keeps relative paths like `/contact` valid.
+              type: 'url',
               description:
                 'Optioneel: relatieve of absolute URL (bijv. `/contact` of `https://...`). Als ingevuld, wordt de beschrijving een klikbare actie op de site.',
-              // @ts-expect-error .uri() exists at runtime but is missing from StringRule types
               validation: (Rule) => Rule.uri({allowRelative: true}),
             }),
             defineField({

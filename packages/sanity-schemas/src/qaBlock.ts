@@ -117,7 +117,7 @@ export const qaPair = defineType({
     select: {question: 'question', tag: 'tag'},
     prepare({question, tag}) {
       return {
-        title: question ?? 'Untitled Q&A pair',
+        title: question ?? 'Naamloos Q&A-paar',
         // Distinguish an explicitly-set `standard` from an unset tag so
         // editors can see at a glance whether the field has been touched.
         subtitle: tag ? `Tag: ${tag}` : 'Tag: — (defaults to standard)',
@@ -136,7 +136,7 @@ export const qaBlock = defineType({
       title: 'Pairs',
       type: 'array',
       of: [{type: 'qaPair'}],
-      validation: (r) => r.min(1).error('At least one Q&A pair required.'),
+      validation: (r) => r.min(1).error('Minstens één Q&A-paar vereist.'),
     }),
     defineField({
       name: 'groupAtTail',

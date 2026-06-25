@@ -29,11 +29,12 @@ export const GALLERIES_QUERY =
 }`);
 
 /**
- * Detail-page payload for `/galerij/[slug]`. `descriptionText` flattens the
- * optional portable-text intro to plain text (a gallery intro needs no rich
- * formatting). Each image resolves its credit at query time — per-image
- * `credit` overrides the gallery `defaultCredit` (`^` is the parent doc).
- * `lqip` feeds the `next/image` `placeholder="blur"`.
+ * Detail-page payload for `/galerij/[slug]`. `descriptionText` is the
+ * flattened plain-text intro (used for the OG/meta description), while
+ * `descriptionRich` keeps the raw Portable Text so the page renders its
+ * formatting via <PortableText> (STUDIO-3). Each image resolves its credit at
+ * query time — per-image `credit` overrides the gallery `defaultCredit` (`^`
+ * is the parent doc). `lqip` feeds the `next/image` `placeholder="blur"`.
  */
 export const GALLERY_BY_SLUG_QUERY =
   defineQuery(`*[_type == "photoGallery" && slug.current == $slug][0] {
@@ -43,9 +44,11 @@ export const GALLERY_BY_SLUG_QUERY =
   "slug": coalesce(slug.current, ""),
   "publishedAt": coalesce(publishedAt, ""),
   "descriptionText": pt::text(description),
+  "descriptionRich": description,
   "images": images[]{
     "url": image.asset->url,
     "lqip": image.asset->metadata.lqip,
+    "alt": coalesce(alt, caption, ""),
     "caption": coalesce(caption, ""),
     "credit": coalesce(credit, ^.defaultCredit, "")
   }

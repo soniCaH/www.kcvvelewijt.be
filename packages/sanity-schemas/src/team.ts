@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {editorialBioOf, PULLQUOTE_BIO_HELP} from './blocks/editorial-marks'
 
 export const trainingDay = defineType({
   name: 'trainingSession',
@@ -171,25 +172,11 @@ export const team = defineType({
       title: 'Description',
       type: 'array',
       group: 'redactioneel',
-      description: 'Beschrijving / het verhaal van de ploeg in vrije tekst. Gebruik de "Pullquote"-stijl voor een uitgelichte quote. Redactioneel.',
-      of: [
-        {
-          type: 'block',
-          // Pullquote decorator reused verbatim from player.bio (6.A) so
-          // <TeamEditorial> can surface a styled "Het verhaal" pull-quote.
-          // Additive — existing body content is unaffected (no migration).
-          marks: {
-            decorators: [
-              {title: 'Strong', value: 'strong'},
-              {title: 'Emphasis', value: 'em'},
-              {title: 'Code', value: 'code'},
-              {title: 'Underline', value: 'underline'},
-              {title: 'Strike', value: 'strike-through'},
-              {title: 'Pullquote', value: 'pullquote'},
-            ],
-          },
-        },
-      ],
+      // Shares `editorialBioOf()` with player.bio / staffMember.bio (STUDIO-4/6)
+      // so <TeamEditorial> can surface a styled "Het verhaal" pull-quote.
+      // Styles are locked to Normal — only paragraphs + the pullquote render.
+      description: `Beschrijving / het verhaal van de ploeg in vrije tekst. Redactioneel. ${PULLQUOTE_BIO_HELP}`,
+      of: editorialBioOf(),
     }),
     defineField({
       name: 'contactInfo',

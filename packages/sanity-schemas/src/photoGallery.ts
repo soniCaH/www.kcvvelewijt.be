@@ -46,7 +46,10 @@ export const photoGallery = defineType({
       name: 'description',
       title: 'Description',
       type: 'array',
-      of: [{type: 'block'}],
+      // Simple prose only (STUDIO-3): the detail page renders this via
+      // <PortableText>, so formatting (vet, cursief, links) is preserved.
+      // Locked to Normal + no lists — a gallery intro needs no headings.
+      of: [{type: 'block', styles: [{title: 'Normaal', value: 'normal'}], lists: []}],
       group: 'inhoud',
       description:
         'Optionele inleiding bovenaan de detailpagina (bijv. context bij de reeks foto\'s). Laat leeg voor een galerij zonder tekst.',
@@ -78,6 +81,15 @@ export const photoGallery = defineType({
               type: 'image',
               options: {hotspot: true},
               validation: (r) => r.required().error('Verplicht. Een lege fotoslot wordt niet getoond.'),
+            }),
+            defineField({
+              name: 'alt',
+              title: 'Alt text',
+              type: 'string',
+              description:
+                'Beschrijf de foto voor toegankelijkheid (schermlezers) en SEO. Niet hetzelfde als het onderschrift.',
+              validation: (r) =>
+                r.required().warning('Geef een beschrijvende alt-tekst voor toegankelijkheid.'),
             }),
             defineField({
               name: 'caption',

@@ -4,8 +4,9 @@
  *
  * Rebuilt on the retro-terrace-fanzine system (#2124, lock `10f2`) and aligned
  * with `/spelers/[slug]`: bare fragment on the near-white body, a person-profile
- * hero (figure left) → a single full-bleed <StripedSeam> → bio (<ArticleBody>
- * cream band) → merged "Rol & verantwoordelijkheden." → related.
+ * hero (figure left) → a single full-bleed <StripedSeam> → bio (<BioBlock>
+ * cream band, shared with players) → merged "Rol & verantwoordelijkheden." →
+ * related.
  */
 
 import { Effect } from "effect";
@@ -20,14 +21,11 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPersonJsonLd } from "@/lib/seo/jsonld";
 import { VerderLezenRow } from "@/components/article/VerderLezenRow";
 import { articleVMsToVerderLezenItems } from "@/lib/utils/article-related-items";
-import { ArticleBody } from "@/components/article/ArticleBody";
+import { BioBlock, QuotesBlock } from "@/components/player";
+import { hasRenderableBioContent } from "@/lib/portable-text/findPullquoteText";
 import { StaffHero } from "@/components/staff/StaffHero";
 import { StaffRoles } from "@/components/staff/StaffRoles";
-import {
-  EditorialHeading,
-  PageContainer,
-  StripedSeam,
-} from "@/components/design-system";
+import { PageContainer, StripedSeam } from "@/components/design-system";
 
 interface StaffPageProps {
   params: Promise<{ slug: string }>;
@@ -104,10 +102,10 @@ export default async function StafPage({ params }: StaffPageProps) {
 
   const fullName = `${member.firstName} ${member.lastName}`.trim() || "Staf";
   const bioBlocks = (member.bio ?? []) as PortableTextBlock[];
-  const hasBio = bioBlocks.length > 0;
-  const bioHeading = member.firstName.trim()
-    ? `Over ${member.firstName}`
-    : "Biografie";
+  // Match the seam gate to the same predicate <BioBlock>/<QuotesBlock> use to
+  // auto-hide, so a whitespace-only bio (with no roles/related) can't strand an
+  // ink→cream seam above the footer with nothing rendered below it.
+  const hasBio = hasRenderableBioContent(bioBlocks);
   const hasRoles =
     member.organigramPositions.length > 0 ||
     member.responsibilityPaths.length > 0;
@@ -157,33 +155,14 @@ export default async function StafPage({ params }: StaffPageProps) {
         <StripedSeam colorPair="ink-cream" height="md" />
       ) : null}
 
-      {/* Bio — <ArticleBody> (retires <SanityArticleBody>). A cream band on the
-          near-white page. Auto-hides when empty. The heading rides the same
-          prose column as the body; the body's own top padding is trimmed so the
-          two read as one block. */}
-      {hasBio ? (
-        <>
-          <div className="bg-cream w-full px-4 pt-12 lg:px-0">
-            <div
-              className="mx-auto w-full"
-              style={{ maxWidth: "var(--container-prose)" }}
-            >
-              <EditorialHeading
-                level={2}
-                size="display-md"
-                emphasis={{ text: ".", tone: "warm" }}
-                className="mb-0"
-              >
-                {bioHeading}
-              </EditorialHeading>
-            </div>
-          </div>
-          <ArticleBody
-            className="article-body pt-3 lg:pt-4"
-            content={bioBlocks}
-          />
-        </>
-      ) : null}
+      {/* Bio — parity with `/spelers/[slug]` (STAFF-1/2): the shared
+          <BioBlock> (cream band, pullquote decorator) + <QuotesBlock> for a
+          second marked pull-quote. Both auto-hide when there's nothing to
+          render, so the old default-H2 "act divider" no longer appears on
+          staff/club profiles. `playerName` is just the pull-quote attribution
+          slot — here it carries the staff member's name. */}
+      <BioBlock bio={bioBlocks} playerName={fullName} />
+      <QuotesBlock bio={bioBlocks} playerName={fullName} />
 
       {/* Rol & verantwoordelijkheden — merged org positions + hulp links. */}
       {hasRoles ? (

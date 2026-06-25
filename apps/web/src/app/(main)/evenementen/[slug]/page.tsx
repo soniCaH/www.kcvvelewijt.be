@@ -77,7 +77,12 @@ export async function generateMetadata({
       description,
       type: "website",
       images: event.coverImageUrl
-        ? [{ url: event.coverImageUrl, alt: event.title }]
+        ? [
+            {
+              url: event.coverImageUrl,
+              alt: event.coverImageAlt || event.title,
+            },
+          ]
         : [DEFAULT_OG_IMAGE],
     },
   };
@@ -144,7 +149,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
             event.coverImageUrl ? (
               <Image
                 src={event.coverImageUrl}
-                alt={event.title}
+                alt={event.coverImageAlt || event.title}
                 fill
                 priority
                 sizes="(min-width: 768px) 760px, 100vw"

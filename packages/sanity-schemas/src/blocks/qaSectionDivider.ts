@@ -1,4 +1,5 @@
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineField, defineType} from 'sanity'
+import {accentTitleOf} from './editorial-marks'
 
 /**
  * Q&A section divider — interview act-divider block.
@@ -25,17 +26,7 @@ export const qaSectionDivider = defineType({
       description:
         'Italic kop van de divider. Selecteer één woord en klik op "Accent" voor de groene cursief.',
       type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'block',
-          styles: [{title: 'Normal', value: 'normal'}],
-          lists: [],
-          marks: {
-            decorators: [{title: 'Accent', value: 'accent'}],
-            annotations: [],
-          },
-        }),
-      ],
+      of: accentTitleOf(),
       validation: (r) =>
         r
           .required()
