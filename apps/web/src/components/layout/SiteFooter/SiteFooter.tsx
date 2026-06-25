@@ -69,7 +69,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
           gesture bar; the inner row keeps its own py-3.5 (#2210). */}
       <div className="bg-ink text-cream pb-safe">
         <div className="mx-auto flex max-w-[1440px] flex-col items-start gap-3 px-6 py-3.5 leading-none md:flex-row md:items-center md:justify-between md:gap-6 md:px-10">
-          <p className="m-0 flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase md:text-[10.5px]">
+          <p className="m-0 flex flex-wrap items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase md:text-[10.5px]">
             <span>
               © {FOOTER_FOUNDING_YEAR}–{currentYear} KCVV Elewijt
             </span>
@@ -93,9 +93,13 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="KCVV Elewijt op Facebook"
-                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors"
+                  className="group/social inline-flex h-11 w-11 items-center justify-center"
                 >
-                  <FacebookLogo className="h-3 w-3" aria-hidden="true" />
+                  {/* 44px tap target (MOB-5); the 24px bordered box stays the
+                      visual so the dense colofon is unchanged. */}
+                  <span className="border-cream/85 text-cream/85 group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
+                    <FacebookLogo className="h-3 w-3" aria-hidden="true" />
+                  </span>
                 </a>
               </li>
               <li>
@@ -104,9 +108,13 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="KCVV Elewijt op Instagram"
-                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors"
+                  className="group/social inline-flex h-11 w-11 items-center justify-center"
                 >
-                  <InstagramLogo className="h-3 w-3" aria-hidden="true" />
+                  {/* 44px tap target (MOB-5); the 24px bordered box stays the
+                      visual so the dense colofon is unchanged. */}
+                  <span className="border-cream/85 text-cream/85 group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
+                    <InstagramLogo className="h-3 w-3" aria-hidden="true" />
+                  </span>
                 </a>
               </li>
             </ul>

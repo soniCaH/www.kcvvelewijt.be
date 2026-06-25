@@ -96,6 +96,7 @@ export const NavTakeover = ({
   return (
     <div
       ref={panelRef}
+      id="nav-takeover"
       role="dialog"
       aria-modal="true"
       aria-label="Navigatiemenu"
@@ -113,7 +114,7 @@ export const NavTakeover = ({
           size="sm"
           aria-label="Sluit menu"
           onClick={() => onOpenChange(false)}
-          className="!px-2 !py-2"
+          className="min-h-11 min-w-11 !px-2 !py-2"
         >
           <X size={20} aria-hidden="true" />
         </Button>

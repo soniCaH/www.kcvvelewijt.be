@@ -111,7 +111,7 @@ export function QuestionCard({
                   >
                     <span
                       aria-hidden
-                      className="border-ink bg-jersey-deep text-cream flex h-5 w-5 flex-shrink-0 items-center justify-center border-[1.5px] font-mono text-[10px]"
+                      className="border-ink bg-jersey-deep flex h-5 w-5 flex-shrink-0 items-center justify-center border-[1.5px] font-mono text-[10px] text-white"
                     >
                       {i + 1}
                     </span>

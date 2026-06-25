@@ -61,7 +61,7 @@ export function HeroCreditChip({ subject }: HeroCreditChipProps) {
         aria-hidden="true"
         className={cn(
           "relative inline-flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full",
-          "bg-jersey-deep text-cream text-xs font-semibold",
+          "bg-jersey-deep text-xs font-semibold text-white",
         )}
       >
         {subject.photoUrl ? (
@@ -408,7 +408,7 @@ export function HeroMatchScoreBar({
     <div
       data-testid="hero-match-score-bar"
       data-variant={variant}
-      className="border-ink shadow-paper-md bg-cream inline-flex flex-col items-center border-2 px-[18px] pt-2 pb-[7px]"
+      className="border-ink shadow-paper-md bg-cream inline-flex max-w-full min-w-0 flex-col items-center border-2 px-[18px] pt-2 pb-[7px]"
     >
       <div className="flex items-center gap-3.5">
         <Crest

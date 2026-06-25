@@ -280,7 +280,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
               type="button"
               aria-pressed={active}
               onClick={() => setAudience(active ? null : option.value)}
-              className={`border-[1.5px] px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.05em] uppercase transition-colors ${
+              className={`inline-flex min-h-11 items-center justify-center border-[1.5px] px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.05em] uppercase transition-colors ${
                 active
                   ? "border-ink bg-ink text-cream"
                   : "border-ink-muted text-ink-soft hover:bg-cream-soft"
@@ -298,7 +298,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
           type="button"
           aria-pressed={category === "alles"}
           onClick={() => setCategory("alles")}
-          className={`border-ink border-[1.5px] px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${
+          className={`border-ink inline-flex min-h-11 items-center justify-center border-[1.5px] px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${
             category === "alles"
               ? "bg-jersey-deep text-cream"
               : "bg-cream text-ink"
@@ -320,7 +320,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
               type="button"
               aria-pressed={active}
               onClick={() => setCategory(cat)}
-              className={`border-ink inline-flex items-center gap-2 border-[1.5px] px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${
+              className={`border-ink inline-flex min-h-11 items-center gap-2 border-[1.5px] px-3 py-1.5 font-mono text-[11px] font-semibold tracking-[0.04em] uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none ${
                 active
                   ? "bg-jersey-deep text-cream"
                   : `bg-cream text-ink ${brickEdge}`
@@ -378,7 +378,7 @@ function CategoryPreview({
           type="button"
           onClick={onSeeAll}
           aria-label={`Alle ${paths.length} vragen in ${meta.label}`}
-          className="text-jersey-deep border-jersey-deep mt-3 inline-flex items-center gap-1.5 border-[1.5px] px-2.5 py-2 font-mono text-[10px] font-semibold tracking-[0.05em] uppercase shadow-[2px_2px_0_0_var(--color-jersey-deep)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          className="text-jersey-deep border-jersey-deep mt-3 inline-flex min-h-11 items-center gap-1.5 border-[1.5px] px-2.5 py-2 font-mono text-[10px] font-semibold tracking-[0.05em] uppercase shadow-[2px_2px_0_0_var(--color-jersey-deep)] transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
         >
           Alle {paths.length} vragen
           <ArrowRight size={12} aria-hidden />

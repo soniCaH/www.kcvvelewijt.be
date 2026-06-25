@@ -101,8 +101,9 @@ function SiteHeaderInner({
             size="sm"
             aria-label="Open menu"
             aria-expanded={drawerOpen}
+            aria-controls={drawerOpen ? "nav-takeover" : undefined}
             onClick={() => setDrawerOpen(true)}
-            className="!px-2 !py-2"
+            className="min-h-11 min-w-11 !px-2 !py-2"
           >
             <List size={20} aria-hidden="true" />
           </Button>

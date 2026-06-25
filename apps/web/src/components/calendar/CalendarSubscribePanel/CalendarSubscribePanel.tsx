@@ -162,6 +162,7 @@ export function CalendarSubscribePanel({
                   aria-pressed={side === tab.value}
                   className={cn(
                     "not-last:border-ink px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase transition-colors not-last:border-r-2",
+                    "focus-visible:outline-ink focus-visible:outline-2 focus-visible:-outline-offset-2",
                     side === tab.value
                       ? "bg-ink text-cream"
                       : "text-ink hover:bg-cream-soft",
@@ -175,7 +176,7 @@ export function CalendarSubscribePanel({
               type="button"
               onClick={handleCopy}
               disabled={selectedPsdIds.length === 0}
-              className="border-ink bg-jersey-deep border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide text-white uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
+              className="border-ink bg-jersey-deep focus-visible:outline-ink border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide text-white uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
             >
               {copied ? "Gekopieerd" : "Kopieer link"}
             </button>

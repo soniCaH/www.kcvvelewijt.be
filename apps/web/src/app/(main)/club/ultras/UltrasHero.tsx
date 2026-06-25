@@ -52,7 +52,7 @@ export function UltrasHero({ joinHref }: UltrasHeroProps) {
           Supporters · KCVV Ultra&apos;s 55
         </MonoLabel>
 
-        <h1 className="font-display-big text-cream text-[length:var(--text-display-2xl)] leading-[0.95] font-black tracking-tight uppercase">
+        <h1 className="font-display-big text-cream text-[length:var(--text-display-2xl)] leading-[0.95] font-black tracking-tight break-words hyphens-auto uppercase">
           De <span className="text-warm">luidste</span> hoek
         </h1>
 

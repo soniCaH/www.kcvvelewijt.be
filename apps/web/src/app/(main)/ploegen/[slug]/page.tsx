@@ -225,7 +225,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <PageContainer
               as="section"
               id="klassement"
-              className="scroll-mt-16 py-10"
+              className="scroll-mt-[6.5rem] py-10"
             >
               <StandingsTable
                 entries={standings}
@@ -246,7 +246,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <PageContainer
               as="section"
               id="wedstrijden"
-              className="scroll-mt-16 py-10"
+              className="scroll-mt-[6.5rem] py-10"
             >
               <TeamMatchesSection
                 matches={scheduleMatches}
@@ -265,7 +265,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <PageContainer
               as="section"
               id="spelers"
-              className="scroll-mt-16 py-10"
+              className="scroll-mt-[6.5rem] py-10"
             >
               <SquadGrid players={team.players} />
             </PageContainer>
@@ -280,7 +280,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
       {team.teamType === "youth" ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <PageContainer as="section" className="scroll-mt-16 py-10">
+          <PageContainer as="section" className="scroll-mt-[6.5rem] py-10">
             <TeamEnrolmentCta
               teamType={team.teamType}
               teamSlug={slug}
@@ -293,7 +293,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
       {showStaff ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <PageContainer as="section" id="staf" className="scroll-mt-16 py-10">
+          <PageContainer
+            as="section"
+            id="staf"
+            className="scroll-mt-[6.5rem] py-10"
+          >
             <TeamStaff staff={staff} />
           </PageContainer>
         </>
@@ -302,7 +306,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
       {showEditorial ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <PageContainer as="section" id="info" className="scroll-mt-16 py-10">
+          <PageContainer
+            as="section"
+            id="info"
+            className="scroll-mt-[6.5rem] py-10"
+          >
             <TeamEditorial
               body={teamBody}
               trainingSchedule={team.trainingSchedule}

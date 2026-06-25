@@ -131,6 +131,10 @@ export function OrganigramExplorer({
   const [fanExpanded, setFanExpanded] = useState(false);
   const [siblingsOpen, setSiblingsOpen] = useState(false);
   const [scaleStep, setScaleStep] = useState(0);
+  // Phones cap the zoom at A+ (1.15): scale(1.3) pushes the centre card under
+  // sibling carets at ~360px, and CSS transforms don't expand the scroll area
+  // so overflow can't rescue it (MOB-4).
+  const [isPhone, setIsPhone] = useState(false);
   // The centre's focus ring shows only once the user navigates by keyboard
   // (arrows/Tab) — never on open or mouse use, where it reads as a heavy,
   // unwanted selection outline. The centre stays focusable throughout (a11y).
@@ -206,6 +210,15 @@ export function OrganigramExplorer({
       { duration: 300, easing: "cubic-bezier(0.2, 0, 0, 1)" },
     );
   }, [open, focusId]);
+
+  useEffect(() => {
+    const mq = window.matchMedia?.("(max-width: 640px)");
+    if (!mq) return;
+    const sync = () => setIsPhone(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   // Restore focus to the launcher on a true→false close.
   const wasOpen = useRef(open);
@@ -338,7 +351,9 @@ export function OrganigramExplorer({
         <div
           role="tree"
           aria-label="Organisatiestructuur"
-          style={{ transform: `scale(${SCALE_STEPS[scaleStep]})` }}
+          style={{
+            transform: `scale(${SCALE_STEPS[isPhone ? Math.min(scaleStep, 1) : scaleStep]})`,
+          }}
           className="mx-auto flex max-w-[60rem] origin-top flex-col items-center gap-5 transition-transform duration-[240ms]"
         >
           <div

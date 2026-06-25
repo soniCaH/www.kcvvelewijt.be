@@ -265,9 +265,9 @@ export function MemberDetailPanel({
               type="button"
               onClick={onClose}
               aria-label="Sluiten"
-              // A 36px square keeps a comfortable tap target (B4) while staying a
-              // tidy bordered close box in the dark header.
-              className="border-cream/50 text-cream hover:border-cream absolute top-3 right-3 flex h-9 w-9 items-center justify-center border-[1.5px]"
+              // A 44px square meets the ≥44px tap-target floor (MOB-5) while
+              // staying a tidy bordered close box in the dark header.
+              className="border-cream/50 text-cream hover:border-cream absolute top-3 right-3 flex h-11 w-11 items-center justify-center border-[1.5px]"
             >
               <X size={14} aria-hidden />
             </button>
@@ -283,7 +283,7 @@ export function MemberDetailPanel({
                 imageUrl={activeHolder?.imageUrl}
               />
               <div className="min-w-0">
-                <p className="font-display text-[23px] leading-none font-black italic">
+                <p className="font-display text-[23px] leading-none font-black break-words italic">
                   {isVacant ? node.title : activeName}
                 </p>
                 {(isVacant || node.roleCode) && (

@@ -47,7 +47,7 @@ type ViewMode = "month" | "week" | "agenda";
 
 const VIEW_TABS: { value: ViewMode; label: string; mobileHidden?: boolean }[] =
   [
-    { value: "month", label: "Maand" },
+    { value: "month", label: "Maand", mobileHidden: true },
     { value: "week", label: "Week", mobileHidden: true },
     { value: "agenda", label: "Agenda" },
   ];
@@ -82,8 +82,14 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
   // which sets `?view=`) always wins.
   const rawView = searchParams.get("view");
   const isPhone = useIsPhoneViewport();
-  const view: ViewMode =
+  const requestedView: ViewMode =
     rawView != null ? parseView(rawView) : isPhone ? "agenda" : "month";
+  // The week grid is forced 7-col (~41px cells) and `?view=week` pins it on any
+  // viewport — coerce it to the agenda list on phones (MOB-6). The month tab is
+  // hidden on phones too, but an explicit `?view=month` still wins (it can only
+  // be reached deliberately).
+  const view: ViewMode =
+    isPhone && requestedView === "week" ? "agenda" : requestedView;
 
   // By-type filter (Phase 6.D Phase 2, #1992). An unknown `?type=` falls to "all".
   const rawType = searchParams.get("type");

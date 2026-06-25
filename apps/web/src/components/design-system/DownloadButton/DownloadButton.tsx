@@ -176,6 +176,7 @@ export const DownloadButton = ({
         "group relative block w-full no-underline",
         "border-ink bg-cream border-2",
         "shadow-paper-md",
+        "focus-visible:outline-ink focus-visible:outline-2 focus-visible:outline-offset-2",
         PRESS_DOWN_CLASSES,
         className,
       )}

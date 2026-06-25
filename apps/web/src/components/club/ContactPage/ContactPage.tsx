@@ -240,7 +240,10 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
                   />
                   <span className={ICON_TITLE}>E-mail</span>
                 </div>
-                <a href="mailto:info@kcvvelewijt.be" className={INLINE_LINK}>
+                <a
+                  href="mailto:info@kcvvelewijt.be"
+                  className={`${INLINE_LINK} break-all`}
+                >
                   info@kcvvelewijt.be
                 </a>
               </div>
@@ -283,7 +286,10 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
                   {card.description}
                 </p>
               ) : null}
-              <a href={`mailto:${card.email}`} className={INLINE_LINK}>
+              <a
+                href={`mailto:${card.email}`}
+                className={`${INLINE_LINK} break-all`}
+              >
                 <Envelope size={16} className="shrink-0" aria-hidden />
                 {card.email}
               </a>
