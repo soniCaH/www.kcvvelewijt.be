@@ -13,10 +13,14 @@ pnpm --filter @kcvv/studio dev   # starts Studio at http://localhost:3333
 ## Deploy
 
 ```bash
-pnpm --filter @kcvv/studio deploy
+cd apps/studio && npx sanity deploy
 ```
 
 Deploys to [kcvvelewijt.sanity.studio](https://kcvvelewijt.sanity.studio).
+
+> Use `npx sanity deploy` (or `pnpm --filter @kcvv/studio run deploy`) — **not** bare
+> `pnpm --filter @kcvv/studio deploy`, which invokes pnpm's built-in `deploy` and errors.
+> There is no CI auto-deploy; schema changes only go live after a manual redeploy.
 
 ## Editing schemas
 

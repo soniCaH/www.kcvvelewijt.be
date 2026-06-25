@@ -4,7 +4,7 @@
 
 ### SVG Handling
 
-**Current Status (2026-04-26):**
+**Current Status (2026-06-26):**
 
 - `dangerouslyAllowSVG: true` is enabled in `next.config.ts`
 - **Current Risk: LOW** — No user-uploaded SVGs are accepted
@@ -15,43 +15,28 @@
 
 1. ✅ `contentDispositionType: 'attachment'` — Forces download instead of inline display
 2. ✅ Limited to specific remote patterns (placehold.co, cdn.sanity.io, Cloudflare CDN)
-3. ✅ Runtime MIME type validation — Schema enforces image MIME types (JPEG/PNG/GIF/WebP only, no SVG)
-4. ✅ Automated test coverage — Tests verify PDF/SVG files are rejected at schema level
+3. ✅ No user uploads — all images are author-controlled via Sanity; the public site has no upload endpoint
+4. ✅ Static asset delivery — Sanity/Cloudflare serve uploaded media as static files (no execution)
 
-### File Upload Security — Defense in Depth
+### File Upload Security
 
-**⚠️ CRITICAL: MIME Type Validation Alone is INSUFFICIENT!**
+**The public site accepts no user file uploads** — all images are author-controlled in
+Sanity and served as static assets, so there is no client-facing upload surface to guard.
+There is intentionally **no app-level MIME schema** in the web app; the controls below apply
+to author-uploaded media. If a user-facing upload surface is ever added, implement runtime
+MIME validation and the SVG hardening below before shipping it.
 
-Our file validation uses a **defense-in-depth approach** with multiple security layers. MIME types can be easily spoofed by attackers, so we implement validation at multiple levels:
+#### Sanity CMS server-side validation (primary control)
 
-#### Layer 1: Schema Validation (Frontend/Runtime)
+1. **Field-level restrictions** — Sanity processes and restricts uploaded assets server-side
+2. **CDN delivery** — assets are served as static files from `cdn.sanity.io` / Cloudflare CDN
+3. **No arbitrary file execution** — assets are static, never executed
 
-- **Location:** `apps/web/src/lib/effect/schemas/file.schema.ts`
-- **Purpose:** Type safety and basic MIME type filtering
-- **Validates:** Accepts only `image/jpeg`, `image/png`, `image/gif`, `image/webp`
-- **⚠️ Limitation:** This is NOT a security control — it's defense-in-depth and type safety
-
-#### Layer 2: Sanity CMS Server-Side Validation (PRIMARY SECURITY CONTROL)
-
-Sanity performs server-side validation on all file uploads:
-
-1. **MIME type enforcement** — Sanity restricts accepted file types at the field level
-2. **CDN delivery** — Images are served via Cloudflare CDN from `cdn.sanity.io`
-3. **No arbitrary file execution** — Assets are served as static files, not executed
-
-#### Layer 3: Next.js Image Optimization
+#### Next.js Image remote allowlist
 
 - **Location:** `next.config.ts` `remotePatterns`
-- **Purpose:** Restrict which domains can serve images
-- **Current allowed domains:** placehold.co, cdn.sanity.io, Cloudflare CDN
-- Any image from unapproved domains will be rejected
-
-#### Testing File Validation
-
-```bash
-# Run schema validation tests
-pnpm --filter @kcvv/web test file.schema.test.ts
-```
+- **Purpose:** restrict which domains can serve images
+- **Allowed domains:** placehold.co, cdn.sanity.io, Cloudflare CDN — images from other domains are rejected
 
 ---
 
@@ -146,6 +131,6 @@ If you discover a security vulnerability, please email: kevin@kcvvelewijt.be
 
 ## Last Security Review
 
-- **Date:** 2026-04-26
+- **Date:** 2026-06-26
 - **Reviewer:** Kevin Van Ransbeeck
 - **Status:** ✅ Safe — No user-uploaded SVGs; fully migrated to Sanity + Cloudflare CDN
