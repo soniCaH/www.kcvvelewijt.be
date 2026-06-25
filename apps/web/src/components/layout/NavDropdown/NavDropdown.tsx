@@ -308,6 +308,7 @@ export const NavDropdown = ({
         aria-expanded={isOpen}
         className={cn(
           "font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]",
+          "focus-visible:outline-ink focus-visible:outline-2 focus-visible:outline-offset-2",
           triggerActive || isOpen
             ? "text-jersey-deep"
             : "text-ink hover:text-jersey-deep",

@@ -138,7 +138,7 @@ export function TicketStub({
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-1 px-4 py-3 pr-28">
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-1 px-4 py-3 sm:pr-28">
           <MonoLabel variant="pill-ink" size="sm">
             {type}
           </MonoLabel>

@@ -29,7 +29,7 @@ const PARENT_ROW =
   "border-paper-edge flex w-full items-center justify-between border-b py-4 text-left font-display text-[22px] italic font-bold leading-tight transition-colors";
 
 const CHILD_ROW =
-  "group/child relative flex w-full items-center py-2 pl-6 text-left font-mono text-[11px] font-semibold tracking-[0.08em] uppercase leading-none transition-all duration-150";
+  "group/child relative flex min-h-11 w-full items-center py-2 pl-6 text-left font-mono text-[11px] font-semibold tracking-[0.08em] uppercase leading-none transition-all duration-150";
 
 export function NavTakeoverItem({
   label,

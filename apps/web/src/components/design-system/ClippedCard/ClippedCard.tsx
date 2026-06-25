@@ -34,8 +34,9 @@ export function ClippedCard({
         // a sheet of paper sitting on the cream page backdrop.
         "border-ink text-ink relative border-2 bg-white",
         // Opinionated default padding mirrors the locked mockup
-        // (`36px 40px 28px`). Override via `className`.
-        "px-10 pt-9 pb-7",
+        // (`36px 40px 28px`) on tablet+, tightened on phones so narrow
+        // content (e.g. the membership form) isn't squeezed. Override via `className`.
+        "px-5 pt-7 pb-6 md:px-10 md:pt-9 md:pb-7",
         className,
       )}
     >

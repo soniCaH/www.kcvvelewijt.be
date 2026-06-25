@@ -67,7 +67,7 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
           // Table & cells — base typography + jersey-deep header band.
           "[&>table]:w-full [&>table]:border-collapse [&>table]:text-sm",
           "[&>table>thead]:bg-jersey-deep",
-          "[&>table>thead>tr>th]:text-cream",
+          "[&>table>thead>tr>th]:text-white",
           "[&>table>thead>tr>th]:font-mono [&>table>thead>tr>th]:text-[10px]",
           "[&>table>thead>tr>th]:font-semibold [&>table>thead>tr>th]:tracking-[0.18em]",
           "[&>table>thead>tr>th]:text-left [&>table>thead>tr>th]:uppercase",

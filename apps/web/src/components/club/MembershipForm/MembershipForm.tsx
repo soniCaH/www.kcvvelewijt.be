@@ -448,7 +448,11 @@ export function MembershipForm({
         <TurnstileWidget onToken={setTurnstileToken} />
 
         {generalError ? (
-          <p className="text-alert mt-5 text-[length:var(--text-body-md)]">
+          <p
+            role="alert"
+            aria-live="assertive"
+            className="text-alert mt-5 text-[length:var(--text-body-md)]"
+          >
             {generalError}
           </p>
         ) : null}

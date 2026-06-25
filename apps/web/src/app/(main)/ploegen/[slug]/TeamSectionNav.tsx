@@ -26,7 +26,7 @@ export function TeamSectionNav({ items }: TeamSectionNavProps) {
       data-testid="team-section-nav"
       aria-label="Sectienavigatie"
       className={cn(
-        "border-ink bg-cream sticky top-0 z-20 border-y-2",
+        "border-ink bg-cream sticky top-16 z-20 border-y-2",
         "overflow-x-auto",
       )}
     >

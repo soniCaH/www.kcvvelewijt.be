@@ -37,7 +37,7 @@ export function MatchStripView({ match }: MatchStripViewProps) {
       className="bg-cream border-t-jersey-deep/35 border-b-ink/15 grid border-t border-b lg:grid-cols-[auto_1fr_auto]"
     >
       {/* Fixture cluster */}
-      <div className="flex items-center justify-center gap-3 px-4 py-3 lg:justify-start lg:px-6">
+      <div className="flex min-w-0 items-center justify-center gap-3 px-4 py-3 lg:justify-start lg:px-6">
         <TeamMark name={homeMark.name} logoUrl={homeMark.logoUrl} />
         <TeamName>{homeMark.name}</TeamName>
         <span className="font-display text-ink/50 text-[14px] leading-none italic">
@@ -85,7 +85,7 @@ export function MatchStripView({ match }: MatchStripViewProps) {
 
 function TeamName({ children }: { children: React.ReactNode }) {
   return (
-    <span className="font-display text-ink truncate text-[15px] leading-none font-bold italic lg:text-[16px]">
+    <span className="font-display text-ink max-w-[40%] min-w-0 truncate text-[15px] leading-none font-bold italic lg:text-[16px]">
       {children}
     </span>
   );

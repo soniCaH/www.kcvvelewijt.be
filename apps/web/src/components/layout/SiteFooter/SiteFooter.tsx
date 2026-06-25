@@ -69,7 +69,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
           gesture bar; the inner row keeps its own py-3.5 (#2210). */}
       <div className="bg-ink text-cream pb-safe">
         <div className="mx-auto flex max-w-[1440px] flex-col items-start gap-3 px-6 py-3.5 leading-none md:flex-row md:items-center md:justify-between md:gap-6 md:px-10">
-          <p className="m-0 flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase md:text-[10.5px]">
+          <p className="m-0 flex flex-wrap items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase md:text-[10.5px]">
             <span>
               © {FOOTER_FOUNDING_YEAR}–{currentYear} KCVV Elewijt
             </span>
@@ -93,7 +93,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="KCVV Elewijt op Facebook"
-                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors"
+                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream relative inline-flex h-6 w-6 items-center justify-center border transition-colors before:absolute before:-inset-2.5 before:content-['']"
                 >
                   <FacebookLogo className="h-3 w-3" aria-hidden="true" />
                 </a>
@@ -104,7 +104,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="KCVV Elewijt op Instagram"
-                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors"
+                  className="border-cream/85 text-cream/85 hover:border-cream hover:text-cream relative inline-flex h-6 w-6 items-center justify-center border transition-colors before:absolute before:-inset-2.5 before:content-['']"
                 >
                   <InstagramLogo className="h-3 w-3" aria-hidden="true" />
                 </a>

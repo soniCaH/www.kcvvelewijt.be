@@ -74,7 +74,7 @@ export function StaffRoles({
               padding="sm"
               shadow="sm"
               dataAttrs={{ "data-testid": "staff-position-row" }}
-              className="flex items-center gap-3"
+              className="flex min-w-0 flex-wrap items-center gap-3"
             >
               {pos.roleCode ? (
                 <MonoLabel variant="pill-jersey-deep">{pos.roleCode}</MonoLabel>
