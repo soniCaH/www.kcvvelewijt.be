@@ -222,10 +222,10 @@ export function MembershipForm({
           ✓ ONTVANGEN
         </StampBadge>
         <h2 className="font-display mb-3 text-[32px] leading-[1.05] font-black">
-          Bedankt voor je inschrijving!
+          Bedankt voor je interesse!
         </h2>
         <p className="text-ink-soft text-[length:var(--text-body-md)]">
-          We hebben je inschrijving goed ontvangen en sturen je een
+          We hebben je aanvraag goed ontvangen en sturen je een
           bevestigingsmail. Iemand van de club neemt binnenkort contact op.
         </p>
       </ClippedCard>
@@ -235,16 +235,16 @@ export function MembershipForm({
   return (
     <ClippedCard as="section">
       <StampBadge tone="jersey" rotation={2} position="top-right">
-        ★ WORD LID
+        ★ INTERESSE
       </StampBadge>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="text-ink-muted border-paper-edge mb-6 flex items-center justify-between border-b pb-2 font-mono text-[11px] tracking-[0.08em] uppercase">
-          <span>Inschrijfformulier · KCVV Elewijt</span>
+          <span>Aanmeldformulier · KCVV Elewijt</span>
         </div>
 
         <h2 className="font-display mb-6 text-[40px] leading-[1.05] font-black">
-          Welkom bij de club.
+          Laat van je horen.
         </h2>
 
         {/* Honeypot — visually hidden, off-screen; bots fill it, humans don't. */}
@@ -265,7 +265,7 @@ export function MembershipForm({
 
         <div className="mb-5">
           <Label htmlFor={fieldId("role")} required>
-            Ik wil me inschrijven als
+            Ik heb interesse als
           </Label>
           <Select
             id={fieldId("role")}
@@ -467,7 +467,7 @@ export function MembershipForm({
             type="submit"
             disabled={state === "submitting"}
           >
-            Inschrijven
+            Verstuur aanvraag
           </Button>
         </div>
       </form>

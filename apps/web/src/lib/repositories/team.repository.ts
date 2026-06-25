@@ -32,7 +32,7 @@ export const TEAM_BY_SLUG_QUERY =
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[] { role, "member": member-> { _id, psdId, archived, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max" } }
+  staff[] { role, "member": member-> { _id, psdId, archived, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max", "hasBio": count(bio) > 0 } }
 }`);
 
 export const YOUTH_TEAMS_CONTACT_QUERY =
@@ -166,8 +166,12 @@ function toStaffMemberVM(
   if (!row.member) return null;
   // A staff-detail page is reachable only for a non-archived member with a
   // psdId (the `/staf/[slug]` route key + `generateStaticParams` filter).
+  // BEST-2: also require actual bio content — without it the detail page is a
+  // hero-only shell, so the card stays non-clickable until a bio is added
+  // (backfill tracked in #2243).
   const psdId = row.member.psdId != null ? String(row.member.psdId).trim() : "";
-  const hasDetailPage = psdId !== "" && row.member.archived !== true;
+  const hasDetailPage =
+    psdId !== "" && row.member.archived !== true && row.member.hasBio === true;
   return {
     id: row.member._id,
     firstName: row.member.firstName ?? "",

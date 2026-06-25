@@ -107,7 +107,7 @@ export default async function RootLayout({
           </Script>
         )}
       </head>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className="flex min-h-screen flex-col">
         {/* WCAG 2.1-A skip link — first focusable element, visible only on
             keyboard focus. Retro register (sharp corners, ink border, mono). */}
         <a
@@ -123,7 +123,9 @@ export default async function RootLayout({
         <ScrollToTop />
         <AccentStrip />
         <SiteHeader youthTeams={youthTeams} seniorTeams={seniorTeams} />
-        <main id="main-content" tabIndex={-1}>
+        {/* flex-1 column so a short page's footer sticks to the viewport
+            bottom (ZOEK-1 / TEGEN-1) instead of floating up or leaving a gap. */}
+        <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col">
           {children}
         </main>
         <SiteFooter />

@@ -54,13 +54,16 @@ export function MatchStripView({ match }: MatchStripViewProps) {
           {aftrap}
         </span>
 
-        <dl className="lg:divide-ink/15 hidden lg:flex lg:items-stretch lg:divide-x">
+        {/* HP-2: date/Aftrap (+Terrein) left, Competitie right. */}
+        <dl className="hidden lg:flex lg:w-full lg:items-stretch lg:justify-between">
+          <div className="lg:divide-ink/15 flex lg:items-stretch lg:divide-x">
+            <MetaCell caption="Aftrap" value={aftrap} />
+            {match.venue ? (
+              <MetaCell caption="Terrein" value={match.venue} />
+            ) : null}
+          </div>
           {match.competition ? (
             <MetaCell caption="Competitie" value={match.competition} />
-          ) : null}
-          <MetaCell caption="Aftrap" value={aftrap} />
-          {match.venue ? (
-            <MetaCell caption="Terrein" value={match.venue} />
           ) : null}
         </dl>
       </div>

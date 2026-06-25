@@ -72,7 +72,14 @@ export function TeamFlagship({
   );
 
   const content = (
-    <div className="flex flex-col items-start justify-center gap-4 p-6 sm:p-10">
+    // TEAMS-1: B-ploeg mirrors the A-ploeg row — its content sits on the right,
+    // so right-align it instead of the shared left default.
+    <div
+      className={cn(
+        "flex flex-col justify-center gap-4 p-6 sm:p-10",
+        isA ? "items-start" : "items-end text-right",
+      )}
+    >
       <span
         className={cn(
           "font-mono text-[11px] tracking-[0.12em] uppercase",

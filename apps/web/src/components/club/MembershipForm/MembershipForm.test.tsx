@@ -21,7 +21,7 @@ describe("MembershipForm", () => {
     render(<MembershipForm />);
     expect(screen.queryByText(/medisch attest/i)).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText(/inschrijven als/i), {
+    fireEvent.change(screen.getByLabelText(/interesse als/i), {
       target: { value: "speler" },
     });
     expect(screen.getByText(/medisch attest/i)).toBeInTheDocument();
@@ -70,11 +70,11 @@ describe("MembershipForm", () => {
       target: { value: "jan@example.com" },
     });
     fireEvent.click(screen.getByLabelText(/privacyverklaring/i));
-    fireEvent.submit(screen.getByText(/Inschrijven/).closest("form")!);
+    fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
 
     await waitFor(() =>
       expect(
-        screen.getByText(/Bedankt voor je inschrijving/i),
+        screen.getByText(/Bedankt voor je interesse/i),
       ).toBeInTheDocument(),
     );
     expect(fetchMock).toHaveBeenCalledWith(

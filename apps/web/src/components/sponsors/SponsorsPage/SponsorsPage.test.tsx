@@ -55,11 +55,9 @@ describe("SponsorsPage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
-  it("renders the club-motto kicker", () => {
+  it("renders the sponsors kicker", () => {
     render(<SponsorsPage sponsors={sponsors} />);
-    expect(
-      screen.getByText("Er is maar één plezante compagnie"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Sponsors & sympathisanten")).toBeInTheDocument();
   });
 
   it("renders one tile per sponsor across the hoofd grid and wall", () => {

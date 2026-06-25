@@ -26,7 +26,9 @@ export function TeamSectionNav({ items }: TeamSectionNavProps) {
       data-testid="team-section-nav"
       aria-label="Sectienavigatie"
       className={cn(
-        "border-ink bg-cream sticky top-16 z-20 border-y-2",
+        // TEAM-1: bottom border only — the StripedSeam above already divides
+        // the nav from the hero, so a top border doubled the line.
+        "border-ink bg-cream sticky top-16 z-20 border-b-2",
         "overflow-x-auto",
       )}
     >

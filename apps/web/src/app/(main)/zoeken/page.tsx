@@ -32,7 +32,7 @@ export const metadata = buildPageMetadata({
  */
 export default function SearchPage() {
   return (
-    <div className="bg-cream min-h-screen">
+    <div className="bg-cream flex flex-1 flex-col">
       <Suspense fallback={<SearchMastheadSkeleton />}>
         <SearchInterface />
       </Suspense>

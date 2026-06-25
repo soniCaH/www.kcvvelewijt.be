@@ -83,7 +83,7 @@ export function PlayerCard({
       shadow="sm"
       padding="none"
       interactive={href ? "press" : false}
-      className={cn("p-2 pb-3", className)}
+      className={cn("h-full p-2 pb-3", className)}
       dataAttrs={href ? undefined : { "data-testid": "player-card" }}
     >
       {inner}
@@ -96,7 +96,7 @@ export function PlayerCard({
         href={href}
         data-testid="player-card"
         aria-label={`${firstName} ${lastName} — ${position}`}
-        className="block"
+        className="block h-full"
       >
         {card}
       </Link>

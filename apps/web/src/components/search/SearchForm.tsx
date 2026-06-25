@@ -9,7 +9,7 @@
  * reads on any ground). No "ZOEK" word — the magnifier carries the action.
  */
 
-import { useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { MagnifyingGlass, X } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 import { searchFieldShellClasses } from "./search-field-styles";
@@ -62,6 +62,18 @@ export const SearchForm = ({
     setValue("");
     onSearch("");
   };
+
+  // ZOEK-2: debounced auto-search (typeahead). Fires 350ms after typing stops
+  // once there are 2+ chars; submit (Enter / magnifier) stays the instant path.
+  // Skips the value already reflected in the URL so mount + result-driven
+  // `initialValue` syncs don't re-fire.
+  useEffect(() => {
+    const trimmed = value.trim();
+    if (trimmed === initialValue.trim()) return;
+    if (trimmed.length === 1) return;
+    const id = setTimeout(() => onSearch(trimmed), 350);
+    return () => clearTimeout(id);
+  }, [value, initialValue, onSearch]);
 
   const canSubmit = value.trim().length >= 2 && !isLoading;
 

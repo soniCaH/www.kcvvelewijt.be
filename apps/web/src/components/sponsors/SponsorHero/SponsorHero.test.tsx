@@ -36,9 +36,7 @@ const featured: Sponsor = {
 describe("SponsorHero", () => {
   it("renders the kicker, level-1 heading and lead", () => {
     render(<SponsorHero featured={featured} />);
-    expect(
-      screen.getByText("Er is maar één plezante compagnie"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Sponsors & sympathisanten")).toBeInTheDocument();
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading).toHaveTextContent("Merci aan onze sponsors.");
     expect(

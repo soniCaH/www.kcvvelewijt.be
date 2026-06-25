@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { FacebookLogo, InstagramLogo } from "@/lib/icons.redesign";
 import { EXTERNAL_LINKS } from "@/lib/constants";
@@ -24,6 +25,17 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
       {/* Top zone — cream paper, wordmark + motto */}
       <div className="border-paper-edge border-b">
         <div className="mx-auto max-w-[1440px] px-6 pt-14 pb-10 text-center md:px-10 md:pt-16 md:pb-12">
+          {/* HP-8: retro/monochrome club crest in the jersey-illustration
+              vocabulary, above the wordmark. Decorative — the wordmark is the
+              accessible name. */}
+          <Image
+            src="/images/logos/kcvv-crest-retro.png"
+            alt=""
+            aria-hidden="true"
+            width={2048}
+            height={2048}
+            className="mx-auto mb-5 h-20 w-20 md:h-24 md:w-24"
+          />
           <h2
             id="site-footer-wordmark"
             className="font-display text-[32px] leading-none font-black tracking-[-0.01em] italic md:text-[44px]"

@@ -818,32 +818,58 @@
    from the left, right side from the right) and fade up; centred photos
    (no `data-side`) default to a pure fade-up. The scoping under
    `.timeline-reveal` means stories/no-JS render at the final state. */
+/* HIST-1: the item only fades — the card slides in directionally while the
+   node bullet stays anchored and "colours in" (fills) in place. */
 .timeline-reveal [data-timeline-item] {
-  --timeline-reveal-x: 0px;
   opacity: 0;
-  transform: translateX(var(--timeline-reveal-x)) translateY(24px);
-  transition:
-    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.timeline-reveal [data-timeline-item][data-side="left"] {
-  --timeline-reveal-x: -32px;
-}
-
-.timeline-reveal [data-timeline-item][data-side="right"] {
-  --timeline-reveal-x: 32px;
+  transition: opacity 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .timeline-reveal [data-timeline-item].timeline-item--entered {
   opacity: 1;
+}
+
+.timeline-reveal [data-timeline-card] {
+  --timeline-reveal-x: 0px;
+  transform: translateX(var(--timeline-reveal-x)) translateY(24px);
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.timeline-reveal [data-timeline-item][data-side="left"] [data-timeline-card] {
+  --timeline-reveal-x: -32px;
+}
+
+.timeline-reveal [data-timeline-item][data-side="right"] [data-timeline-card] {
+  --timeline-reveal-x: 32px;
+}
+
+.timeline-reveal
+  [data-timeline-item].timeline-item--entered
+  [data-timeline-card] {
   transform: none;
 }
 
+/* Bullet fills from hollow (cream) to jersey-deep as the row enters. */
+.timeline-reveal [data-timeline-bullet] {
+  background-color: var(--color-cream);
+  transition: background-color 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.timeline-reveal
+  [data-timeline-item].timeline-item--entered
+  [data-timeline-bullet] {
+  background-color: var(--color-jersey-deep);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .timeline-reveal [data-timeline-item] {
+  .timeline-reveal [data-timeline-item],
+  .timeline-reveal [data-timeline-card] {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+  .timeline-reveal [data-timeline-bullet] {
+    background-color: var(--color-jersey-deep);
     transition: none;
   }
 }
