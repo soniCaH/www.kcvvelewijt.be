@@ -268,14 +268,16 @@ describe("EditorialHero — event variant", () => {
           title: "Steakfestijn",
           location: "Sportpark Elewijt",
           sessions: [
-            { date: "2026-09-25", startTime: "18:00", endTime: "22:00" },
+            // Deliberately out of chronological order — the strip must pick
+            // the EARLIEST session (25 Sep) for both the date and the hours.
             { date: "2026-09-27", startTime: "11:30", endTime: "15:00" },
+            { date: "2026-09-25", startTime: "18:00", endTime: "22:00" },
           ],
         }}
       />,
     );
     const strip = screen.getByTestId("hero-compressed-event-strip");
-    // Earliest session (25 Sep) drives both the date and the hours.
+    expect(strip).toHaveTextContent("25 september 2026");
     expect(strip).toHaveTextContent("18:00–22:00");
   });
 
