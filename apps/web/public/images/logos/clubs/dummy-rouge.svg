@@ -1,17 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dummy club crest — red">
-  <defs>
-    <linearGradient id="g-rouge" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#c0211f" />
-      <stop offset="1" stop-color="#8a1413" />
-    </linearGradient>
-  </defs>
-  <path d="M32 2 L58 8 L58 32 C58 48 46 58 32 62 C18 58 6 48 6 32 L6 8 Z"
-        fill="url(#g-rouge)" stroke="#1a1a1a" stroke-width="2" stroke-linejoin="round" />
-  <path d="M32 2 L58 8 L58 32 C58 48 46 58 32 62 C18 58 6 48 6 32 L6 8 Z"
-        fill="none" stroke="#ffffff" stroke-width="1" stroke-linejoin="round" opacity="0.6" transform="translate(0,2)" />
-  <rect x="6" y="22" width="52" height="6" fill="#ffffff" />
-  <text x="32" y="30" font-family="Georgia, serif" font-size="22" font-weight="700"
-        font-style="italic" text-anchor="middle" fill="#ffffff" stroke="#1a1a1a" stroke-width="0.6">RC</text>
-  <text x="32" y="50" font-family="Helvetica, Arial, sans-serif" font-size="6"
-        text-anchor="middle" fill="#ffffff" letter-spacing="2">1928</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" aria-label="Dummy club crest — red" role="img" viewBox="0 0 64 64"><defs><linearGradient id="g-rouge" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c0211f"/><stop offset="1" stop-color="#8a1413"/></linearGradient></defs><path fill="url(#g-rouge)" stroke="#1a1a1a" stroke-linejoin="round" stroke-width="2" d="M32 2 L58 8 L58 32 C58 48 46 58 32 62 C18 58 6 48 6 32 L6 8 Z"/><path fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="1" d="M32 2 L58 8 L58 32 C58 48 46 58 32 62 C18 58 6 48 6 32 L6 8 Z" opacity=".6" transform="translate(0,2)"/><rect width="52" height="6" x="6" y="22" fill="#fff"/><text x="32" y="30" fill="#fff" stroke="#1a1a1a" stroke-width=".6" font-family="Georgia, serif" font-size="22" font-style="italic" font-weight="700" text-anchor="middle">RC</text><text x="32" y="50" fill="#fff" font-family="Helvetica, Arial, sans-serif" font-size="6" letter-spacing="2" text-anchor="middle">1928</text></svg>
