@@ -12,6 +12,9 @@ import { SearchMasthead } from "./SearchMasthead";
 import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
 import { SearchPreSearchCard } from "./SearchPreSearchCard";
+import { SearchAnswerCard } from "./SearchAnswerCard";
+import { SearchRelated } from "./SearchRelated";
+import { useSemanticAugment } from "./useSemanticAugment";
 import { Alert, PageContainer, Spinner } from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { filterByActiveType } from "./search-filter-utils";
@@ -149,6 +152,15 @@ export const SearchInterface = ({
     [results, activeType],
   );
 
+  // Semantic augment lane (8s5 / ZOEK-3) — one fetch resolved into the card
+  // (above results) or the "Gerelateerd" links (below results). De-dupe against
+  // the lexical result URLs so the same article never shows twice.
+  const lexicalUrls = useMemo(
+    () => new Set(results.map((result) => result.url)),
+    [results],
+  );
+  const augment = useSemanticAugment(query, lexicalUrls);
+
   // Track analytics based on filtered results (respects active filter)
   // Only fires after a successful fetch (no load, no error)
   useEffect(() => {
@@ -272,6 +284,15 @@ export const SearchInterface = ({
         {/* Show results only if query is valid (>= 2 chars) */}
         {query.trim().length >= 2 && (
           <>
+            {/* High-confidence semantic answer (8s5 / ZOEK-3) — the "Slim
+                antwoord" card sits ABOVE the lexical results. */}
+            {augment.kind === "answer" && (
+              <SearchAnswerCard
+                answer={augment.answer}
+                sources={augment.sources}
+              />
+            )}
+
             {/* Filters */}
             <SearchFilters
               activeType={activeType}
@@ -307,6 +328,14 @@ export const SearchInterface = ({
                 activeType={activeType}
                 onResultClick={analytics.trackResultClicked}
               />
+            )}
+
+            {/* Low-confidence semantic fallback (8s5 / ZOEK-3) — "Gerelateerd"
+                links sit BELOW the lexical results; supplementary, not a
+                headline. Renders nothing when there's a high-confidence answer
+                (mutually exclusive) or on low scores / endpoint failure. */}
+            {augment.kind === "related" && (
+              <SearchRelated items={augment.items} />
             )}
           </>
         )}
