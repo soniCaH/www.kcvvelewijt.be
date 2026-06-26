@@ -27,7 +27,7 @@ pnpm --filter @kcvv/api dev                        # wrangler dev on :8787
 
 ```bash
 pnpm --filter @kcvv/api dev              # wrangler dev (local)
-pnpm --filter @kcvv/api deploy           # deploy to production
+pnpm --filter @kcvv/api run deploy       # deploy to production (bare `deploy` hits pnpm's built-in)
 pnpm --filter @kcvv/api deploy:staging   # deploy to staging
 pnpm --filter @kcvv/api test
 pnpm --filter @kcvv/api cache:clear:staging                    # clear all staging KV keys
