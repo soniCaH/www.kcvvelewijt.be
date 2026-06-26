@@ -36,10 +36,10 @@ vi.mock("next/image", () => ({
 }));
 
 // The semantic augment lane has its own fetch (POST /api/search) and tests
-// (SearchAnswerBlock.test.tsx). Stub it here so its request doesn't disturb the
-// lexical fetch-count assertions in this file.
-vi.mock("./SearchAnswerBlock", () => ({
-  SearchAnswerBlock: () => null,
+// (useSemanticAugment.test.ts). Stub it to "none" here so its request doesn't
+// disturb the lexical fetch-count assertions in this file.
+vi.mock("./useSemanticAugment", () => ({
+  useSemanticAugment: () => ({ kind: "none" }),
 }));
 
 describe("SearchInterface", () => {

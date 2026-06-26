@@ -81,11 +81,81 @@ const mockResponse: SearchResponse = {
 
 const mockEmpty: SearchResponse = { results: [], count: 0, query: "xqzptw" };
 
-function mockFetch(response: SearchResponse, delay = 0) {
+// Semantic (POST /api/search) response shape — distinct corpus from lexical
+// (article/page/responsibility only; never players/teams).
+interface SemanticResponse {
+  results: Array<{
+    id: string;
+    slug: string;
+    type: "article" | "page" | "responsibility";
+    score: number;
+    title: string;
+    excerpt: string;
+  }>;
+  answer?: string;
+}
+
+const noSemantic: SemanticResponse = { results: [] };
+
+// High-confidence: top score >= 0.5 + an LLM answer -> "Slim antwoord" card.
+const smartAnswerResponse: SemanticResponse = {
+  answer:
+    "Laat je interesse achter via het inschrijvingsformulier — daarna nemen we contact op om samen een plek in de juiste leeftijdsploeg te zoeken. Een definitieve plaats hangt af van de beschikbaarheid per ploeg.",
+  results: [
+    {
+      id: "page-inschrijven",
+      slug: "inschrijven",
+      type: "page",
+      score: 0.74,
+      title: "Word lid",
+      excerpt: "Praktische informatie om aan te sluiten.",
+    },
+    {
+      id: "page-jeugd",
+      slug: "jeugd",
+      type: "page",
+      score: 0.61,
+      title: "Jeugdwerking",
+      excerpt: "Onze jeugdvisie en leeftijdsploegen.",
+    },
+  ],
+};
+
+// Mid-confidence: 0.35-0.5, no answer -> "Gerelateerd" links below the results.
+const relatedResponse: SemanticResponse = {
+  results: [
+    {
+      id: "page-jeugdvisie",
+      slug: "jeugdvisie",
+      type: "page",
+      score: 0.44,
+      title: "Onze jeugdvisie",
+      excerpt: "Hoe we ploegen samenstellen.",
+    },
+    {
+      id: "resp-inschrijven",
+      slug: "inschrijven",
+      type: "responsibility",
+      score: 0.4,
+      title: "Hoe schrijf ik mijn kind in?",
+      excerpt: "De stappen om lid te worden.",
+    },
+  ],
+};
+
+// Method-aware: GET (lexical) -> `lexical`; POST (semantic) -> `semantic`.
+function mockFetch(
+  lexical: SearchResponse,
+  {
+    semantic = noSemantic,
+    delay = 0,
+  }: { semantic?: SemanticResponse; delay?: number } = {},
+) {
   const original = globalThis.fetch;
-  globalThis.fetch = async () => {
+  globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
     if (delay > 0) await new Promise((r) => setTimeout(r, delay));
-    return new Response(JSON.stringify(response), {
+    const body = init?.method === "POST" ? semantic : lexical;
+    return new Response(JSON.stringify(body), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -132,7 +202,8 @@ export const Idle: Story = {
 };
 
 /**
- * Active search with results across all content types.
+ * Active lexical search with results across all content types (no semantic
+ * augment — the semantic POST returns no match).
  * URL param `?q=KCVV` triggers a fetch on mount.
  */
 export const WithResults: Story = {
@@ -142,6 +213,42 @@ export const WithResults: Story = {
   parameters: SEARCH_NAVIGATION_PARAMS,
   beforeEach() {
     return mockFetch(mockResponse);
+  },
+};
+
+/**
+ * High-confidence semantic answer (8s5 / ZOEK-3): the "Slim antwoord" card
+ * renders ABOVE the lexical results.
+ */
+export const WithSmartAnswer: Story = {
+  args: {
+    initialQuery: "lid worden",
+  },
+  parameters: {
+    nextjs: {
+      navigation: { pathname: "/zoeken", query: { q: "lid worden" } },
+    },
+  },
+  beforeEach() {
+    return mockFetch(mockResponse, { semantic: smartAnswerResponse });
+  },
+};
+
+/**
+ * Low-confidence semantic fallback (8s5 / ZOEK-3): the "Gerelateerd" links
+ * render BELOW the lexical results (no LLM answer at this score).
+ */
+export const WithRelated: Story = {
+  args: {
+    initialQuery: "jeugd",
+  },
+  parameters: {
+    nextjs: {
+      navigation: { pathname: "/zoeken", query: { q: "jeugd" } },
+    },
+  },
+  beforeEach() {
+    return mockFetch(mockResponse, { semantic: relatedResponse });
   },
 };
 
