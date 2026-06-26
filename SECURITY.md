@@ -14,9 +14,9 @@
 **Security Measures:**
 
 1. ✅ `contentDispositionType: 'attachment'` — Forces download instead of inline display
-2. ✅ Limited to specific remote patterns (placehold.co, cdn.sanity.io, Cloudflare CDN)
+2. ✅ Limited to the image hosts allowlisted in `next.config.ts` `remotePatterns`
 3. ✅ No user uploads — all images are author-controlled via Sanity; the public site has no upload endpoint
-4. ✅ Static asset delivery — Sanity/Cloudflare serve uploaded media as static files (no execution)
+4. ✅ Static asset delivery — Sanity serves uploaded media as static files via `cdn.sanity.io` (no execution)
 
 ### File Upload Security
 
@@ -29,14 +29,14 @@ MIME validation and the SVG hardening below before shipping it.
 #### Sanity CMS server-side validation (primary control)
 
 1. **Field-level restrictions** — Sanity processes and restricts uploaded assets server-side
-2. **CDN delivery** — assets are served as static files from `cdn.sanity.io` / Cloudflare CDN
+2. **CDN delivery** — assets are served as static files from `cdn.sanity.io`
 3. **No arbitrary file execution** — assets are static, never executed
 
 #### Next.js Image remote allowlist
 
 - **Location:** `next.config.ts` `remotePatterns`
 - **Purpose:** restrict which domains can serve images
-- **Allowed domains:** placehold.co, cdn.sanity.io, Cloudflare CDN — images from other domains are rejected
+- **Allowed hosts:** the `remotePatterns` allowlist in `next.config.ts` — images from any other host are rejected
 
 ---
 

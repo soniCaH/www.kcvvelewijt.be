@@ -85,10 +85,6 @@ PSD_API_KEY=...
 - **[ProSoccerData API](https://prosoccerdata.com/)** — match results and rankings via BFF
 - **[Cloudflare Workers](https://workers.cloudflare.com/)** — BFF proxy with caching (Wrangler)
 
-### UI Components
-
-- **[d3-org-chart](https://github.com/bumbeishvili/org-chart)** — organization chart visualization
-
 ### Development Tools
 
 - **[Turborepo](https://turbo.build/)** — monorepo build orchestration
@@ -154,7 +150,7 @@ pnpm --filter @kcvv/web build-storybook
 
 ```bash
 pnpm --filter @kcvv/api dev         # wrangler dev
-pnpm --filter @kcvv/api deploy      # wrangler deploy
+pnpm --filter @kcvv/api run deploy  # wrangler deploy (bare `deploy` hits pnpm's built-in)
 ```
 
 ---
@@ -168,9 +164,9 @@ Interactive help system — visitors describe their role and question to find th
 **Status:** Active — data managed via Sanity CMS
 **Docs:** `RESPONSIBILITY.md`
 
-### Organigram (`/club/organigram`)
+### Organigram (part of `/hulp`)
 
-Interactive organizational chart of the club structure.
+Interactive organizational chart of the club structure, rendered within the Responsibility Finder page.
 
 **Status:** Implemented — fully migrated to Sanity (`organigramNode` + `staffMember`)
 
@@ -189,7 +185,7 @@ Content for articles, teams, players, organigram, sponsors, and events.
 ## Design System
 
 - **Primary Color:** `#4acf52` (KCVV green)
-- **Fonts:** Quasimoda (headings), Montserrat (body) via Adobe Typekit
+- **Fonts:** Freight Display/Big Pro (headings) + Freight Sans Pro (body) via Adobe Typekit; IBM Plex Mono (mono) self-hosted via `next/font`
 - **Spacing:** Tailwind v4 scale
 - **Breakpoints:** standard Tailwind (`sm`, `md`, `lg`, `xl`, `2xl`)
 
@@ -201,7 +197,7 @@ See Storybook Foundation stories (`pnpm --filter @kcvv/web storybook`) and `apps
 
 - **Unit tests:** Vitest — target 80%+ coverage. Run: `pnpm test`
 - **Component stories:** Storybook 10 with interaction tests. Run: `pnpm --filter @kcvv/web storybook`
-- **E2E:** Playwright configured, no specs yet
+- **E2E:** Playwright — specs for homepage, article detail, events, matches + route smoke-tests (`apps/web/test/e2e/`)
 
 ---
 
@@ -221,7 +217,7 @@ pnpm --filter @kcvv/web check-all
 git push -u origin feat/feature-name
 ```
 
-**Commit scopes:** `news`, `matches`, `teams`, `players`, `sponsors`, `calendar`, `ranking`, `api`, `ui`, `schema`, `migration`, `config`, `deps`
+**Commit scopes:** `news`, `matches`, `events`, `teams`, `players`, `sponsors`, `calendar`, `ranking`, `search`, `sync`, `analytics`, `studio`, `api`, `ui`, `schema`, `config`, `deps`, `deps-dev` (enforced by `commitlint.config.js`)
 
 Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 
@@ -230,9 +226,9 @@ Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 ## Deployment
 
 - **Web (apps/web):** Vercel — auto-deploys from `main`
-- **BFF (apps/api):** Cloudflare Workers — `pnpm --filter @kcvv/api deploy`
-- **Studio production:** sanity.io — `pnpm --filter @kcvv/studio deploy`
-- **Studio staging:** sanity.io — `pnpm --filter @kcvv/studio-staging deploy`
+- **BFF (apps/api):** Cloudflare Workers — `pnpm --filter @kcvv/api run deploy` (or `wrangler deploy`)
+- **Studio production:** sanity.io — `cd apps/studio && npx sanity deploy` (manual; no CI auto-deploy)
+- **Studio staging:** sanity.io — `cd apps/studio-staging && SANITY_STUDIO_DATASET=staging npx sanity deploy`
 
 ---
 
