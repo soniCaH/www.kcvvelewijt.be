@@ -12,6 +12,7 @@ import { SearchMasthead } from "./SearchMasthead";
 import { SearchFilters } from "./SearchFilters";
 import { SearchResults } from "./SearchResults";
 import { SearchPreSearchCard } from "./SearchPreSearchCard";
+import { SearchAnswerBlock } from "./SearchAnswerBlock";
 import { Alert, PageContainer, Spinner } from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { filterByActiveType } from "./search-filter-utils";
@@ -272,6 +273,11 @@ export const SearchInterface = ({
         {/* Show results only if query is valid (>= 2 chars) */}
         {query.trim().length >= 2 && (
           <>
+            {/* Semantic augment lane (8s5 / ZOEK-3) — renders the "Slim antwoord"
+                card or "Gerelateerd" rows above the unchanged lexical search.
+                Degrades to nothing on low scores or endpoint failure. */}
+            <SearchAnswerBlock query={query} />
+
             {/* Filters */}
             <SearchFilters
               activeType={activeType}
