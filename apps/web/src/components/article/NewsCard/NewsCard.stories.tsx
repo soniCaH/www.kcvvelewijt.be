@@ -293,3 +293,32 @@ export const MatchPreviewType: Story = {
   },
   tags: ["vr"],
 };
+
+// Regression guard: long Dutch compounds in a narrow featured card (the 3-up
+// "Uitgelicht" row width) must hyphenate at a dictionary point WITH a visible
+// hyphen — not hard-cut mid-word. The title carries `hyphens-auto` alone; if
+// `break-words` is ever re-added, its per-character emergency breaks win the
+// greedy line-breaker and the hyphens disappear ("Voorbeschou / wing"), which
+// this baseline catches. Wrapped at ~200px to force the overflow the wide
+// standalone canvas would otherwise hide.
+//
+// `lang="nl"` is set on the wrapper because `hyphens: auto` needs a language
+// dictionary and Storybook's iframe root has no `lang` (the real app sets it
+// on `<html>` in layout.tsx). Scoping it here keeps this guard faithful to
+// production without re-baselining every other hyphenating story.
+export const LongCompoundTitle: Story = {
+  args: {
+    ...phase4SharedArgs,
+    variant: "featured",
+    aspectRatio: "landscape-16-9",
+    title: "Voorbeschouwing op de competitiestart van het tornooi",
+  },
+  decorators: [
+    (StoryFn) => (
+      <div className="w-[200px]" lang="nl">
+        <StoryFn />
+      </div>
+    ),
+  ],
+  tags: ["vr"],
+};

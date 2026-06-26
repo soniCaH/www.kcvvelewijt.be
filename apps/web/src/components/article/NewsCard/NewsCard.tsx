@@ -315,11 +315,13 @@ export const NewsCard = ({
           level={HEADING_LEVEL[as]}
           size={headingSize}
           tone={headingTone}
-          // `break-words` + `hyphens-auto` — long Dutch compounds
-          // (e.g. "Voorbeschouwing", "competitiestart") overflowed the
-          // card horizontally before `line-clamp-3` could vertically
-          // truncate, producing a mid-word visual clip.
-          className="line-clamp-3 break-words hyphens-auto"
+          // `hyphens-auto` (no `break-words`) — long Dutch compounds
+          // (e.g. "Voorbeschouwing") hyphenate at a dictionary point with a
+          // visible hyphen. `break-words` is deliberately omitted: its
+          // per-character emergency breaks out-compete hyphenation in the
+          // greedy line-breaker, producing hyphen-less mid-word clips
+          // ("Voorbeschou / wing"). `line-clamp-3` still caps the height.
+          className="line-clamp-3 hyphens-auto"
         >
           {title}
         </EditorialHeading>
