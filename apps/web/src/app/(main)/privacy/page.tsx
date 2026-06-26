@@ -75,7 +75,7 @@ export default function PrivacyPage() {
             level={1}
             size="display-xl"
             emphasis={{ text: "verklaring." }}
-            className="mt-3 mb-0 break-words hyphens-auto"
+            className="mt-3 mb-0 hyphens-auto"
           >
             Privacyverklaring
           </EditorialHeading>

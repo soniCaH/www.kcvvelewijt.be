@@ -602,6 +602,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  html {
+    /* Only hyphenate words >=8 chars, with >=4 chars before and after the
+       break, so short Dutch words ("plezantste", "passie") wrap whole instead
+       of breaking after "ple-". Long compounds ("doorzettingsvermogen") still
+       hyphenate. Inherited -> covers every `hyphens-auto` heading. */
+    hyphenate-limit-chars: 8 4 4;
+  }
+
   body {
     background: var(--color-cream);
     color: var(--color-ink);

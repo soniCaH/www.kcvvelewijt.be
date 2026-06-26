@@ -15,6 +15,19 @@ const meta = {
   title: "Features/Home/NewsGrid",
   component: NewsGrid,
   tags: ["autodocs", "vr"],
+  // `lang="nl"` so Storybook uses the Dutch hyphenation dictionary. The iframe
+  // root has no `lang` (defaults to English), which can't hyphenate compounds
+  // like "Voorbeschouwing" — without it they overflow/clip in the narrow card
+  // instead of rendering the production breaks. Mirrors the app's
+  // `<html lang="nl">`. (A global Storybook `lang="nl"` is the eventual root
+  // fix; scoped here to the Dutch-content home grids.)
+  decorators: [
+    (Story) => (
+      <div lang="nl">
+        <Story />
+      </div>
+    ),
+  ],
   parameters: {
     layout: "fullscreen",
     docs: {

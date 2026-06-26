@@ -138,7 +138,7 @@ export function MatchArticleLinkCard({
           <EditorialHeading
             level={2}
             size="display-md"
-            className="break-words hyphens-auto"
+            className="hyphens-auto"
           >
             {article.title}
           </EditorialHeading>
