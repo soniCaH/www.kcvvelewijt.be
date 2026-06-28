@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
+        uses: pnpm/action-setup@v6.0.9
         with:
           run_install: false
 
@@ -190,7 +190,7 @@ jobs:
         uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
+        uses: pnpm/action-setup@v6.0.9
         with:
           run_install: false
 
@@ -334,7 +334,7 @@ jobs:
         uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
+        uses: pnpm/action-setup@v6.0.9
         with:
           run_install: false
 
@@ -373,7 +373,7 @@ jobs:
         uses: actions/checkout@v7.0.0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.8
+        uses: pnpm/action-setup@v6.0.9
         with:
           run_install: false
 
