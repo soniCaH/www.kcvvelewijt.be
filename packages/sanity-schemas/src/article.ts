@@ -166,10 +166,16 @@ export const article = defineType({
       // text spans to a plain string for slugify.
       options: {
         source: (doc) => {
+          // Flatten EVERY block's text spans (not just the first) — the schema
+          // caps new titles at one block, but legacy/imported titles can be
+          // multi-block and would otherwise generate a truncated slug.
           const blocks = (doc as {title?: {children?: {text?: string}[]}[]})
             .title;
           return (
-            blocks?.[0]?.children?.map((c) => c.text ?? "").join("") ?? ""
+            blocks
+              ?.map((b) => b.children?.map((c) => c.text ?? "").join("") ?? "")
+              .join(" ")
+              .trim() ?? ""
           );
         },
       },
