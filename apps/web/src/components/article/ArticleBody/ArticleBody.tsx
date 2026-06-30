@@ -583,6 +583,15 @@ function buildComponents({
       qaBlock: ({ value }: { value: QaBlockValue }) => (
         <QaBlock value={value} subjects={subjects} />
       ),
+      // qaSectionDivider is an object block inserted via the body + menu
+      // (distinct from an `h2` style, which the block serializer above also
+      // routes to QASectionDivider). Without this entry the block renders
+      // nothing.
+      qaSectionDivider: ({
+        value,
+      }: {
+        value: { title?: PortableTextBlock[]; kicker?: string };
+      }) => <QASectionDivider title={value.title} kicker={value.kicker} />,
       eventFact: ({ value }: { value: EventFactValue }) => {
         // `linkedEventSlug` is a body-block authoring concern that lives
         // on `<EventDetailBlock>` (hero composition) — body-flow inline

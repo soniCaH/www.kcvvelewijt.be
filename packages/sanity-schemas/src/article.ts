@@ -160,7 +160,25 @@ export const article = defineType({
       group: "publicatie",
       description:
         "De URL van het artikel (bijv. /nieuws/jouw-titel). Klik 'Generate' om hem uit de titel te maken. Wijzig hem niet meer nadat het artikel gepubliceerd en gedeeld is — bestaande links breken anders.",
-      options: { source: "title" },
+      // `title` is Portable Text (an array of blocks), so the default
+      // string-path source resolver hands slugify a non-string and Generate
+      // produces nothing (and clears a manual entry). Flatten the title's
+      // text spans to a plain string for slugify.
+      options: {
+        source: (doc) => {
+          // Flatten EVERY block's text spans (not just the first) — the schema
+          // caps new titles at one block, but legacy/imported titles can be
+          // multi-block and would otherwise generate a truncated slug.
+          const blocks = (doc as {title?: {children?: {text?: string}[]}[]})
+            .title;
+          return (
+            blocks
+              ?.map((b) => b.children?.map((c) => c.text ?? "").join("") ?? "")
+              .join(" ")
+              .trim() ?? ""
+          );
+        },
+      },
       validation: (r) =>
         r
           .required()
