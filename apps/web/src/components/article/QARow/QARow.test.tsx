@@ -90,16 +90,24 @@ describe("<QARow>", () => {
       expect(answer?.querySelector("em")?.textContent).toBe("doorgaan");
     });
 
-    it("places the avatar + speaker tag in a header, question indented below", () => {
+    it("reads question-first, with the speaker + indented answer below", () => {
       const { container } = render(
         <QARow question="Q?" respondents={[respondent({ firstName: "L" })]} />,
       );
       const header = container.querySelector("header");
       expect(header?.className).toContain("items-center");
-      const body = container.querySelector(
-        '[data-qa-row="question"]',
-      )?.parentElement;
-      expect(body?.className).toContain("pl-11");
+      // Question precedes the speaker header in DOM order (same rhythm as
+      // the multi-respondent row) and is not indented.
+      const question = container.querySelector('[data-qa-row="question"]')!;
+      const headerEl = container.querySelector("header")!;
+      expect(
+        question.compareDocumentPosition(headerEl) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(question.parentElement?.className).not.toContain("pl-11");
+      // The answer is indented under the speaker name instead.
+      const answer = container.querySelector('[data-qa-row="answer"]');
+      expect(answer?.className).toContain("pl-11");
     });
 
     it("renders the monogram avatar at row scale", () => {

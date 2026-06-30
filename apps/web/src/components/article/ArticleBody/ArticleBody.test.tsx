@@ -252,6 +252,30 @@ describe("<ArticleBody>", () => {
       expect(accentSpan).toBeTruthy();
       expect(accentSpan?.textContent).toBe("vertrouwen");
     });
+
+    it("renders a qaSectionDivider object block (not just an h2 style)", () => {
+      const divider = {
+        _type: "qaSectionDivider",
+        _key: "qsd-1",
+        title: [
+          {
+            _type: "block",
+            _key: "qsd-t",
+            style: "normal",
+            markDefs: [],
+            children: [
+              { _type: "span", _key: "qsd-s", text: "De overstap.", marks: [] },
+            ],
+          },
+        ],
+        kicker: "AKTE 02",
+      } as unknown as PortableTextBlock;
+      const content = [paragraph("Body opens."), divider];
+      const { container } = render(<ArticleBody content={content} />);
+      const titleSlot = container.querySelector('[data-divider="title"]');
+      expect(titleSlot).toBeTruthy();
+      expect(titleSlot?.textContent).toBe("De overstap.");
+    });
   });
 
   describe("container", () => {

@@ -127,33 +127,36 @@ export function QARow({ question, respondents, className }: QARowProps) {
         data-qa-row-has-speaker={hasSpeaker ? "true" : "false"}
         className={cn("flex flex-col", className)}
       >
-        {hasSpeaker && (
-          <SpeakerHeader
-            firstName={r.firstName!}
-            fullName={r.fullName}
-            role={r.role}
-          />
-        )}
         {/*
-          Body indent: 32px avatar + 12px header gap = `pl-11`. Keeps
-          question + answer flush under the speaker name, not under the
-          avatar disc. Drop the indent when there's no speaker header —
-          the row reads as a plain numbered-style Q&A in that case
-          (fallback for multi-subject articles with untagged
-          respondents).
+          Question always reads first, full-width — identical rhythm to the
+          multi-respondent row below, so single- and multi-speaker pairs
+          don't flip order mid-interview when some answers are attributed.
         */}
-        <div
-          className={cn("flex flex-col gap-2", hasSpeaker ? "mt-3 pl-11" : "")}
+        <h3
+          data-qa-row="question"
+          className="font-display text-[length:var(--text-display-sm)] leading-[var(--text-display-sm--lh)] font-semibold italic"
         >
-          <h3
-            data-qa-row="question"
-            className="font-display text-[length:var(--text-display-sm)] leading-[var(--text-display-sm--lh)] font-semibold italic"
-          >
-            {question}
-          </h3>
+          {question}
+        </h3>
+        <div className={cn(hasSpeaker ? "mt-5" : "mt-2")}>
+          {hasSpeaker && (
+            <SpeakerHeader
+              firstName={r.firstName!}
+              fullName={r.fullName}
+              role={r.role}
+            />
+          )}
+          {/*
+            Answer indent: 32px avatar + 12px header gap = `pl-11`, so the
+            answer sits flush under the speaker name. Dropped when there's
+            no speaker header — the row reads as a plain Q&A in that case.
+          */}
           <div
             data-qa-row="answer"
-            className="text-body-md leading-[var(--text-body-md--lh)]"
+            className={cn(
+              "text-body-md leading-[var(--text-body-md--lh)]",
+              hasSpeaker ? "mt-2 pl-11" : "",
+            )}
           >
             {r.answer}
           </div>
