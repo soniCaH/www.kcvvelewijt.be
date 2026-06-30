@@ -113,13 +113,12 @@ function renderArticleHero({
   const titleProp = titleRich.length > 0 ? titleRich : title;
   const lead = article.lead?.trim() || undefined;
   const author = article.author?.trim() || undefined;
-  // Cover-image projection picks differ per variant (portrait crop for
-  // interview + transfer; landscape crop for announcement + event).
-  // Empty URLs become `undefined` so the hero skips the figure rather
-  // than rendering a broken image.
-  const portrait = article.coverImagePortraitUrl?.trim() || undefined;
+  // Every variant uses the full 16:9 landscape cover (the aspect the
+  // `coverImage` schema mandates). The old interview/transfer 4:5 portrait
+  // crop center-zoomed wide group shots down to ~2 subjects. Empty URLs
+  // become `undefined` so the hero skips the figure rather than rendering a
+  // broken image.
   const landscape = article.coverImageUrl?.trim() || undefined;
-  const portraitCover = portrait ? { url: portrait, alt: title } : undefined;
   const landscapeCover = landscape ? { url: landscape, alt: title } : undefined;
 
   switch (article.articleType) {
@@ -133,7 +132,7 @@ function renderArticleHero({
           author={author}
           date={publishedDate}
           subjects={article.subjects ?? null}
-          coverImage={portraitCover}
+          coverImage={landscapeCover}
         />
       );
     case "transfer":
@@ -146,7 +145,7 @@ function renderArticleHero({
           author={author}
           date={publishedDate}
           feature={firstTransferFact ?? null}
-          coverImage={portraitCover}
+          coverImage={landscapeCover}
         />
       );
     case "event":

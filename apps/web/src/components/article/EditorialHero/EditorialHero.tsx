@@ -415,7 +415,10 @@ export function EditorialHero(props: EditorialHeroProps) {
   // below-hero strip. All branches share the placement + link wrapper
   // logic below.
   let editorial: React.ReactNode;
-  let coverAspect: "landscape-16-9" | "landscape-3-2" = "landscape-16-9";
+  // Every variant renders the cover at 16:9 — the aspect the `coverImage`
+  // schema mandates editors upload. (Interview/transfer previously forced
+  // 3:2, which center-cropped 16:9 sources.)
+  const coverAspect = "landscape-16-9";
   let coverOverlay: React.ReactNode = null;
   let belowHero: React.ReactNode = null;
   // Match hero stacks the cover above the editorial on mobile so the score
@@ -431,7 +434,6 @@ export function EditorialHero(props: EditorialHeroProps) {
       date,
     );
   } else if (props.variant === "interview") {
-    coverAspect = "landscape-3-2";
     editorial = renderInterviewEditorial(
       title,
       lead,
@@ -497,7 +499,6 @@ export function EditorialHero(props: EditorialHeroProps) {
       );
     }
   } else if (props.variant === "transfer") {
-    coverAspect = "landscape-3-2";
     editorial = renderTransferEditorial(
       title,
       lead,
