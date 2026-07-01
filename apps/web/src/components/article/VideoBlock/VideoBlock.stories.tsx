@@ -278,6 +278,36 @@ export const UploadAspectSquare: Story = {
   },
 };
 
+// Portrait 3:4 source (#2279). VR runs pre-play, so the idle frame's
+// aspect is poster-driven — a portrait local poster exercises the auto
+// container in the "frame becomes taller than wide" direction, the case
+// that regressed (a no-poster portrait upload was clipping to a 16:9
+// slice once playing). The MP4 stays the landscape BigBuckBunny sample —
+// no portrait clip exists in the gtv-videos-bucket pool and we won't add
+// a network dependency. The playing → aspect="auto" flip that fixes the
+// clip is locked by unit tests (`VideoBlock — upload aspect fit`), since
+// VR never presses play.
+const SAMPLE_POSTER_PORTRAIT = fixtureImage("match-action-portrait", 0);
+
+export const UploadAspectPortrait: Story = {
+  name: "Upload — aspect 3:4 (portrait)",
+  args: {
+    value: {
+      _type: "videoBlock",
+      videoAsset: {
+        url: SAMPLE_MP4_URL,
+        size: 5_242_880,
+        mimeType: "video/mp4",
+        originalFilename: "portrait-sample.mp4",
+      },
+      videoPosterUrl: SAMPLE_POSTER_PORTRAIT,
+      caption:
+        "Portrait 3:4 source — frame fits the full height, no 16:9 crop.",
+      width: "prose",
+    },
+  },
+};
+
 export const MobileNarrow: Story = {
   name: "Mobile — narrow viewport (375px)",
   args: {

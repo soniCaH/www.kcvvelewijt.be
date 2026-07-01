@@ -118,6 +118,42 @@ describe("VideoBlock — upload path (Phase 5 #1849)", () => {
   });
 });
 
+describe("VideoBlock — upload aspect fit (#2279)", () => {
+  // The clipping box is the TapedFigure photo div: `overflow-hidden` +
+  // a fixed `aspectRatio` when the aspect is not "auto". Its `data-aspect`
+  // is the observable proxy for "does this frame clip the video".
+  const aspectOf = (container: HTMLElement): string | null =>
+    container.querySelector("[data-aspect]")?.getAttribute("data-aspect") ??
+    null;
+
+  it("no-poster upload: idle keeps the 16:9 fallback box so the card never collapses", () => {
+    const { container } = render(<VideoBlock value={withAsset()} />);
+    expect(aspectOf(container)).toBe("landscape-16-9");
+    expect(screen.getByTestId("video-block-play-pill")).toBeTruthy();
+  });
+
+  it("no-poster upload: flips to aspect=auto once playing so a portrait video is not clipped to 16:9", () => {
+    const { container } = render(<VideoBlock value={withAsset()} />);
+    clickPlayPill();
+    expect(aspectOf(container)).toBe("auto");
+  });
+
+  it("poster upload: aspect=auto idle and stays auto when playing (no aspect jump)", () => {
+    const { container } = render(
+      <VideoBlock
+        value={{
+          ...withAsset(),
+          videoPosterUrl:
+            "https://cdn.sanity.io/images/vhb33jaz/staging/poster.webp",
+        }}
+      />,
+    );
+    expect(aspectOf(container)).toBe("auto");
+    clickPlayPill();
+    expect(aspectOf(container)).toBe("auto");
+  });
+});
+
 describe("VideoBlock — embed path (Phase 2)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
