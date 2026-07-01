@@ -6,6 +6,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within } from "storybook/test";
 import { SearchInterface } from "./SearchInterface";
 import type { SearchResponse } from "@/types/search";
 import { fixtureImage } from "@test-fixtures/images";
@@ -21,6 +22,18 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+// The semantic augment lane (POST /api/search, `useSemanticAugment`) settles
+// AFTER the lexical GET renders the results, then prepends the "Slim antwoord"
+// card (above results) or appends the "Gerelateerd" list (below). Without
+// waiting, the VR screenshot races that second render and captures a
+// results-only frame — a large top/height diff (flaky, seen on #2282). Wait
+// for the settled semantic surface before the runner screenshots.
+const waitForSemantic =
+  (pattern: RegExp): NonNullable<Story["play"]> =>
+  async ({ canvasElement }) => {
+    await within(canvasElement).findByText(pattern, {}, { timeout: 5000 });
+  };
 
 // ---------------------------------------------------------------------------
 // Mock data
@@ -232,6 +245,7 @@ export const WithSmartAnswer: Story = {
   beforeEach() {
     return mockFetch(mockResponse, { semantic: smartAnswerResponse });
   },
+  play: waitForSemantic(/slim antwoord/i),
 };
 
 /**
@@ -250,6 +264,7 @@ export const WithRelated: Story = {
   beforeEach() {
     return mockFetch(mockResponse, { semantic: relatedResponse });
   },
+  play: waitForSemantic(/gerelateerd/i),
 };
 
 /**
