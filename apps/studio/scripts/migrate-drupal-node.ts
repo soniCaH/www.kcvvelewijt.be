@@ -41,7 +41,17 @@ const decode = (s: string) =>
     .replace(/&gt;/g, '>')
     .replace(/ /g, ' ')
 
-const stripTags = (s: string) => s.replace(/<[^>]+>/g, '')
+// Strip tags to a fixpoint: a single pass can be circumvented by nesting
+// (`<scr<script>ipt>` → one pass leaves `<script>`), so repeat until stable.
+const stripTags = (s: string): string => {
+  let prev: string
+  let out = s
+  do {
+    prev = out
+    out = out.replace(/<[^>]*>/g, '')
+  } while (out !== prev)
+  return out
+}
 
 // Assumes the regular Drupal interview shape: each <p> is a single logical unit
 // — question (wholly <strong>), answer (wholly <em>), or plain prose. Marks are
