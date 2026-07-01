@@ -36,9 +36,12 @@ const decode = (s: string) =>
     .replace(/&quot;/g, '"')
     .replace(/&hellip;/g, '…')
     .replace(/&mdash;/g, '—')
-    .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
+    // `&amp;` MUST be unescaped after the other entities: doing it earlier lets
+    // the produced `&` re-form a following entity (`&amp;lt;` → `&lt;` → `<`),
+    // a double-unescape. Placing it here means its output can't be re-consumed.
+    .replace(/&amp;/g, '&')
     .replace(/ /g, ' ')
 
 // Strip tags to a fixpoint: a single pass can be circumvented by nesting
