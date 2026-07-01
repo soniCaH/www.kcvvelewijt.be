@@ -44,28 +44,27 @@ export const BannerSlot = ({
     </div>
   );
 
+  // ponytail: no own background — the banner sits on its SectionStack
+  // wrapper's `gray-100` so it blends into the news grid below rather than
+  // echoing the cream StripedSeam that closes the matches section above.
   if (href) {
     return (
-      <div className="bg-cream">
-        <PageContainer width="index" className="py-8">
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group block transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
-          >
-            {inner}
-          </a>
-        </PageContainer>
-      </div>
+      <PageContainer width="index" className="py-8">
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group block transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+        >
+          {inner}
+        </a>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="bg-cream">
-      <PageContainer width="index" className="py-8">
-        {inner}
-      </PageContainer>
-    </div>
+    <PageContainer width="index" className="py-8">
+      {inner}
+    </PageContainer>
   );
 };
