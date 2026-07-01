@@ -71,3 +71,17 @@ Before the final commit on any branch, re-read every plan/doc file touched and v
 
 Current work lives in GitHub Issues. Check status: `gh issue list --label in-progress`
 Skills: `.claude/skills/` — consult when relevant, never load all upfront.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs live in GitHub Issues (via the `gh` CLI); external PRs are **not** a triage surface. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five triage roles → repo labels: `ready-for-agent` → existing `ready`, `wontfix` → `wontfix`, the rest as-named. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout — glossary at `docs/ubiquitous-language.md` + `docs/adr/`. See `docs/agents/domain.md`.
