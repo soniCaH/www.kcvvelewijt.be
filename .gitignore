@@ -69,3 +69,14 @@ test-results.json
 
 # Turborepo
 .turbo
+
+# design-sync (claude.ai/design sync)
+.ds-sync/
+ds-bundle/
+.design-sync/sb-reference/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules
+.design-sync/dist-types/
+.design-sync/sb-compiled.css
+.design-sync/*.log
