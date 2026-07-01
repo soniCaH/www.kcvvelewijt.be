@@ -13,8 +13,13 @@ import { existsSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const SRC = "apps/web/src";
+// Cover every source extension so an `@/…/Dir` alias in a .js/.jsx/.mjs/.cjs
+// file isn't missed (it would fall back to the `@/*` wildcard → EISDIR).
+const INCLUDES = ["ts", "tsx", "js", "jsx", "mjs", "cjs"]
+  .map((e) => `--include='*.${e}'`)
+  .join(" ");
 const raw = execSync(
-  `grep -rhoE "from ['\\"]@/[^'\\"]+['\\"]|import\\(['\\"]@/[^'\\"]+['\\"]\\)" ${SRC} .design-sync/entry.ts --include='*.ts' --include='*.tsx'`,
+  `grep -rhoE "from ['\\"]@/[^'\\"]+['\\"]|import\\(['\\"]@/[^'\\"]+['\\"]\\)" ${SRC} .design-sync/entry.ts ${INCLUDES}`,
   { encoding: "utf8" },
 );
 const specs = new Set();

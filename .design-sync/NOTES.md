@@ -27,8 +27,13 @@ Target project: `8cc4a019-6007-44d8-bd15-70ea439ddf88` (https://claude.ai/design
 - Brand fonts (Freight Display/Big/Sans) ride **Adobe Typekit** at runtime
   (`https://use.typekit.net/cvo5raz.css`), loaded via `preview-head.html`. Set
   `runtimeFontPrefixes: ["freight-", "Freight ", "quasimoda"]` to suppress
-  `[FONT_MISSING]`. TODO: confirm the Typekit `@import` reaches `styles.css` so shipped
-  designs actually get Freight (else wire a small cssEntry that @imports it).
+  `[FONT_MISSING]`.
+- **Verified reaching shipped designs**: the Typekit link is scraped from the
+  storybook iframe as a remote stylesheet and emitted into `styles.css` as
+  `@import url("https://use.typekit.net/cvo5raz.css");` (top of `styles.css`, above
+  the `_ds_bundle.css` import). Confirmed at grading time — `EditorialHeading`
+  renders in Freight Display serif on BOTH the storybook and preview panels (the
+  font canary), so no separate `cssEntry` webfont import is needed.
 
 ## Export surface + prop types (the converter expects a built package)
 
