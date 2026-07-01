@@ -54,7 +54,7 @@ Issues must be **durable** — they should still make sense after major refactor
 
 Use this template:
 
-```
+```markdown
 ## What happened
 
 [Describe the actual behavior the user experienced, in plain language]
@@ -80,7 +80,7 @@ Create issues in dependency order (blockers first) so you can reference real iss
 
 Use this template for each sub-issue:
 
-```
+```markdown
 ## Parent issue
 
 #<parent-issue-number> (if you created a tracking issue) or "Reported during QA session"

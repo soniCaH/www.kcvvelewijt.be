@@ -14,7 +14,7 @@ If the user did not pass a path, ask once where to save the document, then remem
 
 Capture fragments from the very first thing the user says, including the initial prompt.
 
-On first write, put a single H1 at the top with a working title (it can change later) and nothing else — no metadata, no TOC, no date.
+On first write, put a single H1 at the top with a working title (it can change later), followed by the first fragment already captured from the opening message. Keep only that out of the bootstrap write — no metadata, no TOC, no date.
 
 </what-to-do>
 
