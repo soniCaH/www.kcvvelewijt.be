@@ -1,0 +1,55 @@
+{
+  "projectId": "8cc4a019-6007-44d8-bd15-70ea439ddf88",
+  "shape": "storybook",
+  "pkg": "@kcvv/web",
+  "globalName": "KcvvDS",
+  "entry": ".design-sync/entry.ts",
+  "tsconfig": "tsconfig.build.json",
+  "storybookConfigDir": "apps/web/.sb-dssync",
+  "storybookStatic": ".design-sync/sb-reference",
+  "cssEntry": "sb-compiled.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "runtimeFontPrefixes": ["freight-", "Freight ", "quasimoda"],
+  "titleMap": {
+    "MatchStrip": null,
+    "MatchStripInContext": null,
+    "MatchStripSkeleton": null,
+    "Divider": "DashedDivider"
+  },
+  "overrides": {
+    "SiteFooter": { "cardMode": "column" },
+    "CookieConsentBanner": {
+      "skip": [
+        "layout-cookieconsentbanner--banner",
+        "layout-cookieconsentbanner--preferences",
+        "layout-cookieconsentbanner--hidden"
+      ]
+    },
+    "SiteHeader": {
+      "skip": ["layout-siteheader--drawer-open"],
+      "cardMode": "column"
+    },
+    "NavTakeover": {
+      "cardMode": "single",
+      "primaryStory": "Open",
+      "viewport": "430x900"
+    },
+    "AccentStrip": { "cardMode": "single" },
+    "NavDropdown": { "cardMode": "column" },
+    "ClippedCard": { "cardMode": "column" },
+    "EditorialHeading": { "cardMode": "column" },
+    "EditorialHeroShell": { "cardMode": "column" },
+    "ErrorState": { "cardMode": "column" },
+    "Input": { "cardMode": "column" },
+    "JerseyShirt": { "cardMode": "column" },
+    "Label": { "cardMode": "column" },
+    "PageHero": { "cardMode": "column" },
+    "QASectionDivider": { "cardMode": "column" },
+    "SectionHeader": { "cardMode": "column" },
+    "Select": { "cardMode": "column" },
+    "Spinner": { "cardMode": "column" },
+    "StampBadge": { "cardMode": "column" },
+    "TapedCardGrid": { "cardMode": "column" },
+    "Textarea": { "cardMode": "column" }
+  }
+}

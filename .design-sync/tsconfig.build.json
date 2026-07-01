@@ -1,0 +1,301 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/components/analytics": [
+        "../apps/web/src/components/analytics/index.ts"
+      ],
+      "@/components/article": ["../apps/web/src/components/article/index.ts"],
+      "@/components/article/ArticleBody": [
+        "../apps/web/src/components/article/ArticleBody/index.ts"
+      ],
+      "@/components/article/ArticleBodyMotion": [
+        "../apps/web/src/components/article/ArticleBodyMotion/index.ts"
+      ],
+      "@/components/article/ArticleCredits": [
+        "../apps/web/src/components/article/ArticleCredits/index.ts"
+      ],
+      "@/components/article/ArticleMetadata": [
+        "../apps/web/src/components/article/ArticleMetadata/index.ts"
+      ],
+      "@/components/article/ArticleViewTracker": [
+        "../apps/web/src/components/article/ArticleViewTracker/index.ts"
+      ],
+      "@/components/article/EditorialHero": [
+        "../apps/web/src/components/article/EditorialHero/index.ts"
+      ],
+      "@/components/article/NewsCard": [
+        "../apps/web/src/components/article/NewsCard/index.ts"
+      ],
+      "@/components/article/QARow": [
+        "../apps/web/src/components/article/QARow/index.ts"
+      ],
+      "@/components/article/SubjectAttribution": [
+        "../apps/web/src/components/article/SubjectAttribution/index.ts"
+      ],
+      "@/components/article/VerderLezenRow": [
+        "../apps/web/src/components/article/VerderLezenRow/index.ts"
+      ],
+      "@/components/article/VideoBlock": [
+        "../apps/web/src/components/article/VideoBlock/index.ts"
+      ],
+      "@/components/article/blocks/EventDetailBlock": [
+        "../apps/web/src/components/article/blocks/EventDetailBlock/index.ts"
+      ],
+      "@/components/article/blocks/EventFact": [
+        "../apps/web/src/components/article/blocks/EventFact/index.ts"
+      ],
+      "@/components/article/blocks/EventFactInline": [
+        "../apps/web/src/components/article/blocks/EventFactInline/index.ts"
+      ],
+      "@/components/article/blocks/HtmlTableBlock": [
+        "../apps/web/src/components/article/blocks/HtmlTableBlock/index.ts"
+      ],
+      "@/components/article/blocks/MatchGoalsBlock": [
+        "../apps/web/src/components/article/blocks/MatchGoalsBlock/index.ts"
+      ],
+      "@/components/article/blocks/QaBlock": [
+        "../apps/web/src/components/article/blocks/QaBlock/index.ts"
+      ],
+      "@/components/article/blocks/TransferFact": [
+        "../apps/web/src/components/article/blocks/TransferFact/index.ts"
+      ],
+      "@/components/article/blocks/TransferFactCard": [
+        "../apps/web/src/components/article/blocks/TransferFactCard/index.ts"
+      ],
+      "@/components/calendar/CalendarWidget": [
+        "../apps/web/src/components/calendar/CalendarWidget/index.ts"
+      ],
+      "@/components/club/BoardCtaBand": [
+        "../apps/web/src/components/club/BoardCtaBand/index.ts"
+      ],
+      "@/components/club/BoardHero": [
+        "../apps/web/src/components/club/BoardHero/index.ts"
+      ],
+      "@/components/design-system": [
+        "../apps/web/src/components/design-system/index.ts"
+      ],
+      "@/components/design-system/Alert": [
+        "../apps/web/src/components/design-system/Alert/index.ts"
+      ],
+      "@/components/design-system/BodyQuote": [
+        "../apps/web/src/components/design-system/BodyQuote/index.ts"
+      ],
+      "@/components/design-system/Button": [
+        "../apps/web/src/components/design-system/Button/index.ts"
+      ],
+      "@/components/design-system/Divider": [
+        "../apps/web/src/components/design-system/Divider/index.ts"
+      ],
+      "@/components/design-system/DownloadButton": [
+        "../apps/web/src/components/design-system/DownloadButton/index.ts"
+      ],
+      "@/components/design-system/DropCapParagraph": [
+        "../apps/web/src/components/design-system/DropCapParagraph/index.ts"
+      ],
+      "@/components/design-system/EditorialHeading": [
+        "../apps/web/src/components/design-system/EditorialHeading/index.ts"
+      ],
+      "@/components/design-system/EndMark": [
+        "../apps/web/src/components/design-system/EndMark/index.ts"
+      ],
+      "@/components/design-system/FilterTabs": [
+        "../apps/web/src/components/design-system/FilterTabs/index.ts"
+      ],
+      "@/components/design-system/HighlighterStroke": [
+        "../apps/web/src/components/design-system/HighlighterStroke/index.ts"
+      ],
+      "@/components/design-system/HorizontalSlider": [
+        "../apps/web/src/components/design-system/HorizontalSlider/index.ts"
+      ],
+      "@/components/design-system/JerseyIllustration": [
+        "../apps/web/src/components/design-system/JerseyIllustration/index.ts"
+      ],
+      "@/components/design-system/JerseyShirt": [
+        "../apps/web/src/components/design-system/JerseyShirt/index.ts"
+      ],
+      "@/components/design-system/LinkButton": [
+        "../apps/web/src/components/design-system/LinkButton/index.ts"
+      ],
+      "@/components/design-system/MonoLabel": [
+        "../apps/web/src/components/design-system/MonoLabel/index.ts"
+      ],
+      "@/components/design-system/NumberDisplay": [
+        "../apps/web/src/components/design-system/NumberDisplay/index.ts"
+      ],
+      "@/components/design-system/PageContainer": [
+        "../apps/web/src/components/design-system/PageContainer/index.ts"
+      ],
+      "@/components/design-system/PullQuote": [
+        "../apps/web/src/components/design-system/PullQuote/index.ts"
+      ],
+      "@/components/design-system/QASectionDivider": [
+        "../apps/web/src/components/design-system/QASectionDivider/index.ts"
+      ],
+      "@/components/design-system/SectionKicker": [
+        "../apps/web/src/components/design-system/SectionKicker/index.ts"
+      ],
+      "@/components/design-system/StripedSeam": [
+        "../apps/web/src/components/design-system/StripedSeam/index.ts"
+      ],
+      "@/components/design-system/SubjectAvatar": [
+        "../apps/web/src/components/design-system/SubjectAvatar/index.ts"
+      ],
+      "@/components/design-system/TapedCard": [
+        "../apps/web/src/components/design-system/TapedCard/index.ts"
+      ],
+      "@/components/design-system/TapedCardGrid": [
+        "../apps/web/src/components/design-system/TapedCardGrid/index.ts"
+      ],
+      "@/components/design-system/TapedFigure": [
+        "../apps/web/src/components/design-system/TapedFigure/index.ts"
+      ],
+      "@/components/design-system/TextareaCounter": [
+        "../apps/web/src/components/design-system/TextareaCounter/index.ts"
+      ],
+      "@/components/event/AndereEvents": [
+        "../apps/web/src/components/event/AndereEvents/index.ts"
+      ],
+      "@/components/event/EventFilterBar": [
+        "../apps/web/src/components/event/EventFilterBar/index.ts"
+      ],
+      "@/components/event/EventHero": [
+        "../apps/web/src/components/event/EventHero/index.ts"
+      ],
+      "@/components/event/EventViewTracker": [
+        "../apps/web/src/components/event/EventViewTracker/index.ts"
+      ],
+      "@/components/event/EventsBrowser": [
+        "../apps/web/src/components/event/EventsBrowser/index.ts"
+      ],
+      "@/components/home": ["../apps/web/src/components/home/index.ts"],
+      "@/components/home/SponsorsSection": [
+        "../apps/web/src/components/home/SponsorsSection/index.ts"
+      ],
+      "@/components/hulp/HulpFinder": [
+        "../apps/web/src/components/hulp/HulpFinder/index.ts"
+      ],
+      "@/components/layout": ["../apps/web/src/components/layout/index.ts"],
+      "@/components/layout/AccentStrip": [
+        "../apps/web/src/components/layout/AccentStrip/index.ts"
+      ],
+      "@/components/layout/CookieConsentBanner": [
+        "../apps/web/src/components/layout/CookieConsentBanner/index.ts"
+      ],
+      "@/components/layout/GoogleTagManagerLoader": [
+        "../apps/web/src/components/layout/GoogleTagManagerLoader/index.ts"
+      ],
+      "@/components/layout/MatchStrip": [
+        "../apps/web/src/components/layout/MatchStrip/index.ts"
+      ],
+      "@/components/layout/PageHero": [
+        "../apps/web/src/components/layout/PageHero/index.ts"
+      ],
+      "@/components/layout/ScrollToTop": [
+        "../apps/web/src/components/layout/ScrollToTop/index.ts"
+      ],
+      "@/components/layout/SiteFooter": [
+        "../apps/web/src/components/layout/SiteFooter/index.ts"
+      ],
+      "@/components/layout/SiteHeader": [
+        "../apps/web/src/components/layout/SiteHeader/index.ts"
+      ],
+      "@/components/match": ["../apps/web/src/components/match/index.ts"],
+      "@/components/match/MatchArticleLinkCard": [
+        "../apps/web/src/components/match/MatchArticleLinkCard/index.ts"
+      ],
+      "@/components/match/MatchEvents": [
+        "../apps/web/src/components/match/MatchEvents/index.ts"
+      ],
+      "@/components/match/MatchEventsSection": [
+        "../apps/web/src/components/match/MatchEventsSection/index.ts"
+      ],
+      "@/components/match/MatchHero": [
+        "../apps/web/src/components/match/MatchHero/index.ts"
+      ],
+      "@/components/match/MatchLineup": [
+        "../apps/web/src/components/match/MatchLineup/index.ts"
+      ],
+      "@/components/match/MatchLineupSection": [
+        "../apps/web/src/components/match/MatchLineupSection/index.ts"
+      ],
+      "@/components/match/MatchStandingsSection": [
+        "../apps/web/src/components/match/MatchStandingsSection/index.ts"
+      ],
+      "@/components/match/MatchStatusBadge": [
+        "../apps/web/src/components/match/MatchStatusBadge/index.ts"
+      ],
+      "@/components/organigram/HubMemberPanel": [
+        "../apps/web/src/components/organigram/HubMemberPanel/index.ts"
+      ],
+      "@/components/organigram/MemberDetailPanel": [
+        "../apps/web/src/components/organigram/MemberDetailPanel/index.ts"
+      ],
+      "@/components/organigram/OrgPersonCard": [
+        "../apps/web/src/components/organigram/OrgPersonCard/index.ts"
+      ],
+      "@/components/organigram/OrganigramExplorer": [
+        "../apps/web/src/components/organigram/OrganigramExplorer/index.ts"
+      ],
+      "@/components/organigram/OrganigramHero": [
+        "../apps/web/src/components/organigram/OrganigramHero/index.ts"
+      ],
+      "@/components/organigram/OrganigramSectionNav": [
+        "../apps/web/src/components/organigram/OrganigramSectionNav/index.ts"
+      ],
+      "@/components/organigram/StructureDirectory": [
+        "../apps/web/src/components/organigram/StructureDirectory/index.ts"
+      ],
+      "@/components/player": ["../apps/web/src/components/player/index.ts"],
+      "@/components/search": ["../apps/web/src/components/search/index.ts"],
+      "@/components/sponsors": ["../apps/web/src/components/sponsors/index.ts"],
+      "@/components/sponsors/SponsorTile": [
+        "../apps/web/src/components/sponsors/SponsorTile/index.ts"
+      ],
+      "@/components/sponsors/SponsorsBlock": [
+        "../apps/web/src/components/sponsors/SponsorsBlock/index.ts"
+      ],
+      "@/components/staff/StaffHero": [
+        "../apps/web/src/components/staff/StaffHero/index.ts"
+      ],
+      "@/components/staff/StaffRoles": [
+        "../apps/web/src/components/staff/StaffRoles/index.ts"
+      ],
+      "@/components/team/SquadGrid": [
+        "../apps/web/src/components/team/SquadGrid/index.ts"
+      ],
+      "@/components/team/StandingsTable": [
+        "../apps/web/src/components/team/StandingsTable/index.ts"
+      ],
+      "@/components/team/TeamEditorial": [
+        "../apps/web/src/components/team/TeamEditorial/index.ts"
+      ],
+      "@/components/team/TeamEnrolmentCta": [
+        "../apps/web/src/components/team/TeamEnrolmentCta/index.ts"
+      ],
+      "@/components/team/TeamFlagship": [
+        "../apps/web/src/components/team/TeamFlagship/index.ts"
+      ],
+      "@/components/team/TeamHero": [
+        "../apps/web/src/components/team/TeamHero/index.ts"
+      ],
+      "@/components/team/TeamMatchesSection": [
+        "../apps/web/src/components/team/TeamMatchesSection/index.ts"
+      ],
+      "@/components/team/TeamStaff": [
+        "../apps/web/src/components/team/TeamStaff/index.ts"
+      ],
+      "@/components/team/YouthDirectory": [
+        "../apps/web/src/components/team/YouthDirectory/index.ts"
+      ],
+      "@/lib/effect/schemas": ["../apps/web/src/lib/effect/schemas/index.ts"],
+      "@/lib/mappers": ["../apps/web/src/lib/mappers/index.ts"],
+      "@/*": ["../apps/web/src/*"],
+      "next/image": ["./shims/next-image.tsx"],
+      "next/link": ["./shims/next-link.tsx"],
+      "next/navigation": ["./shims/next-navigation.tsx"],
+      "next/script": ["./shims/next-script.tsx"]
+    }
+  }
+}
