@@ -564,7 +564,14 @@ interface ComponentsBuildArgs {
   videoBlockPositions: Map<string, number>;
 }
 
-function buildComponents({
+/**
+ * Builds the Portable Text serializer map for the body. Exported so the
+ * serializer-completeness guard (#2278) can assert every `article.body` /
+ * `page.body` `of:[]` type + mark declared in `@kcvv/sanity-schemas` has a
+ * handler here — a missing entry (the shipped `qaSectionDivider` bug) renders
+ * nothing, which no type-check catches.
+ */
+export function buildComponents({
   subjects,
   articleSlug,
   videoBlockPositions,
