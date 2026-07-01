@@ -133,7 +133,13 @@ export function VideoBlock({
       : null;
   if (embed !== null)
     return renderEmbed(value, embed, className, analyticsContext);
-  return renderUpload(value, className, analyticsContext);
+  return (
+    <VideoBlockUpload
+      value={value}
+      className={className}
+      analyticsContext={analyticsContext}
+    />
+  );
 }
 
 // ─── Width wrapper ──────────────────────────────────────────────────────
@@ -160,11 +166,22 @@ function WidthWrapper({
 
 // ─── Upload path ────────────────────────────────────────────────────────
 
-function renderUpload(
-  value: VideoBlockValue,
-  className: string | undefined,
-  analyticsContext: AnalyticsContext | null,
-) {
+function VideoBlockUpload({
+  value,
+  className,
+  analyticsContext,
+}: {
+  value: VideoBlockValue;
+  className: string | undefined;
+  analyticsContext: AnalyticsContext | null;
+}) {
+  // `isPlaying` is lifted here (from `UploadFigureContent`) so the figure
+  // aspect can react to it — see `figureAspect` below (#2279).
+  const [isPlaying, setIsPlaying] = useState(false);
+  const handlePlayClick = useCallback(() => {
+    setIsPlaying(true);
+  }, []);
+
   const src = value.videoAsset?.url;
   if (typeof src !== "string" || src.length === 0) return null;
   const mimeType = value.videoAsset?.mimeType ?? undefined;
@@ -177,18 +194,20 @@ function renderUpload(
   // Bleed suppresses the tape (locked width-rules table).
   const tape: TapeStripProps | undefined =
     width === "bleed" ? undefined : VIDEO_TAPE;
-  // Aspect strategy (#1856 + no-poster regression fix):
+  // Aspect strategy (#1856 + no-poster regression #2279):
   // - With a poster: the poster's intrinsic dimensions drive the figure
   //   (aspect="auto"), so non-16:9 source videos no longer letterbox
   //   inside a forced 16:9 frame.
-  // - Without a poster: fall back to forced 16:9. The `<video>` has
-  //   `preload="none"` so no metadata is available until the user
-  //   clicks play, and the poster `<img>` short-circuits when absent —
-  //   without a fallback aspect the figure collapses to zero height
-  //   and the card reads as empty. Editors who want exact aspect on a
-  //   poster-less block can upload a poster matching their video.
+  // - Playing: drop to aspect="auto" too. The mounted `<video>`
+  //   (`h-auto w-full`) sizes to its intrinsic aspect, so a portrait
+  //   upload shows in full instead of clipping to a 16:9 slice.
+  // - Idle + no poster: keep forced 16:9. No `<video>` or poster `<img>`
+  //   is mounted yet, so without a fallback aspect the figure collapses
+  //   to zero height and the card reads as empty. Editors who want an
+  //   exact idle aspect upload a poster matching their video.
   // Embed path keeps forced 16:9 — iframes can't size to content.
-  const figureAspect = posterUrl ? "auto" : "landscape-16-9";
+  const figureAspect = posterUrl || isPlaying ? "auto" : "landscape-16-9";
+
   return (
     <WidthWrapper width={width} className={className}>
       <TapedFigure
@@ -202,6 +221,8 @@ function renderUpload(
           src={src}
           mimeType={mimeType}
           posterUrl={posterUrl}
+          isPlaying={isPlaying}
+          onPlayClick={handlePlayClick}
           analyticsContext={analyticsContext}
         />
       </TapedFigure>
@@ -221,6 +242,8 @@ interface UploadFigureContentProps {
   src: string;
   mimeType: string | undefined;
   posterUrl: string | undefined;
+  isPlaying: boolean;
+  onPlayClick: () => void;
   analyticsContext: AnalyticsContext | null;
 }
 
@@ -228,14 +251,11 @@ function UploadFigureContent({
   src,
   mimeType,
   posterUrl,
+  isPlaying,
+  onPlayClick,
   analyticsContext,
 }: UploadFigureContentProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const { trackVideoPlay, trackVideoComplete } = useVideoAnalytics();
-
-  const handlePlayClick = useCallback(() => {
-    setIsPlaying(true);
-  }, []);
 
   const handlePlay = useCallback(() => {
     if (analyticsContext === null) return;
@@ -270,6 +290,10 @@ function UploadFigureContent({
       className={cn(
         "bg-ink relative w-full",
         !isPlaying && !posterUrl && "h-full",
+        // #2279: while playing the figure is aspect="auto" (unconstrained).
+        // Guard the brief pre-metadata window — the `<video>` reports height
+        // 0 before its first frame — so the frame can't collapse to zero.
+        isPlaying && "min-h-32",
       )}
     >
       {!isPlaying && posterUrl && (
@@ -292,7 +316,7 @@ function UploadFigureContent({
       {!isPlaying && (
         <button
           type="button"
-          onClick={handlePlayClick}
+          onClick={onPlayClick}
           aria-label="Speel video af"
           data-testid="video-block-play-pill"
           // Canonical paper-stamped pill: jersey-deep + ink border +
