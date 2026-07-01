@@ -43,6 +43,13 @@ const decode = (s: string) =>
 
 const stripTags = (s: string) => s.replace(/<[^>]+>/g, '')
 
+// Assumes the regular Drupal interview shape: each <p> is a single logical unit
+// — question (wholly <strong>), answer (wholly <em>), or plain prose. Marks are
+// applied per paragraph, not per inline run; `em` wins over `strong` so an
+// em+strong answer-continuation is still classified as an answer. Genuinely
+// mixed inline content (bold + italic in one paragraph) is out of scope for
+// these bodies and would be flattened — check the dry-run before trusting a new
+// source.
 function htmlToBlocks(html: string): Block[] {
   const blocks: Block[] = []
   for (const seg of html.split(/<\/p>/i)) {
@@ -101,7 +108,7 @@ function cleanAnswer(blocks: Block[]): Block[] {
   return out
 }
 
-function toQaBody(body: Block[], subjectKey: string) {
+function toQaBody(body: Block[], subjectKey: string | undefined) {
   const firstQ = body.findIndex(isQuestion)
   if (firstQ < 0) return {body, pairs: 0}
   const intro = body.slice(0, firstQ).filter((b) => !isSeparator(b))
@@ -116,18 +123,31 @@ function toQaBody(body: Block[], subjectKey: string) {
     const q = body[i]
     let j = i + 1
     const ans: Block[] = []
-    while (j < body.length && isAnswer(body[j])) {
-      ans.push(body[j])
+    // Skip separators between question and answer while collecting; stop at the
+    // next question or at plain prose (outro).
+    while (j < body.length && (isAnswer(body[j]) || isSeparator(body[j]))) {
+      if (isAnswer(body[j])) ans.push(body[j])
       j++
     }
     if (ans.length > 0) {
+      const question = textOf(q).trim()
+      if (question.length > 240) {
+        console.warn(`  ! question exceeds 240-char schema limit (${question.length}) — will fail validation: ${question.slice(0, 60)}…`)
+      }
       pairs.push({
         _type: 'qaPair',
         _key: key(),
-        question: textOf(q).trim(),
+        question,
         tag: 'standard',
         respondents: [
-          {_type: 'qaPairRespondent', _key: key(), respondentKey: subjectKey, answer: cleanAnswer(ans)},
+          {
+            _type: 'qaPairRespondent',
+            _key: key(),
+            // Only attribute when a subject was resolved; otherwise leave the
+            // key unset so it can never dangle against a missing subjects[].
+            ...(subjectKey ? {respondentKey: subjectKey} : {}),
+            answer: cleanAnswer(ans),
+          },
         ],
       })
       lastEnd = j
@@ -135,7 +155,9 @@ function toQaBody(body: Block[], subjectKey: string) {
     i = j
   }
   const outro = body.slice(lastEnd).filter((b) => !isSeparator(b))
-  return {body: [...intro, {_type: 'qaBlock', _key: key(), pairs, groupAtTail: false}, ...outro], pairs: pairs.length}
+  // Never emit an empty qaBlock — if no pairs were built, return the prose as-is.
+  const qaBlocks = pairs.length > 0 ? [{_type: 'qaBlock', _key: key(), pairs, groupAtTail: false}] : []
+  return {body: [...intro, ...qaBlocks, ...outro], pairs: pairs.length}
 }
 
 const slugify = (s: string) =>
@@ -149,6 +171,7 @@ const slugify = (s: string) =>
 async function main() {
   const url = `${DRUPAL}/jsonapi/node/article?filter%5Bdrupal_internal__nid%5D=${NID}&include=field_media_article_image.field_media_image,field_tags`
   const res = await fetch(url, {headers: {Accept: 'application/vnd.api+json'}})
+  if (!res.ok) throw new Error(`Drupal JSON:API returned HTTP ${res.status} for node ${NID}`)
   const json = (await res.json()) as any
   const node = json.data?.[0]
   if (!node) throw new Error(`Drupal node ${NID} not found`)
@@ -176,7 +199,9 @@ async function main() {
   )
 
   const rawBlocks = htmlToBlocks(a.body?.value ?? '')
-  const subjectKey = key()
+  // Only mint a subject key (and thus a respondentKey) when the subject was
+  // resolved — keeps subjects[]._key and respondentKey aligned.
+  const subjectKey = person ? key() : undefined
   const {body, pairs} = toQaBody(rawBlocks, subjectKey)
 
   console.log('\n========== MIGRATE DRUPAL NODE ' + NID + ' ==========')
@@ -209,7 +234,9 @@ async function main() {
 
   let coverImage: unknown
   if (coverUrl) {
-    const buf = Buffer.from(await (await fetch(coverUrl)).arrayBuffer())
+    const imgRes = await fetch(coverUrl)
+    if (!imgRes.ok) throw new Error(`Cover image fetch returned HTTP ${imgRes.status} for ${coverUrl}`)
+    const buf = Buffer.from(await imgRes.arrayBuffer())
     const asset = await client.assets.upload('image', buf, {filename: coverUrl.split('/').pop()})
     coverImage = {_type: 'image', asset: {_type: 'reference', _ref: asset._id}}
     console.log('uploaded cover asset:', asset._id)

@@ -111,23 +111,29 @@ function transform(body: Block[], subjectKey: string) {
       ans.push(body[j])
       j++
     }
+    // A question with no contiguous answer is an unsupported shape — abort
+    // rather than silently dropping content or emitting a partial qaBlock.
     if (ans.length === 0) {
-      console.warn(`  ! question with no answer, skipped: ${textOf(q).slice(0, 60)}`)
-      i = j
-      continue
+      throw new Error(`Question with no answer (unsupported shape) — aborting: ${textOf(q).slice(0, 60)}`)
+    }
+    const question = textOf(q).trim()
+    if (question.length > 240) {
+      throw new Error(
+        `Question exceeds the 240-char schema limit (${question.length}) — aborting: ${question.slice(0, 60)}…`,
+      )
     }
     const cleaned = cleanAnswer(ans)
     pairs.push({
       _type: 'qaPair',
       _key: key(),
-      question: textOf(q).trim(),
+      question,
       tag: 'standard',
       respondents: [
         {_type: 'qaPairRespondent', _key: key(), respondentKey: subjectKey, answer: cleaned},
       ],
     })
     preview.push({
-      q: textOf(q).trim(),
+      q: question,
       a: cleaned.map((b) => b.children.map((c) => c.text).join('')).join(' ⏎ '),
       blocks: ans.length,
     })
@@ -153,9 +159,19 @@ async function main() {
       console.warn(`\n${id}: NOT FOUND`)
       continue
     }
-    const subjectKey = doc.subjects?.[0]?._key
+    // This transform attributes every answer to one subject, so it only makes
+    // sense for single-subject interviews — a duo/panel needs per-answer
+    // attribution the source prose doesn't carry.
+    const subjects = doc.subjects ?? []
+    if (subjects.length !== 1) {
+      console.warn(
+        `\n${doc.title} (${id}): expected exactly 1 subject, found ${subjects.length} — skipped (multi-subject needs manual attribution)`,
+      )
+      continue
+    }
+    const subjectKey = subjects[0]?._key
     if (!subjectKey) {
-      console.warn(`\n${doc.title} (${id}): no subject set — skipped`)
+      console.warn(`\n${doc.title} (${id}): subject has no _key — skipped`)
       continue
     }
     const result = transform(doc.body ?? [], subjectKey)
