@@ -5,8 +5,10 @@ import {
   defineField,
   defineType,
 } from 'sanity'
+import {schemaTypes as baseSchemaTypes} from '@kcvv/sanity-schemas'
 import {describe, expect, it} from 'vitest'
 import {applyDecoratorComponents} from './apply-decorator-components'
+import {collectBlockDecoratorComponents} from './collect-block-decorator-components'
 
 const Pullquote: ComponentType<BlockDecoratorProps> = () => null
 const Accent: ComponentType<BlockDecoratorProps> = () => null
@@ -110,5 +112,23 @@ describe('applyDecoratorComponents', () => {
       }),
     ]
     expect(applyDecoratorComponents(input, components)).toEqual(input)
+  })
+
+  // De-drift (#2278): assert the graft lands on the real `pullquote` /`accent`
+  // decorators shipped by `@kcvv/sanity-schemas` (pullquote → bio/body fields,
+  // accent → accent-title fields), not just the hand-rolled fixture above. If a
+  // decorator `value` is renamed or dropped, this fails instead of a stale mock.
+  describe('against the real @kcvv/sanity-schemas schema', () => {
+    it('grafts the real pullquote + accent decorators', () => {
+      const grafted = applyDecoratorComponents(baseSchemaTypes, components)
+      // Shared collector mirrors this helper's block-only traversal — see
+      // collect-block-decorator-components.ts (kept in one place, #2278).
+      const pullquotes = collectBlockDecoratorComponents(grafted, 'pullquote')
+      const accents = collectBlockDecoratorComponents(grafted, 'accent')
+      expect(pullquotes.length).toBeGreaterThan(0)
+      expect(accents.length).toBeGreaterThan(0)
+      expect(pullquotes.every((c) => c === Pullquote)).toBe(true)
+      expect(accents.every((c) => c === Accent)).toBe(true)
+    })
   })
 })
