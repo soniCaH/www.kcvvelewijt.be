@@ -9,7 +9,7 @@ export {responsibilityPreviewSelect, prepareResponsibilityPreview} from './previ
 export {validateOrganigramMember} from './validation/organigram-members'
 export {validateSubjectsCount} from './validation/subjects-count'
 export type {SubjectsCountContext} from './validation/subjects-count'
-export {validateRespondentKey} from './validation/respondent-key'
+export {validateRespondentKey, ALL_RESPONDENTS_KEY} from './validation/respondent-key'
 export type {RespondentKeyContext} from './validation/respondent-key'
 export {validateContactFields} from './validation/contact-fields'
 export {article} from './article'

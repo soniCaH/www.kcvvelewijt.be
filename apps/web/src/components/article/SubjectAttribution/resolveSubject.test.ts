@@ -1,5 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { resolveSubject } from "./resolveSubject";
+import {
+  resolveSubject,
+  deriveSubjectFirstName,
+  joinFirstNames,
+  buildUnanimousAttribution,
+  ALL_RESPONDENTS_KEY,
+  type IndexedSubject,
+} from "./resolveSubject";
 
 describe("resolveSubject", () => {
   describe("player branch", () => {
@@ -143,4 +150,76 @@ describe("resolveSubject", () => {
       }),
     ).toBeNull();
   });
+});
+
+describe("deriveSubjectFirstName", () => {
+  it("prefers the ref first name over splitting the resolved name", () => {
+    expect(
+      deriveSubjectFirstName(
+        { kind: "player", playerRef: { firstName: "Julien" } },
+        "Julien Verschaeve",
+      ),
+    ).toBe("Julien");
+  });
+
+  it("falls back to the first token of the resolved name", () => {
+    expect(deriveSubjectFirstName(null, "Niels Peeters")).toBe("Niels");
+  });
+});
+
+describe("joinFirstNames", () => {
+  it("returns an empty string for no names", () => {
+    expect(joinFirstNames([])).toBe("");
+  });
+  it("returns the single name unchanged", () => {
+    expect(joinFirstNames(["Julien"])).toBe("Julien");
+  });
+  it("joins two names with an ampersand", () => {
+    expect(joinFirstNames(["Julien", "Niels"])).toBe("Julien & Niels");
+  });
+  it("joins 3+ names with commas and a trailing ampersand", () => {
+    expect(joinFirstNames(["Julien", "Niels", "Lars"])).toBe(
+      "Julien, Niels & Lars",
+    );
+  });
+});
+
+describe("buildUnanimousAttribution", () => {
+  const subjects: IndexedSubject[] = [
+    {
+      _key: "a",
+      kind: "player",
+      playerRef: { firstName: "Julien", lastName: "V" },
+    },
+    {
+      _key: "b",
+      kind: "player",
+      playerRef: { firstName: "Niels", lastName: "P" },
+    },
+  ];
+
+  it("returns one member per resolvable subject, in order", () => {
+    expect(buildUnanimousAttribution(subjects)).toEqual([
+      { firstName: "Julien", fullName: "Julien V" },
+      { firstName: "Niels", fullName: "Niels P" },
+    ]);
+  });
+
+  it("drops subjects that fail to resolve", () => {
+    expect(
+      buildUnanimousAttribution([
+        subjects[0]!,
+        { _key: "x", kind: "player", playerRef: null },
+      ]),
+    ).toEqual([{ firstName: "Julien", fullName: "Julien V" }]);
+  });
+
+  it("returns an empty array for missing subjects", () => {
+    expect(buildUnanimousAttribution(null)).toEqual([]);
+    expect(buildUnanimousAttribution(undefined)).toEqual([]);
+  });
+});
+
+it("exposes the sentinel constant", () => {
+  expect(ALL_RESPONDENTS_KEY).toBe("__all__");
 });

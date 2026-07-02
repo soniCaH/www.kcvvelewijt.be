@@ -233,4 +233,64 @@ describe("<QARow>", () => {
       ).toHaveLength(3);
     });
   });
+
+  describe("unanimous (cluster) speaker", () => {
+    const unanimous = respondent({
+      firstName: "Julien",
+      fullName: "Julien & Niels",
+      role: "Unaniem",
+      answer: "Het moment dat we samen besloten door te gaan.",
+      cluster: [
+        { firstName: "Julien", fullName: "Julien Verschaeve" },
+        { firstName: "Niels", fullName: "Niels Peeters" },
+      ],
+    });
+
+    it("renders an overlapping monogram cluster instead of a single avatar", () => {
+      const { container } = render(
+        <QARow question="Wat was het keerpunt?" respondents={[unanimous]} />,
+      );
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).not.toBeNull();
+      expect(
+        container.querySelectorAll('[data-subject-avatar="monogram"]'),
+      ).toHaveLength(2);
+    });
+
+    it("shows the joined first names + Unaniem suffix in the speaker tag", () => {
+      const { container } = render(
+        <QARow question="Q?" respondents={[unanimous]} />,
+      );
+      const tag = container.querySelector('[data-qa-row="speaker-tag"]');
+      expect(tag?.textContent).toContain("Julien & Niels");
+      expect(tag?.textContent).toContain("Unaniem");
+    });
+
+    it("keeps the answer indented under the header (single mode)", () => {
+      const { container } = render(
+        <QARow question="Q?" respondents={[unanimous]} />,
+      );
+      const row = container.firstElementChild as HTMLElement;
+      expect(row.getAttribute("data-qa-row-mode")).toBe("single");
+      expect(
+        container.querySelector('[data-qa-row="answer"]')?.className,
+      ).toContain("pl-11");
+    });
+
+    it("falls back to a single avatar when cluster has fewer than 2 members", () => {
+      const { container } = render(
+        <QARow
+          question="Q?"
+          respondents={[respondent({ cluster: [{ firstName: "Julien" }] })]}
+        />,
+      );
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
+      expect(
+        container.querySelector('[data-subject-avatar="monogram"]'),
+      ).not.toBeNull();
+    });
+  });
 });

@@ -9,6 +9,8 @@
  *   auto-resolve to `subjects[0]` at the runtime boundary.
  * - On N≥2, returns a Dutch error message if the value is unset
  *   ("Kies wie dit gezegd heeft").
+ * - Accepts the reserved `ALL_RESPONDENTS_KEY` sentinel ("unaniem" — all
+ *   subjects said this); it can't collide with Sanity's random `_key`s.
  * - Also returns an error if the value doesn't match any existing
  *   `subjects[]._key` (guards against subject deletion after the
  *   pair was authored).
@@ -17,6 +19,13 @@
  * be unit-tested against synthetic contexts without the Sanity Studio
  * runtime.
  */
+
+/**
+ * Reserved `respondentKey` value meaning "all subjects, unanimous". Shared
+ * source of truth for the picker + validator; the frontend mirrors the
+ * literal (apps/web has no runtime dep on this package).
+ */
+export const ALL_RESPONDENTS_KEY = '__all__'
 export interface RespondentKeyContext {
   parent?: {tag?: string}
   document?: {
@@ -40,6 +49,7 @@ export function validateRespondentKey(
   if (subjects.length < 2) return true
 
   if (typeof value !== 'string' || value === '') return 'Kies wie dit gezegd heeft'
+  if (value === ALL_RESPONDENTS_KEY) return true
   if (!subjects.some((s) => s?._key === value))
     return 'Deze respondent staat niet meer in de lijst van subjects'
   return true

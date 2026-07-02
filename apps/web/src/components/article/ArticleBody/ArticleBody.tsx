@@ -26,6 +26,7 @@ import { DownloadButton } from "@/components/design-system/DownloadButton";
 import {
   resolvePairRespondent,
   resolveSubject,
+  deriveSubjectFirstName,
   type IndexedSubject,
 } from "@/components/article/SubjectAttribution";
 import { TransferFactCard } from "@/components/article/blocks/TransferFactCard";
@@ -385,11 +386,6 @@ function renderPullQuote(
   let inner: ReactNode;
 
   if (resolved && respondent) {
-    const firstNameFromRef =
-      (respondent.kind === "player" && respondent.playerRef?.firstName) ||
-      (respondent.kind === "staff" && respondent.staffRef?.firstName) ||
-      (respondent.kind === "custom" && respondent.customName) ||
-      resolved.name;
     inner = (
       <PullQuote
         tone={tone}
@@ -400,7 +396,7 @@ function renderPullQuote(
         emphasis={emphasis}
         avatarSlot={
           <SubjectAvatar
-            firstName={firstNameFromRef || resolved.name}
+            firstName={deriveSubjectFirstName(respondent, resolved.name)}
             fullName={resolved.name}
             photoUrl={resolved.photoUrl}
             scale="attribution"

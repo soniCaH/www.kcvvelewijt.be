@@ -132,3 +132,69 @@ export function resolveSubject(
   // silently fall through to a branch — the caller must handle null.
   return null;
 }
+
+/**
+ * Reserved `respondentKey` value meaning "all subjects, unanimous". Mirror
+ * of `ALL_RESPONDENTS_KEY` in `@kcvv/sanity-schemas` — apps/web has no
+ * runtime dep on the schema package, so the literal is duplicated here on
+ * purpose. Keep the two in sync.
+ */
+export const ALL_RESPONDENTS_KEY = "__all__";
+
+/**
+ * Derive a subject's first name from the raw ref (preferred) rather than
+ * splitting the joined `resolveSubject().name`, so monogram/tag derivation
+ * stays stable if `resolveSubject` ever changes how it joins name parts.
+ */
+export function deriveSubjectFirstName(
+  subject: SubjectValue | null | undefined,
+  resolvedName: string,
+): string {
+  if (subject?.kind === "player") {
+    const fromRef = subject.playerRef?.firstName?.trim();
+    if (fromRef) return fromRef;
+  } else if (subject?.kind === "staff") {
+    const fromRef = subject.staffRef?.firstName?.trim();
+    if (fromRef) return fromRef;
+  } else if (subject?.kind === "custom") {
+    const fromRef = subject.customName?.trim();
+    if (fromRef) return fromRef;
+  }
+  const trimmed = resolvedName.trim();
+  return trimmed.split(/\s+/)[0] || trimmed;
+}
+
+/** Join first names for the unaniem tag: "Julien & Niels", "A, B & C". */
+export function joinFirstNames(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0]!;
+  return `${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}`;
+}
+
+export interface UnanimousMember {
+  firstName: string;
+  fullName: string;
+}
+
+/**
+ * Resolve the members of a unanimous ("__all__") answer: every subject that
+ * resolves to a real name, in `subjects[]` order. Unresolvable subjects
+ * (missing ref / blank name) are dropped rather than rendered half-empty.
+ * The caller decides how to present the result (0 → no speaker, 1 → single
+ * avatar, ≥2 → overlapping cluster).
+ */
+export function buildUnanimousAttribution(
+  subjects: IndexedSubject[] | null | undefined,
+): UnanimousMember[] {
+  const arr = Array.isArray(subjects) ? subjects : [];
+  const members: UnanimousMember[] = [];
+  for (const s of arr) {
+    const resolved = resolveSubject(s);
+    if (!resolved) continue;
+    members.push({
+      firstName: deriveSubjectFirstName(s, resolved.name),
+      fullName: resolved.name,
+    });
+  }
+  return members;
+}

@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest'
-import {validateRespondentKey} from '@kcvv/sanity-schemas'
+import {validateRespondentKey, ALL_RESPONDENTS_KEY} from '@kcvv/sanity-schemas'
 
 describe('validateRespondentKey', () => {
   const interviewDoc = (subjectKeys: string[]) => ({
@@ -77,6 +77,21 @@ describe('validateRespondentKey', () => {
     expect(
       validateRespondentKey('b', {
         parent: {tag: 'key'},
+        document: interviewDoc(['a', 'b', 'c']),
+      }),
+    ).toBe(true)
+  })
+
+  it('accepts the ALL_RESPONDENTS_KEY sentinel on key/quote pairs at N>=2', () => {
+    expect(
+      validateRespondentKey(ALL_RESPONDENTS_KEY, {
+        parent: {tag: 'key'},
+        document: interviewDoc(['a', 'b']),
+      }),
+    ).toBe(true)
+    expect(
+      validateRespondentKey(ALL_RESPONDENTS_KEY, {
+        parent: {tag: 'quote'},
         document: interviewDoc(['a', 'b', 'c']),
       }),
     ).toBe(true)

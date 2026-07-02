@@ -140,6 +140,28 @@ export const DuoRespondents: Story = {
   },
 };
 
+// Unanimous ("unaniem") answer — one shared answer attributed to every
+// subject (#2276). The speaker header renders an overlapping monogram
+// cluster, the tag joins the first names, and the role reads "Unaniem".
+export const UnanimousRespondent: Story = {
+  args: {
+    question: "Wat was het keerpunt van jullie samenwerking?",
+    respondents: [
+      {
+        firstName: "Julien",
+        fullName: "Julien & Niels",
+        role: "Unaniem",
+        cluster: [
+          { firstName: "Julien", fullName: "Julien Verschaeve" },
+          { firstName: "Niels", fullName: "Niels Peeters" },
+        ],
+        answer:
+          "Het moment dat we samen besloten door te gaan, ondanks de tegenslagen. Vanaf dan trokken we aan hetzelfde zeel.",
+      },
+    ],
+  },
+};
+
 // Three-respondent panel Q&A — extends the multi-respondent rhythm.
 export const PanelRespondents: Story = {
   args: {

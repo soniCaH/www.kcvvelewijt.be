@@ -3,12 +3,18 @@ import { PortableText, type PortableTextBlock } from "@portabletext/react";
 import {
   resolvePairRespondent,
   resolveSubject,
+  buildUnanimousAttribution,
+  deriveSubjectFirstName,
+  joinFirstNames,
+  ALL_RESPONDENTS_KEY,
   type IndexedSubject,
-  type SubjectValue,
 } from "@/components/article/SubjectAttribution";
 import { QARow, type QARowRespondent } from "@/components/article/QARow";
 import { PullQuote } from "@/components/design-system/PullQuote";
-import { SubjectAvatar } from "@/components/design-system/SubjectAvatar";
+import {
+  SubjectAvatar,
+  SubjectAvatarCluster,
+} from "@/components/design-system/SubjectAvatar";
 import {
   QaGroupRapidFire,
   type QaGroupRapidFireRespondent,
@@ -63,6 +69,9 @@ const assertNever = (value: never): never => {
 const isBreakoutTag = (tag?: string): tag is "key" | "quote" =>
   tag === "key" || tag === "quote";
 
+/** Role suffix rendered after the joined names on a unanimous answer. */
+const UNANIMOUS_ROLE = "Unaniem";
+
 /**
  * Collapse consecutive `rapid-fire` pairs into a single unit and fall back
  * to `standard` (rendered as `<QARow>`) for unknown tag values. Single pass
@@ -90,43 +99,39 @@ function groupPairs(pairs: QaPairValue[]): Unit[] {
   return units;
 }
 
-/**
- * Derive the speaker's first name from the raw subject ref rather than
- * splitting the joined `resolved.name`. Mirrors the `renderPullQuote`
- * helper in `ArticleBody.tsx` — keeps the monogram derivation stable when
- * `resolveSubject` ever changes how it joins the player's name parts.
- */
-function deriveFirstName(
-  subject: SubjectValue | null | undefined,
-  resolvedName: string,
-): string {
-  if (subject?.kind === "player") {
-    const fromRef = subject.playerRef?.firstName?.trim();
-    if (fromRef) return fromRef;
-  } else if (subject?.kind === "staff") {
-    const fromRef = subject.staffRef?.firstName?.trim();
-    if (fromRef) return fromRef;
-  } else if (subject?.kind === "custom") {
-    const fromRef = subject.customName?.trim();
-    if (fromRef) return fromRef;
-  }
-  const trimmed = resolvedName.trim();
-  return trimmed.split(/\s+/)[0] || trimmed;
-}
-
 function mapStandardRespondents(
   pair: QaPairValue,
   subjects: IndexedSubject[] | null,
 ): QARowRespondent[] {
   const sources = pair.respondents ?? [];
   return sources.map((src, i) => {
-    const subject = resolvePairRespondent(src.respondentKey, subjects);
-    const resolved = resolveSubject(subject);
     const answer: ReactNode = src.answer ? (
       <PortableText value={src.answer} />
     ) : null;
     const respondentKey =
       src._key ?? src.respondentKey ?? `${pair._key ?? "p"}-${i}`;
+
+    // "Unaniem" — one shared answer for every subject (#2276). Collapse
+    // all resolvable subjects into a single combined respondent: joined
+    // first names + "Unaniem" role + monogram cluster. Checked before the
+    // normal single-subject resolve so the sentinel never falls through to
+    // the "not in subjects" path.
+    if (src.respondentKey === ALL_RESPONDENTS_KEY) {
+      const members = buildUnanimousAttribution(subjects);
+      if (members.length === 0) return { answer, respondentKey };
+      const firstNames = members.map((m) => m.firstName);
+      return {
+        firstName: firstNames[0],
+        fullName: joinFirstNames(firstNames),
+        role: UNANIMOUS_ROLE,
+        answer,
+        respondentKey,
+        cluster: members.length >= 2 ? members : undefined,
+      };
+    }
+
+    const subject = resolvePairRespondent(src.respondentKey, subjects);
+    const resolved = resolveSubject(subject);
     // No resolvable speaker (multi-subject article whose editors didn't
     // tag `respondentKey` on standard pairs — the Studio validator
     // only enforces respondentKey on `key`/`quote`). Render the pair
@@ -135,7 +140,7 @@ function mapStandardRespondents(
     if (!resolved) {
       return { answer, respondentKey };
     }
-    const firstName = deriveFirstName(subject, resolved.name);
+    const firstName = deriveSubjectFirstName(subject, resolved.name);
     return {
       firstName,
       fullName: resolved.name,
@@ -190,10 +195,45 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
       const first = unit.pair.respondents?.[0];
       const body = flattenAnswerToString(first?.answer);
       if (body.length === 0) return;
-      const subject = resolvePairRespondent(first?.respondentKey, subjects);
+      // Unanimous breakout: render the pull-quote with combined attribution
+      // (joined names + "Unaniem") and a monogram cluster so the answer
+      // isn't dropped. Needs 2+ resolvable subjects.
+      const isUnanimous = first?.respondentKey === ALL_RESPONDENTS_KEY;
+      if (isUnanimous) {
+        const members = buildUnanimousAttribution(subjects);
+        if (members.length >= 2) {
+          rendered.push(
+            <PullQuote
+              key={unit.pair._key ?? `${unit.kind}-${i}`}
+              tone={tone}
+              attribution={{
+                name: joinFirstNames(members.map((m) => m.firstName)),
+                role: UNANIMOUS_ROLE,
+                source:
+                  unit.kind === "key"
+                    ? unit.pair.question?.trim() || undefined
+                    : undefined,
+              }}
+              avatarSlot={
+                <SubjectAvatarCluster members={members} scale="attribution" />
+              }
+            >
+              {body}
+            </PullQuote>,
+          );
+          lastRenderedKind = unit.kind;
+          return;
+        }
+      }
+      // Fewer than 2 resolvable subjects (single-subject article, or a
+      // duo with one dangling ref): attribute a `__all__` breakout to the
+      // sole resolvable subject rather than dropping the quote.
+      const subject = isUnanimous
+        ? ((subjects ?? []).find((s) => resolveSubject(s) != null) ?? null)
+        : resolvePairRespondent(first?.respondentKey, subjects);
       const resolved = resolveSubject(subject);
       if (!resolved) return;
-      const firstName = deriveFirstName(subject, resolved.name);
+      const firstName = deriveSubjectFirstName(subject, resolved.name);
       rendered.push(
         <PullQuote
           key={unit.pair._key ?? `${unit.kind}-${i}`}
@@ -236,7 +276,7 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
       const resolved = resolveSubject(subject);
       let respondent: QaGroupRapidFireRespondent | undefined;
       if (resolved) {
-        const firstName = deriveFirstName(subject, resolved.name);
+        const firstName = deriveSubjectFirstName(subject, resolved.name);
         respondent = {
           firstName,
           fullName: resolved.name,

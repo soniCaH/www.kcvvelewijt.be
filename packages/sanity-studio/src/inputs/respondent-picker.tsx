@@ -7,6 +7,7 @@ import {
   useClient,
   useFormValue,
 } from 'sanity'
+import {ALL_RESPONDENTS_KEY} from '@kcvv/sanity-schemas'
 
 const API_VERSION = '2024-01-01'
 
@@ -157,6 +158,27 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
           </Flex>
         )
       })}
+      {/*
+        "Allen (unaniem)" — attributes one shared answer to every subject.
+        Only meaningful (and only offered) for duo/panel interviews, so it
+        stays hidden for single-subject articles. Writes the reserved
+        `ALL_RESPONDENTS_KEY` sentinel, which can't collide with a `_key`.
+      */}
+      {subjects.length >= 2 && (
+        <Flex align="center" gap={3}>
+          <Radio
+            id={`${elementProps.id}-option-all`}
+            name={elementProps.id}
+            value={ALL_RESPONDENTS_KEY}
+            checked={value === ALL_RESPONDENTS_KEY}
+            onChange={handleChange}
+            disabled={readOnly}
+          />
+          <Text as="label" htmlFor={`${elementProps.id}-option-all`} size={1}>
+            Allen (unaniem)
+          </Text>
+        </Flex>
+      )}
     </Stack>
   )
 }
