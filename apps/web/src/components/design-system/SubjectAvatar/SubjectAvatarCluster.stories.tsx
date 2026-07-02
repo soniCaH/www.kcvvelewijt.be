@@ -26,6 +26,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Default editable story — tweak members / scale / max in the Controls panel.
+export const Playground: Story = {
+  args: {
+    scale: "row",
+    max: 3,
+    members: [
+      { firstName: "Julien", fullName: "Julien Verschaeve" },
+      { firstName: "Niels", fullName: "Niels Peeters" },
+    ],
+  },
+};
+
 // Duo — the canonical "beide spelers, één antwoord" case.
 export const Duo: Story = {
   args: {

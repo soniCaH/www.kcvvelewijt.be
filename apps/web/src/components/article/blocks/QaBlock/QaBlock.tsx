@@ -110,27 +110,34 @@ function mapStandardRespondents(
     ) : null;
     const respondentKey =
       src._key ?? src.respondentKey ?? `${pair._key ?? "p"}-${i}`;
+    const isUnanimous = src.respondentKey === ALL_RESPONDENTS_KEY;
 
-    // "Unaniem" — one shared answer for every subject (#2276). Collapse
-    // all resolvable subjects into a single combined respondent: joined
-    // first names + "Unaniem" role + monogram cluster. Checked before the
-    // normal single-subject resolve so the sentinel never falls through to
-    // the "not in subjects" path.
-    if (src.respondentKey === ALL_RESPONDENTS_KEY) {
+    // "Unaniem" — one shared answer for every subject (#2276). Collapse all
+    // resolvable subjects into a combined respondent (joined first names +
+    // "Unaniem" role + monogram cluster). Only when 2+ resolve; a lone
+    // resolvable subject falls through to normal single-subject attribution
+    // below (no misleading one-person "Unaniem").
+    if (isUnanimous) {
       const members = buildUnanimousAttribution(subjects);
-      if (members.length === 0) return { answer, respondentKey };
-      const firstNames = members.map((m) => m.firstName);
-      return {
-        firstName: firstNames[0],
-        fullName: joinFirstNames(firstNames),
-        role: UNANIMOUS_ROLE,
-        answer,
-        respondentKey,
-        cluster: members.length >= 2 ? members : undefined,
-      };
+      if (members.length >= 2) {
+        const firstNames = members.map((m) => m.firstName);
+        return {
+          firstName: firstNames[0],
+          fullName: joinFirstNames(firstNames),
+          role: UNANIMOUS_ROLE,
+          answer,
+          respondentKey,
+          cluster: members,
+        };
+      }
     }
 
-    const subject = resolvePairRespondent(src.respondentKey, subjects);
+    // Single-subject attribution. For the `__all__` sentinel with fewer than
+    // 2 resolvable subjects, attribute to the sole resolvable subject rather
+    // than dropping it — mirrors the key/quote path.
+    const subject = isUnanimous
+      ? ((subjects ?? []).find((s) => resolveSubject(s) != null) ?? null)
+      : resolvePairRespondent(src.respondentKey, subjects);
     const resolved = resolveSubject(subject);
     // No resolvable speaker (multi-subject article whose editors didn't
     // tag `respondentKey` on standard pairs — the Studio validator
@@ -263,25 +270,33 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
     }
 
     if (unit.kind === "rapid-fire") {
-      const firstWithKey = unit.pairs.find(
-        (p) => p.respondents?.[0]?.respondentKey,
-      );
-      const subject =
-        resolvePairRespondent(
-          firstWithKey?.respondents?.[0]?.respondentKey,
-          subjects,
-        ) ??
-        subjects?.[0] ??
-        null;
-      const resolved = resolveSubject(subject);
+      const firstKey = unit.pairs.find((p) => p.respondents?.[0]?.respondentKey)
+        ?.respondents?.[0]?.respondentKey;
       let respondent: QaGroupRapidFireRespondent | undefined;
-      if (resolved) {
-        const firstName = deriveSubjectFirstName(subject, resolved.name);
+      const members =
+        firstKey === ALL_RESPONDENTS_KEY
+          ? buildUnanimousAttribution(subjects)
+          : [];
+      if (members.length >= 2) {
+        // Unaniem: the whole rapid-fire run is shared by every subject. The
+        // speaker strip is single-avatar by design, so it carries the joined
+        // names + "Unaniem" role (no cluster).
         respondent = {
-          firstName,
-          fullName: resolved.name,
-          role: resolved.role || undefined,
+          firstName: members[0]!.firstName,
+          fullName: joinFirstNames(members.map((m) => m.firstName)),
+          role: UNANIMOUS_ROLE,
         };
+      } else {
+        const subject =
+          resolvePairRespondent(firstKey, subjects) ?? subjects?.[0] ?? null;
+        const resolved = resolveSubject(subject);
+        if (resolved) {
+          respondent = {
+            firstName: deriveSubjectFirstName(subject, resolved.name),
+            fullName: resolved.name,
+            role: resolved.role || undefined,
+          };
+        }
       }
       rendered.push(
         <QaGroupRapidFire

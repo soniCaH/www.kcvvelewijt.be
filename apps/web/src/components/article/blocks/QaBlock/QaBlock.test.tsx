@@ -503,6 +503,68 @@ describe("QaBlock", () => {
       expect(screen.getByText("Behouden, niet droppen.")).toBeInTheDocument();
     });
 
+    it("attributes a standard __all__ pair to the lone resolvable subject (no misleading Unaniem)", () => {
+      const { container } = render(
+        <QaBlock
+          subjects={[
+            DUO_SUBJECTS[0]!,
+            { _key: "subj-broken", kind: "player", playerRef: null },
+          ]}
+          value={{
+            pairs: [
+              {
+                _key: "p",
+                tag: "standard",
+                question: "Q?",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("Solo.") },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+      const tag = container.querySelector('[data-qa-row="speaker-tag"]');
+      // Normal single-subject attribution — full name + real role, NOT "Unaniem".
+      expect(tag?.textContent).toContain("Julien Verschaeve");
+      expect(tag?.textContent).not.toContain("Unaniem");
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
+      expect(screen.getByText("Solo.")).toBeInTheDocument();
+    });
+
+    it("renders a rapid-fire __all__ run with combined Unaniem attribution", () => {
+      const group = render(
+        <QaBlock
+          subjects={DUO_SUBJECTS}
+          value={{
+            pairs: [
+              {
+                _key: "rf1",
+                tag: "rapid-fire",
+                question: "Q1",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("A1") },
+                ],
+              },
+              {
+                _key: "rf2",
+                tag: "rapid-fire",
+                question: "Q2",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("A2") },
+                ],
+              },
+            ],
+          }}
+        />,
+      ).getByTestId("qa-group-rapid-fire");
+      // Combined attribution, not just the first subject.
+      expect(group.textContent).toContain("Julien & Niels");
+      expect(group.textContent).toContain("Unaniem");
+    });
+
     it("renders a __all__ pair with no speaker when no subjects resolve", () => {
       const { container } = render(
         <QaBlock

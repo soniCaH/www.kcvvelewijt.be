@@ -52,4 +52,27 @@ describe("<SubjectAvatarCluster>", () => {
     const { container } = render(<SubjectAvatarCluster members={[]} />);
     expect(container.firstChild).toBeNull();
   });
+
+  it("announces the cluster once via a group label, with the discs hidden from AT", () => {
+    const { container } = render(<SubjectAvatarCluster members={members} />);
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.getAttribute("role")).toBe("img");
+    expect(root.getAttribute("aria-label")).toBe("Julien V, Niels P");
+    // The individual discs live under an aria-hidden wrapper.
+    expect(container.querySelector('[aria-hidden="true"]')).not.toBeNull();
+  });
+
+  it("includes the overflow count in the group label", () => {
+    const four = [
+      ...members,
+      { firstName: "Lars", fullName: "Lars J" },
+      { firstName: "Tom", fullName: "Tom D" },
+    ];
+    const { container } = render(
+      <SubjectAvatarCluster members={four} max={3} />,
+    );
+    expect(
+      (container.firstElementChild as HTMLElement).getAttribute("aria-label"),
+    ).toBe("Julien V, Niels P, Lars J +1");
+  });
 });

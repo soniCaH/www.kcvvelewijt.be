@@ -157,8 +157,11 @@ export function deriveSubjectFirstName(
     const fromRef = subject.staffRef?.firstName?.trim();
     if (fromRef) return fromRef;
   } else if (subject?.kind === "custom") {
+    // `customName` is a full display name (no separate first-name field), so
+    // take its first token to match the player/staff first-name semantics —
+    // otherwise a unanimous tag would read "Luc Janssens & Niels".
     const fromRef = subject.customName?.trim();
-    if (fromRef) return fromRef;
+    if (fromRef) return fromRef.split(/\s+/)[0] || fromRef;
   }
   const trimmed = resolvedName.trim();
   return trimmed.split(/\s+/)[0] || trimmed;

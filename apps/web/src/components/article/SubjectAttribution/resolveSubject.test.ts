@@ -165,6 +165,15 @@ describe("deriveSubjectFirstName", () => {
   it("falls back to the first token of the resolved name", () => {
     expect(deriveSubjectFirstName(null, "Niels Peeters")).toBe("Niels");
   });
+
+  it("takes the first token of a custom subject's full name", () => {
+    expect(
+      deriveSubjectFirstName(
+        { kind: "custom", customName: "Luc Janssens" },
+        "Luc Janssens",
+      ),
+    ).toBe("Luc");
+  });
 });
 
 describe("joinFirstNames", () => {
@@ -217,6 +226,18 @@ describe("buildUnanimousAttribution", () => {
   it("returns an empty array for missing subjects", () => {
     expect(buildUnanimousAttribution(null)).toEqual([]);
     expect(buildUnanimousAttribution(undefined)).toEqual([]);
+  });
+
+  it("uses the first token of a custom subject's name so unanimous tags read a first name", () => {
+    expect(
+      buildUnanimousAttribution([
+        subjects[0]!,
+        { _key: "c", kind: "custom", customName: "Luc Janssens" },
+      ]),
+    ).toEqual([
+      { firstName: "Julien", fullName: "Julien V" },
+      { firstName: "Luc", fullName: "Luc Janssens" },
+    ]);
   });
 });
 
