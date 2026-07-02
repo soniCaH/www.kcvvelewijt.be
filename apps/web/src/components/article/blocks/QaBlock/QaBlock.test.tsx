@@ -563,6 +563,10 @@ describe("QaBlock", () => {
       // Combined attribution, not just the first subject.
       expect(group.textContent).toContain("Julien & Niels");
       expect(group.textContent).toContain("Unaniem");
+      // The rapid-fire speaker strip is single-avatar by design — no cluster.
+      expect(
+        group.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
     });
 
     it("renders a __all__ pair with no speaker when no subjects resolve", () => {
