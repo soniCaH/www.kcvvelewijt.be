@@ -3,9 +3,12 @@ import {
   AccentDecorator,
   ArticleTagsInput,
   PullquoteDecorator,
+  QaPairItem,
+  QaPairRespondentItem,
   RespondentPicker,
   applyArticleTagsInput,
   applyDecoratorComponents,
+  applyQaBlockInput,
   applyRespondentPicker,
 } from './inputs'
 
@@ -21,9 +24,12 @@ import {
  * here, the icon stays in `@kcvv/sanity-schemas`.
  */
 export const schemaTypes = applyDecoratorComponents(
-  applyRespondentPicker(
-    applyArticleTagsInput(baseSchemaTypes, ArticleTagsInput),
-    RespondentPicker,
+  applyQaBlockInput(
+    applyRespondentPicker(
+      applyArticleTagsInput(baseSchemaTypes, ArticleTagsInput),
+      RespondentPicker,
+    ),
+    {QaPairItem, QaPairRespondentItem},
   ),
   {pullquote: PullquoteDecorator, accent: AccentDecorator},
 )
