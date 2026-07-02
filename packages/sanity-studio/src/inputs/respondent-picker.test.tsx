@@ -135,6 +135,35 @@ describe('RespondentPicker', () => {
     expect(onChange.mock.calls[0][0].patches).toEqual([{type: 'set', value: 'k2'}])
   })
 
+  it('shows an "Allen (unaniem)" option only when there are 2+ subjects', () => {
+    mockSubjects.current = [{_key: 'k1', kind: 'custom', customName: 'Trainer X'}]
+    const {rerender} = render(<RespondentPicker {...makeProps()} />)
+    expect(screen.queryByText(/Allen \(unaniem\)/i)).toBeNull()
+
+    mockSubjects.current = [
+      {_key: 'k1', kind: 'custom', customName: 'Trainer X'},
+      {_key: 'k2', kind: 'custom', customName: 'Supporter Y'},
+    ]
+    rerender(<RespondentPicker {...makeProps()} />)
+    expect(screen.getByText(/Allen \(unaniem\)/i)).toBeTruthy()
+  })
+
+  it('writes the "__all__" sentinel when "Allen (unaniem)" is selected', async () => {
+    mockSubjects.current = [
+      {_key: 'k1', kind: 'custom', customName: 'Trainer X'},
+      {_key: 'k2', kind: 'custom', customName: 'Supporter Y'},
+    ]
+    const onChange = vi.fn<(event: FakePatchEvent) => void>()
+    render(<RespondentPicker {...makeProps({onChange})} />)
+
+    const radios = await screen.findAllByRole('radio')
+    // Last radio is the appended "Allen (unaniem)" option.
+    fireEvent.click(radios[radios.length - 1])
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange.mock.calls[0][0].patches).toEqual([{type: 'set', value: '__all__'}])
+  })
+
   it('disables all radios when readOnly', async () => {
     mockSubjects.current = [
       {_key: 'k1', kind: 'custom', customName: 'Trainer X'},

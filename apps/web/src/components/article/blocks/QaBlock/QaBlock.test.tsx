@@ -382,6 +382,220 @@ describe("QaBlock", () => {
     });
   });
 
+  describe("unaniem (__all__) attribution", () => {
+    const DUO_SUBJECTS: IndexedSubject[] = [
+      {
+        _key: "subj-julien",
+        kind: "player",
+        playerRef: {
+          firstName: "Julien",
+          lastName: "Verschaeve",
+          jerseyNumber: 9,
+        },
+      },
+      {
+        _key: "subj-niels",
+        kind: "player",
+        playerRef: { firstName: "Niels", lastName: "Peeters", jerseyNumber: 1 },
+      },
+    ];
+
+    it("renders a standard __all__ pair as one combined QARow with a monogram cluster", () => {
+      const { container } = render(
+        <QaBlock
+          subjects={DUO_SUBJECTS}
+          value={{
+            pairs: [
+              {
+                _key: "pair-1",
+                tag: "standard",
+                question: "Wat was het keerpunt?",
+                respondents: [
+                  {
+                    _key: "r",
+                    respondentKey: "__all__",
+                    answer: makeAnswer("Samen besloten door te gaan."),
+                  },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+      const row = screen.getByRole("article");
+      expect(row.getAttribute("data-qa-row-mode")).toBe("single");
+      const tag = container.querySelector('[data-qa-row="speaker-tag"]');
+      expect(tag?.textContent).toContain("Julien & Niels");
+      expect(tag?.textContent).toContain("Unaniem");
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).not.toBeNull();
+      expect(
+        screen.getByText("Samen besloten door te gaan."),
+      ).toBeInTheDocument();
+    });
+
+    it("renders a key __all__ pair as a combined PullQuote instead of dropping it", () => {
+      const { container } = render(
+        <QaBlock
+          subjects={DUO_SUBJECTS}
+          value={{
+            pairs: [
+              {
+                _key: "k",
+                tag: "key",
+                question: "Het sleutelmoment",
+                respondents: [
+                  {
+                    respondentKey: "__all__",
+                    answer: makeAnswer("De promotie samen vieren."),
+                  },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+      expect(
+        document.querySelector('[data-pull-quote-tone="cream"]'),
+      ).not.toBeNull();
+      expect(
+        document.querySelector('[data-pull-quote-name="display"]')?.textContent,
+      ).toBe("Julien & Niels");
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).not.toBeNull();
+      expect(screen.getByText("De promotie samen vieren.")).toBeInTheDocument();
+    });
+
+    it("attributes a key __all__ pair to the sole resolvable subject when a duo has a dangling ref", () => {
+      const { container } = render(
+        <QaBlock
+          subjects={[
+            DUO_SUBJECTS[0]!,
+            { _key: "subj-broken", kind: "player", playerRef: null },
+          ]}
+          value={{
+            pairs: [
+              {
+                _key: "k",
+                tag: "key",
+                question: "Q",
+                respondents: [
+                  {
+                    respondentKey: "__all__",
+                    answer: makeAnswer("Behouden, niet droppen."),
+                  },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+      // Not dropped: a single pull-quote attributed to the resolvable
+      // subject, no cluster (fewer than 2 resolved).
+      expect(
+        document.querySelector('[data-pull-quote-name="display"]')?.textContent,
+      ).toBe("Julien Verschaeve");
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
+      expect(screen.getByText("Behouden, niet droppen.")).toBeInTheDocument();
+    });
+
+    it("attributes a standard __all__ pair to the lone resolvable subject (no misleading Unaniem)", () => {
+      const { container } = render(
+        <QaBlock
+          subjects={[
+            DUO_SUBJECTS[0]!,
+            { _key: "subj-broken", kind: "player", playerRef: null },
+          ]}
+          value={{
+            pairs: [
+              {
+                _key: "p",
+                tag: "standard",
+                question: "Q?",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("Solo.") },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+      const tag = container.querySelector('[data-qa-row="speaker-tag"]');
+      // Normal single-subject attribution — full name + real role, NOT "Unaniem".
+      expect(tag?.textContent).toContain("Julien Verschaeve");
+      expect(tag?.textContent).not.toContain("Unaniem");
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
+      expect(screen.getByText("Solo.")).toBeInTheDocument();
+    });
+
+    it("renders a rapid-fire __all__ run with combined Unaniem attribution", () => {
+      const group = render(
+        <QaBlock
+          subjects={DUO_SUBJECTS}
+          value={{
+            pairs: [
+              {
+                _key: "rf1",
+                tag: "rapid-fire",
+                question: "Q1",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("A1") },
+                ],
+              },
+              {
+                _key: "rf2",
+                tag: "rapid-fire",
+                question: "Q2",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("A2") },
+                ],
+              },
+            ],
+          }}
+        />,
+      ).getByTestId("qa-group-rapid-fire");
+      // Combined attribution, not just the first subject.
+      expect(group.textContent).toContain("Julien & Niels");
+      expect(group.textContent).toContain("Unaniem");
+      // The rapid-fire speaker strip is single-avatar by design — no cluster.
+      expect(
+        group.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
+    });
+
+    it("renders a __all__ pair with no speaker when no subjects resolve", () => {
+      const { container } = render(
+        <QaBlock
+          value={{
+            pairs: [
+              {
+                _key: "pair-1",
+                tag: "standard",
+                question: "Wie?",
+                respondents: [
+                  { respondentKey: "__all__", answer: makeAnswer("Niemand.") },
+                ],
+              },
+            ],
+          }}
+        />,
+      );
+      expect(
+        screen.getByRole("article").getAttribute("data-qa-row-has-speaker"),
+      ).toBe("false");
+      expect(
+        container.querySelector('[data-subject-avatar-cluster="true"]'),
+      ).toBeNull();
+      expect(screen.getByText("Niemand.")).toBeInTheDocument();
+    });
+  });
+
   describe("rapid-fire grouping (unchanged from #1849)", () => {
     it("collapses consecutive rapid-fire pairs into a single QaGroupRapidFire and threads the resolved respondent + answers", () => {
       render(

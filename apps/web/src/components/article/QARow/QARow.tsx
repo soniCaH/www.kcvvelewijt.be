@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
-import { SubjectAvatar } from "@/components/design-system/SubjectAvatar";
+import {
+  SubjectAvatar,
+  SubjectAvatarCluster,
+  type SubjectAvatarClusterMember,
+} from "@/components/design-system/SubjectAvatar";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -61,6 +65,13 @@ export interface QARowRespondent {
    * Sanity, or any unique value for non-PT call-sites.
    */
   respondentKey?: string;
+  /**
+   * Two or more subjects who share this answer ("unaniem", #2276). When
+   * set with length ≥ 2, the speaker header renders an overlapping monogram
+   * cluster instead of a single avatar; `fullName` still carries the joined
+   * tag text ("Julien & Niels") and `role` the "Unaniem" suffix.
+   */
+  cluster?: SubjectAvatarClusterMember[];
 }
 
 export interface QARowProps {
@@ -83,13 +94,24 @@ interface SpeakerHeaderProps {
   firstName: string;
   fullName?: string;
   role?: string;
+  cluster?: SubjectAvatarClusterMember[];
 }
 
-function SpeakerHeader({ firstName, fullName, role }: SpeakerHeaderProps) {
+function SpeakerHeader({
+  firstName,
+  fullName,
+  role,
+  cluster,
+}: SpeakerHeaderProps) {
   const tagName = (fullName ?? firstName).trim();
+  const isCluster = cluster != null && cluster.length > 1;
   return (
     <header className="flex items-center gap-3">
-      <SubjectAvatar firstName={firstName} fullName={fullName} scale="row" />
+      {isCluster ? (
+        <SubjectAvatarCluster members={cluster} scale="row" />
+      ) : (
+        <SubjectAvatar firstName={firstName} fullName={fullName} scale="row" />
+      )}
       <p
         data-qa-row="speaker-tag"
         // `m-0` overrides the global `p { margin-bottom: 1rem }` rule in
@@ -144,6 +166,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
               firstName={r.firstName!}
               fullName={r.fullName}
               role={r.role}
+              cluster={r.cluster}
             />
           )}
           {/*
@@ -201,6 +224,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
                   firstName={r.firstName!}
                   fullName={r.fullName}
                   role={r.role}
+                  cluster={r.cluster}
                 />
               )}
               <div
