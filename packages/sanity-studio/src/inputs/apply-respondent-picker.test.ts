@@ -5,6 +5,7 @@ import {
   type SchemaTypeDefinition,
   type StringInputProps,
 } from 'sanity'
+import {schemaTypes as baseSchemaTypes} from '@kcvv/sanity-schemas'
 import {describe, expect, it} from 'vitest'
 import {applyRespondentPicker} from './apply-respondent-picker'
 
@@ -85,5 +86,22 @@ describe('applyRespondentPicker', () => {
     ]
     const result = applyRespondentPicker(input, StubComponent)
     expect(result).toEqual(input)
+  })
+
+  // De-drift (#2278): the hand-rolled `makeSchemaTypes` fixture above can
+  // diverge from the real schema — which is exactly how the #2275 bug slipped
+  // through (the fixture kept the old `qaPair.respondentKey` shape). Assert the
+  // graft lands on the schema actually shipped by `@kcvv/sanity-schemas`, so a
+  // rename of the type or field fails this test instead of a stale mock.
+  describe('against the real @kcvv/sanity-schemas schema', () => {
+    it('grafts components.input onto the real qaPairRespondent.respondentKey', () => {
+      const result = applyRespondentPicker(baseSchemaTypes, StubComponent)
+      const respondentType = result.find((t) => t.name === 'qaPairRespondent') as unknown as {
+        fields: Array<{name: string; components?: {input?: unknown}}>
+      }
+      expect(respondentType).toBeDefined()
+      const respondent = respondentType.fields.find((f) => f.name === 'respondentKey')
+      expect(respondent?.components?.input).toBe(StubComponent)
+    })
   })
 })
