@@ -1,5 +1,29 @@
 import {defineField, defineType} from 'sanity'
-import {validateRespondentKey} from './validation/respondent-key'
+import {ALL_RESPONDENTS_KEY, validateRespondentKey} from './validation/respondent-key'
+
+/**
+ * Plain-text of a Portable Text answer, for legible previews. Guards every
+ * level — preview `prepare` runs on partially-authored / malformed data and
+ * must never throw. Intentionally a small re-implementation of apps/web's
+ * `flattenAnswerToString`: `@kcvv/sanity-schemas` is app-free by policy and
+ * cannot import from `apps/web`, and this variant only needs a subtitle.
+ */
+function answerSnippet(answer: unknown): string | undefined {
+  if (!Array.isArray(answer)) return undefined
+  const blocks: string[] = []
+  for (const block of answer as unknown[]) {
+    const children = (block as {children?: unknown} | null)?.children
+    if (!Array.isArray(children)) continue
+    let blockText = ''
+    for (const child of children as unknown[]) {
+      const text = (child as {text?: unknown} | null)?.text
+      if (typeof text === 'string') blockText += text
+    }
+    if (blockText) blocks.push(blockText)
+  }
+  const joined = blocks.join(' ').trim()
+  return joined.length > 0 ? joined : undefined
+}
 
 /**
  * One respondent's answer inside a qaPair. The 5.B.int data model
@@ -40,10 +64,17 @@ export const qaPairRespondent = defineType({
     }),
   ],
   preview: {
-    select: {respondentKey: 'respondentKey'},
-    prepare({respondentKey}) {
+    // Never surface the raw `respondentKey` (#2277). The `"__all__"` sentinel
+    // resolves to "Allen (unaniem)"; a real key shows a neutral "Respondent"
+    // label with the answer as the subtitle for legibility — the actual
+    // speaker name is shown inline by the RespondentPicker in the authoring
+    // surface, so no async subject deref is needed here.
+    select: {respondentKey: 'respondentKey', answer: 'answer'},
+    prepare({respondentKey, answer}) {
       return {
-        title: respondentKey ? `Respondent: ${respondentKey}` : 'Respondent — geen',
+        title:
+          respondentKey === ALL_RESPONDENTS_KEY ? 'Allen (unaniem)' : 'Respondent',
+        subtitle: answerSnippet(answer),
       }
     },
   },
@@ -67,6 +98,9 @@ export const qaPair = defineType({
         'Eén of meerdere sprekers met elk hun eigen antwoord. Voor een gewoon Q&A: één respondent. Voor een duo-vraag: voeg meerdere toe.',
       type: 'array',
       of: [{type: 'qaPairRespondent'}],
+      // Seed one respondent so a new pair is answer-ready without an extra
+      // "Add respondent" click (#2277). Editors add more only for duos/panels.
+      initialValue: [{_type: 'qaPairRespondent', _key: 'respondent-0'}],
       validation: (r) =>
         r
           .required()
@@ -136,6 +170,17 @@ export const qaBlock = defineType({
       title: 'Pairs',
       type: 'array',
       of: [{type: 'qaPair'}],
+      // Seed one ready-to-fill pair (with its one respondent) when a Q&A block
+      // is inserted, so the editor lands on question + answer, not an empty
+      // array (#2277).
+      initialValue: [
+        {
+          _type: 'qaPair',
+          _key: 'pair-0',
+          tag: 'standard',
+          respondents: [{_type: 'qaPairRespondent', _key: 'respondent-0'}],
+        },
+      ],
       validation: (r) => r.min(1).error('Minstens één Q&A-paar vereist.'),
     }),
     defineField({
