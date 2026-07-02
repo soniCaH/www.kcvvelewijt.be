@@ -1,29 +1,9 @@
 import {defineField, defineType} from 'sanity'
-import {ALL_RESPONDENTS_KEY, validateRespondentKey} from './validation/respondent-key'
-
-/**
- * Plain-text of a Portable Text answer, for legible previews. Guards every
- * level — preview `prepare` runs on partially-authored / malformed data and
- * must never throw. Intentionally a small re-implementation of apps/web's
- * `flattenAnswerToString`: `@kcvv/sanity-schemas` is app-free by policy and
- * cannot import from `apps/web`, and this variant only needs a subtitle.
- */
-function answerSnippet(answer: unknown): string | undefined {
-  if (!Array.isArray(answer)) return undefined
-  const blocks: string[] = []
-  for (const block of answer as unknown[]) {
-    const children = (block as {children?: unknown} | null)?.children
-    if (!Array.isArray(children)) continue
-    let blockText = ''
-    for (const child of children as unknown[]) {
-      const text = (child as {text?: unknown} | null)?.text
-      if (typeof text === 'string') blockText += text
-    }
-    if (blockText) blocks.push(blockText)
-  }
-  const joined = blocks.join(' ').trim()
-  return joined.length > 0 ? joined : undefined
-}
+import {validateRespondentKey} from './validation/respondent-key'
+import {
+  prepareQaPairRespondentPreview,
+  qaPairRespondentPreviewSelect,
+} from './preview/qa-pair-respondent-preview'
 
 /**
  * One respondent's answer inside a qaPair. The 5.B.int data model
@@ -64,19 +44,8 @@ export const qaPairRespondent = defineType({
     }),
   ],
   preview: {
-    // Never surface the raw `respondentKey` (#2277). The `"__all__"` sentinel
-    // resolves to "Allen (unaniem)"; a real key shows a neutral "Respondent"
-    // label with the answer as the subtitle for legibility — the actual
-    // speaker name is shown inline by the RespondentPicker in the authoring
-    // surface, so no async subject deref is needed here.
-    select: {respondentKey: 'respondentKey', answer: 'answer'},
-    prepare({respondentKey, answer}) {
-      return {
-        title:
-          respondentKey === ALL_RESPONDENTS_KEY ? 'Allen (unaniem)' : 'Respondent',
-        subtitle: answerSnippet(answer),
-      }
-    },
+    select: qaPairRespondentPreviewSelect,
+    prepare: prepareQaPairRespondentPreview,
   },
 })
 

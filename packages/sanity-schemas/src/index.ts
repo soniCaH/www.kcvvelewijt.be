@@ -6,6 +6,10 @@ export {responsibility} from './responsibility'
 export {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 export {organigramNodePreviewSelect, prepareOrganigramNodePreview} from './preview/organigramNode-preview'
 export {responsibilityPreviewSelect, prepareResponsibilityPreview} from './preview/responsibility-preview'
+export {
+  qaPairRespondentPreviewSelect,
+  prepareQaPairRespondentPreview,
+} from './preview/qa-pair-respondent-preview'
 export {validateOrganigramMember} from './validation/organigram-members'
 export {validateSubjectsCount} from './validation/subjects-count'
 export type {SubjectsCountContext} from './validation/subjects-count'
