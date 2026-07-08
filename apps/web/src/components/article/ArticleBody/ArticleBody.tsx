@@ -182,12 +182,17 @@ type PortableTextSpanLike = {
 type PortableTextBlockLike = {
   _type?: string;
   style?: string;
+  listItem?: string;
   children?: PortableTextSpanLike[];
 };
 
 function isNormalParagraph(block: PortableTextBlock): boolean {
   if (block._type !== "block") return false;
-  const style = (block as PortableTextBlockLike).style;
+  const b = block as PortableTextBlockLike;
+  // A list item carries style "normal" too — but it must render as a bullet,
+  // not get lifted into the drop-cap lead paragraph.
+  if (b.listItem !== undefined) return false;
+  const style = b.style;
   return style === undefined || style === "normal";
 }
 
@@ -578,8 +583,44 @@ export function buildComponents({
         if (!value) return null;
         return <QASectionDivider title={[value]} />;
       },
+      // h3–h6 are plain in-body subheadings. Preflight zeroes heading size,
+      // weight and margins, so each level restates its own scale — without
+      // this they'd render as flat body text (same failure mode as lists).
+      // h1 is not selectable in the schema: the article title is the only <h1>.
+      h3: ({ children }) => (
+        <h3 className="font-display text-ink mt-10 mb-3 text-2xl font-black">
+          {children}
+        </h3>
+      ),
+      h4: ({ children }) => (
+        <h4 className="font-display text-ink mt-8 mb-2 text-xl font-black">
+          {children}
+        </h4>
+      ),
+      h5: ({ children }) => (
+        <h5 className="font-display text-ink mt-6 mb-2 text-lg font-bold">
+          {children}
+        </h5>
+      ),
+      h6: ({ children }) => (
+        <h6 className="text-ink mt-6 mb-2 font-mono text-sm font-semibold tracking-[0.14em] uppercase">
+          {children}
+        </h6>
+      ),
       blockquote: ({ children }) => <BodyQuote>{children}</BodyQuote>,
     },
+    // Tailwind v4 Preflight strips list-style + padding from ul/ol; the body is
+    // not wrapped in `prose`, so lists need explicit markers/indent here or they
+    // render as flat text.
+    list: {
+      bullet: ({ children }) => (
+        <ul className="my-4 list-disc space-y-1 pl-6">{children}</ul>
+      ),
+      number: ({ children }) => (
+        <ol className="my-4 list-decimal space-y-1 pl-6">{children}</ol>
+      ),
+    },
+    listItem: ({ children }) => <li className="pl-1">{children}</li>,
     types: {
       pullQuote: ({ value }: { value: PullQuoteBlock }) =>
         renderPullQuote(value, subjects),
