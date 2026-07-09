@@ -181,7 +181,7 @@
   },
   "lockFileMaintenance": {
     "enabled": true,
-    "schedule": ["before 3am on Monday"],
+    "schedule": ["before 11pm on monday"],
     "commitMessagePrefix": "🔧 ",
     "commitMessageAction": "chore(deps): update",
     "commitMessageTopic": "lock files"
@@ -198,6 +198,6 @@
   "postUpdateOptions": ["pnpmDedupe"],
   "prCreation": "immediate",
   "prConcurrentLimit": 3,
-  "schedule": ["before 6am on monday"],
+  "schedule": ["before 11pm on monday"],
   "rebaseWhen": "conflicted"
 }
