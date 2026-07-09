@@ -47,17 +47,20 @@ export const page = defineType({
       title: 'Body',
       type: 'array',
       group: 'inhoud',
-      // Styles locked to what <ArticleBody> intentionally styles (STUDIO-2):
-      // Normal, H2 (the green "act divider") and Blockquote. H1/H3–H6 are
-      // dropped from the dropdown because <ArticleBody> only overrides h2 +
-      // blockquote — the rest fall through to the default serializer as bare,
-      // unstyled heading tags. Lists keep their defaults.
+      // Styles match article.body: H1 is dropped so the page title stays the
+      // only <h1>. H2 renders as the section divider; H3–H6 as plain
+      // subheadings (all serialized in <ArticleBody>). Lists keep their
+      // bullet+number defaults (now serialized).
       of: [
         {
           type: 'block',
           styles: [
             {title: 'Normaal', value: 'normal'},
             {title: 'Tussentitel (groene divider)', value: 'h2'},
+            {title: 'Kop 3', value: 'h3'},
+            {title: 'Kop 4', value: 'h4'},
+            {title: 'Kop 5', value: 'h5'},
+            {title: 'Kop 6', value: 'h6'},
             {title: 'Citaat', value: 'blockquote'},
           ],
         },

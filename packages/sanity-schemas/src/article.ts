@@ -268,6 +268,19 @@ export const article = defineType({
       of: [
         {
           type: "block",
+          // H1 is dropped so the article title stays the page's only <h1>.
+          // H2 renders as the section divider; H3–H6 as plain subheadings
+          // (all serialized in <ArticleBody>). Lists keep their bullet+number
+          // defaults (now serialized).
+          styles: [
+            { title: "Normaal", value: "normal" },
+            { title: "Tussentitel (groene divider)", value: "h2" },
+            { title: "Kop 3", value: "h3" },
+            { title: "Kop 4", value: "h4" },
+            { title: "Kop 5", value: "h5" },
+            { title: "Kop 6", value: "h6" },
+            { title: "Citaat", value: "blockquote" },
+          ],
           marks: {
             annotations: [
               {
