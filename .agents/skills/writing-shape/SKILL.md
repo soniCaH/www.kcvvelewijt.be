@@ -23,7 +23,7 @@ If the user did not say where to save the article, ask once and remember the pat
 3. **Draft 2–3 candidate openings.** Each opening should imply a different thesis or angle for the article. Show all of them. Force the user to pick or compose a hybrid. The chosen opening defines what the rest of the article must do.
 4. **Grow paragraph by paragraph.** After the opening lands, ask "given this opening, what does the reader need to hear next?" Pull material from the pile to answer. The next block may only lean on grounded concepts, and grounds new ones as it lands. Argue about the form the next block takes — a paragraph, a list, a table, a callout, a quote, a code block. Each format choice should be deliberate and defensible.
 5. **Append to the article file as you go.** Don't batch. Write each agreed paragraph or block immediately so the user can see the article taking shape.
-6. **Loop steps 4 and 5 until the article is done.** Repeat both the block-selection and the append together each pass, so every agreed block is persisted as you go. The user decides when it's done.
+6. **Loop step 4 until the article is done.** The user decides when it's done.
 
 ## Grounding
 

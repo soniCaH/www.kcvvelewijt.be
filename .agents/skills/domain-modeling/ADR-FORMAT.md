@@ -1,13 +1,8 @@
 # ADR Format
 
-ADRs live in a `docs/adr/` directory and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs live in `docs/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 
-Resolve *which* `docs/adr/` before creating one — the same single-vs-multi-context rule the `/domain-modeling` skill uses (see [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md)):
-
-- **Single-context repo:** the root `docs/adr/`.
-- **Multi-context repo** (a `CONTEXT-MAP.md` exists at the root): system-wide decisions go in the root `docs/adr/`; a decision scoped to one context goes in that context's `docs/adr/` (e.g. `src/ordering/docs/adr/`).
-
-Create the target `docs/adr/` directory lazily — only when the first ADR for it is needed.
+Create the `docs/adr/` directory lazily — only when the first ADR is needed.
 
 ## Template
 
@@ -17,7 +12,7 @@ Create the target `docs/adr/` directory lazily — only when the first ADR for i
 {1-3 sentences: what's the context, what did we decide, and why.}
 ```
 
-That's it. An ADR can be a single paragraph. The value is in recording *that* a decision was made and *why* — not in filling out sections.
+That's it. An ADR can be a single paragraph. The value is in recording _that_ a decision was made and _why_ — not in filling out sections.
 
 ## Optional sections
 
@@ -29,7 +24,7 @@ Only include these when they add genuine value. Most ADRs won't need them.
 
 ## Numbering
 
-Numbering is **per-directory**: scan the *same* `docs/adr/` the new ADR will live in for the highest existing number and increment by one. A context's `docs/adr/` numbers independently of the root and of other contexts.
+Scan `docs/adr/` for the highest existing number and increment by one.
 
 ## When to offer an ADR
 
