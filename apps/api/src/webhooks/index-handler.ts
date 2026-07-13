@@ -5,6 +5,7 @@ import { WorkerEnvTag } from "../env";
 import { sanityClientConfig } from "../sanity/config";
 import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
 import {
+  ARTICLE_COVER_IMAGE_PROJECTION,
   buildArticleIndexText,
   buildPageIndexText,
   buildResponsibilityIndexText,
@@ -101,7 +102,7 @@ const typeDescriptors: Record<AllowedType, TypeDescriptor> = {
     },
   },
   article: {
-    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), "imageUrl": coverImage.asset->url }`,
+    query: `*[_id == $id][0]{ _id, "slug": coalesce(slug.current,""), title, "tags": coalesce(tags,[]), "bodyText": pt::text(body), ${ARTICLE_COVER_IMAGE_PROJECTION} }`,
     buildIndex: (doc) => {
       const r = S.decodeUnknownSync(ArticleDoc)(doc);
       return {

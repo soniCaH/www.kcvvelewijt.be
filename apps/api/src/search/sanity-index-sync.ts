@@ -4,6 +4,7 @@ import { WorkerEnvTag } from "../env";
 import { sanityClientConfig } from "../sanity/config";
 import { EmbeddingService } from "./embedding";
 import {
+  ARTICLE_COVER_IMAGE_PROJECTION,
   buildArticleIndexText,
   buildPageIndexText,
   buildResponsibilityIndexText,
@@ -54,7 +55,7 @@ const ARTICLE_QUERY = `*[_type == "article" && publishAt <= now() && (!defined(u
   title,
   "tags": coalesce(tags, []),
   "bodyText": pt::text(body),
-  "imageUrl": coverImage.asset->url
+  ${ARTICLE_COVER_IMAGE_PROJECTION}
 }`;
 
 const PAGE_QUERY = `*[_type == "page"] {
