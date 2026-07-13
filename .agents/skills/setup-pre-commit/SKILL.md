@@ -20,10 +20,10 @@ Check for `package-lock.json` (npm), `pnpm-lock.yaml` (pnpm), `yarn.lock` (yarn)
 
 ### 2. Install dependencies
 
-Install as devDependencies (swap `npm install --save-dev` for the detected package manager's equivalent):
+Install as devDependencies:
 
-```bash
-npm install --save-dev husky lint-staged prettier
+```
+husky lint-staged prettier
 ```
 
 ### 3. Initialize Husky

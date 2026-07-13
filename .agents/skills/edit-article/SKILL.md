@@ -13,7 +13,3 @@ Confirm the sections with the user.
 2. For each section:
 
 2a. Rewrite the section to improve clarity, coherence, and flow. Use maximum 240 characters per paragraph.
-
-2b. Edit the rewrite in place, preserving the section's meaning and its position in the dependency order fixed in step 1. Don't reorder or drop information a later section depends on.
-
-3. Read the whole article end-to-end. Check that the sections still flow, that no concept is leaned on before an earlier section grounds it, and that nothing important was lost in the rewrite. Fix anything that reads wrong, then hand the result back to the user.
