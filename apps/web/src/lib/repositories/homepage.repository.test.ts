@@ -54,14 +54,17 @@ function makeBannersResult(
 }
 
 describe("HOMEPAGE_BANNERS_QUERY", () => {
-  it("includes CDN optimization params for all three banner slots", () => {
+  it("includes hotspot-aware CDN crop params for all three banner slots", () => {
     const query = HOMEPAGE_BANNERS_QUERY as unknown as string;
-    const cdnParams = `"?w=1200&q=80&fm=webp&fit=max"`;
+    // Banners render in a fixed 6:1 `object-cover` frame (<BannerSlot>), so the
+    // URL bakes a 6:1 focalpoint crop — otherwise the browser center-crops and
+    // ignores the editorial hotspot (same bug fixed on article cover images).
+    const cropParams = `"?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="`;
     const matches = query.match(
-      /image\.asset->url \+ "\?w=1200&q=80&fm=webp&fit=max"/g,
+      /image\.asset->url \+ "\?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="/g,
     );
     expect(matches).toHaveLength(3);
-    expect(query).toContain(`"imageUrl": image.asset->url + ${cdnParams}`);
+    expect(query).toContain(`"imageUrl": image.asset->url + ${cropParams}`);
   });
 });
 

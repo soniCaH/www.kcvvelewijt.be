@@ -17,7 +17,7 @@ export const TEAMS_QUERY =
   defineQuery(`*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {
   _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,
   tagline,
-  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))
 }`);
 
 export const TEAM_BY_SLUG_QUERY =
@@ -25,7 +25,7 @@ export const TEAM_BY_SLUG_QUERY =
   _id, psdId, name, "slug": slug.current, age, gender, footbelId, division, divisionFull,
   season,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
-  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),
   trainingSchedule,
   players[]-> {
     _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
@@ -45,7 +45,7 @@ export const TEAMS_LANDING_QUERY =
   defineQuery(`*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {
   _id, name, "slug": slug.current, age,
   division, divisionFull, season, tagline,
-  "teamImageUrl": teamImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),
   staff[] { role, "member": member-> { firstName, lastName, functionTitle } }
 }`);
 

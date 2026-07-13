@@ -21,7 +21,7 @@ export const EVENTS_QUERY =
   defineQuery(`*[_type == "event" && coalesce(dateEnd, dateStart) >= now()] | order(dateStart asc) {
   "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": false,
   "href": coalesce(externalLink.url, "#"),
-  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
 }`);
 
 export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
@@ -29,12 +29,12 @@ export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
     *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {
       "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),
       "href": coalesce(externalLink.url, "#"),
-      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+      "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
     },
     *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {
       "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),
       "href": coalesce(externalLink.url, "#"),
-      "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+      "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
     }
   )
 `);
@@ -56,7 +56,7 @@ export const EVENT_BY_SLUG_QUERY =
   "dateStart": coalesce(dateStart, ""),
   dateEnd,
   location,
-  "coverImageUrl": coverImage.asset->url + "?w=1600&q=80&fm=webp&fit=max",
+  "coverImageUrl": coverImage.asset->url + "?w=1600&h=900&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),
   "coverImageAlt": coverImage.alt,
   externalLink
 }`);
