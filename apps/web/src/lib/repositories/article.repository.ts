@@ -21,7 +21,7 @@ import { formatArticleDate } from "../utils/dates";
 export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
-  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),
   articleType,
   subjects[]{
     _key, kind,
@@ -62,13 +62,13 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 export const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
-  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
 }`);
 
 export const RELATED_ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
-  "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
+  "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
 }`);
 
 // Match preview/recap articles linked to a PSD match (#1470 + #1914). Matches
@@ -88,7 +88,7 @@ export const MATCH_ARTICLES_QUERY =
   "slug": coalesce(slug.current, ""),
   publishedAt,
   articleType,
-  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max"
+  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
 }`);
 
 // Title is constrained Portable Text (single block, accent decorator).
@@ -115,7 +115,7 @@ export const ARTICLE_BY_SLUG_QUERY =
   "photographer": coalesce(photographer, ""),
   metaDescription,
   "ogImageUrl": ogImage.asset->url + "?w=1200&h=630&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(ogImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(ogImage.hotspot.y, 0.5)),
-  "coverImageUrl": coverImage.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),
   // Hotspot-aware 4:5 portrait crop for the interview hero (#1329). The
   // Sanity CDN requires explicit fp-x / fp-y alongside crop=focalpoint;
   // passing crop=focalpoint alone silently falls back to centre crop.
@@ -146,7 +146,7 @@ export const ARTICLE_BY_SLUG_QUERY =
     "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
-  relatedArticles[]-> { "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max" },
+  relatedArticles[]-> { "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)) },
   relatedContent[]->{
     _type,
     _id,
@@ -155,7 +155,7 @@ export const ARTICLE_BY_SLUG_QUERY =
       "slug": coalesce(slug.current, ""),
       publishedAt,
       unpublishAt,
-      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
+      "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
     }),
     ...select(_type == "player" => {
       firstName,
@@ -181,7 +181,7 @@ export const ARTICLE_BY_SLUG_QUERY =
       "slug": coalesce(slug.current, ""),
       "dateStart": coalesce(dateStart, ""),
       dateEnd,
-      "coverImageUrl": coverImage.asset->url + "?w=800&q=80&fm=webp&fit=max"
+      "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
     })
   },
   "mentionedPlayers": body[].markDefs[_type == "internalLink" && reference->_type == "player"].reference-> {
