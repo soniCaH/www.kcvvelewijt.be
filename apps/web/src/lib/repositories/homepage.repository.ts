@@ -11,17 +11,17 @@ import type {
 
 export const HOMEPAGE_BANNERS_QUERY = defineQuery(`*[_type == "homePage"][0] {
     "bannerSlotA": bannerSlotA-> {
-      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+      "imageUrl": image.asset->url + "?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(image.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(image.hotspot.y, 0.5)),
       alt,
       href
     },
     "bannerSlotB": bannerSlotB-> {
-      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+      "imageUrl": image.asset->url + "?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(image.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(image.hotspot.y, 0.5)),
       alt,
       href
     },
     "bannerSlotC": bannerSlotC-> {
-      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",
+      "imageUrl": image.asset->url + "?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(image.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(image.hotspot.y, 0.5)),
       alt,
       href
     }
