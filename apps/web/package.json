@@ -41,7 +41,7 @@
     "@kcvv/api-contract": "workspace:*",
     "@phosphor-icons/react": "2.1.10",
     "@portabletext/react": "8.0.1",
-    "@sanity/client": "7.26.2",
+    "@sanity/client": "8.5.0",
     "@sanity/webhook": "4.0.4",
     "@tailwindcss/typography": "0.5.20",
     "@touch4it/ical-timezones": "1.9.0",
