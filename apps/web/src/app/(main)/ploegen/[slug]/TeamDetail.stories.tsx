@@ -17,9 +17,9 @@
  * `…/CompetitiveStatusLine`, `…/SquadGrid`, `…/TeamStaff`, `…/TeamEditorial`)
  * instead.
  *
- * The competitive-block state stories below (#2636) exist to show all four
- * `deriveCompetitiveBlockState` outcomes assembled on a full page — the
- * function itself is unit-tested without rendering anything at
+ * The competitive-block state stories below (#2636, extended in #2795) exist
+ * to show all six `deriveCompetitiveBlockState` outcomes assembled on a full
+ * page — the function itself is unit-tested without rendering anything at
  * `src/lib/utils/competitive-block-state.test.ts`.
  */
 
@@ -36,7 +36,11 @@ import { SquadGrid } from "@/components/team/SquadGrid";
 import { TeamStaff } from "@/components/team/TeamStaff";
 import type { TeamStaffMemberData } from "@/components/team/TeamStaff";
 import { TeamEditorial } from "@/components/team/TeamEditorial";
-import { StripedSeam, PageContainer } from "@/components/design-system";
+import {
+  StripedSeam,
+  PageContainer,
+  EmptyState,
+} from "@/components/design-system";
 import { deriveCompetitiveBlockState } from "@/lib/utils/competitive-block-state";
 
 const KCVV_TEAM_ID = 1235;
@@ -274,22 +278,38 @@ const contactInfo: PortableTextBlock[] = [
  * fed the same shape `page.tsx` passes it (`matches` + `standings`), and
  * switched on the same `state.kind`, rather than a hand-derived
  * `inCompetition` boolean paralleling that function instead of calling it
- * (#2636 finding 13). */
+ * (#2636 finding 13). Two more joined in #2795: `fixtures-unavailable`
+ * mirrors `fetchBffData`'s `"unavailable"` sentinel (the fixtures read
+ * failed permanently — the whole block collapses, same as
+ * `not-in-competition`), and `ranking-unavailable` mirrors a fulfilled
+ * fixtures read with `standings: null` (only the ranking read failed
+ * permanently — `#wedstrijden` still renders in full; the klassement slot
+ * gets the failure notice instead of `<StandingsSection>`). */
 type CompetitiveVariant =
-  "not-in-competition" | "no-table" | "numberless" | "live";
+  | "not-in-competition"
+  | "fixtures-unavailable"
+  | "ranking-unavailable"
+  | "no-table"
+  | "numberless"
+  | "live";
 
+// `fixtures-unavailable` has no `{ matches, standings }` shape of its own —
+// like `fetchBffData`, it is the bare `"unavailable"` sentinel — so it is
+// handled separately in `TeamDetailAssembly` below rather than forced into
+// this record.
 const COMPETITIVE_FIXTURES: Record<
-  CompetitiveVariant,
-  { matches: Match[]; standings: RankingTable[] }
+  Exclude<CompetitiveVariant, "fixtures-unavailable">,
+  { matches: Match[]; standings: RankingTable[] | null }
 > = {
   "not-in-competition": { matches: NO_LEAGUE_FIXTURE, standings: [] },
+  "ranking-unavailable": { matches: LEAGUE_FIXTURE, standings: null },
   "no-table": { matches: LEAGUE_FIXTURE, standings: noTableTables },
   numberless: { matches: LEAGUE_FIXTURE, standings: numberlessTables },
   live: { matches: LEAGUE_FIXTURE, standings: standingsTables },
 };
 
 interface TeamDetailAssemblyProps {
-  /** Which of the four #2636 competitive-block states this story shows.
+  /** Which of the six #2636/#2795 competitive-block states this story shows.
    * Defaults to `"live"` — every section present, the maximal composition. */
   competitive?: CompetitiveVariant;
 }
@@ -299,11 +319,20 @@ interface TeamDetailAssemblyProps {
  * ordering, the `<StripedSeam>` cadence, and the `<PageContainer>` section
  * wrappers of `page.tsx` — including the #2636 rule that `#klassement` and
  * `#wedstrijden` render as ONE unit: both together, or a single status line
- * in their place.
+ * in their place — and the #2795 refinement that being "open" no longer
+ * implies `#klassement` renders `<StandingsSection>`: a permanently-failed
+ * ranking read keeps `#wedstrijden` open but swaps the klassement slot for a
+ * failure notice instead.
  */
 function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
-  const { matches, standings } = COMPETITIVE_FIXTURES[competitive];
-  const competitiveState = deriveCompetitiveBlockState({ matches, standings });
+  const competitiveState =
+    competitive === "fixtures-unavailable"
+      ? deriveCompetitiveBlockState("unavailable")
+      : deriveCompetitiveBlockState(COMPETITIVE_FIXTURES[competitive]);
+  const standings =
+    competitive === "fixtures-unavailable"
+      ? []
+      : (COMPETITIVE_FIXTURES[competitive].standings ?? []);
 
   return (
     <>
@@ -319,23 +348,43 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
         />
       </PageContainer>
 
-      {competitiveState.kind === "not-in-competition" ? (
+      {competitiveState.kind === "not-in-competition" ||
+      competitiveState.kind === "fixtures-unavailable" ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
           <PageContainer className="py-10">
-            <CompetitiveStatusLine />
+            <CompetitiveStatusLine
+              variant={
+                competitiveState.kind === "fixtures-unavailable"
+                  ? "unavailable"
+                  : "not-in-competition"
+              }
+            />
           </PageContainer>
         </>
       ) : (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <PageContainer as="section" className="py-10">
-            <StandingsSection
-              tables={standings}
-              divisionFull="Eerste Elftal A – 3e Nat. A"
-              highlightTeamId={KCVV_TEAM_ID}
-            />
-          </PageContainer>
+          {competitiveState.kind === "ranking-unavailable" ? (
+            <PageContainer className="py-10">
+              <EmptyState
+                tier="slot"
+                reason="unavailable"
+                emphasis={{ text: "even niet beschikbaar" }}
+              >
+                Het klassement is even niet beschikbaar. Probeer het later
+                opnieuw.
+              </EmptyState>
+            </PageContainer>
+          ) : (
+            <PageContainer as="section" className="py-10">
+              <StandingsSection
+                tables={standings}
+                divisionFull="Eerste Elftal A – 3e Nat. A"
+                highlightTeamId={KCVV_TEAM_ID}
+              />
+            </PageContainer>
+          )}
 
           <StripedSeam colorPair="ink-cream" height="md" />
           <PageContainer as="section" className="py-10">
@@ -424,4 +473,26 @@ export const NoTablePublished: Story = {
  */
 export const Numberless: Story = {
   args: { competitive: "numberless" },
+};
+
+/**
+ * Fixtures read permanently failed (#2795) — the FIXTURES read itself never
+ * fulfilled, so there is no way to tell whether the team is even in
+ * competition. Byte-for-byte the same collapse as `NotInCompetition`: one
+ * `<CompetitiveStatusLine>`, no sections, no nav chips — only the copy
+ * differs (`variant="unavailable"`).
+ */
+export const FixturesUnavailable: Story = {
+  args: { competitive: "fixtures-unavailable" },
+};
+
+/**
+ * Ranking read permanently failed while fixtures fulfilled (#2795) — the bug
+ * this ticket fixes. `#wedstrijden` renders in full with its `Wedstrijden`
+ * nav chip; the klassement slot renders the
+ * `<EmptyState tier="slot" reason="unavailable">` failure notice in place of
+ * `<StandingsSection>`, with no `<h2>`, no `id`, and no klassement nav chip.
+ */
+export const RankingUnavailable: Story = {
+  args: { competitive: "ranking-unavailable" },
 };

@@ -1,9 +1,11 @@
 /**
- * `deriveCompetitiveBlockState` unit tests (#2636).
+ * `deriveCompetitiveBlockState` unit tests (#2636, split further in #2795).
  *
- * Covers all four reachable states plus the null-fetch-result and
- * "unavailable" paths, and the gate rule itself: a match's `competitionType`,
- * never `standings.length`.
+ * Covers all reachable states plus the null-fetch-result and
+ * "unavailable" (fixtures) paths, and the gate rule itself: a match's
+ * `competitionType`, never `standings.length`. #2795 adds `ranking-
+ * unavailable` (a fulfilled-fixtures result with `standings: null`) and
+ * proves it is never conflated with `no-table` (`standings: []`).
  */
 
 import { describe, it, expect } from "vitest";
@@ -12,6 +14,7 @@ import {
   classifyStandingsTables,
   competitiveBlockHeadingLabel,
   deriveCompetitiveBlockState,
+  isCompetitiveBlockOpen,
   isNumberlessTable,
 } from "./competitive-block-state";
 
@@ -152,14 +155,50 @@ describe("deriveCompetitiveBlockState", () => {
     expect(state).toEqual({ kind: "live" });
   });
 
-  it("returns unavailable for the 'unavailable' sentinel, without reading matches or standings", () => {
-    // `fetchBffData` passes this literal when it caught a PERMANENT PSD
-    // failure (#2636 finding 3) — a stale/mistyped psdId or an undecodable
-    // response. A transient failure never reaches here at all; the render
-    // throws instead so ISR can serve the last-good page.
+  it("returns fixtures-unavailable for the 'unavailable' sentinel, without reading matches or standings", () => {
+    // `fetchBffData` passes this literal when it caught a PERMANENT failure
+    // on the FIXTURES read (#2636 finding 3) — a stale/mistyped psdId or an
+    // undecodable response. A transient failure never reaches here at all;
+    // the render throws instead so ISR can serve the last-good page.
     expect(deriveCompetitiveBlockState("unavailable")).toEqual({
-      kind: "unavailable",
+      kind: "fixtures-unavailable",
     });
+  });
+
+  it("returns ranking-unavailable when fixtures fulfilled and standings is null (#2795)", () => {
+    // `fetchBffData` resolves this shape when the RANKING read failed
+    // permanently but the fixtures read fulfilled — the fixtures must not be
+    // thrown away, only the klassement slot reports the failure.
+    const state = deriveCompetitiveBlockState({
+      matches: [match()],
+      standings: null,
+    });
+    expect(state).toEqual({ kind: "ranking-unavailable" });
+  });
+
+  it("does not conflate ranking-unavailable (standings: null) with no-table (standings: [])", () => {
+    const unavailable = deriveCompetitiveBlockState({
+      matches: [match()],
+      standings: null,
+    });
+    const noTable = deriveCompetitiveBlockState({
+      matches: [match()],
+      standings: [],
+    });
+    expect(unavailable).toEqual({ kind: "ranking-unavailable" });
+    expect(noTable).toEqual({ kind: "no-table" });
+    expect(unavailable).not.toEqual(noTable);
+  });
+
+  it("returns not-in-competition when standings is null and there is no league fixture either", () => {
+    // The fixtures gate is checked before the null-standings read: without a
+    // league fixture, a null ranking still collapses to not-in-competition,
+    // not ranking-unavailable.
+    const state = deriveCompetitiveBlockState({
+      matches: [match({ competitionType: "tournament" })],
+      standings: null,
+    });
+    expect(state).toEqual({ kind: "not-in-competition" });
   });
 });
 
@@ -195,8 +234,16 @@ describe("competitiveBlockHeadingLabel", () => {
     ).toBeNull();
   });
 
-  it("reads null for unavailable — no nav entry to label", () => {
-    expect(competitiveBlockHeadingLabel({ kind: "unavailable" })).toBeNull();
+  it("reads null for fixtures-unavailable — no nav entry to label", () => {
+    expect(
+      competitiveBlockHeadingLabel({ kind: "fixtures-unavailable" }),
+    ).toBeNull();
+  });
+
+  it("reads null for ranking-unavailable — the failure notice earns no nav chip (#2795)", () => {
+    expect(
+      competitiveBlockHeadingLabel({ kind: "ranking-unavailable" }),
+    ).toBeNull();
   });
 
   it("reads Klassement for a live state", () => {
@@ -211,5 +258,37 @@ describe("competitiveBlockHeadingLabel", () => {
     expect(competitiveBlockHeadingLabel({ kind: "numberless" })).toBe(
       "De reeks",
     );
+  });
+});
+
+describe("isCompetitiveBlockOpen", () => {
+  it("is false for not-in-competition", () => {
+    expect(isCompetitiveBlockOpen({ kind: "not-in-competition" })).toBe(false);
+  });
+
+  it("is false for fixtures-unavailable", () => {
+    expect(isCompetitiveBlockOpen({ kind: "fixtures-unavailable" })).toBe(
+      false,
+    );
+  });
+
+  it("is true for ranking-unavailable — #wedstrijden must still render (#2795)", () => {
+    // This is the load-bearing case: with the fixtures read fulfilled and
+    // only the ranking read permanently failed, the block stays "open" so
+    // `#wedstrijden` renders in full — `competitiveBlockHeadingLabel` alone
+    // (null for this state) must never be used to derive this flag.
+    expect(isCompetitiveBlockOpen({ kind: "ranking-unavailable" })).toBe(true);
+  });
+
+  it("is true for no-table", () => {
+    expect(isCompetitiveBlockOpen({ kind: "no-table" })).toBe(true);
+  });
+
+  it("is true for numberless", () => {
+    expect(isCompetitiveBlockOpen({ kind: "numberless" })).toBe(true);
+  });
+
+  it("is true for live", () => {
+    expect(isCompetitiveBlockOpen({ kind: "live" })).toBe(true);
   });
 });

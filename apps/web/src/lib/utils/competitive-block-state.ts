@@ -3,20 +3,34 @@ import type { Match, RankingEntry, RankingTable } from "@kcvv/api-contract";
 /**
  * The competitive half of a team page — `#klassement` + `#wedstrijden` — as
  * one state, keyed to the data rather than to the section, the age group, or
- * history (#2540/#2636). Five reachable states plus a sixth degenerate input
+ * history (#2540/#2636). Six reachable states plus a seventh degenerate input
  * (no fetch result at all — a team with no PSD id):
  *
  * - **`not-in-competition`** — the club has no official fixture for this team
  *   this season. Both sections stay off the page; the caller renders a single
  *   status line instead (`CompetitiveStatusLine`).
- * - **`unavailable`** — the PSD read failed *permanently* (a stale/mistyped
- *   `psdId`, or a response this deploy can no longer decode) rather than
- *   transiently. Not the same failure as #2540 state 4: a transient failure
- *   never reaches this function at all — `page.tsx` lets that promise reject
- *   so the render throws and ISR serves the last-good page. A permanent one
- *   never *has* a last-good page to fall back to (every render fails the
- *   same way), so it is caught and degrades to this state instead, rather
- *   than taking the whole page down forever (#2636 finding 3).
+ * - **`fixtures-unavailable`** — the *fixtures* read failed *permanently* (a
+ *   stale/mistyped `psdId`, or a response this deploy can no longer decode)
+ *   rather than transiently. Not the same failure as #2540 state 4: a
+ *   transient failure never reaches this function at all — `page.tsx` lets
+ *   that promise reject so the render throws and ISR serves the last-good
+ *   page. A permanent one never *has* a last-good page to fall back to
+ *   (every render fails the same way), so it is caught and degrades to this
+ *   state instead, rather than taking the whole page down forever (#2636
+ *   finding 3). Without fixtures there is genuinely no way to tell whether
+ *   the team has a league at all (`isInCompetition` reads the fixtures), so
+ *   both sections stay off the page — the same collapse as
+ *   `not-in-competition`, just for a different reason.
+ * - **`ranking-unavailable`** — the *ranking* read failed permanently while
+ *   the fixtures read fulfilled (#2795). Unlike `fixtures-unavailable`, the
+ *   fixtures are in hand and prove the team IS in competition, so
+ *   `#wedstrijden` still renders in full — only the klassement slot reports
+ *   the failure, via `<EmptyState tier="slot" reason="unavailable">` in
+ *   place of `<StandingsSection>`. Distinct from `no-table` (a *value* — the
+ *   association genuinely has not published a row yet): `no-table` means
+ *   `standings` resolved to `[]`, `ranking-unavailable` means the ranking
+ *   read never resolved to a value at all. Conflating the two would call a
+ *   broken read "not published yet," which is false.
  * - **`no-table`** — in competition, but the association has not published a
  *   row yet.
  * - **`numberless`** — in competition, and every published entry reads
@@ -40,15 +54,22 @@ import type { Match, RankingEntry, RankingTable } from "@kcvv/api-contract";
  */
 export type CompetitiveBlockState =
   | { readonly kind: "not-in-competition" }
-  | { readonly kind: "unavailable" }
+  | { readonly kind: "fixtures-unavailable" }
+  | { readonly kind: "ranking-unavailable" }
   | { readonly kind: "no-table" }
   | { readonly kind: "numberless" }
   | { readonly kind: "live" };
 
-/** What `fetchBffData` resolves to when it resolves — never the rejection. */
+/**
+ * What `fetchBffData` resolves to when it resolves — never the rejection.
+ * `standings` is nullable: `null` means the ranking read failed
+ * *permanently* (#2795) while the fixtures read fulfilled — a value this
+ * function reads into `ranking-unavailable`, never `no-table`. A genuine
+ * "no table published yet" is the *value* `[]`, not `null`.
+ */
 export interface CompetitiveFetchResult {
   readonly matches: readonly Match[];
-  readonly standings: readonly RankingTable[];
+  readonly standings: readonly RankingTable[] | null;
 }
 
 /**
@@ -116,18 +137,24 @@ export function classifyStandingsTables(
  * `fetchResult` is `null` when the team carries no usable PSD id — not a
  * fetch failure, a deliberate skip, so it fails closed to
  * `not-in-competition` rather than throwing. It is the string `"unavailable"`
- * when `fetchBffData` caught a *permanent* PSD failure (see the `unavailable`
- * member of `CompetitiveBlockState` above) — a transient failure is never
- * passed here at all, because `page.tsx` lets that one reject the render.
+ * when `fetchBffData` caught a *permanent* failure on the **fixtures** read
+ * (see the `fixtures-unavailable` member of `CompetitiveBlockState` above) —
+ * a transient failure is never passed here at all, because `page.tsx` lets
+ * that one reject the render. A permanent failure on the **ranking** read
+ * alone does not use this sentinel: `fetchBffData` still resolves with the
+ * fixtures it has plus `standings: null` (#2795), which this function reads
+ * into `ranking-unavailable` below — never conflated with `no-table`, whose
+ * `standings` is the fulfilled value `[]`.
  */
 export function deriveCompetitiveBlockState(
   fetchResult: CompetitiveFetchResult | null | "unavailable",
 ): CompetitiveBlockState {
-  if (fetchResult === "unavailable") return { kind: "unavailable" };
+  if (fetchResult === "unavailable") return { kind: "fixtures-unavailable" };
   if (fetchResult === null) return { kind: "not-in-competition" };
   if (!isInCompetition(fetchResult.matches)) {
     return { kind: "not-in-competition" };
   }
+  if (fetchResult.standings === null) return { kind: "ranking-unavailable" };
   return { kind: classifyStandingsTables(fetchResult.standings) };
 }
 
@@ -135,10 +162,13 @@ export function deriveCompetitiveBlockState(
  * `#klassement`'s heading follows the data (#2605 decision): `"Klassement"`
  * only when the table carries real points, `"De reeks"` when it is in
  * competition but has none yet, and no label (`null`) at all when the block
- * doesn't render a `#klassement` nav entry in the first place. Used for both
- * the sticky nav's chip label today and the section's own `<h2>` once #2637
- * adds one — one word, one owner, so the nav chip and the heading can never
- * read differently for the same page.
+ * doesn't render a `#klassement` nav entry in the first place — which now
+ * includes `ranking-unavailable` (#2795): the failure notice that replaces
+ * `<StandingsSection>` there is not a section, so it earns no nav chip
+ * either, the same rule `fixtures-unavailable`/`not-in-competition` already
+ * followed. Used for both the sticky nav's chip label today and the
+ * section's own `<h2>` once #2637 adds one — one word, one owner, so the nav
+ * chip and the heading can never read differently for the same page.
  *
  * Takes the full `CompetitiveBlockState` (not a narrowed `Exclude<>`) and
  * switches on every member so a state added later fails to compile here
@@ -150,7 +180,8 @@ export function competitiveBlockHeadingLabel(
 ): string | null {
   switch (state.kind) {
     case "not-in-competition":
-    case "unavailable":
+    case "fixtures-unavailable":
+    case "ranking-unavailable":
       return null;
     case "live":
       return "Klassement";
@@ -161,6 +192,44 @@ export function competitiveBlockHeadingLabel(
       const _exhaustive: never = state;
       throw new Error(
         `competitiveBlockHeadingLabel: unhandled state ${JSON.stringify(_exhaustive)}`,
+      );
+    }
+  }
+}
+
+/**
+ * Whether the competitive block is "open" at all — i.e. whether `#wedstrijden`
+ * (and, separately, `#klassement` when `competitiveBlockHeadingLabel` returns
+ * non-null) should render, as opposed to the single-line collapse
+ * (`<CompetitiveStatusLine>`) that replaces both sections.
+ *
+ * This is **not** `competitiveBlockHeadingLabel(state) !== null` (#2795):
+ * `ranking-unavailable` returns `null` from that function — the klassement
+ * slot earns no heading/nav-chip — but the fixtures still fulfilled, so
+ * `#wedstrijden` must still render in full. Deriving `inCompetition` from
+ * the label would silently re-collapse the fixtures every time the ranking
+ * read fails, which is the exact bug #2795 fixes. A page must call this
+ * function for that gate rather than hand-writing the exclusion at the call
+ * site — #2636 finding 5 rejected that shape, and a state added later would
+ * silently fall out of sync with a hand-written list the same way.
+ *
+ * Switches on every member, mirroring `competitiveBlockHeadingLabel`, so a
+ * state added later fails to compile here instead of defaulting silently.
+ */
+export function isCompetitiveBlockOpen(state: CompetitiveBlockState): boolean {
+  switch (state.kind) {
+    case "not-in-competition":
+    case "fixtures-unavailable":
+      return false;
+    case "ranking-unavailable":
+    case "no-table":
+    case "numberless":
+    case "live":
+      return true;
+    default: {
+      const _exhaustive: never = state;
+      throw new Error(
+        `isCompetitiveBlockOpen: unhandled state ${JSON.stringify(_exhaustive)}`,
       );
     }
   }

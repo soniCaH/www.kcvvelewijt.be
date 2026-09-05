@@ -2,9 +2,9 @@
  * Team Detail Page — Phase 6.C single-scroll composition.
  *
  * SiteHeader → MatchStripSlot → TeamHero → sticky section-nav →
- * [competitive block: status line, or StandingsSection + TeamMatchesSection]
- * → SquadGrid → TeamStaff → TeamEditorial → global SponsorsBlock →
- * RelatedRow → footer.
+ * [competitive block: status line, or (StandingsSection | failure notice) +
+ * TeamMatchesSection] → SquadGrid → TeamStaff → TeamEditorial → global
+ * SponsorsBlock → RelatedRow → footer.
  * <StripedSeam> separates sections; every non-hero section auto-hides on
  * empty data (a U6 page degrades to hero + squad + staff).
  *
@@ -14,9 +14,13 @@
  *
  * The competitive block (`#klassement` + `#wedstrijden`) does not auto-hide
  * per section any more — it is gated as ONE unit by
- * `deriveCompetitiveBlockState` (#2636): both sections render together, or
- * neither does and a single status line takes their place. See the comment
- * beside `competitiveState` below.
+ * `isCompetitiveBlockOpen(deriveCompetitiveBlockState(...))` (#2636, split
+ * further in #2795): either the block is closed and a single status line
+ * takes both sections' place, or it is open and `#wedstrijden` renders in
+ * full — with `#klassement` itself rendering `<StandingsSection>` UNLESS the
+ * ranking read alone failed permanently, in which case it renders a failure
+ * notice with no heading/id/nav-chip instead. See the comment beside
+ * `competitiveState` below.
  */
 
 import { Effect } from "effect";
@@ -39,6 +43,7 @@ import { degradeIfPermanent } from "@/lib/effect/degrade-if-permanent";
 import { StripedSeam } from "@/components/design-system/StripedSeam";
 import { PageContainer } from "@/components/design-system/PageContainer";
 import { UpLink } from "@/components/design-system/UpLink";
+import { EmptyState } from "@/components/design-system/EmptyState";
 import { TeamHero } from "@/components/team/TeamHero";
 import { StandingsSection } from "@/components/team/StandingsSection";
 import { TeamMatchesSection } from "@/components/team/TeamMatchesSection";
@@ -62,6 +67,7 @@ import { transformMatchToSchedule } from "@/components/match";
 import {
   deriveCompetitiveBlockState,
   competitiveBlockHeadingLabel,
+  isCompetitiveBlockOpen,
 } from "@/lib/utils/competitive-block-state";
 import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
 
@@ -117,7 +123,14 @@ export async function generateMetadata({
 
 interface BffData {
   matches: readonly Match[];
-  standings: readonly RankingTable[];
+  // Nullable (#2795): `null` means the ranking read failed *permanently* —
+  // specifically a `ParseError`/`HttpApiDecodeError`, a response this
+  // deploy can no longer decode — while the fixtures read fulfilled. A value
+  // `deriveCompetitiveBlockState` reads into `ranking-unavailable`, never
+  // `no-table`. A genuine "no table published yet" (including the BFF's own
+  // 404 for that case — see `fetchBffData`'s docblock) is the fulfilled
+  // value `[]`, not `null`.
+  standings: readonly RankingTable[] | null;
   teamId: number;
 }
 
@@ -139,18 +152,44 @@ interface BffData {
  * the route serves `error.tsx` forever instead of the hero/squad/staff a
  * broken competitive block should still degrade to.
  *
- * The two reads are told apart differently (#2636 finding 2, review round 2):
+ * The two reads are told apart differently (#2636 finding 2, review round 2),
+ * and now **resolve differently too** (#2795): a permanent failure on the
+ * fixtures read still collapses the whole competitive block (there is no
+ * fixture data left to prove the team is even in competition), but a
+ * permanent failure on the ranking read alone must not throw away a
+ * `matchesResult` that fulfilled — `#wedstrijden` still has data to render.
+ *
  * - The **ranking** read still has its typed `BffError` channel here, so a
  *   permanent tag is caught *as an Effect* via the shared `degradeIfPermanent`
  *   (`lib/effect/degrade-if-permanent.ts`, extracted in #2778 once
  *   `/wedstrijd/[matchId]` needed the identical split), exhaustiveness-checked
  *   against the union. A caught read resolves to `null` (a value, not a
  *   rejection) rather than the empty array a transient failure would be
- *   indistinguishable from.
+ *   indistinguishable from. That `null` now flows all the way to `BffData`
+ *   as `standings: null` — it is no longer collapsed to the `"unavailable"`
+ *   sentinel, so the fixtures already in hand are never discarded.
+ *
+ *   **`HttpNotFound` is resolved to `[]` before it ever reaches
+ *   `degradeIfPermanent`** (#2795 review round). `apps/api/src/handlers/
+ *   ranking.ts` maps an *empty* upstream table list to the exact same 404 a
+ *   genuinely-unknown PSD team id would get — the handler's own
+ *   `tables.length === 0` guard and `apps/api/src/psd/service.ts`'s
+ *   `classifyHttpError` both funnel into `ResourceNotFoundError` →
+ *   `HttpNotFound`, indistinguishable at this boundary. Because the
+ *   fixtures read alongside this one already fulfilled for this exact
+ *   `psdTeamId`, a same-id 404 here overwhelmingly means "not published
+ *   yet," so it degrades to `no-table`, never `ranking-unavailable` — the
+ *   identical carve-out `/wedstrijd/[matchId]`'s `fetchStandings` makes
+ *   (#2576/#2778). Only `ParseError`/`HttpApiDecodeError` — a response this
+ *   deploy genuinely cannot decode — still reach `degradeIfPermanent` and
+ *   degrade to `null`.
  * - The **matches** read goes through `getTeamMatches`, whose channel is
  *   already flattened to a rejecting `Promise` by the #2441 dedupe below, so
  *   it cannot be classified before it becomes one. `isPermanentBffFailure`
- *   inspects the rejection's tag after the fact instead.
+ *   inspects the rejection's tag after the fact instead. A permanent failure
+ *   HERE is the only case that still returns the `"unavailable"` sentinel:
+ *   without fixtures there is no way to tell whether the team is even in
+ *   competition, so the whole block collapses exactly as it did before.
  *
  * Either way, a transient failure is rethrown unchanged, preserving the
  * throw-for-ISR-fallback behaviour above.
@@ -178,7 +217,24 @@ async function fetchBffData(
         Effect.gen(function* () {
           const bff = yield* BffService;
           return yield* bff.getRanking(psdTeamId);
-        }),
+        }).pipe(
+          // `apps/api/src/handlers/ranking.ts` maps BOTH "no ranking
+          // published yet" (an empty upstream table list — the handler's own
+          // `tables.length === 0` guard) AND a genuinely unknown/stale PSD
+          // team id (`classifyHttpError` in `apps/api/src/psd/service.ts`,
+          // any upstream 404) to the exact same `HttpNotFound` — the two
+          // are indistinguishable from the HTTP status alone (verified
+          // against both source files, #2795 review). This read already
+          // knows the team exists in PSD: the fixtures read alongside it
+          // fulfilled for this very `psdTeamId`, so a same-id 404 here
+          // overwhelmingly means "not published yet," not "no such team."
+          // Resolve it to `[]` BEFORE `degradeIfPermanent` classifies it,
+          // the same split `/wedstrijd/[matchId]`'s `fetchStandings` already
+          // makes for the identical BFF ambiguity (#2576/#2778) — so
+          // `no-table` stays reachable against real data, instead of every
+          // not-yet-published youth ranking reading as `ranking-unavailable`.
+          Effect.catchTag("HttpNotFound", () => Effect.succeed([])),
+        ),
         null,
       ),
     ),
@@ -195,8 +251,12 @@ async function fetchBffData(
     // transient by construction.
     throw standingsResult.reason;
   }
-  if (standingsResult.value === null) return "unavailable";
 
+  // `standingsResult.value` is `null` on a permanent ranking failure (#2795)
+  // — no longer collapsed to the `"unavailable"` sentinel. The fixtures that
+  // fulfilled above are kept; `deriveCompetitiveBlockState` reads a `null`
+  // standings into `ranking-unavailable`, distinct from the fulfilled `[]`
+  // it reads into `no-table`.
   return {
     matches: matchesResult.value,
     standings: standingsResult.value,
@@ -250,9 +310,15 @@ export default async function TeamPage({ params }: TeamPageProps) {
   ]);
 
   // `bffData` collapses `null` (no usable psdId) and `"unavailable"`
-  // (permanent PSD failure) to the same "nothing to read from" shape here —
-  // `competitiveState` below is what still tells the two apart for the
-  // status line's copy (#2636 finding 8).
+  // (permanent failure on the FIXTURES read) to the same "nothing to read
+  // from" shape here — `competitiveState` below is what still tells the two
+  // apart for the status line's copy (#2636 finding 8). A permanent failure
+  // on the RANKING read alone does not collapse here: `bffOutcome.standings`
+  // stays `null` in that case (#2795), read below into `standings` via `??
+  // []` purely so `<StandingsSection>` never receives `null` on the one
+  // branch that still renders it — that branch is never reached when
+  // `standings` is actually `null` (see `competitiveState.kind ===
+  // "ranking-unavailable"` further down).
   const bffOutcome = bffData === "unavailable" ? null : bffData;
   const bffTeamId = bffOutcome?.teamId;
   const standings = bffOutcome?.standings ?? [];
@@ -276,19 +342,30 @@ export default async function TeamPage({ params }: TeamPageProps) {
   // unit, replacing the two independent `showStandings` / `showMatches`
   // flags this used to derive inline (#2636). `bffData` is `null` only when
   // the team carries no usable PSD id (a deliberate skip, not a failure) and
-  // `"unavailable"` when `fetchBffData` caught a *permanent* PSD failure
-  // (#2636 finding 3) — a *transient* failure never reaches here at all,
-  // since `fetchBffData` lets that one reject and take the render down so
-  // ISR can serve the last-good page.
+  // `"unavailable"` when `fetchBffData` caught a *permanent* failure on the
+  // FIXTURES read (#2636 finding 3) — a *transient* failure never reaches
+  // here at all, since `fetchBffData` lets that one reject and take the
+  // render down so ISR can serve the last-good page. A permanent failure on
+  // the RANKING read alone does not collapse `bffData` at all (#2795): it
+  // still carries the fulfilled fixtures, with `standings: null`.
   //
-  // `competitiveBlockHeadingLabel` switches on every member of
-  // `CompetitiveBlockState` and returns `null` for the two that earn no nav
-  // entry — so `inCompetition` is read straight off that, rather than a
-  // second, hand-written list of "which kinds don't count" that a state
-  // added later could silently fall out of sync with (#2636 finding 5).
+  // `klassementLabel` is `competitiveBlockHeadingLabel(competitiveState)` —
+  // it switches on every member of `CompetitiveBlockState` and returns
+  // `null` for the three kinds that earn no `#klassement` nav entry
+  // (`not-in-competition`, `fixtures-unavailable`, and, since #2795,
+  // `ranking-unavailable` — its failure notice is not a section either).
+  //
+  // `inCompetition` is DELIBERATELY NOT `klassementLabel !== null` (#2795):
+  // that reads `ranking-unavailable`'s null label as "not in competition"
+  // and re-hides the fixtures that fulfilled — the exact bug this ticket
+  // fixes. `isCompetitiveBlockOpen` is the single exported predicate for
+  // this gate, switching on every member so a state added later fails to
+  // compile here rather than silently falling out of sync with a
+  // hand-written exclusion (#2636 finding 5 rejected that shape).
   const competitiveState = deriveCompetitiveBlockState(bffData);
   const klassementLabel = competitiveBlockHeadingLabel(competitiveState);
-  const inCompetition = klassementLabel !== null;
+  const inCompetition = isCompetitiveBlockOpen(competitiveState);
+  const rankingUnavailable = competitiveState.kind === "ranking-unavailable";
 
   // Section render flags — keep the sticky nav in sync with each section's
   // own auto-hide so the nav never lists a section that doesn't render.
@@ -319,10 +396,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   // One record for every section's label — the nav chip and each section's
   // own `aria-label` (on its focus target below) read from the same value,
-  // so the two can never drift and there is nothing to fall back to if
-  // `klassementLabel` were ever null here (it can't be: `inCompetition`
-  // is exactly `klassementLabel !== null`, and only the `inCompetition`
-  // branch ever reads it).
+  // so the two can never drift. Unlike the other four entries,
+  // `sectionLabels.klassement` CAN be null while `inCompetition` is true
+  // (#2795: the `ranking-unavailable` state opens the block for
+  // `#wedstrijden` but has no klassement heading to give) — the render below
+  // only reads `sectionLabels.klassement!` on the branch that renders
+  // `<StandingsSection>`, which is gated on `klassementLabel !== null`
+  // separately from `inCompetition`.
   const sectionLabels = {
     klassement: klassementLabel,
     wedstrijden: "Wedstrijden",
@@ -331,11 +411,17 @@ export default async function TeamPage({ params }: TeamPageProps) {
     info: "Info",
   } as const;
 
-  // The status line states (`not-in-competition` / `unavailable`) are the
-  // ONE deliberate exception to the nav/render invariant below: neither is a
-  // section, so neither earns a nav entry even though one renders in the
-  // section-nav's stead (#2540/#2636 decision). Every other item here is
-  // kept in exact sync with what actually renders further down.
+  // Three states render something in place of `#klassement` that is not a
+  // section and so earns no nav entry: the two status-line states
+  // (`not-in-competition` / `fixtures-unavailable`, #2540/#2636 decision)
+  // and, since #2795, `ranking-unavailable`'s failure notice — its
+  // `<EmptyState tier="slot" reason="unavailable">` gets no `<h2>` and no
+  // `id` either, for the same reason `<CompetitiveStatusLine>` doesn't:
+  // `klassementLabel !== null` is exactly the gate for all three at once.
+  // `#wedstrijden` is unaffected by any of this — it keeps its own nav entry
+  // under `ranking-unavailable` because the fixtures still rendered in full.
+  // Every other item here is kept in exact sync with what actually renders
+  // further down.
   const navItems: TeamSectionNavItem[] = [
     // `sectionLabels.klassement` is the same value as `klassementLabel`,
     // but TS narrows the bare variable, not a property read off it — the
@@ -410,19 +496,24 @@ export default async function TeamPage({ params }: TeamPageProps) {
       <TeamSectionNav items={navItems} />
 
       {/* The competitive block — #klassement + #wedstrijden — renders as ONE
-          gated unit (#2540/#2636): `#klassement` always renders once
-          `inCompetition`, or a status line takes both sections' place
-          (pre-publication, or a permanently-failed PSD read). `#wedstrijden`
-          carries its own `showWedstrijden` flag beneath that gate — see the
-          comment beside it above — so an empty section can never sit behind
-          a live nav chip. */}
+          gated unit (#2540/#2636), open whenever `isCompetitiveBlockOpen`
+          says so, or a status line takes both sections' place
+          (pre-publication, or a permanently-failed FIXTURES read).
+          `#wedstrijden` carries its own `showWedstrijden` flag beneath that
+          gate — see the comment beside it above — so an empty section can
+          never sit behind a live nav chip. Since #2795, being "open" no
+          longer implies `#klassement` renders `<StandingsSection>`: a
+          permanently-failed RANKING read (`rankingUnavailable`) keeps the
+          block open for `#wedstrijden` but replaces the klassement slot with
+          a failure notice instead — no `<h2>`, no `id`, matching the status
+          line's own nav/render-invariant exception. */}
       {!inCompetition ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
           <PageContainer className="py-10">
             <CompetitiveStatusLine
               variant={
-                competitiveState.kind === "unavailable"
+                competitiveState.kind === "fixtures-unavailable"
                   ? "unavailable"
                   : "not-in-competition"
               }
@@ -432,27 +523,41 @@ export default async function TeamPage({ params }: TeamPageProps) {
       ) : (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <TrackInView
-            eventName="team_standings_in_view"
-            params={analyticsParams}
-          >
-            <PageContainer
-              as="section"
-              id="klassement"
-              tabIndex={-1}
-              // Non-null: this branch only renders when `inCompetition` —
-              // exactly `klassementLabel !== null` — is true, but TS
-              // narrows the variable, not a property read off the record.
-              ariaLabel={sectionLabels.klassement!}
-              className="py-10 focus:outline-none"
-            >
-              <StandingsSection
-                tables={standings}
-                divisionFull={team.divisionFull}
-                highlightTeamId={bffTeamId}
-              />
+          {rankingUnavailable ? (
+            <PageContainer className="py-10">
+              <EmptyState
+                tier="slot"
+                reason="unavailable"
+                emphasis={{ text: "even niet beschikbaar" }}
+              >
+                Het klassement is even niet beschikbaar. Probeer het later
+                opnieuw.
+              </EmptyState>
             </PageContainer>
-          </TrackInView>
+          ) : (
+            <TrackInView
+              eventName="team_standings_in_view"
+              params={analyticsParams}
+            >
+              <PageContainer
+                as="section"
+                id="klassement"
+                tabIndex={-1}
+                // Non-null: this branch only renders when `klassementLabel`
+                // is non-null (the `rankingUnavailable` guard above excludes
+                // the one `inCompetition` state where it wouldn't be), but TS
+                // narrows the variable, not a property read off the record.
+                ariaLabel={sectionLabels.klassement!}
+                className="py-10 focus:outline-none"
+              >
+                <StandingsSection
+                  tables={standings}
+                  divisionFull={team.divisionFull}
+                  highlightTeamId={bffTeamId}
+                />
+              </PageContainer>
+            </TrackInView>
+          )}
 
           {showWedstrijden ? (
             <>

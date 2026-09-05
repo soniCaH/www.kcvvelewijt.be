@@ -466,19 +466,20 @@ A row in the league standings table.
 
 The `#klassement` + `#wedstrijden` pair on a team page, gated as **one unit** rather than two independent sections. What it shows is keyed to the data — never to the age group, and never to last season.
 
-| Code                 | Dutch surface | Meaning                                                                                     |
-| -------------------- | ------------- | ------------------------------------------------------------------------------------------- |
-| `not-in-competition` | status line   | The club has no official league fixture for this team this season. Neither section renders. |
-| `unavailable`        | status line   | A PSD read failed **permanently**. Neither section renders.                                 |
-| `no-table`           | De reeks      | In competition; the association has published no row yet.                                   |
-| `numberless`         | De reeks      | In competition; every published entry reads zero played and zero points.                    |
-| `live`               | Klassement    | At least one published table carries real numbers.                                          |
+| Code                   | Dutch surface  | Meaning                                                                                                                                                                                                       |
+| ---------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `not-in-competition`   | status line    | The club has no official league fixture for this team this season. Neither section renders.                                                                                                                   |
+| `fixtures-unavailable` | status line    | The **fixtures** read failed **permanently**. Without fixtures there is no way to tell the team is in competition at all, so neither section renders — the same collapse as `not-in-competition`.             |
+| `ranking-unavailable`  | failure notice | The **ranking** read failed **permanently** while the fixtures read fulfilled ([#2795]). `#wedstrijden` renders in full; only the klassement slot is replaced, by a failure notice, not `<StandingsSection>`. |
+| `no-table`             | De reeks       | In competition; the association has published no row yet.                                                                                                                                                     |
+| `numberless`           | De reeks       | In competition; every published entry reads zero played and zero points.                                                                                                                                      |
+| `live`                 | Klassement     | At least one published table carries real numbers.                                                                                                                                                            |
 
 **The gate** is at least one fixture whose competition type is `league` in the current season — never "the ranking has rows" (the ranking arrives months after the fixtures) and never the phase's association code.
 
-**Rule: a failure is not a section.** The two status-line states carry no `<h2>`, no `id` and no sticky-nav chip. This is the one deliberate exception to the team page's rule that every nav chip leads to a section that renders.
+**`ranking-unavailable` is not `no-table`.** `no-table` is a _value_: the ranking read fulfilled with zero rows. `ranking-unavailable` is the read never fulfilling a value at all. Conflating the two would report a broken read as "not published yet," which is false.
 
-**Pending:** [#2795] splits `unavailable` into `fixtures-unavailable` and `ranking-unavailable`, so a permanently-failed ranking read stops hiding fixtures that loaded fine. Update this table when it lands.
+**Rule: a failure is not a section.** The two status-line states, plus `ranking-unavailable`'s klassement-slot failure notice, carry no `<h2>`, no `id` and no sticky-nav chip for that slot. This is the one deliberate exception to the team page's rule that every nav chip leads to a section that renders — `ranking-unavailable`'s `#wedstrijden` chip is unaffected, since that section still renders in full.
 
 ---
 
