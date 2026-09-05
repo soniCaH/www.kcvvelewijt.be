@@ -157,11 +157,7 @@ export const SectionHeader = ({
 
   const ctaEl =
     linkText && linkHref ? (
-      <EditorialLink
-        href={linkHref}
-        variant="cta"
-        tone={isDark ? "dark" : "light"}
-      >
+      <EditorialLink href={linkHref} tone={isDark ? "dark" : "light"}>
         {linkText}
       </EditorialLink>
     ) : null;

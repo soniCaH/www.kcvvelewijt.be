@@ -9,45 +9,29 @@ describe("EditorialLink", () => {
     expect(link).toHaveAttribute("href", "/news");
   });
 
-  it("defaults to inline variant + light tone", () => {
+  it("defaults to light tone", () => {
     const { container } = render(
-      <EditorialLink href="/x">Inline</EditorialLink>,
+      <EditorialLink href="/x">Bekijk alles</EditorialLink>,
     );
-    const el = container.firstChild as HTMLElement;
-    expect(el).toHaveAttribute("data-variant", "inline");
-    expect(el).toHaveAttribute("data-tone", "light");
+    expect(container.firstChild).toHaveAttribute("data-tone", "light");
   });
 
-  it("inline variant omits the trailing arrow by default", () => {
-    render(<EditorialLink href="/x">Inline</EditorialLink>);
-    expect(screen.queryByText("→")).not.toBeInTheDocument();
-  });
-
-  it("cta variant renders the trailing arrow by default", () => {
+  it("renders the trailing arrow at rest by default (#2474 rule 3)", () => {
     render(
-      <EditorialLink href="/x" variant="cta">
+      <EditorialLink href="/x" tone="dark">
         Bekijk alles
       </EditorialLink>,
     );
     expect(screen.getByText("→")).toBeInTheDocument();
   });
 
-  it("cta variant can suppress the arrow with withArrow={false}", () => {
+  it("can suppress the arrow with withArrow={false}", () => {
     render(
-      <EditorialLink href="/x" variant="cta" withArrow={false}>
+      <EditorialLink href="/x" withArrow={false}>
         No arrow
       </EditorialLink>,
     );
     expect(screen.queryByText("→")).not.toBeInTheDocument();
-  });
-
-  it("inline variant can opt-in to an arrow with withArrow", () => {
-    render(
-      <EditorialLink href="/x" withArrow>
-        Inline + arrow
-      </EditorialLink>,
-    );
-    expect(screen.getByText("→")).toBeInTheDocument();
   });
 
   it("dark tone sets data-tone='dark'", () => {
@@ -72,12 +56,32 @@ describe("EditorialLink", () => {
   // computes no layout, so only the real coarse-pointer measurement at 390px
   // can show the target is big enough. Both halves are asserted because the
   // padding without the margin would reflow every section header.
-  it("cta variant carries the hit area and its layout-neutralising margin", () => {
+  it("carries the hit area and its layout-neutralising margin", () => {
+    const { container } = render(<EditorialLink href="/x">X</EditorialLink>);
+    expect(container.firstChild).toHaveClass("py-2", "-my-2");
+  });
+
+  // #2474 rule 3 — the highlighter marker is reserved for links inside a
+  // running sentence (`.prose-link`); an onward CTA never carries it. The
+  // marker's implementation is a `mask-image` sweep span — assert none
+  // renders rather than asserting an implementation detail is absent by name.
+  it("never renders a highlighter sweep", () => {
     const { container } = render(
-      <EditorialLink href="/x" variant="cta">
+      <EditorialLink href="/x">Bekijk alles</EditorialLink>,
+    );
+    expect(container.querySelector("[style*='mask-image']")).toBeNull();
+  });
+
+  // Arbitrary anchor attributes (e.g. a `data-*` selector a consumer needs)
+  // pass through — the component has no dedicated prop for every possible
+  // selector, so it forwards what it doesn't recognise instead of dropping
+  // it (EventFactInline's linked-event line relies on this).
+  it("forwards unrecognised props to the rendered anchor", () => {
+    render(
+      <EditorialLink href="/x" data-testid="onward-link">
         X
       </EditorialLink>,
     );
-    expect(container.firstChild).toHaveClass("py-2", "-my-2");
+    expect(screen.getByTestId("onward-link")).toBeInTheDocument();
   });
 });

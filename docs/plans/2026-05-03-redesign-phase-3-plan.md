@@ -390,6 +390,8 @@ Each migration ships with:
 
 ## Task 3.C.3 — `<SiteFooter>` rework
 
+> **Superseded (#2565, 2026-09-05):** the `<EditorialLink variant="inline" tone="light">` prescription below does not match what shipped (`SiteFooter.tsx`'s directory links are hand-rolled, not `<EditorialLink>`) or what exists today (`<EditorialLink>`'s `inline` variant and `variant` prop were deleted by #2565 — the component is now a single uppercase-mono CTA treatment; see `docs/design/mockups/phase-3-d-footer/footer-locked.md`'s own superseding note). Read `EditorialLink.tsx`'s current docblock before touching footer links.
+
 **Sub-issue:** `3.C.3 · <SiteFooter> rework + founding year fixes` — `addBlockedBy 3.0`.
 
 **Files to create:**

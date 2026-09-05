@@ -2,15 +2,26 @@
  * SearchNoResultsCard Component Tests
  */
 
-import type { ReactNode } from "react";
+import type { AnchorHTMLAttributes, ReactNode } from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { SearchNoResultsCard } from "./SearchNoResultsCard";
 
 // Mock Next.js Link (Vitest hoisting requirement keeps this in-file).
+// className must be forwarded — the .prose-link marker assertion below
+// reads it off the rendered anchor.
 vi.mock("next/link", () => ({
-  default: ({ children, href }: { children: ReactNode; href: string }) => (
-    <a href={href}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...rest
+  }: {
+    children: ReactNode;
+    href: string;
+  } & AnchorHTMLAttributes<HTMLAnchorElement>) => (
+    <a href={href} {...rest}>
+      {children}
+    </a>
   ),
 }));
 
@@ -46,6 +57,18 @@ describe("SearchNoResultsCard", () => {
     expect(screen.getByRole("link", { name: "spelers" })).toHaveAttribute(
       "href",
       "/ploegen",
+    );
+  });
+
+  // #2474 rule 2 — these three links sit inside a running sentence ("Probeer
+  // een andere term — of spring meteen naar nieuws, ploegen of spelers."),
+  // so they are body copy and join `.prose-link` rather than wearing the
+  // affordance-chip styling they had before.
+  it("renders the way-forward links with the .prose-link marker", () => {
+    render(<SearchNoResultsCard query="elewijt" />);
+
+    expect(screen.getByRole("link", { name: "nieuws" })).toHaveClass(
+      "prose-link",
     );
   });
 

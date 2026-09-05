@@ -64,6 +64,21 @@ describe("<EventFactInline>", () => {
     expect(link?.getAttribute("href")).toBe("/evenementen/steakfestijn-2026");
   });
 
+  // Every other sub-element carries a `data-event-fact-inline` selector
+  // ("age", "title", "date", "meta", "cta") — the linked-event line keeps
+  // the convention through <EditorialLink>'s pass-through props.
+  it("keeps the data-event-fact-inline convention on the linked-event link", () => {
+    render(
+      <EventFactInline
+        value={BASE}
+        isPast={false}
+        linkedEventSlug="steakfestijn-2026"
+      />,
+    );
+    const link = screen.getByText(/Ook in agenda/i).closest("a");
+    expect(link).toHaveAttribute("data-event-fact-inline", "linked-event");
+  });
+
   it("does not render the linked-event line when slug is blank", () => {
     render(
       <EventFactInline value={BASE} isPast={false} linkedEventSlug="  " />,

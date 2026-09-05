@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { PageContainer, SectionHeader } from "@/components/design-system";
 import { SponsorTile, SPONSOR_TILE_GRID_CLASS } from "../SponsorTile";
@@ -36,6 +35,8 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
         <SectionHeader
           title="Met dank aan onze sponsors"
           emphasis={{ text: "sponsors" }}
+          linkText="Alle sponsors & sympathisanten"
+          linkHref="/sponsors"
         />
 
         <ul className={cn("mt-8", SPONSOR_TILE_GRID_CLASS)}>
@@ -45,16 +46,6 @@ export const SponsorsBlock = ({ sponsors, className }: SponsorsBlockProps) => {
             </li>
           ))}
         </ul>
-
-        <div className="mt-10 flex justify-end">
-          <Link
-            href="/sponsors"
-            // `py-2 -my-2` — hit area only, no layout shift (#2394).
-            className="text-ink hover:text-jersey-deep -my-2 inline-flex items-center gap-1 py-2 font-mono text-sm font-bold tracking-wide uppercase underline-offset-4 hover:underline"
-          >
-            Alle sponsors &amp; sympathisanten →
-          </Link>
-        </div>
       </PageContainer>
     </section>
   );

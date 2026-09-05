@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { getButtonClasses } from "@/components/design-system/Button";
 import { cn } from "@/lib/utils/cn";
 import { capitalize } from "@/lib/utils/capitalize";
@@ -237,14 +237,14 @@ export function EventFactInline({
           ) : null}
 
           {linkedSlug ? (
-            <Link
+            // A link onward on the site — uppercase mono CTA, no marker
+            // (#2474 rule 3).
+            <EditorialLink
               href={`/evenementen/${linkedSlug}`}
               data-event-fact-inline="linked-event"
-              className="text-ink-muted hover:text-ink font-mono text-[10px] tracking-[0.16em] uppercase underline-offset-4 hover:underline"
             >
-              <span aria-hidden="true">★ </span>Ook in agenda{" "}
-              <span aria-hidden="true">→</span>
-            </Link>
+              <span aria-hidden="true">★ </span>Ook in agenda
+            </EditorialLink>
           ) : null}
         </section>
       </TapedCard>

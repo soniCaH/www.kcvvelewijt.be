@@ -160,7 +160,11 @@ export function TicketStub({
           aria-hidden="true"
           className={cn(
             MONO_LABEL_CLASS,
-            "text-jersey-deep pointer-events-none absolute right-3 bottom-3 opacity-0 transition-opacity duration-300",
+            // `reveal-on-hover` (globals.css, #2393) carries the resting
+            // `opacity: 0` *and* an `@media (hover: none)` fallback to
+            // `opacity: 1` — a bare `opacity-0` had no such fallback, so
+            // "Meer details →" never appeared on touch (#2474 rule 9).
+            "text-jersey-deep reveal-on-hover pointer-events-none absolute right-3 bottom-3",
             "group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none",
           )}
         >

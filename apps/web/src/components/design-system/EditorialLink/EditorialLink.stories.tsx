@@ -20,73 +20,40 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   args: {
-    href: "/news",
-    children: "Lees meer",
-    variant: "inline",
+    href: "/nieuws",
+    children: "Bekijk alle nieuws",
     tone: "light",
   },
 };
 
-export const InlineLight: Story = {
-  args: {
-    href: "/news",
-    variant: "inline",
-    tone: "light",
-    children: "Lees meer",
-  },
-};
-
-export const InlineLightWithArrow: Story = {
-  args: {
-    href: "/news",
-    variant: "inline",
-    tone: "light",
-    withArrow: true,
-    children: "Lees meer",
-  },
-};
-
-export const InlineDark: Story = {
-  args: {
-    href: "/news",
-    variant: "inline",
-    tone: "dark",
-    children: "Lees meer",
-  },
-  decorators: [
-    (Story) => (
-      <div className="bg-ink border-paper-edge inline-block border p-6">
-        <Story />
-      </div>
-    ),
-  ],
-};
-
-export const CtaLight: Story = {
+// Renders the identical code path as Playground (light tone is the default,
+// arrow-on is the default) — kept for autodocs completeness only. Story
+// tags merge with the meta's by default, so dropping "vr" here requires the
+// explicit negation `"!vr"` (see JerseyIllustration.stories.tsx) — a bare
+// `tags: ["autodocs"]` still inherits "vr" and gets captured anyway.
+export const Light: Story = {
+  tags: ["autodocs", "!vr"],
   args: {
     href: "/nieuws",
-    variant: "cta",
     tone: "light",
-    children: "BEKIJK ALLE NIEUWS",
+    children: "Bekijk alle nieuws",
   },
 };
 
-export const CtaLightNoArrow: Story = {
+export const LightNoArrow: Story = {
   args: {
     href: "/nieuws",
-    variant: "cta",
     tone: "light",
     withArrow: false,
-    children: "BEKIJK ALLE NIEUWS",
+    children: "Bekijk alle nieuws",
   },
 };
 
-export const CtaDark: Story = {
+export const Dark: Story = {
   args: {
     href: "/nieuws",
-    variant: "cta",
     tone: "dark",
-    children: "BEKIJK ALLE NIEUWS",
+    children: "Bekijk alle nieuws",
   },
   decorators: [
     (Story) => (
@@ -95,51 +62,4 @@ export const CtaDark: Story = {
       </div>
     ),
   ],
-};
-
-export const MatrixOnCream: Story = {
-  args: { href: "/x", children: "X" },
-  render: () => (
-    <div className="grid grid-cols-2 items-start gap-x-10 gap-y-6">
-      <EditorialLink href="/x" variant="inline">
-        Lees meer
-      </EditorialLink>
-      <EditorialLink href="/x" variant="inline" withArrow>
-        Lees meer
-      </EditorialLink>
-      <EditorialLink href="/x" variant="cta">
-        BEKIJK ALLE NIEUWS
-      </EditorialLink>
-      <EditorialLink href="/x" variant="cta" withArrow={false}>
-        BEKIJK ALLE NIEUWS
-      </EditorialLink>
-    </div>
-  ),
-};
-
-export const MatrixOnInk: Story = {
-  args: { href: "/x", children: "X" },
-  decorators: [
-    (Story) => (
-      <div className="bg-ink border-paper-edge text-cream border p-6">
-        <Story />
-      </div>
-    ),
-  ],
-  render: () => (
-    <div className="grid grid-cols-2 items-start gap-x-10 gap-y-6">
-      <EditorialLink href="/x" variant="inline" tone="dark">
-        Lees meer
-      </EditorialLink>
-      <EditorialLink href="/x" variant="inline" tone="dark" withArrow>
-        Lees meer
-      </EditorialLink>
-      <EditorialLink href="/x" variant="cta" tone="dark">
-        BEKIJK ALLE NIEUWS
-      </EditorialLink>
-      <EditorialLink href="/x" variant="cta" tone="dark" withArrow={false}>
-        BEKIJK ALLE NIEUWS
-      </EditorialLink>
-    </div>
-  ),
 };

@@ -132,6 +132,16 @@ describe("TicketStub", () => {
     expect(screen.getByText(/Meer details/i)).toBeInTheDocument();
   });
 
+  // #2474 rule 9 — `reveal-on-hover` (globals.css) carries the resting
+  // `opacity: 0` *and* the `@media (hover: none)` touch fallback, so the cue
+  // isn't permanently hidden on a device with no hover (DESIGN.md — "nothing
+  // important hides behind hover"). A bare `opacity-0` had no such fallback.
+  it("gates the 'Meer details' reveal with reveal-on-hover, not a bare opacity-0", () => {
+    render(<TicketStub {...baseProps} />);
+
+    expect(screen.getByText(/Meer details/i)).toHaveClass("reveal-on-hover");
+  });
+
   it("gates the hover press-down behind motion-safe", () => {
     render(<TicketStub {...baseProps} />);
 

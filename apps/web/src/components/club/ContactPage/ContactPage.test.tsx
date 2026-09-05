@@ -58,6 +58,20 @@ describe("ContactPage — Clubgegevens", () => {
     );
   });
 
+  // #2474 rule 4 — an action link (mailto:, Google Maps) is lowercase body
+  // type, so the highlighter marker binds. It keeps its Envelope/ArrowRight
+  // icon; only the affordance chrome (`hover:underline`) is replaced by the
+  // marker.
+  it("gives the Maps and mailto action links the .prose-link marker", () => {
+    render(<ContactPage />);
+    const route = screen.getByRole("link", { name: /routebeschrijving/i });
+    expect(route).toHaveClass("prose-link");
+    const [infoLink] = screen.getAllByRole("link", {
+      name: /info@kcvvelewijt.be/i,
+    });
+    expect(infoLink).toHaveClass("prose-link");
+  });
+
   it("renders the general info mailto and both cross-links", () => {
     render(<ContactPage />);
     // info@ appears here AND as the "Algemene vragen" category card (the

@@ -19,8 +19,15 @@ export interface SearchNoResultsCardProps {
   query: string;
 }
 
-const WAY_FORWARD_LINK_CLASS =
-  "text-jersey-deep font-bold underline-offset-2 hover:underline";
+// The three links sit inside a running sentence, so they are body copy and
+// join `.prose-link` (#2474 rule 2) rather than the affordance-chip styling
+// (`underline-offset-2 hover:underline`) they carried before. `.prose-link`
+// is deliberately unlayered (globals.css) so it beats the typography plugin
+// — which also means it beats any `@layer utilities` class on the same
+// property. A `font-bold`/`font-semibold` here would never apply: accept
+// `.prose-link`'s own `font-weight: 500` as the link weight, don't add a
+// dead one.
+const WAY_FORWARD_LINK_CLASS = "prose-link";
 
 /**
  * No-results paper card with taped jersey artefact + way-forward links.

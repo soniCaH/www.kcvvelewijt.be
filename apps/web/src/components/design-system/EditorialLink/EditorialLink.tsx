@@ -1,91 +1,71 @@
-import Link from "next/link";
+import Link, { type LinkProps } from "next/link";
 import { cn } from "@/lib/utils/cn";
-import { STROKE_PATH } from "../HighlighterStroke/strokes";
 
-export type EditorialLinkVariant = "cta" | "inline";
 export type EditorialLinkTone = "light" | "dark";
 
-export interface EditorialLinkProps {
+export interface EditorialLinkProps extends Omit<
+  LinkProps,
+  "className" | "href"
+> {
   href: string;
   children: React.ReactNode;
-  variant?: EditorialLinkVariant;
   tone?: EditorialLinkTone;
+  /** Trailing `→` glyph, visible at rest and sliding 4px right on
+   *  hover/focus. Default `true` — see the docblock below. */
   withArrow?: boolean;
   className?: string;
 }
-
-// Mask geometry shared with <HighlighterStroke> via STROKE_PATH so the sweep
-// uses the same hand-pulled slab outline. fill='black' makes this a mask:
-// the consuming element fills via background-color so the sweep colour is
-// driven by tone, not by the mask SVG.
-const HIGHLIGHTER_MASK_DATA_URL = `data:image/svg+xml;utf8,${encodeURIComponent(
-  `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='${STROKE_PATH}' fill='black'/></svg>`,
-)}`;
 
 const TEXT_TONE: Record<EditorialLinkTone, string> = {
   light: "text-jersey-deep",
   dark: "text-cream/85",
 };
 
-const SWEEP_TONE: Record<EditorialLinkTone, string> = {
-  light: "bg-jersey-deep",
-  dark: "bg-jersey/65",
-};
+// Hit area, not spacing (#2394). The label is set at `leading-none` —
+// correct as type, 11px tall as a thumb target. The padding grows it to
+// ~27px and the equal negative margin pulls the box back, so the consumer
+// does not shift by a pixel. The two halves only work as a pair: `py-2`
+// alone would push `<SectionHeader>`'s heading row out of alignment.
+const HIT_AREA = "py-2 -my-2";
 
-const VARIANT_TYPE: Record<EditorialLinkVariant, string> = {
-  cta: "font-mono text-label leading-none font-medium uppercase",
-  inline: "font-medium",
-};
-
-// Hit area, not spacing (#2394). The cta variant is the label step at
-// `leading-none` — correct as type, 11px tall as a thumb target. The padding
-// grows it to ~27px and the equal negative margin pulls the box back, so the
-// consumer does not shift by a pixel. The two halves only work as a pair:
-// `py-2` alone would push `<SectionHeader>`'s heading row out of alignment.
-const CTA_HIT_AREA = "py-2 -my-2";
-
+/**
+ * `<EditorialLink>` — the site's one onward-CTA treatment (#2474 rule 3): a
+ * link that sends a visitor elsewhere **on the site** renders uppercase
+ * mono with a trailing arrow, present at rest — the slide is a pointer-only
+ * enhancement, never the cue itself (touch has no hover, #2474's measured
+ * finding). It never carries the highlighter marker: the marker is reserved
+ * for a link inside a running sentence (`.prose-link`), and #2474 measured
+ * that the marker cannot bind to uppercase letterforms at any thickness —
+ * matching absolute thickness against a mono cap-height reads as a
+ * strikethrough, matching the x-height ratio renders too thin to see.
+ *
+ * Previously a two-variant component (`cta` / `inline`); `inline` — the
+ * variant that overlapped `.prose-link` — had zero production consumers and
+ * was deleted by #2565, along with the sweep both variants used to share.
+ */
 export const EditorialLink = ({
   href,
   children,
-  variant = "inline",
   tone = "light",
-  withArrow,
+  withArrow = true,
   className,
+  ...rest
 }: EditorialLinkProps) => {
-  const showArrow = withArrow ?? variant === "cta";
-
   return (
     <Link
       href={href}
-      data-variant={variant}
       data-tone={tone}
       className={cn(
         "group inline-flex items-center gap-2",
-        VARIANT_TYPE[variant],
-        variant === "cta" && CTA_HIT_AREA,
+        "text-label font-mono leading-none font-medium uppercase",
+        HIT_AREA,
         TEXT_TONE[tone],
         className,
       )}
+      {...rest}
     >
-      <span className="relative inline-block">
-        {children}
-        <span
-          aria-hidden="true"
-          className={cn(
-            "absolute right-0 -bottom-1 left-0 h-[0.45em] origin-left scale-x-0 transition-transform duration-300 ease-out group-hover:scale-x-100 group-focus-visible:scale-x-100 motion-reduce:transition-none",
-            SWEEP_TONE[tone],
-          )}
-          style={{
-            WebkitMaskImage: `url("${HIGHLIGHTER_MASK_DATA_URL}")`,
-            maskImage: `url("${HIGHLIGHTER_MASK_DATA_URL}")`,
-            WebkitMaskRepeat: "no-repeat",
-            maskRepeat: "no-repeat",
-            WebkitMaskSize: "100% 100%",
-            maskSize: "100% 100%",
-          }}
-        />
-      </span>
-      {showArrow && (
+      {children}
+      {withArrow && (
         <span
           aria-hidden="true"
           className="inline-block transition-transform duration-300 group-hover:translate-x-1 group-focus-visible:translate-x-1 motion-reduce:transition-none"

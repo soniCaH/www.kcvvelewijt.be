@@ -179,11 +179,7 @@ export { MonoStar } from "./MonoStar";
 
 // EditorialLink
 export { EditorialLink } from "./EditorialLink";
-export type {
-  EditorialLinkProps,
-  EditorialLinkVariant,
-  EditorialLinkTone,
-} from "./EditorialLink";
+export type { EditorialLinkProps, EditorialLinkTone } from "./EditorialLink";
 
 // MonoLabel
 export { MonoLabel } from "./MonoLabel";

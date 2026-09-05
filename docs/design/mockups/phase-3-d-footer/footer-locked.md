@@ -7,6 +7,8 @@
 **Companions:** `header-locked.md` + `matchstrip-locked.md` (other Checkpoint C/D locks).
 
 > **★ Reuse audit correction (2026-05-05):** the `<FooterLink>` primitive originally proposed in this spec is **not** built. Audit against the design-system barrel found that `<EditorialLink variant="inline" tone="light">` already provides the ink-soft default + jersey-deep hover (with `<HighlighterStroke>` sweep) at the right density for footer columns. Footer directory links use `<EditorialLink variant="inline" tone="light">` directly — no new primitive, no new Storybook story (existing primitive's baselines apply). The reuse map and approval checklist below still mention `<FooterLink>` for historical accuracy of the drilling; **the canonical source of truth is the Phase 3 PRD §8b**.
+>
+> **★★ Superseded (#2565, 2026-09-05):** neither half of the correction above matches what shipped or what exists today. `SiteFooter.tsx`'s directory links were built hand-rolled (`text-ink-soft hover:text-jersey-deep … underline decoration-transparent`) — this spec's own reuse audit was never actually followed. And `<EditorialLink>` no longer has an `inline` variant or a `variant` prop at all: #2474 resolved that a link inside a sentence keeps `.prose-link`'s highlighter marker and a link that goes elsewhere on the site is the uppercase-mono CTA treatment, with nothing in between — `<EditorialLink variant="inline">` had zero production consumers (this footer prescription included) and was deleted. Anyone picking up footer-link work should read `EditorialLink.tsx`'s current docblock and #2474/#2551's resolutions, not this note.
 
 ## Scope
 
