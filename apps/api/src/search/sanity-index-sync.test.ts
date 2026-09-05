@@ -12,7 +12,7 @@ import {
   type VectorizeServiceInterface,
   type VectorRecord,
 } from "./vectorize";
-import { WorkerEnvTag } from "../env";
+import { WorkerEnvTag, type WorkerEnv } from "../env";
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
@@ -46,7 +46,7 @@ const mockPage = {
   fileAttachmentLabels: [] as string[],
 };
 
-function makeEnvLayer() {
+function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
   return Layer.succeed(WorkerEnvTag, {
     AI: {} as Ai,
     SEARCH_INDEX: {} as VectorizeIndex,
@@ -59,9 +59,13 @@ function makeEnvLayer() {
     PSD_CACHE: {} as KVNamespace,
     PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "",
-    SANITY_DATASET: "",
+    // Correctly-paired by default so every pre-existing test in this file
+    // (not exercising the dataset/index guard) passes through it unaffected.
+    SANITY_DATASET: "production",
+    SEARCH_INDEX_NAME: "kcvv-search",
     SANITY_API_TOKEN: "",
     SANITY_WEBHOOK_SECRET: "",
+    ...overrides,
   });
 }
 
@@ -434,5 +438,31 @@ describe("runSanityIndexSync", () => {
     expect(
       messages.some((m) => m.includes("Indexed 0/1 responsibility paths")),
     ).toBe(true);
+  });
+
+  it("refuses to sync when the worker's dataset doesn't match its configured index", async () => {
+    // Reproduces #2833 review finding 7: the bulk sync writes to the same
+    // SEARCH_INDEX binding as the webhook but had no equivalent guard. It is
+    // unreachable on staging today only because crons are [] there — the
+    // same reasoning this issue was filed to retire for the webhook.
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    const exit = await Effect.runPromiseExit(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([mockDoc]),
+      }).pipe(
+        Effect.provide(
+          makeEnvLayer({
+            SANITY_DATASET: "staging",
+            SEARCH_INDEX_NAME: "kcvv-search",
+          }),
+        ),
+        Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    expect(Exit.isFailure(exit)).toBe(true);
+    expect(upsertCalls).toHaveLength(0);
   });
 });

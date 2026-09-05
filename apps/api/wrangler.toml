@@ -11,6 +11,11 @@ FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
 # PSD_API_KEY, PSD_API_CLUB, PSD_API_AUTH are secrets — set via wrangler secret put (never in toml)
 SANITY_PROJECT_ID = "vhb33jaz"
 SANITY_DATASET = "production"
+# Mirrors [[vectorize]].index_name below — Wrangler does not expose a
+# binding's target index name to the worker at runtime, so the webhook's
+# dataset/index guard (src/webhooks/index-handler.ts) reads this var instead
+# of trusting the binding to point where this file says it does (#2833).
+SEARCH_INDEX_NAME = "kcvv-search"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY (see docs/prd/email-delivery.md)
@@ -63,6 +68,9 @@ FOOTBALISTO_LOGO_CDN_URL = "https://dfaozfi7c7f3s.cloudfront.net/logos"
 SANITY_PROJECT_ID = "vhb33jaz"
 SANITY_DATASET = "staging"
 CACHE_LONG_TTL = "true"
+# Mirrors [[env.staging.vectorize]].index_name below — see the guard note on
+# the top-level SEARCH_INDEX_NAME above (#2833).
+SEARCH_INDEX_NAME = "kcvv-search-staging"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN --env staging
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET --env staging
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY --env staging (see docs/prd/email-delivery.md)
@@ -83,4 +91,9 @@ binding = "AI"
 
 [[env.staging.vectorize]]
 binding = "SEARCH_INDEX"
-index_name = "kcvv-search" # staging has no cron — index is read-only from staging; shares production data
+# Separate index from production. The "no cron" argument this used to carry
+# never covered the webhook: /webhooks/index is routed unconditionally in
+# src/index.ts, both deployments run the same `main`, and the staging worker
+# serves it — so a staging Sanity edit could silently overwrite (or add junk
+# to) the production vector for the same document id. See #2833.
+index_name = "kcvv-search-staging"

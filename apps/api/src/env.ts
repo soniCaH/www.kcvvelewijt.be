@@ -13,6 +13,7 @@ export interface WorkerEnv {
   readonly SANITY_API_TOKEN: string; // write token — wrangler secret
   readonly AI: Ai; // Workers AI binding
   readonly SEARCH_INDEX: VectorizeIndex; // Vectorize vector store
+  readonly SEARCH_INDEX_NAME?: string; // per-environment name of the index SEARCH_INDEX is bound to (mirrors wrangler.toml's [[vectorize]].index_name — Wrangler doesn't expose it at runtime). Read by the webhook's dataset/index guard (webhooks/index-handler.ts, #2833); absent → guard refuses, fail closed
   readonly PSD_GATE: DurableObjectNamespace; // global PSD rate-limit + single-flight gate (see psd/gate.ts)
   readonly SANITY_WEBHOOK_SECRET: string; // SVIX signing secret — wrangler secret
   readonly RESEND_API_KEY?: string; // Resend transactional email — wrangler secret (absent locally → email dispatch is a no-op)

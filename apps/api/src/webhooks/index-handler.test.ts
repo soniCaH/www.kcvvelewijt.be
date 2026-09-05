@@ -72,7 +72,11 @@ function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
     PSD_CACHE: {} as KVNamespace,
     PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "test",
-    SANITY_DATASET: "test",
+    // Correctly-paired by default so every pre-existing test in this file
+    // (not exercising the dataset/index guard) passes through it unaffected.
+    // Tests for the guard itself override both fields explicitly.
+    SANITY_DATASET: "production",
+    SEARCH_INDEX_NAME: "kcvv-search",
     SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: TEST_SECRET,
     AI: {} as Ai,
@@ -585,6 +589,104 @@ describe("handleIndexWebhook", () => {
 
     const json = await response.json();
     expect(json).toMatchObject({ ok: false, code: "parse_failed" });
+  });
+
+  it("refuses to index when a staging-dataset worker is wired to the production index name", async () => {
+    // Reproduces #2833: SANITY_DATASET says "staging" but SEARCH_INDEX_NAME
+    // (mirroring the vectorize binding) still says the production index. The
+    // document below would index cleanly if the guard were not there.
+    const sanityDoc = {
+      _id: "resp-123",
+      slug: "kantine",
+      title: "Kantine",
+      question: "Wie regelt de kantine?",
+      keywords: ["kantine", "bar"],
+      summary: "De kantine wordt beheerd door de evenementencommissie.",
+    };
+    mockSanityFetch.mockResolvedValue(sanityDoc);
+
+    const body = JSON.stringify({ _id: "resp-123", _type: "responsibility" });
+    const request = await makeSignedRequest(body);
+
+    const response = await handleIndexWebhook(
+      request,
+      makeEnv({ SANITY_DATASET: "staging", SEARCH_INDEX_NAME: "kcvv-search" }),
+      defaultLayer,
+    );
+
+    // 409, not 500: this is a deploy-time misconfiguration, identical on
+    // every retry, not a transient failure Sanity should keep retrying.
+    expect(response.status).toBe(409);
+    const json = (await response.json()) as { ok: boolean };
+    expect(json.ok).toBe(false);
+    expect(upsertSpy).not.toHaveBeenCalled();
+    expect(deleteByIdsSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses a delete too, not only an upsert, on the same dataset/index mismatch", async () => {
+    const body = JSON.stringify({
+      _id: "doc-to-delete",
+      _type: "responsibility",
+    });
+    const request = await makeSignedRequest(body, { operation: "delete" });
+
+    const response = await handleIndexWebhook(
+      request,
+      makeEnv({ SANITY_DATASET: "staging", SEARCH_INDEX_NAME: "kcvv-search" }),
+      defaultLayer,
+    );
+
+    expect(response.status).toBe(409);
+    expect(upsertSpy).not.toHaveBeenCalled();
+    expect(deleteByIdsSpy).not.toHaveBeenCalled();
+  });
+
+  it("still indexes when the staging dataset is correctly paired with the staging index", async () => {
+    const sanityDoc = {
+      _id: "resp-123",
+      slug: "kantine",
+      title: "Kantine",
+      question: "Wie regelt de kantine?",
+      keywords: ["kantine", "bar"],
+      summary: "De kantine wordt beheerd door de evenementencommissie.",
+    };
+    mockSanityFetch.mockResolvedValue(sanityDoc);
+
+    const body = JSON.stringify({ _id: "resp-123", _type: "responsibility" });
+    const request = await makeSignedRequest(body);
+
+    const response = await handleIndexWebhook(
+      request,
+      makeEnv({
+        SANITY_DATASET: "staging",
+        SEARCH_INDEX_NAME: "kcvv-search-staging",
+      }),
+      defaultLayer,
+    );
+
+    expect(response.status).toBe(200);
+    expect(upsertSpy).toHaveBeenCalled();
+  });
+
+  it("refuses when SEARCH_INDEX_NAME is unset, failing closed rather than assuming production", async () => {
+    // Isolates the unset branch: SANITY_DATASET is "production" here, so if
+    // the `?? "unset"` fallback were wrong (e.g. it silently treated a
+    // missing var as "matches whatever production expects"), this is the
+    // one combination that would let it slip through. Pairing "staging"
+    // with an unset name (as an earlier version of this test did) fails on
+    // the dataset mismatch regardless of how the unset case is handled, so
+    // it never actually exercised this branch.
+    const body = JSON.stringify({ _id: "resp-123", _type: "responsibility" });
+    const request = await makeSignedRequest(body);
+
+    const response = await handleIndexWebhook(
+      request,
+      makeEnv({ SANITY_DATASET: "production", SEARCH_INDEX_NAME: undefined }),
+      defaultLayer,
+    );
+
+    expect(response.status).toBe(409);
+    expect(upsertSpy).not.toHaveBeenCalled();
   });
 
   it("returns 400 for malformed JSON body", async () => {

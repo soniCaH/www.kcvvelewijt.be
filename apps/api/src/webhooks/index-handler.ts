@@ -3,6 +3,7 @@ import { Effect, Layer, Schema as S } from "effect";
 import type { WorkerEnv } from "../env";
 import { WorkerEnvTag } from "../env";
 import { sanityClientConfig } from "../sanity/config";
+import { datasetIndexMismatch } from "../search/dataset-index-guard";
 import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
 import {
   ARTICLE_INDEX_PROJECTION,
@@ -43,7 +44,8 @@ class WebhookServiceError {
       | "embedding_failed"
       | "upsert_failed"
       | "delete_failed"
-      | "invalid_document",
+      | "invalid_document"
+      | "dataset_mismatch",
     readonly detail: string,
   ) {}
 }
@@ -160,6 +162,18 @@ const toErrorResponse = (
     case "WebhookAuthError":
       return new Response("Unauthorized", { status: 401 });
     case "WebhookServiceError":
+      // dataset_mismatch is a deploy-time misconfiguration, identical on
+      // every retry — never transient like the other codes below it. 409
+      // (not 500) so Sanity's webhook delivery fails fast instead of
+      // retrying with backoff and eventually disabling the endpoint, which
+      // would also take down delivery for a correctly-configured deploy
+      // sharing the same webhook config (review finding 5 on #2833).
+      if (error.code === "dataset_mismatch") {
+        return Response.json(
+          { ok: false, error: error.detail, code: error.code },
+          { status: 409 },
+        );
+      }
       return Response.json(
         { ok: false, error: "Internal server error" },
         { status: 500 },
@@ -187,6 +201,19 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
       catch: () => new WebhookAuthError(),
     });
     if (!valid) return yield* Effect.fail(new WebhookAuthError());
+
+    // 2.5. Refuse when this worker's dataset doesn't match the index its
+    // SEARCH_INDEX binding is configured for — the config-level guarantee in
+    // wrangler.toml is not enough on its own (#2833). Gated ahead of both the
+    // upsert and the delete paths: a delete from a mismatched worker could
+    // just as easily remove a production vector that happens to share an id
+    // with a staging document.
+    const mismatch = datasetIndexMismatch(env);
+    if (mismatch) {
+      return yield* Effect.fail(
+        new WebhookServiceError("dataset_mismatch", mismatch),
+      );
+    }
 
     // 3. Parse JSON
     const parsed = yield* Effect.try({

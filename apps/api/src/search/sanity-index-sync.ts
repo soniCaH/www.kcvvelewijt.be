@@ -2,6 +2,7 @@ import { createClient } from "@sanity/client";
 import { Array as Arr, Effect, Schedule } from "effect";
 import { WorkerEnvTag } from "../env";
 import { sanityClientConfig } from "../sanity/config";
+import { datasetIndexMismatch } from "./dataset-index-guard";
 import { EmbeddingService } from "./embedding";
 import {
   ARTICLE_INDEX_PROJECTION,
@@ -93,6 +94,20 @@ interface SyncOptions {
 export const runSanityIndexSync = (options?: SyncOptions) =>
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
+
+    // Refuse the whole run when this worker's dataset doesn't match its
+    // configured index (#2833). This job is unreachable on staging today
+    // (`env.staging.triggers.crons` is `[]`) — but that is the same "no
+    // cron" reasoning this issue was filed to retire for the webhook, and
+    // it stops being true the moment anything triggers this run manually
+    // (see the staging backfill instructions in apps/api/CLAUDE.md).
+    const mismatch = datasetIndexMismatch(env);
+    if (mismatch) {
+      return yield* Effect.fail(
+        new Error(`[search-sync] refusing to sync: ${mismatch}`),
+      );
+    }
+
     const embedding = yield* EmbeddingService;
     const vectorize = yield* VectorizeService;
 
