@@ -87,7 +87,7 @@ jobs:
       pull-requests: write
     # Same image as the visual-regression job and the local Docker runner.
     container:
-      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
       options: --user 0:0
     steps:
       - name: Resolve PR head

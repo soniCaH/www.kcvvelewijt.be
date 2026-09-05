@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@kcvv/sanity-schemas": "workspace:*",
-    "@playwright/test": "1.60.0",
+    "@playwright/test": "1.63.0",
     "@storybook/addon-a11y": "10.5.10",
     "@storybook/addon-docs": "10.5.10",
     "@storybook/addon-mcp": "0.7.0",
