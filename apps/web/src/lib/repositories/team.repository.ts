@@ -34,7 +34,14 @@ export const TEAM_BY_SLUG_QUERY =
   staff[] { role, "member": member-> {
     _id, psdId, archived, firstName, lastName, functionTitle,
     "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)),
-    "psdImageUrl": psdImage.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(psdImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(psdImage.hotspot.y, 0.5)),
+    // fit=max, not the hotspot-crop route photoUrl above uses: psdImage has
+    // no hotspot option on the schema (it's readOnly — no editor could ever
+    // set one), so a hotspot-crop URL here would always centre-crop a
+    // 350x350 PSD square with no way to adjust it. Matches the player
+    // psdImageUrl projection above (#2895 review). A staff member who needs
+    // specific framing uses the editorial 'photo' field, which keeps its
+    // hotspot and still wins at render.
+    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "hasBio": count(bio) > 0
   } }
 }`);

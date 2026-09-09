@@ -845,6 +845,7 @@ describe("runSync", () => {
     const {
       getActiveStaffPsdIds,
       upsertStaff,
+      uploadStaffImage,
       archiveStaff,
       writerMock,
       readerMock,
@@ -877,6 +878,10 @@ describe("runSync", () => {
     );
     // Nothing archived: 9391 is now accumulated, so it is not an orphan.
     expect(archiveStaff).not.toHaveBeenCalled();
+    // Club-wide staff never get an image upload attempt (#2895 review):
+    // PsdClubStaffMember carries no profilePictureURL at all, so the call
+    // would only ever log a skip line — it is deliberately not wired here.
+    expect(uploadStaffImage).not.toHaveBeenCalled();
   });
 
   it("skips staff archival when the club-wide staff fetch fails", async () => {

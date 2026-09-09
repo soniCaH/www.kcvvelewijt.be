@@ -110,6 +110,34 @@ describe("resolveSubject", () => {
     it("returns null when the staff reference is missing", () => {
       expect(resolveSubject({ kind: "staff", staffRef: null })).toBeNull();
     });
+
+    it("falls back to the sync-owned psdImage when the editorial photo is absent (#2895)", () => {
+      const resolved = resolveSubject({
+        kind: "staff",
+        staffRef: {
+          firstName: "Jeroen",
+          lastName: "Van den Berghe",
+          functionTitle: "Hoofdcoach A-ploeg",
+          photoUrl: null,
+          psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+        },
+      });
+      expect(resolved?.photoUrl).toBe("https://cdn.sanity.io/psd-staff.webp");
+    });
+
+    it("prefers the editorial photo over the sync-owned psdImage when both are present (#2895)", () => {
+      const resolved = resolveSubject({
+        kind: "staff",
+        staffRef: {
+          firstName: "Jeroen",
+          lastName: "Van den Berghe",
+          functionTitle: "Hoofdcoach A-ploeg",
+          photoUrl: "https://cdn.sanity.io/staff.webp",
+          psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+        },
+      });
+      expect(resolved?.photoUrl).toBe("https://cdn.sanity.io/staff.webp");
+    });
   });
 
   describe("custom branch", () => {

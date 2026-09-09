@@ -56,6 +56,10 @@ createServer((req, res) => {
     console.log("[uploadPlayerImage] player=100 patch committed — image upload complete");
     console.log("[uploadPlayerImage] player=101 patch committed — image upload complete");
     console.log("player 102: image up-to-date (hasPsdImage=true)");
+    // A staff-only rate limit (#2895 review fixture): must not bleed into
+    // the players' rate-limited count.
+    console.log("[uploadStaffImage] staff=200 patch committed — image upload complete");
+    console.log("staff 201: image upload failed — Sanity asset upload rate limited (429) | cause: undefined");
     console.log("team 1 (Test Team): done");
     // The genuine terminal line. The per-team "done" above fires before three
     // KV writes, the reconciliation branch and the cursor advance, so the
@@ -137,14 +141,15 @@ describe("trigger-psd-sync.sh", () => {
     expect(r.stdout).toContain("fixture mode — skipping the KV cursor write");
   });
 
-  it("summarises what actually committed", () => {
+  it("summarises what actually committed, players and staff counted separately (#2895)", () => {
     const r = run(["0"]);
     expect(r.status).toBe(0);
     expect(r.stdout).toContain("processing team 1/21: 1 (Test Team)");
     expect(r.stdout).toContain("team 1: 3 players, 1 staff");
-    expect(r.stdout).toContain("images committed        : 2");
-    expect(r.stdout).toContain("already up to date      : 1");
-    expect(r.stdout).toContain("rate-limited (429)      : 0");
+    expect(r.stdout).toContain("images committed        : players 2, staff 1");
+    expect(r.stdout).toContain("already up to date      : players 1, staff 0");
+    // The fixture's staff-only 429 must not bleed into the players' count.
+    expect(r.stdout).toContain("rate-limited (429)      : players 0, staff 1");
   });
 
   it("refuses a missing or non-numeric team index rather than syncing the wrong team", () => {

@@ -334,11 +334,10 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
 
-  // Shared by the team-scoped loop below and the club-wide reconciliation
-  // branch further down (#2895) — mirrors the player image block above.
-  // Safe to call with a doc that has no PSD portrait (club-wide staff, whose
-  // source endpoint carries no profilePictureURL at all): _psdImageUrl is
-  // then null and this just logs a skip.
+  // Used by the team-scoped loop below (#2895) — mirrors the player image
+  // block above. Deliberately NOT called from the club-wide reconciliation
+  // branch further down: PsdClubStaffMember has no profilePictureURL, so it
+  // could only ever log a skip there — see the comment at that call site.
   const syncStaffImage = (
     doc: SanityStaffDoc & {
       _psdImageUrl: string | null;
@@ -508,18 +507,17 @@ export const runSync = Effect.gen(function* () {
         const toUpsert = clubStaff.filter(
           (m) => !accumulatedStaffIds.has(String(m.id)),
         );
+        // No syncStaffImage call here (#2895 review): PsdClubStaffMember has
+        // no profilePictureURL field, and it's an S.Class, so the field is
+        // stripped even if the quicksearch endpoint started sending one —
+        // the call could never do anything but log a skip line per member,
+        // every cycle-end run. If that endpoint ever grows portrait support,
+        // add `profilePictureURL` to PsdClubStaffMember first (schemas-
+        // player-team.ts) and bring the call back here at the same
+        // concurrency: 2 the team-scoped loop uses above, not 3.
         yield* Effect.forEach(
           toUpsert,
-          (m) =>
-            Effect.gen(function* () {
-              // PsdClubStaffMember carries no profilePictureURL (the
-              // quicksearch endpoint it comes from is PII-stripped down to
-              // the fields the sync reads), so syncStaffImage always skips
-              // here today — kept for consistency should that ever change.
-              const doc = transformStaff(m, imageBaseUrl);
-              yield* sanityWriter.upsertStaff(doc);
-              yield* syncStaffImage(doc);
-            }),
+          (m) => sanityWriter.upsertStaff(transformStaff(m, imageBaseUrl)),
           { concurrency: 3 },
         );
         for (const m of clubStaff) accumulatedStaffIds.add(String(m.id));

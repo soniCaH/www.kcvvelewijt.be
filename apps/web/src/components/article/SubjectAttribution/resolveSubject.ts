@@ -13,6 +13,7 @@ export interface SubjectStaffRef {
   lastName?: string | null;
   functionTitle?: string | null;
   photoUrl?: string | null;
+  psdImageUrl?: string | null;
 }
 
 export interface SubjectValue {
@@ -82,6 +83,9 @@ export interface ResolvedSubject {
  * ~90% of players only have `psdImage`. Callers must treat the returned
  * `photoUrl` as a rectangular portrait by default (see the subject-photo
  * memory), not a silhouette cutout.
+ *
+ * Staff photo fallback (#2895 review): editorial `photo` wins when set, else
+ * the sync-owned `psdImage` — same shape as the player fallback above.
  */
 export function resolveSubject(
   subject: SubjectValue | null | undefined,
@@ -110,7 +114,7 @@ export function resolveSubject(
     return {
       name,
       role: s.functionTitle ?? "",
-      photoUrl: s.photoUrl ?? null,
+      photoUrl: s.photoUrl ?? s.psdImageUrl ?? null,
       jerseyNumber: null,
       position: null,
     };
