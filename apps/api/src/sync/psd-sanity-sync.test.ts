@@ -165,7 +165,7 @@ const baseStaff: PsdMember = {
 
 describe("transformStaff", () => {
   it("maps PSD staff to SanityStaffDoc", () => {
-    const result = transformStaff(baseStaff);
+    const result = transformStaff(baseStaff, BASE_URL);
     expect(result.psdId).toBe("99");
     expect(result.firstName).toBe("Marc");
     expect(result.lastName).toBe("Peeters");
@@ -174,31 +174,83 @@ describe("transformStaff", () => {
   });
 
   it("handles null functionTitle", () => {
-    const result = transformStaff({ ...baseStaff, functionTitle: null });
+    const result = transformStaff(
+      { ...baseStaff, functionTitle: null },
+      BASE_URL,
+    );
     expect(result.functionTitle).toBeNull();
   });
 
   it("handles null birthDate", () => {
-    const result = transformStaff({ ...baseStaff, birthDate: null });
+    const result = transformStaff({ ...baseStaff, birthDate: null }, BASE_URL);
     expect(result.birthDate).toBeNull();
   });
 
   it("passes through full functionTitle without truncation", () => {
-    const result = transformStaff({
-      ...baseStaff,
-      functionTitle: "Keeperstrainer",
-    });
+    const result = transformStaff(
+      {
+        ...baseStaff,
+        functionTitle: "Keeperstrainer",
+      },
+      BASE_URL,
+    );
     expect(result.functionTitle).toBe("Keeperstrainer");
   });
 
   it("passes through short functionTitle", () => {
-    const result = transformStaff(baseStaff); // functionTitle: "T1"
+    const result = transformStaff(baseStaff, BASE_URL); // functionTitle: "T1"
     expect(result.functionTitle).toBe("T1");
   });
 
   it("sets functionTitle to null when PSD functionTitle is null", () => {
-    const result = transformStaff({ ...baseStaff, functionTitle: null });
+    const result = transformStaff(
+      { ...baseStaff, functionTitle: null },
+      BASE_URL,
+    );
     expect(result.functionTitle).toBeNull();
+  });
+
+  // ─── Portrait fields (#2895) — mirrors transformMember's image tests ───────
+
+  it("strips profileAccessKey but retains v= from the staff image URL", () => {
+    const result = transformStaff(
+      {
+        ...baseStaff,
+        profilePictureURL:
+          "/api/v2/members/profilepicture/99?profileAccessKey=abc123&v=1",
+      },
+      BASE_URL,
+    );
+    expect(result._psdImageUrl).toBe(
+      `${BASE_URL}/api/v2/members/profilepicture/99?v=1`,
+    );
+    expect(result._psdImageFetchUrl).toBe(
+      `${BASE_URL}/api/v2/members/profilepicture/99?profileAccessKey=abc123&v=1`,
+    );
+  });
+
+  it("handles null profilePictureURL", () => {
+    const result = transformStaff(
+      { ...baseStaff, profilePictureURL: null },
+      BASE_URL,
+    );
+    expect(result._psdImageUrl).toBeNull();
+    expect(result._psdImageFetchUrl).toBeNull();
+  });
+
+  it("handles a club-wide staff member with no profilePictureURL field at all", () => {
+    // PsdClubStaffMember (the quicksearch endpoint) never carries this field —
+    // the parameter type makes it optional for exactly this case.
+    const clubWideMember = {
+      id: 99,
+      firstName: "Marc",
+      lastName: "Peeters",
+      birthDate: "1975-04-12 00:00",
+      functionTitle: "T1",
+    };
+    const result = transformStaff(clubWideMember, BASE_URL);
+    expect(result._psdImageUrl).toBeNull();
+    expect(result._psdImageFetchUrl).toBeNull();
   });
 });
 

@@ -57,6 +57,7 @@ function makeSanityMock(
 ): SanityProjectionInterface {
   return {
     getPlayersImageState: () => Effect.succeed(new Map()),
+    getStaffImageState: () => Effect.succeed(new Map()),
     getActivePlayerPsdIds: () => Effect.succeed([]),
     getActiveStaffPsdIds: () => Effect.succeed([]),
     getActiveTeamPsdIds: () => Effect.succeed([]),

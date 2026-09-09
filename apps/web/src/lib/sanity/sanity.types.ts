@@ -884,6 +884,13 @@ export type StaffMember = {
     crop?: SanityImageCrop;
     _type: "image";
   };
+  psdImage?: {
+    asset?: SanityImageAssetReference;
+    media?: unknown;
+    hotspot?: SanityImageHotspot;
+    crop?: SanityImageCrop;
+    _type: "image";
+  };
   email?: string;
   phone?: string;
   birthDate?: string;
@@ -908,6 +915,7 @@ export type StaffMember = {
   }>;
   functionTitle?: string;
   psdId?: string;
+  psdImageUrl?: string;
   archived?: boolean;
 };
 
@@ -1970,7 +1978,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         firstName: string | null;
         lastName: string | null;
         position: null;
-        imageUrl: null;
+        imageUrl: string | null;
         psdId: string | null;
       }
     | {
@@ -2514,7 +2522,7 @@ export type SPONSORS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: ORGANIGRAM_NODES_QUERY
-// Query: *[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {  _id,  title,  description,  roleCode,  department,  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),  "members": members[@->archived != true]->{    "id": _id,    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",    email,    phone,    "psdId": psdId  }}
+// Query: *[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {  _id,  title,  description,  roleCode,  department,  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),  "members": members[@->archived != true]->{    "id": _id,    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",    email,    phone,    "psdId": psdId  }}
 export type ORGANIGRAM_NODES_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
@@ -2525,7 +2533,8 @@ export type ORGANIGRAM_NODES_QUERY_RESULT = Array<{
   members: Array<{
     id: string;
     name: string | " ";
-    imageUrl: string | null;
+    photoUrl: string | null;
+    psdImageUrl: string | null;
     email: string | null;
     phone: string | null;
     psdId: string | null;
@@ -2546,7 +2555,7 @@ export type KEY_CONTACTS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: STAFF_MEMBER_BY_PSD_ID_QUERY
-// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }}
+// Query: *[_type == "staffMember" && psdId == $psdId && archived != true][0] {  _id, psdId, firstName, lastName, email, phone, bio,  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",  "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }}
 export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
   _id: string;
   psdId: string | null;
@@ -2573,6 +2582,7 @@ export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
     _key: string;
   }> | null;
   photoUrl: string | null;
+  psdImageUrl: string | null;
   organigramPositions: Array<{
     _id: string;
     title: string | null;
@@ -2619,7 +2629,7 @@ export type TEAMS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/team.repository.ts
 // Variable: TEAM_BY_SLUG_QUERY
-// Query: *[_type == "team" && slug.current == $slug][0] {  _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),  players[]-> {    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  staff[] { role, "member": member-> { _id, psdId, archived, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)), "hasBio": count(bio) > 0 } }}
+// Query: *[_type == "team" && slug.current == $slug][0] {  _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),  players[]-> {    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  staff[] { role, "member": member-> {    _id, psdId, archived, firstName, lastName, functionTitle,    "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)),    "psdImageUrl": psdImage.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(psdImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(psdImage.hotspot.y, 0.5)),    "hasBio": count(bio) > 0  } }}
 export type TEAM_BY_SLUG_QUERY_RESULT = {
   _id: string;
   psdId: string | null;
@@ -2693,6 +2703,7 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
       lastName: string | null;
       functionTitle: string | null;
       photoUrl: string | null;
+      psdImageUrl: string | null;
       hasBio: boolean | null;
     } | null;
   }> | null;
@@ -2782,12 +2793,12 @@ declare global {
     '*[_type == "player" && keeper == true && archived != true].psdId': KEEPER_PSD_IDS_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    contactType,\n    teamRole,\n    teamRoleFallback,\n    "position": organigramNode->title,\n    "roleCode": organigramNode->roleCode,\n    "members": organigramNode->members[]->{\n      "id": _id,\n      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n      email, phone\n    },\n    "nodeId": organigramNode->_id,\n    "role": role,\n    "email": email,\n    "phone": phone,\n    "department": department\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      contactType,\n      teamRole,\n      teamRoleFallback,\n      "position": organigramNode->title,\n      "roleCode": organigramNode->roleCode,\n      "members": organigramNode->members[]->{\n        "id": _id,\n        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n        email, phone\n      },\n      "nodeId": organigramNode->_id,\n      "role": role,\n      "email": email,\n      "phone": phone,\n      "department": department\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,\n  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
-    '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
+    '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true && roleCode in $roleCodes]{\n  title,\n  roleCode,\n  "members": members[@->archived != true && defined(@->email)]->{\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    email\n  }\n}[count(members) > 0] | order(title asc)': KEY_CONTACTS_QUERY_RESULT;
-    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },\n  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.\n  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).\n  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).\n  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
+    '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },\n  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.\n  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).\n  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).\n  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {\n  _id, psdId\n}': STAFF_MEMBERS_PSDID_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, displayName, "slug": slug.current, age, division, divisionFull,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))\n}': TEAMS_QUERY_RESULT;
-    '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[] { role, "member": member-> { _id, psdId, archived, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)), "hasBio": count(bio) > 0 } }\n}': TEAM_BY_SLUG_QUERY_RESULT;
+    '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[] { role, "member": member-> {\n    _id, psdId, archived, firstName, lastName, functionTitle,\n    "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)),\n    "psdImageUrl": psdImage.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(psdImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(psdImage.hotspot.y, 0.5)),\n    "hasBio": count(bio) > 0\n  } }\n}': TEAM_BY_SLUG_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && references($memberId)] | order(name asc) {\n  _id, name, displayName, "slug": slug.current, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))\n}': TEAMS_BY_MEMBER_QUERY_RESULT;
     '*[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  staff[defined(member) && !member->archived] { role, "member": member-> { _id, firstName, lastName, email, phone } }\n}': YOUTH_TEAMS_CONTACT_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, psdId, name, displayName, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),\n  staff[] { role, "member": member-> { firstName, lastName, functionTitle } }\n}': TEAMS_LANDING_QUERY_RESULT;

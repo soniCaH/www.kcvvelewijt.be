@@ -37,6 +37,18 @@ export const staffMember = defineType({
       options: {hotspot: true},
       description: 'Portretfoto van het staflid, in kleur getoond. Zonder foto valt het profiel terug op de naam.',
     }),
+    // Sync-owned portrait (#2895), mirroring player.psdImage/psdImageUrl. Never
+    // written into `photo` above — an editor may already have uploaded a
+    // better portrait there, and `photo` keeps winning at render.
+    defineField({
+      name: 'psdImage',
+      title: 'PSD image',
+      type: 'image',
+      group: 'identiteit',
+      description:
+        'Portretfoto gesynchroniseerd vanuit PSD. Alleen-lezen — wordt door de sync beheerd, niet handmatig bewerken. Vul "Photo" hierboven in voor een eigen foto op de site.',
+      readOnly: true,
+    }),
     defineField({
       name: 'email',
       title: 'Email',
@@ -93,6 +105,16 @@ export const staffMember = defineType({
       description:
         'Unieke identifier uit PSD (GET /teams/{id}/staff), gebruikt als publieke slug. Alleen-lezen — wordt door de sync beheerd, niet handmatig bewerken.',
       readOnly: true,
+    }),
+    defineField({
+      name: 'psdImageUrl',
+      title: 'PSD image source URL',
+      type: 'url',
+      group: 'meta',
+      description:
+        'Ruwe PSD-URL — gebruikt om te detecteren wanneer de foto opnieuw gesynchroniseerd moet worden. Niet getoond op de site. Alleen-lezen.',
+      readOnly: true,
+      hidden: true,
     }),
     defineField({
       name: 'archived',

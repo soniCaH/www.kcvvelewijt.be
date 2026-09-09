@@ -31,7 +31,12 @@ export const TEAM_BY_SLUG_QUERY =
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[] { role, "member": member-> { _id, psdId, archived, firstName, lastName, functionTitle, "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)), "hasBio": count(bio) > 0 } }
+  staff[] { role, "member": member-> {
+    _id, psdId, archived, firstName, lastName, functionTitle,
+    "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)),
+    "psdImageUrl": psdImage.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(psdImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(psdImage.hotspot.y, 0.5)),
+    "hasBio": count(bio) > 0
+  } }
 }`);
 
 // Reverse relation for the domain tier of `<RelatedRow>` (#2443/#2581): every
@@ -236,7 +241,10 @@ function toStaffMemberVM(
     lastName: row.member.lastName ?? "",
     role: row.role ?? row.member.functionTitle ?? "",
     functionTitle: row.member.functionTitle ?? undefined,
-    imageUrl: row.member.photoUrl ?? undefined,
+    // Editorial `photo` wins over the sync-owned `psdImage` when both are
+    // present (#2895) — same ?? chain player.repository.ts uses for
+    // transparentImage ?? psdImageUrl.
+    imageUrl: row.member.photoUrl ?? row.member.psdImageUrl ?? undefined,
     ...(hasDetailPage ? { href: `/staf/${psdId}` } : {}),
   };
 }

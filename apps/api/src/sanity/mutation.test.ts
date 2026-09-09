@@ -730,3 +730,174 @@ describe("uploadPlayerImage", () => {
     }
   });
 });
+
+// ─── uploadStaffImage (#2895) — mirrors uploadPlayerImage's own tests ───────
+
+describe("uploadStaffImage", () => {
+  it("uploads image and patches staffMember doc on success", async () => {
+    const imageBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    // First call: PSD image fetch
+    fetchSpy.mockResolvedValueOnce(
+      new Response(imageBytes, {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+
+    // Second call: Sanity asset upload
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ document: { _id: "image-staff-abc" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadStaffImage(
+          "8001",
+          "https://kcvv.prosoccerdata.com/img/staff.jpg?profileAccessKey=abc",
+          "https://kcvv.prosoccerdata.com/img/staff.jpg?v=1",
+        );
+      }),
+    );
+
+    // PSD image was fetched
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "https://kcvv.prosoccerdata.com/img/staff.jpg?profileAccessKey=abc",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+
+    // staffMember doc was patched with psdImage and psdImageUrl — never `photo`
+    expect(mockClientPatch).toHaveBeenCalledWith("staffMember-psd-8001");
+    const setFn = mockClientPatch.mock.results[0]!.value.set;
+    expect(setFn).toHaveBeenCalledWith({
+      psdImage: {
+        _type: "image",
+        asset: { _type: "reference", _ref: "image-staff-abc" },
+      },
+      psdImageUrl: "https://kcvv.prosoccerdata.com/img/staff.jpg?v=1",
+    });
+    expect(setFn).not.toHaveBeenCalledWith(
+      expect.objectContaining({ photo: expect.anything() }),
+    );
+
+    fetchSpy.mockRestore();
+  });
+
+  it("skips upload and patch when bytes match the PSD placeholder SHA-1", async () => {
+    const placeholderHashBytes = new Uint8Array(20);
+    for (let i = 0; i < 20; i++) {
+      placeholderHashBytes[i] = parseInt(
+        PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2),
+        16,
+      );
+    }
+    const digestSpy = vi
+      .spyOn(crypto.subtle, "digest")
+      .mockResolvedValueOnce(placeholderHashBytes.buffer);
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockResolvedValueOnce(
+      new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+
+    const patchCallsBefore = mockClientPatch.mock.calls.length;
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadStaffImage(
+          "8001",
+          "https://kcvv.prosoccerdata.com/img/placeholder.jpg?profileAccessKey=abc",
+          "https://kcvv.prosoccerdata.com/img/placeholder.jpg?v=1",
+        );
+      }),
+    );
+
+    expect(digestSpy).toHaveBeenCalledTimes(1);
+    // Exactly one fetch (PSD) — Sanity upload was never invoked
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    // psdImage patch was NOT issued — the staff-detail name fallback renders
+    expect(mockClientPatch.mock.calls.length).toBe(patchCallsBefore);
+
+    digestSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+
+  it("uploads + patches when bytes do NOT match the PSD placeholder SHA-1", async () => {
+    const nonPlaceholderHashBytes = new Uint8Array(20);
+    const digestSpy = vi
+      .spyOn(crypto.subtle, "digest")
+      .mockResolvedValueOnce(nonPlaceholderHashBytes.buffer);
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockResolvedValueOnce(
+      new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ document: { _id: "image-staff-real" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadStaffImage(
+          "9002",
+          "https://kcvv.prosoccerdata.com/img/real.jpg?profileAccessKey=xyz",
+          "https://kcvv.prosoccerdata.com/img/real.jpg?v=1",
+        );
+      }),
+    );
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(mockClientPatch).toHaveBeenCalledWith("staffMember-psd-9002");
+    const lastPatchResult =
+      mockClientPatch.mock.results[mockClientPatch.mock.results.length - 1]!
+        .value.set;
+    expect(lastPatchResult).toHaveBeenCalledWith(
+      expect.objectContaining({
+        psdImage: {
+          _type: "image",
+          asset: { _type: "reference", _ref: "image-staff-real" },
+        },
+      }),
+    );
+
+    digestSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+
+  it("rejects image URLs from wrong host, same as uploadPlayerImage", async () => {
+    const result = await Effect.runPromise(
+      Effect.either(
+        Effect.gen(function* () {
+          const mutation = yield* SanityMutation;
+          yield* mutation.uploadStaffImage(
+            "123",
+            "https://wrong-host.com/img.jpg",
+            "https://wrong-host.com/img.jpg",
+          );
+        }).pipe(Effect.provide(makeTestLayer())),
+      ),
+    );
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left).toBeInstanceOf(SanityMutationError);
+      expect(result.left.message).toContain("not allowed");
+    }
+  });
+});

@@ -1,7 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
-import type { PlayerImageState } from "./types";
+import type { PlayerImageState, StaffImageState } from "./types";
 import { sanityClientConfig } from "./config";
 
 // ─── Error ────────────────────────────────────────────────────────────────────
@@ -37,6 +37,11 @@ export interface SanityProjectionInterface {
   /** Fetch existing psdImageUrl + psdImage presence for all player docs. */
   readonly getPlayersImageState: () => Effect.Effect<
     Map<string, PlayerImageState>,
+    SanityQueryError
+  >;
+  /** Fetch existing psdImageUrl + psdImage presence for all staff docs. */
+  readonly getStaffImageState: () => Effect.Effect<
+    Map<string, StaffImageState>,
     SanityQueryError
   >;
   /** Fetch PSD IDs of all non-archived players. */
@@ -115,6 +120,29 @@ export const SanityProjectionLive = Layer.effect(
           },
           catch: (cause) =>
             new SanityQueryError("Failed to fetch player image state", cause),
+        }),
+
+      getStaffImageState: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<
+              Array<{
+                psdId: string;
+                psdImageUrl: string | null;
+                hasPsdImage: boolean;
+              }>
+            >(
+              `*[_type == "staffMember" && defined(psdId) && psdId != ""] { psdId, psdImageUrl, "hasPsdImage": defined(psdImage) }`,
+            );
+            return new Map(
+              rows.map((r) => [
+                r.psdId,
+                { psdImageUrl: r.psdImageUrl, hasPsdImage: r.hasPsdImage },
+              ]),
+            );
+          },
+          catch: (cause) =>
+            new SanityQueryError("Failed to fetch staff image state", cause),
         }),
 
       getActivePlayerPsdIds: () =>

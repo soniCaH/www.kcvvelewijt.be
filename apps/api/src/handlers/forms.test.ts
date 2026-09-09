@@ -34,6 +34,7 @@ function makeMutationMock(
     upsertTeam: () => Effect.succeed(undefined),
     upsertStaff: () => Effect.succeed(undefined),
     uploadPlayerImage: () => Effect.succeed(undefined),
+    uploadStaffImage: () => Effect.succeed(undefined),
     archivePlayers: () => Effect.succeed(undefined),
     archiveStaff: () => Effect.succeed(undefined),
     archiveTeams: () => Effect.succeed(undefined),
@@ -44,6 +45,7 @@ function makeMutationMock(
 
 const projectionMock: SanityProjectionInterface = {
   getPlayersImageState: () => Effect.succeed(new Map()),
+  getStaffImageState: () => Effect.succeed(new Map()),
   getActivePlayerPsdIds: () => Effect.succeed([]),
   getActiveStaffPsdIds: () => Effect.succeed([]),
   getActiveTeamPsdIds: () => Effect.succeed([]),

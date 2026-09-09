@@ -45,7 +45,8 @@ function makeNodeRow(overrides: Partial<NodeRow> = {}): NodeRow {
       {
         id: "staff-1",
         name: "Jan Janssens",
-        imageUrl: "https://cdn.sanity.io/photo.webp",
+        photoUrl: "https://cdn.sanity.io/photo.webp",
+        psdImageUrl: null,
         email: "jan@kcvv.be",
         phone: "+32 123 456 789",
         psdId: "42",
@@ -111,7 +112,8 @@ describe("toOrgChartNode", () => {
           {
             id: "staff-1",
             name: "Jan Janssens",
-            imageUrl: null,
+            photoUrl: null,
+            psdImageUrl: null,
             email: null,
             phone: null,
             psdId: null,
@@ -133,7 +135,8 @@ describe("toOrgChartNode", () => {
           {
             id: "staff-1",
             name: "Jan Janssens",
-            imageUrl: null,
+            photoUrl: null,
+            psdImageUrl: null,
             email: null,
             phone: null,
             psdId: 42 as unknown as string,
@@ -151,7 +154,8 @@ describe("toOrgChartNode", () => {
           {
             id: "staff-1",
             name: " ",
-            imageUrl: null,
+            photoUrl: null,
+            psdImageUrl: null,
             email: null,
             phone: null,
             psdId: " 42 ",
@@ -162,6 +166,50 @@ describe("toOrgChartNode", () => {
     const member = result.members[0];
     expect(member.name).toBeUndefined();
     expect(member.href).toBe("/staf/42");
+  });
+
+  // ─── Sync-owned staff portrait (#2895) ──────────────────────────────────
+
+  it("falls back to the sync-owned psdImage when the editorial photo is absent", () => {
+    const result = toOrgChartNode(
+      makeNodeRow({
+        members: [
+          {
+            id: "staff-1",
+            name: "Jan Janssens",
+            photoUrl: null,
+            psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+            email: null,
+            phone: null,
+            psdId: "42",
+          },
+        ],
+      }),
+    );
+    expect(result.members[0].imageUrl).toBe(
+      "https://cdn.sanity.io/psd-staff.webp",
+    );
+  });
+
+  it("prefers the editorial photo over the sync-owned psdImage when both are present", () => {
+    const result = toOrgChartNode(
+      makeNodeRow({
+        members: [
+          {
+            id: "staff-1",
+            name: "Jan Janssens",
+            photoUrl: "https://cdn.sanity.io/editorial.webp",
+            psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+            email: null,
+            phone: null,
+            psdId: "42",
+          },
+        ],
+      }),
+    );
+    expect(result.members[0].imageUrl).toBe(
+      "https://cdn.sanity.io/editorial.webp",
+    );
   });
 });
 
@@ -308,6 +356,7 @@ describe("StaffRepository", () => {
         phone: "+32 123 456 789",
         bio: null,
         photoUrl: "https://cdn.sanity.io/photo.webp",
+        psdImageUrl: null,
         organigramPositions: [],
         responsibilityPaths: [],
         ...overrides,
@@ -486,6 +535,44 @@ describe("StaffRepository", () => {
       expect(member?.phone).toBeUndefined();
       expect(member?.imageUrl).toBeUndefined();
       expect(member?.bio).toBeUndefined();
+    });
+
+    // ─── Sync-owned staff portrait (#2895) ────────────────────────────────
+
+    it("falls back to the sync-owned psdImage when the editorial photo is absent", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          photoUrl: null,
+          psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+        }),
+      );
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.imageUrl).toBe("https://cdn.sanity.io/psd-staff.webp");
+    });
+
+    it("prefers the editorial photo over the sync-owned psdImage when both are present", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          photoUrl: "https://cdn.sanity.io/editorial.webp",
+          psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+        }),
+      );
+
+      const member = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findByPsdId("psd-42");
+        }),
+      );
+
+      expect(member?.imageUrl).toBe("https://cdn.sanity.io/editorial.webp");
     });
   });
 

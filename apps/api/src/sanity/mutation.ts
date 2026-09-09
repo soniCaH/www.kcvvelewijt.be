@@ -152,6 +152,14 @@ export interface SanityMutationInterface {
     fetchUrl: string,
     stableUrl: string,
   ) => Effect.Effect<void, SanityMutationError>;
+  /** Same contract as uploadPlayerImage, for staffMember documents (#2895).
+   * stableUrl must match transformStaff._psdImageUrl. Never writes the
+   * editorial `photo` field. */
+  readonly uploadStaffImage: (
+    psdId: string,
+    fetchUrl: string,
+    stableUrl: string,
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Create a searchFeedback document in Sanity. */
   readonly writeFeedback: (doc: {
     pathSlug: string;
@@ -225,20 +233,28 @@ export const SanityMutationLive = Layer.effect(
           new SanityMutationError(`Failed to upsert ${type} ${psdId}`, cause),
       }).pipe(Effect.asVoid);
 
-    return {
-      upsertPlayer: (doc) =>
-        upsert("player", doc.psdId, {
-          psdId: doc.psdId,
-          firstName: doc.firstName,
-          lastName: doc.lastName,
-          birthDate: doc.birthDate,
-          keeper: doc.keeper,
-          positionPsd: doc.positionPsd,
-          archived: false,
-        }),
-
-      uploadPlayerImage: (psdId, imageUrl, stableUrl) =>
-        Effect.gen(function* () {
+    /**
+     * Shared body behind uploadPlayerImage / uploadStaffImage (#2895) — the
+     * player path already solves the four hard parts (host allowlist, the
+     * PSD placeholder SHA-1 skip, Workers-safe REST upload, stable-URL patch
+     * for dedup) and staff needs exactly the same ones. `entityType` picks
+     * the doc id / asset filename prefix, `entityLabel` + `logName` keep the
+     * player's existing log lines byte-identical (scripts/trigger-psd-sync.sh
+     * greps them by exact text), and `placeholderFallbackNote` names what
+     * fires once the upload is skipped — the PlayerHero illustration for
+     * players, the name/initial fallback for staff.
+     */
+    const uploadMemberImage =
+      (params: {
+        entityType: "player" | "staffMember";
+        entityLabel: "player" | "staff";
+        logName: "uploadPlayerImage" | "uploadStaffImage";
+        placeholderFallbackNote: string;
+      }) =>
+      (psdId: string, imageUrl: string, stableUrl: string) => {
+        const { entityType, entityLabel, logName, placeholderFallbackNote } =
+          params;
+        return Effect.gen(function* () {
           // Validate imageUrl before attaching PSD credentials
           let parsedUrl: URL;
           try {
@@ -285,16 +301,16 @@ export const SanityMutationLive = Layer.effect(
             },
             catch: (cause) =>
               new SanityMutationError(
-                `Failed to upload image for player ${psdId}`,
+                `Failed to upload image for ${entityLabel} ${psdId}`,
                 cause,
               ),
           }).pipe(Effect.ensuring(cache.increment()));
 
           yield* Effect.log(
-            `[uploadPlayerImage] player=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,
+            `[${logName}] ${entityLabel}=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,
           );
 
-          // 404 = player has no photo in PSD — skip silently
+          // 404 = no photo in PSD for this member — skip silently
           if (response.status === 404) return;
           if (!response.ok) {
             return yield* Effect.fail(
@@ -310,36 +326,32 @@ export const SanityMutationLive = Layer.effect(
             try: () => response.arrayBuffer(),
             catch: (cause) =>
               new SanityMutationError(
-                `Failed to read image body for player ${psdId}`,
+                `Failed to read image body for ${entityLabel} ${psdId}`,
                 cause,
               ),
           });
 
           yield* Effect.log(
-            `[uploadPlayerImage] player=${psdId} body_bytes=${arrayBuffer.byteLength} content-type=${contentType}`,
+            `[${logName}] ${entityLabel}=${psdId} body_bytes=${arrayBuffer.byteLength} content-type=${contentType}`,
           );
 
           // PSD's "no image available" placeholder slips through this code
           // path: PSD returns it as a real image (HTTP 200, valid JPEG bytes)
-          // for any player that lacks a real photo, so the previous early
-          // 404 guard doesn't catch it. Sanity's asset deduplication means
-          // every placeholder upload across syncs lands on the same asset
-          // ref — every affected player ends up sharing one common
-          // `image-<sha1>-...` id. We detect by computing SHA-1 of the
-          // bytes and matching against the known placeholder hash.
-          //
-          // Phase 6.A design (lock 6.d2) requires the player profile photo
-          // column to be EITHER a real player photo OR the canonical
-          // `<PlayerFigure>` illustration fallback — never the silhouette.
-          // Skipping the upload here keeps `psdImage` unset on those
-          // players so the fallback fires correctly.
+          // for any member that lacks a real photo, so the earlier 404 guard
+          // doesn't catch it. Sanity's asset deduplication means every
+          // placeholder upload across syncs lands on the same asset ref —
+          // every affected member ends up sharing one common
+          // `image-<sha1>-...` id. We detect by computing SHA-1 of the bytes
+          // and matching against the known placeholder hash, so the upload
+          // is skipped and the fallback named in placeholderFallbackNote
+          // fires instead of the silhouette.
           //
           // Issue #1895 / originating screenshot: Memphis Vercammen.
           const sha1Buffer = yield* Effect.tryPromise({
             try: () => crypto.subtle.digest("SHA-1", arrayBuffer),
             catch: (cause) =>
               new SanityMutationError(
-                `Failed to hash image bytes for player ${psdId}`,
+                `Failed to hash image bytes for ${entityLabel} ${psdId}`,
                 cause,
               ),
           });
@@ -348,14 +360,14 @@ export const SanityMutationLive = Layer.effect(
             .join("");
           if (sha1Hex === PSD_PLACEHOLDER_IMAGE_SHA1) {
             yield* Effect.log(
-              `[uploadPlayerImage] player=${psdId} bytes match PSD "no image available" placeholder (sha1=${sha1Hex}) — skipping upload and patch so PlayerHero illustration fallback fires`,
+              `[${logName}] ${entityLabel}=${psdId} bytes match PSD "no image available" placeholder (sha1=${sha1Hex}) — ${placeholderFallbackNote}`,
             );
             return;
           }
 
           // Use REST API directly — client.assets.upload() uses Node.js internals
           // incompatible with Cloudflare Workers runtime.
-          const uploadUrl = `https://${env.SANITY_PROJECT_ID}.api.sanity.io/v2024-01-01/assets/images/${env.SANITY_DATASET}?filename=player-psd-${psdId}.jpg`;
+          const uploadUrl = `https://${env.SANITY_PROJECT_ID}.api.sanity.io/v2024-01-01/assets/images/${env.SANITY_DATASET}?filename=${entityType}-psd-${psdId}.jpg`;
           const asset = yield* Effect.tryPromise({
             try: async () => {
               const sanityAbort = new AbortController();
@@ -385,40 +397,74 @@ export const SanityMutationLive = Layer.effect(
             },
             catch: (cause) =>
               new SanityMutationError(
-                `Failed to upload image for player ${psdId}`,
+                `Failed to upload image for ${entityLabel} ${psdId}`,
                 cause,
               ),
           });
 
           yield* Effect.log(
-            `[uploadPlayerImage] player=${psdId} sanity_asset_id=${asset._id}`,
+            `[${logName}] ${entityLabel}=${psdId} sanity_asset_id=${asset._id}`,
           );
 
           yield* Effect.tryPromise({
             try: () =>
               client
-                .patch(docId("player", psdId))
+                .patch(docId(entityType, psdId))
                 .set({
                   psdImage: {
                     _type: "image",
                     asset: { _type: "reference", _ref: asset._id },
                   },
                   // Store stable URL (path + ?v=N) for dedup comparison on future syncs.
-                  // Must equal transformMember._psdImageUrl so needsUpload stabilizes.
+                  // Must equal transformMember._psdImageUrl / transformStaff._psdImageUrl
+                  // so needsUpload stabilizes.
                   psdImageUrl: stableUrl,
                 })
                 .commit(),
             catch: (cause) =>
               new SanityMutationError(
-                `Failed to patch player ${psdId} with image`,
+                `Failed to patch ${entityLabel} ${psdId} with image`,
                 cause,
               ),
           });
 
           yield* Effect.log(
-            `[uploadPlayerImage] player=${psdId} patch committed — image upload complete`,
+            `[${logName}] ${entityLabel}=${psdId} patch committed — image upload complete`,
           );
-        }).pipe(Effect.asVoid),
+        }).pipe(Effect.asVoid);
+      };
+
+    const uploadPlayerImageImpl = uploadMemberImage({
+      entityType: "player",
+      entityLabel: "player",
+      logName: "uploadPlayerImage",
+      placeholderFallbackNote:
+        "skipping upload and patch so PlayerHero illustration fallback fires",
+    });
+
+    const uploadStaffImageImpl = uploadMemberImage({
+      entityType: "staffMember",
+      entityLabel: "staff",
+      logName: "uploadStaffImage",
+      placeholderFallbackNote:
+        "skipping upload and patch so the name fallback renders",
+    });
+
+    return {
+      upsertPlayer: (doc) =>
+        upsert("player", doc.psdId, {
+          psdId: doc.psdId,
+          firstName: doc.firstName,
+          lastName: doc.lastName,
+          birthDate: doc.birthDate,
+          keeper: doc.keeper,
+          positionPsd: doc.positionPsd,
+          archived: false,
+        }),
+
+      uploadPlayerImage: uploadPlayerImageImpl,
+
+      uploadStaffImage: uploadStaffImageImpl,
 
       archivePlayers: (psdIds) => archiveByPsdIds("player", psdIds),
 
