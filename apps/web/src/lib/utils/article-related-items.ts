@@ -129,7 +129,9 @@ export function mapMentionedStaff(
     firstName: s.firstName,
     lastName: s.lastName,
     role: s.role,
-    imageUrl: s.imageUrl,
+    // Editorial photo wins over the sync-owned psdImage when both are
+    // present (#2895 review) — same ?? chain the other repositories use.
+    imageUrl: s.imageUrl ?? s.psdImageUrl ?? null,
   }));
 }
 
@@ -203,7 +205,9 @@ function mapCuratedEntry(
         firstName: entry.firstName,
         lastName: entry.lastName,
         role: entry.role,
-        imageUrl: entry.imageUrl,
+        // Editorial photo wins over the sync-owned psdImage when both are
+        // present (#2895 review) — mirrors mapMentionedStaff above.
+        imageUrl: entry.imageUrl ?? entry.psdImageUrl ?? null,
       } satisfies RelatedStaffItem;
     case "event":
       // Event without dateStart has no meaningful card body — skip rather

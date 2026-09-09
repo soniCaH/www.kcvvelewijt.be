@@ -165,6 +165,46 @@ describe("buildAboutFromSubject", () => {
         }),
       ).toBeUndefined();
     });
+
+    it("falls back to the sync-owned psdImage when the editorial photo is absent (#2895)", () => {
+      const result = buildAboutFromSubject({
+        ...baseArticle,
+        articleType: "interview",
+        subjects: [
+          {
+            kind: "staff",
+            staffRef: {
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: "Jeugdcoördinator",
+              photoUrl: null,
+              psdImageUrl: "https://cdn/psd-piet.webp",
+            },
+          },
+        ],
+      });
+      expect(result?.image).toBe("https://cdn/psd-piet.webp");
+    });
+
+    it("prefers the editorial photo over the sync-owned psdImage when both are present (#2895)", () => {
+      const result = buildAboutFromSubject({
+        ...baseArticle,
+        articleType: "interview",
+        subjects: [
+          {
+            kind: "staff",
+            staffRef: {
+              firstName: "Piet",
+              lastName: "Pieters",
+              functionTitle: "Jeugdcoördinator",
+              photoUrl: "https://cdn/piet.webp",
+              psdImageUrl: "https://cdn/psd-piet.webp",
+            },
+          },
+        ],
+      });
+      expect(result?.image).toBe("https://cdn/piet.webp");
+    });
   });
 
   describe("custom", () => {

@@ -83,25 +83,42 @@ export function transformTeam(
 }
 
 /**
- * Convert a PSD staff member record into a Sanity staffMember document.
+ * Convert a PSD staff member record into a Sanity staffMember document and
+ * include the PSD image URL when present (#2895), mirroring transformMember.
  * Only PSD-sourced fields are written — editorial fields (role, department,
  * parentMember, inOrganigram, roleLabel, responsibilities, photo) are never touched.
  *
- * Accepts both team-scoped `PsdMember` and club-wide `PsdClubStaffMember` — only
- * the shared fields below are read.
+ * Accepts both team-scoped `PsdMember` (has `profilePictureURL`) and club-wide
+ * `PsdClubStaffMember` (does not — the quicksearch endpoint it comes from
+ * carries no portrait). `profilePictureURL` is optional on the parameter type
+ * for exactly that reason: passed a club-wide member, `_psdImageUrl` /
+ * `_psdImageFetchUrl` come back `null` and the caller skips the upload.
+ *
+ * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, functionTitle, profilePictureURL)
+ * @param baseUrl - Base URL to prepend to `profilePictureURL` to form an absolute `_psdImageUrl`
  */
 export function transformStaff(
   psd: Pick<
     PsdMember,
     "id" | "firstName" | "lastName" | "birthDate" | "functionTitle"
-  >,
-): SanityStaffDoc {
+  > & { profilePictureURL?: string | null },
+  baseUrl: string,
+): SanityStaffDoc & {
+  _psdImageUrl: string | null;
+  _psdImageFetchUrl: string | null;
+} {
+  const profilePictureURL = psd.profilePictureURL ?? null;
   return {
     psdId: String(psd.id),
     firstName: psd.firstName,
     lastName: psd.lastName,
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null,
     functionTitle: psd.functionTitle,
+    _psdImageUrl: extractStableImageUrl(profilePictureURL, baseUrl),
+    // Full URL including ?profileAccessKey — required to actually fetch the image.
+    _psdImageFetchUrl: profilePictureURL
+      ? `${baseUrl}${profilePictureURL}`
+      : null,
   };
 }
 
@@ -229,6 +246,14 @@ export const runSync = Effect.gen(function* () {
   const imageState = yield* sanityReader.getPlayersImageState();
   yield* Effect.log(`player image state fetched: ${imageState.size} records`);
 
+  // Same pre-fetch for staff (#2895) — one read for the whole run, not one
+  // read per member, mirroring getPlayersImageState above.
+  yield* Effect.log("fetching staff image state from Sanity");
+  const staffImageState = yield* sanityReader.getStaffImageState();
+  yield* Effect.log(
+    `staff image state fetched: ${staffImageState.size} records`,
+  );
+
   yield* Effect.log("fetching teams from PSD");
   const teams = yield* psd.getRawTeams();
   yield* Effect.log(`teams fetched: ${teams.length} total`);
@@ -309,10 +334,62 @@ export const runSync = Effect.gen(function* () {
     { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
 
+  // Used by the team-scoped loop below (#2895) — mirrors the player image
+  // block above. Deliberately NOT called from the club-wide reconciliation
+  // branch further down: PsdClubStaffMember has no profilePictureURL, so it
+  // could only ever log a skip there — see the comment at that call site.
+  const syncStaffImage = (
+    doc: SanityStaffDoc & {
+      _psdImageUrl: string | null;
+      _psdImageFetchUrl: string | null;
+    },
+  ) =>
+    Effect.gen(function* () {
+      const stableImageUrl = doc._psdImageUrl;
+      const fetchImageUrl = doc._psdImageFetchUrl;
+      if (!stableImageUrl || !fetchImageUrl) {
+        yield* Effect.log(
+          `staff ${doc.psdId}: no profilePictureURL from PSD — skipping image`,
+        );
+        return;
+      }
+
+      const existing = staffImageState.get(doc.psdId);
+      const shouldUpload = needsUpload(
+        stableImageUrl,
+        existing?.hasPsdImage ? existing.psdImageUrl : null,
+      );
+
+      if (!shouldUpload) {
+        yield* Effect.log(
+          `staff ${doc.psdId}: image up-to-date (hasPsdImage=${existing?.hasPsdImage}, storedUrl=${existing?.psdImageUrl ?? "null"})`,
+        );
+        return;
+      }
+
+      yield* Effect.log(
+        `staff ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
+      );
+      yield* sanityWriter
+        .uploadStaffImage(doc.psdId, fetchImageUrl, stableImageUrl)
+        .pipe(
+          Effect.catchAll((e) =>
+            Effect.log(
+              `staff ${doc.psdId}: image upload failed — ${e.message} | cause: ${String(e.cause)}`,
+            ),
+          ),
+        );
+    });
+
   yield* Effect.forEach(
     staffMembers,
-    (m) => sanityWriter.upsertStaff(transformStaff(m)),
-    { concurrency: 3 },
+    (m) =>
+      Effect.gen(function* () {
+        const doc = transformStaff(m, imageBaseUrl);
+        yield* sanityWriter.upsertStaff(doc);
+        yield* syncStaffImage(doc);
+      }),
+    { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
 
   const playerPsdIds = players.map((m) => String(m.id));
@@ -430,9 +507,17 @@ export const runSync = Effect.gen(function* () {
         const toUpsert = clubStaff.filter(
           (m) => !accumulatedStaffIds.has(String(m.id)),
         );
+        // No syncStaffImage call here (#2895 review): PsdClubStaffMember has
+        // no profilePictureURL field, and it's an S.Class, so the field is
+        // stripped even if the quicksearch endpoint started sending one —
+        // the call could never do anything but log a skip line per member,
+        // every cycle-end run. If that endpoint ever grows portrait support,
+        // add `profilePictureURL` to PsdClubStaffMember first (schemas-
+        // player-team.ts) and bring the call back here at the same
+        // concurrency: 2 the team-scoped loop uses above, not 3.
         yield* Effect.forEach(
           toUpsert,
-          (m) => sanityWriter.upsertStaff(transformStaff(m)),
+          (m) => sanityWriter.upsertStaff(transformStaff(m, imageBaseUrl)),
           { concurrency: 3 },
         );
         for (const m of clubStaff) accumulatedStaffIds.add(String(m.id));

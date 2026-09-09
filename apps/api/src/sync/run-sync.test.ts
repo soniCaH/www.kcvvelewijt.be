@@ -47,6 +47,7 @@ function makeSanityMocks() {
   const upsertTeam = vi.fn(() => Effect.succeed(undefined as void));
   const upsertStaff = vi.fn(() => Effect.succeed(undefined as void));
   const uploadPlayerImage = vi.fn(() => Effect.succeed(undefined as void));
+  const uploadStaffImage = vi.fn(() => Effect.succeed(undefined as void));
   const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
   const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
   const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
@@ -57,6 +58,11 @@ function makeSanityMocks() {
 
   // Read methods (SanityProjection)
   const getPlayersImageState = vi.fn(() =>
+    Effect.succeed(
+      new Map<string, { psdImageUrl: string | null; hasPsdImage: boolean }>(),
+    ),
+  );
+  const getStaffImageState = vi.fn(() =>
     Effect.succeed(
       new Map<string, { psdImageUrl: string | null; hasPsdImage: boolean }>(),
     ),
@@ -73,6 +79,7 @@ function makeSanityMocks() {
     upsertTeam,
     upsertStaff,
     uploadPlayerImage,
+    uploadStaffImage,
     archivePlayers,
     archiveStaff,
     archiveTeams,
@@ -82,6 +89,7 @@ function makeSanityMocks() {
 
   const readerMock: SanityProjectionInterface = {
     getPlayersImageState,
+    getStaffImageState,
     getActivePlayerPsdIds,
     getActiveStaffPsdIds,
     getActiveTeamPsdIds,
@@ -95,10 +103,12 @@ function makeSanityMocks() {
     upsertTeam,
     upsertStaff,
     uploadPlayerImage,
+    uploadStaffImage,
     archivePlayers,
     archiveStaff,
     archiveTeams,
     getPlayersImageState,
+    getStaffImageState,
     getActivePlayerPsdIds,
     getActiveStaffPsdIds,
     getActiveTeamPsdIds,
@@ -215,6 +225,20 @@ const ONE_STAFF: PsdMember = {
   active: true,
   status: "staff",
   functionTitle: "Coach",
+};
+
+const STAFF_WITH_IMAGE: PsdMember = {
+  id: 8002,
+  firstName: "Mieke",
+  lastName: "Fotograaf",
+  birthDate: "1978-03-20 00:00",
+  nationality: "Belgium",
+  profilePictureURL: "/images/staff/8002.jpg?v=2&profileAccessKey=def456",
+  keeper: false,
+  bestPosition: null,
+  active: true,
+  status: "staff",
+  functionTitle: "T2",
 };
 
 const UNKNOWN_STATUS_MEMBER: PsdMember = {
@@ -376,6 +400,7 @@ describe("runSync", () => {
         return Effect.succeed(undefined as void);
       }),
       uploadPlayerImage: vi.fn(() => Effect.succeed(undefined as void)),
+      uploadStaffImage: vi.fn(() => Effect.succeed(undefined as void)),
       archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
       archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
       archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
@@ -386,6 +411,14 @@ describe("runSync", () => {
     };
     const readerMock: SanityProjectionInterface = {
       getPlayersImageState: vi.fn(() =>
+        Effect.succeed(
+          new Map<
+            string,
+            { psdImageUrl: string | null; hasPsdImage: boolean }
+          >(),
+        ),
+      ),
+      getStaffImageState: vi.fn(() =>
         Effect.succeed(
           new Map<
             string,
@@ -519,6 +552,110 @@ describe("runSync", () => {
 
     // Cursor was written (sync completed, didn't abort on image failure)
     // With 1 team: nextCursor = (0 + 1) % 1 = 0
+    const kvPut = kvStub.put as ReturnType<typeof vi.fn>;
+    expect(kvPut).toHaveBeenCalledWith("sync:team-cursor", "0");
+  });
+
+  // ─── Staff image sync (#2895) — mirrors the player-image tests above ──────
+
+  it("calls uploadStaffImage when profilePictureURL is present and needsUpload is true", async () => {
+    const kvStub = makeKvStub();
+    const { upsertStaff, uploadStaffImage, writerMock, readerMock } =
+      makeSanityMocks();
+    // Image state: empty map → no existing image → needsUpload = true
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [], [STAFF_WITH_IMAGE]);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    expect(upsertStaff).toHaveBeenCalledOnce();
+    expect(uploadStaffImage).toHaveBeenCalledOnce();
+    // First arg = psdId, second = fetch URL (with auth), third = stable URL (without auth)
+    expect(uploadStaffImage).toHaveBeenCalledWith(
+      "8002",
+      expect.stringContaining("profileAccessKey=def456"),
+      expect.stringContaining("?v=2"),
+    );
+  });
+
+  it("skips uploadStaffImage when image is already up-to-date", async () => {
+    const kvStub = makeKvStub();
+    const {
+      upsertStaff,
+      uploadStaffImage,
+      getStaffImageState,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // The stable URL that transformStaff will produce for STAFF_WITH_IMAGE
+    const expectedStableUrl =
+      "https://kcvv.prosoccerdata.com/images/staff/8002.jpg?v=2";
+
+    // Pre-populate image state: already has image with same stable URL
+    getStaffImageState.mockReturnValue(
+      Effect.succeed(
+        new Map([
+          ["8002", { psdImageUrl: expectedStableUrl, hasPsdImage: true }],
+        ]),
+      ),
+    );
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [], [STAFF_WITH_IMAGE]);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    expect(upsertStaff).toHaveBeenCalledOnce();
+    // Image already up-to-date — should NOT upload
+    expect(uploadStaffImage).not.toHaveBeenCalled();
+  });
+
+  it("still upserts staff and advances cursor when uploadStaffImage fails (429 etc. — non-fatal)", async () => {
+    const kvStub = makeKvStub();
+    const {
+      upsertStaff,
+      upsertTeam,
+      uploadStaffImage,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // Make uploadStaffImage fail, e.g. a 429 from the Sanity asset endpoint
+    uploadStaffImage.mockReturnValue(
+      Effect.fail(
+        new SanityMutationError("Sanity asset upload rate limited (429)"),
+      ) as unknown as Effect.Effect<void>,
+    );
+
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [], [STAFF_WITH_IMAGE]);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    // Staff was still upserted despite image failure
+    expect(upsertStaff).toHaveBeenCalledOnce();
+    expect(upsertStaff).toHaveBeenCalledWith(
+      expect.objectContaining({ psdId: "8002" }),
+    );
+
+    // Image upload was attempted
+    expect(uploadStaffImage).toHaveBeenCalledOnce();
+
+    // Team was still upserted
+    expect(upsertTeam).toHaveBeenCalledOnce();
+
+    // Cursor was written (sync completed, didn't abort on image failure —
+    // the failure retries on the next run, same as the player path)
     const kvPut = kvStub.put as ReturnType<typeof vi.fn>;
     expect(kvPut).toHaveBeenCalledWith("sync:team-cursor", "0");
   });
@@ -708,6 +845,7 @@ describe("runSync", () => {
     const {
       getActiveStaffPsdIds,
       upsertStaff,
+      uploadStaffImage,
       archiveStaff,
       writerMock,
       readerMock,
@@ -740,6 +878,10 @@ describe("runSync", () => {
     );
     // Nothing archived: 9391 is now accumulated, so it is not an orphan.
     expect(archiveStaff).not.toHaveBeenCalled();
+    // Club-wide staff never get an image upload attempt (#2895 review):
+    // PsdClubStaffMember carries no profilePictureURL at all, so the call
+    // would only ever log a skip line — it is deliberately not wired here.
+    expect(uploadStaffImage).not.toHaveBeenCalled();
   });
 
   it("skips staff archival when the club-wide staff fetch fails", async () => {

@@ -16,6 +16,7 @@ interface ArticleSubjectStaffRef {
   lastName?: string | null;
   functionTitle?: string | null;
   photoUrl?: string | null;
+  psdImageUrl?: string | null;
 }
 
 interface ArticleSubjectLike {
@@ -80,7 +81,7 @@ export function buildAboutFromSubject(
     if (!name) return undefined;
     return {
       name,
-      image: s.photoUrl ?? undefined,
+      image: s.photoUrl ?? s.psdImageUrl ?? undefined,
       jobTitle: s.functionTitle ?? undefined,
     };
   }

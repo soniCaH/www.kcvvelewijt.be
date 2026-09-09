@@ -33,7 +33,8 @@ export const ARTICLES_QUERY =
     },
     staffRef->{
       _id, firstName, lastName, functionTitle,
-      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"
+      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
     },
     customName, customRole,
     "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
@@ -140,7 +141,8 @@ export const ARTICLE_BY_SLUG_QUERY =
     },
     staffRef->{
       _id, firstName, lastName, functionTitle,
-      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max"
+      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
     },
     customName,
     customRole,
@@ -175,6 +177,7 @@ export const ARTICLE_BY_SLUG_QUERY =
       firstName,
       lastName,
       "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
       "role": functionTitle
     }),
     ...select(_type == "event" => {
@@ -198,6 +201,7 @@ export const ARTICLE_BY_SLUG_QUERY =
   "mentionedStaffMembers": body[].markDefs[_type == "internalLink" && reference->_type == "staffMember"].reference-> {
     _id, firstName, lastName,
     "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",
+    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "role": functionTitle
   }
 }`);

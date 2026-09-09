@@ -142,6 +142,7 @@ function makeArticleDetailRow(
         firstName: "Piet",
         lastName: "Pieters",
         imageUrl: "https://cdn.sanity.io/staff.webp",
+        psdImageUrl: null,
         role: null,
       },
     ],
@@ -565,6 +566,7 @@ describe("ArticleRepository", () => {
         firstName: "Piet",
         lastName: "Pieters",
         imageUrl: "https://cdn.sanity.io/staff.webp",
+        psdImageUrl: null,
         role: null,
       });
     });

@@ -290,7 +290,8 @@ describe("GET /api/search", () => {
             {
               id: "staff-1",
               name: "Jan Janssens",
-              imageUrl: "https://cdn.sanity.io/jan.webp",
+              photoUrl: "https://cdn.sanity.io/jan.webp",
+              psdImageUrl: null,
               email: null,
               phone: null,
               psdId: "123",
@@ -308,7 +309,8 @@ describe("GET /api/search", () => {
             {
               id: "staff-2",
               name: "Piet Pieters",
-              imageUrl: "https://cdn.sanity.io/piet.webp",
+              photoUrl: "https://cdn.sanity.io/piet.webp",
+              psdImageUrl: null,
               email: null,
               phone: null,
               psdId: "456",
@@ -347,7 +349,8 @@ describe("GET /api/search", () => {
             {
               id: "staff-3",
               name: "KarelAnsen",
-              imageUrl: null,
+              photoUrl: null,
+              psdImageUrl: null,
               email: null,
               phone: null,
               psdId: null,
@@ -378,7 +381,8 @@ describe("GET /api/search", () => {
             {
               id: "staff-4",
               name: "  ",
-              imageUrl: null,
+              photoUrl: null,
+              psdImageUrl: null,
               email: null,
               phone: null,
               psdId: "789",
@@ -413,7 +417,8 @@ describe("GET /api/search", () => {
       const member = {
         id: "staff-1",
         name: "Jan Janssens",
-        imageUrl: "https://cdn.sanity.io/jan.webp",
+        photoUrl: "https://cdn.sanity.io/jan.webp",
+        psdImageUrl: null,
         email: null,
         phone: null,
         psdId: "123",

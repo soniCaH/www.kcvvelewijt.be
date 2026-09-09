@@ -197,23 +197,35 @@ count() {
 
 TEAM_LINE="$(grep -oE "processing team [0-9]+/[0-9]+: .*" "${LOG}" | head -1 || true)"
 ROSTER="$(grep -oE "team [0-9]+: [0-9]+ players, [0-9]+ staff" "${LOG}" | head -1 || true)"
-COMMITTED="$(count 'player=[0-9]+ patch committed')"
-UPTODATE="$(count 'player [0-9]+: image up-to-date')"
-PLACEHOLDER="$(count 'player=[0-9]+ bytes match PSD')"
-# Anchored to the actual failure text. A bare '429' matches a timestamp
-# (11:37:46.429Z), a body_bytes value, or a sha1 — a clean run reported one
-# phantom rate limit that way.
-RATE_LIMITED="$(grep -c 'image upload failed.*429' "${LOG}" || true)"
+# Players and staff each get their own patterns: mutation.ts (#2895) keeps
+# the player log lines byte-identical ("[uploadPlayerImage] player=…") and
+# gives staff its own ("[uploadStaffImage] staff=…", "staff <id>: …") rather
+# than reusing the player wording, specifically so these can stay separate
+# counts instead of silently merging two different rosters into one number.
+COMMITTED_PLAYERS="$(count 'player=[0-9]+ patch committed')"
+COMMITTED_STAFF="$(count 'staff=[0-9]+ patch committed')"
+UPTODATE_PLAYERS="$(count 'player [0-9]+: image up-to-date')"
+UPTODATE_STAFF="$(count 'staff [0-9]+: image up-to-date')"
+PLACEHOLDER_PLAYERS="$(count 'player=[0-9]+ bytes match PSD')"
+PLACEHOLDER_STAFF="$(count 'staff=[0-9]+ bytes match PSD')"
+# Anchored to the actual failure text AND to the "player "/"staff " prefix
+# psd-sanity-sync.ts logs it under. A bare 'image upload failed.*429' used to
+# match both rosters identically, so a run where only staff hit a 429 printed
+# it as a player-side failure that never happened (#2895 review). A bare
+# '429' alone matches a timestamp (11:37:46.429Z), a body_bytes value, or a
+# sha1 — a clean run reported one phantom rate limit that way.
+RATE_LIMITED_PLAYERS="$(grep -c 'player [0-9]*: image upload failed.*429' "${LOG}" || true)"
+RATE_LIMITED_STAFF="$(grep -c 'staff [0-9]*: image upload failed.*429' "${LOG}" || true)"
 FIRED="$(grep -c 'processing team [0-9]*/' "${LOG}" || true)"
 
 echo
 echo "──────────────────────────────────────────────"
 [ -n "${TEAM_LINE}" ] && echo " ${TEAM_LINE}"
 [ -n "${ROSTER}" ] && echo " ${ROSTER}"
-echo " images committed        : ${COMMITTED}"
-echo " already up to date      : ${UPTODATE}"
-echo " PSD placeholder skipped : ${PLACEHOLDER}   (illustration fallback renders)"
-echo " rate-limited (429)      : ${RATE_LIMITED}   (non-fatal, retries next run)"
+echo " images committed        : players ${COMMITTED_PLAYERS}, staff ${COMMITTED_STAFF}"
+echo " already up to date      : players ${UPTODATE_PLAYERS}, staff ${UPTODATE_STAFF}"
+echo " PSD placeholder skipped : players ${PLACEHOLDER_PLAYERS}, staff ${PLACEHOLDER_STAFF}   (name/illustration fallback renders)"
+echo " rate-limited (429)      : players ${RATE_LIMITED_PLAYERS}, staff ${RATE_LIMITED_STAFF}   (non-fatal, retries next run)"
 echo "──────────────────────────────────────────────"
 
 if [ "${FIRED}" -gt 1 ]; then

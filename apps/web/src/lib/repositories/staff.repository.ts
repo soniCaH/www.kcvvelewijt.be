@@ -22,7 +22,8 @@ export const ORGANIGRAM_NODES_QUERY =
   "members": members[@->archived != true]->{
     "id": _id,
     "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
-    "imageUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",
     email,
     phone,
     "psdId": psdId
@@ -52,6 +53,7 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
   _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
+  "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",
   "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },
   // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.
   // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).
@@ -154,7 +156,9 @@ export function toOrgChartNode(
         return {
           id: m.id,
           name: trimmed === "" ? undefined : trimmed,
-          imageUrl: m.imageUrl ?? undefined,
+          // Editorial `photo` wins over the sync-owned `psdImage` when both
+          // are present (#2895) — same ?? chain team.repository.ts uses.
+          imageUrl: m.photoUrl ?? m.psdImageUrl ?? undefined,
           email: m.email ?? undefined,
           phone: m.phone ?? undefined,
           href: psdId ? `/staf/${psdId}` : undefined,
@@ -176,7 +180,9 @@ export function toStaffDetailVM(
     email: row.email ?? undefined,
     phone: row.phone ?? undefined,
     bio: row.bio ?? undefined,
-    imageUrl: row.photoUrl ?? undefined,
+    // Editorial `photo` wins over the sync-owned `psdImage` when both are
+    // present (#2895).
+    imageUrl: row.photoUrl ?? row.psdImageUrl ?? undefined,
     href: psdId ? `/staf/${psdId}` : "",
     organigramPositions: (row.organigramPositions ?? []).map((p) => ({
       _id: p._id,

@@ -44,6 +44,7 @@ const cacheMock: KvCacheInterface = {
 
 const sanityProjectionMock: SanityProjectionInterface = {
   getPlayersImageState: () => Effect.succeed(new Map()),
+  getStaffImageState: () => Effect.succeed(new Map()),
   getActivePlayerPsdIds: () => Effect.succeed([]),
   getActiveStaffPsdIds: () => Effect.succeed([]),
   getActiveTeamPsdIds: () => Effect.succeed([]),

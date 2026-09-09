@@ -157,6 +157,7 @@ describe("TeamRepository", () => {
               lastName: "Pieters",
               functionTitle: null,
               photoUrl: "https://cdn.sanity.io/photo.webp",
+              psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
             },
           },
         ],
@@ -226,6 +227,7 @@ describe("TeamRepository", () => {
                 lastName: "Pieters",
                 functionTitle: "T1",
                 photoUrl: null,
+                psdImageUrl: null,
               },
             },
           ],
@@ -257,6 +259,7 @@ describe("TeamRepository", () => {
                 lastName: "Pieters",
                 functionTitle: "T1",
                 photoUrl: null,
+                psdImageUrl: null,
               },
             },
           ],
@@ -356,6 +359,7 @@ describe("TeamRepository", () => {
                 lastName: "Janssens",
                 functionTitle: "T1",
                 photoUrl: null,
+                psdImageUrl: null,
               },
             },
           ],
@@ -388,6 +392,7 @@ describe("TeamRepository", () => {
                 lastName: "B",
                 functionTitle: null,
                 photoUrl: null,
+                psdImageUrl: null,
               },
             },
           ],
@@ -402,6 +407,72 @@ describe("TeamRepository", () => {
       );
 
       expect(t!.staff[0].imageUrl).toBeUndefined();
+    });
+
+    // ─── Sync-owned staff portrait (#2895) ──────────────────────────────────
+
+    it("falls back to the sync-owned psdImage when the editorial photo is absent", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: null,
+              member: {
+                _id: "staff-1",
+                psdId: null,
+                archived: null,
+                hasBio: null,
+                firstName: "Piet",
+                lastName: "Pieters",
+                functionTitle: null,
+                photoUrl: null,
+                psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+              },
+            },
+          ],
+        }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.staff[0].imageUrl).toBe("https://cdn.sanity.io/psd-staff.webp");
+    });
+
+    it("prefers the editorial photo over the sync-owned psdImage when both are present — never overwritten by sync", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: null,
+              member: {
+                _id: "staff-1",
+                psdId: null,
+                archived: null,
+                hasBio: null,
+                firstName: "Piet",
+                lastName: "Pieters",
+                functionTitle: null,
+                photoUrl: "https://cdn.sanity.io/editorial.webp",
+                psdImageUrl: "https://cdn.sanity.io/psd-staff.webp",
+              },
+            },
+          ],
+        }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.staff[0].imageUrl).toBe("https://cdn.sanity.io/editorial.webp");
     });
 
     it("returns null for unknown slug", async () => {

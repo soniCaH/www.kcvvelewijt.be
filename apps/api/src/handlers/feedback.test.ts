@@ -15,6 +15,7 @@ function makeSanityMock(
     upsertTeam: () => Effect.succeed(undefined),
     upsertStaff: () => Effect.succeed(undefined),
     uploadPlayerImage: () => Effect.succeed(undefined),
+    uploadStaffImage: () => Effect.succeed(undefined),
     archivePlayers: () => Effect.succeed(undefined),
     archiveStaff: () => Effect.succeed(undefined),
     archiveTeams: () => Effect.succeed(undefined),

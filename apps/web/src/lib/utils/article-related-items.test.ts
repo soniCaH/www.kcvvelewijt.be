@@ -220,6 +220,7 @@ describe("mapMentionedStaff", () => {
       firstName: "John",
       lastName: "Doe",
       imageUrl: "https://example.com/photo.jpg",
+      psdImageUrl: null,
       role: null,
     };
     const result = mapMentionedStaff([null, staff, staff]);
@@ -242,6 +243,7 @@ describe("mapMentionedStaff", () => {
         firstName: "John",
         lastName: "Doe",
         imageUrl: null,
+        psdImageUrl: null,
         role: "Hoofdtrainer",
       },
     ]);
@@ -257,6 +259,34 @@ describe("mapMentionedStaff", () => {
         imageUrl: null,
       },
     ]);
+  });
+
+  it("falls back to the sync-owned psdImage when the editorial photo is absent (#2895)", () => {
+    const result = mapMentionedStaff([
+      {
+        _id: "staff-1",
+        firstName: "John",
+        lastName: "Doe",
+        imageUrl: null,
+        psdImageUrl: "https://example.com/psd-photo.jpg",
+        role: "Hoofdtrainer",
+      },
+    ]);
+    expect(result[0]?.imageUrl).toBe("https://example.com/psd-photo.jpg");
+  });
+
+  it("prefers the editorial photo over the sync-owned psdImage when both are present (#2895)", () => {
+    const result = mapMentionedStaff([
+      {
+        _id: "staff-1",
+        firstName: "John",
+        lastName: "Doe",
+        imageUrl: "https://example.com/photo.jpg",
+        psdImageUrl: "https://example.com/psd-photo.jpg",
+        role: "Hoofdtrainer",
+      },
+    ]);
+    expect(result[0]?.imageUrl).toBe("https://example.com/photo.jpg");
   });
 });
 
@@ -383,6 +413,7 @@ describe("mapCuratedRelatedContent", () => {
         firstName: "Marc",
         lastName: "Vermeulen",
         imageUrl: "https://cdn.example.com/marc.jpg",
+        psdImageUrl: null,
         role: "Hoofdtrainer",
       },
     ]);
@@ -398,6 +429,23 @@ describe("mapCuratedRelatedContent", () => {
         imageUrl: "https://cdn.example.com/marc.jpg",
       },
     ]);
+  });
+
+  it("curated staffMember entry falls back to the sync-owned psdImage when the editorial photo is absent (#2895)", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "staffMember",
+        _id: "staff-3",
+        firstName: "Marc",
+        lastName: "Vermeulen",
+        imageUrl: null,
+        psdImageUrl: "https://cdn.example.com/psd-marc.jpg",
+        role: "Hoofdtrainer",
+      },
+    ]);
+    expect((result[0] as RelatedStaffItem | undefined)?.imageUrl).toBe(
+      "https://cdn.example.com/psd-marc.jpg",
+    );
   });
 
   it("maps a curated event entry with editorial source", () => {
