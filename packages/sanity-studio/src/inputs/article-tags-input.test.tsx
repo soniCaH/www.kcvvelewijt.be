@@ -46,6 +46,13 @@ vi.mock('@sanity/ui', () => {
   }: {onClick?: () => void; 'aria-label'?: string}) => (
     <button type="button" onClick={onClick} aria-label={ariaLabel} />
   )
+  return {Stack, Flex, Card, Text, Button}
+})
+
+// @sanity/ui v4 moved Autocomplete to its own entry point, so it needs its own
+// mock — stubbing it on '@sanity/ui' would silently render the real component,
+// which now requires a ThemeProvider this test does not set up.
+vi.mock('@sanity/ui/autocomplete', () => {
   const Autocomplete = forwardRef<HTMLInputElement, AutocompleteShape>(function Autocomplete(
     {id, placeholder, onQueryChange, onKeyDown, onBlur, onFocus, disabled},
     ref,
@@ -64,7 +71,7 @@ vi.mock('@sanity/ui', () => {
       />
     )
   })
-  return {Stack, Flex, Card, Text, Button, Autocomplete}
+  return {Autocomplete}
 })
 
 vi.mock('@sanity/icons/Close', () => ({CloseIcon: () => null}))

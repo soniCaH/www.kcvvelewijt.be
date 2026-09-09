@@ -22,7 +22,7 @@ export function GuideFormInput(props: InputProps): JSX.Element {
   if (!entry) return props.renderDefault(props)
 
   return (
-    <Stack space={5}>
+    <Stack gap={5}>
       <Card padding={4} radius={2} tone="primary" border>
         <GuideBody entry={entry} />
       </Card>

@@ -41,7 +41,7 @@ function InlineMembers({
   skipFieldNames?: readonly string[]
 }): JSX.Element {
   return (
-    <Stack space={4}>
+    <Stack gap={4}>
       {inputProps.members.map((member) => {
         if (member.kind === 'field') {
           if (skipFieldNames?.includes(member.name)) return null
@@ -83,7 +83,7 @@ export function QaPairRespondentItem(props: ObjectItemProps): JSX.Element {
   const isSolo = !Array.isArray(subjects) || subjects.length < 2
   return (
     <Card border radius={2} padding={3} tone="transparent">
-      <Stack space={3}>
+      <Stack gap={3}>
         <Flex align="center" justify="space-between">
           <Text size={1} weight="semibold" muted>
             Respondent {index + 1}
@@ -130,7 +130,7 @@ export function QaPairItem(props: ObjectItemProps): JSX.Element {
   const isCollapsed = collapsed === true
   return (
     <Card border radius={2} padding={3} shadow={1}>
-      <Stack space={isCollapsed ? 0 : 4}>
+      <Stack gap={isCollapsed ? 0 : 4}>
         <Flex align="center" gap={2}>
           {collapsible && (
             <Button

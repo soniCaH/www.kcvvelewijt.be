@@ -12,12 +12,12 @@ export function GuideBody({entry}: {entry: GuideEntry}): JSX.Element {
   const {intro, placement, tips} = entry
 
   return (
-    <Stack space={5}>
+    <Stack gap={5}>
       <Text size={1} muted>
         {intro}
       </Text>
 
-      <Stack space={2}>
+      <Stack gap={2}>
         <Text size={1} weight="semibold">
           Waar verschijnt dit?
         </Text>
@@ -27,7 +27,7 @@ export function GuideBody({entry}: {entry: GuideEntry}): JSX.Element {
       </Stack>
 
       {tips && tips.length > 0 ? (
-        <Stack space={2}>
+        <Stack gap={2}>
           <Text size={1} weight="semibold">
             Tips
           </Text>

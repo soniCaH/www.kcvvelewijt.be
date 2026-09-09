@@ -42,7 +42,7 @@ export function LauncherCard({template, onSelect}: LauncherCardProps): JSX.Eleme
       aria-label={`Maak nieuw "${template.title}" document aan`}
       style={{cursor: 'pointer'}}
     >
-      <Stack space={3}>
+      <Stack gap={3}>
         <Flex align="center" gap={2}>
           <Text size={2} weight="medium">
             {template.title}
@@ -52,7 +52,7 @@ export function LauncherCard({template, onSelect}: LauncherCardProps): JSX.Eleme
           {template.ui.description}
         </Text>
         <Flex>
-          <Badge tone="primary" mode="outline" fontSize={0}>
+          <Badge tone="primary" fontSize={0}>
             {template.schemaType}
           </Badge>
         </Flex>

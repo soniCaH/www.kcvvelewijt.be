@@ -16,8 +16,8 @@ export function LauncherGrid({templates, onSelect}: LauncherGridProps): JSX.Elem
 
   return (
     <Container width={3} padding={4}>
-      <Stack space={5}>
-        <Stack space={3}>
+      <Stack gap={5}>
+        <Stack gap={3}>
           <Heading size={3}>Wat wil je aanmaken?</Heading>
           <Text size={1} muted>
             Kies een sjabloon hieronder. Elke kaart legt uit wanneer je dit type document gebruikt.
@@ -35,7 +35,7 @@ export function LauncherGrid({templates, onSelect}: LauncherGridProps): JSX.Elem
           </Box>
         ) : (
           grouped.map(({group, templates: groupTemplates}) => (
-            <Stack key={group} space={3}>
+            <Stack key={group} gap={3}>
               <Heading size={1}>{group}</Heading>
               <div
                 style={{

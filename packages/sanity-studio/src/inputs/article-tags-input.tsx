@@ -1,5 +1,8 @@
 import {CloseIcon} from '@sanity/icons/Close'
-import {Autocomplete, Button, Card, Flex, Stack, Text} from '@sanity/ui'
+import {Button, Card, Flex, Stack, Text} from '@sanity/ui'
+// @sanity/ui v4 moved Autocomplete to its own entry point; the root export
+// is now a deprecated `never`.
+import {Autocomplete} from '@sanity/ui/autocomplete'
 import {
   type FocusEvent,
   type JSX,
@@ -101,7 +104,7 @@ export function ArticleTagsInput(props: ArrayOfPrimitivesInputProps<string>): JS
   }
 
   return (
-    <Stack space={2} data-ui="ArticleTagsInput">
+    <Stack gap={2} data-ui="ArticleTagsInput">
       {current.length > 0 && (
         <Flex gap={2} wrap="wrap">
           {current.map((tag, index) => (

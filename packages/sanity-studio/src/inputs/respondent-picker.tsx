@@ -134,7 +134,7 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
   }
 
   return (
-    <Stack space={2} data-ui="RespondentPicker">
+    <Stack gap={2} data-ui="RespondentPicker">
       {subjects.map((subject, index) => {
         const key = subject?._key
         if (!key) return null

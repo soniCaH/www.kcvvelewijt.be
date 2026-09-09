@@ -39,7 +39,7 @@ export function BulkImageUploadInput(props: ArrayOfObjectsInputProps): JSX.Eleme
   }
 
   return (
-    <Stack space={3} data-ui="BulkImageUploadInput">
+    <Stack gap={3} data-ui="BulkImageUploadInput">
       {props.renderDefault(props)}
       <Button
         icon={UploadIcon}
