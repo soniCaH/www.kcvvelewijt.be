@@ -16,6 +16,36 @@ export interface SquadGridProps {
  */
 const CATCH_ALL_ID = "catch-all";
 
+/**
+ * Dutch collation for the lastName fallback (#2894) — so `Van Hof` and
+ * `Van Hóf` sort by their base letters first, diacritic as tie-break only,
+ * instead of a bare `<` putting the accented byte in the wrong place.
+ * Module-level: one collator, not rebuilt per render or per comparison.
+ */
+const lastNameCollator = new Intl.Collator("nl");
+
+/**
+ * Within-group squad order (#2894): `jerseyNumber` ascending, then
+ * `lastName` — both as the primary key's tiebreak (two players can share a
+ * number: a mid-season departure and arrival both wearing 7, or a youth
+ * squad reusing numbers, and the read-only field means nobody can fix it by
+ * hand) and as the fallback when either side has no number. Numbered
+ * players always sort before unnumbered ones — a partial roster must not
+ * interleave the two. `jerseyNumber` is editorial and, measured
+ * 2026-09-09, unset on every active player, so on today's data this is
+ * pure last-name order; it becomes number order as editors fill it in.
+ */
+function compareSquadOrder(a: PlayerVM, b: PlayerVM): number {
+  if (a.number !== undefined && b.number !== undefined) {
+    return (
+      a.number - b.number || lastNameCollator.compare(a.lastName, b.lastName)
+    );
+  }
+  if (a.number !== undefined) return -1;
+  if (b.number !== undefined) return 1;
+  return lastNameCollator.compare(a.lastName, b.lastName);
+}
+
 interface PositionGroup {
   /** Stable identifier — never rendered, never compared against display text. */
   id: string;
@@ -59,6 +89,12 @@ function partition(players: readonly PlayerVM[]): {
   const rest = players.filter((p) => !assigned.has(p.id));
   if (rest.length > 0) {
     result.push({ id: CATCH_ALL_ID, label: "Spelers", players: rest });
+  }
+
+  // Applied once, over every group including the catch-all, rather than
+  // per-group above — so #2894's order is never a rule one bucket forgets.
+  for (const group of result) {
+    group.players.sort(compareSquadOrder);
   }
 
   return result;
