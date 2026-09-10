@@ -174,7 +174,12 @@ export function PullQuote({
         data-pull-quote-placement={placement}
         className="flex flex-col gap-4"
       >
-        <QuoteMark color={palette.quoteMark} />
+        {/* `hang` (D14/Y6, #2617) — opt-in: this card's own padding
+            (`padding="lg"` above, `<TapedCard>`'s 32px) is what the
+            mark's fixed pull is sized for; QuoteMark defaults it off so a
+            tighter wrapper elsewhere doesn't inherit a hang it can't
+            absorb. */}
+        <QuoteMark color={palette.quoteMark} hang />
         <blockquote
           className={cn(
             "font-display block italic",

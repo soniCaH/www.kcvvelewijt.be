@@ -172,8 +172,11 @@ export default async function WedstrijdenPage({
           <div className="flex flex-col gap-10">
             {monthGroups.map((group) => (
               <section key={group.label} aria-label={group.label}>
-                {/* Newspaper month heading — display-big, no rule beneath */}
-                <h2 className="font-display-big text-ink text-display-xl mb-4 tracking-tight">
+                {/* Newspaper month heading — display-big, no rule beneath.
+                    `text-display-xl` now carries its own -0.035em tracking
+                    (D14/Y8, #2617); the hand-applied `tracking-tight` this
+                    replaced was a duplicate of the ramp's own step. */}
+                <h2 className="font-display-big text-ink text-display-xl mb-4">
                   {group.monthName}{" "}
                   <em className="text-jersey-deep italic">
                     {group.yearSuffix}

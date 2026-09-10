@@ -67,6 +67,12 @@ export interface EditorialHeadingProps {
   className?: string;
 }
 
+// All five display steps carry their own letter-spacing as ramp properties
+// now (D14/Y8, decision-sheet §8, #2617) — display-2xl/xl at -0.035em,
+// display-lg/md/sm at -0.025em (the exact value `tracking-tight` already
+// resolved to here — a values-only move, not a retune; see the ramp's own
+// comment in globals.css). No hand-applied `tracking-tight` survives in
+// this map, or the ramp's own value and the hand literal would both apply.
 const SIZE_CLASS: Record<EditorialHeadingSize, string> = {
   "display-2xl": "font-display-big text-display-2xl font-black",
   "display-xl": "font-display text-display-xl font-bold",
@@ -180,12 +186,7 @@ export function EditorialHeading({
     {
       "data-size": size,
       "data-tone": tone,
-      className: cn(
-        "tracking-tight",
-        SIZE_CLASS[size],
-        TONE_CLASS[tone],
-        className,
-      ),
+      className: cn(SIZE_CLASS[size], TONE_CLASS[tone], className),
     },
     body,
   );

@@ -202,16 +202,23 @@ export function PlayerHero({
           </span>
         ) : null}
 
-        <h1 className="text-ink m-0 flex flex-col leading-[0.9]">
+        {/* 6.d1 — 2-line stacked rhythm. `leading-hero-lead` / `leading-hero`
+            (D14/Y1, #2617) are the ramp's tight-leading sibling step,
+            applied per-line rather than once on the `<h1>` wrapper — the
+            shared-wrapper `leading-[0.9]` this replaces had no ascender
+            guard at all. Only the first (tallest, top) line needs the
+            `-lead` variant's bundled `padding-top`: it's the one line with
+            the jersey number / kicker sitting above it. */}
+        <h1 className="text-ink m-0 flex flex-col">
           <span
             data-testid="player-hero-first-name"
-            className="font-display-big text-display-2xl block font-black"
+            className="font-display-big text-display-2xl leading-hero-lead block font-black"
           >
             {firstName}
           </span>
           <span
             data-testid="player-hero-last-name"
-            className="font-display text-display-xl block font-normal italic"
+            className="font-display text-display-xl leading-hero block font-normal italic"
           >
             {lastName}.
           </span>
