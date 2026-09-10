@@ -1060,6 +1060,14 @@
      that tightness is the "hold together as one object" effect Y1 exists
      for, and padding there would work against it, not guard it. */
   .leading-hero-lead {
+    /* `--tw-leading` is the half that actually works. A `text-display-*`
+       step is a UTILITY and emits `line-height: var(--tw-leading, <step>)`;
+       this class sits in `@layer components`, which the cascade puts BEFORE
+       utilities, so a bare `line-height` here loses to the step and the
+       line silently keeps the ramp's own leading. Setting the variable the
+       step already reads is what makes 0.85 win. The literal stays as the
+       fallback for any consumer that pairs this with no `text-*` step. */
+    --tw-leading: var(--leading-hero);
     line-height: var(--leading-hero);
     padding-top: 0.08em;
   }
