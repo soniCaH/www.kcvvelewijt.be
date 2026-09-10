@@ -69,6 +69,12 @@ export function TeamHero({
     <section
       data-testid="team-hero"
       aria-label={`${displayName} · ploegpagina`}
+      // `overflow-x-clip` (#1950) — since #2912, `apps/web/src/app/layout.tsx`
+      // carries the same guard on <html>+<body>, which likely makes this
+      // local one redundant. Left in place, not removed: removing it could
+      // not be verified (every `/ploegen/[slug]` needs a live PSD BFF, which
+      // isn't reachable in a plain local dev/build environment) and this repo
+      // doesn't drop an unverifiable guard. A named leftover, not a silent one.
       className={cn(
         "grid grid-cols-1 items-start gap-x-10 gap-y-8 overflow-x-clip sm:grid-cols-[1fr_minmax(300px,420px)]",
         className,

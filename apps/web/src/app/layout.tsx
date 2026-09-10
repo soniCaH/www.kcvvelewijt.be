@@ -14,7 +14,6 @@ import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoad
 // here would drag both into every route's root chunk.
 import { EmptyStateUndoTracker } from "@/components/analytics/EmptyStateUndoTracker";
 import { Effect } from "effect";
-import { cn } from "@/lib/utils/cn";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   TeamRepository,
@@ -93,7 +92,21 @@ export default async function RootLayout({
       lang="nl"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={cn(ibmPlexMono.variable, "overflow-x-clip")}
+      // `overflow-x-clip` here AND on <body> below — #2912. A press-down
+      // consumer (e.g. the homepage <EditorialHero>) can be full-bleed and
+      // translate +4px on hover; that still counts toward `scrollWidth`, and
+      // with only one of the two elements clipped, Chromium still lets the
+      // page scroll sideways (body-only and html-only were both tested live
+      // and both failed — verified with a real scroll attempt, not just a
+      // `scrollWidth` read, since `clip` can leave that inflated without
+      // anything actually being reachable). Dropping either one silently
+      // reintroduces the bug. Must stay `clip`, never `hidden`: `hidden`
+      // creates a scroll container that the sticky <SiteHeader> positions
+      // against, which breaks it (confirmed: parks the header at y:-1200
+      // instead of y:0). See `apps/web/test/e2e/homepage.spec.ts`'s #2912
+      // test and `apps/web/DESIGN.md`'s press-down section for the guard
+      // contract every future full-bleed press-down consumer relies on.
+      className={`${ibmPlexMono.variable} overflow-x-clip`}
     >
       <head>
         {/* Adobe Typekit (Adobe Fonts) — serves Freight Display/Big Pro + Freight
@@ -111,6 +124,8 @@ export default async function RootLayout({
       </head>
       <body
         suppressHydrationWarning
+        // `overflow-x-clip` — required alongside <html>'s, not redundant
+        // with it. See the comment on <html>'s className above.
         className="flex min-h-screen flex-col overflow-x-clip"
       >
         {/* WCAG 2.1-A skip link — first focusable element, visible only on

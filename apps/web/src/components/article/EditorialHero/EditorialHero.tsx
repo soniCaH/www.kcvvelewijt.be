@@ -578,6 +578,11 @@ export function EditorialHero(props: EditorialHeroProps) {
     return (
       <Link
         href={`/nieuws/${slug}`}
+        // Distinguishes this from every `<NewsCard>`/`<FeaturedUitgelichtRow>`
+        // link on the same page, which also match `a[href^="/nieuws/"]` —
+        // `apps/web/test/e2e/homepage.spec.ts`'s #2912 test anchors on this
+        // rather than guessing DOM position or link count.
+        data-testid="homepage-hero-link"
         className={cn("group block", PRESS_DOWN_CLASSES)}
         aria-label={serializeTitle(title)}
       >
