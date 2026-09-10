@@ -82,7 +82,9 @@ export const CoatGarment: Story = {
 };
 
 /**
- * `blendPhoto={false}` — a free-form staff upload skips the newsprint
+ * `blendPhoto={false}` — the escape hatch, with NO production call site since
+ * #2901 made every person surface blend. Kept as coverage of the prop itself,
+ * for a surface that ever knowingly renders free-form photography. It skips
  * multiply blend (#2575 review), unlike a standardised PSD headshot.
  */
 export const UnblendedPhoto: Story = {

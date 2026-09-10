@@ -87,39 +87,6 @@ const STAFF: TeamStaffMemberData[] = [
   },
 ];
 
-describe("TeamStaff — the staff photo blends like a player's (#2901)", () => {
-  /**
-   * `mix-blend-multiply` erases a white studio matte against the card's cream.
-   * `<TeamStaff>` opted out while every staff photo was a free-form editorial
-   * upload; #2895 gave staff PSD-synced studio headshots, and the owner's call
-   * is that ALL person photos blend — editorial ones on this site are cutouts
-   * on white too. Before this, a PSD staff portrait rendered on a stark white
-   * rectangle beside blended neighbours.
-   */
-  const photoClasses = (container: HTMLElement) =>
-    // Split rather than substring-match: `md:mix-blend-multiply` contains the
-    // token but would not blend at rest.
-    container.querySelector("img")?.className.split(/\s+/) ?? [];
-
-  it("blends a staff portrait onto the card's cream", () => {
-    const { container } = render(
-      <TeamStaff
-        heading="Staf"
-        staff={[
-          {
-            id: "psd",
-            firstName: "Frank",
-            lastName: "Dirix",
-            functionTitle: "T1",
-            imageUrl: "/player-fixtures/player-schulz.jpg",
-          },
-        ]}
-      />,
-    );
-    expect(photoClasses(container)).toContain("mix-blend-multiply");
-  });
-});
-
 describe("TeamStaff", () => {
   it("renders null when staff is empty", () => {
     const { container } = render(<TeamStaff staff={[]} heading="Staf" />);

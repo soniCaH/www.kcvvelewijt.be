@@ -112,7 +112,13 @@ export function SubjectAvatar({
           alt=""
           fill
           sizes={tokens.sizes}
-          className="object-cover"
+          // Same source as the cards and heroes — `subjects[]` resolves
+          // `transparentImageUrl ?? psdImageUrl` for a player and
+          // `photoUrl ?? psdImageUrl` for staff — so a studio cutout would
+          // otherwise render as a white disc beside surfaces that blend
+          // (#2901 review). `bg-cream-soft` is the ground the matte lands on;
+          // the wrapper paints none.
+          className="bg-cream-soft object-cover mix-blend-multiply"
           style={{ filter: "var(--filter-photo-newsprint)" }}
         />
         <span

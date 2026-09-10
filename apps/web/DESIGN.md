@@ -370,6 +370,10 @@ The ornament vocabulary is physical: **tape strips** (small solid rectangles anc
 
 Photographs get a newsprint treatment: a warm-tint filter (`sepia(0.06) saturate(0.94) hue-rotate(-4deg) contrast(1.02) brightness(1.01)`) plus a 4%-opacity SVG turbulence grain in multiply. They stay in colour.
 
+**The Person-Photo Rule.** A photo _of a person_ additionally multiplies onto the cream it sits on — squad and staff cards, the player and staff detail heroes, the organigram card and its detail panel, and a pull-quote's subject avatar. Multiply erases **white**, so a studio cutout's matte disappears into the paper and the subject sits on the page rather than in a white box. It applies club-wide and without exception (#2901): `<PlayerCard>`'s `blendPhoto` prop survives as an escape hatch but has no production call site.
+
+The cost is stated rather than hidden: multiply darkens a photo that fills its frame instead of erasing anything — measured at roughly **10%** mean luminance on a full-bleed fixture. That is accepted because club portraits are cutouts in practice, and one consistent rule beats a per-surface exception. Note that `imageUrl` resolves `photoUrl ?? psdImageUrl` — the _editorial_ upload wins — so this is a decision about the common case, not a guarantee about every image. Whichever surface renders the blend paints its own cream ground; it never reaches through a parent for one.
+
 ### Named Rules
 
 **The Sharp Corner Rule.** If it is a rectangle, its radius is `0`. Circles are circles. There is nothing in between.

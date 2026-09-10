@@ -254,10 +254,16 @@ export function PlayerHero({
               width={400}
               height={533}
               unoptimized
-              // Multiply drops a studio cutout's white matte onto the figure's
-              // cream ground, the same treatment <PlayerCard> gives the squad
-              // grid (#2633, extended to every person surface in #2901).
-              className="block h-full w-full object-cover mix-blend-multiply"
+              // Multiply drops a studio cutout's white matte onto the cream
+              // ground, the same treatment <PlayerCard> gives the squad grid
+              // (#2633, extended to every person surface in #2901).
+              //
+              // The ground is painted here rather than reached through to
+              // <TapedFigure bg> two levels up: PlayerCard removed that same
+              // silent dependency on purpose, and the blend would break
+              // quietly the day `TapedFigureBg` gains a non-cream value
+              // (#2901 review).
+              className="bg-cream-soft block h-full w-full object-cover mix-blend-multiply"
             />
           ) : (
             <JerseyIllustration
