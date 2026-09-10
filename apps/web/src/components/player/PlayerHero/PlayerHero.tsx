@@ -202,16 +202,22 @@ export function PlayerHero({
           </span>
         ) : null}
 
-        <h1 className="text-ink m-0 flex flex-col leading-[0.9]">
+        {/* 6.d1 — 2-line stacked rhythm. `leading-hero` (D14/Y1, #2617) is
+            the ramp's tight-leading sibling step, applied per-line rather
+            than once on the `<h1>` wrapper so each line's own `padding-top`
+            (an em value, scaled to that line's own font-size) can guard its
+            own ascenders — the shared-wrapper `leading-[0.9]` this replaces
+            had no such guard. */}
+        <h1 className="text-ink m-0 flex flex-col">
           <span
             data-testid="player-hero-first-name"
-            className="font-display-big text-display-2xl block font-black"
+            className="font-display-big text-display-2xl leading-hero block pt-[0.08em] font-black"
           >
             {firstName}
           </span>
           <span
             data-testid="player-hero-last-name"
-            className="font-display text-display-xl block font-normal italic"
+            className="font-display text-display-xl leading-hero block font-normal italic"
           >
             {lastName}.
           </span>

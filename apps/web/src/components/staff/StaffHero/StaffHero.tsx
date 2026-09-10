@@ -140,11 +140,14 @@ export function StaffHero({
           <MonoLabel variant="plain">Staf</MonoLabel>
         </span>
 
-        <h1 className="text-ink m-0 flex flex-col leading-[0.9]">
-          <span className="font-display-big text-display-2xl block font-black">
+        {/* Same 2-line stacked rhythm as `<PlayerHero>` — see its comment
+            for why `leading-hero` (D14/Y1, #2617) sits per-line rather than
+            on the `<h1>` wrapper it replaces `leading-[0.9]` on. */}
+        <h1 className="text-ink m-0 flex flex-col">
+          <span className="font-display-big text-display-2xl leading-hero block pt-[0.08em] font-black">
             {firstName}
           </span>
-          <span className="font-display text-display-xl block font-normal italic">
+          <span className="font-display text-display-xl leading-hero block font-normal italic">
             {lastName}.
           </span>
         </h1>
