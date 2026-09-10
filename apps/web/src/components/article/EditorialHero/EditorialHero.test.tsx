@@ -123,23 +123,6 @@ describe("EditorialHero — shell + placement", () => {
     expect(link?.className).not.toContain("hover:-translate-x-[2px]");
   });
 
-  it("clips the press-down's +4px translate so hovering never scrolls the page horizontally (#2912)", () => {
-    const { container } = render(
-      <EditorialHero
-        variant="announcement"
-        {...SHARED}
-        placement="homepage"
-        slug="zomer-2026"
-      />,
-    );
-    const link = container.querySelector("a");
-    // Same fix as TeamHero (#1950): `overflow-x-clip`, never `overflow-x-hidden` —
-    // `hidden` would create a scroll container that the sticky <SiteHeader>
-    // positions against and breaks.
-    expect(link?.className).toContain("overflow-x-clip");
-    expect(link?.className).not.toContain("overflow-x-hidden");
-  });
-
   it("reveals '★ Lees verder →' on hover without hiding it from touch readers (#2393)", () => {
     render(
       <EditorialHero

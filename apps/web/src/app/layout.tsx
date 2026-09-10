@@ -14,6 +14,7 @@ import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoad
 // here would drag both into every route's root chunk.
 import { EmptyStateUndoTracker } from "@/components/analytics/EmptyStateUndoTracker";
 import { Effect } from "effect";
+import { cn } from "@/lib/utils/cn";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   TeamRepository,
@@ -92,7 +93,7 @@ export default async function RootLayout({
       lang="nl"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
-      className={ibmPlexMono.variable}
+      className={cn(ibmPlexMono.variable, "overflow-x-clip")}
     >
       <head>
         {/* Adobe Typekit (Adobe Fonts) — serves Freight Display/Big Pro + Freight
@@ -108,7 +109,10 @@ export default async function RootLayout({
           </Script>
         )}
       </head>
-      <body suppressHydrationWarning className="flex min-h-screen flex-col">
+      <body
+        suppressHydrationWarning
+        className="flex min-h-screen flex-col overflow-x-clip"
+      >
         {/* WCAG 2.1-A skip link — first focusable element, visible only on
             keyboard focus. Retro register (sharp corners, ink border, mono). */}
         <a
