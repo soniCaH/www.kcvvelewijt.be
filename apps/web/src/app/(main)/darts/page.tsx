@@ -77,63 +77,72 @@ const ROWS: Array<{ label: string; value: string }> = [
 
 export default function DartsPage() {
   return (
-    <PageContainer width="default">
-      <PageHero
-        register="band"
-        tone="cream"
-        kicker={darts.tagline}
-        headline={darts.titel}
-        lead={`${darts.datum.tekst} — ${darts.waar.naam}`}
-        image={POSTER}
-        cta={{ label: "Inschrijven", href: "#inschrijven" }}
-      />
+    <>
+      {/* The opening gets its own container with the site's standard vertical
+          rhythm — `pt-10 pb-12`, the same as /club. Without the top padding the
+          taped card and its tape strip butt straight into the nav, which is what
+          shipped for one round. `band` owns the space it sits in; it does not
+          create it. */}
+      <PageContainer width="default" className="pt-10 pb-12">
+        <PageHero
+          register="band"
+          tone="cream"
+          kicker={darts.tagline}
+          headline={darts.titel}
+          lead={`${darts.datum.tekst} — ${darts.waar.naam}`}
+          image={POSTER}
+          cta={{ label: "Inschrijven", href: "#inschrijven" }}
+        />
+      </PageContainer>
 
-      <section className="mt-14" aria-labelledby="het-toernooi">
-        <SectionHeader title="Het toernooi" as="h2" ruled />
-        <dl className="mt-6">
-          {ROWS.map((r) => (
-            <LeaderDotRow key={r.label} label={r.label} value={r.value} />
-          ))}
-        </dl>
-      </section>
+      <PageContainer width="default">
+        <section className="mt-14" aria-labelledby="het-toernooi">
+          <SectionHeader title="Het toernooi" as="h2" ruled />
+          <dl className="mt-6">
+            {ROWS.map((r) => (
+              <LeaderDotRow key={r.label} label={r.label} value={r.value} />
+            ))}
+          </dl>
+        </section>
 
-      {/* Featured 1 — the number everybody asks first, and it is still open. */}
-      <div className="my-10">
-        <PullQuote
-          placement="flow"
-          rotation={-1}
-          labels={[{ label: "Prijs per ploeg" }]}
+        {/* Featured 1 — the number everybody asks first, and it is still open. */}
+        <div className="my-10">
+          <PullQuote
+            placement="flow"
+            rotation={-1}
+            labels={[{ label: "Prijs per ploeg" }]}
+          >
+            {`${darts.prijs.dummy} voor een ploeg van vier. Nog niet beslist — dit cijfer staat er om de pagina te kunnen lezen, niet om op te rekenen.`}
+          </PullQuote>
+        </div>
+
+        <section
+          className="mt-4"
+          id="inschrijven"
+          aria-labelledby="inschrijven-titel"
         >
-          {`${darts.prijs.dummy} voor een ploeg van vier. Nog niet beslist — dit cijfer staat er om de pagina te kunnen lezen, niet om op te rekenen.`}
-        </PullQuote>
-      </div>
+          <SectionHeader title="Inschrijven" as="h2" ruled />
+          <p className="text-ink-soft mt-4">{open(darts.inschrijven.dummy)}</p>
+        </section>
 
-      <section
-        className="mt-4"
-        id="inschrijven"
-        aria-labelledby="inschrijven-titel"
-      >
-        <SectionHeader title="Inschrijven" as="h2" ruled />
-        <p className="text-ink-soft mt-4">{open(darts.inschrijven.dummy)}</p>
-      </section>
+        <section className="mt-14">
+          <SectionHeader title="Reglement" as="h2" ruled />
+          <p className="text-ink-soft mt-4">{open(darts.reglement.dummy)}</p>
+        </section>
 
-      <section className="mt-14">
-        <SectionHeader title="Reglement" as="h2" ruled />
-        <p className="text-ink-soft mt-4">{open(darts.reglement.dummy)}</p>
-      </section>
+        {/* Featured 2 — the one rule that costs €70 a board when it is missed. */}
+        <div className="my-10">
+          <PullQuote
+            placement="flow"
+            rotation={1}
+            labels={[{ label: "Reglement" }, { label: "Verplicht" }]}
+          >
+            {darts.reglement.vast[0]}
+          </PullQuote>
+        </div>
 
-      {/* Featured 2 — the one rule that costs €70 a board when it is missed. */}
-      <div className="my-10">
-        <PullQuote
-          placement="flow"
-          rotation={1}
-          labels={[{ label: "Reglement" }, { label: "Verplicht" }]}
-        >
-          {darts.reglement.vast[0]}
-        </PullQuote>
-      </div>
-
-      <p className="text-ink-muted mb-16 text-sm">{darts.wettelijk.regel}</p>
-    </PageContainer>
+        <p className="text-ink-muted mb-16 text-sm">{darts.wettelijk.regel}</p>
+      </PageContainer>
+    </>
   );
 }
