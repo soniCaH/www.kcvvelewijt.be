@@ -1,5 +1,3 @@
-import type {ValidationContext} from 'sanity'
-
 interface ImageValue {
   asset?: {_ref?: string}
 }
@@ -15,43 +13,53 @@ interface ImageValue {
  * `MIN_ACCEPTABLE_RATIO` sits below the house ratio with headroom for
  * ordinary photography (not every banner is a pure 6:1 crop already) but
  * catches exactly that kind of asset — a warning, not a block: the field's
- * own `required()` already gates on "no image at all"; this gates on "an
- * image that will crop badly".
+ * own `required()` rule (a separate array entry in `banner.ts`, at its own
+ * error level) already gates on "no image at all"; this gates on "an image
+ * that will crop badly".
  */
 const EXPECTED_RATIO = 6
 const MIN_ACCEPTABLE_RATIO = 5
 
 /**
- * Async validation rule for `banner.image`. Warns (never blocks) when the
- * uploaded asset's aspect ratio is materially narrower than the slot's 6:1
- * house ratio, naming the expected ratio so the editor knows what to fix.
- * Mirrors `validateOrganigramMember`'s shape — deref via the validation
- * context's client, swallow a transient fetch failure to `true` (a hint,
- * not a gate).
+ * A Sanity image asset `_ref` encodes its pixel dimensions in its own id —
+ * `image-<sha1>-<width>x<height>-<ext>` (see
+ * `packages/sanity-studio/src/migrations/unset-player-placeholder-psd-image.ts`
+ * for the same format documented against a real ref). Parsing it answers
+ * "how wide is this asset" synchronously, with no network round trip.
  */
-export async function validateBannerAspectRatio(
+const ASSET_REF_DIMENSIONS_RE = /-(\d+)x(\d+)-\w+$/
+
+/**
+ * Validation rule for `banner.image`, run at `.warning()` level by its call
+ * site in `banner.ts` (never blocking — the field's own `required()` rule is
+ * the only thing that can withhold Publish). Warns when the referenced
+ * asset's aspect ratio is materially narrower than the slot's 6:1 house
+ * ratio, naming the expected ratio so the editor knows what to fix.
+ *
+ * Synchronous and dependency-free on purpose (#2401 review finding 6): the
+ * dimensions live in the asset `_ref` itself, so there is no
+ * `context.getClient().fetch()` round trip to make, and therefore no
+ * network-failure path that could silently wave a bad asset through — the
+ * previous `client.fetch(...).catch(() => null)` version would pass any
+ * asset that Studio merely failed to read, which is the wrong failure mode
+ * for a check that exists to catch a mistake.
+ */
+export function validateBannerAspectRatio(
   value: ImageValue | undefined,
-  context: ValidationContext,
-): Promise<true | {level: 'warning'; message: string}> {
+): true | {message: string} {
   const ref = value?.asset?._ref
   if (!ref) return true
 
-  const client = context.getClient({apiVersion: '2024-01-01'})
-  const asset = await client
-    .fetch<{width?: number; height?: number} | null>(
-      `*[_id == $id][0]{ "width": metadata.dimensions.width, "height": metadata.dimensions.height }`,
-      {id: ref},
-    )
-    .catch(() => null)
+  const match = ASSET_REF_DIMENSIONS_RE.exec(ref)
+  if (!match) return true
 
-  const width = asset?.width
-  const height = asset?.height
+  const width = Number(match[1])
+  const height = Number(match[2])
   if (!width || !height) return true
 
   const ratio = width / height
   if (ratio < MIN_ACCEPTABLE_RATIO) {
     return {
-      level: 'warning',
       message:
         `Deze afbeelding is smaller dan de verwachte verhouding van ~${EXPECTED_RATIO}:1 voor een bannerslot ` +
         `(huidige verhouding ≈ ${ratio.toFixed(1)}:1). Ze wordt op de homepage bijgesneden tot een brede, liggende ` +
