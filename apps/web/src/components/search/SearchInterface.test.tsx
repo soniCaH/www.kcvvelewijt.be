@@ -9,6 +9,10 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
 import { createMockSearchResponse } from "@/../tests/helpers/search.helpers";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+const mockTrackEvent = vi.mocked(trackEvent);
 
 // Mock Next.js navigation hooks
 const mockPush = vi.fn();
@@ -1084,6 +1088,126 @@ describe("SearchInterface", () => {
       expect(new URLSearchParams(String(lastUrl).split("?")[1]).get("q")).toBe(
         "nieuw",
       );
+    });
+  });
+
+  describe("Results-tracking effect on a no-op re-render (#2913)", () => {
+    // Driven through type + submit (not a URL-preset `q`) so the effect's
+    // guard (`!query`) keeps it silent until the real fetch resolves — a
+    // URL-preset query renders the filters (and satisfies the effect's guard)
+    // on the very first commit, before the mount fetch has even started,
+    // which is an unrelated quirk of this component and not what these tests
+    // are about.
+    it("does not re-fire search_results_shown when nothing about the results, query, filter or load state changed", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      const { rerender } = render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      const resultsShownCalls = () =>
+        mockTrackEvent.mock.calls.filter(
+          ([eventName]) => eventName === "search_results_shown",
+        );
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(1);
+      });
+      expect(resultsShownCalls()).toEqual([
+        [
+          "search_results_shown",
+          { results_count: mockResponse.count, query_text: "test" },
+        ],
+      ]);
+
+      // Force a re-render of the same instance with no change to the query,
+      // the result set, the active type filter, or the loading/error state —
+      // e.g. a parent re-render, or any unrelated state update elsewhere in
+      // the tree. Before the fix, `useSearchAnalytics()`'s freshly-allocated
+      // return object was in the effect's dep array, so this alone re-fired
+      // the event.
+      rerender(<SearchInterface />);
+
+      expect(resultsShownCalls()).toHaveLength(1);
+    });
+
+    it("does not re-fire search_no_results when nothing about the results, query, filter or load state changed", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("nothing", []);
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      const { rerender } = render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "nothing");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      const noResultsCalls = () =>
+        mockTrackEvent.mock.calls.filter(
+          ([eventName]) => eventName === "search_no_results",
+        );
+
+      await waitFor(() => {
+        expect(noResultsCalls()).toHaveLength(1);
+      });
+      expect(noResultsCalls()).toEqual([
+        [
+          "search_no_results",
+          { query_text: "nothing", query_length: "nothing".length },
+        ],
+      ]);
+
+      rerender(<SearchInterface />);
+
+      expect(noResultsCalls()).toHaveLength(1);
+    });
+
+    it("still re-reports exactly once when switching to a different type filter", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      const resultsShownCalls = () =>
+        mockTrackEvent.mock.calls.filter(
+          ([eventName]) => eventName === "search_results_shown",
+        );
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(1);
+      });
+
+      const articleCount = mockResponse.results.filter(
+        (result) => result.type === "article",
+      ).length;
+      const articleTab = screen.getByRole("button", { name: /nieuws/i });
+      await user.click(articleTab);
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(2);
+      });
+      expect(resultsShownCalls().at(-1)).toEqual([
+        "search_results_shown",
+        { results_count: articleCount, query_text: "test" },
+      ]);
     });
   });
 });

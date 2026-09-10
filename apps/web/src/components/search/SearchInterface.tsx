@@ -49,6 +49,13 @@ export const SearchInterface = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const analytics = useSearchAnalytics();
+  // `useSearchAnalytics()` returns a bare object literal (the house pattern —
+  // all eight `use*Analytics` hooks do this), so `analytics` itself is a new
+  // reference on every render even though each tracker inside it is a
+  // `useCallback(…, [])`. The results-tracking effect below depends on these
+  // two trackers directly rather than on `analytics`, so a render that
+  // changes nothing else doesn't re-run it (#2913).
+  const { trackResultsShown, trackNoResults } = analytics;
 
   // URL is the source of truth for query + active type; `initialQuery` /
   // `initialType` props are ignored when the URL has no params (documented by
@@ -167,11 +174,19 @@ export const SearchInterface = ({
     if (!query || query.trim().length < 2 || isLoading || error) return;
 
     if (filteredResults.length > 0) {
-      analytics.trackResultsShown(filteredResults.length, query.trim());
+      trackResultsShown(filteredResults.length, query.trim());
     } else {
-      analytics.trackNoResults(query.trim());
+      trackNoResults(query.trim());
     }
-  }, [filteredResults, activeType, query, isLoading, error, analytics]);
+  }, [
+    filteredResults,
+    activeType,
+    query,
+    isLoading,
+    error,
+    trackResultsShown,
+    trackNoResults,
+  ]);
 
   /**
    * Handle search submit
