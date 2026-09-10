@@ -188,7 +188,7 @@ function SingleAvatar({
           width={cfg.avatarPx}
           height={cfg.avatarPx}
           unoptimized
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover mix-blend-multiply"
           style={{ filter: "var(--filter-photo-newsprint)" }}
         />
       ) : (
@@ -233,7 +233,7 @@ function DualAvatar({
             width={cfg.dualCirclePx}
             height={cfg.dualCirclePx}
             unoptimized
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover mix-blend-multiply"
             style={{ filter: "var(--filter-photo-newsprint)" }}
           />
         ) : (

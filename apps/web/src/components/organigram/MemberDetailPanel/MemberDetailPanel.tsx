@@ -432,7 +432,7 @@ function HeaderAvatar({
           width={54}
           height={54}
           unoptimized
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover mix-blend-multiply"
           style={{ filter: "var(--filter-photo-newsprint)" }}
         />
       ) : (

@@ -9,7 +9,7 @@
  *    board-page order is never silently reordered (#2638, #2638 review)
  *  - `heading` drives the run's heading text + accessible name — no baked
  *    default (#2575 review)
- *  - One shared <PlayerCard> per member, garment="coat", blendPhoto={false},
+ *  - One shared <PlayerCard> per member, garment="coat", blend ON (#2901),
  *    linkAffordance (#2477 rule 1, #2485, #2575 review)
  *  - Whitespace-only imageUrl/href normalise to absent
  *  - Resolved function label reaches the card
@@ -108,7 +108,7 @@ describe("TeamStaff", () => {
     expect(screen.getAllByTestId("player-card")).toHaveLength(2);
   });
 
-  it("renders the coat-garment illustration, unblended photo, and the link affordance (#2485 / #2575 review)", () => {
+  it("renders the coat-garment illustration, blended photo, and the link affordance (#2485 / #2575 review, blend added #2901)", () => {
     render(
       <TeamStaff
         staff={[{ ...STAFF[0]!, href: "/staf/12345" }, STAFF[1]!]}
@@ -121,9 +121,10 @@ describe("TeamStaff", () => {
     const photoImg = screen
       .getAllByTestId("player-card-figure")[0]
       ?.querySelector("img");
-    expect(photoImg?.className.split(/\s+/)).not.toContain(
-      "mix-blend-multiply",
-    );
+    // Blended since #2901 — this asserted the opposite while staff photos were
+    // free-form editorial uploads. PSD-synced staff portraits are studio
+    // cutouts on white, and the owner's call is that every person photo blends.
+    expect(photoImg?.className.split(/\s+/)).toContain("mix-blend-multiply");
 
     expect(
       screen.getByTestId("player-card-link-affordance"),

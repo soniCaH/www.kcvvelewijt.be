@@ -34,7 +34,21 @@ export interface PlayerCardProps {
   href?: string;
   /** Which garment the imageless-fallback figure wears (#2485): `"jersey"` (default) for a player, `"coat"` for a staff document. */
   garment?: JerseyIllustrationGarment;
-  /** Blend the photo onto the card's cream via `mix-blend-multiply` (#2633). Default `true` for a standardised PSD headshot; `<TeamStaff>` passes `false` for a free-form staff upload (#2575 review). */
+  /**
+   * Blend the photo onto the card's cream via `mix-blend-multiply` (#2633).
+   * Default `true`, and since #2901 every consumer takes the default.
+   *
+   * What multiply actually does is erase WHITE. It disappears on a studio
+   * cutout and darkens a photo that fills its frame — measured at roughly 10%
+   * on a full-bleed fixture. So this is not a claim that every portrait is a
+   * cutout: `imageUrl` resolves `photoUrl ?? psdImageUrl`, the EDITORIAL upload
+   * wins, and an editor may upload anything. It is an owner's decision (#2901)
+   * that one consistent rule beats a per-surface exception, taken with that
+   * number in hand, because club portraits are cutouts in practice.
+   *
+   * The escape hatch survives for a surface that knowingly renders free-form
+   * photography. Nothing passes `false` today.
+   */
   blendPhoto?: boolean;
   /** Show a resting "Bekijk →" affordance under a linked card (BEST-1). Default `false`; `<TeamStaff>` passes `true` for its routinely-mixed linked/unlinked runs (#2575 review). */
   linkAffordance?: boolean;
@@ -70,8 +84,8 @@ export function PlayerCard({
       >
         {hasPhoto ? (
           /* Multiply drops a studio cutout's white matte onto the card's
-             cream (#2633, deciding #2590) — see `blendPhoto` for why a
-             staff upload skips it. */
+             cream (#2633, deciding #2590). Every consumer blends since
+             #2901; see `blendPhoto` for the trade-off it accepts. */
           <Image
             src={photoUrl!}
             alt=""

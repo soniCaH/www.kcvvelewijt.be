@@ -131,7 +131,6 @@ export function TeamStaff({
             photoUrl={member.imageUrl?.trim() || undefined}
             href={member.href?.trim() || undefined}
             garment="coat"
-            blendPhoto={false}
             linkAffordance
           />
         ))}
