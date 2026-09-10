@@ -342,6 +342,8 @@ export { PRESS_DOWN_CLASSES } from "./press-down";
 // Skeleton
 export { Skeleton } from "./Skeleton";
 export type { SkeletonProps, SkeletonTone } from "./Skeleton";
+export { SkeletonBars } from "./Skeleton";
+export type { SkeletonBarsProps } from "./Skeleton";
 
 // LoadingAnnouncement
 export { LoadingAnnouncement } from "./LoadingAnnouncement";

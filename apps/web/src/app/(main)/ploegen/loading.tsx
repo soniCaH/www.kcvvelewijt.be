@@ -1,32 +1,27 @@
 /**
- * Team listing — loading skeleton. Mirrors the Phase 6.C composition:
- * editorial header → two flagship blocks → youth grid.
+ * Team listing — loading skeleton.
  *
- * The opening's kicker/headline/lead are fixed copy, not data, so per
- * #2432 §2 this reuses the real `<PageHero>` unshimmered.
+ * A skeleton draws only what it can know before the fetch (#2642). The
+ * opening's kicker/headline/lead are fixed copy, not data, so per #2432 §2
+ * this reuses the real `<PageHero>` unshimmered — this route's only
+ * invariant.
+ *
+ * Everything below it is read from the same Sanity fetch. The two flagship
+ * blocks this file used to draw unconditionally are not structural (#2607
+ * correction): `page.tsx` gates each one independently (`{aTeam ? … :
+ * null}`, `{bTeam ? … : null}`), so 0, 1 or 2 can render. The youth
+ * directory's division and team counts (1/4/4/7 in production) are data
+ * too. Neither is drawn; a run of neutral `paper-edge` bars of varying
+ * width stands in for both, the same vocabulary the hero's own bars use.
  */
 
 import {
   PageContainer,
-  Skeleton,
+  SkeletonBars,
   LoadingAnnouncement,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { PLOEGEN_KICKER, PLOEGEN_TITLE, PLOEGEN_LEAD } from "./page";
-
-function FlagshipSkeleton() {
-  return (
-    <div className="border-ink grid grid-cols-1 border-2 sm:grid-cols-[1.25fr_1fr]">
-      <div className="flex flex-col gap-4 p-6 sm:p-10">
-        <Skeleton className="h-3 w-24" />
-        <Skeleton className="h-10 w-48" />
-        <Skeleton className="h-3 w-32" />
-        <Skeleton className="mt-2 h-9 w-36" />
-      </div>
-      <div className="bg-cream-soft min-h-[220px] sm:min-h-[300px]" />
-    </div>
-  );
-}
 
 export default function TeamsLoading() {
   return (
@@ -40,24 +35,10 @@ export default function TeamsLoading() {
         lead={PLOEGEN_LEAD}
       />
 
-      <div className="flex flex-col gap-10 sm:gap-16">
-        <FlagshipSkeleton />
-        <FlagshipSkeleton />
-      </div>
-
-      <div className="mt-16 space-y-8">
-        <Skeleton className="h-8 w-48" />
-        {Array.from({ length: 3 }).map((_, div) => (
-          <div key={div} className="space-y-4">
-            <Skeleton className="h-3 w-40" />
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-20" />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* The flagship pair (0, 1 or 2 — #2607 correction) and the youth
+          directory's division/team counts are both read from the same
+          Sanity fetch this fallback covers. Neutral bars only. */}
+      <SkeletonBars className="mt-16" />
     </PageContainer>
   );
 }
