@@ -60,7 +60,7 @@ function Poster({ className = "" }: { className?: string }) {
   return (
     <Image
       src={POSTER}
-      alt="EK Darts 2026 — zaterdag 19 december, kantine KCVV Elewijt"
+      alt="Affiche EK Darts 2026 — zaterdag 19 december 2026, kantine KCVV Elewijt. Teams van vier personen, gegarandeerd meerdere wedstrijden, kwalificatie en eindronde voor iedereen, mooie prijzen en een vette afterparty."
       width={1920}
       height={1080}
       priority
