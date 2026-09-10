@@ -194,4 +194,37 @@ describe("FeaturedUitgelichtRow", () => {
       expect(screen.queryByText("Korte samenvatting.")).not.toBeInTheDocument();
     });
   });
+
+  // #2401 item 3 — the three Uitgelicht covers blur-placeholder when their
+  // Sanity asset has an LQIP, and degrade cleanly with no placeholder when
+  // it doesn't.
+  describe("Cover LQIP blur placeholder", () => {
+    it("forwards imageLqip to <NewsCard> as a blur placeholder", () => {
+      render(
+        <FeaturedUitgelichtRow
+          articles={[
+            sampleArticle({
+              href: "/a",
+              imageLqip: "data:image/jpeg;base64,/9j...",
+            }),
+          ]}
+        />,
+      );
+      const img = screen.getByAltText("");
+      expect(img).toHaveAttribute(
+        "blurDataURL",
+        "data:image/jpeg;base64,/9j...",
+      );
+      expect(img).toHaveAttribute("placeholder", "blur");
+    });
+
+    it("renders with no placeholder when imageLqip is absent", () => {
+      render(
+        <FeaturedUitgelichtRow articles={[sampleArticle({ href: "/a" })]} />,
+      );
+      const img = screen.getByAltText("");
+      expect(img).toHaveAttribute("placeholder", "empty");
+      expect(img).not.toHaveAttribute("blurDataURL");
+    });
+  });
 });

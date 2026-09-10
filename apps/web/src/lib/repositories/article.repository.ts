@@ -22,6 +22,7 @@ export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
   "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),
+  "coverImageLqip": coverImage.asset->metadata.lqip,
   articleType,
   subjects[]{
     _key, kind,
@@ -237,6 +238,14 @@ export type ArticleVM = Omit<
    *  `widenToArticleVM` defaults it. Optional here so hand-built test
    *  fixtures need not set it. Consumed by the /nieuws featured row (#2027). */
   lead?: string;
+  /**
+   * Sanity `metadata.lqip` for the cover image, scoped to `ARTICLES_QUERY`
+   * only (#2401 item 3 — the homepage's source query). The paginated and
+   * related projections don't select it, and `widenToArticleVM` defaults
+   * those rows to `null`. Optional here (not `Pick`-ed, like `lead` above)
+   * so hand-built fixtures elsewhere in the codebase need not set it.
+   */
+  coverImageLqip?: string | null;
 };
 
 type ARTICLE_BY_SLUG_DETAIL = NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>;
@@ -267,6 +276,12 @@ export interface HomepageArticle {
   title: string;
   description?: string;
   imageUrl?: string;
+  /**
+   * Sanity `metadata.lqip` data-URI for `<NewsCard>`'s `next/image` blur
+   * placeholder (#2401 item 3). `undefined` → no placeholder, same as a
+   * cover with no LQIP asset — never a generic literal.
+   */
+  imageLqip?: string | null;
   date: string;
   dateIso: string;
   tags: Array<{ name: string }>;
@@ -326,6 +341,11 @@ function widenToArticleVM(
     subjects: null,
     firstTransferFact: null,
     firstEventFact: null,
+    // Neither the paginated nor the related projection selects the LQIP
+    // (#2401 item 3 scoped `metadata.lqip` to `ARTICLES_QUERY`, the
+    // homepage's source query, only) — `null` degrades to no placeholder,
+    // same as a cover with no LQIP asset.
+    coverImageLqip: null,
   };
 }
 
@@ -334,6 +354,7 @@ export function toHomepageArticle(article: ArticleVM): HomepageArticle {
     href: `/nieuws/${article.slug}`,
     title: article.title,
     imageUrl: article.coverImageUrl ?? undefined,
+    imageLqip: article.coverImageLqip ?? undefined,
     date: article.publishedAt ? formatArticleDate(article.publishedAt) : "",
     dateIso: article.publishedAt ?? "",
     tags: article.tags.map((t) => ({ name: t })),

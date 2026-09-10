@@ -18,6 +18,8 @@ export interface NewsGridArticle {
   href: string;
   title: string;
   imageUrl?: string;
+  /** Sanity `metadata.lqip` for `<NewsCard>`'s blur placeholder (#2401 item 3). */
+  imageLqip?: string | null;
   date: string;
   /** Drives the per-card background via the R3.B `BG_BY_TYPE` lookup
    *  (`card-semantics-locked.md`). `null` / missing falls back to
@@ -116,6 +118,7 @@ export const NewsGrid = ({
                 title={article.title}
                 href={article.href}
                 imageUrl={article.imageUrl}
+                imageLqip={article.imageLqip}
                 badge={article.tags?.[0]?.name}
                 typeLabel={articleTypeCardLabel(article.articleType)}
                 date={article.date}
