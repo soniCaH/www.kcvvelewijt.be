@@ -3,8 +3,26 @@ import { cn } from "@/lib/utils/cn";
 import { PageContainer } from "@/components/design-system";
 
 export interface BannerSlotProps {
-  /** Banner image URL */
+  /**
+   * Banner image URL, cropped 6:1 server-side — rendered from the `md`
+   * breakpoint up. See `mobileImage` for why this isn't the only image.
+   */
   image: string;
+  /**
+   * Banner image URL for the small breakpoint, cropped 3:1 server-side
+   * (#2401 item 2). The house ratio stays 6:1 from `md` up — locked
+   * 2026-07-13, reaffirmed 2026-09-10 — but at a ~358px mobile column a
+   * 6:1 box is only ~60px tall, too short for any text baked into the
+   * artwork. 3:1 resolves to ~119px there: readable, and still close
+   * enough to 6:1 that the single hotspot the schema collects frames
+   * sensibly at both sizes. Two `<Image>`s (one per breakpoint, toggled by
+   * a Tailwind `md:` class) rather than one responsive box, because the
+   * crop is baked into each CDN URL server-side — a single image can't
+   * change its own crop rectangle when the viewport crosses a breakpoint,
+   * so the CSS box and the CDN transform would disagree exactly the way
+   * the July sweep's `object-cover` centre-crop did.
+   */
+  mobileImage: string;
   /** Alt text for accessibility */
   alt: string;
   /** Optional click-through URL — wraps in <a> when set */
@@ -28,28 +46,44 @@ export interface BannerSlotProps {
  */
 export const BannerSlot = ({
   image,
+  mobileImage,
   alt,
   href,
   slot,
   className,
 }: BannerSlotProps) => {
+  const boxClasses = cn(
+    "border-ink shadow-paper-sm relative w-full overflow-hidden rounded-none border-2 transition-all duration-300 group-hover:shadow-none",
+    className,
+  );
+
   const inner = (
-    <div
-      className={cn(
-        "border-ink shadow-paper-sm relative w-full overflow-hidden rounded-none border-2 transition-all duration-300 group-hover:shadow-none",
-        "aspect-[6/1] min-h-[60px]",
-        className,
-      )}
-    >
-      <Image
-        src={image}
-        alt={alt}
-        fill
-        className="object-cover"
-        sizes="(max-width: 768px) 100vw, 1280px"
-        priority={false}
-      />
-    </div>
+    <>
+      {/* Mobile crop (< md) — 3:1, see `mobileImage`'s docblock. */}
+      <div className={cn(boxClasses, "aspect-[3/1] min-h-[100px] md:hidden")}>
+        <Image
+          src={mobileImage}
+          alt={alt}
+          fill
+          className="object-cover"
+          sizes="100vw"
+          priority={false}
+        />
+      </div>
+      {/* Desktop/tablet crop (md+) — the locked 6:1 house ratio. */}
+      <div
+        className={cn(boxClasses, "hidden aspect-[6/1] min-h-[60px] md:block")}
+      >
+        <Image
+          src={image}
+          alt={alt}
+          fill
+          className="object-cover"
+          sizes="1280px"
+          priority={false}
+        />
+      </div>
+    </>
   );
 
   // ponytail: no own background — the banner sits directly on the page cream

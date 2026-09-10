@@ -30,9 +30,20 @@ describe("YouthSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the stats line", () => {
-    render(<YouthSection />);
+  it("renders the stats line from CMS-sourced props (#2401 item 4)", () => {
+    render(<YouthSection stats={{ playerCount: "220+", teamCount: "16" }} />);
     expect(screen.getByText(/220\+ spelers · 16 ploegen/i)).toBeInTheDocument();
+  });
+
+  it("omits the stats line entirely when no stats are provided (Writer Rule — no half-claim)", () => {
+    render(<YouthSection stats={null} />);
+    expect(screen.queryByText(/spelers/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ploegen/i)).not.toBeInTheDocument();
+  });
+
+  it("omits the stats line by default when `stats` is not passed at all", () => {
+    render(<YouthSection />);
+    expect(screen.queryByText(/spelers/i)).not.toBeInTheDocument();
   });
 
   it("renders the primary CTA link to /jeugd", () => {

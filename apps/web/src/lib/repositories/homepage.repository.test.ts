@@ -15,9 +15,11 @@ import {
   HomepageRepository,
   HomepageRepositoryLive,
   toPlaceholderVM,
+  toYouthStatsVM,
   type HomepageBannersVM,
   type BannerSlotVM,
   type MatchesSliderPlaceholderVM,
+  type YouthStatsVM,
 } from "./homepage.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,20 +35,25 @@ function makeHomepageResult(
   return {
     bannerSlotA: {
       imageUrl: "https://cdn.sanity.io/banner-a.webp",
+      imageUrlMobile: "https://cdn.sanity.io/banner-a-mobile.webp",
       alt: "Banner A alt",
       href: "https://example.com/a",
     },
     bannerSlotB: {
       imageUrl: "https://cdn.sanity.io/banner-b.webp",
+      imageUrlMobile: "https://cdn.sanity.io/banner-b-mobile.webp",
       alt: "Banner B alt",
       href: null,
     },
     bannerSlotC: {
       imageUrl: "https://cdn.sanity.io/banner-c.webp",
+      imageUrlMobile: "https://cdn.sanity.io/banner-c-mobile.webp",
       alt: "Banner C alt",
       href: "https://example.com/c",
     },
     matchesSliderPlaceholder: null,
+    youthPlayerCount: "220+",
+    youthTeamCount: "16",
     ...overrides,
   };
 }
@@ -54,15 +61,28 @@ function makeHomepageResult(
 describe("HOMEPAGE_QUERY", () => {
   it("includes hotspot-aware CDN crop params for all three banner slots", () => {
     const query = HOMEPAGE_QUERY as unknown as string;
-    // Banners render in a fixed 6:1 `object-cover` frame (<BannerSlot>), so the
-    // URL bakes a 6:1 focalpoint crop — otherwise the browser center-crops and
-    // ignores the editorial hotspot (same bug fixed on article cover images).
+    // Banners render in a fixed 6:1 `object-cover` frame (<BannerSlot>) from
+    // the `md` breakpoint up, so the URL bakes a 6:1 focalpoint crop —
+    // otherwise the browser center-crops and ignores the editorial hotspot
+    // (same bug fixed on article cover images).
     const cropParams = `"?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="`;
     const matches = query.match(
       /image\.asset->url \+ "\?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="/g,
     );
     expect(matches).toHaveLength(3);
     expect(query).toContain(`"imageUrl": image.asset->url + ${cropParams}`);
+  });
+
+  it("includes a taller 3:1 mobile crop per slot (#2401 item 2)", () => {
+    const query = HOMEPAGE_QUERY as unknown as string;
+    const mobileCropParams = `"?w=720&h=240&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="`;
+    const matches = query.match(
+      /image\.asset->url \+ "\?w=720&h=240&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="/g,
+    );
+    expect(matches).toHaveLength(3);
+    expect(query).toContain(
+      `"imageUrlMobile": image.asset->url + ${mobileCropParams}`,
+    );
   });
 
   it("also projects the matchesSliderPlaceholder fields (#2858 — folded into the same round-trip)", () => {
@@ -129,18 +149,21 @@ describe("HomepageRepository", () => {
 
       expect(banners.bannerSlotA).toEqual<BannerSlotVM>({
         imageUrl: "https://cdn.sanity.io/banner-a.webp",
+        imageUrlMobile: "https://cdn.sanity.io/banner-a-mobile.webp",
         alt: "Banner A alt",
         href: "https://example.com/a",
       });
 
       expect(banners.bannerSlotB).toEqual<BannerSlotVM>({
         imageUrl: "https://cdn.sanity.io/banner-b.webp",
+        imageUrlMobile: "https://cdn.sanity.io/banner-b-mobile.webp",
         alt: "Banner B alt",
         href: undefined,
       });
 
       expect(banners.bannerSlotC).toEqual<BannerSlotVM>({
         imageUrl: "https://cdn.sanity.io/banner-c.webp",
+        imageUrlMobile: "https://cdn.sanity.io/banner-c-mobile.webp",
         alt: "Banner C alt",
         href: "https://example.com/c",
       });
@@ -186,6 +209,29 @@ describe("HomepageRepository", () => {
         makeHomepageResult({
           bannerSlotA: {
             imageUrl: null,
+            imageUrlMobile: "https://cdn.sanity.io/banner-a-mobile.webp",
+            alt: "Banner A alt",
+            href: null,
+          },
+        }),
+      );
+
+      const { banners } = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* HomepageRepository;
+          return yield* repo.getHomepage();
+        }),
+      );
+
+      expect(banners.bannerSlotA).toBeNull();
+    });
+
+    it("null imageUrlMobile in a slot produces null for that slot too (#2401 item 2 — CSS box and CDN crop must agree)", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeHomepageResult({
+          bannerSlotA: {
+            imageUrl: "https://cdn.sanity.io/banner-a.webp",
+            imageUrlMobile: null,
             alt: "Banner A alt",
             href: null,
           },
@@ -256,6 +302,40 @@ describe("HomepageRepository", () => {
       // fetch is still correctly mapped in the same call.
       expect(banners.bannerSlotA).not.toBeNull();
     });
+
+    it("maps the youth stats fields alongside the banners and placeholder (#2401 item 4)", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeHomepageResult({
+          youthPlayerCount: "230+",
+          youthTeamCount: "17",
+        }),
+      );
+
+      const { youthStats } = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* HomepageRepository;
+          return yield* repo.getHomepage();
+        }),
+      );
+
+      expect(youthStats).toEqual<YouthStatsVM>({
+        playerCount: "230+",
+        teamCount: "17",
+      });
+    });
+
+    it("returns a null youthStats when the homepage document is missing", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+
+      const { youthStats } = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* HomepageRepository;
+          return yield* repo.getHomepage();
+        }),
+      );
+
+      expect(youthStats).toBeNull();
+    });
   });
 
   describe("toPlaceholderVM", () => {
@@ -303,6 +383,45 @@ describe("HomepageRepository", () => {
       } as HOMEPAGE_QUERY_RESULT);
 
       expect(result?.nextSeasonKickoff).toEqual(new Date("2024-08-10"));
+    });
+  });
+
+  // #2401 item 4 — the jeugd-band stat line moved from a hardcoded literal
+  // to two `homePage` fields. Both must be set or the line degrades to
+  // nothing rather than showing half a claim (Writer Rule).
+  describe("toYouthStatsVM", () => {
+    it("maps both fields when set", () => {
+      const result = toYouthStatsVM({
+        youthPlayerCount: "220+",
+        youthTeamCount: "16",
+      } as HOMEPAGE_QUERY_RESULT);
+
+      expect(result).toEqual<YouthStatsVM>({
+        playerCount: "220+",
+        teamCount: "16",
+      });
+    });
+
+    it("returns null when the player count is missing", () => {
+      const result = toYouthStatsVM({
+        youthPlayerCount: null,
+        youthTeamCount: "16",
+      } as HOMEPAGE_QUERY_RESULT);
+
+      expect(result).toBeNull();
+    });
+
+    it("returns null when the team count is missing", () => {
+      const result = toYouthStatsVM({
+        youthPlayerCount: "220+",
+        youthTeamCount: null,
+      } as HOMEPAGE_QUERY_RESULT);
+
+      expect(result).toBeNull();
+    });
+
+    it("returns null when the homepage document itself is missing", () => {
+      expect(toYouthStatsVM(null)).toBeNull();
     });
   });
 });
