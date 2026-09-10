@@ -70,7 +70,14 @@ export function UltrasHero({ joinHref, upLink }: UltrasHeroProps) {
           Supporters · KCVV Ultra&apos;s 55
         </MonoLabel>
 
-        <h1 className="font-display-big text-cream text-display-2xl leading-[0.95] font-black tracking-tight hyphens-auto uppercase">
+        {/* `text-display-2xl` now carries its own -0.035em tracking (D14/Y8,
+            #2617) — the hand-applied `tracking-tight` this replaced was a
+            duplicate of the ramp's own step property. `leading-[0.95]` stays:
+            it is this hero's own hand-tuned value, not the two-line-hero
+            `leading-hero` step (0.85) — this headline isn't a fixed 2-line
+            composition, it wraps by content length, so the tight-leading
+            step (never the default) does not apply here. */}
+        <h1 className="font-display-big text-cream text-display-2xl leading-[0.95] font-black hyphens-auto uppercase">
           De <span className="text-warm">luidste</span> hoek
         </h1>
 

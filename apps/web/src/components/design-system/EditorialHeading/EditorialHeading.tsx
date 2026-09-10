@@ -67,12 +67,18 @@ export interface EditorialHeadingProps {
   className?: string;
 }
 
+// `display-2xl` / `display-xl` carry their own -0.035em tracking as ramp
+// properties now (D14/Y8, #2617) — no `tracking-tight` here, or the ramp's
+// step value and this hand literal would both apply. `display-lg` / `md` /
+// `sm` keep `tracking-tight` (Tailwind's stock -0.025em): the AC is explicit
+// that no step but the two largest moves, so these three are unchanged from
+// before this ticket, not newly introduced.
 const SIZE_CLASS: Record<EditorialHeadingSize, string> = {
   "display-2xl": "font-display-big text-display-2xl font-black",
   "display-xl": "font-display text-display-xl font-bold",
-  "display-lg": "font-display text-display-lg font-bold",
-  "display-md": "font-display text-display-md font-bold",
-  "display-sm": "font-display text-display-sm font-semibold",
+  "display-lg": "font-display text-display-lg font-bold tracking-tight",
+  "display-md": "font-display text-display-md font-bold tracking-tight",
+  "display-sm": "font-display text-display-sm font-semibold tracking-tight",
 };
 
 const TONE_CLASS: Record<EditorialHeadingTone, string> = {
@@ -180,12 +186,7 @@ export function EditorialHeading({
     {
       "data-size": size,
       "data-tone": tone,
-      className: cn(
-        "tracking-tight",
-        SIZE_CLASS[size],
-        TONE_CLASS[tone],
-        className,
-      ),
+      className: cn(SIZE_CLASS[size], TONE_CLASS[tone], className),
     },
     body,
   );
