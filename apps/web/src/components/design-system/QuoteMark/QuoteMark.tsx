@@ -16,12 +16,16 @@ const COLOR_CLASS: Record<QuoteMarkColor, string> = {
 // gives the solid stroke. Tight letter-spacing pulls the two parts of the
 // double-mark glyph closer together. Negative bottom margin tucks the mark
 // up so its tail sits above the quote body.
+//
+// `quote-mark-hang` (globals.css, D14/Y6 #2617) hangs this glyph — the pull
+// quote's opening mark — outside the card's left padding so the card's
+// actual reading column (the blockquote text below) keeps a straight edge.
 export function QuoteMark({ color = "jersey" }: QuoteMarkProps) {
   return (
     <span
       data-color={color}
       aria-hidden="true"
-      className={`font-body block text-[4.5rem] leading-[0.5] font-black tracking-[-0.05em] select-none ${COLOR_CLASS[color]}`}
+      className={`quote-mark-hang font-body block text-[4.5rem] leading-[0.5] font-black tracking-[-0.05em] select-none ${COLOR_CLASS[color]}`}
       style={{ marginBottom: "-0.3em" }}
     >
       &rdquo;

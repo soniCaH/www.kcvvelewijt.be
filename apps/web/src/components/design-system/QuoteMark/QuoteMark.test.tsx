@@ -14,4 +14,14 @@ describe("QuoteMark", () => {
     const { container } = render(<QuoteMark color="cream" />);
     expect(container.firstChild).toHaveAttribute("data-color", "cream");
   });
+
+  // D14/Y6 (#2617) — the opening mark hangs outside the measure. The actual
+  // hang (native `hanging-punctuation` vs. the negative-`text-indent`
+  // fallback, and their `@supports` mutual exclusivity) is a CSS rule in
+  // globals.css that jsdom cannot evaluate — this only guards that the class
+  // the rule hangs off survives onto the rendered element.
+  it("carries the quote-mark-hang class every colour variant shares", () => {
+    const { container } = render(<QuoteMark />);
+    expect(container.firstChild).toHaveClass("quote-mark-hang");
+  });
 });
