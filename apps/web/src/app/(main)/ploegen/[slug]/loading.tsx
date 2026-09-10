@@ -13,32 +13,41 @@
  *
  * Kept at full fidelity: the `min-h-screen` root, the `sr-only` status
  * region, the up-link (real, fixed copy), `<TeamHero>`'s bars + taped
- * figure, and `<TeamSectionNav>`'s own strip — invariant since `#info`
- * renders on 18 of 18 teams, so the strip always clears the component's
- * null-guard. Its chips are data (which sections will render) and are not
- * drawn; the strip renders empty, `border-b-2` only (no top border — the
- * `<StripedSeam>` below already divides it from the hero, matching
- * `TeamSectionNav.tsx`'s own `SECTION_NAV_BAR_CLASSES`).
+ * figure, and `<TeamSectionNav>`'s own strip. The strip renders on the
+ * balance of cases, not as a strict invariant: `#info` alone is exactly one
+ * item, which trips the real bar's `items.length <= 1` null-guard
+ * (`TeamSectionNav.tsx:68`) rather than clearing it — `loading.tsx` cannot
+ * know whether this team's klassement, wedstrijden, squad and staff are all
+ * absent too. Its chips are data (which sections will render) and are not
+ * drawn; an `invisible` chip-shaped spacer reserves the real row's height
+ * (review round 2, #2642) so the swap-in doesn't collapse the strip to its
+ * padding and shift everything below it ~30px. Uses the real
+ * `<TeamSectionNav>`'s own `SECTION_NAV_BAR_CLASSES` (sticky positioning
+ * included) so the strip can never drift from the shape it stands in for.
  *
  * Everything below the nav — klassement, wedstrijden, the squad grid (both
  * position groups, the cards, and the `rounded-full` avatar circle all die
- * with it), staf, info — is a `<StripedSeam>` and a handful of neutral
- * `paper-edge` bars of varying width, the vocabulary `<TeamHero>`'s own
- * bars already use. Three alternatives were tried and rejected (#2607): a
- * flat slab (no vocabulary for it on this site — every other surface is
- * bars, borders and seams), an ink-bordered box (names a component this
- * skeleton cannot promise — one framed element instead of a seam, three
- * headings and a grid), and nothing at all (indistinguishable from a route
- * with genuinely no content below the fold).
+ * with it), staf, info — is a `<StripedSeam>` and `<SkeletonBars>`, the
+ * content-field vocabulary #2642 introduced. Three alternatives were tried
+ * and rejected (#2607): a flat slab (no vocabulary for it on this site —
+ * every other surface is bars, borders and seams), an ink-bordered box
+ * (names a component this skeleton cannot promise — one framed element
+ * instead of a seam, three headings and a grid), and nothing at all
+ * (indistinguishable from a route with genuinely no content below the
+ * fold).
  */
 
 import {
   PageContainer,
   StripedSeam,
   Skeleton,
+  SkeletonBars,
   LoadingAnnouncement,
   UpLink,
+  SECTION_NAV_BAR_CLASSES,
+  SECTION_NAV_CHIP_BASE_CLASSES,
 } from "@/components/design-system";
+import { cn } from "@/lib/utils/cn";
 
 export default function TeamDetailLoading() {
   return (
@@ -70,12 +79,22 @@ export default function TeamDetailLoading() {
         <div className="border-ink bg-cream-soft shadow-paper-md order-first aspect-[3/2] w-full border-2 sm:order-last" />
       </section>
 
-      {/* TeamSectionNav — invariant strip (`#info` renders on 18 of 18
-          teams, so the real bar always clears its ≤1-item null-guard).
-          Which chips it would list is data, so the strip renders empty. */}
-      <div aria-hidden="true" className="border-ink bg-cream-deep border-b-2">
+      {/* TeamSectionNav — see the file docblock: drawn on the balance of
+          cases, height reserved either way. The chip-shaped spacer is
+          `invisible` (not drawn — it carries no visible fill or shimmer),
+          it only occupies the same box a real chip would (border + padding
+          + this font's line height), matching `<SectionNavChip>`'s own
+          typography classes so the two can never drift apart. */}
+      <div aria-hidden="true" className={SECTION_NAV_BAR_CLASSES}>
         <PageContainer className="flex items-center gap-2 py-2">
-          {null}
+          <div
+            className={cn(
+              SECTION_NAV_CHIP_BASE_CLASSES,
+              "invisible font-mono text-[11px] font-semibold tracking-[0.06em] whitespace-nowrap uppercase",
+            )}
+          >
+            &nbsp;
+          </div>
         </PageContainer>
       </div>
 
@@ -86,11 +105,8 @@ export default function TeamDetailLoading() {
           the same Sanity + PSD fetch this fallback covers (#2642). Neutral
           bars only; no card, table or section shape that would promise a
           structure the fetch may not deliver. */}
-      <PageContainer className="flex flex-col gap-4 py-10">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-2/3" />
-        <Skeleton className="h-4 w-1/2" />
+      <PageContainer className="py-10">
+        <SkeletonBars />
       </PageContainer>
     </div>
   );
