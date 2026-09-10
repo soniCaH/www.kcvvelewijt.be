@@ -543,8 +543,19 @@
   /* Paper-grain noise overlay — Phase 4.5 (R9). Inline-encoded SVG turbulence
      applied as a ::after pseudo on <TapedFigure>. Consumer sets opacity 0.04
      and mix-blend-mode multiply. Cache-friendly (ships with stylesheet, no
-     network request). */
+     network request). This is a *photo* treatment — see the body::before /
+     body::after ground texture below, which reuses this exact token at a
+     different opacity rather than duplicating it. */
   --pattern-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+
+  /* Paper mottle — broad, low-frequency noise for the page ground itself
+     (D3a, #2613). Deliberately the opposite shape from --pattern-paper-grain
+     above: baseFrequency 0.014 (vs 0.9) and 4 octaves (vs 2), so it reads as
+     a slow cloud of stock variation rather than fine grain. Same
+     feColorMatrix recipe (RGB pinned to 0, alpha carries the noise shape) —
+     the consumer draws it in ink at 9% opacity, multiply, below. No image
+     asset, no network request, no fallback path. */
+  --pattern-paper-mottle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.014' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
 
   --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
   --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
@@ -752,6 +763,52 @@
     font-family: var(--font-family-body);
     font-size: var(--text-base);
     line-height: var(--line-height-loose);
+    /* Positions the ground-texture pseudo-elements below, so their `inset: 0`
+       sizes to the full scrollable page (this box) rather than only the
+       viewport — the texture has to scroll with the page like paper, not
+       stay pinned like a fixed background. */
+    position: relative;
+  }
+
+  /* ===== Paper ground texture (D3 / D3a, #2613) =====
+
+     There was no texture on the page ground before this — --pattern-paper-
+     grain above is wired into exactly one rule, .taped-figure::after, plus
+     <SubjectAvatar>: it is a *photo* treatment, and body/every section
+     ground was flat cream. These two pseudo-elements give the paper itself
+     texture for the first time: the existing speckle recipe reused at a new
+     opacity (::before), plus a new broad low-frequency mottle (::after).
+     Both layers are procedural inline SVG turbulence — no image asset, no
+     network request, no fallback path — and z-index: -1 keeps them behind
+     every real child of <body> (header, main, footer), which paint at the
+     default z-index: auto stacking level above a negative-z sibling.
+
+     Recorded so it is not re-litigated (decision-sheet.md §8, D3a): ink at
+     9% over cream is a desaturated darkening — arguably a grey layer, on a
+     palette that deleted its last neutral in #2342. The No-Grey-UI rule
+     governs *surfaces* (panels, chrome, listing grounds); a multiply
+     texture is not a surface. Three cream-tone alternatives were drawn
+     side by side in docs/design/mockups/research-d-series/d3a-mottle.html
+     and lost on the render — read that page before re-proposing a
+     cream-tone mottle. */
+  body::before,
+  body::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+
+  body::before {
+    background-image: var(--pattern-paper-grain);
+    opacity: 0.05;
+  }
+
+  body::after {
+    background-image: var(--pattern-paper-mottle);
+    opacity: 0.09;
   }
 
   /* Heading Styles */
