@@ -194,6 +194,43 @@ describe("TeamSectionNav", () => {
 
       expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
     });
+
+    it("scrolls the newly-active chip into view inside the horizontal rail (#2640)", () => {
+      renderWithSections(FIVE_ITEMS);
+
+      const stafLink = screen.getByRole("link", { name: "Staf" });
+      const scrollIntoViewSpy = vi
+        .spyOn(stafLink, "scrollIntoView")
+        .mockImplementation(() => {});
+
+      const stafSection = document.getElementById("staf")!;
+      emitIntersecting(stafSection, 10);
+
+      // `block: "nearest"` so this never fights the page's own vertical
+      // scroll (the sticky bar is already on-screen whenever scroll-spy
+      // fires) — only `inline` moves anything, sliding the rail.
+      expect(scrollIntoViewSpy).toHaveBeenCalledWith({
+        block: "nearest",
+        inline: "nearest",
+      });
+    });
+
+    it("does not slide the rail before scroll-spy has picked an active section", () => {
+      const prototypeSpy = vi
+        .spyOn(HTMLElement.prototype, "scrollIntoView")
+        .mockImplementation(() => {});
+
+      renderWithSections(THREE_ITEMS);
+
+      // `block: "start"` calls belong to the unrelated hash-landing
+      // correction (`useHashLandingCorrection`), which this suite does not
+      // own — only this effect's own `{ block: "nearest", inline: "nearest"
+      // }` signature is under test here.
+      expect(prototypeSpy).not.toHaveBeenCalledWith({
+        block: "nearest",
+        inline: "nearest",
+      });
+    });
   });
 
   describe("scroll arrow — real overflow, not a permanent ceiling", () => {

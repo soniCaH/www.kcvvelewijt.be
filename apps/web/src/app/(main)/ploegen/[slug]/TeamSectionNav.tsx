@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   PageContainer,
   SectionNavChip,
@@ -58,11 +59,27 @@ export interface TeamSectionNavProps {
  * that ticket, no longer auto-hides — every team page now carries the full
  * five-item row (`Klassement`'s own presence still varies with the
  * competitive-block state). At the exact chip markup/classes this component
- * renders, the five-item row now overflows below **~570px** viewport width
- * (up from ~430px measured for the shorter `Info` label) — an ordinary
- * phone in portrait, not an edge case. The arrow mounts routinely now,
- * rather than "essentially never" as this docblock previously (and, as of
- * #2637, incorrectly) claimed.
+ * renders, the five-item row now overflows below ~570px viewport width (up
+ * from ~430px measured for the shorter `Info` label) — an ordinary phone in
+ * portrait, not an edge case. The arrow mounts routinely now, rather than
+ * "essentially never" as this docblock previously (and, as of #2637,
+ * incorrectly) claimed.
+ *
+ * **Browser-measured, not computed (#2640).** The ~570px figure above was
+ * still a class-reading prediction. A real render of this exact component
+ * (`Klassement · Wedstrijden · Spelers · Staf · Trainingen & contact`, the
+ * longest of the two possible first labels) puts the unpadded row at 541px
+ * and the row overflows below **563px** viewport width — a phone in
+ * portrait, same conclusion, corrected number. Trimming to fit was
+ * considered and rejected in #2544: tightening `px-3`→`px-2` and dropping
+ * `gap-2` was estimated to land at ~358px against an (also since corrected)
+ * predicted content width; the real content width is 541px, so trimming was
+ * never going to close a gap that size — scrolling, not squeezing, is the
+ * only fit. The active chip is scrolled into view inside the rail on every
+ * scroll-spy update (`block: "nearest", inline: "nearest"` — never fights
+ * the page's own vertical scroll, only slides the rail), so a chip the
+ * overflow hides is still reachable without a manual scroll of the bar
+ * itself.
  */
 export function TeamSectionNav({ items }: TeamSectionNavProps) {
   if (items.length <= 1) return null;
@@ -76,6 +93,21 @@ function TeamSectionNavBar({
 }) {
   const ids = items.map((item) => item.id);
   const { navRef, activeId } = useSectionNav(ids);
+
+  // Keeps the active chip reachable when the overflow hides it — scroll-spy
+  // can activate a chip currently past the fade/arrow, and the visitor never
+  // touched the rail themselves to bring it into view (#2640). `block:
+  // "nearest"` is deliberate: the bar is sticky and already on-screen
+  // whenever this fires, so only `inline` should move anything — a bare
+  // `scrollIntoView()` would also fight the page's own vertical scroll
+  // position mid-read.
+  useEffect(() => {
+    if (!activeId) return;
+    const chip = navRef.current?.querySelector<HTMLElement>(
+      `a[href="#${activeId}"]`,
+    );
+    chip?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [activeId, navRef]);
 
   return (
     <nav
