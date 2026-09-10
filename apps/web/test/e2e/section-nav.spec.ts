@@ -183,6 +183,21 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
 
     // A couple of px of slack for sub-pixel rounding — never behind the bar.
     expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
+
+    // The geometry check above only proves the target isn't hidden BEHIND
+    // the bar — a scroll that stalled well SHORT of the target (never
+    // reaching it at all) leaves `targetTop` even further below the
+    // viewport, which trivially satisfies that same assertion (#2640
+    // review, finding 1: the old `chip.scrollIntoView` implementation
+    // reissued a fresh, short root-scroll on every scroll-spy `activeId`
+    // change mid-animation, repeatedly truncating this exact click's
+    // native smooth scroll before it ever reached `lastLink`'s target — a
+    // regression this geometry-only assertion would NOT have caught).
+    // Asserting scroll-spy's own fill against the clicked chip closes
+    // that gap: if the scroll had stalled at an earlier section, THAT
+    // section's chip — not `lastLink` — would still be the one marked
+    // active once settled.
+    await expect(lastLink).toHaveAttribute("aria-current", "location");
   });
 
   test("clicking an OrganigramSectionNav door lands its section below the bar, even once HubSearch mounts mid-scroll", async ({

@@ -61,6 +61,17 @@ const FIVE_ITEMS: TeamSectionNavItem[] = [
   { id: "info", label: "Info" },
 ];
 
+/** Mocks `getBoundingClientRect` on an element — happy-dom has no layout
+ *  engine, so this file's rail-geometry tests (the track-scrolling effect)
+ *  supply their own left/right edges the way the scroll-arrow tests above
+ *  already supply their own `scrollWidth`/`clientWidth`. */
+function mockRect(el: Element, rect: { left: number; right: number }) {
+  Object.defineProperty(el, "getBoundingClientRect", {
+    configurable: true,
+    value: () => rect,
+  });
+}
+
 function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   const originalScrollWidth = Object.getOwnPropertyDescriptor(
     HTMLElement.prototype,
@@ -195,40 +206,141 @@ describe("TeamSectionNav", () => {
       expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
     });
 
-    it("scrolls the newly-active chip into view inside the horizontal rail (#2640)", () => {
-      renderWithSections(FIVE_ITEMS);
+    describe("keeping the active chip reachable inside the overflowing rail (#2640, corrected by review)", () => {
+      it("scrolls the TRACK, not the document — moves the chip out from under the arrow gutter", () => {
+        renderWithSections(FIVE_ITEMS);
 
-      const stafLink = screen.getByRole("link", { name: "Staf" });
-      const scrollIntoViewSpy = vi
-        .spyOn(stafLink, "scrollIntoView")
-        .mockImplementation(() => {});
+        const list = screen.getByRole("list");
+        const stafLink = screen.getByRole("link", { name: "Staf" });
 
-      const stafSection = document.getElementById("staf")!;
-      emitIntersecting(stafSection, 10);
+        // A 300px-wide track with the real overflow-driven 40px gutter on
+        // each side (`<ScrollRail>`'s `pl-10 pr-10`) — so the visible
+        // window is [40, 260]. The chip sits at [280, 330]: past the
+        // right gutter, its right edge 70px beyond the visible window.
+        mockRect(list, { left: 0, right: 300 });
+        list.style.paddingLeft = "40px";
+        list.style.paddingRight = "40px";
+        mockRect(stafLink, { left: 280, right: 330 });
+        Object.defineProperty(list, "scrollLeft", {
+          configurable: true,
+          value: 50,
+        });
+        const scrollToSpy = vi.fn();
+        Object.defineProperty(list, "scrollTo", {
+          configurable: true,
+          value: scrollToSpy,
+        });
+        const documentScrollIntoViewSpy = vi.spyOn(
+          HTMLElement.prototype,
+          "scrollIntoView",
+        );
 
-      // `block: "nearest"` so this never fights the page's own vertical
-      // scroll (the sticky bar is already on-screen whenever scroll-spy
-      // fires) — only `inline` moves anything, sliding the rail.
-      expect(scrollIntoViewSpy).toHaveBeenCalledWith({
-        block: "nearest",
-        inline: "nearest",
+        const stafSection = document.getElementById("staf")!;
+        emitIntersecting(stafSection, 10);
+
+        // 50 (current scrollLeft) + 70 (how far past the visible window's
+        // right edge the chip's own right edge sits) = 120.
+        expect(scrollToSpy).toHaveBeenCalledWith({
+          left: 120,
+          behavior: "smooth",
+        });
+        // The fix this replaces called `chip.scrollIntoView`, which also
+        // walks the document — a real regression (review finding 1): the
+        // chip's sticky-bar position always sits inside the band
+        // `scroll-padding-top` excludes, so `block: "nearest"` judged it
+        // permanently "not visible" and scrolled the ROOT on every
+        // scroll-spy tick, truncating an in-flight anchor jump. Proving
+        // it's gone means proving `scrollIntoView` is never called at all
+        // here, not just called with different arguments.
+        expect(documentScrollIntoViewSpy).not.toHaveBeenCalled();
       });
-    });
 
-    it("does not slide the rail before scroll-spy has picked an active section", () => {
-      const prototypeSpy = vi
-        .spyOn(HTMLElement.prototype, "scrollIntoView")
-        .mockImplementation(() => {});
+      it("does nothing when the active chip is already fully clear of the gutter", () => {
+        renderWithSections(FIVE_ITEMS);
 
-      renderWithSections(THREE_ITEMS);
+        const list = screen.getByRole("list");
+        const stafLink = screen.getByRole("link", { name: "Staf" });
 
-      // `block: "start"` calls belong to the unrelated hash-landing
-      // correction (`useHashLandingCorrection`), which this suite does not
-      // own — only this effect's own `{ block: "nearest", inline: "nearest"
-      // }` signature is under test here.
-      expect(prototypeSpy).not.toHaveBeenCalledWith({
-        block: "nearest",
-        inline: "nearest",
+        mockRect(list, { left: 0, right: 300 });
+        list.style.paddingLeft = "40px";
+        list.style.paddingRight = "40px";
+        // Fully inside the visible window [40, 260].
+        mockRect(stafLink, { left: 100, right: 150 });
+        const scrollToSpy = vi.fn();
+        Object.defineProperty(list, "scrollTo", {
+          configurable: true,
+          value: scrollToSpy,
+        });
+
+        const stafSection = document.getElementById("staf")!;
+        emitIntersecting(stafSection, 10);
+
+        expect(scrollToSpy).not.toHaveBeenCalled();
+      });
+
+      it("guards against activeId being null — a missing guard here would coerce into the literal selector '#null' and match a real chip", () => {
+        // The regression this proves (review finding 3): a chip literally
+        // ID'd "null" is a deliberately adversarial fixture. Without
+        // `if (!activeId) return`, the template literal
+        // `a[href="#${activeId}"]` stringifies a null activeId to the
+        // selector `a[href="#null"]` — which THIS chip's real `id: "null"`
+        // satisfies, even though scroll-spy never activated anything.
+        //
+        // The interesting effect run here is the MOUNT-time one — the
+        // component always fires this effect once on mount, with
+        // `activeId` still null — so the geometry mocks must exist on the
+        // shared prototype BEFORE `render()`, not on a specific instance
+        // afterwards (an instance only exists once render has already run
+        // the effect once). A test that mocked per-instance after
+        // rendering, like the two above, would silently observe the
+        // WRONG effect invocation and pass regardless of the guard — the
+        // exact flaw the reviewer found in the original version of this
+        // test.
+        // This mocks the shared PROTOTYPE, unlike `mockRect` (per-instance)
+        // above — restore it explicitly afterwards so it can't leak into a
+        // later test's own `getBoundingClientRect` calls (`react-testing-
+        // library`/`user-event` read it internally too).
+        const originalRect = HTMLElement.prototype.getBoundingClientRect;
+        const scrollToSpy = vi.fn();
+        Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+          configurable: true,
+          value: scrollToSpy,
+        });
+        Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
+          configurable: true,
+          // Every element reports geometry that WOULD trigger a scroll if
+          // reached — the track's 300px box and an out-of-gutter chip box
+          // — so reaching the "null" chip at all (guard removed) fires
+          // `scrollTo`; never reaching it (guard present) does not. `height`
+          // is also supplied — `useSectionNav`'s own unrelated bar-height
+          // measurement reads it off this same element via this prototype
+          // mock, and an `undefined` there is worth avoiding even though
+          // it's harmless to this test's own assertion.
+          value(this: HTMLElement) {
+            return this.tagName === "UL"
+              ? { left: 0, right: 300, top: 0, height: 0 }
+              : { left: 280, right: 330, top: 0, height: 0 };
+          },
+        });
+
+        try {
+          const itemsWithNullId: TeamSectionNavItem[] = [
+            { id: "null", label: "Null" },
+            { id: "staf", label: "Staf" },
+          ];
+          renderWithSections(itemsWithNullId);
+
+          // No intersection has fired — activeId is still null.
+          expect(scrollToSpy).not.toHaveBeenCalled();
+        } finally {
+          Object.defineProperty(
+            HTMLElement.prototype,
+            "getBoundingClientRect",
+            originalRect
+              ? { configurable: true, value: originalRect }
+              : { configurable: true, value: undefined },
+          );
+        }
       });
     });
   });
