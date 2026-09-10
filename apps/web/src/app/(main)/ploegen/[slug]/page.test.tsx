@@ -464,8 +464,14 @@ describe("/ploegen/[slug] enrolment CTA band — moved position + in-view event 
     expect(
       document.querySelector('[data-track-event="team_enrolment_cta_in_view"]'),
     ).toBeNull();
-    expect(
-      screen.queryByText("Sluit je aan bij de jeugd van Elewijt."),
-    ).toBeNull();
+    // Not `queryByText` with the full sentence: `<EditorialHeading
+    // emphasis={{ text: "Elewijt" }}>` splits the heading into a text node +
+    // `<em>Elewijt</em>` + a text node, and the default text matcher only
+    // concatenates an element's DIRECT text-node children — it never matches
+    // the full sentence even when the band IS rendered, making that
+    // assertion vacuous. `textContent` walks the whole subtree instead.
+    expect(document.body.textContent).not.toContain(
+      "Sluit je aan bij de jeugd van Elewijt.",
+    );
   });
 });

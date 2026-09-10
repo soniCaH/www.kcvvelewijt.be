@@ -13,9 +13,12 @@ import { cn } from "@/lib/utils/cn";
 /**
  * <TeamEnrolmentCta> — youth "Word lid" recruitment ad for `/ploegen/[slug]`.
  *
- * A standalone fanzine section that sits between <SquadGrid> and <TeamStaff>
- * (no section-nav anchor — it's a CTA, not navigable content) and links to the
- * static `/club/word-lid` route. Out-of-PRD addition on top of the shipped
+ * A standalone fanzine section, mounted in `page.tsx` after `#info` and
+ * before `<SponsorsSection>` (moved there from between <SquadGrid> and
+ * <TeamStaff> by #2639, decided by #2543 — see that ticket and
+ * `enrolment-cta-locked.md` §2's superseded entry for why) — no section-nav
+ * anchor — it's a CTA, not navigable content — and links to the static
+ * `/club/word-lid` route. Out-of-PRD addition on top of the shipped
  * Phase 6.C page; design locked in `enrolment-cta-locked.md` (#1949).
  *
  * Youth-only: returns `null` for senior teams. Senior recruitment runs via
