@@ -1,11 +1,17 @@
 /**
- * `/jeugd` loading skeleton — mirrors the composition: the shared opening's
- * dark register (group photo beside the words, #2555) → seam → filosofie/visie
- * block → editorial nav grid → youth-directory division grid.
+ * `/jeugd` loading skeleton — the shared opening's dark register (group
+ * photo beside the words, #2555) is kept real and unshimmered: its
+ * kicker/headline/lead and its image are all fixed — `/images/youth-
+ * trainers.jpg`, a bundled asset, not CMS data — so per #2432 §2 this
+ * reuses the real `<PageHero>`. The filosofie/visie block and the editorial
+ * nav grid below the seam are unchanged by #2642 (their own shimmer, not
+ * this ticket's scope).
  *
- * The opening's kicker/headline/lead and its image are all fixed —
- * `/images/youth-trainers.jpg`, a bundled asset, not CMS data — so per
- * #2432 §2 this reuses the real `<PageHero>` unshimmered.
+ * The youth directory is (#2642): its division and team counts (1/4/4/7 in
+ * production) are read from the same Sanity fetch this fallback covers, so
+ * the fixed "3 groups of cards" shape it used to draw is gone. Neutral
+ * `paper-edge` bars of varying width replace it — the same vocabulary the
+ * hero's own bars already use.
  */
 
 import {
@@ -58,19 +64,13 @@ export default function JeugdLoading() {
           </TapedCardGrid>
         </div>
 
-        {/* Youth directory */}
-        <div className="mt-16 space-y-8">
-          <Skeleton className="h-8 w-44" />
-          {Array.from({ length: 3 }).map((_, div) => (
-            <div key={div} className="space-y-4">
-              <Skeleton className="h-4 w-32" />
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20" />
-                ))}
-              </div>
-            </div>
-          ))}
+        {/* Youth directory — division/team counts are data (#2642). Neutral
+            bars only. */}
+        <div className="mt-16 flex flex-col gap-4">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-1/2" />
         </div>
       </PageContainer>
 
