@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {validateBannerAspectRatio} from './validation/banner-aspect-ratio'
 
 export const banner = defineType({
   name: 'banner',
@@ -19,9 +20,18 @@ export const banner = defineType({
       description:
         'De bannerafbeelding (bijv. een webshop- of sponsoractie). Wordt op de homepage volledig in kleur getoond in een breed, liggend kader (verhouding ~6:1). Gebruik een brede afbeelding zodat ze niet ongelukkig bijgesneden wordt.',
       validation: (r) =>
-        r.required().error(
-          'Verplicht. Zonder afbeelding is er geen banner om te tonen en blijft de bannerslot op de homepage leeg.',
-        ),
+        r
+          .required()
+          .error(
+            'Verplicht. Zonder afbeelding is er geen banner om te tonen en blijft de bannerslot op de homepage leeg.',
+          )
+          // #2401 item 2 — the 6:1 house ratio (2026-07-13, reaffirmed
+          // 2026-09-10) is a description above, not an enforced rule. This
+          // warns (never blocks) when the uploaded asset is materially
+          // narrower than the slot expects — see `validateBannerAspectRatio`.
+          .custom((value, context) =>
+            validateBannerAspectRatio(value as never, context),
+          ),
     }),
     defineField({
       name: 'alt',
