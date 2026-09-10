@@ -67,18 +67,18 @@ export interface EditorialHeadingProps {
   className?: string;
 }
 
-// `display-2xl` / `display-xl` carry their own -0.035em tracking as ramp
-// properties now (D14/Y8, #2617) — no `tracking-tight` here, or the ramp's
-// step value and this hand literal would both apply. `display-lg` / `md` /
-// `sm` keep `tracking-tight` (Tailwind's stock -0.025em): the AC is explicit
-// that no step but the two largest moves, so these three are unchanged from
-// before this ticket, not newly introduced.
+// All five display steps carry their own letter-spacing as ramp properties
+// now (D14/Y8, decision-sheet §8, #2617) — display-2xl/xl at -0.035em,
+// display-lg/md/sm at -0.025em (the exact value `tracking-tight` already
+// resolved to here — a values-only move, not a retune; see the ramp's own
+// comment in globals.css). No hand-applied `tracking-tight` survives in
+// this map, or the ramp's own value and the hand literal would both apply.
 const SIZE_CLASS: Record<EditorialHeadingSize, string> = {
   "display-2xl": "font-display-big text-display-2xl font-black",
   "display-xl": "font-display text-display-xl font-bold",
-  "display-lg": "font-display text-display-lg font-bold tracking-tight",
-  "display-md": "font-display text-display-md font-bold tracking-tight",
-  "display-sm": "font-display text-display-sm font-semibold tracking-tight",
+  "display-lg": "font-display text-display-lg font-bold",
+  "display-md": "font-display text-display-md font-bold",
+  "display-sm": "font-display text-display-sm font-semibold",
 };
 
 const TONE_CLASS: Record<EditorialHeadingTone, string> = {

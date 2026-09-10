@@ -141,10 +141,11 @@ export function StaffHero({
         </span>
 
         {/* Same 2-line stacked rhythm as `<PlayerHero>` — see its comment
-            for why `leading-hero` (D14/Y1, #2617) sits per-line rather than
-            on the `<h1>` wrapper it replaces `leading-[0.9]` on. */}
+            for why `leading-hero-lead` / `leading-hero` (D14/Y1, #2617)
+            sit per-line rather than on the `<h1>` wrapper they replace
+            `leading-[0.9]` on. */}
         <h1 className="text-ink m-0 flex flex-col">
-          <span className="font-display-big text-display-2xl leading-hero block pt-[0.08em] font-black">
+          <span className="font-display-big text-display-2xl leading-hero-lead block font-black">
             {firstName}
           </span>
           <span className="font-display text-display-xl leading-hero block font-normal italic">

@@ -130,15 +130,30 @@ Headings are set globally in CSS — no per-component overrides needed. Since #2
 
 ## Line Heights
 
+`leading-hero` is the one row below backed by a real `--leading-*` token in
+`globals.css`; the other five are Tailwind v4's own **unmodified stock**
+values (verified in the compiled CSS at implementation time) — this project
+defines no `--leading-tight` / `--leading-snug` / `--leading-normal` /
+`--leading-relaxed` / `--leading-loose` override, so nothing here is a
+project choice. **Do not confuse these with the same-named
+`--line-height-*` custom properties** declared elsewhere in `globals.css`
+(`--line-height-tight: 1.2`, `-snug: 1.25`, `-normal: 1.5`, `-relaxed: 1.6`,
+`-loose: 1.75`) — near-identical names, different numbers, and nothing
+connects the two systems. That divergence is tracked in
+`docs/design/typeset-wayfinder-map.md` ("Ramp B′") as a separate, larger
+cleanup; this table was previously listing the `--line-height-*` values
+under the `leading-*` utility names, which is what a reader actually gets
+when writing `leading-tight` in a `className`.
+
 <table>
   <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
   <tbody>
-    <tr><td><code>leading-hero</code></td><td>0.85</td><td>Two-line heroes only (<code>&lt;PlayerHero&gt;</code>, <code>&lt;StaffHero&gt;</code>) — never the default. Pair with a small <code>padding-top</code> on the tallest line or its ascenders crowd whatever sits above it (D14/Y1, #2617)</td></tr>
-    <tr><td><code>leading-tight</code></td><td>1.2</td><td>Headings</td></tr>
-    <tr><td><code>leading-snug</code></td><td>1.25</td><td>Subheadings, blockquotes</td></tr>
-    <tr><td><code>leading-normal</code></td><td>1.5</td><td>Short body</td></tr>
-    <tr><td><code>leading-relaxed</code></td><td>1.6</td><td>Article content</td></tr>
-    <tr><td><code>leading-loose</code></td><td>1.75</td><td>Default body (<code>&lt;body&gt;</code>)</td></tr>
+    <tr><td><code>leading-hero</code></td><td>0.85</td><td>Two-line heroes only (<code>&lt;PlayerHero&gt;</code>, <code>&lt;StaffHero&gt;</code>) — never the default. Use <code>leading-hero-lead</code> (globals.css, <code>@layer components</code>) on the top line, which bundles the <code>padding-top</code> its ascender clearance needs; the second line takes bare <code>leading-hero</code> (D14/Y1, #2617)</td></tr>
+    <tr><td><code>leading-tight</code></td><td>1.25</td><td>Tailwind stock — not a project-tuned value</td></tr>
+    <tr><td><code>leading-snug</code></td><td>1.375</td><td>Tailwind stock — not a project-tuned value</td></tr>
+    <tr><td><code>leading-normal</code></td><td>1.5</td><td>Tailwind stock — not a project-tuned value</td></tr>
+    <tr><td><code>leading-relaxed</code></td><td>1.625</td><td>Tailwind stock — not a project-tuned value</td></tr>
+    <tr><td><code>leading-loose</code></td><td>2</td><td>Tailwind stock — not a project-tuned value</td></tr>
   </tbody>
 </table>
 
