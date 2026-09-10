@@ -3,8 +3,8 @@
  *
  * SiteHeader → MatchStripSlot → TeamHero → sticky section-nav →
  * [competitive block: status line, or (StandingsSection | failure notice) +
- * TeamMatchesSection] → SquadGrid → TeamStaff → TeamEditorial → global
- * SponsorsBlock → RelatedRow → footer.
+ * TeamMatchesSection] → SquadGrid → TeamStaff → TeamEditorial → youth
+ * TeamEnrolmentCta → global SponsorsBlock → RelatedRow → footer.
  * <StripedSeam> separates sections; every non-hero section auto-hides on
  * empty data (a U6 page degrades to hero + squad + staff) — EXCEPT the info
  * section (#2637, see below), which always renders.
@@ -12,6 +12,17 @@
  * #2443 resolution reorders the last two sections: `SponsorsSection` now
  * renders BEFORE `RelatedRow` (previously last) — the team page's last word
  * was a sponsor logo wall, not an onward-navigation slot.
+ *
+ * **The youth-only `<TeamEnrolmentCta>` band moved from between `SquadGrid`
+ * and `TeamStaff` to after `TeamEditorial` (`#info`) and before
+ * `SponsorsBlock` (#2639, decided by #2543).** #2637 made `#info` render on
+ * 18 of 18 team pages, which stranded the CTA — locked mid-page in June when
+ * `#info` rendered on 0 of 16 — as the page's first (and, on a thin youth
+ * page, only) content `<h2>`, ahead of the coach and the training times. The
+ * move is unchanged in every other respect: same seam, same section, same
+ * component, same copy/visual/render-gate/href, still youth-gated, still no
+ * `<TeamSectionNav>` anchor. See `enrolment-cta-locked.md` §2's superseded
+ * entry.
  *
  * The competitive block (`#klassement` + `#wedstrijden`) does not auto-hide
  * per section any more — it is gated as ONE unit by
@@ -649,23 +660,6 @@ export default async function TeamPage({ params }: TeamPageProps) {
         </>
       ) : null}
 
-      {/* Youth-only "Word lid" enrolment CTA (#1949). Gate the seam + section
-          here so senior pages get no empty chrome; <TeamEnrolmentCta> also
-          self-gates (returns null for senior). No section-nav anchor — it's a
-          CTA, not navigable content. */}
-      {team.teamType === "youth" ? (
-        <>
-          <StripedSeam colorPair="ink-cream" height="md" />
-          <PageContainer as="section" className="py-10">
-            <TeamEnrolmentCta
-              teamType={team.teamType}
-              teamSlug={slug}
-              ageGroup={team.ageGroup}
-            />
-          </PageContainer>
-        </>
-      ) : null}
-
       {showStaff ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
@@ -706,6 +700,41 @@ export default async function TeamPage({ params }: TeamPageProps) {
           teamLabel={trainingRoutingLabel}
         />
       </PageContainer>
+
+      {/* Youth-only "Word lid" enrolment CTA (#1949), moved here from between
+          <SquadGrid> and <TeamStaff> by #2639 (decided by #2543): #2637 made
+          `#info` render on every page, which stranded this band mid-page as
+          the first (and, on a thin youth page, only) content `<h2>` — ahead
+          of the coach and the training times. Everything else is unchanged:
+          same seam, same section, the component itself untouched (no copy,
+          visual, render-gate or href change), still gated on
+          `team.teamType === "youth"` so senior pages get no empty chrome
+          (`<TeamEnrolmentCta>` also self-gates, returning null for senior),
+          still no `<TeamSectionNav>` anchor — it's a CTA, not navigable
+          content. The `<TrackInView>` wrapper is new: an in-view event
+          mirroring the three sibling section events above
+          (`team_standings_in_view` / `team_matches_in_view` /
+          `team_squad_in_view`) with the same `analyticsParams`, so the band's
+          click-only analytics today (view→click uncomputable) become
+          falsifiable once there is post-go-live traffic. No GTM change — the
+          live `team_` trigger regex already matches this event. */}
+      {team.teamType === "youth" ? (
+        <>
+          <StripedSeam colorPair="ink-cream" height="md" />
+          <TrackInView
+            eventName="team_enrolment_cta_in_view"
+            params={analyticsParams}
+          >
+            <PageContainer as="section" className="py-10">
+              <TeamEnrolmentCta
+                teamType={team.teamType}
+                teamSlug={slug}
+                ageGroup={team.ageGroup}
+              />
+            </PageContainer>
+          </TrackInView>
+        </>
+      ) : null}
 
       {/* Sponsor logo wall now renders BEFORE the onward-navigation row
           (#2443 resolution) — the page's last word is a "keep going"
