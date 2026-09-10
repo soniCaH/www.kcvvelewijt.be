@@ -127,11 +127,16 @@ else
     --port "${PORT}") >>"${LOG}" 2>&1 &
 fi
 SERVER_PID=$!
+# Set once curl is actually backgrounded below. Declared here (empty, not
+# unset) so cleanup() can reference it safely under `set -u` even if it runs
+# before that point (e.g. the readiness loop below fails first).
+CURL_PID=""
 
 # Kill the process GROUP first (see `set -m` above). Falling back to the bare
 # PID keeps this working if job control is ever unavailable, at the cost of
 # possibly orphaning a child.
 cleanup() {
+  kill "${CURL_PID}" 2>/dev/null || true
   kill -- -"${SERVER_PID}" 2>/dev/null || kill "${SERVER_PID}" 2>/dev/null || true
   wait "${SERVER_PID}" 2>/dev/null || true
 }
@@ -162,12 +167,23 @@ fi
 
 # ── fire the cron, exactly once ───────────────────────────────────────────────
 echo "firing the sync…"
-curl -sS --get "http://localhost:${PORT}/__scheduled" --data-urlencode "cron=${CRON}" -o /dev/null
+# Backgrounded, not foreground (#2900 review): scheduled() now awaits the sync
+# itself (see the SYNC_TIMEOUT_S comment above), so this request blocks for
+# the sync's FULL duration rather than returning immediately the way it used
+# to. Foregrounding it here would make the poll loop below, its
+# SYNC_TIMEOUT_S bound, and its liveness guard all unreachable — curl would
+# already have returned by the time any of them ran. --max-time bounds it
+# independently of the poll loop, and `|| true` under `set -e` means a
+# curl-level failure (e.g. the worker dying mid-request) can't abort the
+# script before the "what did land" summary below gets to print.
+(curl -sS --max-time "${SYNC_TIMEOUT_S}" --get "http://localhost:${PORT}/__scheduled" \
+  --data-urlencode "cron=${CRON}" -o /dev/null || true) &
+CURL_PID=$!
 
 # ── wait for the sync's own completion line ───────────────────────────────────
 # `team <id> (<name>): done` is NOT the end of the pass — after it the effect
 # still writes three KV cycle-id keys, may run reconciliation, and advances the
-# cursor. Stopping there cancels all of that mid-`waitUntil`, which is the exact
+# cursor. Stopping there cancels all of that mid-flight, which is the exact
 # truncation this script exists to avoid. `sync completed — cursor advanced to N`
 # (psd-sanity-sync.ts) is the genuine terminal line.
 echo "waiting for the sync to finish (up to ${SYNC_TIMEOUT_S}s)…"
