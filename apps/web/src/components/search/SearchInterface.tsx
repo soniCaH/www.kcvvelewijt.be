@@ -237,7 +237,11 @@ export const SearchInterface = ({
       // Dedup guard (repo analytics policy, apps/web/CLAUDE.md → Analytics
       // & Instrumentation): re-selecting the already-active chip is a
       // no-op, so neither the URL push nor `search_filter_changed` fires
-      // twice (#2449).
+      // twice (#2449). Compares against the sanitised `activeType`, not the
+      // raw `?type=` — an invalid param therefore survives a no-op reselect
+      // instead of self-healing. Deliberate: results are already unfiltered
+      // in that state, and any genuine filter change rewrites the URL and
+      // cleans it up anyway.
       if (type === activeType) return;
 
       setActiveType(type);
