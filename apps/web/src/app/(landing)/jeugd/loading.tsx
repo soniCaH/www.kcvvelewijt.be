@@ -4,20 +4,23 @@
  * kicker/headline/lead and its image are all fixed — `/images/youth-
  * trainers.jpg`, a bundled asset, not CMS data — so per #2432 §2 this
  * reuses the real `<PageHero>`. The filosofie/visie block and the editorial
- * nav grid below the seam are unchanged by #2642 (their own shimmer, not
- * this ticket's scope).
+ * nav grid below the seam are not touched by #2642 — this ticket's scope is
+ * the youth directory below them, not a re-certification of the rest of
+ * the file.
  *
  * The youth directory is (#2642): its division and team counts (1/4/4/7 in
  * production) are read from the same Sanity fetch this fallback covers, so
- * the fixed "3 groups of cards" shape it used to draw is gone. Neutral
- * `paper-edge` bars of varying width replace it — the same vocabulary the
- * hero's own bars already use.
+ * the fixed "3 groups of cards" shape it used to draw is gone. `<SkeletonBars>`
+ * replaces it — the content-field vocabulary #2642 introduced, the same one
+ * `ploegen/[slug]/loading.tsx`, `.../wedstrijden/loading.tsx` and
+ * `ploegen/loading.tsx` all compose.
  */
 
 import {
   PageContainer,
   StripedSeam,
   Skeleton,
+  SkeletonBars,
   LoadingAnnouncement,
   TapedCardGrid,
 } from "@/components/design-system";
@@ -54,8 +57,10 @@ export default function JeugdLoading() {
         {/* Editorial nav grid — the real <TapedCardGrid columns={3} gap="sm">
             (JeugdEditorialGrid.tsx), so each slot's --taped-card-rotation
             lands before the swap. Without it the rotation snaps in on
-            arrival: 12 skeleton cards sit flat, then EditorialHubCard reads
-            the grid's per-slot CSS var and tilts −1°…−6°. */}
+            arrival: 3 skeleton cards sit flat, then EditorialHubCard reads
+            the grid's per-slot CSS var and tilts −1°…−6° (the real grid's
+            own minimum is `NAV_CARDS.length`, 6 — this skeleton has always
+            undershot that count; unrelated to #2642, not touched here). */}
         <div className="mt-16">
           <TapedCardGrid columns={3} gap="sm">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -66,12 +71,7 @@ export default function JeugdLoading() {
 
         {/* Youth directory — division/team counts are data (#2642). Neutral
             bars only. */}
-        <div className="mt-16 flex flex-col gap-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
+        <SkeletonBars className="mt-16" />
       </PageContainer>
 
       {/* CTA band (full-bleed) */}
