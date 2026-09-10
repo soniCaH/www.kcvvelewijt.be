@@ -20,7 +20,7 @@ export interface WorkerEnv {
   readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent locally → verification is skipped)
   readonly SLACK_ALERT_WEBHOOK_URL?: string; // Slack incoming-webhook for PSD incident/drift alerts — wrangler secret (absent locally → alerting is a no-op)
   readonly CACHE_LONG_TTL?: string; // "true" on staging — overrides hardTtl to 365 days
-  readonly SEARCH_INDEX_PRUNE_DRY_RUN?: string; // "true" while the sweep's prune step is unverified in production; sanity-index-sync.ts logs the delete set instead of calling deleteByIds. Fails safe: anything other than the literal "false" is treated as dry-run (#2831)
+  readonly SEARCH_INDEX_PRUNE_DRY_RUN?: string; // "false" since the sweep's prune step was checked against the live index (#2857); set it back to "true" to re-arm dry-run, where sanity-index-sync.ts logs the delete set instead of calling deleteByIds. Fails safe: anything other than the literal "false" is treated as dry-run (#2831)
 }
 
 export class WorkerEnvTag extends Context.Tag("WorkerEnv")<
