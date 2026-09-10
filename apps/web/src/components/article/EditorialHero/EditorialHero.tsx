@@ -187,11 +187,7 @@ type MatchProps = EditorialHeroSharedProps &
   };
 
 export type EditorialHeroProps =
-  | AnnouncementProps
-  | InterviewProps
-  | EventProps
-  | TransferProps
-  | MatchProps;
+  AnnouncementProps | InterviewProps | EventProps | TransferProps | MatchProps;
 
 // ─── Cover ───────────────────────────────────────────────────────────────────
 
@@ -582,7 +578,11 @@ export function EditorialHero(props: EditorialHeroProps) {
     return (
       <Link
         href={`/nieuws/${slug}`}
-        className={cn("group block", PRESS_DOWN_CLASSES)}
+        // `overflow-x-clip`, not `-hidden`: the press-down's +4px translate
+        // still contributes to `scrollWidth` on this full-bleed link, and
+        // `hidden` would create a scroll container the sticky <SiteHeader>
+        // positions against (breaking `sticky`). Same fix as TeamHero (#1950).
+        className={cn("group block overflow-x-clip", PRESS_DOWN_CLASSES)}
         aria-label={serializeTitle(title)}
       >
         {body}
