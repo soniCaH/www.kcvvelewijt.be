@@ -51,11 +51,19 @@ CRON="0 2 * * *"
 CURSOR_KEY="sync:team-cursor"
 
 # How long to wait for the sync to report `done` before giving up and
-# summarising what did land. The whole sync runs inside ctx.waitUntil() and
-# `scheduled()` returns immediately, so killing wrangler early cancels uploads
-# still in flight — that is the bug this script exists to not repeat (#2890).
+# summarising what did land.
+#
+# `scheduled()` now AWAITS the sync (#2900) rather than firing it via
+# ctx.waitUntil() and returning immediately — that used to confine the whole
+# run to the ~30s grace period Cloudflare grants *after* an invocation ends,
+# which killed a team whose photos all changed partway through every time
+# (#2890's bug, still worth not repeating: killing wrangler early cancels
+# uploads still in flight). Awaited, the real ceiling is the Workers Paid
+# plan's Cron Trigger wall-clock limit for this daily (>= 1h interval) cron —
+# 15 minutes, not a guessed number. Match it exactly rather than re-guessing:
+# https://developers.cloudflare.com/workers/platform/limits/
 READY_TIMEOUT_S=120
-SYNC_TIMEOUT_S=600
+SYNC_TIMEOUT_S=900
 
 # Fixture hook for apps/web/test/hooks/trigger-psd-sync.test.ts: replaces the
 # wrangler launch with a stub server AND skips the KV cursor write, so the test
@@ -119,11 +127,16 @@ else
     --port "${PORT}") >>"${LOG}" 2>&1 &
 fi
 SERVER_PID=$!
+# Set once curl is actually backgrounded below. Declared here (empty, not
+# unset) so cleanup() can reference it safely under `set -u` even if it runs
+# before that point (e.g. the readiness loop below fails first).
+CURL_PID=""
 
 # Kill the process GROUP first (see `set -m` above). Falling back to the bare
 # PID keeps this working if job control is ever unavailable, at the cost of
 # possibly orphaning a child.
 cleanup() {
+  kill "${CURL_PID}" 2>/dev/null || true
   kill -- -"${SERVER_PID}" 2>/dev/null || kill "${SERVER_PID}" 2>/dev/null || true
   wait "${SERVER_PID}" 2>/dev/null || true
 }
@@ -154,12 +167,23 @@ fi
 
 # ── fire the cron, exactly once ───────────────────────────────────────────────
 echo "firing the sync…"
-curl -sS --get "http://localhost:${PORT}/__scheduled" --data-urlencode "cron=${CRON}" -o /dev/null
+# Backgrounded, not foreground (#2900 review): scheduled() now awaits the sync
+# itself (see the SYNC_TIMEOUT_S comment above), so this request blocks for
+# the sync's FULL duration rather than returning immediately the way it used
+# to. Foregrounding it here would make the poll loop below, its
+# SYNC_TIMEOUT_S bound, and its liveness guard all unreachable — curl would
+# already have returned by the time any of them ran. --max-time bounds it
+# independently of the poll loop, and `|| true` under `set -e` means a
+# curl-level failure (e.g. the worker dying mid-request) can't abort the
+# script before the "what did land" summary below gets to print.
+(curl -sS --max-time "${SYNC_TIMEOUT_S}" --get "http://localhost:${PORT}/__scheduled" \
+  --data-urlencode "cron=${CRON}" -o /dev/null || true) &
+CURL_PID=$!
 
 # ── wait for the sync's own completion line ───────────────────────────────────
 # `team <id> (<name>): done` is NOT the end of the pass — after it the effect
 # still writes three KV cycle-id keys, may run reconciliation, and advances the
-# cursor. Stopping there cancels all of that mid-`waitUntil`, which is the exact
+# cursor. Stopping there cancels all of that mid-flight, which is the exact
 # truncation this script exists to avoid. `sync completed — cursor advanced to N`
 # (psd-sanity-sync.ts) is the genuine terminal line.
 echo "waiting for the sync to finish (up to ${SYNC_TIMEOUT_S}s)…"
@@ -241,8 +265,12 @@ if [ "${failed}" -eq 1 ]; then
 fi
 
 if [ "${finished}" -ne 1 ]; then
-  echo "⚠  the sync did not report done within ${SYNC_TIMEOUT_S}s." >&2
-  echo "   Whatever committed above is safe; re-run to finish the rest." >&2
+  echo "⚠  the sync's ${SYNC_TIMEOUT_S}s budget ran out before it finished." >&2
+  echo "   This is not a hang — it is Cloudflare's own Cron Trigger ceiling," >&2
+  echo "   and an unusually large team (e.g. every photo changed) can still" >&2
+  echo "   exceed it. Whatever committed above is safe, and it checkpoints as" >&2
+  echo "   it goes (#2900): a re-run resumes past those members rather than" >&2
+  echo "   re-walking the team from the start." >&2
   echo "   Log: ${LOG}" >&2
   exit 1
 fi

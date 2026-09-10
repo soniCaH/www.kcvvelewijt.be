@@ -165,16 +165,31 @@ export default {
         Layer.provide(KvCacheLive),
         Layer.provide(envLayer),
       );
-      ctx.waitUntil(
-        Effect.runPromise(Effect.provide(runSync, layer)).catch((e) => {
-          console.error(
-            "[scheduled] psd-sanity-sync failed:",
-            String(e),
-            e instanceof Error ? e.stack : "",
-          );
-          throw e;
-        }),
-      );
+      // Awaited, not ctx.waitUntil() (#2900). waitUntil() only buys the ~30s
+      // Cloudflare grants after the invocation would otherwise end — nowhere
+      // near enough for a team whose photos all changed (four runs, ~30s
+      // each, to sync one team — see the issue). Awaiting here keeps the
+      // invocation itself alive for the sync's duration, so the real ceiling
+      // becomes the Workers Paid plan's Cron Trigger wall-clock limit — 15
+      // minutes for this daily (>= 1h interval) cron — not a 30s afterthought.
+      // Measured, not assumed: the log line below records actual wall-clock
+      // per run; see the PR for before/after numbers.
+      // https://developers.cloudflare.com/workers/platform/limits/
+      const syncStartedAt = Date.now();
+      try {
+        await Effect.runPromise(Effect.provide(runSync, layer));
+      } catch (e) {
+        console.error(
+          "[scheduled] psd-sanity-sync failed:",
+          String(e),
+          e instanceof Error ? e.stack : "",
+        );
+        throw e;
+      } finally {
+        console.log(
+          `[scheduled] psd-sanity-sync wall-clock: ${Date.now() - syncStartedAt}ms`,
+        );
+      }
     } else {
       await Effect.runPromise(
         Effect.logWarning(`[scheduled] unknown cron expression: ${event.cron}`),

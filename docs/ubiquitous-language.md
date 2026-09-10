@@ -525,7 +525,7 @@ Legacy name for the PSD API integration layer in the BFF, now renamed to `PsdSer
 
 ### PSD↔Sanity Sync
 
-Nightly cron job that synchronises player, team, and staff data from PSD into Sanity documents. Cursor-based: one team per invocation, full rotation over N nights.
+Nightly cron job that synchronises player, team, and staff data from PSD into Sanity documents. Cursor-based: one team per invocation, full rotation over N nights. `scheduled()` awaits the sync directly rather than firing it via `ctx.waitUntil()`, so an invocation's real budget is the Workers Paid plan's Cron Trigger wall-clock limit (15 minutes), not the ~30s grace `waitUntil()` grants after an invocation ends. Within a team, a KV checkpoint tracks which members are already committed this pass, so a run that still runs out of budget (e.g. a team whose photos all changed) resumes past already-committed members on the next invocation instead of re-walking the team (#2900).
 
 **Rule:** Sync only writes PSD-owned fields. Editorial fields (position, images, bio, training schedule, etc.) are never overwritten.
 

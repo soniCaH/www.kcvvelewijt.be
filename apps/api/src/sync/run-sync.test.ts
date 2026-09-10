@@ -1207,4 +1207,319 @@ describe("runSync", () => {
     expect(archiveStaff).toHaveBeenCalledOnce();
     expect(archiveStaff).toHaveBeenCalledWith(["900"]);
   });
+
+  // ─── Team checkpoint / resume (#2900) ───────────────────────────────────
+  // A team whose photos all changed cannot finish in one invocation's budget.
+  // These tests pin the fix's guarantee: a truncated run resumes past
+  // already-committed members instead of re-walking the whole team, and
+  // never marks a member "done" it did not actually finish.
+
+  const PLAYER_A: PsdMember = { ...ONE_PLAYER, id: 501 };
+  const PLAYER_B: PsdMember = { ...ONE_PLAYER, id: 502 };
+  const PLAYER_C: PsdMember = { ...ONE_PLAYER, id: 503 };
+  const STAFF_A: PsdMember = { ...ONE_STAFF, id: 601 };
+  const STAFF_B: PsdMember = { ...ONE_STAFF, id: 602 };
+
+  describe("team checkpoint / resume (#2900)", () => {
+    it("skips players already checkpointed for the current team, but the team doc still references the full roster", async () => {
+      const kvStub = makeKvStub();
+      await kvStub.put(
+        "sync:team-checkpoint",
+        JSON.stringify({
+          teamId: ONE_TEAM.id,
+          donePlayerIds: ["501"],
+          doneStaffIds: [],
+        }),
+      );
+
+      const { upsertPlayer, upsertTeam, writerMock, readerMock } =
+        makeSanityMocks();
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C],
+      );
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // Only B and C were (re)processed — A was skipped as already committed.
+      expect(upsertPlayer).toHaveBeenCalledTimes(2);
+      expect(upsertPlayer).not.toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "501" }),
+      );
+      expect(upsertPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "502" }),
+      );
+      expect(upsertPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "503" }),
+      );
+
+      // The team doc references the full roster, including the member
+      // committed before this run even started.
+      expect(upsertTeam).toHaveBeenCalledWith(
+        expect.objectContaining({ playerPsdIds: ["501", "502", "503"] }),
+      );
+    });
+
+    it("ignores a checkpoint that names a different team (stale from a previous rotation)", async () => {
+      const kvStub = makeKvStub();
+      await kvStub.put(
+        "sync:team-checkpoint",
+        JSON.stringify({
+          teamId: 999,
+          donePlayerIds: ["501"],
+          doneStaffIds: [],
+        }),
+      );
+
+      const { upsertPlayer, writerMock, readerMock } = makeSanityMocks();
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [PLAYER_A]);
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // A checkpoint for a different team must never suppress this team's
+      // own players.
+      expect(upsertPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "501" }),
+      );
+    });
+
+    it("checkpoints incrementally: a mid-team failure leaves only the completed member marked done, and the cursor unadvanced", async () => {
+      const kvStub = makeKvStub();
+      const { upsertPlayer, writerMock, readerMock } = makeSanityMocks();
+      upsertPlayer
+        .mockImplementationOnce(() => Effect.succeed(undefined as void)) // player A (501) commits
+        .mockImplementationOnce(
+          () =>
+            Effect.fail(
+              new SanityMutationError("boom"),
+            ) as unknown as Effect.Effect<void>,
+        ); // player B (502) fails mid-team
+
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C],
+      );
+
+      await expect(
+        Effect.runPromise(
+          runSync.pipe(
+            Effect.provide(
+              buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+            ),
+          ),
+        ),
+      ).rejects.toBeDefined();
+
+      // Only player A — fully committed before the failure — is checkpointed.
+      const checkpointRaw = await kvStub.get("sync:team-checkpoint");
+      expect(checkpointRaw).not.toBeNull();
+      expect(JSON.parse(checkpointRaw!)).toEqual({
+        teamId: ONE_TEAM.id,
+        donePlayerIds: ["501"],
+        doneStaffIds: [],
+      });
+
+      // Player B (the one that failed) was still attempted. Whether player C
+      // is reached at all depends on fiber scheduling under `concurrency: 2`
+      // — a freed slot can start it before B's failure interrupts the loop —
+      // so it is deliberately not asserted. The checkpoint above is what
+      // proves bounded re-work: nothing past the failure point is marked done.
+      expect(upsertPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "502" }),
+      );
+
+      // The cursor never advances on a failed run.
+      expect(await kvStub.get("sync:team-cursor")).toBeNull();
+    });
+
+    it("a resumed run after that failure completes the team, clears the checkpoint, and advances the cursor", async () => {
+      const kvStub = makeKvStub();
+      // The state the failed run above would have left behind.
+      await kvStub.put(
+        "sync:team-checkpoint",
+        JSON.stringify({
+          teamId: ONE_TEAM.id,
+          donePlayerIds: ["501"],
+          doneStaffIds: [],
+        }),
+      );
+
+      const { upsertPlayer, upsertTeam, writerMock, readerMock } =
+        makeSanityMocks();
+      // This time every player succeeds.
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C],
+      );
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // Only the bounded remainder (B, C) was re-walked — not A.
+      expect(upsertPlayer).toHaveBeenCalledTimes(2);
+      expect(upsertPlayer).not.toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "501" }),
+      );
+
+      expect(upsertTeam).toHaveBeenCalledWith(
+        expect.objectContaining({ playerPsdIds: ["501", "502", "503"] }),
+      );
+
+      // The team fully completed: checkpoint cleared, cursor advanced
+      // (1 team → wraps back to 0).
+      expect(await kvStub.get("sync:team-checkpoint")).toBeNull();
+      expect(await kvStub.get("sync:team-cursor")).toBe("0");
+    });
+
+    it("mirrors the same checkpoint/resume behaviour for staff", async () => {
+      const kvStub = makeKvStub();
+      await kvStub.put(
+        "sync:team-checkpoint",
+        JSON.stringify({
+          teamId: ONE_TEAM.id,
+          donePlayerIds: [],
+          doneStaffIds: ["601"],
+        }),
+      );
+
+      const { upsertStaff, upsertTeam, writerMock, readerMock } =
+        makeSanityMocks();
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [ONE_PLAYER],
+        [STAFF_A, STAFF_B],
+      );
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      expect(upsertStaff).toHaveBeenCalledTimes(1);
+      expect(upsertStaff).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "602" }),
+      );
+      expect(upsertTeam).toHaveBeenCalledWith(
+        expect.objectContaining({ staffPsdIds: ["601", "602"] }),
+      );
+    });
+
+    it("treats a shape-invalid stored checkpoint the same as no checkpoint (#2900 review)", async () => {
+      const kvStub = makeKvStub();
+      // donePlayerIds is not an array — JSON.parse succeeds, the shape does not.
+      await kvStub.put(
+        "sync:team-checkpoint",
+        JSON.stringify({
+          teamId: ONE_TEAM.id,
+          donePlayerIds: "not-an-array",
+          doneStaffIds: [],
+        }),
+      );
+
+      const { upsertPlayer, writerMock, readerMock } = makeSanityMocks();
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C],
+      );
+
+      // Must not throw — a shape-invalid checkpoint degrades to "start fresh".
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      expect(upsertPlayer).toHaveBeenCalledTimes(3);
+    });
+
+    it("does not checkpoint a member whose image upload failed (#2900 review) — it must retry on the next run, not wait a full rotation", async () => {
+      const kvStub = makeKvStub();
+      const { upsertPlayer, uploadPlayerImage, writerMock, readerMock } =
+        makeSanityMocks();
+      uploadPlayerImage.mockReturnValue(
+        Effect.fail(
+          new SanityMutationError("rate limited (429)"),
+        ) as unknown as Effect.Effect<void>,
+      );
+
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [PLAYER_WITH_IMAGE]);
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // The player doc still committed (existing behaviour)...
+      expect(upsertPlayer).toHaveBeenCalledOnce();
+      // ...but every checkpoint snapshot written along the way excluded this
+      // member, since its image never actually landed.
+      const checkpointWrites = (
+        kvStub.put as ReturnType<typeof vi.fn>
+      ).mock.calls
+        .filter(([key]) => key === "sync:team-checkpoint")
+        .map(([, value]) => JSON.parse(value as string) as TeamCheckpointShape);
+      for (const snapshot of checkpointWrites) {
+        expect(snapshot.donePlayerIds).not.toContain("7001");
+      }
+    });
+
+    it("debounces checkpoint writes instead of one per member (#2900 review — KV allows at most 1 write/s/key)", async () => {
+      const kvStub = makeKvStub();
+      const { writerMock, readerMock } = makeSanityMocks();
+      const PLAYER_D: PsdMember = { ...ONE_PLAYER, id: 504 };
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C, PLAYER_D],
+      );
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // 4 members complete near-instantly in this test — one checkpoint PUT
+      // per member (the pre-review design) would be 4. Debounced to ~1.1s,
+      // only the first member's write (the debounce window always starts
+      // open) and the forced final flush should actually land.
+      const checkpointWrites = (
+        kvStub.put as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(([key]) => key === "sync:team-checkpoint");
+      expect(checkpointWrites.length).toBeLessThan(4);
+      expect(checkpointWrites.length).toBeGreaterThan(0);
+    });
+  });
 });
+
+interface TeamCheckpointShape {
+  teamId: number;
+  donePlayerIds: string[];
+  doneStaffIds: string[];
+}
