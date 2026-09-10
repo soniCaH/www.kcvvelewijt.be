@@ -37,9 +37,17 @@ import darts from "@/data/darts.json";
 
 const POSTER = "/darts/poster-liggend.jpg";
 
-/* The affiche carries the date, the five bullets and the QR as pixels, so the
-   alt text carries them too. A short alt drops the whole poster for anyone who
-   cannot see it. */
+/* ⚠️ This describes the affiche for the OG image ONLY — it is the `ogImage.alt`
+   below, and nothing else. `<PageHero>` renders its image with a hard-coded
+   `alt=""` and takes no alt parameter, which is a deliberate site-wide decision
+   (#2559 / #2548 rule 1): the hero image sits beside the h1 that names it, so a
+   photograph would only repeat the words.
+   That premise does not hold here — this image is not a photograph, it is an
+   information graphic — so the fix is NOT to punch an `imageAlt` prop through a
+   component 31 routes share. It is to make sure nothing lives only in the
+   picture. Everything the affiche says now exists as text on this page,
+   `watJeKrijgt` included, so `alt=""` is the correct answer rather than a lucky
+   one. Found by a reviewer on PR #2908. */
 const POSTER_ALT =
   "Affiche EK Darts 2026 — zaterdag 19 december 2026, kantine KCVV Elewijt. " +
   "Teams van vier personen, gegarandeerd meerdere wedstrijden, kwalificatie en " +
@@ -115,6 +123,19 @@ export default function DartsPage() {
             {`${darts.prijs.dummy} voor een ploeg van vier. Nog niet beslist — dit cijfer staat er om de pagina te kunnen lezen, niet om op te rekenen.`}
           </PullQuote>
         </div>
+
+        {/* The affiche's own promise, in text. Two of these bullets — the
+            guaranteed matches and the prizes — existed nowhere but inside the
+            poster image until PR #2908. A fact that lives only in a picture does
+            not exist for anyone who cannot see the picture. */}
+        <section className="mt-14">
+          <SectionHeader title="Wat je krijgt" as="h2" ruled />
+          <ul className="text-ink-soft mt-4 list-disc pl-5">
+            {darts.watJeKrijgt.punten.map((punt) => (
+              <li key={punt}>{punt}</li>
+            ))}
+          </ul>
+        </section>
 
         <section
           className="mt-4"
