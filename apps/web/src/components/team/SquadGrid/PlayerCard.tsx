@@ -34,7 +34,14 @@ export interface PlayerCardProps {
   href?: string;
   /** Which garment the imageless-fallback figure wears (#2485): `"jersey"` (default) for a player, `"coat"` for a staff document. */
   garment?: JerseyIllustrationGarment;
-  /** Blend the photo onto the card's cream via `mix-blend-multiply` (#2633). Default `true` for a standardised PSD headshot; `<TeamStaff>` passes `false` for a free-form staff upload (#2575 review). */
+  /**
+   * Blend the photo onto the card's cream via `mix-blend-multiply` (#2633).
+   * Default `true`, and now used by every consumer: a person photo on this site
+   * is a studio cutout on white, so the matte is always there to erase. The
+   * escape hatch stays for a surface that ever renders a genuinely free-form
+   * upload — `<TeamStaff>` passed `false` until #2901, when PSD-synced staff
+   * portraits made staff photos as standardised as players'.
+   */
   blendPhoto?: boolean;
   /** Show a resting "Bekijk →" affordance under a linked card (BEST-1). Default `false`; `<TeamStaff>` passes `true` for its routinely-mixed linked/unlinked runs (#2575 review). */
   linkAffordance?: boolean;

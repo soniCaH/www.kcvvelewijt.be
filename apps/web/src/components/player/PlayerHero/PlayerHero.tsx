@@ -254,7 +254,10 @@ export function PlayerHero({
               width={400}
               height={533}
               unoptimized
-              className="block h-full w-full object-cover"
+              // Multiply drops a studio cutout's white matte onto the figure's
+              // cream ground, the same treatment <PlayerCard> gives the squad
+              // grid (#2633, extended to every person surface in #2901).
+              className="block h-full w-full object-cover mix-blend-multiply"
             />
           ) : (
             <JerseyIllustration

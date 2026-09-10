@@ -9,7 +9,7 @@
  *    board-page order is never silently reordered (#2638, #2638 review)
  *  - `heading` drives the run's heading text + accessible name — no baked
  *    default (#2575 review)
- *  - One shared <PlayerCard> per member, garment="coat", blendPhoto={false},
+ *  - One shared <PlayerCard> per member, garment="coat", blend ON (#2901),
  *    linkAffordance (#2477 rule 1, #2485, #2575 review)
  *  - Whitespace-only imageUrl/href normalise to absent
  *  - Resolved function label reaches the card
@@ -87,6 +87,39 @@ const STAFF: TeamStaffMemberData[] = [
   },
 ];
 
+describe("TeamStaff — the staff photo blends like a player's (#2901)", () => {
+  /**
+   * `mix-blend-multiply` erases a white studio matte against the card's cream.
+   * `<TeamStaff>` opted out while every staff photo was a free-form editorial
+   * upload; #2895 gave staff PSD-synced studio headshots, and the owner's call
+   * is that ALL person photos blend — editorial ones on this site are cutouts
+   * on white too. Before this, a PSD staff portrait rendered on a stark white
+   * rectangle beside blended neighbours.
+   */
+  const photoClasses = (container: HTMLElement) =>
+    // Split rather than substring-match: `md:mix-blend-multiply` contains the
+    // token but would not blend at rest.
+    container.querySelector("img")?.className.split(/\s+/) ?? [];
+
+  it("blends a staff portrait onto the card's cream", () => {
+    const { container } = render(
+      <TeamStaff
+        heading="Staf"
+        staff={[
+          {
+            id: "psd",
+            firstName: "Frank",
+            lastName: "Dirix",
+            functionTitle: "T1",
+            imageUrl: "/player-fixtures/player-schulz.jpg",
+          },
+        ]}
+      />,
+    );
+    expect(photoClasses(container)).toContain("mix-blend-multiply");
+  });
+});
+
 describe("TeamStaff", () => {
   it("renders null when staff is empty", () => {
     const { container } = render(<TeamStaff staff={[]} heading="Staf" />);
@@ -108,7 +141,7 @@ describe("TeamStaff", () => {
     expect(screen.getAllByTestId("player-card")).toHaveLength(2);
   });
 
-  it("renders the coat-garment illustration, unblended photo, and the link affordance (#2485 / #2575 review)", () => {
+  it("renders the coat-garment illustration, blended photo, and the link affordance (#2485 / #2575 review, blend added #2901)", () => {
     render(
       <TeamStaff
         staff={[{ ...STAFF[0]!, href: "/staf/12345" }, STAFF[1]!]}
@@ -121,9 +154,10 @@ describe("TeamStaff", () => {
     const photoImg = screen
       .getAllByTestId("player-card-figure")[0]
       ?.querySelector("img");
-    expect(photoImg?.className.split(/\s+/)).not.toContain(
-      "mix-blend-multiply",
-    );
+    // Blended since #2901 — this asserted the opposite while staff photos were
+    // free-form editorial uploads. PSD-synced staff portraits are studio
+    // cutouts on white, and the owner's call is that every person photo blends.
+    expect(photoImg?.className.split(/\s+/)).toContain("mix-blend-multiply");
 
     expect(
       screen.getByTestId("player-card-link-affordance"),
