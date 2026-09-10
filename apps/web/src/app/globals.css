@@ -545,8 +545,17 @@
      and mix-blend-mode multiply. Cache-friendly (ships with stylesheet, no
      network request). This is a *photo* treatment — see the body::before /
      body::after ground texture below, which reuses this exact token at a
-     different opacity rather than duplicating it. */
-  --pattern-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+     different opacity rather than duplicating it.
+
+     The <filter> carries an explicit x/y/width/height region (#2613 review).
+     `stitchTiles="stitch"` stitches over the filter *region*, which SVG
+     defaults to -10% -10% 120% 120% of the referencing element (192x192
+     here) — not the 160x160 <rect>/tile size — so without an explicit
+     region a tiled background-repeat cuts mid-noise at every 160px seam.
+     Invisible here only because baseFrequency 0.9 is too fine to show a
+     seam; kept explicit anyway so the recipe stays correct if reused at a
+     coarser frequency. */
+  --pattern-paper-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 
   /* Paper mottle — broad, low-frequency noise for the page ground itself
      (D3a, #2613). Deliberately the opposite shape from --pattern-paper-grain
@@ -554,8 +563,20 @@
      a slow cloud of stock variation rather than fine grain. Same
      feColorMatrix recipe (RGB pinned to 0, alpha carries the noise shape) —
      the consumer draws it in ink at 9% opacity, multiply, below. No image
-     asset, no network request, no fallback path. */
-  --pattern-paper-mottle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.014' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
+     asset, no network request, no fallback path.
+
+     `<filter>` gets an explicit x/y/width/height region for the same reason
+     as --pattern-paper-grain above — here it is not cosmetic: at this
+     baseFrequency the default -10%/120% region (504x504) mismatched the
+     420x420 tile enough to cut a visible seam every 420px on
+     `background-repeat` (measured: the three largest column-to-column
+     luminance deltas across a 1440px viewport landed exactly on tile
+     boundaries, ~2.5x the noise floor). Pinning the region to the tile
+     removes the seam. Known limitation kept rather than hidden: even
+     seam-free, a 420px tile still repeats ~3.4x across a desktop viewport,
+     so at this size it reads as a discernible repeat rather than a truly
+     non-repeating cloud. */
+  --pattern-paper-mottle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='m' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.014' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
 
   --shadow-paper-sm: 4px 4px 0 0 var(--color-ink);
   --shadow-paper-md: 6px 6px 0 0 var(--color-ink);
