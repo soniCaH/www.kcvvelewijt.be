@@ -1,17 +1,26 @@
 /**
- * `/jeugd` loading skeleton — mirrors the composition: the shared opening's
- * dark register (group photo beside the words, #2555) → seam → filosofie/visie
- * block → editorial nav grid → youth-directory division grid.
+ * `/jeugd` loading skeleton — the shared opening's dark register (group
+ * photo beside the words, #2555) is kept real and unshimmered: its
+ * kicker/headline/lead and its image are all fixed — `/images/youth-
+ * trainers.jpg`, a bundled asset, not CMS data — so per #2432 §2 this
+ * reuses the real `<PageHero>`. The filosofie/visie block and the editorial
+ * nav grid below the seam are not touched by #2642 — this ticket's scope is
+ * the youth directory below them, not a re-certification of the rest of
+ * the file.
  *
- * The opening's kicker/headline/lead and its image are all fixed —
- * `/images/youth-trainers.jpg`, a bundled asset, not CMS data — so per
- * #2432 §2 this reuses the real `<PageHero>` unshimmered.
+ * The youth directory is (#2642): its division and team counts (1/4/4/7 in
+ * production) are read from the same Sanity fetch this fallback covers, so
+ * the fixed "3 groups of cards" shape it used to draw is gone. `<SkeletonBars>`
+ * replaces it — the content-field vocabulary #2642 introduced, the same one
+ * `ploegen/[slug]/loading.tsx`, `.../wedstrijden/loading.tsx` and
+ * `ploegen/loading.tsx` all compose.
  */
 
 import {
   PageContainer,
   StripedSeam,
   Skeleton,
+  SkeletonBars,
   LoadingAnnouncement,
   TapedCardGrid,
 } from "@/components/design-system";
@@ -48,8 +57,10 @@ export default function JeugdLoading() {
         {/* Editorial nav grid — the real <TapedCardGrid columns={3} gap="sm">
             (JeugdEditorialGrid.tsx), so each slot's --taped-card-rotation
             lands before the swap. Without it the rotation snaps in on
-            arrival: 12 skeleton cards sit flat, then EditorialHubCard reads
-            the grid's per-slot CSS var and tilts −1°…−6°. */}
+            arrival: 3 skeleton cards sit flat, then EditorialHubCard reads
+            the grid's per-slot CSS var and tilts −1°…−6° (the real grid's
+            own minimum is `NAV_CARDS.length`, 6 — this skeleton has always
+            undershot that count; unrelated to #2642, not touched here). */}
         <div className="mt-16">
           <TapedCardGrid columns={3} gap="sm">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -58,20 +69,9 @@ export default function JeugdLoading() {
           </TapedCardGrid>
         </div>
 
-        {/* Youth directory */}
-        <div className="mt-16 space-y-8">
-          <Skeleton className="h-8 w-44" />
-          {Array.from({ length: 3 }).map((_, div) => (
-            <div key={div} className="space-y-4">
-              <Skeleton className="h-4 w-32" />
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-20" />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Youth directory — division/team counts are data (#2642). Neutral
+            bars only. */}
+        <SkeletonBars className="mt-16" />
       </PageContainer>
 
       {/* CTA band (full-bleed) */}
