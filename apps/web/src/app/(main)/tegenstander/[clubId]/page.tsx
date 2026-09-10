@@ -47,8 +47,12 @@ const NOT_FOUND_METADATA: Metadata = {
 /**
  * Head-to-head description shared by the page's own lead paragraph and its
  * metadata `description`/`og:description` — one phrasing, two surfaces, so
- * they never drift apart (see root CLAUDE.md's Writer Rule carve-out for
- * metadata composition).
+ * they never drift apart. Not a Writer Rule fallback-chain case (that
+ * carve-out, in `apps/web/CLAUDE.md` under "The Writer Rule — rendering
+ * absence", licenses metadata *composing a fallback chain* a rendered slot
+ * never would, e.g. `tagline ?? divisionFull ?? division`); this is simpler
+ * — #2464 asks for the page's existing lead verbatim, not a second phrasing
+ * invented beside it, so both surfaces call this one function.
  */
 function opponentHistoryDescription(opponentName: string): string {
   return `Alle onderlinge duels tussen KCVV Elewijt en ${opponentName}, per seizoen.`;
