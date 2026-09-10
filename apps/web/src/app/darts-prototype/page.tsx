@@ -24,6 +24,7 @@ import {
   MonoLabel,
   PageContainer,
   LinkButton,
+  PullQuote,
   SectionHeader,
   StampBadge,
   TapedCard,
@@ -311,6 +312,126 @@ function VariantR() {
   );
 }
 
+/* ------------------------------------------------------------- VARIANT S -- */
+/* THE MIX — Kevin, 2026-09-10: "Header from P, without the first horizontal
+   line between image and text (it goes from tilted to straight in a weird way,
+   keep below). Titles in body and table style — but full width — from Q. Maybe
+   a featured or important one in a card, but not ALL of them — waaaaaay too
+   crowded."
+   So: P's taped poster with only the LOWER rule under the facts, Q's ruled
+   headings and dotted-leader rows at full width, and exactly two PullQuotes —
+   the article-page treatment — on the two things that actually matter. */
+
+/** The two rows that earn a card. Everything else stays in the table: a page
+ *  where every fact is featured has featured nothing. */
+function Featured({
+  labels,
+  children,
+  rotation,
+}: {
+  labels: string[];
+  children: React.ReactNode;
+  rotation: -1 | 1;
+}) {
+  return (
+    <div className="my-10">
+      <PullQuote
+        placement="flow"
+        rotation={rotation}
+        labels={labels.map((label) => ({ label }))}
+      >
+        {children}
+      </PullQuote>
+    </div>
+  );
+}
+
+function VariantS() {
+  const rows: Array<[string, React.ReactNode]> = [
+    ["Wanneer", darts.datum.tekst],
+    ["Waar", `${darts.waar.naam} — ${darts.waar.adres}`],
+    ["Formule", `${darts.formule.ploeg} · ${darts.formule.ontmoeting}`],
+    ["Verloop", darts.formule.verloop],
+    ["Deuren", <Todo key="d">{uren.deuren}</Todo>],
+    ["Eerste worp", <Todo key="w">{uren.eersteWorp}</Todo>],
+    ["Prijsuitreiking", <Todo key="u">{uren.prijsuitreiking}</Todo>],
+    ["Eten en drank", <Fact key="e" value={darts.eten} />],
+    ["Afterparty", darts.dj.tekst],
+  ];
+  return (
+    <div className="bg-cream pb-16">
+      <PageContainer width="default">
+        {/* The poster is tilted, so nothing straight goes directly under it —
+            a -1° edge meeting a 0° rule reads as a mistake rather than a
+            choice. The rule that closes the facts block is kept. */}
+        <div className="pt-10">
+          <TapedCard rotation={-1} shadow="lift" padding="none" bg="cream">
+            <Poster className="block h-auto w-full" />
+          </TapedCard>
+        </div>
+
+        <div className="border-ink mt-10 border-b-2 pb-8">
+          <dl className="grid gap-8 sm:grid-cols-3">
+            {[
+              ["Wanneer", darts.datum.tekst],
+              ["Waar", darts.waar.naam],
+              ["Ploeg", darts.formule.ploeg],
+            ].map(([k, v]) => (
+              <div key={k}>
+                <dt className="mb-2">
+                  <MonoLabel tone="muted">{k}</MonoLabel>
+                </dt>
+                <dd className="text-ink text-lg leading-snug">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        <div className="mt-14">
+          <SectionHeader title="Het toernooi" as="h2" ruled />
+          <dl className="mt-6">
+            {rows.map(([k, v]) => (
+              <div
+                key={k}
+                className="border-paper-edge flex flex-wrap items-baseline justify-between gap-x-6 border-b border-dotted py-3"
+              >
+                <dt className="text-ink-muted">{k}</dt>
+                <dd className="text-ink text-right">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+
+        {/* Featured 1 — the number everybody asks first, and the one still open. */}
+        <Featured labels={["Prijs per ploeg"]} rotation={-1}>
+          {darts.prijs.dummy} — vier spelers, dus{" "}
+          {Math.round(Number(darts.prijs.dummy.replace(/[^\d]/g, "")) / 4)} euro
+          per kop. Nog niet beslist.
+        </Featured>
+
+        <div className="mt-4">
+          <SectionHeader title="Inschrijven" as="h2" ruled />
+          <p className="text-ink-soft mt-4">
+            <Fact value={darts.inschrijven} />
+          </p>
+        </div>
+
+        <div className="mt-14">
+          <SectionHeader title="Reglement" as="h2" ruled />
+          <p className="text-ink-soft mt-4">
+            <Fact value={darts.reglement} />
+          </p>
+        </div>
+
+        {/* Featured 2 — the one rule that costs 70 euro a board if it is missed. */}
+        <Featured labels={["Reglement", "Verplicht"]} rotation={1}>
+          {darts.reglement.vast[0]}
+        </Featured>
+      </PageContainer>
+    </div>
+  );
+}
+
 /* ------------------------------------------------------------ THE SWITCHER  */
 const VARIANTS: Record<
   string,
@@ -319,6 +440,7 @@ const VARIANTS: Record<
   P: { name: "Papieren affiche", render: () => <VariantP /> },
   Q: { name: "Programmablad", render: () => <VariantQ /> },
   R: { name: "Prikbord", render: () => <VariantR /> },
+  S: { name: "De mix (P+Q)", render: () => <VariantS /> },
 };
 const KEYS = Object.keys(VARIANTS);
 
@@ -352,8 +474,8 @@ function Switcher({ current }: { current: string }) {
 }
 
 function Prototype() {
-  const asked = useSearchParams().get("variant") ?? "P";
-  const current = KEYS.includes(asked) ? asked : "P";
+  const asked = useSearchParams().get("variant") ?? "S";
+  const current = KEYS.includes(asked) ? asked : "S";
   return (
     <>
       {VARIANTS[current].render()}
