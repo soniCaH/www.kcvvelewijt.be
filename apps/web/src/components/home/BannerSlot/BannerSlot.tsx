@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { PageContainer } from "@/components/design-system";
 
@@ -11,16 +10,11 @@ export interface BannerSlotProps {
   /**
    * Banner image URL for the small breakpoint, cropped 3:1 server-side
    * (#2401 item 2). The house ratio stays 6:1 from `md` up — locked
-   * 2026-07-13, reaffirmed 2026-09-10 — but at a ~358px mobile column a
+   * 2026-07-13, reaffirmed 2026-09-10 — but at a ~375px mobile column a
    * 6:1 box is only ~60px tall, too short for any text baked into the
-   * artwork. 3:1 resolves to ~119px there: readable, and still close
+   * artwork. 3:1 resolves to ~125px there: readable, and still close
    * enough to 6:1 that the single hotspot the schema collects frames
-   * sensibly at both sizes. Two `<Image>`s (one per breakpoint, toggled by
-   * a Tailwind `md:` class) rather than one responsive box, because the
-   * crop is baked into each CDN URL server-side — a single image can't
-   * change its own crop rectangle when the viewport crosses a breakpoint,
-   * so the CSS box and the CDN transform would disagree exactly the way
-   * the July sweep's `object-cover` centre-crop did.
+   * sensibly at both sizes.
    */
   mobileImage: string;
   /** Alt text for accessibility */
@@ -52,38 +46,42 @@ export const BannerSlot = ({
   slot,
   className,
 }: BannerSlotProps) => {
-  const boxClasses = cn(
-    "border-ink shadow-paper-sm relative w-full overflow-hidden rounded-none border-2 transition-all duration-300 group-hover:shadow-none",
-    className,
-  );
-
   const inner = (
-    <>
-      {/* Mobile crop (< md) — 3:1, see `mobileImage`'s docblock. */}
-      <div className={cn(boxClasses, "aspect-[3/1] min-h-[100px] md:hidden")}>
-        <Image
+    // One box whose aspect ratio itself switches at `md` (#2401 review
+    // finding 2) — not two boxes toggled by `hidden`/`md:hidden`. A
+    // `display:none` subtree still downloads its `<img>`/`srcSet`, so the
+    // earlier two-box version fetched BOTH crops on every load, on every
+    // viewport, for all three slots. One box + a `<picture>` art-direction
+    // swap below fetches exactly one.
+    <div
+      className={cn(
+        "border-ink shadow-paper-sm relative aspect-[3/1] min-h-[100px] w-full overflow-hidden rounded-none border-2 transition-all duration-300 group-hover:shadow-none md:aspect-[6/1] md:min-h-[60px]",
+        className,
+      )}
+    >
+      <picture>
+        {/* `min-width: 768px` mirrors Tailwind's `md` breakpoint — the
+            CDN's 6:1 crop only makes sense once the CSS box above has
+            switched to `md:aspect-[6/1]` too; the two must agree. */}
+        <source media="(min-width: 768px)" srcSet={image} />
+        {/* Plain `<img>`, not `next/image` — intentional (#2401 review
+            finding 2). `next/image` has no art-direction equivalent (two
+            source URLs, swapped by breakpoint, exactly one fetched); only
+            `<picture>`'s native `<source media>` does that. No
+            `@next/next/no-img-element` suppression needed: the rule
+            already exempts an `<img>` that is a `<picture>` child, which
+            is exactly this case. `next/image`'s own value here (responsive
+            `srcSet`, lazy loading) is covered anyway — the Sanity CDN URLs
+            are pre-sized and carry `q=80&fm=webp`, and `loading="lazy"`
+            gives native lazy-loading without the optimizer. */}
+        <img
           src={mobileImage}
           alt={alt}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority={false}
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
         />
-      </div>
-      {/* Desktop/tablet crop (md+) — the locked 6:1 house ratio. */}
-      <div
-        className={cn(boxClasses, "hidden aspect-[6/1] min-h-[60px] md:block")}
-      >
-        <Image
-          src={image}
-          alt={alt}
-          fill
-          className="object-cover"
-          sizes="1280px"
-          priority={false}
-        />
-      </div>
-    </>
+      </picture>
+    </div>
   );
 
   // ponytail: no own background — the banner sits directly on the page cream

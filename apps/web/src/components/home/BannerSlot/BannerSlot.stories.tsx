@@ -15,10 +15,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// #2401 review finding 5 — `image` and `mobileImage` deliberately use two
+// VISUALLY DIFFERENT fixtures (a green line-art pattern vs. a photograph),
+// not the same URL twice. If a future refactor ever fed the desktop crop to
+// the mobile `<source>` (or vice versa) — the exact class of bug the
+// `<picture>` art-direction swap in `BannerSlot.tsx` exists to avoid — the
+// mismatch would show up as an obviously wrong baseline instead of staying
+// green because both fixtures happened to render identically.
+const DESKTOP_FIXTURE = "/images/header-pattern.png";
+const MOBILE_FIXTURE = "/images/ultras.jpg";
+
 export const WithLink: Story = {
   args: {
-    image: "/images/header-pattern.png",
-    mobileImage: "/images/header-pattern.png",
+    image: DESKTOP_FIXTURE,
+    mobileImage: MOBILE_FIXTURE,
     alt: "Anti-racism campaign",
     href: "https://example.com",
   },
@@ -26,8 +36,8 @@ export const WithLink: Story = {
 
 export const NoLink: Story = {
   args: {
-    image: "/images/header-pattern.png",
-    mobileImage: "/images/header-pattern.png",
+    image: DESKTOP_FIXTURE,
+    mobileImage: MOBILE_FIXTURE,
     alt: "Summer camp 2026",
   },
 };
@@ -37,11 +47,12 @@ export const NoLink: Story = {
 // 6:1 ratio resolves to an illegible ~60px strip. `vr.viewports` (not the
 // Storybook-10-removed `parameters.viewport.defaultViewport`, which the VR
 // runner doesn't read at all) locks this story to the VR runner's "mobile"
-// viewport so the 3:1 crop is what gets captured.
+// viewport so the 3:1 crop — and the mobile fixture, per finding 5 above —
+// is what gets captured.
 export const MobileRatio: Story = {
   args: {
-    image: "/images/header-pattern.png",
-    mobileImage: "/images/header-pattern.png",
+    image: DESKTOP_FIXTURE,
+    mobileImage: MOBILE_FIXTURE,
     alt: "Summer camp 2026",
     href: "https://example.com",
   },
