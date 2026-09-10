@@ -168,13 +168,49 @@ describe("BffService", () => {
     // ploegen/[slug]/wedstrijden `catchTag("HttpNotFound") → notFound()` path.
     // We assert on the specific tag (not catchAll): anything that flattens the
     // error to an opaque UnknownException would fall through to "flattened".
+    // A 503 is a status `getMatches` declares (see
+    // packages/api-contract/src/api/matches.ts), so this exercises a real
+    // round-trip through the client's decode map -- the server-declared
+    // status is read back off the response and the body decodes as the
+    // matching HttpServiceUnavailable class. This is the only test in the
+    // suite that pins that path for a non-404 declared error; see the test
+    // below for the 404/HttpNotFound path, and the one after for what
+    // happens on a status the endpoint does NOT declare.
+    mockFetchWith(
+      {
+        error: "Service temporarily unavailable",
+        _tag: "HttpServiceUnavailable",
+      },
+      503,
+    );
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getMatches(1).pipe(
+          Effect.catchTag("HttpServiceUnavailable", () =>
+            Effect.succeed("typed-survived" as const),
+          ),
+          Effect.catchAll(() => Effect.succeed("flattened" as const)),
+        );
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(result).toBe("typed-survived");
+    // One read, one BFF call — nothing retries or re-runs on the error path.
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+  });
+
+  it("an undeclared status surfaces as an untyped ResponseError, not a decode error", async () => {
     // `getMatches` declares errors for 503/502/404 only (see
-    // packages/api-contract/src/api/matches.ts), so a bare 500 — which none
-    // of those cover — never reaches the declared error union at all. The
-    // client's `HttpApiClient` surfaces it as `ResponseError`, tagged
-    // `@effect/platform/HttpClientError`'s "ResponseError" (see #2440's
-    // deploy-order note: an undecodable status "falls through to `orElse`
-    // and surfaces as an untyped `ResponseError`").
+    // packages/api-contract/src/api/matches.ts), so a bare 500 -- which none
+    // of those cover -- never reaches the declared error union at all. The
+    // client's `HttpApiClient` surfaces it as `ResponseError`
+    // (`@effect/platform/HttpClientError`'s "ResponseError" tag), not a
+    // decode failure. This pins the mechanism the #2440 deploy-order section
+    // relies on: an undecodable status "falls through ... and surfaces as an
+    // untyped `ResponseError`", which classifies as transient (not in
+    // PERMANENT_BFF_TAGS) and throws for ISR to retry.
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(new Response("", { status: 500 })),
@@ -185,15 +221,14 @@ describe("BffService", () => {
         const bff = yield* BffService;
         return yield* bff.getMatches(1).pipe(
           Effect.catchTag("ResponseError", () =>
-            Effect.succeed("typed-survived" as const),
+            Effect.succeed("untyped-response-error" as const),
           ),
           Effect.catchAll(() => Effect.succeed("flattened" as const)),
         );
       }).pipe(Effect.provide(BffServiceLive)),
     );
 
-    expect(result).toBe("typed-survived");
-    // One read, one BFF call — nothing retries or re-runs on the error path.
+    expect(result).toBe("untyped-response-error");
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
   });
 
