@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 
 // ── Mocks ──────────────────────────────────────────────────────────
 
@@ -80,6 +80,13 @@ const matchFixture = {
   home_score: 2,
   away_score: 1,
   competition: "Provinciaal",
+};
+
+const opponentFixture = {
+  opponentName: "KVV St-Denijs Sport",
+  opponentLogo: null,
+  summary: { wins: 3, draws: 1, losses: 2, goalsFor: 10, goalsAgainst: 8 },
+  matches: [],
 };
 
 // ── Tests ──────────────────────────────────────────────────────────
@@ -217,14 +224,69 @@ describe("Static listing canonicals (#2228)", () => {
 });
 
 describe("Noindex routes do NOT have canonical URLs", () => {
-  it("/tegenstander/[clubId] has robots noindex and no canonical", () => {
-    const { metadata } = tegenstander;
+  it("/tegenstander/[clubId] has robots noindex and no canonical", async () => {
+    mockRunPromise.mockResolvedValueOnce(opponentFixture);
+    const metadata = await tegenstander.generateMetadata({
+      params: Promise.resolve({ clubId: "11001" }),
+    });
     expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(metadata).not.toHaveProperty("alternates");
   });
 
   it("/share has robots noindex and no canonical", () => {
     const { metadata } = share;
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect(metadata).not.toHaveProperty("alternates");
+  });
+});
+
+describe("/tegenstander/[clubId] names the opponent (#2464)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("title names the opponent and is distinct from the /wedstrijd 'vs' title", async () => {
+    mockRunPromise.mockResolvedValueOnce(opponentFixture);
+    const metadata = await tegenstander.generateMetadata({
+      params: Promise.resolve({ clubId: "11001" }),
+    });
+    expect(metadata.title).toContain(opponentFixture.opponentName);
+    expect(metadata.title).not.toBe(
+      `KCVV Elewijt vs ${opponentFixture.opponentName}`,
+    );
+  });
+
+  it("description and openGraph name the opponent, and og:image is the site default", async () => {
+    mockRunPromise.mockResolvedValueOnce(opponentFixture);
+    const metadata = await tegenstander.generateMetadata({
+      params: Promise.resolve({ clubId: "11001" }),
+    });
+    expect(metadata.description).toContain(opponentFixture.opponentName);
+    expect(metadata.openGraph?.title).toContain(opponentFixture.opponentName);
+    expect(metadata.openGraph?.description).toContain(
+      opponentFixture.opponentName,
+    );
+    expect(metadata.openGraph?.images).toEqual([DEFAULT_OG_IMAGE]);
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect(metadata).not.toHaveProperty("alternates");
+  });
+
+  it("a non-numeric clubId returns a not-found title that still carries robots", async () => {
+    const metadata = await tegenstander.generateMetadata({
+      params: Promise.resolve({ clubId: "not-a-number" }),
+    });
+    expect(metadata.title).toBeTruthy();
+    expect(metadata.robots).toEqual({ index: false, follow: false });
+    expect(metadata).not.toHaveProperty("alternates");
+    expect(mockRunPromise).not.toHaveBeenCalled();
+  });
+
+  it("an unknown clubId returns a not-found title that still carries robots", async () => {
+    mockRunPromise.mockResolvedValueOnce(null);
+    const metadata = await tegenstander.generateMetadata({
+      params: Promise.resolve({ clubId: "99999" }),
+    });
+    expect(metadata.title).toBeTruthy();
     expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(metadata).not.toHaveProperty("alternates");
   });
