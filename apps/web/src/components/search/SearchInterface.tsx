@@ -52,10 +52,10 @@ export const SearchInterface = ({
   // `useSearchAnalytics()` returns a bare object literal (the house pattern —
   // all eight `use*Analytics` hooks do this), so `analytics` itself is a new
   // reference on every render even though each tracker inside it is a
-  // `useCallback(…, [])`. The results-tracking effect below depends on these
-  // two trackers directly rather than on `analytics`, so a render that
-  // changes nothing else doesn't re-run it (#2913).
-  const { trackResultsShown, trackNoResults } = analytics;
+  // `useCallback(…, [])`. The results-tracking effect and `handleSearch`
+  // below depend on these trackers directly rather than on `analytics`, so a
+  // render that changes nothing else doesn't re-run them (#2913).
+  const { trackResultsShown, trackNoResults, trackSearchSubmitted } = analytics;
 
   // URL is the source of truth for query + active type; `initialQuery` /
   // `initialType` props are ignored when the URL has no params (documented by
@@ -196,7 +196,7 @@ export const SearchInterface = ({
       setQuery(searchQuery);
 
       if (searchQuery.trim()) {
-        analytics.trackSearchSubmitted(searchQuery.trim());
+        trackSearchSubmitted(searchQuery.trim());
       }
 
       // Update URL
@@ -213,12 +213,23 @@ export const SearchInterface = ({
       // Perform search
       performSearch(searchQuery);
     },
-    [activeType, router, performSearch, analytics],
+    // Depend on the stable tracker, not `analytics` — this callback is
+    // SearchForm's `onSearch` prop, which SearchForm's typeahead-debounce
+    // effect lists in its own deps (SearchForm.tsx). A reallocated
+    // `handleSearch` on every SearchInterface render was clearing and
+    // restarting that 350ms debounce on every unrelated re-render.
+    [activeType, router, performSearch, trackSearchSubmitted],
   );
 
   /**
    * Handle filter change
    * Note: Only updates UI state and URL - no refetch needed since we use client-side filtering
+   *
+   * Deliberately still keyed on the whole `analytics` object (unlike
+   * `handleSearch` above) rather than a destructured `trackFilterChanged` —
+   * #2449 owns this function's body (a dedup-guard fix) and lands separately;
+   * touching its dep array here would collide with that branch for no
+   * benefit. Revisit once #2449 has landed.
    */
   const handleFilterChange = useCallback(
     (type: SearchResultType | "all") => {

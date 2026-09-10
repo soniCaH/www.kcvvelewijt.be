@@ -1092,12 +1092,10 @@ describe("SearchInterface", () => {
   });
 
   describe("Results-tracking effect on a no-op re-render (#2913)", () => {
-    // Driven through type + submit (not a URL-preset `q`) so the effect's
-    // guard (`!query`) keeps it silent until the real fetch resolves — a
-    // URL-preset query renders the filters (and satisfies the effect's guard)
-    // on the very first commit, before the mount fetch has even started,
-    // which is an unrelated quirk of this component and not what these tests
-    // are about.
+    // The URL-preset mount path emits a spurious `search_no_results` before
+    // the fetch settles — a separate defect, tracked as #2918. These tests
+    // drive the component through type-and-submit so they exercise the
+    // render-loop path this ticket fixes.
     it("does not re-fire search_results_shown when nothing about the results, query, filter or load state changed", async () => {
       const user = userEvent.setup();
       const mockResponse = createMockSearchResponse("test");
@@ -1180,7 +1178,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      render(<SearchInterface />);
+      const { rerender } = render(<SearchInterface />);
 
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
@@ -1201,9 +1199,21 @@ describe("SearchInterface", () => {
       const articleTab = screen.getByRole("button", { name: /nieuws/i });
       await user.click(articleTab);
 
+      // Settle on a DOM signal unrelated to the tracked call count (the tab's
+      // pressed state, which commits in the same render as the effect) rather
+      // than waiting for `resultsShownCalls()` to reach 2 — polling the count
+      // itself would resolve the instant it hits 2 and never notice a third,
+      // spurious call landing a render later.
       await waitFor(() => {
-        expect(resultsShownCalls()).toHaveLength(2);
+        expect(articleTab).toHaveAttribute("aria-pressed", "true");
       });
+
+      // Force one more no-op re-render (same pattern as the two tests above)
+      // to catch a spurious call landing a render after the filter change
+      // settles, not just one racing the `waitFor` above.
+      rerender(<SearchInterface />);
+
+      expect(resultsShownCalls()).toHaveLength(2);
       expect(resultsShownCalls().at(-1)).toEqual([
         "search_results_shown",
         { results_count: articleCount, query_text: "test" },
