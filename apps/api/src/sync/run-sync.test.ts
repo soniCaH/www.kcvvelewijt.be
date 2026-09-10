@@ -1305,7 +1305,7 @@ describe("runSync", () => {
             Effect.fail(
               new SanityMutationError("boom"),
             ) as unknown as Effect.Effect<void>,
-        ); // player B (502) fails — player C (503) is never reached (sequential)
+        ); // player B (502) fails mid-team
 
       const psdMock = makePsdTeamClientMock(
         [ONE_TEAM],
@@ -1331,12 +1331,13 @@ describe("runSync", () => {
         doneStaffIds: [],
       });
 
-      // Player B (the one that failed) was still attempted...
-      expect(upsertPlayer).toHaveBeenCalledTimes(2);
-      // ...but player C was never even reached (bounded re-work — no half
-      // roster is committed past the failure point).
-      expect(upsertPlayer).not.toHaveBeenCalledWith(
-        expect.objectContaining({ psdId: "503" }),
+      // Player B (the one that failed) was still attempted. Whether player C
+      // is reached at all depends on fiber scheduling under `concurrency: 2`
+      // — a freed slot can start it before B's failure interrupts the loop —
+      // so it is deliberately not asserted. The checkpoint above is what
+      // proves bounded re-work: nothing past the failure point is marked done.
+      expect(upsertPlayer).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "502" }),
       );
 
       // The cursor never advances on a failed run.
