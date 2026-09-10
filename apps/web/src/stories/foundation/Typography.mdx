@@ -133,7 +133,7 @@ Headings are set globally in CSS — no per-component overrides needed. Since #2
 <table>
   <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
   <tbody>
-    <tr><td><code>leading-hero</code></td><td>0.9</td><td>Hero headings (tight stacking for large type)</td></tr>
+    <tr><td><code>leading-hero</code></td><td>0.85</td><td>Two-line heroes only (<code>&lt;PlayerHero&gt;</code>, <code>&lt;StaffHero&gt;</code>) — never the default. Pair with a small <code>padding-top</code> on the tallest line or its ascenders crowd whatever sits above it (D14/Y1, #2617)</td></tr>
     <tr><td><code>leading-tight</code></td><td>1.2</td><td>Headings</td></tr>
     <tr><td><code>leading-snug</code></td><td>1.25</td><td>Subheadings, blockquotes</td></tr>
     <tr><td><code>leading-normal</code></td><td>1.5</td><td>Short body</td></tr>
@@ -229,12 +229,12 @@ exercised on the display rows.
     </tr>
     <tr>
       <td><code>--text-display-2xl</code></td>
-      <td><code>clamp(3.5rem, 1.5rem + 8vw, 6rem)</code> · lh <code>1.0</code></td>
+      <td><code>clamp(3.5rem, 1.5rem + 8vw, 6rem)</code> · lh <code>1.0</code> · tracking <code>-0.035em</code></td>
       <td>Page hero — largest editorial display</td>
     </tr>
     <tr>
       <td><code>--text-display-xl</code></td>
-      <td><code>clamp(2.75rem, 1.5rem + 5vw, 4.5rem)</code> · lh <code>1.05</code></td>
+      <td><code>clamp(2.75rem, 1.5rem + 5vw, 4.5rem)</code> · lh <code>1.05</code> · tracking <code>-0.035em</code></td>
       <td>Section hero, big section headlines</td>
     </tr>
     <tr>
