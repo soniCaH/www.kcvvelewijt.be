@@ -1422,5 +1422,103 @@ describe("runSync", () => {
         expect.objectContaining({ staffPsdIds: ["601", "602"] }),
       );
     });
+
+    it("treats a shape-invalid stored checkpoint the same as no checkpoint (#2900 review)", async () => {
+      const kvStub = makeKvStub();
+      // donePlayerIds is not an array — JSON.parse succeeds, the shape does not.
+      await kvStub.put(
+        "sync:team-checkpoint",
+        JSON.stringify({
+          teamId: ONE_TEAM.id,
+          donePlayerIds: "not-an-array",
+          doneStaffIds: [],
+        }),
+      );
+
+      const { upsertPlayer, writerMock, readerMock } = makeSanityMocks();
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C],
+      );
+
+      // Must not throw — a shape-invalid checkpoint degrades to "start fresh".
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      expect(upsertPlayer).toHaveBeenCalledTimes(3);
+    });
+
+    it("does not checkpoint a member whose image upload failed (#2900 review) — it must retry on the next run, not wait a full rotation", async () => {
+      const kvStub = makeKvStub();
+      const { upsertPlayer, uploadPlayerImage, writerMock, readerMock } =
+        makeSanityMocks();
+      uploadPlayerImage.mockReturnValue(
+        Effect.fail(
+          new SanityMutationError("rate limited (429)"),
+        ) as unknown as Effect.Effect<void>,
+      );
+
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [PLAYER_WITH_IMAGE]);
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // The player doc still committed (existing behaviour)...
+      expect(upsertPlayer).toHaveBeenCalledOnce();
+      // ...but every checkpoint snapshot written along the way excluded this
+      // member, since its image never actually landed.
+      const checkpointWrites = (
+        kvStub.put as ReturnType<typeof vi.fn>
+      ).mock.calls
+        .filter(([key]) => key === "sync:team-checkpoint")
+        .map(([, value]) => JSON.parse(value as string) as TeamCheckpointShape);
+      for (const snapshot of checkpointWrites) {
+        expect(snapshot.donePlayerIds).not.toContain("7001");
+      }
+    });
+
+    it("debounces checkpoint writes instead of one per member (#2900 review — KV allows at most 1 write/s/key)", async () => {
+      const kvStub = makeKvStub();
+      const { writerMock, readerMock } = makeSanityMocks();
+      const PLAYER_D: PsdMember = { ...ONE_PLAYER, id: 504 };
+      const psdMock = makePsdTeamClientMock(
+        [ONE_TEAM],
+        [PLAYER_A, PLAYER_B, PLAYER_C, PLAYER_D],
+      );
+
+      await Effect.runPromise(
+        runSync.pipe(
+          Effect.provide(
+            buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+          ),
+        ),
+      );
+
+      // 4 members complete near-instantly in this test — one checkpoint PUT
+      // per member (the pre-review design) would be 4. Debounced to ~1.1s,
+      // only the first member's write (the debounce window always starts
+      // open) and the forced final flush should actually land.
+      const checkpointWrites = (
+        kvStub.put as ReturnType<typeof vi.fn>
+      ).mock.calls.filter(([key]) => key === "sync:team-checkpoint");
+      expect(checkpointWrites.length).toBeLessThan(4);
+      expect(checkpointWrites.length).toBeGreaterThan(0);
+    });
   });
 });
+
+interface TeamCheckpointShape {
+  teamId: number;
+  donePlayerIds: string[];
+  doneStaffIds: string[];
+}

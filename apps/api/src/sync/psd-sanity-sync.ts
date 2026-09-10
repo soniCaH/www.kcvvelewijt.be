@@ -9,7 +9,7 @@ import type {
   SanityTeamDoc,
   SanityStaffDoc,
 } from "../sanity/mutation";
-import { SanityMutation } from "../sanity/mutation";
+import { SanityMutation, type SanityMutationError } from "../sanity/mutation";
 import { SanityProjection } from "../sanity/projection";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
@@ -208,6 +208,69 @@ export const reconcileEntity = <E>(
     return { action: "archived", orphanIds } as const;
   });
 
+// ─── Member image sync ──────────────────────────────────────────────────────
+
+/**
+ * Upload a player's or staff member's PSD image if it needs one, mirroring
+ * `uploadMemberImage`'s shared-body pattern in `sanity/mutation.ts` — one
+ * body, `kind` picks the log prefix (`scripts/trigger-psd-sync.sh` greps
+ * "player "/"staff " literally, so this must keep emitting exactly what the
+ * two call sites used to write by hand).
+ *
+ * Returns whether the member is safe to checkpoint as done (#2900 review):
+ * `true` when there was nothing to upload, the stored image already
+ * matches, or the upload succeeded; `false` when the upload was attempted
+ * and failed. A failed upload must NOT be checkpointed — the caller's
+ * done-id set gates the next run's resume-skip, and skipping a member whose
+ * image never actually landed would mean it never retries until this
+ * team's full N-night rotation comes back around, a regression from the
+ * pre-#2900 behaviour of retrying every night.
+ */
+export function syncMemberImage(
+  kind: "player" | "staff",
+  psdId: string,
+  stableImageUrl: string | null,
+  fetchImageUrl: string | null,
+  existing: { psdImageUrl: string | null; hasPsdImage: boolean } | undefined,
+  upload: (
+    psdId: string,
+    fetchUrl: string,
+    stableUrl: string,
+  ) => Effect.Effect<void, SanityMutationError>,
+): Effect.Effect<boolean> {
+  return Effect.gen(function* () {
+    if (!stableImageUrl || !fetchImageUrl) {
+      yield* Effect.log(
+        `${kind} ${psdId}: no profilePictureURL from PSD — skipping image`,
+      );
+      return true;
+    }
+
+    const shouldUpload = needsUpload(
+      stableImageUrl,
+      existing?.hasPsdImage ? existing.psdImageUrl : null,
+    );
+    if (!shouldUpload) {
+      yield* Effect.log(
+        `${kind} ${psdId}: image up-to-date (hasPsdImage=${existing?.hasPsdImage}, storedUrl=${existing?.psdImageUrl ?? "null"})`,
+      );
+      return true;
+    }
+
+    yield* Effect.log(
+      `${kind} ${psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
+    );
+    return yield* upload(psdId, fetchImageUrl, stableImageUrl).pipe(
+      Effect.as(true),
+      Effect.catchAll((e) =>
+        Effect.log(
+          `${kind} ${psdId}: image upload failed — ${e.message} | cause: ${String(e.cause)}`,
+        ).pipe(Effect.as(false)),
+      ),
+    );
+  });
+}
+
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
 const CURSOR_KEY = "sync:team-cursor";
@@ -235,18 +298,48 @@ interface TeamCheckpoint {
 const CHECKPOINT_KEY = "sync:team-checkpoint";
 
 /**
- * Parse a stored checkpoint, treating anything unparseable as "none" — a
- * corrupt or unrecognised value is a resumption hint gone stale, not an
- * error worth failing the sync over.
+ * Runtime shape guard for a parsed checkpoint. JSON.parse only proves the
+ * text was valid JSON, not that it has the shape this sync expects — a
+ * value written by some future/other version of this key would parse fine
+ * and then blow up `new Set(...)` on a non-array field (#2900 review).
+ */
+function isTeamCheckpoint(value: unknown): value is TeamCheckpoint {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const isStringArray = (a: unknown): a is string[] =>
+    Array.isArray(a) && a.every((id) => typeof id === "string");
+  return (
+    typeof v.teamId === "number" &&
+    isStringArray(v.donePlayerIds) &&
+    isStringArray(v.doneStaffIds)
+  );
+}
+
+/**
+ * Parse a stored checkpoint, treating anything unparseable OR shape-invalid
+ * as "none" — a corrupt or unrecognised value is a resumption hint gone
+ * stale, not an error worth failing the sync over.
  */
 function parseCheckpoint(raw: string | null): TeamCheckpoint | null {
   if (!raw) return null;
   try {
-    return JSON.parse(raw) as TeamCheckpoint;
+    const parsed: unknown = JSON.parse(raw);
+    return isTeamCheckpoint(parsed) ? parsed : null;
   } catch {
     return null;
   }
 }
+
+/**
+ * KV enforces at most one write per second per key. A member whose image is
+ * already up to date finishes in well under that — flushing the checkpoint
+ * on every member (the original #2900 design) meant writes 2..N inside the
+ * same second got silently 429'd (swallowed by the write's own error log),
+ * and the checkpoint stopped advancing without anything visibly failing
+ * (#2900 review). Debouncing to this cadence keeps the flush rate under the
+ * limit regardless of how many members complete per second.
+ */
+const CHECKPOINT_FLUSH_INTERVAL_MS = 1_100;
 
 /**
  * Fetches all club teams from PSD and upserts ONE team per invocation using a
@@ -256,13 +349,14 @@ function parseCheckpoint(raw: string | null): TeamCheckpoint | null {
  * rotation over N nightly cron invocations (N = number of teams).
  * Only PSD-sourced fields are written — editorial fields are never touched.
  *
- * Within a team, members are processed sequentially (concurrency 1, #2900)
- * and each completed member is checkpointed to KV before the next one
- * starts. Sequential-and-checkpointed is what makes "resume without
- * re-walking" safe: two members completing out of order could otherwise race
- * to persist the checkpoint, and a fast-but-stale write landing after a
- * slower-but-fresher one would silently drop already-committed members from
- * the resume set.
+ * Members are processed at concurrency 2 (unchanged from before #2900).
+ * Checkpoint safety does not depend on that concurrency: the done-id sets
+ * are mutated synchronously (JS has no true parallelism, so two members
+ * "completing concurrently" still add to the Set as two ordered,
+ * non-interleaved steps), and the actual KV write is (a) rate-limited to
+ * `CHECKPOINT_FLUSH_INTERVAL_MS` and (b) serialized through a semaphore, so
+ * two flushes racing on the network can never let an earlier, less-complete
+ * snapshot land after a later, more-complete one.
  */
 export const runSync = Effect.gen(function* () {
   const psd = yield* PsdTeamClient;
@@ -337,28 +431,52 @@ export const runSync = Effect.gen(function* () {
     );
   }
 
-  // Persists the checkpoint after every member so a run cut off mid-team
-  // resumes from here rather than re-walking it. Members are processed at
-  // concurrency 1 (below) specifically so this is never called concurrently
-  // with itself — see the runSync doc comment.
-  const persistCheckpoint = () =>
-    Effect.tryPromise({
-      try: () =>
-        env.PSD_CACHE.put(
-          CHECKPOINT_KEY,
-          JSON.stringify({
-            teamId: team.id,
-            donePlayerIds: [...donePlayerIds],
-            doneStaffIds: [...doneStaffIds],
-          } satisfies TeamCheckpoint),
-        ),
-      catch: () => new Error("KV checkpoint write failed"),
-    }).pipe(
-      Effect.catchAll((e) =>
-        Effect.log(
-          `checkpoint write failed — a truncated run may re-walk this member: ${String(e)}`,
-        ),
-      ),
+  // Serializes checkpoint writes (#2900 review) so two flushes racing on the
+  // network can never let a less-complete snapshot land after a
+  // more-complete one — see the runSync doc comment.
+  const checkpointLock = yield* Effect.makeSemaphore(1);
+  // 0, not Date.now(): the FIRST flush after a member completes must always
+  // go through immediately (an "always debounced" clock would let a whole
+  // truncation window pass with nothing written at all).
+  let lastCheckpointFlushAt = 0;
+
+  /**
+   * Write the current in-memory done-id sets to KV, rate-limited to
+   * `CHECKPOINT_FLUSH_INTERVAL_MS` (KV allows at most one write/second/key —
+   * see that constant's doc comment) unless `force` is set. `force` is used
+   * once, at the very end of the team, to guarantee the final members'
+   * progress is durable even if they completed inside the debounce window.
+   */
+  const flushCheckpoint = (force: boolean) =>
+    checkpointLock.withPermits(1)(
+      Effect.gen(function* () {
+        const now = Date.now();
+        if (
+          !force &&
+          now - lastCheckpointFlushAt < CHECKPOINT_FLUSH_INTERVAL_MS
+        ) {
+          return;
+        }
+        lastCheckpointFlushAt = now;
+        yield* Effect.tryPromise({
+          try: () =>
+            env.PSD_CACHE.put(
+              CHECKPOINT_KEY,
+              JSON.stringify({
+                teamId: team.id,
+                donePlayerIds: [...donePlayerIds],
+                doneStaffIds: [...doneStaffIds],
+              } satisfies TeamCheckpoint),
+            ),
+          catch: () => new Error("KV checkpoint write failed"),
+        }).pipe(
+          Effect.catchAll((e) =>
+            Effect.log(
+              `checkpoint write failed — a truncated run may re-walk more members: ${String(e)}`,
+            ),
+          ),
+        );
+      }),
     );
 
   const [members, staffMembers] = yield* Effect.all(
@@ -396,98 +514,23 @@ export const runSync = Effect.gen(function* () {
         const doc = transformMember(m, imageBaseUrl);
         yield* sanityWriter.upsertPlayer(doc);
 
-        const stableImageUrl = doc._psdImageUrl;
-        const fetchImageUrl = doc._psdImageFetchUrl;
-        if (!stableImageUrl || !fetchImageUrl) {
-          yield* Effect.log(
-            `player ${doc.psdId}: no profilePictureURL from PSD — skipping image`,
-          );
-        } else {
-          const existing = imageState.get(doc.psdId);
-          const shouldUpload = needsUpload(
-            stableImageUrl,
-            existing?.hasPsdImage ? existing.psdImageUrl : null,
-          );
+        const imageOk = yield* syncMemberImage(
+          "player",
+          doc.psdId,
+          doc._psdImageUrl,
+          doc._psdImageFetchUrl,
+          imageState.get(doc.psdId),
+          sanityWriter.uploadPlayerImage,
+        );
 
-          if (!shouldUpload) {
-            yield* Effect.log(
-              `player ${doc.psdId}: image up-to-date (hasPsdImage=${existing?.hasPsdImage}, storedUrl=${existing?.psdImageUrl ?? "null"})`,
-            );
-          } else {
-            yield* Effect.log(
-              `player ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
-            );
-            yield* sanityWriter
-              .uploadPlayerImage(doc.psdId, fetchImageUrl, stableImageUrl)
-              .pipe(
-                Effect.catchAll((e) =>
-                  Effect.log(
-                    `player ${doc.psdId}: image upload failed — ${e.message} | cause: ${String(e.cause)}`,
-                  ),
-                ),
-              );
-          }
-        }
-
-        // Doc upserted, image handled or skipped — this member is fully
-        // committed (#2900). Checkpoint it before moving on so a run cut off
-        // after this point resumes past it instead of redoing it.
-        donePlayerIds.add(doc.psdId);
-        yield* persistCheckpoint();
+        // Only checkpoint a member whose image genuinely landed (or needed
+        // none) — see syncMemberImage's doc comment for why a failed upload
+        // must not be marked done (#2900 review).
+        if (imageOk) donePlayerIds.add(doc.psdId);
+        yield* flushCheckpoint(false);
       }),
-    // Sequential, not concurrent (#2900) — was `concurrency: 2` to stay easy
-    // on the Sanity asset upload rate limit; concurrency 1 is more
-    // conservative still, and is what makes per-member checkpointing above
-    // race-free without a semaphore (see the runSync doc comment).
-    { concurrency: 1 },
+    { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
-
-  // Used by the team-scoped loop below (#2895) — mirrors the player image
-  // block above. Deliberately NOT called from the club-wide reconciliation
-  // branch further down: PsdClubStaffMember has no profilePictureURL, so it
-  // could only ever log a skip there — see the comment at that call site.
-  const syncStaffImage = (
-    doc: SanityStaffDoc & {
-      _psdImageUrl: string | null;
-      _psdImageFetchUrl: string | null;
-    },
-  ) =>
-    Effect.gen(function* () {
-      const stableImageUrl = doc._psdImageUrl;
-      const fetchImageUrl = doc._psdImageFetchUrl;
-      if (!stableImageUrl || !fetchImageUrl) {
-        yield* Effect.log(
-          `staff ${doc.psdId}: no profilePictureURL from PSD — skipping image`,
-        );
-        return;
-      }
-
-      const existing = staffImageState.get(doc.psdId);
-      const shouldUpload = needsUpload(
-        stableImageUrl,
-        existing?.hasPsdImage ? existing.psdImageUrl : null,
-      );
-
-      if (!shouldUpload) {
-        yield* Effect.log(
-          `staff ${doc.psdId}: image up-to-date (hasPsdImage=${existing?.hasPsdImage}, storedUrl=${existing?.psdImageUrl ?? "null"})`,
-        );
-        return;
-      }
-
-      yield* Effect.log(
-        `staff ${doc.psdId}: uploading image — hasPsdImage=${existing?.hasPsdImage ?? false}, storedUrl=${existing?.psdImageUrl ?? "null"}, newUrl=${stableImageUrl}`,
-      );
-      yield* sanityWriter
-        .uploadStaffImage(doc.psdId, fetchImageUrl, stableImageUrl)
-        .pipe(
-          Effect.catchAll((e) =>
-            Effect.log(
-              `staff ${doc.psdId}: image upload failed — ${e.message} | cause: ${String(e.cause)}`,
-            ),
-          ),
-        );
-    });
 
   const staffToProcess = staffMembers.filter(
     (m) => !doneStaffIds.has(String(m.id)),
@@ -504,17 +547,25 @@ export const runSync = Effect.gen(function* () {
       Effect.gen(function* () {
         const doc = transformStaff(m, imageBaseUrl);
         yield* sanityWriter.upsertStaff(doc);
-        yield* syncStaffImage(doc);
 
-        // Doc upserted, image handled or skipped — this member is fully
-        // committed (#2900). Checkpoint before moving on (see the player
-        // loop above for why this is race-free at concurrency 1).
-        doneStaffIds.add(doc.psdId);
-        yield* persistCheckpoint();
+        const imageOk = yield* syncMemberImage(
+          "staff",
+          doc.psdId,
+          doc._psdImageUrl,
+          doc._psdImageFetchUrl,
+          staffImageState.get(doc.psdId),
+          sanityWriter.uploadStaffImage,
+        );
+
+        if (imageOk) doneStaffIds.add(doc.psdId);
+        yield* flushCheckpoint(false);
       }),
-    // Sequential, not concurrent (#2900) — see the player loop above.
-    { concurrency: 1 },
+    { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
+
+  // Final flush, forced: guarantees the last members' progress is durable
+  // even if they completed inside the debounce window above (#2900 review).
+  yield* flushCheckpoint(true);
 
   const playerPsdIds = players.map((m) => String(m.id));
   const staffPsdIds = staffMembers.map((m) => String(m.id));
@@ -522,23 +573,6 @@ export const runSync = Effect.gen(function* () {
     transformTeam(team, playerPsdIds, staffPsdIds),
   );
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
-
-  // Team fully processed — clear its checkpoint (#2900) so a stale "already
-  // done" set from this pass can never be misread as in-progress work when
-  // this same team comes back around next rotation, N nights from now. Not
-  // load-bearing for correctness on its own: the teamId guard above already
-  // discards a checkpoint that names a different team, which is what the
-  // *next* team's run would see if this delete itself got cut off.
-  yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.delete(CHECKPOINT_KEY),
-    catch: () => new Error("KV checkpoint delete failed"),
-  }).pipe(
-    Effect.catchAll((e) =>
-      Effect.log(
-        `checkpoint delete failed — harmless, see comment: ${String(e)}`,
-      ),
-    ),
-  );
 
   // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
   const existingIds = yield* Effect.tryPromise({
@@ -719,6 +753,29 @@ export const runSync = Effect.gen(function* () {
     Effect.catchAll((e) =>
       Effect.log(
         `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+      ),
+    ),
+  );
+
+  // Team fully processed AND the cursor has moved on — only now clear the
+  // checkpoint (#2900 review: this used to run right after `upsertTeam`,
+  // before the accumulate writes / reconciliation / cursor write above. A
+  // truncation anywhere in that tail would have deleted the one thing that
+  // still named this team as in-progress while the cursor still pointed at
+  // it, forcing exactly the full-team re-walk this PR removes). Deleting
+  // last means a truncation before this point leaves a fully-populated,
+  // all-done checkpoint behind — a same-team resume finds nothing left to
+  // do and just re-runs this tail, which is idempotent. Not load-bearing
+  // for correctness even so: the teamId guard earlier already discards a
+  // checkpoint naming a different team, which is what the *next* team's run
+  // would see if this delete itself got cut off.
+  yield* Effect.tryPromise({
+    try: () => env.PSD_CACHE.delete(CHECKPOINT_KEY),
+    catch: () => new Error("KV checkpoint delete failed"),
+  }).pipe(
+    Effect.catchAll((e) =>
+      Effect.log(
+        `checkpoint delete failed — harmless, see comment: ${String(e)}`,
       ),
     ),
   );

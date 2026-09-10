@@ -6,8 +6,10 @@ import {
   transformStaff,
   partitionMembers,
   reconcileEntity,
+  syncMemberImage,
   MAX_ORPHAN_RATIO,
 } from "./psd-sanity-sync";
+import { SanityMutationError } from "../sanity/mutation";
 import type { PsdMember } from "../psd/schemas-player-team";
 
 const BASE_URL = "https://clubapi.prosoccerdata.com";
@@ -446,5 +448,79 @@ describe("reconcileEntity", () => {
 
   it("has MAX_ORPHAN_RATIO set to 0.3", () => {
     expect(MAX_ORPHAN_RATIO).toBe(0.3);
+  });
+});
+
+describe("syncMemberImage (#2900 review)", () => {
+  it("returns true and skips upload when there is no PSD image", async () => {
+    const upload = vi.fn(() => Effect.succeed(undefined as void));
+
+    const ok = await Effect.runPromise(
+      syncMemberImage("player", "1", null, null, undefined, upload),
+    );
+
+    expect(ok).toBe(true);
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it("returns true and skips upload when the stored image already matches", async () => {
+    const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const stableUrl = "https://kcvv.prosoccerdata.com/images/player/1.jpg?v=2";
+
+    const ok = await Effect.runPromise(
+      syncMemberImage(
+        "player",
+        "1",
+        stableUrl,
+        `${stableUrl}&profileAccessKey=abc`,
+        { psdImageUrl: stableUrl, hasPsdImage: true },
+        upload,
+      ),
+    );
+
+    expect(ok).toBe(true);
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it("returns true when the upload succeeds", async () => {
+    const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const stableUrl = "https://kcvv.prosoccerdata.com/images/player/1.jpg?v=3";
+
+    const ok = await Effect.runPromise(
+      syncMemberImage(
+        "player",
+        "1",
+        stableUrl,
+        `${stableUrl}&profileAccessKey=abc`,
+        {
+          psdImageUrl: "https://kcvv.prosoccerdata.com/images/player/1.jpg?v=2",
+          hasPsdImage: true,
+        },
+        upload,
+      ),
+    );
+
+    expect(ok).toBe(true);
+    expect(upload).toHaveBeenCalledOnce();
+  });
+
+  it("returns false when the upload fails — a caller must not checkpoint this member as done (#2900)", async () => {
+    const upload = vi.fn(() =>
+      Effect.fail(new SanityMutationError("rate limited (429)")),
+    );
+    const stableUrl = "https://kcvv.prosoccerdata.com/images/staff/9.jpg?v=2";
+
+    const ok = await Effect.runPromise(
+      syncMemberImage(
+        "staff",
+        "9",
+        stableUrl,
+        `${stableUrl}&profileAccessKey=abc`,
+        undefined,
+        upload,
+      ),
+    );
+
+    expect(ok).toBe(false);
   });
 });
