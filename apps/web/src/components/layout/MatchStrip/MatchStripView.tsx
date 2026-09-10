@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { getButtonClasses } from "@/components/design-system/Button";
@@ -185,16 +186,24 @@ function Crest({
   dark?: boolean;
 }) {
   const size = big ? "h-9 w-9" : "h-7 w-7";
+  const sizePx = big ? 36 : 28;
   // The upstream does not always carry a logo for KCVV's own side; fall back to
   // the local asset before the initial badge, so the club crest is never an "E".
   const src =
     team.logo ?? (team.id === KCVV_CLUB_ID ? KCVV_LOGO_URL : undefined);
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
+      // `unoptimized`, matching `<Crest>` in design-system (#2006): the
+      // Vercel image optimizer is metered per source image and saves
+      // negligible bytes on crests this small across a full division of
+      // remote PSD-hosted logos — the remote host is already covered by
+      // `next.config.ts` `remotePatterns` (#2401 item 5 triage).
+      <Image
         src={src}
         alt=""
+        width={sizePx}
+        height={sizePx}
+        unoptimized
         className={cn(size, "shrink-0 object-contain")}
         loading="lazy"
       />
