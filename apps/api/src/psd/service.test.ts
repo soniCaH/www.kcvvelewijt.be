@@ -8,7 +8,12 @@ import {
   RankingEntry,
   RankingTable,
 } from "@kcvv/api-contract";
-import { UpstreamUnavailableError, type BffError } from "./errors";
+import {
+  UpstreamUnavailableError,
+  UpstreamDecodeError,
+  ResourceNotFoundError,
+  type BffError,
+} from "./errors";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import {
@@ -1325,6 +1330,7 @@ describe("PsdService.getMatchDetail", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => leagueDetailResponse,
+      text: async () => JSON.stringify(leagueDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99));
@@ -1339,6 +1345,7 @@ describe("PsdService.getMatchDetail", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailResponse,
+      text: async () => JSON.stringify(rawDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99));
@@ -1369,6 +1376,77 @@ describe("PsdService.getMatchDetail", () => {
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("UpstreamUnavailable");
       expect((result.left as UpstreamUnavailableError).status).toBe(500);
+    }
+  });
+
+  // PSD's not-found signal for an unknown match id is an HTTP 200 with a
+  // zero-length body, not a 404 — observed directly against the live
+  // upstream for three fresh ids (see PR description). This must become
+  // ResourceNotFound so `/wedstrijd/<unknown-id>` reaches the site's 404
+  // page instead of the 500/BadGateway page.
+  it("classifies an empty response body as ResourceNotFoundError (unknown match)", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: async () => "",
+      json: async () => {
+        throw new Error(
+          "the empty-body path must read text(), not json() — an empty body makes json() throw and gives no way to tell it apart from a malformed one",
+        );
+      },
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(919191919));
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+      expect((result.left as ResourceNotFoundError).resourceType).toBe("match");
+      expect((result.left as ResourceNotFoundError).resourceId).toBe(919191919);
+    }
+  });
+
+  // Distinguishing test (required by the AC): a genuinely broken upstream
+  // payload must NOT be swept into the same not-found bucket as an empty
+  // body. A later change that widens the empty check into a catch-all would
+  // fail this test.
+  it("still classifies a non-empty unparseable body as UpstreamDecodeError", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: async () => "{not valid json",
+      json: async () => {
+        throw new SyntaxError("Unexpected token o in JSON at position 1");
+      },
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99));
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamDecode");
+      expect((result.left as UpstreamDecodeError).message).toBe(
+        "Failed to parse JSON",
+      );
+    }
+  });
+
+  it("still classifies a non-empty body that fails the schema as UpstreamDecodeError", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ not: "a match detail shape" }),
+      json: async () => ({ not: "a match detail shape" }),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99));
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamDecode");
+      expect((result.left as UpstreamDecodeError).message).toBe(
+        "Schema validation failed",
+      );
     }
   });
 });
@@ -1409,6 +1487,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => previewDetailResponse,
+      text: async () => JSON.stringify(previewDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99), {
@@ -1435,6 +1514,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailResponse, // finished 2-0
+      text: async () => JSON.stringify(rawDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99), {
@@ -1460,6 +1540,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailResponse, // finished 2-0
+      text: async () => JSON.stringify(rawDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99), {
@@ -1484,6 +1565,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => previewDetailResponse,
+      text: async () => JSON.stringify(previewDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99), {
@@ -1533,6 +1615,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailWithGoal,
+      text: async () => JSON.stringify(rawDetailWithGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1564,6 +1647,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => awayGoal,
+      text: async () => JSON.stringify(awayGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1589,6 +1673,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => penaltyGoal,
+      text: async () => JSON.stringify(penaltyGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1615,6 +1700,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => ownGoal,
+      text: async () => JSON.stringify(ownGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1641,6 +1727,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => yellowCard,
+      text: async () => JSON.stringify(yellowCard),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1668,6 +1755,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => redCard,
+      text: async () => JSON.stringify(redCard),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1697,6 +1785,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => doubleYellow,
+      text: async () => JSON.stringify(doubleYellow),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1722,6 +1811,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => substitution,
+      text: async () => JSON.stringify(substitution),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1749,6 +1839,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => unknownEvent,
+      text: async () => JSON.stringify(unknownEvent),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1763,6 +1854,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailResponse,
+      text: async () => JSON.stringify(rawDetailResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99));
@@ -1777,6 +1869,7 @@ describe("PsdService.getMatchDetail - events", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailWithGoal,
+      text: async () => JSON.stringify(rawDetailWithGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1805,6 +1898,7 @@ describe("PsdService.getMatchDetail - resilient decoding", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => responseWithBadLineup,
+      text: async () => JSON.stringify(responseWithBadLineup),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(99));
@@ -1833,6 +1927,7 @@ describe("PsdService.getMatchDetail - resilient decoding", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => responseWithBadEvent,
+      text: async () => JSON.stringify(responseWithBadEvent),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -1860,6 +1955,7 @@ describe("PsdService.getMatchDetail - resilient decoding", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => futureMatchResponse,
+      text: async () => JSON.stringify(futureMatchResponse),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(42));
@@ -2008,6 +2104,7 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailWithGoal,
+      text: async () => JSON.stringify(rawDetailWithGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123), {
@@ -2028,6 +2125,7 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
       json: async () => rawDetailWithGoal,
+      text: async () => JSON.stringify(rawDetailWithGoal),
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123));
@@ -2066,11 +2164,20 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
       increment: () => Effect.succeed(undefined),
     };
     (global.fetch as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ ok: true, json: async () => rawDetailWithGoal }) // /info
-      .mockResolvedValueOnce({ ok: true, json: async () => rawTeams }) // /teams
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => rawDetailWithGoal,
+        text: async () => JSON.stringify(rawDetailWithGoal),
+      }) // /info
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => rawTeams,
+        text: async () => JSON.stringify(rawTeams),
+      }) // /teams
       .mockResolvedValueOnce({
         ok: true,
         json: async () => ({ content: [officialGame123] }),
+        text: async () => JSON.stringify({ content: [officialGame123] }),
       }) // team 1 season games
       .mockResolvedValueOnce({ ok: true, json: async () => ({ content: [] }) }); // team 23 season games
 

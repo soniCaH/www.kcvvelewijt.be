@@ -102,10 +102,38 @@ function classifyHttpError(
   });
 }
 
+// Reused by both fetchJson branches below so the two error messages stay
+// identical whichever path produced the raw JSON value.
+const decodeAgainstSchema = <A, I>(
+  json: unknown,
+  schema: S.Schema<A, I>,
+): Effect.Effect<A, UpstreamDecodeError> =>
+  S.decodeUnknown(schema)(json).pipe(
+    Effect.mapError(
+      (cause) =>
+        new UpstreamDecodeError({
+          message: "Schema validation failed",
+          cause,
+        }),
+    ),
+  );
+
+// Opt-in per call site (see `fetchJson`'s `emptyBodyIsNotFound` option): PSD's
+// not-found signal on some endpoints — confirmed for match detail — is an
+// HTTP 200 with a zero-length body, not a 404 (#2911). Deliberately not a
+// global rule: a PSD *list* endpoint could in principle use an empty body to
+// mean "no rows" rather than "no such resource", which a blanket rule would
+// silently turn into a false 404. Every other endpoint is unaffected.
+interface EmptyBodyNotFoundOptions {
+  readonly resourceType: string;
+  readonly resourceId: string | number;
+}
+
 function fetchJson<A, I>(
   url: string,
   schema: S.Schema<A, I>,
   headers: Record<string, string>,
+  options?: { readonly emptyBodyIsNotFound: EmptyBodyNotFoundOptions },
 ): Effect.Effect<A, BffError> {
   return Effect.gen(function* () {
     const response = yield* Effect.tryPromise({
@@ -123,21 +151,47 @@ function fetchJson<A, I>(
       );
     }
 
+    if (options?.emptyBodyIsNotFound) {
+      // `response.json()` throws the same way on an empty body as on a
+      // malformed one — it gives no way to tell "no such resource" apart
+      // from "PSD sent something broken". Read the raw text first so the
+      // two stay distinguishable.
+      const text = yield* Effect.tryPromise({
+        try: () => response.text(),
+        catch: (cause) =>
+          new UpstreamDecodeError({
+            message: "Failed to read response body",
+            cause,
+          }),
+      });
+
+      if (text.trim().length === 0) {
+        const { resourceType, resourceId } = options.emptyBodyIsNotFound;
+        return yield* Effect.fail(
+          new ResourceNotFoundError({
+            message: `PSD returned an empty body for ${resourceType} ${resourceId}`,
+            resourceType,
+            resourceId,
+          }),
+        );
+      }
+
+      const json = yield* Effect.try({
+        try: () => JSON.parse(text) as unknown,
+        catch: (cause) =>
+          new UpstreamDecodeError({ message: "Failed to parse JSON", cause }),
+      });
+
+      return yield* decodeAgainstSchema(json, schema);
+    }
+
     const json = yield* Effect.tryPromise({
       try: () => response.json(),
       catch: (cause) =>
         new UpstreamDecodeError({ message: "Failed to parse JSON", cause }),
     });
 
-    return yield* S.decodeUnknown(schema)(json).pipe(
-      Effect.mapError(
-        (cause) =>
-          new UpstreamDecodeError({
-            message: "Schema validation failed",
-            cause,
-          }),
-      ),
-    );
+    return yield* decodeAgainstSchema(json, schema);
   });
 }
 
@@ -161,9 +215,13 @@ export const PsdServiceLive = Layer.effect(
     // Every PSD call passes the global gate first: `acquireToken` blocks until a
     // ≤5/s worldwide token is free (best-effort — proceeds if the gate is down),
     // capping the fan-out below PSD's rate limit. `increment` records the call.
-    const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
+    const countedFetch = <A, I>(
+      url: string,
+      schema: S.Schema<A, I>,
+      options?: { readonly emptyBodyIsNotFound: EmptyBodyNotFoundOptions },
+    ) =>
       gate.acquireToken.pipe(
-        Effect.zipRight(fetchJson(url, schema, psdHeaders)),
+        Effect.zipRight(fetchJson(url, schema, psdHeaders, options)),
         Effect.ensuring(cache.increment()),
       );
 
@@ -290,6 +348,9 @@ export const PsdServiceLive = Layer.effect(
       countedFetch(
         `${base}/games/${matchId}/info`,
         FootbalistoMatchDetailResponse,
+        {
+          emptyBodyIsNotFound: { resourceType: "match", resourceId: matchId },
+        },
       );
 
     // ─── Match → team/competition index ───────────────────────────────────────
