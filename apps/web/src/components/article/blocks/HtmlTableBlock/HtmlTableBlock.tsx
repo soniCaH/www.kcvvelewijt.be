@@ -59,8 +59,9 @@ export interface HtmlTableBlockProps {
  * `>thead>tr>th` chain, so every row container `TABLE_SANITIZE_OPTIONS`
  * allows — `thead`, `tbody`, `tfoot` — is covered by construction, not by
  * remembering to list it (review M6: a `<tfoot>` row rendered half-skinned
- * under the old chained selectors). `<strong>` is in `TABLE_SANITIZE_OPTIONS.allowedTags`
- * (#2481) and needs no selector here to render bold — Preflight's
+ * under the old chained selectors). `<strong>` is in
+ * `TABLE_SANITIZE_OPTIONS.allowedTags` (#2481) and needs no selector here
+ * to render bold — Preflight's
  * `strong { font-weight: bolder }` already resolves to a real 700 face in
  * this table's `font-mono` (IBM Plex Mono loads 400/600/700). An authored
  * `<a>` still does **not** render — restoring it (allowlist entry plus the
