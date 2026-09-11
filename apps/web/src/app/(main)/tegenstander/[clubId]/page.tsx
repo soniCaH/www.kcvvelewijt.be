@@ -10,6 +10,7 @@
  * Design lock: docs/design/mockups/phase-10-tegenstander/10t4-locked.html
  */
 
+import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -17,7 +18,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { Match, OpponentHistory } from "@kcvv/api-contract";
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import {
@@ -35,9 +36,83 @@ import { pendingEmptyBody } from "@/lib/utils/empty-state-copy";
 import { groupBySeason } from "@/lib/utils/season";
 import { OpponentSummaryCard } from "./OpponentSummaryCard";
 
-export const metadata: Metadata = {
+/** Not-found metadata for an unparseable or unknown `clubId`. `robots` is
+ *  still carried here — a 404'd opponent page must never become indexable
+ *  just because the not-found branch forgot the tag. */
+const NOT_FOUND_METADATA: Metadata = {
+  title: "Tegenstander niet gevonden",
   robots: { index: false, follow: false },
 };
+
+/**
+ * Head-to-head description shared by the page's own lead paragraph and its
+ * metadata `description`/`og:description` — one phrasing, two surfaces, so
+ * they never drift apart. Not a Writer Rule fallback-chain case (that
+ * carve-out, in `apps/web/CLAUDE.md` under "The Writer Rule — rendering
+ * absence", licenses metadata *composing a fallback chain* a rendered slot
+ * never would, e.g. `tagline ?? divisionFull ?? division`); this is simpler
+ * — #2464 asks for the page's existing lead verbatim, not a second phrasing
+ * invented beside it, so both surfaces call this one function.
+ */
+function opponentHistoryDescription(opponentName: string): string {
+  return `Alle onderlinge duels tussen KCVV Elewijt en ${opponentName}, per seizoen.`;
+}
+
+/**
+ * Build SEO metadata for the opponent history page using the route `clubId`.
+ *
+ * `robots: { index: false, follow: false }` is set on every branch — this
+ * route stays noindex (triage 2026-09-10) regardless of whether the opponent
+ * resolves. No `alternates` on any branch either: `buildPageMetadata` is
+ * explicitly "not for noindex routes" (see `src/lib/seo/page-metadata.ts`),
+ * so this Metadata object is hand-rolled the way `/wedstrijd/[matchId]` is,
+ * minus its `alternates`.
+ *
+ * The title deliberately does not reuse `/wedstrijd/[matchId]`'s
+ * `"KCVV Elewijt vs <opponent>"` string — this page is the whole head-to-head
+ * record, not one match, so it borrows the page's own "Onderlinge
+ * geschiedenis" kicker instead.
+ */
+export async function generateMetadata({
+  params,
+}: OpponentPageProps): Promise<Metadata> {
+  const { clubId: clubIdStr } = await params;
+  const clubId = parseInt(clubIdStr, 10);
+
+  if (isNaN(clubId)) {
+    return NOT_FOUND_METADATA;
+  }
+
+  try {
+    const data = await fetchOpponentData(clubId);
+    if (!data) {
+      return NOT_FOUND_METADATA;
+    }
+
+    const { opponentName } = data;
+    const title = `Onderlinge geschiedenis met ${opponentName}`;
+    const description = opponentHistoryDescription(opponentName);
+
+    return {
+      title,
+      description,
+      robots: { index: false, follow: false },
+      openGraph: {
+        title,
+        description,
+        type: "website",
+        images: [DEFAULT_OG_IMAGE],
+      },
+    };
+  } catch {
+    // Mirrors /wedstrijd/[matchId]'s generateMetadata: a genuine upstream
+    // failure degrades metadata generation to the not-found title rather
+    // than 500ing here. The page component awaits the same memoized read
+    // separately and surfaces the real failure through Next's error
+    // boundary (or notFound() for a genuinely unknown club).
+    return NOT_FOUND_METADATA;
+  }
+}
 
 // 15 min ISR — renders live PSD opponent-match history, aligned to the BFF
 // freshness window.
@@ -112,7 +187,21 @@ function SeasonBand({ label, tally }: { label: string; tally: string }) {
   );
 }
 
-async function fetchOpponentData(clubId: number): Promise<{
+/**
+ * Retrieve the opponent's head-to-head history against KCVV's senior teams.
+ *
+ * Wrapped in React `cache()` so `generateMetadata` and the page component
+ * share one read: they run in the same render pass with the same `clubId`,
+ * and Next's `fetch` memoization cannot collapse them because
+ * `@effect/platform` always attaches an `AbortSignal`, which opts the
+ * request out of it — same pattern and reason as `/wedstrijd/[matchId]`'s
+ * `fetchMatchOrNotFound` (#2441). Per-render only — no TTL, see
+ * `BffServiceLive` (#2389). Getting this wrong doubles the live PSD hops on
+ * a read path that already 429s, on every cold render.
+ */
+const fetchOpponentData = cache(async function fetchOpponentData(
+  clubId: number,
+): Promise<{
   opponentName: string;
   opponentLogo?: string;
   summary: OpponentHistory["summary"];
@@ -186,7 +275,7 @@ async function fetchOpponentData(clubId: number): Promise<{
       };
     }),
   );
-}
+});
 
 export default async function OpponentPage({ params }: OpponentPageProps) {
   const { clubId: clubIdStr } = await params;
@@ -221,7 +310,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
         <PageHero
           kicker="Onderlinge geschiedenis"
           headline={opponentName}
-          lead={`Alle onderlinge duels tussen KCVV Elewijt en ${opponentName}, per seizoen.`}
+          lead={opponentHistoryDescription(opponentName)}
           adornment={
             <Crest
               name={opponentName}
