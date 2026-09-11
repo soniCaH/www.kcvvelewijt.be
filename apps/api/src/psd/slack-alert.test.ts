@@ -108,17 +108,19 @@ describe("buildJobAlertMessage", () => {
 describe("postSlack", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("no-ops (no fetch) when the webhook URL is absent", async () => {
+  it("no-ops (no fetch) and resolves false when the webhook URL is absent", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
-    await postSlack(undefined, "hi");
+    await expect(postSlack(undefined, "hi")).resolves.toBe(false);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("POSTs a JSON {text} body to the webhook when present", async () => {
+  it("POSTs a JSON {text} body to the webhook and resolves true on a confirmed (ok) response", async () => {
     const fetchMock = vi.fn(async () => new Response("ok"));
     vi.stubGlobal("fetch", fetchMock);
-    await postSlack("https://hooks.slack.test/abc", "hello");
+    await expect(
+      postSlack("https://hooks.slack.test/abc", "hello"),
+    ).resolves.toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://hooks.slack.test/abc",
       expect.objectContaining({
@@ -128,15 +130,31 @@ describe("postSlack", () => {
     );
   });
 
-  it("swallows fetch errors (best-effort)", async () => {
+  it("resolves false (never throws) and logs on a non-ok response", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("nope", { status: 500 })),
+    );
+    await expect(postSlack("https://hooks.slack.test/abc", "x")).resolves.toBe(
+      false,
+    );
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
+  it("swallows fetch errors (best-effort) and resolves false", async () => {
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => {
         throw new Error("network down");
       }),
     );
-    await expect(
-      postSlack("https://hooks.slack.test/abc", "x"),
-    ).resolves.toBeUndefined();
+    await expect(postSlack("https://hooks.slack.test/abc", "x")).resolves.toBe(
+      false,
+    );
+    expect(errorSpy).toHaveBeenCalled();
+    errorSpy.mockRestore();
   });
 });

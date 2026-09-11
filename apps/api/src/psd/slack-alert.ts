@@ -104,21 +104,37 @@ export function buildJobAlertMessage(
 }
 
 /**
- * Best-effort POST to a Slack incoming webhook. No-op when `webhookUrl` is
- * absent (local/dev without the secret). Never throws.
+ * Best-effort POST to a Slack incoming webhook. No-op (resolves `false`)
+ * when `webhookUrl` is absent (local/dev without the secret). Never throws —
+ * resolves `true` only once the webhook has actually confirmed the POST
+ * (`response.ok`), and logs (never throws on) a non-2xx response or a
+ * network failure. The boolean return exists so a caller that needs
+ * delivery confirmation — `psd/job-alert.ts`'s failure-alert retry — can
+ * tell "confirmed delivered" apart from "dropped silently", which used to
+ * look identical from the outside (#2870 review: a dropped webhook POST
+ * used to debounce a whole outage into never being announced at all).
  */
 export async function postSlack(
   webhookUrl: string | undefined,
   text: string,
-): Promise<void> {
-  if (!webhookUrl) return;
+): Promise<boolean> {
+  if (!webhookUrl) return false;
   try {
-    await fetch(webhookUrl, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text }),
     });
-  } catch {
-    // Best-effort: alerting must never break the read path.
+    if (!response.ok) {
+      console.error(
+        `[slack-alert] postSlack: webhook responded HTTP ${response.status}`,
+      );
+      return false;
+    }
+    return true;
+  } catch (e) {
+    // Best-effort: alerting must never break the caller it observes.
+    console.error("[slack-alert] postSlack: fetch failed:", String(e));
+    return false;
   }
 }
