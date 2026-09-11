@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils/cn";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -73,6 +73,11 @@ export function CalendarSubscribePanel({
   // construction: change any selection (team/side/includeEvents) and the
   // comparison itself goes false, so there is nothing to reset by hand.
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  // The pending auto-clear timer, cancelled and replaced on every successful
+  // copy. The value guard below only protects a confirmation for a DIFFERENT
+  // url; copying the SAME url twice inside the window would otherwise let the
+  // first attempt's timer clear the second attempt's confirmation early.
+  const clearCopiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const host =
     typeof window !== "undefined"
@@ -106,10 +111,13 @@ export function CalendarSubscribePanel({
       // different URL must not clear that later failure (#2580: two
       // overlapping copies can settle out of order).
       setFailedUrl((prev) => (prev === webcalUrl ? null : prev));
-      // Auto-clear after the confirmation window — guarded the same way, so
-      // a newer copy's confirmation (a different URL) is never clobbered by
-      // an older attempt's own timeout firing after it (#2819).
-      setTimeout(
+      // Auto-clear after the confirmation window. Two layers, because they
+      // cover different races (#2819): cancel-and-replace gives every attempt
+      // its own full window, so re-copying the SAME url does not inherit the
+      // previous attempt's part-spent timer; the value guard then stops an
+      // in-flight timer from clearing a confirmation for a DIFFERENT url.
+      if (clearCopiedTimer.current) clearTimeout(clearCopiedTimer.current);
+      clearCopiedTimer.current = setTimeout(
         () => setCopiedUrl((prev) => (prev === webcalUrl ? null : prev)),
         2000,
       );
