@@ -9,6 +9,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
@@ -50,14 +51,23 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
   const categorySlug = params.categorie;
 
-  // Fetch unique tags (lightweight) and initial paginated batch in parallel
+  // Fetch unique tags (lightweight) and initial paginated batch in parallel.
+  // `ArticleRepository.findTags` is a Sanity read (`E = never`, #2863), so the
+  // guard must be `degradeSection` — a plain `Effect.catchAll` type-checks but
+  // never runs against it. The tag list is a filter facet, not the page's
+  // subject (the article grid is), so a failed read keeps the page up with no
+  // category filters rather than taking it down.
   const [allTags, initialBatch] = await Promise.all([
     runPromise(
-      Effect.gen(function* () {
-        const repo = yield* ArticleRepository;
-        const tags = yield* repo.findTags();
-        return tags.filter((t: string | null): t is string => t != null);
-      }).pipe(Effect.catchAll(() => Effect.succeed([] as string[]))),
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          const tags = yield* repo.findTags();
+          return tags.filter((t: string | null): t is string => t != null);
+        }),
+        [] as string[],
+        "[NewsPage] tags read failed; falling back to an empty category list.",
+      ),
     ),
     fetchArticlesAction({
       offset: 0,
