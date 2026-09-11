@@ -214,7 +214,7 @@ describe("FirstTeamsBlock", () => {
       // The subject renders alongside the homepage's "Volgende" kind word
       // (#2632 review finding 1 — the placeholder branch honours `kind`), so
       // it is not its own standalone text node; scope to the placeholder row.
-      const row = container.querySelector('[data-placeholder="true"]');
+      const row = container.querySelector('[data-row-kind="reservation"]');
       expect(row).not.toBeNull();
       expect(row).toHaveTextContent("Tornooi");
       expect(row).toHaveTextContent("09:30");
@@ -229,7 +229,7 @@ describe("FirstTeamsBlock", () => {
       const { container } = render(
         <FirstTeamsBlock teams={[{ ...aTeam, result: reservation }]} />,
       );
-      const row = container.querySelector('[data-placeholder="true"]');
+      const row = container.querySelector('[data-row-kind="reservation"]');
       expect(row).not.toBeNull();
       expect(row).toHaveTextContent("Tornooi");
       expect(screen.getAllByText("Sporting Hasselt").length).toBeGreaterThan(0);
@@ -241,7 +241,7 @@ describe("FirstTeamsBlock", () => {
           teams={[{ ...aTeamResultOnly, fixture: reservation }]}
         />,
       );
-      const row = container.querySelector('[data-placeholder="true"]');
+      const row = container.querySelector('[data-row-kind="reservation"]');
       expect(row).not.toBeNull();
       expect(row?.tagName).toBe("ARTICLE");
       if (row) fireEvent.click(row);

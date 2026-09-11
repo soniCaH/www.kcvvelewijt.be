@@ -42,8 +42,9 @@
  * `expect(...queryByRole("link")).toBeNull()` alone passes on an empty DOM —
  * a row whose fixture misses its own renderer's date/month/selected-day
  * window renders nothing at all, and "renders nothing" satisfies "no link"
- * for free. `data-placeholder="true"` is the one marker every reservation
- * renderer carries (#2688) regardless of role (`<article>`, `<div>`,
+ * for free. `data-row-kind="reservation"`/`"reduced"` is the one marker every
+ * reservation renderer carries (#2688, consolidated onto `data-row-kind` in
+ * #2829) regardless of role (`<article>`, `<div>`,
  * `<section>`) or whether the subject text is its own text node — several
  * renderers, e.g. `UpcomingMatchesClient`'s row, compose it into a joined
  * caption string (`"U13 · Tornooi"`), so a shared `screen.getByText` check
@@ -424,13 +425,13 @@ describe("a reservation or a reduced tournament fixture is never a link (#2801/#
       // see the docblock above for why a shared accessible query
       // (`getByText`) can't reach every row's subject uniformly, and why this
       // half is what makes the `MatchHero` row (no `next/link` import at
-      // all) assert anything. `MatchHero` marks its reduced state with a
-      // single `data-row-kind`; every other renderer still carries the
-      // older two-boolean `data-placeholder`/`data-tournament` pair — either
-      // family counts here, they are never all true on the same row (#2802).
+      // all) assert anything. Every renderer now marks its reduced state
+      // with the single `data-row-kind` `MatchHero` introduced in #2802 —
+      // the older two-boolean `data-placeholder`/`data-tournament` pair was
+      // retired repo-wide in #2829.
       expect(
         document.querySelector(
-          '[data-placeholder="true"], [data-tournament="true"], [data-row-kind="reservation"], [data-row-kind="reduced"]',
+          '[data-row-kind="reservation"], [data-row-kind="reduced"]',
         ),
       ).not.toBeNull();
       expect(screen.queryByRole("link")).toBeNull();
