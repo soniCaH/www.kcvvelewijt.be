@@ -86,3 +86,11 @@ export {
   migrateDropTeamTrainingSchedule,
 } from './drop-team-training-schedule'
 export type {TeamWithTrainingScheduleDoc as DropTeamTrainingScheduleDoc} from './drop-team-training-schedule'
+
+export {
+  default as setHomepageYouthStatsMigration,
+  migrateSetHomepageYouthStats,
+  YOUTH_PLAYER_COUNT_DEFAULT,
+  YOUTH_TEAM_COUNT_DEFAULT,
+} from './set-homepage-youth-stats'
+export type {HomePageWithYouthStatsDoc} from './set-homepage-youth-stats'

@@ -23,6 +23,8 @@ export interface UitgelichtArticle {
   href: string;
   title: string;
   imageUrl?: string;
+  /** Sanity `metadata.lqip` for `<NewsCard>`'s blur placeholder (#2401 item 3). */
+  imageLqip?: string | null;
   date: string;
   articleType?: ArticleType | null;
   dek?: string;
@@ -127,6 +129,7 @@ export const FeaturedUitgelichtRow = ({
                 title={article.title}
                 href={article.href}
                 imageUrl={article.imageUrl}
+                imageLqip={article.imageLqip}
                 badge={article.badge}
                 // Same reason as `<NewsGrid>`'s (#2404): this row applies the
                 // same `BG_BY_TYPE`, so an unlabelled green card here would sit

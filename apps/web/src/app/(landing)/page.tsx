@@ -129,6 +129,7 @@ function toUitgelichtArticle(article: ArticleVM): UitgelichtArticle {
     href: `/nieuws/${article.slug}`,
     title: article.title,
     imageUrl: article.coverImageUrl ?? undefined,
+    imageLqip: article.coverImageLqip ?? undefined,
     date: article.publishedAt ? formatArticleDate(article.publishedAt) : "",
     articleType: toUitgelichtArticleType(article.articleType),
     badge: article.tags[0],
@@ -189,8 +190,9 @@ export default async function HomePage() {
         {
           banners: { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
           placeholder: null,
+          youthStats: null,
         },
-        "[HomePage] homepage (banners + placeholder) read failed; falling back to empty slots and no placeholder.",
+        "[HomePage] homepage (banners + placeholder + youth stats) read failed; falling back to empty slots, no placeholder, and no youth stats.",
       ),
     ),
     runPromise(
@@ -219,6 +221,7 @@ export default async function HomePage() {
   const matches = matchesResult ?? [];
   const banners = homepageResult.banners;
   const placeholder = homepageResult.placeholder;
+  const youthStats = homepageResult.youthStats;
   const featuredEvent = featuredEventResult;
 
   // Senior teams (A/B) — drive the "Eerste ploegen" block and are de-duplicated
@@ -406,7 +409,7 @@ export default async function HomePage() {
   const youthSection: SectionConfig = {
     key: "youth",
     bg: "jersey-deep",
-    content: <YouthSection />,
+    content: <YouthSection stats={youthStats} />,
     backdrop: <YouthBackdrop />,
     // R5.B `<StripedSeam>` lock — the seam is the first child of
     // `<YouthSection>` and is meant to sit AT the section's top edge,
@@ -507,6 +510,7 @@ function toBannerSection(
       >
         <BannerSlot
           image={banner.imageUrl}
+          mobileImage={banner.imageUrlMobile}
           alt={banner.alt}
           href={banner.href}
           slot={slot}

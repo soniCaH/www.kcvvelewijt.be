@@ -30,9 +30,16 @@ const withBackdrop = (children: React.ReactNode) => (
   </div>
 );
 
+// #2401 item 4 — the stat numbers now come from the `homePage` singleton
+// (`youthPlayerCount`/`youthTeamCount`) instead of a hardcoded literal.
+// Stories pass a fixture value so the composition still shows the line;
+// `WithoutStats` locks the degrade the Writer Rule requires when either
+// field is empty in Sanity.
+const SAMPLE_STATS = { playerCount: "220+", teamCount: "16" };
+
 export const Default: Story = {
   args: {},
-  render: () => withBackdrop(<YouthSection />),
+  render: () => withBackdrop(<YouthSection stats={SAMPLE_STATS} />),
   parameters: {
     docs: {
       description: {
@@ -45,7 +52,7 @@ export const Default: Story = {
 
 export const Mobile: Story = {
   args: {},
-  render: () => withBackdrop(<YouthSection />),
+  render: () => withBackdrop(<YouthSection stats={SAMPLE_STATS} />),
   parameters: {
     // Locks the flex-wrap CTA stacking, which only shows below 640px
     // (#2803).
@@ -54,6 +61,19 @@ export const Mobile: Story = {
       description: {
         story:
           "Mobile (<640px) — CTAs stack vertically thanks to `flex-wrap` on the dual-CTA row. Top stripe band stays full-bleed.",
+      },
+    },
+  },
+};
+
+export const WithoutStats: Story = {
+  args: {},
+  render: () => withBackdrop(<YouthSection stats={null} />),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'No stat line (#2401 item 4) — both `youthPlayerCount` and `youthTeamCount` empty in Sanity. The section omits the line entirely rather than rendering an empty label or a stray "·" (Writer Rule).',
       },
     },
   },

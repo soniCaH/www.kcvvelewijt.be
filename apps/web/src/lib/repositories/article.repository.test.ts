@@ -33,6 +33,7 @@ function makeArticleListRow(
     featured: false,
     tags: ["Eerste ploeg", "Wedstrijdverslag"],
     coverImageUrl: "https://cdn.sanity.io/cover.webp",
+    coverImageLqip: null,
     articleType: null,
     subjects: null,
     firstTransferFact: null,
@@ -190,6 +191,38 @@ describe("ArticleRepository", () => {
       expect(a.coverImageUrl).toBeNull();
     });
 
+    it("forwards coverImageLqip from the GROQ projection (#2401 item 3)", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeArticleListRow({
+          coverImageLqip: "data:image/jpeg;base64,/9j...",
+        }),
+      ]);
+
+      const [a] = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(a.coverImageLqip).toBe("data:image/jpeg;base64,/9j...");
+    });
+
+    it("null coverImageLqip stays null (asset with no LQIP, or a misspelled GROQ field would silently do the same — #2401 item 3)", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeArticleListRow({ coverImageLqip: null }),
+      ]);
+
+      const [a] = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(a.coverImageLqip).toBeNull();
+    });
+
     it("GROQ coalesce handles tags — returns empty array from projection", async () => {
       mockFetch.mockResolvedValueOnce([makeArticleListRow({ tags: [] })]);
 
@@ -332,6 +365,44 @@ describe("ArticleRepository", () => {
       const hp = toHomepageArticle(articles[0]);
 
       expect(hp.imageUrl).toBeUndefined();
+    });
+
+    it("forwards imageLqip so <NewsCard> can render a blur placeholder (#2401 item 3)", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeArticleListRow({
+          coverImageLqip: "data:image/jpeg;base64,/9j...",
+        }),
+      ]);
+
+      const articles = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      const { toHomepageArticle } = await import("./article.repository");
+      const hp = toHomepageArticle(articles[0]);
+
+      expect(hp.imageLqip).toBe("data:image/jpeg;base64,/9j...");
+    });
+
+    it("handles null coverImageLqip (no placeholder, not a generic literal)", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makeArticleListRow({ coverImageLqip: null }),
+      ]);
+
+      const articles = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      const { toHomepageArticle } = await import("./article.repository");
+      const hp = toHomepageArticle(articles[0]);
+
+      expect(hp.imageLqip).toBeUndefined();
     });
 
     it("handles empty tags", async () => {

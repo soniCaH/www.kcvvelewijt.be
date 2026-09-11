@@ -218,6 +218,7 @@ const Homepage = ({
     content: (
       <BannerSlot
         image={fixtureImage("stadium-hero", 0)}
+        mobileImage={fixtureImage("stadium-hero", 0)}
         alt="Banner A"
         href="/sponsors"
       />
@@ -259,6 +260,7 @@ const Homepage = ({
     content: (
       <BannerSlot
         image={fixtureImage("stadium-hero", 1)}
+        mobileImage={fixtureImage("stadium-hero", 1)}
         alt="Banner B"
         href="/sponsors"
       />
@@ -282,6 +284,7 @@ const Homepage = ({
     content: (
       <BannerSlot
         image={fixtureImage("crowd-atmosphere", 0)}
+        mobileImage={fixtureImage("crowd-atmosphere", 0)}
         alt="Banner C"
         href="/sponsors"
       />

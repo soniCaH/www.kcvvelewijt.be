@@ -216,5 +216,31 @@ describe("NewsGrid", () => {
       expect(screen.getAllByText("Tag1").length).toBeGreaterThanOrEqual(1);
       expect(screen.getAllByText("Tag6").length).toBeGreaterThanOrEqual(1);
     });
+
+    // #2401 item 3 — every non-hero homepage cover blur-placeholders when its
+    // Sanity asset has an LQIP, and degrades cleanly with no placeholder
+    // when it doesn't.
+    it("forwards imageLqip to <NewsCard> as a blur placeholder", () => {
+      render(
+        <NewsGrid
+          articles={[
+            makeArticle(1, { imageLqip: "data:image/jpeg;base64,/9j..." }),
+          ]}
+        />,
+      );
+      const img = screen.getByAltText("");
+      expect(img).toHaveAttribute(
+        "blurDataURL",
+        "data:image/jpeg;base64,/9j...",
+      );
+      expect(img).toHaveAttribute("placeholder", "blur");
+    });
+
+    it("renders with no placeholder when imageLqip is absent", () => {
+      render(<NewsGrid articles={[makeArticle(1)]} />);
+      const img = screen.getByAltText("");
+      expect(img).toHaveAttribute("placeholder", "empty");
+      expect(img).not.toHaveAttribute("blurDataURL");
+    });
   });
 });

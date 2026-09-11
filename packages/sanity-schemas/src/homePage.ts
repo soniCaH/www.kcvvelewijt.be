@@ -51,6 +51,40 @@ export const homePage = defineType({
       description:
         'Optionele inhoud voor het blok "Eerste ploegen" tijdens het tussenseizoen — een aftelling, een korte mededeling en/of een foto. Als er geen aankomende wedstrijden zijn, toont dat blok anders altijd "Nog geen wedstrijden ingepland.".',
     }),
+    // #2401 item 4: the jeugd-band stat line ("220+ spelers · 16 ploegen")
+    // used to be a hardcoded literal in <YouthSection> with no writer — a
+    // club fact that could only ever drift silently. Only the two NUMBERS
+    // move to Sanity; "spelers"/"ploegen"/"·" stay code-owned copy, not
+    // free text, so an editor can't accidentally break the sentence shape.
+    // Two fields, not one free-text line: each number has its own season
+    // cadence (squad count vs. team count rarely change together), and a
+    // shared field would let an editor overwrite one while retyping the
+    // other. <YouthSection> renders the stat line only when BOTH are set —
+    // see the Writer Rule (root CLAUDE.md / apps/web/CLAUDE.md): a slot with
+    // no value yet degrades by disappearing, it never shows a half-claim.
+    // `initialValue` only seeds a NEWLY created document — the singleton
+    // already exists in both datasets, so it does nothing for the current
+    // rollout on its own. The migration (`set-homepage-youth-stats`,
+    // #2401 review finding 3) is what backfills the existing document;
+    // `initialValue` just keeps a future fresh dataset from starting blank.
+    defineField({
+      name: 'youthPlayerCount',
+      title: 'Aantal jeugdspelers',
+      type: 'string',
+      group: 'widgets',
+      initialValue: '220+',
+      description:
+        'Getoond in de jeugdsectie op de homepage, bijv. "220+". Vul het volledige label in zoals het moet verschijnen (inclusief een eventueel "+"). Leeg = de statistiekregel verschijnt niet.',
+    }),
+    defineField({
+      name: 'youthTeamCount',
+      title: 'Aantal jeugdploegen',
+      type: 'string',
+      group: 'widgets',
+      initialValue: '16',
+      description:
+        'Getoond in de jeugdsectie op de homepage, bijv. "16". Verschijnt samen met het aantal spelers als "220+ spelers · 16 ploegen" — leeg = de statistiekregel verschijnt niet.',
+    }),
   ],
   preview: {
     prepare() {
