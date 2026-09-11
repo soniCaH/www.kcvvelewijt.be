@@ -151,6 +151,65 @@ describe("SharePage", () => {
     ).not.toBeDisabled();
   });
 
+  describe("generate failure (#2818)", () => {
+    it("shows the locked notice through <EmptyState>, logs the caught error to the console only, and never leaks its message into the DOM", async () => {
+      const { toPng } = await import("html-to-image");
+      const generateError = new Error("CORS error");
+      vi.mocked(toPng).mockRejectedValueOnce(generateError);
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const user = userEvent.setup();
+
+      try {
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+        await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+        // The accented substring splits the sentence across DOM nodes, so
+        // assert on the notice's own alert region's full text content, the
+        // same pattern #2580's CalendarSubscribePanel/MembershipForm tests
+        // use.
+        const notice = await screen.findByRole("alert");
+        expect(notice).toHaveTextContent(
+          "Exporteren mislukt. Probeer opnieuw.",
+        );
+        // The visitor never sees the caught error's own text — it must not
+        // be fed to `<EmptyState>` from `err.message` (#2818).
+        expect(screen.queryByText("CORS error")).not.toBeInTheDocument();
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining("generate"),
+          generateError,
+        );
+      } finally {
+        consoleError.mockRestore();
+      }
+    });
+
+    it("no longer renders the pre-#2580 bespoke alert paragraph", async () => {
+      const { toPng } = await import("html-to-image");
+      vi.mocked(toPng).mockRejectedValueOnce(new Error("CORS error"));
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const user = userEvent.setup();
+
+      try {
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+        await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+        const notice = await screen.findByRole("alert");
+        // The retired idiom carried `text-card-red` (a bespoke bare-paragraph
+        // alert). `<EmptyState tier="slot" reason="unavailable">`'s own frame
+        // carries `border-dashed` instead — see EmptyState.tsx's
+        // `SlotNoticeEmptyState`.
+        expect(notice.className).not.toContain("text-card-red");
+        expect(notice.className).toContain("border-dashed");
+      } finally {
+        consoleError.mockRestore();
+      }
+    });
+  });
+
   // ─── Phase 3: Template picker ─────────────────────────────────────────────
 
   it("renders 9 template picker buttons", () => {
@@ -484,6 +543,160 @@ describe("SharePage", () => {
         configurable: true,
       });
     }
+  });
+
+  describe("share failure (#2818)", () => {
+    it("shows the locked notice through <EmptyState>, logs the caught error to the console only, and never leaks its message into the DOM", async () => {
+      const shareError = new Error("Permission denied");
+      const mockShare = vi.fn().mockRejectedValue(shareError);
+      const originalShare = navigator.share;
+      const originalCanShare = navigator.canShare;
+      Object.defineProperty(navigator, "canShare", {
+        value: () => true,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "share", {
+        value: mockShare,
+        writable: true,
+        configurable: true,
+      });
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await user.click(screen.getByRole("button", { name: /genereer/i }));
+        await user.click(screen.getByRole("button", { name: /delen/i }));
+
+        const notice = await screen.findByRole("alert");
+        expect(notice).toHaveTextContent("Delen mislukt. Probeer opnieuw.");
+        expect(screen.queryByText("Permission denied")).not.toBeInTheDocument();
+        expect(consoleError).toHaveBeenCalledWith(
+          expect.stringContaining("share"),
+          shareError,
+        );
+      } finally {
+        consoleError.mockRestore();
+        Object.defineProperty(navigator, "share", {
+          value: originalShare,
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(navigator, "canShare", {
+          value: originalCanShare,
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+
+    it("clears the failure notice after a subsequent successful share (#2818 review finding 1)", async () => {
+      const mockShare = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Permission denied"))
+        .mockResolvedValueOnce(undefined);
+      const originalShare = navigator.share;
+      const originalCanShare = navigator.canShare;
+      Object.defineProperty(navigator, "canShare", {
+        value: () => true,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "share", {
+        value: mockShare,
+        writable: true,
+        configurable: true,
+      });
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await user.click(screen.getByRole("button", { name: /genereer/i }));
+        const shareButton = screen.getByRole("button", { name: /delen/i });
+        await user.click(shareButton);
+        await screen.findByRole("alert");
+
+        await user.click(shareButton);
+
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      } finally {
+        consoleError.mockRestore();
+        Object.defineProperty(navigator, "share", {
+          value: originalShare,
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(navigator, "canShare", {
+          value: originalCanShare,
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
+
+    it("clears the failure notice, along with the Delen button it described, when the form changes (#2818 review finding 1)", async () => {
+      const mockShare = vi
+        .fn()
+        .mockRejectedValue(new Error("Permission denied"));
+      const originalShare = navigator.share;
+      const originalCanShare = navigator.canShare;
+      Object.defineProperty(navigator, "canShare", {
+        value: () => true,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(navigator, "share", {
+        value: mockShare,
+        writable: true,
+        configurable: true,
+      });
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await user.click(screen.getByRole("button", { name: /genereer/i }));
+        await user.click(screen.getByRole("button", { name: /delen/i }));
+        await screen.findByRole("alert");
+
+        // Any field change drops the stale preview/blob via `clearPreview`,
+        // which unmounts the Delen button — the notice must not outlive it.
+        // `getByLabelText` matches both the input and its labelled `<section>`
+        // here, so target the match input by its placeholder instead.
+        await user.type(
+          screen.getByPlaceholderText("KCVV Elewijt — FC Tegenstander"),
+          "x",
+        );
+
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole("button", { name: /delen/i }),
+        ).not.toBeInTheDocument();
+      } finally {
+        consoleError.mockRestore();
+        Object.defineProperty(navigator, "share", {
+          value: originalShare,
+          writable: true,
+          configurable: true,
+        });
+        Object.defineProperty(navigator, "canShare", {
+          value: originalCanShare,
+          writable: true,
+          configurable: true,
+        });
+      }
+    });
   });
 
   it("does not show an error when share is cancelled (AbortError)", async () => {
