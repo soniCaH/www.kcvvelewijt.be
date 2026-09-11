@@ -14,41 +14,27 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, act } from "@testing-library/react";
 import { createElement, useEffect } from "react";
 import {
+  FakeIntersectionObserver,
+  FakeResizeObserver,
+} from "@/../tests/helpers/fake-observers.helpers";
+import {
   useSectionNav,
   getStickyHeaderHeight,
   type UseSectionNavResult,
 } from "./useSectionNav";
 
-// IntersectionObserver stub — happy-dom doesn't implement it. Captures every
-// observer instance created (there may be more than one across renders) so
-// tests can target entries at whichever section elements they observed, and
-// assert on `disconnected` to prove a stale observer was torn down.
-let intersectionObservers: {
-  cb: IntersectionObserverCallback;
-  options?: IntersectionObserverInit;
-  observed: Element[];
-  disconnected: boolean;
-}[] = [];
+// Section target elements are appended straight to `document.body` (there is
+// no host element to render them for real) — tracked here so `afterEach` can
+// remove them by reference, without a bespoke marker attribute (every one of
+// them already sets a real `id`, which is all these tests query by).
+let appendedSectionTargets: Element[] = [];
 
-class FakeIntersectionObserver {
-  #entry: (typeof intersectionObservers)[number];
-  constructor(
-    cb: IntersectionObserverCallback,
-    options?: IntersectionObserverInit,
-  ) {
-    this.#entry = { cb, options, observed: [], disconnected: false };
-    intersectionObservers.push(this.#entry);
-  }
-  observe(el: Element) {
-    this.#entry.observed.push(el);
-  }
-  unobserve() {}
-  disconnect() {
-    this.#entry.disconnected = true;
-  }
-  takeRecords() {
-    return [];
-  }
+function appendSectionTarget(id: string): HTMLDivElement {
+  const el = document.createElement("div");
+  el.id = id;
+  document.body.appendChild(el);
+  appendedSectionTargets.push(el);
+  return el;
 }
 
 function emit(
@@ -56,40 +42,13 @@ function emit(
   entries: Partial<IntersectionObserverEntry>[],
 ) {
   act(() => {
-    intersectionObservers[observerIndex]!.cb(
-      entries as IntersectionObserverEntry[],
-      {} as IntersectionObserver,
-    );
+    FakeIntersectionObserver.instances[observerIndex]!.trigger(entries);
   });
-}
-
-// ResizeObserver stub — happy-dom's real implementation doesn't fire off a
-// monkey-patched `getBoundingClientRect` (it has no layout engine), so a
-// test that needs to simulate "the bar resized" drives this fake directly.
-let resizeObservers: {
-  cb: ResizeObserverCallback;
-  observed: Element[];
-}[] = [];
-
-class FakeResizeObserver {
-  #entry: (typeof resizeObservers)[number];
-  constructor(cb: ResizeObserverCallback) {
-    this.#entry = { cb, observed: [] };
-    resizeObservers.push(this.#entry);
-  }
-  observe(el: Element) {
-    this.#entry.observed.push(el);
-  }
-  unobserve() {}
-  disconnect() {}
 }
 
 function fireResize(observerIndex: number) {
   act(() => {
-    resizeObservers[observerIndex]!.cb(
-      [] as ResizeObserverEntry[],
-      {} as ResizeObserver,
-    );
+    FakeResizeObserver.instances[observerIndex]!.trigger();
   });
 }
 
@@ -139,8 +98,8 @@ function renderHook(ids: readonly string[]) {
 
 describe("useSectionNav", () => {
   beforeEach(() => {
-    intersectionObservers = [];
-    resizeObservers = [];
+    FakeIntersectionObserver.reset();
+    FakeResizeObserver.reset();
     vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
     vi.stubGlobal("ResizeObserver", FakeResizeObserver);
   });
@@ -150,9 +109,8 @@ describe("useSectionNav", () => {
     vi.useRealTimers();
     document.documentElement.style.scrollPaddingTop = "";
     window.location.hash = "";
-    document
-      .querySelectorAll("[data-section-nav-test-target]")
-      .forEach((el) => el.remove());
+    appendedSectionTargets.forEach((el) => el.remove());
+    appendedSectionTargets = [];
   });
 
   it("returns null active id and zero barHeight when no section matches", () => {
@@ -177,15 +135,12 @@ describe("useSectionNav", () => {
   });
 
   it("marks the topmost intersecting section active", () => {
-    const target = document.createElement("div");
-    target.id = "spelers";
-    target.setAttribute("data-section-nav-test-target", "");
-    document.body.appendChild(target);
+    const target = appendSectionTarget("spelers");
 
     const rendered = renderHook(["spelers", "staf"]);
     expect(rendered.result.activeId).toBeNull();
 
-    const spyObserverIndex = intersectionObservers.length - 1;
+    const spyObserverIndex = FakeIntersectionObserver.instances.length - 1;
     emit(spyObserverIndex, [
       {
         isIntersecting: true,
@@ -198,16 +153,11 @@ describe("useSectionNav", () => {
   });
 
   it("picks the entry with the smallest top when multiple sections intersect at once", () => {
-    const a = document.createElement("div");
-    a.id = "a";
-    a.setAttribute("data-section-nav-test-target", "");
-    const b = document.createElement("div");
-    b.id = "b";
-    b.setAttribute("data-section-nav-test-target", "");
-    document.body.append(a, b);
+    const a = appendSectionTarget("a");
+    const b = appendSectionTarget("b");
 
     const rendered = renderHook(["a", "b"]);
-    const spyObserverIndex = intersectionObservers.length - 1;
+    const spyObserverIndex = FakeIntersectionObserver.instances.length - 1;
     emit(spyObserverIndex, [
       {
         isIntersecting: true,
@@ -225,13 +175,10 @@ describe("useSectionNav", () => {
   });
 
   it("ignores non-intersecting entries", () => {
-    const target = document.createElement("div");
-    target.id = "spelers";
-    target.setAttribute("data-section-nav-test-target", "");
-    document.body.appendChild(target);
+    const target = appendSectionTarget("spelers");
 
     const rendered = renderHook(["spelers"]);
-    const spyObserverIndex = intersectionObservers.length - 1;
+    const spyObserverIndex = FakeIntersectionObserver.instances.length - 1;
     emit(spyObserverIndex, [
       {
         isIntersecting: false,
@@ -260,24 +207,21 @@ describe("useSectionNav", () => {
 
   describe("scroll-spy rebuilds when the bar resizes", () => {
     it("disconnects the stale observer and builds a new one with the grown offset", () => {
-      const target = document.createElement("div");
-      target.id = "spelers";
-      target.setAttribute("data-section-nav-test-target", "");
-      document.body.appendChild(target);
+      appendSectionTarget("spelers");
 
       renderHook(["spelers"]);
-      const firstSpy = intersectionObservers.at(-1)!;
+      const firstSpy = FakeIntersectionObserver.instances.at(-1)!;
       expect(firstSpy.disconnected).toBe(false);
       const firstOptions = firstSpy.options;
 
       // Simulate the bar growing (e.g. HubSearch mounting and wrapping to
       // its own line) via the resize observer that watches the bar itself.
-      const navEl = resizeObservers[0]!.observed[0]!;
+      const navEl = FakeResizeObserver.instances[0]!.observed[0]!;
       mockHeight(navEl, 60);
       fireResize(0);
 
       expect(firstSpy.disconnected).toBe(true);
-      const secondSpy = intersectionObservers.at(-1)!;
+      const secondSpy = FakeIntersectionObserver.instances.at(-1)!;
       expect(secondSpy).not.toBe(firstSpy);
       expect(secondSpy.options?.rootMargin).not.toBe(firstOptions?.rootMargin);
     });
@@ -293,16 +237,11 @@ describe("useSectionNav", () => {
     // overwrite a later section that is still genuinely intersecting but
     // simply wasn't mentioned in that particular batch.
     it("does not let a stale, delta-only re-report of an earlier section override a later one that is still intersecting", () => {
-      const a = document.createElement("div");
-      a.id = "a";
-      a.setAttribute("data-section-nav-test-target", "");
-      const b = document.createElement("div");
-      b.id = "b";
-      b.setAttribute("data-section-nav-test-target", "");
-      document.body.append(a, b);
+      const a = appendSectionTarget("a");
+      const b = appendSectionTarget("b");
 
       const rendered = renderHook(["a", "b"]);
-      const spyObserverIndex = intersectionObservers.length - 1;
+      const spyObserverIndex = FakeIntersectionObserver.instances.length - 1;
 
       // "b" (the later section) is read first — its own batch doesn't
       // mention "a" at all.
@@ -350,10 +289,7 @@ describe("useSectionNav", () => {
     // a bar resize here actually reaches that hook's `notifyLayoutChange`.
     it("notifies the hash-landing correction on every bar resize while armed", () => {
       vi.useFakeTimers();
-      const target = document.createElement("div");
-      target.id = "structuur";
-      target.setAttribute("data-section-nav-test-target", "");
-      document.body.appendChild(target);
+      const target = appendSectionTarget("structuur");
       const scrollIntoView = vi
         .spyOn(target, "scrollIntoView")
         .mockImplementation(() => {});
@@ -369,7 +305,7 @@ describe("useSectionNav", () => {
       // The bar grows shortly after (HubSearch mounting) — still inside the
       // armed window, so the landing gets corrected.
       act(() => vi.advanceTimersByTime(200));
-      mockHeight(resizeObservers[0]!.observed[0]!, 60);
+      mockHeight(FakeResizeObserver.instances[0]!.observed[0]!, 60);
       fireResize(0);
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
     });

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, act } from "@testing-library/react";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { TrackInView } from "./TrackInView";
 
 vi.mock("@/lib/analytics/track-event", () => ({
@@ -8,47 +9,15 @@ vi.mock("@/lib/analytics/track-event", () => ({
 
 import { trackEvent } from "@/lib/analytics/track-event";
 
-type IOEntry = Pick<IntersectionObserverEntry, "isIntersecting">;
-
-let observerCallbacks: Array<(entries: IOEntry[]) => void> = [];
-let observeCount = 0;
-let disconnectCount = 0;
-
-class FakeIntersectionObserver {
-  private cb: (entries: IOEntry[]) => void;
-  constructor(cb: (entries: IOEntry[]) => void) {
-    this.cb = cb;
-    observerCallbacks.push(cb);
-  }
-  observe() {
-    observeCount += 1;
-  }
-  disconnect() {
-    disconnectCount += 1;
-  }
-  unobserve() {}
-  takeRecords() {
-    return [];
-  }
-  root = null;
-  rootMargin = "";
-  thresholds = [];
-}
-
 describe("<TrackInView>", () => {
   beforeEach(() => {
-    observerCallbacks = [];
-    observeCount = 0;
-    disconnectCount = 0;
+    FakeIntersectionObserver.reset();
     vi.mocked(trackEvent).mockClear();
-    (
-      globalThis as unknown as { IntersectionObserver: unknown }
-    ).IntersectionObserver = FakeIntersectionObserver;
+    vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
   });
 
   afterEach(() => {
-    delete (globalThis as unknown as { IntersectionObserver?: unknown })
-      .IntersectionObserver;
+    vi.unstubAllGlobals();
   });
 
   it("renders children inside a wrapper carrying the event name", () => {
@@ -69,7 +38,7 @@ describe("<TrackInView>", () => {
         <span>child</span>
       </TrackInView>,
     );
-    expect(observeCount).toBe(1);
+    expect(FakeIntersectionObserver.latest()!.observe).toHaveBeenCalledTimes(1);
   });
 
   it("fires trackEvent once when the section becomes visible", () => {
@@ -79,7 +48,7 @@ describe("<TrackInView>", () => {
       </TrackInView>,
     );
     act(() => {
-      observerCallbacks[0]?.([{ isIntersecting: true }]);
+      FakeIntersectionObserver.latest()!.trigger([{ isIntersecting: true }]);
     });
     expect(trackEvent).toHaveBeenCalledTimes(1);
     expect(trackEvent).toHaveBeenCalledWith("x_in_view", { slug: "foo" });
@@ -92,9 +61,10 @@ describe("<TrackInView>", () => {
       </TrackInView>,
     );
     act(() => {
-      observerCallbacks[0]?.([{ isIntersecting: true }]);
-      observerCallbacks[0]?.([{ isIntersecting: true }]);
-      observerCallbacks[0]?.([{ isIntersecting: true }]);
+      const observer = FakeIntersectionObserver.latest()!;
+      observer.trigger([{ isIntersecting: true }]);
+      observer.trigger([{ isIntersecting: true }]);
+      observer.trigger([{ isIntersecting: true }]);
     });
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });
@@ -106,7 +76,7 @@ describe("<TrackInView>", () => {
       </TrackInView>,
     );
     act(() => {
-      observerCallbacks[0]?.([{ isIntersecting: false }]);
+      FakeIntersectionObserver.latest()!.trigger([{ isIntersecting: false }]);
     });
     expect(trackEvent).not.toHaveBeenCalled();
   });
@@ -118,8 +88,10 @@ describe("<TrackInView>", () => {
       </TrackInView>,
     );
     act(() => {
-      observerCallbacks[0]?.([{ isIntersecting: true }]);
+      FakeIntersectionObserver.latest()!.trigger([{ isIntersecting: true }]);
     });
-    expect(disconnectCount).toBeGreaterThanOrEqual(1);
+    expect(
+      FakeIntersectionObserver.latest()!.disconnect.mock.calls.length,
+    ).toBeGreaterThanOrEqual(1);
   });
 });

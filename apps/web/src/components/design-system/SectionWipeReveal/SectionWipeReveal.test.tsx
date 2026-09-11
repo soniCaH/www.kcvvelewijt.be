@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act, render, screen } from "@testing-library/react";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { SectionWipeReveal } from "./SectionWipeReveal";
 
 const RUN_CLASS = "section-wipe-reveal--run";
@@ -64,38 +65,11 @@ function mockScrolledPastRect(): void {
   });
 }
 
-let observerInstance: MockIntersectionObserver | null = null;
-
-class MockIntersectionObserver {
-  callback: IntersectionObserverCallback;
-  options?: IntersectionObserverInit;
-  observed: Element[] = [];
-  observe = vi.fn((el: Element) => {
-    this.observed.push(el);
-  });
-  disconnect = vi.fn();
-  unobserve = vi.fn();
-  takeRecords = vi.fn(() => []);
-  root: Element | Document | null = null;
-  rootMargin = "";
-  thresholds: ReadonlyArray<number> = [];
-
-  constructor(
-    callback: IntersectionObserverCallback,
-    options?: IntersectionObserverInit,
-  ) {
-    this.callback = callback;
-    this.options = options;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    observerInstance = this;
-  }
-}
-
 describe("SectionWipeReveal", () => {
   beforeEach(() => {
-    observerInstance = null;
+    FakeIntersectionObserver.reset();
     stubMatchMedia(false);
-    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+    vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
     mockOffscreenRect();
   });
 
@@ -119,8 +93,8 @@ describe("SectionWipeReveal", () => {
         <p>Content</p>
       </SectionWipeReveal>,
     );
-    expect(observerInstance).not.toBeNull();
-    expect(observerInstance!.observe).toHaveBeenCalledTimes(1);
+    expect(FakeIntersectionObserver.latest()).not.toBeUndefined();
+    expect(FakeIntersectionObserver.latest()!.observe).toHaveBeenCalledTimes(1);
   });
 
   it("configures the observer with threshold 0.1 and rootMargin '0px 0px -10% 0px'", () => {
@@ -129,8 +103,10 @@ describe("SectionWipeReveal", () => {
         <p>Content</p>
       </SectionWipeReveal>,
     );
-    expect(observerInstance?.options?.threshold).toBe(0.1);
-    expect(observerInstance?.options?.rootMargin).toBe("0px 0px -10% 0px");
+    expect(FakeIntersectionObserver.latest()?.options?.threshold).toBe(0.1);
+    expect(FakeIntersectionObserver.latest()?.options?.rootMargin).toBe(
+      "0px 0px -10% 0px",
+    );
   });
 
   it("adds the --run class when the section intersects, and stops observing it", () => {
@@ -143,24 +119,15 @@ describe("SectionWipeReveal", () => {
     expect(host).not.toHaveClass(RUN_CLASS);
 
     act(() => {
-      observerInstance!.callback(
-        [
-          {
-            isIntersecting: true,
-            target: host,
-            intersectionRatio: 1,
-            boundingClientRect: {} as DOMRectReadOnly,
-            intersectionRect: {} as DOMRectReadOnly,
-            rootBounds: null,
-            time: 0,
-          },
-        ],
-        observerInstance as unknown as IntersectionObserver,
-      );
+      FakeIntersectionObserver.latest()!.trigger([
+        { isIntersecting: true, target: host, intersectionRatio: 1 },
+      ]);
     });
 
     expect(host).toHaveClass(RUN_CLASS);
-    expect(observerInstance!.unobserve).toHaveBeenCalledWith(host);
+    expect(FakeIntersectionObserver.latest()!.unobserve).toHaveBeenCalledWith(
+      host,
+    );
   });
 
   it("does not arm an observer, and never adds --run, for a section already visible at first paint", () => {
@@ -171,7 +138,7 @@ describe("SectionWipeReveal", () => {
       </SectionWipeReveal>,
     );
 
-    expect(observerInstance).toBeNull();
+    expect(FakeIntersectionObserver.latest()).toBeUndefined();
     expect(screen.getByTestId("child")).toBeVisible();
     expect(container.firstElementChild).not.toHaveClass(RUN_CLASS);
   });
@@ -187,7 +154,7 @@ describe("SectionWipeReveal", () => {
       </SectionWipeReveal>,
     );
 
-    expect(observerInstance).toBeNull();
+    expect(FakeIntersectionObserver.latest()).toBeUndefined();
     expect(screen.getByTestId("child")).toBeVisible();
     expect(container.firstElementChild).not.toHaveClass(RUN_CLASS);
   });
@@ -215,7 +182,7 @@ describe("SectionWipeReveal", () => {
       </SectionWipeReveal>,
     );
 
-    expect(observerInstance).toBeNull();
+    expect(FakeIntersectionObserver.latest()).toBeUndefined();
     expect(screen.getByTestId("child")).toBeVisible();
     expect(container.firstElementChild).not.toHaveClass(RUN_CLASS);
   });
@@ -242,8 +209,8 @@ describe("SectionWipeReveal", () => {
       </SectionWipeReveal>,
     );
 
-    expect(observerInstance).not.toBeNull();
-    expect(observerInstance!.observe).toHaveBeenCalledTimes(1);
+    expect(FakeIntersectionObserver.latest()).not.toBeUndefined();
+    expect(FakeIntersectionObserver.latest()!.observe).toHaveBeenCalledTimes(1);
     // No callback invocation happens here — by design.
     expect(screen.getByTestId("child")).toBeVisible();
     expect(container.firstElementChild).not.toHaveClass(RUN_CLASS);
@@ -255,8 +222,10 @@ describe("SectionWipeReveal", () => {
         <p>Content</p>
       </SectionWipeReveal>,
     );
-    expect(observerInstance).not.toBeNull();
+    expect(FakeIntersectionObserver.latest()).not.toBeUndefined();
     unmount();
-    expect(observerInstance!.disconnect).toHaveBeenCalledTimes(1);
+    expect(FakeIntersectionObserver.latest()!.disconnect).toHaveBeenCalledTimes(
+      1,
+    );
   });
 });
