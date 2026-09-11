@@ -137,6 +137,12 @@ export default {
     const jobAlertLayer = Layer.mergeAll(KvCacheLive, envLayer).pipe(
       Layer.provide(envLayer),
     );
+    // Reports the outcome and NEVER throws itself — a `KvCacheService`
+    // hiccup or a dropped Slack POST inside the report must not be mistaken
+    // for the scheduled job it's reporting on failing (#2870 review:
+    // `reportJobOutcome` used to run *inside* the sync's own try/catch, so a
+    // reporting error there posted a false "job failed" alert for a sync
+    // that actually succeeded, and rethrew to fail a healthy invocation).
     const reportJobOutcome = (
       job: string,
       outcome:
@@ -146,7 +152,12 @@ export default {
         reportScheduledJobOutcome(job, outcome).pipe(
           Effect.provide(jobAlertLayer),
         ),
-      );
+      ).catch((e) => {
+        console.error(
+          `[scheduled] job-alert report failed for "${job}":`,
+          String(e),
+        );
+      });
 
     if (event.cron === "30 2 * * *") {
       // Search embedding index sync — separate invocation budget. Its
@@ -159,20 +170,30 @@ export default {
         envLayer,
       ).pipe(Layer.provide(envLayer));
       ctx.waitUntil(
-        Effect.runPromise(Effect.provide(runSanityIndexSync(), layer))
-          .then(() => reportJobOutcome("sanity-index-sync", { ok: true }))
-          .catch(async (e) => {
+        (async () => {
+          let syncError: unknown;
+          try {
+            await Effect.runPromise(
+              Effect.provide(runSanityIndexSync(), layer),
+            );
+          } catch (e) {
+            syncError = e;
             console.error(
               "[scheduled] sanity-index-sync failed:",
               String(e),
               e instanceof Error ? e.stack : "",
             );
-            await reportJobOutcome("sanity-index-sync", {
-              ok: false,
-              error: e,
-            });
-            throw e;
-          }),
+          }
+          // Reported strictly AFTER the sync settles — see the comment on
+          // reportJobOutcome above.
+          await reportJobOutcome(
+            "sanity-index-sync",
+            syncError === undefined
+              ? { ok: true }
+              : { ok: false, error: syncError },
+          );
+          if (syncError !== undefined) throw syncError;
+        })(),
       );
     } else if (event.cron === "0 2 * * *") {
       // PSD → Sanity player/team/staff sync
@@ -203,22 +224,32 @@ export default {
       // per run; see the PR for before/after numbers.
       // https://developers.cloudflare.com/workers/platform/limits/
       const syncStartedAt = Date.now();
+      let syncError: unknown;
       try {
         await Effect.runPromise(Effect.provide(runSync, layer));
-        await reportJobOutcome("psd-sanity-sync", { ok: true });
       } catch (e) {
+        syncError = e;
         console.error(
           "[scheduled] psd-sanity-sync failed:",
           String(e),
           e instanceof Error ? e.stack : "",
         );
-        await reportJobOutcome("psd-sanity-sync", { ok: false, error: e });
-        throw e;
       } finally {
         console.log(
           `[scheduled] psd-sanity-sync wall-clock: ${Date.now() - syncStartedAt}ms`,
         );
       }
+      // Reported strictly AFTER the wall-clock log above — inside the try
+      // would fold the report's own KV read/write and Slack POST into the
+      // "wall-clock" number #2900 measures against the 15-minute Cron
+      // Trigger ceiling (#2870 review).
+      await reportJobOutcome(
+        "psd-sanity-sync",
+        syncError === undefined
+          ? { ok: true }
+          : { ok: false, error: syncError },
+      );
+      if (syncError !== undefined) throw syncError;
     } else {
       await Effect.runPromise(
         Effect.logWarning(`[scheduled] unknown cron expression: ${event.cron}`),
