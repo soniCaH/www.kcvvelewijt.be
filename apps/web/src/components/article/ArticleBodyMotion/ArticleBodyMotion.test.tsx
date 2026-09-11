@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act, render, screen } from "@testing-library/react";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { ArticleBodyMotion } from "./ArticleBodyMotion";
 
 function stubMatchMedia(matches: boolean): void {
@@ -15,38 +16,11 @@ function stubMatchMedia(matches: boolean): void {
   }));
 }
 
-let observerInstance: MockIntersectionObserver | null = null;
-
-class MockIntersectionObserver {
-  callback: IntersectionObserverCallback;
-  options?: IntersectionObserverInit;
-  observed: Element[] = [];
-  observe = vi.fn((el: Element) => {
-    this.observed.push(el);
-  });
-  disconnect = vi.fn();
-  unobserve = vi.fn();
-  takeRecords = vi.fn(() => []);
-  root: Element | Document | null = null;
-  rootMargin = "";
-  thresholds: ReadonlyArray<number> = [];
-
-  constructor(
-    callback: IntersectionObserverCallback,
-    options?: IntersectionObserverInit,
-  ) {
-    this.callback = callback;
-    this.options = options;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    observerInstance = this;
-  }
-}
-
 describe("ArticleBodyMotion", () => {
   beforeEach(() => {
-    observerInstance = null;
+    FakeIntersectionObserver.reset();
     stubMatchMedia(false);
-    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+    vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
   });
 
   afterEach(() => {
@@ -72,9 +46,9 @@ describe("ArticleBodyMotion", () => {
       </ArticleBodyMotion>,
     );
 
-    expect(observerInstance).not.toBeNull();
+    expect(FakeIntersectionObserver.latest()).not.toBeUndefined();
     // One observer instance covers all four elements.
-    expect(observerInstance!.observe).toHaveBeenCalledTimes(4);
+    expect(FakeIntersectionObserver.latest()!.observe).toHaveBeenCalledTimes(4);
     expect(screen.getByTestId("p1")).toHaveClass("article-body-motion");
     expect(screen.getByTestId("h2")).toHaveClass("article-body-motion");
     expect(screen.getByTestId("p2")).toHaveClass("article-body-motion");
@@ -88,8 +62,10 @@ describe("ArticleBodyMotion", () => {
       </ArticleBodyMotion>,
     );
 
-    expect(observerInstance?.options?.threshold).toBe(0.15);
-    expect(observerInstance?.options?.rootMargin).toBe("0px 0px -10% 0px");
+    expect(FakeIntersectionObserver.latest()?.options?.threshold).toBe(0.15);
+    expect(FakeIntersectionObserver.latest()?.options?.rootMargin).toBe(
+      "0px 0px -10% 0px",
+    );
   });
 
   it("adds the --entered class when an element intersects and stops observing it", () => {
@@ -104,24 +80,15 @@ describe("ArticleBodyMotion", () => {
     expect(p1).not.toHaveClass("article-body-motion--entered");
 
     act(() => {
-      observerInstance!.callback(
-        [
-          {
-            isIntersecting: true,
-            target: p1,
-            intersectionRatio: 1,
-            boundingClientRect: {} as DOMRectReadOnly,
-            intersectionRect: {} as DOMRectReadOnly,
-            rootBounds: null,
-            time: 0,
-          },
-        ],
-        observerInstance as unknown as IntersectionObserver,
-      );
+      FakeIntersectionObserver.latest()!.trigger([
+        { isIntersecting: true, target: p1, intersectionRatio: 1 },
+      ]);
     });
 
     expect(p1).toHaveClass("article-body-motion--entered");
-    expect(observerInstance!.unobserve).toHaveBeenCalledWith(p1);
+    expect(FakeIntersectionObserver.latest()!.unobserve).toHaveBeenCalledWith(
+      p1,
+    );
   });
 
   it("does not instantiate an observer when prefers-reduced-motion is reduce", () => {
@@ -133,7 +100,7 @@ describe("ArticleBodyMotion", () => {
       </ArticleBodyMotion>,
     );
 
-    expect(observerInstance).toBeNull();
+    expect(FakeIntersectionObserver.latest()).toBeUndefined();
     // And the base motion class is not applied either — elements render at
     // their final state straight away so there is nothing to transition.
     expect(screen.getByTestId("p1")).not.toHaveClass("article-body-motion");

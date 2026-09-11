@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { OrganigramSectionNav } from "./OrganigramSectionNav";
 import {
   HUB_SEARCH_MEMBERS,
@@ -8,36 +9,19 @@ import {
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
-// IntersectionObserver stub that captures the *latest* callback — safe only
-// because no single test here needs both observers at once: the hero-reveal
-// one exists when `#hub-hero` is in the DOM, the scroll-spy one when
-// `appendSectionTargets()` has added `#hulp`/`#structuur` — and each test
-// below sets up exactly one of the two.
-let observerCb: IntersectionObserverCallback | null = null;
-
-class FakeIntersectionObserver {
-  constructor(cb: IntersectionObserverCallback) {
-    observerCb = cb;
-  }
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-  takeRecords() {
-    return [];
-  }
-}
-
+// `FakeIntersectionObserver.latest()` is safe only because no single test
+// here needs both observers at once: the hero-reveal one exists when
+// `#hub-hero` is in the DOM, the scroll-spy one when `appendSectionTargets()`
+// has added `#hulp`/`#structuur` — and each test below sets up exactly one
+// of the two.
 function emitHeroIntersecting(isIntersecting: boolean) {
   act(() => {
-    observerCb?.(
-      [{ isIntersecting } as IntersectionObserverEntry],
-      {} as IntersectionObserver,
-    );
+    FakeIntersectionObserver.latest()!.trigger([{ isIntersecting }]);
   });
 }
 
 beforeEach(() => {
-  observerCb = null;
+  FakeIntersectionObserver.reset();
   vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
 });
 
@@ -86,22 +70,23 @@ describe("OrganigramSectionNav", () => {
     expect(structuur).toHaveAttribute("href", "#structuur");
   });
 
+  // Focus-on-click (#2478 rule 8) is `<SectionNavChip>`'s own contract,
+  // covered by `SectionNavChip.test.tsx` — this component delegates
+  // rendering to it entirely, so re-asserting it here is the same hand-copy
+  // drift #2478's chip extraction (A1) already fixed one layer up.
   describe("scroll-spy — the fill means the section being read, not the one last clicked (#2478 rule 3)", () => {
-    it("fills the chip for the topmost intersecting section", () => {
+    it("wires the topmost intersecting section's id into aria-current on its chip", () => {
       const { structuur } = appendSectionTargets();
       renderNav();
 
       act(() => {
-        observerCb?.(
-          [
-            {
-              isIntersecting: true,
-              target: structuur,
-              boundingClientRect: { top: 5 },
-            } as unknown as IntersectionObserverEntry,
-          ],
-          {} as IntersectionObserver,
-        );
+        FakeIntersectionObserver.latest()!.trigger([
+          {
+            isIntersecting: true,
+            target: structuur,
+            boundingClientRect: { top: 5 } as DOMRectReadOnly,
+          },
+        ]);
       });
 
       expect(screen.getByRole("link", { name: "Structuur" })).toHaveAttribute(
@@ -118,16 +103,13 @@ describe("OrganigramSectionNav", () => {
       renderNav();
 
       act(() => {
-        observerCb?.(
-          [
-            {
-              isIntersecting: true,
-              target: structuur,
-              boundingClientRect: { top: 5 },
-            } as unknown as IntersectionObserverEntry,
-          ],
-          {} as IntersectionObserver,
-        );
+        FakeIntersectionObserver.latest()!.trigger([
+          {
+            isIntersecting: true,
+            target: structuur,
+            boundingClientRect: { top: 5 } as DOMRectReadOnly,
+          },
+        ]);
       });
 
       // Clicking "Hulp" navigates, but the fill still means "the section
@@ -141,16 +123,6 @@ describe("OrganigramSectionNav", () => {
       expect(screen.getByRole("link", { name: "Hulp" })).not.toHaveAttribute(
         "aria-current",
       );
-    });
-
-    it("moves focus into the clicked section (#2478 rule 8)", () => {
-      const { hulp } = appendSectionTargets();
-      const focusSpy = vi.spyOn(hulp, "focus");
-      renderNav();
-
-      fireEvent.click(screen.getByRole("link", { name: "Hulp" }));
-
-      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
     });
   });
 
