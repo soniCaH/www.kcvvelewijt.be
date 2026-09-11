@@ -159,7 +159,7 @@ describe("CalendarWeek", () => {
     const matches = [tournamentMatch({ id: 91, date: "2026-03-28T09:30:00" })];
     render(<CalendarWeek {...defaultProps} matches={matches} />);
     const saturdayColumn = screen.getByTestId("week-col-2026-03-28");
-    const card = saturdayColumn.querySelector('[data-tournament="true"]');
+    const card = saturdayColumn.querySelector('[data-row-kind="reduced"]');
     expect(card).not.toBeNull();
     expect(card).toHaveTextContent("Tornooi");
     expect(card).toHaveTextContent(tournamentOpponent.name);
@@ -202,7 +202,9 @@ describe("CalendarWeek", () => {
     render(<CalendarWeek {...defaultProps} matches={matches} />);
     const saturdayColumn = screen.getByTestId("week-col-2026-03-28");
     expect(saturdayColumn).toHaveTextContent("Racing Mechelen");
-    expect(saturdayColumn.querySelector('[data-tournament="true"]')).toBeNull();
+    expect(
+      saturdayColumn.querySelector('[data-row-kind="reduced"]'),
+    ).toBeNull();
   });
 
   it("renders an event in its day column", () => {

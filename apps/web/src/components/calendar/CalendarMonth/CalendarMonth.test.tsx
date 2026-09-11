@@ -222,7 +222,7 @@ describe("CalendarMonth", () => {
         />,
       );
       const row = screen.getByTestId("team-agenda-row");
-      expect(row).toHaveAttribute("data-placeholder", "true");
+      expect(row).toHaveAttribute("data-row-kind", "reservation");
       expect(row.tagName).toBe("ARTICLE");
       expect(row.closest("a")).toBeNull();
       expect(row.textContent).not.toMatch(/KCVV Elewijt.*KCVV Elewijt/);
@@ -259,7 +259,7 @@ describe("CalendarMonth", () => {
         />,
       );
       const row = screen.getByTestId("team-agenda-row");
-      expect(row).toHaveAttribute("data-tournament", "true");
+      expect(row).toHaveAttribute("data-row-kind", "reduced");
       expect(row.closest("a")).toBeNull();
       expect(row.textContent).toContain("FC Zemst Sportief");
       // The squad chip a normal row carries via homeTeam.teamLabel has no

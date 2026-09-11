@@ -563,8 +563,7 @@ function ReservationLedgerRow({
     // `reservationRowLabel` in `match-display.ts`.
     <article
       aria-label={label}
-      data-placeholder={match.isPlaceholder ? "true" : undefined}
-      data-tournament={match.kind === "reduced" ? "true" : undefined}
+      data-row-kind={match.kind}
       className={cn(
         "flex min-w-0 items-center gap-2.5 px-4 py-2.5",
         last ? "" : "border-ink/15 border-b",
@@ -712,8 +711,11 @@ function DesktopSlider({
           the desktop switch was announced in neither direction. */}
       <div
         aria-live="polite"
-        data-placeholder={showing.isPlaceholder ? "true" : undefined}
-        data-tournament={showing.kind === "reduced" ? "true" : undefined}
+        data-row-kind={
+          showing.kind === "reservation" || showing.kind === "reduced"
+            ? showing.kind
+            : undefined
+        }
         className="min-w-0 py-3"
       >
         {showing.kind === "reservation" || showing.kind === "reduced" ? (

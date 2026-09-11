@@ -190,7 +190,7 @@ describe("CalendarAgenda", () => {
         events={[]}
       />,
     );
-    const row = container.querySelector('[data-placeholder="true"]');
+    const row = container.querySelector('[data-row-kind="reservation"]');
     expect(row).not.toBeNull();
     expect(row!.tagName).not.toBe("A");
     expect(row!.querySelector("a")).toBeNull();
@@ -216,7 +216,7 @@ describe("CalendarAgenda", () => {
         events={[]}
       />,
     );
-    const row = container.querySelector('[data-tournament="true"]');
+    const row = container.querySelector('[data-row-kind="reduced"]');
     expect(row).not.toBeNull();
     expect(row!.tagName).not.toBe("A");
     expect(row!.querySelector("a")).toBeNull();
