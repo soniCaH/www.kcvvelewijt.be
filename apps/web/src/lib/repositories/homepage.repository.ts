@@ -149,12 +149,17 @@ export interface YouthStatsVM {
  * the Writer Rule's "never show a half-claim" guidance warns against. Either
  * value empty ⇒ `<YouthSection>` omits the whole line rather than rendering
  * one number next to a stray separator.
+ *
+ * Trimmed before the check: both fields are free-text `string`s in the
+ * schema with no validation, so a stray space is a reachable editor value
+ * and `" "` is truthy. Untrimmed, it would hand `<YouthSection>` a stat line
+ * reading " spelers ·  ploegen" — the blank-claim this guard exists to stop.
  */
 export function toYouthStatsVM(
   data: HOMEPAGE_QUERY_RESULT,
 ): YouthStatsVM | null {
-  const playerCount = data?.youthPlayerCount;
-  const teamCount = data?.youthTeamCount;
+  const playerCount = data?.youthPlayerCount?.trim();
+  const teamCount = data?.youthTeamCount?.trim();
   if (!playerCount || !teamCount) return null;
   return { playerCount, teamCount };
 }

@@ -423,5 +423,36 @@ describe("HomepageRepository", () => {
     it("returns null when the homepage document itself is missing", () => {
       expect(toYouthStatsVM(null)).toBeNull();
     });
+
+    // Both fields are free-text `string`s with no schema validation, so a
+    // stray space is a reachable editor value — and `" "` is truthy. Without
+    // the trim the line would render " spelers ·  ploegen".
+    it("returns null when a count is whitespace only", () => {
+      expect(
+        toYouthStatsVM({
+          youthPlayerCount: "   ",
+          youthTeamCount: "16",
+        } as HOMEPAGE_QUERY_RESULT),
+      ).toBeNull();
+
+      expect(
+        toYouthStatsVM({
+          youthPlayerCount: "220+",
+          youthTeamCount: "\t\n ",
+        } as HOMEPAGE_QUERY_RESULT),
+      ).toBeNull();
+    });
+
+    it("strips surrounding whitespace from counts it keeps", () => {
+      const result = toYouthStatsVM({
+        youthPlayerCount: " 220+ ",
+        youthTeamCount: " 16 ",
+      } as HOMEPAGE_QUERY_RESULT);
+
+      expect(result).toEqual<YouthStatsVM>({
+        playerCount: "220+",
+        teamCount: "16",
+      });
+    });
   });
 });
