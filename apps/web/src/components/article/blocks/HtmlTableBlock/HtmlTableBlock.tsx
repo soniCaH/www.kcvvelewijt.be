@@ -16,6 +16,7 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     "caption",
     "colgroup",
     "col",
+    "strong",
   ],
   allowedAttributes: {
     "*": ["colspan", "rowspan", "scope"],
@@ -58,10 +59,13 @@ export interface HtmlTableBlockProps {
  * `>thead>tr>th` chain, so every row container `TABLE_SANITIZE_OPTIONS`
  * allows — `thead`, `tbody`, `tfoot` — is covered by construction, not by
  * remembering to list it (review M6: a `<tfoot>` row rendered half-skinned
- * under the old chained selectors). This does **not** mean an authored
- * `<a>` or `<strong>` renders correctly today — `TABLE_SANITIZE_OPTIONS`
- * strips both before they ever reach this markup, and restoring them
- * (allowlist plus a link/bold recipe) is #2481's job, not started here.
+ * under the old chained selectors). `<strong>` is in `TABLE_SANITIZE_OPTIONS.allowedTags`
+ * (#2481) and needs no selector here to render bold — Preflight's
+ * `strong { font-weight: bolder }` already resolves to a real 700 face in
+ * this table's `font-mono` (IBM Plex Mono loads 400/600/700). An authored
+ * `<a>` still does **not** render — restoring it (allowlist entry plus the
+ * `.prose-link` recipe and `rel` handling) is #2482's job, deliberately
+ * blocked by this one.
  *
  * A `<caption>` (three published tables ship one) renders in the kicker
  * register per #2476 rule 8 — `font-mono`, `text-label`, uppercase,
