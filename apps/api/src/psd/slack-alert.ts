@@ -71,22 +71,70 @@ export function buildDriftMessage(ctx: DriftContext): string {
   )} old${status}; ${formatDuration(timeToCliff)} until it drops off the hard-expiry cliff.`;
 }
 
+export interface JobAlertContext {
+  /** Name of the scheduled job (e.g. "psd-sanity-sync", "sanity-index-sync"). */
+  readonly job: string;
+  /** How many consecutive runs have failed — the current streak on a
+   * `job-failure` alert, or the streak that just ended on a `job-recovery`. */
+  readonly consecutiveFailures: number;
+  /** Stringified error from the failing run, when known. */
+  readonly error?: string;
+}
+
 /**
- * Best-effort POST to a Slack incoming webhook. No-op when `webhookUrl` is
- * absent (local/dev without the secret). Never throws.
+ * State transition for the debounced scheduled-job failure signal (#2870) —
+ * deliberately its own union, not {@link IncidentAlert}. This never feeds
+ * `IncidentTracker`: a failed nightly cron is not the same event as PSD
+ * being down for visitors. See `psd/job-alert.ts`.
+ */
+export type JobAlert =
+  { readonly kind: "job-failure" } | { readonly kind: "job-recovery" };
+
+/** Message for a scheduled-job failure/recovery transition. */
+export function buildJobAlertMessage(
+  alert: JobAlert,
+  ctx: JobAlertContext,
+): string {
+  const runs = ctx.consecutiveFailures === 1 ? "run" : "runs";
+  if (alert.kind === "job-recovery") {
+    return `:large_green_circle: *Scheduled job recovered* — \`${ctx.job}\` succeeded after ${ctx.consecutiveFailures} failed ${runs}.`;
+  }
+  const detail = ctx.error ? `: ${ctx.error}` : "";
+  return `:red_circle: *Scheduled job failing* — \`${ctx.job}\` has now failed ${ctx.consecutiveFailures} consecutive ${runs}${detail}.`;
+}
+
+/**
+ * Best-effort POST to a Slack incoming webhook. No-op (resolves `false`)
+ * when `webhookUrl` is absent (local/dev without the secret). Never throws —
+ * resolves `true` only once the webhook has actually confirmed the POST
+ * (`response.ok`), and logs (never throws on) a non-2xx response or a
+ * network failure. The boolean return exists so a caller that needs
+ * delivery confirmation — `psd/job-alert.ts`'s failure-alert retry — can
+ * tell "confirmed delivered" apart from "dropped silently", which used to
+ * look identical from the outside (#2870 review: a dropped webhook POST
+ * used to debounce a whole outage into never being announced at all).
  */
 export async function postSlack(
   webhookUrl: string | undefined,
   text: string,
-): Promise<void> {
-  if (!webhookUrl) return;
+): Promise<boolean> {
+  if (!webhookUrl) return false;
   try {
-    await fetch(webhookUrl, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text }),
     });
-  } catch {
-    // Best-effort: alerting must never break the read path.
+    if (!response.ok) {
+      console.error(
+        `[slack-alert] postSlack: webhook responded HTTP ${response.status}`,
+      );
+      return false;
+    }
+    return true;
+  } catch (e) {
+    // Best-effort: alerting must never break the caller it observes.
+    console.error("[slack-alert] postSlack: fetch failed:", String(e));
+    return false;
   }
 }

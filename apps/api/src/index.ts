@@ -38,6 +38,7 @@ import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
 import { handleIndexWebhook } from "./webhooks/index-handler";
+import { reportScheduledJobOutcome } from "./psd/job-alert";
 
 // The PSD gate Durable Object must be exported from the worker entry (the
 // `main` module) for Cloudflare to bind it — see wrangler.toml [[durable_objects]].
@@ -127,6 +128,56 @@ export default {
   ): Promise<void> {
     const envLayer = Layer.succeed(WorkerEnvTag, env);
 
+    // Debounced Slack failure/recovery signal for both nightly crons (#2870).
+    // Deliberately independent of PsdGateLive/IncidentTracker — see the
+    // "scheduled-job failures" rule in apps/api/CLAUDE.md and
+    // psd/job-alert.ts's doc comment. Additive: it never replaces the
+    // console.error below, and it no-ops silently without
+    // SLACK_ALERT_WEBHOOK_URL (staging).
+    const jobAlertLayer = Layer.mergeAll(KvCacheLive, envLayer).pipe(
+      Layer.provide(envLayer),
+    );
+    type JobOutcome =
+      { readonly ok: true } | { readonly ok: false; readonly error: unknown };
+
+    // Settles a scheduled job into an outcome instead of throwing, so the
+    // caller reports from a `const` rather than a `let` straddling a
+    // try/catch. Logging the failure here keeps both crons on one format.
+    const settleJob = async (
+      job: string,
+      run: () => Promise<unknown>,
+    ): Promise<JobOutcome> => {
+      try {
+        await run();
+        return { ok: true };
+      } catch (error) {
+        console.error(
+          `[scheduled] ${job} failed:`,
+          String(error),
+          error instanceof Error ? error.stack : "",
+        );
+        return { ok: false, error };
+      }
+    };
+
+    // Reports the outcome and NEVER throws itself — a `KvCacheService`
+    // hiccup or a dropped Slack POST inside the report must not be mistaken
+    // for the scheduled job it's reporting on failing (#2870 review:
+    // `reportJobOutcome` used to run *inside* the sync's own try/catch, so a
+    // reporting error there posted a false "job failed" alert for a sync
+    // that actually succeeded, and rethrew to fail a healthy invocation).
+    const reportJobOutcome = (job: string, outcome: JobOutcome) =>
+      Effect.runPromise(
+        reportScheduledJobOutcome(job, outcome).pipe(
+          Effect.provide(jobAlertLayer),
+        ),
+      ).catch((e) => {
+        console.error(
+          `[scheduled] job-alert report failed for "${job}":`,
+          String(e),
+        );
+      });
+
     if (event.cron === "30 2 * * *") {
       // Search embedding index sync — separate invocation budget. Its
       // reconciliation step (#2831) reads/writes its id manifest via the
@@ -138,16 +189,15 @@ export default {
         envLayer,
       ).pipe(Layer.provide(envLayer));
       ctx.waitUntil(
-        Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)).catch(
-          (e) => {
-            console.error(
-              "[scheduled] sanity-index-sync failed:",
-              String(e),
-              e instanceof Error ? e.stack : "",
-            );
-            throw e;
-          },
-        ),
+        (async () => {
+          const outcome = await settleJob("sanity-index-sync", () =>
+            Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)),
+          );
+          // Reported strictly AFTER the sync settles — see the comment on
+          // reportJobOutcome above.
+          await reportJobOutcome("sanity-index-sync", outcome);
+          if (!outcome.ok) throw outcome.error;
+        })(),
       );
     } else if (event.cron === "0 2 * * *") {
       // PSD → Sanity player/team/staff sync
@@ -159,8 +209,10 @@ export default {
       ).pipe(
         // PsdGateLive paces this job's PSD calls against the same global ≤5/s
         // budget the request path uses — without it the nightly fan-out is
-        // unmetered. Pacing only: incident alerting still does not cover this
-        // path (see the note in sync/psd-team-client.ts).
+        // unmetered. Pacing only: PSD incident alerting (IncidentTracker /
+        // gate.reportOutcome) still does not cover this path (see the note in
+        // sync/psd-team-client.ts) — that gap is deliberate, not this one.
+        // The separate job-failure signal below (#2870) is independent of it.
         Layer.provide(PsdGateLive),
         Layer.provide(KvCacheLive),
         Layer.provide(envLayer),
@@ -176,20 +228,20 @@ export default {
       // per run; see the PR for before/after numbers.
       // https://developers.cloudflare.com/workers/platform/limits/
       const syncStartedAt = Date.now();
-      try {
-        await Effect.runPromise(Effect.provide(runSync, layer));
-      } catch (e) {
-        console.error(
-          "[scheduled] psd-sanity-sync failed:",
-          String(e),
-          e instanceof Error ? e.stack : "",
-        );
-        throw e;
-      } finally {
-        console.log(
-          `[scheduled] psd-sanity-sync wall-clock: ${Date.now() - syncStartedAt}ms`,
-        );
-      }
+      const outcome = await settleJob("psd-sanity-sync", () =>
+        Effect.runPromise(Effect.provide(runSync, layer)),
+      );
+      // `settleJob` never throws, so this always runs — and it still measures
+      // only the sync's own work, because the report below comes after it.
+      console.log(
+        `[scheduled] psd-sanity-sync wall-clock: ${Date.now() - syncStartedAt}ms`,
+      );
+      // Reported strictly AFTER the wall-clock log above — reporting first
+      // would fold the report's own KV read/write and Slack POST into the
+      // "wall-clock" number #2900 measures against the 15-minute Cron
+      // Trigger ceiling (#2870 review).
+      await reportJobOutcome("psd-sanity-sync", outcome);
+      if (!outcome.ok) throw outcome.error;
     } else {
       await Effect.runPromise(
         Effect.logWarning(`[scheduled] unknown cron expression: ${event.cron}`),
