@@ -600,6 +600,63 @@ describe("SearchInterface", () => {
 
       expect(mockPush).toHaveBeenCalledWith("/zoeken?q=test");
     });
+
+    it("does not fire search_filter_changed or push the URL when the active chip is re-pressed (dedup guard, #2449)", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      mockSearchParams.set("q", "test");
+
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("group")).toBeInTheDocument();
+      });
+
+      // "Alles" is already active (no ?type= param) → re-pressing it is a
+      // no-op: no analytics event, no URL push.
+      const allTab = screen.getByRole("button", { name: /alles/i });
+      await user.click(allTab);
+
+      expect(
+        mockTrackEvent.mock.calls.some(
+          ([eventName]) => eventName === "search_filter_changed",
+        ),
+      ).toBe(false);
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("still fires exactly one search_filter_changed carrying the new type when a different type is selected (#2449)", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      mockSearchParams.set("q", "test");
+
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("group")).toBeInTheDocument();
+      });
+
+      const articleTab = screen.getByRole("button", { name: /nieuws/i });
+      await user.click(articleTab);
+
+      const filterChangedCalls = mockTrackEvent.mock.calls.filter(
+        ([eventName]) => eventName === "search_filter_changed",
+      );
+      expect(filterChangedCalls).toEqual([
+        ["search_filter_changed", { filter_type: "article" }],
+      ]);
+      expect(mockPush).toHaveBeenCalledWith("/zoeken?q=test&type=article");
+    });
   });
 
   describe("URL Synchronization", () => {

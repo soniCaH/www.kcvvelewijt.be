@@ -225,14 +225,25 @@ export const SearchInterface = ({
    * Handle filter change
    * Note: Only updates UI state and URL - no refetch needed since we use client-side filtering
    *
-   * Deliberately still keyed on the whole `analytics` object (unlike
-   * `handleSearch` above) rather than a destructured `trackFilterChanged` —
-   * #2449 owns this function's body (a dedup-guard fix) and lands separately;
-   * touching its dep array here would collide with that branch for no
-   * benefit. Revisit once #2449 has landed.
+   * Still keyed on the whole `analytics` object (unlike `handleSearch`
+   * above, which destructures `trackSearchSubmitted`) rather than a
+   * destructured `trackFilterChanged` — `analytics` is a fresh object
+   * literal on every render (#2913), so this callback is already recreated
+   * every render regardless of what else sits in its deps; destructuring
+   * here would be churn without a behavioural payoff.
    */
   const handleFilterChange = useCallback(
     (type: SearchResultType | "all") => {
+      // Dedup guard (repo analytics policy, apps/web/CLAUDE.md → Analytics
+      // & Instrumentation): re-selecting the already-active chip is a
+      // no-op, so neither the URL push nor `search_filter_changed` fires
+      // twice (#2449). Compares against the sanitised `activeType`, not the
+      // raw `?type=` — an invalid param therefore survives a no-op reselect
+      // instead of self-healing. Deliberate: results are already unfiltered
+      // in that state, and any genuine filter change rewrites the URL and
+      // cleans it up anyway.
+      if (type === activeType) return;
+
       setActiveType(type);
       analytics.trackFilterChanged(type);
 
@@ -249,7 +260,7 @@ export const SearchInterface = ({
 
       // No need to re-fetch: SearchResults handles client-side filtering
     },
-    [query, router, analytics],
+    [activeType, query, router, analytics],
   );
 
   /**
