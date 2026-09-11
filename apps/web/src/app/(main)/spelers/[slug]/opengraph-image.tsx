@@ -7,6 +7,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
 import {
   OG_CONTENT_TYPE,
@@ -39,23 +40,30 @@ export default async function Image({ params }: ImageProps) {
 
   // An OG route has no error boundary to bubble into — a throw here serves a
   // broken image to every social crawler, so it degrades to the club card.
+  // `PlayerRepository.findByPsdId` is a Sanity read (`E = never`, #2863), so
+  // the guard must be `degradeSection` — a plain `Effect.catchAll` type-checks
+  // but never runs against it.
   const card = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* PlayerRepository;
-      const player = yield* repo.findByPsdId(slug);
-      if (!player) return FALLBACK;
-      return {
-        ...(player.number !== undefined
-          ? { stampText: String(player.number) }
-          : {}),
-        nameTop: player.firstName,
-        nameBottom: player.lastName,
-        // Same subject as the metadata description (#2567 review): position
-        // when authored, else the active team, so the card and its caption
-        // never disagree about what's known.
-        ...(player.metaLabel ? { meta: player.metaLabel } : {}),
-      } satisfies ShareCardProps;
-    }).pipe(Effect.catchAll(() => Effect.succeed(FALLBACK))),
+    degradeSection(
+      Effect.gen(function* () {
+        const repo = yield* PlayerRepository;
+        const player = yield* repo.findByPsdId(slug);
+        if (!player) return FALLBACK;
+        return {
+          ...(player.number !== undefined
+            ? { stampText: String(player.number) }
+            : {}),
+          nameTop: player.firstName,
+          nameBottom: player.lastName,
+          // Same subject as the metadata description (#2567 review): position
+          // when authored, else the active team, so the card and its caption
+          // never disagree about what's known.
+          ...(player.metaLabel ? { meta: player.metaLabel } : {}),
+        } satisfies ShareCardProps;
+      }),
+      FALLBACK,
+      "[spelers/[slug]/opengraph-image] player read failed; falling back to the club card.",
+    ),
   );
 
   return renderShareCard(card);
