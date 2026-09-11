@@ -6,7 +6,13 @@
  * surfaced, so URL generation is asserted through the clipboard.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CalendarSubscribePanel } from "./CalendarSubscribePanel";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -296,6 +302,46 @@ describe("CalendarSubscribePanel", () => {
       render(<CalendarSubscribePanel {...defaultProps} />);
       await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
       expect(screen.getByText("Gekopieerd")).toBeInTheDocument();
+    });
+
+    it("reverts to 'Kopieer link' when the selection changes within the confirmation window (#2819)", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
+      expect(screen.getByText("Gekopieerd")).toBeInTheDocument();
+
+      // Changing the selection rebuilds `webcalUrl` — the confirmation
+      // described the URL as it stood before this change, so it must not
+      // survive describing a URL that was never actually copied.
+      await user.click(
+        screen.getAllByRole("button", { name: /Verwijder/ })[0]!,
+      );
+
+      expect(screen.queryByText("Gekopieerd")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Kopieer link" }),
+      ).toBeInTheDocument();
+    });
+
+    it("still reverts to 'Kopieer link' after the existing timeout when nothing changes", async () => {
+      vi.useFakeTimers();
+      try {
+        render(<CalendarSubscribePanel {...defaultProps} />);
+        fireEvent.click(screen.getByRole("button", { name: /Kopieer link/ }));
+        // Flush the clipboard promise's microtask (fireEvent is synchronous,
+        // but handleCopy awaits navigator.clipboard.writeText first).
+        await vi.waitFor(() =>
+          expect(screen.getByText("Gekopieerd")).toBeInTheDocument(),
+        );
+
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(2000);
+        });
+
+        expect(screen.queryByText("Gekopieerd")).not.toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it("fires kalender_subscribe_copy with teams_count + side + events", async () => {

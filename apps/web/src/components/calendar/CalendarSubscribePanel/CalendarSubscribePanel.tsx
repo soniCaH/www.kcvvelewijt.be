@@ -62,7 +62,12 @@ export function CalendarSubscribePanel({
   // On by default (#2705) — deliberately not the same as the route's own
   // default, which stays off (#2704).
   const [includeEvents, setIncludeEvents] = useState(true);
-  const [copied, setCopied] = useState(false);
+  // The URL a successful copy put on the clipboard — not a boolean. Comparing
+  // it against the CURRENT `webcalUrl` below makes a stale confirmation
+  // impossible by construction: change any selection (team/side/
+  // includeEvents) and the comparison itself goes false, so there is nothing
+  // to reset by hand (#2819, mirrors `failedUrl` below).
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
   // The URL a failed copy described — not a boolean. Comparing it against the
   // CURRENT `webcalUrl` below makes a stale notice impossible by
   // construction: change any selection (team/side/includeEvents) and the
@@ -95,13 +100,19 @@ export function CalendarSubscribePanel({
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(webcalUrl);
-      setCopied(true);
+      setCopiedUrl(webcalUrl);
       // Only clear the notice this attempt's own URL put up — an EARLIER,
       // now-stale attempt resolving after a LATER one already failed for a
       // different URL must not clear that later failure (#2580: two
       // overlapping copies can settle out of order).
       setFailedUrl((prev) => (prev === webcalUrl ? null : prev));
-      setTimeout(() => setCopied(false), 2000);
+      // Auto-clear after the confirmation window — guarded the same way, so
+      // a newer copy's confirmation (a different URL) is never clobbered by
+      // an older attempt's own timeout firing after it (#2819).
+      setTimeout(
+        () => setCopiedUrl((prev) => (prev === webcalUrl ? null : prev)),
+        2000,
+      );
       trackEvent("kalender_subscribe_copy", {
         teams_count: selectedPsdIds.length,
         side,
@@ -245,7 +256,7 @@ export function CalendarSubscribePanel({
               disabled={selectedPsdIds.length === 0}
               className="border-ink bg-jersey-deep focus-visible:outline-ink border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide text-white uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
             >
-              {copied ? "Gekopieerd" : "Kopieer link"}
+              {copiedUrl === webcalUrl ? "Gekopieerd" : "Kopieer link"}
             </button>
           </div>
 
