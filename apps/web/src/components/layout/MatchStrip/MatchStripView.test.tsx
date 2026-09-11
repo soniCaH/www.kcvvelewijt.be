@@ -379,11 +379,10 @@ describe("MatchStripView", () => {
       ).toBeInTheDocument();
     });
 
-    it("marks the row data-row-kind=reduced, not reservation", () => {
+    it("marks the row data-row-kind=reduced", () => {
       render(<MatchStripView data={{ result: null, fixture: tournament }} />);
       const article = screen.getByRole("article", { name: /Tornooi/ });
       expect(article).toHaveAttribute("data-row-kind", "reduced");
-      expect(article).not.toHaveAttribute("data-row-kind", "reservation");
     });
 
     it("desktop slide: no CTA, no second crest", () => {

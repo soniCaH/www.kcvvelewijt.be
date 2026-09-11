@@ -42,9 +42,9 @@
  * `expect(...queryByRole("link")).toBeNull()` alone passes on an empty DOM —
  * a row whose fixture misses its own renderer's date/month/selected-day
  * window renders nothing at all, and "renders nothing" satisfies "no link"
- * for free. `data-row-kind="reservation"`/`"reduced"` is the one marker every
- * reservation renderer carries (#2688, consolidated onto `data-row-kind` in
- * #2829) regardless of role (`<article>`, `<div>`,
+ * for free. `data-row-kind="reservation"`/`"reduced"` is the one marker
+ * every reservation renderer carries (#2688, consolidated onto
+ * `data-row-kind` in #2829) regardless of role (`<article>`, `<div>`,
  * `<section>`) or whether the subject text is its own text node — several
  * renderers, e.g. `UpcomingMatchesClient`'s row, compose it into a joined
  * caption string (`"U13 · Tornooi"`), so a shared `screen.getByText` check

@@ -386,11 +386,10 @@ describe("UpcomingMatches", () => {
       expect(container).toHaveTextContent("FC Zemst Sportief");
     });
 
-    it("gives the tournament row its own accessible name, marked data-row-kind=reduced not reservation", () => {
+    it("gives the tournament row its own accessible name, marked data-row-kind=reduced", () => {
       render(<UpcomingMatches matches={mockUpcomingWithTournament} />);
       const article = screen.getByRole("article", { name: /Tornooi/ });
       expect(article).toHaveAttribute("data-row-kind", "reduced");
-      expect(article).not.toHaveAttribute("data-row-kind", "reservation");
     });
 
     it("still buckets the tournament fixture under its own squad's filter chip", () => {
