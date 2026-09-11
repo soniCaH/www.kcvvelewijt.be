@@ -71,6 +71,38 @@ export function buildDriftMessage(ctx: DriftContext): string {
   )} old${status}; ${formatDuration(timeToCliff)} until it drops off the hard-expiry cliff.`;
 }
 
+export interface JobAlertContext {
+  /** Name of the scheduled job (e.g. "psd-sanity-sync", "sanity-index-sync"). */
+  readonly job: string;
+  /** How many consecutive runs have failed — the current streak on a
+   * `job-failure` alert, or the streak that just ended on a `job-recovery`. */
+  readonly consecutiveFailures: number;
+  /** Stringified error from the failing run, when known. */
+  readonly error?: string;
+}
+
+/**
+ * State transition for the debounced scheduled-job failure signal (#2870) —
+ * deliberately its own union, not {@link IncidentAlert}. This never feeds
+ * `IncidentTracker`: a failed nightly cron is not the same event as PSD
+ * being down for visitors. See `psd/job-alert.ts`.
+ */
+export type JobAlert =
+  { readonly kind: "job-failure" } | { readonly kind: "job-recovery" };
+
+/** Message for a scheduled-job failure/recovery transition. */
+export function buildJobAlertMessage(
+  alert: JobAlert,
+  ctx: JobAlertContext,
+): string {
+  const runs = ctx.consecutiveFailures === 1 ? "run" : "runs";
+  if (alert.kind === "job-recovery") {
+    return `:large_green_circle: *Scheduled job recovered* — \`${ctx.job}\` succeeded after ${ctx.consecutiveFailures} failed ${runs}.`;
+  }
+  const detail = ctx.error ? `: ${ctx.error}` : "";
+  return `:red_circle: *Scheduled job failing* — \`${ctx.job}\` has now failed ${ctx.consecutiveFailures} consecutive ${runs}${detail}.`;
+}
+
 /**
  * Best-effort POST to a Slack incoming webhook. No-op when `webhookUrl` is
  * absent (local/dev without the secret). Never throws.

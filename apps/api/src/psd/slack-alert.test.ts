@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   buildIncidentMessage,
   buildDriftMessage,
+  buildJobAlertMessage,
   formatDuration,
   postSlack,
 } from "./slack-alert";
@@ -67,6 +68,40 @@ describe("buildDriftMessage", () => {
       hardTtlMs: 7 * day,
     });
     expect(msg).toContain("0s until");
+  });
+});
+
+describe("buildJobAlertMessage", () => {
+  it("names the job, failure count, and error on a job-failure alert", () => {
+    const msg = buildJobAlertMessage(
+      { kind: "job-failure" },
+      {
+        job: "psd-sanity-sync",
+        consecutiveFailures: 1,
+        error: "PSD 429: Too Many Requests",
+      },
+    );
+    expect(msg).toContain("psd-sanity-sync");
+    expect(msg).toContain("1 consecutive run");
+    expect(msg).toContain("PSD 429: Too Many Requests");
+  });
+
+  it("pluralises the run count on a job-failure alert", () => {
+    const msg = buildJobAlertMessage(
+      { kind: "job-failure" },
+      { job: "sanity-index-sync", consecutiveFailures: 3, error: "boom" },
+    );
+    expect(msg).toContain("3 consecutive runs");
+  });
+
+  it("names the job and the failed-run count on a job-recovery alert", () => {
+    const msg = buildJobAlertMessage(
+      { kind: "job-recovery" },
+      { job: "psd-sanity-sync", consecutiveFailures: 3 },
+    );
+    expect(msg).toContain("recovered");
+    expect(msg).toContain("psd-sanity-sync");
+    expect(msg).toContain("3 failed runs");
   });
 });
 
