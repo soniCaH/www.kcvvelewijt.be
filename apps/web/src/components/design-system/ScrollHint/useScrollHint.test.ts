@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { createElement, useEffect } from "react";
+import { FakeResizeObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { useScrollHint, type UseScrollHintReturn } from "./useScrollHint";
 
 /**
@@ -391,23 +392,8 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      const observedTargets: Element[] = [];
-      let triggerResize: (() => void) | undefined;
-      const OriginalRO = globalThis.ResizeObserver;
-      class SpyResizeObserver {
-        #cb: ResizeObserverCallback;
-        constructor(cb: ResizeObserverCallback) {
-          this.#cb = cb;
-          triggerResize = () => this.#cb([], this as unknown as ResizeObserver);
-        }
-        observe(target: Element) {
-          observedTargets.push(target);
-        }
-        unobserve() {}
-        disconnect() {}
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      globalThis.ResizeObserver = SpyResizeObserver as any;
+      FakeResizeObserver.reset();
+      vi.stubGlobal("ResizeObserver", FakeResizeObserver);
 
       let hookResult: UseScrollHintReturn | undefined;
       function HostWithChild({
@@ -435,18 +421,21 @@ describe("useScrollHint", () => {
       );
 
       expect(hookResult!.overflows).toBe(false);
-      expect(observedTargets.length).toBeGreaterThanOrEqual(2); // track + child
+      // track + child
+      expect(
+        FakeResizeObserver.latest()!.observed.length,
+      ).toBeGreaterThanOrEqual(2);
 
       // Content grows (e.g. the web font swaps in) without the track's own
       // box changing — a child ResizeObserver entry fires instead.
       currentScrollWidth = 900;
       act(() => {
-        triggerResize?.();
+        FakeResizeObserver.latest()!.trigger();
       });
 
       expect(hookResult!.overflows).toBe(true);
 
-      globalThis.ResizeObserver = OriginalRO;
+      vi.unstubAllGlobals();
     });
   });
 
