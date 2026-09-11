@@ -8,6 +8,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import {
   OG_CONTENT_TYPE,
@@ -40,18 +41,25 @@ export default async function Image({ params }: ImageProps) {
 
   // An OG route has no error boundary to bubble into — a throw here serves a
   // broken image to every social crawler, so it degrades to the club card.
+  // `StaffRepository.findByPsdId` is a Sanity read (`E = never`, #2863), so
+  // the guard must be `degradeSection` — a plain `Effect.catchAll` type-checks
+  // but never runs against it.
   const card = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* StaffRepository;
-      const member = yield* repo.findByPsdId(slug);
-      if (!member) return FALLBACK;
-      const role = member.organigramPositions[0]?.title;
-      return {
-        nameTop: member.firstName,
-        nameBottom: member.lastName,
-        ...(role ? { meta: role } : {}),
-      } satisfies ShareCardProps;
-    }).pipe(Effect.catchAll(() => Effect.succeed(FALLBACK))),
+    degradeSection(
+      Effect.gen(function* () {
+        const repo = yield* StaffRepository;
+        const member = yield* repo.findByPsdId(slug);
+        if (!member) return FALLBACK;
+        const role = member.organigramPositions[0]?.title;
+        return {
+          nameTop: member.firstName,
+          nameBottom: member.lastName,
+          ...(role ? { meta: role } : {}),
+        } satisfies ShareCardProps;
+      }),
+      FALLBACK,
+      "[staf/[slug]/opengraph-image] staff-member read failed; falling back to the club card.",
+    ),
   );
 
   return renderShareCard(card);
