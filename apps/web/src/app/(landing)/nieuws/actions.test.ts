@@ -1,17 +1,21 @@
 /**
- * A failed articles read must degrade to an empty page, not throw (#2863).
+ * A failed articles read must reject, not silently degrade (#2863 review
+ * round 2, finding 1).
  *
- * `ArticleRepository.findPaginated` is a Sanity read — every Sanity read ends
- * in `Effect.orDie` (`lib/sanity/fetch-groq.ts`), so the effect is typed
- * `Effect<A>` with `E = never` and its failures arrive as *defects*. An
- * `Effect.catchAll` on it type-checks but never runs; only a cause-aware
- * guard (`degradeSection`) can see the failure. `fetchArticlesAction` is a
- * server action called directly from `NewsListingClient`'s client-side
- * "load more" flow with no surrounding `.catch()` — a dead guard here leaves
- * that click unhandled.
+ * `NewsListingClient` is this action's only caller — its "load more" footer
+ * and its category-chip switch, both in `NewsListingClient.tsx` — and both
+ * call sites already `try/catch` a rejection into a real "Artikelen laden
+ * mislukt." notice with a working retry. A `degradeSection`-style guard here
+ * would resolve to an empty success instead of rejecting, making both
+ * catches unreachable: the load-more footer would read "no more articles"
+ * and a category switch would read "empty category" on what is actually a
+ * Sanity blip — and the category switch would still write the now-wrong
+ * category into the URL/history, because that write is gated on the fetch
+ * resolving, not on the fetch being *correct*. So unlike the other four
+ * #2863 sites, this read is deliberately left bare.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 
 vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
   const mod =
@@ -34,17 +38,14 @@ vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
 
 import { fetchArticlesAction } from "./actions";
 
-describe("fetchArticlesAction degrades on a failed read (#2863)", () => {
-  beforeEach(() => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
-  });
+describe("fetchArticlesAction leaves a failed read live for its caller (#2863)", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it("resolves to an empty page instead of rejecting when the articles read fails", async () => {
+  it("rejects instead of resolving to an empty page when the articles read fails", async () => {
     await expect(
       fetchArticlesAction({ offset: 0, limit: 12 }),
-    ).resolves.toEqual({ items: [], hasMore: false });
+    ).rejects.toThrow();
   });
 });

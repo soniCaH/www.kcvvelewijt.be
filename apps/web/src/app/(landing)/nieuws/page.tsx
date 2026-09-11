@@ -54,9 +54,17 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   // Fetch unique tags (lightweight) and initial paginated batch in parallel.
   // `ArticleRepository.findTags` is a Sanity read (`E = never`, #2863), so the
   // guard must be `degradeSection` — a plain `Effect.catchAll` type-checks but
-  // never runs against it. The tag list is a filter facet, not the page's
-  // subject (the article grid is), so a failed read keeps the page up with no
-  // category filters rather than taking it down.
+  // never runs against it — and it degrades to an empty category list rather
+  // than throwing.
+  //
+  // The article grid's own `.catch()` just below is unrelated: it is a
+  // genuine Promise-level handler around `fetchArticlesAction`, not an
+  // Effect-level guard, so it was never affected by the dead-`catchAll` bug
+  // this ticket fixes and stays live either way. `fetchArticlesAction` itself
+  // now deliberately leaves its Sanity read bare (#2863 review round 2,
+  // finding 1) so this `.catch()` — and `NewsListingClient`'s own retry UI on
+  // every later call — actually sees a rejection when the read fails, instead
+  // of a silently-empty success.
   const [allTags, initialBatch] = await Promise.all([
     runPromise(
       degradeSection(
