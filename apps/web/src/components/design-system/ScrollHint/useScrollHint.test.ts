@@ -43,6 +43,14 @@ describe("useScrollHint", () => {
       HTMLElement.prototype,
       "scrollLeft",
     );
+    // Only the "#2448" test below ever calls `.trigger()` on this — every
+    // other test here never fires a resize, so stubbing it file-wide is
+    // behaviourally inert for them. Stubbed/reset in `beforeEach` and
+    // unstubbed in `afterEach` (not inside that one test body) so a thrown
+    // assertion above it can never leave the stub bound for the tests that
+    // follow.
+    FakeResizeObserver.reset();
+    vi.stubGlobal("ResizeObserver", FakeResizeObserver);
   });
 
   afterEach(() => {
@@ -58,6 +66,7 @@ describe("useScrollHint", () => {
     restore("scrollWidth", savedScrollWidth);
     restore("clientWidth", savedClientWidth);
     restore("scrollLeft", savedScrollLeft);
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -392,9 +401,6 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      FakeResizeObserver.reset();
-      vi.stubGlobal("ResizeObserver", FakeResizeObserver);
-
       let hookResult: UseScrollHintReturn | undefined;
       function HostWithChild({
         onHook,
@@ -434,8 +440,6 @@ describe("useScrollHint", () => {
       });
 
       expect(hookResult!.overflows).toBe(true);
-
-      vi.unstubAllGlobals();
     });
   });
 

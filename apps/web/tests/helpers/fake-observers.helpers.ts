@@ -37,9 +37,6 @@ export class FakeIntersectionObserver {
   readonly unobserve = vi.fn();
   readonly disconnect = vi.fn();
   readonly takeRecords = vi.fn((): IntersectionObserverEntry[] => []);
-  readonly root: Element | Document | null = null;
-  readonly rootMargin = "";
-  readonly thresholds: readonly number[] = [];
 
   #callback: IntersectionObserverCallback;
 
@@ -90,6 +87,11 @@ export class FakeResizeObserver {
   constructor(callback: ResizeObserverCallback) {
     this.#callback = callback;
     FakeResizeObserver.instances.push(this);
+  }
+
+  /** True once `disconnect()` has been called on this instance. */
+  get disconnected(): boolean {
+    return this.disconnect.mock.calls.length > 0;
   }
 
   /** Invokes this instance's callback — mirrors `SpyResizeObserver`'s
