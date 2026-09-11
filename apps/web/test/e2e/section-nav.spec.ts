@@ -55,7 +55,7 @@ test.beforeAll(async ({ baseURL }) => {
 
 /** Reads the bar's own bottom edge in viewport coordinates. */
 async function stickyBarBottom(page: Page, testId: string) {
-  return stickyBarBottomFromLocator(page.getByTestId(testId));
+  return stickyBarBottomFromLocator(page.getByTestId(testId), testId);
 }
 
 /**
@@ -63,11 +63,12 @@ async function stickyBarBottom(page: Page, testId: string) {
  * `data-testid` — the organigram nav has none, so its tests locate it by
  * role `navigation` + accessible name instead (see the scroll-spy test
  * above). Shared here once this became a third call site for the same
- * bounding-box arithmetic.
+ * bounding-box arithmetic. `label` names the bar in the thrown error so a
+ * missing-bounding-box failure in CI still says which bar was missing.
  */
-async function stickyBarBottomFromLocator(bar: Locator) {
+async function stickyBarBottomFromLocator(bar: Locator, label: string) {
   const box = await bar.boundingBox();
-  if (!box) throw new Error("sticky bar has no bounding box");
+  if (!box) throw new Error(`sticky bar ${label} has no bounding box`);
   return box.y + box.height;
 }
 
@@ -224,7 +225,10 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     await nav.getByRole("link", { name: "Structuur" }).click();
     await waitForScrollSettled(page);
 
-    const barBottom = await stickyBarBottomFromLocator(nav);
+    const barBottom = await stickyBarBottomFromLocator(
+      nav,
+      "OrganigramSectionNav",
+    );
 
     const targetTop = await page
       .locator("#structuur")
@@ -268,16 +272,25 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
   });
 
-  test("a cold load with a hash already in the URL on /hulp still lands below the bar, even once HubSearch mounts mid-scroll", async ({
+  test("a cold load with a hash already in the URL on /hulp still lands below the bar, once HubSearch mounts in the nav", async ({
     page,
   }) => {
     // /hulp is the route this cold-load path actually needed guarding on:
     // its nav always renders (its sections are static, no pre-season
-    // skip), and <HubSearch> mounting mid-scroll once the hero leaves view
-    // is the exact bar-growth race the correction hook exists for (see the
-    // click variant of this test above). The /ploegen cold-load test above
-    // covers the same code path on a route whose nav can disable itself;
-    // this one can't skip itself the same way.
+    // skip). The /ploegen cold-load test above covers the same code path
+    // on a route whose nav can disable itself; this one can't skip itself
+    // the same way.
+    //
+    // Unlike the click variant above — where the hero genuinely leaves view
+    // *during* the click's scroll animation — a cold load straight to
+    // `#structuur` already has `#hub-hero` out of view by the time
+    // `OrganigramSectionNav`'s `IntersectionObserver` delivers its first
+    // callback at hydration, so `<HubSearch>` mounts immediately rather
+    // than mid-scroll. What this test still exercises is the bar-growth
+    // race that follows: `barHeight` starts at 0, only grows once
+    // `<HubSearch>` mounts and is measured, and `notifyLayoutChange()` must
+    // re-correct an already-armed hash landing against that grown height —
+    // the same mechanism, just resolved at hydration instead of mid-scroll.
     //
     // 375px is where <HubSearch> reveals as its own wrapped row — the same
     // width the sibling click test above uses, for the same reason.
@@ -292,26 +305,44 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     await waitForScrollSettled(page);
 
     const nav = page.getByRole("navigation", { name: "Secties van de hub" });
-    const barBottom = await stickyBarBottomFromLocator(nav);
+
+    // `<HubSearch>` mounting in the nav is the premise of this test (see the
+    // comment above) — assert it directly rather than only inferring it
+    // from the bar's grown height, so a broken reveal (hero id renamed, the
+    // observer dropped) fails this test instead of passing it by accident.
+    await expect(
+      nav.getByRole("combobox", { name: "Zoek een persoon of hulpvraag" }),
+    ).toBeVisible();
+
+    // `waitForScrollSettled` only proves `scrollY` stopped moving — it
+    // cannot tell "the correction already ran" from "the correction hasn't
+    // started yet" (a slow hydration under load could settle at the
+    // pre-correction position and read stale geometry below). Waiting on
+    // this assertion first is what actually waits for the correction: it
+    // auto-retries until `#structuur`'s chip is marked active, which can
+    // only happen once the landing has reached the section.
+    const structuur = nav.getByRole("link", { name: "Structuur" });
+    await expect(structuur).toHaveAttribute("aria-current", "location");
+
+    const barBottom = await stickyBarBottomFromLocator(
+      nav,
+      "OrganigramSectionNav",
+    );
     const targetTop = await page
       .locator("#structuur")
       .evaluate((el) => el.getBoundingClientRect().top);
 
     // A couple of px of slack for sub-pixel rounding — never behind the bar.
+    // The `aria-current` wait above is what makes this assertion meaningful
+    // (see #2640, finding 1): geometry alone can't tell "landed behind the
+    // bar" from "never reached the target" — a stalled-short scroll leaves
+    // `targetTop` even further below the viewport, which trivially
+    // satisfies this same comparison. A manual run of this test with
+    // `useHashLandingCorrection`'s `correct()` neutralised confirmed the
+    // gap: the cold load stalled at `scrollY ≈ 1199px` while `#structuur`
+    // sits at document position `≈3267px`, and the `aria-current` wait
+    // above failed loudly while this line alone would have passed.
     expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
-
-    // The geometry check above only proves the target isn't hidden BEHIND
-    // the bar — a scroll that stalled well SHORT of the target (never
-    // reaching it at all) leaves `targetTop` even further below the
-    // viewport, which trivially satisfies that same assertion (the same gap
-    // #2640's review, finding 1, closed for the click variant above — a
-    // manual run of this test with the correction disabled reproduced it
-    // here too: the cold load stalled at a much earlier scroll position,
-    // which this assertion alone did not catch). Asserting scroll-spy's own
-    // fill against `#structuur` closes it the same way: only a landing that
-    // actually reached the section marks its chip active.
-    const structuur = nav.getByRole("link", { name: "Structuur" });
-    await expect(structuur).toHaveAttribute("aria-current", "location");
   });
 
   test("/jeugd#visie — no section nav on this route, lands below the header alone", async ({
