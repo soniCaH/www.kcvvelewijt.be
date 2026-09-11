@@ -23,6 +23,19 @@ export const size = OG_SIZE;
 
 export const contentType = OG_CONTENT_TYPE;
 
+// This route is prerendered (the parent segment exports
+// `generateStaticParams`) and, like every prerendered route, defaults to
+// `revalidate: false` — permanently cached — unless it declares its own
+// window. A degraded club-card fallback would otherwise be baked in for the
+// life of the deploy on any build-time Sanity flake, and `/api/revalidate`
+// cannot rescue it: `revalidatePath` targets the sibling page route, not
+// this one. Matches `page.tsx`'s own 86400s window rather than the general
+// 900s cap (`cross-page-consistency.test.ts` rule 5): `/staf/[slug]` is the
+// one route #2433 deliberately left at 86400 despite degrading a Sanity
+// section, and this image shares the same subject and the same webhook-
+// freshness argument (#2863 review round 2, finding 2).
+export const revalidate = 86400;
+
 interface ImageProps {
   params: Promise<{ slug: string }>;
 }
