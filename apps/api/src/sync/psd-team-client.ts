@@ -117,11 +117,15 @@ export const PsdTeamClientLive = Layer.effect(
     // runs the remaining pages at 3 — so without a token those six in-flight
     // calls sat entirely outside the ≤5/s worldwide budget (#2318).
     //
-    // Pacing only. This does NOT put the sync inside incident alerting:
+    // Pacing only. This does NOT put the sync inside PSD incident alerting:
     // `gate.reportOutcome` is called from the `TypedKvCache` refresh path
     // (`cache/kv-cache.ts`) alone, and the sync never goes through one — it
     // touches `KvCacheService` for `increment()` and nothing else. A sync that
-    // fails against a 429-ing PSD still opens no incident and pings no Slack.
+    // fails against a 429-ing PSD still opens no PSD incident — deliberate,
+    // see `psd/job-alert.ts`'s doc comment and apps/api/CLAUDE.md. It DOES
+    // now ping Slack: `index.ts`'s `scheduled()` reports the outcome to the
+    // separate, debounced job-failure signal (#2870), which never touches
+    // `IncidentTracker` and cannot escalate the read path's serve-stale logs.
     const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
       gate.acquireToken.pipe(
         Effect.zipRight(fetchJson(url, schema, psdHeaders)),
