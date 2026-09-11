@@ -732,22 +732,22 @@ describe("TeamAgendaRow", () => {
    * calendar but the opponent and programme aren't settled yet. Unlike the
    * normal row, this state is ONE DOM tree at every viewport (no
    * `data-layout` split — its two breakpoints differ only in a font size
-   * and a spacer), scoped for these tests via `[data-placeholder="true"]`.
+   * and a spacer), scoped for these tests via `[data-row-kind="reservation"]`.
    */
   describe("Placeholder fixture (#2606)", () => {
     const placeholderRow = () =>
-      document.querySelector('[data-placeholder="true"]') as HTMLElement;
+      document.querySelector('[data-row-kind="reservation"]') as HTMLElement;
 
-    it("marks itself with data-placeholder — a normal row never carries the attribute", () => {
+    it("marks itself with data-row-kind=reservation — a normal row never carries the attribute", () => {
       const { container: withPlaceholder } = render(
         <TeamAgendaRow match={PLACEHOLDER} />,
       );
       expect(
-        withPlaceholder.querySelector('[data-placeholder="true"]'),
+        withPlaceholder.querySelector('[data-row-kind="reservation"]'),
       ).not.toBeNull();
 
       const { container: normal } = render(<TeamAgendaRow match={BASE} />);
-      expect(normal.querySelector("[data-placeholder]")).toBeNull();
+      expect(normal.querySelector("[data-row-kind]")).toBeNull();
     });
 
     it("keeps the date stub", () => {
@@ -974,18 +974,18 @@ describe("TeamAgendaRow", () => {
    */
   describe("Tournament fixture (#2696)", () => {
     const tournamentRow = () =>
-      document.querySelector('[data-tournament="true"]') as HTMLElement;
+      document.querySelector('[data-row-kind="reduced"]') as HTMLElement;
 
-    it("marks itself with data-tournament — a normal row never carries the attribute", () => {
+    it("marks itself with data-row-kind=reduced — a normal row never carries the attribute", () => {
       const { container: withTournament } = render(
         <TeamAgendaRow match={TOURNAMENT} />,
       );
       expect(
-        withTournament.querySelector('[data-tournament="true"]'),
+        withTournament.querySelector('[data-row-kind="reduced"]'),
       ).not.toBeNull();
 
       const { container: normal } = render(<TeamAgendaRow match={BASE} />);
-      expect(normal.querySelector("[data-tournament]")).toBeNull();
+      expect(normal.querySelector("[data-row-kind]")).toBeNull();
     });
 
     it("gates on the structured competitionType, never on the Dutch competition label", () => {
@@ -997,7 +997,7 @@ describe("TeamAgendaRow", () => {
         />,
       );
       expect(
-        leagueWithTornooiLabel.querySelector('[data-tournament="true"]'),
+        leagueWithTornooiLabel.querySelector('[data-row-kind="reduced"]'),
       ).toBeNull();
       // It's the ordinary two-team row — both layouts render in jsdom (no
       // CSS breakpoints), so home+away show on desktop and the opponent
@@ -1015,7 +1015,7 @@ describe("TeamAgendaRow", () => {
         />,
       );
       expect(
-        tournamentWithOtherLabel.querySelector('[data-tournament="true"]'),
+        tournamentWithOtherLabel.querySelector('[data-row-kind="reduced"]'),
       ).not.toBeNull();
     });
 
@@ -1124,8 +1124,7 @@ describe("TeamAgendaRow", () => {
       };
       const { container } = render(<TeamAgendaRow match={played} />);
 
-      expect(container.querySelector('[data-tournament="true"]')).toBeNull();
-      expect(container.querySelector('[data-placeholder="true"]')).toBeNull();
+      expect(container.querySelector("[data-row-kind]")).toBeNull();
       expect(screen.getByRole("link")).toBeInTheDocument();
       expect(screen.getByTestId("team-agenda-row").textContent).toContain("3");
       expect(screen.getByTestId("team-agenda-row").textContent).toContain("1");

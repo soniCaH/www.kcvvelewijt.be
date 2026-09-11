@@ -93,8 +93,7 @@ function ReservationAgendaRow({
   const when = match.time ?? formatMatchTime(match.date) ?? "";
   return (
     <div
-      data-placeholder={match.isPlaceholder ? "true" : undefined}
-      data-tournament={match.kind === "reduced" ? "true" : undefined}
+      data-row-kind={match.kind}
       className="border-paper-edge grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 last:border-b-0"
     >
       <span className="text-ink-muted font-mono text-[11px]">{when}</span>

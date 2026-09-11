@@ -353,7 +353,7 @@ describe("UpcomingMatches", () => {
       const article = screen.getByRole("article", { name: /Tornooi/ });
       expect(article).toBeInTheDocument();
       // The one marker every reservation renderer carries (#2688).
-      expect(article).toHaveAttribute("data-placeholder", "true");
+      expect(article).toHaveAttribute("data-row-kind", "reservation");
     });
 
     it("prints the status wording on a cancelled reservation — a dead slot must not read as live", () => {
@@ -386,11 +386,10 @@ describe("UpcomingMatches", () => {
       expect(container).toHaveTextContent("FC Zemst Sportief");
     });
 
-    it("gives the tournament row its own accessible name, marked data-tournament not data-placeholder", () => {
+    it("gives the tournament row its own accessible name, marked data-row-kind=reduced", () => {
       render(<UpcomingMatches matches={mockUpcomingWithTournament} />);
       const article = screen.getByRole("article", { name: /Tornooi/ });
-      expect(article).toHaveAttribute("data-tournament", "true");
-      expect(article).not.toHaveAttribute("data-placeholder");
+      expect(article).toHaveAttribute("data-row-kind", "reduced");
     });
 
     it("still buckets the tournament fixture under its own squad's filter chip", () => {

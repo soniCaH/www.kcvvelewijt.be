@@ -13,7 +13,7 @@ const SCHEDULE_TABLE_HTML = `
   </thead>
   <tbody>
     <tr><td>Za 12 jul</td><td>VK Veltem</td><td>Uit</td><td>2-1</td></tr>
-    <tr><td>Za 19 jul</td><td>SK Berg</td><td>Thuis</td><td>3-0</td></tr>
+    <tr><td>Za 19 jul</td><td><strong>SK Berg</strong></td><td>Thuis</td><td>3-0</td></tr>
     <tr><td>Za 26 jul</td><td>FC Diest</td><td>Uit</td><td>1-1</td></tr>
     <tr><td>Za 2 aug</td><td>KFC Boechout</td><td>Thuis</td><td>3-1</td></tr>
     <tr><td>Za 9 aug</td><td>RC Mechelen</td><td>Uit</td><td>0-2</td></tr>

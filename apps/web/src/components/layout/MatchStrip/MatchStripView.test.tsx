@@ -274,7 +274,7 @@ describe("MatchStripView", () => {
       // The one marker every reservation renderer carries (#2688) — lets a
       // consumer (or a future test) find this row without depending on the
       // element type or the accessible name.
-      expect(article).toHaveAttribute("data-placeholder", "true");
+      expect(article).toHaveAttribute("data-row-kind", "reservation");
     });
 
     it("prints the club crest, never the opponent's — a reservation has no opponent", () => {
@@ -379,11 +379,10 @@ describe("MatchStripView", () => {
       ).toBeInTheDocument();
     });
 
-    it("marks the row data-tournament, not data-placeholder", () => {
+    it("marks the row data-row-kind=reduced", () => {
       render(<MatchStripView data={{ result: null, fixture: tournament }} />);
       const article = screen.getByRole("article", { name: /Tornooi/ });
-      expect(article).toHaveAttribute("data-tournament", "true");
-      expect(article).not.toHaveAttribute("data-placeholder");
+      expect(article).toHaveAttribute("data-row-kind", "reduced");
     });
 
     it("desktop slide: no CTA, no second crest", () => {

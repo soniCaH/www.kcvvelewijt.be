@@ -59,8 +59,7 @@ function ReservationWeekCard({
   const { subject, statusWording } = reservationView(match, otherClub);
   return (
     <div
-      data-placeholder={match.isPlaceholder ? "true" : undefined}
-      data-tournament={match.kind === "reduced" ? "true" : undefined}
+      data-row-kind={match.kind}
       className="border-ink bg-cream shadow-paper-sm block border-2 p-1.5"
     >
       {match.team && (

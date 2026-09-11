@@ -93,6 +93,39 @@ describe("<HtmlTableBlock>", () => {
     expect(region.innerHTML).not.toContain("<script");
   });
 
+  it("renders <strong> inside a cell — the fixture calendar's side marker (#2481)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><strong>KCVV Elewijt A</strong></td><td>VK Veltem</td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const region = screen.getByRole("region");
+    const strong = region.querySelector("strong");
+    expect(strong).not.toBeNull();
+    expect(strong?.textContent).toBe("KCVV Elewijt A");
+  });
+
+  it("still strips <a> and every other unlisted tag — the allowlist gained exactly one entry (#2481)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="/player/some-slug">Speler</a></td><td><em>Uit</em></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const region = screen.getByRole("region");
+    expect(region.querySelector("a")).toBeNull();
+    expect(region.querySelector("em")).toBeNull();
+    expect(region.innerHTML).not.toContain("<a ");
+    expect(region.innerHTML).not.toContain("<em>");
+    expect(region.textContent).toContain("Speler");
+    expect(region.textContent).toContain("Uit");
+  });
+
   it("preserves colspan/rowspan/scope attributes", () => {
     const html = `
       <table>
