@@ -404,7 +404,12 @@ export function SharePage({ matches, players }: SharePageProps) {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   // Drop a generated preview once it no longer matches the form, so the
-  // Share/Download buttons can never emit a stale graphic.
+  // Share/Download buttons can never emit a stale graphic. Also drops any
+  // export failure notice: it can only ever describe the preview/blob this
+  // same call just nulled (Generate clears it up front too — see
+  // `handleGenerate`/`handleShare` — this is the field-change path), so a
+  // failure notice can never outlive the Genereer/Delen button it refers to
+  // (#2818 review finding 1).
   const clearPreview = useCallback(() => {
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -412,6 +417,7 @@ export function SharePage({ matches, players }: SharePageProps) {
     }
     setGeneratedBlob(null);
     setPreviewUrl(null);
+    setExportFailure(null);
   }, []);
 
   const clearUpload = useCallback(() => {
@@ -588,6 +594,13 @@ export function SharePage({ matches, players }: SharePageProps) {
 
   const handleShare = async () => {
     if (!generatedBlob) return;
+    // Clear any stale notice from a previous share attempt up front — the
+    // same "clear on entry" `handleGenerate` already does — so a retry that
+    // now succeeds doesn't leave the old failure notice on screen, and a
+    // repeat failure is a real null→"share" state transition (re-announced
+    // to assistive tech) rather than a same-value bailout (#2818 review
+    // finding 1).
+    setExportFailure(null);
     const file = new File([generatedBlob], `kcvv-${selectedTemplateId}.png`, {
       type: "image/png",
     });
@@ -964,7 +977,13 @@ export function SharePage({ matches, players }: SharePageProps) {
 
       {/* Tier 2, no action (#2818, mirrors #2580 rule 4): the Genereer/Delen
           button below already survives this failure and is its own retry,
-          so a second control here would be redundant. Replaces the retired
+          so a second control here would be redundant. True by construction,
+          not just by luck: Genereer is unconditional, and a "share" failure
+          only exists while `generatedBlob` is still set (`handleShare`
+          early-returns without one, and `clearPreview` nulls the failure in
+          the same call it nulls the blob) — so whenever this notice can
+          read `exportFailure === "share"`, the Delen/Download button is
+          still on screen too. Replaces the retired
           `<p role="alert" className="text-card-red">` idiom. */}
       {exportFailure && (
         <EmptyState
