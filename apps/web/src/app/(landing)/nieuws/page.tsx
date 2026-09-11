@@ -9,6 +9,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
@@ -50,14 +51,31 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
   const categorySlug = params.categorie;
 
-  // Fetch unique tags (lightweight) and initial paginated batch in parallel
+  // Fetch unique tags (lightweight) and initial paginated batch in parallel.
+  // `ArticleRepository.findTags` is a Sanity read (`E = never`, #2863), so the
+  // guard must be `degradeSection` — a plain `Effect.catchAll` type-checks but
+  // never runs against it — and it degrades to an empty category list rather
+  // than throwing.
+  //
+  // The article grid's own `.catch()` just below is unrelated: it is a
+  // genuine Promise-level handler around `fetchArticlesAction`, not an
+  // Effect-level guard, so it was never affected by the dead-`catchAll` bug
+  // this ticket fixes and stays live either way. `fetchArticlesAction` itself
+  // now deliberately leaves its Sanity read bare (#2863 review round 2,
+  // finding 1) so this `.catch()` — and `NewsListingClient`'s own retry UI on
+  // every later call — actually sees a rejection when the read fails, instead
+  // of a silently-empty success.
   const [allTags, initialBatch] = await Promise.all([
     runPromise(
-      Effect.gen(function* () {
-        const repo = yield* ArticleRepository;
-        const tags = yield* repo.findTags();
-        return tags.filter((t: string | null): t is string => t != null);
-      }).pipe(Effect.catchAll(() => Effect.succeed([] as string[]))),
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          const tags = yield* repo.findTags();
+          return tags.filter((t: string | null): t is string => t != null);
+        }),
+        [] as string[],
+        "[NewsPage] tags read failed; falling back to an empty category list.",
+      ),
     ),
     fetchArticlesAction({
       offset: 0,
