@@ -598,8 +598,7 @@ export function TeamAgendaRow({
       <article
         data-testid="team-agenda-row"
         data-featured={featured}
-        data-placeholder={match.isPlaceholder ? "true" : undefined}
-        data-tournament={match.kind === "reduced" ? "true" : undefined}
+        data-row-kind={match.kind}
         aria-label={placeholderLabel}
         className={cardBase}
       >

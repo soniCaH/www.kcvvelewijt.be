@@ -301,8 +301,7 @@ const ReservationMatchRow = ({
   return (
     <article
       aria-label={label}
-      data-placeholder={match.isPlaceholder ? "true" : undefined}
-      data-tournament={match.kind === "reduced" ? "true" : undefined}
+      data-row-kind={match.kind}
       className={cn(
         "border-ink bg-cream relative grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-2 px-4 py-3",
         "sm:grid-cols-[auto_1fr_auto] sm:gap-x-4",
