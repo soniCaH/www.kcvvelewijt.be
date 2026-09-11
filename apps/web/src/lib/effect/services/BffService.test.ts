@@ -168,19 +168,27 @@ describe("BffService", () => {
     // ploegen/[slug]/wedstrijden `catchTag("HttpNotFound") → notFound()` path.
     // We assert on the specific tag (not catchAll): anything that flattens the
     // error to an opaque UnknownException would fall through to "flattened".
-    // An empty 500 body fails the declared error union's decode, so the tag
-    // that survives here is ParseError — see the test below for the
-    // HttpNotFound path.
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    // A 503 is a status `getMatches` declares (see
+    // packages/api-contract/src/api/matches.ts), so this exercises a real
+    // round-trip through the client's decode map -- the server-declared
+    // status is read back off the response and the body decodes as the
+    // matching HttpServiceUnavailable class. This is the only test in the
+    // suite that pins that path for a non-404 declared error; see the test
+    // below for the 404/HttpNotFound path, and the one after for what
+    // happens on a status the endpoint does NOT declare.
+    mockFetchWith(
+      {
+        error: "Service temporarily unavailable",
+        _tag: "HttpServiceUnavailable",
+      },
+      503,
     );
 
     const result = await Effect.runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getMatches(1).pipe(
-          Effect.catchTag("ParseError", () =>
+          Effect.catchTag("HttpServiceUnavailable", () =>
             Effect.succeed("typed-survived" as const),
           ),
           Effect.catchAll(() => Effect.succeed("flattened" as const)),
@@ -193,20 +201,50 @@ describe("BffService", () => {
     expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
   });
 
+  it("an undeclared status surfaces as an untyped ResponseError, not a decode error", async () => {
+    // `getMatches` declares errors for 503/502/404 only (see
+    // packages/api-contract/src/api/matches.ts), so a bare 500 -- which none
+    // of those cover -- never reaches the declared error union at all. The
+    // client's `HttpApiClient` surfaces it as `ResponseError`
+    // (`@effect/platform/HttpClientError`'s "ResponseError" tag), not a
+    // decode failure. This pins the mechanism the #2440 deploy-order section
+    // relies on: an undecodable status "falls through ... and surfaces as an
+    // untyped `ResponseError`", which classifies as transient (not in
+    // PERMANENT_BFF_TAGS) and throws for ISR to retry.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("", { status: 500 })),
+    );
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getMatches(1).pipe(
+          Effect.catchTag("ResponseError", () =>
+            Effect.succeed("untyped-response-error" as const),
+          ),
+          Effect.catchAll(() => Effect.succeed("flattened" as const)),
+        );
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(result).toBe("untyped-response-error");
+    expect(vi.mocked(fetch)).toHaveBeenCalledTimes(1);
+  });
+
   it("surfaces a missing match as a typed HttpNotFound at the call site", async () => {
     // The invariant behind `catchTag("HttpNotFound") → notFound()` at
     // wedstrijd/[matchId] (and the empty-array fallbacks at sitemap.ts,
     // ploegen/[slug]/wedstrijden, share, tegenstander).
     //
-    // NB the status: 500, not 404. The `{ status }` argument in
-    // `packages/api-contract/src/schemas/http-errors.ts` is a plain schema
-    // annotation, which @effect/platform does not read (it wants
-    // `HttpApiSchema.annotations({ status })`), so every declared error resolves
-    // to 500 and carries its discriminator in the body instead. A real 404 is
-    // not in the client's decode map at all and surfaces as an untyped
-    // ResponseError. This pins the wire contract as it is, so fixing the status
-    // annotation fails loudly here rather than silently breaking `notFound()`.
-    mockFetchWith({ error: "Not found", _tag: "HttpNotFound" }, 500);
+    // The wire status is 404, matching `HttpNotFound`'s declared status.
+    // `packages/api-contract/src/schemas/http-errors.ts` attaches it via
+    // `HttpApiSchema.annotations({ status })`, which is the annotation
+    // `@effect/platform` actually reads to both serve and decode the
+    // response — so the client's decode map has a 404 entry and this
+    // resolves through the typed `HttpNotFound` branch below rather than
+    // falling through to an untyped `ResponseError`.
+    mockFetchWith({ error: "Not found", _tag: "HttpNotFound" }, 404);
 
     const result = await Effect.runPromise(
       Effect.gen(function* () {
