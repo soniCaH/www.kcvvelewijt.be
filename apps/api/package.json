@@ -16,10 +16,10 @@
     "cache:clear:staging:key": "wrangler kv key delete --binding=PSD_CACHE --env staging"
   },
   "dependencies": {
-    "@effect/platform": "0.97.1",
+    "@effect/platform": "0.97.2",
     "@kcvv/api-contract": "workspace:*",
-    "@sanity/client": "8.6.0",
-    "effect": "3.22.1"
+    "@sanity/client": "8.6.1",
+    "effect": "3.22.2"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20260901.1",
