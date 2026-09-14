@@ -356,15 +356,22 @@ describe("/ — the agenda's outage signal is its own read (#2505 review finding
   });
 });
 
+// A literal future date is a time bomb — it silently starts failing once the
+// calendar catches up to it, with no code change and no one touching this
+// file. Freeze the clock instead (mirrors `TeamMatchesSection.test.tsx`'s
+// `NOW` + `vi.setSystemTime` pattern) and date the fixture relative to that
+// frozen `NOW`, so `<FeaturedEventBand>`'s own drop-if-empty guard (which
+// reads `DateTime.now()` — no `now` prop is threaded through from
+// `page.tsx`) can never see it as "past".
+const NOW = new Date("2026-09-15T12:00:00.000Z");
+
 /** Only the fields `toFeaturedEventBandEvent` reads — mirrors the fixture in
- *  `to-featured-event.test.ts`. Dated well past this suite's run so it
- *  can't accidentally read as "past" and get dropped by
- *  `<FeaturedEventBand>`'s own drop-if-empty guard. */
+ *  `to-featured-event.test.ts`. */
 const featuredEventFixture: EventVM = {
   id: "event-1",
   title: "Mosselfestijn",
   slug: "mosselfestijn",
-  dateStart: "2027-06-01T18:00:00Z",
+  dateStart: "2026-09-20T18:00:00.000Z", // 5 days after the frozen `NOW`
   dateEnd: null,
   eventType: null,
   location: null,
@@ -375,6 +382,8 @@ const featuredEventFixture: EventVM = {
 
 describe("/ — the featured-event band holds its shape on a failed read (#2944)", () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
     vi.spyOn(console, "warn").mockImplementation(() => {});
     mockGetNextMatches.mockReturnValue(Effect.succeed([]));
     mockTeamsFindAll.mockReturnValue(Effect.succeed([]));
@@ -386,6 +395,7 @@ describe("/ — the featured-event band holds its shape on a failed read (#2944)
     );
   });
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
