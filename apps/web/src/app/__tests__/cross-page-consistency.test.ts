@@ -1306,24 +1306,23 @@ describe("a repository method with no caller renders nothing, silently (#2505)",
   // and this fails loudly the day that happens rather than quietly stop
   // testing a method that no longer needs the carve-out.
   //
-  // Guarded on a non-empty list: `it.each([])` throws "No test found in
-  // suite" under Vitest 4 rather than silently registering zero tests, so an
-  // empty `ORPHAN_EXEMPTIONS` (the common case — every orphan found so far
-  // has been fixed, not carved out) must not reach `describe` at all.
-  const exempted = Object.entries(ORPHAN_EXEMPTIONS).flatMap(
-    ([file, methods]) => methods.map((method) => [file, method] as const),
-  );
-  if (exempted.length > 0) {
-    describe("exemptions stay pinned to a real, still-live orphan", () => {
-      it.each(exempted)(
-        "%s — %s is still actually orphaned",
-        (file, method) => {
-          const repo = repositories.find((r) => r.file === file)!;
-          expect(hasCaller(repo, method)).toBe(false);
-        },
-      );
-    });
-  }
+  // One always-registered test looping the list internally, not `it.each` —
+  // `it.each([])` throws "No test found in suite" under Vitest 4 rather than
+  // registering zero tests, and a conditional `describe` around it would
+  // make the pin itself disappear from the report the moment the map is
+  // empty (the common case — every orphan found so far has been fixed, not
+  // carved out), leaving rule 10's "no fewer, no more" bar structurally
+  // unenforced. This test stays in the report either way: vacuously true
+  // when the map is empty, and it still fails per-entry when it isn't.
+  it("exemptions stay pinned to a real, still-live orphan", () => {
+    const exempted = Object.entries(ORPHAN_EXEMPTIONS).flatMap(
+      ([file, methods]) => methods.map((method) => [file, method] as const),
+    );
+    for (const [file, method] of exempted) {
+      const repo = repositories.find((r) => r.file === file)!;
+      expect(hasCaller(repo, method), `${file} — ${method}`).toBe(false);
+    }
+  });
 });
 
 /**
