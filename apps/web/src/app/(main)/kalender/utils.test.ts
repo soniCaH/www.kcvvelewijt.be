@@ -26,6 +26,7 @@ import type {
   CalendarReducedMatch,
 } from "./utils";
 import { asNonPlaceholder, asReduced } from "@/components/match/test-narrowing";
+import { createMatch } from "@/components/match/match.fixtures";
 import {
   reservationMatch,
   tournamentMatch,
@@ -57,8 +58,11 @@ const _reducedHasNoHomeTeam: CalendarReducedMatch = {
   homeTeam: { id: 1235, name: "KCVV Elewijt" },
 };
 
-function createMatch(overrides: Partial<Match> = {}): Match {
-  return {
+/** This suite's own defaults for the shared raw-`Match` factory (#2826) — kept
+ *  identical to the pre-migration local `createMatch` so no assertion below
+ *  had to change. */
+function createTestMatch(overrides: Partial<Match> = {}): Match {
+  return createMatch({
     id: 100,
     date: new Date("2026-03-28T14:00:00Z"),
     time: "14:00",
@@ -68,12 +72,12 @@ function createMatch(overrides: Partial<Match> = {}): Match {
     competition: "2e Nationale",
     kcvv_team_label: "A-Ploeg",
     ...overrides,
-  } as Match;
+  });
 }
 
 describe("transformMatchToCalendar", () => {
   it("maps all fields correctly", () => {
-    const match = createMatch();
+    const match = createTestMatch();
     const result = transformMatchToCalendar(match);
 
     expect(result).toEqual({
@@ -95,9 +99,11 @@ describe("transformMatchToCalendar", () => {
   });
 
   it("normalizes isPlaceholder to a definite boolean, never undefined (#2688)", () => {
-    expect(transformMatchToCalendar(createMatch()).isPlaceholder).toBe(false);
+    expect(transformMatchToCalendar(createTestMatch()).isPlaceholder).toBe(
+      false,
+    );
     expect(
-      transformMatchToCalendar(createMatch({ is_placeholder: true }))
+      transformMatchToCalendar(createTestMatch({ is_placeholder: true }))
         .isPlaceholder,
     ).toBe(true);
   });
@@ -111,21 +117,21 @@ describe("transformMatchToCalendar", () => {
     // output, which has no `isHome` field to get the order wrong on
     // (#2802 review).
     const result = transformMatchToCalendar(
-      createMatch({ is_placeholder: true, is_home: true }),
+      createTestMatch({ is_placeholder: true, is_home: true }),
     );
     expect(result.kind).toBe("reservation");
     expect("isHome" in result).toBe(false);
   });
 
   it("renames kcvv_team_label to team", () => {
-    const match = createMatch({ kcvv_team_label: "U21" });
+    const match = createTestMatch({ kcvv_team_label: "U21" });
     const result = transformMatchToCalendar(match);
 
     expect(result.team).toBe("U21");
   });
 
   it("serializes date to ISO string", () => {
-    const match = createMatch({
+    const match = createTestMatch({
       date: new Date("2026-06-15T18:30:00Z"),
     });
     const result = transformMatchToCalendar(match);
@@ -134,15 +140,15 @@ describe("transformMatchToCalendar", () => {
   });
 
   it("passes through is_home as isHome", () => {
-    const home = createMatch({ is_home: true } as Partial<Match>);
+    const home = createTestMatch({ is_home: true } as Partial<Match>);
     expect(asNonPlaceholder(transformMatchToCalendar(home)).isHome).toBe(true);
 
-    const away = createMatch({ is_home: false } as Partial<Match>);
+    const away = createTestMatch({ is_home: false } as Partial<Match>);
     expect(asNonPlaceholder(transformMatchToCalendar(away)).isHome).toBe(false);
   });
 
   it("passes competitionType through when present (#2696)", () => {
-    const match = createMatch({ competitionType: "tournament" });
+    const match = createTestMatch({ competitionType: "tournament" });
     expect(
       asNonPlaceholder(transformMatchToCalendar(match)).competitionType,
     ).toBe("tournament");
@@ -150,12 +156,13 @@ describe("transformMatchToCalendar", () => {
 
   it("leaves competitionType undefined when absent", () => {
     expect(
-      asNonPlaceholder(transformMatchToCalendar(createMatch())).competitionType,
+      asNonPlaceholder(transformMatchToCalendar(createTestMatch()))
+        .competitionType,
     ).toBeUndefined();
   });
 
   it("passes through undefined scores", () => {
-    const match = createMatch({
+    const match = createTestMatch({
       home_team: { id: 1, name: "KCVV Elewijt" },
       away_team: { id: 2, name: "KFC Turnhout" },
       status: "scheduled",
@@ -169,7 +176,7 @@ describe("transformMatchToCalendar", () => {
 
   describe("a tournament fixture with no result yet reverts to the full scoreboard once a score arrives (#2696/#2802)", () => {
     it("returns the CalendarReducedMatch shape — the other club's crest, no homeTeam/awayTeam/scores", () => {
-      const pending = createMatch({
+      const pending = createTestMatch({
         competitionType: "tournament",
         status: "scheduled",
         home_team: { id: 1235, name: "KCVV Elewijt" },
@@ -191,7 +198,7 @@ describe("transformMatchToCalendar", () => {
     });
 
     it('reverts to kind: "match" the moment both scores are present, same fixture id', () => {
-      const played = createMatch({
+      const played = createTestMatch({
         id: 555,
         competitionType: "tournament",
         status: "finished",
@@ -213,7 +220,7 @@ describe("transformMatchToCalendar", () => {
       // `otherClubSide()` call sites; only asserting the KCVV-home
       // direction here would leave this one uncovered if it ever drifted
       // to reading `away_team` unconditionally.
-      const pending = createMatch({
+      const pending = createTestMatch({
         competitionType: "tournament",
         status: "scheduled",
         home_team: { id: 77, name: "FC Zemst Sportief" },
