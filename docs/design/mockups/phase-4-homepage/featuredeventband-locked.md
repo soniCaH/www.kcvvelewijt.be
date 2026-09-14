@@ -6,8 +6,11 @@
 ## Composition
 
 ```text
-<FeaturedEventBand>                       // server component
-  if (event === null) return null;        // drop-if-empty
+<FeaturedEventBand unavailable>           // server component
+  if (event === null) {
+    if (!unavailable) return null;        // drop-if-empty: genuinely no upcoming event
+    return <heldOpenNotice />;            // #2944: EventRepository read failed — hold the
+  }                                       // band's shape and name the reason instead
   <section className="jersey-deep-band">
     <div className="grid 1fr 1.4fr">
       <TapedFigure
@@ -31,30 +34,31 @@
 
 ## Spec
 
-| Aspect | Value |
-| --- | --- |
-| Section background | `var(--jersey-deep)` |
-| Layout | Image left 1fr + text right 1.4fr (desktop); stacks on mobile |
-| Image treatment | `<TapedFigure>` polaroid with `tape="warm"` variant (new — see Phase 0 task) |
-| Image aspect | `landscape-16-9` |
-| Polaroid rotation | `rotation="a"` (-0.5°) |
-| Text colour | `var(--cream)` |
-| Accent colour | `#f0c264` (warm yellow) on first noun in title |
-| Meta line | `AANSTAAND EVENEMENT` (uppercase mono, opacity 0.85) |
-| Headline | Event `title` rendered via `<EditorialHeading>` italic with optional accent decorator |
-| When line | `formatDateTime(dateStart, dateEnd)` + optional `location` (defaults to "Kantine") |
-| CTA copy | `event.externalLink.label` if present, else `"Meer info →"` |
-| CTA target | `event.externalLink.url` if present, else `/evenementen/${event.slug}` |
-| CTA hover | Canonical press-down |
-| Empty state | If 0 future events flagged `featuredOnHome === true`, return null |
+| Aspect                    | Value                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Section background        | `var(--jersey-deep)`                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Layout                    | Image left 1fr + text right 1.4fr (desktop); stacks on mobile                                                                                                                                                                                                                                                                                                                                                                  |
+| Image treatment           | `<TapedFigure>` polaroid with `tape="warm"` variant (new — see Phase 0 task)                                                                                                                                                                                                                                                                                                                                                   |
+| Image aspect              | `landscape-16-9`                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Polaroid rotation         | `rotation="a"` (-0.5°)                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Text colour               | `var(--cream)`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Accent colour             | `#f0c264` (warm yellow) on first noun in title                                                                                                                                                                                                                                                                                                                                                                                 |
+| Meta line                 | `AANSTAAND EVENEMENT` (uppercase mono, opacity 0.85)                                                                                                                                                                                                                                                                                                                                                                           |
+| Headline                  | Event `title` rendered via `<EditorialHeading>` italic with optional accent decorator                                                                                                                                                                                                                                                                                                                                          |
+| When line                 | `formatDateTime(dateStart, dateEnd)` + optional `location` (defaults to "Kantine")                                                                                                                                                                                                                                                                                                                                             |
+| CTA copy                  | `event.externalLink.label` if present, else `"Meer info →"`                                                                                                                                                                                                                                                                                                                                                                    |
+| CTA target                | `event.externalLink.url` if present, else `/evenementen/${event.slug}`                                                                                                                                                                                                                                                                                                                                                         |
+| CTA hover                 | Canonical press-down                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Empty state               | `event === null` and the read succeeded (genuinely no upcoming event) → return null. Not gated on `featuredOnHome`: the query prefers a flagged event but falls back to any next upcoming one, so this is the true no-event case, not "nothing flagged" (corrected #2944 — the original wording here was itself the premise #2944 found false).                                                                                |
+| Failed-read state (#2944) | `event === null` and `unavailable === true` (the `EventRepository.findNextFeatured()` read failed) → hold the band's shape: kicker + a static heading + a dashed held-open notice, cream-on-jersey-deep. Not routed through `<EmptyState tier="slot" reason="unavailable">` — that register is ink-only, documented as wrong on a dark-green band; see `FeaturedEventUnavailableNotice`'s docblock in `FeaturedEventBand.tsx`. |
 
 ## Locked decisions
 
-| Round | Decision | Rationale |
-| --- | --- | --- |
-| 3 (IA) | **E.2 · Standalone band between hero and NewsGrid** | Surfaces the band; positions it after hero |
-| 10 | **L.1 · Image left (TapedFigure) + text right** | Reuses TapedFigure (consistent with NewsCard / EditorialHero cover) |
-| F.1 | **Warm/yellow tape variant on jersey-deep sections** | Default jersey-tape green disappears against jersey-deep section bg |
+| Round  | Decision                                             | Rationale                                                           |
+| ------ | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| 3 (IA) | **E.2 · Standalone band between hero and NewsGrid**  | Surfaces the band; positions it after hero                          |
+| 10     | **L.1 · Image left (TapedFigure) + text right**      | Reuses TapedFigure (consistent with NewsCard / EditorialHero cover) |
+| F.1    | **Warm/yellow tape variant on jersey-deep sections** | Default jersey-tape green disappears against jersey-deep section bg |
 
 ## New `tape="warm"` variant
 
@@ -70,19 +74,20 @@ in. Phase 4 introduces a `warm` variant:
 
 ## Data flow
 
-| Field | Source | Notes |
-| --- | --- | --- |
-| `event` | `EventRepository.findNextFeatured()` (existing) | Returns next future event with `featuredOnHome === true` |
-| `title` | Sanity `event.title` (PortableText with optional accent decorator) | Rendered via `<EditorialHeading>` |
-| `dateStart` | Sanity `event.dateStart` (datetime) | Required |
-| `dateEnd` | Sanity `event.dateEnd` (datetime) | Optional; if present, format as range |
-| `coverImage` | Sanity `event.coverImage` | Required for FeaturedEventBand to show — if missing, treat as empty and return null |
-| `externalLink` | Sanity `event.externalLink {url, label}` | Optional; falls back to internal `/evenementen/{slug}` |
-| `location` | _NOT in schema today_ | Phase 4 hardcodes "Kantine" as default. Future schema field if location varies (Phase 6 events redesign). |
+| Field          | Source                                                             | Notes                                                                                                     |
+| -------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `event`        | `EventRepository.findNextFeatured()` (existing)                    | Returns next future event with `featuredOnHome === true`                                                  |
+| `title`        | Sanity `event.title` (PortableText with optional accent decorator) | Rendered via `<EditorialHeading>`                                                                         |
+| `dateStart`    | Sanity `event.dateStart` (datetime)                                | Required                                                                                                  |
+| `dateEnd`      | Sanity `event.dateEnd` (datetime)                                  | Optional; if present, format as range                                                                     |
+| `coverImage`   | Sanity `event.coverImage`                                          | Required for FeaturedEventBand to show — if missing, treat as empty and return null                       |
+| `externalLink` | Sanity `event.externalLink {url, label}`                           | Optional; falls back to internal `/evenementen/{slug}`                                                    |
+| `location`     | _NOT in schema today_                                              | Phase 4 hardcodes "Kantine" as default. Future schema field if location varies (Phase 6 events redesign). |
 
 ## Reuse mandate
 
 FeaturedEventBand composes:
+
 - `<TapedFigure>` with new `tape="warm"` variant (extends Phase 1)
 - `<EditorialHeading>` with accent decorator (Phase 1)
 - `<MonoLabel>` (Phase 0) for the meta line
@@ -98,10 +103,11 @@ One new primitive variant introduced (`tape="warm"`); no new primitive component
 
 ## VR baseline contract
 
-- Story: `Home/FeaturedEventBand/Default` — typical event with all fields
-- Story: `Home/FeaturedEventBand/NoExternalLink` — internal `/evenementen/{slug}` fallback CTA
-- Story: `Home/FeaturedEventBand/MultiDay` — dateStart + dateEnd both set
-- Story: `Home/FeaturedEventBand/Empty` — returns null (deliberately empty viewport)
+- Story: `Features/Home/FeaturedEventBand/Default` — typical event with all fields
+- Story: `Features/Home/FeaturedEventBand/NoExternalLink` — internal `/evenementen/{slug}` fallback CTA
+- Story: `Features/Home/FeaturedEventBand/MultiDay` — dateStart + dateEnd both set
+- Story: `Features/Home/FeaturedEventBand/Empty` — genuinely no upcoming event, returns null (deliberately empty viewport)
+- Story: `Features/Home/FeaturedEventBand/FeedUnavailable` (#2944) — the read failed; band holds its shape and names the reason instead of vanishing
 
 ## Out of scope
 

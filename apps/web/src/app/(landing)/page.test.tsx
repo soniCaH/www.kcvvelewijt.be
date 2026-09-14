@@ -12,6 +12,7 @@ import { Effect, Layer } from "effect";
 import { HttpBadGateway, type Match } from "@kcvv/api-contract";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
+import type { EventVM } from "@/lib/repositories/event.repository";
 
 const minimalArticle: ArticleVM = {
   id: "art-1",
@@ -110,6 +111,14 @@ vi.mock("@/lib/repositories/homepage.repository", async (importOriginal) => {
   };
 });
 
+// A `vi.fn()`, not a fixed `Effect.succeed(null)`, so the #2944 suite below
+// can discriminate a failed read from a genuinely empty calendar — both of
+// which the pre-fix code degraded to the same `null` (that collapse was the
+// bug). Every other describe block sets its own default in `beforeEach`.
+const { mockFindNextFeatured } = vi.hoisted(() => ({
+  mockFindNextFeatured: vi.fn(),
+}));
+
 vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
   const mod =
     await importOriginal<
@@ -120,7 +129,7 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
     EventRepositoryLive: Layer.succeed(mod.EventRepository, {
       findAll: () => Effect.die("not used by this suite"),
       findUpcomingForList: () => Effect.die("not used by this suite"),
-      findNextFeatured: () => Effect.succeed(null),
+      findNextFeatured: mockFindNextFeatured,
       findBySlug: () => Effect.die("not used by this suite"),
       findAllSlugs: () => Effect.die("not used by this suite"),
     }),
@@ -160,6 +169,7 @@ describe("/ — a failed placeholder read keeps the page (#2505 review finding 1
     vi.spyOn(console, "warn").mockImplementation(() => {});
     mockGetNextMatches.mockReturnValue(Effect.succeed([]));
     mockTeamsFindAll.mockReturnValue(Effect.succeed([]));
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(null));
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -257,6 +267,7 @@ describe("/ — the agenda's outage signal is its own read (#2505 review finding
     );
     mockTeamsFindAll.mockReturnValue(Effect.succeed([]));
     mockGetMatches.mockReturnValue(Effect.die("not used by this suite"));
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(null));
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -342,5 +353,106 @@ describe("/ — the agenda's outage signal is its own read (#2505 review finding
     expect(
       screen.queryByRole("region", { name: "Komende wedstrijden" }),
     ).not.toBeInTheDocument();
+  });
+});
+
+// A literal future date is a time bomb — it silently starts failing once the
+// calendar catches up to it, with no code change and no one touching this
+// file. Freeze the clock instead (mirrors `TeamMatchesSection.test.tsx`'s
+// `NOW` + `vi.setSystemTime` pattern) and date the fixture relative to that
+// frozen `NOW`, so `<FeaturedEventBand>`'s own drop-if-empty guard (which
+// reads `DateTime.now()` — no `now` prop is threaded through from
+// `page.tsx`) can never see it as "past".
+const NOW = new Date("2026-09-15T12:00:00.000Z");
+
+/** Only the fields `toFeaturedEventBandEvent` reads — mirrors the fixture in
+ *  `to-featured-event.test.ts`. */
+const featuredEventFixture: EventVM = {
+  id: "event-1",
+  title: "Mosselfestijn",
+  slug: "mosselfestijn",
+  dateStart: "2026-09-20T18:00:00.000Z", // 5 days after the frozen `NOW`
+  dateEnd: null,
+  eventType: null,
+  location: null,
+  coverImageUrl: "https://cdn.example/cover.jpg",
+  href: "#",
+  featuredOnHome: true,
+} as unknown as EventVM;
+
+describe("/ — the featured-event band holds its shape on a failed read (#2944)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(NOW);
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+    mockTeamsFindAll.mockReturnValue(Effect.succeed([]));
+    mockGetHomepage.mockReturnValue(
+      Effect.succeed({
+        banners: { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
+        placeholder: null,
+      }),
+    );
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("holds the featured-event band open and names the reason when the event read fails", async () => {
+    // Every other read succeeds — mirrors the isolation comment at
+    // page.test.tsx:208: the failure must be attributable to THIS read, not
+    // to a shared flag another band can flip.
+    mockFindNextFeatured.mockReturnValue(
+      Effect.die(new Error("Sanity is unreachable")),
+    );
+
+    const element = await HomePage();
+    render(element);
+
+    expect(screen.getByText(/even niet beschikbaar/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Aanstaand evenement" }),
+    ).toBeInTheDocument();
+  });
+
+  it("drops the featured-event band silently when there is genuinely no upcoming event", async () => {
+    // `findNextFeatured` resolves to `null` (empty calendar), no failure —
+    // this is a guard against over-correcting into hold-always: before the
+    // fix this passed vacuously (the band was absent either way), so it's
+    // meaningless on its own without the sibling test above also failing
+    // pre-fix.
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(null));
+
+    const element = await HomePage();
+    render(element);
+
+    expect(
+      screen.queryByRole("region", { name: "Aanstaand evenement" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("featured-event-band")).not.toBeInTheDocument();
+  });
+
+  it("does not claim the featured-event band is unavailable when only an unrelated read fails", async () => {
+    // Isolation, mirroring the #2505 round-3 finding M2 pattern above: a
+    // shared or mis-derived flag must not let another band's own failure
+    // (here, the agenda's `getNextMatches`) trip this band's notice too.
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(featuredEventFixture));
+    mockGetNextMatches.mockReturnValue(
+      Effect.fail(new HttpBadGateway({ error: "upstream is down" })),
+    );
+
+    const element = await HomePage();
+    render(element);
+
+    const featuredEventRegion = screen.getByRole("region", {
+      name: "Aanstaand evenement",
+    });
+    expect(
+      within(featuredEventRegion).queryByText(/even niet beschikbaar/i),
+    ).not.toBeInTheDocument();
+    expect(
+      within(featuredEventRegion).getByRole("heading", { level: 2 }),
+    ).toBeInTheDocument();
   });
 });

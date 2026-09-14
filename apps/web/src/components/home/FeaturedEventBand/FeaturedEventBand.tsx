@@ -8,6 +8,7 @@ import {
   MonoLabel,
   TapedFigure,
 } from "@/components/design-system";
+import { HELD_OPEN_FRAME } from "@/components/home/FirstTeamsBlock";
 
 export interface FeaturedEventBandImage {
   url: string;
@@ -47,6 +48,71 @@ export interface FeaturedEventBandProps {
   /** Render reference time. Defaults to now in the club's zone. Tests override
    *  to make the past/future split deterministic without freezing `Date`. */
   now?: DateTime;
+  /**
+   * The upstream `EventRepository.findNextFeatured()` read failed, as
+   * opposed to the calendar genuinely holding no upcoming event. Read only
+   * on the no-event path (mirrors `<UpcomingMatches>`'s own `unavailable`
+   * prop, `UpcomingMatches.tsx:39`): with a renderable `event` present, the
+   * band renders as normal regardless of this flag.
+   *
+   * @default false
+   */
+  unavailable?: boolean;
+}
+
+/**
+ * The held-open dark-ground notice for a failed read. Not routed through
+ * `<EmptyState tier="slot" reason="unavailable">` — that register is
+ * ink-only (`border-ink/30` frame, `text-ink-soft` body, a `text-jersey-deep`
+ * accent span with no prop to swap it) and is explicitly documented as wrong
+ * on a dark-green band (`EmptyState.tsx`'s own file docblock, "parked: the
+ * dark-ground slot register"); `jersey-deep` is this band's own background.
+ * `<FirstTeamsBlock>` — the band directly above this one on the homepage
+ * spine, on the same dark-green family (`jersey-deep-dark`) — solves the
+ * identical problem, so this notice imports its `HELD_OPEN_FRAME` constant
+ * rather than hand-rolling a third copy of the same dashed frame (review
+ * finding on #2944 — see `HELD_OPEN_FRAME`'s own docblock). See the PR for
+ * #2944 for why this deviates from the ticket's literal `<EmptyState>`
+ * wording.
+ *
+ * Keeps the kicker + a heading, matching how both sibling bands hold their
+ * shape: `<FirstTeamsBlock>` keeps its "EERSTE PLOEGEN" kicker and heading
+ * on a failed read, `<UpcomingMatches>` keeps "AGENDA" and "Komende
+ * wedstrijden." — dropping the chrome here (review finding on #2944) left
+ * the `aria-label`'d region unheaded and the band's own hierarchy missing
+ * on the one render path a visitor is most likely to land on during an
+ * outage. The populated heading is the event's own title and can't render
+ * here, so this uses a static heading that names the slot instead —
+ * "Volgend evenement." rather than "Aanstaand evenement." (the kicker
+ * above it, word for word) — echoing the kicker read as an unfilled
+ * placeholder rather than a deliberate two-line header (review finding,
+ * caught in the captured baseline). `display-md`, matching the siblings'
+ * own generic-heading size rather than this band's `display-lg` hero
+ * treatment (reserved for an actual title).
+ */
+function FeaturedEventUnavailableNotice() {
+  return (
+    <section
+      data-testid="featured-event-band"
+      aria-label="Aanstaand evenement"
+      className="bg-jersey-deep text-cream py-12 md:py-16"
+    >
+      <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
+        <div className="mb-6 flex flex-col gap-2">
+          <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
+          <EditorialHeading level={2} size="display-md" tone="cream">
+            Volgend evenement.
+          </EditorialHeading>
+        </div>
+        <div className={`${HELD_OPEN_FRAME} px-4 py-8`}>
+          <p className="text-cream/80">
+            Het eerstvolgende evenement is even niet beschikbaar. Probeer het
+            later opnieuw.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 /**
@@ -81,18 +147,38 @@ function formatDateTime(dateStart: string, dateEnd?: string | null): string {
   return start.toFormat("d MMM");
 }
 
+/**
+ * Every drop-if-empty condition in one place: null event, missing cover
+ * image, invalid date, or start time already past. A type guard rather than
+ * a plain boolean so the one call site below both makes the hold-vs-drop
+ * decision exactly once (review finding on #2944 — two copies of `return
+ * unavailable ? <Notice /> : null` risked a third drop condition someday
+ * reintroducing the vanish this ticket removed) and narrows `event` for the
+ * populated render that follows.
+ */
+function isRenderableEvent(
+  event: FeaturedEventBandEvent | null,
+  now: DateTime,
+): event is FeaturedEventBandEvent & { coverImage: FeaturedEventBandImage } {
+  if (!event || !event.coverImage) return false;
+  const start = toDisplayZone(event.dateStart);
+  return start.isValid && start >= now;
+}
+
 export const FeaturedEventBand = ({
   event,
   // Zone-pinned like every other date this file reads. The comparison below is
   // between instants, so the zone cannot change the outcome — it is stated so
   // the file holds no unpinned parse for the next reader to copy.
   now = DateTime.now().setZone(CLUB_TIMEZONE),
+  unavailable = false,
 }: FeaturedEventBandProps) => {
-  // Drop-if-empty per locked spec: null event, missing cover image, or
-  // start time already past — caller doesn't have to filter upstream.
-  if (!event || !event.coverImage) return null;
-  const start = toDisplayZone(event.dateStart);
-  if (!start.isValid || start < now) return null;
+  // A failed read (`unavailable`) holds the band's shape and names the
+  // reason instead of dropping silently — mirrors `<UpcomingMatches>`
+  // (`UpcomingMatches.tsx:39`); #2944.
+  if (!isRenderableEvent(event, now)) {
+    return unavailable ? <FeaturedEventUnavailableNotice /> : null;
+  }
 
   const location = event.location?.trim() || "Kantine";
   const ctaUrl = event.externalLink?.url || `/evenementen/${event.slug}`;
@@ -106,6 +192,7 @@ export const FeaturedEventBand = ({
   return (
     <section
       data-testid="featured-event-band"
+      aria-label="Aanstaand evenement"
       className="bg-jersey-deep text-cream py-12 md:py-16"
     >
       <div className="mx-auto grid max-w-[var(--container-index)] grid-cols-1 items-stretch gap-8 px-4 md:grid-cols-[1fr_1.4fr] md:gap-12 md:px-8">

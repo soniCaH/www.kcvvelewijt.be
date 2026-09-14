@@ -17,9 +17,10 @@ const meta = {
           "upcoming event, preferring one flagged `featuredOnHome` and " +
           "falling back to the next upcoming event when none is flagged " +
           "(NEXT_FEATURED_EVENT_QUERY). The query itself returns null only " +
-          "when no upcoming event matches, but the homepage also drops the " +
-          "band when the read fails — `degradeSection` degrades that to the " +
-          "same null, so the two are indistinguishable there (#2944). Spec: " +
+          "when no upcoming event matches; the homepage tells that apart " +
+          "from a failed read via a sentinel distinct from null, and passes " +
+          "the result through as `unavailable` (#2944) — see `FeedUnavailable` " +
+          "below. Spec: " +
           "docs/design/mockups/phase-4-homepage/featuredeventband-locked.md.",
       },
     },
@@ -84,4 +85,32 @@ export const MultiDay: Story = {
 // regression that re-renders the band when there's no event is caught.
 export const Empty: Story = {
   args: { event: null, now: REFERENCE_NOW },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "No upcoming event — the calendar is genuinely empty, the read " +
+          "succeeded. Entire band returns null. `unavailable: true` (see " +
+          "FeedUnavailable) is the one case that holds the band's shape " +
+          "instead.",
+      },
+    },
+  },
+};
+
+/** #2944 — the read failed rather than the calendar genuinely being empty.
+ *  Holds the band's shape with a dark-ground held-open notice (not
+ *  `<EmptyState tier="slot" reason="unavailable">` — see the docblock on
+ *  `FeaturedEventUnavailableNotice` in `FeaturedEventBand.tsx` for why). */
+export const FeedUnavailable: Story = {
+  args: { event: null, now: REFERENCE_NOW, unavailable: true },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "No upcoming event because the Sanity read failed — the band " +
+          "holds its shape and names the reason instead of vanishing (#2944).",
+      },
+    },
+  },
 };

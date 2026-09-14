@@ -80,15 +80,22 @@
  * ink-only (`SLOT_BACKGROUND_CLASS` below: `border-ink-muted` /
  * `border-ink bg-cream-soft`) — both wrong on a dark-green band. Tier
  * "surface" already solved its own version via `surface="inverse"` (#2562);
- * tier "slot" has no such axis yet. Exactly one place would use it:
- * `FirstTeamsBlock`, on the homepage's `jersey-deep-dark` band — see its
- * `HELD_OPEN_FRAME` docblock in `FirstTeamsBlock.tsx`. **Not built here**
- * — the migration is #2402's call, not this primitive's. Values to carry
- * verbatim when it is: frame `border-cream/40 border-2 border-dashed`,
- * `SkipCard` `text-cream/65`, band note `text-cream/80`. VR guard to name:
- * `FirstTeamsBlock` stories `NoMatches`, `FeedUnavailable` and the five
- * `Placeholder*` stories (#2505), three viewports each — ink-on-dark-green
- * would be a loud diff.
+ * tier "slot" has no such axis yet. Two places hand-roll it today rather
+ * than wait on this primitive to grow a dark axis: `FirstTeamsBlock`, on the
+ * homepage's `jersey-deep-dark` band (see its `HELD_OPEN_FRAME` docblock in
+ * `FirstTeamsBlock.tsx`), and `FeaturedEventBand`, on the homepage's
+ * `jersey-deep` band (see `FeaturedEventUnavailableNotice`'s docblock in
+ * `FeaturedEventBand.tsx`, #2944) — the second import of `FirstTeamsBlock`'s
+ * own exported `HELD_OPEN_FRAME`, not a second hand-copy of the value; two
+ * consumers is the primitive's own signal to exist (review finding on
+ * #2944). **Not built here** — the migration is #2402's call, not this
+ * primitive's. Carry `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`)
+ * verbatim when it is; the two files' own text tones (`SkipCard`
+ * `text-cream/65`, band note `text-cream/80`) stay per-file. VR guard to
+ * name: `FirstTeamsBlock` stories
+ * `NoMatches`, `FeedUnavailable` and the five `Placeholder*` stories
+ * (#2505), and `FeaturedEventBand`'s own `FeedUnavailable` story (#2944) —
+ * three viewports each — ink-on-dark-green would be a loud diff.
  *
  * **Not every failure notice on cream goes through this register.**
  * `<CompetitiveStatusLine>` (#2540/#2636) is a deliberate non-adopter: its
@@ -112,18 +119,21 @@
  * feed still drops it silently.
  *
  * **`<FeaturedEventBand>` is not the auto-hide counter-example this rule
- * was believed to have.** Its query (`NEXT_FEATURED_EVENT_QUERY`,
- * `event.repository.ts`) is a `coalesce()` of a `featuredOnHome`-preferred
- * branch and a second, unfiltered "any upcoming event" branch — so the flag
- * is a *preference*, not a gate, and the band is normally populated the same
- * way `<UpcomingMatches>` is, not "one optional, editorially-gated
- * document." Its silent vanish on a failed read (`degradeSection` collapses
- * a failed read and a genuinely event-less calendar to the same `null`,
- * indistinguishable at this call site) has no discriminant left to justify
- * it once the gate premise is gone — it reads as the same #2399 harm this
- * rule exists to prevent, not a deliberate second half of it. Tracked as a
- * likely defect, not documented here as the rule's auto-hide half: see
- * #2944.
+ * was once believed to have (#2944, fixed).** Its query
+ * (`NEXT_FEATURED_EVENT_QUERY`, `event.repository.ts`) is a `coalesce()` of
+ * a `featuredOnHome`-preferred branch and a second, unfiltered "any upcoming
+ * event" branch — so the flag is a *preference*, not a gate, and the band is
+ * normally populated the same way `<UpcomingMatches>` is, not "one optional,
+ * editorially-gated document." `(landing)/page.tsx` now degrades a failed
+ * read to a sentinel distinct from the genuinely-empty `null`
+ * (`FEATURED_EVENT_READ_FAILED`), and passes that apart as `unavailable` —
+ * the band holds its shape and names the reason on a failed read, exactly
+ * this rule's shape, and still drops silently on a genuinely empty calendar.
+ * It reaches that hold-open register through its own dark-ground notice
+ * rather than through `<EmptyState tier="slot" reason="unavailable">`
+ * itself — that member is ink-only (see the parked note above) and this
+ * band's `bg-jersey-deep` ground is exactly the case that note describes as
+ * unmigrated; `<FeaturedEventBand>`'s own file carries the reasoning.
  *
  * The artefact is never `<TapedCard>` — that primitive has no frameless
  * (`shadow: "none"`) or transparent-`bg` option today, and this slot needs

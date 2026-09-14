@@ -33,3 +33,24 @@ export const degradeSection = <A, E, R>(
       return Effect.succeed(fallback);
     }),
   );
+
+/**
+ * A `degradeSection` fallback no legitimate read can ever produce — for a
+ * read whose success type already spends a value (typically `null`) on
+ * "genuinely nothing", so a plain `degradeSection` fallback of that same
+ * value would make a failed read indistinguishable from a genuinely empty
+ * one at the call site (#2944). `unique symbol` — no `A` can equal it.
+ */
+export const READ_FAILED: unique symbol = Symbol("READ_FAILED");
+
+/**
+ * `degradeSection`, always falling back to `READ_FAILED`. Same `E = never`
+ * restriction as `degradeSection` above — Sanity reads (`Effect.orDie`
+ * defects) only, not a general error-channel handler; a read with a real
+ * error channel (e.g. a BFF call) should keep its own `Effect.catchAll`.
+ */
+export const degradeSectionFlagged = <A, R>(
+  self: Effect.Effect<A, never, R>,
+  note: string,
+): Effect.Effect<A | typeof READ_FAILED, never, R> =>
+  degradeSection<A | typeof READ_FAILED, never, R>(self, READ_FAILED, note);

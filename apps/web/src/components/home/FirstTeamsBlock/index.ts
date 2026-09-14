@@ -1,4 +1,8 @@
-export { FirstTeamsBlock, FIRST_TEAMS_ROW_GRID } from "./FirstTeamsBlock";
+export {
+  FirstTeamsBlock,
+  FIRST_TEAMS_ROW_GRID,
+  HELD_OPEN_FRAME,
+} from "./FirstTeamsBlock";
 export type { FirstTeamsBlockProps } from "./FirstTeamsBlock";
 export {
   deriveFirstTeamVM,

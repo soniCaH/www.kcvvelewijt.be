@@ -73,21 +73,28 @@ export interface FirstTeamsBlockProps {
  * The held-open dashed frame — #2427's tier-2 register: an empty slot inside a
  * populated page keeps its shape so the absence reads as a known gap rather
  * than a render failure. Shared by the per-slot `<SkipCard>` and the whole-band
- * notice so the two can't drift, the way `FIRST_TEAMS_ROW_GRID` is below.
+ * notice so the two can't drift, the way `FIRST_TEAMS_ROW_GRID` is below —
+ * and exported for the same reason `FIRST_TEAMS_ROW_GRID` is: `<
+ * FeaturedEventBand>`'s own dark-ground notice (`jersey-deep`, #2944) reuses
+ * this constant rather than hand-rolling a third copy of the same utility
+ * string. Import it via `@/components/home/FirstTeamsBlock`, not by copying
+ * the value.
  *
  * **Parked: this is the dark-ground register `<EmptyState>` tier "slot"
  * doesn't have yet (#2690/#2804).** `<EmptyState tier="slot">` is ink-only
- * (`border-ink-muted` / `border-ink bg-cream-soft`) — both wrong on this
- * band's `jersey-deep-dark` ground. This file is the one place that would
- * adopt a dark axis if `<EmptyState>` grew one; see the admission-rule/parked
- * note in `EmptyState.tsx`'s own docblock for the other end of this hand-off.
- * **Not migrated here** — that is #2402's call. Values to carry verbatim if
- * it happens: frame `border-cream/40 border-2 border-dashed` (this const),
- * `SkipCard` `text-cream/65`, band note `text-cream/80`. VR guard to name:
- * this file's `NoMatches`, `FeedUnavailable` and the five `Placeholder*`
- * stories, three viewports each — ink-on-dark-green would be a loud diff.
+ * (`border-ink-muted` / `border-ink bg-cream-soft`) — both wrong on a
+ * dark-green ground. This file is the one place that would adopt a dark axis
+ * if `<EmptyState>` grew one; see the admission-rule/parked note in
+ * `EmptyState.tsx`'s own docblock for the other end of this hand-off.
+ * **Not migrated here** — that is #2402's call. `SkipCard` `text-cream/65`,
+ * band note `text-cream/80` stay this file's own (not exported — only the
+ * frame itself is shared). VR guard to name: this file's `NoMatches`,
+ * `FeedUnavailable` and the five `Placeholder*` stories, plus
+ * `FeaturedEventBand`'s own `FeedUnavailable` story — three viewports each —
+ * ink-on-dark-green would be a loud diff.
  */
-const HELD_OPEN_FRAME = "border-cream/40 border-2 border-dashed text-center";
+export const HELD_OPEN_FRAME =
+  "border-cream/40 border-2 border-dashed text-center";
 
 function SkipCard({ children }: { children: React.ReactNode }) {
   return (

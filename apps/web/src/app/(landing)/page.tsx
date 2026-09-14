@@ -25,7 +25,11 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
-import { degradeSection } from "@/lib/effect/degrade";
+import {
+  degradeSection,
+  degradeSectionFlagged,
+  READ_FAILED,
+} from "@/lib/effect/degrade";
 import {
   ArticleRepository,
   type ArticleVM,
@@ -37,7 +41,10 @@ import {
   type BannerSlotVM,
 } from "@/lib/repositories/homepage.repository";
 import { TrackInView } from "@/components/analytics";
-import { EventRepository } from "@/lib/repositories/event.repository";
+import {
+  EventRepository,
+  type EventVM,
+} from "@/lib/repositories/event.repository";
 import { BffService } from "@/lib/effect/services/BffService";
 import {
   TeamRepository,
@@ -196,13 +203,16 @@ export default async function HomePage() {
       ),
     ),
     runPromise(
-      degradeSection(
+      // `degradeSectionFlagged` (`lib/effect/degrade.ts`) — `null` is a
+      // legitimate `findNextFeatured()` result (genuinely no upcoming
+      // event), so a plain `degradeSection` fallback of `null` would make a
+      // failed read indistinguishable from that (#2944).
+      degradeSectionFlagged(
         Effect.gen(function* () {
           const repo = yield* EventRepository;
           return yield* repo.findNextFeatured();
         }),
-        null,
-        "[HomePage] featured-event read failed; falling back to null.",
+        "[HomePage] featured-event read failed; falling back to a sentinel distinct from a genuinely empty calendar.",
       ),
     ),
     runPromise(
@@ -222,7 +232,14 @@ export default async function HomePage() {
   const banners = homepageResult.banners;
   const placeholder = homepageResult.placeholder;
   const youthStats = homepageResult.youthStats;
-  const featuredEvent = featuredEventResult;
+  // #2944: `featuredEventResult` is `READ_FAILED` on a failed read (see
+  // `degradeSectionFlagged`, `lib/effect/degrade.ts`), so this is the one
+  // place the two "no event" causes get told apart — `featuredEventSection`
+  // below reads only `featuredEventReadFailed`, never the sentinel itself,
+  // mirroring `firstTeamsReadFailed`/`upcomingMatchesReadFailed` just below.
+  const featuredEventReadFailed = featuredEventResult === READ_FAILED;
+  const featuredEvent: EventVM | null =
+    featuredEventResult === READ_FAILED ? null : featuredEventResult;
 
   // Senior teams (A/B) — drive the "Eerste ploegen" block and are de-duplicated
   // out of the generic "Komende wedstrijden" agenda below (#2211). The senior
@@ -358,25 +375,29 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
-  // Vanishing here is NOT the deliberate half of a rule — it's a likely
-  // defect, tracked separately (#2944). `featuredEventBandEvent` degrades to
-  // `null` on a failed read the same way it does when there's genuinely no
-  // upcoming event (`degradeSection` above), so this section can't tell the
-  // two apart. That would be fine for a subject nobody expects to see; it
-  // isn't one — `NEXT_FEATURED_EVENT_QUERY` (`event.repository.ts`) falls
+  // Unconditional (#2505/#2844/#2944), same as `upcomingMatchesSection`
+  // below: `<FeaturedEventBand>` itself decides null-vs-notice from `event`
+  // + `unavailable`, so the section config here never nulls out — one rule,
+  // one guard. `NEXT_FEATURED_EVENT_QUERY` (`event.repository.ts`) falls
   // back to the next upcoming event whenever none is `featuredOnHome`, so
   // this band is normally populated the same way `<UpcomingMatches>` is, not
-  // gated on an editorial opt-in. See `<EmptyState>`'s docblock for the rule
-  // this band was believed to follow, and #2944 for why it doesn't.
-  const featuredEventSection: SectionConfig | null = featuredEventBandEvent
-    ? {
-        key: "featured-event",
-        bg: "transparent",
-        content: <FeaturedEventBand event={featuredEventBandEvent} />,
-        paddingTop: "pt-0",
-        paddingBottom: "pb-0",
-      }
-    : null;
+  // gated on an editorial opt-in — see `<EmptyState>`'s docblock for the
+  // rule this band now follows. `featuredEventReadFailed` (derived above
+  // from `degradeSectionFlagged`'s `READ_FAILED` sentinel, not from
+  // `featuredEventBandEvent` being null) is what tells a failed read apart
+  // from a genuinely event-less calendar.
+  const featuredEventSection: SectionConfig = {
+    key: "featured-event",
+    bg: "transparent",
+    content: (
+      <FeaturedEventBand
+        event={featuredEventBandEvent}
+        unavailable={featuredEventReadFailed}
+      />
+    ),
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+  };
 
   const bannerSlotASection = toBannerSection("a", banners.bannerSlotA);
 
@@ -397,10 +418,10 @@ export default async function HomePage() {
         }
       : null;
 
-  // Unconditional (#2505/#2844) — unlike `featuredEventSection` above, this
-  // band holds its shape on a failed read: `<UpcomingMatches>` itself decides
-  // null-vs-notice from `matches.length` + `unavailable`, so the section
-  // config here never nulls out. One rule, one guard.
+  // Unconditional (#2505/#2844) — `<UpcomingMatches>` itself decides
+  // null-vs-notice internally from `matches.length` + `unavailable`, so the
+  // section config here never nulls out. `featuredEventSection` above is the
+  // same shape (#2944): one rule, one guard, in the band, not the page.
   const upcomingMatchesSection: SectionConfig = {
     key: "upcoming-matches",
     bg: "transparent",
