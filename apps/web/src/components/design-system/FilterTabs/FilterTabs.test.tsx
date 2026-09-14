@@ -25,6 +25,19 @@ const mockTabs: FilterTab[] = [
   { value: "archived", label: "Archived", count: 2 },
 ];
 
+// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
+// callback synchronously lets a test assert on post-scroll state without a
+// separate flush step. Restored by the shared `afterEach`'s
+// `vi.restoreAllMocks()`.
+function runAnimationFrameSynchronously() {
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
+    (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    },
+  );
+}
+
 describe("FilterTabs", () => {
   describe("Rendering", () => {
     it("should render all tabs", () => {
@@ -475,6 +488,7 @@ describe("FilterTabs", () => {
       Object.defineProperty(scrollContainer, "scrollWidth", { value: 200 });
       Object.defineProperty(scrollContainer, "clientWidth", { value: 100 });
 
+      runAnimationFrameSynchronously();
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
       });

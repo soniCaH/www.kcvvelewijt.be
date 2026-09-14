@@ -85,6 +85,19 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   });
 }
 
+// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
+// callback synchronously lets a test assert on post-scroll state without a
+// separate flush step. Restored by the shared `afterEach`'s
+// `vi.restoreAllMocks()`.
+function runAnimationFrameSynchronously() {
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
+    (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    },
+  );
+}
+
 describe("StandingsTable", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -257,6 +270,7 @@ describe("StandingsTable", () => {
       const region = screen.getByRole("region");
       // 400px total overflow; scrolled to 385 leaves 15px.
       Object.defineProperty(region, "scrollLeft", { value: 385 });
+      runAnimationFrameSynchronously();
       act(() => {
         region.dispatchEvent(new Event("scroll"));
       });
