@@ -16,34 +16,21 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
 
-// IntersectionObserver stub — happy-dom doesn't implement it. Only the
-// `useSectionNav` scroll-spy tests below register a section target with a
-// matching id, so every other test in this file simply never creates an
-// observer instance (see the hook's own early-return on zero targets).
-let observerCb: IntersectionObserverCallback | null = null;
-
-class FakeIntersectionObserver {
-  constructor(cb: IntersectionObserverCallback) {
-    observerCb = cb;
-  }
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-  takeRecords() {
-    return [];
-  }
-}
-
+// Only the `useSectionNav` scroll-spy tests below register a section target
+// with a matching id, so every other test in this file simply never creates
+// an observer instance (see the hook's own early-return on zero targets).
 function emitIntersecting(target: Element, top: number) {
   act(() => {
-    observerCb?.(
-      [
-        { isIntersecting: true, target, boundingClientRect: { top } },
-      ] as IntersectionObserverEntry[],
-      {} as IntersectionObserver,
-    );
+    FakeIntersectionObserver.latest()!.trigger([
+      {
+        isIntersecting: true,
+        target,
+        boundingClientRect: { top } as DOMRectReadOnly,
+      },
+    ]);
   });
 }
 
@@ -115,9 +102,15 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   };
 }
 
+// Section target elements are appended straight to `document.body` — tracked
+// here so `afterEach` can remove them by reference, without a bespoke marker
+// attribute (every one of them already sets a real `id`, which is all these
+// tests query by).
+let appendedSectionTargets: Element[] = [];
+
 describe("TeamSectionNav", () => {
   beforeEach(() => {
-    observerCb = null;
+    FakeIntersectionObserver.reset();
     vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
   });
 
@@ -125,9 +118,8 @@ describe("TeamSectionNav", () => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.documentElement.style.scrollPaddingTop = "";
-    document
-      .querySelectorAll("[data-team-section-nav-test]")
-      .forEach((el) => el.remove());
+    appendedSectionTargets.forEach((el) => el.remove());
+    appendedSectionTargets = [];
   });
 
   it("renders nothing with zero sections", () => {
@@ -158,29 +150,26 @@ describe("TeamSectionNav", () => {
     );
   });
 
-  it("renders the light chip recipe — 1px border, 1px shadow, no press-down — never the filter chip's weight", () => {
-    render(<TeamSectionNav items={THREE_ITEMS} />);
-    const link = screen.getByRole("link", { name: "Spelers" });
-
-    expect(link).toHaveClass("border");
-    expect(link).not.toHaveClass("border-2");
-    expect(link.className).toContain("shadow-[1px_1px_0_0_var(--color-ink)]");
-    // No press-down: the filter chip's canonical hover translate is absent.
-    expect(link).not.toHaveClass("hover:translate-x-1");
-  });
+  // The light chip recipe (border/shadow/no-press-down) and focus-on-click
+  // are `<SectionNavChip>`'s own contract — this component delegates
+  // rendering to it entirely, so re-asserting either here would be the same
+  // hand-copy drift #2478's chip extraction (A1) already fixed one layer up.
+  // `SectionNavChip.test.tsx` owns both. This file proves only what is
+  // TeamSectionNav's own: that scroll-spy's `activeId` is wired into the
+  // right chip's `aria-current`.
 
   describe("scroll-spy — the fill means the section being read, not the one last clicked", () => {
     function renderWithSections(items: TeamSectionNavItem[]) {
       for (const item of items) {
         const el = document.createElement("div");
         el.id = item.id;
-        el.setAttribute("data-team-section-nav-test", "");
         document.body.appendChild(el);
+        appendedSectionTargets.push(el);
       }
       return render(<TeamSectionNav items={items} />);
     }
 
-    it("fills the chip for the topmost intersecting section", () => {
+    it("wires the topmost intersecting section's id into aria-current on its chip", () => {
       renderWithSections(THREE_ITEMS);
 
       const spelersSection = document.getElementById("spelers")!;
@@ -190,20 +179,7 @@ describe("TeamSectionNav", () => {
       const stafLink = screen.getByRole("link", { name: "Staf" });
 
       expect(spelersLink).toHaveAttribute("aria-current", "location");
-      expect(spelersLink).toHaveClass("bg-jersey-deep");
       expect(stafLink).not.toHaveAttribute("aria-current");
-    });
-
-    it("moves focus into the target section on click, unlike today's bare link", async () => {
-      const user = userEvent.setup();
-      renderWithSections(THREE_ITEMS);
-
-      const stafSection = document.getElementById("staf")!;
-      const focusSpy = vi.spyOn(stafSection, "focus");
-
-      await user.click(screen.getByRole("link", { name: "Staf" }));
-
-      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
     });
 
     describe("keeping the active chip reachable inside the overflowing rail (#2640, corrected by review)", () => {

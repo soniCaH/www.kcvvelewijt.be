@@ -48,21 +48,31 @@ function renderHook(ids: readonly string[]) {
   };
 }
 
+// Target elements are appended straight to `document.body` — tracked here so
+// `afterEach` can remove them by reference, without a bespoke marker
+// attribute (every one of them already sets a real `id`, which is all these
+// tests query by).
+let appendedTargets: Element[] = [];
+
+function appendTarget(id: string): HTMLDivElement {
+  const el = document.createElement("div");
+  el.id = id;
+  document.body.appendChild(el);
+  appendedTargets.push(el);
+  return el;
+}
+
 describe("useHashLandingCorrection", () => {
   afterEach(() => {
     vi.useRealTimers();
     window.location.hash = "";
-    document
-      .querySelectorAll("[data-test-target]")
-      .forEach((el) => el.remove());
+    appendedTargets.forEach((el) => el.remove());
+    appendedTargets = [];
   });
 
   it("corrects a hash already in the URL at mount (a cold load)", () => {
     window.location.hash = "#spelers";
-    const target = document.createElement("div");
-    target.id = "spelers";
-    target.setAttribute("data-test-target", "");
-    document.body.appendChild(target);
+    const target = appendTarget("spelers");
     const scrollIntoView = vi
       .spyOn(target, "scrollIntoView")
       .mockImplementation(() => {});
@@ -92,10 +102,7 @@ describe("useHashLandingCorrection", () => {
     });
 
     window.location.hash = "#visie";
-    const target = document.createElement("div");
-    target.id = "visie";
-    target.setAttribute("data-test-target", "");
-    document.body.appendChild(target);
+    const target = appendTarget("visie");
     const scrollIntoView = vi
       .spyOn(target, "scrollIntoView")
       .mockImplementation(() => {});
@@ -114,10 +121,7 @@ describe("useHashLandingCorrection", () => {
   });
 
   it("does not correct on the hashchange itself — that would race the browser's own in-flight native scroll", () => {
-    const target = document.createElement("div");
-    target.id = "structuur";
-    target.setAttribute("data-test-target", "");
-    document.body.appendChild(target);
+    const target = appendTarget("structuur");
     const scrollIntoView = vi
       .spyOn(target, "scrollIntoView")
       .mockImplementation(() => {});
@@ -135,10 +139,7 @@ describe("useHashLandingCorrection", () => {
 
   it("corrects on notifyLayoutChange() while armed after a hashchange (a bar resize mid-scroll)", () => {
     vi.useFakeTimers();
-    const target = document.createElement("div");
-    target.id = "structuur";
-    target.setAttribute("data-test-target", "");
-    document.body.appendChild(target);
+    const target = appendTarget("structuur");
     const scrollIntoView = vi
       .spyOn(target, "scrollIntoView")
       .mockImplementation(() => {});
@@ -159,10 +160,7 @@ describe("useHashLandingCorrection", () => {
 
   it("does not correct via notifyLayoutChange() once the armed window has elapsed", () => {
     vi.useFakeTimers();
-    const target = document.createElement("div");
-    target.id = "structuur";
-    target.setAttribute("data-test-target", "");
-    document.body.appendChild(target);
+    const target = appendTarget("structuur");
     const scrollIntoView = vi
       .spyOn(target, "scrollIntoView")
       .mockImplementation(() => {});
