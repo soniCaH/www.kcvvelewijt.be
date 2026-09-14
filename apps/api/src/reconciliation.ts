@@ -29,6 +29,35 @@ export type ReconcileOrphansResult =
     }
   | { readonly action: "none" };
 
+export interface ReconcileOrphansConfig {
+  /** `max(floor, activeIds.length * ratioThreshold)` caps the orphan count
+   * this call will act on. Omit to never cap (orphans are always removed,
+   * subject only to the none-case). */
+  readonly ratioThreshold?: number;
+  /** Absolute floor for the cap above. Defaults to 0 — this is the
+   * compatibility guarantee for `sync/psd-sanity-sync.ts`'s three
+   * production callers, which never passed a floor before this helper
+   * existed and must reproduce their exact pre-refactor behaviour (a bare
+   * ratio check) unless they opt in. */
+  readonly floor?: number;
+  /** Prepended to every log line this call emits (e.g. `"[search-sync] "`)
+   * so a log query scoped to a caller's own prefix still finds its
+   * reconciliation outcome, refusal included. Defaults to `""`. */
+  readonly logPrefix?: string;
+  /**
+   * Where an operator finds THIS caller's release lever once a cap
+   * refusal has been investigated and confirmed genuine. Required — not
+   * defaulted — because the two current callers have different levers
+   * (search-index deletes a KV manifest key; PSD sync sets a scoped
+   * override key) documented in different `apps/api/CLAUDE.md` sections.
+   * A shared default here previously pointed every caller at the
+   * search-index-only lever, which would tell an operator investigating a
+   * PSD refusal to delete the search-index manifest — wiping unrelated
+   * state while leaving the actual refusal untouched (#2854 review).
+   */
+  readonly releaseLeverHint: string;
+}
+
 /**
  * Compare `activeIds` (the current/stored set being checked) against
  * `accumulatedIds` (the freshly-known-good set) and remove whatever is in
@@ -42,34 +71,35 @@ export type ReconcileOrphansResult =
  * fraction alone latches forever on a small set, because once it trips, the
  * same input recomputes the same refusal every run with no release lever.
  *
- * `floor` defaults to 0 — this is the compatibility guarantee for
- * `sync/psd-sanity-sync.ts`'s three production callers, which never passed
- * a floor before this helper existed and must reproduce their exact
- * pre-refactor behaviour (a bare ratio check) unless they opt in.
- *
- * `ratioThreshold` left `undefined` means "no cap" — orphans are always
- * removed (subject only to the none-case below). Both current callers
- * always pass an explicit threshold; the default only matters for a future
- * caller that doesn't need a cap at all.
- *
  * Returns the **confirmed** removed subset — whatever `remove` reports —
  * not merely a completion signal. A caller whose delete can fail after
  * retries (Vectorize's `deleteByIds`, batched) must know exactly what
  * landed to keep its own bookkeeping (a manifest, a checkpoint) honest.
+ *
+ * The "removed" log line reports the CONFIRMED ids, not the requested
+ * ones: a caller whose `remove` is a dry run (returns `[]` without acting)
+ * gets `confirmed 0/N … removed` with no id list, not a line that reads as
+ * if a prune happened and repeats the same ids its own dry-run log already
+ * printed.
  */
 export const reconcileOrphans = <E>(
   label: string,
   activeIds: readonly string[],
   accumulatedIds: ReadonlySet<string>,
   remove: (ids: string[]) => Effect.Effect<readonly string[], E>,
-  ratioThreshold?: number,
-  floor = 0,
+  config: ReconcileOrphansConfig,
 ): Effect.Effect<ReconcileOrphansResult, E> =>
   Effect.gen(function* () {
+    const {
+      ratioThreshold,
+      floor = 0,
+      logPrefix = "",
+      releaseLeverHint,
+    } = config;
     const orphanIds = activeIds.filter((id) => !accumulatedIds.has(id));
 
     if (orphanIds.length === 0) {
-      yield* Effect.log(`reconciliation: no orphan ${label} found`);
+      yield* Effect.log(`${logPrefix}reconciliation: no orphan ${label} found`);
       return { action: "none" } as const;
     }
 
@@ -81,8 +111,8 @@ export const reconcileOrphans = <E>(
         : Math.max(floor, activeCount * ratioThreshold);
 
     if (cap !== undefined && orphanIds.length > cap) {
-      yield* Effect.log(
-        `reconciliation: SKIPPED — ${orphanIds.length}/${activeCount} ${label} would be removed (${Math.round(ratio * 100)}%), exceeds safety cap max(${floor}, ${activeCount} × ${ratioThreshold}). This does not self-heal — the same input recomputes the same refusal every run; see apps/api/CLAUDE.md ("Releasing a stuck prune safety cap") for the release lever once a genuine removal has been confirmed.`,
+      yield* Effect.logWarning(
+        `${logPrefix}reconciliation: SKIPPED — ${orphanIds.length}/${activeCount} ${label} would be removed (${Math.round(ratio * 100)}%), exceeds safety cap max(${floor}, ${activeCount} × ${ratioThreshold}). This does not self-heal — the same input recomputes the same refusal every run; ${releaseLeverHint}`,
       );
       return {
         action: "skipped",
@@ -93,8 +123,10 @@ export const reconcileOrphans = <E>(
     }
 
     const confirmedIds = yield* remove(orphanIds);
+    const confirmedList =
+      confirmedIds.length > 0 ? `: ${confirmedIds.join(", ")}` : "";
     yield* Effect.log(
-      `reconciliation: removed ${confirmedIds.length}/${orphanIds.length} ${label}: ${orphanIds.join(", ")}`,
+      `${logPrefix}reconciliation: confirmed ${confirmedIds.length}/${orphanIds.length} ${label} removed${confirmedList}`,
     );
     return {
       action: "removed",

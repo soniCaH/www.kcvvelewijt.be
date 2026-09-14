@@ -1,6 +1,26 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect } from "effect";
-import { reconcileOrphans } from "./reconciliation";
+import { Effect, Logger } from "effect";
+import {
+  reconcileOrphans,
+  type ReconcileOrphansConfig,
+} from "./reconciliation";
+
+const HINT = 'see apps/api/CLAUDE.md ("Some Section") for the release lever.';
+const baseConfig: ReconcileOrphansConfig = { releaseLeverHint: HINT };
+
+/** Runs an Effect while capturing every log line's level and message. */
+async function runCapturingLogs<A>(effect: Effect.Effect<A>) {
+  const messages: { level: string; message: string }[] = [];
+  const TestLogger = Logger.make(({ logLevel, message }) => {
+    messages.push({ level: logLevel.label, message: String(message) });
+  });
+  const result = await Effect.runPromise(
+    effect.pipe(
+      Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
+    ),
+  );
+  return { result, messages };
+}
 
 describe("reconcileOrphans", () => {
   it("removes orphans when the count is under the cap", async () => {
@@ -9,7 +29,10 @@ describe("reconcileOrphans", () => {
     const remove = vi.fn((ids: string[]) => Effect.succeed(ids));
 
     const result = await Effect.runPromise(
-      reconcileOrphans("players", activeIds, accumulatedIds, remove, 0.3),
+      reconcileOrphans("players", activeIds, accumulatedIds, remove, {
+        ...baseConfig,
+        ratioThreshold: 0.3,
+      }),
     );
 
     expect(result).toEqual({
@@ -20,13 +43,16 @@ describe("reconcileOrphans", () => {
     expect(remove).toHaveBeenCalledWith(["9", "10"]);
   });
 
-  it("skips when the orphan count exceeds max(floor, ratio * active)", async () => {
+  it("skips when the orphan count exceeds max(floor, ratio * active), logging at WARN", async () => {
     const activeIds = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
     const accumulatedIds = new Set(["1", "2", "3"]);
     const remove = vi.fn((ids: string[]) => Effect.succeed(ids));
 
-    const result = await Effect.runPromise(
-      reconcileOrphans("teams", activeIds, accumulatedIds, remove, 0.3),
+    const { result, messages } = await runCapturingLogs(
+      reconcileOrphans("teams", activeIds, accumulatedIds, remove, {
+        ...baseConfig,
+        ratioThreshold: 0.3,
+      }),
     );
 
     expect(result).toEqual({
@@ -36,13 +62,25 @@ describe("reconcileOrphans", () => {
       ratio: 0.7,
     });
     expect(remove).not.toHaveBeenCalled();
+
+    // #2854 review finding 1: the refusal must land at WARN, not INFO — a
+    // sweep filtering Workers logs at WARN+ (as apps/api/CLAUDE.md instructs)
+    // must still see it.
+    const refusal = messages.find((m) => m.message.includes("SKIPPED"));
+    expect(refusal?.level).toBe("WARN");
+    // #2854 review finding 2: the release-lever pointer must come from the
+    // caller, not a hardcoded search-index-only pointer.
+    expect(refusal?.message).toContain(HINT);
   });
 
   it("handles zero active entities without dividing by zero", async () => {
     const remove = vi.fn((ids: string[]) => Effect.succeed(ids));
 
     const result = await Effect.runPromise(
-      reconcileOrphans("staff", [], new Set(["1", "2"]), remove, 0.3),
+      reconcileOrphans("staff", [], new Set(["1", "2"]), remove, {
+        ...baseConfig,
+        ratioThreshold: 0.3,
+      }),
     );
 
     expect(result).toEqual({ action: "none" });
@@ -55,7 +93,7 @@ describe("reconcileOrphans", () => {
     const remove = vi.fn((ids: string[]) => Effect.succeed(ids));
 
     const result = await Effect.runPromise(
-      reconcileOrphans("x", activeIds, new Set(), remove),
+      reconcileOrphans("x", activeIds, new Set(), remove, baseConfig),
     );
 
     expect(result.action).toBe("removed");
@@ -70,14 +108,11 @@ describe("reconcileOrphans", () => {
     const remove = vi.fn((ids: string[]) => Effect.succeed(ids));
 
     const result = await Effect.runPromise(
-      reconcileOrphans(
-        "search index",
-        activeIds,
-        accumulatedIds,
-        remove,
-        0.5,
-        25,
-      ),
+      reconcileOrphans("search index", activeIds, accumulatedIds, remove, {
+        ...baseConfig,
+        ratioThreshold: 0.5,
+        floor: 25,
+      }),
     );
 
     expect(result.action).toBe("removed");
@@ -90,14 +125,11 @@ describe("reconcileOrphans", () => {
     const remove = vi.fn((ids: string[]) => Effect.succeed(ids));
 
     const result = await Effect.runPromise(
-      reconcileOrphans(
-        "search index",
-        activeIds,
-        accumulatedIds,
-        remove,
-        0.5,
-        25,
-      ),
+      reconcileOrphans("search index", activeIds, accumulatedIds, remove, {
+        ...baseConfig,
+        ratioThreshold: 0.5,
+        floor: 25,
+      }),
     );
 
     expect(result).toEqual({
@@ -117,7 +149,13 @@ describe("reconcileOrphans", () => {
     const remove = vi.fn(() => Effect.succeed(["1", "2"]));
 
     const result = await Effect.runPromise(
-      reconcileOrphans("vectors", activeIds, accumulatedIds, remove),
+      reconcileOrphans(
+        "vectors",
+        activeIds,
+        accumulatedIds,
+        remove,
+        baseConfig,
+      ),
     );
 
     expect(result).toEqual({
@@ -131,9 +169,85 @@ describe("reconcileOrphans", () => {
     const remove = () => Effect.fail(new Error("boom"));
 
     const exit = await Effect.runPromiseExit(
-      reconcileOrphans("players", ["1"], new Set(), remove),
+      reconcileOrphans("players", ["1"], new Set(), remove, baseConfig),
     );
 
     expect(exit._tag).toBe("Failure");
+  });
+
+  it("does not repeat the id list when remove is a dry run (confirms nothing) — #2854 review finding 6", async () => {
+    const activeIds = ["1", "2", "3"];
+    const accumulatedIds = new Set<string>();
+    // A dry-run remove: reports the action without actually confirming any
+    // removal, same shape as sanity-index-sync.ts's dry-run branch.
+    const remove = vi.fn(() => Effect.succeed([] as string[]));
+
+    const { result, messages } = await runCapturingLogs(
+      reconcileOrphans(
+        "manifest entries",
+        activeIds,
+        accumulatedIds,
+        remove,
+        baseConfig,
+      ),
+    );
+
+    expect(result).toEqual({
+      action: "removed",
+      requestedIds: ["1", "2", "3"],
+      confirmedIds: [],
+    });
+    const summary = messages.find((m) => m.message.includes("confirmed 0/3"));
+    expect(summary).toBeDefined();
+    // The confirmed list is empty, so no id list — and specifically no
+    // trailing colon with nothing after it.
+    expect(summary?.message.endsWith(":")).toBe(false);
+    expect(summary?.message).not.toContain("1, 2, 3");
+  });
+
+  it("prefixes every log line it emits with logPrefix — #2854 review finding 7", async () => {
+    const remove = vi.fn(() => Effect.succeed(["1"]));
+
+    const { messages: removedMessages } = await runCapturingLogs(
+      reconcileOrphans("x", ["1"], new Set(), remove, {
+        ...baseConfig,
+        logPrefix: "[search-sync] ",
+      }),
+    );
+    expect(
+      removedMessages.every((m) => m.message.startsWith("[search-sync] ")),
+    ).toBe(true);
+
+    const { messages: noneMessages } = await runCapturingLogs(
+      reconcileOrphans("x", [], new Set(), remove, {
+        ...baseConfig,
+        logPrefix: "[search-sync] ",
+      }),
+    );
+    expect(
+      noneMessages.every((m) => m.message.startsWith("[search-sync] ")),
+    ).toBe(true);
+
+    const { messages: skippedMessages } = await runCapturingLogs(
+      reconcileOrphans("x", ["1", "2"], new Set(), remove, {
+        ...baseConfig,
+        ratioThreshold: 0,
+        floor: 0,
+        logPrefix: "[search-sync] ",
+      }),
+    );
+    expect(
+      skippedMessages.every((m) => m.message.startsWith("[search-sync] ")),
+    ).toBe(true);
+  });
+
+  it("defaults logPrefix to empty string", async () => {
+    const remove = vi.fn(() => Effect.succeed(["1"]));
+
+    const { messages } = await runCapturingLogs(
+      reconcileOrphans("x", ["1"], new Set(), remove, baseConfig),
+    );
+
+    expect(messages[0]?.message.startsWith("reconciliation:")).toBe(true);
   });
 });
