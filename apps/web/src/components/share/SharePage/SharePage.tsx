@@ -19,6 +19,7 @@ import {
 import { ShareBadgeContext } from "../shared/ShareFrame";
 import { shortSquadLabel, type ResultMood } from "../shared/theme";
 import { Button } from "@/components/design-system/Button/Button";
+import { EmptyState } from "@/components/design-system/EmptyState";
 import { Input } from "@/components/design-system/Input/Input";
 import { Select } from "@/components/design-system/Select/Select";
 import { PageContainer } from "@/components/design-system/PageContainer";
@@ -211,6 +212,22 @@ const FALLBACK_MATCH_NAME = "KCVV Elewijt — FC Tegenstander";
 const FALLBACK_SCORE = "0 - 0";
 const FALLBACK_MINUTE = "0";
 
+/**
+ * Which of the two client-initiated actions on this page failed — a
+ * discriminant, not a message string carried up from a `catch` (#2818). The
+ * caught error goes to the console only; the visitor sees exactly one of
+ * these two locked Dutch sentences, identical for every cause, through
+ * `<EmptyState tier="slot" reason="unavailable">` (the same failure-notice
+ * register #2580 established at `CalendarSubscribePanel` and
+ * `MembershipForm`'s transport catch).
+ */
+type ExportFailure = "generate" | "share";
+
+const EXPORT_FAILURE_COPY: Record<ExportFailure, string> = {
+  generate: "Exporteren mislukt. Probeer opnieuw.",
+  share: "Delen mislukt. Probeer opnieuw.",
+};
+
 interface RenderOpts {
   matchName: string;
   score: string;
@@ -355,7 +372,9 @@ export function SharePage({ matches, players }: SharePageProps) {
   const uploadUrlRef = useRef<string | null>(null);
   const isGeneratingRef = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportFailure, setExportFailure] = useState<ExportFailure | null>(
+    null,
+  );
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -385,7 +404,12 @@ export function SharePage({ matches, players }: SharePageProps) {
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   // Drop a generated preview once it no longer matches the form, so the
-  // Share/Download buttons can never emit a stale graphic.
+  // Share/Download buttons can never emit a stale graphic. Also drops any
+  // export failure notice: it can only ever describe the preview/blob this
+  // same call just nulled (Generate clears it up front too — see
+  // `handleGenerate`/`handleShare` — this is the field-change path), so a
+  // failure notice can never outlive the Genereer/Delen button it refers to
+  // (#2818 review finding 1).
   const clearPreview = useCallback(() => {
     if (previewUrlRef.current) {
       URL.revokeObjectURL(previewUrlRef.current);
@@ -393,6 +417,7 @@ export function SharePage({ matches, players }: SharePageProps) {
     }
     setGeneratedBlob(null);
     setPreviewUrl(null);
+    setExportFailure(null);
   }, []);
 
   const clearUpload = useCallback(() => {
@@ -521,7 +546,7 @@ export function SharePage({ matches, players }: SharePageProps) {
     if (!templateRef.current || isGeneratingRef.current) return;
     isGeneratingRef.current = true;
     setIsGenerating(true);
-    setExportError(null);
+    setExportFailure(null);
     clearPreview();
     try {
       const opts = {
@@ -546,11 +571,11 @@ export function SharePage({ matches, players }: SharePageProps) {
       setGeneratedBlob(blob);
       setPreviewUrl(url);
     } catch (err) {
-      setExportError(
-        err instanceof Error
-          ? err.message
-          : "Exporteren mislukt. Probeer opnieuw.",
-      );
+      // The caught error goes to the console only — the visitor sees the
+      // locked Dutch copy below, never the error's own text (#2818, mirrors
+      // #2580 rule 6).
+      console.error("[SharePage] Failed to generate:", err);
+      setExportFailure("generate");
     } finally {
       isGeneratingRef.current = false;
       setIsGenerating(false);
@@ -569,6 +594,13 @@ export function SharePage({ matches, players }: SharePageProps) {
 
   const handleShare = async () => {
     if (!generatedBlob) return;
+    // Clear any stale notice from a previous share attempt up front — the
+    // same "clear on entry" `handleGenerate` already does — so a retry that
+    // now succeeds doesn't leave the old failure notice on screen, and a
+    // repeat failure is a real null→"share" state transition (re-announced
+    // to assistive tech) rather than a same-value bailout (#2818 review
+    // finding 1).
+    setExportFailure(null);
     const file = new File([generatedBlob], `kcvv-${selectedTemplateId}.png`, {
       type: "image/png",
     });
@@ -576,9 +608,11 @@ export function SharePage({ matches, players }: SharePageProps) {
       await navigator.share({ files: [file] });
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") return;
-      setExportError(
-        err instanceof Error ? err.message : "Delen mislukt. Probeer opnieuw.",
-      );
+      // The caught error goes to the console only — the visitor sees the
+      // locked Dutch copy below, never the error's own text (#2818, mirrors
+      // #2580 rule 6).
+      console.error("[SharePage] Failed to share:", err);
+      setExportFailure("share");
     }
   };
 
@@ -941,10 +975,25 @@ export function SharePage({ matches, players }: SharePageProps) {
         </div>
       </div>
 
-      {exportError && (
-        <p role="alert" className="text-card-red font-mono text-sm">
-          {exportError}
-        </p>
+      {/* Tier 2, no action (#2818, mirrors #2580 rule 4): the Genereer/Delen
+          button below already survives this failure and is its own retry,
+          so a second control here would be redundant. True by construction,
+          not just by luck: Genereer is unconditional, and a "share" failure
+          only exists while `generatedBlob` is still set (`handleShare`
+          early-returns without one, and `clearPreview` nulls the failure in
+          the same call it nulls the blob) — so whenever this notice can
+          read `exportFailure === "share"`, the Delen/Download button is
+          still on screen too. Replaces the retired
+          `<p role="alert" className="text-card-red">` idiom. */}
+      {exportFailure && (
+        <EmptyState
+          tier="slot"
+          reason="unavailable"
+          live
+          emphasis={{ text: "mislukt" }}
+        >
+          {EXPORT_FAILURE_COPY[exportFailure]}
+        </EmptyState>
       )}
 
       <Button onClick={handleGenerate} disabled={isGenerating} size="lg">
