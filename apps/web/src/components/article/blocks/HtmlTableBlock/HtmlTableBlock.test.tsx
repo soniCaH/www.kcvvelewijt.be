@@ -166,6 +166,66 @@ describe("<HtmlTableBlock>", () => {
     expect(anchor?.getAttribute("rel")).toBeNull();
   });
 
+  it("forces rel on a case-varied target=_BLANK, not just a lowercase exact match (#2482 review)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="https://www.facebook.com/KCVVElewijt/posts/1" target="_BLANK">Facebook</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor?.getAttribute("target")).toBe("_BLANK");
+    expect(anchor?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("forces rel on a named target, not only _blank — any target opens a new browsing context (#2482 review)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="https://www.facebook.com/KCVVElewijt/posts/1" target="foo">Facebook</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor?.getAttribute("target")).toBe("foo");
+    expect(anchor?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("does not dress a javascript: anchor as a live link — no class once its href is stripped (#2482 review)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="javascript:alert(1)">Naam</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor).not.toBeNull();
+    expect(anchor?.getAttribute("href")).toBeNull();
+    expect(anchor?.className).toBe("");
+    expect(anchor?.textContent).toBe("Naam");
+  });
+
+  it("does not dress a legacy <a name> anchor (no href ever authored) as a live link (#2482 review)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a name="anchor">Naam</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor).not.toBeNull();
+    expect(anchor?.getAttribute("href")).toBeNull();
+    expect(anchor?.className).toBe("");
+    expect(anchor?.textContent).toBe("Naam");
+  });
+
   it("still strips <em> and every other unlisted tag — the allowlist gained exactly two entries (#2481/#2482)", () => {
     const html = `
       <table>

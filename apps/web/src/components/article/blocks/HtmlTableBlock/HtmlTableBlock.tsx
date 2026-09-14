@@ -19,39 +19,32 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     "strong",
     "a",
   ],
+  // `class` is deliberately absent here (from both `*` and `a`) — stored
+  // HTML can never populate it, full stop. `.prose-link` is spliced onto
+  // the *sanitized* output afterward by `addProseLinkClassToAnchors`
+  // below, never accepted as input.
   allowedAttributes: {
     "*": ["colspan", "rowspan", "scope"],
-    a: ["href", "target", "rel", "class"],
-  },
-  // `class` is in `allowedAttributes.a` only so `transformTags.a`'s forced
-  // value below survives sanitize-html's own attribute filter — stored
-  // HTML is never the source of it. `allowedClasses` is a second,
-  // independent guard: even if a class value reached this check, only
-  // `prose-link` would pass, so nothing "arbitrary from stored HTML" gets
-  // through either path.
-  allowedClasses: {
-    a: ["prose-link"],
+    a: ["href", "target", "rel"],
   },
   // Default `allowedSchemes` is left untouched — it already blocks
-  // `javascript:` on `href`, and sanitize-html applies it automatically to
-  // any attribute now allowed (`href`). Hand-rolling a scheme guard here
-  // would be invisible to CodeQL, which recognises the library's own
-  // barrier but not a bespoke one (#2482).
+  // `javascript:` on `href`. Hand-rolling a scheme guard here would be
+  // invisible to CodeQL, which recognises the library's own barrier but
+  // not a bespoke one (#2482).
   transformTags: {
-    // `.prose-link` (globals.css) is a class, and stored HTML never gets to
-    // supply an arbitrary one (`allowedClasses` above) — this hook is the
-    // only place a table anchor's class is ever set, forcing the canonical
-    // value regardless of what an editor's markup carried. The same pass
-    // forces `rel="noopener noreferrer"` on any `target="_blank"` anchor —
-    // 53 Facebook permalinks carry `target` today and none carries `rel`
-    // (#2482) — and drops `rel` on anything else so an authored value
-    // can't sneak through un-vetted.
+    // `target`/`rel` aren't scheme-checked (`naughtyHref` only runs against
+    // `href`), so unlike `href` they're final by the time this hook sees
+    // them — safe to decide here. Force `rel="noopener noreferrer"` on
+    // *any* `target`, not just an exact `target="_blank"`: a case-varied
+    // `target="_BLANK"` or a named target (`target="foo"`) both open a new
+    // browsing context with a live `window.opener` back-reference, and a
+    // strict `=== "_blank"` check let both slip through with no `rel` at
+    // all (review finding #2482). 53 Facebook permalinks carry `target`
+    // today and none carries `rel`; drop any authored `rel` on an anchor
+    // with no `target` so nothing un-vetted survives.
     a: (tagName, attribs) => {
-      const nextAttribs: Record<string, string> = {
-        ...attribs,
-        class: "prose-link",
-      };
-      if (nextAttribs.target === "_blank") {
+      const nextAttribs: Record<string, string> = { ...attribs };
+      if (nextAttribs.target) {
         nextAttribs.rel = "noopener noreferrer";
       } else {
         delete nextAttribs.rel;
@@ -60,6 +53,33 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     },
   },
 };
+
+const SANITIZED_ANCHOR_OPEN_TAG_RE = /<a\b([^>]*)>/gi;
+
+/**
+ * Adds `.prose-link` to every anchor that still carries an `href` **after**
+ * `sanitizeHtml` has already run — never before, and never as a scheme
+ * check of our own. `transformTags.a` above runs *before*
+ * `allowedSchemes` strips a disallowed `href` (e.g. `javascript:…`), so
+ * deciding the class inside that hook would see the href that is about to
+ * be removed, not the href that survives — the exact bug this function
+ * fixes (#2482 review). Operating on sanitize-html's own output instead
+ * means this only ever has to ask "does the tag that came out the other
+ * end still have an `href`", never "is this href's scheme allowed" — the
+ * library already answered that. A `<a>` with no surviving `href` (a
+ * stripped `javascript:` scheme, or a legacy `<a name="…">` that never had
+ * one) is left as a bare, unstyled `<a>` rather than dressed up as a live
+ * link that goes nowhere.
+ */
+function addProseLinkClassToAnchors(sanitizedHtml: string): string {
+  return sanitizedHtml.replace(
+    SANITIZED_ANCHOR_OPEN_TAG_RE,
+    (tag, attrs: string) => {
+      if (!/(?:^|\s)href="/.test(attrs)) return tag;
+      return `<a class="prose-link"${attrs}>`;
+    },
+  );
+}
 
 export interface HtmlTableBlockProps {
   /** Raw HTML — sanitized through `TABLE_SANITIZE_OPTIONS` before render. */
@@ -102,13 +122,18 @@ export interface HtmlTableBlockProps {
  * to render bold — Preflight's
  * `strong { font-weight: bolder }` already resolves to a real 700 face in
  * this table's `font-mono` (IBM Plex Mono loads 400/600/700). An authored
- * `<a>` renders too now (#2482): `allowedTags` gained `a`, and
- * `TABLE_SANITIZE_OPTIONS.transformTags.a` forces the anchor's `class` to
- * `.prose-link` (the shared body-link colour + hover marker) and its `rel`
- * to `noopener noreferrer` whenever `target="_blank"` is present — no
- * selector needed here, same as `<strong>`. `class` is not otherwise in
- * `allowedAttributes.a` for stored HTML to populate; `allowedClasses`
- * restricts it to `prose-link` as a second, independent guard.
+ * `<a>` renders too now (#2482): `allowedTags` gained `a`, but `class` is
+ * not in `allowedAttributes.a` at all — stored HTML has no path to
+ * populate it. `.prose-link` (the shared body-link colour + hover marker)
+ * is spliced onto the sanitized output afterward, by
+ * `addProseLinkClassToAnchors`, and only onto an anchor that still has an
+ * `href` once sanitize-html's own pipeline is done with it — see that
+ * function's docblock for why the timing matters.
+ * `TABLE_SANITIZE_OPTIONS.transformTags.a` separately forces `rel` to
+ * `noopener noreferrer` on any anchor carrying a `target` (any value, not
+ * just `target="_blank"` — `target` isn't scheme-checked, so this one is
+ * safe to decide inline). No selector needed for any of this, same as
+ * `<strong>`.
  *
  * A `<caption>` (three published tables ship one) renders in the kicker
  * register per #2476 rule 8 — `font-mono`, `text-label`, uppercase,
@@ -168,7 +193,9 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
           "[&>table>caption]:pb-2 [&>table>caption]:text-left [&>table>caption]:uppercase",
         )}
         dangerouslySetInnerHTML={{
-          __html: sanitizeHtml(trimmed, TABLE_SANITIZE_OPTIONS),
+          __html: addProseLinkClassToAnchors(
+            sanitizeHtml(trimmed, TABLE_SANITIZE_OPTIONS),
+          ),
         }}
       />
     </div>
