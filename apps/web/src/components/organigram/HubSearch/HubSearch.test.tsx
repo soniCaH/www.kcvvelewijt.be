@@ -286,10 +286,8 @@ describe("HubSearch", () => {
       results: [hit("blessure", 0.41)],
       executedQuery: "blessure",
     });
-    // Asserted on the dispatch, not on a `hashchange` listener: happy-dom
-    // fires one for a same-value hash write, where a real browser does not —
-    // a listener-based test is green with or without the fix.
-    const dispatch = vi.spyOn(window, "dispatchEvent");
+    const onHashChange = vi.fn();
+    window.addEventListener("hashchange", onHashChange);
     renderSearch();
     typeQuery("blessure");
     fireEvent.click(
@@ -297,17 +295,21 @@ describe("HubSearch", () => {
     );
     expect(window.location.hash).toBe("#blessure");
 
-    // Search the very same question again — picking it must reach the finder
-    // a second time, even though the hash already holds this slug.
-    dispatch.mockClear();
+    // Search the very same question again — picking it must reach the finder a
+    // second time, even though the hash already holds this slug. Re-typing the
+    // query matters: selecting closes the dropdown, so the first result row is
+    // detached and clicking it again would be a no-op for the wrong reason.
     typeQuery("blessure");
-    fireEvent.click(
-      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    const sameRow = await screen.findByText(
+      "Wat moet ik doen bij een blessure?",
     );
-    expect(
-      dispatch.mock.calls.filter(([event]) => event.type === "hashchange"),
-    ).toHaveLength(1);
-    dispatch.mockRestore();
+    // Cleared here, with no `await` left before the assertion: happy-dom does
+    // not fire `hashchange` synchronously on a hash write, so anything the
+    // first pick queued must not be allowed to land in this count.
+    onHashChange.mockClear();
+    fireEvent.click(sameRow);
+    window.removeEventListener("hashchange", onHashChange);
+    expect(onHashChange).toHaveBeenCalled();
   });
 
   it("shows an empty state with a contact escape when nothing matches", async () => {

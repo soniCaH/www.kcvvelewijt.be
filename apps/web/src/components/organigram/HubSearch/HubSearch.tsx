@@ -340,7 +340,14 @@ export function HubSearch({
         // Re-picking the answer already in the hash writes the SAME value, so
         // the browser fires no `hashchange` and the finder never reopens a
         // card the visitor collapsed in between — dispatch the event by hand.
-        if (window.location.hash === `#${result.path.id}`) {
+        // Decoded, not raw: `window.location.hash` comes back percent-encoded,
+        // while `path.id` is the raw Sanity slug — the same decode
+        // `<HulpFinder>`'s own `fromHash` does. A raw comparison would never
+        // match a slug with a non-ASCII character, leaving this bug in place
+        // for exactly those questions.
+        if (
+          decodeURIComponent(window.location.hash).slice(1) === result.path.id
+        ) {
           window.dispatchEvent(new HashChangeEvent("hashchange"));
         } else {
           window.location.hash = result.path.id;

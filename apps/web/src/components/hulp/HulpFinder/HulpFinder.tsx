@@ -212,7 +212,25 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
       // wouldn't render. Reset the audience row to "Alles" as well: a path
       // carries several roles, so there is no single right role to switch to.
       const wrongAudience = audience !== null && !path.role.includes(audience);
-      if (!wrongCategory && !wrongAudience) return;
+      if (!wrongCategory && !wrongAudience) {
+        // The question already renders where it is, so nothing below changes
+        // state — and when it is also already the open one, nothing above did
+        // either, leaving the scroll effect (keyed on `[openId, category]`)
+        // with no reason to run. Reachable only since `<HubSearch>` began
+        // dispatching a synthetic `hashchange` for an identical hash. Scroll
+        // here and disarm: a `pendingScroll` left armed fires at the next
+        // unrelated open and yanks the page to the wrong card.
+        //
+        // `openId` is deliberately NOT a dep of this callback — the listener
+        // effect below re-runs `fromHash()` every time `reveal` changes
+        // identity, so depending on `openId` would re-reveal the hashed
+        // question on every unrelated card click.
+        pendingScroll.current = null;
+        document
+          .getElementById(id)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
       // ONE url write for both params, not two `useRouterFilterParam`
       // setters: each of those merges from the live `window.location.search`,
       // which `router.replace` has not updated yet by the time the second one

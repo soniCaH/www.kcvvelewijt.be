@@ -417,6 +417,20 @@ describe("HulpFinder", () => {
     );
   });
 
+  it("scrolls to an already-open question when it is re-picked in the search", () => {
+    // `<HubSearch>` dispatches a `hashchange` for an identical hash so a
+    // re-pick reaches the finder. The question is then already open in the
+    // already-right category, so that reveal changes no state and the scroll
+    // effect — keyed on `[openId, category]` — has no reason to run: the
+    // reveal has to scroll (and disarm `pendingScroll`) itself.
+    window.location.hash = "#blessure";
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+
+    scrollIntoView.mockClear();
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(scrollIntoView).toHaveBeenCalled();
+  });
+
   it("shows an empty state when there are no paths", () => {
     render(<HulpFinder responsibilityPaths={[]} />);
     expect(screen.getByRole("status")).toHaveTextContent(
