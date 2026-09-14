@@ -112,18 +112,21 @@
  * feed still drops it silently.
  *
  * **`<FeaturedEventBand>` is not the auto-hide counter-example this rule
- * was believed to have.** Its query (`NEXT_FEATURED_EVENT_QUERY`,
- * `event.repository.ts`) is a `coalesce()` of a `featuredOnHome`-preferred
- * branch and a second, unfiltered "any upcoming event" branch — so the flag
- * is a *preference*, not a gate, and the band is normally populated the same
- * way `<UpcomingMatches>` is, not "one optional, editorially-gated
- * document." Its silent vanish on a failed read (`degradeSection` collapses
- * a failed read and a genuinely event-less calendar to the same `null`,
- * indistinguishable at this call site) has no discriminant left to justify
- * it once the gate premise is gone — it reads as the same #2399 harm this
- * rule exists to prevent, not a deliberate second half of it. Tracked as a
- * likely defect, not documented here as the rule's auto-hide half: see
- * #2944.
+ * was once believed to have (#2944, fixed).** Its query
+ * (`NEXT_FEATURED_EVENT_QUERY`, `event.repository.ts`) is a `coalesce()` of
+ * a `featuredOnHome`-preferred branch and a second, unfiltered "any upcoming
+ * event" branch — so the flag is a *preference*, not a gate, and the band is
+ * normally populated the same way `<UpcomingMatches>` is, not "one optional,
+ * editorially-gated document." `(landing)/page.tsx` now degrades a failed
+ * read to a sentinel distinct from the genuinely-empty `null`
+ * (`FEATURED_EVENT_READ_FAILED`), and passes that apart as `unavailable` —
+ * the band holds its shape and names the reason on a failed read, exactly
+ * this rule's shape, and still drops silently on a genuinely empty calendar.
+ * It reaches that hold-open register through its own dark-ground notice
+ * rather than through `<EmptyState tier="slot" reason="unavailable">`
+ * itself — that member is ink-only (see the parked note above) and this
+ * band's `bg-jersey-deep` ground is exactly the case that note describes as
+ * unmigrated; `<FeaturedEventBand>`'s own file carries the reasoning.
  *
  * The artefact is never `<TapedCard>` — that primitive has no frameless
  * (`shadow: "none"`) or transparent-`bg` option today, and this slot needs
