@@ -47,6 +47,51 @@ export interface FeaturedEventBandProps {
   /** Render reference time. Defaults to now in the club's zone. Tests override
    *  to make the past/future split deterministic without freezing `Date`. */
   now?: DateTime;
+  /**
+   * The upstream `EventRepository.findNextFeatured()` read failed, as
+   * opposed to the calendar genuinely holding no upcoming event. Read only
+   * on the no-event path (mirrors `<UpcomingMatches>`'s own `unavailable`
+   * prop, `UpcomingMatches.tsx:39`): with a renderable `event` present, the
+   * band renders as normal regardless of this flag.
+   *
+   * @default false
+   */
+  unavailable?: boolean;
+}
+
+/**
+ * The held-open dark-ground notice for a failed read. Not routed through
+ * `<EmptyState tier="slot" reason="unavailable">` — that register is
+ * ink-only (`border-ink/30` frame, `text-ink-soft` body, a `text-jersey-deep`
+ * accent span with no prop to swap it) and is explicitly documented as wrong
+ * on a dark-green band (`EmptyState.tsx`'s own file docblock, "parked: the
+ * dark-ground slot register"); `jersey-deep` is this band's own background.
+ * `<FirstTeamsBlock>` — the band directly above this one on the homepage
+ * spine, on the same dark-green family (`jersey-deep-dark`) — solves the
+ * identical problem by hand-rolling its own cream-toned frame rather than
+ * waiting on that primitive to grow a dark axis (tracked separately, #2402);
+ * this notice copies that same vocabulary (`border-cream/40` dashed frame,
+ * `text-cream/80` body) instead of inventing a third one. See the PR for
+ * #2944 for why this deviates from the ticket's literal `<EmptyState>`
+ * wording.
+ */
+function FeaturedEventUnavailableNotice() {
+  return (
+    <section
+      data-testid="featured-event-band"
+      aria-label="Aanstaand evenement"
+      className="bg-jersey-deep text-cream py-12 md:py-16"
+    >
+      <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
+        <div className="border-cream/40 border-2 border-dashed px-4 py-8 text-center">
+          <p className="text-cream/80">
+            Het eerstvolgende evenement is even niet beschikbaar. Probeer het
+            later opnieuw.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 /**
@@ -87,12 +132,20 @@ export const FeaturedEventBand = ({
   // between instants, so the zone cannot change the outcome — it is stated so
   // the file holds no unpinned parse for the next reader to copy.
   now = DateTime.now().setZone(CLUB_TIMEZONE),
+  unavailable = false,
 }: FeaturedEventBandProps) => {
   // Drop-if-empty per locked spec: null event, missing cover image, or
   // start time already past — caller doesn't have to filter upstream.
-  if (!event || !event.coverImage) return null;
+  // A failed read (`unavailable`) holds the band's shape and names the
+  // reason instead of dropping silently — mirrors `<UpcomingMatches>`
+  // (`UpcomingMatches.tsx:39`); #2944.
+  if (!event || !event.coverImage) {
+    return unavailable ? <FeaturedEventUnavailableNotice /> : null;
+  }
   const start = toDisplayZone(event.dateStart);
-  if (!start.isValid || start < now) return null;
+  if (!start.isValid || start < now) {
+    return unavailable ? <FeaturedEventUnavailableNotice /> : null;
+  }
 
   const location = event.location?.trim() || "Kantine";
   const ctaUrl = event.externalLink?.url || `/evenementen/${event.slug}`;
@@ -106,6 +159,7 @@ export const FeaturedEventBand = ({
   return (
     <section
       data-testid="featured-event-band"
+      aria-label="Aanstaand evenement"
       className="bg-jersey-deep text-cream py-12 md:py-16"
     >
       <div className="mx-auto grid max-w-[var(--container-index)] grid-cols-1 items-stretch gap-8 px-4 md:grid-cols-[1fr_1.4fr] md:gap-12 md:px-8">

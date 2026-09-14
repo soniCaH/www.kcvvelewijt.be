@@ -39,6 +39,13 @@ describe("FeaturedEventBand", () => {
       expect(container.firstChild).toBeNull();
     });
 
+    it("still returns null when event is null and unavailable is explicitly false", () => {
+      const { container } = render(
+        <FeaturedEventBand event={null} now={NOW} unavailable={false} />,
+      );
+      expect(container.firstChild).toBeNull();
+    });
+
     it("returns null when coverImage is missing", () => {
       const { container } = render(
         <FeaturedEventBand event={{ ...event, coverImage: null }} now={NOW} />,
@@ -64,6 +71,26 @@ describe("FeaturedEventBand", () => {
         />,
       );
       expect(container.firstChild).toBeNull();
+    });
+  });
+
+  describe("Unavailable (#2944)", () => {
+    it("renders the unavailable notice instead of dropping when event is null and unavailable is true", () => {
+      render(<FeaturedEventBand event={null} now={NOW} unavailable />);
+      expect(screen.getByText(/even niet beschikbaar/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("region", { name: "Aanstaand evenement" }),
+      ).toBeInTheDocument();
+    });
+
+    it("renders the event as normal when unavailable is true but a renderable event is also passed", () => {
+      // Only read on the no-event path — mirrors `<UpcomingMatches>`.
+      render(<FeaturedEventBand event={event} now={NOW} unavailable />);
+      expect(
+        screen.queryByText(/even niet beschikbaar/i),
+      ).not.toBeInTheDocument();
+      const heading = screen.getByRole("heading", { level: 2 });
+      expect(heading.textContent).toContain("Sponsorfeest 2026");
     });
   });
 
