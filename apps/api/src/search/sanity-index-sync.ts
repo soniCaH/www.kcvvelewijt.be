@@ -503,17 +503,31 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
                     ),
                   ),
                 ),
-          PRUNE_SAFETY_CAP_FRACTION,
-          PRUNE_SAFETY_FLOOR,
+          {
+            ratioThreshold: PRUNE_SAFETY_CAP_FRACTION,
+            floor: PRUNE_SAFETY_FLOOR,
+            logPrefix: "[search-sync] ",
+            releaseLeverHint:
+              'see apps/api/CLAUDE.md ("Releasing a stuck prune safety cap") for the release lever once the cause is understood.',
+          },
         );
         const manifestConfirmedIds =
           manifestReconciliation.action === "removed"
             ? manifestReconciliation.confirmedIds
             : [];
+        const manifestConfirmedIdSet = new Set(manifestConfirmedIds);
 
+        // Subtract ids the manifest-diff call above already confirmed
+        // removed — a document deactivated between sweeps is commonly BOTH
+        // a manifest orphan and an excluded id, and without this the same
+        // id goes to deleteByIds twice in one sweep, and the two "Pruned N"
+        // logs double-count it (#2854 review). Requested-but-NOT-confirmed
+        // ids (a capped or failed manifest-diff delete) are deliberately
+        // NOT subtracted — the excluded-ids query is authoritative and
+        // uncapped, so it's still this sweep's only chance to retry them.
         const excludedIds = [
           ...new Set([...excludedResponsibilityIds, ...excludedArticleIds]),
-        ];
+        ].filter((id) => !manifestConfirmedIdSet.has(id));
         let excludedConfirmedIds: readonly string[] = [];
         if (excludedIds.length > 0) {
           if (dryRun) {
@@ -526,6 +540,10 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
               `[search-sync] Pruned ${excludedConfirmedIds.length} excluded-ids vector(s)`,
             );
           }
+        } else {
+          yield* Effect.log(
+            "[search-sync] reconciliation: no orphan excluded ids to prune",
+          );
         }
 
         const confirmedDeleted = new Set([

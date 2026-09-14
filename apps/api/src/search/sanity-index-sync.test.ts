@@ -805,6 +805,53 @@ describe("runSanityIndexSync", () => {
       expect(new Set(deleteCalls.flat())).toEqual(new Set(manyExcluded));
     });
 
+    it("does not double-delete or double-count an id that is both a manifest orphan and an excluded id (#2854 review finding 5)", async () => {
+      const kv = makeKvNamespaceMock();
+
+      // Bootstrap: mockDoc tracked in the manifest.
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // Sweep 2: mockDoc drops out of the responsibility query (a manifest
+      // orphan) AND is simultaneously reported by the excluded-ids query
+      // (e.g. deactivated) — the common real-world case the two sets
+      // overlap on.
+      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const messages: string[] = [];
+      const TestLogger = Logger.make(({ message }) => {
+        messages.push(String(message));
+      });
+      await Effect.runPromise(
+        sweep(
+          {
+            fetchExcludedResponsibilityIds: noopFetch(["sanity-abc-123"]),
+          },
+          mock2,
+          { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
+        ).pipe(
+          Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
+        ),
+      );
+
+      // Deleted exactly once across the whole sweep, not once per set.
+      expect(deleteCalls.flat()).toEqual(["sanity-abc-123"]);
+
+      // Not double-counted across the two "Pruned N" lines either — the
+      // excluded-ids branch had nothing left to prune once the id it shared
+      // with the manifest diff was subtracted out.
+      expect(
+        messages.some((m) => m.includes("no orphan excluded ids to prune")),
+      ).toBe(true);
+      expect(
+        messages.some((m) => m.includes("Pruned 1 excluded-ids vector(s)")),
+      ).toBe(false);
+    });
+
     it("writes the union of every type's ids to the manifest on the very first sweep", async () => {
       const kv = makeKvNamespaceMock();
       const { deleteCalls, mock } = makeVectorizeCapture();
