@@ -103,6 +103,9 @@ export function buildJobAlertMessage(
   return `:red_circle: *Scheduled job failing* — \`${ctx.job}\` has now failed ${ctx.consecutiveFailures} consecutive ${runs}${detail}.`;
 }
 
+/** Slack must answer within this or the ping is dropped (resolves `false`). */
+const SLACK_TIMEOUT_MS = 3000;
+
 /**
  * Best-effort POST to a Slack incoming webhook. No-op (resolves `false`)
  * when `webhookUrl` is absent (local/dev without the secret). Never throws —
@@ -124,6 +127,12 @@ export async function postSlack(
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text }),
+      // Every caller awaits this — the cron reporter, the DO incident ping and
+      // the serve-stale nudge — so a Slack that accepts the connection and then
+      // stalls would hang the very thing it is observing. Aborting lands in the
+      // catch below as `false`, which is the honest answer: not delivered, so a
+      // failure alert stays unannounced and the next run retries it.
+      signal: AbortSignal.timeout(SLACK_TIMEOUT_MS),
     });
     if (!response.ok) {
       console.error(

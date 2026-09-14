@@ -130,6 +130,17 @@ describe("postSlack", () => {
     );
   });
 
+  it("bounds the request with a live abort signal so a stalled Slack cannot hang the caller", async () => {
+    const fetchMock = vi.fn(
+      async (_url: string, _init?: RequestInit) => new Response("ok"),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await postSlack("https://hooks.slack.test/abc", "hello");
+    const signal = fetchMock.mock.calls[0]?.[1]?.signal;
+    expect(signal).toBeInstanceOf(AbortSignal);
+    expect(signal?.aborted).toBe(false);
+  });
+
   it("resolves false (never throws) and logs on a non-ok response", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     vi.stubGlobal(
