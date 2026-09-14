@@ -100,25 +100,30 @@
  * this register and re-open that exception deliberately, not assume
  * `<CompetitiveStatusLine>`'s shape is the norm.
  *
- * **A homepage band's zero-row behaviour is decided by what its subject is,
- * before this primitive ever enters the picture (#2399/#2505/#2844).** A
- * band that acknowledges a remote match feed — `<FirstTeamsBlock>`,
- * `<UpcomingMatches>` — holds its shape and names the reason on a failed
- * read, because a visitor watching an empty band can't otherwise tell a
- * stalled BFF from a feed that's genuinely gone quiet. `<FirstTeamsBlock>`
- * holds that shape on every zero-row cause, not only a failure, and
- * hand-rolls the dark-ground equivalent of this register rather than
- * adopting it (see the parked note above); `<UpcomingMatches>` is the one
- * that reaches this exact register (`tier="slot"`, `reason="unavailable"`),
- * and only on a failed read — a genuinely empty feed still drops it
- * silently. A band whose subject is one optional, editorially-gated
- * document — `<FeaturedEventBand>`, gated on `featuredOnHome` and ticked on
- * 5 of 82 events — has no feed to acknowledge in the first place, so it may
- * vanish instead, deliberately, including on a failed read: nobody is
- * waiting for a band that only exists when someone ticks a box, so its
- * absence draws no wrong conclusion. A future band picks between these two
- * halves by asking which kind of subject it has, not by copying whichever
- * of the three it resembles most.
+ * **A homepage band that acknowledges a remote feed holds its shape and
+ * names the reason on a failed read (#2399/#2505/#2844).** A visitor
+ * watching such a band go empty can't otherwise tell a stalled read from a
+ * feed that's genuinely gone quiet, so the band says which one happened
+ * instead of just going dark. `<FirstTeamsBlock>` holds that shape on every
+ * zero-row cause, not only a failure, and hand-rolls the dark-ground
+ * equivalent of this register rather than adopting it (see the parked note
+ * above); `<UpcomingMatches>` reaches this exact register (`tier="slot"`,
+ * `reason="unavailable"`), and only on a failed read — a genuinely empty
+ * feed still drops it silently.
+ *
+ * **`<FeaturedEventBand>` is not the auto-hide counter-example this rule
+ * was believed to have.** Its query (`NEXT_FEATURED_EVENT_QUERY`,
+ * `event.repository.ts`) is a `coalesce()` of a `featuredOnHome`-preferred
+ * branch and a second, unfiltered "any upcoming event" branch — so the flag
+ * is a *preference*, not a gate, and the band is normally populated the same
+ * way `<UpcomingMatches>` is, not "one optional, editorially-gated
+ * document." Its silent vanish on a failed read (`degradeSection` collapses
+ * a failed read and a genuinely event-less calendar to the same `null`,
+ * indistinguishable at this call site) has no discriminant left to justify
+ * it once the gate premise is gone — it reads as the same #2399 harm this
+ * rule exists to prevent, not a deliberate second half of it. Tracked as a
+ * likely defect, not documented here as the rule's auto-hide half: see
+ * #2944.
  *
  * The artefact is never `<TapedCard>` — that primitive has no frameless
  * (`shadow: "none"`) or transparent-`bg` option today, and this slot needs

@@ -14,8 +14,10 @@ const meta = {
       description: {
         component:
           "Standalone band between hero and NewsGrid that surfaces the next " +
-          "future event flagged `featuredOnHome` (with a coverImage). Drops " +
-          "to null otherwise. Spec: " +
+          "upcoming event, preferring one flagged `featuredOnHome` and " +
+          "falling back to the next upcoming event when none is flagged " +
+          "(NEXT_FEATURED_EVENT_QUERY). Drops to null only when there is no " +
+          "upcoming event at all. Spec: " +
           "docs/design/mockups/phase-4-homepage/featuredeventband-locked.md.",
       },
     },
