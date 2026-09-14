@@ -430,11 +430,10 @@ describe("matchDay ground (#2616)", () => {
     expect(aside).not.toHaveClass("bg-cream");
   });
 
-  // No venue: PSD supplies none on this path today (`transformPsdGame` /
-  // `transformPsdMatchDetail` in apps/api/src/psd/transforms.ts both hardcode
-  // `venue: undefined`, #2398) — ScheduleMatch carries no such field, so the
-  // strip only ever names today and the kickoff, never a ground it cannot
-  // confirm.
+  // No venue: ScheduleMatch carries no such field at all (#2398) — a
+  // deliberate type-level omission, unaffected by the BFF sourcing `venue`
+  // for other consumers since #2491 — so the strip only ever names today and
+  // the kickoff, never a ground.
   it("relabels the mobile fixture row to Vandaag with its kickoff", () => {
     render(
       <MatchStripView

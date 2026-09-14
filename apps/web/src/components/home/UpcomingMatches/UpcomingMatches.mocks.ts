@@ -44,10 +44,11 @@ const makeMatch = (
 });
 
 /**
- * The club's own ground. Only home fixtures carry it — and only in fixtures:
- * PSD supplies no venue field and `apps/api/src/psd/transforms.ts` hardcodes
- * `venue: undefined`, so production renders no venue at all today (#2398).
- * Kept here so the caption's populated state stays covered for the day it does.
+ * A standalone mock string, deliberately not imported from `apps/api` (a
+ * different app) or re-typed to the club's real address — see #2491 for the
+ * production spelling (`apps/api/src/psd/venue.ts`). Only home fixtures
+ * carry a venue at all; kept here so the caption's populated state stays
+ * covered in Storybook regardless of that production string.
  */
 const HOME_VENUE = "Driesstraat 32, 1982 Elewijt";
 

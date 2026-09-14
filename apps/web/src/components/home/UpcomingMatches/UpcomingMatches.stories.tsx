@@ -18,7 +18,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Homepage upcoming-matches block (Phase 4.B.2). Single-purpose schedule listing across all KCVV teams. Renames the legacy `<MatchesSliderSection>` and absorbs `<MatchWidget>`. Default shows 5 chronological matches; inline expand reveals all upcoming and is reversible, and the `/kalender` link is only visible after expansion. Empty state returns null.\n\n#2398 added the youth-parent path: a label-sorted team-chip filter (`<FilterTabs>`) above the list, the venue in each row's caption, and the home/away badge reconciled with `<TeamAgendaRow>`'s House/Bus glyph per drill 2398-1 variant B. Venue renders nothing in production today — PSD supplies no venue field and the BFF hardcodes `undefined` — so the fixtures below carry one only to keep the populated caption covered.",
+          "Homepage upcoming-matches block (Phase 4.B.2). Single-purpose schedule listing across all KCVV teams. Renames the legacy `<MatchesSliderSection>` and absorbs `<MatchWidget>`. Default shows 5 chronological matches; inline expand reveals all upcoming and is reversible, and the `/kalender` link is only visible after expansion. Empty state returns null.\n\n#2398 added the youth-parent path: a label-sorted team-chip filter (`<FilterTabs>`) above the list, the venue in each row's caption, and the home/away badge reconciled with `<TeamAgendaRow>`'s House/Bus glyph per drill 2398-1 variant B. Venue renders for a home fixture in production (#2491) and is absent otherwise — the fixtures below carry one to keep the populated caption covered regardless of live data.",
       },
     },
   },
