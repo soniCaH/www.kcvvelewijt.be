@@ -17,6 +17,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FilterTabs, type FilterTab } from "./FilterTabs";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 const mockTabs: FilterTab[] = [
   { value: "all", label: "All", count: 10 },
@@ -475,8 +476,12 @@ describe("FilterTabs", () => {
       Object.defineProperty(scrollContainer, "scrollWidth", { value: 200 });
       Object.defineProperty(scrollContainer, "clientWidth", { value: 100 });
 
+      const { flush } = stubAnimationFrame();
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       const rightArrow = screen.getByLabelText("Scroll right");

@@ -18,6 +18,7 @@ import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 // Only the `useSectionNav` scroll-spy tests below register a section target
 // with a matching id, so every other test in this file simply never creates
@@ -351,9 +352,13 @@ describe("TeamSectionNav", () => {
       render(<TeamSectionNav items={FIVE_ITEMS} />);
 
       const list = screen.getByRole("list");
+      const { flush } = stubAnimationFrame();
       Object.defineProperty(list, "scrollLeft", { value: 357 });
       act(() => {
         list.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       const rightArrow = screen.getByLabelText("Scroll right");

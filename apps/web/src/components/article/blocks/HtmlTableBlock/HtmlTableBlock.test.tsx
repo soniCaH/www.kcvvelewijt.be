@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { HtmlTableBlock } from "./HtmlTableBlock";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 const SIMPLE_TABLE_HTML = `
 <table>
@@ -220,12 +221,16 @@ describe("<HtmlTableBlock>", () => {
       const { container } = render(<HtmlTableBlock html={SIMPLE_TABLE_HTML} />);
 
       const region = screen.getByRole("region");
+      const { flush } = stubAnimationFrame();
       // 900 - 500 = 400 total overflow; scrolled to 385 leaves 15px — still
       // over the 10px dead-zone (so the arrow/fade stay mounted) but under
       // the 24px cap.
       Object.defineProperty(region, "scrollLeft", { value: 385 });
       act(() => {
         region.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       const fade = container.querySelector(

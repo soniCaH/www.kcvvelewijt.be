@@ -9,6 +9,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ScrollRail } from "./ScrollRail";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
@@ -102,9 +103,13 @@ describe("ScrollRail", () => {
     );
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
+    const { flush } = stubAnimationFrame();
     Object.defineProperty(track, "scrollLeft", { value: 500 });
     act(() => {
       track.dispatchEvent(new Event("scroll"));
+    });
+    act(() => {
+      flush();
     });
 
     expect(screen.getByLabelText("Scroll left")).toBeInTheDocument();
