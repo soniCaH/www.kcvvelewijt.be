@@ -10,7 +10,7 @@ const contactFields = [
     options: {
       list: [
         {title: 'Organigram positie', value: 'position'},
-        {title: 'Teamrol (dynamisch)', value: 'team-role'},
+        {title: 'Teamrol', value: 'team-role'},
         {title: 'Handmatig', value: 'manual'},
       ],
       layout: 'radio',
@@ -41,7 +41,7 @@ const contactFields = [
       ],
     },
     description:
-      'Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest. Bijvoorbeeld: een speler van het A-team die "trainer" selecteert krijgt zijn eigen trainer als contactpersoon te zien.',
+      'Bepaalt het generieke rol-label dat op de site verschijnt (bijv. "Trainer van jouw ploeg"), samen met een link naar /ploegen. Er wordt geen specifieke trainer of afgevaardigde opgezocht of getoond — de gebruiker vindt zijn eigen ploeg en diens contactpersoon zelf via die link.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
@@ -55,7 +55,7 @@ const contactFields = [
       ],
     },
     description:
-      'Optioneel: als de primaire teamrol niet beschikbaar is voor de gekozen ploeg, wordt deze rol geprobeerd. Voorkomt dat gebruikers met een lege contactkaart eindigen.',
+      'Wordt enkel gelezen als "Teamrol" leeg is — maar "Teamrol" is verplicht, dus dat kan bij een document dat via Studio is opgeslagen nooit voorkomen. Laat dit veld leeg; of het geschrapt wordt, staat genoteerd in #2952.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
@@ -281,7 +281,7 @@ export const responsibility = defineType({
       type: 'object',
       group: 'contact',
       description:
-        'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een dynamische teamrol, of handmatige contactgegevens.',
+        'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een teamrol (toont enkel een generiek label + link naar /ploegen), of handmatige contactgegevens.',
       fields: contactFields,
       validation: (Rule) =>
         Rule.required()

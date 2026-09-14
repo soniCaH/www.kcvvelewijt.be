@@ -152,7 +152,6 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
       findAll: mockTeamsFindAll,
       findBySlug: () => Effect.die("not used by this suite"),
       findAllForLanding: () => Effect.die("not used by this suite"),
-      findYouthTeamsForContact: () => Effect.die("not used by this suite"),
       findByMemberId: () => Effect.die("not used by this suite"),
     }),
   };

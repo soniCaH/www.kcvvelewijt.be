@@ -1281,12 +1281,7 @@ function hasCaller(repo: RepositoryDeclaration, method: string): boolean {
  * orphan this rule found, deliberately not fixed inside the PR that added
  * the rule, with a follow-up issue tracking its resolution.
  */
-const ORPHAN_EXEMPTIONS: Record<string, readonly string[]> = {
-  // Pre-existing, unrelated to #2505's own change — a `/hulp`-style youth-
-  // team-contact feature that was either never wired up or lost its caller
-  // in a refactor. https://github.com/soniCaH/www.kcvvelewijt.be/issues/2859
-  "lib/repositories/team.repository.ts": ["findYouthTeamsForContact"],
-};
+const ORPHAN_EXEMPTIONS: Record<string, readonly string[]> = {};
 
 function isExempt(file: string, method: string): boolean {
   return (ORPHAN_EXEMPTIONS[file] ?? []).includes(method);
@@ -1310,14 +1305,23 @@ describe("a repository method with no caller renders nothing, silently (#2505)",
   // must have its exemption removed (rule 8's own "no fewer, no more" bar),
   // and this fails loudly the day that happens rather than quietly stop
   // testing a method that no longer needs the carve-out.
-  describe("exemptions stay pinned to a real, still-live orphan", () => {
+  //
+  // One always-registered test looping the list internally, not `it.each` —
+  // `it.each([])` throws "No test found in suite" under Vitest 4 rather than
+  // registering zero tests, and a conditional `describe` around it would
+  // make the pin itself disappear from the report the moment the map is
+  // empty (the common case — every orphan found so far has been fixed, not
+  // carved out), leaving rule 10's "no fewer, no more" bar structurally
+  // unenforced. This test stays in the report either way: vacuously true
+  // when the map is empty, and it still fails per-entry when it isn't.
+  it("exemptions stay pinned to a real, still-live orphan", () => {
     const exempted = Object.entries(ORPHAN_EXEMPTIONS).flatMap(
       ([file, methods]) => methods.map((method) => [file, method] as const),
     );
-    it.each(exempted)("%s — %s is still actually orphaned", (file, method) => {
+    for (const [file, method] of exempted) {
       const repo = repositories.find((r) => r.file === file)!;
-      expect(hasCaller(repo, method)).toBe(false);
-    });
+      expect(hasCaller(repo, method), `${file} — ${method}`).toBe(false);
+    }
   });
 });
 

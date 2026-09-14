@@ -95,7 +95,6 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
       findAll: () => Effect.succeed([]), // MatchStripSlot's own A-side read
       findBySlug: mockFindBySlug,
       findAllForLanding: () => Effect.succeed([]),
-      findYouthTeamsForContact: () => Effect.succeed([]),
       findByMemberId: () => Effect.succeed([]),
     }),
   };

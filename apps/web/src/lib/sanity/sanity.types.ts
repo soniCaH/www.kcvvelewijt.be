@@ -2736,26 +2736,6 @@ export type TEAMS_BY_MEMBER_QUERY_RESULT = Array<{
 }>;
 
 // Source: ../web/src/lib/repositories/team.repository.ts
-// Variable: YOUTH_TEAMS_CONTACT_QUERY
-// Query: *[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {  _id, name, "slug": slug.current, age,  staff[defined(member) && !member->archived] { role, "member": member-> { _id, firstName, lastName, email, phone } }}
-export type YOUTH_TEAMS_CONTACT_QUERY_RESULT = Array<{
-  _id: string;
-  name: string | null;
-  slug: string | null;
-  age: string | null;
-  staff: Array<{
-    role: "afgevaardigde" | "trainer" | null;
-    member: {
-      _id: string;
-      firstName: string | null;
-      lastName: string | null;
-      email: string | null;
-      phone: string | null;
-    } | null;
-  }> | null;
-}>;
-
-// Source: ../web/src/lib/repositories/team.repository.ts
 // Variable: TEAMS_LANDING_QUERY
 // Query: *[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {  _id, psdId, name, displayName, "slug": slug.current, age,  division, divisionFull, tagline,  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),  staff[] { role, "member": member-> { firstName, lastName, functionTitle } }}
 export type TEAMS_LANDING_QUERY_RESULT = Array<{
@@ -2814,7 +2794,6 @@ declare global {
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, displayName, "slug": slug.current, age, division, divisionFull,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))\n}': TEAMS_QUERY_RESULT;
     '*[_type == "team" && slug.current == $slug][0] {\n  _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,\n  tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),\n  players[]-> {\n    _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  staff[] { role, "member": member-> {\n    _id, psdId, archived, firstName, lastName, functionTitle,\n    "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)),\n    // fit=max, not the hotspot-crop route photoUrl above uses: psdImage has\n    // no hotspot option on the schema (it\'s readOnly \u2014 no editor could ever\n    // set one), so a hotspot-crop URL here would always centre-crop a\n    // 350x350 PSD square with no way to adjust it. Matches the player\n    // psdImageUrl projection above (#2895 review). A staff member who needs\n    // specific framing uses the editorial \'photo\' field, which keeps its\n    // hotspot and still wins at render.\n    "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n    "hasBio": count(bio) > 0\n  } }\n}': TEAM_BY_SLUG_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && references($memberId)] | order(name asc) {\n  _id, name, displayName, "slug": slug.current, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))\n}': TEAMS_BY_MEMBER_QUERY_RESULT;
-    '*[_type == "team" && archived != true && defined(age) && age match "U*"] | order(name asc) {\n  _id, name, "slug": slug.current, age,\n  staff[defined(member) && !member->archived] { role, "member": member-> { _id, firstName, lastName, email, phone } }\n}': YOUTH_TEAMS_CONTACT_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {\n  _id, psdId, name, displayName, "slug": slug.current, age,\n  division, divisionFull, tagline,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),\n  staff[] { role, "member": member-> { firstName, lastName, functionTitle } }\n}': TEAMS_LANDING_QUERY_RESULT;
   }
 }

@@ -30,7 +30,7 @@ export function prepareResponsibilityPreview(selection: ResponsibilityPreviewSel
       contact = contactNodeTitle
       break
     case 'team-role':
-      contact = 'Teamrol (dynamisch)'
+      contact = 'Teamrol'
       break
     case 'manual':
       contact = contactRole
