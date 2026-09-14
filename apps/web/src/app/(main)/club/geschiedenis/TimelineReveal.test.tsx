@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act, render, screen } from "@testing-library/react";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { TimelineReveal } from "./TimelineReveal";
 
 function stubMatchMedia(matches: boolean): void {
@@ -15,57 +16,19 @@ function stubMatchMedia(matches: boolean): void {
   }));
 }
 
-let observerInstance: MockIntersectionObserver | null = null;
-
-class MockIntersectionObserver {
-  callback: IntersectionObserverCallback;
-  options?: IntersectionObserverInit;
-  observed: Element[] = [];
-  observe = vi.fn((el: Element) => {
-    this.observed.push(el);
-  });
-  disconnect = vi.fn();
-  unobserve = vi.fn();
-  takeRecords = vi.fn(() => []);
-  root: Element | Document | null = null;
-  rootMargin = "";
-  thresholds: ReadonlyArray<number> = [];
-
-  constructor(
-    callback: IntersectionObserverCallback,
-    options?: IntersectionObserverInit,
-  ) {
-    this.callback = callback;
-    this.options = options;
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    observerInstance = this;
-  }
-}
-
 function intersect(target: Element): void {
   act(() => {
-    observerInstance!.callback(
-      [
-        {
-          isIntersecting: true,
-          target,
-          intersectionRatio: 1,
-          boundingClientRect: {} as DOMRectReadOnly,
-          intersectionRect: {} as DOMRectReadOnly,
-          rootBounds: null,
-          time: 0,
-        },
-      ],
-      observerInstance as unknown as IntersectionObserver,
-    );
+    FakeIntersectionObserver.latest()!.trigger([
+      { isIntersecting: true, target, intersectionRatio: 1 },
+    ]);
   });
 }
 
 describe("TimelineReveal", () => {
   beforeEach(() => {
-    observerInstance = null;
+    FakeIntersectionObserver.reset();
     stubMatchMedia(false);
-    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+    vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
   });
 
   afterEach(() => {
@@ -90,8 +53,8 @@ describe("TimelineReveal", () => {
       </TimelineReveal>,
     );
 
-    expect(observerInstance).not.toBeNull();
-    expect(observerInstance!.observe).toHaveBeenCalledTimes(3);
+    expect(FakeIntersectionObserver.latest()).not.toBeUndefined();
+    expect(FakeIntersectionObserver.latest()!.observe).toHaveBeenCalledTimes(3);
     expect(screen.getByTestId("a").parentElement).toHaveClass(
       "timeline-reveal",
     );
@@ -104,8 +67,10 @@ describe("TimelineReveal", () => {
       </TimelineReveal>,
     );
 
-    expect(observerInstance?.options?.threshold).toBe(0.1);
-    expect(observerInstance?.options?.rootMargin).toBe("0px 0px -10% 0px");
+    expect(FakeIntersectionObserver.latest()?.options?.threshold).toBe(0.1);
+    expect(FakeIntersectionObserver.latest()?.options?.rootMargin).toBe(
+      "0px 0px -10% 0px",
+    );
   });
 
   it("adds the --entered class on intersection and stops observing", () => {
@@ -121,7 +86,9 @@ describe("TimelineReveal", () => {
     intersect(item);
 
     expect(item).toHaveClass("timeline-item--entered");
-    expect(observerInstance!.unobserve).toHaveBeenCalledWith(item);
+    expect(FakeIntersectionObserver.latest()!.unobserve).toHaveBeenCalledWith(
+      item,
+    );
   });
 
   it("does not instantiate an observer or apply the base class under reduced motion", () => {
@@ -133,7 +100,7 @@ describe("TimelineReveal", () => {
       </TimelineReveal>,
     );
 
-    expect(observerInstance).toBeNull();
+    expect(FakeIntersectionObserver.latest()).toBeUndefined();
     expect(screen.getByTestId("item").parentElement).not.toHaveClass(
       "timeline-reveal",
     );
