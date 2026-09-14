@@ -21,6 +21,19 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   });
 }
 
+// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
+// callback synchronously lets a test assert on post-scroll state without a
+// separate flush step. Restored by the shared `afterEach`'s
+// `vi.restoreAllMocks()`.
+function runAnimationFrameSynchronously() {
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
+    (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    },
+  );
+}
+
 describe("ScrollOverlay", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -71,6 +84,7 @@ describe("ScrollOverlay", () => {
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
     Object.defineProperty(track, "scrollLeft", { value: 100 });
+    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
     });
@@ -116,6 +130,7 @@ describe("ScrollOverlay", () => {
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
     // 500px total overflow; scrolled to 485 leaves 15px.
     Object.defineProperty(track, "scrollLeft", { value: 485 });
+    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
     });
@@ -150,6 +165,7 @@ describe("ScrollOverlay", () => {
     // the track still overflows at this width, so the anchor must not
     // un-pin (#2582: this reacts to `overflows`, not `canScrollRight`).
     Object.defineProperty(track, "scrollLeft", { value: 500 });
+    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
     });

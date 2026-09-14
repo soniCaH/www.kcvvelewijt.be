@@ -19,6 +19,43 @@ function TestHost({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) {
   });
 }
 
+/**
+ * Takes manual control of `window.requestAnimationFrame` /
+ * `cancelAnimationFrame` for a single test, mirroring the `SpyResizeObserver`
+ * pattern already used below — a scheduled frame sits in a queue until the
+ * test calls `flush()`, rather than firing on a real (or fake) timer, so
+ * coalescing and cancellation are assertable without a real animation loop.
+ * The spies are restored by the outer `afterEach`'s `vi.restoreAllMocks()`.
+ */
+function stubAnimationFrame() {
+  const queue = new Map<number, FrameRequestCallback>();
+  let nextId = 1;
+
+  const raf = vi
+    .spyOn(window, "requestAnimationFrame")
+    .mockImplementation((cb: FrameRequestCallback) => {
+      const id = nextId++;
+      queue.set(id, cb);
+      return id;
+    });
+  const caf = vi
+    .spyOn(window, "cancelAnimationFrame")
+    .mockImplementation((id: number) => {
+      queue.delete(id);
+    });
+
+  return {
+    raf,
+    caf,
+    pendingCount: () => queue.size,
+    flush: () => {
+      const callbacks = Array.from(queue.values());
+      queue.clear();
+      callbacks.forEach((cb) => cb(0));
+    },
+  };
+}
+
 describe("useScrollHint", () => {
   let savedScrollTo: PropertyDescriptor | undefined;
   let savedScrollWidth: PropertyDescriptor | undefined;
@@ -751,6 +788,8 @@ describe("useScrollHint", () => {
       },
     });
 
+    const { flush } = stubAnimationFrame();
+
     let hookResult: UseScrollHintReturn | undefined;
     render(
       createElement(TestHost, {
@@ -769,7 +808,309 @@ describe("useScrollHint", () => {
       container.dispatchEvent(new Event("scroll"));
     });
 
+    // Scroll measurement is rAF-coalesced (#2860) — flush the pending frame
+    // before asserting, rather than reading state synchronously.
+    act(() => {
+      flush();
+    });
+
     expect(hookResult!.canScrollLeft).toBe(true);
     expect(hookResult!.canScrollRight).toBe(true);
+  });
+
+  describe("#2860 — cached padding and rAF-coalesced scroll", () => {
+    it("does not call getComputedStyle from the scroll path — only cached padding is read", () => {
+      const getComputedStyleSpy = vi.spyOn(window, "getComputedStyle");
+      const { flush } = stubAnimationFrame();
+
+      let scrollLeftValue = 0;
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        value: 1000,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 500,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        get: () => scrollLeftValue,
+      });
+
+      render(
+        createElement(TestHost, {
+          onHook: () => {},
+        }),
+      );
+
+      // Mount measures the padding at least once — capture that baseline
+      // rather than asserting zero calls.
+      const callsAfterMount = getComputedStyleSpy.mock.calls.length;
+      expect(callsAfterMount).toBeGreaterThan(0);
+
+      const container = screen.getByTestId("scroll-container");
+      scrollLeftValue = 200;
+      act(() => {
+        container.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
+      });
+
+      // A scroll tick — even coalesced through a flushed frame — must not
+      // have added a single new getComputedStyle call.
+      expect(getComputedStyleSpy).toHaveBeenCalledTimes(callsAfterMount);
+    });
+
+    it("refreshes the cached padding via the resize listener, not the scroll path", () => {
+      let currentPaddingPx = 40;
+      vi.spyOn(window, "getComputedStyle").mockImplementation(
+        () =>
+          ({
+            paddingLeft: `${currentPaddingPx}px`,
+            paddingRight: `${currentPaddingPx}px`,
+          }) as CSSStyleDeclaration,
+      );
+
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        value: 680,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 640,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        value: 0,
+      });
+
+      // Declared directly (rather than via the `renderScrollHint` helper,
+      // which snapshots the hook result once at mount) so it keeps
+      // reflecting the latest render after the resize event below.
+      let hookResult: UseScrollHintReturn | undefined;
+      render(
+        createElement(TestHost, {
+          onHook: (h: UseScrollHintReturn) => {
+            hookResult = h;
+          },
+        }),
+      );
+
+      // 680 scrollWidth - 80 padding - 640 clientWidth = -40, well under the
+      // dead zone — no overflow once the (cached) padding is subtracted.
+      expect(hookResult!.overflows).toBe(false);
+
+      // Padding shrinks to 0 (e.g. a breakpoint change). Only a non-scroll
+      // trigger picks this up — here, the window resize listener.
+      currentPaddingPx = 0;
+      act(() => {
+        window.dispatchEvent(new Event("resize"));
+      });
+
+      // 680 - 0 - 640 = 40, past the dead zone: overflows flips true only
+      // if the resize listener actually refreshed the cached padding.
+      expect(hookResult!.overflows).toBe(true);
+    });
+
+    it("coalesces multiple scroll events into a single measurement per animation frame", () => {
+      let scrollLeftValue = 0;
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        value: 1000,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 500,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        get: () => scrollLeftValue,
+      });
+
+      const { raf, flush } = stubAnimationFrame();
+
+      let hookResult: UseScrollHintReturn | undefined;
+      render(
+        createElement(TestHost, {
+          onHook: (h: UseScrollHintReturn) => {
+            hookResult = h;
+          },
+        }),
+      );
+
+      const rafCallsAfterMount = raf.mock.calls.length;
+      const container = screen.getByTestId("scroll-container");
+
+      scrollLeftValue = 50;
+      act(() => {
+        container.dispatchEvent(new Event("scroll"));
+      });
+      scrollLeftValue = 120;
+      act(() => {
+        container.dispatchEvent(new Event("scroll"));
+      });
+      scrollLeftValue = 300;
+      act(() => {
+        container.dispatchEvent(new Event("scroll"));
+      });
+
+      // Three scroll ticks before the frame fires schedule exactly one
+      // frame, not three.
+      expect(raf.mock.calls.length - rafCallsAfterMount).toBe(1);
+
+      act(() => {
+        flush();
+      });
+
+      // The single coalesced measurement reflects the latest scroll
+      // position (300), not a stale intermediate one.
+      expect(hookResult!.canScrollLeft).toBe(true);
+      expect(hookResult!.remainingLeft).toBe(300);
+    });
+
+    it("cancels a pending animation frame in the cleanup function on unmount", () => {
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        value: 1000,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 500,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        value: 50,
+      });
+
+      const { caf, pendingCount } = stubAnimationFrame();
+
+      const { unmount } = render(createElement(TestHost, { onHook: () => {} }));
+      const container = screen.getByTestId("scroll-container");
+
+      act(() => {
+        container.dispatchEvent(new Event("scroll"));
+      });
+      expect(pendingCount()).toBe(1);
+
+      unmount();
+
+      expect(caf).toHaveBeenCalledTimes(1);
+      expect(pendingCount()).toBe(0);
+    });
+  });
+
+  describe("maxRemainingPx — capping the remaining-distance outputs (#2860)", () => {
+    it("returns raw, uncapped pixel counts when no cap is supplied", () => {
+      const { hookResult } = renderScrollHint({
+        scrollWidth: 2000,
+        clientWidth: 500,
+        scrollLeft: 300,
+      });
+
+      expect(hookResult.remainingLeft).toBe(300);
+      expect(hookResult.remainingRight).toBe(1200);
+    });
+
+    it("caps remainingLeft/remainingRight at maxRemainingPx once the real distance exceeds it", () => {
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        value: 2000,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 500,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        value: 300,
+      });
+
+      function CappedHost({
+        onHook,
+      }: {
+        onHook: (h: UseScrollHintReturn) => void;
+      }) {
+        const hook = useScrollHint({ maxRemainingPx: 24 });
+        useEffect(() => {
+          onHook(hook);
+        });
+        return createElement("div", {
+          ref: hook.scrollRef,
+          "data-testid": "scroll-container",
+        });
+      }
+
+      let hookResult: UseScrollHintReturn | undefined;
+      render(
+        createElement(CappedHost, {
+          onHook: (h: UseScrollHintReturn) => {
+            hookResult = h;
+          },
+        }),
+      );
+
+      // Real remaining is 300 / 1200 — both well past the 24px cap.
+      expect(hookResult!.remainingLeft).toBe(24);
+      expect(hookResult!.remainingRight).toBe(24);
+    });
+
+    it("keeps a capped value unchanged across a scroll tick that stays past the cap", () => {
+      let scrollLeftValue = 0;
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        value: 2000,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 500,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        get: () => scrollLeftValue,
+      });
+
+      const { flush } = stubAnimationFrame();
+
+      function CappedHost({
+        onHook,
+      }: {
+        onHook: (h: UseScrollHintReturn) => void;
+      }) {
+        const hook = useScrollHint({ maxRemainingPx: 24 });
+        useEffect(() => {
+          onHook(hook);
+        });
+        return createElement("div", {
+          ref: hook.scrollRef,
+          "data-testid": "scroll-container",
+        });
+      }
+
+      let hookResult: UseScrollHintReturn | undefined;
+      render(
+        createElement(CappedHost, {
+          onHook: (h: UseScrollHintReturn) => {
+            hookResult = h;
+          },
+        }),
+      );
+
+      // 2000 - 500 - 0 = 1500, capped to 24.
+      expect(hookResult!.remainingRight).toBe(24);
+
+      const container = screen.getByTestId("scroll-container");
+      scrollLeftValue = 100;
+      act(() => {
+        container.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
+      });
+
+      // Real remaining dropped to 1400 — still far past the cap, so the
+      // capped output — and a consumer keyed off it — is unchanged.
+      expect(hookResult!.remainingRight).toBe(24);
+    });
   });
 });

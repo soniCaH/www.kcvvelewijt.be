@@ -21,6 +21,19 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   });
 }
 
+// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
+// callback synchronously lets a test assert on post-scroll state without a
+// separate flush step. Restored by the shared `afterEach`'s
+// `vi.restoreAllMocks()`.
+function runAnimationFrameSynchronously() {
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
+    (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    },
+  );
+}
+
 describe("ScrollRail", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -103,6 +116,7 @@ describe("ScrollRail", () => {
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
     Object.defineProperty(track, "scrollLeft", { value: 500 });
+    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
     });
