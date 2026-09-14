@@ -52,9 +52,9 @@ export type Contact =
        * enforces it on every `team-role` document written through Studio.
        * That check does not cover documents written via the Content API, so
        * `responsibility.repository.ts`'s `toContact()` degrades a
-       * `team-role` row that is missing one to an empty `manual` contact
-       * rather than construct a `Contact` value this type says cannot
-       * exist.
+       * `team-role` row that is missing one — or holds a value outside the
+       * known set — to a `manual` contact rather than construct a `Contact`
+       * value this type says cannot exist.
        */
       teamRole: "trainer" | "afgevaardigde";
     }

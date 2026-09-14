@@ -74,10 +74,10 @@ export function resolveContact(contact: Contact): ResolvedContact {
     }
 
     case "team-role": {
-      // `teamRole` is required on this arm — a raw Sanity row missing it is
-      // degraded to a `manual` contact upstream, in
-      // `responsibility.repository.ts`'s `toContact()`, before it ever
-      // reaches here.
+      // `teamRole` is required on this arm — a raw Sanity row missing it,
+      // or holding a value outside the known set, is degraded to a
+      // `manual` contact upstream, in `responsibility.repository.ts`'s
+      // `toContact()`, before it ever reaches here.
       const label = TEAM_ROLE_LABELS[contact.teamRole];
       return { name: label, role: label, organigramHref: "/ploegen" };
     }

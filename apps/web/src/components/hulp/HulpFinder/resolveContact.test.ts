@@ -95,4 +95,17 @@ describe("resolveContact", () => {
     });
     expect(afgevaardigde.role).toBe("Afgevaardigde van jouw ploeg");
   });
+
+  it("renders the generic team-role fallback label with no /ploegen link (the 'manual' arm has no organigramHref concept)", () => {
+    // The exact shape `responsibility.repository.ts`'s `toContact()`
+    // degrades a team-role row with a missing/invalid `teamRole` to. The
+    // generic label survives; the pre-#2958 `/ploegen` link does not.
+    const resolved = resolveContact({
+      contactType: "manual",
+      role: "Contactpersoon van jouw ploeg",
+    });
+    expect(resolved.name).toBe("Contactpersoon van jouw ploeg");
+    expect(resolved.role).toBe("Contactpersoon van jouw ploeg");
+    expect(resolved.organigramHref).toBeUndefined();
+  });
 });

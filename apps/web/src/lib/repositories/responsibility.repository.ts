@@ -83,15 +83,27 @@ function toContact(c: ContactRow): Contact {
       };
 
     case "team-role":
-      // Sanity's `validateContactFields` `Rule.custom` requires `teamRole`
-      // on every "team-role" document written through Studio, but that
-      // check does not cover documents written via the Content API. Degrade
-      // to the same empty "manual" contact the null-`contactType` branch
-      // below already falls back to, rather than construct a `Contact` the
-      // type says can't exist without a `teamRole`.
-      return c.teamRole
+      // Sanity's `validateContactFields` `Rule.custom` requires a valid
+      // `teamRole` on every "team-role" document written through Studio,
+      // but that check does not cover documents written via the Content
+      // API — such a write can land with `teamRole` missing OR holding a
+      // value outside the known set entirely (the enum is a schema-level
+      // constraint, not enforced on raw data). This is an explicit
+      // membership check, not a truthiness check, precisely to catch that
+      // second case too: a stray value here would otherwise construct a
+      // `Contact` the type says can't exist, then make
+      // `TEAM_ROLE_LABELS[...]` in `resolveContact.ts` return `undefined`
+      // and crash the whole `/hulp` render (`splitDisplayName(undefined)`
+      // in `ContactCard.tsx`).
+      //
+      // Degrades to a "manual" contact carrying the same generic label
+      // `resolveContact.ts` used to render for this case — but the
+      // "manual" arm has no `organigramHref` concept, so the accompanying
+      // `/ploegen` link from the pre-#2958 behaviour does not survive this
+      // fallback.
+      return c.teamRole === "trainer" || c.teamRole === "afgevaardigde"
         ? { contactType, teamRole: c.teamRole }
-        : { contactType: "manual" };
+        : { contactType: "manual", role: "Contactpersoon van jouw ploeg" };
 
     case "manual":
       return {
