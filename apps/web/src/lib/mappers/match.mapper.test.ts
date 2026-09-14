@@ -13,6 +13,7 @@ import type {
   UpcomingReducedMatch,
 } from "@/components/match/types";
 import { asNonPlaceholder, asReduced } from "@/components/match/test-narrowing";
+import { createRawMatch } from "@/components/match/match.fixtures";
 
 // Type-level assertion (#2802 review) — TypeScript, not vitest, is under
 // test here. `@ts-expect-error` fails the type check if `UpcomingReservation`
@@ -42,7 +43,7 @@ const _reducedHasNoHomeTeam: UpcomingReducedMatch = {
 
 describe("mapMatchToUpcomingMatch", () => {
   it("should map a scheduled match correctly", () => {
-    const match: Match = {
+    const match = createRawMatch({
       id: 1,
       date: new Date("2025-12-06T09:00:00"),
       time: "09:00",
@@ -60,7 +61,7 @@ describe("mapMatchToUpcomingMatch", () => {
       status: "scheduled",
       squadLabel: "U9",
       competition: "Competitie",
-    };
+    });
 
     const result = mapMatchToUpcomingMatch(match);
 
@@ -92,7 +93,7 @@ describe("mapMatchToUpcomingMatch", () => {
   });
 
   it("should map a forfeited match with scores correctly", () => {
-    const match: Match = {
+    const match = createRawMatch({
       id: 10,
       date: new Date(),
       time: "15:30",
@@ -112,7 +113,7 @@ describe("mapMatchToUpcomingMatch", () => {
       status: "forfeited",
       squadLabel: "U15",
       competition: "Competitie",
-    };
+    });
 
     const result = asNonPlaceholder(mapMatchToUpcomingMatch(match));
 
@@ -122,7 +123,7 @@ describe("mapMatchToUpcomingMatch", () => {
   });
 
   it("should handle postponed status", () => {
-    const match: Match = {
+    const match = createRawMatch({
       id: 12,
       date: new Date("2025-12-15T15:00:00"),
       time: undefined,
@@ -140,7 +141,7 @@ describe("mapMatchToUpcomingMatch", () => {
       status: "postponed",
       squadLabel: "U13",
       competition: "Competitie",
-    };
+    });
 
     const result = mapMatchToUpcomingMatch(match);
 
@@ -148,7 +149,7 @@ describe("mapMatchToUpcomingMatch", () => {
   });
 
   it("should map kcvv_team_id and kcvv_team_label", () => {
-    const match: Match = {
+    const match = createRawMatch({
       id: 42,
       date: new Date("2025-12-06T15:00:00"),
       time: "15:00",
@@ -167,7 +168,7 @@ describe("mapMatchToUpcomingMatch", () => {
       competition: "LEAGUE",
       kcvv_team_id: 7,
       kcvv_team_label: "U21",
-    };
+    });
 
     const result = asNonPlaceholder(mapMatchToUpcomingMatch(match));
 
@@ -176,7 +177,7 @@ describe("mapMatchToUpcomingMatch", () => {
   });
 
   it("returns an UpcomingReservation for a pitch-reservation placeholder — no awayTeam, one `team` (#2606, #2688)", () => {
-    const match: Match = {
+    const match = createRawMatch({
       id: 90,
       date: new Date("2026-05-09T09:30:00"),
       time: "09:30",
@@ -193,7 +194,7 @@ describe("mapMatchToUpcomingMatch", () => {
       kcvv_team_id: 7,
       kcvv_team_label: "U13",
       is_placeholder: true,
-    } as Match;
+    });
 
     const result = mapMatchToUpcomingMatch(match);
 
@@ -214,7 +215,7 @@ describe("mapMatchToUpcomingMatch", () => {
 
   describe("a tournament fixture with no result yet (#2696/#2802)", () => {
     it('returns the UpcomingReducedMatch shape and reverts to kind: "match" once scored', () => {
-      const pending: Match = {
+      const pending = createRawMatch({
         id: 91,
         date: new Date("2026-05-10T09:30:00.000Z"),
         time: "09:30",
@@ -227,7 +228,7 @@ describe("mapMatchToUpcomingMatch", () => {
         kcvv_team_id: 7,
         kcvv_team_label: "U13",
         competitionType: "tournament",
-      } as Match;
+      });
 
       const reduced = asReduced(mapMatchToUpcomingMatch(pending));
       expect(reduced.team).toEqual({
@@ -239,7 +240,7 @@ describe("mapMatchToUpcomingMatch", () => {
       expect("awayTeam" in reduced).toBe(false);
       expect("homeScore" in reduced).toBe(false);
 
-      const played: Match = {
+      const played = createRawMatch({
         ...pending,
         status: "finished",
         home_team: {
@@ -254,7 +255,7 @@ describe("mapMatchToUpcomingMatch", () => {
           logo: "zemst.png",
           score: 0,
         },
-      };
+      });
       const full = asNonPlaceholder(mapMatchToUpcomingMatch(played));
       expect(full.homeTeam.score).toBe(2);
       expect(full.awayTeam.score).toBe(0);
@@ -266,7 +267,7 @@ describe("mapMatchToUpcomingMatch", () => {
       // `otherClubSide()` call sites; only asserting the KCVV-home
       // direction here would leave this one uncovered if it ever drifted
       // to reading `away_team` unconditionally.
-      const pending: Match = {
+      const pending = createRawMatch({
         id: 92,
         date: new Date("2026-05-10T09:30:00.000Z"),
         time: "09:30",
@@ -276,7 +277,7 @@ describe("mapMatchToUpcomingMatch", () => {
         status: "scheduled",
         competition: "Tornooi",
         competitionType: "tournament",
-      } as Match;
+      });
 
       const reduced = asReduced(mapMatchToUpcomingMatch(pending));
       expect(reduced.team).toEqual({
@@ -288,7 +289,7 @@ describe("mapMatchToUpcomingMatch", () => {
   });
 
   it("should handle stopped status", () => {
-    const match: Match = {
+    const match = createRawMatch({
       id: 13,
       date: new Date("2025-12-22T14:30:00"),
       time: undefined,
@@ -306,7 +307,7 @@ describe("mapMatchToUpcomingMatch", () => {
       status: "stopped",
       squadLabel: "U12",
       competition: "Competitie",
-    };
+    });
 
     const result = asNonPlaceholder(mapMatchToUpcomingMatch(match));
 
@@ -318,7 +319,7 @@ describe("mapMatchToUpcomingMatch", () => {
 describe("mapMatchesToUpcomingMatches", () => {
   it("should map an array of matches correctly", () => {
     const matches: Match[] = [
-      {
+      createRawMatch({
         id: 1,
         date: new Date("2025-12-06T09:00:00"),
         time: "09:00",
@@ -336,8 +337,8 @@ describe("mapMatchesToUpcomingMatches", () => {
         status: "scheduled",
         squadLabel: "U9",
         competition: "Competitie",
-      },
-      {
+      }),
+      createRawMatch({
         id: 2,
         date: new Date("2025-12-07T15:00:00"),
         time: "15:00",
@@ -355,7 +356,7 @@ describe("mapMatchesToUpcomingMatches", () => {
         status: "scheduled",
         squadLabel: "A-ploeg",
         competition: "Competitie",
-      },
+      }),
     ];
 
     const result = mapMatchesToUpcomingMatches(matches);
