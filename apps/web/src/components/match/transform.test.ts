@@ -4,9 +4,9 @@
 
 import { describe, it, expect } from "vitest";
 import { transformMatchToSchedule } from "./transform";
-import type { Match } from "@/lib/effect/schemas";
 import type { ScheduleReservation, ScheduleReducedMatch } from "./types";
 import { asNonPlaceholder, asReduced } from "./test-narrowing";
+import { createMatch } from "./match.fixtures";
 
 // Type-level assertion (#2802 review) — TypeScript, not vitest, is under
 // test here. `@ts-expect-error` fails the type check if `ScheduleReservation`
@@ -34,33 +34,9 @@ const _reducedHasNoHomeTeam: ScheduleReducedMatch = {
   homeTeam: { id: 1235, name: "KCVV Elewijt" },
 };
 
-// Mock Match factory
-function createMockMatch(overrides: Partial<Match> = {}): Match {
-  return {
-    id: 123,
-    date: new Date("2025-02-15T15:00:00"),
-    time: "15:00",
-    home_team: {
-      id: 1,
-      name: "KCVV Elewijt",
-      logo: "https://example.com/kcvv.png",
-      score: 2,
-    },
-    away_team: {
-      id: 2,
-      name: "FC Opponent",
-      logo: "https://example.com/opponent.png",
-      score: 1,
-    },
-    status: "finished",
-    competition: "3e Nationale",
-    ...overrides,
-  } as Match;
-}
-
 describe("transformMatchToSchedule", () => {
   it("transforms a match to schedule format", () => {
-    const match = createMockMatch();
+    const match = createMatch();
     const result = asNonPlaceholder(transformMatchToSchedule(match));
 
     expect(result.id).toBe(123);
@@ -78,7 +54,7 @@ describe("transformMatchToSchedule", () => {
   });
 
   it("carries the opponent team designation through as teamLabel", () => {
-    const match = createMockMatch({
+    const match = createMatch({
       away_team: { id: 2, name: "Opponent", team_label: "U23" },
     });
     expect(
@@ -87,7 +63,7 @@ describe("transformMatchToSchedule", () => {
   });
 
   it("handles scheduled match without scores", () => {
-    const match = createMockMatch({
+    const match = createMatch({
       status: "scheduled",
       home_team: { id: 1, name: "KCVV", score: undefined },
       away_team: { id: 2, name: "Opponent", score: undefined },
@@ -100,7 +76,7 @@ describe("transformMatchToSchedule", () => {
   });
 
   it("handles match without logos", () => {
-    const match = createMockMatch({
+    const match = createMatch({
       home_team: { id: 1, name: "KCVV", logo: undefined },
       away_team: { id: 2, name: "Opponent", logo: undefined },
     });
@@ -111,53 +87,53 @@ describe("transformMatchToSchedule", () => {
   });
 
   it("passes is_home through as isHome when present", () => {
-    const homeMatch = createMockMatch({ is_home: true });
+    const homeMatch = createMatch({ is_home: true });
     expect(asNonPlaceholder(transformMatchToSchedule(homeMatch)).isHome).toBe(
       true,
     );
 
-    const awayMatch = createMockMatch({ is_home: false });
+    const awayMatch = createMatch({ is_home: false });
     expect(asNonPlaceholder(transformMatchToSchedule(awayMatch)).isHome).toBe(
       false,
     );
   });
 
   it("leaves isHome undefined when is_home is absent", () => {
-    const match = createMockMatch();
+    const match = createMatch();
     expect(
       asNonPlaceholder(transformMatchToSchedule(match)).isHome,
     ).toBeUndefined();
   });
 
   it("passes competitionType through when present (#2696)", () => {
-    const match = createMockMatch({ competitionType: "tournament" });
+    const match = createMatch({ competitionType: "tournament" });
     expect(
       asNonPlaceholder(transformMatchToSchedule(match)).competitionType,
     ).toBe("tournament");
   });
 
   it("leaves competitionType undefined when absent", () => {
-    const match = createMockMatch();
+    const match = createMatch();
     expect(
       asNonPlaceholder(transformMatchToSchedule(match)).competitionType,
     ).toBeUndefined();
   });
 
   it("passes is_placeholder through as isPlaceholder when present (#2606)", () => {
-    const placeholder = createMockMatch({ is_placeholder: true });
+    const placeholder = createMatch({ is_placeholder: true });
     expect(transformMatchToSchedule(placeholder).isPlaceholder).toBe(true);
 
-    const normal = createMockMatch({ is_placeholder: false });
+    const normal = createMatch({ is_placeholder: false });
     expect(transformMatchToSchedule(normal).isPlaceholder).toBe(false);
   });
 
   it("normalizes isPlaceholder to false when is_placeholder is absent (#2688 — a definite discriminant, not a tri-state)", () => {
-    const match = createMockMatch();
+    const match = createMatch();
     expect(transformMatchToSchedule(match).isPlaceholder).toBe(false);
   });
 
   it("returns the ScheduleReservation shape for a placeholder — no awayTeam/scores, one `team` (#2688)", () => {
-    const placeholder = createMockMatch({
+    const placeholder = createMatch({
       is_placeholder: true,
       home_team: {
         id: 1235,
@@ -186,14 +162,14 @@ describe("transformMatchToSchedule", () => {
   });
 
   it('emits kind: "match" for an ordinary fixture (#2802)', () => {
-    expect(
-      asNonPlaceholder(transformMatchToSchedule(createMockMatch())).kind,
-    ).toBe("match");
+    expect(asNonPlaceholder(transformMatchToSchedule(createMatch())).kind).toBe(
+      "match",
+    );
   });
 
   describe("a tournament fixture with no result yet reverts to the full scoreboard once a score arrives (#2696/#2802)", () => {
     it("returns the ScheduleReducedMatch shape — one `team` (the other club), no awayTeam/scores", () => {
-      const pending = createMockMatch({
+      const pending = createMatch({
         competitionType: "tournament",
         status: "scheduled",
         home_team: {
@@ -225,7 +201,7 @@ describe("transformMatchToSchedule", () => {
     });
 
     it('reverts to kind: "match" the moment both scores are present, same fixture id', () => {
-      const played = createMockMatch({
+      const played = createMatch({
         id: 555,
         competitionType: "tournament",
         status: "finished",
@@ -243,7 +219,7 @@ describe("transformMatchToSchedule", () => {
     });
 
     it("stays reduced for a played tournament fixture whose scores are missing from the feed", () => {
-      const played = createMockMatch({
+      const played = createMatch({
         competitionType: "tournament",
         status: "finished",
         home_team: { id: 1235, name: "KCVV Elewijt" },
@@ -254,7 +230,7 @@ describe("transformMatchToSchedule", () => {
     });
 
     it("never applies to an ordinary league fixture, even before kickoff", () => {
-      const scheduled = createMockMatch({
+      const scheduled = createMatch({
         competitionType: "league",
         status: "scheduled",
         home_team: { id: 1235, name: "KCVV Elewijt", score: undefined },
@@ -268,7 +244,7 @@ describe("transformMatchToSchedule", () => {
       // KCVV listed as away this time — the crest must still name the other
       // club, proving the derivation reads the club id, never the side PSD
       // happened to list it on.
-      const pending = createMockMatch({
+      const pending = createMatch({
         competitionType: "tournament",
         status: "scheduled",
         home_team: {
