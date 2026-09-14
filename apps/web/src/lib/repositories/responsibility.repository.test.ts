@@ -211,6 +211,25 @@ describe("ResponsibilityRepository", () => {
       });
     });
 
+    it("degrades a team-role contact missing teamRole to an empty manual contact (Studio validation doesn't cover API writes)", async () => {
+      const row = makePathRow({
+        primaryContact: makeContact({
+          contactType: "team-role",
+          teamRole: null,
+          position: null,
+          roleCode: null,
+          members: null,
+          nodeId: null,
+        }),
+      });
+      mockFetch.mockResolvedValueOnce([row]);
+
+      const paths = await runFindAll();
+      const contact = paths[0].primaryContact;
+
+      expect(contact).toEqual({ contactType: "manual" });
+    });
+
     it("missing optional contact fields use fallback values", async () => {
       const row = makePathRow({
         icon: null,
