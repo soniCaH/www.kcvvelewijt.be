@@ -272,7 +272,14 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!article) return { title: "Artikel niet gevonden" };
+  if (!article)
+    return {
+      title: "Artikel niet gevonden",
+      // #2963: this branch renders under a 200 (a `loading.tsx`
+      // Suspense boundary flushes the shell before `notFound()` runs),
+      // so noindex is what actually keeps it out of the index.
+      robots: { index: false, follow: false },
+    };
 
   const description =
     article.metaDescription?.trim() ||

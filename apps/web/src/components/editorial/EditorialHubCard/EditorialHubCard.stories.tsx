@@ -84,7 +84,8 @@ export const Nav: Story = {
 export const NavTrainingen: Story = {
   args: {
     variant: "nav",
-    href: "/nieuws/prosoccerdata",
+    // #2963: was `/nieuws/prosoccerdata`, an article that never existed.
+    href: "/hulp",
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
     arrowText: "Meer info",

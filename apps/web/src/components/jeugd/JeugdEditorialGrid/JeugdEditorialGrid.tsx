@@ -40,8 +40,13 @@ const NAV_CARDS: NavCardConfig[] = [
   {
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
-    arrowText: "Lees verder",
-    href: "/nieuws/prosoccerdata",
+    arrowText: "Zoek het op",
+    // #2963: was `/nieuws/prosoccerdata`, an article that does not exist —
+    // it rendered the not-found page under a 200. The live answer is the
+    // `prosoccerdata-gebruiken` hulpvraag, and `/hulp` has no deep-link
+    // param, so the hub is the closest real target. #2965 owns whether this
+    // tile survives the block's redesign — it is now the third pointing here.
+    href: "/hulp",
     iconName: "SoccerBall",
   },
   {

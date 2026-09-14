@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { runPromise } from "@/lib/effect/runtime";
@@ -17,6 +18,17 @@ interface LegacyYouthProps {
  * favour of this age-based resolver (#2227, SEO-8). 308 to the resolved
  * `/ploegen/<slug>`; 404 when no youth team of that age exists.
  */
+/**
+ * #2963: this route has no not-found metadata of its own, so an unknown age
+ * token inherited the root layout's indexable metadata — and `(landing)` has
+ * a `loading.tsx`, whose Suspense boundary flushes the shell (and its 200)
+ * before `notFound()` runs. A resolver either redirects or 404s, so static
+ * noindex metadata is always correct here; no second read is needed.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function LegacyYouthRedirect({
   params,
 }: LegacyYouthProps) {
