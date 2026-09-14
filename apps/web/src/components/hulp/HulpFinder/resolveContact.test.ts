@@ -1,5 +1,25 @@
 import { describe, it, expect } from "vitest";
 import { resolveContact } from "./resolveContact";
+import type { Contact } from "@/types/responsibility";
+
+// Type-level regression tests (#2958) — TypeScript, not vitest, is under
+// test here. `@ts-expect-error` fails the type check if `Contact` ever
+// regresses to its pre-#2958 flat interface, where every field (including
+// `teamRole`) was optional and legal to read/write on every arm regardless
+// of `contactType` — the exact shape that let the dead `teamRoleFallback`
+// field (#2952) sit untyped-differently from a live field for months.
+
+// `teamRole` is required on the "team-role" arm.
+// @ts-expect-error — omitting `teamRole` on a "team-role" contact must not compile.
+const _teamRoleContactRequiresTeamRole: Contact = { contactType: "team-role" };
+
+// `teamRole` only exists on the "team-role" arm.
+const _manualContact: Contact = {
+  contactType: "manual",
+  role: "Secretariaat",
+  // @ts-expect-error — `teamRole` does not exist on the "manual" arm.
+  teamRole: "trainer",
+};
 
 describe("resolveContact", () => {
   it("collapses a manual contact to its inline fields", () => {
@@ -76,9 +96,16 @@ describe("resolveContact", () => {
     expect(afgevaardigde.role).toBe("Afgevaardigde van jouw ploeg");
   });
 
-  it("falls back to a generic label when a team-role contact has no teamRole (Studio validation doesn't cover API writes)", () => {
-    const resolved = resolveContact({ contactType: "team-role" });
+  it("renders the generic team-role fallback label with no /ploegen link (the 'manual' arm has no organigramHref concept)", () => {
+    // The exact shape `responsibility.repository.ts`'s `toContact()`
+    // degrades a team-role row with a missing/invalid `teamRole` to. The
+    // generic label survives; the pre-#2958 `/ploegen` link does not.
+    const resolved = resolveContact({
+      contactType: "manual",
+      role: "Contactpersoon van jouw ploeg",
+    });
+    expect(resolved.name).toBe("Contactpersoon van jouw ploeg");
     expect(resolved.role).toBe("Contactpersoon van jouw ploeg");
-    expect(resolved.organigramHref).toBe("/ploegen");
+    expect(resolved.organigramHref).toBeUndefined();
   });
 });

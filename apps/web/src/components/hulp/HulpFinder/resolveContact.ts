@@ -37,7 +37,9 @@ export interface ResolvedContact {
   organigramHref?: string;
 }
 
-const TEAM_ROLE_LABELS: Record<NonNullable<Contact["teamRole"]>, string> = {
+type TeamRoleContact = Extract<Contact, { contactType: "team-role" }>;
+
+const TEAM_ROLE_LABELS: Record<TeamRoleContact["teamRole"], string> = {
   trainer: "Trainer van jouw ploeg",
   afgevaardigde: "Afgevaardigde van jouw ploeg",
 };
@@ -72,9 +74,11 @@ export function resolveContact(contact: Contact): ResolvedContact {
     }
 
     case "team-role": {
-      const label = contact.teamRole
-        ? TEAM_ROLE_LABELS[contact.teamRole]
-        : "Contactpersoon van jouw ploeg";
+      // `teamRole` is required on this arm — a raw Sanity row missing it,
+      // or holding a value outside the known set, is degraded to a
+      // `manual` contact upstream, in `responsibility.repository.ts`'s
+      // `toContact()`, before it ever reaches here.
+      const label = TEAM_ROLE_LABELS[contact.teamRole];
       return { name: label, role: label, organigramHref: "/ploegen" };
     }
   }
