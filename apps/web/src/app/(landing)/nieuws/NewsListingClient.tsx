@@ -259,14 +259,22 @@ export function NewsListingClient({
           leftover nothing in DESIGN.md ever authorised — on it the active
           "Alles" chip's ink-on-ink fill vanished and `<ScrollRail>`'s
           default cream fade read as a mismatched yellowish band.
-          `top-16` (not `top-0`, #2487): `<SiteHeader>` is itself
-          `sticky top-0 z-50` with `h-16` and an opaque `bg-cream` — at
+          `top-[var(--sticky-header-h)]` (not `top-0`, #2487): `<SiteHeader>`
+          is itself `sticky top-0 z-50` with an opaque `bg-cream` — at
           `top-0` this bar parked entirely behind the header once both
           stuck, and once it also shared the header's `bg-cream` the
-          occlusion was total. `top-16` clears the header's height, same
-          notch `<TeamSectionNav>` and `<OrganigramSectionNav>` already use
-          below the same header. z-index and padding are unchanged. */}
-      <div className="border-ink bg-cream sticky top-16 z-30 border-b-2 py-3">
+          occlusion was total. The token (65px) — not the hand-written
+          `top-16` (64px) this bar used to sit at, one pixel short of the
+          header's true height because `<SiteHeader>` derives its own height
+          as `calc(var(--sticky-header-h) - 1px)`, the missing pixel being
+          its own `border-b` (#2820) — clears the header exactly, same notch
+          `<TeamSectionNav>` and `<OrganigramSectionNav>` already use below
+          the same header via `SECTION_NAV_BAR_CLASSES`. This bar keeps its
+          own class string (not that constant) because its `bg-cream` ground is a
+          filter bar, not a section nav — background is a purpose
+          difference, not a value to flatten. z-index and padding are
+          unchanged. */}
+      <div className="border-ink bg-cream sticky top-[var(--sticky-header-h)] z-30 border-b-2 py-3">
         <PageContainer width="index">
           <CategoryFilters
             categories={categories}

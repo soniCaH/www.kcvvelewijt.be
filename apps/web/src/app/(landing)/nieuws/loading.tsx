@@ -65,17 +65,18 @@ export default function NewsLoading() {
 
       {/* Sticky filter bar — mirrors the live page's paper category-filter
           band (#2805: the bar moved off a pre-redesign `bg-ink/95` onto
-          <TeamSectionNav>'s sticky ground). `top-16` (not `top-0`, #2487)
-          clears the opaque `sticky top-0 z-50 h-16` <SiteHeader> — must
-          stay byte-identical to the live bar's offset or the skeleton and
-          the loaded page disagree about where the bar sticks. The shared
-          <FilterTabsSkeleton> (#2564 review items 3 + 4): the real row
-          dropped its `size="sm"` (~29px) chip for the one `md` (~36px)
-          size on absorption, and this skeleton — still drawing `h-8`
-          (32px) — used to reflow on every /nieuws load. `surface` is
-          omitted (default `"paper"`) to keep the skeleton and the live
-          row's beliefs about the ground in sync. */}
-      <div className="border-ink bg-cream sticky top-16 z-30 border-b-2 py-3">
+          <TeamSectionNav>'s sticky ground). `top-[var(--sticky-header-h)]`
+          (not `top-0`, #2487; not the hand-written `top-16`, #2820 — that
+          was 1px short of the header's true 65px height) clears the opaque
+          `sticky top-0 z-50` <SiteHeader> exactly — must stay byte-identical
+          to the live bar's offset or the skeleton and the loaded page
+          disagree about where the bar sticks. The shared <FilterTabsSkeleton>
+          (#2564 review items 3 + 4): the real row dropped its `size="sm"`
+          (~29px) chip for the one `md` (~36px) size on absorption, and this
+          skeleton — still drawing `h-8` (32px) — used to reflow on every
+          /nieuws load. `surface` is omitted (default `"paper"`) to keep the
+          skeleton and the live row's beliefs about the ground in sync. */}
+      <div className="border-ink bg-cream sticky top-[var(--sticky-header-h)] z-30 border-b-2 py-3">
         <PageContainer width="index">
           <FilterTabsSkeleton
             widths={["w-16", "w-20", "w-24", "w-20", "w-16"]}
