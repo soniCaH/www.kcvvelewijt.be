@@ -11,7 +11,6 @@ import type {
 const OPPONENT = { id: 9999, name: "RC Mechelen", logo: "https://psd/rc.png" };
 
 const result: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 42,
   date: new Date("2026-08-03T15:00:00Z"),
@@ -25,7 +24,6 @@ const result: ScheduleMatch = {
 };
 
 const fixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 43,
   date: new Date("2026-08-08T18:00:00Z"),
@@ -250,7 +248,6 @@ describe("MatchStripView", () => {
 
   describe("pitch-reservation placeholder (#2606, #2688)", () => {
     const reservation: ScheduleReservation = {
-      isPlaceholder: true,
       kind: "reservation",
       id: 90,
       date: new Date("2026-05-09T09:30:00Z"),
@@ -360,7 +357,6 @@ describe("MatchStripView", () => {
   // hasn't confirmed as a genuine opponent.
   describe("tournament fixture with no result yet (#2696/#2802)", () => {
     const tournament: ScheduleReducedMatch = {
-      isPlaceholder: false,
       kind: "reduced",
       id: 91,
       date: new Date("2026-08-30T09:30:00Z"),

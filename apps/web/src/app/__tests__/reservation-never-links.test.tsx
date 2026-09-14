@@ -53,13 +53,13 @@
  * asserts *both*: the reservation actually rendered, then that it renders no
  * link. `MatchHero` has no `next/link` import anywhere in its 400+ lines, so
  * its null-link half is a tautology on its own — the presence half is what
- * makes that row assert anything at all; without it, flipping its fixture to
- * `isPlaceholder={false}` (the full two-crest scoreboard #2606 exists to
+ * makes that row assert anything at all; without it, flipping its fixture's
+ * `kind` to `"match"` (the full two-crest scoreboard #2606 exists to
  * prevent) still passed.
  *
  * **What this file found, not just what it guards.** Every one of the eight
  * was already correct when this file was written — #2606/#2688 built the
- * reduced (`isPlaceholder` / `isReducedMatchRow`) branch into all of them
+ * reduced (`kind` / `isReducedMatchRow`) branch into all of them
  * before this ticket existed. Confirmed red by hand, twice over:
  *
  * - **A real production regression.** Temporarily forcing `CalendarWeek`'s
@@ -73,7 +73,7 @@
  *   `CalendarMonth` at `currentMonth={7}` (`CalendarMonth` also needs
  *   `selectedDate="2026-07-15"` — its day-detail panel looks up
  *   `selectedDate` independently of `currentMonth`), and `MatchHero` at
- *   `isPlaceholder={false}` — windows/fixtures that render nothing or the
+ *   `kind: "match"` — windows/fixtures that render nothing or the
  *   wrong thing — still reported 8/8 passed with only the null-link check.
  *   With the presence assertion added, the same four mutations now fail.
  *
@@ -159,7 +159,6 @@ vi.mock("next/image", () => ({
  *  `reservation` already use, so this table asserts the same fixture those
  *  two files' own local tests do. */
 const scheduleReservation: ScheduleReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 90,
   date: new Date("2026-05-09T09:30:00.000Z"),
@@ -172,7 +171,6 @@ const scheduleReservation: ScheduleReservation = {
 /** The `UpcomingReservation` shape `<UpcomingMatchesClient>` consumes —
  *  mirrors `UpcomingMatches.mocks.ts`'s (unexported) `mockUpcomingReservation`. */
 const upcomingReservation: UpcomingReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 90,
   date: new Date("2026-05-09T09:30:00.000Z"),
@@ -191,7 +189,6 @@ const upcomingReservation: UpcomingReservation = {
  * row asserting the *other* reduced member, not just the reservation one.
  */
 const scheduleReduced: ScheduleReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 91,
   date: new Date("2026-08-30T09:30:00.000Z"),
@@ -204,7 +201,6 @@ const scheduleReduced: ScheduleReducedMatch = {
 
 /** The `UpcomingReducedMatch` twin of `upcomingReservation` above. */
 const upcomingReduced: UpcomingReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 91,
   date: new Date("2026-08-30T09:30:00.000Z"),
@@ -312,7 +308,6 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
         <MatchHero
           match={{
             kind: "reservation",
-            isPlaceholder: true,
             team: { id: KCVV_CLUB_ID, name: "KCVV Elewijt" },
             date: scheduleReservation.date,
             time: scheduleReservation.time,
@@ -325,8 +320,8 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
   // ── Tournament fixture, no result yet (#2696/#2802) — the union's other
   // reduced member. Not a self-match, so it needs its own row per renderer
   // rather than reusing the reservation fixtures above: a fix that only
-  // widens `isPlaceholder` to `kind !== "match"` at the reservation call
-  // site would leave this half unguarded.
+  // widens the reservation check to `kind !== "match"` at the reservation
+  // call site would leave this half unguarded.
   {
     name: "TeamAgendaRow (reduced tournament branch)",
     render: () => render(<TeamAgendaRow match={scheduleReduced} />),
@@ -404,7 +399,6 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
         <MatchHero
           match={{
             kind: "reduced",
-            isPlaceholder: false,
             team: { id: 1391, name: "FC Zemst Sportief" },
             date: scheduleReduced.date,
             time: scheduleReduced.time,

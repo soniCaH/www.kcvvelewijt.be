@@ -40,7 +40,6 @@ const finishedDate = new Date("2025-09-06T13:30:00Z");
 
 const baseMatch = {
   kind: "match",
-  isPlaceholder: false,
   homeTeam: defaultHomeTeam,
   awayTeam: defaultAwayTeam,
   date: upcomingDate,
@@ -135,7 +134,6 @@ export const MinimalData: Story = {
   args: {
     match: {
       kind: "match",
-      isPlaceholder: false,
       homeTeam: defaultHomeTeam,
       awayTeam: defaultAwayTeam,
       date: upcomingDate,
@@ -160,7 +158,6 @@ export const Reservation: Story = {
   args: {
     match: {
       kind: "reservation",
-      isPlaceholder: true,
       team: defaultHomeTeam,
       date: upcomingDate,
       time: "09:30",
@@ -185,7 +182,6 @@ export const TournamentPending: Story = {
   args: {
     match: {
       kind: "reduced",
-      isPlaceholder: false,
       team: { id: 1391, name: "FC Zemst Sportief" },
       date: upcomingDate,
       time: "09:30",
@@ -206,7 +202,6 @@ export const TournamentPlayed: Story = {
   args: {
     match: {
       kind: "match",
-      isPlaceholder: false,
       homeTeam: { ...defaultHomeTeam, score: 4 },
       awayTeam: { id: 1391, name: "FC Zemst Sportief", score: 1 },
       date: finishedDate,

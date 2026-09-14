@@ -13,7 +13,6 @@ import {
 // renderer reaching for the two-crest scoreboard on a reservation/reduced
 // row a compile error instead of a runtime crash.
 const _reservationHasNoHomeTeam: MatchHeroReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   team: { id: 1235, name: "KCVV Elewijt" },
   date: new Date(),
@@ -22,7 +21,6 @@ const _reservationHasNoHomeTeam: MatchHeroReservation = {
   homeTeam: { id: 1235, name: "KCVV Elewijt" },
 };
 const _reducedHasNoHomeTeam: MatchHeroReduced = {
-  isPlaceholder: false,
   kind: "reduced",
   team: { id: 99, name: "FC Zemst Sportief" },
   date: new Date(),
@@ -41,14 +39,12 @@ const finishedMatchDate = new Date("2025-09-13T13:30:00Z");
 
 const baseMatch = {
   kind: "match",
-  isPlaceholder: false,
   homeTeam,
   awayTeam,
 } as const;
 
 const baseReservation = {
   kind: "reservation",
-  isPlaceholder: true,
   team: homeTeam,
 } as const;
 
@@ -275,7 +271,6 @@ describe("MatchHero", () => {
         <MatchHero
           match={{
             kind: "match",
-            isPlaceholder: false,
             homeTeam: { id: 1235, name: "KCVV Elewijt" },
             awayTeam: { id: 9999, name: "RC Mechelen" },
             date: scheduledMatchDate,
@@ -509,7 +504,6 @@ describe("MatchHero", () => {
     const kcvv = { id: 1235, name: "KCVV Elewijt", logo: homeTeam.logo };
     const baseReduced = {
       kind: "reduced",
-      isPlaceholder: false,
       team: zemst,
     } as const;
 
@@ -606,7 +600,6 @@ describe("MatchHero", () => {
     it("reverts to the full two-crest scoreboard once a result exists", () => {
       const row: MatchHeroRow = {
         kind: "match",
-        isPlaceholder: false,
         homeTeam: { ...kcvv, score: 3 },
         awayTeam: { ...zemst, score: 1 },
         date: finishedMatchDate,
@@ -628,7 +621,6 @@ describe("MatchHero", () => {
         <MatchHero
           match={{
             kind: "match",
-            isPlaceholder: false,
             homeTeam: kcvv,
             awayTeam: zemst,
             date: scheduledMatchDate,

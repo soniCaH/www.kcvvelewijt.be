@@ -223,7 +223,6 @@ function MatchDetailAssembly() {
       <MatchHero
         match={{
           kind: "match",
-          isPlaceholder: false,
           homeTeam: {
             id: KCVV_CLUB_ID,
             name: HOME_NAME,
