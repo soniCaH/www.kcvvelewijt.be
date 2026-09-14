@@ -31,7 +31,6 @@ const makeMatch = (
   away: UpcomingMatch["homeTeam"],
   options: Partial<UpcomingMatch> = {},
 ): UpcomingMatch => ({
-  isPlaceholder: false,
   kind: "match",
   id,
   date: new Date(date),
@@ -171,7 +170,6 @@ export const mockUpcomingSingleTeam: UpcomingMatch[] =
  * "KCVV Elewijt — KCVV Elewijt" (#2688).
  */
 const mockUpcomingReservation: UpcomingReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 90,
   date: new Date("2026-05-09T09:30:00Z"),
@@ -196,7 +194,6 @@ export const mockUpcomingWithReservation: UpcomingRow[] = [
  * non-senior team rendered the ordinary linked two-crest scoreboard here.
  */
 const mockUpcomingTournament: UpcomingReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 91,
   // Dated earlier than every `mockUpcomingFive` fixture (earliest 05-16), so

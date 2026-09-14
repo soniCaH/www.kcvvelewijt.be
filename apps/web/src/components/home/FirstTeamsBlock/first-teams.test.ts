@@ -46,7 +46,7 @@ function match(p: {
   awayScore?: number;
   time?: string;
   competition?: string;
-  isPlaceholder?: boolean;
+  isReservation?: boolean;
 }): Match {
   return {
     id: p.id,
@@ -57,7 +57,7 @@ function match(p: {
     status: p.status,
     competition: p.competition,
     is_home: p.isHome,
-    is_placeholder: p.isPlaceholder,
+    is_placeholder: p.isReservation,
   } as unknown as Match;
 }
 
@@ -516,14 +516,14 @@ describe("deriveFirstTeamVM", () => {
             date: "2026-06-01T09:30:00Z", // well before NOW (2026-06-23)
             status: "scheduled",
             competition: "Tornooi",
-            isPlaceholder: true,
+            isReservation: true,
           }),
         ],
         NOW,
       );
       expect(vm.result).toBeUndefined();
       expect(vm.fixture?.id).toBe(90);
-      expect(vm.fixture?.isPlaceholder).toBe(true);
+      expect(vm.fixture?.kind).toBe("reservation");
     });
 
     it("routes a future-dated reservation to the fixture slot too", () => {
@@ -535,7 +535,7 @@ describe("deriveFirstTeamVM", () => {
             date: "2026-07-01T09:30:00Z",
             status: "scheduled",
             competition: "Tornooi",
-            isPlaceholder: true,
+            isReservation: true,
           }),
         ],
         NOW,
@@ -552,7 +552,7 @@ describe("deriveFirstTeamVM", () => {
             date: "2026-06-01T09:30:00Z",
             status: "cancelled",
             competition: "Tornooi",
-            isPlaceholder: true,
+            isReservation: true,
           }),
         ],
         NOW,
