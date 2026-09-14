@@ -269,8 +269,8 @@ export function NewsListingClient({
           as `calc(var(--sticky-header-h) - 1px)`, the missing pixel being
           its own `border-b` (#2820) — clears the header exactly, same notch
           `<TeamSectionNav>` and `<OrganigramSectionNav>` already use below
-          the same header via `SECTION_NAV_BAR_CLASSES`. This bar stays its
-          own constant (not that one) because its `bg-cream` ground is a
+          the same header via `SECTION_NAV_BAR_CLASSES`. This bar keeps its
+          own class string (not that constant) because its `bg-cream` ground is a
           filter bar, not a section nav — background is a purpose
           difference, not a value to flatten. z-index and padding are
           unchanged. */}
