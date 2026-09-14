@@ -42,7 +42,6 @@ interface MatchHeroCommon {
 }
 
 export interface MatchHeroMatch extends MatchHeroCommon {
-  isPlaceholder: false;
   /** Discriminant against `MatchHeroReservation`/`MatchHeroReduced`. */
   kind: "match";
   homeTeam: MatchHeroTeam;
@@ -56,7 +55,6 @@ export interface MatchHeroMatch extends MatchHeroCommon {
  * `kind` first fails to compile (AC 1).
  */
 export interface MatchHeroReservation extends MatchHeroCommon {
-  isPlaceholder: true;
   /** Discriminant against `MatchHeroMatch`/`MatchHeroReduced`. */
   kind: "reservation";
   /** The club's own crest/name — a self-match has no second side. */
@@ -69,7 +67,6 @@ export interface MatchHeroReservation extends MatchHeroCommon {
  * resolved via club-id equality, never home/away.
  */
 export interface MatchHeroReduced extends MatchHeroCommon {
-  isPlaceholder: false;
   /** Discriminant against `MatchHeroMatch`/`MatchHeroReservation`. */
   kind: "reduced";
   team: MatchHeroTeam;
@@ -467,7 +464,7 @@ function FullHero({
  * The match-detail page's hero — state-aware, never auto-hides (#2802
  * review). Dispatches on `match.kind`, already resolved by
  * `matchDetailToHeroRow()`; this component narrows and renders, it never
- * asks `isReducedMatchRow` or `otherClubSide` itself.
+ * asks `matchRowKind` or `otherClubSide` itself.
  */
 export function MatchHero({ match, className }: MatchHeroProps) {
   switch (match.kind) {

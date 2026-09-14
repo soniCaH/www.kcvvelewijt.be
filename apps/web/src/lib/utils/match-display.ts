@@ -106,46 +106,6 @@ export function isExceptionalMatchStatus(status: MatchStatus): boolean {
   return status !== "scheduled" && status !== "finished";
 }
 
-/**
- * Fields `isReducedMatchRow` needs — a structural subset both `ScheduleRow`
- * members and `CalendarMatch` satisfy without a branch, mirroring
- * `ReservationSubjectInput` below.
- */
-export interface ReducedRowInput {
-  isPlaceholder: boolean;
-  competitionType?: CompetitionType;
-  status: MatchStatus;
-  homeScore?: number;
-  awayScore?: number;
-}
-
-/**
- * Whether a match row renders the reduced reservation register — one crest,
- * one mono subject, no link — instead of the full two-sided scoreboard.
- * True for a placeholder (#2606, both sides are the same club) and for a
- * tournament fixture (#2696, `competitionType === "tournament"` — never a
- * string match on the Dutch `competition` label) that has no result yet.
- *
- * Gated on there being a scoreline, not merely on `isPlayedMatch`: a
- * finished/forfeited/stopped tournament fixture whose scores are missing
- * from the feed must not fall back to the vs-framed, linked scoreboard with
- * a kickoff time and no score (#2696 review) — once a result exists, the
- * club really was the opponent, so the row reverts to the full scoreboard.
- *
- * The one place this question is asked — `<TeamAgendaRow>` and
- * `<CalendarMonth>`'s `captionLabel` gate each spelled it independently
- * once, and the two answers had already drifted apart by review.
- */
-export function isReducedMatchRow(match: ReducedRowInput): boolean {
-  if (match.isPlaceholder) return true;
-  if (match.competitionType !== "tournament") return false;
-  const hasScoreline =
-    isPlayedMatch(match.status) &&
-    typeof match.homeScore === "number" &&
-    typeof match.awayScore === "number";
-  return !hasScoreline;
-}
-
 /** The raw `Match`/`MatchDetail` fields `matchRowKind()` needs — both share
  *  this shape via `BaseMatchFields` (`packages/api-contract/src/schemas/match.ts`). */
 export interface MatchRowKindSource {
@@ -163,27 +123,42 @@ export interface MatchRowKindSource {
  * `transformMatchToCalendar`) and every other reader of a raw match
  * (`toHeroMatchData`, the article `SportsEvent` gate, `/wedstrijd`'s own
  * gates, `matchSlot`, the ICS feed) had each hand-copied the same six-field
- * `isReducedMatchRow({...})` literal — nine of eleven copies byte-identical,
- * four re-`||`ing the placeholder half back on outside the call even though
- * this function already returns `true` for one. A caller that forgot to wire
- * `homeScore`/`awayScore` (both optional on `ReducedRowInput`) type-checked
- * anyway and silently read "reduced" forever for a played tournament fixture
- * — the mechanism behind five of the fifteen findings the first review round
- * found. One function, one return type (`ScheduleRow["kind"]`, identical
- * across all three adapters' `kind`), makes a fifth hand-copy a one-line
- * diff instead of a six-field one.
+ * reduced-row literal — nine of eleven copies byte-identical, four
+ * re-`||`ing the placeholder half back on outside the call even though the
+ * shared check already covered it. A caller that forgot to wire
+ * `home_team.score`/`away_team.score` type-checked anyway and silently read
+ * "reduced" forever for a played tournament fixture — the mechanism behind
+ * five of the fifteen findings the first review round found. One function,
+ * one return type (`ScheduleRow["kind"]`, identical across all four
+ * adapters' `kind`), makes a fifth hand-copy a one-line diff instead of a
+ * six-field one.
+ *
+ * The reduced check itself used to be a separate exported
+ * `isReducedMatchRow()` helper — inlined here (#2825) because this was its
+ * only production caller (`ReducedRowInput` existed only to type this one
+ * internal literal) and an exported "is this row reduced?" that actually
+ * answered "is this a resultless tournament fixture" — silently `false` for
+ * a reservation — was the exact #2802 hazard this function exists to close,
+ * just reopened one level down. True for a tournament fixture (#2696,
+ * `competitionType === "tournament"` — never a string match on the Dutch
+ * `competition` label) that has no result yet. Gated on there being a
+ * scoreline, not merely on `isPlayedMatch`: a finished/forfeited/stopped
+ * tournament fixture whose scores are missing from the feed must not fall
+ * back to the vs-framed, linked scoreboard with a kickoff time and no score
+ * (#2696 review) — once a result exists, the club really was the opponent,
+ * so the row reverts to the full scoreboard. `<TeamAgendaRow>` and
+ * `<CalendarMonth>`'s `captionLabel` gate each spelled this independently
+ * once, and the two answers had already drifted apart by review before
+ * being consolidated here.
  */
 export function matchRowKind(match: MatchRowKindSource): ScheduleRow["kind"] {
   if (match.is_placeholder) return "reservation";
-  return isReducedMatchRow({
-    isPlaceholder: false,
-    competitionType: match.competitionType,
-    status: match.status,
-    homeScore: match.home_team.score,
-    awayScore: match.away_team.score,
-  })
-    ? "reduced"
-    : "match";
+  if (match.competitionType !== "tournament") return "match";
+  const hasScoreline =
+    isPlayedMatch(match.status) &&
+    typeof match.home_team.score === "number" &&
+    typeof match.away_team.score === "number";
+  return hasScoreline ? "match" : "reduced";
 }
 
 /**

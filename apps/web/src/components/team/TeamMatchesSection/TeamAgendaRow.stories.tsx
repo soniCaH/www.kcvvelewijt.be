@@ -10,7 +10,6 @@ const KCVV = { id: 1235, name: "KCVV Elewijt" };
 const OPP = { id: 42, name: "KSV Schoonbeek-Beverst A" };
 
 const upcoming: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 1,
   date: new Date("2026-09-20T15:00:00.000Z"),
@@ -205,7 +204,6 @@ export const WithOpponentTeamLabel: Story = {
 // every other state on this page — not a link.
 
 const placeholderTournament: ScheduleReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 90,
   date: new Date("2026-05-09T09:30:00.000Z"),
@@ -279,9 +277,8 @@ export const PlaceholderLongSubjectNarrow: Story = {
 // to the non-KCVV side via `otherClubSide()`/club-id equality, so this
 // fixture spells that resolved shape out directly rather than a `ScheduleMatch`
 // the row would now render as an ordinary two-crest scoreboard (the row
-// trusts `kind`, not a re-derivation of `isReducedMatchRow` from raw fields).
+// trusts `kind`, not a re-derivation of `matchRowKind` from raw fields).
 const tournamentFixture: ScheduleReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 93,
   date: new Date("2026-08-30T09:30:00.000Z"),

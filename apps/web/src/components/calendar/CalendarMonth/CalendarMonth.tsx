@@ -156,10 +156,10 @@ function SelectedDayDetail({
               // `awayTeam.teamLabel` (injected below), but the reduced
               // Crest+caption tree has no equivalent slot, so it's supplied
               // the same way `/tegenstander` supplies one (#2688). Gating on
-              // `isPlaceholder` alone left a tournament row's squad label
-              // off — widened rather than adding a second prop. Reads
+              // the reservation case alone left a tournament row's squad
+              // label off — widened rather than adding a second prop. Reads
               // `match.kind` directly (#2802 review), not a re-derivation
-              // via `isReducedMatchRow`: the adapter already decided this
+              // via `matchRowKind`: the adapter already decided this
               // once, and `CalendarReducedMatch.competitionType` being
               // optional means re-asking the question here could disagree
               // with the `kind` the row itself renders under.

@@ -358,7 +358,7 @@ describe("UpcomingMatches", () => {
 
     it("prints the status wording on a cancelled reservation — a dead slot must not read as live", () => {
       const cancelled = mockUpcomingWithReservation.map((m) =>
-        m.isPlaceholder ? { ...m, status: "cancelled" as const } : m,
+        m.kind === "reservation" ? { ...m, status: "cancelled" as const } : m,
       );
       render(<UpcomingMatches matches={cancelled} />);
       const article = screen.getByRole("article", { name: /Tornooi/ });

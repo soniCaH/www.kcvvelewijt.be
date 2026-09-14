@@ -12,9 +12,9 @@ import type { ScheduleRow, ScheduleTeam } from "./types";
  * Branches on `matchRowKind()` into the three `ScheduleRow` members
  * (#2688/#2802) — the contract itself stays sparse (`is_placeholder` is
  * `undefined` for an ordinary fixture, per #2606/#2632's review), but the
- * web view-model normalises that into a definite `isPlaceholder`/`kind`
- * discriminant, because the union needs a real discriminant to narrow on,
- * not a tri-state optional.
+ * web view-model normalises that into a definite `kind` discriminant,
+ * because the union needs a real discriminant to narrow on, not a tri-state
+ * optional.
  *
  * `kind` is switched over explicitly (#2802 review) rather than three
  * cascading `if`s ending in a bare fallthrough `return` —
@@ -32,7 +32,6 @@ export function transformMatchToSchedule(match: Match): ScheduleRow {
   switch (kind) {
     case "reservation":
       return {
-        isPlaceholder: true,
         kind,
         id: match.id,
         date: match.date,
@@ -43,7 +42,6 @@ export function transformMatchToSchedule(match: Match): ScheduleRow {
       };
     case "reduced":
       return {
-        isPlaceholder: false,
         kind,
         id: match.id,
         date: match.date,
@@ -55,7 +53,6 @@ export function transformMatchToSchedule(match: Match): ScheduleRow {
       };
     case "match":
       return {
-        isPlaceholder: false,
         kind,
         id: match.id,
         date: match.date,

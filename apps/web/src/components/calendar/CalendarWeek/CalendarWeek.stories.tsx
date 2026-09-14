@@ -39,7 +39,6 @@ const weekMatches: CalendarMatch[] = [
     competition: "Nationale 1",
     team: "A-ploeg",
     isHome: true,
-    isPlaceholder: false,
     kind: "match",
   },
   {
@@ -53,7 +52,6 @@ const weekMatches: CalendarMatch[] = [
     competition: "Jeugd",
     team: "U15 A",
     isHome: true,
-    isPlaceholder: false,
     kind: "match",
   },
 ];
@@ -134,7 +132,6 @@ export const WithPlayedMatch: Story = {
         competition: "Beker van Vlaanderen",
         team: "A-ploeg",
         isHome: true,
-        isPlaceholder: false,
         kind: "match",
       },
     ],

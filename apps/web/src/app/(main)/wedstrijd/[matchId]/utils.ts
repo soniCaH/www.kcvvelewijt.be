@@ -53,7 +53,7 @@ export function transformAwayTeam(match: MatchDetail): MatchHeroTeam {
  * pass this one did not, until #2802 review). Branches on `matchRowKind()`
  * into the three `MatchHeroRow` members, exactly like the other three
  * adapters — `<MatchHero>` itself narrows and renders, it never asks
- * `isReducedMatchRow`/`otherClubSide` again.
+ * `matchRowKind`/`otherClubSide` again.
  */
 export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
   const common = {
@@ -70,21 +70,18 @@ export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
     case "reservation":
       return {
         ...common,
-        isPlaceholder: true,
         kind,
         team: transformHomeTeam(match),
       };
     case "reduced":
       return {
         ...common,
-        isPlaceholder: false,
         kind,
         team: otherClubSide(transformHomeTeam(match), transformAwayTeam(match)),
       };
     case "match":
       return {
         ...common,
-        isPlaceholder: false,
         kind,
         homeTeam: transformHomeTeam(match),
         awayTeam: transformAwayTeam(match),

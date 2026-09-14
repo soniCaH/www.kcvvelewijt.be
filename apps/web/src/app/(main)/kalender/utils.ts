@@ -49,7 +49,6 @@ interface CalendarMatchCommon {
 }
 
 export interface CalendarMatchFixture extends CalendarMatchCommon {
-  isPlaceholder: false;
   /** Discriminant against `CalendarReservation`/`CalendarReducedMatch`. */
   kind: "match";
   homeTeam: CalendarTeam;
@@ -67,7 +66,6 @@ export interface CalendarMatchFixture extends CalendarMatchCommon {
  * narrowing `kind` first fails to compile, mirroring `ScheduleReservation`.
  */
 export interface CalendarReservation extends CalendarMatchCommon {
-  isPlaceholder: true;
   /** Discriminant against `CalendarMatchFixture`/`CalendarReducedMatch`. */
   kind: "reservation";
   /** The club's own crest/name — a self-match has no second side. */
@@ -80,7 +78,6 @@ export interface CalendarReservation extends CalendarMatchCommon {
  * resolved via id equality, never home/away.
  */
 export interface CalendarReducedMatch extends CalendarMatchCommon {
-  isPlaceholder: false;
   /** Discriminant against `CalendarMatchFixture`/`CalendarReservation`. */
   kind: "reduced";
   club: CalendarTeam;
@@ -89,11 +86,8 @@ export interface CalendarReducedMatch extends CalendarMatchCommon {
 
 /**
  * A genuine fixture, a pitch-reservation placeholder, or a tournament
- * fixture with a hidden result (#2688/#2802). `isPlaceholder` alone no longer
- * disambiguates every member (`CalendarMatchFixture` and
- * `CalendarReducedMatch` both carry `false`) — narrow on `kind` for the
- * three-way split, `isPlaceholder` where only the self-match distinction
- * matters.
+ * fixture with a hidden result (#2688/#2802). `kind` is the sole
+ * discriminant across the three-way split.
  */
 export type CalendarMatch =
   CalendarMatchFixture | CalendarReservation | CalendarReducedMatch;
@@ -140,7 +134,6 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
   switch (kind) {
     case "reservation":
       return {
-        isPlaceholder: true,
         kind,
         id: match.id,
         date: match.date.toISOString(),
@@ -157,7 +150,6 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     case "reduced": {
       const other = otherClubSide(match.home_team, match.away_team);
       return {
-        isPlaceholder: false,
         kind,
         id: match.id,
         date: match.date.toISOString(),
@@ -171,7 +163,6 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     }
     case "match":
       return {
-        isPlaceholder: false,
         kind,
         id: match.id,
         date: match.date.toISOString(),
@@ -535,9 +526,9 @@ export const MATCH_DOT_CLASS: Record<MatchDotType, string> = {
  *
  * Branches on `match.kind` into the three `ScheduleRow` members (#2688/#2802)
  * — this was the two-hop chain's silent hole: `isHome` crossed both hops,
- * `isPlaceholder` crossed neither, so the same reservation that renders
- * reduced on the team page rendered as an ordinary two-crest linked scoreboard
- * here.
+ * the reservation/reduced discriminant crossed neither, so the same
+ * reservation that renders reduced on the team page rendered as an ordinary
+ * two-crest linked scoreboard here.
  *
  * `/kalender` mixes every KCVV squad on one surface, so the squad context
  * (`match.team`, e.g. "U13"/"A-ploeg") is injected as the KCVV side's
@@ -552,7 +543,6 @@ export function calendarMatchToScheduleMatch(
   switch (match.kind) {
     case "reservation":
       return {
-        isPlaceholder: true,
         kind: match.kind,
         id: match.id,
         date: new Date(match.date),
@@ -563,7 +553,6 @@ export function calendarMatchToScheduleMatch(
       };
     case "reduced":
       return {
-        isPlaceholder: false,
         kind: match.kind,
         id: match.id,
         date: new Date(match.date),
@@ -576,7 +565,6 @@ export function calendarMatchToScheduleMatch(
     case "match": {
       const dotType = getMatchDotType(match);
       return {
-        isPlaceholder: false,
         kind: match.kind,
         id: match.id,
         date: new Date(match.date),

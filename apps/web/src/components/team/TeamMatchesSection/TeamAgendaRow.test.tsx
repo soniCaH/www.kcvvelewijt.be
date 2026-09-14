@@ -41,7 +41,6 @@ vi.mock("next/link", () => ({
 }));
 
 const BASE: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 1,
   date: new Date("2026-08-15T15:00:00.000Z"),
@@ -99,7 +98,6 @@ const mobileText = () =>
 
 /** A pitch-reservation placeholder (#2606) — both sides are the same club. */
 const PLACEHOLDER: ScheduleReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 99,
   date: new Date("2026-05-09T09:30:00.000Z"),
@@ -118,7 +116,6 @@ const PLACEHOLDER: ScheduleReservation = {
  * from `competitionType`/`status`/scores (#2802).
  */
 const TOURNAMENT: ScheduleReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 200,
   date: new Date("2026-08-30T09:30:00.000Z"),
@@ -1108,7 +1105,6 @@ describe("TeamAgendaRow", () => {
       // not a mutation of `TOURNAMENT` itself, which as `kind: "reduced"`
       // no longer carries those fields to spread (#2802).
       const played: ScheduleMatch = {
-        isPlaceholder: false,
         kind: "match",
         id: TOURNAMENT.id,
         date: TOURNAMENT.date,

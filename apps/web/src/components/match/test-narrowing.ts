@@ -5,10 +5,10 @@
  * `"match"`/`"reservation"`/`"reduced"` — so one generic assertion per
  * member covers all of them instead of a copy per test file.
  *
- * `asNonPlaceholder` narrows to `kind: "match"` specifically, not merely
- * `isPlaceholder: false` — a `"reduced"` row also carries `isPlaceholder:
- * false` (it's a real tournament fixture, not a self-match) but has no
- * `homeTeam`/`awayTeam`/scores, so `Extract<T, { isPlaceholder: false }>`
+ * `asNonPlaceholder` narrows to `kind: "match"` specifically, not to
+ * "not a reservation" — a `"reduced"` row is not a reservation either (it's
+ * a real tournament fixture, not a self-match) but has no
+ * `homeTeam`/`awayTeam`/scores, so a narrower "not a reservation" check
  * would still refuse those fields. Callers that want the full scoreboard
  * shape need `kind === "match"`; the name is kept (rather than renamed to
  * `asMatch`) so every existing call site in the test suite keeps working

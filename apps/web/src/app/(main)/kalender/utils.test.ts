@@ -38,7 +38,6 @@ import {
 // a renderer reaching for the two-team scoreboard on a reservation/reduced
 // row a compile error instead of a runtime crash.
 const _reservationHasNoHomeTeam: CalendarReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 1,
   date: "2026-03-13",
@@ -48,7 +47,6 @@ const _reservationHasNoHomeTeam: CalendarReservation = {
   homeTeam: { id: 1235, name: "KCVV Elewijt" },
 };
 const _reducedHasNoHomeTeam: CalendarReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 1,
   date: "2026-03-13",
@@ -93,29 +91,25 @@ describe("transformMatchToCalendar", () => {
       competition: "2e Nationale",
       team: "A-Ploeg",
       isHome: undefined,
-      isPlaceholder: false,
       kind: "match",
     });
   });
 
-  it("normalizes isPlaceholder to a definite boolean, never undefined (#2688)", () => {
-    expect(transformMatchToCalendar(createTestMatch()).isPlaceholder).toBe(
-      false,
-    );
+  it("normalizes kind to a definite discriminant, never undefined (#2688)", () => {
+    expect(transformMatchToCalendar(createTestMatch()).kind).toBe("match");
     expect(
-      transformMatchToCalendar(createTestMatch({ is_placeholder: true }))
-        .isPlaceholder,
-    ).toBe(true);
+      transformMatchToCalendar(createTestMatch({ is_placeholder: true })).kind,
+    ).toBe("reservation");
   });
 
   it('returns kind: "reservation" even when is_home is true — the discriminant is checked before isHome, not after (#2688 review)', () => {
     // A self-match's is_home is typically true (home_team.id === team.id),
     // so `getMatchDotType` must never fall through to a home/away read for
     // one — the bug #2688 found when the two-hop chain crossed `isHome`
-    // but not `isPlaceholder`. Asserted at the boundary that actually
-    // carries `is_home`: the raw `Match`, not the `CalendarReservation`
-    // output, which has no `isHome` field to get the order wrong on
-    // (#2802 review).
+    // but not the reservation/reduced discriminant. Asserted at the
+    // boundary that actually carries `is_home`: the raw `Match`, not the
+    // `CalendarReservation` output, which has no `isHome` field to get the
+    // order wrong on (#2802 review).
     const result = transformMatchToCalendar(
       createTestMatch({ is_placeholder: true, is_home: true }),
     );
@@ -333,7 +327,6 @@ function makeCalendarMatch(
     status: "scheduled",
     team: "A-ploeg",
     scoreDisplay: { type: "vs" },
-    isPlaceholder: false,
     kind: "match",
     ...overrides,
   };
@@ -649,7 +642,7 @@ describe("calendarMatchToScheduleMatch", () => {
   });
 
   describe("pitch-reservation placeholder (#2606, #2688)", () => {
-    it("returns a ScheduleReservation — the silent hole #2688 found: isHome crossed this adapter, isPlaceholder did not", () => {
+    it("returns a ScheduleReservation — the silent hole #2688 found: isHome crossed this adapter, the reservation discriminant did not", () => {
       const result = calendarMatchToScheduleMatch(
         reservationMatch({
           id: 90,
@@ -660,8 +653,9 @@ describe("calendarMatchToScheduleMatch", () => {
         }),
       );
 
-      expect(result.isPlaceholder).toBe(true);
-      if (!result.isPlaceholder) throw new Error("expected a reservation");
+      expect(result.kind).toBe("reservation");
+      if (result.kind !== "reservation")
+        throw new Error("expected a reservation");
       expect(result.team).toEqual({
         id: 1235,
         name: "KCVV Elewijt",
@@ -868,9 +862,9 @@ describe("buildKalenderItemListEntries", () => {
   });
 
   it("names a pitch-reservation placeholder by its subject, never 'home — away' (#2606, #2688)", () => {
-    // The same bug this PR exists to remove, found live on a route its own
-    // body declared fixed — CalendarMatch's flat isPlaceholder boolean let
-    // this construction site compile clean without branching on it.
+    // The same class of bug #2825 removed the last opportunity for — a flat
+    // boolean placeholder field let a construction site that forgot to
+    // branch on it compile clean instead of failing.
     const feed = buildCalendarFeed(
       [
         reservationMatch({

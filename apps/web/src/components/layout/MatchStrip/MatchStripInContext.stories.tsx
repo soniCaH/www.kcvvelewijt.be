@@ -38,7 +38,6 @@ const seniorTeams: TeamNavVM[] = [
 ];
 
 const homeResult: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 12345,
   date: new Date("2026-08-03T15:00:00Z"),
@@ -56,7 +55,6 @@ const homeResult: ScheduleMatch = {
 };
 
 const awayFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 12346,
   date: new Date("2026-08-08T18:00:00Z"),
@@ -118,7 +116,6 @@ export const NoMatchData: Story = {
  * the chrome immediately around it (no cream sliver, no double border).
  */
 const todaysFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 12350,
   date: new Date("2026-08-15T15:00:00Z"),

@@ -29,8 +29,8 @@ import type { Match } from "@/lib/effect/schemas/match.schema";
  *
  * **Defaults are a public contract, not an implementation detail — widen
  * with care.** `transform.test.ts` asserts three *absences* against a bare
- * `createRawMatch()`: `is_placeholder` (normalizes to `isPlaceholder: false`
- * when absent, #2688), `is_home` (leaves `isHome` undefined when absent) and
+ * `createRawMatch()`: `is_placeholder` (normalizes to `kind: "match"` when
+ * absent, #2688), `is_home` (leaves `isHome` undefined when absent) and
  * `competitionType` (leaves it undefined when absent). None of those three
  * keys may be added to the defaults below without checking those tests
  * first — doing so makes them vacuously pass or fail, and a vacuous test is

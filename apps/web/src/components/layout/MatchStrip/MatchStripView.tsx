@@ -161,13 +161,14 @@ function scoreboardScore(match: ScheduleMatch): string | null {
  * Whether this row/slide is showing the match-day fixture (#2616) — the one
  * definition `<LedgerLinkRow>` and `<DesktopSlider>` both call, replacing two
  * formulas that had already drifted (each carried its own comment explaining
- * why it differed from the other — the same drift `isReducedMatchRow`'s
+ * why it differed from the other — the same drift `matchRowKind`'s
  * docblock in `match-display.ts` records for a different pair of call
  * sites). `kind === "fixture"` is enough on its own: `<MatchStrip>` is the
  * single place that ever sets `matchDay` true, and it only does so when
- * `fixture.kind === "match"` (#2802 review — `!isPlaceholder` alone would
- * also pass a reduced tournament fixture) — re-checking here would be the
- * same re-derivation the "one owner for the rule" convention forbids.
+ * `fixture.kind === "match"` (#2802 review — a boolean placeholder check
+ * alone would also pass a reduced tournament fixture) — re-checking here
+ * would be the same re-derivation the "one owner for the rule" convention
+ * forbids.
  */
 function isTodayFixture(matchDay: boolean, kind: MatchRowKind): boolean {
   return matchDay && kind === "fixture";

@@ -41,7 +41,6 @@ type Story = StoryObj<typeof meta>;
 // Both result + fixture are `ScheduleMatch`, fed straight into <TeamAgendaRow>.
 // Hoisted so the Outcomes story can spread it without a non-null assertion.
 const aResult: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 101,
   date: new Date("2026-06-21T15:00:00Z"),
@@ -55,7 +54,6 @@ const aResult: ScheduleMatch = {
 };
 
 const aFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 102,
   date: new Date("2026-06-29T13:00:00Z"),
@@ -77,7 +75,6 @@ const aTeam: FirstTeamVM = {
 };
 
 const bResult: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 201,
   date: new Date("2026-06-22T13:30:00Z"),
@@ -91,7 +88,6 @@ const bResult: ScheduleMatch = {
 };
 
 const bFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 202,
   date: new Date("2026-06-28T17:30:00Z"),
@@ -177,7 +173,6 @@ export const AwaitingResult: Story = {
       {
         ...bTeam,
         result: {
-          isPlaceholder: false,
           kind: "match",
           id: 203,
           date: new Date("2026-06-25T17:30:00Z"),
@@ -245,7 +240,6 @@ export const LongOpponentNames: Story = {
  * kickoff — no opponent, no score, no link.
  */
 const bFixtureReservation: ScheduleReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 204,
   date: new Date("2026-06-28T09:30:00Z"),

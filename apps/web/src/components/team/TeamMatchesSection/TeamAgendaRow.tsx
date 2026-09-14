@@ -12,7 +12,7 @@
  * ellipsises — it never borrows from the other side, because a score that moves
  * between rows reads as a broken table (#2397).
  *
- * A third state — `match.isPlaceholder` (#2606) — replaces the row's body with
+ * A third state — `match.kind === "reservation"` (#2606) — replaces the row's body with
  * one crest, a subject line in the caption's mono-uppercase register (the
  * competition label by default, `kind`/`captionLabel`/an exceptional status
  * layered on via the same `buildCaption` the normal row uses), and the real
@@ -243,7 +243,7 @@ export function TeamAgendaRow({
   className,
 }: TeamAgendaRowProps) {
   // The adapter (`transformMatchToSchedule`) has already asked
-  // `isReducedMatchRow()` once and baked the answer into `kind` — this reads
+  // `matchRowKind()` once and baked the answer into `kind` — this reads
   // that discriminant rather than re-deriving the same question a second
   // time from raw match fields. Enumerated positively (#2802 review)
   // rather than `kind !== "match"`: a negated catch-all treats

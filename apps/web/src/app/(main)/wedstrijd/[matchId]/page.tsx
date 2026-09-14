@@ -398,10 +398,11 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
   // The fourth adapter's output (#2802 review) — `<MatchHero>` renders this
   // directly, and everything gated below it reads `heroRow.kind` rather
-  // than re-deriving the reduced question from raw fields. `!isPlaceholder`
-  // alone used to let a tournament fixture through every one of these
-  // gates, shipping a two-competitor `SportsEvent` and a real lineup/events
-  // section under a one-crest hero that names no confirmed opponent.
+  // than re-deriving the reduced question from raw fields. A boolean
+  // placeholder flag alone used to let a tournament fixture through every
+  // one of these gates, shipping a two-competitor `SportsEvent` and a real
+  // lineup/events section under a one-crest hero that names no confirmed
+  // opponent.
   const heroRow = matchDetailToHeroRow(match);
   const isReduced = heroRow.kind !== "match";
 

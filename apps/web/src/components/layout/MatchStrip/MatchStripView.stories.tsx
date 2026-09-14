@@ -25,7 +25,6 @@ const OPPONENT = {
 };
 
 const homeWin: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 12345,
   date: new Date("2026-08-03T15:00:00Z"),
@@ -39,7 +38,6 @@ const homeWin: ScheduleMatch = {
 };
 
 const awayFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 12346,
   date: new Date("2026-08-08T18:00:00Z"),
@@ -69,7 +67,6 @@ export const ResultAndFixture: Story = {
  * strip never claims a ground it cannot confirm.
  */
 const todaysFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 12349,
   date: new Date("2026-08-15T15:00:00Z"),
@@ -157,7 +154,6 @@ export const AwaitingResult: Story = {
  * reduced treatment rather than inventing a second vocabulary (#2688).
  */
 const reservation: ScheduleReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 12348,
   date: new Date("2026-05-09T09:30:00Z"),
@@ -180,7 +176,6 @@ export const ReservationFixture: Story = {
  * subject name the other club, not KCVV's own.
  */
 const tournamentFixture: ScheduleReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 12349,
   date: new Date("2026-08-30T09:30:00Z"),

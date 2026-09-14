@@ -52,9 +52,9 @@ export function FirstTeamAgendaRow({
       // downstream would ever flag it. `<TeamAgendaRow>` also never wires the
       // click handler for a reduced row, but the skip belongs here too — the
       // caller is the one that knows this row won't link before it hands
-      // anything over. Tests `match.kind`, not `match.isPlaceholder` (#2802
-      // review) — a reduced tournament fixture carries `isPlaceholder: false`
-      // too, and the guard exists for both.
+      // anything over. Tests `match.kind !== "match"` (#2802 review) so the
+      // guard covers both the reservation and the reduced tournament-fixture
+      // case, not just the reservation.
       onNavigate={
         match.kind !== "match"
           ? undefined

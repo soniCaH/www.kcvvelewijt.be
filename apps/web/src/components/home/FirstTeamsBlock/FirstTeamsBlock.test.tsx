@@ -20,7 +20,6 @@ vi.mock("next/image", () => ({
 }));
 
 const aResult: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 101,
   date: new Date("2026-06-21T15:00:00Z"),
@@ -34,7 +33,6 @@ const aResult: ScheduleMatch = {
 };
 
 const aFixture: ScheduleMatch = {
-  isPlaceholder: false,
   kind: "match",
   id: 102,
   date: new Date("2026-06-29T13:00:00Z"),
@@ -66,7 +64,6 @@ const bTeamFixtureOnly: FirstTeamVM = {
   slug: "b-ploeg",
   division: "2de Provinciale",
   fixture: {
-    isPlaceholder: false,
     kind: "match",
     id: 202,
     date: new Date("2026-06-28T17:30:00Z"),
@@ -119,7 +116,6 @@ describe("FirstTeamsBlock", () => {
             slug: "b-ploeg",
             division: "2de Provinciale",
             result: {
-              isPlaceholder: false,
               kind: "match",
               id: 203,
               date: new Date("2026-06-25T17:30:00Z"),
@@ -195,7 +191,6 @@ describe("FirstTeamsBlock", () => {
   // <FirstTeamAgendaRow> could silently re-break it without a failing test.
   describe("pitch-reservation placeholder (#2606, #2688)", () => {
     const reservation: ScheduleReservation = {
-      isPlaceholder: true,
       kind: "reservation",
       id: 90,
       date: new Date("2026-05-09T09:30:00Z"),
