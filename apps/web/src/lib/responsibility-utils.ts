@@ -14,7 +14,10 @@ function contactHasMember(
   contact: Contact | undefined,
   memberId: string,
 ): boolean {
-  return contact?.members?.some((m) => m.id === memberId) ?? false;
+  return (
+    contact?.contactType === "position" &&
+    (contact.members?.some((m) => m.id === memberId) ?? false)
+  );
 }
 
 /**
@@ -61,9 +64,13 @@ export function getMembersWithResponsibilities(
   const memberIds = new Set<string>();
 
   paths.forEach((path) => {
-    path.primaryContact?.members?.forEach((m) => memberIds.add(m.id));
+    if (path.primaryContact?.contactType === "position") {
+      path.primaryContact.members?.forEach((m) => memberIds.add(m.id));
+    }
     path.steps?.forEach((step) => {
-      step.contact?.members?.forEach((m) => memberIds.add(m.id));
+      if (step.contact?.contactType === "position") {
+        step.contact.members?.forEach((m) => memberIds.add(m.id));
+      }
     });
   });
 

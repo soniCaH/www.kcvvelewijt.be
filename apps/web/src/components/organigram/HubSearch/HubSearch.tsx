@@ -84,18 +84,21 @@ function forwardContact(
   path: ResponsibilityPath,
 ): { name: string; sub?: string } | null {
   const contact = path.primaryContact;
-  const memberName = contact.members?.[0]?.name?.trim();
-  if (memberName) {
-    return {
-      name: memberName,
-      ...(contact.position ? { sub: contact.position } : {}),
-    };
+  if (contact.contactType === "position") {
+    const memberName = contact.members?.[0]?.name?.trim();
+    if (memberName) {
+      return {
+        name: memberName,
+        ...(contact.position ? { sub: contact.position } : {}),
+      };
+    }
+    if (contact.position?.trim()) {
+      return { name: contact.position };
+    }
+    return null;
   }
   if (contact.contactType === "manual" && contact.role?.trim()) {
     return { name: contact.role };
-  }
-  if (contact.contactType === "position" && contact.position?.trim()) {
-    return { name: contact.position };
   }
   return null;
 }

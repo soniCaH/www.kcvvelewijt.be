@@ -58,32 +58,50 @@ type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
 type ContactRow = NonNullable<PathRow["primaryContact"]>;
 
 function toContact(c: ContactRow): Contact {
-  return {
-    // Default to "manual" when contactType is null (legacy docs or incomplete data)
-    contactType: (c.contactType ?? "manual") as Contact["contactType"],
-    ...(c.position ? { position: c.position } : {}),
-    ...(c.roleCode ? { roleCode: c.roleCode } : {}),
-    ...(c.members?.length
-      ? {
-          members: c.members
-            .filter((m): m is NonNullable<typeof m> => m != null)
-            .map((m) => ({
-              id: m.id ?? "",
-              name: (m.name ?? "").replace(/\s+/g, " ").trim(),
-              ...(m.email ? { email: m.email } : {}),
-              ...(m.phone ? { phone: m.phone } : {}),
-            })),
-        }
-      : {}),
-    ...(c.nodeId ? { nodeId: c.nodeId } : {}),
-    ...(c.teamRole ? { teamRole: c.teamRole as Contact["teamRole"] } : {}),
-    ...(c.role ? { role: c.role } : {}),
-    ...(c.email ? { email: c.email } : {}),
-    ...(c.phone ? { phone: c.phone } : {}),
-    ...(c.department
-      ? { department: c.department as Contact["department"] }
-      : {}),
-  };
+  // Default to "manual" when contactType is null (legacy docs or incomplete data)
+  const contactType = c.contactType ?? "manual";
+
+  switch (contactType) {
+    case "position":
+      return {
+        contactType,
+        ...(c.position ? { position: c.position } : {}),
+        ...(c.roleCode ? { roleCode: c.roleCode } : {}),
+        ...(c.members?.length
+          ? {
+              members: c.members
+                .filter((m): m is NonNullable<typeof m> => m != null)
+                .map((m) => ({
+                  id: m.id ?? "",
+                  name: (m.name ?? "").replace(/\s+/g, " ").trim(),
+                  ...(m.email ? { email: m.email } : {}),
+                  ...(m.phone ? { phone: m.phone } : {}),
+                })),
+            }
+          : {}),
+        ...(c.nodeId ? { nodeId: c.nodeId } : {}),
+      };
+
+    case "team-role":
+      // Sanity's `validateContactFields` `Rule.custom` requires `teamRole`
+      // on every "team-role" document written through Studio, but that
+      // check does not cover documents written via the Content API. Degrade
+      // to the same empty "manual" contact the null-`contactType` branch
+      // below already falls back to, rather than construct a `Contact` the
+      // type says can't exist without a `teamRole`.
+      return c.teamRole
+        ? { contactType, teamRole: c.teamRole }
+        : { contactType: "manual" };
+
+    case "manual":
+      return {
+        contactType,
+        ...(c.role ? { role: c.role } : {}),
+        ...(c.email ? { email: c.email } : {}),
+        ...(c.phone ? { phone: c.phone } : {}),
+        ...(c.department ? { department: c.department } : {}),
+      };
+  }
 }
 
 export function toResponsibilityPath(p: PathRow): ResponsibilityPath {

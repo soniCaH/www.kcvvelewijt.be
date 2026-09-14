@@ -11,41 +11,64 @@ export type UserRole =
   "speler" | "ouder" | "trainer" | "supporter" | "niet-lid" | "andere";
 
 /**
- * Contact information for who to reach out to.
- * Discriminated by contactType: position (organigramNode), team-role (generic
- * role label + /ploegen hand-off — never a resolved member, see
- * `resolveContact.ts`), manual (freeform).
+ * A resolved organigramNode member (`position` contacts only).
  */
-export interface Contact {
-  contactType: "position" | "team-role" | "manual";
-  /** position: organigramNode title */
-  position?: string;
-  /** position: organigramNode roleCode */
-  roleCode?: string;
-  /** position: resolved organigramNode members */
-  members?: Array<{
-    id: string;
-    name: string;
-    email?: string;
-    phone?: string;
-  }>;
-  /** position: organigramNode _id for "Bekijk in organigram" link */
-  nodeId?: string;
-  /**
-   * team-role: picks the generic role label `resolveContact.ts` renders
-   * (e.g. "Trainer van jouw ploeg") plus a `/ploegen` link — never resolved
-   * to a specific team or member (per-team resolution was dropped in #2100).
-   */
-  teamRole?: "trainer" | "afgevaardigde";
-  /** manual: display role label */
-  role?: string;
-  /** manual: email address */
+export interface ContactMember {
+  id: string;
+  name: string;
   email?: string;
-  /** manual: phone number */
   phone?: string;
-  /** manual: department */
-  department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
 }
+
+/**
+ * Contact information for who to reach out to — a discriminated union on
+ * `contactType`, one arm per shape `resolveContact.ts` and
+ * `responsibility.repository.ts`'s `toContact()` actually construct. Each
+ * arm types only the fields that contact type uses, so there is no flat
+ * shared shape to accidentally read (or leave dead) a foreign-arm field on
+ * — see #2958, which replaced the former single flat interface that let the
+ * unreachable `teamRoleFallback` field (#2952) sit untyped-differently
+ * from every live field for months.
+ */
+export type Contact =
+  | {
+      contactType: "position";
+      /** organigramNode title */
+      position?: string;
+      /** organigramNode roleCode */
+      roleCode?: string;
+      /** resolved organigramNode members */
+      members?: ContactMember[];
+      /** organigramNode _id for "Bekijk in organigram" link */
+      nodeId?: string;
+    }
+  | {
+      contactType: "team-role";
+      /**
+       * Picks the generic role label `resolveContact.ts` renders (e.g.
+       * "Trainer van jouw ploeg") plus a `/ploegen` link — never resolved to
+       * a specific team or member (per-team resolution was dropped in
+       * #2100). Required: Sanity's `validateContactFields` `Rule.custom`
+       * enforces it on every `team-role` document written through Studio.
+       * That check does not cover documents written via the Content API, so
+       * `responsibility.repository.ts`'s `toContact()` degrades a
+       * `team-role` row that is missing one to an empty `manual` contact
+       * rather than construct a `Contact` value this type says cannot
+       * exist.
+       */
+      teamRole: "trainer" | "afgevaardigde";
+    }
+  | {
+      contactType: "manual";
+      /** display role label */
+      role?: string;
+      /** email address */
+      email?: string;
+      /** phone number */
+      phone?: string;
+      /** department */
+      department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
+    };
 
 /**
  * Step in the solution path
