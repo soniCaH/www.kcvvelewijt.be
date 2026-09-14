@@ -165,7 +165,11 @@ export interface MatchRowKindSource {
  * gates, `matchSlot`, the ICS feed) had each hand-copied the same six-field
  * `isReducedMatchRow({...})` literal — nine of eleven copies byte-identical,
  * four re-`||`ing the placeholder half back on outside the call even though
- * this function already returns `true` for one. A caller that forgot to wire
+ * `isReducedMatchRow` at the time already returned `true` for one (#2825
+ * later dropped that branch entirely — `matchRowKind` below now answers the
+ * placeholder case itself, straight off the raw `is_placeholder` field,
+ * before `isReducedMatchRow` is ever reached; see its own docblock above).
+ * A caller that forgot to wire
  * `homeScore`/`awayScore` (both optional on `ReducedRowInput`) type-checked
  * anyway and silently read "reduced" forever for a played tournament fixture
  * — the mechanism behind five of the fifteen findings the first review round
