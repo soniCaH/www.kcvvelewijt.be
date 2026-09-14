@@ -45,20 +45,6 @@ const contactFields = [
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
-    name: 'teamRoleFallback',
-    title: 'Fallback teamrol',
-    type: 'string',
-    options: {
-      list: [
-        {title: 'Trainer', value: 'trainer'},
-        {title: 'Afgevaardigde', value: 'afgevaardigde'},
-      ],
-    },
-    description:
-      'Wordt enkel gelezen als "Teamrol" leeg is — maar "Teamrol" is verplicht, dus dat kan bij een document dat via Studio is opgeslagen nooit voorkomen. Laat dit veld leeg; of het geschrapt wordt, staat genoteerd in #2952.',
-    hidden: ({parent}) => parent?.contactType !== 'team-role',
-  }),
-  defineField({
     name: 'role',
     title: 'Rol',
     type: 'string',

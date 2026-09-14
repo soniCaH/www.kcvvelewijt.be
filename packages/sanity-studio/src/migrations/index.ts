@@ -82,6 +82,16 @@ export {default as dropTeamSeasonMigration, migrateDropTeamSeason} from './drop-
 export type {TeamWithSeasonDoc as DropTeamSeasonDoc} from './drop-team-season'
 
 export {
+  default as dropResponsibilityTeamRoleFallbackMigration,
+  migrateDropResponsibilityTeamRoleFallback,
+} from './drop-responsibility-team-role-fallback'
+export type {
+  ResponsibilityWithTeamRoleFallbackDoc as DropResponsibilityTeamRoleFallbackDoc,
+  ResponsibilityStepLike as DropResponsibilityTeamRoleFallbackStepLike,
+  ResponsibilityStepContactLike as DropResponsibilityTeamRoleFallbackStepContactLike,
+} from './drop-responsibility-team-role-fallback'
+
+export {
   default as dropTeamTrainingScheduleMigration,
   migrateDropTeamTrainingSchedule,
 } from './drop-team-training-schedule'
