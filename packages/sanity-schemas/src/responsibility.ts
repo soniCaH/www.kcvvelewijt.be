@@ -41,7 +41,7 @@ const contactFields = [
       ],
     },
     description:
-      'Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest. Bijvoorbeeld: een speler van het A-team die "trainer" selecteert krijgt zijn eigen trainer als contactpersoon te zien.',
+      'Bepaalt het generieke rol-label dat op de site verschijnt (bijv. "Trainer van jouw ploeg"), samen met een link naar /ploegen. Er wordt geen specifieke trainer of afgevaardigde opgezocht of getoond — de gebruiker vindt zijn eigen ploeg en diens contactpersoon zelf via die link.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
@@ -55,7 +55,7 @@ const contactFields = [
       ],
     },
     description:
-      'Optioneel: als de primaire teamrol niet beschikbaar is voor de gekozen ploeg, wordt deze rol geprobeerd. Voorkomt dat gebruikers met een lege contactkaart eindigen.',
+      'Optioneel: wordt gebruikt voor het rol-label wanneer "Teamrol" niet is ingevuld. Toont, net als "Teamrol", geen specifieke contactpersoon — enkel het label en de link naar /ploegen.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
