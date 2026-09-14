@@ -21,7 +21,7 @@
     "build": "tsgo --noEmit"
   },
   "peerDependencies": {
-    "@sanity/icons": "5.2.1",
+    "@sanity/icons": "5.2.2",
     "sanity": "6.11.0"
   },
   "devDependencies": {
