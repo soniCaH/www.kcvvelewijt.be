@@ -9,7 +9,7 @@
     "delete-legacy": "tsx src/delete-legacy-responsibility-paths.ts"
   },
   "dependencies": {
-    "@sanity/client": "8.4.0"
+    "@sanity/client": "8.6.1"
   },
   "devDependencies": {
     "tsx": "4.23.12"
