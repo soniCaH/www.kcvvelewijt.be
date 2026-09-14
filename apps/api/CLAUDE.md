@@ -9,6 +9,7 @@ implementing `PsdApi` from `@kcvv/api-contract`.
 src/
 ├── index.ts                  ← Worker entry point (HttpApiBuilder.toWebHandler)
 ├── env.ts                    ← WorkerEnv type + WorkerEnvTag (Effect Context)
+├── reconciliation.ts         ← reconcileOrphans — shared orphan-reconciliation guard (#2854), used by sync/psd-sanity-sync.ts and search/sanity-index-sync.ts
 ├── cache/
 │   └── kv-cache.ts           ← KvCacheService + TypedKvCache (SWR read path, TTLs, drift alerting)
 ├── psd/
@@ -77,6 +78,35 @@ wrangler kv key delete "search-index:manifest:staging" --binding=PSD_CACHE --env
 ```
 
 This deletes the whole manifest, not just the over-cap entries — the next sweep bootstraps fresh (prunes nothing, just re-learns the current state) rather than resuming a partial one. Safe: nothing in the manifest is unrecoverable except the pre-existing backlog this mechanism could never see anyway (see #2831's PR description).
+
+### The shared orphan-reconciliation guard (`reconciliation.ts`, #2854)
+
+`reconcileOrphans` (`src/reconciliation.ts`) is the one shared implementation of the four-step orphan-reconciliation pattern both sync jobs need: diff the tracked set against the current set, handle the none-case, apply a ratio-based safety cap before acting, then act (calling a caller-supplied archive/delete function and returning the **confirmed** removed subset — not merely a completion signal, since a caller like the search-index sweep needs to know exactly what landed before touching its own manifest).
+
+Every call passes a config object with a **required** `releaseLeverHint` — the pointer an operator sees in the cap-refusal WARN telling them where THIS caller's release lever lives. It's required, not defaulted, on purpose: the two callers have different levers documented in different sections below, and a shared default previously pointed every refusal at the search-index-only manifest-delete lever, which would tell an operator investigating a PSD refusal to delete the search-index manifest instead (#2854 review). `logPrefix` (optional, default `""`) is prepended to every log line the call emits, so a log query scoped to a caller's own prefix (e.g. `[search-sync]`) still finds its reconciliation outcome, refusal included.
+
+- **`sync/psd-sanity-sync.ts`**'s `reconcileEntity` is a thin adapter over it — same public signature as before this refactor, still used by its three cycle-end callers (players, staff, teams). It always passes `floor: 0` (the default), which reproduces the pre-refactor bare-ratio behaviour (`ratio > MAX_ORPHAN_RATIO`) exactly — see the latching note below for why this means PSD sync's latching behaviour is unchanged, not fixed.
+- **`search/sanity-index-sync.ts`**'s manifest-diff prune calls it directly, passing its existing `PRUNE_SAFETY_CAP_FRACTION`, `PRUNE_SAFETY_FLOOR`, and `logPrefix: "[search-sync] "` — unchanged from before this refactor except for the prefix, which restores what a log query scoped to `[search-sync]` used to see. The excluded-ids deletes (stateless, authoritative) are **not** routed through this helper — they're scoped independently and must never be subject to the manifest-diff's cap (see the block comment above the call site). Before deleting, they're also filtered against whatever the manifest-diff call just confirmed removed, so an id that is simultaneously a manifest orphan and an excluded id is not sent to `deleteByIds` twice in the same sweep and does not get double-counted across the two "Pruned N" log lines.
+
+**A floor-less ratio latches.** A bare `ratio > threshold` check with no floor refuses forever once tripped against a small tracked set: the same input recomputes the same refusal every run, with no state change and no release lever, until something external changes the underlying data.
+
+**This is NOT fixed for PSD sync by the refactor itself.** `reconcileEntity`'s three production callers pass `floor: 0` — the compatibility guarantee — so `max(0, activeCount × ratioThreshold)` is mathematically identical to the bare ratio check they always had. PSD sync's latching behaviour is **unchanged**: a genuinely stuck cap still recomputes the same refusal every cycle. What #2854 actually gives PSD sync is not immunity to latching but a **manual lever to break it** — the one-shot override key below — where before there was no documented way to clear a stuck refusal at all. Do not read "the shared helper supports a floor" as "PSD sync's small id sets are now protected"; they aren't, by design (see the AC in #2854: the three callers must behave identically to today).
+
+### Releasing a stuck PSD sync orphan-cap refusal
+
+Unlike the search-index prune, PSD sync's cap isn't evaluated against a persisted manifest — it's recomputed fresh every rotation cycle from the current Sanity-active ids and the freshly-accumulated PSD ids, so there's no stored state to delete. The release lever is a one-shot KV bypass key instead, **scoped to a single entity type per use** — an operator who investigated and confirmed a genuine `players` refusal has verified nothing about that same cycle's staff or team fetch, so a blanket bypass would also wave through an unrelated, uninvestigated refusal. The key is read and deleted **upfront**, before any reconciliation leg runs, so it is always consumed on observation — whether or not the leg it was meant for actually runs that cycle (e.g. a failed club-wide staff fetch skips staff reconciliation entirely; a staff-scoped override set for that cycle is still consumed and must be re-armed).
+
+Value is a comma-separated list of `players`, `staff`, `teams`, or the literal `all` (`1` also works, as a quick blanket override):
+
+```bash
+# Release a players-only refusal (production; SANITY_DATASET=production)
+wrangler kv key put "sync:orphan-cap-override" "players" --binding=PSD_CACHE
+
+# Release every entity type at once (staging; SANITY_DATASET=staging)
+wrangler kv key put "sync:orphan-cap-override" "all" --binding=PSD_CACHE --env staging
+```
+
+Only set this after confirming the refusal is a false positive (a genuine mass roster change, not a truncated/regressed PSD fetch) — see the WARN log `reconciliation: SKIPPED — …` for the counts that tripped it, and `reconciliation: orphan-cap override consumed — …` for confirmation of what the key actually bypassed.
 
 ## Deployment
 

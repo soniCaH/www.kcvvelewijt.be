@@ -1066,6 +1066,131 @@ describe("runSync", () => {
     expect(archiveTeams).not.toHaveBeenCalled();
   });
 
+  it("releases a stuck orphan-cap refusal via the sync:orphan-cap-override KV key, then clears it (#2854)", async () => {
+    const kvStub = makeKvStub();
+    // Set the release lever before this run — mirrors a human running
+    // `wrangler kv key put sync:orphan-cap-override 1 --binding=PSD_CACHE`
+    // after confirming the delete set is legitimate.
+    await kvStub.put("sync:orphan-cap-override", "1");
+
+    const psdMock = makePsdTeamClientMock(
+      [ONE_TEAM],
+      [ONE_PLAYER],
+      [ONE_STAFF],
+    );
+
+    const {
+      getActivePlayerPsdIds,
+      archivePlayers,
+      getActiveStaffPsdIds,
+      archiveStaff,
+      getActiveTeamPsdIds,
+      archiveTeams,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // Same 80%-orphan shape as the test above, which normally refuses.
+    getActivePlayerPsdIds.mockReturnValue(
+      Effect.succeed(["6453", "200", "300", "400", "500"]),
+    );
+    getActiveStaffPsdIds.mockReturnValue(
+      Effect.succeed(["8001", "600", "700", "800", "900"]),
+    );
+    getActiveTeamPsdIds.mockReturnValue(
+      Effect.succeed(["42", "43", "44", "45", "46"]),
+    );
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    // The override bypassed the cap — all three archive calls went through.
+    expect(archivePlayers).toHaveBeenCalledWith(["200", "300", "400", "500"]);
+    expect(archiveStaff).toHaveBeenCalledWith(["600", "700", "800", "900"]);
+    expect(archiveTeams).toHaveBeenCalledWith(["43", "44", "45", "46"]);
+
+    // One-shot: the key is gone after use.
+    expect(await kvStub.get("sync:orphan-cap-override")).toBeNull();
+  });
+
+  it("scopes the override to one entity type — a players-only value does not bypass staff or teams (#2854 review finding 3)", async () => {
+    const kvStub = makeKvStub();
+    await kvStub.put("sync:orphan-cap-override", "players");
+
+    const psdMock = makePsdTeamClientMock(
+      [ONE_TEAM],
+      [ONE_PLAYER],
+      [ONE_STAFF],
+    );
+
+    const {
+      getActivePlayerPsdIds,
+      archivePlayers,
+      getActiveStaffPsdIds,
+      archiveStaff,
+      getActiveTeamPsdIds,
+      archiveTeams,
+      writerMock,
+      readerMock,
+    } = makeSanityMocks();
+
+    // Same 80%-orphan shape for all three — only players should bypass.
+    getActivePlayerPsdIds.mockReturnValue(
+      Effect.succeed(["6453", "200", "300", "400", "500"]),
+    );
+    getActiveStaffPsdIds.mockReturnValue(
+      Effect.succeed(["8001", "600", "700", "800", "900"]),
+    );
+    getActiveTeamPsdIds.mockReturnValue(
+      Effect.succeed(["42", "43", "44", "45", "46"]),
+    );
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    // Players bypassed the cap; staff and teams were still refused.
+    expect(archivePlayers).toHaveBeenCalledWith(["200", "300", "400", "500"]);
+    expect(archiveStaff).not.toHaveBeenCalled();
+    expect(archiveTeams).not.toHaveBeenCalled();
+
+    expect(await kvStub.get("sync:orphan-cap-override")).toBeNull();
+  });
+
+  it("consumes the override key upfront even when the scoped leg never runs (#2854 review finding 4)", async () => {
+    const kvStub = makeKvStub();
+    await kvStub.put("sync:orphan-cap-override", "staff");
+
+    // The club-wide staff fetch fails outright — staff reconciliation is
+    // skipped entirely, so the staff-scoped bypass is never evaluated.
+    const psdMock: PsdTeamClientInterface = {
+      getRawTeams: () => Effect.succeed([ONE_TEAM]),
+      getRawMembers: () => Effect.succeed([ONE_PLAYER]),
+      getRawStaff: () => Effect.succeed([]),
+      getRawClubStaff: () =>
+        Effect.fail(new PsdTeamClientError("club staff fetch failed")),
+    };
+
+    const { archiveStaff, writerMock, readerMock } = makeSanityMocks();
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    expect(archiveStaff).not.toHaveBeenCalled();
+    // Consumed on observation, not on confirmed application (documented
+    // trade-off in ORPHAN_CAP_OVERRIDE_KEY's doc comment) — the operator
+    // must re-arm it if the staff cap still needs releasing.
+    expect(await kvStub.get("sync:orphan-cap-override")).toBeNull();
+  });
+
   it("does not reconcile staff or teams mid-cycle", async () => {
     const kvStub = makeKvStub();
 
