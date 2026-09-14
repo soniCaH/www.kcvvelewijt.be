@@ -63,3 +63,27 @@ export function handleSamePageAnchorClick(
   el.scrollIntoView({ behavior: "smooth" });
   el.focus({ preventScroll: true });
 }
+
+/**
+ * Points `<HulpFinder>` at the question `#<id>`, which it reveals + opens on
+ * `hashchange`.
+ *
+ * Writing the hash the URL already holds changes nothing, so the browser fires
+ * no `hashchange` — and a visitor who collapsed that card and then picked the
+ * same question again got no response at all. Dispatch the event ourselves in
+ * exactly that case.
+ *
+ * Decoded before comparing: `window.location.hash` comes back percent-encoded
+ * while the id is a raw Sanity slug, so a raw comparison would never match a
+ * slug carrying a non-ASCII character.
+ *
+ * ponytail: the plain hash write still does the work in the common case; this
+ * only covers the repeat.
+ */
+export function revealHash(id: string): void {
+  if (decodeURIComponent(window.location.hash).slice(1) === id) {
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    return;
+  }
+  window.location.hash = id;
+}

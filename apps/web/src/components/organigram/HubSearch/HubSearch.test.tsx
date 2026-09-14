@@ -278,6 +278,40 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
+  it("still fires a hashchange when the SAME answer is chosen twice", async () => {
+    // The finder reopens a card on `hashchange`. Writing the same hash value
+    // a second time changes nothing, so the browser fires no event and a card
+    // the visitor collapsed in between would stay shut.
+    setSemantic({
+      results: [hit("blessure", 0.41)],
+      executedQuery: "blessure",
+    });
+    const onHashChange = vi.fn();
+    window.addEventListener("hashchange", onHashChange);
+    renderSearch();
+    typeQuery("blessure");
+    fireEvent.click(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    );
+    expect(window.location.hash).toBe("#blessure");
+
+    // Search the very same question again — picking it must reach the finder a
+    // second time, even though the hash already holds this slug. Re-typing the
+    // query matters: selecting closes the dropdown, so the first result row is
+    // detached and clicking it again would be a no-op for the wrong reason.
+    typeQuery("blessure");
+    const sameRow = await screen.findByText(
+      "Wat moet ik doen bij een blessure?",
+    );
+    // Cleared here, with no `await` left before the assertion: happy-dom does
+    // not fire `hashchange` synchronously on a hash write, so anything the
+    // first pick queued must not be allowed to land in this count.
+    onHashChange.mockClear();
+    fireEvent.click(sameRow);
+    window.removeEventListener("hashchange", onHashChange);
+    expect(onHashChange).toHaveBeenCalled();
+  });
+
   it("shows an empty state with a contact escape when nothing matches", async () => {
     setSemantic({ results: [], executedQuery: "zzzzz" });
     renderSearch();

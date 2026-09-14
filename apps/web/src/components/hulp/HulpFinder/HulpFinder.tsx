@@ -34,6 +34,7 @@ import {
   type MouseEvent,
 } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight } from "@/lib/icons.redesign";
 import {
   EmptyState,
@@ -107,6 +108,7 @@ export interface HulpFinderProps {
 }
 
 export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
+  const router = useRouter();
   const panel = useHubMemberPanel();
   const {
     trackView,
@@ -144,6 +146,9 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   );
 
   const [openId, setOpenId] = useState<string | null>(null);
+  // `openId` mirrored for `reveal()` to read without taking it as a dep — see
+  // the comment at its use site.
+  const openIdRef = useRef<string | null>(null);
   const pendingScroll = useRef<string | null>(null);
   const finderRef = useRef<HTMLDivElement>(null);
   const scrollToTopRef = useRef(false);
@@ -202,13 +207,52 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
       const path = pathById.get(id);
       if (!path) return;
       setOpenId(id);
-      pendingScroll.current = id;
-      if (path.category !== category) {
-        setCategoryParam(path.category, { hash: id, replace: true });
+      const wrongCategory = path.category !== category;
+      // An active ?audience= that the revealed question isn't tagged for
+      // filters it out of `audiencePaths` before the category list is even
+      // built — the category chip would switch and the question still
+      // wouldn't render. Reset the audience row to "Alles" as well: a path
+      // carries several roles, so there is no single right role to switch to.
+      const wrongAudience = audience !== null && !path.role.includes(audience);
+      // Nothing at all will change: the question is already the open one, in
+      // the already-right category, for the already-right audience. So no
+      // render is coming and the scroll effect below — keyed on `[openId,
+      // category]` — has no reason to run; scroll here instead. Reachable
+      // only since `revealHash` began dispatching a synthetic `hashchange`
+      // for an identical hash. All three conjuncts are load-bearing: with a
+      // different question, or a category/audience still to switch, a render
+      // IS coming, and `pendingScroll` below is what lets that scroll land
+      // after the target card has expanded rather than against stale
+      // geometry.
+      //
+      // `openId` is read through a ref, not a dep: the listener effect below
+      // re-runs `fromHash()` every time `reveal` changes identity, so a dep
+      // would re-reveal the hashed question on every unrelated card click.
+      if (id === openIdRef.current && !wrongCategory && !wrongAudience) {
+        document
+          .getElementById(id)
+          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
       }
+      pendingScroll.current = id;
+      // A render is coming and the card already renders where it is, so the
+      // scroll effect will drain `pendingScroll` — no url write needed.
+      if (!wrongCategory && !wrongAudience) return;
+      // ONE url write for both params, not two `useRouterFilterParam`
+      // setters: each of those merges from the live `window.location.search`,
+      // which `router.replace` has not updated yet by the time the second one
+      // runs — the second write would drop the first one's param.
+      const params = new URLSearchParams(window.location.search);
+      params.set(CATEGORY_PARAM, path.category);
+      if (wrongAudience) params.delete(AUDIENCE_PARAM);
+      router.replace(`/hulp?${params.toString()}#${id}`, { scroll: false });
     },
-    [pathById, category, setCategoryParam],
+    [pathById, category, audience, router],
   );
+
+  useEffect(() => {
+    openIdRef.current = openId;
+  }, [openId]);
 
   useEffect(() => {
     const fromHash = () => {

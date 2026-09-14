@@ -32,6 +32,7 @@ import {
 } from "@/lib/icons.redesign";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
+import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { SECTION_NAV_CHIP_SHADOW_CLASS } from "@/components/design-system/section-nav";
@@ -340,7 +341,7 @@ export function HubSearch({
         });
       } else {
         // An answer deep-links the finder accordion by its slug (#2056).
-        window.location.hash = result.path.id;
+        revealHash(result.path.id);
       }
     }
     setValue(

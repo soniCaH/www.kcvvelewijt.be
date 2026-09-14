@@ -13,6 +13,7 @@ import Link from "next/link";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { cn } from "@/lib/utils/cn";
+import { revealHash } from "@/lib/utils/same-page-anchor";
 import { findMemberResponsibilities } from "@/lib/responsibility-utils";
 import {
   monogramInitials,
@@ -369,6 +370,11 @@ export function MemberDetailPanel({
                             onClick={() => {
                               if (returnFocusRef) returnFocusRef.current = null;
                               onClose();
+                              // The anchor's own default covers a hash that
+                              // actually changes; this covers re-picking the
+                              // question the hash already holds, where the
+                              // browser fires no `hashchange` at all.
+                              revealHash(path.id);
                             }}
                             className="border-jersey-deep text-jersey-deep hover:bg-jersey-deep hover:text-cream inline-block border-[1.5px] px-2 py-1 font-mono text-[11px] tracking-[0.02em] uppercase transition-colors"
                           >

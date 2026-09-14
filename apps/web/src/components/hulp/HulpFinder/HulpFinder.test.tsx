@@ -398,6 +398,39 @@ describe("HulpFinder", () => {
     );
   });
 
+  it("clears an ?audience= that would hide the #<slug> deep-linked question", () => {
+    // Reproduction: filter on an audience the question isn't tagged for, then
+    // pick it in the search. The category chip switched but the question was
+    // filtered out before the category list was built, so nothing rendered.
+    setMockSearchParams(new URLSearchParams("audience=supporter"));
+    window.location.hash = "#blessure"; // role: ouder + speler, not supporter
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+
+    expect(q(/mijn kind is geblesseerd/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Medisch" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Supporter" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
+  it("scrolls to an already-open question when it is re-picked in the search", () => {
+    // `<HubSearch>` dispatches a `hashchange` for an identical hash so a
+    // re-pick reaches the finder. The question is then already open in the
+    // already-right category, so that reveal changes no state and the scroll
+    // effect — keyed on `[openId, category]` — has no reason to run: the
+    // reveal has to scroll (and disarm `pendingScroll`) itself.
+    window.location.hash = "#blessure";
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+
+    scrollIntoView.mockClear();
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(scrollIntoView).toHaveBeenCalled();
+  });
+
   it("shows an empty state when there are no paths", () => {
     render(<HulpFinder responsibilityPaths={[]} />);
     expect(screen.getByRole("status")).toHaveTextContent(
