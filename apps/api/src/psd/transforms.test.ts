@@ -16,6 +16,7 @@ import {
   psdGameToMs,
 } from "./transforms";
 import type { PsdGame, PsdCompetition } from "./schemas";
+import { CLUB_VENUE } from "./venue";
 
 describe("resolveCompetitionType", () => {
   const obj = (type: string): PsdGame["competitionType"] =>
@@ -343,6 +344,48 @@ describe("transformPsdGame — is_placeholder (#2606)", () => {
       awayClub: { id: 456, name: "FC Other" },
     });
     expect(transformPsdGame(game).is_placeholder).toBeUndefined();
+  });
+});
+
+describe("transformPsdGame — venue (#2491)", () => {
+  it("stamps the club's own ground for a home fixture (is_home: true)", () => {
+    const game = makePsdGame({ teamId: 7, homeTeamId: 7 });
+    expect(transformPsdGame(game).is_home).toBe(true);
+    expect(transformPsdGame(game).venue).toBe(CLUB_VENUE);
+  });
+
+  it("carries no venue for an away fixture (is_home: false)", () => {
+    const game = makePsdGame({ teamId: 7, homeTeamId: 3, awayTeamId: 7 });
+    expect(transformPsdGame(game).is_home).toBe(false);
+    expect(transformPsdGame(game).venue).toBeUndefined();
+  });
+
+  it("carries no venue when is_home is unresolved (undefined) — never treated as home", () => {
+    const game = makePsdGame();
+    expect(transformPsdGame(game).is_home).toBeUndefined();
+    expect(transformPsdGame(game).venue).toBeUndefined();
+  });
+
+  it("never claims the ground for a pitch-reservation placeholder, even when is_home resolves true", () => {
+    const game = makePsdGame({
+      teamId: 7,
+      homeTeamId: 7,
+      homeClub: { id: 1235, name: "KCVV Elewijt" },
+      awayClub: { id: 1235, name: "KCVV Elewijt" },
+    });
+    expect(transformPsdGame(game).is_placeholder).toBe(true);
+    expect(transformPsdGame(game).venue).toBeUndefined();
+  });
+
+  it("never claims the ground for an unconfirmed tournament fixture with no result yet", () => {
+    const game = makePsdGame({
+      teamId: 7,
+      homeTeamId: 7,
+      competitionType: { id: 9, name: null, type: "TOURNAMENT" } as never,
+      goalsHomeTeam: null,
+      goalsAwayTeam: null,
+    });
+    expect(transformPsdGame(game).venue).toBeUndefined();
   });
 });
 

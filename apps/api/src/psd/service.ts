@@ -46,6 +46,7 @@ import {
   computeOpponentSummary,
   psdGameToMs,
 } from "./transforms";
+import { resolveVenue } from "./venue";
 
 // ─── Service definition ────────────────────────────────────────────────────────
 
@@ -367,9 +368,12 @@ export const PsdServiceLive = Layer.effect(
     // freshness (that's `getRanking`'s concern) — so a long TTL costs nothing in
     // live-site accuracy while keeping us far under quota.
     // v2: entries now carry the season-list status + score for the detail
-    // backfill. Bump the key so pre-deployment (v1-shaped) entries are not read
-    // by the new field-shape logic and a clean index is rebuilt on first use.
-    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index:v2";
+    // backfill. v3: entries now also carry `isHome` (#2491), the same
+    // homeTeamId/teamId-then-ownClubId derivation `transformPsdGame` uses,
+    // so `getMatchDetail` can source a fixture's venue. Bump the key so
+    // pre-deployment (older-shaped) entries are not read by the new
+    // field-shape logic and a clean index is rebuilt on first use.
+    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index:v3";
     const MATCH_TEAM_INDEX_TTL = 60 * 60 * 12; // 12h
     // Negative-cache an empty index briefly so a partial upstream outage (e.g.
     // /info ok but the per-team fetches fail) can't trigger a ~20-fetch rebuild
@@ -385,6 +389,11 @@ export const PsdServiceLive = Layer.effect(
       status: Match["status"];
       homeScore?: number;
       awayScore?: number;
+      // Whether the queried team played at home for this fixture (#2491) —
+      // `transformPsdGame`'s own `homeTeamId === teamId`, falling back to a
+      // derived `ownClubId`. The match-detail endpoint has no club context of
+      // its own to compute this, so `getMatchDetail` reads it from here.
+      isHome?: boolean;
     }
     type MatchTeamIndex = Record<string, MatchTeamIndexEntry>;
 
@@ -414,14 +423,27 @@ export const PsdServiceLive = Layer.effect(
 
         const index: MatchTeamIndex = {};
         for (const { team, content } of perTeam) {
+          // Decoded up front, not per-item: `isHome`'s ownClubId fallback
+          // (mirrors `transformPsdGame`) needs the whole team's season to
+          // derive the club id, the same way `getTeamMatches` does.
+          const games: PsdGame[] = [];
           for (const item of content) {
             const decoded = S.decodeUnknownOption(PsdGame)(item);
-            if (Option.isNone(decoded)) continue;
-            const game = decoded.value;
+            if (Option.isSome(decoded)) games.push(decoded.value);
+          }
+          const ownClubId = deriveOwnClubId(games);
+
+          for (const game of games) {
             const key = String(game.id);
             // First write wins — deterministic for the rare KCVV-internal match
             // that appears in two teams' lists (always a friendly → no standings).
             if (index[key]) continue;
+            const isHome =
+              game.homeTeamId != null && game.teamId != null
+                ? game.homeTeamId === game.teamId
+                : ownClubId != null
+                  ? game.homeClub.id === ownClubId
+                  : undefined;
             index[key] = {
               teamId: team.id,
               competitionType: resolveCompetitionType(game.competitionType),
@@ -433,6 +455,7 @@ export const PsdServiceLive = Layer.effect(
               ),
               homeScore: game.goalsHomeTeam ?? undefined,
               awayScore: game.goalsAwayTeam ?? undefined,
+              isHome,
             };
           }
         }
@@ -728,10 +751,11 @@ export const PsdServiceLive = Layer.effect(
       getMatchDetail: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
           Effect.map(transformFootbalistoMatchDetail),
-          // Enrich with the team id + structured competition type that
-          // `/games/{id}/info` cannot provide (see the match-team index above).
-          // Strictly additive: an index miss/failure leaves the detail exactly
-          // as transformed (incl. `is_home` — keeper enrichment is unaffected).
+          // Enrich with the team id, structured competition type, and
+          // `is_home` that `/games/{id}/info` cannot provide (see the
+          // match-team index above). Strictly additive: an index miss/failure
+          // leaves the detail exactly as transformed — `is_home` (and so
+          // `venue`) stays absent, keeper enrichment is unaffected.
           Effect.flatMap((detail) =>
             getMatchTeamIndex().pipe(
               Effect.map((index) => {
@@ -756,10 +780,11 @@ export const PsdServiceLive = Layer.effect(
                   isSettledMatchStatus(entry.status) &&
                   !isSettledMatchStatus(detail.status);
 
-                return {
+                const enriched = {
                   ...detail,
                   kcvv_team_id: entry.teamId,
                   competitionType: entry.competitionType,
+                  is_home: entry.isHome,
                   ...(backfill
                     ? {
                         status: entry.status,
@@ -773,6 +798,23 @@ export const PsdServiceLive = Layer.effect(
                         },
                       }
                     : {}),
+                };
+
+                // Venue (#2491): computed here, not in the transform — the
+                // detail transform has no club context of its own, and
+                // `is_home` only becomes known once the index entry above
+                // resolves it. Reads the (possibly backfilled) status/scores,
+                // so a tournament fixture that just settled claims the venue
+                // the same request it gets its scoreline.
+                return {
+                  ...enriched,
+                  venue: resolveVenue(enriched.is_home, {
+                    isPlaceholder: enriched.is_placeholder,
+                    competitionType: enriched.competitionType,
+                    status: enriched.status,
+                    homeScore: enriched.home_team.score,
+                    awayScore: enriched.away_team.score,
+                  }),
                 };
               }),
             ),
