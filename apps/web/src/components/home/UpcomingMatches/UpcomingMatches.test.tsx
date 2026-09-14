@@ -167,7 +167,7 @@ describe("UpcomingMatches", () => {
     render(<UpcomingMatches matches={[mockUpcomingFive[0]!]} />);
     expect(
       screen.getByText(
-        /A-Ploeg · 3e Afdeling VV · Driesstraat 32, 1982 Elewijt/,
+        /A-Ploeg · 3e Afdeling VV · Sportpark Elewijt, Driesstraat 32, 1982 Elewijt/,
       ),
     ).toBeInTheDocument();
   });

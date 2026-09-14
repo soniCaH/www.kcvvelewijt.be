@@ -44,13 +44,14 @@ const makeMatch = (
 });
 
 /**
- * A standalone mock string, deliberately not imported from `apps/api` (a
- * different app) or re-typed to the club's real address — see #2491 for the
- * production spelling (`apps/api/src/psd/venue.ts`). Only home fixtures
- * carry a venue at all; kept here so the caption's populated state stays
- * covered in Storybook regardless of that production string.
+ * The real production spelling (#2491, `apps/api/src/psd/venue.ts`'s
+ * `CLUB_VENUE`) — a standalone literal, not imported from `apps/api` (a
+ * different app), but deliberately the true 46-char string rather than a
+ * shorter placeholder: a shorter mock would let this story (and its VR
+ * baseline) understate how long the homepage caption actually gets on a
+ * home fixture. Only home fixtures carry a venue at all.
  */
-const HOME_VENUE = "Driesstraat 32, 1982 Elewijt";
+const HOME_VENUE = "Sportpark Elewijt, Driesstraat 32, 1982 Elewijt";
 
 export const mockUpcomingFive: UpcomingMatch[] = [
   makeMatch(
