@@ -184,9 +184,12 @@ export type ReconciliationResult =
  * `ratioThreshold` defaults to `MAX_ORPHAN_RATIO`, matching every call site
  * before this refactor; `floor` is not exposed here and stays at
  * `reconcileOrphans`'s default of 0 — this is the compatibility guarantee
- * for the three production callers below (see apps/api/CLAUDE.md, "Releasing
- * a stuck prune safety cap", for the release lever that widens
- * `ratioThreshold` instead).
+ * for the three production callers below. `floor: 0` means `max(0, active ×
+ * ratioThreshold)` is mathematically identical to the bare ratio check
+ * these callers always had — this refactor does NOT change their latching
+ * behaviour. What changed is that a stuck refusal now has a release lever
+ * (see apps/api/CLAUDE.md, "Releasing a stuck PSD sync orphan-cap
+ * refusal").
  */
 export const reconcileEntity = <E>(
   type: string,
@@ -200,7 +203,11 @@ export const reconcileEntity = <E>(
     activeIds,
     accumulatedIds,
     (ids) => archiveFn(ids).pipe(Effect.as(ids)),
-    ratioThreshold,
+    {
+      ratioThreshold,
+      releaseLeverHint:
+        'see apps/api/CLAUDE.md ("Releasing a stuck PSD sync orphan-cap refusal") for the release lever once a genuine removal has been confirmed.',
+    },
   ).pipe(
     Effect.map((result): ReconciliationResult => {
       switch (result.action) {
@@ -315,12 +322,62 @@ const CHECKPOINT_KEY = "sync:team-checkpoint";
  * cap". PSD sync has no persisted manifest to delete — its cap is
  * recomputed fresh every cycle from the current Sanity/PSD id sets, not
  * from stored state — so there is nothing to reset. What it needs instead
- * is a one-shot bypass: set this key (any value) to skip the ratio cap for
- * every entity type on the NEXT cycle-end reconciliation only. The key is
- * deleted right after that cycle runs, so a human who leaves it in place
- * "just in case" does not silently disable the safety net forever.
+ * is a one-shot bypass: set this key to skip the ratio cap on the NEXT
+ * cycle-end reconciliation only, then it's cleared.
+ *
+ * The value SCOPES which entity type(s) the bypass applies to — an
+ * operator who investigated and confirmed a genuine PLAYERS refusal has
+ * verified nothing about that cycle's team/staff fetch, so a blanket
+ * bypass would also wave through an unrelated, uninvestigated staff or
+ * team refusal in the same cycle (#2854 review). Value is a
+ * comma-separated list of `"players"`, `"staff"`, `"teams"`, or the
+ * literal `"all"` (also accepted: `"1"`, for a quick `wrangler kv key put
+ * … 1` blanket override) to bypass every type.
+ *
+ * The key is READ AND DELETED upfront, before any reconcile leg runs, not
+ * after — this is a deliberate choice over "delete only once a bypass
+ * actually applied": PSD sync's own three legs can each independently
+ * fail or be skipped (a failed club-wide staff fetch skips staff
+ * reconciliation entirely; an archive call can itself fail), and there is
+ * no single point after all three where "did every intended bypass apply"
+ * can be answered cheaply. Consuming the key on OBSERVATION rather than
+ * on confirmed application keeps the one-shot guarantee unconditional — it
+ * never survives a failure downstream and silently leaves the cap
+ * disabled for a future cycle — at the cost that a cycle whose staff leg
+ * gets skipped (club-wide fetch failure) still consumes a staff-scoped
+ * override without ever evaluating the staff cap. That is logged
+ * explicitly below so an operator knows to re-arm it.
  */
 const ORPHAN_CAP_OVERRIDE_KEY = "sync:orphan-cap-override";
+
+type OrphanCapOverrideScope = "players" | "staff" | "teams";
+
+const ORPHAN_CAP_OVERRIDE_SCOPES: readonly OrphanCapOverrideScope[] = [
+  "players",
+  "staff",
+  "teams",
+];
+
+/**
+ * Parse the override key's raw value into the set of entity types it
+ * bypasses this cycle. An unrecognised value parses to an empty set
+ * (bypasses nothing) rather than failing the sync — a typo'd override
+ * should never take down the sync, only fail to release anything.
+ */
+function parseOrphanCapOverride(
+  raw: string | null,
+): ReadonlySet<OrphanCapOverrideScope> {
+  if (raw === null) return new Set();
+  const trimmed = raw.trim().toLowerCase();
+  if (trimmed === "") return new Set();
+  if (trimmed === "all" || trimmed === "1") {
+    return new Set(ORPHAN_CAP_OVERRIDE_SCOPES);
+  }
+  const requested = new Set(trimmed.split(",").map((s) => s.trim()));
+  return new Set(
+    ORPHAN_CAP_OVERRIDE_SCOPES.filter((scope) => requested.has(scope)),
+  );
+}
 
 /**
  * Runtime shape guard for a parsed checkpoint. JSON.parse only proves the
@@ -681,24 +738,38 @@ export const runSync = Effect.gen(function* () {
   if (nextCursor === 0) {
     yield* Effect.log("cycle complete — running reconciliation");
 
-    // See ORPHAN_CAP_OVERRIDE_KEY above. A present key (any value) bypasses
-    // the ratio cap for every reconcileEntity call this cycle — passing
-    // Number.POSITIVE_INFINITY rather than `undefined`, since `undefined`
-    // would just fall back to reconcileEntity's own MAX_ORPHAN_RATIO
-    // default parameter.
+    // See ORPHAN_CAP_OVERRIDE_KEY above. Read AND delete upfront — this is
+    // the one-shot consumption point, unconditional on whether any leg
+    // below actually applies the bypass (see the constant's doc comment
+    // for why).
     const orphanCapOverrideRaw = yield* Effect.tryPromise({
       try: () => env.PSD_CACHE.get(ORPHAN_CAP_OVERRIDE_KEY),
       catch: () => new Error("KV orphan-cap-override read failed"),
     }).pipe(Effect.orElseSucceed(() => null));
-    const orphanCapOverrideActive = orphanCapOverrideRaw !== null;
-    const reconciliationRatioThreshold = orphanCapOverrideActive
-      ? Number.POSITIVE_INFINITY
-      : undefined;
-    if (orphanCapOverrideActive) {
+    const orphanCapOverrideScopes =
+      parseOrphanCapOverride(orphanCapOverrideRaw);
+    if (orphanCapOverrideRaw !== null) {
+      yield* Effect.tryPromise({
+        try: () => env.PSD_CACHE.delete(ORPHAN_CAP_OVERRIDE_KEY),
+        catch: () => new Error("KV delete failed"),
+      }).pipe(
+        Effect.catchAll((e) =>
+          Effect.log(
+            `reconciliation: failed to clear the orphan-cap override key — it may still be active next cycle: ${String(e)}`,
+          ),
+        ),
+      );
       yield* Effect.log(
-        `reconciliation: orphan-cap override key present (${ORPHAN_CAP_OVERRIDE_KEY}) — bypassing the safety cap for this cycle only; the key is deleted after this run`,
+        orphanCapOverrideScopes.size > 0
+          ? `reconciliation: orphan-cap override consumed — bypassing the safety cap this cycle for: ${[...orphanCapOverrideScopes].join(", ")}`
+          : `reconciliation: orphan-cap override key present but its value ("${orphanCapOverrideRaw}") named no recognised scope — bypassing nothing`,
       );
     }
+    // Number.POSITIVE_INFINITY rather than `undefined`: passing `undefined`
+    // for a defaulted parameter falls back to reconcileEntity's own
+    // MAX_ORPHAN_RATIO default, which would NOT bypass the cap.
+    const ratioThresholdFor = (scope: OrphanCapOverrideScope) =>
+      orphanCapOverrideScopes.has(scope) ? Number.POSITIVE_INFINITY : undefined;
 
     const activeInSanity = yield* sanityReader.getActivePlayerPsdIds();
     yield* reconcileEntity(
@@ -706,7 +777,7 @@ export const runSync = Effect.gen(function* () {
       activeInSanity,
       accumulatedIds,
       (ids) => sanityWriter.archivePlayers(ids),
-      reconciliationRatioThreshold,
+      ratioThresholdFor("players"),
     );
 
     // Club-wide staff (team-less club functions: board members, general roles)
@@ -771,10 +842,15 @@ export const runSync = Effect.gen(function* () {
       yield* Effect.log(
         `reconciliation: SKIPPED staff archival — club-wide staff fetch failed: ${String(clubStaffResult.left)}`,
       );
+      if (orphanCapOverrideScopes.has("staff")) {
+        yield* Effect.log(
+          "reconciliation: a staff-scoped orphan-cap override was consumed this cycle, but staff reconciliation never ran (club-wide fetch failed) — re-arm the override if it's still needed",
+        );
+      }
     } else {
       yield* reconcileStaffWithClubWide(
         clubStaffResult.right,
-        reconciliationRatioThreshold,
+        ratioThresholdFor("staff"),
       );
     }
 
@@ -784,7 +860,7 @@ export const runSync = Effect.gen(function* () {
       activeTeamsInSanity,
       accumulatedTeamIds,
       (ids) => sanityWriter.archiveTeams(ids),
-      reconciliationRatioThreshold,
+      ratioThresholdFor("teams"),
     );
 
     // Clear accumulation keys for next cycle (even when archival is skipped)
@@ -797,21 +873,6 @@ export const runSync = Effect.gen(function* () {
         ]),
       catch: () => new Error("KV delete failed"),
     });
-
-    // One-shot: clear the override so a forgotten key doesn't silently
-    // disable the safety cap on every future cycle.
-    if (orphanCapOverrideActive) {
-      yield* Effect.tryPromise({
-        try: () => env.PSD_CACHE.delete(ORPHAN_CAP_OVERRIDE_KEY),
-        catch: () => new Error("KV delete failed"),
-      }).pipe(
-        Effect.catchAll((e) =>
-          Effect.log(
-            `reconciliation: failed to clear the orphan-cap override key — it will still be active next cycle: ${String(e)}`,
-          ),
-        ),
-      );
-    }
   }
 
   // Advance cursor only after reconciliation succeeds (if applicable)
