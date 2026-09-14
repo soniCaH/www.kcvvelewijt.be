@@ -60,7 +60,6 @@ function makeMatch(
     status: "scheduled" as CalendarMatchFixture["status"],
     team: "U7",
     isHome: true,
-    isPlaceholder: false as const,
     kind: "match" as const,
     ...overrides,
   };

@@ -43,7 +43,6 @@ const marchMatches: CalendarMatch[] = [
     competition: "Nationale 1",
     team: "A-ploeg",
     isHome: true,
-    isPlaceholder: false,
     kind: "match" as const,
   },
   {
@@ -57,7 +56,6 @@ const marchMatches: CalendarMatch[] = [
     competition: "Nationale 1",
     team: "A-ploeg",
     isHome: false,
-    isPlaceholder: false,
     kind: "match" as const,
   },
   {
@@ -71,7 +69,6 @@ const marchMatches: CalendarMatch[] = [
     competition: "Jeugd",
     team: "U15 A",
     isHome: true,
-    isPlaceholder: false,
     kind: "match" as const,
   },
 ];
@@ -101,7 +98,6 @@ const denseSaturdayMatches: CalendarMatch[] = Array.from(
     competition: "Jeugd",
     team: `U${7 + i}`,
     isHome: i % 3 !== 0,
-    isPlaceholder: false,
     kind: "match" as const,
   }),
 );

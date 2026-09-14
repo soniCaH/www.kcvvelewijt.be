@@ -57,7 +57,6 @@ function makeMatch(
     status: "scheduled" as CalendarMatchFixture["status"],
     team: "A-ploeg",
     isHome: true,
-    isPlaceholder: false as const,
     kind: "match" as const,
     ...overrides,
   };
@@ -204,8 +203,8 @@ describe("CalendarMonth", () => {
 
     it("renders a pitch-reservation placeholder as the reduced TeamAgendaRow — no opponent, no link (#2606, #2688)", () => {
       // The bug this closes: before #2688, `calendarMatchToScheduleMatch`
-      // dropped `isPlaceholder`, so this row rendered as an ordinary linked
-      // "KCVV Elewijt – KCVV Elewijt" scoreboard.
+      // dropped the reservation discriminant, so this row rendered as an
+      // ordinary linked "KCVV Elewijt – KCVV Elewijt" scoreboard.
       render(
         <CalendarMonth
           {...baseProps}
@@ -264,8 +263,8 @@ describe("CalendarMonth", () => {
       expect(row.textContent).toContain("FC Zemst Sportief");
       // The squad chip a normal row carries via homeTeam.teamLabel has no
       // equivalent slot on the reduced tree — SelectedDayDetail must widen
-      // its captionLabel gate to cover this state too, not just
-      // isPlaceholder, or a mixed-squad day loses which team this is.
+      // its captionLabel gate to cover this state too, not just the
+      // reservation case, or a mixed-squad day loses which team this is.
       expect(row.textContent).toContain("U9");
     });
 

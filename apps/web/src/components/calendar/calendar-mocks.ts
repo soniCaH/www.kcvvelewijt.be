@@ -41,7 +41,6 @@ export function reservationMatch(
     status: "scheduled",
     competition: "Tornooi",
     team: "U8",
-    isPlaceholder: true,
     ...overrides,
   };
 }
@@ -67,7 +66,6 @@ export function tournamentMatch(
     competition: "Tornooi",
     competitionType: "tournament",
     team: "U9",
-    isPlaceholder: false,
     ...overrides,
   };
 }

@@ -58,7 +58,6 @@ function match(
     competition: "Competitie",
     team,
     isHome,
-    isPlaceholder: false,
     ...opts,
   };
 }
