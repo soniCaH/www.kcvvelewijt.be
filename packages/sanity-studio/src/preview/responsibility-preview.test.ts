@@ -14,7 +14,7 @@ describe('responsibility preview', () => {
     expect(result.subtitle).toBe('medisch — Secretaris')
   })
 
-  it('shows "Teamrol (dynamisch)" for team-role type', () => {
+  it('shows "Teamrol" for team-role type', () => {
     const result = prepareResponsibilityPreview({
       title: 'Sportieve vraag',
       active: true,
@@ -23,7 +23,7 @@ describe('responsibility preview', () => {
       contactNodeTitle: undefined,
       contactRole: undefined,
     })
-    expect(result.subtitle).toBe('sportief — Teamrol (dynamisch)')
+    expect(result.subtitle).toBe('sportief — Teamrol')
   })
 
   it('shows role label for manual type', () => {

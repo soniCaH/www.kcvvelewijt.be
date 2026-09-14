@@ -8,16 +8,13 @@
  * User role type
  */
 export type UserRole =
-  | "speler"
-  | "ouder"
-  | "trainer"
-  | "supporter"
-  | "niet-lid"
-  | "andere";
+  "speler" | "ouder" | "trainer" | "supporter" | "niet-lid" | "andere";
 
 /**
  * Contact information for who to reach out to.
- * Discriminated by contactType: position (organigramNode), team-role (dynamic), manual (fallback).
+ * Discriminated by contactType: position (organigramNode), team-role (generic
+ * role label + /ploegen hand-off — never a resolved member, see
+ * `resolveContact.ts`), manual (freeform).
  */
 export interface Contact {
   contactType: "position" | "team-role" | "manual";
@@ -34,9 +31,19 @@ export interface Contact {
   }>;
   /** position: organigramNode _id for "Bekijk in organigram" link */
   nodeId?: string;
-  /** team-role: dynamic role resolved at runtime by #1220 */
+  /**
+   * team-role: picks the generic role label `resolveContact.ts` renders
+   * (e.g. "Trainer van jouw ploeg") plus a `/ploegen` link — never resolved
+   * to a specific team or member (per-team resolution was dropped in #2100).
+   */
   teamRole?: "trainer" | "afgevaardigde";
-  /** team-role: optional fallback when primary teamRole is unavailable */
+  /**
+   * team-role: unused. `teamRole` is required whenever `contactType ===
+   * "team-role"` (`validateContactFields`), so `resolveContact.ts`'s
+   * `contact.teamRole ?? contact.teamRoleFallback` can never take this
+   * branch. Kept only because deleting it needs a Sanity migration — see
+   * #2952.
+   */
   teamRoleFallback?: "trainer" | "afgevaardigde";
   /** manual: display role label */
   role?: string;

@@ -19,7 +19,7 @@ export const guideContent: Record<string, GuideEntry> = {
     tips: [
       'Doelgroep en categorie bepalen wie dit te zien krijgt en hoe het gegroepeerd wordt — kies ze zorgvuldig.',
       'Voeg royaal keywords (synoniemen) toe zodat bezoekers het ook vinden met andere woorden dan in de vraag.',
-      'Kies bij Contact een vaste organigram-positie (blijft up-to-date bij rolwissels), een dynamische teamrol, of handmatige gegevens.',
+      'Kies bij Contact een vaste organigram-positie (blijft up-to-date bij rolwissels), een teamrol (toont enkel een generiek label + link naar /ploegen), of handmatige gegevens.',
     ],
   },
   article: {

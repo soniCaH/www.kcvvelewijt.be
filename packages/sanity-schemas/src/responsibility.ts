@@ -10,7 +10,7 @@ const contactFields = [
     options: {
       list: [
         {title: 'Organigram positie', value: 'position'},
-        {title: 'Teamrol (dynamisch)', value: 'team-role'},
+        {title: 'Teamrol', value: 'team-role'},
         {title: 'Handmatig', value: 'manual'},
       ],
       layout: 'radio',
@@ -55,7 +55,7 @@ const contactFields = [
       ],
     },
     description:
-      'Optioneel: wordt gebruikt voor het rol-label wanneer "Teamrol" niet is ingevuld. Toont, net als "Teamrol", geen specifieke contactpersoon — enkel het label en de link naar /ploegen.',
+      '"Teamrol" is verplicht, dus dit veld komt momenteel nooit tot zijn recht — de site leest het niet. Laat het leeg tot een product-beslissing dit veld schrapt of de "Teamrol"-verplichting versoepelt.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
@@ -281,7 +281,7 @@ export const responsibility = defineType({
       type: 'object',
       group: 'contact',
       description:
-        'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een dynamische teamrol, of handmatige contactgegevens.',
+        'Hoofdcontactpersoon voor dit info-pad. Verschijnt rechtsboven op de detailpagina als "Voor vragen, contacteer …". Kies tussen een vaste organigram-positie, een teamrol (toont enkel een generiek label + link naar /ploegen), of handmatige contactgegevens.',
       fields: contactFields,
       validation: (Rule) =>
         Rule.required()
