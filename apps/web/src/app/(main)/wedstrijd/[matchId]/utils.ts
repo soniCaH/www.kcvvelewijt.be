@@ -70,21 +70,18 @@ export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
     case "reservation":
       return {
         ...common,
-        isPlaceholder: true,
         kind,
         team: transformHomeTeam(match),
       };
     case "reduced":
       return {
         ...common,
-        isPlaceholder: false,
         kind,
         team: otherClubSide(transformHomeTeam(match), transformAwayTeam(match)),
       };
     case "match":
       return {
         ...common,
-        isPlaceholder: false,
         kind,
         homeTeam: transformHomeTeam(match),
         awayTeam: transformAwayTeam(match),

@@ -112,7 +112,6 @@ export function isExceptionalMatchStatus(status: MatchStatus): boolean {
  * `ReservationSubjectInput` below.
  */
 export interface ReducedRowInput {
-  isPlaceholder: boolean;
   competitionType?: CompetitionType;
   status: MatchStatus;
   homeScore?: number;
@@ -122,9 +121,11 @@ export interface ReducedRowInput {
 /**
  * Whether a match row renders the reduced reservation register — one crest,
  * one mono subject, no link — instead of the full two-sided scoreboard.
- * True for a placeholder (#2606, both sides are the same club) and for a
- * tournament fixture (#2696, `competitionType === "tournament"` — never a
- * string match on the Dutch `competition` label) that has no result yet.
+ * True for a tournament fixture (#2696, `competitionType === "tournament"`
+ * — never a string match on the Dutch `competition` label) that has no
+ * result yet. The pitch-reservation case (#2606) is answered upstream by
+ * `matchRowKind()` from the raw `is_placeholder` wire field, before this
+ * function is ever called.
  *
  * Gated on there being a scoreline, not merely on `isPlayedMatch`: a
  * finished/forfeited/stopped tournament fixture whose scores are missing
@@ -137,7 +138,6 @@ export interface ReducedRowInput {
  * once, and the two answers had already drifted apart by review.
  */
 export function isReducedMatchRow(match: ReducedRowInput): boolean {
-  if (match.isPlaceholder) return true;
   if (match.competitionType !== "tournament") return false;
   const hasScoreline =
     isPlayedMatch(match.status) &&
@@ -176,7 +176,6 @@ export interface MatchRowKindSource {
 export function matchRowKind(match: MatchRowKindSource): ScheduleRow["kind"] {
   if (match.is_placeholder) return "reservation";
   return isReducedMatchRow({
-    isPlaceholder: false,
     competitionType: match.competitionType,
     status: match.status,
     homeScore: match.home_team.score,

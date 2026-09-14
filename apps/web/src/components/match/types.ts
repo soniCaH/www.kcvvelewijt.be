@@ -34,22 +34,9 @@ interface ScheduleRowCommon {
 export interface ScheduleMatch extends ScheduleRowCommon {
   /**
    * Discriminant against `ScheduleReservation`/`ScheduleReducedMatch` below.
-   * Required — an optional `isPlaceholder?: false` would let a construction
-   * site that simply omits the field type-check as `ScheduleMatch` with no
-   * complaint, defeating the entire point of the union. Required and literal
-   * `false` means every site that builds this object must say which kind of
-   * row it's building.
-   *
-   * Not the full discriminant on its own once `ScheduleReducedMatch` exists —
-   * both it and `ScheduleMatch` carry `isPlaceholder: false` (a tournament
-   * fixture with a hidden result is not a reservation), so narrow on `kind`
-   * to tell them apart. Kept, rather than dropped in favour of `kind` alone,
-   * so every existing `match.isPlaceholder` narrowing site keeps working
-   * unchanged for the one distinction it always answered correctly: is this
-   * a self-match with no second side at all.
+   * Required and literal `"match"` means every site that builds this object
+   * must say which kind of row it's building.
    */
-  isPlaceholder: false;
-  /** Discriminant against `ScheduleReservation`/`ScheduleReducedMatch`. */
   kind: "match";
   /** Match time (HH:MM) */
   time?: string;
@@ -89,7 +76,7 @@ export interface ScheduleMatch extends ScheduleRowCommon {
  * Deliberately a **different shape** from `ScheduleMatch`, not the same shape
  * with a boolean toggled — `awayTeam`/`homeScore`/`awayScore`/`isHome` do not
  * exist here, so a renderer that reaches for an opponent without narrowing
- * `match.isPlaceholder` first (`opponentOf`, a hand-built desktop slide, a
+ * `match.kind` first (`opponentOf`, a hand-built desktop slide, a
  * two-hop calendar adapter) fails to compile instead of printing "KCVV
  * Elewijt — KCVV Elewijt". See `reservationView()` in
  * `@/lib/utils/match-display` for the shared subject/status derivation every
@@ -97,7 +84,6 @@ export interface ScheduleMatch extends ScheduleRowCommon {
  * art for the reduced treatment itself.
  */
 export interface ScheduleReservation extends ScheduleRowCommon {
-  isPlaceholder: true;
   /** Discriminant against `ScheduleMatch`/`ScheduleReducedMatch`. */
   kind: "reservation";
   /** Match time (HH:MM) — the real kickoff/meeting time, never "hele dag". */
@@ -133,7 +119,6 @@ export interface ScheduleReservation extends ScheduleRowCommon {
  * its next call, not a mutation of this one.
  */
 export interface ScheduleReducedMatch extends ScheduleRowCommon {
-  isPlaceholder: false;
   /** Discriminant against `ScheduleMatch`/`ScheduleReservation`. */
   kind: "reduced";
   /** Match time (HH:MM). */
@@ -198,17 +183,12 @@ interface UpcomingRowCommon {
 
 export interface UpcomingMatch extends UpcomingRowCommon {
   /**
-   * Discriminant against `UpcomingReservation` below — required, mirroring
-   * `ScheduleMatch`/`ScheduleReservation` (#2688). The homepage's other-teams
-   * agenda (`<UpcomingMatchesClient>`) is the surface most likely to carry a
-   * pitch reservation: it renders exactly the non-senior/youth matches, and
-   * youth tournaments are where reservations come from.
-   */
-  isPlaceholder: false;
-  /**
-   * Discriminant against `UpcomingReservation`/`UpcomingReducedMatch` — see
-   * `ScheduleMatch.kind` for why `isPlaceholder` alone can no longer tell
-   * `UpcomingMatch` and `UpcomingReducedMatch` apart.
+   * Discriminant against `UpcomingReservation`/`UpcomingReducedMatch` below —
+   * required, mirroring `ScheduleMatch`/`ScheduleReservation` (#2688). The
+   * homepage's other-teams agenda (`<UpcomingMatchesClient>`) is the surface
+   * most likely to carry a pitch reservation: it renders exactly the
+   * non-senior/youth matches, and youth tournaments are where reservations
+   * come from.
    */
   kind: "match";
   /** Home team */
@@ -237,7 +217,6 @@ export interface UpcomingMatch extends UpcomingRowCommon {
  * never a field read off a row).
  */
 export interface UpcomingReservation extends UpcomingRowCommon {
-  isPlaceholder: true;
   /** Discriminant against `UpcomingMatch`/`UpcomingReducedMatch`. */
   kind: "reservation";
   /** The club's own crest/name — a self-match has no second side. */
@@ -259,7 +238,6 @@ export interface UpcomingReservation extends UpcomingRowCommon {
  * the shared `kind` discriminant closes by construction.
  */
 export interface UpcomingReducedMatch extends UpcomingRowCommon {
-  isPlaceholder: false;
   /** Discriminant against `UpcomingMatch`/`UpcomingReservation`. */
   kind: "reduced";
   /** The other club's crest/name — resolved via club-id equality, never home/away. */

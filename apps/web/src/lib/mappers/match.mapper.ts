@@ -35,7 +35,6 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
   switch (kind) {
     case "reservation":
       return {
-        isPlaceholder: true,
         kind,
         id: match.id,
         date: match.date,
@@ -54,7 +53,6 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
     case "reduced": {
       const other = otherClubSide(match.home_team, match.away_team);
       return {
-        isPlaceholder: false,
         kind,
         id: match.id,
         date: match.date,
@@ -70,7 +68,6 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
     }
     case "match":
       return {
-        isPlaceholder: false,
         kind,
         id: match.id,
         date: match.date,

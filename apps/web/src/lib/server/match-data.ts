@@ -44,7 +44,7 @@ export interface MatchStripData {
   result: ScheduleRow | null;
   /**
    * Next scheduled fixture. Can be a placeholder — `<MatchStripView>` branches
-   * on `.isPlaceholder` to render the reduced treatment.
+   * on `.kind` to render the reduced treatment.
    */
   fixture: ScheduleRow | null;
 }

@@ -165,9 +165,10 @@ function scoreboardScore(match: ScheduleMatch): string | null {
  * docblock in `match-display.ts` records for a different pair of call
  * sites). `kind === "fixture"` is enough on its own: `<MatchStrip>` is the
  * single place that ever sets `matchDay` true, and it only does so when
- * `fixture.kind === "match"` (#2802 review — `!isPlaceholder` alone would
- * also pass a reduced tournament fixture) — re-checking here would be the
- * same re-derivation the "one owner for the rule" convention forbids.
+ * `fixture.kind === "match"` (#2802 review — a boolean placeholder check
+ * alone would also pass a reduced tournament fixture) — re-checking here
+ * would be the same re-derivation the "one owner for the rule" convention
+ * forbids.
  */
 function isTodayFixture(matchDay: boolean, kind: MatchRowKind): boolean {
   return matchDay && kind === "fixture";

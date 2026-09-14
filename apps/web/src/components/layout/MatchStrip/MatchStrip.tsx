@@ -29,8 +29,8 @@ import { MatchStripView } from "./MatchStripView";
  * (`docs/ubiquitous-language.md`) with a confirmed opponent and kickoff,
  * which is exactly what neither reduced state has yet. Reading either match
  * day and relabelling it "Vandaag" would assert a certainty PSD hasn't given
- * the club yet — `!fixture.isPlaceholder` alone would pass a reduced
- * tournament fixture through, since it carries `isPlaceholder: false` too.
+ * the club yet — excluding only the reservation case would still pass a
+ * reduced tournament fixture through, since it isn't a reservation either.
  */
 export async function MatchStrip() {
   const data = await getFirstTeamStripData();

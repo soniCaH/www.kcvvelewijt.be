@@ -47,7 +47,7 @@ export interface FirstTeamVM extends FirstTeamInput {
   /**
    * Most recent played match — rendered as a cream `<TeamAgendaRow>`. Can be
    * a pitch-reservation placeholder (#2688); `<TeamAgendaRow>` already
-   * branches on `.isPlaceholder` for the reduced treatment.
+   * branches on `.kind` for the reduced treatment.
    */
   result?: ScheduleRow;
   /** Next scheduled fixture — rendered as the featured jersey-deep `<TeamAgendaRow>`. Can also be a placeholder — see `result`. */
