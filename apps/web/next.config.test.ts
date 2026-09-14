@@ -101,4 +101,128 @@ describe("next.config redirects", () => {
     expect(sources).not.toContain("/staff/:slug");
     expect(sources.some((source) => source.startsWith("/jeugd/"))).toBe(false);
   });
+
+  it("routes the Gatsby team slugs that did not survive the rename (#2963)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const expected = [
+      { source: "/team/a-ploeg", destination: "/ploegen/eerste-elftallen-a" },
+      { source: "/team/b-ploeg", destination: "/ploegen/eerste-elftallen-b" },
+      { source: "/team/u17", destination: "/ploegen/kcvve-u17" },
+      { source: "/team/zondagsreserven", destination: "/ploegen/reserven" },
+      { source: "/team/veteranen", destination: "/ploegen" },
+      { source: "/team/:slug/index.html", destination: "/team/:slug" },
+    ];
+
+    for (const { source, destination } of expected) {
+      const match = redirects.find((r) => r.source === source);
+      expect(match, `Missing redirect for ${source}`).toBeDefined();
+      expect(match!.destination).toBe(destination);
+      expect(match!.permanent).toBe(true);
+    }
+  });
+
+  it("puts every /team and /news specific rule ahead of its generic rename (#2963)", async () => {
+    const redirects = await nextConfig.redirects!();
+    const indexOf = (source: string) =>
+      redirects.findIndex((r) => r.source === source);
+
+    // A generic rule placed first would swallow the specific ones and land the
+    // visitor on a not-found page that answers 200 — the #2963 defect.
+    const genericTeam = indexOf("/team/:slug");
+    const genericNews = indexOf("/news/:slug");
+    expect(genericTeam).toBeGreaterThan(-1);
+    expect(genericNews).toBeGreaterThan(-1);
+
+    for (const source of [
+      "/team/a-ploeg",
+      "/team/b-ploeg",
+      "/team/u17",
+      "/team/zondagsreserven",
+      "/team/veteranen",
+    ]) {
+      expect(
+        indexOf(source),
+        `${source} must precede /team/:slug`,
+      ).toBeLessThan(genericTeam);
+    }
+
+    for (const source of [
+      "/news/transfernieuws",
+      "/news/jeugd",
+      "/news/b-ploeg",
+      "/news/bestuur",
+      "/news/:page(\\d+)",
+    ]) {
+      expect(
+        indexOf(source),
+        `${source} must precede /news/:slug`,
+      ).toBeLessThan(genericNews);
+    }
+  });
+
+  it("routes the Gatsby category archives to the tag listing (#2963)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const expected = [
+      {
+        source: "/news/transfernieuws",
+        destination: "/nieuws?categorie=Transfernieuws",
+      },
+      { source: "/news/jeugd", destination: "/nieuws?categorie=Jeugd" },
+      { source: "/news/b-ploeg", destination: "/nieuws?categorie=B-Ploeg" },
+      { source: "/news/sponsor", destination: "/nieuws?categorie=Sponsor" },
+      { source: "/news/corona", destination: "/nieuws?categorie=Corona" },
+      {
+        source: "/news/beker-van-zemst",
+        destination: "/nieuws?categorie=Beker%20Van%20Zemst",
+      },
+      {
+        source: "/news/beker-van-brabant",
+        destination: "/nieuws?categorie=Beker%20Van%20Brabant",
+      },
+      // No surviving tag — the archive itself.
+      { source: "/news/bestuur", destination: "/nieuws" },
+      { source: "/news/kcvv-tv", destination: "/nieuws" },
+      { source: "/news/ploeg", destination: "/nieuws" },
+      { source: "/news/:page(\\d+)", destination: "/nieuws" },
+    ];
+
+    for (const { source, destination } of expected) {
+      const match = redirects.find((r) => r.source === source);
+      expect(match, `Missing redirect for ${source}`).toBeDefined();
+      expect(match!.destination).toBe(destination);
+      expect(match!.permanent).toBe(true);
+    }
+  });
+
+  it("routes the five re-slugged articles from their date-prefixed URL (#2963)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const expected = [
+      "vincent-haegeman-geen-afscheidsinterview",
+      "kcvv-elewijt-b-stelt-de-kern-voor-van-seizoen-2026-2027",
+      "dieter-van-dionant-groei-visie-succesvol",
+      "afscheid-van-julien-en-nillie",
+      "maxim-breugelmans-drive-passie-en-doorzettingsvermogen",
+    ];
+
+    for (const slug of expected) {
+      const match = redirects.find((r) => r.destination === `/nieuws/${slug}`);
+      expect(match, `Missing redirect to /nieuws/${slug}`).toBeDefined();
+      expect(match!.source).toMatch(/^\/nieuws\/\d{4}-\d{2}-\d{2}-/);
+      expect(match!.permanent).toBe(true);
+    }
+  });
+
+  it("does not strip the date prefix generically — 120 article slugs legitimately carry one (#2963)", async () => {
+    const redirects = await nextConfig.redirects!();
+    // A pattern rule here would break every article whose slug really does
+    // begin with a date. Only the five hand-listed exceptions may exist.
+    const dated = redirects.filter((r) => r.source.startsWith("/nieuws/"));
+    expect(dated).toHaveLength(5);
+    for (const r of dated) {
+      expect(r.source).not.toContain(":");
+    }
+  });
 });

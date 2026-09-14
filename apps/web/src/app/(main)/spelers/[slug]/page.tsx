@@ -95,7 +95,14 @@ export async function generateMetadata({
         return yield* repo.findByPsdId(slug);
       }),
     );
-    if (!player) return { title: "Speler niet gevonden" };
+    if (!player)
+      return {
+        title: "Speler niet gevonden",
+        // #2963: this branch renders under a 200 (a `loading.tsx`
+        // Suspense boundary flushes the shell before `notFound()` runs),
+        // so noindex is what actually keeps it out of the index.
+        robots: { index: false, follow: false },
+      };
 
     const fullName =
       `${player.firstName} ${player.lastName}`.trim() || "Speler";
@@ -123,7 +130,14 @@ export async function generateMetadata({
       },
     };
   } catch {
-    return { title: "Speler niet gevonden" };
+    return {
+      title: "Speler niet gevonden",
+      // Deliberately NOT noindex: this `catch` fires on a read failure
+      // (Sanity/BFF outage, timeout, parse error), not only on an unknown
+      // id. Emitting noindex here would ask Google to drop a live, indexed
+      // page during an outage. Only the genuine not-found branch above
+      // carries it.
+    };
   }
 }
 

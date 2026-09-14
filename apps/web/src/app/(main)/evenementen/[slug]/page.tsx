@@ -71,7 +71,14 @@ export async function generateMetadata({
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!event) return { title: "Evenement niet gevonden" };
+  if (!event)
+    return {
+      title: "Evenement niet gevonden",
+      // #2963: this branch renders under a 200 (a `loading.tsx`
+      // Suspense boundary flushes the shell before `notFound()` runs),
+      // so noindex is what actually keeps it out of the index.
+      robots: { index: false, follow: false },
+    };
 
   const description = `${event.title} — Evenement van KCVV Elewijt`;
 

@@ -114,6 +114,10 @@ export async function generateMetadata({
   if (isNaN(numericId)) {
     return {
       title: "Wedstrijd niet gevonden",
+      // #2963: this branch renders under a 200 (a `loading.tsx` Suspense
+      // boundary flushes the shell before `notFound()` runs), so noindex is
+      // what actually keeps it out of the index.
+      robots: { index: false, follow: false },
     };
   }
 
@@ -138,6 +142,13 @@ export async function generateMetadata({
     // Also swallows the `notFound()` sentinel for an unknown matchId, which is
     // fine: the page component awaits the same memoized promise and re-throws
     // it, so the 404 still renders — with exactly this title.
+    //
+    // #2963: deliberately NOT noindex. This `catch` cannot tell an unknown
+    // match from a BFF read failure — an unknown PSD id returns 200 with an
+    // empty body and dies at `response.json()`, exactly like a transient
+    // outage. Emitting noindex here would ask Google to drop live match
+    // pages during an outage. Only the `isNaN` branch above, which can never
+    // be a real match, carries it.
     return {
       title: "Wedstrijd niet gevonden",
     };

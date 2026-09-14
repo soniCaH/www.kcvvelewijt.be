@@ -111,7 +111,14 @@ export async function generateMetadata({
       return yield* repo.findBySlug(slug);
     }),
   );
-  if (!team) return { title: "Team niet gevonden" };
+  if (!team)
+    return {
+      title: "Team niet gevonden",
+      // #2963: this branch renders under a 200 (a `loading.tsx`
+      // Suspense boundary flushes the shell before `notFound()` runs),
+      // so noindex is what actually keeps it out of the index.
+      robots: { index: false, follow: false },
+    };
 
   // Tab, share card and heading all read the one resolved name, so a visitor is
   // never shown three names for one team (#2630).

@@ -47,7 +47,14 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const page = await fetchPage(slug);
-  if (!page) return {};
+  if (!page)
+    return {
+      title: "Pagina niet gevonden",
+      // #2963: this branch renders under a 200 (a `loading.tsx` Suspense
+      // boundary flushes the shell before `notFound()` runs), so noindex is
+      // what actually keeps it out of the index.
+      robots: { index: false, follow: false },
+    };
 
   const description =
     page.metaDescription?.trim() || `${page.title} — KCVV Elewijt`;

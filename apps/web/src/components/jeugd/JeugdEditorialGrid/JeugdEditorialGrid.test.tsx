@@ -70,10 +70,15 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).toContain("/club/word-lid");
     expect(hrefs).toContain("/hulp");
     expect(hrefs).toContain("/jeugd#visie");
-    expect(hrefs).toContain("/nieuws/prosoccerdata");
     expect(hrefs).toContain("/hulp#structuur");
 
     // Old dead routes are gone.
+    // `/nieuws/prosoccerdata` was asserted here until #2963 — an article that
+    // does not exist, so this very test ("no more dead routes") was pinning a
+    // dead route. It rendered the not-found page under a 200, which is why it
+    // read as live. The live answer is the `prosoccerdata-gebruiken`
+    // hulpvraag; `/hulp` has no deep-link param, so the hub is the target.
+    expect(hrefs).not.toContain("/nieuws/prosoccerdata");
     expect(hrefs).not.toContain("/club/inschrijven");
     expect(hrefs).not.toContain("/jeugd/visie");
     expect(hrefs).not.toContain("/jeugd/medisch");
