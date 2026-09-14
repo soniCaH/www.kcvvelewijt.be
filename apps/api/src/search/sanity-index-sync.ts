@@ -1,6 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Array as Arr, Effect, Either, Schedule } from "effect";
 import { WorkerEnvTag } from "../env";
+import { reconcileOrphans } from "../reconciliation";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "./dataset-index-guard";
 import { EmbeddingService } from "./embedding";
@@ -468,62 +469,69 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           ...new Set([...previousManifest, ...pendingIds]),
         ];
 
-        const currentIdSet = new Set(currentIds);
-        const droppedFromManifest = effectivePreviousManifest.filter(
-          (id) => !currentIdSet.has(id),
-        );
-
-        // The safety cap applies only to droppedFromManifest, not to the
-        // excluded-ids sets below. droppedFromManifest is an INFERENCE from
-        // a diff — a truncated or regressed fetch can inflate it, which is
-        // exactly what the cap guards against. The excluded-ids queries are
-        // AUTHORITATIVE — Sanity directly confirming "this document exists
-        // and does not match" — so a truncated excluded-ids fetch can only
-        // yield FEWER deletes, never more, and never needs the cap.
+        // The manifest-diff portion goes through the shared reconciliation
+        // guard (#2854, `../reconciliation.ts`) — same helper
+        // `sync/psd-sanity-sync.ts` uses. droppedFromManifest is an
+        // INFERENCE from a diff — a truncated or regressed fetch can
+        // inflate it, which is exactly what the safety cap guards against.
         //
-        // Excluded ids also recur in every sweep's toDelete by design:
-        // nothing removes an id from Sanity's exclusion set once excluded,
-        // and there is no local record of "already asked Vectorize to
-        // delete this one" to consult. That's deliberately not a problem —
-        // deleteByIds on an id Vectorize no longer holds is a documented
-        // no-op, and these ids ride inside a deleteBatched call already
-        // batched at ≤1000 ids, so re-including them costs zero extra
-        // Vectorize requests. A tombstone/pending store to suppress the
-        // repeat would add persistent state to save nothing.
-        const manifestDropExceedsCap =
-          droppedFromManifest.length >
-          Math.max(
-            PRUNE_SAFETY_FLOOR,
-            effectivePreviousManifest.length * PRUNE_SAFETY_CAP_FRACTION,
-          );
-        const toDelete = [
-          ...new Set([
-            ...(manifestDropExceedsCap ? [] : droppedFromManifest),
-            ...excludedResponsibilityIds,
-            ...excludedArticleIds,
-          ]),
+        // The excluded-ids sets below are handled separately, NOT through
+        // this helper: they're AUTHORITATIVE (Sanity directly confirming
+        // "this document exists and does not match"), so a truncated
+        // excluded-ids fetch can only yield FEWER deletes, never more, and
+        // must never be subject to the cap — folding them into the same
+        // diff/cap call would let a legitimately huge excluded-ids set trip
+        // the manifest-diff cap it has nothing to do with (see the
+        // "scoped independently" test). They also recur in every sweep's
+        // delete set by design: nothing removes an id from Sanity's
+        // exclusion set once excluded, and deleteByIds on an id Vectorize no
+        // longer holds is a documented no-op, so re-sending them costs
+        // nothing worth tracking state to avoid.
+        const manifestReconciliation = yield* reconcileOrphans(
+          "manifest entries",
+          effectivePreviousManifest,
+          new Set(currentIds),
+          (ids) =>
+            dryRun
+              ? Effect.log(
+                  `[search-sync] DRY RUN — would prune ${ids.length} orphaned vector(s): ${ids.join(", ")}`,
+                ).pipe(Effect.as([] as string[]))
+              : deleteBatched(ids).pipe(
+                  Effect.tap((confirmed) =>
+                    Effect.log(
+                      `[search-sync] Pruned ${confirmed.length} orphaned vector(s)`,
+                    ),
+                  ),
+                ),
+          PRUNE_SAFETY_CAP_FRACTION,
+          PRUNE_SAFETY_FLOOR,
+        );
+        const manifestConfirmedIds =
+          manifestReconciliation.action === "removed"
+            ? manifestReconciliation.confirmedIds
+            : [];
+
+        const excludedIds = [
+          ...new Set([...excludedResponsibilityIds, ...excludedArticleIds]),
         ];
-
-        let confirmedDeleted: string[] = [];
-
-        if (manifestDropExceedsCap) {
-          yield* Effect.logWarning(
-            `[search-sync] Refusing to prune ${droppedFromManifest.length} of ${effectivePreviousManifest.length} manifest entries — exceeds the safety cap (max(${PRUNE_SAFETY_FLOOR}, ${PRUNE_SAFETY_CAP_FRACTION * 100}%)). Skipping the manifest-diff portion of this sweep's prune (excluded-ids deletes, if any, still proceed below — they're authoritative, not subject to this cap). This does not self-heal: investigate, then see apps/api/CLAUDE.md ("Releasing a stuck prune safety cap") for the release lever once the cause is understood.`,
-          );
+        let excludedConfirmedIds: readonly string[] = [];
+        if (excludedIds.length > 0) {
+          if (dryRun) {
+            yield* Effect.log(
+              `[search-sync] DRY RUN — would prune ${excludedIds.length} excluded-ids vector(s): ${excludedIds.join(", ")}`,
+            );
+          } else {
+            excludedConfirmedIds = yield* deleteBatched(excludedIds);
+            yield* Effect.log(
+              `[search-sync] Pruned ${excludedConfirmedIds.length} excluded-ids vector(s)`,
+            );
+          }
         }
 
-        if (toDelete.length === 0) {
-          yield* Effect.log("[search-sync] Reconciliation: nothing to prune");
-        } else if (dryRun) {
-          yield* Effect.log(
-            `[search-sync] DRY RUN — would prune ${toDelete.length} orphaned vector(s): ${toDelete.join(", ")}`,
-          );
-        } else {
-          confirmedDeleted = yield* deleteBatched(toDelete);
-          yield* Effect.log(
-            `[search-sync] Pruned ${confirmedDeleted.length} orphaned vector(s)`,
-          );
-        }
+        const confirmedDeleted = new Set([
+          ...manifestConfirmedIds,
+          ...excludedConfirmedIds,
+        ]);
 
         // (effectivePreviousManifest ∪ currentIds) − confirmedDeleted — see
         // the block comment above for why union, and why only confirmed.
