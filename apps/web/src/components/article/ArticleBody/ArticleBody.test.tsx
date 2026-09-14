@@ -190,6 +190,24 @@ describe("<ArticleBody>", () => {
       ).toBeNull();
     });
 
+    it("renders a repointed /spelers/<psdId> link as internal — no target, no external mark (#2482)", () => {
+      // What the repoint-legacy-player-links migration writes: a relative
+      // href, not the absolute https://www.kcvvelewijt.be/player/<slug>
+      // the article used to store. The serializer's isExternal test is
+      // `href.startsWith("http")` — relative is load-bearing here.
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithLink("Maxim Breugelmans", "/spelers/1673"),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const link = container.querySelector('a[data-article-link="internal"]');
+      expect(link).toBeTruthy();
+      expect(link?.getAttribute("href")).toBe("/spelers/1673");
+      expect(link?.getAttribute("target")).toBeNull();
+      expect(link?.querySelector("svg")).toBeNull();
+      expect(link?.className).toContain("prose-link");
+    });
+
     it("keeps the .prose-link marker for non-social external links", () => {
       const content = [
         paragraph("First paragraph, plain (DropCap target)."),
