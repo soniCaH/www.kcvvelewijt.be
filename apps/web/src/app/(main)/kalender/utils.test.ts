@@ -26,7 +26,7 @@ import type {
   CalendarReducedMatch,
 } from "./utils";
 import { asNonPlaceholder, asReduced } from "@/components/match/test-narrowing";
-import { createMatch } from "@/components/match/match.fixtures";
+import { createRawMatch } from "@/components/match/match.fixtures";
 import {
   reservationMatch,
   tournamentMatch,
@@ -62,7 +62,7 @@ const _reducedHasNoHomeTeam: CalendarReducedMatch = {
  *  identical to the pre-migration local `createMatch` so no assertion below
  *  had to change. */
 function createTestMatch(overrides: Partial<Match> = {}): Match {
-  return createMatch({
+  return createRawMatch({
     id: 100,
     date: new Date("2026-03-28T14:00:00Z"),
     time: "14:00",
