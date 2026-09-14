@@ -91,7 +91,7 @@ describe("FeaturedEventBand", () => {
       render(<FeaturedEventBand event={null} now={NOW} unavailable />);
       expect(screen.getByText("AANSTAAND EVENEMENT")).toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { level: 2, name: "Aanstaand evenement." }),
+        screen.getByRole("heading", { level: 2, name: "Volgend evenement." }),
       ).toBeInTheDocument();
     });
 

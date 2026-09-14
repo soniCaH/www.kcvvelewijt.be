@@ -85,10 +85,14 @@
  * homepage's `jersey-deep-dark` band (see its `HELD_OPEN_FRAME` docblock in
  * `FirstTeamsBlock.tsx`), and `FeaturedEventBand`, on the homepage's
  * `jersey-deep` band (see `FeaturedEventUnavailableNotice`'s docblock in
- * `FeaturedEventBand.tsx`, #2944). **Not built here** — the migration is
- * #2402's call, not this primitive's. Values to carry verbatim when it is:
- * frame `border-cream/40 border-2 border-dashed`, `SkipCard` `text-cream/65`,
- * band note `text-cream/80`. VR guard to name: `FirstTeamsBlock` stories
+ * `FeaturedEventBand.tsx`, #2944) — the second import of `FirstTeamsBlock`'s
+ * own exported `HELD_OPEN_FRAME`, not a second hand-copy of the value; two
+ * consumers is the primitive's own signal to exist (review finding on
+ * #2944). **Not built here** — the migration is #2402's call, not this
+ * primitive's. Carry `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`)
+ * verbatim when it is; the two files' own text tones (`SkipCard`
+ * `text-cream/65`, band note `text-cream/80`) stay per-file. VR guard to
+ * name: `FirstTeamsBlock` stories
  * `NoMatches`, `FeedUnavailable` and the five `Placeholder*` stories
  * (#2505), and `FeaturedEventBand`'s own `FeedUnavailable` story (#2944) —
  * three viewports each — ink-on-dark-green would be a loud diff.

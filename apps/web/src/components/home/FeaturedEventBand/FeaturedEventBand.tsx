@@ -8,6 +8,7 @@ import {
   MonoLabel,
   TapedFigure,
 } from "@/components/design-system";
+import { HELD_OPEN_FRAME } from "@/components/home/FirstTeamsBlock";
 
 export interface FeaturedEventBandImage {
   url: string;
@@ -68,10 +69,9 @@ export interface FeaturedEventBandProps {
  * dark-ground slot register"); `jersey-deep` is this band's own background.
  * `<FirstTeamsBlock>` — the band directly above this one on the homepage
  * spine, on the same dark-green family (`jersey-deep-dark`) — solves the
- * identical problem by hand-rolling its own cream-toned frame rather than
- * waiting on that primitive to grow a dark axis (tracked separately, #2402);
- * this notice copies that same vocabulary (`border-cream/40` dashed frame,
- * `text-cream/80` body) instead of inventing a third one. See the PR for
+ * identical problem, so this notice imports its `HELD_OPEN_FRAME` constant
+ * rather than hand-rolling a third copy of the same dashed frame (review
+ * finding on #2944 — see `HELD_OPEN_FRAME`'s own docblock). See the PR for
  * #2944 for why this deviates from the ticket's literal `<EmptyState>`
  * wording.
  *
@@ -82,9 +82,13 @@ export interface FeaturedEventBandProps {
  * the `aria-label`'d region unheaded and the band's own hierarchy missing
  * on the one render path a visitor is most likely to land on during an
  * outage. The populated heading is the event's own title and can't render
- * here, so this uses a static sentence that names the slot instead —
- * `display-md`, matching the siblings' own generic-heading size rather than
- * this band's `display-lg` hero treatment (reserved for an actual title).
+ * here, so this uses a static heading that names the slot instead —
+ * "Volgend evenement." rather than "Aanstaand evenement." (the kicker
+ * above it, word for word) — echoing the kicker read as an unfilled
+ * placeholder rather than a deliberate two-line header (review finding,
+ * caught in the captured baseline). `display-md`, matching the siblings'
+ * own generic-heading size rather than this band's `display-lg` hero
+ * treatment (reserved for an actual title).
  */
 function FeaturedEventUnavailableNotice() {
   return (
@@ -97,10 +101,10 @@ function FeaturedEventUnavailableNotice() {
         <div className="mb-6 flex flex-col gap-2">
           <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
           <EditorialHeading level={2} size="display-md" tone="cream">
-            Aanstaand evenement.
+            Volgend evenement.
           </EditorialHeading>
         </div>
-        <div className="border-cream/40 border-2 border-dashed px-4 py-8 text-center">
+        <div className={`${HELD_OPEN_FRAME} px-4 py-8`}>
           <p className="text-cream/80">
             Het eerstvolgende evenement is even niet beschikbaar. Probeer het
             later opnieuw.
@@ -143,6 +147,24 @@ function formatDateTime(dateStart: string, dateEnd?: string | null): string {
   return start.toFormat("d MMM");
 }
 
+/**
+ * Every drop-if-empty condition in one place: null event, missing cover
+ * image, invalid date, or start time already past. A type guard rather than
+ * a plain boolean so the one call site below both makes the hold-vs-drop
+ * decision exactly once (review finding on #2944 — two copies of `return
+ * unavailable ? <Notice /> : null` risked a third drop condition someday
+ * reintroducing the vanish this ticket removed) and narrows `event` for the
+ * populated render that follows.
+ */
+function isRenderableEvent(
+  event: FeaturedEventBandEvent | null,
+  now: DateTime,
+): event is FeaturedEventBandEvent & { coverImage: FeaturedEventBandImage } {
+  if (!event || !event.coverImage) return false;
+  const start = toDisplayZone(event.dateStart);
+  return start.isValid && start >= now;
+}
+
 export const FeaturedEventBand = ({
   event,
   // Zone-pinned like every other date this file reads. The comparison below is
@@ -151,16 +173,10 @@ export const FeaturedEventBand = ({
   now = DateTime.now().setZone(CLUB_TIMEZONE),
   unavailable = false,
 }: FeaturedEventBandProps) => {
-  // Drop-if-empty per locked spec: null event, missing cover image, or
-  // start time already past — caller doesn't have to filter upstream.
   // A failed read (`unavailable`) holds the band's shape and names the
   // reason instead of dropping silently — mirrors `<UpcomingMatches>`
   // (`UpcomingMatches.tsx:39`); #2944.
-  if (!event || !event.coverImage) {
-    return unavailable ? <FeaturedEventUnavailableNotice /> : null;
-  }
-  const start = toDisplayZone(event.dateStart);
-  if (!start.isValid || start < now) {
+  if (!isRenderableEvent(event, now)) {
     return unavailable ? <FeaturedEventUnavailableNotice /> : null;
   }
 
