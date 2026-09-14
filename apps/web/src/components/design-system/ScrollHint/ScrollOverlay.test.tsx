@@ -9,6 +9,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ScrollOverlay } from "./ScrollOverlay";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
@@ -19,19 +20,6 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
-
-// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
-// callback synchronously lets a test assert on post-scroll state without a
-// separate flush step. Restored by the shared `afterEach`'s
-// `vi.restoreAllMocks()`.
-function runAnimationFrameSynchronously() {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    },
-  );
 }
 
 describe("ScrollOverlay", () => {
@@ -83,13 +71,61 @@ describe("ScrollOverlay", () => {
     );
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
+    const { flush } = stubAnimationFrame();
     Object.defineProperty(track, "scrollLeft", { value: 100 });
-    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
     });
+    act(() => {
+      flush();
+    });
 
     expect(screen.getByLabelText("Scroll left")).toBeInTheDocument();
+  });
+
+  it("re-measures across two separate scroll events, not just the first (regression: #2860)", () => {
+    // A naive synchronous rAF mock (`cb(); return 0;`) jams
+    // `useScrollHint`'s `scheduleScrollCheck` re-entrancy guard after the
+    // very first scroll tick, because the callback resets `rafRef.current`
+    // to `null` before the `rafRef.current = requestAnimationFrame(cb)`
+    // assignment lands — so the assignment then overwrites it back to a
+    // non-null handle. Every later scroll event in the same test is then
+    // silently dropped. `stubAnimationFrame`'s queue defers the callback
+    // the way a real frame does, so this must keep working across a second,
+    // independent scroll + flush cycle.
+    mockScrollDimensions(900, 400);
+    const { container } = render(
+      <ScrollOverlay direction="both">
+        <span>Item</span>
+      </ScrollOverlay>,
+    );
+
+    const track = container.querySelector('[tabindex="0"]') as HTMLElement;
+    const { flush } = stubAnimationFrame();
+
+    Object.defineProperty(track, "scrollLeft", {
+      value: 100,
+      configurable: true,
+    });
+    act(() => {
+      track.dispatchEvent(new Event("scroll"));
+    });
+    act(() => {
+      flush();
+    });
+    expect(screen.getByLabelText("Scroll left")).toBeInTheDocument();
+
+    Object.defineProperty(track, "scrollLeft", {
+      value: 0,
+      configurable: true,
+    });
+    act(() => {
+      track.dispatchEvent(new Event("scroll"));
+    });
+    act(() => {
+      flush();
+    });
+    expect(screen.queryByLabelText("Scroll left")).not.toBeInTheDocument();
   });
 
   it("mounts the control register (32x32, jersey-deep)", () => {
@@ -128,11 +164,14 @@ describe("ScrollOverlay", () => {
     expect(fade.style.width).toBe("24px");
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
+    const { flush } = stubAnimationFrame();
     // 500px total overflow; scrolled to 485 leaves 15px.
     Object.defineProperty(track, "scrollLeft", { value: 485 });
-    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
+    });
+    act(() => {
+      flush();
     });
 
     fade = container.querySelector('[aria-hidden="true"]') as HTMLElement;
@@ -164,10 +203,13 @@ describe("ScrollOverlay", () => {
     // Scrolled all the way to the end — `canScrollRight` is now false, but
     // the track still overflows at this width, so the anchor must not
     // un-pin (#2582: this reacts to `overflows`, not `canScrollRight`).
+    const { flush } = stubAnimationFrame();
     Object.defineProperty(track, "scrollLeft", { value: 500 });
-    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
+    });
+    act(() => {
+      flush();
     });
     expect(track.className).toContain("anchor-col");
   });

@@ -9,6 +9,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ScrollRail } from "./ScrollRail";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
@@ -19,19 +20,6 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
-
-// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
-// callback synchronously lets a test assert on post-scroll state without a
-// separate flush step. Restored by the shared `afterEach`'s
-// `vi.restoreAllMocks()`.
-function runAnimationFrameSynchronously() {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    },
-  );
 }
 
 describe("ScrollRail", () => {
@@ -115,10 +103,13 @@ describe("ScrollRail", () => {
     );
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
+    const { flush } = stubAnimationFrame();
     Object.defineProperty(track, "scrollLeft", { value: 500 });
-    runAnimationFrameSynchronously();
     act(() => {
       track.dispatchEvent(new Event("scroll"));
+    });
+    act(() => {
+      flush();
     });
 
     expect(screen.getByLabelText("Scroll left")).toBeInTheDocument();

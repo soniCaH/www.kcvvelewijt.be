@@ -12,6 +12,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HorizontalSlider } from "./HorizontalSlider";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 function mockScrollDimensions(scrollWidth = 1000, clientWidth = 500) {
   const originalScrollWidth = Object.getOwnPropertyDescriptor(
@@ -57,19 +58,6 @@ function mockScrollDimensions(scrollWidth = 1000, clientWidth = 500) {
 
     vi.restoreAllMocks();
   };
-}
-
-// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
-// callback synchronously lets a test assert on post-scroll state without a
-// separate flush step. Restored by `mockScrollDimensions`'s returned
-// `restore()`, which already calls `vi.restoreAllMocks()`.
-function runAnimationFrameSynchronously() {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    },
-  );
 }
 
 describe("HorizontalSlider", () => {
@@ -253,9 +241,12 @@ describe("HorizontalSlider", () => {
 
       Object.defineProperty(scrollContainer, "scrollLeft", { value: 100 });
 
-      runAnimationFrameSynchronously();
+      const { flush } = stubAnimationFrame();
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       expect(screen.getByLabelText("Scroll left")).toBeInTheDocument();
@@ -273,9 +264,12 @@ describe("HorizontalSlider", () => {
         "[data-slot='scroll-track']",
       ) as HTMLElement;
       Object.defineProperty(scrollContainer, "scrollLeft", { value: 100 });
-      runAnimationFrameSynchronously();
+      const { flush } = stubAnimationFrame();
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       expect(screen.getByLabelText("Scroll left").className).toContain(
@@ -299,9 +293,12 @@ describe("HorizontalSlider", () => {
       Object.defineProperty(scrollContainer, "scrollWidth", { value: 1000 });
       Object.defineProperty(scrollContainer, "clientWidth", { value: 500 });
 
-      runAnimationFrameSynchronously();
+      const { flush } = stubAnimationFrame();
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       expect(screen.queryByLabelText("Scroll right")).not.toBeInTheDocument();
@@ -323,9 +320,12 @@ describe("HorizontalSlider", () => {
       scrollContainer.scrollTo = scrollToSpy;
 
       Object.defineProperty(scrollContainer, "scrollLeft", { value: 200 });
-      runAnimationFrameSynchronously();
+      const { flush } = stubAnimationFrame();
       act(() => {
         scrollContainer.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       await user.click(screen.getByLabelText("Scroll left"));

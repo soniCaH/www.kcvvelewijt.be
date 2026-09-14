@@ -19,6 +19,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
   return {
@@ -83,19 +84,6 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
-
-// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
-// callback synchronously lets a test assert on post-scroll state without a
-// separate flush step. Restored by the shared `afterEach`'s
-// `vi.restoreAllMocks()`.
-function runAnimationFrameSynchronously() {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    },
-  );
 }
 
 describe("StandingsTable", () => {
@@ -268,11 +256,14 @@ describe("StandingsTable", () => {
       expect(fade.style.width).toBe("24px");
 
       const region = screen.getByRole("region");
+      const { flush } = stubAnimationFrame();
       // 400px total overflow; scrolled to 385 leaves 15px.
       Object.defineProperty(region, "scrollLeft", { value: 385 });
-      runAnimationFrameSynchronously();
       act(() => {
         region.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       fade = container.querySelector(".bg-gradient-to-l") as HTMLElement;

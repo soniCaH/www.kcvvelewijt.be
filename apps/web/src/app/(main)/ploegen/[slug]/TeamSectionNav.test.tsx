@@ -17,6 +17,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 // IntersectionObserver stub — happy-dom doesn't implement it. Only the
 // `useSectionNav` scroll-spy tests below register a section target with a
@@ -113,19 +114,6 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
       delete (HTMLElement.prototype as any).clientWidth;
     }
   };
-}
-
-// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
-// callback synchronously lets a test assert on post-scroll state without a
-// separate flush step. Restored by the shared `afterEach`'s
-// `vi.restoreAllMocks()`.
-function runAnimationFrameSynchronously() {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    },
-  );
 }
 
 describe("TeamSectionNav", () => {
@@ -388,10 +376,13 @@ describe("TeamSectionNav", () => {
       render(<TeamSectionNav items={FIVE_ITEMS} />);
 
       const list = screen.getByRole("list");
+      const { flush } = stubAnimationFrame();
       Object.defineProperty(list, "scrollLeft", { value: 357 });
-      runAnimationFrameSynchronously();
       act(() => {
         list.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       const rightArrow = screen.getByLabelText("Scroll right");

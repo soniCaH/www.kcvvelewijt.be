@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { HtmlTableBlock } from "./HtmlTableBlock";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 const SIMPLE_TABLE_HTML = `
 <table>
@@ -21,19 +22,6 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
-
-// Scroll measurement is rAF-coalesced (#2860) — running the scheduled
-// callback synchronously lets a test assert on post-scroll state without a
-// separate flush step. Restored by the shared `afterEach`'s
-// `vi.restoreAllMocks()`.
-function runAnimationFrameSynchronously() {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(
-    (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    },
-  );
 }
 
 describe("<HtmlTableBlock>", () => {
@@ -233,13 +221,16 @@ describe("<HtmlTableBlock>", () => {
       const { container } = render(<HtmlTableBlock html={SIMPLE_TABLE_HTML} />);
 
       const region = screen.getByRole("region");
+      const { flush } = stubAnimationFrame();
       // 900 - 500 = 400 total overflow; scrolled to 385 leaves 15px — still
       // over the 10px dead-zone (so the arrow/fade stay mounted) but under
       // the 24px cap.
       Object.defineProperty(region, "scrollLeft", { value: 385 });
-      runAnimationFrameSynchronously();
       act(() => {
         region.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
       });
 
       const fade = container.querySelector(

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { createElement, useEffect } from "react";
 import { useScrollHint, type UseScrollHintReturn } from "./useScrollHint";
+import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
 /**
  * Test helper: renders a div with the hook's scrollRef attached,
@@ -17,43 +18,6 @@ function TestHost({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) {
     "data-testid": "scroll-container",
     style: { overflow: "auto" },
   });
-}
-
-/**
- * Takes manual control of `window.requestAnimationFrame` /
- * `cancelAnimationFrame` for a single test, mirroring the `SpyResizeObserver`
- * pattern already used below — a scheduled frame sits in a queue until the
- * test calls `flush()`, rather than firing on a real (or fake) timer, so
- * coalescing and cancellation are assertable without a real animation loop.
- * The spies are restored by the outer `afterEach`'s `vi.restoreAllMocks()`.
- */
-function stubAnimationFrame() {
-  const queue = new Map<number, FrameRequestCallback>();
-  let nextId = 1;
-
-  const raf = vi
-    .spyOn(window, "requestAnimationFrame")
-    .mockImplementation((cb: FrameRequestCallback) => {
-      const id = nextId++;
-      queue.set(id, cb);
-      return id;
-    });
-  const caf = vi
-    .spyOn(window, "cancelAnimationFrame")
-    .mockImplementation((id: number) => {
-      queue.delete(id);
-    });
-
-  return {
-    raf,
-    caf,
-    pendingCount: () => queue.size,
-    flush: () => {
-      const callbacks = Array.from(queue.values());
-      queue.clear();
-      callbacks.forEach((cb) => cb(0));
-    },
-  };
 }
 
 describe("useScrollHint", () => {
