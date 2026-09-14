@@ -10,6 +10,7 @@ import {
   SanityProjection,
   type SanityProjectionInterface,
 } from "../sanity/projection";
+import { CLUB_VENUE } from "./venue";
 
 global.fetch = vi.fn();
 
@@ -383,6 +384,60 @@ describe("PsdService.getOpponentHistory", () => {
       expect(result.right.matches[0]!.id).toBe(201);
       expect(result.right.summary.wins).toBe(0);
       expect(result.right.summary.losses).toBe(1);
+    }
+  });
+
+  // #2491 review: a season with fewer than 2 games can't resolve
+  // `deriveOwnClubId`, and the game carries no `homeTeamId`/`teamId` either
+  // — the exact combination that used to ship `is_home: true` (patched on
+  // after the fact from the caller-supplied `clubId`) with `venue:
+  // undefined` (resolved earlier, from the unresolved pre-fallback
+  // `isHome`). Both are now derived from the same `perGameOwnClubId`, so a
+  // home fixture reached only through this fallback still gets its venue.
+  it("resolves a consistent is_home + venue via the clubId fallback when the season has too few games to derive ownClubId", async () => {
+    const oneGameSeason = {
+      content: [
+        {
+          id: 401,
+          status: 0,
+          date: "2025-01-01 00:00",
+          time: "15:00",
+          homeClub: { id: 100, name: "KCVV Elewijt", logo: null },
+          awayClub: { id: 456, name: "Opponent FC", logo: null },
+          // No homeTeamId/awayTeamId/teamId — forces the ownClubId branch.
+          goalsHomeTeam: 2,
+          goalsAwayTeam: 0,
+          competitionType: { id: 1, name: "3de Nationale", type: "LEAGUE" },
+        },
+      ],
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => [allSeasons[0]] })
+      .mockResolvedValueOnce({ ok: true, json: async () => oneGameSeason })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => [
+          {
+            id: 1,
+            name: "KCVV Elewijt",
+            age: "A",
+            gender: "mannen",
+            footbelId: null,
+            active: true,
+          },
+        ],
+      });
+
+    const result = await runService((svc) => svc.getOpponentHistory(1, 456));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.matches).toHaveLength(1);
+      const match = result.right.matches[0]!;
+      // KCVV (100) is home, the opponent (456) is away → is_home: true,
+      // and — the point of this test — a venue to match.
+      expect(match.is_home).toBe(true);
+      expect(match.venue).toBe(CLUB_VENUE);
     }
   });
 });

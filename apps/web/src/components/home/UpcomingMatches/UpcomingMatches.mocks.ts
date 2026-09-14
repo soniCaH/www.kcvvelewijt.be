@@ -44,12 +44,14 @@ const makeMatch = (
 });
 
 /**
- * The club's own ground. Only home fixtures carry it — and only in fixtures:
- * PSD supplies no venue field and `apps/api/src/psd/transforms.ts` hardcodes
- * `venue: undefined`, so production renders no venue at all today (#2398).
- * Kept here so the caption's populated state stays covered for the day it does.
+ * The real production spelling (#2491, `apps/api/src/psd/venue.ts`'s
+ * `CLUB_VENUE`) — a standalone literal, not imported from `apps/api` (a
+ * different app), but deliberately the true 46-char string rather than a
+ * shorter placeholder: a shorter mock would let this story (and its VR
+ * baseline) understate how long the homepage caption actually gets on a
+ * home fixture. Only home fixtures carry a venue at all.
  */
-const HOME_VENUE = "Driesstraat 32, 1982 Elewijt";
+const HOME_VENUE = "Sportpark Elewijt, Driesstraat 32, 1982 Elewijt";
 
 export const mockUpcomingFive: UpcomingMatch[] = [
   makeMatch(
@@ -93,7 +95,11 @@ export const mockUpcomingFive: UpcomingMatch[] = [
     "10:30",
     kcvv(),
     opponent(230, "KCS Machelen"),
-    { kcvvTeamLabel: "U17", competition: "Gewestelijke U17" },
+    {
+      kcvvTeamLabel: "U17",
+      competition: "Gewestelijke U17",
+      venue: HOME_VENUE,
+    },
   ),
 ];
 
@@ -112,7 +118,11 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "14:00",
     kcvv(),
     opponent(628, "City Pirates"),
-    { kcvvTeamLabel: "U15", competition: "Gewestelijke U15" },
+    {
+      kcvvTeamLabel: "U15",
+      competition: "Gewestelijke U15",
+      venue: HOME_VENUE,
+    },
   ),
   makeMatch(
     508,
@@ -120,6 +130,7 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "15:00",
     kcvv(),
     opponent(448, "FC Wezel Sport"),
+    { venue: HOME_VENUE },
   ),
   makeMatch(
     509,
@@ -135,6 +146,7 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "15:00",
     kcvv(),
     opponent(230, "KCS Machelen"),
+    { venue: HOME_VENUE },
   ),
   makeMatch(
     511,
@@ -150,6 +162,7 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "14:30",
     kcvv(),
     opponent(628, "City Pirates"),
+    { venue: HOME_VENUE },
   ),
 ];
 

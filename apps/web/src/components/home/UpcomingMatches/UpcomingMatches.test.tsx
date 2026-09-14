@@ -167,12 +167,12 @@ describe("UpcomingMatches", () => {
     render(<UpcomingMatches matches={[mockUpcomingFive[0]!]} />);
     expect(
       screen.getByText(
-        /A-Ploeg · 3e Afdeling VV · Driesstraat 32, 1982 Elewijt/,
+        /A-Ploeg · 3e Afdeling VV · Sportpark Elewijt, Driesstraat 32, 1982 Elewijt/,
       ),
     ).toBeInTheDocument();
   });
 
-  it("omits the venue separator when PSD supplies no venue", () => {
+  it("omits the venue separator when the match carries no venue (e.g. an away fixture)", () => {
     render(<UpcomingMatches matches={[mockUpcomingFive[1]!]} />);
     const caption = screen.getByText(/U21 · Provinciaal U21/);
     expect(caption.textContent).toBe("U21 · Provinciaal U21");

@@ -15,8 +15,6 @@ import {
   reservationView,
 } from "./match-display";
 
-const HOME_VENUE_FALLBACK = "Sportpark Elewijt, Elewijt, België";
-
 export type MatchSide = "home" | "away" | "all";
 
 interface IcalEntryBase {
@@ -103,16 +101,21 @@ export function resolveFeedVariant(includeEvents: boolean): FeedVariant {
 }
 
 /**
- * A pitch-reservation placeholder (#2606) has `home_team.id === away_team.id`,
- * so both sides carry the literal name "KCVV Elewijt" — `isHomeMatch` returns
- * `true` for it without needing a special case. That is the intended reading:
- * a reservation is the club's own booking with no designated away side, so
+ * Whether `match` belongs on the "home" side of the ICS feed (`?side=home`
+ * vs. `?side=away`, #2698). Reads the BFF-resolved `is_home`/`is_placeholder`
+ * fields — never a team name (#2491 retired the `home_team.name` substring
+ * match this replaces; never re-derive home/away by name here again).
+ *
+ * A pitch-reservation placeholder (#2606) has `home_team.id === away_team.id`
+ * — the club's own booking with no designated away side — so it always reads
+ * as home regardless of what `is_home` itself resolved to for the booking:
  * `side=home` includes it and `side=away` excludes it (#2698). Verified
  * against `ical.test.ts`'s "is treated as a home fixture" case rather than
  * assumed.
  */
-function isHomeMatch(match: Match): boolean {
-  return match.home_team.name.toLowerCase().includes("elewijt");
+function isHomeSide(match: Match): boolean {
+  if (match.is_placeholder) return true;
+  return match.is_home === true;
 }
 
 /**
@@ -175,27 +178,18 @@ function buildDescription(match: Match): string {
 }
 
 /**
- * A pitch-reservation placeholder (#2606) is "the club has something that
- * day, the details aren't settled" and — per the contract's own doc comment
- * (`packages/api-contract/src/schemas/match.ts`) — the club uses the same
- * device for external tournaments too. `isHomeMatch()` reading `true` for it
- * is a filtering decision ("this belongs in the club's feed"), not a claim
- * about where it happens — asserting the club's own street address for a
- * reservation with no confirmed venue would tell a subscriber's calendar app
- * to offer directions to a tournament that may be nowhere near it (#2698).
- * So the home-venue fallback is skipped for a placeholder; only a `venue`
- * PSD actually sent produces a `LOCATION` line.
- *
- * Widened to a tournament fixture with no result yet (#2696/#2802 review) —
- * `isHomeMatch()`'s name-substring match reads `true` whenever KCVV happens
- * to be listed as `home_team`, which says nothing about whether an
- * unconfirmed tournament is actually played at the club's own pitch.
+ * `match.venue` is the single source now (#2491): the BFF stamps it for a
+ * home fixture and leaves it absent for an away one, an unresolved
+ * `is_home`, a pitch-reservation placeholder, or an unconfirmed tournament
+ * fixture with no result yet (#2606/#2696/#2802 review) — see
+ * `resolveVenue`/`isRealFixture` in `apps/api/src/psd/venue.ts`, the "guard
+ * you must not bypass" this app no longer needs to apply itself. Being
+ * listed as `home_team` never asserted the club's own street address here
+ * either: a reservation or an unconfirmed tournament fixture may be nowhere
+ * near the club's own pitch.
  */
 function buildLocation(match: Match): string | undefined {
-  if (match.venue) return match.venue;
-  if (matchRowKind(match) !== "match") return undefined;
-  if (isHomeMatch(match)) return HOME_VENUE_FALLBACK;
-  return undefined;
+  return match.venue;
 }
 
 /**
@@ -299,9 +293,9 @@ export function matchesToEntries(
 
   const filtered =
     side === "home"
-      ? unique.filter(isHomeMatch)
+      ? unique.filter(isHomeSide)
       : side === "away"
-        ? unique.filter((m) => !isHomeMatch(m))
+        ? unique.filter((m) => !isHomeSide(m))
         : unique;
 
   const sorted = [...filtered].sort(

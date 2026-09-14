@@ -96,23 +96,27 @@ describe("generateIcal", () => {
     expect(output).toContain("SUMMARY:KCVV Elewijt 3-1 KFC Turnhout");
   });
 
-  it("uses home venue as LOCATION when provided", () => {
+  it("uses the BFF-supplied venue as LOCATION when provided", () => {
     const match = makeMatch({ venue: "Stadion De Kuip" });
     const output = renderIcal([match]);
 
     expect(output).toContain("Stadion De Kuip");
   });
 
-  it("falls back to Sportpark Elewijt for home matches without venue", () => {
-    const match = makeMatch({ venue: undefined });
+  // #2491: the BFF is the sole source of `venue` now — a home fixture with
+  // no `venue` gets no LOCATION line, never a locally-synthesised fallback
+  // (`HOME_VENUE_FALLBACK` is retired, not moved).
+  it("omits LOCATION for a home match without venue — no local fallback", () => {
+    const match = makeMatch({ venue: undefined, is_home: true });
     const output = renderIcal([match]);
 
-    expect(output).toContain("Sportpark Elewijt\\, Elewijt\\, België");
+    expect(output).not.toMatch(/^LOCATION:/m);
   });
 
   it("omits LOCATION for away matches without venue", () => {
     const match = makeMatch({
       venue: undefined,
+      is_home: false,
       home_team: { id: 2, name: "KFC Turnhout", score: undefined },
       away_team: { id: 1, name: "KCVV Elewijt", score: undefined },
     } as Partial<Match>);
@@ -122,9 +126,10 @@ describe("generateIcal", () => {
   });
 
   it("filters by side=home", () => {
-    const home = makeMatch({ id: 1 });
+    const home = makeMatch({ id: 1, is_home: true });
     const away = makeMatch({
       id: 2,
+      is_home: false,
       home_team: { id: 3, name: "FC Away", score: undefined },
       away_team: { id: 1, name: "KCVV Elewijt", score: undefined },
     } as Partial<Match>);
@@ -135,9 +140,10 @@ describe("generateIcal", () => {
   });
 
   it("filters by side=away", () => {
-    const home = makeMatch({ id: 1 });
+    const home = makeMatch({ id: 1, is_home: true });
     const away = makeMatch({
       id: 2,
+      is_home: false,
       home_team: { id: 3, name: "FC Away", score: undefined },
       away_team: { id: 1, name: "KCVV Elewijt", score: undefined },
     } as Partial<Match>);
@@ -145,6 +151,13 @@ describe("generateIcal", () => {
 
     expect(output).not.toContain("kcvv-match-1@kcvvelewijt.be");
     expect(output).toContain("kcvv-match-2@kcvvelewijt.be");
+  });
+
+  it("side=home excludes a match whose is_home is unresolved", () => {
+    const unresolved = makeMatch({ id: 3, is_home: undefined });
+    const output = renderIcal([unresolved], { side: "home" });
+
+    expect(output).not.toContain("kcvv-match-3@kcvvelewijt.be");
   });
 
   it("deduplicates matches by id", () => {

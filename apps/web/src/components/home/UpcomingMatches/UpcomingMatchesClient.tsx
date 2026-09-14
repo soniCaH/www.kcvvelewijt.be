@@ -354,9 +354,9 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
       : undefined;
   const dateLabel = formatMatchWidgetDate(match.date);
   const when = [dateLabel, match.time].filter(Boolean).join(" · ");
-  // Venue last, and only when present. PSD supplies no venue field today —
-  // `apps/api/src/psd/transforms.ts` hardcodes `undefined` — so in production
-  // this collapses back to `team · competition` until the BFF sources one.
+  // Venue last, and only when present. The BFF stamps it for a home fixture
+  // and leaves it absent otherwise (#2491, `apps/api/src/psd/venue.ts`), so
+  // this collapses back to `team · competition` only for an away fixture.
   const caption = [matchTeamLabel(match), match.competition, match.venue]
     .filter(Boolean)
     .join(" · ");

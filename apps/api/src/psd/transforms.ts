@@ -19,6 +19,7 @@ import {
   FootbalistoRankingEntry,
   FootbalistoClub,
 } from "./schemas";
+import { resolveVenue } from "./venue";
 
 // ─── Competition label helpers ────────────────────────────────────────────────
 
@@ -412,11 +413,26 @@ export function transformPsdGame(
     game.cancelled,
   );
 
+  const competitionType = resolveCompetitionType(game.competitionType);
+  const isPlaceholder = isSelfMatch(game.homeClub.id, game.awayClub.id);
+
   return {
     id: game.id,
     date: matchDate,
     time: timePart,
-    venue: undefined,
+    // Sourced from `resolveVenue` (#2491), not a second, home-only literal —
+    // see that module's doc for the `isHome === true` + real-fixture guard.
+    // Costs ~46 bytes on the roughly half of every KV-cached payload that is
+    // a home fixture — judged worth it, unlike the bare `is_home` boolean
+    // dropped below, because the string itself carries information a reader
+    // needs.
+    venue: resolveVenue(isHome, {
+      isPlaceholder,
+      competitionType,
+      status,
+      homeScore: game.goalsHomeTeam ?? undefined,
+      awayScore: game.goalsAwayTeam ?? undefined,
+    }),
     home_team: toMatchTeam(
       game.homeClub,
       game.goalsHomeTeam,
@@ -435,7 +451,7 @@ export function transformPsdGame(
     // Normalized league/cup/friendly classification — the season-games object
     // form carries a reliable `.type`, so this is the canonical league gate for
     // list consumers (the `competition` label is a division name, not "Competitie").
-    competitionType: resolveCompetitionType(game.competitionType),
+    competitionType,
     kcvv_team_id: game.teamId ?? undefined,
     is_home: isHome,
     // `|| undefined`, not the bare boolean: this is `false` for ~99.9% of
@@ -445,8 +461,7 @@ export function transformPsdGame(
     // response. `is_home`'s sibling field already models "not applicable"
     // as `undefined`, and the web side reads `=== true`, so `undefined` and
     // `false` are indistinguishable downstream.
-    is_placeholder:
-      isSelfMatch(game.homeClub.id, game.awayClub.id) || undefined,
+    is_placeholder: isPlaceholder || undefined,
   };
 }
 

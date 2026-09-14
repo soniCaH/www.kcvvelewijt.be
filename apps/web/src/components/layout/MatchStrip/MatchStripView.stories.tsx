@@ -61,10 +61,9 @@ export const ResultAndFixture: Story = {
  * `inverted`, arrows/dividers/slide label to cream alphas, team names and
  * score to cream, the meta line to `warm`.
  *
- * No venue: PSD supplies none on this path today (`transformPsdGame` /
- * `transformPsdMatchDetail` in `apps/api/src/psd/transforms.ts` both hardcode
- * `venue: undefined`, #2398) — `ScheduleMatch` carries no such field, so the
- * strip never claims a ground it cannot confirm.
+ * No venue: `ScheduleMatch` carries no such field at all (#2398) — a
+ * deliberate type-level omission, unaffected by the BFF sourcing `venue` for
+ * other consumers since #2491 — so the strip never claims a ground.
  */
 const todaysFixture: ScheduleMatch = {
   kind: "match",
