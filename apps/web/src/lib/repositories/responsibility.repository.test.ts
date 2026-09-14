@@ -258,6 +258,33 @@ describe("ResponsibilityRepository", () => {
       });
     });
 
+    it("degrades a contact with an out-of-schema contactType to a manual contact", async () => {
+      const row = makePathRow({
+        primaryContact: makeContact({
+          // A Content-API write can bypass the schema's `contactType` enum
+          // entirely — this cast simulates that (TypeScript would refuse
+          // this literal against the generated `ContactRow` type otherwise).
+          contactType: "bestuur" as unknown as
+            "manual" | "position" | "team-role",
+          teamRole: null,
+          position: null,
+          roleCode: null,
+          members: null,
+          nodeId: null,
+          role: null,
+          email: null,
+          phone: null,
+          department: null,
+        }),
+      });
+      mockFetch.mockResolvedValueOnce([row]);
+
+      const paths = await runFindAll();
+      const contact = paths[0].primaryContact;
+
+      expect(contact).toEqual({ contactType: "manual" });
+    });
+
     it("missing optional contact fields use fallback values", async () => {
       const row = makePathRow({
         icon: null,

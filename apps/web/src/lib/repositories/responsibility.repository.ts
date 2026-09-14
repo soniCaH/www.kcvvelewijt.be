@@ -58,8 +58,17 @@ type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
 type ContactRow = NonNullable<PathRow["primaryContact"]>;
 
 function toContact(c: ContactRow): Contact {
-  // Default to "manual" when contactType is null (legacy docs or incomplete data)
-  const contactType = c.contactType ?? "manual";
+  // Default to "manual" for a null `contactType` (legacy docs or incomplete
+  // data) — and, same as the `teamRole` guard below, for any value outside
+  // the known set (a Content-API write can hold `contactType: "bestuur"`
+  // just as easily as an unknown `teamRole`; an unguarded switch on that
+  // value would fall off the end and return `undefined` from a function
+  // whose signature promises a `Contact`). This is an explicit membership
+  // check, not a nullish default, precisely to catch that case too.
+  const contactType =
+    c.contactType === "position" || c.contactType === "team-role"
+      ? c.contactType
+      : "manual";
 
   switch (contactType) {
     case "position":
