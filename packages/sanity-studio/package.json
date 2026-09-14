@@ -29,7 +29,7 @@
   },
   "peerDependencies": {
     "@sanity/icons": "5.2.2",
-    "@sanity/ui": "4.2.0",
+    "@sanity/ui": "4.2.1",
     "react": "19.2.8",
     "sanity": "6.11.0"
   },
