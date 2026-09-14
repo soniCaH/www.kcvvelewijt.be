@@ -398,6 +398,25 @@ describe("HulpFinder", () => {
     );
   });
 
+  it("clears an ?audience= that would hide the #<slug> deep-linked question", () => {
+    // Reproduction: filter on an audience the question isn't tagged for, then
+    // pick it in the search. The category chip switched but the question was
+    // filtered out before the category list was built, so nothing rendered.
+    setMockSearchParams(new URLSearchParams("audience=supporter"));
+    window.location.hash = "#blessure"; // role: ouder + speler, not supporter
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+
+    expect(q(/mijn kind is geblesseerd/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Medisch" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: "Supporter" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
   it("shows an empty state when there are no paths", () => {
     render(<HulpFinder responsibilityPaths={[]} />);
     expect(screen.getByRole("status")).toHaveTextContent(

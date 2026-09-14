@@ -34,6 +34,7 @@ import {
   type MouseEvent,
 } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight } from "@/lib/icons.redesign";
 import {
   EmptyState,
@@ -107,6 +108,7 @@ export interface HulpFinderProps {
 }
 
 export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
+  const router = useRouter();
   const panel = useHubMemberPanel();
   const {
     trackView,
@@ -203,11 +205,24 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
       if (!path) return;
       setOpenId(id);
       pendingScroll.current = id;
-      if (path.category !== category) {
-        setCategoryParam(path.category, { hash: id, replace: true });
-      }
+      const wrongCategory = path.category !== category;
+      // An active ?audience= that the revealed question isn't tagged for
+      // filters it out of `audiencePaths` before the category list is even
+      // built — the category chip would switch and the question still
+      // wouldn't render. Reset the audience row to "Alles" as well: a path
+      // carries several roles, so there is no single right role to switch to.
+      const wrongAudience = audience !== null && !path.role.includes(audience);
+      if (!wrongCategory && !wrongAudience) return;
+      // ONE url write for both params, not two `useRouterFilterParam`
+      // setters: each of those merges from the live `window.location.search`,
+      // which `router.replace` has not updated yet by the time the second one
+      // runs — the second write would drop the first one's param.
+      const params = new URLSearchParams(window.location.search);
+      params.set(CATEGORY_PARAM, path.category);
+      if (wrongAudience) params.delete(AUDIENCE_PARAM);
+      router.replace(`/hulp?${params.toString()}#${id}`, { scroll: false });
     },
-    [pathById, category, setCategoryParam],
+    [pathById, category, audience, router],
   );
 
   useEffect(() => {

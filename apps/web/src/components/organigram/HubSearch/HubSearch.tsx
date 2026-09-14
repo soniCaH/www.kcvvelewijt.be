@@ -337,7 +337,14 @@ export function HubSearch({
         });
       } else {
         // An answer deep-links the finder accordion by its slug (#2056).
-        window.location.hash = result.path.id;
+        // Re-picking the answer already in the hash writes the SAME value, so
+        // the browser fires no `hashchange` and the finder never reopens a
+        // card the visitor collapsed in between — dispatch the event by hand.
+        if (window.location.hash === `#${result.path.id}`) {
+          window.dispatchEvent(new HashChangeEvent("hashchange"));
+        } else {
+          window.location.hash = result.path.id;
+        }
       }
     }
     setValue(

@@ -278,6 +278,38 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
+  it("still fires a hashchange when the SAME answer is chosen twice", async () => {
+    // The finder reopens a card on `hashchange`. Writing the same hash value
+    // a second time changes nothing, so the browser fires no event and a card
+    // the visitor collapsed in between would stay shut.
+    setSemantic({
+      results: [hit("blessure", 0.41)],
+      executedQuery: "blessure",
+    });
+    // Asserted on the dispatch, not on a `hashchange` listener: happy-dom
+    // fires one for a same-value hash write, where a real browser does not —
+    // a listener-based test is green with or without the fix.
+    const dispatch = vi.spyOn(window, "dispatchEvent");
+    renderSearch();
+    typeQuery("blessure");
+    fireEvent.click(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    );
+    expect(window.location.hash).toBe("#blessure");
+
+    // Search the very same question again — picking it must reach the finder
+    // a second time, even though the hash already holds this slug.
+    dispatch.mockClear();
+    typeQuery("blessure");
+    fireEvent.click(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    );
+    expect(
+      dispatch.mock.calls.filter(([event]) => event.type === "hashchange"),
+    ).toHaveLength(1);
+    dispatch.mockRestore();
+  });
+
   it("shows an empty state with a contact escape when nothing matches", async () => {
     setSemantic({ results: [], executedQuery: "zzzzz" });
     renderSearch();
