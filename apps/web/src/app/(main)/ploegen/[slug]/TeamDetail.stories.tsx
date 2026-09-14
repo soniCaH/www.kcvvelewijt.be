@@ -112,7 +112,6 @@ function scheduleMatch(
   const date = new Date("2026-09-15T12:00:00.000Z");
   date.setDate(date.getDate() + daysOffset);
   return {
-    isPlaceholder: false,
     kind: "match",
     id,
     date,

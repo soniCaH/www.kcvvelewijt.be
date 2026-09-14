@@ -26,7 +26,6 @@ function makeMatch(
   overrides: Partial<ScheduleMatch> & { id: number },
 ): ScheduleMatch {
   return {
-    isPlaceholder: false,
     kind: "match",
     date: new Date("2026-09-20T15:00:00.000Z"),
     time: "15:00",
