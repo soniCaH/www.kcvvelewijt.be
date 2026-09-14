@@ -55,7 +55,7 @@ const contactFields = [
       ],
     },
     description:
-      '"Teamrol" is verplicht, dus dit veld komt momenteel nooit tot zijn recht — de site leest het niet. Laat het leeg tot een product-beslissing dit veld schrapt of de "Teamrol"-verplichting versoepelt.',
+      'Wordt enkel gelezen als "Teamrol" leeg is — maar "Teamrol" is verplicht, dus dat kan bij een document dat via Studio is opgeslagen nooit voorkomen. Laat dit veld leeg; of het geschrapt wordt, staat genoteerd in #2952.',
     hidden: ({parent}) => parent?.contactType !== 'team-role',
   }),
   defineField({
