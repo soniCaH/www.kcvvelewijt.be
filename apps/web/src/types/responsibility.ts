@@ -37,14 +37,6 @@ export interface Contact {
    * to a specific team or member (per-team resolution was dropped in #2100).
    */
   teamRole?: "trainer" | "afgevaardigde";
-  /**
-   * team-role: unused. `teamRole` is required whenever `contactType ===
-   * "team-role"` (`validateContactFields`), so `resolveContact.ts`'s
-   * `contact.teamRole ?? contact.teamRoleFallback` can never take this
-   * branch. Kept only because deleting it needs a Sanity migration — see
-   * #2952.
-   */
-  teamRoleFallback?: "trainer" | "afgevaardigde";
   /** manual: display role label */
   role?: string;
   /** manual: email address */

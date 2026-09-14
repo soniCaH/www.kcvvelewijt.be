@@ -72,10 +72,8 @@ export function resolveContact(contact: Contact): ResolvedContact {
     }
 
     case "team-role": {
-      // Fall back to `teamRoleFallback` when the primary `teamRole` is unset.
-      const role = contact.teamRole ?? contact.teamRoleFallback;
-      const label = role
-        ? TEAM_ROLE_LABELS[role]
+      const label = contact.teamRole
+        ? TEAM_ROLE_LABELS[contact.teamRole]
         : "Contactpersoon van jouw ploeg";
       return { name: label, role: label, organigramHref: "/ploegen" };
     }
