@@ -5,7 +5,8 @@ import {
   getResultColor,
   isExceptionalMatchStatus,
   isPlayedMatch,
-  isReducedMatchRow,
+  matchRowKind,
+  type MatchRowKindSource,
   isSettledMatch,
   otherClubSide,
   OUTCOME_UNDERLINE,
@@ -307,54 +308,59 @@ describe("otherClubSide (#2696, positional since #2802 review)", () => {
   });
 });
 
-describe("isReducedMatchRow (#2696)", () => {
-  it("is false for an ordinary league match", () => {
+describe("matchRowKind (#2696, #2802, #2825)", () => {
+  function rawMatch(
+    overrides: Partial<MatchRowKindSource> = {},
+  ): MatchRowKindSource {
+    return {
+      status: "scheduled",
+      home_team: {},
+      away_team: {},
+      ...overrides,
+    };
+  }
+
+  it('returns "reservation" when is_placeholder is set — checked before competitionType', () => {
     expect(
-      isReducedMatchRow({
-        competitionType: "league",
-        status: "scheduled",
-      }),
-    ).toBe(false);
+      matchRowKind(
+        rawMatch({ is_placeholder: true, competitionType: "tournament" }),
+      ),
+    ).toBe("reservation");
   });
 
-  it("is true for an unplayed tournament fixture", () => {
-    expect(
-      isReducedMatchRow({
-        competitionType: "tournament",
-        status: "scheduled",
-      }),
-    ).toBe(true);
+  it('returns "match" for an ordinary league match', () => {
+    expect(matchRowKind(rawMatch({ competitionType: "league" }))).toBe("match");
   });
 
-  it("is false again once a tournament fixture has a result — not merely once it has been played", () => {
-    expect(
-      isReducedMatchRow({
-        competitionType: "tournament",
-        status: "finished",
-        homeScore: 3,
-        awayScore: 1,
-      }),
-    ).toBe(false);
+  it('returns "reduced" for an unplayed tournament fixture', () => {
+    expect(matchRowKind(rawMatch({ competitionType: "tournament" }))).toBe(
+      "reduced",
+    );
   });
 
-  it("stays true for a finished/forfeited/stopped tournament fixture whose scores are missing from the feed", () => {
+  it('returns "match" again once a tournament fixture has a result — not merely once it has been played', () => {
+    expect(
+      matchRowKind(
+        rawMatch({
+          competitionType: "tournament",
+          status: "finished",
+          home_team: { score: 3 },
+          away_team: { score: 1 },
+        }),
+      ),
+    ).toBe("match");
+  });
+
+  it('stays "reduced" for a finished/forfeited/stopped tournament fixture whose scores are missing from the feed', () => {
     for (const status of ["finished", "forfeited", "stopped"] as const) {
       expect(
-        isReducedMatchRow({
-          competitionType: "tournament",
-          status,
-        }),
-      ).toBe(true);
+        matchRowKind(rawMatch({ competitionType: "tournament", status })),
+      ).toBe("reduced");
     }
   });
 
   it("never keys on the Dutch competition label", () => {
-    expect(
-      isReducedMatchRow({
-        competitionType: "league",
-        status: "scheduled",
-      }),
-    ).toBe(false);
+    expect(matchRowKind(rawMatch({ competitionType: "league" }))).toBe("match");
   });
 });
 

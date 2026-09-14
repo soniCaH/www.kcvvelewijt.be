@@ -243,7 +243,7 @@ export function TeamAgendaRow({
   className,
 }: TeamAgendaRowProps) {
   // The adapter (`transformMatchToSchedule`) has already asked
-  // `isReducedMatchRow()` once and baked the answer into `kind` — this reads
+  // `matchRowKind()` once and baked the answer into `kind` — this reads
   // that discriminant rather than re-deriving the same question a second
   // time from raw match fields. Enumerated positively (#2802 review)
   // rather than `kind !== "match"`: a negated catch-all treats

@@ -464,7 +464,7 @@ function FullHero({
  * The match-detail page's hero — state-aware, never auto-hides (#2802
  * review). Dispatches on `match.kind`, already resolved by
  * `matchDetailToHeroRow()`; this component narrows and renders, it never
- * asks `isReducedMatchRow` or `otherClubSide` itself.
+ * asks `matchRowKind` or `otherClubSide` itself.
  */
 export function MatchHero({ match, className }: MatchHeroProps) {
   switch (match.kind) {

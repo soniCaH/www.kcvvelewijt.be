@@ -112,7 +112,7 @@ export interface ScheduleReservation extends ScheduleRowCommon {
  * `awayTeam`/`homeScore`/`awayScore` do not exist here for the same compile-
  * time reason `ScheduleReservation` drops them — a renderer reaching for the
  * scoreboard fields without narrowing `kind` first fails to compile. This is
- * not data loss: `isReducedMatchRow()` is re-evaluated from the raw `Match`
+ * not data loss: `matchRowKind()` is re-evaluated from the raw `Match`
  * on every transform call, so the moment PSD publishes a scoreline the same
  * fixture id transforms to a `ScheduleMatch` instead — the "reduced → full
  * scoreboard" transition is the adapter picking a different union member on
@@ -232,8 +232,8 @@ export interface UpcomingReservation extends UpcomingRowCommon {
  * other-teams agenda — `UpcomingRowCommon` plus the other club, mirroring
  * `UpcomingReservation`'s shape. `<UpcomingMatchesClient>` had no reduced
  * treatment at all before this ticket (unlike
- * `<TeamAgendaRow>`/`<MatchStripView>`/`/kalender`, which all call
- * `isReducedMatchRow` already) — a not-yet-played tournament fixture for a
+ * `<TeamAgendaRow>`/`<MatchStripView>`/`/kalender`, whose adapters already
+ * call `matchRowKind` and narrow on `kind`) — a not-yet-played tournament fixture for a
  * non-senior team rendered the full linked scoreboard here, the exact gap
  * the shared `kind` discriminant closes by construction.
  */

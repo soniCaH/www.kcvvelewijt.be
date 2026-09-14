@@ -37,7 +37,7 @@ export interface MatchStripData {
    * pitch-reservation placeholder or a reduced tournament fixture with no
    * scoreline yet: a booking carries no score, and neither does an
    * unconfirmed tournament opponent, so `matchSlot`'s shared
-   * `isReducedMatchRow` guard never routes either to the result slot and
+   * `matchRowKind` guard never routes either to the result slot and
    * `pickLastResult` cannot return one (#2688/#2802). Guarded there, not
    * re-checked here — one owner for the rule.
    */

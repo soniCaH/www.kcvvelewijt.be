@@ -50,8 +50,8 @@ export function reservationMatch(
  * "tournament"`, a real named opponent, not a self-match. Renders the same
  * reduced row/card as `reservationMatch()` above, but the crest and subject
  * name the opponent, not KCVV — `club` is precomputed via club-id equality
- * by `transformMatchToCalendar` (see `match-display.ts`'s `isReducedMatchRow`
- * for the predicate deciding this member applies).
+ * by `transformMatchToCalendar` (see `match-display.ts`'s `matchRowKind`
+ * for the function deciding this member applies).
  */
 export function tournamentMatch(
   overrides: Partial<CalendarReducedMatch> = {},

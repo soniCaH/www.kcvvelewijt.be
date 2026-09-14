@@ -277,7 +277,7 @@ export const PlaceholderLongSubjectNarrow: Story = {
 // to the non-KCVV side via `otherClubSide()`/club-id equality, so this
 // fixture spells that resolved shape out directly rather than a `ScheduleMatch`
 // the row would now render as an ordinary two-crest scoreboard (the row
-// trusts `kind`, not a re-derivation of `isReducedMatchRow` from raw fields).
+// trusts `kind`, not a re-derivation of `matchRowKind` from raw fields).
 const tournamentFixture: ScheduleReducedMatch = {
   kind: "reduced",
   id: 93,

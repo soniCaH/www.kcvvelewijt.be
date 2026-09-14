@@ -65,20 +65,20 @@ A fixture where both sides are the same club (`home_team.id === away_team.id`). 
 
 `kind` is the sole discriminant across all four families (#2825) — no member carries a separate `isPlaceholder` boolean any more. The reservation member is always `kind: "reservation"`; the reduced member (a tournament fixture with no result yet) is `kind: "reduced"`, distinct from the ordinary `kind: "match"` — `isPlaceholder` used to answer only the self-match question and could not tell those last two apart on its own, which is why it was removed rather than kept alongside `kind`.
 
-Two surfaces stay deliberately outside the union, both `noindex` and unlinked, both reading the raw contract `Match`: `/share`'s `MatchOption` and `/scheurkalender`'s `ScheurkalenderMatch` ([#2699] decision 2 — a KCVV-vs-KCVV row there is ugly, not wrong). Both of `/nieuws/[slug]`'s public `MatchDetail` surfaces are covered the same way: `toHeroMatchData` (`nieuws/[slug]/utils.ts`) returns `null` for either reduced state, and the article `SportsEvent` JSON-LD (`nieuws/[slug]/page.tsx`) is gated on the same `isReducedMatchRow` check `/wedstrijd/[matchId]` applies to its own `SportsEvent`. "Never a click-through" is locked by the table-driven test in `app/__tests__/reservation-never-links.test.tsx` ([#2801]).
+Two surfaces stay deliberately outside the union, both `noindex` and unlinked, both reading the raw contract `Match`: `/share`'s `MatchOption` and `/scheurkalender`'s `ScheurkalenderMatch` ([#2699] decision 2 — a KCVV-vs-KCVV row there is ugly, not wrong). Both of `/nieuws/[slug]`'s public `MatchDetail` surfaces are covered the same way: `toHeroMatchData` (`nieuws/[slug]/utils.ts`) returns `null` for either reduced state, and the article `SportsEvent` JSON-LD (`nieuws/[slug]/page.tsx`) is gated on the same `matchRowKind` check `/wedstrijd/[matchId]` applies to its own `SportsEvent`. "Never a click-through" is locked by the table-driven test in `app/__tests__/reservation-never-links.test.tsx` ([#2801]).
 
 ### Reduced Row
 
 The **register** a row/page renders in when it has no confirmed two-sided fixture to show: one crest, a mono subject line, the real time, no score slot, no home/away side, no link. Distinct from the two **states** that render in it — a [Pitch-Reservation Placeholder](#pitch-reservation-placeholder) (no opponent exists) and a not-yet-played tournament fixture (an opponent exists but PSD does not say whether the named club hosts the tournament or merely shares its bracket, #2696).
 
-| Code                   | Notes                                                                                                                                              |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `isReducedMatchRow()`  | `apps/web/src/lib/utils/match-display.ts` — the one predicate deciding the register. Gated on a scoreline existing, not on `isPlayedMatch` (#2696) |
-| `ScheduleReducedMatch` | The `kind: "reduced"` member of `ScheduleRow` — one `team` (the other club, by club id), no `homeTeam`/`awayTeam`/scores (#2802)                   |
-| `UpcomingReducedMatch` | The same member on the homepage other-teams agenda ([#2802])                                                                                       |
-| `CalendarReducedMatch` | The same member on `/kalender`, carrying one `club` ([#2802])                                                                                      |
+| Code                   | Notes                                                                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `matchRowKind()`       | `apps/web/src/lib/utils/match-display.ts` — the one function deciding `kind`, including the register. The reduced half is gated on a scoreline existing, not on `isPlayedMatch` (#2696) |
+| `ScheduleReducedMatch` | The `kind: "reduced"` member of `ScheduleRow` — one `team` (the other club, by club id), no `homeTeam`/`awayTeam`/scores (#2802)                                                        |
+| `UpcomingReducedMatch` | The same member on the homepage other-teams agenda ([#2802])                                                                                                                            |
+| `CalendarReducedMatch` | The same member on `/kalender`, carrying one `club` ([#2802])                                                                                                                           |
 
-**A reduced row is not a permanent classification.** The three adapters re-ask `isReducedMatchRow()` on every call, so the moment PSD publishes a scoreline the same fixture id transforms into the `"match"` member and the row reverts to the full scoreboard — the club really was the opponent after all. That transition is asserted in all three adapters' tests ([#2802]).
+**A reduced row is not a permanent classification.** The four adapters re-ask `matchRowKind()` on every call, so the moment PSD publishes a scoreline the same fixture id transforms into the `"match"` member and the row reverts to the full scoreboard — the club really was the opponent after all. That transition is asserted in all four adapters' tests ([#2802]).
 
 ### Lineup
 
