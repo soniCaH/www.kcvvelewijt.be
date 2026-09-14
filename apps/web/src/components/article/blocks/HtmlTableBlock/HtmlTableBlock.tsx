@@ -17,9 +17,47 @@ const TABLE_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     "colgroup",
     "col",
     "strong",
+    "a",
   ],
   allowedAttributes: {
     "*": ["colspan", "rowspan", "scope"],
+    a: ["href", "target", "rel", "class"],
+  },
+  // `class` is in `allowedAttributes.a` only so `transformTags.a`'s forced
+  // value below survives sanitize-html's own attribute filter — stored
+  // HTML is never the source of it. `allowedClasses` is a second,
+  // independent guard: even if a class value reached this check, only
+  // `prose-link` would pass, so nothing "arbitrary from stored HTML" gets
+  // through either path.
+  allowedClasses: {
+    a: ["prose-link"],
+  },
+  // Default `allowedSchemes` is left untouched — it already blocks
+  // `javascript:` on `href`, and sanitize-html applies it automatically to
+  // any attribute now allowed (`href`). Hand-rolling a scheme guard here
+  // would be invisible to CodeQL, which recognises the library's own
+  // barrier but not a bespoke one (#2482).
+  transformTags: {
+    // `.prose-link` (globals.css) is a class, and stored HTML never gets to
+    // supply an arbitrary one (`allowedClasses` above) — this hook is the
+    // only place a table anchor's class is ever set, forcing the canonical
+    // value regardless of what an editor's markup carried. The same pass
+    // forces `rel="noopener noreferrer"` on any `target="_blank"` anchor —
+    // 53 Facebook permalinks carry `target` today and none carries `rel`
+    // (#2482) — and drops `rel` on anything else so an authored value
+    // can't sneak through un-vetted.
+    a: (tagName, attribs) => {
+      const nextAttribs: Record<string, string> = {
+        ...attribs,
+        class: "prose-link",
+      };
+      if (nextAttribs.target === "_blank") {
+        nextAttribs.rel = "noopener noreferrer";
+      } else {
+        delete nextAttribs.rel;
+      }
+      return { tagName, attribs: nextAttribs };
+    },
   },
 };
 
@@ -64,9 +102,13 @@ export interface HtmlTableBlockProps {
  * to render bold — Preflight's
  * `strong { font-weight: bolder }` already resolves to a real 700 face in
  * this table's `font-mono` (IBM Plex Mono loads 400/600/700). An authored
- * `<a>` still does **not** render — restoring it (allowlist entry plus the
- * `.prose-link` recipe and `rel` handling) is #2482's job, deliberately
- * blocked by this one.
+ * `<a>` renders too now (#2482): `allowedTags` gained `a`, and
+ * `TABLE_SANITIZE_OPTIONS.transformTags.a` forces the anchor's `class` to
+ * `.prose-link` (the shared body-link colour + hover marker) and its `rel`
+ * to `noopener noreferrer` whenever `target="_blank"` is present — no
+ * selector needed here, same as `<strong>`. `class` is not otherwise in
+ * `allowedAttributes.a` for stored HTML to populate; `allowedClasses`
+ * restricts it to `prose-link` as a second, independent guard.
  *
  * A `<caption>` (three published tables ship one) renders in the kicker
  * register per #2476 rule 8 — `font-mono`, `text-label`, uppercase,

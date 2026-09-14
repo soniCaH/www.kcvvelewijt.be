@@ -108,19 +108,76 @@ describe("<HtmlTableBlock>", () => {
     expect(strong?.textContent).toBe("KCVV Elewijt A");
   });
 
-  it("still strips <a> and every other unlisted tag — the allowlist gained exactly one entry (#2481)", () => {
+  it("renders a restored <a> with the canonical .prose-link class (#2482)", () => {
     const html = `
       <table>
         <tbody>
-          <tr><td><a href="/player/some-slug">Speler</a></td><td><em>Uit</em></td></tr>
+          <tr><td><a href="/spelers/1673">Maxim Breugelmans</a></td></tr>
         </tbody>
       </table>
     `;
     render(<HtmlTableBlock html={html} />);
     const region = screen.getByRole("region");
-    expect(region.querySelector("a")).toBeNull();
+    const anchor = region.querySelector("a");
+    expect(anchor).not.toBeNull();
+    expect(anchor?.getAttribute("href")).toBe("/spelers/1673");
+    expect(anchor?.className).toBe("prose-link");
+    expect(anchor?.textContent).toBe("Maxim Breugelmans");
+  });
+
+  it("ignores an arbitrary class authored on a table anchor — .prose-link always wins (#2482)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="/spelers/1673" class="evil-tracker">Naam</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor?.className).toBe("prose-link");
+    expect(anchor?.className).not.toContain("evil-tracker");
+  });
+
+  it("forces rel=noopener noreferrer on a target=_blank anchor (the 53 Facebook permalinks, #2482)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="https://www.facebook.com/KCVVElewijt/posts/1" target="_blank">Facebook</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor?.getAttribute("target")).toBe("_blank");
+    expect(anchor?.getAttribute("rel")).toBe("noopener noreferrer");
+  });
+
+  it("adds no rel to an anchor with no target=_blank", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="/spelers/1673">Naam</a></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const anchor = screen.getByRole("region").querySelector("a");
+    expect(anchor?.getAttribute("rel")).toBeNull();
+  });
+
+  it("still strips <em> and every other unlisted tag — the allowlist gained exactly two entries (#2481/#2482)", () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr><td><a href="/spelers/1673">Speler</a></td><td><em>Uit</em></td></tr>
+        </tbody>
+      </table>
+    `;
+    render(<HtmlTableBlock html={html} />);
+    const region = screen.getByRole("region");
+    expect(region.querySelector("a")).not.toBeNull();
     expect(region.querySelector("em")).toBeNull();
-    expect(region.innerHTML).not.toContain("<a ");
     expect(region.innerHTML).not.toContain("<em>");
     expect(region.textContent).toContain("Speler");
     expect(region.textContent).toContain("Uit");
