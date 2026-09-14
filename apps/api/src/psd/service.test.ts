@@ -49,7 +49,7 @@ const cacheMock: KvCacheInterface = {
   // /competitions, /teams and season-games requests.
   get: (key: string) =>
     Effect.succeed(
-      key === "psd:competition-labels" || key === "psd:match-team-index:v3"
+      key === "psd:competition-labels" || key === "psd:match-team-index:v4"
         ? "{}"
         : null,
     ),
@@ -1473,7 +1473,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
   const indexKvMock = (entry: Record<string, unknown>): KvCacheInterface => ({
     get: (key: string) =>
       Effect.succeed(
-        key === "psd:match-team-index:v3"
+        key === "psd:match-team-index:v4"
           ? JSON.stringify({ "99": entry })
           : key === "psd:competition-labels"
             ? "{}"
@@ -2096,7 +2096,7 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
     const kvMock: KvCacheInterface = {
       get: (key: string) =>
         Effect.succeed(
-          key === "psd:match-team-index:v3" ? JSON.stringify(idx) : null,
+          key === "psd:match-team-index:v4" ? JSON.stringify(idx) : null,
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
@@ -2206,7 +2206,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
   const kvMockFor = (isHome: boolean | undefined): KvCacheInterface => ({
     get: (key: string) =>
       Effect.succeed(
-        key === "psd:match-team-index:v3"
+        key === "psd:match-team-index:v4"
           ? JSON.stringify(indexEntry(isHome))
           : null,
       ),
@@ -2228,7 +2228,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      expect(result.right.is_home).toBe(true);
       expect(result.right.venue).toBe(CLUB_VENUE);
     }
   });
@@ -2246,7 +2245,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      expect(result.right.is_home).toBe(false);
       expect(result.right.venue).toBeUndefined();
     }
   });
@@ -2264,8 +2262,33 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      expect(result.right.is_home).toBeUndefined();
       expect(result.right.venue).toBeUndefined();
+    }
+  });
+
+  // Pins the keeper-marker fix from the #2491 review round: `is_home` feeds
+  // `resolveVenue` internally but must NEVER reach the returned
+  // `MatchDetail`, home or away — `page.tsx`'s `kcvvSide` (and so
+  // `enrichLineupWithKeeperFlag`'s Sanity-vs-jersey-#1 choice) and
+  // `toHeroMatchData`'s crest side both key off `match.is_home`, and on
+  // `main` it is always absent for a `MatchDetail`. A venue ticket must not
+  // change who gets a keeper badge.
+  it("never exposes is_home on the returned MatchDetail, whichever way it resolved", async () => {
+    for (const isHome of [true, false, undefined]) {
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: async () => rawDetailWithGoal,
+        text: async () => JSON.stringify(rawDetailWithGoal),
+      });
+
+      const result = await runService((svc) => svc.getMatchDetail(123), {
+        kvMock: kvMockFor(isHome),
+      });
+
+      expect(result._tag).toBe("Right");
+      if (result._tag === "Right") {
+        expect(result.right.is_home).toBeUndefined();
+      }
     }
   });
 
@@ -2361,7 +2384,71 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      expect(result.right.is_home).toBe(true);
+      expect(result.right.venue).toBe(CLUB_VENUE);
+      expect(result.right.is_home).toBeUndefined();
+    }
+  });
+
+  // #2491 review: the season-games row PSD sent carries `homeTeamId` but
+  // omits `teamId` outright (PsdGame declares it optional) — exactly the
+  // shape `getTeamMatches`/`getNextMatches` normalise to the queried team
+  // before ever calling `transformPsdGame` (`game.teamId ?? teamId`/
+  // `team.id`). The index build used to read the raw, still-`undefined`
+  // `game.teamId`, fall through to the `ownClubId` branch, and — with only
+  // one game in team 1's season here — find `ownClubId` unresolved too:
+  // the same fixture would show a venue on `/kalender` (via the
+  // normalising list path) and none on `/wedstrijd/{id}` (via the
+  // un-normalised index). Both paths must agree.
+  it("normalises a season-games row's missing teamId to the queried team, same as every list path", async () => {
+    const gameMissingTeamId = {
+      id: 123,
+      status: 0,
+      date: "2025-03-15 15:00",
+      // No `teamId` — only `homeTeamId`, matching team 1's own id.
+      homeTeamId: 1,
+      homeClub: { id: 1235, name: "KCVV Elewijt" },
+      awayClub: { id: 200, name: "Opponent FC" },
+      goalsHomeTeam: 1,
+      goalsAwayTeam: 0,
+      competitionType: { id: 1, name: null, type: "OFFICIAL" },
+    };
+    const kvMock: KvCacheInterface = {
+      get: (key: string) =>
+        Effect.succeed(
+          key === "psd:current-season-id"
+            ? JSON.stringify(seasons[0])
+            : key === "psd:competition-labels"
+              ? "{}"
+              : null, // psd:match-team-index → null → force a build
+        ),
+      set: () => Effect.succeed(undefined),
+      delete: () => Effect.succeed(undefined),
+      increment: () => Effect.succeed(undefined),
+    };
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => rawDetailWithGoal,
+        text: async () => JSON.stringify(rawDetailWithGoal),
+      }) // /info
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => rawTeams,
+        text: async () => JSON.stringify(rawTeams),
+      }) // /teams
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [gameMissingTeamId] }),
+        text: async () => JSON.stringify({ content: [gameMissingTeamId] }),
+      }) // team 1 season games — a single game, so deriveOwnClubId can't resolve either
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ content: [] }) }); // team 23 season games
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock,
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
       expect(result.right.venue).toBe(CLUB_VENUE);
     }
   });

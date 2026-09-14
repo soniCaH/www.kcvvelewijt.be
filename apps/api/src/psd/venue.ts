@@ -3,9 +3,17 @@ import type { CompetitionType, MatchStatus } from "@kcvv/api-contract";
 /**
  * The club's own ground, spelled once (#2491). Truthful, geocodable as an
  * ICS `LOCATION`, and a valid schema.org `Place` name — the form a parent
- * driving there actually needs (#2398). The only occurrence of this address
- * in `apps/api`; every read path stamps a fixture's `venue` by calling
- * {@link resolveVenue} rather than restating the string.
+ * driving there actually needs (#2398). The single source for a MATCH
+ * venue in `apps/api`; every read path stamps a fixture's `venue` by
+ * calling {@link resolveVenue} rather than restating the string.
+ *
+ * Not the only spelling of this street address anywhere in `apps/api` —
+ * `apps/api/src/forms/membership-emails.ts` carries the same address in a
+ * membership-signup email footer, unrelated page copy in a different
+ * domain (predates #2491, deliberately left alone by it). That is a
+ * different fact ("where the club's postal address is") from this one
+ * ("where a match is played"); the two happen to coincide today only
+ * because the club plays at its own registered address.
  */
 export const CLUB_VENUE = "Sportpark Elewijt, Driesstraat 32, 1982 Elewijt";
 

@@ -370,10 +370,13 @@ export const PsdServiceLive = Layer.effect(
     // v2: entries now carry the season-list status + score for the detail
     // backfill. v3: entries now also carry `isHome` (#2491), the same
     // homeTeamId/teamId-then-ownClubId derivation `transformPsdGame` uses,
-    // so `getMatchDetail` can source a fixture's venue. Bump the key so
-    // pre-deployment (older-shaped) entries are not read by the new
-    // field-shape logic and a clean index is rebuilt on first use.
-    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index:v3";
+    // so `getMatchDetail` can source a fixture's venue. v4: v3's `isHome`
+    // read the raw, possibly-absent `game.teamId` instead of normalising it
+    // to the queried team the way every list path does (`game.teamId ??
+    // teamId`/`team.id`) — a review caught the resulting home/away parity
+    // gap between `/kalender` and `/wedstrijd/{id}` before it shipped. Bump
+    // again so a v3 entry computed with the bug is never read as correct.
+    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index:v4";
     const MATCH_TEAM_INDEX_TTL = 60 * 60 * 12; // 12h
     // Negative-cache an empty index briefly so a partial upstream outage (e.g.
     // /info ok but the per-team fetches fail) can't trigger a ~20-fetch rebuild
@@ -391,8 +394,16 @@ export const PsdServiceLive = Layer.effect(
       awayScore?: number;
       // Whether the queried team played at home for this fixture (#2491) —
       // `transformPsdGame`'s own `homeTeamId === teamId`, falling back to a
-      // derived `ownClubId`. The match-detail endpoint has no club context of
-      // its own to compute this, so `getMatchDetail` reads it from here.
+      // derived `ownClubId`, against `game.teamId` normalised to the queried
+      // team exactly like every list path normalises it before calling
+      // `transformPsdGame` (`game.teamId ?? teamId`/`team.id` in
+      // `getTeamMatches`/`getNextMatches`/`getMatchesWindow`) — the same
+      // fixture must not read home on `/kalender` and away (or unresolved)
+      // on `/wedstrijd/{id}`. The match-detail endpoint has no club context
+      // of its own to compute this, so `getMatchDetail` reads it from here.
+      // Feeds `resolveVenue` only — deliberately NOT copied onto the
+      // `MatchDetail` this index enriches; see the `is_home` comment above
+      // `getMatchDetail`'s `Effect.flatMap`.
       isHome?: boolean;
     }
     type MatchTeamIndex = Record<string, MatchTeamIndexEntry>;
@@ -438,9 +449,15 @@ export const PsdServiceLive = Layer.effect(
             // First write wins — deterministic for the rare KCVV-internal match
             // that appears in two teams' lists (always a friendly → no standings).
             if (index[key]) continue;
+            // Normalised exactly like every list path normalises it before
+            // calling `transformPsdGame` (`game.teamId ?? teamId`/`team.id`)
+            // — PSD's season-games rows can omit `teamId` outright, and an
+            // un-normalised `undefined` here silently fell through to the
+            // `ownClubId` branch while the list paths never would have.
+            const queriedTeamId = game.teamId ?? team.id;
             const isHome =
-              game.homeTeamId != null && game.teamId != null
-                ? game.homeTeamId === game.teamId
+              game.homeTeamId != null
+                ? game.homeTeamId === queriedTeamId
                 : ownClubId != null
                   ? game.homeClub.id === ownClubId
                   : undefined;
@@ -751,11 +768,25 @@ export const PsdServiceLive = Layer.effect(
       getMatchDetail: (matchId: number) =>
         fetchRawMatchDetail(matchId).pipe(
           Effect.map(transformFootbalistoMatchDetail),
-          // Enrich with the team id, structured competition type, and
-          // `is_home` that `/games/{id}/info` cannot provide (see the
-          // match-team index above). Strictly additive: an index miss/failure
-          // leaves the detail exactly as transformed — `is_home` (and so
-          // `venue`) stays absent, keeper enrichment is unaffected.
+          // Enrich with the team id and structured competition type that
+          // `/games/{id}/info` cannot provide (see the match-team index
+          // above). Strictly additive: an index miss/failure leaves the
+          // detail exactly as transformed.
+          //
+          // `is_home` is read from the index (#2491) but deliberately NOT
+          // written onto the returned `MatchDetail` — see the review that
+          // caught this on the first pass. `page.tsx`'s `kcvvSide` (and so
+          // `enrichLineupWithKeeperFlag`'s Sanity-vs-jersey-#1 choice) and
+          // `toHeroMatchData`'s crest side are both keyed off
+          // `match.is_home`, and on `main` it is always absent for a
+          // `MatchDetail` — every detail-page reader falls back to its own
+          // id-based or jersey-#1 logic. Exposing a newly-resolved value
+          // here would silently switch a KCVV keeper missing from Sanity's
+          // keeper set from "marked via jersey #1" to "not marked at all".
+          // A venue ticket must not change who gets a keeper badge, so
+          // `is_home` stays an internal input to `resolveVenue` below, and
+          // this app-facing field is left exactly as `transformFootbalisto-
+          // MatchDetail` set it (always absent).
           Effect.flatMap((detail) =>
             getMatchTeamIndex().pipe(
               Effect.map((index) => {
@@ -784,7 +815,6 @@ export const PsdServiceLive = Layer.effect(
                   ...detail,
                   kcvv_team_id: entry.teamId,
                   competitionType: entry.competitionType,
-                  is_home: entry.isHome,
                   ...(backfill
                     ? {
                         status: entry.status,
@@ -802,13 +832,15 @@ export const PsdServiceLive = Layer.effect(
 
                 // Venue (#2491): computed here, not in the transform — the
                 // detail transform has no club context of its own, and
-                // `is_home` only becomes known once the index entry above
+                // `entry.isHome` only becomes known once the index above
                 // resolves it. Reads the (possibly backfilled) status/scores,
                 // so a tournament fixture that just settled claims the venue
-                // the same request it gets its scoreline.
+                // the same request it gets its scoreline. `entry.isHome`
+                // feeds only this call, never `enriched.is_home` — see the
+                // comment above `Effect.flatMap`.
                 return {
                   ...enriched,
-                  venue: resolveVenue(enriched.is_home, {
+                  venue: resolveVenue(entry.isHome, {
                     isPlaceholder: enriched.is_placeholder,
                     competitionType: enriched.competitionType,
                     status: enriched.status,
@@ -911,12 +943,29 @@ export const PsdServiceLive = Layer.effect(
                       );
                     }
                     const ownClubId = deriveOwnClubId(games);
-                    return games.map((g) =>
-                      transformPsdGame(
+                    return games.map((g) => {
+                      // Secondary `ownClubId` fallback (#2491 review): when
+                      // `deriveOwnClubId` can't resolve (fewer than 2 games
+                      // this season), the caller-supplied `clubId` — the
+                      // opponent this whole call is about — still pins the
+                      // *other* side of THIS game as our own club, exactly
+                      // (never a season-wide guess). Feeding it into
+                      // `transformPsdGame` here, rather than patching
+                      // `is_home` on its output afterward, is what keeps
+                      // `is_home` and `venue` from disagreeing — the two
+                      // were computed from different `isHome` values before
+                      // this fix, so a fixture could ship `is_home: true`
+                      // with no venue.
+                      const perGameOwnClubId =
+                        ownClubId ??
+                        (g.homeClub.id === clubId
+                          ? g.awayClub.id
+                          : g.homeClub.id);
+                      return transformPsdGame(
                         { ...g, teamId },
-                        { ownClubId, competitionLabels },
-                      ),
-                    );
+                        { ownClubId: perGameOwnClubId, competitionLabels },
+                      );
+                    });
                   }),
                 ),
                 Effect.map((matches) => ({ _tag: "ok" as const, matches })),
@@ -974,14 +1023,13 @@ export const PsdServiceLive = Layer.effect(
             Effect.catchAll(() => Effect.succeed(undefined)),
           );
 
-          // Enrich matches:
-          // - is_home: secondary fallback using the opponent clubId parameter.
-          //   transformPsdGame already uses ownClubId (derived from game data),
-          //   but this acts as a safety net using the caller-provided clubId.
-          // - kcvv_team_label: set from team metadata (mirrors getNextMatches)
+          // Enrich matches: kcvv_team_label from team metadata (mirrors
+          // getNextMatches). `is_home`'s clubId-based safety net now runs
+          // *before* `transformPsdGame` (see `perGameOwnClubId` above) so it
+          // can't disagree with the `venue` that same call already resolved
+          // — a post-hoc override here previously could (#2491 review).
           const enrichedMatches = opponentMatches.map((m) => ({
             ...m,
-            is_home: m.is_home ?? m.home_team.id !== clubId,
             kcvv_team_label: kcvvTeamLabel,
           }));
 

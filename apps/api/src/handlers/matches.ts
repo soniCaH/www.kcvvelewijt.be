@@ -20,6 +20,16 @@ const matchesCache = TypedKvCache(MatchesArray);
 const matchDetailCache = TypedKvCache(MatchDetail);
 const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 
+// #2491: `transformPsdGame`/`getMatchDetail` gained a `venue` field, and
+// `apps/web/src/lib/utils/ical.ts` lost the local fallback that used to
+// synthesise one — so a cached pre-#2491 entry under the OLD key would ship
+// with no `LOCATION` line on a home fixture for up to its full TTL (24h for
+// `matches:team`, 4h for `matches:next`/`matches:window`, up to 7d for
+// `match:detail`/`opponent:team`) after this deploys. Every cache key these
+// handlers write is versioned here so a stale pre-#2491 entry is never read
+// as current — see the review that caught this on the first pass.
+const CACHE_VERSION = "v2";
+
 export const getMatchesByTeamHandler = (
   teamId: number,
 ): Effect.Effect<
@@ -27,7 +37,7 @@ export const getMatchesByTeamHandler = (
   BffError,
   PsdService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
-  const cacheKey = `matches:team:${teamId}`;
+  const cacheKey = `matches:team:${CACHE_VERSION}:${teamId}`;
   const fetchMatches = Effect.gen(function* () {
     const service = yield* PsdService;
     return yield* service.getTeamMatches(teamId);
@@ -47,7 +57,7 @@ export const getNextMatchesHandler = (): Effect.Effect<
   BffError,
   PsdService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
-  const cacheKey = "matches:next";
+  const cacheKey = `matches:next:${CACHE_VERSION}`;
   const fetchMatches = Effect.gen(function* () {
     const service = yield* PsdService;
     return yield* service.getNextMatches();
@@ -74,7 +84,7 @@ export const getMatchesWindowHandler = (): Effect.Effect<
   BffError,
   PsdService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
-  const cacheKey = "matches:window";
+  const cacheKey = `matches:window:${CACHE_VERSION}`;
   const fetchMatches = Effect.gen(function* () {
     const service = yield* PsdService;
     return yield* service.getMatchesWindow();
@@ -213,7 +223,7 @@ export const getMatchDetailHandler = (
   BffError,
   PsdService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
-  const cacheKey = `match:detail:${matchId}`;
+  const cacheKey = `match:detail:${CACHE_VERSION}:${matchId}`;
   const fetchDetail = Effect.gen(function* () {
     const service = yield* PsdService;
     return yield* service.getMatchDetail(matchId);
