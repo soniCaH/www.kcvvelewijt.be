@@ -433,10 +433,15 @@ export default async function HomePage() {
         }
       : null;
 
-  // Unconditional (#2505/#2844) — unlike `featuredEventSection` above, this
-  // band holds its shape on a failed read: `<UpcomingMatches>` itself decides
-  // null-vs-notice from `matches.length` + `unavailable`, so the section
-  // config here never nulls out. One rule, one guard.
+  // Unconditional (#2505/#2844) — `<UpcomingMatches>` itself decides
+  // null-vs-notice internally from `matches.length` + `unavailable`, so the
+  // section config here never nulls out. `<FeaturedEventBand>` above now
+  // makes the identical internal decision from `event` + `unavailable`
+  // (#2944) — it also holds its shape on a failed read. Its section config
+  // still stays conditional (`featuredEventBandEvent ||
+  // featuredEventReadFailed`), purely to skip an otherwise-empty
+  // `<SectionStack>` slot when there's truly nothing to show; that's a
+  // config-level tidiness choice, not a difference in the two bands' rule.
   const upcomingMatchesSection: SectionConfig = {
     key: "upcoming-matches",
     bg: "transparent",

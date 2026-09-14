@@ -80,15 +80,18 @@
  * ink-only (`SLOT_BACKGROUND_CLASS` below: `border-ink-muted` /
  * `border-ink bg-cream-soft`) — both wrong on a dark-green band. Tier
  * "surface" already solved its own version via `surface="inverse"` (#2562);
- * tier "slot" has no such axis yet. Exactly one place would use it:
- * `FirstTeamsBlock`, on the homepage's `jersey-deep-dark` band — see its
- * `HELD_OPEN_FRAME` docblock in `FirstTeamsBlock.tsx`. **Not built here**
- * — the migration is #2402's call, not this primitive's. Values to carry
- * verbatim when it is: frame `border-cream/40 border-2 border-dashed`,
- * `SkipCard` `text-cream/65`, band note `text-cream/80`. VR guard to name:
- * `FirstTeamsBlock` stories `NoMatches`, `FeedUnavailable` and the five
- * `Placeholder*` stories (#2505), three viewports each — ink-on-dark-green
- * would be a loud diff.
+ * tier "slot" has no such axis yet. Two places hand-roll it today rather
+ * than wait on this primitive to grow a dark axis: `FirstTeamsBlock`, on the
+ * homepage's `jersey-deep-dark` band (see its `HELD_OPEN_FRAME` docblock in
+ * `FirstTeamsBlock.tsx`), and `FeaturedEventBand`, on the homepage's
+ * `jersey-deep` band (see `FeaturedEventUnavailableNotice`'s docblock in
+ * `FeaturedEventBand.tsx`, #2944). **Not built here** — the migration is
+ * #2402's call, not this primitive's. Values to carry verbatim when it is:
+ * frame `border-cream/40 border-2 border-dashed`, `SkipCard` `text-cream/65`,
+ * band note `text-cream/80`. VR guard to name: `FirstTeamsBlock` stories
+ * `NoMatches`, `FeedUnavailable` and the five `Placeholder*` stories
+ * (#2505), and `FeaturedEventBand`'s own `FeedUnavailable` story (#2944) —
+ * three viewports each — ink-on-dark-green would be a loud diff.
  *
  * **Not every failure notice on cream goes through this register.**
  * `<CompetitiveStatusLine>` (#2540/#2636) is a deliberate non-adopter: its
