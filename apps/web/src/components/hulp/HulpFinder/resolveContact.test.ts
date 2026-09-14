@@ -75,13 +75,4 @@ describe("resolveContact", () => {
     });
     expect(afgevaardigde.role).toBe("Afgevaardigde van jouw ploeg");
   });
-
-  it("falls back to teamRoleFallback when the primary teamRole is unset", () => {
-    const resolved = resolveContact({
-      contactType: "team-role",
-      teamRoleFallback: "afgevaardigde",
-    });
-    expect(resolved.role).toBe("Afgevaardigde van jouw ploeg");
-    expect(resolved.organigramHref).toBe("/ploegen");
-  });
 });

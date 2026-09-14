@@ -43,7 +43,6 @@ function makeContact(
   return {
     contactType: "position",
     teamRole: null,
-    teamRoleFallback: null,
     position: "Secretaris",
     roleCode: "SEC",
     members: [

@@ -72,8 +72,7 @@ export function resolveContact(contact: Contact): ResolvedContact {
     }
 
     case "team-role": {
-      // Fall back to `teamRoleFallback` when the primary `teamRole` is unset.
-      const role = contact.teamRole ?? contact.teamRoleFallback;
+      const role = contact.teamRole;
       const label = role
         ? TEAM_ROLE_LABELS[role]
         : "Contactpersoon van jouw ploeg";
