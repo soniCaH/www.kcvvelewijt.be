@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { MouseEvent } from "react";
-import { handleSamePageAnchorClick } from "./same-page-anchor";
+import { handleSamePageAnchorClick, revealHash } from "./same-page-anchor";
 
 /** Minimal stand-in for the fields the handler reads off the click event. */
 function clickEvent(
@@ -142,5 +142,34 @@ describe("handleSamePageAnchorClick", () => {
     const event = clickEvent();
     handleSamePageAnchorClick(event, "/hulp#structuur");
     expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+});
+
+describe("revealHash", () => {
+  it("writes the hash when it points somewhere else", () => {
+    window.location.hash = "";
+    revealHash("blessure");
+    expect(window.location.hash).toBe("#blessure");
+  });
+
+  it("fires a hashchange itself when the hash already holds that id", () => {
+    // The whole point: the browser fires nothing for a same-value write, so a
+    // visitor re-picking the question they just collapsed got no response.
+    window.location.hash = "#blessure";
+    const seen = vi.fn();
+    window.addEventListener("hashchange", seen);
+    revealHash("blessure");
+    window.removeEventListener("hashchange", seen);
+    expect(seen).toHaveBeenCalled();
+  });
+
+  it("matches a percent-encoded hash against the raw slug", () => {
+    // `window.location.hash` comes back encoded; the id is a raw Sanity slug.
+    window.location.hash = "#caf%C3%A9";
+    const seen = vi.fn();
+    window.addEventListener("hashchange", seen);
+    revealHash("café");
+    window.removeEventListener("hashchange", seen);
+    expect(seen).toHaveBeenCalled();
   });
 });
