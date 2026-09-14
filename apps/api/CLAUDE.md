@@ -9,6 +9,7 @@ implementing `PsdApi` from `@kcvv/api-contract`.
 src/
 ├── index.ts                  ← Worker entry point (HttpApiBuilder.toWebHandler)
 ├── env.ts                    ← WorkerEnv type + WorkerEnvTag (Effect Context)
+├── reconciliation.ts         ← reconcileOrphans — shared orphan-reconciliation guard (#2854), used by sync/psd-sanity-sync.ts and search/sanity-index-sync.ts
 ├── cache/
 │   └── kv-cache.ts           ← KvCacheService + TypedKvCache (SWR read path, TTLs, drift alerting)
 ├── psd/
@@ -77,6 +78,29 @@ wrangler kv key delete "search-index:manifest:staging" --binding=PSD_CACHE --env
 ```
 
 This deletes the whole manifest, not just the over-cap entries — the next sweep bootstraps fresh (prunes nothing, just re-learns the current state) rather than resuming a partial one. Safe: nothing in the manifest is unrecoverable except the pre-existing backlog this mechanism could never see anyway (see #2831's PR description).
+
+### The shared orphan-reconciliation guard (`reconciliation.ts`, #2854)
+
+`reconcileOrphans` (`src/reconciliation.ts`) is the one shared implementation of the four-step orphan-reconciliation pattern both sync jobs need: diff the tracked set against the current set, handle the none-case, apply a ratio-based safety cap before acting, then act (calling a caller-supplied archive/delete function and returning the **confirmed** removed subset — not merely a completion signal, since a caller like the search-index sweep needs to know exactly what landed before touching its own manifest).
+
+- **`sync/psd-sanity-sync.ts`**'s `reconcileEntity` is a thin adapter over it — same public signature as before this refactor, still used by its three cycle-end callers (players, staff, teams). It always passes `floor: 0` (the default), which reproduces the pre-refactor bare-ratio behaviour (`ratio > MAX_ORPHAN_RATIO`) exactly.
+- **`search/sanity-index-sync.ts`**'s manifest-diff prune calls it directly, passing its existing `PRUNE_SAFETY_CAP_FRACTION` and `PRUNE_SAFETY_FLOOR` — unchanged from before this refactor. The excluded-ids deletes (stateless, authoritative) are **not** routed through this helper — they're scoped independently and must never be subject to the manifest-diff's cap (see the block comment above the call site).
+
+**A floor-less ratio latches.** A bare `ratio > threshold` check with no floor refuses forever once tripped against a small tracked set: the same input recomputes the same refusal every run, with no state change and no release lever, until something external changes the underlying data. This was a real bug in `reconcileEntity` before #2854 — PSD sync had no floor and no release lever at all. `reconcileOrphans` always evaluates `max(floor, activeCount × ratioThreshold)`, and PSD sync now has a release lever for it too (below).
+
+### Releasing a stuck PSD sync orphan-cap refusal
+
+Unlike the search-index prune, PSD sync's cap isn't evaluated against a persisted manifest — it's recomputed fresh every rotation cycle from the current Sanity-active ids and the freshly-accumulated PSD ids, so there's no stored state to delete. The release lever is a one-shot KV bypass key instead: set it, and the **next** cycle-end reconciliation skips the ratio cap for players, staff, and teams alike, then deletes the key itself so the bypass doesn't silently stay armed.
+
+```bash
+# Production (SANITY_DATASET=production)
+wrangler kv key put "sync:orphan-cap-override" "1" --binding=PSD_CACHE
+
+# Staging (SANITY_DATASET=staging)
+wrangler kv key put "sync:orphan-cap-override" "1" --binding=PSD_CACHE --env staging
+```
+
+As with the search-index lever, only set this after confirming the refusal is a false positive (a genuine mass roster change, not a truncated/regressed PSD fetch) — see the WARN log `reconciliation: SKIPPED — …` for the counts that tripped it.
 
 ## Deployment
 
