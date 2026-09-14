@@ -21,7 +21,6 @@ import { createRawMatch } from "@/components/match/match.fixtures";
 // a renderer reaching for the two-team scoreboard on a reservation/reduced
 // row a compile error instead of a runtime crash.
 const _reservationHasNoHomeTeam: UpcomingReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 1,
   date: new Date(),
@@ -31,7 +30,6 @@ const _reservationHasNoHomeTeam: UpcomingReservation = {
   homeTeam: { id: 1235, name: "KCVV Elewijt" },
 };
 const _reducedHasNoHomeTeam: UpcomingReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 1,
   date: new Date(),
@@ -66,7 +64,6 @@ describe("mapMatchToUpcomingMatch", () => {
     const result = mapMatchToUpcomingMatch(match);
 
     expect(result).toEqual({
-      isPlaceholder: false,
       kind: "match",
       id: 1,
       date: new Date("2025-12-06T09:00:00"),
@@ -198,8 +195,9 @@ describe("mapMatchToUpcomingMatch", () => {
 
     const result = mapMatchToUpcomingMatch(match);
 
-    expect(result.isPlaceholder).toBe(true);
-    if (!result.isPlaceholder) throw new Error("expected a reservation");
+    expect(result.kind).toBe("reservation");
+    if (result.kind !== "reservation")
+      throw new Error("expected a reservation");
     expect(result.team).toEqual({
       id: 1235,
       name: "KCVV Elewijt",

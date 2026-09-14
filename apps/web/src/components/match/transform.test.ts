@@ -14,7 +14,6 @@ import { createRawMatch } from "./match.fixtures";
 // "a renderer reaches for the two-team scoreboard on a reservation/reduced
 // row" a compile error at the call site instead of `undefined.id` at runtime.
 const _reservationHasNoHomeTeam: ScheduleReservation = {
-  isPlaceholder: true,
   kind: "reservation",
   id: 1,
   date: new Date(),
@@ -24,7 +23,6 @@ const _reservationHasNoHomeTeam: ScheduleReservation = {
   homeTeam: { id: 1235, name: "KCVV Elewijt" },
 };
 const _reducedHasNoHomeTeam: ScheduleReducedMatch = {
-  isPlaceholder: false,
   kind: "reduced",
   id: 1,
   date: new Date(),
@@ -119,17 +117,17 @@ describe("transformMatchToSchedule", () => {
     ).toBeUndefined();
   });
 
-  it("passes is_placeholder through as isPlaceholder when present (#2606)", () => {
+  it('passes is_placeholder through as kind: "reservation" when present (#2606)', () => {
     const placeholder = createRawMatch({ is_placeholder: true });
-    expect(transformMatchToSchedule(placeholder).isPlaceholder).toBe(true);
+    expect(transformMatchToSchedule(placeholder).kind).toBe("reservation");
 
     const normal = createRawMatch({ is_placeholder: false });
-    expect(transformMatchToSchedule(normal).isPlaceholder).toBe(false);
+    expect(transformMatchToSchedule(normal).kind).toBe("match");
   });
 
-  it("normalizes isPlaceholder to false when is_placeholder is absent (#2688 — a definite discriminant, not a tri-state)", () => {
+  it('normalizes kind to "match" when is_placeholder is absent (#2688 — a definite discriminant, not a tri-state)', () => {
     const match = createRawMatch();
-    expect(transformMatchToSchedule(match).isPlaceholder).toBe(false);
+    expect(transformMatchToSchedule(match).kind).toBe("match");
   });
 
   it("returns the ScheduleReservation shape for a placeholder — no awayTeam/scores, one `team` (#2688)", () => {
@@ -146,8 +144,9 @@ describe("transformMatchToSchedule", () => {
     });
     const result = transformMatchToSchedule(placeholder);
 
-    expect(result.isPlaceholder).toBe(true);
-    if (!result.isPlaceholder) throw new Error("expected a reservation");
+    expect(result.kind).toBe("reservation");
+    if (result.kind !== "reservation")
+      throw new Error("expected a reservation");
     expect(result.team).toEqual({
       id: 1235,
       name: "KCVV Elewijt",

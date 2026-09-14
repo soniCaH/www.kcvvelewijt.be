@@ -308,16 +308,9 @@ describe("otherClubSide (#2696, positional since #2802 review)", () => {
 });
 
 describe("isReducedMatchRow (#2696)", () => {
-  it("is true for a placeholder", () => {
-    expect(
-      isReducedMatchRow({ isPlaceholder: true, status: "scheduled" }),
-    ).toBe(true);
-  });
-
   it("is false for an ordinary league match", () => {
     expect(
       isReducedMatchRow({
-        isPlaceholder: false,
         competitionType: "league",
         status: "scheduled",
       }),
@@ -327,7 +320,6 @@ describe("isReducedMatchRow (#2696)", () => {
   it("is true for an unplayed tournament fixture", () => {
     expect(
       isReducedMatchRow({
-        isPlaceholder: false,
         competitionType: "tournament",
         status: "scheduled",
       }),
@@ -337,7 +329,6 @@ describe("isReducedMatchRow (#2696)", () => {
   it("is false again once a tournament fixture has a result — not merely once it has been played", () => {
     expect(
       isReducedMatchRow({
-        isPlaceholder: false,
         competitionType: "tournament",
         status: "finished",
         homeScore: 3,
@@ -350,7 +341,6 @@ describe("isReducedMatchRow (#2696)", () => {
     for (const status of ["finished", "forfeited", "stopped"] as const) {
       expect(
         isReducedMatchRow({
-          isPlaceholder: false,
           competitionType: "tournament",
           status,
         }),
@@ -361,7 +351,6 @@ describe("isReducedMatchRow (#2696)", () => {
   it("never keys on the Dutch competition label", () => {
     expect(
       isReducedMatchRow({
-        isPlaceholder: false,
         competitionType: "league",
         status: "scheduled",
       }),
