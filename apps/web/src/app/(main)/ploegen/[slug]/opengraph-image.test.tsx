@@ -35,8 +35,6 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
       findAll: () => Effect.die(new Error("Sanity is unreachable")),
       findBySlug: () => Effect.die(new Error("Sanity is unreachable")),
       findAllForLanding: () => Effect.die(new Error("Sanity is unreachable")),
-      findYouthTeamsForContact: () =>
-        Effect.die(new Error("Sanity is unreachable")),
       findByMemberId: () => Effect.die(new Error("Sanity is unreachable")),
     }),
   };
