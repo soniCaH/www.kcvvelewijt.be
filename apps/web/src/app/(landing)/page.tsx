@@ -358,6 +358,13 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
+  // Vanishing here is deliberate, not an oversight — `featuredEventBandEvent`
+  // degrades to `null` on a failed read the same way it does when nothing is
+  // authored (`degradeSection` above), so this section has no way to tell the
+  // two apart and doesn't need one: `featuredOnHome` is an editorial opt-in
+  // ticked on 5 of 82 events, so nobody is waiting for a band that only
+  // exists when someone ticks a box. See `<EmptyState>`'s docblock for the
+  // rule this follows (#2399/#2505/#2844).
   const featuredEventSection: SectionConfig | null = featuredEventBandEvent
     ? {
         key: "featured-event",

@@ -100,6 +100,26 @@
  * this register and re-open that exception deliberately, not assume
  * `<CompetitiveStatusLine>`'s shape is the norm.
  *
+ * **A homepage band's zero-row behaviour is decided by what its subject is,
+ * before this primitive ever enters the picture (#2399/#2505/#2844).** A
+ * band that acknowledges a remote match feed — `<FirstTeamsBlock>`,
+ * `<UpcomingMatches>` — holds its shape and names the reason on a failed
+ * read, because a visitor watching an empty band can't otherwise tell a
+ * stalled BFF from a feed that's genuinely gone quiet. `<FirstTeamsBlock>`
+ * holds that shape on every zero-row cause, not only a failure, and
+ * hand-rolls the dark-ground equivalent of this register rather than
+ * adopting it (see the parked note above); `<UpcomingMatches>` is the one
+ * that reaches this exact register (`tier="slot"`, `reason="unavailable"`),
+ * and only on a failed read — a genuinely empty feed still drops it
+ * silently. A band whose subject is one optional, editorially-gated
+ * document — `<FeaturedEventBand>`, gated on `featuredOnHome` and ticked on
+ * 5 of 82 events — has no feed to acknowledge in the first place, so it may
+ * vanish instead, deliberately, including on a failed read: nobody is
+ * waiting for a band that only exists when someone ticks a box, so its
+ * absence draws no wrong conclusion. A future band picks between these two
+ * halves by asking which kind of subject it has, not by copying whichever
+ * of the three it resembles most.
+ *
  * The artefact is never `<TapedCard>` — that primitive has no frameless
  * (`shadow: "none"`) or transparent-`bg` option today, and this slot needs
  * both (a bare `<JerseyShirt>`, not a second nested card). Add those options
