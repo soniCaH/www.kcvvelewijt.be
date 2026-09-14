@@ -432,7 +432,7 @@ describe("runSanityIndexSync", () => {
     expect(upserted.map((v) => v.id)).toEqual(["article-002"]);
   });
 
-  it("logs the dropped count and completes the run when a batch keeps failing", async () => {
+  it("logs the dropped count, still finishes the sweep, but reports the run as failed since nothing landed", async () => {
     const messages: string[] = [];
     const TestLogger = Logger.make(({ message }) => {
       messages.push(String(message));
@@ -448,13 +448,48 @@ describe("runSanityIndexSync", () => {
       ).pipe(Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger))),
     );
 
-    expect(Exit.isSuccess(exit)).toBe(true);
+    // Degradation still ran to completion (the drop is logged below) — but
+    // the whole sweep landed 0 of the 1 document it attempted, which #2870's
+    // review requires this to surface as a failure (previously this resolved
+    // successfully, so the scheduled job's Slack signal called it healthy).
+    expect(Exit.isSuccess(exit)).toBe(false);
     expect(
       messages.some((m) => m.includes("dropped 1 of 1") && m.includes("40041")),
     ).toBe(true);
     expect(
       messages.some((m) => m.includes("Indexed 0/1 responsibility paths")),
     ).toBe(true);
+  });
+
+  it("succeeds on a quiet night with nothing to index at all", async () => {
+    const { mock } = makeVectorizeCapture();
+
+    const exit = await Effect.runPromiseExit(sweep({}, mock));
+
+    expect(Exit.isSuccess(exit)).toBe(true);
+  });
+
+  it("still succeeds when one phase is entirely dropped but another phase lands documents (#2870: only a TOTAL wipeout fails the run)", async () => {
+    const { mock } = makeVectorizeCapture({
+      // Fail only chunks that are all-responsibility; let article/page
+      // chunks through, so one phase is a total loss while another lands.
+      upsert: (chunk) =>
+        chunk.every((v) => v.metadata["type"] === "responsibility")
+          ? Effect.fail(new VectorizeError("40041 Too Many Requests"))
+          : Effect.succeed(undefined),
+    });
+
+    const exit = await Effect.runPromiseExit(
+      sweep(
+        {
+          fetchResponsibility: noopFetch([mockDoc]),
+          fetchArticles: noopFetch([mockArticle]),
+        },
+        mock,
+      ),
+    );
+
+    expect(Exit.isSuccess(exit)).toBe(true);
   });
 
   it("refuses to sync when the worker's dataset doesn't match its configured index", async () => {

@@ -546,4 +546,26 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         }
       }
     }
+
+    // Report a real outcome (#2870 review). `embedDoc` and `upsertBatched`
+    // above degrade every embedding/upsert failure to "log and skip" so one
+    // bad document never aborts the rest of the sweep — but that means
+    // `Effect.runPromise` on this whole function used to resolve
+    // successfully even when Workers AI rate-limited every embed, or
+    // Vectorize rejected every upsert: zero vectors landed, search silently
+    // stopped updating, and the caller had no way to tell. Fail (and let the
+    // job-alert signal in index.ts see it) only on the unambiguous case —
+    // there was content to index and NONE of it landed — rather than on any
+    // single degraded document, which stays a WARN/ERROR log, not a job
+    // failure.
+    const totalAttempted =
+      docs.length + articleResult.length + pageResult.length;
+    const totalLanded = successCount + articleSuccessCount + pageSuccessCount;
+    if (totalAttempted > 0 && totalLanded === 0) {
+      return yield* Effect.fail(
+        new Error(
+          `[search-sync] indexed 0/${totalAttempted} documents this sweep — treating the run as failed`,
+        ),
+      );
+    }
   });

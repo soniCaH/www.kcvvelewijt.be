@@ -14,6 +14,7 @@ import { WorkerEnvTag } from "../env";
 import { PsdGateService, PsdGateTest, makePsdGateLayer } from "../psd/gate";
 import { GateLogic } from "../psd/gate-logic";
 import { BackgroundRunnerService } from "../psd/background";
+import { reportScheduledJobOutcome } from "../psd/job-alert";
 
 function makeMockKv() {
   const store = new Map<string, string>();
@@ -913,6 +914,71 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
       expect.anything(),
       expect.anything(),
     );
+  });
+});
+
+describe("Scheduled-job failure signal stays decoupled from PSD incident state (#2870)", () => {
+  it("running many job failures through reportScheduledJobOutcome never touches IncidentTracker, so the read path's own escalation is unaffected", async () => {
+    const mockKv = makeMockKv();
+    const incident = new IncidentTracker();
+    const reportSpy = vi.spyOn(incident, "report");
+    const gateLayer = makePsdGateLayer(
+      new GateLogic({ ratePerSecond: 1e9 }),
+      incident,
+    );
+
+    // Seven consecutive nightly job failures — the exact regression Option A
+    // was rejected to avoid is `gate.reportOutcome` (and therefore
+    // IncidentTracker) getting fed by the scheduled path.
+    for (let i = 0; i < 7; i++) {
+      await Effect.runPromise(
+        reportScheduledJobOutcome("psd-sanity-sync", {
+          ok: false,
+          error: new Error("PSD 429"),
+        }).pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+      );
+    }
+
+    // The job-alert reporter's Effect signature requires only KvCacheService
+    // and WorkerEnvTag — it was never given a PsdGateService to call.
+    expect(reportSpy).not.toHaveBeenCalled();
+    expect(incident.isOpen).toBe(false);
+
+    // Confirm the tracker is in its pristine "healthy since forever" state,
+    // not merely coincidentally closed: an UNRELATED read-path key's own
+    // first failure still opens an incident exactly as it would have with no
+    // job failures at all, proving the seven failures above left no trace.
+    mockKv.store.set(
+      "matches:team:1",
+      makeWrapper({ name: "stale", value: 1 }, 2 * 60 * 60 * 1000),
+    );
+    const { entries, layer: capture } = captureLogs();
+
+    await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch(
+          "matches:team:1",
+          Effect.fail(new Error("PSD 429") as never),
+          60,
+        )
+        .pipe(
+          Effect.provide(capture),
+          Effect.provide(Logger.minimumLogLevel(LogLevel.All)),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gateLayer),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(
+      entries.some(
+        (e) => e.level === "ERROR" && e.message.includes("refresh failed"),
+      ),
+    ).toBe(true);
+    expect(incident.isOpen).toBe(true); // opened NOW, for the first time, by this read failure alone
   });
 });
 
