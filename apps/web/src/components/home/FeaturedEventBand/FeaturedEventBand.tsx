@@ -74,6 +74,17 @@ export interface FeaturedEventBandProps {
  * `text-cream/80` body) instead of inventing a third one. See the PR for
  * #2944 for why this deviates from the ticket's literal `<EmptyState>`
  * wording.
+ *
+ * Keeps the kicker + a heading, matching how both sibling bands hold their
+ * shape: `<FirstTeamsBlock>` keeps its "EERSTE PLOEGEN" kicker and heading
+ * on a failed read, `<UpcomingMatches>` keeps "AGENDA" and "Komende
+ * wedstrijden." — dropping the chrome here (review finding on #2944) left
+ * the `aria-label`'d region unheaded and the band's own hierarchy missing
+ * on the one render path a visitor is most likely to land on during an
+ * outage. The populated heading is the event's own title and can't render
+ * here, so this uses a static sentence that names the slot instead —
+ * `display-md`, matching the siblings' own generic-heading size rather than
+ * this band's `display-lg` hero treatment (reserved for an actual title).
  */
 function FeaturedEventUnavailableNotice() {
   return (
@@ -83,6 +94,12 @@ function FeaturedEventUnavailableNotice() {
       className="bg-jersey-deep text-cream py-12 md:py-16"
     >
       <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
+        <div className="mb-6 flex flex-col gap-2">
+          <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
+          <EditorialHeading level={2} size="display-md" tone="cream">
+            Aanstaand evenement.
+          </EditorialHeading>
+        </div>
         <div className="border-cream/40 border-2 border-dashed px-4 py-8 text-center">
           <p className="text-cream/80">
             Het eerstvolgende evenement is even niet beschikbaar. Probeer het

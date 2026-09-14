@@ -83,6 +83,18 @@ describe("FeaturedEventBand", () => {
       ).toBeInTheDocument();
     });
 
+    it("keeps the kicker and a heading on the unavailable notice, so the region isn't unheaded", () => {
+      // Review finding on #2944: dropping the chrome (kicker + heading) on
+      // the failed-read path left the aria-label'd region unheaded — an
+      // a11y regression — and only half-satisfied "holds its shape",
+      // mirroring how `<FirstTeamsBlock>`/`<UpcomingMatches>` keep theirs.
+      render(<FeaturedEventBand event={null} now={NOW} unavailable />);
+      expect(screen.getByText("AANSTAAND EVENEMENT")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 2, name: "Aanstaand evenement." }),
+      ).toBeInTheDocument();
+    });
+
     it("renders the event as normal when unavailable is true but a renderable event is also passed", () => {
       // Only read on the no-event path — mirrors `<UpcomingMatches>`.
       render(<FeaturedEventBand event={event} now={NOW} unavailable />);
