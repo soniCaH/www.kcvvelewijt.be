@@ -1,12 +1,22 @@
 import {at, defineMigration, set} from 'sanity/migrate'
 
 /**
- * Repoints (or strips) every legacy `/player/<name-slug>` link stored in a
- * published `article` or `page` body — the Gatsby URL shape, carried over
- * two ways:
+ * Repoints (or strips) every legacy `/player/<name-slug>` link found at the
+ * **top level** of a published `article` or `page` body — the Gatsby URL
+ * shape, carried over two ways this walks:
  *
  *   - An authored `htmlTable` block's raw `html` string (`<a href="…">`).
- *   - A Portable Text `link` markDef's `href`.
+ *   - A top-level Portable Text block's `link` markDef `href`.
+ *
+ * **Known-uncovered: nested Portable Text.** `article.body` also admits
+ * `qaBlock` (→ `qaPair.respondents[].answer[]`, its own Portable Text with
+ * the default `link` annotation) and `eventFact`, neither of which this
+ * `body.map` descends into — a `/player/` link authored inside a Q&A answer
+ * would be silently left behind. Confirmed zero instances of either on
+ * production as of the 2026-09-10 scan (all 9 distinct hits are
+ * `body/[htmlTable]/html` or `body/[block]/markDefs/[link]/href`) — not
+ * built here because there is no data to test it against; a real instance
+ * would need this migration extended before it could be trusted to fix.
  *
  * Measured on production 2026-09-10 (see #2482): 59 instances across
  * exactly 3 articles, none of it in a `page`. A slug that still resolves to
@@ -279,13 +289,45 @@ interface MigrationFetchClient {
   fetch<T>(query: string): Promise<T>
 }
 
+/**
+ * Refuses to let the migration proceed when the player-rows query comes
+ * back empty. Without this, `resolvePlayerPsdId` would return `null` for
+ * *every* slug — the migration would silently take the destructive branch
+ * on all 59 instances (every anchor unwrapped, every markDef dropped) and
+ * overwrite the whole `body` array via `at('body', set(nextBody))` on a
+ * one-shot, irreversible run. A wrong `--dataset`/`--project`, a dataset
+ * restored before the PSD sync has populated `player` documents, or a
+ * transient API failure would all look identical from the migration's own
+ * output — nothing about the run itself would look wrong.
+ */
+export function assertPlayerRowsNonEmpty(rows: readonly PlayerRow[]): void {
+  if (rows.length > 0) return
+  throw new Error(
+    'repoint-legacy-player-links: the player-rows query ' +
+      `(${PLAYER_ROWS_QUERY}) returned zero rows — refusing to run. Every ` +
+      '/player/ link would resolve as dead and this migration would strip ' +
+      'all of them, which cannot be undone once committed. Check: the ' +
+      '--dataset/--project flags point at the intended dataset; the PSD ' +
+      'sync has actually populated `player` documents with a `psdId` in ' +
+      'this dataset; and the Sanity API call above did not fail silently.',
+  )
+}
+
 // Fetched once per migration run (the CLI runs this module fresh in its own
 // process) and reused across every document() invocation — mirrors the
-// run-scoped `Set` in `backfill-event-slug.ts`.
+// run-scoped `Set` in `backfill-event-slug.ts`. The empty-rows guard runs
+// inside this cached chain so it fires exactly once per run, and every
+// document() call awaiting the same cached (rejected) promise fails the
+// same way rather than only the first one.
 let cachedPlayerRows: Promise<PlayerRow[]> | undefined
 
 function fetchPlayerRows(client: MigrationFetchClient): Promise<PlayerRow[]> {
-  cachedPlayerRows ??= client.fetch<PlayerRow[]>(PLAYER_ROWS_QUERY)
+  cachedPlayerRows ??= client
+    .fetch<PlayerRow[]>(PLAYER_ROWS_QUERY)
+    .then((rows) => {
+      assertPlayerRowsNonEmpty(rows)
+      return rows
+    })
   return cachedPlayerRows
 }
 

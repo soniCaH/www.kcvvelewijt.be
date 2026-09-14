@@ -97,6 +97,7 @@ export type {HomePageWithYouthStatsDoc} from './set-homepage-youth-stats'
 
 export {
   default as repointLegacyPlayerLinksMigration,
+  assertPlayerRowsNonEmpty,
   migrateRepointLegacyPlayerLinks,
   resolvePlayerPsdId,
   rewritePlayerLinksInBlock,

@@ -1,6 +1,7 @@
 import {at, set} from 'sanity/migrate'
 import {describe, expect, it} from 'vitest'
 import {
+  assertPlayerRowsNonEmpty,
   migrateRepointLegacyPlayerLinks,
   resolvePlayerPsdId,
   rewritePlayerLinksInBlock,
@@ -30,6 +31,21 @@ describe('resolvePlayerPsdId', () => {
 
   it('falls back to treating the slug as a psdId directly', () => {
     expect(resolvePlayerPsdId('1673', ROWS)).toBe('1673')
+  })
+})
+
+describe('assertPlayerRowsNonEmpty', () => {
+  it('throws when the player-rows query came back empty — refusing to run rather than strip every link', () => {
+    expect(() => assertPlayerRowsNonEmpty([])).toThrow(/zero rows/i)
+  })
+
+  it('names what to check in the thrown message: dataset/project flags and the PSD sync', () => {
+    expect(() => assertPlayerRowsNonEmpty([])).toThrow(/--dataset/)
+    expect(() => assertPlayerRowsNonEmpty([])).toThrow(/psd sync/i)
+  })
+
+  it('does not throw when at least one player row is present', () => {
+    expect(() => assertPlayerRowsNonEmpty(ROWS)).not.toThrow()
   })
 })
 
