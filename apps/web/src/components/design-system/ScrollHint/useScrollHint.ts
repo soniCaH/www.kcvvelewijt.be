@@ -24,6 +24,17 @@ export interface UseScrollHintOptions<T extends HTMLElement = HTMLElement> {
    * own border box (review finding #2577, part 6).
    */
   remeasureOn?: React.DependencyList;
+  /**
+   * Caps `remainingLeft` / `remainingRight` at this many pixels. A consumer
+   * that renders a fade whose width is `min(fadeWidth, remaining)` should
+   * pass its fade width here instead of clamping at the call site (#2860):
+   * once the real remaining distance exceeds the cap, the capped value —
+   * and therefore the consumer's render — stops changing, since past that
+   * point the rendered fade is already at full width regardless of exactly
+   * how much further there is to scroll. Defaults to `Infinity` — uncapped,
+   * the raw pixel count.
+   */
+  maxRemainingPx?: number;
 }
 
 export interface UseScrollHintReturn<T extends HTMLElement = HTMLElement> {
@@ -38,9 +49,17 @@ export interface UseScrollHintReturn<T extends HTMLElement = HTMLElement> {
    * when its track overflows at that width, and nothing when it does not").
    */
   overflows: boolean;
-  /** Pixels still scrollable to the left — 0 at the start of the track. */
+  /**
+   * Pixels still scrollable to the left — 0 at the start of the track,
+   * capped at `maxRemainingPx` when the caller supplies one (uncapped, the
+   * raw pixel count, by default).
+   */
   remainingLeft: number;
-  /** Pixels still scrollable to the right — 0 at the end of the track. */
+  /**
+   * Pixels still scrollable to the right — 0 at the end of the track,
+   * capped at `maxRemainingPx` when the caller supplies one (uncapped, the
+   * raw pixel count, by default).
+   */
   remainingRight: number;
   scrollLeft: () => void;
   scrollRight: () => void;
@@ -49,7 +68,11 @@ export interface UseScrollHintReturn<T extends HTMLElement = HTMLElement> {
 export function useScrollHint<T extends HTMLElement = HTMLElement>(
   options: UseScrollHintOptions<T> = {},
 ): UseScrollHintReturn<T> {
-  const { scrollAmount = SCROLL_AMOUNT, remeasureOn = [] } = options;
+  const {
+    scrollAmount = SCROLL_AMOUNT,
+    remeasureOn = [],
+    maxRemainingPx = Infinity,
+  } = options;
   const scrollRef = useRef<T | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -57,7 +80,34 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
   const [remainingLeft, setRemainingLeft] = useState(0);
   const [remainingRight, setRemainingRight] = useState(0);
 
-  const checkScroll = useCallback(() => {
+  // The track's own horizontal padding, cached across scroll events.
+  // Scrolling cannot change an element's own padding, so re-reading
+  // `getComputedStyle` — a forced style/layout flush — on every scroll tick
+  // measures a value scrolling never touches. `measurePadding` below is
+  // called by every non-scroll trigger (mount, resize, transitionend, the
+  // ResizeObserver, the MutationObserver, the font-swap promise) so the
+  // cache is refreshed whenever the padding could genuinely have changed;
+  // the scroll path (`applyMeasurement`) only ever reads it back (#2860).
+  const paddingRef = useRef(0);
+  // Handle of the animation frame scheduled by a pending scroll tick, so
+  // `scheduleScrollCheck` can coalesce a burst of `scroll` events into one
+  // measurement and the cleanup below can cancel a frame that never got a
+  // chance to run before unmount.
+  const rafRef = useRef<number | null>(null);
+
+  const measurePadding = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const style = window.getComputedStyle(el);
+    paddingRef.current =
+      parseFloat(style.paddingLeft || "0") +
+      parseFloat(style.paddingRight || "0");
+  }, []);
+
+  // The measurement itself. Reads only the track's own scroll offsets and
+  // dimensions plus the cached padding — never `getComputedStyle` — so it
+  // is safe to run on every scroll tick.
+  const applyMeasurement = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
 
@@ -77,27 +127,43 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     // fixed by the track's own layout, not by its padding) — so a track
     // that would fit unpadded at a wider viewport can still read as
     // overflowing purely from padding a PRIOR, narrower measurement added.
-    // Reading the padding actually on the element right now (rather than
-    // assuming a fixed rail width) keeps this correct for any consumer,
-    // railed or not.
-    const style = window.getComputedStyle(el);
-    const paddingX =
-      parseFloat(style.paddingLeft || "0") +
-      parseFloat(style.paddingRight || "0");
-    setOverflows(scrollWidth - paddingX - clientWidth > DEAD_ZONE);
+    // Reading the padding actually on the element (rather than assuming a
+    // fixed rail width) keeps this correct for any consumer, railed or not.
+    // `paddingRef` is cached rather than re-read here — see the comment on
+    // its declaration above — because scroll ticks cannot change it.
+    setOverflows(scrollWidth - paddingRef.current - clientWidth > DEAD_ZONE);
 
-    setRemainingLeft(rLeft);
-    setRemainingRight(rRight);
-  }, []);
+    setRemainingLeft(Math.min(maxRemainingPx, rLeft));
+    setRemainingRight(Math.min(maxRemainingPx, rRight));
+  }, [maxRemainingPx]);
+
+  // Full re-check for every non-scroll trigger: refresh the cached padding
+  // first (it may genuinely have changed), then recompute from it.
+  const remeasure = useCallback(() => {
+    measurePadding();
+    applyMeasurement();
+  }, [measurePadding, applyMeasurement]);
+
+  // The scroll path. A fast scroll fires many `scroll` events within a
+  // single frame; only the last one before paint matters, so coalesce them
+  // into at most one `applyMeasurement` call per animation frame instead of
+  // running it synchronously on every event.
+  const scheduleScrollCheck = useCallback(() => {
+    if (rafRef.current !== null) return;
+    rafRef.current = window.requestAnimationFrame(() => {
+      rafRef.current = null;
+      applyMeasurement();
+    });
+  }, [applyMeasurement]);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    checkScroll();
+    remeasure();
 
-    el.addEventListener("scroll", checkScroll);
-    window.addEventListener("resize", checkScroll);
+    el.addEventListener("scroll", scheduleScrollCheck);
+    window.addEventListener("resize", remeasure);
     // A CSS transition (e.g. the organigram explorer's zoom control, a
     // `transform: scale()` on a descendant) changes the rendered size
     // gradually — `remeasureOn` fires immediately on the dependency change,
@@ -105,7 +171,7 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     // value. `transitionend` bubbles up from the transitioned descendant to
     // this track, giving a correct final re-check once the animation
     // actually settles.
-    el.addEventListener("transitionend", checkScroll);
+    el.addEventListener("transitionend", remeasure);
 
     // #2448: the track's own border box never changes when its CONTENT gets
     // wider — a horizontally-constrained row's width is set by its parent,
@@ -122,7 +188,7 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     // re-checks scroll AND starts observing any newly-arrived child's own
     // box, so a trail that starts shallow (no overflow) still gets a
     // correct read once it grows deep.
-    const resizeObserver = new ResizeObserver(checkScroll);
+    const resizeObserver = new ResizeObserver(remeasure);
     resizeObserver.observe(el);
 
     const observedChildren = new WeakSet<Element>();
@@ -135,26 +201,30 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
 
     const mutationObserver = new MutationObserver(() => {
       for (const child of Array.from(el.children)) observeChild(child);
-      checkScroll();
+      remeasure();
     });
     mutationObserver.observe(el, { childList: true });
 
-    document.fonts?.ready.then(checkScroll).catch(() => {});
+    document.fonts?.ready.then(remeasure).catch(() => {});
 
     return () => {
-      el.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-      el.removeEventListener("transitionend", checkScroll);
+      el.removeEventListener("scroll", scheduleScrollCheck);
+      window.removeEventListener("resize", remeasure);
+      el.removeEventListener("transitionend", remeasure);
       resizeObserver.disconnect();
       mutationObserver.disconnect();
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
-  }, [checkScroll]);
+  }, [remeasure, scheduleScrollCheck]);
 
   // Extra, caller-declared re-measure triggers — e.g. a zoom control whose
   // CSS transform a ResizeObserver cannot see (part 6).
 
   useEffect(() => {
-    checkScroll();
+    remeasure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, remeasureOn);
 

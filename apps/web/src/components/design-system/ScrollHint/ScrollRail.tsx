@@ -4,8 +4,7 @@ import type { ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useScrollHint } from "./useScrollHint";
 import { ScrollArrowButton } from "./ScrollArrowButton";
-
-const MAX_FADE_PX = 24;
+import { MAX_FADE_PX } from "./scrollFadeWidth";
 
 /**
  * Reserved gutter for a "row of discrete things" — chips, crumbs, nav
@@ -85,7 +84,7 @@ export function ScrollRail({
     remainingRight,
     scrollLeft,
     scrollRight,
-  } = useScrollHint<HTMLElement>();
+  } = useScrollHint<HTMLElement>({ maxRemainingPx: MAX_FADE_PX });
 
   return (
     <div className={cn("relative", className)}>
@@ -93,7 +92,7 @@ export function ScrollRail({
         <>
           <div
             aria-hidden="true"
-            style={{ width: Math.min(MAX_FADE_PX, remainingLeft) }}
+            style={{ width: remainingLeft }}
             className={cn(
               "pointer-events-none absolute inset-y-0 left-0 z-[5] bg-gradient-to-r to-transparent",
               fadeFromClassName,
@@ -127,7 +126,7 @@ export function ScrollRail({
         <>
           <div
             aria-hidden="true"
-            style={{ width: Math.min(MAX_FADE_PX, remainingRight) }}
+            style={{ width: remainingRight }}
             className={cn(
               "pointer-events-none absolute inset-y-0 right-0 z-[5] bg-gradient-to-l to-transparent",
               fadeFromClassName,

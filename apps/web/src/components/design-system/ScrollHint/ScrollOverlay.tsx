@@ -4,8 +4,7 @@ import type { ElementType, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useScrollHint } from "./useScrollHint";
 import { ScrollArrowButton } from "./ScrollArrowButton";
-
-const MAX_FADE_PX = 24;
+import { MAX_FADE_PX } from "./scrollFadeWidth";
 
 export interface ScrollOverlayProps {
   /** Element type for the scrollable track itself. Defaults to `"div"`. */
@@ -65,8 +64,10 @@ export interface ScrollOverlayProps {
  * targets — a table, a diagram — so it never reserves a gutter: the arrow
  * simply overlays the edge, mounted per direction exactly when
  * `useScrollHint`'s `canScrollLeft`/`canScrollRight` is true, with a fade
- * capped at `min(24px, remaining)` (#2476 amendment: a fixed-width fade
- * over a narrow overflow veils more than is actually cut).
+ * capped at `MAX_FADE_PX` via `useScrollHint`'s `maxRemainingPx` (#2476
+ * amendment: a fixed-width fade over a narrow overflow veils more than is
+ * actually cut; #2860 moved the cap from a call-site `Math.min` into the
+ * hook itself so the capped value stops changing past that point).
  *
  * `register` is not a prop here for the same reason `<ScrollRail>` doesn't
  * expose it — every arrow this component renders is `"control"`.
@@ -98,7 +99,7 @@ export function ScrollOverlay({
     remainingRight,
     scrollLeft,
     scrollRight,
-  } = useScrollHint<HTMLElement>({ remeasureOn });
+  } = useScrollHint<HTMLElement>({ remeasureOn, maxRemainingPx: MAX_FADE_PX });
 
   const showLeft = direction === "both" && canScrollLeft;
 
@@ -125,7 +126,7 @@ export function ScrollOverlay({
         <>
           <div
             aria-hidden="true"
-            style={{ width: Math.min(MAX_FADE_PX, remainingLeft) }}
+            style={{ width: remainingLeft }}
             className={cn(
               "pointer-events-none absolute inset-y-0 left-0 bg-gradient-to-r to-transparent",
               fadeFromClassName,
@@ -144,7 +145,7 @@ export function ScrollOverlay({
         <>
           <div
             aria-hidden="true"
-            style={{ width: Math.min(MAX_FADE_PX, remainingRight) }}
+            style={{ width: remainingRight }}
             className={cn(
               "pointer-events-none absolute inset-y-0 right-0 bg-gradient-to-l to-transparent",
               fadeFromClassName,
