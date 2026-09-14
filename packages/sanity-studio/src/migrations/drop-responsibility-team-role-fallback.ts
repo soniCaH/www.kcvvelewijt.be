@@ -62,12 +62,20 @@ export function migrateDropResponsibilityTeamRoleFallback(
   }
 
   const steps = Array.isArray(doc.steps) ? doc.steps : []
-  for (const step of steps) {
-    if (!step?._key) continue
-    if (step.contact?.teamRoleFallback !== undefined) {
-      patches.push(at(`steps[_key=="${step._key}"].contact.teamRoleFallback`, unset()))
+  steps.forEach((step, index) => {
+    if (step?.contact?.teamRoleFallback === undefined) return
+    if (!step._key) {
+      // Can't build a stable patch path without a _key — same guard as the
+      // peer `qa-pair-respondents.ts`. Unmeasured on both datasets today
+      // (0 step-level occurrences), but stay loud about it rather than
+      // silently leaving the orphan field in place forever.
+      console.warn(
+        `[drop-responsibility-team-role-fallback] doc ${doc._id ?? '(unknown id)'}: steps[${index}].contact.teamRoleFallback is set but the step has no _key — skipping, field left in place`,
+      )
+      return
     }
-  }
+    patches.push(at(`steps[_key=="${step._key}"].contact.teamRoleFallback`, unset()))
+  })
 
   return patches.length > 0 ? patches : undefined
 }

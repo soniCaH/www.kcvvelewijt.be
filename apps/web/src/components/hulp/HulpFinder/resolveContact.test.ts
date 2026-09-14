@@ -75,4 +75,10 @@ describe("resolveContact", () => {
     });
     expect(afgevaardigde.role).toBe("Afgevaardigde van jouw ploeg");
   });
+
+  it("falls back to a generic label when a team-role contact has no teamRole (Studio validation doesn't cover API writes)", () => {
+    const resolved = resolveContact({ contactType: "team-role" });
+    expect(resolved.role).toBe("Contactpersoon van jouw ploeg");
+    expect(resolved.organigramHref).toBe("/ploegen");
+  });
 });

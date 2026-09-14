@@ -242,14 +242,14 @@ Replaces the entire `primaryContact` object UI (8 fields + 3 conditional branche
 - Empty: single search box "Zoek positie, teamrol of voeg handmatig toe…"
 - Searching: dropdown grouped by source (Posities, Teamrollen, ✏️ Handmatig)
 - Selected (position): chip showing position + holder name + ✕
-- Selected (team-role): chip + secondary "Fallback teamrol" select expands inline (the only conditional that survives — it's a real editorial choice)
+- Selected (team-role): chip only — no secondary conditional. `teamRoleFallback` was dropped from the schema (#2952): `teamRole` is required whenever `contactType === 'team-role'`, so a fallback select could never be reached through Studio.
 - Selected (manual): chip showing summary; click chip to expand inline form (rol/email/telefoon/afdeling)
 - Orphan `_ref`: chip renders "⚠️ Verwijderd contact (id: xyz)" + ✕ to clear
 
 **Patch shapes (unchanged from today's `contactFields`):**
 
 - Position → `{ contactType: 'position', organigramNode: { _type: 'reference', _ref } }`
-- Team-role → `{ contactType: 'team-role', teamRole, teamRoleFallback? }`
+- Team-role → `{ contactType: 'team-role', teamRole }`
 - Manual → `{ contactType: 'manual', role?, email?, phone?, department? }`
 
 **Implementation notes:**

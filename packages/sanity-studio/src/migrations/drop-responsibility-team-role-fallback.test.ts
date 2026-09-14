@@ -1,5 +1,5 @@
 import {at, unset} from 'sanity/migrate'
-import {describe, expect, it} from 'vitest'
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 import {
   migrateDropResponsibilityTeamRoleFallback,
   type ResponsibilityWithTeamRoleFallbackDoc,
@@ -85,12 +85,36 @@ describe('migrateDropResponsibilityTeamRoleFallback', () => {
     ])
   })
 
-  it('skips a step contact carrying the field when the step has no _key', () => {
-    const doc: ResponsibilityWithTeamRoleFallbackDoc = {
-      _id: 'r-1',
-      _type: 'responsibility',
-      steps: [{contact: {teamRoleFallback: 'trainer'}}],
-    }
-    expect(migrateDropResponsibilityTeamRoleFallback(doc)).toBeUndefined()
+  describe('a step contact carrying the field with no _key', () => {
+    let warnSpy: ReturnType<typeof vi.spyOn>
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      warnSpy.mockRestore()
+    })
+
+    it('skips the patch — no stable path can be built without a _key', () => {
+      const doc: ResponsibilityWithTeamRoleFallbackDoc = {
+        _id: 'r-1',
+        _type: 'responsibility',
+        steps: [{contact: {teamRoleFallback: 'trainer'}}],
+      }
+      expect(migrateDropResponsibilityTeamRoleFallback(doc)).toBeUndefined()
+    })
+
+    it('warns loudly instead of silently leaving the orphan field in place', () => {
+      const doc: ResponsibilityWithTeamRoleFallbackDoc = {
+        _id: 'r-1',
+        _type: 'responsibility',
+        steps: [{contact: {teamRoleFallback: 'trainer'}}],
+      }
+      migrateDropResponsibilityTeamRoleFallback(doc)
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy.mock.calls[0][0]).toContain('r-1')
+      expect(warnSpy.mock.calls[0][0]).toContain('steps[0]')
+    })
   })
 })
