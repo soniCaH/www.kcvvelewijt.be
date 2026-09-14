@@ -95,7 +95,11 @@ export const mockUpcomingFive: UpcomingMatch[] = [
     "10:30",
     kcvv(),
     opponent(230, "KCS Machelen"),
-    { kcvvTeamLabel: "U17", competition: "Gewestelijke U17" },
+    {
+      kcvvTeamLabel: "U17",
+      competition: "Gewestelijke U17",
+      venue: HOME_VENUE,
+    },
   ),
 ];
 
@@ -114,7 +118,11 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "14:00",
     kcvv(),
     opponent(628, "City Pirates"),
-    { kcvvTeamLabel: "U15", competition: "Gewestelijke U15" },
+    {
+      kcvvTeamLabel: "U15",
+      competition: "Gewestelijke U15",
+      venue: HOME_VENUE,
+    },
   ),
   makeMatch(
     508,
@@ -122,6 +130,7 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "15:00",
     kcvv(),
     opponent(448, "FC Wezel Sport"),
+    { venue: HOME_VENUE },
   ),
   makeMatch(
     509,
@@ -137,6 +146,7 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "15:00",
     kcvv(),
     opponent(230, "KCS Machelen"),
+    { venue: HOME_VENUE },
   ),
   makeMatch(
     511,
@@ -152,6 +162,7 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
     "14:30",
     kcvv(),
     opponent(628, "City Pirates"),
+    { venue: HOME_VENUE },
   ),
 ];
 
