@@ -94,3 +94,18 @@ export {
   YOUTH_TEAM_COUNT_DEFAULT,
 } from './set-homepage-youth-stats'
 export type {HomePageWithYouthStatsDoc} from './set-homepage-youth-stats'
+
+export {
+  default as repointLegacyPlayerLinksMigration,
+  migrateRepointLegacyPlayerLinks,
+  resolvePlayerPsdId,
+  rewritePlayerLinksInBlock,
+  rewritePlayerLinksInHtml,
+} from './repoint-legacy-player-links'
+export type {
+  ArticleOrPageDoc as RepointLegacyPlayerLinksDoc,
+  PlayerRow as RepointLegacyPlayerLinksPlayerRow,
+  PortableTextBlockLike as RepointLegacyPlayerLinksBlock,
+  PortableTextMarkDef as RepointLegacyPlayerLinksMarkDef,
+  PortableTextSpan as RepointLegacyPlayerLinksSpan,
+} from './repoint-legacy-player-links'
