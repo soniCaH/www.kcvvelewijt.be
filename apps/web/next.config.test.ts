@@ -225,4 +225,28 @@ describe("next.config redirects", () => {
       expect(r.source).not.toContain(":");
     }
   });
+
+  it("routes the Gatsby content-hashed PDF URLs to their migrated copies (#2960)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const expected = [
+      {
+        source:
+          "/static/reglement_inwendige_orde_2022-823bb0914d959fb88bd234cfdbe94df5.pdf",
+        destination: "/downloads/reglement_inwendige_orde_2022.pdf",
+      },
+      {
+        source:
+          "/static/2022-2023_-_De_ideale_voetbalgrootouder-9258184a39461d932c725c054e3007f9.pdf",
+        destination: "/downloads/2022-2023_-_De_ideale_voetbalgrootouder.pdf",
+      },
+    ];
+
+    for (const { source, destination } of expected) {
+      const match = redirects.find((r) => r.source === source);
+      expect(match, `Missing redirect for ${source}`).toBeDefined();
+      expect(match!.destination).toBe(destination);
+      expect(match!.permanent).toBe(true);
+    }
+  });
 });
