@@ -7,7 +7,7 @@ import type { SanityProjectionInterface } from "../sanity/projection";
 import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient, PsdTeamClientError } from "./psd-team-client";
-import { WorkerEnvTag } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import type {
   PsdClubStaffMember,
   PsdMember,
@@ -150,21 +150,9 @@ function makeKvStub() {
 }
 
 function makeEnvLayer(kvStub: KVNamespace) {
-  return Layer.succeed(WorkerEnvTag, {
-    PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
-    PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
-    FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
-    PSD_API_KEY: "test-key",
-    PSD_API_CLUB: "test-club",
-    PSD_API_AUTH: "test-auth",
+  return makeTestEnvLayer({
     PSD_CACHE: kvStub,
-    PSD_GATE: {} as DurableObjectNamespace,
-    SANITY_PROJECT_ID: "test",
-    SANITY_DATASET: "test",
-    SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: "",
-    AI: {} as Ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
   });
 }
 

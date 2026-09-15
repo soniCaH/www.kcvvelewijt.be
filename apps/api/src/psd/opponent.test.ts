@@ -4,7 +4,7 @@ import { PsdService, PsdServiceLive } from "./service";
 import { PsdGateTest } from "./gate";
 import { OpponentHistory } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
-import { WorkerEnvTag } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import {
   SanityProjection,
@@ -15,21 +15,9 @@ import { CLUB_VENUE } from "./venue";
 global.fetch = vi.fn();
 
 function makeEnvLayer() {
-  return Layer.succeed(WorkerEnvTag, {
-    PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
-    PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
-    FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
-    PSD_API_KEY: "test-key",
-    PSD_API_CLUB: "test-club",
-    PSD_API_AUTH: "test-auth",
-    PSD_CACHE: {} as KVNamespace,
-    PSD_GATE: {} as DurableObjectNamespace,
+  return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
-    SANITY_DATASET: "test",
-    SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: "",
-    AI: {} as Ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
   });
 }
 

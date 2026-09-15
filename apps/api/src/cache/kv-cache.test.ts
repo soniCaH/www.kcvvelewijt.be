@@ -10,7 +10,7 @@ import {
   HARD_TTL_LONG,
   BG_REFRESH_TIMEOUT_MS,
 } from "./kv-cache";
-import { WorkerEnvTag } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { PsdGateService, PsdGateTest, makePsdGateLayer } from "../psd/gate";
 import { GateLogic } from "../psd/gate-logic";
 import { BackgroundRunnerService } from "../psd/background";
@@ -34,21 +34,10 @@ function makeEnvLayer(
   mockKv: ReturnType<typeof makeMockKv>,
   overrides: { CACHE_LONG_TTL?: string } = {},
 ) {
-  return Layer.succeed(WorkerEnvTag, {
-    PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
-    PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
-    FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
-    PSD_API_KEY: "test-key",
-    PSD_API_CLUB: "test-club",
-    PSD_API_AUTH: "test-auth",
+  return makeTestEnvLayer({
     PSD_CACHE: mockKv as unknown as KVNamespace,
-    PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "test-project",
-    SANITY_DATASET: "test",
-    SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: "",
-    AI: {} as Ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
     ...overrides,
   });
 }
