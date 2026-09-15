@@ -137,7 +137,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
     JSON.stringify({ value, fetchedAt: Date.now() });
 
   return {
-    getOrFetch: <E, R>(
+    getOrFetch: <E, R extends PsdRefreshEnv>(
       key: string,
       fetch: Effect.Effect<A, E, R>,
       softTtl: number | ((value: A) => number),
@@ -383,10 +383,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
               // when no runner is wired (no `waitUntil` to hand it to).
               const ping = nudge(Date.now() - fetchedAt);
               yield* Option.isSome(runnerOpt)
-                ? runnerOpt.value.fork(
-                    `drift:${key}`,
-                    ping as Effect.Effect<void, unknown, PsdRefreshEnv>,
-                  )
+                ? runnerOpt.value.fork(`drift:${key}`, ping)
                 : ping;
             }
 
@@ -407,12 +404,10 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
             if (Option.isSome(runnerOpt)) {
               // Stale-while-revalidate: serve stale NOW, refresh in the
               // background (single-flight) via the runner — see background-live.ts.
-              // Cast is safe: only PSD handlers provide a runner, and its layer
-              // covers this refresh's deps (a non-PSD caller has no runner here).
-              const refresh = backgroundRefresh(
-                fetchedAt,
-                resolvedSoftTtl,
-              ) as Effect.Effect<void, unknown, PsdRefreshEnv>;
+              // `R extends PsdRefreshEnv` on `getOrFetch` makes this safe by
+              // construction: `fetch`'s own requirements are already within
+              // what the runner's layer provides.
+              const refresh = backgroundRefresh(fetchedAt, resolvedSoftTtl);
               yield* runnerOpt.value.fork(`refresh:${key}`, refresh);
               return value;
             }
