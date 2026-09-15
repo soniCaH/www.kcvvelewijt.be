@@ -919,21 +919,24 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
   });
 });
 
-describe("TypedKvCache — non-PSD callers never speak for PSD incident state (#2868)", () => {
+describe("TypedKvCache — non-PSD-backed caches never speak for PSD incident state (#2868)", () => {
   const staleWrapper = (value: unknown) =>
     makeWrapper(value, 2 * 60 * 60 * 1000);
 
-  it("a related:-prefixed background refresh SUCCESS never reaches gate.reportOutcome", async () => {
+  it("a psdBacked: false cache's background refresh SUCCESS never reaches gate.reportOutcome", async () => {
     const mockKv = makeMockKv();
-    mockKv.store.set("related:1:max", staleWrapper({ name: "old", value: 1 }));
+    // Deliberately NOT "related:"-prefixed — the classification is a
+    // property of the cache instance (the `psdBacked` option below), not a
+    // guess from the key string (#2868 review).
+    mockKv.store.set("vec:1:max", staleWrapper({ name: "old", value: 1 }));
     const { layer: gate, reportOutcome } = spyGate();
     const { runnerLayer, settle } = withRunner(mockKv, gate);
 
     const fetchEffect = Effect.succeed({ name: "fresh", value: 2 });
 
     const result = await Effect.runPromise(
-      TypedKvCache(TestSchema)
-        .getOrFetch("related:1:max", fetchEffect, 60)
+      TypedKvCache(TestSchema, { psdBacked: false })
+        .getOrFetch("vec:1:max", fetchEffect, 60)
         .pipe(
           Effect.provide(runnerLayer),
           Effect.provide(KvCacheLive),
@@ -947,7 +950,7 @@ describe("TypedKvCache — non-PSD callers never speak for PSD incident state (#
     expect(result).toEqual({ name: "old", value: 1 });
     // ...and the background refresh really did succeed (proves the guard
     // suppresses only the REPORT, not the refresh itself)...
-    expect(JSON.parse(mockKv.store.get("related:1:max")!).value).toEqual({
+    expect(JSON.parse(mockKv.store.get("vec:1:max")!).value).toEqual({
       name: "fresh",
       value: 2,
     });
@@ -956,17 +959,17 @@ describe("TypedKvCache — non-PSD callers never speak for PSD incident state (#
     expect(reportOutcome).not.toHaveBeenCalled();
   });
 
-  it("a related:-prefixed background refresh FAILURE never reaches gate.reportOutcome", async () => {
+  it("a psdBacked: false cache's background refresh FAILURE never reaches gate.reportOutcome", async () => {
     const mockKv = makeMockKv();
-    mockKv.store.set("related:1:max", staleWrapper({ name: "old", value: 1 }));
+    mockKv.store.set("vec:1:max", staleWrapper({ name: "old", value: 1 }));
     const { layer: gate, reportOutcome } = spyGate();
     const { runnerLayer, settle } = withRunner(mockKv, gate);
 
     const fetchEffect = Effect.fail(new Error("vectorize down") as never);
 
     const result = await Effect.runPromise(
-      TypedKvCache(TestSchema)
-        .getOrFetch("related:1:max", fetchEffect, 60)
+      TypedKvCache(TestSchema, { psdBacked: false })
+        .getOrFetch("vec:1:max", fetchEffect, 60)
         .pipe(
           Effect.provide(runnerLayer),
           Effect.provide(KvCacheLive),
@@ -978,13 +981,13 @@ describe("TypedKvCache — non-PSD callers never speak for PSD incident state (#
 
     expect(result).toEqual({ name: "old", value: 1 });
     // Normal failure path still ran (negative marker set)...
-    expect(mockKv.store.get("neg:related:1:max")).toBe("1");
+    expect(mockKv.store.get("neg:vec:1:max")).toBe("1");
     // ...but it must never be able to open a false PSD outage on the
     // strength of a Vectorize-only failure (#2868 review).
     expect(reportOutcome).not.toHaveBeenCalled();
   });
 
-  it("control: a PSD-prefixed key's background refresh success STILL reports to the gate", async () => {
+  it("control: a default (psdBacked-omitted) cache's background refresh success STILL reports to the gate", async () => {
     const mockKv = makeMockKv();
     mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
     const { layer: gate, reportOutcome } = spyGate();
@@ -1004,8 +1007,8 @@ describe("TypedKvCache — non-PSD callers never speak for PSD incident state (#
     );
     await settle();
 
-    // The guard is scoped to `related:*`, not a blanket disable — a normal
-    // PSD-backed key must keep reporting.
+    // The guard is scoped to caches declared psdBacked: false, not a
+    // blanket disable — a normal (default) cache must keep reporting.
     expect(reportOutcome).toHaveBeenCalledWith({ ok: true, key: "test-key" });
   });
 });

@@ -29,11 +29,12 @@ import type { VectorizeService } from "../search/vectorize";
  * the caller).
  *
  * Because a non-PSD caller now genuinely runs through this seam,
- * `TypedKvCache.getOrFetch` (`cache/kv-cache.ts`) gates every
- * `gate.reportOutcome` call it can reach from here on `isPsdBackedKey(key)`:
- * `gate.reportOutcome` feeds the GLOBAL PSD incident tracker
- * (`psd/incident.ts`), so a `related:*` key's Vectorize-only outcome must
- * never open or close a PSD outage on its behalf (#2868 review).
+ * `TypedKvCache` (`cache/kv-cache.ts`) takes a `psdBacked` option — a
+ * property of the CACHE INSTANCE, not a key-prefix guess — and
+ * `handlers/related.ts` declares `psdBacked: false`, so `getOrFetch` never
+ * lets a Vectorize-only refresh's outcome reach `gate.reportOutcome` (which
+ * feeds the GLOBAL PSD incident tracker, `psd/incident.ts`): it must never
+ * open or close a PSD outage on Vectorize's behalf (#2868 review).
  */
 export type PsdRefreshEnv =
   | PsdService
