@@ -7,12 +7,14 @@ import { OrgPersonCard } from "@/components/organigram/OrgPersonCard";
  * `<StructureDirectory>` — the Phase 7 `/hulp` "Structuur" browse (design lock
  * `7o2` view model).
  *
- * The calm, single-scroll people directory: every active organigram position
- * grouped by **afdeling** (Hoofdbestuur · Jeugdbestuur · Algemeen) and rendered
- * as an `<OrgPersonCard>` (single / shared / vacant). Every position is shown —
- * no per-afdeling cap (an arbitrary "first N" read as a featured subset, #2054
- * owner review); navigation lives in the explorer + the clickable full chart, so
- * the directory's job is simply to list everyone honestly.
+ * The calm, single-scroll listing of organigram **positions**, grouped by
+ * **afdeling** (Hoofdbestuur · Jeugdbestuur · Algemeen) and rendered as an
+ * `<OrgPersonCard>` (single / shared / vacant): `/hulp` is a chart of
+ * positions, not a directory of people (#2477 rule 7). Every position is
+ * shown — no per-afdeling cap (an arbitrary "first N" read as a featured
+ * subset, #2054 owner review); navigation lives in the explorer + the
+ * clickable full chart, so this component's job is simply to list every
+ * position honestly.
  *
  * Data only: vacant cards are the real 0-members positions, never fabricated.
  */
