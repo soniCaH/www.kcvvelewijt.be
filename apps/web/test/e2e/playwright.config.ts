@@ -16,7 +16,20 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 2 : undefined,
-  reporter: process.env.CI ? [["github"], ["list"]] : "list",
+  // `github-summary` writes flaky/skipped counts to the job summary (#2971):
+  // this job exits 0 for a passed test, a retried-then-passed one and a
+  // data-guard-skipped one alike, and only the first verified anything.
+  reporter: process.env.CI
+    ? [
+        ["github"],
+        ["list"],
+        // The `playwright-report` artifact the workflow uploads had no
+        // producer — no `html` reporter was registered, so it was always
+        // empty. It is the surface you actually read a flaky attempt from.
+        ["html", { open: "never" }],
+        ["../reporters/github-summary.ts"],
+      ]
+    : "list",
   use: {
     baseURL: BASE_URL,
     trace: "retain-on-failure",

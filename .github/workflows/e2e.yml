@@ -111,8 +111,14 @@ jobs:
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
-      - name: Upload Playwright report on failure
-        if: failure()
+      # Not `failure()`: a flaky test's run concludes SUCCESS, and its failed
+      # attempt's trace is exactly the evidence needed to root-cause it
+      # (#2971). `!cancelled()` rather than `always()` — this workflow sets
+      # `cancel-in-progress`, and a superseded push shouldn't pay to upload
+      # half a run. With the `html` reporter now registered this artifact is
+      # produced on every CI run, so it uploads every time, not only on red.
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.1
         with:
           name: playwright-report
@@ -120,8 +126,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Upload trace + screenshots on failure
-        if: failure()
+      - name: Upload trace + screenshots
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v7.0.1
         with:
           name: playwright-test-results
