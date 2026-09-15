@@ -43,13 +43,13 @@ SANITY_STUDIO_DATASET=production
 
 ## Typegen
 
-`sanity.cli.ts` points typegen output at `apps/web/src/lib/sanity/sanity.types.ts`. Run after any schema change:
+`sanity.cli.ts` points typegen output at `apps/web/src/lib/sanity/sanity.types.ts`. Run after any schema or GROQ query change:
 
 ```bash
 pnpm --filter @kcvv/studio typegen
 ```
 
-Commit the updated `sanity.types.ts` alongside the schema change.
+Commit the updated `sanity.types.ts` alongside the schema change. **CI enforces this** (`.github/workflows/ci.yml`, the "Sanity types in sync" step in `quality-checks`): it regenerates the types and fails the build if that produces a diff, so a forgotten regeneration is caught on the PR, not discovered later (#2862).
 
 ## Migrations
 
