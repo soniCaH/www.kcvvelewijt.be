@@ -58,7 +58,7 @@ const cacheMock: KvCacheInterface = {
 describe("getRankingHandler", () => {
   it("yields PsdService and returns every ranking table", async () => {
     const result = await Effect.runPromise(
-      getRankingHandler(1, "https://cdn.example.com").pipe(
+      getRankingHandler(1).pipe(
         Effect.provide(Layer.succeed(PsdService, makeServiceMock())),
         Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
         Effect.provide(PsdGateTest),
@@ -76,7 +76,7 @@ describe("getRankingHandler", () => {
   it("fails with ResourceNotFoundError when the team publishes no table", async () => {
     const result = await Effect.runPromise(
       Effect.either(
-        getRankingHandler(1, "https://cdn.example.com").pipe(
+        getRankingHandler(1).pipe(
           Effect.provide(
             Layer.succeed(
               PsdService,
@@ -100,7 +100,7 @@ describe("getRankingHandler", () => {
   it("propagates UpstreamUnavailableError from service", async () => {
     const result = await Effect.runPromise(
       Effect.either(
-        getRankingHandler(1, "https://cdn.example.com").pipe(
+        getRankingHandler(1).pipe(
           Effect.provide(
             Layer.succeed(
               PsdService,

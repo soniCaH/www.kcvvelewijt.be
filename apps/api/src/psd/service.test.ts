@@ -1088,9 +1088,7 @@ describe("PsdService.getRanking", () => {
       json: async () => rawRankingCompetitions,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1138,9 +1136,7 @@ describe("PsdService.getRanking", () => {
       json: async () => asLeague,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1158,9 +1154,7 @@ describe("PsdService.getRanking", () => {
       json: async () => cupAndFriendlyOnly,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1177,9 +1171,7 @@ describe("PsdService.getRanking", () => {
       json: async () => noTeams,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1217,9 +1209,7 @@ describe("PsdService.getRanking", () => {
       json: async () => mixedRanking,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1261,7 +1251,7 @@ describe("PsdService.getRanking", () => {
     await Effect.runPromise(
       Effect.gen(function* () {
         const svc = yield* PsdService;
-        return yield* svc.getRanking(1, "https://cdn.example.com");
+        return yield* svc.getRanking(1);
       }).pipe(
         Effect.provide(PsdServiceLive),
         Effect.provide(PsdGateTest),
@@ -1306,9 +1296,7 @@ describe("PsdService.getRanking", () => {
       json: async () => oneRotten,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     // A table nobody can decode drops out; the sibling still renders. The
     // handler is what turns "no table at all" into a 404.
