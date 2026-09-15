@@ -36,6 +36,11 @@ export interface RunTally {
   failed: number;
   flaky: TallyEntry[];
   skipped: TallyEntry[];
+  /** Playwright's verdict for the whole run. A suite that never started
+   *  (`next start` missing its 180s boot window) reports zero tests and a
+   *  non-`passed` status — without it the summary would call that a clean
+   *  run, which is the exact failure this reporter exists to prevent. */
+  status: FullResult["status"];
 }
 
 function list(entries: TallyEntry[]): string {
@@ -52,11 +57,14 @@ function list(entries: TallyEntry[]): string {
  * actually run" arithmetic are testable without a browser.
  */
 export function summaryMarkdown(tally: RunTally): string {
-  const { passed, failed, flaky, skipped } = tally;
+  const { passed, failed, flaky, skipped, status } = tally;
   const unverified = flaky.length + skipped.length;
   const total = passed + failed + unverified;
+  // A run is only green when nothing failed AND Playwright itself is happy —
+  // `timedout` / `interrupted` leave `failed` at 0 with nothing verified.
+  const green = failed === 0 && status === "passed";
 
-  const head = [
+  const lines = [
     "### E2E run",
     "",
     "| passed | failed | flaky | skipped |",
@@ -65,21 +73,33 @@ export function summaryMarkdown(tally: RunTally): string {
     "",
   ];
 
-  if (unverified === 0) {
-    return [
-      ...head,
-      `All ${total} tests passed on the first attempt.`,
-      "",
-    ].join("\n");
+  if (total === 0) {
+    lines.push(`**No tests ran** — the suite ended \`${status}\`.`, "");
+    return lines.join("\n");
   }
 
-  const body = [
-    `**${unverified} of ${total} tests left this job green without verifying anything.** A flaky test failed at least once before passing; a skipped test asserted nothing. Neither turns the job red, so read the passed column — not the job's tick — as this run's real coverage.`,
-    "",
-  ];
+  if (!green) {
+    lines.push(
+      failed > 0
+        ? `**${failed} of ${total} tests failed.**`
+        : `**No test failed, but the suite ended \`${status}\`.**`,
+      "",
+    );
+  } else if (unverified === 0) {
+    lines.push(`All ${total} tests passed on the first attempt.`, "");
+  }
+
+  if (unverified > 0) {
+    lines.push(
+      green
+        ? `**${unverified} of ${total} tests left this job green without verifying anything.** A flaky test failed at least once before passing; a skipped test asserted nothing. Neither turns the job red, so read the passed column — not the job's tick — as this run's real coverage.`
+        : `**${unverified} of ${total} tests verified nothing**, on top of the above. A flaky test failed at least once before passing; a skipped test asserted nothing.`,
+      "",
+    );
+  }
 
   if (flaky.length > 0) {
-    body.push(
+    lines.push(
       "#### Flaky",
       list(flaky),
       "",
@@ -88,10 +108,10 @@ export function summaryMarkdown(tally: RunTally): string {
     );
   }
   if (skipped.length > 0) {
-    body.push("#### Skipped", list(skipped), "");
+    lines.push("#### Skipped", list(skipped), "");
   }
 
-  return [...head, ...body].join("\n");
+  return lines.join("\n");
 }
 
 /** `section-nav.spec.ts:140` from a Playwright `TestCase`. */
@@ -113,11 +133,17 @@ export default class GithubSummaryReporter implements Reporter {
     this.tests.set(test.id, test);
   }
 
-  onEnd(_result: FullResult): void {
+  onEnd(result: FullResult): void {
     const summaryFile = process.env.GITHUB_STEP_SUMMARY;
     if (!summaryFile) return;
 
-    const tally: RunTally = { passed: 0, failed: 0, flaky: [], skipped: [] };
+    const tally: RunTally = {
+      passed: 0,
+      failed: 0,
+      flaky: [],
+      skipped: [],
+      status: result.status,
+    };
     for (const test of this.tests.values()) {
       const entry: TallyEntry = {
         title: titleOf(test),
