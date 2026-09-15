@@ -42,8 +42,11 @@
       "outputs": ["schema.json"],
       "inputs": [
         "schemaTypes/**",
+        "sanity.config.ts",
+        "structure.ts",
         "sanity.cli.ts",
-        "../../packages/sanity-schemas/src/**"
+        "../../packages/sanity-schemas/src/**",
+        "../../packages/sanity-studio/src/**"
       ]
     },
     "@kcvv/web#build": {
