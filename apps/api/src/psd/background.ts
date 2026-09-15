@@ -27,6 +27,13 @@ import type { VectorizeService } from "../search/vectorize";
  * surfaced that the runner's layer didn't cover that caller; fixed here by
  * widening the union and `backgroundStackLayer` together, not by excluding
  * the caller).
+ *
+ * Because a non-PSD caller now genuinely runs through this seam,
+ * `TypedKvCache.getOrFetch` (`cache/kv-cache.ts`) gates every
+ * `gate.reportOutcome` call it can reach from here on `isPsdBackedKey(key)`:
+ * `gate.reportOutcome` feeds the GLOBAL PSD incident tracker
+ * (`psd/incident.ts`), so a `related:*` key's Vectorize-only outcome must
+ * never open or close a PSD outage on its behalf (#2868 review).
  */
 export type PsdRefreshEnv =
   | PsdService

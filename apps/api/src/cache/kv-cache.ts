@@ -91,6 +91,17 @@ export const HARD_TTL_LONG = 60 * 60 * 24 * 365;
 const negKey = (key: string): string => `neg:${key}`;
 const nudgeKey = (key: string): string => `nudge:${key}`;
 
+/**
+ * `TypedKvCache` is shared by PSD-backed callers and one non-PSD caller:
+ * `handlers/related.ts`'s `related:*` keys, whose `fetch` needs
+ * `VectorizeService` rather than `PsdService` (see the `PsdRefreshEnv` doc in
+ * `psd/background.ts`). `gate.reportOutcome` feeds the GLOBAL PSD incident
+ * tracker (`psd/incident.ts`), so only a PSD-backed key's outcome may reach
+ * it — a Vectorize-only success must never close a real PSD outage, and a
+ * Vectorize-only failure must never open a false one (#2868 review).
+ */
+const isPsdBackedKey = (key: string): boolean => !key.startsWith("related:");
+
 /** Best-effort HTTP status off an upstream error (UpstreamUnavailable carries one). */
 const statusOf = (e: unknown): number | undefined => {
   const s = (e as { status?: unknown }).status;
@@ -245,13 +256,18 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
           Effect.gen(function* () {
             const status = statusOf(err);
             const staleAgeMs = Date.now() - fetchedAt;
-            const { incidentOpen } = yield* gate.reportOutcome({
-              ok: false,
-              key,
-              status,
-              error: String(err),
-              staleAgeMs,
-            });
+            // Non-PSD key → skip the report (see isPsdBackedKey): no
+            // incidentOpen state applies to it either, so escalation below
+            // falls back to the plain (non-alert) WARN.
+            const { incidentOpen } = yield* isPsdBackedKey(key)
+              ? gate.reportOutcome({
+                  ok: false,
+                  key,
+                  status,
+                  error: String(err),
+                  staleAgeMs,
+                })
+              : Effect.succeed({ incidentOpen: false });
             yield* keepStale(`${label} (${String(err)})`, {
               fetchedAt,
               softTtlSec,
@@ -338,7 +354,11 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
                   "background refresh failed",
                 );
               }
-              yield* gate.reportOutcome({ ok: true, key });
+              // Non-PSD key → skip the report (see isPsdBackedKey) so a
+              // Vectorize-only success can't be misread as "PSD recovered".
+              yield* isPsdBackedKey(key)
+                ? gate.reportOutcome({ ok: true, key })
+                : Effect.void;
               const valid = S.decodeUnknownOption(schema)(result.right);
               yield* Option.isSome(valid)
                 ? persist(result.right)

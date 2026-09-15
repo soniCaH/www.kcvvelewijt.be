@@ -88,6 +88,19 @@ const isolatedGate = () =>
     new IncidentTracker(),
   );
 
+/** The real gate with only `reportOutcome` swapped for a spy — proves a call
+ * was (or, critically, was NOT) made, which "incidentOpen ended up false"
+ * can't distinguish from "never reported". Wrapping `isolatedGate` keeps
+ * single-flight behaviour honest and survives `PsdGate` gaining methods. */
+function spyGate() {
+  const reportOutcome = vi.fn(() => Effect.succeed({ incidentOpen: false }));
+  const layer = Layer.effect(
+    PsdGateService,
+    Effect.map(PsdGateService, (real) => ({ ...real, reportOutcome })),
+  ).pipe(Layer.provide(isolatedGate()));
+  return { layer, reportOutcome };
+}
+
 const dayMs = 24 * 60 * 60 * 1000;
 
 /** Collect every log entry emitted while the returned layer is provided. */
@@ -906,6 +919,97 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
   });
 });
 
+describe("TypedKvCache — non-PSD callers never speak for PSD incident state (#2868)", () => {
+  const staleWrapper = (value: unknown) =>
+    makeWrapper(value, 2 * 60 * 60 * 1000);
+
+  it("a related:-prefixed background refresh SUCCESS never reaches gate.reportOutcome", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("related:1:max", staleWrapper({ name: "old", value: 1 }));
+    const { layer: gate, reportOutcome } = spyGate();
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+
+    const fetchEffect = Effect.succeed({ name: "fresh", value: 2 });
+
+    const result = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("related:1:max", fetchEffect, 60)
+        .pipe(
+          Effect.provide(runnerLayer),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+    await settle();
+
+    // Foreground stale serve is unaffected by the guard...
+    expect(result).toEqual({ name: "old", value: 1 });
+    // ...and the background refresh really did succeed (proves the guard
+    // suppresses only the REPORT, not the refresh itself)...
+    expect(JSON.parse(mockKv.store.get("related:1:max")!).value).toEqual({
+      name: "fresh",
+      value: 2,
+    });
+    // ...but it must never be able to close a real PSD outage on the
+    // strength of a Vectorize-only success (#2868 review).
+    expect(reportOutcome).not.toHaveBeenCalled();
+  });
+
+  it("a related:-prefixed background refresh FAILURE never reaches gate.reportOutcome", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("related:1:max", staleWrapper({ name: "old", value: 1 }));
+    const { layer: gate, reportOutcome } = spyGate();
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+
+    const fetchEffect = Effect.fail(new Error("vectorize down") as never);
+
+    const result = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("related:1:max", fetchEffect, 60)
+        .pipe(
+          Effect.provide(runnerLayer),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+    await settle();
+
+    expect(result).toEqual({ name: "old", value: 1 });
+    // Normal failure path still ran (negative marker set)...
+    expect(mockKv.store.get("neg:related:1:max")).toBe("1");
+    // ...but it must never be able to open a false PSD outage on the
+    // strength of a Vectorize-only failure (#2868 review).
+    expect(reportOutcome).not.toHaveBeenCalled();
+  });
+
+  it("control: a PSD-prefixed key's background refresh success STILL reports to the gate", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
+    const { layer: gate, reportOutcome } = spyGate();
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+
+    const fetchEffect = Effect.succeed({ name: "fresh", value: 2 });
+
+    await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", fetchEffect, 60)
+        .pipe(
+          Effect.provide(runnerLayer),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+    await settle();
+
+    // The guard is scoped to `related:*`, not a blanket disable — a normal
+    // PSD-backed key must keep reporting.
+    expect(reportOutcome).toHaveBeenCalledWith({ ok: true, key: "test-key" });
+  });
+});
+
 describe("Scheduled-job failure signal stays decoupled from PSD incident state (#2870)", () => {
   it("running many job failures through reportScheduledJobOutcome never touches IncidentTracker, so the read path's own escalation is unaffected", async () => {
     const mockKv = makeMockKv();
@@ -972,19 +1076,6 @@ describe("Scheduled-job failure signal stays decoupled from PSD incident state (
 });
 
 describe("TypedKvCache — silent-drift observability (#2335)", () => {
-  /** The real gate with only `reportOutcome` swapped for a spy — a timed-out
-   * refresh must not open an incident, and "never called" is the only way to
-   * prove it. Wrapping `isolatedGate` keeps single-flight behaviour honest and
-   * survives `PsdGate` gaining methods. */
-  function spyGate() {
-    const reportOutcome = vi.fn(() => Effect.succeed({ incidentOpen: false }));
-    const layer = Layer.effect(
-      PsdGateService,
-      Effect.map(PsdGateService, (real) => ({ ...real, reportOutcome })),
-    ).pipe(Layer.provide(isolatedGate()));
-    return { layer, reportOutcome };
-  }
-
   /** A fetch that never settles — stands in for the slow fan-out that Cloudflare
    * would kill ~30 s after the invocation ends. */
   const hangingFetch = Effect.never as Effect.Effect<{
