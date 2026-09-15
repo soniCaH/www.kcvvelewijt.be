@@ -111,8 +111,11 @@ jobs:
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
-      - name: Upload Playwright report on failure
-        if: failure()
+      # `always()`, not `failure()`: a flaky test's run concludes SUCCESS, and
+      # its failed attempt's trace is exactly the evidence needed to root-cause
+      # it (#2971). `if-no-files-found: ignore` keeps a clean run quiet.
+      - name: Upload Playwright report
+        if: always()
         uses: actions/upload-artifact@v7.0.1
         with:
           name: playwright-report
@@ -120,8 +123,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Upload trace + screenshots on failure
-        if: failure()
+      - name: Upload trace + screenshots
+        if: always()
         uses: actions/upload-artifact@v7.0.1
         with:
           name: playwright-test-results
