@@ -5,6 +5,7 @@ import {
   VectorizeServiceLive,
   VectorizeError,
 } from "./vectorize";
+import { readManifest, writeManifest } from "./index-manifest";
 import { WorkerEnvTag } from "../env";
 
 function makeVectorizeMock(
@@ -30,7 +31,34 @@ function makeVectorizeMock(
   } as unknown as VectorizeIndex;
 }
 
-function makeEnvLayer(index: VectorizeIndex) {
+/**
+ * Stateful in-memory KVNamespace so a test can seed/observe the manifest
+ * VectorizeServiceLive now maintains (#2855) — `{} as KVNamespace` (used
+ * everywhere the manifest is irrelevant) has no `get`/`put` to call at all.
+ */
+function makeKvNamespaceMock(): KVNamespace & {
+  readonly store: Map<string, string>;
+} {
+  const store = new Map<string, string>();
+  const mock = {
+    store,
+    get: (async (key: string) => store.get(key) ?? null) as KVNamespace["get"],
+    put: (async (key: string, value: string) => {
+      store.set(key, value);
+    }) as KVNamespace["put"],
+    delete: (async (key: string) => {
+      store.delete(key);
+    }) as KVNamespace["delete"],
+  };
+  return mock as unknown as KVNamespace & {
+    readonly store: Map<string, string>;
+  };
+}
+
+function makeEnvLayer(
+  index: VectorizeIndex,
+  overrides: { kv?: KVNamespace; dataset?: string } = {},
+) {
   return Layer.succeed(WorkerEnvTag, {
     AI: {} as Ai,
     SEARCH_INDEX: index,
@@ -40,10 +68,10 @@ function makeEnvLayer(index: VectorizeIndex) {
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
-    PSD_CACHE: {} as KVNamespace,
+    PSD_CACHE: overrides.kv ?? makeKvNamespaceMock(),
     PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "",
-    SANITY_DATASET: "",
+    SANITY_DATASET: overrides.dataset ?? "production",
     SANITY_API_TOKEN: "",
     SANITY_WEBHOOK_SECRET: "",
   });
@@ -369,5 +397,169 @@ describe("VectorizeService", () => {
     expect(
       (result as Extract<typeof result, { _tag: "Left" }>).left,
     ).toBeInstanceOf(VectorizeError);
+  });
+
+  describe("manifest ownership (#2855)", () => {
+    it("records every successfully upserted id in the manifest", async () => {
+      const kv = makeKvNamespaceMock();
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(makeVectorizeMock(), { kv })),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "doc-abc",
+              values: Array(1024).fill(0.1),
+              metadata: { slug: "kantine", type: "responsibility" },
+            },
+            {
+              id: "doc-def",
+              values: Array(1024).fill(0.1),
+              metadata: { slug: "bar", type: "responsibility" },
+            },
+          ]);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      const manifest = await Effect.runPromise(readManifest(kv, "production"));
+      expect(new Set(manifest)).toEqual(new Set(["doc-abc", "doc-def"]));
+    });
+
+    it("does not touch the manifest when upsert fails", async () => {
+      const kv = makeKvNamespaceMock();
+      await Effect.runPromise(writeManifest(kv, "production", ["existing"]));
+      const failIndex = {
+        upsert: async () => {
+          throw new Error("Vectorize unavailable");
+        },
+      } as unknown as VectorizeIndex;
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(failIndex, { kv })),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          return yield* svc
+            .upsert([
+              {
+                id: "doc-new",
+                values: [0.1],
+                metadata: { slug: "x", type: "x" },
+              },
+            ])
+            .pipe(Effect.either);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      const manifest = await Effect.runPromise(readManifest(kv, "production"));
+      expect(manifest).toEqual(["existing"]);
+    });
+
+    it("removes every successfully deleted id from the manifest", async () => {
+      const kv = makeKvNamespaceMock();
+      await Effect.runPromise(
+        writeManifest(kv, "production", ["doc-abc", "doc-keep"]),
+      );
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(
+          makeEnvLayer(
+            makeVectorizeMock({
+              deleteByIds: async () => ({
+                mutationId: "mut-del",
+                count: 1,
+                ids: ["doc-abc"],
+              }),
+            }),
+            { kv },
+          ),
+        ),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.deleteByIds(["doc-abc"]);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      const manifest = await Effect.runPromise(readManifest(kv, "production"));
+      expect(manifest).toEqual(["doc-keep"]);
+    });
+
+    it("leaves the id in the manifest when a delete fails, even after retries", async () => {
+      const kv = makeKvNamespaceMock();
+      await Effect.runPromise(writeManifest(kv, "production", ["doc-abc"]));
+      const failIndex = {
+        deleteByIds: async () => {
+          throw new Error("Vectorize outage");
+        },
+      } as unknown as VectorizeIndex;
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(failIndex, { kv })),
+      );
+
+      const result = await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          return yield* svc.deleteByIds(["doc-abc"]).pipe(Effect.either);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      expect(result._tag).toBe("Left");
+      const manifest = await Effect.runPromise(readManifest(kv, "production"));
+      expect(manifest).toEqual(["doc-abc"]);
+    });
+
+    it("keeps staging and production manifests on separate keys sharing the same KV (#2833 regression)", async () => {
+      const kv = makeKvNamespaceMock();
+      const stagingLayer = VectorizeServiceLive.pipe(
+        Layer.provide(
+          makeEnvLayer(makeVectorizeMock(), { kv, dataset: "staging" }),
+        ),
+      );
+      const productionLayer = VectorizeServiceLive.pipe(
+        Layer.provide(
+          makeEnvLayer(makeVectorizeMock(), { kv, dataset: "production" }),
+        ),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "staging-only",
+              values: [0.1],
+              metadata: { slug: "x", type: "x" },
+            },
+          ]);
+        }).pipe(Effect.provide(stagingLayer)),
+      );
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "production-only",
+              values: [0.1],
+              metadata: { slug: "x", type: "x" },
+            },
+          ]);
+        }).pipe(Effect.provide(productionLayer)),
+      );
+
+      const stagingManifest = await Effect.runPromise(
+        readManifest(kv, "staging"),
+      );
+      const productionManifest = await Effect.runPromise(
+        readManifest(kv, "production"),
+      );
+      expect(stagingManifest).toEqual(["staging-only"]);
+      expect(productionManifest).toEqual(["production-only"]);
+    });
   });
 });
