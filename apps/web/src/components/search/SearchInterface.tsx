@@ -316,12 +316,23 @@ export const SearchInterface = ({
   }, [currentUrlQueryValue]);
 
   /**
-   * Cleanup: abort any in-flight requests on unmount
+   * Cleanup: abort any in-flight requests on unmount.
+   *
+   * Also clears `lastRequestedQueryRef` — an aborted request never resolved,
+   * so its query is NOT "covered" the way the guard above assumes. Left
+   * unset, React StrictMode's dev-only mount→cleanup→remount cycle (which
+   * preserves refs across the cycle) aborts the first pass's in-flight
+   * fetch here, then the second pass's URL-watching effect sees the ref
+   * still claiming that query is handled and skips re-fetching — the
+   * scarf spins forever because the aborted request's own `finally` never
+   * clears `isLoading` either (#2784 review). A real unmount doesn't care
+   * either way (the component is gone), so this is safe unconditionally.
    */
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        lastRequestedQueryRef.current = null;
       }
     };
   }, []);

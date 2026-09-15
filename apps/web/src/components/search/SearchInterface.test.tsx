@@ -3,7 +3,7 @@
  * Most complex component - handles state, URL sync, fetch, and coordination
  */
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import { StrictMode, useSyncExternalStore, type ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -1253,10 +1253,15 @@ describe("SearchInterface", () => {
       // The only retry a visitor has: no retry button on the error state, so
       // pressing "Zoeken" again with the identical query is it. This is
       // exactly the regression that ruled out having `handleSearch` stop
-      // calling `performSearch` directly — under that fix, `router.push` to
+      // calling `performSearch` directly — in REAL Next.js, `router.push` to
       // an unchanged URL is a `replaceState` (no history entry, no
       // `useSearchParams()` change), so the URL-watching effect would never
-      // re-fire and this retry would silently do nothing.
+      // re-fire and this retry would silently do nothing. This mock doesn't
+      // literally implement that replaceState no-op (`mockPush` always hands
+      // the store a fresh `URLSearchParams`) — this test instead passes
+      // because `currentUrlQueryValue` is a derived *string*, and React's
+      // effect-dependency comparison is by value, so an unchanged "q" never
+      // looks like a change to the effect either way.
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1340,6 +1345,39 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.queryByRole("status")).not.toBeInTheDocument();
       });
+    });
+
+    it("recovers under React StrictMode's dev-only mount→cleanup→remount cycle instead of spinning forever (#2784 review)", async () => {
+      // StrictMode preserves refs across its synthetic
+      // mount→cleanup→remount: pass 1's mount effect starts a fetch and sets
+      // `lastRequestedQueryRef`; the cleanup effect then aborts that
+      // in-flight request; pass 2's mount effect re-runs the URL-watching
+      // effect. Without resetting the ref on that abort, pass 2 sees the
+      // query as already "covered" and skips re-fetching — the aborted
+      // request's own `finally` never clears `isLoading` either, so the
+      // page is stuck on the spinner forever. Production builds don't
+      // double-invoke, so this never reaches a visitor — but it breaks the
+      // page in local dev and on every Fast Refresh of this file.
+      setMockSearchParams({ q: "test" });
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      render(
+        <StrictMode>
+          <SearchInterface />
+        </StrictMode>,
+      );
+
+      await waitFor(
+        () => {
+          expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+        },
+        { timeout: 2000 },
+      );
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
   });
 
