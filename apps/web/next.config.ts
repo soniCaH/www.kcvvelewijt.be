@@ -10,6 +10,22 @@ const nextConfig: NextConfig = {
   // would 404 against the psdId-/slug-keyed targets (#2227).
   async redirects() {
     return [
+      // ── #2960 — Gatsby's content-hashed asset URLs for two PDFs that are
+      // already migrated to `public/downloads/` at identical byte sizes. Only
+      // the old hashed path was unrouted.
+      {
+        source:
+          "/static/reglement_inwendige_orde_2022-823bb0914d959fb88bd234cfdbe94df5.pdf",
+        destination: "/downloads/reglement_inwendige_orde_2022.pdf",
+        permanent: true,
+      },
+      {
+        source:
+          "/static/2022-2023_-_De_ideale_voetbalgrootouder-9258184a39461d932c725c054e3007f9.pdf",
+        destination: "/downloads/2022-2023_-_De_ideale_voetbalgrootouder.pdf",
+        permanent: true,
+      },
+
       // ── #2963 — specific rules, kept ABOVE the generic `/news/:slug` and
       // `/team/:slug` renames below, which would otherwise swallow them and
       // land the visitor on a not-found page that answers 200 (see the issue).

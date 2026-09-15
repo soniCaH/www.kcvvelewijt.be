@@ -30,6 +30,20 @@ export interface EditorialHubCardProps {
   /** `next/image` `sizes` hint for the news cover. */
   sizes?: string;
   /**
+   * Render a plain `<a target="_blank">` instead of `next/link` — for a card
+   * whose target is a document, not a route (#2960).
+   *
+   * `next/link` has no file-extension guard: with the default `auto` intent
+   * it prefetches on viewport entry and only discards the response after the
+   * request, by `content-type`. A 642 KB PDF tile therefore costs every
+   * visitor that download just for scrolling past. The click is also an MPA
+   * navigation in the same tab, and the file is served
+   * `content-disposition: inline`, so "Download" would replace the site with
+   * an inline viewer. `target="_blank"` + `rel="noopener noreferrer"` is the
+   * treatment every other out-of-app link in this repo already uses.
+   */
+  external?: boolean;
+  /**
    * Pre-hashed article id (`hashMemberId`), news variant only. Emitted as an
    * inert `data-article-id-hashed` marker for page-scoped click-delegation
    * analytics (e.g. `<EditorialHubAnalytics>`). No raw id reaches the DOM.
@@ -66,12 +80,21 @@ export function EditorialHubCard({
   icon,
   sizes,
   articleIdHashed,
+  external = false,
 }: EditorialHubCardProps) {
   const isNav = variant === "nav";
+  // One element, two tags: `next/link` for a route, a plain anchor for a
+  // document (see `external`). Everything below — classes, analytics markers,
+  // children — is identical either way.
+  const Wrapper = external ? "a" : Link;
+  const externalProps = external
+    ? { target: "_blank" as const, rel: "noopener noreferrer" }
+    : {};
 
   return (
-    <Link
+    <Wrapper
       href={href}
+      {...externalProps}
       // Inert analytics markers — read by a page-scoped click-delegation
       // wrapper (<EditorialHubAnalytics>); no per-card onClick.
       data-card-type={variant}
@@ -141,6 +164,6 @@ export function EditorialHubCard({
           </span>
         </span>
       </div>
-    </Link>
+    </Wrapper>
   );
 }

@@ -51,11 +51,11 @@ describe("JeugdEditorialGrid", () => {
     render(<JeugdEditorialGrid articles={[]} />);
 
     expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
-    expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
+    expect(screen.getByText("Ons leerplan")).toBeInTheDocument();
     expect(screen.getByText("Trainingen & ProSoccerData")).toBeInTheDocument();
     expect(screen.getByText("Organigram")).toBeInTheDocument();
     expect(screen.getByText("Wie contacteer ik?")).toBeInTheDocument();
-    expect(screen.getByText("Blessure of afmelding?")).toBeInTheDocument();
+    expect(screen.getByText("Blessure of medisch attest?")).toBeInTheDocument();
   });
 
   it("repoints nav cards to live routes (no more dead routes)", () => {
@@ -65,23 +65,68 @@ describe("JeugdEditorialGrid", () => {
       .getAllByRole("link")
       .map((link) => link.getAttribute("href"));
 
-    // Repointed: word lid → /club/word-lid (#2206); medisch + hulp → /hulp;
-    // jeugdvisie → #visie anchor.
+    // Repointed: word lid → /club/word-lid (#2206); structuur → /hulp#structuur.
     expect(hrefs).toContain("/club/word-lid");
-    expect(hrefs).toContain("/hulp");
-    expect(hrefs).toContain("/jeugd#visie");
     expect(hrefs).toContain("/hulp#structuur");
+
+    // #2960: each nav card lands on a specific answer, not the bare hub.
+    // `<HulpFinder>` makes every card `#<slug>` deep-linkable (a direct hit
+    // scrolls to the card and expands it) and `?categorie=` filters the set.
+    expect(hrefs).toContain("/hulp#prosoccerdata-gebruiken");
+    expect(hrefs).toContain("/hulp?categorie=medisch#hulp");
+
+    // #2960: the jeugdvisie tile is now the leerplan download. `/jeugd#visie`
+    // scrolled to a single sentence on this same page; the leerplan is the
+    // long form of the same promise.
+    expect(hrefs).toContain("/downloads/leerplan-jeugdopleiding-2019.pdf");
+    expect(hrefs).not.toContain("/jeugd#visie");
+
+    // Exactly one card may still point at the bare hub — "Wie contacteer ik?",
+    // whose whole job IS the search box. Any second one is the duplicate this
+    // block was flagged for (#2965).
+    expect(hrefs.filter((h) => h === "/hulp")).toHaveLength(1);
 
     // Old dead routes are gone.
     // `/nieuws/prosoccerdata` was asserted here until #2963 — an article that
     // does not exist, so this very test ("no more dead routes") was pinning a
     // dead route. It rendered the not-found page under a 200, which is why it
-    // read as live. The live answer is the `prosoccerdata-gebruiken`
-    // hulpvraag; `/hulp` has no deep-link param, so the hub is the target.
+    // read as live.
     expect(hrefs).not.toContain("/nieuws/prosoccerdata");
     expect(hrefs).not.toContain("/club/inschrijven");
     expect(hrefs).not.toContain("/jeugd/visie");
     expect(hrefs).not.toContain("/jeugd/medisch");
+  });
+
+  it("renders the leerplan tile as a document link, not a route (#2960)", () => {
+    render(<JeugdEditorialGrid articles={[]} />);
+
+    const pdf = screen
+      .getAllByRole("link")
+      .find((l) =>
+        l.getAttribute("href")?.endsWith("leerplan-jeugdopleiding-2019.pdf"),
+      );
+    expect(pdf, "leerplan tile missing").toBeDefined();
+
+    // `next/link` has no file-extension guard: it would prefetch 642 KB on
+    // viewport entry for every visitor, and open the PDF in the same tab over
+    // the site. A plain anchor opts out of both.
+    expect(pdf!).toHaveAttribute("target", "_blank");
+    expect(pdf!).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
+  it("keeps the #hulp hash on the deep-linked hub tiles (#2960)", () => {
+    render(<JeugdEditorialGrid articles={[]} />);
+
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((l) => l.getAttribute("href"));
+
+    // `<HulpFinder>` only scrolls on a `#<slug>` reveal or "see all". A bare
+    // `?categorie=` lands on the hero instead of the filtered answers, which
+    // is the bare-hub impression these tiles exist to avoid.
+    for (const href of hrefs.filter((h) => h?.startsWith("/hulp?"))) {
+      expect(href, `${href} needs a hash to scroll`).toContain("#");
+    }
   });
 
   it("renders 3 article cards (news variant) when 3 articles provided", () => {
@@ -188,7 +233,7 @@ describe("JeugdEditorialGrid", () => {
 
       expect(screen.getByText("Sanity Nav Card 1")).toBeInTheDocument();
       expect(screen.getByText("Sanity Nav Card 2")).toBeInTheDocument();
-      expect(screen.queryByText("Onze jeugdvisie")).not.toBeInTheDocument();
+      expect(screen.queryByText("Ons leerplan")).not.toBeInTheDocument();
     });
 
     it("renders nav card links from Sanity config", () => {
@@ -241,7 +286,7 @@ describe("JeugdEditorialGrid", () => {
       render(<JeugdEditorialGrid articles={[]} editorialConfig={null} />);
 
       expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
-      expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
+      expect(screen.getByText("Ons leerplan")).toBeInTheDocument();
     });
 
     it("falls back to hardcoded defaults when editorialConfig is undefined", () => {

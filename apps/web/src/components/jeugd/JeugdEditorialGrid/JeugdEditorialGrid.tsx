@@ -14,13 +14,20 @@ interface NavCardConfig {
   arrowText: string;
   href: string;
   iconName: NavGlyphName;
+  /** Document target, not a route — renders a plain anchor (#2960). */
+  external?: boolean;
 }
 
 /**
- * The six pinned nav cards (7j0b targets). Hrefs are repointed away from the
- * old dead routes: `word lid`/`inschrijven` and `medisch` default to `/hulp`
- * (membership form is #1473), `jeugdvisie` to the `#visie` anchor on this page.
- * Each carries its own Phosphor-fill glyph for the nav-variant panel.
+ * The six pinned nav cards (7j0b targets). Each carries its own Phosphor-fill
+ * glyph for the nav-variant panel.
+ *
+ * Targets as of #2960: `word lid` → `/club/word-lid` (membership form is
+ * #1473); the Visie slot is now the leerplan PDF, not the `#visie` anchor;
+ * `prosoccerdata` and `medisch` deep-link into `<HulpFinder>` rather than
+ * defaulting to the bare hub. Exactly one card — "Wie contacteer ik?" —
+ * still points at `/hulp`, because the search box is its whole job; a second
+ * one is the duplicate #2965 was filed for, and a test asserts the count.
  */
 const NAV_CARDS: NavCardConfig[] = [
   {
@@ -32,21 +39,27 @@ const NAV_CARDS: NavCardConfig[] = [
   },
   {
     tag: "Visie",
-    title: "Onze jeugdvisie",
-    arrowText: "Ontdek",
-    href: "/jeugd#visie",
-    iconName: "Eye",
+    // #2960: was a tile linking `/jeugd#visie` — an anchor on this same page
+    // that scrolls to a single sentence. The leerplan is the long form of
+    // that promise: the full jeugdopleiding curriculum, and the club's
+    // most-searched document (17 clicks / 695 impressions a year). It lived
+    // only on the legacy Drupal host until this change.
+    title: "Ons leerplan",
+    arrowText: "Download",
+    href: "/downloads/leerplan-jeugdopleiding-2019.pdf",
+    iconName: "DownloadSimple",
+    external: true,
   },
   {
     tag: "Praktisch",
     title: "Trainingen & ProSoccerData",
     arrowText: "Zoek het op",
-    // #2963: was `/nieuws/prosoccerdata`, an article that does not exist —
-    // it rendered the not-found page under a 200. The live answer is the
-    // `prosoccerdata-gebruiken` hulpvraag, and `/hulp` has no deep-link
-    // param, so the hub is the closest real target. #2965 owns whether this
-    // tile survives the block's redesign — it is now the third pointing here.
-    href: "/hulp",
+    // #2963 repointed this off `/nieuws/prosoccerdata`, an article that never
+    // existed. #2960 takes it the rest of the way: `<HulpFinder>` makes every
+    // card `#<slug>` deep-linkable, and a direct hit scrolls to the card AND
+    // expands its answer — verified against production. So this lands on the
+    // answer itself, not on the hub's search box.
+    href: "/hulp#prosoccerdata-gebruiken",
     iconName: "SoccerBall",
   },
   {
@@ -65,9 +78,25 @@ const NAV_CARDS: NavCardConfig[] = [
   },
   {
     tag: "Medisch",
-    title: "Blessure of afmelding?",
+    // #2960: `?categorie=` filters the finder, so this lands on the three
+    // medical hulpvragen (AED/EHBO, allergieën/medicatie, medisch attest)
+    // instead of the bare hub — which is what made this tile read as a
+    // duplicate of "Wie contacteer ik?" below.
+    //
+    // Title was "Blessure of afmelding?" until #2960. Afmelden happens in
+    // ProSoccerData (owner, 2026-09-15), not here — and no hulpvraag covers
+    // it either: 37 active responsibilities, none about telling the club you
+    // cannot come, and `prosoccerdata-gebruiken` is about logins only. The
+    // old title promised an answer no target gave. The medical set it does
+    // reach is AED/EHBO, allergieën/medicatie and medisch attest.
+    // Authoring an "afmelden via ProSoccerData" vraag is tracked on #2965.
+    title: "Blessure of medisch attest?",
     arrowText: "Zoek het op",
-    href: "/hulp",
+    // The `#hulp` hash is load-bearing: `<HulpFinder>` only scrolls on a
+    // `#<slug>` reveal or "see all", so `?categorie=` alone lands the visitor
+    // on the hero with the search box — the exact bare-hub impression this
+    // change removes. Measured on production: y=0 without it, y=493 with.
+    href: "/hulp?categorie=medisch#hulp",
     iconName: "FirstAid",
   },
 ];
@@ -94,6 +123,7 @@ function renderNavCard(nav: NavCardConfig): React.ReactNode {
       title={nav.title}
       arrowText={nav.arrowText}
       icon={<NavGlyph name={nav.iconName} />}
+      external={nav.external}
     />
   );
 }
