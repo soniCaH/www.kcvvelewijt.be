@@ -79,6 +79,21 @@ wrangler kv key delete "search-index:manifest:staging" --binding=PSD_CACHE --env
 
 This deletes the whole manifest, not just the over-cap entries — the next sweep bootstraps fresh (prunes nothing, just re-learns the current state) rather than resuming a partial one. Safe: nothing in the manifest is unrecoverable except the pre-existing backlog this mechanism could never see anyway (see #2831's PR description).
 
+### The search-index manifest is owned by `VectorizeServiceLive`, not by its callers (#2855)
+
+`VectorizeServiceLive` (`search/vectorize.ts`) is the **only** writer of the KV manifest `index-manifest.ts` defines: its `upsert` adds every id it successfully upserts, and its `deleteByIds` removes every id it successfully deletes — both as an internal side effect of the same call, not a follow-up step a caller has to remember. "Successfully" is load-bearing: a delete that fails after every retry a caller (the nightly sweep's `deleteBatched`) wraps around it never reaches the manifest-removal step, so the id stays tracked for the next sweep to retry.
+
+Both writers of the search index go through this one service, so both are now structurally incapable of forgetting the manifest:
+
+- **The webhook** (`webhooks/index-handler.ts`) just calls `vectorize.upsert`/`vectorize.deleteByIds` and returns — there is no separate pending-marker write, no `ctx.waitUntil` bookkeeping step, and nothing for a future third caller to get wrong. A document whose entire visible life fits between two nightly sweeps (published and unpublished the same day) is tracked in the manifest from the moment its upsert lands, not absorbed by a later sweep.
+- **The nightly sweep** (`search/sanity-index-sync.ts`) still _reads_ the manifest directly (via `readManifest`, captured once at the top of the sweep, before any of that sweep's own phases run) to diff its freshly-fetched current ids against what's believed indexed — that diff is core sweep logic, not manifest bookkeeping. But it never writes the manifest: every id the sweep's own phases upsert, and every id its reconciliation step deletes, updates the manifest automatically through the same `VectorizeServiceLive` calls the webhook uses.
+
+Manifest keys stay dataset-scoped exactly as before (`manifestKey(dataset)`, keyed off `env.SANITY_DATASET`) — `VectorizeServiceLive` reads `SANITY_DATASET` from the same `WorkerEnv` the sweep and webhook already use, so a staging worker and a production worker sharing one `PSD_CACHE` namespace never touch each other's manifest. Getting this scoping wrong is exactly what #2833 was about.
+
+**Manifest growth is not a bug.** A deleted document's id can linger in the manifest for one extra sweep in the (documented, expected) case where a webhook delete never got a chance to run — the next sweep's `deleteByIds` call for an already-absent id is a no-op, and the manifest converges within that one sweep. Do not "fix" this; #2855 fixed the two structural rules (upsert adds, only a confirmed delete removes), not manifest size.
+
+**Known, accepted limitation:** the manifest write itself is a KV read-modify-write against one shared array, not a race-free per-id marker. Within one sweep this is safe (`upsertBatched`/`deleteBatched` run at concurrency 1, so the sweep's own writes are sequential); the residual exposure is a webhook call landing at the same instant as another webhook call, or as a sweep's own write. Accepted for now — see `search/vectorize.ts`'s `updateManifest` docblock.
+
 ### The shared orphan-reconciliation guard (`reconciliation.ts`, #2854)
 
 `reconcileOrphans` (`src/reconciliation.ts`) is the one shared implementation of the four-step orphan-reconciliation pattern both sync jobs need: diff the tracked set against the current set, handle the none-case, apply a ratio-based safety cap before acting, then act (calling a caller-supplied archive/delete function and returning the **confirmed** removed subset — not merely a completion signal, since a caller like the search-index sweep needs to know exactly what landed before touching its own manifest).
