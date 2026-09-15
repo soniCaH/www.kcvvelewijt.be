@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { StrictMode } from "react";
 import { act, render } from "@testing-library/react";
 
 const mockPathname = vi.fn<() => string>(() => "/");
@@ -71,6 +72,34 @@ describe("ScrollToTop", () => {
     mockPathname.mockReturnValue("/sponsors");
     rerender(<ScrollToTop />);
     expect(scrollSpy).toHaveBeenCalledWith(TO_TOP);
+  });
+
+  it("survives Strict Mode's double-invoked mount effect", () => {
+    // `next dev` runs the App Router in Strict Mode, which invokes a mount
+    // effect twice. A "have I mounted yet" boolean is spent by the first
+    // invocation, so the initial-load reset fired anyway on the second.
+    render(
+      <StrictMode>
+        <ScrollToTop />
+      </StrictMode>,
+    );
+    expect(scrollSpy).not.toHaveBeenCalled();
+  });
+
+  it("keeps the restored offset through a multi-step Back", () => {
+    // A held Back fires several popstates before React commits, so the record
+    // has to hold more than the most recent one.
+    mockPathname.mockReturnValue("/sponsors");
+    const { rerender } = render(<ScrollToTop />);
+    scrollSpy.mockClear();
+
+    popTo("/jeugd");
+    popTo("/club");
+    mockPathname.mockReturnValue("/jeugd");
+    rerender(<ScrollToTop />);
+    mockPathname.mockReturnValue("/club");
+    rerender(<ScrollToTop />);
+    expect(scrollSpy).not.toHaveBeenCalled();
   });
 
   it("does not let a pop that kept the same pathname swallow the next navigation", () => {

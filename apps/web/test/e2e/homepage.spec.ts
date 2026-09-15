@@ -152,30 +152,21 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     // regression `overflow: hidden` (instead of `clip`) would cause (it
     // parks the header at y:-1200 here, not y:0).
     //
-    // `<ScrollToTop>` resets `window.scrollY` to 0 in a `useEffect` that
-    // fires once on hydration, and `page.goto()`'s default `waitUntil:
-    // "load"` routinely resolves before an App Router page hydrates. If
-    // that effect lands after our `scrollTo`, scrollY silently goes back to
-    // 0 and a fixed `waitForTimeout` would read a header position from
-    // BEFORE the reset — passing at y:0 whether the header is sticky or
-    // not, which is exactly the failure this assertion exists to catch.
-    // So: read the scroll position and the header's position in the SAME
-    // evaluate, retrying the scroll inside the page until it actually
-    // holds, and assert the page really scrolled before trusting the
-    // header's position at all.
+    // Read the scroll position and the header's position in the SAME
+    // evaluate, and assert the page really scrolled before trusting the
+    // header's position at all: a header read at y:0 passes whether it is
+    // sticky or not, which is exactly the failure this assertion exists to
+    // catch. This used to need a 20-attempt retry loop because
+    // `<ScrollToTop>` reset scrollY to 0 on hydration, and `page.goto()`'s
+    // default `waitUntil: "load"` resolves before an App Router page
+    // hydrates — that reset is gone (#2986), so one scroll holds.
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/");
-    const { scrollY, headerTop } = await page.evaluate(async () => {
-      let y = 0;
-      for (let attempt = 0; attempt < 20; attempt++) {
-        window.scrollTo({ top: 1200, behavior: "instant" });
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        y = window.scrollY;
-        if (y > 0) break;
-      }
+    const { scrollY, headerTop } = await page.evaluate(() => {
+      window.scrollTo({ top: 1200, behavior: "instant" });
       const header = document.querySelector("header");
       return {
-        scrollY: y,
+        scrollY: window.scrollY,
         headerTop: header ? header.getBoundingClientRect().top : null,
       };
     });

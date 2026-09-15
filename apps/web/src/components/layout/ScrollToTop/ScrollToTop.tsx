@@ -21,15 +21,15 @@ import { usePathname } from "next/navigation";
  * - **The initial load.** The effect runs on mount, several hundred ms after
  *   first paint on a slow device — long enough for a visitor to have started
  *   reading. Measured on the live deployment under 20× CPU throttling: scroll
- *   to y=1500 during hydration, and ~600 ms later you are back at y=0.
- * - **A back/forward traversal.** The browser (and Next) restore the offset
- *   the visitor left; this effect used to overwrite it one frame later.
- *   Measured at full speed, no throttling: leave `/hulp` at y=1507, visit
- *   `/sponsors`, press Back → y=4.
- *
- * The second one is also what made `section-nav.spec.ts:140` flaky — the test
- * scrolled a section into view, the mount reset returned the page to the top,
- * and the scroll-spy correctly reported that no section was being read.
+ *   to y=1500 during hydration, and ~600 ms later you are back at y=0. This is
+ *   also what made `section-nav.spec.ts`'s "OrganigramSectionNav on /hulp"
+ *   flaky — the test scrolled a section into view, the mount reset returned the
+ *   page to the top, and the scroll-spy correctly reported that no section was
+ *   being read.
+ * - **A back/forward traversal.** The browser restores the offset the visitor
+ *   left; this effect used to overwrite it one frame later. Measured at full
+ *   speed, no throttling: leave `/hulp` at y=1507, visit `/sponsors`, press
+ *   Back → y=4.
  *
  * Mounted before <main> in the root layout, so pages that intentionally manage
  * their own scroll (e.g. <AgendaScrollToNext>) run their effect afterwards and
@@ -38,36 +38,55 @@ import { usePathname } from "next/navigation";
  */
 export function ScrollToTop() {
   const pathname = usePathname();
-  /** Unset after the mount run — the browser placed the first page itself. */
-  const isInitialRender = useRef(true);
   /**
-   * The pathname a `popstate` just landed on, or `null`. Recording the path
-   * rather than a bare "a pop happened" flag is what keeps this from leaking:
-   * a pop that does NOT change the pathname (going back over a `#hash`) never
-   * reaches the effect below, so a bare flag would stay armed and swallow the
-   * next real forward navigation.
+   * The pathname this effect last ran for. Comparing against it — rather than
+   * flipping a "have I mounted yet" boolean — is what makes the initial-load
+   * skip survive React Strict Mode, which double-invokes mount effects in
+   * `next dev` (on by default for the App Router). A boolean is already spent
+   * by the second invocation, so the reset fired anyway in the one environment
+   * a developer checks locally.
    */
-  const poppedTo = useRef<string | null>(null);
+  const lastPathname = useRef(pathname);
+  /**
+   * Pathnames that a `popstate` landed on and that the effect below has not
+   * accounted for yet.
+   *
+   * A set, not one slot: a held or double-tapped Back fires several popstates
+   * before React commits, and a single slot would keep only the last one — the
+   * intermediate commit would then mismatch and scroll to top, re-creating the
+   * bug for a multi-step Back.
+   *
+   * Pathnames, not a bare "a pop happened" flag: a pop that does NOT change the
+   * pathname (going back over a `#hash`) never reaches the effect, so a flag
+   * would stay armed and swallow the next real forward navigation.
+   *
+   * The equality below holds because `usePathname()` and
+   * `window.location.pathname` agree in this app — it configures no `basePath`,
+   * no locale prefix and no rewriting middleware. Adding any of those means
+   * normalising here first.
+   */
+  const poppedTo = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const onPopState = () => {
-      poppedTo.current = window.location.pathname;
+      poppedTo.current.add(window.location.pathname);
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
   useEffect(() => {
-    // Consumed on every pathname change, whichever branch wins below: a stale
-    // entry can only survive until the next navigation, never past it.
-    const landedOnByPop = poppedTo.current;
-    poppedTo.current = null;
+    const previous = lastPathname.current;
+    lastPathname.current = pathname;
+    if (previous === pathname) return;
 
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
-      return;
-    }
-    if (landedOnByPop === pathname) return;
+    // Consume this pathname's own pop record, and drop any older ones — they
+    // belong to a traversal this navigation has now moved past, so keeping
+    // them could suppress a later forward navigation.
+    const wasPopped = poppedTo.current.delete(pathname);
+    if (!wasPopped) poppedTo.current.clear();
+    if (wasPopped) return;
+
     if (window.location.hash) return;
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
