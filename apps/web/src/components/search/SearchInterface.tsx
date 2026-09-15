@@ -87,11 +87,20 @@ export const SearchInterface = ({
   // AbortController ref for cancelling in-flight requests
   const abortControllerRef = useRef<AbortController | null>(null);
 
+  // The query `performSearch` is currently in flight for, or last resolved
+  // as the current result set — whichever happened most recently. Read by
+  // the URL-watching effect below to skip a redundant fetch for a query it
+  // already has covered (#2784). A ref, not state: it must not itself cause
+  // a render.
+  const lastRequestedQueryRef = useRef<string | null>(null);
+
   /**
    * Perform search
    * Note: Always fetches unfiltered results for accurate counts across all types
    */
   const performSearch = useCallback(async (searchQuery: string) => {
+    lastRequestedQueryRef.current = searchQuery;
+
     if (!searchQuery || searchQuery.trim().length < 2) {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -291,16 +300,39 @@ export const SearchInterface = ({
   }, [performSearch]);
 
   useEffect(() => {
+    // Skip when a request for this exact query is already in flight or
+    // already resolved as the current result set (#2784). `handleSearch`'s
+    // direct `performSearch(searchQuery)` call already covers the common
+    // path (submit, and the 350ms typeahead pause in SearchForm) — without
+    // this guard, `router.push`'s reactive effect on `useSearchParams()`
+    // fires a second, redundant fetch for the same query right behind it.
+    // The direct call stays (not removed) specifically so retry-after-error
+    // keeps working: re-submitting the identical query pushes an unchanged
+    // URL (a `replaceState`, per Next.js), so `currentUrlQueryValue` never
+    // changes and this effect never re-fires — the direct call is the only
+    // thing that issues the retry's fetch.
+    if (lastRequestedQueryRef.current === currentUrlQueryValue) return;
     performSearchRef.current(currentUrlQueryValue);
   }, [currentUrlQueryValue]);
 
   /**
-   * Cleanup: abort any in-flight requests on unmount
+   * Cleanup: abort any in-flight requests on unmount.
+   *
+   * Also clears `lastRequestedQueryRef` — an aborted request never resolved,
+   * so its query is NOT "covered" the way the guard above assumes. Left
+   * unset, React StrictMode's dev-only mount→cleanup→remount cycle (which
+   * preserves refs across the cycle) aborts the first pass's in-flight
+   * fetch here, then the second pass's URL-watching effect sees the ref
+   * still claiming that query is handled and skips re-fetching — the
+   * scarf spins forever because the aborted request's own `finally` never
+   * clears `isLoading` either (#2784 review). A real unmount doesn't care
+   * either way (the component is gone), so this is safe unconditionally.
    */
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        lastRequestedQueryRef.current = null;
       }
     };
   }, []);
