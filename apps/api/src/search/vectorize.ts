@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
+import { addToManifest } from "./index-manifest";
 
 export class VectorizeError extends Error {
   readonly _tag = "VectorizeError" as const;
@@ -50,6 +51,44 @@ export const VectorizeServiceLive = Layer.effect(
   VectorizeService,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
+    const kv = env.PSD_CACHE;
+    const dataset = env.SANITY_DATASET;
+
+    /**
+     * The manifest ADD side of #2855: this is the only place `upsert`'s
+     * confirmed ids get recorded, so a caller cannot write the index
+     * without a marker following — structural, not a second call site a
+     * future caller could forget (the webhook used to make this call
+     * itself; now every caller inherits it for free).
+     *
+     * Deliberately still the put-only per-id marker (`addToManifest`,
+     * `index-manifest.ts`) rather than a read-modify-write against the
+     * shared manifest array: Workers KV is eventually consistent (a `get`
+     * can serve a stale value for up to 60s after a `put`) and throttles a
+     * single key to ~1 write/sec. A read-modify-write here would run at
+     * least once per upsert *batch* — several times inside one sweep, plus
+     * once per concurrent webhook — so two callers racing the same shared
+     * key would silently lose one another's additions, exactly the defect
+     * #2856 fixed by giving every id its own write-only key with nothing to
+     * race on. Folding those markers into the manifest array stays the
+     * nightly sweep's job (`sanity-index-sync.ts`) — it is still the
+     * array's only writer, running once, sequentially, per invocation.
+     *
+     * The delete side is NOT symmetric on purpose: `deleteByIds` below does
+     * not touch the manifest at all. Pre-#2855, a webhook delete never
+     * updated the manifest either — the array only ever drops an id via the
+     * sweep's own confirmed-delete reconciliation, and that was already the
+     * manifest's only removal path, so there was no second call site to
+     * consolidate for deletes. Adding a parallel "pending delete" marker
+     * here would be new complexity #2855 didn't ask for, not a fix for
+     * anything broken — see apps/api/CLAUDE.md.
+     */
+    const recordUpsertedIds = (ids: readonly string[]): Effect.Effect<void> =>
+      Effect.forEach(ids, (id) => addToManifest(kv, dataset, id), {
+        concurrency: 5,
+        discard: true,
+      });
+
     return {
       upsert: (vectors) =>
         Effect.tryPromise({
@@ -59,7 +98,7 @@ export const VectorizeServiceLive = Layer.effect(
               `Vectorize upsert failed: ${String(cause)}`,
               cause,
             ),
-        }),
+        }).pipe(Effect.tap(() => recordUpsertedIds(vectors.map((v) => v.id)))),
 
       query: (vector, options) =>
         Effect.tryPromise({
@@ -67,9 +106,7 @@ export const VectorizeServiceLive = Layer.effect(
             const result = await env.SEARCH_INDEX.query(vector, options);
             return result.matches.map((m) => {
               const rawMeta = m.metadata as
-                | Record<string, unknown>
-                | null
-                | undefined;
+                Record<string, unknown> | null | undefined;
               if (rawMeta == null) {
                 return { id: m.id, score: m.score };
               }
@@ -109,6 +146,9 @@ export const VectorizeServiceLive = Layer.effect(
             ),
         }),
 
+      // No manifest interaction here — see the docblock above
+      // `recordUpsertedIds`. Only the nightly sweep's reconciliation step
+      // removes a confirmed-deleted id from the manifest array.
       deleteByIds: (ids) =>
         Effect.tryPromise({
           try: () => env.SEARCH_INDEX.deleteByIds(ids).then(() => undefined),

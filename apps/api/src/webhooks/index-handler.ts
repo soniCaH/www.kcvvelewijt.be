@@ -5,7 +5,6 @@ import { WorkerEnvTag } from "../env";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "../search/dataset-index-guard";
 import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
-import { addToManifest } from "../search/index-manifest";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
@@ -149,20 +148,6 @@ function queryForType(type: AllowedType): string {
 const errorMessage = (err: unknown) =>
   err instanceof Error ? err.message : String(err);
 
-/**
- * `afterResponse` lets a branch queue work that must run but provably cannot
- * change the response — the manifest write below is the only user today.
- * Keeping it out of the awaited response path is what lets the caller hand
- * it to `ctx.waitUntil` instead of adding its latency to every webhook
- * (#2831).
- */
-interface WebhookResult {
-  readonly response: Response;
-  readonly afterResponse?: Effect.Effect<void>;
-}
-
-const respond = (response: Response): WebhookResult => ({ response });
-
 // ─── Error → Response mapping ──────────────────────────────────────────────
 
 const toErrorResponse = (
@@ -249,9 +234,7 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
     // 5. Check operation
     const operation = request.headers.get("sanity-operation") ?? "update";
     if (!isAllowedOp(operation)) {
-      return respond(
-        Response.json({ ok: true, action: "skipped_unknown_operation" }),
-      );
+      return Response.json({ ok: true, action: "skipped_unknown_operation" });
     }
 
     // 6. Delete path — ahead of the type gate on purpose. A retired type still
@@ -269,14 +252,12 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
               new WebhookServiceError("delete_failed", errorMessage(err)),
           ),
         );
-      return respond(Response.json({ ok: true, action: "deleted" }));
+      return Response.json({ ok: true, action: "deleted" });
     }
 
     // 7. Check document type
     if (!isAllowedType(_type)) {
-      return respond(
-        Response.json({ ok: true, action: "skipped_unknown_type" }),
-      );
+      return Response.json({ ok: true, action: "skipped_unknown_type" });
     }
     const docType = _type;
 
@@ -315,7 +296,7 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
               new WebhookServiceError("delete_failed", errorMessage(err)),
           ),
         );
-      return respond(Response.json({ ok: true, action: "skipped_not_found" }));
+      return Response.json({ ok: true, action: "skipped_not_found" });
     }
 
     // 9. Build index text + metadata
@@ -347,21 +328,12 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
         ),
       );
 
-    // 12. Drop a pending marker for the id (#2831, #2856) — a document
-    // whose entire visible life fits between two nightly sweeps (published
-    // and unpublished the same day) would otherwise never appear in any
-    // sweep's current-ids set, so no sweep could ever notice it dropped
-    // out. The next sweep absorbs this marker into the reconciliation
-    // manifest and deletes it (search/index-manifest.ts) — this call does
-    // not write the manifest array itself. Handed back as `afterResponse`
-    // rather than awaited here: it
-    // provably cannot change this response (`addToManifest` never fails
-    // its caller), so there is no reason to add its KV round-trip latency
-    // to every indexing webhook — the caller runs it via `ctx.waitUntil`.
-    return {
-      response: Response.json({ ok: true, action: "indexed" }),
-      afterResponse: addToManifest(env.PSD_CACHE, env.SANITY_DATASET, _id),
-    };
+    // VectorizeServiceLive records `_id` in the search-index manifest itself
+    // now that the upsert above is confirmed (#2855) — a document whose
+    // entire visible life fits between two nightly sweeps (published and
+    // unpublished the same day) is tracked from this call onward, with
+    // nothing further for this handler to do.
+    return Response.json({ ok: true, action: "indexed" });
   });
 
 // ─── Public handler ────────────────────────────────────────────────────────
@@ -372,13 +344,12 @@ export async function handleIndexWebhook(
   request: Request,
   env: WorkerEnv,
   layer?: WebhookLayer,
-  ctx?: ExecutionContext,
 ): Promise<Response> {
   const envLayer = Layer.succeed(WorkerEnvTag, env);
   const serviceLayer =
     layer ?? Layer.mergeAll(EmbeddingServiceLive, VectorizeServiceLive);
 
-  const { response, afterResponse } = await Effect.runPromise(
+  return await Effect.runPromise(
     webhookEffect(request, env.SANITY_WEBHOOK_SECRET).pipe(
       Effect.provide(serviceLayer),
       Effect.provide(envLayer),
@@ -389,29 +360,15 @@ export async function handleIndexWebhook(
           }
         }),
       ),
-      Effect.catchAll((error) =>
-        Effect.succeed(respond(toErrorResponse(error))),
-      ),
+      Effect.catchAll((error) => Effect.succeed(toErrorResponse(error))),
       Effect.catchAllDefect(() =>
         Effect.succeed(
-          respond(
-            Response.json(
-              { ok: false, error: "internal error", code: "internal" },
-              { status: 500 },
-            ),
+          Response.json(
+            { ok: false, error: "internal error", code: "internal" },
+            { status: 500 },
           ),
         ),
       ),
     ),
   );
-
-  if (afterResponse) {
-    const run = () => Effect.runPromise(afterResponse);
-    // No ExecutionContext (e.g. a test calling this directly): fall back to
-    // awaiting inline rather than firing-and-forgetting a dropped promise.
-    if (ctx) ctx.waitUntil(run());
-    else await run();
-  }
-
-  return response;
 }

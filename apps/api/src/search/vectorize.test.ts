@@ -5,6 +5,7 @@ import {
   VectorizeServiceLive,
   VectorizeError,
 } from "./vectorize";
+import { listPendingIds } from "./index-manifest";
 import { WorkerEnvTag } from "../env";
 
 function makeVectorizeMock(
@@ -30,7 +31,92 @@ function makeVectorizeMock(
   } as unknown as VectorizeIndex;
 }
 
-function makeEnvLayer(index: VectorizeIndex) {
+/**
+ * Stateful in-memory KVNamespace so a test can observe the pending-marker
+ * writes `VectorizeServiceLive.upsert` now makes (#2855) — `{} as
+ * KVNamespace` (used everywhere markers are irrelevant) has no
+ * `get`/`put`/`list` to call at all. `list` supports the `prefix` filter
+ * `listPendingIds` (index-manifest.ts) uses — single page, `list_complete:
+ * true`, which is all a test-scale marker count ever needs.
+ */
+function makeKvNamespaceMock(): KVNamespace & {
+  readonly store: Map<string, string>;
+} {
+  const store = new Map<string, string>();
+  const mock = {
+    store,
+    get: (async (key: string) => store.get(key) ?? null) as KVNamespace["get"],
+    put: (async (key: string, value: string) => {
+      store.set(key, value);
+    }) as KVNamespace["put"],
+    delete: (async (key: string) => {
+      store.delete(key);
+    }) as KVNamespace["delete"],
+    list: (async (opts?: { prefix?: string }) => {
+      const prefix = opts?.prefix ?? "";
+      const keys = [...store.keys()]
+        .filter((k) => k.startsWith(prefix))
+        .map((name) => ({ name }));
+      return {
+        keys,
+        list_complete: true,
+        cursor: undefined,
+        cacheStatus: null,
+      };
+    }) as KVNamespace["list"],
+  };
+  return mock as unknown as KVNamespace & {
+    readonly store: Map<string, string>;
+  };
+}
+
+/**
+ * Like `makeKvNamespaceMock`, but `put` throws on the first `failCount`
+ * calls before succeeding — simulates a transient KV failure for
+ * `addToManifest`'s retry (index-manifest.ts's `MANIFEST_RETRY`), now
+ * exercised via `VectorizeServiceLive.upsert` rather than a webhook call
+ * site.
+ */
+function makeFlakyKvNamespaceMock(
+  failCount: number,
+): KVNamespace & { readonly store: Map<string, string> } {
+  const store = new Map<string, string>();
+  let attempts = 0;
+  const mock = {
+    store,
+    get: (async (key: string) => store.get(key) ?? null) as KVNamespace["get"],
+    put: (async (key: string, value: string) => {
+      attempts++;
+      if (attempts <= failCount) {
+        throw new Error(`KV put failed (simulated attempt ${attempts})`);
+      }
+      store.set(key, value);
+    }) as KVNamespace["put"],
+    delete: (async (key: string) => {
+      store.delete(key);
+    }) as KVNamespace["delete"],
+    list: (async (opts?: { prefix?: string }) => {
+      const prefix = opts?.prefix ?? "";
+      const keys = [...store.keys()]
+        .filter((k) => k.startsWith(prefix))
+        .map((name) => ({ name }));
+      return {
+        keys,
+        list_complete: true,
+        cursor: undefined,
+        cacheStatus: null,
+      };
+    }) as KVNamespace["list"],
+  };
+  return mock as unknown as KVNamespace & {
+    readonly store: Map<string, string>;
+  };
+}
+
+function makeEnvLayer(
+  index: VectorizeIndex,
+  overrides: { kv?: KVNamespace; dataset?: string } = {},
+) {
   return Layer.succeed(WorkerEnvTag, {
     AI: {} as Ai,
     SEARCH_INDEX: index,
@@ -40,10 +126,10 @@ function makeEnvLayer(index: VectorizeIndex) {
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
-    PSD_CACHE: {} as KVNamespace,
+    PSD_CACHE: overrides.kv ?? makeKvNamespaceMock(),
     PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "",
-    SANITY_DATASET: "",
+    SANITY_DATASET: overrides.dataset ?? "production",
     SANITY_API_TOKEN: "",
     SANITY_WEBHOOK_SECRET: "",
   });
@@ -369,5 +455,227 @@ describe("VectorizeService", () => {
     expect(
       (result as Extract<typeof result, { _tag: "Left" }>).left,
     ).toBeInstanceOf(VectorizeError);
+  });
+
+  describe("manifest ownership (#2855)", () => {
+    // upsert's confirmed ids are recorded as put-only pending markers
+    // (index-manifest.ts's `addToManifest`/`listPendingIds`), not written
+    // into the shared manifest array directly — a read-modify-write there
+    // would race across concurrent callers on Workers KV's eventually
+    // consistent, per-key-throttled store (see vectorize.ts's
+    // `recordUpsertedIds` docblock). Folding markers into the array stays
+    // the nightly sweep's job (sanity-index-sync.test.ts covers that).
+    it("records every successfully upserted id as a pending manifest marker", async () => {
+      const kv = makeKvNamespaceMock();
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(makeVectorizeMock(), { kv })),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "doc-abc",
+              values: Array(1024).fill(0.1),
+              metadata: { slug: "kantine", type: "responsibility" },
+            },
+            {
+              id: "doc-def",
+              values: Array(1024).fill(0.1),
+              metadata: { slug: "bar", type: "responsibility" },
+            },
+          ]);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      expect(new Set(pending.ids)).toEqual(new Set(["doc-abc", "doc-def"]));
+    });
+
+    it("does not write a pending marker when upsert fails", async () => {
+      const kv = makeKvNamespaceMock();
+      const failIndex = {
+        upsert: async () => {
+          throw new Error("Vectorize unavailable");
+        },
+      } as unknown as VectorizeIndex;
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(failIndex, { kv })),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          return yield* svc
+            .upsert([
+              {
+                id: "doc-new",
+                values: [0.1],
+                metadata: { slug: "x", type: "x" },
+              },
+            ])
+            .pipe(Effect.either);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      expect(pending.ids).toHaveLength(0);
+    });
+
+    it("retries a transient marker-write failure and still records the id", async () => {
+      const kv = makeFlakyKvNamespaceMock(1); // fails once, succeeds after
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(makeVectorizeMock(), { kv })),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "doc-retry",
+              values: [0.1],
+              metadata: { slug: "x", type: "x" },
+            },
+          ]);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      expect(pending.ids).toEqual(["doc-retry"]);
+    });
+
+    it("does not fail the upsert when every marker-write retry is exhausted", async () => {
+      const kv = makeFlakyKvNamespaceMock(Infinity); // never succeeds
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(makeVectorizeMock(), { kv })),
+      );
+
+      const result = await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          return yield* svc
+            .upsert([
+              {
+                id: "doc-unlucky",
+                values: [0.1],
+                metadata: { slug: "x", type: "x" },
+              },
+            ])
+            .pipe(Effect.either);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      expect(result._tag).toBe("Right");
+    });
+
+    it("survives two concurrent upserts for different ids (#2856) — no shared read to race on", async () => {
+      // The defect #2856 fixed: a read-modify-write manifest update has both
+      // callers read the same array before either writes, so whichever
+      // writes last wins and the other addition is lost. A put-only marker
+      // per id has no shared read to race on. Genuinely concurrent — both
+      // upserts are started before either is awaited.
+      const kv = makeKvNamespaceMock();
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer(makeVectorizeMock(), { kv })),
+      );
+      const run = (id: string) =>
+        Effect.runPromise(
+          Effect.gen(function* () {
+            const svc = yield* VectorizeService;
+            yield* svc.upsert([
+              { id, values: [0.1], metadata: { slug: "x", type: "x" } },
+            ]);
+          }).pipe(Effect.provide(layer)),
+        );
+
+      await Promise.all([run("concurrent-a"), run("concurrent-b")]);
+
+      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      expect(new Set(pending.ids)).toEqual(
+        new Set(["concurrent-a", "concurrent-b"]),
+      );
+    });
+
+    it("does not touch any manifest state on deleteByIds — that stays the sweep's responsibility", async () => {
+      // Pre-#2855, a webhook delete never updated the manifest either — the
+      // array only ever drops an id via the nightly sweep's own
+      // confirmed-delete reconciliation. Mirroring the ADD side with a
+      // "pending delete" marker here would be new complexity #2855 never
+      // asked for; deleteByIds must stay a pure passthrough to Vectorize.
+      const kv = makeKvNamespaceMock();
+      const layer = VectorizeServiceLive.pipe(
+        Layer.provide(
+          makeEnvLayer(
+            makeVectorizeMock({
+              deleteByIds: async () => ({
+                mutationId: "mut-del",
+                count: 1,
+                ids: ["doc-abc"],
+              }),
+            }),
+            { kv },
+          ),
+        ),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.deleteByIds(["doc-abc"]);
+        }).pipe(Effect.provide(layer)),
+      );
+
+      expect(kv.store.size).toBe(0);
+    });
+
+    it("keeps staging and production pending markers on separate keys sharing the same KV (#2833 regression)", async () => {
+      const kv = makeKvNamespaceMock();
+      const stagingLayer = VectorizeServiceLive.pipe(
+        Layer.provide(
+          makeEnvLayer(makeVectorizeMock(), { kv, dataset: "staging" }),
+        ),
+      );
+      const productionLayer = VectorizeServiceLive.pipe(
+        Layer.provide(
+          makeEnvLayer(makeVectorizeMock(), { kv, dataset: "production" }),
+        ),
+      );
+
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "staging-only",
+              values: [0.1],
+              metadata: { slug: "x", type: "x" },
+            },
+          ]);
+        }).pipe(Effect.provide(stagingLayer)),
+      );
+      await Effect.runPromise(
+        Effect.gen(function* () {
+          const svc = yield* VectorizeService;
+          yield* svc.upsert([
+            {
+              id: "production-only",
+              values: [0.1],
+              metadata: { slug: "x", type: "x" },
+            },
+          ]);
+        }).pipe(Effect.provide(productionLayer)),
+      );
+
+      const stagingPending = await Effect.runPromise(
+        listPendingIds(kv, "staging"),
+      );
+      const productionPending = await Effect.runPromise(
+        listPendingIds(kv, "production"),
+      );
+      expect(stagingPending.ids).toEqual(["staging-only"]);
+      expect(productionPending.ids).toEqual(["production-only"]);
+    });
   });
 });
