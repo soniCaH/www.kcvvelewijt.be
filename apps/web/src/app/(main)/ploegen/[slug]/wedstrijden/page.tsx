@@ -120,13 +120,20 @@ export default async function WedstrijdenPage({
     rawMatches = await runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
-        return yield* bff
-          .getMatches(psdTeamId)
-          .pipe(
-            Effect.catchTag("HttpNotFound", () =>
-              Effect.sync(() => notFound()),
-            ),
-          );
+        return yield* bff.getMatches(psdTeamId).pipe(
+          // Deliberately narrow (#2782), not converged onto
+          // `degradeIfPermanent`'s three-tag split: `team` above already
+          // resolved from Sanity, so a `ParseError`/`HttpApiDecodeError`
+          // here means only the matches read failed, not the team. Catching
+          // those too would still call `notFound()` — "Pagina niet
+          // gevonden" for a team whose lookup just succeeded. This route is
+          // `force-dynamic` (below), so unlike the ISR routes among these
+          // five it has no last-good page to fall back to either way — a
+          // thrown transient failure always hits the error boundary on
+          // this exact request, same as today. Staying narrow only avoids
+          // the strictly worse false 404; it buys no ISR staleness escape.
+          Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound())),
+        );
       }),
     );
   }

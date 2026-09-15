@@ -167,6 +167,26 @@ export async function generateMetadata({
  * and Next's `fetch` memoization cannot collapse them because
  * `@effect/platform` always attaches an `AbortSignal`, which opts the request
  * out of it (#2441). Per-render only — no TTL, see `BffServiceLive` (#2389).
+ *
+ * **Deliberately narrow (#2782)**, not converged onto `degradeIfPermanent`'s
+ * three-tag split. Widening to also catch `ParseError`/`HttpApiDecodeError`
+ * would call `notFound()` for those too — telling a visitor "this match does
+ * not exist" about a real match this deploy simply failed to decode. Left to
+ * reject, that same failure throws instead, and at this route's 5-minute ISR
+ * window (`revalidate` below) a *cached* match keeps serving its last-good
+ * render rather than a false 404 for the window. That fallback exists only
+ * once the route has rendered successfully at least once, though — on a cold
+ * render (first hit, or right after a redeploy) the same throw sends the
+ * visitor straight to the error boundary; staying narrow is the better of
+ * two imperfect outcomes here, not a free win.
+ *
+ * Confirmed while auditing this site: an empty-body HTTP 200 from
+ * `/games/{id}/info` for an unknown `matchId` is converted to
+ * `ResourceNotFoundError` → `HttpNotFound` by `fetchRawMatchDetail`'s
+ * `emptyBodyIsNotFound` opt-in (`apps/api/src/psd/service.ts`, landed in
+ * #2911) before it ever reaches this function — so the branch below is
+ * genuinely reachable for a bogus `matchId`, not dead code shadowed by a
+ * decode error arriving first.
  */
 const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
   matchId: number,

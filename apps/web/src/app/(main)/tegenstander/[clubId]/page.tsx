@@ -220,6 +220,32 @@ const fetchOpponentData = cache(async function fetchOpponentData(
       if (seniorTeams.length === 0) return null;
 
       // Fetch opponent history for each senior team; swallow 404s, propagate other errors
+      //
+      // Deliberately narrow (#2782), not converged onto `degradeIfPermanent`'s
+      // three-tag split — and this is the site where widening is riskiest of
+      // all five. The catch is per team inside this bounded-concurrency
+      // fan-out (`concurrency: 3`): a genuinely unknown team/opponent pairing
+      // (`HttpNotFound`) already degrades to the `{ _tag: "failed", history:
+      // null }` sentinel below, and the page only calls `notFound()` once
+      // every senior team has failed — `successful.length === 0` further
+      // down. Widening this per-team catch would fold `ParseError`/
+      // `HttpApiDecodeError` into that same sentinel: one team's contract-
+      // decode failure would silently drop out of the summed wins/draws/
+      // losses/goalsFor/goalsAgainst totals below, alongside teams that
+      // legitimately never played this opponent — a quietly *wrong* aggregate
+      // presented as a complete one, with no signal anything failed. At this
+      // route's 15-minute ISR window (`revalidate` above), that wrong number
+      // is what every visitor sees for the whole window, not just the one
+      // request that hit the decode failure.
+      //
+      // The ISR fallback this narrow catch protects — a rejected fan-out
+      // throws, and a *cached* route keeps serving its last-good render
+      // instead of the wrong aggregate — only exists once this route has
+      // successfully rendered at least once. On a cold render (first hit,
+      // or right after a redeploy) there is no last-good page yet, so the
+      // same throw sends the visitor straight to the error boundary instead.
+      // Staying narrow is the better of two imperfect outcomes, not a
+      // guarantee that throwing is free.
       const results = yield* Effect.all(
         seniorTeams.map((team) =>
           bff.getOpponentHistory(parseInt(team.psdId!, 10), clubId).pipe(
