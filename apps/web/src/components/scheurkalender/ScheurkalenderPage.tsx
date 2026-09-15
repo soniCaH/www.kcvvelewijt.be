@@ -56,7 +56,10 @@ export interface ScheurkalenderPageProps {
 
 interface Weekend {
   key: string;
-  /** The weekend's Saturday — anchors which month/year the weekend belongs to. */
+  /**
+   * The date that anchors which month/year the weekend belongs to — its
+   * Saturday, except where that Saturday sits in the previous month.
+   */
   saturday: DateTime;
   matches: ScheurkalenderMatch[];
 }
@@ -167,13 +170,23 @@ const POSTER_PRINT_CSS = `
 }
 `;
 
-/** Bucket fixtures per weekend (ISO week — Mon–Sun share a group). */
+/**
+ * Bucket fixtures per weekend (ISO week — Mon–Sun share a group), split on the
+ * month where a weekend crosses one.
+ */
 function groupByWeekend(matches: ScheurkalenderMatch[]): Weekend[] {
   const order: string[] = [];
   const buckets = new Map<string, ScheurkalenderMatch[]>();
   for (const match of matches) {
     const dt = toDisplayZone(match.date);
-    const key = `${dt.weekYear}-W${String(dt.weekNumber).padStart(2, "0")}`;
+    // The month is part of the key, so a weekend straddling two months splits
+    // into one bucket per month. Held together under a single heading, the far
+    // half prints as a date that month does not have: 31 Oct + 1 Nov under
+    // "Oktober ’26." puts a "ZO 1" in a month whose 1st is a Thursday, while
+    // November opens on the 8th with its first fixture nowhere on the sheet.
+    // Keeping the pair adjacent is worth less than printing it readable — this
+    // poster hangs a full season.
+    const key = `${dt.weekYear}-W${String(dt.weekNumber).padStart(2, "0")}-${dt.toFormat("yyyy-MM")}`;
     let bucket = buckets.get(key);
     if (!bucket) {
       bucket = [];
@@ -184,10 +197,16 @@ function groupByWeekend(matches: ScheurkalenderMatch[]): Weekend[] {
   }
   return order.map((key) => {
     const bucket = buckets.get(key)!;
-    // Anchor on the weekend's Saturday so a Sat/Sun pair never straddles two
-    // month headings (e.g. 31 Jan + 1 Feb both belong to January).
-    const monday = toDisplayZone(bucket[0]!.date).startOf("week");
-    return { key, saturday: monday.plus({ days: 5 }), matches: bucket };
+    const first = toDisplayZone(bucket[0]!.date);
+    // Anchor on the weekend's Saturday so a Sat/Sun pair inside one month shares
+    // a heading. Where that Saturday falls in the previous month — a split half,
+    // or a lone Sunday on the 1st — anchor on the fixtures themselves.
+    const saturday = first.startOf("week").plus({ days: 5 });
+    return {
+      key,
+      saturday: saturday.hasSame(first, "month") ? saturday : first,
+      matches: bucket,
+    };
   });
 }
 
