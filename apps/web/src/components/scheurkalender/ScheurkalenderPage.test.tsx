@@ -107,10 +107,10 @@ describe("ScheurkalenderPage", () => {
       expect(container.querySelector(".grid-cols-1")).toBeInTheDocument();
     });
 
-    it("keeps a Sat/Sun pair in the month of its Saturday", () => {
-      // 31/01/2026 (Sat) and 01/02/2026 (Sun) are the same ISO week but different
-      // months — the pair must stay together under the Saturday's heading rather
-      // than splitting across Januari and Februari.
+    it("splits a Sat/Sun pair that crosses a month onto both headings", () => {
+      // 31/01/2026 (Sat) and 01/02/2026 (Sun) are one ISO week in two months.
+      // Held together under Januari, the Sunday prints as "ZO 1" in a month
+      // whose 1st is a Thursday, and Februari loses its opening fixture.
       const { container } = renderPage([
         {
           id: 9,
@@ -130,11 +130,61 @@ describe("ScheurkalenderPage", () => {
         },
       ]);
       const headings = container.querySelectorAll("h2");
+      expect(headings).toHaveLength(2);
+      expect(headings[0]).toHaveTextContent("Januari ’26.");
+      expect(headings[1]).toHaveTextContent("Februari ’26.");
+      // Each fixture sits under its own month, not merely somewhere on the page.
+      const [januari, februari] = container.querySelectorAll("section");
+      expect(
+        within(januari as HTMLElement).getByText(/KVK Ieper/),
+      ).toBeInTheDocument();
+      expect(
+        within(februari as HTMLElement).getByText(/SK Laar/),
+      ).toBeInTheDocument();
+    });
+
+    it("keeps a Sat/Sun pair inside one month under a single heading", () => {
+      // The split above must not fire on an ordinary weekend.
+      const { container } = renderPage([
+        {
+          id: 11,
+          date: "2026-01-17",
+          time: "20:00",
+          opponent: "KVK Ieper",
+          kcvvLabel: "B",
+          kcvvIsHome: true,
+        },
+        {
+          id: 12,
+          date: "2026-01-18",
+          time: "15:00",
+          opponent: "SK Laar",
+          kcvvLabel: "A",
+          kcvvIsHome: true,
+        },
+      ]);
+      const headings = container.querySelectorAll("h2");
       expect(headings).toHaveLength(1);
       expect(headings[0]).toHaveTextContent("Januari ’26.");
-      // Both fixtures sit under that single heading.
-      expect(screen.getByText(/KVK Ieper/)).toBeInTheDocument();
-      expect(screen.getByText(/SK Laar/)).toBeInTheDocument();
+    });
+
+    it("puts a lone Sunday on the 1st under its own month", () => {
+      // 01/02/2026 is a Sunday, so its weekend's Saturday is 31 January. With no
+      // Saturday fixture there is no pair to keep together and nothing to hint
+      // that the heading is a month early.
+      const { container } = renderPage([
+        {
+          id: 13,
+          date: "2026-02-01",
+          time: "15:00",
+          opponent: "SK Laar",
+          kcvvLabel: "A",
+          kcvvIsHome: true,
+        },
+      ]);
+      const headings = container.querySelectorAll("h2");
+      expect(headings).toHaveLength(1);
+      expect(headings[0]).toHaveTextContent("Februari ’26.");
     });
   });
 

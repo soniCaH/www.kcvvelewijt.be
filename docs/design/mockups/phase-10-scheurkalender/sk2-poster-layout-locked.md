@@ -49,6 +49,14 @@ reverse.
   gone. The day-of-month carries no month or year — the heading owns those.
 - **Weekend seams** are a dotted hairline between weekends within a month; the
   first weekend of a month has none.
+- **A weekend that crosses a month is split**, one heading each — amended
+  2026-09-15, against the printed 26/27 sheet. Weekends were anchored on their
+  Saturday so a Sat/Sun pair stayed together, which put `ZO 1` (1 November) under
+  `Oktober ’26.` — a day-of-month that October's Sunday column cannot have, while
+  November opened on the 8th with its first fixture nowhere on the poster. The
+  date tab carries no month by design, so the heading is the only thing saying
+  which month a row is in; adjacency is worth less than that. Same rule covers a
+  lone Sunday on the 1st, whose weekend Saturday sits in the month before.
 - **KCVV side is bolded**, squad letter (`A`/`B`) inline and in jersey-deep;
   opponent in `text-ink-soft`.
 - **Club names arrive already re-cased** — PSD returns `Ksc Blankenberge` /
