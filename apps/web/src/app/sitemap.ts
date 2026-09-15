@@ -131,6 +131,13 @@ async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
         const bff = yield* BffService;
         return yield* bff.getMatches(teamId);
       }).pipe(
+        // Deliberately narrow (#2782), not converged onto the full
+        // `degradeIfPermanent` classifier (`ParseError`/`HttpApiDecodeError`
+        // alongside `HttpNotFound`): the `Effect.catchAll` immediately below
+        // already degrades every non-404 failure — decode errors included —
+        // to the same `[]`, so widening this line to the three-tag split
+        // would be a no-op. It stays here only for the per-team error-log
+        // message that line would otherwise swallow.
         Effect.catchTag("HttpNotFound", () => Effect.succeed([] as const)),
         Effect.catchAll((error) => {
           console.error(

@@ -57,6 +57,16 @@ async function fetchSharePageData(): Promise<{
           // finished today (for goal/HT/FT/card posts) plus the next 7 days
           // (for pre-game posts). Replaces the old getNextMatches + today-only
           // filter, which dropped a match the moment it started (#2160).
+          // Deliberately narrow (#2782), not converged onto
+          // `degradeIfPermanent`'s three-tag split. Widening to also catch
+          // `ParseError`/`HttpApiDecodeError` would degrade a genuine
+          // contract-decode failure to the same empty picker as "no
+          // upcoming matches" — this internal tool would silently render
+          // with nothing to post about instead of surfacing the failure.
+          // This route is `force-dynamic` (top of file), so there is no ISR
+          // cache to fall back to anyway: a thrown transient failure already
+          // hits the error boundary on every request until it clears, the
+          // same outcome staying narrow leaves unchanged.
           bff
             .getMatchesWindow()
             .pipe(Effect.catchTag("HttpNotFound", () => Effect.succeed([]))),

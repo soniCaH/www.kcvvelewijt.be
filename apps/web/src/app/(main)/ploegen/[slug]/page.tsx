@@ -221,14 +221,22 @@ interface BffData {
  * Either way, a transient failure is rethrown unchanged, preserving the
  * throw-for-ISR-fallback behaviour above.
  *
- * `degradeIfPermanent` is not yet universal: `app/sitemap.ts`,
- * `(main)/ploegen/[slug]/wedstrijden/page.tsx`, `(main)/share/page.tsx`, and
- * `(main)/tegenstander/[clubId]/page.tsx` still hand-spell a narrower version
- * of this split as a bare `Effect.catchTag("HttpNotFound", ...)` — catching
- * only the 404 case, not the full three-tag permanent classifier. Converging
- * them is deliberately not done here: it would widen what they catch to
- * `ParseError`/`HttpApiDecodeError` too, a behaviour change beyond what those
- * routes asked for. Tracked in #2782.
+ * `degradeIfPermanent` is deliberately not universal (decided, not
+ * outstanding — #2782). Five sites hand-spell a narrower version of this
+ * split as a bare `Effect.catchTag("HttpNotFound", ...)`, catching only the
+ * 404 case rather than the full three-tag permanent classifier: `app/
+ * sitemap.ts`, `(main)/ploegen/[slug]/wedstrijden/page.tsx`, `(main)/share/
+ * page.tsx`, `(main)/tegenstander/[clubId]/page.tsx`, and `(main)/wedstrijd/
+ * [matchId]/page.tsx`'s `fetchMatchOrNotFound`. Converging any of them was
+ * considered and rejected per site (#2782's own comment thread) — each has
+ * been left alone with its own reason recorded at its call site, not because
+ * it was missed. See those five comments for the specifics; the shared
+ * reason is the same one two paragraphs up: widening would let a
+ * `ParseError`/`HttpApiDecodeError` stop throwing and get its degraded
+ * render written into the ISR cache instead of leaving ISR to serve the
+ * last-good page — which itself only helps a route that has already
+ * rendered successfully once; a cold render still hits the error boundary
+ * either way.
  */
 async function fetchBffData(
   psdTeamId: number,
