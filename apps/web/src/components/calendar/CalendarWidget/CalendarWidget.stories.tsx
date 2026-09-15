@@ -87,6 +87,32 @@ const feedWithReservation = buildCalendarFeed(
   [...matches, reservationMatch()],
   events,
 );
+// A finished match with a score, alongside the `vs` fixtures above (#2884) —
+// `matches` only exercises `scoreDisplay: { type: "vs" }`, so no
+// `CalendarWidget` story previously entered the `{ type: "score" }` branch
+// `CalendarWeek`'s week-grid card renders (see `WeekMatchCard` in
+// `CalendarWeek.tsx`). Mirrors the fixture shape `CalendarWeek.stories.tsx`'s
+// `WithPlayedMatch` already uses. Own feed, dated inside the same navigated
+// week as the `vs` fixtures above, so one frame shows both states side by
+// side without perturbing the other views' existing baselines.
+const feedWithPlayedMatch = buildCalendarFeed(
+  [
+    ...matches,
+    {
+      id: 4,
+      date: "2026-03-13T20:00:00",
+      time: "20:00",
+      homeTeam: kcvv,
+      awayTeam: { id: 4, name: "SK Londerzeel" },
+      scoreDisplay: { type: "score", home: 3, away: 1 },
+      status: "finished",
+      competition: "Beker van Vlaanderen",
+      team: "A-ploeg",
+      kind: "match" as const,
+    },
+  ],
+  events,
+);
 
 const meta = {
   title: "Features/Calendar/CalendarWidget",
@@ -132,6 +158,24 @@ export const AgendaView: Story = {
   parameters: {
     nextjs: {
       navigation: { pathname: "/kalender", query: { view: "agenda" } },
+    },
+  },
+};
+
+/**
+ * A finished match's score alongside the week's scheduled `vs` fixtures
+ * (#2884) — the three-story baseline set above only ever set
+ * `scoreDisplay: { type: "vs" }`, so `CalendarWeek`'s composed week-grid card
+ * (the `{ type: "score" }` branch touched by #2610's `lining-nums` fix) had
+ * no `CalendarWidget` baseline exercising it. Own `feedWithPlayedMatch`, not
+ * the shared `feed`, so this is the only story whose baseline carries the
+ * score row.
+ */
+export const WeekViewWithPlayedMatch: Story = {
+  args: { feed: feedWithPlayedMatch },
+  parameters: {
+    nextjs: {
+      navigation: { pathname: "/kalender", query: { view: "week" } },
     },
   },
 };
