@@ -1,5 +1,6 @@
 import {
   expect,
+  test,
   type ConsoleMessage,
   type Page,
   type Request,
@@ -112,7 +113,25 @@ export async function smokeTest(
   page.on("response", responseHandler);
 
   try {
-    const response = await page.goto(path);
+    // #2977: waitUntil defaults to "load", which blocks on every subresource
+    // (fonts, images, background BFF reads) even though none of the
+    // assertions below need anything past the parsed DOM. That redundant
+    // wait was eating into the shared 30s test budget on the suite's
+    // heaviest routes and causing goto to time out under CI contention.
+    // The explicit waitForLoadState("load") below still gates the broken
+    // image check, so no coverage is lost — only the wasted wait is.
+    // Recorded as a "goto-ms" annotation (visible in the CI report) so a
+    // future flake investigation has per-route timing instead of a guess.
+    const gotoStarted = Date.now();
+    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    const gotoMs = Date.now() - gotoStarted;
+    test
+      .info()
+      .annotations.push({ type: "goto-ms", description: String(gotoMs) });
+    // Also logged directly — the CI reporters configured for this suite
+    // (`github` + `list`) don't render custom annotations to the job log,
+    // so this is the line that actually shows per-route timing there.
+    console.log(`[smoke] goto ${path} → ${gotoMs}ms`);
     expect(response, `goto(${path}) returned no response`).not.toBeNull();
     expect(response!.status(), `${path} status`).toBe(expectedStatus);
 
