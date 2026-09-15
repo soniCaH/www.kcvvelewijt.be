@@ -14,7 +14,7 @@ import {
   ResourceNotFoundError,
   type BffError,
 } from "./errors";
-import { WorkerEnvTag } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import {
   SanityProjection,
@@ -25,21 +25,9 @@ import { CLUB_VENUE } from "./venue";
 global.fetch = vi.fn();
 
 function makeEnvLayer() {
-  return Layer.succeed(WorkerEnvTag, {
-    PSD_API_BASE_URL: "https://clubapi.prosoccerdata.com",
-    PSD_IMAGE_BASE_URL: "https://kcvv.prosoccerdata.com",
-    FOOTBALISTO_LOGO_CDN_URL: "https://cdn.example.com",
-    PSD_API_KEY: "test-key",
-    PSD_API_CLUB: "test-club",
-    PSD_API_AUTH: "test-auth",
-    PSD_CACHE: {} as KVNamespace,
-    PSD_GATE: {} as DurableObjectNamespace,
+  return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
-    SANITY_DATASET: "test",
-    SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: "",
-    AI: {} as Ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
   });
 }
 
@@ -1088,9 +1076,7 @@ describe("PsdService.getRanking", () => {
       json: async () => rawRankingCompetitions,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1138,9 +1124,7 @@ describe("PsdService.getRanking", () => {
       json: async () => asLeague,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1158,9 +1142,7 @@ describe("PsdService.getRanking", () => {
       json: async () => cupAndFriendlyOnly,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1177,9 +1159,7 @@ describe("PsdService.getRanking", () => {
       json: async () => noTeams,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1217,9 +1197,7 @@ describe("PsdService.getRanking", () => {
       json: async () => mixedRanking,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -1261,7 +1239,7 @@ describe("PsdService.getRanking", () => {
     await Effect.runPromise(
       Effect.gen(function* () {
         const svc = yield* PsdService;
-        return yield* svc.getRanking(1, "https://cdn.example.com");
+        return yield* svc.getRanking(1);
       }).pipe(
         Effect.provide(PsdServiceLive),
         Effect.provide(PsdGateTest),
@@ -1306,9 +1284,7 @@ describe("PsdService.getRanking", () => {
       json: async () => oneRotten,
     });
 
-    const result = await runService((svc) =>
-      svc.getRanking(1, "https://cdn.example.com"),
-    );
+    const result = await runService((svc) => svc.getRanking(1));
 
     // A table nobody can decode drops out; the sibling still renders. The
     // handler is what turns "no table at all" into a 404.

@@ -18,8 +18,18 @@ const defaultTestEnv: WorkerEnv = {
   SANITY_WEBHOOK_SECRET: "test-webhook-secret",
 };
 
+/** The raw `WorkerEnv` object — defaults merged with `overrides`. Use this
+ * when a test needs the plain env value itself (e.g. to compose it into a
+ * `Layer.mergeAll(...).pipe(Layer.provide(...))` alongside other services,
+ * or to build several env variants before wrapping just one in a Layer)
+ * rather than an already-built `Layer<WorkerEnvTag>`. `makeTestEnvLayer`
+ * builds on this, so there is one source of truth for the defaults. */
+export function makeTestEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
+  return { ...defaultTestEnv, ...overrides };
+}
+
 export const testEnvLayer = Layer.succeed(WorkerEnvTag, defaultTestEnv);
 
 export function makeTestEnvLayer(overrides: Partial<WorkerEnv> = {}) {
-  return Layer.succeed(WorkerEnvTag, { ...defaultTestEnv, ...overrides });
+  return Layer.succeed(WorkerEnvTag, makeTestEnv(overrides));
 }

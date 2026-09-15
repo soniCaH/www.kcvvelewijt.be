@@ -6,7 +6,7 @@ import {
   VectorizeError,
 } from "./vectorize";
 import { listPendingIds } from "./index-manifest";
-import { WorkerEnvTag } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 function makeVectorizeMock(
   overrides: Partial<VectorizeIndex> = {},
@@ -117,8 +117,7 @@ function makeEnvLayer(
   index: VectorizeIndex,
   overrides: { kv?: KVNamespace; dataset?: string } = {},
 ) {
-  return Layer.succeed(WorkerEnvTag, {
-    AI: {} as Ai,
+  return makeTestEnvLayer({
     SEARCH_INDEX: index,
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
@@ -127,7 +126,6 @@ function makeEnvLayer(
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
     PSD_CACHE: overrides.kv ?? makeKvNamespaceMock(),
-    PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "",
     SANITY_DATASET: overrides.dataset ?? "production",
     SANITY_API_TOKEN: "",

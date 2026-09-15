@@ -14,12 +14,20 @@ import { SanityProjectionLive } from "../sanity/projection";
 import { PsdServiceLive } from "./service";
 import { PsdGateLive } from "./gate";
 import { BackgroundRunnerService, type BackgroundRunner } from "./background";
+import { VectorizeServiceLive } from "../search/vectorize";
 
-/** The PSD read stack a background refresh needs, exposing every PsdRefreshEnv service. */
+/** Every service a background refresh may need, exposing every PsdRefreshEnv
+ * member — the PSD read stack plus VectorizeService, since `handlers/related.ts`
+ * also refreshes through this runner (see the comment on PsdRefreshEnv). */
 const backgroundStackLayer = (env: WorkerEnv) =>
   PsdServiceLive.pipe(
     Layer.provideMerge(
-      Layer.mergeAll(KvCacheLive, PsdGateLive, SanityProjectionLive),
+      Layer.mergeAll(
+        KvCacheLive,
+        PsdGateLive,
+        SanityProjectionLive,
+        VectorizeServiceLive,
+      ),
     ),
     Layer.provideMerge(Layer.succeed(WorkerEnvTag, env)),
   );

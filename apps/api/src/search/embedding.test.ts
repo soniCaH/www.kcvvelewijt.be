@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Layer } from "effect";
 import { EmbeddingService, EmbeddingServiceLive } from "./embedding";
-import { WorkerEnvTag } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 function makeAiMock(runFn?: () => Promise<unknown>): Ai {
   return {
@@ -10,17 +10,14 @@ function makeAiMock(runFn?: () => Promise<unknown>): Ai {
 }
 
 function makeEnvLayer(ai: Ai) {
-  return Layer.succeed(WorkerEnvTag, {
+  return makeTestEnvLayer({
     AI: ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
     FOOTBALISTO_LOGO_CDN_URL: "",
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
-    PSD_CACHE: {} as KVNamespace,
-    PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "",
     SANITY_DATASET: "",
     SANITY_API_TOKEN: "",

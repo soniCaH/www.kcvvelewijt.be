@@ -97,7 +97,31 @@ const statusOf = (e: unknown): number | undefined => {
   return typeof s === "number" ? s : undefined;
 };
 
-export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
+export const TypedKvCache = <A, I>(
+  schema: S.Schema<A, I>,
+  options?: {
+    /**
+     * Whether a refresh through this cache instance may report to the
+     * GLOBAL PSD incident tracker (`gate.reportOutcome`, `psd/incident.ts`).
+     * Defaults to `true` — every cache is PSD-backed except
+     * `handlers/related.ts`'s (`related:*` keys, whose `fetch` needs
+     * `VectorizeService` rather than `PsdService`; see the `PsdRefreshEnv`
+     * doc in `psd/background.ts`).
+     *
+     * This is a property of the CACHE INSTANCE, not of the key string — a
+     * per-key prefix check drifts silently the moment a second non-PSD
+     * cache is added (#2868 review: an allowlist-by-prefix would classify
+     * a hypothetical future `search:` cache as PSD-backed by default and
+     * quietly reopen the exact bug this option exists to prevent, with no
+     * test failure and no compile error to announce it). Declaring it here
+     * instead makes a new non-PSD cache state its own exclusion; every
+     * existing `TypedKvCache(schema)` call keeps today's behaviour
+     * unchanged.
+     */
+    readonly psdBacked?: boolean;
+  },
+) => {
+  const psdBacked = options?.psdBacked ?? true;
   const WrapperSchema = S.Struct({
     value: schema,
     fetchedAt: S.Number,
@@ -137,7 +161,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
     JSON.stringify({ value, fetchedAt: Date.now() });
 
   return {
-    getOrFetch: <E, R>(
+    getOrFetch: <E, R extends PsdRefreshEnv>(
       key: string,
       fetch: Effect.Effect<A, E, R>,
       softTtl: number | ((value: A) => number),
@@ -245,13 +269,19 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
           Effect.gen(function* () {
             const status = statusOf(err);
             const staleAgeMs = Date.now() - fetchedAt;
-            const { incidentOpen } = yield* gate.reportOutcome({
-              ok: false,
-              key,
-              status,
-              error: String(err),
-              staleAgeMs,
-            });
+            // Non-PSD cache instance → skip the report (see the `psdBacked`
+            // option doc above): no incidentOpen state applies to it
+            // either, so escalation below falls back to the plain
+            // (non-alert) WARN.
+            const { incidentOpen } = yield* psdBacked
+              ? gate.reportOutcome({
+                  ok: false,
+                  key,
+                  status,
+                  error: String(err),
+                  staleAgeMs,
+                })
+              : Effect.succeed({ incidentOpen: false });
             yield* keepStale(`${label} (${String(err)})`, {
               fetchedAt,
               softTtlSec,
@@ -338,7 +368,12 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
                   "background refresh failed",
                 );
               }
-              yield* gate.reportOutcome({ ok: true, key });
+              // Non-PSD cache instance → skip the report (see the
+              // `psdBacked` option doc above) so a Vectorize-only success
+              // can't be misread as "PSD recovered".
+              yield* psdBacked
+                ? gate.reportOutcome({ ok: true, key })
+                : Effect.void;
               const valid = S.decodeUnknownOption(schema)(result.right);
               yield* Option.isSome(valid)
                 ? persist(result.right)
@@ -383,10 +418,7 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
               // when no runner is wired (no `waitUntil` to hand it to).
               const ping = nudge(Date.now() - fetchedAt);
               yield* Option.isSome(runnerOpt)
-                ? runnerOpt.value.fork(
-                    `drift:${key}`,
-                    ping as Effect.Effect<void, unknown, PsdRefreshEnv>,
-                  )
+                ? runnerOpt.value.fork(`drift:${key}`, ping)
                 : ping;
             }
 
@@ -407,12 +439,10 @@ export const TypedKvCache = <A, I>(schema: S.Schema<A, I>) => {
             if (Option.isSome(runnerOpt)) {
               // Stale-while-revalidate: serve stale NOW, refresh in the
               // background (single-flight) via the runner — see background-live.ts.
-              // Cast is safe: only PSD handlers provide a runner, and its layer
-              // covers this refresh's deps (a non-PSD caller has no runner here).
-              const refresh = backgroundRefresh(
-                fetchedAt,
-                resolvedSoftTtl,
-              ) as Effect.Effect<void, unknown, PsdRefreshEnv>;
+              // `R extends PsdRefreshEnv` on `getOrFetch` makes this safe by
+              // construction: `fetch`'s own requirements are already within
+              // what the runner's layer provides.
+              const refresh = backgroundRefresh(fetchedAt, resolvedSoftTtl);
               yield* runnerOpt.value.fork(`refresh:${key}`, refresh);
               return value;
             }

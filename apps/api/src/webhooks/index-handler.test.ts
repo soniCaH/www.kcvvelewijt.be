@@ -1,7 +1,8 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { handleIndexWebhook, type WebhookLayer } from "./index-handler";
-import { WorkerEnvTag, type WorkerEnv } from "../env";
+import type { WorkerEnv } from "../env";
+import { makeTestEnv, makeTestEnvLayer } from "../test-helpers/env-layer";
 import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 import { EmbeddingService } from "../search/embedding";
 import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
@@ -63,27 +64,21 @@ async function makeSignedRequest(
 }
 
 function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
-  return {
+  return makeTestEnv({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
     FOOTBALISTO_LOGO_CDN_URL: "",
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
-    PSD_CACHE: {} as KVNamespace,
-    PSD_GATE: {} as DurableObjectNamespace,
-    SANITY_PROJECT_ID: "test",
     // Correctly-paired by default so every pre-existing test in this file
     // (not exercising the dataset/index guard) passes through it unaffected.
     // Tests for the guard itself override both fields explicitly.
     SANITY_DATASET: "production",
     SEARCH_INDEX_NAME: "kcvv-search",
-    SANITY_API_TOKEN: "test-token",
     SANITY_WEBHOOK_SECRET: TEST_SECRET,
-    AI: {} as Ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
     ...overrides,
-  };
+  });
 }
 
 // ─── Test layer factories ──────────────────────────────────────────────────
@@ -285,12 +280,15 @@ describe("handleIndexWebhook", () => {
     // annotated as WebhookLayer; a value passed as the `layer` parameter
     // must actually be self-contained.
     function liveLayer(env: WorkerEnv): WebhookLayer {
+      // `env` here is already a fully-populated WorkerEnv (built by
+      // makeEnv), so passing it as makeTestEnvLayer's overrides yields
+      // exactly `env` back, wrapped as a Layer<WorkerEnvTag>.
       return Layer.mergeAll(
         Layer.succeed(EmbeddingService, {
           embed: () => Effect.succeed(FAKE_VECTOR),
         }),
         VectorizeServiceLive,
-      ).pipe(Layer.provide(Layer.succeed(WorkerEnvTag, env)));
+      ).pipe(Layer.provide(makeTestEnvLayer(env)));
     }
 
     it("records a successful upsert's id as a pending manifest marker", async () => {

@@ -20,7 +20,6 @@ const rankingCache = TypedKvCache(RankingTableArray);
 
 export const getRankingHandler = (
   teamId: number,
-  logoCdnUrl: string,
 ): Effect.Effect<
   readonly RankingTable[],
   BffError,
@@ -29,7 +28,7 @@ export const getRankingHandler = (
   const cacheKey = `ranking:team:${teamId}`;
   const fetchRanking = Effect.gen(function* () {
     const service = yield* PsdService;
-    const tables = yield* service.getRanking(teamId, logoCdnUrl);
+    const tables = yield* service.getRanking(teamId);
     if (tables.length === 0) {
       return yield* new ResourceNotFoundError({
         message: "No ranking data found",
@@ -56,11 +55,6 @@ export const RankingApiLive = HttpApiBuilder.group(
   "ranking",
   (handlers) =>
     handlers.handle("getRanking", ({ path: { teamId } }) =>
-      withErrorMapping(
-        Effect.gen(function* () {
-          const env = yield* WorkerEnvTag;
-          return yield* getRankingHandler(teamId, env.FOOTBALISTO_LOGO_CDN_URL);
-        }),
-      ),
+      withErrorMapping(getRankingHandler(teamId)),
     ),
 );

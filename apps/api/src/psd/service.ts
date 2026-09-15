@@ -61,7 +61,6 @@ export interface PsdServiceInterface {
   ) => Effect.Effect<MatchDetail, BffError>;
   readonly getRanking: (
     teamId: number,
-    logoCdnUrl: string,
   ) => Effect.Effect<readonly RankingTable[], BffError>;
   readonly getOpponentHistory: (
     teamId: number,
@@ -853,7 +852,7 @@ export const PsdServiceLive = Layer.effect(
           ),
         ),
 
-      getRanking: (teamId: number, logoCdnUrl: string) =>
+      getRanking: (teamId: number) =>
         Effect.gen(function* () {
           const competitions = yield* countedFetch(
             `${base}/teams/${teamId}/ranking`,
@@ -900,7 +899,10 @@ export const PsdServiceLive = Layer.effect(
               competition_id: competition.id,
               competition_name: stripPsdName(competition.name),
               entries: entries.map((e) =>
-                transformFootbalistoRankingEntry(e, logoCdnUrl),
+                transformFootbalistoRankingEntry(
+                  e,
+                  env.FOOTBALISTO_LOGO_CDN_URL,
+                ),
               ),
             });
           }

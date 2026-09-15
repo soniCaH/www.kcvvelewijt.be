@@ -12,7 +12,8 @@ import {
   type VectorizeServiceInterface,
   type VectorRecord,
 } from "./vectorize";
-import { WorkerEnvTag, type WorkerEnv } from "../env";
+import type { WorkerEnv } from "../env";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import {
   addToManifest,
   listPendingIds,
@@ -55,17 +56,13 @@ const mockPage = {
 };
 
 function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
-  return Layer.succeed(WorkerEnvTag, {
-    AI: {} as Ai,
-    SEARCH_INDEX: {} as VectorizeIndex,
+  return makeTestEnvLayer({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
     FOOTBALISTO_LOGO_CDN_URL: "",
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
-    PSD_CACHE: {} as KVNamespace,
-    PSD_GATE: {} as DurableObjectNamespace,
     SANITY_PROJECT_ID: "",
     // Correctly-paired by default so every pre-existing test in this file
     // (not exercising the dataset/index guard) passes through it unaffected.

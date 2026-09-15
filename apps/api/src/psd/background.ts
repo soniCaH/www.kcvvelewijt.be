@@ -16,13 +16,32 @@ import type { WorkerEnvTag } from "../env";
 import type { KvCacheService } from "../cache/kv-cache";
 import type { PsdService } from "./service";
 import type { PsdGateService } from "./gate";
+import type { VectorizeService } from "../search/vectorize";
 
-/** Everything a PSD background refresh needs; the live runner's layer provides it. */
+/**
+ * Everything a background refresh may need; the live runner's layer (see
+ * background-live.ts) provides every member. Despite the name, this is not
+ * PSD-exclusive: `handlers/related.ts` also runs its `getOrFetch` through
+ * this same runner and its fetch requires `VectorizeService`, not
+ * `PsdService` (#2868 — constraining `getOrFetch`'s `R` to this union
+ * surfaced that the runner's layer didn't cover that caller; fixed here by
+ * widening the union and `backgroundStackLayer` together, not by excluding
+ * the caller).
+ *
+ * Because a non-PSD caller now genuinely runs through this seam,
+ * `TypedKvCache` (`cache/kv-cache.ts`) takes a `psdBacked` option — a
+ * property of the CACHE INSTANCE, not a key-prefix guess — and
+ * `handlers/related.ts` declares `psdBacked: false`, so `getOrFetch` never
+ * lets a Vectorize-only refresh's outcome reach `gate.reportOutcome` (which
+ * feeds the GLOBAL PSD incident tracker, `psd/incident.ts`): it must never
+ * open or close a PSD outage on Vectorize's behalf (#2868 review).
+ */
 export type PsdRefreshEnv =
   | PsdService
   | KvCacheService
   | PsdGateService
-  | WorkerEnvTag;
+  | WorkerEnvTag
+  | VectorizeService;
 
 export interface BackgroundRunner {
   /** Fire-and-forget a refresh on an env-built layer via `ctx.waitUntil`. */

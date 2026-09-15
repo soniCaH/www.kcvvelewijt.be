@@ -11,7 +11,9 @@ import { PsdGateService } from "../psd/gate";
 const DEFAULT_LIMIT = 3;
 const MAX_LIMIT = 5; // upper bound from S.between(1, 5) in api-contract
 
-const relatedCache = TypedKvCache(S.Array(RelatedItem));
+// `fetch` needs VectorizeService, not PsdService — its outcome must never
+// speak for PSD health (`TypedKvCache`'s `psdBacked` option, #2868 review).
+const relatedCache = TypedKvCache(S.Array(RelatedItem), { psdBacked: false });
 
 export const getRelatedHandler = (request: {
   id: string;
