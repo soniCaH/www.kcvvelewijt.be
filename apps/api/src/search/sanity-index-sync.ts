@@ -5,7 +5,12 @@ import { reconcileOrphans } from "../reconciliation";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "./dataset-index-guard";
 import { EmbeddingService } from "./embedding";
-import { readManifest } from "./index-manifest";
+import {
+  deletePendingKeys,
+  listPendingIds,
+  readManifest,
+  writeManifest,
+} from "./index-manifest";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
@@ -121,31 +126,32 @@ const PRUNE_SAFETY_FLOOR = 25;
 //
 // Vectorize exposes exactly upsert / query / getByIds / deleteByIds — no
 // list, no scan, no cursor. A delete must always be addressed by an id this
-// worker already knows, so "what should be pruned" has to come from two
+// worker already knows, so "what should be pruned" has to come from three
 // sources other than the index itself:
 //
 // 1. A KV manifest (index-manifest.ts) of ids the index is believed to
-//    hold. `VectorizeServiceLive` (search/vectorize.ts, #2855) is its only
-//    writer: it adds an id there the instant its own `upsert` confirms
-//    that id landed, and removes one the instant its own `deleteByIds`
-//    confirms it's gone — for every caller, this sweep's own upserts below
-//    included, not just the webhook's. That's what makes
-//    `previousManifest − currentIds` (captured BEFORE this sweep's phases
-//    run, see `manifestRead` above) safe to treat as "believed indexed as
-//    of the last write, sweep or webhook" — a document whose entire
-//    visible life fit between two sweeps (published and unpublished the
-//    same day) is already tracked the moment the webhook's upsert lands,
-//    with no absorption step needed to fold it in later.
-// 2. The excluded-ids queries above — stateless and authoritative, so they
+//    hold — a single array, written only by this sweep.
+//    `effectivePreviousManifest − currentIds` catches anything it named
+//    that no longer matches, including a document deleted from Sanity
+//    outright (nothing else can ever name that id).
+// 2. Pending markers — the webhook's upsert path (webhooks/index-handler.ts)
+//    drops a put-only marker per id instead of read-modify-writing the
+//    manifest array directly (#2856: two concurrent webhooks racing one
+//    shared array is a lost-update bug a retry cannot fix, since a retry
+//    re-reads the same stale value). This sweep lists and absorbs every
+//    pending marker into `effectivePreviousManifest` BEFORE diffing — not
+//    just before writing — so a document whose entire visible life fit
+//    between two sweeps (published and unpublished the same day, with no
+//    sweep ever seeing it as current) is folded in and pruned by this same
+//    sweep's diff, then its marker key is deleted so it isn't absorbed
+//    again.
+// 3. The excluded-ids queries above — stateless and authoritative, so they
 //    also catch a document excluded before the manifest ever tracked it (a
 //    responsibility deactivated pre-dating this mechanism's first write).
 //
 // Only ids Vectorize actually confirms deleting leave the manifest — a dry
 // run, a failed delete chunk, or a cap refusal all confirm nothing, so
-// those ids stay tracked for the next sweep to retry deleting. This sweep
-// never writes the manifest itself: every add and every remove below flows
-// through `vectorize.upsert`/`vectorize.deleteByIds`, which is the only
-// thing touching KV on the manifest's behalf.
+// those ids stay pending for the next sweep to retry.
 //
 // What NEITHER source covers: a vector already in the index whose Sanity
 // document is ALSO already gone, from before this mechanism's first
@@ -154,11 +160,14 @@ const PRUNE_SAFETY_FLOOR = 25;
 // up that pre-existing population is a separate, one-off, manually-run
 // exercise (see the PR description for the measured count).
 //
-// Cost per sweep: 2 extra GROQ reads (excluded ids) + 1 KV read (the
-// manifest, currently ~166 ids / ~6.5 KB, far under KV's 25 MB value cap),
-// plus ceil(prunedCount / MAX_VECTORS_PER_UPSERT) additional deleteByIds
-// calls. Negligible against the ~175-subrequest sweep this corpus already
-// makes, dominated by embed calls.
+// Cost per sweep: 2 extra GROQ reads (excluded ids) + 1 KV read + 1 KV list
+// (pending markers, normally near-empty) + 1 KV write (the manifest array,
+// currently ~166 ids / ~6.5 KB, far under KV's 25 MB value cap) + one KV
+// delete per absorbed marker, plus ceil(prunedCount / MAX_VECTORS_PER_UPSERT)
+// additional deleteByIds calls. Negligible against the ~175-subrequest
+// sweep this corpus already makes, dominated by embed calls. Per webhook
+// call: one KV put replaces what used to be one KV get + one KV put — less
+// work, not more, and no shared key to contend on with another webhook.
 
 // ─── Options ─────────────────────────────────────────────────────────────────
 
@@ -196,18 +205,6 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // absent var (local dev, a test that doesn't set it) or a typo never
     // silently starts deleting production vectors (#2831).
     const dryRun = env.SEARCH_INDEX_PRUNE_DRY_RUN !== "false";
-
-    // Captured now, before any phase below runs its own upserts —
-    // VectorizeServiceLive (#2855) maintains this manifest itself, adding
-    // an id the moment its upsert lands, so reading it after the phases run
-    // would already reflect THIS sweep's own additions instead of "believed
-    // indexed as of the last write." Reading it here keeps the diff below
-    // meaning what it always meant. A read failure is carried forward as an
-    // Either rather than resolved here, so the phases still run — indexing
-    // must not stop just because reconciliation can't.
-    const manifestRead = yield* Effect.either(
-      readManifest(env.PSD_CACHE, env.SANITY_DATASET),
-    );
 
     // Whether every degradable fetch this sweep ran actually succeeded.
     // fetchPhase below is the only way any phase gets its items, and it
@@ -436,12 +433,41 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ...pageResult.map((d) => d._id),
       ];
 
+      const manifestRead = yield* Effect.either(
+        readManifest(env.PSD_CACHE, env.SANITY_DATASET),
+      );
+
       if (Either.isLeft(manifestRead)) {
         yield* Effect.logWarning(
           `[search-sync] Skipping reconciliation — manifest read failed, leaving it untouched: ${String(manifestRead.left)}`,
         );
       } else {
         const previousManifest = manifestRead.right;
+
+        // Absorb pending markers (webhook additions, #2856) BEFORE diffing,
+        // not just before writing — see the "Reconciliation" block comment
+        // above. Folding them in here is what lets a document whose entire
+        // life fit between two sweeps get pruned by THIS sweep's diff
+        // rather than waiting one more cycle. A failed list just means
+        // "nothing absorbed this sweep" — the markers themselves are
+        // untouched by a failed list (nothing was deleted), so they're
+        // retried next sweep; not worth failing the whole reconciliation
+        // over, unlike a failed manifest read.
+        const pendingRead = yield* Effect.either(
+          listPendingIds(env.PSD_CACHE, env.SANITY_DATASET),
+        );
+        if (Either.isLeft(pendingRead)) {
+          yield* Effect.logWarning(
+            `[search-sync] Could not list pending markers this sweep, will retry next time: ${String(pendingRead.left)}`,
+          );
+        }
+        const { ids: pendingIds, keys: pendingKeys } = Either.getOrElse(
+          pendingRead,
+          () => ({ ids: [] as string[], keys: [] as string[] }),
+        );
+        const effectivePreviousManifest = [
+          ...new Set([...previousManifest, ...pendingIds]),
+        ];
 
         // The manifest-diff portion goes through the shared reconciliation
         // guard (#2854, `../reconciliation.ts`) — same helper
@@ -463,7 +489,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         // nothing worth tracking state to avoid.
         const manifestReconciliation = yield* reconcileOrphans(
           "manifest entries",
-          previousManifest,
+          effectivePreviousManifest,
           new Set(currentIds),
           (ids) =>
             dryRun
@@ -502,13 +528,14 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         const excludedIds = [
           ...new Set([...excludedResponsibilityIds, ...excludedArticleIds]),
         ].filter((id) => !manifestConfirmedIdSet.has(id));
+        let excludedConfirmedIds: readonly string[] = [];
         if (excludedIds.length > 0) {
           if (dryRun) {
             yield* Effect.log(
               `[search-sync] DRY RUN — would prune ${excludedIds.length} excluded-ids vector(s): ${excludedIds.join(", ")}`,
             );
           } else {
-            const excludedConfirmedIds = yield* deleteBatched(excludedIds);
+            excludedConfirmedIds = yield* deleteBatched(excludedIds);
             yield* Effect.log(
               `[search-sync] Pruned ${excludedConfirmedIds.length} excluded-ids vector(s)`,
             );
@@ -519,12 +546,30 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           );
         }
 
-        // No manifest write here: `deleteBatched` above calls
-        // `vectorize.deleteByIds`, and every currentId this sweep's earlier
-        // phases upserted already went through `vectorize.upsert` — both
-        // already updated the manifest as each call was confirmed
-        // (`VectorizeServiceLive`, #2855). There is nothing left for this
-        // sweep to write.
+        const confirmedDeleted = new Set([
+          ...manifestConfirmedIds,
+          ...excludedConfirmedIds,
+        ]);
+
+        // (effectivePreviousManifest ∪ currentIds) − confirmedDeleted — see
+        // the block comment above for why union, and why only confirmed.
+        const nextManifest = new Set([
+          ...effectivePreviousManifest,
+          ...currentIds,
+        ]);
+        for (const id of confirmedDeleted) nextManifest.delete(id);
+        yield* writeManifest(env.PSD_CACHE, env.SANITY_DATASET, [
+          ...nextManifest,
+        ]);
+
+        // Only delete the markers once the manifest write they were folded
+        // into has actually landed — if writeManifest fails, this line
+        // never runs (the failure propagates and fails the sweep), so the
+        // markers survive to be absorbed again next time instead of being
+        // silently lost.
+        if (pendingKeys.length > 0) {
+          yield* deletePendingKeys(env.PSD_CACHE, pendingKeys);
+        }
       }
     }
 

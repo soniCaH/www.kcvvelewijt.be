@@ -1,10 +1,11 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { handleIndexWebhook, type WebhookLayer } from "./index-handler";
-import type { WorkerEnv } from "../env";
+import { WorkerEnvTag, type WorkerEnv } from "../env";
 import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 import { EmbeddingService } from "../search/embedding";
-import { VectorizeService } from "../search/vectorize";
+import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
+import { listPendingIds } from "../search/index-manifest";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
@@ -225,6 +226,151 @@ describe("handleIndexWebhook", () => {
         }),
       }),
     ]);
+  });
+
+  describe("manifest recording via VectorizeServiceLive (#2855)", () => {
+    // The webhook itself no longer calls the manifest directly — since
+    // #2855, VectorizeServiceLive records a successful upsert's ids as
+    // pending markers internally (search/vectorize.ts). That's invisible
+    // through `defaultLayer`'s mocked VectorizeService above, so these
+    // tests provide the real VectorizeServiceLive (backed by a fake raw
+    // VectorizeIndex) to exercise it end-to-end through the webhook.
+    function makeVectorizeIndexMock(
+      overrides: Partial<VectorizeIndex> = {},
+    ): VectorizeIndex {
+      return {
+        upsert: async () => ({ mutationId: "mut", count: 1 }),
+        deleteByIds: async () => ({ mutationId: "mut-del", count: 0, ids: [] }),
+        query: async () => ({ matches: [] }),
+        getByIds: async () => [],
+        ...overrides,
+      } as unknown as VectorizeIndex;
+    }
+
+    function makeKvNamespaceMock(): KVNamespace & {
+      readonly store: Map<string, string>;
+    } {
+      const store = new Map<string, string>();
+      const mock = {
+        store,
+        get: (async (key: string) =>
+          store.get(key) ?? null) as KVNamespace["get"],
+        put: (async (key: string, value: string) => {
+          store.set(key, value);
+        }) as KVNamespace["put"],
+        delete: (async (key: string) => {
+          store.delete(key);
+        }) as KVNamespace["delete"],
+        list: (async (opts?: { prefix?: string }) => {
+          const prefix = opts?.prefix ?? "";
+          const keys = [...store.keys()]
+            .filter((k) => k.startsWith(prefix))
+            .map((name) => ({ name }));
+          return {
+            keys,
+            list_complete: true,
+            cursor: undefined,
+            cacheStatus: null,
+          };
+        }) as KVNamespace["list"],
+      };
+      return mock as unknown as KVNamespace & {
+        readonly store: Map<string, string>;
+      };
+    }
+
+    // Self-contained (WorkerEnvTag provided in) so the result satisfies
+    // WebhookLayer's R = never — `handleIndexWebhook`'s own default branch
+    // gets away with an open requirement only because it isn't explicitly
+    // annotated as WebhookLayer; a value passed as the `layer` parameter
+    // must actually be self-contained.
+    function liveLayer(env: WorkerEnv): WebhookLayer {
+      return Layer.mergeAll(
+        Layer.succeed(EmbeddingService, {
+          embed: () => Effect.succeed(FAKE_VECTOR),
+        }),
+        VectorizeServiceLive,
+      ).pipe(Layer.provide(Layer.succeed(WorkerEnvTag, env)));
+    }
+
+    it("records a successful upsert's id as a pending manifest marker", async () => {
+      const kv = makeKvNamespaceMock();
+      mockSanityFetch.mockResolvedValue({
+        _id: "resp-transient",
+        slug: "kantine",
+        title: "Kantine",
+        question: "Wie regelt de kantine?",
+        keywords: ["kantine", "bar"],
+        summary: "De kantine wordt beheerd door de evenementencommissie.",
+      });
+
+      const body = JSON.stringify({
+        _id: "resp-transient",
+        _type: "responsibility",
+      });
+      const env = makeEnv({
+        PSD_CACHE: kv,
+        SEARCH_INDEX: makeVectorizeIndexMock(),
+      });
+      const response = await handleIndexWebhook(
+        await makeSignedRequest(body),
+        env,
+        liveLayer(env),
+      );
+      expect(response.status).toBe(200);
+
+      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      expect(pending.ids).toEqual(["resp-transient"]);
+    });
+
+    it("survives two concurrent webhook additions for different ids (#2856)", async () => {
+      // The defect this fix closes: a read-modify-write manifest update has
+      // both webhooks read the same array before either writes, so
+      // whichever writes last wins and the other addition is lost. A
+      // put-only marker per id has no shared read to race on. Genuinely
+      // concurrent — both requests are started before either is awaited.
+      const kv = makeKvNamespaceMock();
+      const env = makeEnv({
+        PSD_CACHE: kv,
+        SEARCH_INDEX: makeVectorizeIndexMock(),
+      });
+      const layer = liveLayer(env);
+
+      mockSanityFetch.mockImplementation(async () => ({
+        _id: "unused",
+        slug: "kantine",
+        title: "Kantine",
+        question: "Wie regelt de kantine?",
+        keywords: ["kantine", "bar"],
+        summary: "De kantine wordt beheerd door de evenementencommissie.",
+      }));
+
+      const bodyA = JSON.stringify({
+        _id: "concurrent-a",
+        _type: "responsibility",
+      });
+      const bodyB = JSON.stringify({
+        _id: "concurrent-b",
+        _type: "responsibility",
+      });
+      const [requestA, requestB] = await Promise.all([
+        makeSignedRequest(bodyA),
+        makeSignedRequest(bodyB),
+      ]);
+
+      const [responseA, responseB] = await Promise.all([
+        handleIndexWebhook(requestA, env, layer),
+        handleIndexWebhook(requestB, env, layer),
+      ]);
+
+      expect(responseA.status).toBe(200);
+      expect(responseB.status).toBe(200);
+
+      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      expect(new Set(pending.ids)).toEqual(
+        new Set(["concurrent-a", "concurrent-b"]),
+      );
+    });
   });
 
   it("returns skipped_not_found when document is not in Sanity", async () => {
