@@ -1,6 +1,5 @@
 import {
   expect,
-  test,
   type ConsoleMessage,
   type Page,
   type Request,
@@ -113,27 +112,48 @@ export async function smokeTest(
   page.on("response", responseHandler);
 
   try {
-    // #2977: waitUntil defaults to "load", which blocks on every subresource
-    // (fonts, images, background BFF reads) even though none of the
-    // assertions below need anything past the parsed DOM. That redundant
-    // wait was eating into the shared 30s test budget on the suite's
-    // heaviest routes and causing goto to time out under CI contention.
-    // The explicit waitForLoadState("load") below still gates the broken
-    // image check, so no coverage is lost — only the wasted wait is.
-    // Recorded as a "goto-ms" annotation (visible in the CI report) so a
-    // future flake investigation has per-route timing instead of a guess.
+    // #2977: goto used to default to waitUntil: "load", which blocks on
+    // every subresource (fonts, images, background BFF reads) — on a
+    // slow-TTFB route (e.g. /kalender's 19-call BFF fan-out) that wait was
+    // unbounded, sharing the same 30s test budget as every assertion below,
+    // and was the direct cause of the navigation timeouts this issue is
+    // about. Switching goto alone to "domcontentloaded" does NOT fix that:
+    // it still waits for the same slow HTML response, and the identical
+    // "load" wait was still happening a few lines down (before this fix),
+    // just moved to an explicit waitForLoadState call — same unbounded
+    // wait, same budget, different stack frame in the timeout error.
+    // The actual fix is bounding that wait (below), not just relocating it.
+    //
+    // Logged directly rather than as a TestInfo annotation: this suite's
+    // configured CI reporters (`github` + `list`) don't render
+    // TestInfo.annotations, so an annotation here would be silently inert.
     const gotoStarted = Date.now();
-    const response = await page.goto(path, { waitUntil: "domcontentloaded" });
-    const gotoMs = Date.now() - gotoStarted;
-    test
-      .info()
-      .annotations.push({ type: "goto-ms", description: String(gotoMs) });
-    // Also logged directly — the CI reporters configured for this suite
-    // (`github` + `list`) don't render custom annotations to the job log,
-    // so this is the line that actually shows per-route timing there.
-    console.log(`[smoke] goto ${path} → ${gotoMs}ms`);
+    let response: Response | null = null;
+    try {
+      response = await page.goto(path, { waitUntil: "domcontentloaded" });
+    } finally {
+      // In a `finally` so the one route that times out — the case this
+      // instrumentation exists for — still gets a number, not silence.
+      console.log(`[smoke] goto ${path} → ${Date.now() - gotoStarted}ms`);
+    }
     expect(response, `goto(${path}) returned no response`).not.toBeNull();
     expect(response!.status(), `${path} status`).toBe(expectedStatus);
+
+    // Bounded, best-effort wait for the load event, run BEFORE the
+    // structural assertions (same relative order as the pre-fix code) so
+    // h1/nav/footer are checked against a rendered, styled page rather than
+    // racing render-blocking CSS at bare DOMContentLoaded. Capped at 10s so
+    // a slow subresource can no longer consume the rest of the shared test
+    // budget the way the unbounded wait used to — this cap, not the
+    // `domcontentloaded` goto by itself, is what actually bounds the flake.
+    // Trade-off: under a genuinely slow load, this gives up after 10s and
+    // the broken-image check below runs against whatever finished loading
+    // by then. That's a real, if narrow, coverage reduction, not a silent
+    // pass — the check still fails on any image that has already resolved
+    // broken; images still in flight are just not yet checkable (`complete`
+    // is false for those, so the filter below already skips them rather
+    // than reporting them as broken).
+    await page.waitForLoadState("load", { timeout: 10_000 }).catch(() => {});
 
     await expect(page.locator("h1").first(), `${path} <h1>`).toBeVisible();
     await expect(page.locator("nav").first(), `${path} <nav>`).toBeVisible();
@@ -141,10 +161,6 @@ export async function smokeTest(
       page.locator("footer").first(),
       `${path} <footer>`,
     ).toBeVisible();
-
-    // Wait for the load event before sampling images — `complete` is only
-    // meaningful after the browser has finished its initial loading pass.
-    await page.waitForLoadState("load");
 
     const brokenImages = await page.evaluate(() => {
       const imgs = Array.from(document.querySelectorAll("img"));
