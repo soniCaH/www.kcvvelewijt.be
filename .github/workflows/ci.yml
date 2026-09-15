@@ -101,6 +101,25 @@ jobs:
       - name: Build Studio
         run: npx turbo build --filter=@kcvv/studio
 
+      # `@kcvv/web#build` already depends on `@kcvv/studio#typegen` in
+      # turbo.json, so the Next.js build below silently regenerates these types
+      # every run — but it never compares the result to what's committed, so a
+      # schema or GROQ edit that forgot to regenerate just gets quietly
+      # rebuilt around (#2862). This step makes that comparison explicit, and
+      # runs before the expensive Next.js build so a stale file fails fast.
+      # `turbo typegen --filter=@kcvv/studio` reuses the exact task/cache the
+      # build depends on, so the later build step gets a cache hit here, not a
+      # second run. Needs no Sanity token: `sanity schema extract` reads the
+      # local schema code and `sanity typegen generate` reads local GROQ query
+      # files — both fully offline.
+      - name: Sanity types in sync
+        run: |
+          npx turbo typegen --filter=@kcvv/studio
+          if ! git diff --exit-code -- apps/web/src/lib/sanity/sanity.types.ts; then
+            echo "::error::apps/web/src/lib/sanity/sanity.types.ts is out of date. Run 'pnpm --filter @kcvv/studio run typegen' locally and commit the result."
+            exit 1
+          fi
+
       # Folded in from the former standalone `security-scan` job — it reuses this
       # job's already-installed dependencies instead of paying for its own
       # checkout + install. Non-blocking (advisory only). Deeper dependency
