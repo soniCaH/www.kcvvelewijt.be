@@ -90,9 +90,14 @@ const feedWithReservation = buildCalendarFeed(
 // A finished match with a score, alongside the `vs` fixtures above (#2884) —
 // `matches` only exercises `scoreDisplay: { type: "vs" }`, so no
 // `CalendarWidget` story previously entered the `{ type: "score" }` branch
-// `CalendarWeek`'s week-grid card renders (see `WeekMatchCard` in
+// `CalendarWeek`'s week-grid card renders it in (see `WeekMatchCard` in
 // `CalendarWeek.tsx`). Mirrors the fixture shape `CalendarWeek.stories.tsx`'s
-// `WithPlayedMatch` already uses. Own feed, dated inside the same navigated
+// `WithPlayedMatch` already uses, `homeScore`/`awayScore` included —
+// `transformMatchToCalendar` always writes both alongside `scoreDisplay`
+// (`kalender/utils.ts`), so a fixture that omits them locks a state
+// production can't produce and (below the `?view=week` → agenda coercion
+// on phones) silently stops guarding `CalendarAgenda`'s scoreline, which
+// gates on both being numbers. Own feed, dated inside the same navigated
 // week as the `vs` fixtures above, so one frame shows both states side by
 // side without perturbing the other views' existing baselines.
 const feedWithPlayedMatch = buildCalendarFeed(
@@ -105,6 +110,9 @@ const feedWithPlayedMatch = buildCalendarFeed(
       homeTeam: kcvv,
       awayTeam: { id: 4, name: "SK Londerzeel" },
       scoreDisplay: { type: "score", home: 3, away: 1 },
+      homeScore: 3,
+      awayScore: 1,
+      isHome: true,
       status: "finished",
       competition: "Beker van Vlaanderen",
       team: "A-ploeg",
