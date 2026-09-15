@@ -180,13 +180,12 @@ export async function generateMetadata({
  * visitor straight to the error boundary; staying narrow is the better of
  * two imperfect outcomes here, not a free win.
  *
- * Confirmed while auditing this site: root `CLAUDE.md`'s note that PSD
- * answers an unknown game id with HTTP 200 and an empty body, not a 404, no
- * longer describes this endpoint. `apps/api/src/psd/service.ts`'s
- * `fetchRawMatchDetail` opts `/games/{id}/info` into `emptyBodyIsNotFound`
- * (#2911), which now turns that empty body into a `ResourceNotFoundError` →
- * `HttpNotFound` before it ever reaches this function — so the branch below
- * is genuinely reachable for a bogus `matchId`, not dead code shadowed by a
+ * Confirmed while auditing this site: an empty-body HTTP 200 from
+ * `/games/{id}/info` for an unknown `matchId` is converted to
+ * `ResourceNotFoundError` → `HttpNotFound` by `fetchRawMatchDetail`'s
+ * `emptyBodyIsNotFound` opt-in (`apps/api/src/psd/service.ts`, landed in
+ * #2911) before it ever reaches this function — so the branch below is
+ * genuinely reachable for a bogus `matchId`, not dead code shadowed by a
  * decode error arriving first.
  */
 const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(

@@ -230,13 +230,20 @@ interface BffData {
  * [matchId]/page.tsx`'s `fetchMatchOrNotFound`. Converging any of them was
  * considered and rejected per site (#2782's own comment thread) — each has
  * been left alone with its own reason recorded at its call site, not because
- * it was missed. See those five comments for the specifics; the shared
- * reason is the same one two paragraphs up: widening would let a
- * `ParseError`/`HttpApiDecodeError` stop throwing and get its degraded
- * render written into the ISR cache instead of leaving ISR to serve the
- * last-good page — which itself only helps a route that has already
- * rendered successfully once; a cold render still hits the error boundary
- * either way.
+ * it was missed.
+ *
+ * These five share the *decision* — stay narrow — not one single reason.
+ * Two of them (`tegenstander`/`wedstrijd`) share this function's own ISR
+ * rationale two paragraphs up: widening would let a `ParseError`/
+ * `HttpApiDecodeError` stop throwing and get its degraded render written
+ * into the ISR cache instead of leaving ISR to serve the last-good page
+ * (itself only a fallback once a route has rendered successfully at least
+ * once). `wedstrijden` and `share` are `force-dynamic`, so that ISR
+ * rationale doesn't apply to them at all — their narrow catch instead
+ * avoids a false `notFound()`/empty-result outcome for a read that never
+ * had anything to do with the failure. `sitemap.ts`'s reason is different
+ * again: its narrow catch keeps an expected 404 out of a diagnostic log,
+ * not an ISR concern. See each site's own comment for its specific reason.
  */
 async function fetchBffData(
   psdTeamId: number,

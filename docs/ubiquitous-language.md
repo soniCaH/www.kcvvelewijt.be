@@ -540,7 +540,7 @@ Every BFF read failure is one of exactly two kinds, and the kind decides what th
 
 **Rule:** one list owns the split (`PERMANENT_BFF_TAGS`). Nothing hand-types a second copy — a tag added to only one copy would silently disagree, with no compiler or test signal.
 
-**Known hole:** a permanent classification is inferred from the error tag, and one tag is ambiguous — a response that fails to decode looks the same whether PSD changed its shape (genuinely permanent) or the Worker died mid-response (transient). Tracked in [#2782].
+**Known hole:** a permanent classification is inferred from the error tag, and one tag is ambiguous — a response that fails to decode looks the same whether PSD changed its shape (genuinely permanent) or the Worker died mid-response (transient). Tracked in [#2953].
 
 ---
 
@@ -594,7 +594,7 @@ Each content type has its own visibility logic. There is no universal "published
 
 [#819]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/819
 [#2699]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2699
-[#2782]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2782
 [#2795]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2795
 [#2801]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2801
 [#2802]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2802
+[#2953]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2953

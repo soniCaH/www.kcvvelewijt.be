@@ -234,7 +234,7 @@ const fetchOpponentData = cache(async function fetchOpponentData(
       // losses/goalsFor/goalsAgainst totals below, alongside teams that
       // legitimately never played this opponent — a quietly *wrong* aggregate
       // presented as a complete one, with no signal anything failed. At this
-      // route's 15-minute ISR window (`revalidate` below), that wrong number
+      // route's 15-minute ISR window (`revalidate` above), that wrong number
       // is what every visitor sees for the whole window, not just the one
       // request that hit the decode failure.
       //

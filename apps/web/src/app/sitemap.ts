@@ -133,11 +133,17 @@ async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
       }).pipe(
         // Deliberately narrow (#2782), not converged onto the full
         // `degradeIfPermanent` classifier (`ParseError`/`HttpApiDecodeError`
-        // alongside `HttpNotFound`): the `Effect.catchAll` immediately below
-        // already degrades every non-404 failure — decode errors included —
-        // to the same `[]`, so widening this line to the three-tag split
-        // would be a no-op. It stays here only for the per-team error-log
-        // message that line would otherwise swallow.
+        // alongside `HttpNotFound`). This `catchTag` resolves an expected
+        // 404 (a team with no matches) to `[]` *before* it ever reaches the
+        // `Effect.catchAll` below — that's what keeps routine per-team 404s
+        // out of its `[sitemap] Failed to fetch matches for team N` error
+        // log (see the block comment above this function). Both branches
+        // already resolve the sitemap output to the same `[]` either way, so
+        // widening would not change what gets built — but it would delete
+        // that diagnostic: a `ParseError`/`HttpApiDecodeError` would then
+        // resolve silently here instead of reaching `catchAll`'s
+        // `console.error`, the only signal this path has for BFF contract
+        // drift during sitemap generation.
         Effect.catchTag("HttpNotFound", () => Effect.succeed([] as const)),
         Effect.catchAll((error) => {
           console.error(
