@@ -3,9 +3,9 @@
  * Most complex component - handles state, URL sync, fetch, and coordination
  */
 
-import type { ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
 import { createMockSearchResponse } from "@/../tests/helpers/search.helpers";
@@ -14,15 +14,46 @@ import { trackEvent } from "@/lib/analytics/track-event";
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 const mockTrackEvent = vi.mocked(trackEvent);
 
-// Mock Next.js navigation hooks
-const mockPush = vi.fn();
-const mockSearchParams = new URLSearchParams();
+// Mock Next.js navigation hooks — reactive: `push` feeds back into what
+// `useSearchParams()` returns and notifies every mounted consumer, the way a
+// real client-side navigation does. Mirrors the store `HulpFinder.test.tsx`
+// uses. Before #2784 this mock was a bare `vi.fn()` that never touched
+// `useSearchParams()`'s return value, which is exactly why the double-fetch
+// this file now guards against went untested: the `currentUrlQueryValue`
+// effect that `router.push` retriggers in real Next.js never actually fired
+// here.
+const searchParamsStore = vi.hoisted(() => {
+  let current = new URLSearchParams();
+  const listeners = new Set<() => void>();
+  return {
+    get: () => current,
+    set: (next: URLSearchParams) => {
+      current = next;
+      listeners.forEach((listener) => listener());
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+  };
+});
+
+function setMockSearchParams(params: Record<string, string>) {
+  const next = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => next.set(key, value));
+  searchParamsStore.set(next);
+}
+
+const mockPush = vi.fn((url: string) => {
+  searchParamsStore.set(new URLSearchParams(url.split("?")[1] ?? ""));
+});
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
   }),
-  useSearchParams: () => mockSearchParams,
+  useSearchParams: () =>
+    useSyncExternalStore(searchParamsStore.subscribe, searchParamsStore.get),
 }));
 
 // Mock child components' dependencies
@@ -50,10 +81,8 @@ describe("SearchInterface", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    // Clear all params to prevent cross-test leakage
-    Array.from(mockSearchParams.keys()).forEach((key) => {
-      mockSearchParams.delete(key);
-    });
+    // Reset the URL store to prevent cross-test leakage
+    searchParamsStore.set(new URLSearchParams());
 
     // Setup fetch mock using vi.stubGlobal for proper cleanup
     fetchMock = vi.fn();
@@ -112,8 +141,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
-      mockSearchParams.set("type", "article");
+      setMockSearchParams({ q: "test", type: "article" });
 
       render(<SearchInterface initialType="article" />);
 
@@ -128,8 +156,7 @@ describe("SearchInterface", () => {
     });
 
     it("should respect URL params over initial props", async () => {
-      mockSearchParams.set("q", "url query");
-      mockSearchParams.set("type", "player");
+      setMockSearchParams({ q: "url query", type: "player" });
 
       const mockResponse = createMockSearchResponse("url query");
       fetchMock.mockResolvedValueOnce({
@@ -207,7 +234,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
+      setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
 
@@ -539,7 +566,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
+      setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
 
@@ -561,7 +588,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
+      setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
 
@@ -586,8 +613,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
-      mockSearchParams.set("type", "article");
+      setMockSearchParams({ q: "test", type: "article" });
 
       render(<SearchInterface />);
 
@@ -609,7 +635,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
+      setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
 
@@ -638,7 +664,7 @@ describe("SearchInterface", () => {
         json: async () => mockResponse,
       });
 
-      mockSearchParams.set("q", "test");
+      setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
 
@@ -661,8 +687,7 @@ describe("SearchInterface", () => {
 
   describe("URL Synchronization", () => {
     it("should initialize state from URL params on mount", async () => {
-      mockSearchParams.set("q", "initial");
-      mockSearchParams.set("type", "article");
+      setMockSearchParams({ q: "initial", type: "article" });
 
       const mockResponse = createMockSearchResponse("initial");
       fetchMock.mockResolvedValueOnce({
@@ -696,8 +721,7 @@ describe("SearchInterface", () => {
     });
 
     it("should validate type param from URL", async () => {
-      mockSearchParams.set("q", "test");
-      mockSearchParams.set("type", "invalid");
+      setMockSearchParams({ q: "test", type: "invalid" });
 
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
@@ -1091,7 +1115,7 @@ describe("SearchInterface", () => {
 
     it("does not silently drop a filter click made before the previous push's useSearchParams() catches up (1a)", async () => {
       const user = userEvent.setup();
-      mockSearchParams.set("q", "test");
+      setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
 
@@ -1099,9 +1123,11 @@ describe("SearchInterface", () => {
         expect(screen.getByRole("group")).toBeInTheDocument();
       });
 
-      // First click: "all" -> "article". `mockSearchParams` (what
-      // useSearchParams() returns) is deliberately NOT updated by this —
-      // exactly like a real router.push whose transition hasn't landed yet.
+      // First click: "all" -> "article". The mock's `push` now reactively
+      // updates `useSearchParams()` (#2784), but the dedup guard in
+      // `handleFilterChange` compares against the component's own
+      // `activeType` state, never a value re-derived from the URL — so this
+      // still exercises the thing the test is actually about.
       await user.click(screen.getByRole("button", { name: /nieuws/i }));
       expect(mockPush).toHaveBeenCalledTimes(1);
 
@@ -1145,6 +1171,175 @@ describe("SearchInterface", () => {
       expect(new URLSearchParams(String(lastUrl).split("?")[1]).get("q")).toBe(
         "nieuw",
       );
+    });
+  });
+
+  describe("Double-fetch guard on submit and typeahead (#2784)", () => {
+    // Bug: `handleSearch`'s direct `performSearch(searchQuery)` call and the
+    // `router.push` it also triggers both end up requesting the same query —
+    // the push reactively changes what `useSearchParams()` returns, which
+    // retriggers the component's own URL-watching effect. Went untested
+    // because the old `next/navigation` mock never fed `push` back into
+    // `useSearchParams()` (see the mock block at the top of this file).
+
+    it("issues exactly one fetch when a search is submitted", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("issues exactly one fetch for a 350ms typeahead pause", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("typeah");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      // No Enter / submit click — SearchForm's own 350ms debounce fires
+      // `onSearch` once typing stops (ZOEK-2).
+      await user.type(input, "typeah");
+
+      await waitFor(
+        () => {
+          expect(fetchMock).toHaveBeenCalled();
+        },
+        { timeout: 1000 },
+      );
+
+      // Give a redundant, effect-driven second fetch a chance to land before
+      // asserting the final count.
+      await waitFor(() => {
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("retries with a fresh fetch when the identical query is resubmitted after a failed search", async () => {
+      const user = userEvent.setup();
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      // The only retry a visitor has: no retry button on the error state, so
+      // pressing "Zoeken" again with the identical query is it. This is
+      // exactly the regression that ruled out having `handleSearch` stop
+      // calling `performSearch` directly — under that fix, `router.push` to
+      // an unchanged URL is a `replaceState` (no history entry, no
+      // `useSearchParams()` change), so the URL-watching effect would never
+      // re-fire and this retry would silently do nothing.
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+      });
+      await waitFor(() => {
+        expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+      });
+    });
+
+    it("searches again for each query across browser back/forward between two different queries", async () => {
+      setMockSearchParams({ q: "first" });
+      const firstResponse = createMockSearchResponse("first");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => firstResponse,
+      });
+
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledWith(
+          expect.stringContaining("q=first"),
+          expect.any(Object),
+        );
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      // Let the fetch's promise chain (and the results-tracking effect it
+      // feeds) fully settle before moving on — otherwise a floating
+      // microtask from this stage can land its `setResults`/tracking call
+      // during a LATER test instead of this one.
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      });
+
+      // Simulate browser "back" to a different query — a URL change that
+      // happens WITHOUT the component ever calling `router.push` itself.
+      const secondResponse = createMockSearchResponse("second");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => secondResponse,
+      });
+      act(() => {
+        setMockSearchParams({ q: "second" });
+      });
+
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledWith(
+          expect.stringContaining("q=second"),
+          expect.any(Object),
+        );
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      });
+
+      // Simulate browser "forward" back to the first query.
+      const thirdResponse = createMockSearchResponse("first");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => thirdResponse,
+      });
+      act(() => {
+        setMockSearchParams({ q: "first" });
+      });
+
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(3);
+      });
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        expect.stringContaining("q=first"),
+        expect.any(Object),
+      );
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      });
     });
   });
 
