@@ -9,16 +9,12 @@ import {
 import {
   VectorizeError,
   VectorizeService,
+  VectorizeServiceLive,
   type VectorizeServiceInterface,
   type VectorRecord,
 } from "./vectorize";
 import { WorkerEnvTag, type WorkerEnv } from "../env";
-import {
-  addToManifest,
-  listPendingIds,
-  manifestKey,
-  readManifest,
-} from "./index-manifest";
+import { manifestKey, readManifest, writeManifest } from "./index-manifest";
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
@@ -113,13 +109,10 @@ function makeVectorizeCapture(overrides?: Partial<VectorizeServiceInterface>) {
 
 /**
  * Stateful, in-memory KVNamespace so a test can run sweeps back to back and
- * have each see the manifest (and any pending markers) the last one wrote —
- * real KV persists between scheduled invocations, `{} as KVNamespace` (the
- * env default) cannot exercise that. `get`/`put` are mutable properties so
- * a test can swap in a failing implementation for one sweep and restore it
- * afterward. `list` supports the `prefix` filter `listPendingIds` uses
- * (index-manifest.ts) — single page, `list_complete: true`, which is all a
- * test-scale marker count ever needs.
+ * have each see the manifest the last one wrote — real KV persists between
+ * scheduled invocations, `{} as KVNamespace` (the env default) cannot
+ * exercise that. `get`/`put` are mutable properties so a test can swap in a
+ * failing implementation for one sweep and restore it afterward.
  */
 function makeKvNamespaceMock(): KVNamespace & {
   readonly store: Map<string, string>;
@@ -178,6 +171,69 @@ function sweep(
     Effect.provide(makeEnvLayer(envOverrides)),
     Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
     Effect.provide(Layer.succeed(VectorizeService, vectorize)),
+  );
+}
+
+/**
+ * Fakes the raw Cloudflare `VectorizeIndex` binding (upsert/query/getByIds/
+ * deleteByIds) rather than `VectorizeServiceInterface` — paired with the
+ * REAL `VectorizeServiceLive` (via `sweepLive` below) so a reconciliation
+ * test observes the manifest exactly the way production does: since #2855,
+ * `VectorizeServiceLive` is the manifest's only writer, so a test asserting
+ * on manifest state (or on multi-sweep behavior that depends on a previous
+ * sweep's writes having landed) must go through it rather than the bare
+ * `VectorizeServiceInterface` mock `makeVectorizeCapture` builds, whose
+ * `upsert`/`deleteByIds` never touch KV at all.
+ */
+function makeVectorizeIndexCapture(overrides?: Partial<VectorizeIndex>) {
+  const upsertCalls: VectorRecord[][] = [];
+  const deleteCalls: string[][] = [];
+  const probe = { inFlight: 0, maxInFlight: 0 };
+  const index = {
+    upsert: async (vectors: VectorRecord[]) => {
+      probe.inFlight++;
+      probe.maxInFlight = Math.max(probe.maxInFlight, probe.inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      probe.inFlight--;
+      upsertCalls.push(vectors);
+      return { mutationId: "mut", count: vectors.length };
+    },
+    query: async () => ({ matches: [] }),
+    getByIds: async () => [],
+    deleteByIds: async (ids: string[]) => {
+      deleteCalls.push(ids);
+      return { mutationId: "mut-del", count: ids.length, ids };
+    },
+    ...overrides,
+  } as unknown as VectorizeIndex;
+  return { upsertCalls, deleteCalls, probe, index };
+}
+
+/**
+ * Like `sweep`, but provides the real `VectorizeServiceLive` (backed by a
+ * fake `VectorizeIndex` from `makeVectorizeIndexCapture`) instead of a bare
+ * `VectorizeServiceInterface` mock — see that helper's docblock for why.
+ */
+function sweepLive(
+  options: Parameters<typeof runSanityIndexSync>[0],
+  index: VectorizeIndex,
+  envOverrides: Partial<WorkerEnv> = {},
+) {
+  return runSanityIndexSync({
+    fetchResponsibility: noopFetch([]),
+    fetchArticles: noopFetch([]),
+    fetchPages: noopFetch([]),
+    fetchExcludedResponsibilityIds: noopFetch([]),
+    fetchExcludedArticleIds: noopFetch([]),
+    ...options,
+  }).pipe(
+    Effect.provide(makeEnvLayer(envOverrides)),
+    Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
+    Effect.provide(
+      VectorizeServiceLive.pipe(
+        Layer.provide(makeEnvLayer({ ...envOverrides, SEARCH_INDEX: index })),
+      ),
+    ),
   );
 }
 
@@ -516,9 +572,9 @@ describe("runSanityIndexSync", () => {
 
       // Sweep 1: indexed. No previous manifest exists yet, so nothing is
       // deleted.
-      const { deleteCalls, mock: mock1 } = makeVectorizeCapture();
+      const { deleteCalls, index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -527,9 +583,10 @@ describe("runSanityIndexSync", () => {
 
       // Sweep 2: mockDoc went inactive (or was deleted) and no longer
       // matches RESPONSIBILITY_QUERY — the fetcher now omits it.
-      const { deleteCalls: deleteCalls2, mock: mock2 } = makeVectorizeCapture();
+      const { deleteCalls: deleteCalls2, index: index2 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({}, mock2, {
+        sweepLive({}, index2, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -542,27 +599,28 @@ describe("runSanityIndexSync", () => {
       const kv = makeKvNamespaceMock();
 
       // Sweep 1 (bootstrap): indexed.
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           PSD_CACHE: kv,
         }),
       );
 
       // Sweep 2: mockDoc drops out, but dry-run is on (the default) —
-      // nothing is actually deleted. The manifest must not be overwritten
-      // with (empty) currentIds regardless — that would silently lose
-      // mockDoc from tracking.
-      const { deleteCalls: deleteCalls2, mock: mock2 } = makeVectorizeCapture();
-      await Effect.runPromise(sweep({}, mock2, { PSD_CACHE: kv }));
+      // nothing is actually deleted. The manifest must not be touched
+      // regardless — that would silently lose mockDoc from tracking.
+      const { deleteCalls: deleteCalls2, index: index2 } =
+        makeVectorizeIndexCapture();
+      await Effect.runPromise(sweepLive({}, index2, { PSD_CACHE: kv }));
       expect(deleteCalls2).toHaveLength(0);
 
       // Sweep 3: same fetch result, dry-run flipped to "false". mockDoc must
       // still be prunable — it must not have fallen out of the manifest
       // during sweep 2's dry-run pass.
-      const { deleteCalls: deleteCalls3, mock: mock3 } = makeVectorizeCapture();
+      const { deleteCalls: deleteCalls3, index: index3 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({}, mock3, {
+        sweepLive({}, index3, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -575,25 +633,31 @@ describe("runSanityIndexSync", () => {
       const kv = makeKvNamespaceMock();
 
       // Sweep 1 (bootstrap): indexed.
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
       );
 
       // Sweep 2: mockDoc drops out, dry-run off, but Vectorize's delete is
-      // down — every deleteByIds call fails, even after retries.
+      // down — every deleteByIds call fails, even after retries. Because the
+      // underlying index call never succeeds, VectorizeServiceLive's own
+      // manifest-removal step (#2855) never runs either — this is the
+      // "failed delete leaves the id in the manifest" acceptance criterion,
+      // exercised here through a real multi-sweep sequence.
       const messages: string[] = [];
       const TestLogger = Logger.make(({ message }) => {
         messages.push(String(message));
       });
-      const { mock: failingVectorize } = makeVectorizeCapture({
-        deleteByIds: () => Effect.fail(new VectorizeError("Vectorize outage")),
+      const { index: failingIndex } = makeVectorizeIndexCapture({
+        deleteByIds: async () => {
+          throw new Error("Vectorize outage");
+        },
       });
       await Effect.runPromise(
-        sweep({}, failingVectorize, {
+        sweepLive({}, failingIndex, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }).pipe(
@@ -608,9 +672,10 @@ describe("runSanityIndexSync", () => {
       // Sweep 3: Vectorize recovers. mockDoc must still be in the manifest
       // for this sweep to find and delete — the failed attempt in sweep 2
       // must not have dropped it from tracking.
-      const { deleteCalls: deleteCalls3, mock: mock3 } = makeVectorizeCapture();
+      const { deleteCalls: deleteCalls3, index: index3 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({}, mock3, {
+        sweepLive({}, index3, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -619,59 +684,30 @@ describe("runSanityIndexSync", () => {
       expect(deleteCalls3.flat()).toEqual(["sanity-abc-123"]);
     });
 
-    it("prunes a document whose entire visible life fit between two sweeps, tracked only via the webhook's addToManifest", async () => {
+    it("prunes a document whose entire visible life fit between two sweeps, tracked only via a prior webhook upsert", async () => {
       const kv = makeKvNamespaceMock();
 
       // No sweep has ever observed "transient-doc" as current — simulate the
-      // webhook's upsert path (webhooks/index-handler.ts) registering it the
-      // moment it was published, the same way it registers every successful
-      // upsert.
-      await Effect.runPromise(addToManifest(kv, "production", "transient-doc"));
+      // webhook's upsert path (webhooks/index-handler.ts) having already
+      // indexed it: since #2855, `VectorizeServiceLive.upsert` is what would
+      // have recorded this in the manifest, so seeding the manifest directly
+      // stands in for "a webhook already confirmed this upsert."
+      await Effect.runPromise(
+        writeManifest(kv, "production", ["transient-doc"]),
+      );
 
       // A sweep runs after "transient-doc" has both published AND expired
       // (its whole visible life fit between two sweeps) — no query returns
       // it.
-      const { deleteCalls, mock } = makeVectorizeCapture();
+      const { deleteCalls, index } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({}, mock, { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv }),
+        sweepLive({}, index, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
       );
 
       expect(deleteCalls.flat()).toEqual(["transient-doc"]);
-    });
-
-    it("absorbs a marker written between sweeps into the manifest, and deletes its key so it isn't absorbed twice (#2856)", async () => {
-      const kv = makeKvNamespaceMock();
-
-      // Simulate the webhook registering an id via a pending marker
-      // (addToManifest) — no sweep has bootstrapped a manifest yet.
-      await Effect.runPromise(addToManifest(kv, "production", "webhook-added"));
-
-      // The sweep runs and the id still matches its query (unlike the
-      // "entire visible life fit between two sweeps" case above) — it
-      // should land in the manifest as a normal tracked id, not get pruned.
-      const { deleteCalls, mock } = makeVectorizeCapture();
-      await Effect.runPromise(
-        sweep(
-          {
-            fetchResponsibility: noopFetch([
-              { ...mockDoc, _id: "webhook-added" },
-            ]),
-          },
-          mock,
-          { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
-        ),
-      );
-      expect(deleteCalls).toHaveLength(0);
-
-      const manifest = await Effect.runPromise(readManifest(kv, "production"));
-      expect(manifest).toContain("webhook-added");
-
-      // The marker key itself is gone — absorbed, not left to be absorbed
-      // (and no-op re-unioned) forever.
-      const pendingAfter = await Effect.runPromise(
-        listPendingIds(kv, "production"),
-      );
-      expect(pendingAfter.ids).toHaveLength(0);
     });
 
     it("deletes an inactive responsibility that predates the first manifest, via the excluded-ids query", async () => {
@@ -720,9 +756,9 @@ describe("runSanityIndexSync", () => {
       }));
 
       // Sweep 1 (bootstrap): 30 responsibilities indexed.
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch(manyDocs) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch(manyDocs) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -733,9 +769,10 @@ describe("runSanityIndexSync", () => {
       // rest, not a real mass deactivation. 26 dropped exceeds
       // max(25, 30*50%=15)=25, so nothing must be deleted.
       const fourRemain = manyDocs.slice(0, 4);
-      const { deleteCalls: deleteCalls2, mock: mock2 } = makeVectorizeCapture();
+      const { deleteCalls: deleteCalls2, index: index2 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch(fourRemain) }, mock2, {
+        sweepLive({ fetchResponsibility: noopFetch(fourRemain) }, index2, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -744,9 +781,10 @@ describe("runSanityIndexSync", () => {
 
       // Sweep 3: nothing about the underlying data changed — the refusal
       // must NOT have quietly resolved itself. Same input, same refusal.
-      const { deleteCalls: deleteCalls3, mock: mock3 } = makeVectorizeCapture();
+      const { deleteCalls: deleteCalls3, index: index3 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch(fourRemain) }, mock3, {
+        sweepLive({ fetchResponsibility: noopFetch(fourRemain) }, index3, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -755,9 +793,10 @@ describe("runSanityIndexSync", () => {
 
       // Sweep 4: the fetch recovers to all 30 — the 26 "missing" ids must
       // still be tracked (the refused sweeps must not have dropped them).
-      const { deleteCalls: deleteCalls4, mock: mock4 } = makeVectorizeCapture();
+      const { deleteCalls: deleteCalls4, index: index4 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch(manyDocs) }, mock4, {
+        sweepLive({ fetchResponsibility: noopFetch(manyDocs) }, index4, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -772,9 +811,9 @@ describe("runSanityIndexSync", () => {
       // Bootstrap: 2 responsibilities tracked, and every later sweep below
       // keeps fetching the exact same 2 — droppedFromManifest is always 0,
       // so the manifest-diff cap has nothing to ever refuse here.
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch(stableDocs) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch(stableDocs) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -790,14 +829,14 @@ describe("runSanityIndexSync", () => {
         { length: 30 },
         (_, i) => `excluded-${i}`,
       );
-      const { deleteCalls, mock } = makeVectorizeCapture();
+      const { deleteCalls, index } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep(
+        sweepLive(
           {
             fetchResponsibility: noopFetch(stableDocs),
             fetchExcludedResponsibilityIds: noopFetch(manyExcluded),
           },
-          mock,
+          index,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
         ),
       );
@@ -809,9 +848,9 @@ describe("runSanityIndexSync", () => {
       const kv = makeKvNamespaceMock();
 
       // Bootstrap: mockDoc tracked in the manifest.
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -821,17 +860,17 @@ describe("runSanityIndexSync", () => {
       // orphan) AND is simultaneously reported by the excluded-ids query
       // (e.g. deactivated) — the common real-world case the two sets
       // overlap on.
-      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const { deleteCalls, index: index2 } = makeVectorizeIndexCapture();
       const messages: string[] = [];
       const TestLogger = Logger.make(({ message }) => {
         messages.push(String(message));
       });
       await Effect.runPromise(
-        sweep(
+        sweepLive(
           {
             fetchExcludedResponsibilityIds: noopFetch(["sanity-abc-123"]),
           },
-          mock2,
+          index2,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
         ).pipe(
           Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
@@ -852,18 +891,22 @@ describe("runSanityIndexSync", () => {
       ).toBe(false);
     });
 
-    it("writes the union of every type's ids to the manifest on the very first sweep", async () => {
+    it("adds every type's ids to the manifest via each phase's own upsert on the very first sweep", async () => {
+      // Under #2855 there is no separate "write the union" step any more —
+      // VectorizeServiceLive adds an id the instant its own upsert for that
+      // id is confirmed, so by the end of the sweep the manifest should
+      // simply contain everything every phase successfully upserted.
       const kv = makeKvNamespaceMock();
-      const { deleteCalls, mock } = makeVectorizeCapture();
+      const { deleteCalls, index } = makeVectorizeIndexCapture();
 
       await Effect.runPromise(
-        sweep(
+        sweepLive(
           {
             fetchResponsibility: noopFetch([mockDoc]),
             fetchArticles: noopFetch([mockArticle]),
             fetchPages: noopFetch([mockPage]),
           },
-          mock,
+          index,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
         ),
       );
@@ -875,13 +918,14 @@ describe("runSanityIndexSync", () => {
       );
     });
 
-    it("writes no manifest and deletes nothing when the article phase fails — the partial-sweep trap", async () => {
+    it("deletes nothing when the article phase fails — the partial-sweep trap", async () => {
       const kv = makeKvNamespaceMock();
 
-      // Sweep 1 succeeds fully and writes a manifest containing the article.
-      const { mock: mock1 } = makeVectorizeCapture();
+      // Sweep 1 succeeds fully; VectorizeServiceLive records article-001 in
+      // the manifest as its upsert lands.
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchArticles: noopFetch([mockArticle]) }, mock1, {
+        sweepLive({ fetchArticles: noopFetch([mockArticle]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -890,27 +934,30 @@ describe("runSanityIndexSync", () => {
       // Sweep 2: the article phase's Sanity fetch fails outright. Even
       // though the article is now absent from articleResult (the phase's
       // catchAll degrades it to []), that absence must not be read as "this
-      // article stopped matching the query" — it's unknown, not gone.
-      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      // article stopped matching the query" — it's unknown, not gone. With
+      // no items to upsert this phase makes no upsert call at all, so
+      // article-001 is left exactly as sweep 1 recorded it — there is no
+      // union/overwrite step left that could lose it (#2855).
+      const { deleteCalls, index: index2 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep(
+        sweepLive(
           {
             fetchArticles: async () => {
               throw new Error("Sanity timeout");
             },
           },
-          mock2,
+          index2,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
         ),
       );
       expect(deleteCalls).toHaveLength(0);
 
-      // Sweep 3, fetches succeed again with nothing changed: if sweep 2 had
-      // wrongly overwritten the manifest with the empty article list, this
-      // sweep would now (wrongly) delete article-001.
-      const { deleteCalls: deleteCalls3, mock: mock3 } = makeVectorizeCapture();
+      // Sweep 3, fetches succeed again with nothing changed: article-001
+      // must still be tracked, and still current, so nothing gets deleted.
+      const { deleteCalls: deleteCalls3, index: index3 } =
+        makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchArticles: noopFetch([mockArticle]) }, mock3, {
+        sweepLive({ fetchArticles: noopFetch([mockArticle]) }, index3, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
@@ -918,31 +965,31 @@ describe("runSanityIndexSync", () => {
       expect(deleteCalls3).toHaveLength(0);
     });
 
-    it("writes no manifest and deletes nothing when the page phase fails, even though an unrelated drop looks real", async () => {
+    it("deletes nothing when the page phase fails, even though an unrelated drop looks real", async () => {
       // The footgun this guards: reconciliationSafe is one flag shared by
       // every phase. A page-fetch failure must suppress pruning for
       // EVERY type, not just pages — including a genuine responsibility
       // drop that happened in the very same sweep.
       const kv = makeKvNamespaceMock();
 
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
       );
 
-      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const { deleteCalls, index: index2 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep(
+        sweepLive(
           {
             fetchResponsibility: noopFetch([]), // a genuine drop
             fetchPages: async () => {
               throw new Error("Sanity timeout");
             },
           },
-          mock2,
+          index2,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
         ),
       );
@@ -950,27 +997,27 @@ describe("runSanityIndexSync", () => {
       expect(deleteCalls).toHaveLength(0);
     });
 
-    it("writes no manifest and deletes nothing when the excluded-ids phase fails, even though an unrelated drop looks real", async () => {
+    it("deletes nothing when the excluded-ids phase fails, even though an unrelated drop looks real", async () => {
       const kv = makeKvNamespaceMock();
 
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
       );
 
-      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const { deleteCalls, index: index2 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep(
+        sweepLive(
           {
             fetchResponsibility: noopFetch([]), // a genuine drop
             fetchExcludedResponsibilityIds: async () => {
               throw new Error("Sanity timeout");
             },
           },
-          mock2,
+          index2,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
         ),
       );
@@ -985,18 +1032,18 @@ describe("runSanityIndexSync", () => {
         messages.push(String(message));
       });
 
-      const { mock: mock1 } = makeVectorizeCapture();
+      const { index: index1 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+        sweepLive({ fetchResponsibility: noopFetch([mockDoc]) }, index1, {
           SEARCH_INDEX_PRUNE_DRY_RUN: "false",
           PSD_CACHE: kv,
         }),
       );
 
       // Sweep 2: dry-run left at its default ("true" when unset — fail safe).
-      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const { deleteCalls, index: index2 } = makeVectorizeIndexCapture();
       await Effect.runPromise(
-        sweep({}, mock2, { PSD_CACHE: kv }).pipe(
+        sweepLive({}, index2, { PSD_CACHE: kv }).pipe(
           Effect.provide(Logger.replace(Logger.defaultLogger, TestLogger)),
         ),
       );

@@ -99,7 +99,7 @@ export default {
       new URL(request.url).pathname === "/webhooks/index"
     ) {
       try {
-        return await handleIndexWebhook(request, env, undefined, ctx);
+        return await handleIndexWebhook(request, env);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         console.error("[webhook] unhandled error:", err);
