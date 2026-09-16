@@ -74,6 +74,30 @@ async function stickyBarBottomFromLocator(bar: Locator, label: string) {
 }
 
 /**
+ * Scrolls `el` into view and waits for the browser's own `scrollend` signal
+ * rather than asserting right after the call. `globals.css`'s global
+ * `scroll-behavior: smooth` turns a plain `scrollIntoView` into an
+ * *animation*, not a jump — measured at 4.0s/4.7s/5.4s under ×20 CPU
+ * throttling, against the 5s default budget of a subsequent
+ * `expect(...).toHaveAttribute()` (#2988). `scrollend` is the browser's own
+ * completion signal; a 15s fallback covers the case where the element is
+ * already in place (no scroll starts, so `scrollend` never fires).
+ */
+async function scrollIntoViewAndSettle(locator: Locator) {
+  await locator.evaluate((el) => {
+    return new Promise<void>((resolve) => {
+      const done = () => {
+        clearTimeout(fallback);
+        resolve();
+      };
+      const fallback = setTimeout(done, 15_000);
+      addEventListener("scrollend", done, { once: true });
+      el.scrollIntoView({ block: "start" });
+    });
+  });
+}
+
+/**
  * Waits until `window.scrollY` has stopped changing for a short quiet
  * period, rather than a fixed timeout. A fixed wait can read the geometry
  * mid-animation and pass "by accident": a bar that grows *after* a native
@@ -126,9 +150,7 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
     // latter scrolls the *minimum* distance needed, which for a short
     // trailing section can leave it short of the spy's `-55%` bottom band
     // entirely, so `aria-current` never appears.
-    await page
-      .locator(`#${targetId}`)
-      .evaluate((el) => el.scrollIntoView({ block: "start" }));
+    await scrollIntoViewAndSettle(page.locator(`#${targetId}`));
     // The scroll-spy IntersectionObserver settles asynchronously.
     await expect(lastLink).toHaveAttribute("aria-current", "location");
 
@@ -149,17 +171,13 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
     const structuur = nav.getByRole("link", { name: "Structuur" });
     const hulp = nav.getByRole("link", { name: "Hulp" });
 
-    await page
-      .locator("#structuur")
-      .evaluate((el) => el.scrollIntoView({ block: "start" }));
+    await scrollIntoViewAndSettle(page.locator("#structuur"));
     await expect(structuur).toHaveAttribute("aria-current", "location");
     await expect(hulp).not.toHaveAttribute("aria-current");
 
     // Scrolling back up flips the fill again — it tracks reading position on
     // every pass, not just the first jump.
-    await page
-      .locator("#hulp")
-      .evaluate((el) => el.scrollIntoView({ block: "start" }));
+    await scrollIntoViewAndSettle(page.locator("#hulp"));
     await expect(hulp).toHaveAttribute("aria-current", "location");
     await expect(structuur).not.toHaveAttribute("aria-current");
   });

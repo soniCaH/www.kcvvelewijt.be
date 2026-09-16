@@ -145,7 +145,17 @@ export function useSectionNav(ids: readonly string[]): UseSectionNavResult {
       },
       // Top inset clears the header + this bar; the bottom inset flips
       // "active" near the top third of the viewport, not the very bottom.
-      { rootMargin: `-${topInset}px 0px -55% 0px`, threshold: [0, 0.25, 0.6] },
+      //
+      // threshold is `[0]` ONLY — membership, not a ratio step. A section
+      // taller than the band this rootMargin leaves can never reach a
+      // higher ratio at all: e.g. a 289px-tall band against a 1803px-tall
+      // section caps its ratio at ≈0.16, so `0.25`/`0.6` thresholds sat in
+      // this array unreachable for exactly the sections most likely to be
+      // "the one being read" (#2988). `[0]` only asks "does it overlap the
+      // band at all" — entering and leaving — which the reducer above
+      // already turns into "topmost currently intersecting" via
+      // `boundingClientRect`, so no ratio step was ever load-bearing here.
+      { rootMargin: `-${topInset}px 0px -55% 0px`, threshold: [0] },
     );
 
     targets.forEach((el) => observer.observe(el));

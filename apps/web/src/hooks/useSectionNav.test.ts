@@ -190,6 +190,23 @@ describe("useSectionNav", () => {
     expect(rendered.result.activeId).toBeNull();
   });
 
+  it("observes with only a membership threshold ([0]) — a section taller than the band can never cross a higher ratio (#2988)", () => {
+    appendSectionTarget("structuur");
+
+    renderHook(["structuur"]);
+    const spy = FakeIntersectionObserver.instances.at(-1)!;
+
+    // A section taller than the band this rootMargin leaves (e.g. #2988's
+    // measured 289px band against a 1803px-tall section, ratio capped at
+    // ≈0.16) can only ever cross threshold 0 — entering and leaving. A
+    // higher threshold (0.25, 0.6 pre-#2988) sits in the array unreachable
+    // for exactly the sections most likely to be "the one being read", so
+    // membership alone — which the reducer already turns into "topmost
+    // currently intersecting" via `boundingClientRect` — is both necessary
+    // and sufficient here.
+    expect(spy.options?.threshold).toEqual([0]);
+  });
+
   describe("getStickyHeaderHeight", () => {
     afterEach(() => {
       document.documentElement.style.removeProperty("--sticky-header-h");
