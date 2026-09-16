@@ -313,7 +313,10 @@ function SquadHistorySection({
         {section.squadLabel}
       </EditorialHeading>
 
-      <OpponentSummaryCard summary={section.summary} />
+      <OpponentSummaryCard
+        summary={section.summary}
+        testId={`opponent-summary-${section.teamPsdId}`}
+      />
 
       <div className="mt-8 mb-5">
         <StripedSeam height="sm" />
