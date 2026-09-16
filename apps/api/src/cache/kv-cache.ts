@@ -143,17 +143,27 @@ export interface DurableKv {
    * call site instead of threaded as a `dataset: string` argument repeated
    * (and possibly stale or mismatched) on every individual call —
    * `search/index-manifest.ts`'s five functions used to take `dataset` as
-   * their own parameter each; now they take the scoped handle this returns
-   * and read `.dataset` off it, so one function body can no longer build
-   * one key against one dataset and another key against a different one by
-   * accident. This turns the #2833 failure class (a call site building a
-   * key against the wrong dataset) into a function-signature-level
-   * guarantee rather than a per-call string to get right by hand.
+   * their own parameter each, so within one flow they could each be handed
+   * a *different* value; now they all take the same scoped handle this
+   * returns and read `.dataset` off it. That narrows the #2833 failure
+   * class from "any of five call sites can mismatch" down to "the one
+   * `forDataset` call at the top of the function can be wrong" — a real
+   * reduction in where the bug can hide, not a guarantee it can't happen:
+   * `forDataset` doesn't own key construction (see the next paragraph), so
+   * a caller can still pass the wrong dataset to it, or build a key from a
+   * different string entirely.
    *
    * Callers still own how a *logical* key maps to bytes — see
    * `manifestKey`/`pendingKey` in `search/index-manifest.ts` — this handle
    * neither knows nor enforces a naming scheme, so the exact key strings
-   * already in KV are unaffected by scoping through it.
+   * already in KV are unaffected by scoping through it. Folding
+   * `manifestKey`/`pendingKey` into this handle would turn the narrowing
+   * above into an actual guarantee (a key could only ever be built from
+   * `.dataset`) — deliberately not done here, since it would mean
+   * generating the key bytes through a new, port-owned path instead of the
+   * existing, already-correct functions, and behaviour preservation (the
+   * exact same key strings, byte-for-byte) was the higher priority for
+   * this change.
    */
   readonly forDataset: (dataset: string) => DurableKvScoped;
 }
