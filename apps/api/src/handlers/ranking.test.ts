@@ -3,6 +3,7 @@ import { Effect, Layer, Schema as S } from "effect";
 import { getRankingHandler } from "./ranking";
 import { PsdService, type PsdServiceInterface } from "../psd/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { testEnvLayer } from "../test-helpers/env-layer";
 import { PsdGateTest } from "../psd/gate";
 import { RankingTableArray, type RankingTable } from "@kcvv/api-contract";
@@ -53,6 +54,7 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
+  durable: noopDurableKv,
 };
 
 describe("getRankingHandler", () => {

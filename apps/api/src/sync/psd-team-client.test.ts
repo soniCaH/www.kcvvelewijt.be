@@ -3,6 +3,7 @@ import { Effect, Layer } from "effect";
 import { PsdTeamClient, PsdTeamClientLive } from "./psd-team-client";
 import { PsdGateService } from "../psd/gate";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 global.fetch = vi.fn();
@@ -12,6 +13,7 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
+  durable: noopDurableKv,
 };
 
 /**

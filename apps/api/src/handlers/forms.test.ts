@@ -10,6 +10,7 @@ import {
   type SanityProjectionInterface,
 } from "../sanity/projection";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { EmailTransport, type EmailTransportInterface } from "../email/resend";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { handleMembership } from "./forms";
@@ -59,6 +60,7 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
+  durable: noopDurableKv,
 };
 
 function run(

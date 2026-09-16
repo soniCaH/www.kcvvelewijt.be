@@ -15,6 +15,7 @@ import { PsdService, type PsdServiceInterface } from "../psd/service";
 import type { BffError } from "../psd/errors";
 import { UpstreamUnavailableError, ResourceNotFoundError } from "../psd/errors";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
 import { PsdGateService, PsdGateTest } from "../psd/gate";
@@ -86,6 +87,7 @@ function makeCacheMock(): KvCacheInterface {
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
   };
 }
 
@@ -223,6 +225,7 @@ describe("getMatchDetailHandler", () => {
               setCalls.push([key, value, ttl]);
               return Effect.succeed(undefined);
             }),
+            durable: noopDurableKv,
           }),
         ),
         Effect.provide(PsdGateTest),

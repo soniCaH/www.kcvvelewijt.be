@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { getRelatedHandler } from "./related";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
   VectorizeService,
   type VectorizeServiceInterface,
@@ -17,6 +18,7 @@ function makeCacheMock(
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
     ...overrides,
   };
 }

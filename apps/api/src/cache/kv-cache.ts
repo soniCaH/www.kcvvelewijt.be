@@ -75,6 +75,146 @@ export interface KvCacheInterface {
   readonly delete: (key: string) => Effect.Effect<void>;
   /** Increment today's PSD-call counter by n (default 1). Owns the daily key (psd:calls:YYYY-MM-DD). */
   readonly increment: (by?: number) => Effect.Effect<void>;
+  /**
+   * KV operations for callers outside the SWR read path — see `DurableKv`'s
+   * doc comment for why they surface `KvError` instead of swallowing it
+   * like get/set/delete above (#2873).
+   */
+  readonly durable: DurableKv;
+}
+
+/**
+ * A KV op failed. Unlike get/set/delete/increment above — whose whole point
+ * is to be silently forgiving, because a cache miss must never break a read
+ * path — every `DurableKv` operation surfaces this instead of swallowing it.
+ * A caller reaching for `durable` has already decided a KV blip must not be
+ * quietly reinterpreted as "absent" (`sync/psd-sanity-sync.ts`'s KV reads,
+ * several of which fail the whole sync on error) or "empty"
+ * (`search/index-manifest.ts`'s `readManifest` — an empty read would tell
+ * the nightly sweep it's safe to prune every tracked id, exactly the bug
+ * #2831 fixed by making `readManifest` fail instead of falling back to
+ * `[]`).
+ */
+export class KvError extends Error {
+  readonly _tag = "KvError" as const;
+  constructor(
+    message: string,
+    readonly cause?: unknown,
+  ) {
+    super(message);
+  }
+}
+
+/** One page of a `list` call — Cloudflare's own cursor-paged shape (`keys`
+ * flattened to names). `search/index-manifest.ts`'s `listPendingIds` loops
+ * on `complete` until it has drained every page, same as it always has —
+ * this only moves where the `KVNamespace.list` call itself happens. */
+export interface KvListPage {
+  readonly keys: readonly string[];
+  readonly cursor?: string;
+  readonly complete: boolean;
+}
+
+/**
+ * KV operations for callers the SWR-cache shape (get/set/delete/increment
+ * above) never fit: a TTL-bearing write that FAILS on error rather than
+ * swallowing it (`set`), a write with NO expiry at all (`setForever` — the
+ * port's original gap: the SWR `set` requires a `ttl`, so "this must never
+ * expire" had no way to be said), a single-page `list`, and `delete`.
+ */
+export interface DurableKv {
+  readonly get: (key: string) => Effect.Effect<string | null, KvError>;
+  readonly set: (
+    key: string,
+    value: string,
+    ttl: number,
+  ) => Effect.Effect<void, KvError>;
+  readonly setForever: (
+    key: string,
+    value: string,
+  ) => Effect.Effect<void, KvError>;
+  readonly delete: (key: string) => Effect.Effect<void, KvError>;
+  readonly list: (params: {
+    readonly prefix: string;
+    readonly cursor?: string;
+  }) => Effect.Effect<KvListPage, KvError>;
+  /**
+   * Binds every operation above to one Sanity dataset, captured ONCE per
+   * call site instead of threaded as a `dataset: string` argument repeated
+   * (and possibly stale or mismatched) on every individual call —
+   * `search/index-manifest.ts`'s five functions used to take `dataset` as
+   * their own parameter each; now they take the scoped handle this returns
+   * and read `.dataset` off it, so one function body can no longer build
+   * one key against one dataset and another key against a different one by
+   * accident. This turns the #2833 failure class (a call site building a
+   * key against the wrong dataset) into a function-signature-level
+   * guarantee rather than a per-call string to get right by hand.
+   *
+   * Callers still own how a *logical* key maps to bytes — see
+   * `manifestKey`/`pendingKey` in `search/index-manifest.ts` — this handle
+   * neither knows nor enforces a naming scheme, so the exact key strings
+   * already in KV are unaffected by scoping through it.
+   */
+  readonly forDataset: (dataset: string) => DurableKvScoped;
+}
+
+export interface DurableKvScoped extends Omit<DurableKv, "forDataset"> {
+  readonly dataset: string;
+}
+
+/**
+ * Builds `DurableKv` operations directly off a raw `KVNamespace` — shared by
+ * `KvCacheLive` (the live binding) and by tests that already hold a fake
+ * `KVNamespace` and want to exercise `search/index-manifest.ts`'s functions
+ * directly rather than through the full Layer/Effect wiring.
+ */
+export function makeDurableKv(kv: KVNamespace): DurableKv {
+  const ops = {
+    get: (key: string) =>
+      Effect.tryPromise({
+        try: () => kv.get(key),
+        catch: (cause) =>
+          new KvError(`KV get failed for "${key}": ${String(cause)}`, cause),
+      }),
+    set: (key: string, value: string, ttl: number) =>
+      Effect.tryPromise({
+        try: () => kv.put(key, value, { expirationTtl: ttl }),
+        catch: (cause) =>
+          new KvError(`KV put failed for "${key}": ${String(cause)}`, cause),
+      }),
+    setForever: (key: string, value: string) =>
+      Effect.tryPromise({
+        try: () => kv.put(key, value),
+        catch: (cause) =>
+          new KvError(`KV put failed for "${key}": ${String(cause)}`, cause),
+      }),
+    delete: (key: string) =>
+      Effect.tryPromise({
+        try: () => kv.delete(key),
+        catch: (cause) =>
+          new KvError(`KV delete failed for "${key}": ${String(cause)}`, cause),
+      }),
+    list: ({ prefix, cursor }: { prefix: string; cursor?: string }) =>
+      Effect.tryPromise({
+        try: async () => {
+          const page = await kv.list({ prefix, cursor });
+          return {
+            keys: page.keys.map((k) => k.name),
+            cursor: page.list_complete ? undefined : page.cursor,
+            complete: page.list_complete,
+          };
+        },
+        catch: (cause) =>
+          new KvError(
+            `KV list failed for prefix "${prefix}": ${String(cause)}`,
+            cause,
+          ),
+      }),
+  };
+  return {
+    ...ops,
+    forDataset: (dataset: string) => ({ ...ops, dataset }),
+  };
 }
 
 export class KvCacheService extends Context.Tag("KvCacheService")<
@@ -536,6 +676,7 @@ export const KvCacheLive = Layer.effect(
           },
           catch: () => undefined,
         }).pipe(Effect.orElseSucceed(() => undefined)),
+      durable: makeDurableKv(env.PSD_CACHE),
     };
   }),
 );

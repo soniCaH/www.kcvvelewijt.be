@@ -6,6 +6,7 @@ import { OpponentHistory } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
   SanityProjection,
   type SanityProjectionInterface,
@@ -29,6 +30,7 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
+  durable: noopDurableKv,
 };
 
 const sanityProjectionMock: SanityProjectionInterface = {
