@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { gotoBounded } from "./helpers/goto";
 
 // Phase 4.D.2 (#1681) + Phase 4.5.C.1 (#1754) — Playwright e2e
 // regression for the assembled homepage. The carousel was retired in
@@ -23,7 +24,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await gotoBounded(page, "/");
   });
 
   test("renders the page without console errors", async ({ page }) => {
@@ -32,7 +33,7 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
       if (msg.type() === "error") errors.push(msg.text());
     });
 
-    await page.goto("/");
+    await gotoBounded(page, "/");
     await expect(page.locator("h1")).toHaveCount(1);
     expect(errors).toEqual([]);
   });
@@ -115,7 +116,7 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     // no breakpoint threshold, any width reproduces the bug pre-fix.
     for (const width of [400, 885, 1497]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.goto("/");
+      await gotoBounded(page, "/");
 
       // `[data-testid="homepage-hero-link"]` (set on the <Link> itself in
       // EditorialHero.tsx), not `main a[href^="/nieuws/"]` + `.first()` —
@@ -161,7 +162,7 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     // default `waitUntil: "load"` resolves before an App Router page
     // hydrates — that reset is gone (#2986), so one scroll holds.
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/");
+    await gotoBounded(page, "/");
     const { scrollY, headerTop } = await page.evaluate(() => {
       window.scrollTo({ top: 1200, behavior: "instant" });
       const header = document.querySelector("header");

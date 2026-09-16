@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
 import { discoverRouteFixtures, type RouteFixtures } from "./helpers/fixtures";
+import { gotoBounded } from "./helpers/goto";
 
 // #2577 — "one scroll arrow in two registers, held space by real overflow"
 // (#2444, as amended by #2476, #2478 and #2489). Source-scan and Storybook
@@ -88,13 +89,47 @@ test.beforeAll(async ({ baseURL }) => {
   }
 });
 
+/**
+ * Repeatedly evaluates `read` until two consecutive reads agree, then
+ * returns that settled value — instead of a single snapshot.
+ *
+ * #2985 bounded this suite's post-goto `load` wait to 10s (`gotoBounded`).
+ * On a contended runner the page can still be swapping its real webfont in
+ * after that bound expires, and a one-shot `scrollWidth`/`clientWidth`
+ * snapshot taken then can read fallback-font metrics instead of the
+ * settled layout — a race the old *unbounded* `load` wait papered over by
+ * construction, since it always waited the font out. The arrow assertions
+ * that follow already auto-retry against the DOM; this makes the
+ * measurement they're compared against retry the same way, rather than
+ * staying frozen at a pre-settle read. Do NOT swap this for
+ * `document.fonts.ready` — #2834 already recorded that signal as
+ * unreliable in this repo.
+ */
+async function settled<T>(read: () => Promise<T>): Promise<T> {
+  let previousKey: string | undefined;
+  let latest!: T;
+  await expect
+    .poll(
+      async () => {
+        latest = await read();
+        const key = JSON.stringify(latest);
+        const stable = key === previousKey;
+        previousKey = key;
+        return stable;
+      },
+      { timeout: 5000 },
+    )
+    .toBe(true);
+  return latest;
+}
+
 async function readOverflow(track: Locator) {
-  const { scrollWidth, clientWidth, scrollLeft } = await track.evaluate(
-    (el) => ({
+  const { scrollWidth, clientWidth, scrollLeft } = await settled(() =>
+    track.evaluate((el) => ({
       scrollWidth: el.scrollWidth,
       clientWidth: el.clientWidth,
       scrollLeft: el.scrollLeft,
-    }),
+    })),
   );
   const DEAD_ZONE = 10;
   return {
@@ -178,7 +213,7 @@ async function assertRailArrowMatchesOverflow(
 test.describe("scroll arrow — mounts only on real overflow at that width", () => {
   test("FilterTabs on /nieuws — desktop (1280px)", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/nieuws");
+    await gotoBounded(page, "/nieuws");
     const group = page.getByRole("group", { name: /filter/i }).first();
     // The arrows are the group's own siblings inside FilterTabs' outer
     // `relative` wrapper, not its descendants — scope the label lookup to
@@ -191,7 +226,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto("/nieuws");
+    await gotoBounded(page, "/nieuws");
     const group = page.getByRole("group", { name: /filter/i }).first();
     const wrapper = group.locator("..");
     await assertRailArrowMatchesOverflow(wrapper, group);
@@ -210,7 +245,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       { width: 375, height: 800 },
     ]) {
       await page.setViewportSize(viewport);
-      await page.goto(`/nieuws/${slug}`);
+      await gotoBounded(page, `/nieuws/${slug}`);
       const track = page.locator('[data-slot="scroll-track"]').first();
       // The related row is optional (auto-hides at zero items) — skip this
       // viewport iteration honestly rather than fail if it isn't present.
@@ -236,7 +271,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       "no team in the sitemap renders TeamSectionNav today (≤1 section on every team — pre-season)",
     );
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto(`/ploegen/${teamSectionNavSlug}`);
+    await gotoBounded(page, `/ploegen/${teamSectionNavSlug}`);
     const nav = page.getByTestId("team-section-nav");
 
     const list = nav.locator("ul").first();
@@ -251,7 +286,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       "no team or match in the sitemap renders a numbered StandingsTable today (pre-season / numberless-only data)",
     );
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto(standingsTableUrl!);
+    await gotoBounded(page, standingsTableUrl!);
 
     // Scoped to the standings table itself, not `page` — a team page also
     // ships `TeamSectionNav`'s own "Scroll right" control, and asserting
@@ -302,19 +337,19 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       { width: 375, height: 800 },
     ]) {
       await page.setViewportSize(viewport);
-      await page.goto(`/nieuws/${slug}`);
+      await gotoBounded(page, `/nieuws/${slug}`);
       const region = page.locator('[data-html-table="true"] [role="region"]');
       if ((await region.count()) === 0) continue;
       // HtmlTableBlock never mounts a left arrow — `direction="right"`,
       // unconditionally (#2582: an authored table anchors nothing, so
       // there is no sticky column to justify a left cue either) — only
       // assert the right side.
-      const { scrollWidth, clientWidth } = await region
-        .first()
-        .evaluate((el) => ({
+      const { scrollWidth, clientWidth } = await settled(() =>
+        region.first().evaluate((el) => ({
           scrollWidth: el.scrollWidth,
           clientWidth: el.clientWidth,
-        }));
+        })),
+      );
       const expectCanScrollRight = scrollWidth - clientWidth > 10;
       const rightArrow = page
         .locator('[data-html-table="true"]')
@@ -338,7 +373,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     // zooming to A+ or A++ should overflow it and mount the arrow; "A"
     // itself should not.
     await page.setViewportSize({ width: 1024, height: 800 });
-    await page.goto("/hulp");
+    await gotoBounded(page, "/hulp");
 
     // The organigram section renders collapsed on /hulp
     // (`<OrganigramOverview collapsible>`) — expand it first.
@@ -372,15 +407,17 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
 
     // "A" (scaleStep 0) is the default on open — assert its own invariant
     // first rather than assuming it never overflows.
-    const readOverflow = async () => {
-      const { scrollWidth, clientWidth } = await stage.evaluate((el) => ({
-        scrollWidth: el.scrollWidth,
-        clientWidth: el.clientWidth,
-      }));
+    const readStageOverflow = async () => {
+      const { scrollWidth, clientWidth } = await settled(() =>
+        stage.evaluate((el) => ({
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth,
+        })),
+      );
       return scrollWidth - clientWidth > 10;
     };
 
-    if (await readOverflow()) {
+    if (await readStageOverflow()) {
       await expect(stageWrapper.getByLabel("Scroll right")).toBeVisible();
     } else {
       await expect(stageWrapper.getByLabel("Scroll right")).toHaveCount(0);
@@ -394,7 +431,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     // past the transition rather than asserting immediately.
     await page.waitForTimeout(500);
 
-    expect(await readOverflow()).toBe(true);
+    expect(await readStageOverflow()).toBe(true);
     await expect(stageWrapper.getByLabel("Scroll right")).toBeVisible();
   });
 });
