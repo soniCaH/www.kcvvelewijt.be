@@ -3,7 +3,7 @@ import { fn } from "storybook/test";
 import { CalendarMonth } from "./CalendarMonth";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
 import { fixtureImage } from "@test-fixtures/images";
-import { reservationMatch } from "../calendar-mocks";
+import { reservationMatch, tournamentMatch } from "../calendar-mocks";
 
 const meta = {
   title: "Features/Calendar/CalendarMonth",
@@ -174,6 +174,48 @@ export const SelectedDayEmpty: Story = {
 export const SelectedDayWithReservation: Story = {
   args: {
     matches: [...marchMatches, reservationMatch()],
+    events: [],
+    selectedDate: "2026-03-15",
+    currentMonth: 3,
+    currentYear: 2026,
+  },
+};
+
+/**
+ * A tournament fixture (#2696/#2802, `kind: "reduced"`) alongside the
+ * pitch-reservation placeholder above and the ordinary matches (#2978) — the
+ * grid pip can't tell the two apart (`getMatchDotType` maps both to the same
+ * dashed `"reservation"` ring), so this story's baseline is the only one
+ * that proves the *other* reduced-register state — a real opponent, one
+ * crest, no self-match — also reaches that pip and the day-detail panel's
+ * `captionLabel={match.kind !== "match" ? match.team : undefined}` swap.
+ * `tournamentMatch()` mirrors the fixture shape `CalendarWeek.stories.tsx`'s
+ * `WithTournament` and `CalendarAgenda.stories.tsx`'s `WithTournament`
+ * already use; its date is overridden onto the same selected day so both
+ * `kind: "reservation"` and `kind: "reduced"` land in the day-detail panel
+ * together.
+ *
+ * The VR runner clips each baseline to `document.documentElement.scrollHeight`
+ * (== the viewport height for these stories), so what's actually visible
+ * differs per viewport rather than being one uniform "all four rows beside
+ * each other" frame: **tablet** (768×1024) is the only baseline tall enough
+ * to hold all four day-detail rows — the reduced/tournament row, the
+ * reservation row, and both `kind: "match"` rows — genuinely side by side.
+ * **Desktop** (1440×900) is shorter than the day-detail panel needs once a
+ * fourth row is added, so both `kind: "match"` rows fall below the fold;
+ * that baseline still locks the two reduced-register rows and the caption
+ * swap, just not beside a `kind: "match"` entry. **Mobile** (375×667) has
+ * the whole day-detail panel below the fold, same as the pre-existing
+ * `SelectedDayWithReservation--mobile` baseline — it only locks the fourth
+ * grid pip.
+ */
+export const SelectedDayWithReservationAndTournament: Story = {
+  args: {
+    matches: [
+      ...marchMatches,
+      reservationMatch(),
+      tournamentMatch({ date: "2026-03-15T08:00:00", time: "08:00" }),
+    ],
     events: [],
     selectedDate: "2026-03-15",
     currentMonth: 3,
