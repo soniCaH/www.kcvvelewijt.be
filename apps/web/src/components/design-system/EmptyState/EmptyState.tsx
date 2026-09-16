@@ -344,6 +344,13 @@ export interface EmptyStateSlotHeldOpenProps extends EmptyStateSharedProps {
   children: ReactNode;
   /** @default "transparent" */
   background?: EmptyStateSlotBackground;
+  /** Not accepted on the held-open register — `never` rather than omitting
+   *  the field, the same mutual-exclusion trick the notice member's own
+   *  `background?: never` uses below: a bare TS union's excess-property
+   *  check does not flag a property that exists on a SIBLING member, so
+   *  without this, `<EmptyState tier="slot" action={{…}}>` silently drops
+   *  the action instead of failing to compile (#2815 review finding 1). */
+  action?: never;
 }
 
 /**
@@ -501,13 +508,20 @@ function SlotNoticeEmptyState({
 
   return (
     <div
-      {...live_}
       className={cn(
         "border-ink/30 border-2 border-dashed px-6 py-8 text-center",
         className,
       )}
     >
-      <p className="text-ink-soft text-body-md">{sentence}</p>
+      {/* The live-region attributes stay on the sentence only, not this
+          wrapping frame — a `role="alert"` subtree is flattened to a plain
+          announced string by some AT (JAWS), so a `<Button>` living inside
+          one is announced as text with no signal a control exists at all
+          (#2815 review finding 3). The bespoke markup this replaced had the
+          same property: the retry button sat outside any live region. */}
+      <p {...live_} className="text-ink-soft text-body-md">
+        {sentence}
+      </p>
       <div className="mt-4">
         <Button
           type="button"

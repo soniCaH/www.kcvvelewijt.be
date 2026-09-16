@@ -6,6 +6,7 @@ import type {
   EmptyStateSurfaceFilteredProps,
   EmptyStateSurfacePendingProps,
   EmptyStateSlotNoticeProps,
+  EmptyStateSlotHeldOpenProps,
 } from "./EmptyState";
 
 // Type-level assertions (#2719) — TypeScript, not vitest, is what's under
@@ -54,6 +55,15 @@ const _noticeWithBackground: EmptyStateSlotNoticeProps = {
   // is typed `never` here so passing it is a compile error rather than a
   // silently-ignored prop.
   background: "cream-soft",
+};
+const _heldOpenWithAction: EmptyStateSlotHeldOpenProps = {
+  tier: "slot",
+  children: "Geen opstelling beschikbaar",
+  // @ts-expect-error — `action` is only meaningful on the notice member
+  // (#2815); typed `never` here so a bare union's excess-property check
+  // (which does NOT flag a property that exists on a sibling member) can't
+  // let this silently compile and drop the action (#2815 review finding 1).
+  action: { label: "Probeer opnieuw", onClick: () => {} },
 };
 
 describe("EmptyState — tier: surface (Tier 1)", () => {
@@ -402,6 +412,30 @@ describe("EmptyState — tier: slot, reason: unavailable (#2469/#2576 failure no
     expect(onClick).toHaveBeenCalledOnce();
     // The sentence stays intact alongside the action.
     expect(screen.getByText("mislukt").tagName).toBe("EM");
+  });
+
+  it("puts the live-region attributes on the sentence, not on a container that also holds the retry button (#2815 review finding 3)", () => {
+    render(
+      <EmptyState
+        tier="slot"
+        reason="unavailable"
+        live
+        emphasis={{ text: "mislukt" }}
+        action={{ label: "Probeer opnieuw", onClick: vi.fn() }}
+      >
+        Artikelen laden mislukt.
+      </EmptyState>,
+    );
+    // Some AT (JAWS) flattens a `role="alert"` subtree to a plain announced
+    // string, so an interactive control inside one is announced as text
+    // with no signal a control exists at all. The button must sit outside
+    // the announced element.
+    const alert = screen.getByRole("alert");
+    expect(alert.tagName).toBe("P");
+    expect(screen.getByRole("button", { name: "Probeer opnieuw" })).not.toBe(
+      alert,
+    );
+    expect(alert.contains(screen.getByRole("button"))).toBe(false);
   });
 
   it("does not throw and renders children verbatim when emphasis is missing at runtime (#2576 review finding 4)", () => {

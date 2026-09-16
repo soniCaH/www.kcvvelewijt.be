@@ -367,6 +367,7 @@ export function NewsListingClient({
           hasMore={hasMore}
           isLoading={isLoading}
           error={error?.message}
+          errorEmphasis="mislukt"
           onLoadMore={error ? error.retry : loadMore}
         />
       </PageContainer>

@@ -72,6 +72,7 @@ export function GalleryListingClient({
         hasMore={hasMore}
         isLoading={isLoading}
         error={error ? "Fotogalerijen laden mislukt." : undefined}
+        errorEmphasis="mislukt"
         onLoadMore={loadMore}
       />
     </>

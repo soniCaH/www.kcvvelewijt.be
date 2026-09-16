@@ -8,24 +8,20 @@ export interface LoadMoreFooterProps {
   hasMore: boolean;
   isLoading: boolean;
   /** Message for a failed batch, e.g. `"Artikelen laden mislukt."`. Absent
-   *  → no error is showing. Its own last word (before trailing punctuation)
-   *  is what `<EmptyState>` accents — every message here already ends
-   *  "… mislukt.", the same failure word convention `/zoeken`'s card uses
-   *  (#2815). */
+   *  → no error is showing. */
   error?: string;
+  /**
+   * The substring of `error` that `<EmptyState>` accents — an explicit
+   * caller-supplied word, not derived from `error` itself (#2815 review
+   * findings 4/5: a "last word" heuristic silently diverges the moment a
+   * caller's message doesn't end on the failure word — #2469 resolution
+   * rule 3 requires the accent land on the failure, not the subject, and a
+   * heuristic can't tell those apart). Both current callers pass
+   * `"mislukt"`.
+   */
+  errorEmphasis?: string;
   /** Retries the failed batch; also the load-more handler. */
   onLoadMore: () => void;
-}
-
-/** The word `<EmptyState>` accents in `error` — its own last word before
- *  trailing punctuation, mirroring `<ErrorState>`'s own `lastWord()`
- *  default (#2815 scoping note: worth the three lines it costs). */
-function lastWord(message: string): string {
-  const words = message
-    .trim()
-    .replace(/[.!?]+$/, "")
-    .split(/\s+/);
-  return words[words.length - 1] ?? message;
 }
 
 /**
@@ -48,6 +44,7 @@ export function LoadMoreFooter({
   hasMore,
   isLoading,
   error,
+  errorEmphasis,
   onLoadMore,
 }: LoadMoreFooterProps) {
   if (error) {
@@ -56,8 +53,16 @@ export function LoadMoreFooter({
         tier="slot"
         reason="unavailable"
         live
-        emphasis={{ text: lastWord(error) }}
+        emphasis={{ text: errorEmphasis ?? "" }}
         action={{ label: "Probeer opnieuw", onClick: onLoadMore }}
+        // The footer's own vertical air (#2815 review finding 2) — the two
+        // surviving branches below keep `py-8` / `pt-2 pb-4` of their own,
+        // and the bespoke markup this replaced had `py-4`. `<EmptyState>`'s
+        // own `px-6 py-8` sits INSIDE its dashed frame, so without this the
+        // frame's top edge sits flush against whatever renders above it
+        // (e.g. `TapedCardGrid`'s bare, margin-less root on `/nieuws` and
+        // `/galerij`).
+        className="my-8"
       >
         {error}
       </EmptyState>

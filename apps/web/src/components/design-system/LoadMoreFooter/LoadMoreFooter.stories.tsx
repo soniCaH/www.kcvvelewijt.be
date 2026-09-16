@@ -39,12 +39,16 @@ export const Loading: Story = {
  * also show, so there is only ever one thing to click.
  */
 export const Error: Story = {
-  args: { error: "Artikelen laden mislukt." },
+  args: { error: "Artikelen laden mislukt.", errorEmphasis: "mislukt" },
 };
 
 /** An error outranks an in-flight state, so a retry is always reachable. */
 export const ErrorWhileLoading: Story = {
-  args: { error: "Artikelen laden mislukt.", isLoading: true },
+  args: {
+    error: "Artikelen laden mislukt.",
+    errorEmphasis: "mislukt",
+    isLoading: true,
+  },
 };
 
 /** Nothing left to fetch — the footer renders nothing at all. */
