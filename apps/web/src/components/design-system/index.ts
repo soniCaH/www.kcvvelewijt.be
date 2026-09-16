@@ -149,7 +149,8 @@ export type {
   EmptyStateSlotProps,
   EmptyStateSlotHeldOpenProps,
   EmptyStateSlotNoticeProps,
-  EmptyStateSlotEmphasis,
+  EmptyStateSlotNoticeAction,
+  EmptyStateEmphasis,
   EmptyStateSlotBackground,
   EmptyStateAction,
 } from "./EmptyState";

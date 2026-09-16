@@ -15,6 +15,14 @@
  *   `analyticsFacet` are required alongside `label`/`onClick`, rendered as
  *   inert `data-*` attributes a single global click listener reads — see
  *   `EmptyStateAction` below for why the analytics fields live there.
+ *   `emphasis` (#2815) accents a substring of `heading` — an **optional**
+ *   prop, defaulting to `{ text: "." }` so every call site that doesn't pass
+ *   one keeps accenting the auto-appended trailing period exactly as before.
+ *   `/zoeken`'s failure card is the one caller that overrides it, to accent
+ *   the failure word ("Zoeken **mislukt**.") instead of the period. This is
+ *   not a new `reason` value — the admission rule below is unchanged;
+ *   `emphasis` forces nothing, so it was never a candidate for a `reason`
+ *   discriminant in the first place.
  * - **Tier "slot"** — one slot is empty inside an otherwise full page (a
  *   `MatchLineup` team column, a `MatchEvents` team list). A dashed box that
  *   holds the slot's shape so the absence reads as a known gap rather than a
@@ -22,12 +30,13 @@
  *   "transparent"`), or `border-ink` on a `cream-soft` fill
  *   (`background: "cream-soft"`) for a slot standing alone on the page
  *   rather than inside an already-framed surface (`<CompetitiveStatusLine>`,
- *   #2636). No heading, no action, ever — the type system has no
- *   `heading`/`artefact`/`undo` prop on this tier. `flex-1` by default so it
- *   fills a `flex flex-col` host column's grid-stretched height instead of
- *   collapsing to one line — the host still owns making that column `flex
- *   flex-col` in the first place; the primitive cannot reach outside itself
- *   to do that part.
+ *   #2636). No heading, ever — the type system has no `heading`/`artefact`
+ *   prop on this tier. The held-open member additionally has no action;
+ *   its sibling failure-notice member below may carry one (#2815).
+ *   `flex-1` by default so it fills a `flex flex-col` host column's
+ *   grid-stretched height instead of collapsing to one line — the host
+ *   still owns making that column `flex flex-col` in the first place; the
+ *   primitive cannot reach outside itself to do that part.
  *
  *   `reason: "unavailable"` (#2469/#2576) swaps that held-open register for
  *   a **failure notice**: a sentence in the section's own body copy instead
@@ -50,7 +59,21 @@
  *   `href?: never`/`onClick?: never` mutual exclusion) — a notice's frame is
  *   not configurable, since only the cream case is in scope here; a
  *   dark-ground register is #2402's job (see below). `emphasis` accents the
- *   failure itself, not the subject (rule 3) — see below.
+ *   failure itself, not the subject (rule 3) — see below. `action` (#2815)
+ *   is an **optional** retry button, mirroring the shape tier "surface"'s
+ *   `EmptyStateAction` uses for its undo minus the undo-only analytics
+ *   fields (`EmptyStateSlotNoticeAction` below) — added so `<LoadMoreFooter>`
+ *   can render its failed-batch retry through this primitive instead of a
+ *   bespoke `<p>` + ghost button, the "Tier 2 + action" register #2470's
+ *   copy table asked for from the start. The held-open member above still
+ *   has no action prop at all.
+ *
+ * **The failure register now carries both an accent and an action
+ * (#2815).** Tier "surface" gained an optional `emphasis` (default `{ text:
+ * "." }`) and tier "slot"'s notice member gained an optional `action` —
+ * two additive, optional props, not a widened `reason`. Neither forces a
+ * companion prop, so neither was ever a candidate for the admission rule
+ * below; its table is unchanged.
  *
  * **The `reason` admission rule (#2690/#2804).** A `reason` value exists
  * ONLY to make a companion prop compiler-required. It is never a label for
@@ -233,7 +256,10 @@ interface EmptyStateSharedProps {
    * the 1:1 correlation is failure vs. emptiness, not who triggered it).
    * Pass `"assertive"` explicitly only where the tier has no failure
    * discriminant to derive it from (tier "surface" — see `SearchInterface`'s
-   * "Zoeken mislukt"; #2815 tracks widening tier "surface" to carry one).
+   * "Zoeken mislukt"). #2815 gave tier "surface" an optional `emphasis` for
+   * the accent, but deliberately did not give it a failure discriminant to
+   * derive `live` from (that would have meant widening `reason` — see the
+   * admission rule below), so this stays explicit at that call site.
    */
   live?: boolean | "assertive";
   className?: string;
@@ -242,8 +268,8 @@ interface EmptyStateSharedProps {
 interface EmptyStateSurfaceCommonProps extends EmptyStateSharedProps {
   tier: "surface";
   /** Heading. Auto-terminated with a period by `<EditorialHeading>`, and
-   *  accented on the trailing period — the `SponsorEmptyState` /
-   *  `SearchNoResultsCard` convention. */
+   *  accented per `emphasis` below (defaulting to the trailing period) —
+   *  the `SponsorEmptyState` / `SearchNoResultsCard` convention. */
   heading: string;
   /** Rendered heading tag, for a page that already has an adjacent `<h2>`
    *  this heading would otherwise collide with. Default `"h2"`, matching
@@ -260,6 +286,16 @@ interface EmptyStateSurfaceCommonProps extends EmptyStateSharedProps {
    */
   artefact?: ReactNode;
   surface?: EmptyStateSurface;
+  /**
+   * Accented substring of `heading` (post period-termination), forwarded to
+   * `<EditorialHeading>`. Optional (#2815) — omit it and every existing call
+   * site ships byte-identical output: the accent lands on the
+   * auto-appended trailing period, same as before this prop existed. Pass
+   * your own to move the accent onto the words that actually matter, e.g.
+   * `/zoeken`'s failure card accenting "mislukt" instead of the period.
+   * @default { text: "." }
+   */
+  emphasis?: EmptyStateEmphasis;
 }
 
 /** Genuine emptiness or a fruitless query — nothing to undo. */
@@ -302,29 +338,50 @@ const SLOT_BACKGROUND_CLASS: Record<EmptyStateSlotBackground, string> = {
 export interface EmptyStateSlotHeldOpenProps extends EmptyStateSharedProps {
   tier: "slot";
   reason?: undefined;
-  /** The held-open label — short, mono, uppercase. No heading, no action. */
+  /** The held-open label — short, mono, uppercase. No heading, no action —
+   *  unlike its sibling failure-notice member below, this one never grows
+   *  one (#2815). */
   children: ReactNode;
   /** @default "transparent" */
   background?: EmptyStateSlotBackground;
 }
 
 /**
- * Accented substring within an `EmptyStateSlotNoticeProps.children` sentence
- * — mirrors `<EditorialHeading>`'s `emphasis={{ text }}` (#2469 resolution
- * rule 5) rather than inventing a second shape. No `tone`/`highlight`: the
- * highlighter sweep is this site's *celebratory* register, wrong on an
- * outage (rule 2), and a dark-ground tone is #2402's job (parked via
- * #2690/#2804 — see the file docblock above), not wired here.
+ * Accented substring within a heading (tier "surface") or a
+ * `EmptyStateSlotNoticeProps.children` sentence (tier "slot") — mirrors
+ * `<EditorialHeading>`'s `emphasis={{ text }}` (#2469 resolution rule 5)
+ * rather than inventing a second shape. Shared by both tiers since #2815
+ * gave tier "surface" its own optional `emphasis` prop. No `tone`/
+ * `highlight`: the highlighter sweep is this site's *celebratory* register,
+ * wrong on an outage (rule 2), and a dark-ground tone is #2402's job
+ * (parked via #2690/#2804 — see the file docblock above), not wired here.
  */
-export interface EmptyStateSlotEmphasis {
+export interface EmptyStateEmphasis {
   text: string;
+}
+
+/**
+ * The failure notice's optional retry (#2815) — a plain button action,
+ * mirroring `EmptyStateAction`'s shape (`label` + `onClick`, extending the
+ * same `StateActionBase`) minus its undo-only analytics fields:
+ * `analyticsSource`/`analyticsFacet` are `EmptyStateUndoSource`'s closed
+ * GA4 vocabulary for a filter's undo specifically — a load-more retry is
+ * not an undo and has no home there, so this member stays a plain button.
+ * Added so `<LoadMoreFooter>` can render its failed-batch retry through
+ * this primitive instead of a bespoke `<p>` + ghost button — the
+ * "Tier 2 + action" register #2470's copy table asked for from the start.
+ */
+export interface EmptyStateSlotNoticeAction extends StateActionBase {
+  onClick: () => void;
 }
 
 /**
  * A failure notice (#2469/#2576) — a sentence in the section's own body
  * copy, with an accented substring on the words that failed, not the
  * subject (#2469 resolution rule 3, e.g. *"Het klassement is `even niet
- * beschikbaar`."*). Still tier "slot": no heading, no action, ever.
+ * beschikbaar`."*). Still tier "slot": no heading, ever — but unlike the
+ * held-open member above, it may carry a single optional retry `action`
+ * (#2815).
  */
 export interface EmptyStateSlotNoticeProps extends EmptyStateSharedProps {
   tier: "slot";
@@ -333,7 +390,11 @@ export interface EmptyStateSlotNoticeProps extends EmptyStateSharedProps {
    *  dev-only console warning fires otherwise, mirroring
    *  `<EditorialHeading>`'s own `emphasis.text`-not-found warning. */
   children: string;
-  emphasis: EmptyStateSlotEmphasis;
+  emphasis: EmptyStateEmphasis;
+  /** Optional retry button, rendered below the sentence (#2815). Omit it
+   *  for the original action-less notice every existing call site still
+   *  gets. */
+  action?: EmptyStateSlotNoticeAction;
   /** Not accepted on the notice register (#2576 review finding 5) — `never`
    *  rather than omitting the field, the same mutual-exclusion trick
    *  `_internal/stateAction.ts`'s `href?: never`/`onClick?: never` uses, so
@@ -383,6 +444,7 @@ function headingLevelFor(
 function SlotNoticeEmptyState({
   children,
   emphasis,
+  action,
   live,
   className,
 }: EmptyStateSlotNoticeProps) {
@@ -403,29 +465,60 @@ function SlotNoticeEmptyState({
       `[EmptyState] emphasis.text "${emphasis.text}" not found in notice children "${children}"`,
     );
   }
+  const sentence = split ? (
+    <>
+      {split.before}
+      <span className="text-[1.09em]">
+        <AccentEm tone="jersey-deep">{split.match}</AccentEm>
+      </span>
+      {split.after}
+    </>
+  ) : (
+    children
+  );
+  // This member is always a failure (`reason: "unavailable"` is its own
+  // discriminant), so any truthy `live` upgrades to assertive here — the
+  // caller no longer spells out "assertive" at each call site.
+  const live_ = liveRegionProps(live ? "assertive" : undefined);
+
+  // No `action` (every existing call site) → the original single-`<p>`
+  // register, byte-identical to before #2815 added the prop. `action`
+  // present → a wrapping `<div>` frame so the retry button can sit below
+  // the sentence rather than nested inside its `<p>` (#2815).
+  if (!action) {
+    return (
+      <p
+        {...live_}
+        className={cn(
+          "border-ink/30 text-ink-soft text-body-md border-2 border-dashed px-6 py-8 text-center",
+          className,
+        )}
+      >
+        {sentence}
+      </p>
+    );
+  }
+
   return (
-    <p
-      // This member is always a failure (`reason: "unavailable"` is its own
-      // discriminant), so any truthy `live` upgrades to assertive here —
-      // the caller no longer spells out "assertive" at each call site.
-      {...liveRegionProps(live ? "assertive" : undefined)}
+    <div
+      {...live_}
       className={cn(
-        "border-ink/30 text-ink-soft text-body-md border-2 border-dashed px-6 py-8 text-center",
+        "border-ink/30 border-2 border-dashed px-6 py-8 text-center",
         className,
       )}
     >
-      {split ? (
-        <>
-          {split.before}
-          <span className="text-[1.09em]">
-            <AccentEm tone="jersey-deep">{split.match}</AccentEm>
-          </span>
-          {split.after}
-        </>
-      ) : (
-        children
-      )}
-    </p>
+      <p className="text-ink-soft text-body-md">{sentence}</p>
+      <div className="mt-4">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={action.onClick}
+        >
+          {action.label}
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -462,6 +555,9 @@ function SurfaceEmptyState(props: EmptyStateSurfaceProps) {
     children,
     artefact,
     surface = "paper",
+    // Defaults to the trailing period — the original hardcode every
+    // existing call site still gets byte-identically (#2815).
+    emphasis = { text: "." },
     live,
     className,
   } = props;
@@ -498,7 +594,7 @@ function SurfaceEmptyState(props: EmptyStateSurfaceProps) {
           <EditorialHeading
             level={headingLevelFor(as)}
             size="display-md"
-            emphasis={{ text: "." }}
+            emphasis={emphasis}
           >
             {heading}
           </EditorialHeading>

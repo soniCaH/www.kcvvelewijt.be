@@ -189,6 +189,31 @@ describe("EmptyState — tier: surface (Tier 1)", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
+  it("accents the trailing period by default, when emphasis is omitted (#2815)", () => {
+    render(
+      <EmptyState tier="surface" heading="Zoeken mislukt">
+        Body.
+      </EmptyState>,
+    );
+    const accent = screen.getByText(".");
+    expect(accent.tagName).toBe("EM");
+  });
+
+  it("accents a passed emphasis substring instead of the period (#2815)", () => {
+    render(
+      <EmptyState
+        tier="surface"
+        heading="Zoeken mislukt"
+        emphasis={{ text: "mislukt" }}
+      >
+        Body.
+      </EmptyState>,
+    );
+    const accent = screen.getByText("mislukt");
+    expect(accent.tagName).toBe("EM");
+    expect(screen.queryByText(".", { selector: "em" })).toBeNull();
+  });
+
   it("draws its own paper frame by default", () => {
     const { container } = render(
       <EmptyState tier="surface" heading="Nog geen sponsors">
@@ -345,7 +370,7 @@ describe("EmptyState — tier: slot, reason: unavailable (#2469/#2576 failure no
     expect(container.firstElementChild).not.toHaveClass("border-ink-muted");
   });
 
-  it("renders no heading and no action, ever — same as the held-open register", () => {
+  it("renders no heading, ever, and no action when omitted", () => {
     const { container } = render(
       <EmptyState
         tier="slot"
@@ -357,6 +382,26 @@ describe("EmptyState — tier: slot, reason: unavailable (#2469/#2576 failure no
     );
     expect(container.querySelector("h1,h2,h3,h4,h5,h6")).toBeNull();
     expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  it("renders an optional retry action below the sentence (#2815)", async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <EmptyState
+        tier="slot"
+        reason="unavailable"
+        emphasis={{ text: "mislukt" }}
+        action={{ label: "Probeer opnieuw", onClick }}
+      >
+        Artikelen laden mislukt.
+      </EmptyState>,
+    );
+    const button = screen.getByRole("button", { name: "Probeer opnieuw" });
+    await user.click(button);
+    expect(onClick).toHaveBeenCalledOnce();
+    // The sentence stays intact alongside the action.
+    expect(screen.getByText("mislukt").tagName).toBe("EM");
   });
 
   it("does not throw and renders children verbatim when emphasis is missing at runtime (#2576 review finding 4)", () => {
