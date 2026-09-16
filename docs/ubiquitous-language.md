@@ -540,7 +540,9 @@ Every BFF read failure is one of exactly two kinds, and the kind decides what th
 
 **Rule:** one list owns the split (`PERMANENT_BFF_TAGS`). Nothing hand-types a second copy — a tag added to only one copy would silently disagree, with no compiler or test signal.
 
-**Known hole:** a permanent classification is inferred from the error tag, and one tag is ambiguous — a response that fails to decode looks the same whether PSD changed its shape (genuinely permanent) or the Worker died mid-response (transient). Tracked in [#2953].
+**The declared-error-status ambiguity is closed ([#2924]):** a permanent classification is inferred from the error tag, and `ParseError` used to be ambiguous — a response whose status matched a declared BFF error (404/502/503/400) but whose body failed to decode looked identical whether PSD/the BFF changed its shape (genuinely permanent) or a stale/misconfigured Worker sent something that isn't this BFF's error at all (transient — e.g. `apps/api` deploys production on merge and staging on PRs only, so a Worker missing a newly added route is a normal state). `guard-declared-error-body.ts`'s `transformClient` hook on `BffServiceLive` (`apps/web/src/lib/effect/`) resolves this upstream of decoding, where the status and raw body are still both in hand: it decodes the body against that status's declared error schema (reflected off `PsdApi` itself, not a hand-typed list) before the response ever reaches `HttpApiClient`'s own decode. A body that decodes as the declared error still classifies permanent; one that doesn't — empty, HTML, malformed JSON, or even a `_tag`-bearing body from a mismatched contract version — fails as a transient `ResponseError` instead.
+
+**What's still open:** the same shape of ambiguity exists in principle on the **success** path — a 2xx response whose body fails to decode against the success schema is always classified permanent (#2924's own acceptance criteria require this: it must not become transient, since it's usually a genuine contract mismatch), even though in theory a Worker could crash mid-response on a 200 and produce the same decode failure a real contract drift would. Not tracked by an open issue; #2953, which raised a version of this concern, was closed as a duplicate of #2924 once triage found its described 500 case doesn't occur post-#2440 and its underlying concern was #2924's declared-error-status case, not the success path.
 
 ---
 
@@ -597,4 +599,4 @@ Each content type has its own visibility logic. There is no universal "published
 [#2795]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2795
 [#2801]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2801
 [#2802]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2802
-[#2953]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2953
+[#2924]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2924

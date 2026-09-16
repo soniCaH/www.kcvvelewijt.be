@@ -487,6 +487,21 @@ describe("BffService", () => {
       expect(tag).toBe("HttpNotFound");
     });
 
+    it("a wrong-version body (right _tag, missing the required `error` field) classifies as transient, not permanent", async () => {
+      // An older deploy's HttpNotFound body — has the right _tag but not
+      // this contract's required `error` field. A `_tag`-presence check
+      // alone would wave this through to HttpApiClient's real decode, where
+      // it fails and reintroduces the exact silent-permanent-degrade #2924
+      // exists to fix. This is the stale-worker scenario just as much as an
+      // empty body is: the worker is running an older contract version.
+      mockFetchWith({ _tag: "HttpNotFound", message: "not found" }, 404);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(false);
+      expect(tag).toBe("ResponseError");
+    });
+
     it("a success-status body that fails the success schema stays a permanent ParseError — unchanged", async () => {
       // 200, but shaped nothing like RankingTableArray. This is a real
       // contract-mismatch ParseError (this deploy can't decode a genuine BFF
