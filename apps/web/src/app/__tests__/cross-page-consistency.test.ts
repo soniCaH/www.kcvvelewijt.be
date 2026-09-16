@@ -1679,3 +1679,201 @@ describe("rule 11 catches what it claims to (#2578)", () => {
     ).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule 12 (#2865) — a named view-model field with no reader renders nothing, silently
+// ---------------------------------------------------------------------------
+
+/**
+ * The bug this exists to catch, concretely: `HOMEPAGE_PLACEHOLDER_QUERY`
+ * projected `_id` and `metadata.dimensions` into
+ * `MatchesSliderPlaceholderVM.highlightImage`, and `width`/`height` were
+ * carried all the way through `toPlaceholderVM` — but nothing ever read
+ * them, because `<FirstTeamsBlock>` renders the image with `<Image fill>`,
+ * which never consumes width/height. Rule 10 could not have caught this:
+ * `toPlaceholderVM` (the method) had a real caller; only two of its
+ * *fields* did not. Fixed in `a60f3037` (#2505 round-3 review finding S3);
+ * this rule pins the fix so the fields can't quietly grow back.
+ *
+ * **knip cannot do this (checked, not assumed — #2865 triage).** knip
+ * v6.32.3's `--include classMembers` is rejected outright as an invalid
+ * issue type — that detector does not exist in this version — and the
+ * `types` detector reports an unused exported *type*, not an unread
+ * *field* of one: the known instance wouldn't have appeared, because
+ * `MatchesSliderPlaceholderVM` itself is very much used. The full valid
+ * detector set here is `exports,nsExports,types,nsTypes,enumMembers,
+ * namespaceMembers,duplicates,files,cycles` plus the dependency ones —
+ * none operates at property level. Nothing installed catches this bug
+ * class; this rule is what fills that specific gap.
+ *
+ * **Why this is a hand-list, not rule 10 one level down.** Rule 10's
+ * `Repo.method` two-signal trick (the repository's own `Context.Tag`
+ * identifier AND a `.method(` call, both required in the same file) has
+ * no analogue at the field level — `url`, `alt`, `width` are common
+ * enough as field names that a site-wide `.fieldName` sweep would return
+ * mostly matches that have nothing to do with this VM, and an exemption
+ * list is how a guard dies (rule 10 already carries one from its first
+ * week; rule 11 carries two). So this rule does not scan
+ * `scannableSources` at all. Each entry below hand-names its own small
+ * set of known consumer files, and a field only needs a reader *inside
+ * that named set* — the same specificity rule 10 buys with two regex
+ * signals, bought here instead by narrowing *where* the rule looks
+ * rather than *what* it matches.
+ *
+ * **What this covers, named explicitly, and nothing else:**
+ * `MatchesSliderPlaceholderVM` and its nested `highlightImage` shape,
+ * both declared in `lib/repositories/homepage.repository.ts` — the VM
+ * that produced the one confirmed instance of this bug. The other ten
+ * repositories under `lib/repositories/` are **not** covered by this
+ * rule. Extending coverage means adding another named entry to
+ * `VM_FIELD_GROUPS` below, with its own hand-picked `consumers` — the
+ * same way this one was added — never widening the search to
+ * `scannableSources`.
+ *
+ * **What this cannot see**, named so nobody reads it as more: a field
+ * read via destructuring (`const { url } = image`) rather than dotting
+ * off the value — no consumer named below does that today, but a future
+ * one that did would read as unread. And a field read only inside a
+ * Storybook story or a `.test.ts` file not named as a consumer would
+ * also read as unread — deliberately: this rule's bar is "read by a
+ * named production consumer," the field-level mirror of rule 10's "a
+ * caller outside the repository's own test file."
+ */
+interface VmFieldGroup {
+  /** Name used in test output only — the interface, or the inline type of
+   *  one of its fields, that `fields` below belong to. */
+  vmType: string;
+  /** The repository file that declares `vmType` — documentation only; not
+   *  itself scanned as a consumer, mirroring rule 10's own boundary. */
+  declaredIn: string;
+  /** Every field this rule holds accountable for `vmType`, in source order. */
+  fields: readonly string[];
+  /** The exact files known to render/consume `vmType` — hand-picked, not a
+   *  sweep of `scannableSources`, because field names alone (`alt`, `url`)
+   *  are common enough that a wider search would return false positives
+   *  unrelated to this VM (see the docblock above). */
+  consumers: readonly string[];
+}
+
+const VM_FIELD_GROUPS: readonly VmFieldGroup[] = [
+  {
+    vmType: "MatchesSliderPlaceholderVM",
+    declaredIn: "lib/repositories/homepage.repository.ts",
+    fields: [
+      "nextSeasonKickoff",
+      "announcementText",
+      "announcementHref",
+      "highlightImage",
+    ],
+    consumers: [
+      "components/home/FirstTeamsBlock/placeholder-rule.ts",
+      "components/home/FirstTeamsBlock/FirstTeamsBlock.tsx",
+    ],
+  },
+  {
+    vmType: 'MatchesSliderPlaceholderVM["highlightImage"]',
+    declaredIn: "lib/repositories/homepage.repository.ts",
+    fields: ["alt", "url", "lqip"],
+    consumers: [
+      "components/home/FirstTeamsBlock/placeholder-rule.ts",
+      "components/home/FirstTeamsBlock/FirstTeamsBlock.tsx",
+    ],
+  },
+];
+
+/** True when `field` is dotted off *something* (`.field`, including through
+ *  optional chaining — `?.field` still contains a literal `.field`) inside
+ *  `source`. A bare word boundary, so `.urlMobile` does not count as a
+ *  reader of `url`. */
+function hasFieldAccess(source: string, field: string): boolean {
+  return new RegExp(`\\.${field}\\b`).test(source);
+}
+
+/** True when at least one of `consumers` reads `field` — see the docblock's
+ *  "why this is a hand-list" paragraph for why the search is scoped to a
+ *  named file set rather than the whole tree. */
+function fieldHasReader(field: string, consumers: readonly string[]): boolean {
+  return consumers.some((relPath) => hasFieldAccess(code.get(relPath)!, field));
+}
+
+describe("a named view-model field with no reader renders nothing, silently (#2865)", () => {
+  const namedConsumers = [
+    ...new Set(VM_FIELD_GROUPS.flatMap((group) => group.consumers)),
+  ];
+  it.each(namedConsumers)(
+    "%s is a real file in the scanned tree",
+    (relPath) => {
+      expect(scannableSources).toContain(relPath);
+    },
+  );
+
+  const cases = VM_FIELD_GROUPS.flatMap((group) =>
+    group.fields.map(
+      (field) => [group.vmType, field, group.consumers] as const,
+    ),
+  );
+  it.each(cases)(
+    "%s.%s has at least one reader among its named consumer files",
+    (_vmType, field, consumers) => {
+      expect(fieldHasReader(field, consumers)).toBe(true);
+    },
+  );
+});
+
+/**
+ * The list is hand-written, not derived, so nothing here re-runs it against
+ * the live tree the way rules 5/9/10 re-derive theirs — instead this pins
+ * the two claims that would make the hand list silently wrong: that the
+ * named VM types are still actually declared where this rule says they are,
+ * and that the detector functions still do what they claim on synthetic
+ * input, the same way rule 10's and rule 11's own self-tests exercise
+ * `referencesCaller`/`hasExternalArrowGlyph` rather than only the real tree.
+ */
+describe("rule 12 catches what it claims to (#2865)", () => {
+  it("covers exactly the VM shapes named above, and nothing else", () => {
+    expect(VM_FIELD_GROUPS.map((g) => g.vmType)).toEqual([
+      "MatchesSliderPlaceholderVM",
+      'MatchesSliderPlaceholderVM["highlightImage"]',
+    ]);
+  });
+
+  it("both entries are declared where this rule says they are", () => {
+    const source = code.get("lib/repositories/homepage.repository.ts")!;
+    expect(source).toContain("export interface MatchesSliderPlaceholderVM");
+    expect(source).toContain("highlightImage?:");
+  });
+
+  it("matches a field dotted off a plain reference", () => {
+    expect(hasFieldAccess("const x = image.url;", "url")).toBe(true);
+  });
+
+  it("matches a field dotted off an optional-chained reference", () => {
+    expect(
+      hasFieldAccess("placeholder?.announcementText", "announcementText"),
+    ).toBe(true);
+  });
+
+  it("does not match the field name when it only appears undotted elsewhere", () => {
+    expect(hasFieldAccess("const url = buildUrl();", "url")).toBe(false);
+  });
+
+  it("does not match a longer field name that merely starts with the same prefix", () => {
+    expect(hasFieldAccess("image.urlMobile", "url")).toBe(false);
+  });
+
+  it("reproduces #2505's own regression: width/height were projected but never read by either real consumer", () => {
+    const highlightImageGroup = VM_FIELD_GROUPS.find(
+      (g) => g.vmType === 'MatchesSliderPlaceholderVM["highlightImage"]',
+    )!;
+    expect(fieldHasReader("width", highlightImageGroup.consumers)).toBe(false);
+    expect(fieldHasReader("height", highlightImageGroup.consumers)).toBe(false);
+  });
+
+  it("confirms the real consumer files still read every field this rule pins as read", () => {
+    for (const group of VM_FIELD_GROUPS) {
+      for (const field of group.fields) {
+        expect(fieldHasReader(field, group.consumers)).toBe(true);
+      }
+    }
+  });
+});
