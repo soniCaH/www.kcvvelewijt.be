@@ -3,7 +3,7 @@ import { Effect, Layer } from "effect";
 import { handleIndexWebhook, type WebhookLayer } from "./index-handler";
 import type { WorkerEnv } from "../env";
 import { makeTestEnv, makeTestEnvLayer } from "../test-helpers/env-layer";
-import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
+import { TEST_SECRET, signPayload } from "../test-helpers/webhook-signing";
 import { EmbeddingService } from "../search/embedding";
 import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
 import { listPendingIds } from "../search/index-manifest";
@@ -34,21 +34,18 @@ async function makeSignedRequest(
     missingHeaders?: boolean;
   } = {},
 ): Promise<Request> {
-  const svixId = "msg_test123";
   const timestamp = options.oldTimestamp
-    ? Math.floor(Date.now() / 1000) - 301
-    : Math.floor(Date.now() / 1000);
+    ? Date.now() - 5 * 60 * 1000 - 1000
+    : Date.now();
 
   const signature = options.invalidSig
-    ? "v1,invalidsignature=="
-    : await signPayload(svixId, timestamp, body);
+    ? `t=${timestamp},v1=invalidsignature`
+    : await signPayload(body, timestamp);
 
   const headers: Record<string, string> = options.missingHeaders
     ? {}
     : {
-        "svix-id": svixId,
-        "svix-timestamp": String(timestamp),
-        "svix-signature": signature,
+        "sanity-webhook-signature": signature,
         "content-type": "application/json",
       };
 
@@ -118,7 +115,7 @@ describe("handleIndexWebhook", () => {
 
   const defaultLayer = makeTestLayer();
 
-  it("returns 401 for missing SVIX headers", async () => {
+  it("returns 401 for a missing signature header", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
     const request = await makeSignedRequest(body, { missingHeaders: true });
 

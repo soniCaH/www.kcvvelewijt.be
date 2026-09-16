@@ -20,7 +20,7 @@ import {
 } from "../search/index-queries";
 import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
 import { WebhookPayload } from "./schemas";
-import { verifySvixSignature } from "./svix-verify";
+import { verifySanitySignature } from "./sanity-signature";
 
 // ─── Error types ───────────────────────────────────────────────────────────
 
@@ -195,9 +195,9 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
       catch: () => new WebhookParseError("invalid_json", "failed to read body"),
     });
 
-    // 2. Verify SVIX signature
+    // 2. Verify Sanity signature
     const valid = yield* Effect.tryPromise({
-      try: () => verifySvixSignature(request.headers, rawBody, webhookSecret),
+      try: () => verifySanitySignature(request.headers, rawBody, webhookSecret),
       catch: () => new WebhookAuthError(),
     });
     if (!valid) return yield* Effect.fail(new WebhookAuthError());
