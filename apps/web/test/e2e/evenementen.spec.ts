@@ -14,6 +14,7 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { gotoBounded } from "./helpers/goto";
 
 // Event-doc tickets link to /evenementen/[slug]; article-sourced (articleType
 // "event") tickets link to /nieuws/[slug]. Both render as <TicketStub> links.
@@ -24,7 +25,7 @@ test.describe("/evenementen", () => {
   // Relative goto resolves against the config `baseURL`; every test starts on
   // the list, so a single beforeEach covers them all.
   test.beforeEach(async ({ page }) => {
-    await page.goto("/evenementen");
+    await gotoBounded(page, "/evenementen");
   });
 
   test("renders the month-grouped list with the filter bar and at least one ticket", async ({

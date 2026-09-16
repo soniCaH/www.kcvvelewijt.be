@@ -1,5 +1,6 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
 import { discoverRouteFixtures, type RouteFixtures } from "./helpers/fixtures";
+import { gotoBounded } from "./helpers/goto";
 
 // #2577 — "one scroll arrow in two registers, held space by real overflow"
 // (#2444, as amended by #2476, #2478 and #2489). Source-scan and Storybook
@@ -178,7 +179,7 @@ async function assertRailArrowMatchesOverflow(
 test.describe("scroll arrow — mounts only on real overflow at that width", () => {
   test("FilterTabs on /nieuws — desktop (1280px)", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/nieuws");
+    await gotoBounded(page, "/nieuws");
     const group = page.getByRole("group", { name: /filter/i }).first();
     // The arrows are the group's own siblings inside FilterTabs' outer
     // `relative` wrapper, not its descendants — scope the label lookup to
@@ -191,7 +192,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto("/nieuws");
+    await gotoBounded(page, "/nieuws");
     const group = page.getByRole("group", { name: /filter/i }).first();
     const wrapper = group.locator("..");
     await assertRailArrowMatchesOverflow(wrapper, group);
@@ -210,7 +211,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       { width: 375, height: 800 },
     ]) {
       await page.setViewportSize(viewport);
-      await page.goto(`/nieuws/${slug}`);
+      await gotoBounded(page, `/nieuws/${slug}`);
       const track = page.locator('[data-slot="scroll-track"]').first();
       // The related row is optional (auto-hides at zero items) — skip this
       // viewport iteration honestly rather than fail if it isn't present.
@@ -236,7 +237,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       "no team in the sitemap renders TeamSectionNav today (≤1 section on every team — pre-season)",
     );
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto(`/ploegen/${teamSectionNavSlug}`);
+    await gotoBounded(page, `/ploegen/${teamSectionNavSlug}`);
     const nav = page.getByTestId("team-section-nav");
 
     const list = nav.locator("ul").first();
@@ -251,7 +252,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       "no team or match in the sitemap renders a numbered StandingsTable today (pre-season / numberless-only data)",
     );
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto(standingsTableUrl!);
+    await gotoBounded(page, standingsTableUrl!);
 
     // Scoped to the standings table itself, not `page` — a team page also
     // ships `TeamSectionNav`'s own "Scroll right" control, and asserting
@@ -302,7 +303,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       { width: 375, height: 800 },
     ]) {
       await page.setViewportSize(viewport);
-      await page.goto(`/nieuws/${slug}`);
+      await gotoBounded(page, `/nieuws/${slug}`);
       const region = page.locator('[data-html-table="true"] [role="region"]');
       if ((await region.count()) === 0) continue;
       // HtmlTableBlock never mounts a left arrow — `direction="right"`,
@@ -338,7 +339,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     // zooming to A+ or A++ should overflow it and mount the arrow; "A"
     // itself should not.
     await page.setViewportSize({ width: 1024, height: 800 });
-    await page.goto("/hulp");
+    await gotoBounded(page, "/hulp");
 
     // The organigram section renders collapsed on /hulp
     // (`<OrganigramOverview collapsible>`) — expand it first.

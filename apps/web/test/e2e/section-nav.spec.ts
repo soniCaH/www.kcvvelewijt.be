@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { gotoBounded } from "./helpers/goto";
 
 // #2584 — "the sticky section nav is chrome, not content" (#2478's full
 // resolution). Two invariants only a real browser can confirm (the map's own
@@ -110,7 +111,7 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
       "no team in the sitemap renders TeamSectionNav today (pre-season)",
     );
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(`/ploegen/${teamSlugWithNav}`);
+    await gotoBounded(page, `/ploegen/${teamSlugWithNav}`);
 
     const nav = page.getByTestId("team-section-nav");
     const links = nav.getByRole("link");
@@ -139,7 +140,7 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
 
   test("OrganigramSectionNav on /hulp", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/hulp");
+    await gotoBounded(page, "/hulp");
 
     // "Hulp" and "Structuur" both also appear in the global header/footer —
     // scope to the section nav's own landmark so this asserts the chip, not
@@ -173,7 +174,7 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
       "no team in the sitemap renders TeamSectionNav today (pre-season)",
     );
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(`/ploegen/${teamSlugWithNav}`);
+    await gotoBounded(page, `/ploegen/${teamSlugWithNav}`);
 
     const nav = page.getByTestId("team-section-nav");
     const links = nav.getByRole("link");
@@ -219,7 +220,7 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     // makes this landing worth its own test (measured on this route at
     // this width).
     await page.setViewportSize({ width: 375, height: 800 });
-    await page.goto("/hulp");
+    await gotoBounded(page, "/hulp");
 
     const nav = page.getByRole("navigation", { name: "Secties van de hub" });
     await nav.getByRole("link", { name: "Structuur" }).click();
@@ -252,7 +253,7 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     await page.setViewportSize({ width: 1280, height: 900 });
 
     // Discover a real section id first (a fresh, unscrolled load).
-    await page.goto(`/ploegen/${teamSlugWithNav}`);
+    await gotoBounded(page, `/ploegen/${teamSlugWithNav}`);
     const nav = page.getByTestId("team-section-nav");
     const links = nav.getByRole("link");
     const count = await links.count();
@@ -261,7 +262,7 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
       1,
     );
 
-    await page.goto(`/ploegen/${teamSlugWithNav}#${targetId}`);
+    await gotoBounded(page, `/ploegen/${teamSlugWithNav}#${targetId}`);
     await waitForScrollSettled(page);
 
     const barBottom = await stickyBarBottom(page, "team-section-nav");
@@ -301,7 +302,7 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     // only *arms* the correction hook, it does not also correct, so only a
     // true cold load exercises the "arm and correct immediately" branch
     // (see `useHashLandingCorrection`'s wiring comment).
-    await page.goto("/hulp#structuur");
+    await gotoBounded(page, "/hulp#structuur");
     await waitForScrollSettled(page);
 
     const nav = page.getByRole("navigation", { name: "Secties van de hub" });
@@ -349,7 +350,7 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/jeugd#visie");
+    await gotoBounded(page, "/jeugd#visie");
     await waitForScrollSettled(page);
 
     const header = page.locator("header").first();
