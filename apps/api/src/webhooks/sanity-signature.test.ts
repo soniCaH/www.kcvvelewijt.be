@@ -39,6 +39,16 @@ describe("verifySanitySignature", () => {
     expect(await verifySanitySignature(headers, body, TEST_SECRET)).toBe(false);
   });
 
+  it("rejects a signature that is not base64", async () => {
+    const headers = headersWith(`t=${Date.now()},v1=%%%`);
+    expect(await verifySanitySignature(headers, body, TEST_SECRET)).toBe(false);
+  });
+
+  it("rejects an empty body", async () => {
+    const headers = headersWith(await signPayload(body));
+    expect(await verifySanitySignature(headers, "", TEST_SECRET)).toBe(false);
+  });
+
   it("rejects when the secret is unset", async () => {
     const headers = headersWith(await signPayload(body));
     expect(await verifySanitySignature(headers, body, "")).toBe(false);
