@@ -171,6 +171,7 @@ describe("mapMentionedTeams", () => {
         imageUrl: "https://cdn.example.com/logo.png",
         slug: "kcvv-elewijt",
         tagline: "3e Nationale A",
+        archived: null,
       },
     ]);
 
@@ -187,6 +188,20 @@ describe("mapMentionedTeams", () => {
     ]);
   });
 
+  it("skips an archived team (no page to link to, #3000)", () => {
+    const result = mapMentionedTeams([
+      {
+        _id: "team-30",
+        name: "KCVVE U9P",
+        imageUrl: null,
+        slug: "kcvve-u9p",
+        tagline: null,
+        archived: true,
+      },
+    ]);
+    expect(result).toEqual([]);
+  });
+
   it("propagates a null tagline straight through (matches GROQ shape)", () => {
     const result = mapMentionedTeams([
       {
@@ -195,6 +210,7 @@ describe("mapMentionedTeams", () => {
         imageUrl: null,
         slug: "kcvv",
         tagline: null,
+        archived: null,
       },
     ]);
     expect(result[0]).toMatchObject({ tagline: null });
@@ -207,6 +223,7 @@ describe("mapMentionedTeams", () => {
       imageUrl: null,
       slug: "kcvv",
       tagline: null,
+      archived: null,
     };
     const result = mapMentionedTeams([null, team, team]);
     expect(result).toHaveLength(1);
@@ -375,6 +392,7 @@ describe("mapCuratedRelatedContent", () => {
         slug: "eerste-elftal-a",
         imageUrl: "https://cdn.example.com/team-a.png",
         tagline: "3e Nationale A",
+        archived: null,
       },
     ]);
 
@@ -400,6 +418,22 @@ describe("mapCuratedRelatedContent", () => {
         slug: null,
         imageUrl: null,
         tagline: null,
+        archived: null,
+      },
+    ]);
+    expect(result).toEqual([]);
+  });
+
+  it("skips an archived curated team (no page to link to, #3000)", () => {
+    const result = mapCuratedRelatedContent([
+      {
+        _type: "team",
+        _id: "team-30",
+        name: "KCVVE U9P",
+        slug: "kcvve-u9p",
+        imageUrl: null,
+        tagline: null,
+        archived: true,
       },
     ]);
     expect(result).toEqual([]);

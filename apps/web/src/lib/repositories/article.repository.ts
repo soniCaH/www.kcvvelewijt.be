@@ -49,7 +49,7 @@ export const ARTICLES_QUERY =
     location, address, ageGroup, competitionTag,
     ticketUrl, ticketLabel
   },
-  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } }
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }
 }`);
 
 export const ARTICLE_TAGS_QUERY = defineQuery(
@@ -149,7 +149,7 @@ export const ARTICLE_BY_SLUG_QUERY =
     customRole,
     "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId } } } },
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } },
   relatedArticles[]-> { "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)) },
   relatedContent[]->{
     _type,
@@ -170,6 +170,7 @@ export const ARTICLE_BY_SLUG_QUERY =
     }),
     ...select(_type == "team" => {
       name,
+      archived,
       "slug": slug.current,
       "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
       tagline
@@ -195,7 +196,7 @@ export const ARTICLE_BY_SLUG_QUERY =
     psdId
   },
   "mentionedTeams": body[].markDefs[_type == "internalLink" && reference->_type == "team"].reference-> {
-    _id, name, tagline,
+    _id, name, tagline, archived,
     "imageUrl": teamImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "slug": slug.current
   },

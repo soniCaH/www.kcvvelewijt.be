@@ -70,6 +70,25 @@ function paragraphWithLink(text: string, href: string): PortableTextBlock {
   } as PortableTextBlock;
 }
 
+function paragraphWithTeamLink(
+  text: string,
+  reference: { slug: string; archived?: boolean | null },
+): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: "team-link-block",
+    style: "normal",
+    children: [{ _type: "span", _key: "tc", text, marks: ["tl"] }],
+    markDefs: [
+      {
+        _type: "internalLink",
+        _key: "tl",
+        reference: { _type: "team", ...reference },
+      },
+    ],
+  } as PortableTextBlock;
+}
+
 describe("<ArticleBody>", () => {
   describe("DropCap injection", () => {
     it("wraps the first normal paragraph in <DropCapParagraph>", () => {
@@ -206,6 +225,30 @@ describe("<ArticleBody>", () => {
       expect(link?.getAttribute("target")).toBeNull();
       expect(link?.querySelector("svg")).toBeNull();
       expect(link?.className).toContain("prose-link");
+    });
+
+    it("links an internal team reference to /ploegen/<slug>", () => {
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithTeamLink("de U9", { slug: "kcvve-u9", archived: false }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const link = container.querySelector('a[data-article-link="internal"]');
+      expect(link?.getAttribute("href")).toBe("/ploegen/kcvve-u9");
+    });
+
+    // A team PSD retired has no page any more (#3000) — keep the words,
+    // drop the link rather than send the reader to "Team niet gevonden".
+    it("renders an archived team reference as plain text", () => {
+      const content = [
+        paragraph("First paragraph, plain (DropCap target)."),
+        paragraphWithTeamLink("de U9P", { slug: "kcvve-u9p", archived: true }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      expect(
+        container.querySelector('a[data-article-link="internal"]'),
+      ).toBeNull();
+      expect(screen.getByText("de U9P")).toBeInTheDocument();
     });
 
     it("keeps the .prose-link marker for non-social external links", () => {
