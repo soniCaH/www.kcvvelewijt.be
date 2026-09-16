@@ -89,13 +89,47 @@ test.beforeAll(async ({ baseURL }) => {
   }
 });
 
+/**
+ * Repeatedly evaluates `read` until two consecutive reads agree, then
+ * returns that settled value — instead of a single snapshot.
+ *
+ * #2985 bounded this suite's post-goto `load` wait to 10s (`gotoBounded`).
+ * On a contended runner the page can still be swapping its real webfont in
+ * after that bound expires, and a one-shot `scrollWidth`/`clientWidth`
+ * snapshot taken then can read fallback-font metrics instead of the
+ * settled layout — a race the old *unbounded* `load` wait papered over by
+ * construction, since it always waited the font out. The arrow assertions
+ * that follow already auto-retry against the DOM; this makes the
+ * measurement they're compared against retry the same way, rather than
+ * staying frozen at a pre-settle read. Do NOT swap this for
+ * `document.fonts.ready` — #2834 already recorded that signal as
+ * unreliable in this repo.
+ */
+async function settled<T>(read: () => Promise<T>): Promise<T> {
+  let previousKey: string | undefined;
+  let latest!: T;
+  await expect
+    .poll(
+      async () => {
+        latest = await read();
+        const key = JSON.stringify(latest);
+        const stable = key === previousKey;
+        previousKey = key;
+        return stable;
+      },
+      { timeout: 5000 },
+    )
+    .toBe(true);
+  return latest;
+}
+
 async function readOverflow(track: Locator) {
-  const { scrollWidth, clientWidth, scrollLeft } = await track.evaluate(
-    (el) => ({
+  const { scrollWidth, clientWidth, scrollLeft } = await settled(() =>
+    track.evaluate((el) => ({
       scrollWidth: el.scrollWidth,
       clientWidth: el.clientWidth,
       scrollLeft: el.scrollLeft,
-    }),
+    })),
   );
   const DEAD_ZONE = 10;
   return {
@@ -310,12 +344,12 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       // unconditionally (#2582: an authored table anchors nothing, so
       // there is no sticky column to justify a left cue either) — only
       // assert the right side.
-      const { scrollWidth, clientWidth } = await region
-        .first()
-        .evaluate((el) => ({
+      const { scrollWidth, clientWidth } = await settled(() =>
+        region.first().evaluate((el) => ({
           scrollWidth: el.scrollWidth,
           clientWidth: el.clientWidth,
-        }));
+        })),
+      );
       const expectCanScrollRight = scrollWidth - clientWidth > 10;
       const rightArrow = page
         .locator('[data-html-table="true"]')
@@ -373,15 +407,17 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
 
     // "A" (scaleStep 0) is the default on open — assert its own invariant
     // first rather than assuming it never overflows.
-    const readOverflow = async () => {
-      const { scrollWidth, clientWidth } = await stage.evaluate((el) => ({
-        scrollWidth: el.scrollWidth,
-        clientWidth: el.clientWidth,
-      }));
+    const readStageOverflow = async () => {
+      const { scrollWidth, clientWidth } = await settled(() =>
+        stage.evaluate((el) => ({
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth,
+        })),
+      );
       return scrollWidth - clientWidth > 10;
     };
 
-    if (await readOverflow()) {
+    if (await readStageOverflow()) {
       await expect(stageWrapper.getByLabel("Scroll right")).toBeVisible();
     } else {
       await expect(stageWrapper.getByLabel("Scroll right")).toHaveCount(0);
@@ -395,7 +431,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     // past the transition rather than asserting immediately.
     await page.waitForTimeout(500);
 
-    expect(await readOverflow()).toBe(true);
+    expect(await readStageOverflow()).toBe(true);
     await expect(stageWrapper.getByLabel("Scroll right")).toBeVisible();
   });
 });
