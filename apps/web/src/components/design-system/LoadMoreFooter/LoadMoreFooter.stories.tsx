@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The tail of a paginated listing — exactly one of three things shows at a time: a failed-batch message with a retry, the in-flight spinner, or the load-more button. `/nieuws` and `/galerij` are the two listings on the shared 24 + 12 contract (#2569), and they render this rather than each keeping a hand-copied footer.",
+          'The tail of a paginated listing — exactly one of three things shows at a time: a failed-batch notice with a retry (rendered through `<EmptyState tier="slot" reason="unavailable">`, #2815), the in-flight spinner, or the load-more button. `/nieuws` and `/galerij` are the two listings on the shared 24 + 12 contract (#2569), and they render this rather than each keeping a hand-copied footer.',
       },
     },
   },
@@ -39,12 +39,15 @@ export const Loading: Story = {
  * also show, so there is only ever one thing to click.
  */
 export const Error: Story = {
-  args: { error: "Artikelen laden mislukt." },
+  args: { error: { message: "Artikelen laden mislukt.", emphasis: "mislukt" } },
 };
 
 /** An error outranks an in-flight state, so a retry is always reachable. */
 export const ErrorWhileLoading: Story = {
-  args: { error: "Artikelen laden mislukt.", isLoading: true },
+  args: {
+    error: { message: "Artikelen laden mislukt.", emphasis: "mislukt" },
+    isLoading: true,
+  },
 };
 
 /** Nothing left to fetch — the footer renders nothing at all. */

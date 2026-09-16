@@ -155,8 +155,12 @@ describe("GalleryListingClient", () => {
 
     fireEvent.click(loadMoreButton());
 
+    // The failure notice now renders through <EmptyState>, which accents
+    // "mislukt" in its own <em> — the sentence text is split across nodes,
+    // so a single getByText(/laden mislukt/i) can no longer match it whole
+    // (#2815).
     await waitFor(() => {
-      expect(screen.getByText(/laden mislukt/i)).toBeInTheDocument();
+      expect(screen.getByText("mislukt").tagName).toBe("EM");
     });
 
     mockFetchGalleries.mockResolvedValue({

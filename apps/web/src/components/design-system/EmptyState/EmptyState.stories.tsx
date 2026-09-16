@@ -5,13 +5,14 @@ import { EmptyState } from "./EmptyState";
 /**
  * #2427 / #2562 — one primitive, two tiers. State-coverage: tier-1 genuine
  * (the null path — default artefact, no undo), tier-1 filter-empty (with
- * the mandatory undo), tier-1's two non-default `surface` values, tier-2's
- * held-open register, and tier-2's `reason="unavailable"` failure register
- * (#2469/#2576). `vr`-tagged so every state acquires VR baselines per the
- * master-design VR contract — `surface="inverse"` exists specifically to
- * fix a shadow that was invisible on a dark ground, so it needs its own
- * baseline or a future token change could silently undo the fix
- * (#2562 review round 4).
+ * the mandatory undo), tier-1's two non-default `surface` values, tier-1's
+ * accented failure heading (`emphasis`, #2815), tier-2's held-open register,
+ * tier-2's `reason="unavailable"` failure register (#2469/#2576), and
+ * tier-2's failure notice with a retry `action` (#2815). `vr`-tagged so
+ * every state acquires VR baselines per the master-design VR contract —
+ * `surface="inverse"` exists specifically to fix a shadow that was invisible
+ * on a dark ground, so it needs its own baseline or a future token change
+ * could silently undo the fix (#2562 review round 4).
  *
  * No dedicated "custom artefact" story: every current call site that has
  * its own obvious mark (a crest, a ball) either doesn't exist yet or was
@@ -67,6 +68,25 @@ export const SurfaceFilterEmpty: Story = {
       analyticsFacet: "Jeugd",
     },
     children: "Er zijn geen artikelen in deze categorie.",
+  },
+};
+
+/**
+ * Tier 1, a failed fetch (`/zoeken`'s "Zoeken mislukt" card) — `emphasis`
+ * (#2815) moves the accent off the auto-appended trailing period and onto
+ * the failure word instead. No `undo`: the search form above already
+ * survives with the query intact, so a second retry action here would be
+ * redundant chrome (#2470 resolution rule 4) — this is still the pending
+ * (reason-omitted) variant, just with a non-default `emphasis`.
+ */
+export const SurfaceFailureHeading: Story = {
+  name: "Tier 1 — failure heading (accented failure word)",
+  args: {
+    tier: "surface",
+    heading: "Zoeken mislukt",
+    emphasis: { text: "mislukt" },
+    live: "assertive",
+    children: "Er ging iets mis bij het zoeken — probeer opnieuw.",
   },
 };
 
@@ -160,5 +180,22 @@ export const SlotNotice: Story = {
     emphasis: { text: "even niet beschikbaar" },
     children:
       "Het klassement is even niet beschikbaar. Probeer het later opnieuw.",
+  },
+};
+
+/**
+ * Tier 2, `reason="unavailable"` with an optional retry `action` (#2815) —
+ * the register `<LoadMoreFooter>`'s failed-batch retry now renders through,
+ * in place of its old bespoke `<p>` + ghost button. The same fixed dashed
+ * frame as the plain notice above; the retry sits below the sentence.
+ */
+export const SlotNoticeWithAction: Story = {
+  name: "Tier 2 — failure notice with action",
+  args: {
+    tier: "slot",
+    reason: "unavailable",
+    emphasis: { text: "mislukt" },
+    action: { label: "Probeer opnieuw", onClick: fn() },
+    children: "Artikelen laden mislukt.",
   },
 };

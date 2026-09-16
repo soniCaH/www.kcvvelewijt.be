@@ -8,7 +8,8 @@ export {
   type EmptyStateSlotProps,
   type EmptyStateSlotHeldOpenProps,
   type EmptyStateSlotNoticeProps,
-  type EmptyStateSlotEmphasis,
+  type EmptyStateSlotNoticeAction,
+  type EmptyStateEmphasis,
   type EmptyStateSlotBackground,
   type EmptyStateAction,
 } from "./EmptyState";

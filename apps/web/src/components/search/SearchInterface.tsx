@@ -404,11 +404,14 @@ export const SearchInterface = ({
                 "slot"'s `reason="unavailable"` — #2815) and matches the
                 <Alert variant="error"> this replaces: the visitor just
                 pressed "Zoeken", so the failure needs an immediate
-                announcement. */}
+                announcement. `emphasis` (#2815) moves the accent off the
+                auto-appended period and onto "mislukt" — the failure word,
+                not the punctuation. */}
             {error && !isLoading && (
               <EmptyState
                 tier="surface"
                 heading="Zoeken mislukt"
+                emphasis={{ text: "mislukt" }}
                 live="assertive"
               >
                 Er ging iets mis bij het zoeken — probeer opnieuw.

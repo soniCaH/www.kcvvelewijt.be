@@ -1,4 +1,5 @@
 import { Button } from "../Button";
+import { EmptyState } from "../EmptyState";
 import { Spinner } from "../Spinner";
 
 export interface LoadMoreFooterProps {
@@ -6,20 +7,42 @@ export interface LoadMoreFooterProps {
   label: string;
   hasMore: boolean;
   isLoading: boolean;
-  /** Message for a failed batch. Absent → no error is showing. */
-  error?: string;
+  /**
+   * A failed batch: the message plus the substring of it that
+   * `<EmptyState>` accents. Absent → no error is showing. Paired into one
+   * object, not two separate optional props, on purpose (#2815 review
+   * follow-up): `emphasis` is meaningless without `message` and `message`
+   * degrades badly without `emphasis` — an omitted `errorEmphasis` used to
+   * fall back to `{ text: "" }`, which `<EmptyState>`'s notice member
+   * (`emphasis` is *required* there) accepts without complaint, silently
+   * dropping the accent and misdirecting the dev-only "not found" warning
+   * at a missing substring instead of a forgotten prop. Same shape as the
+   * `reason` admission rule this file documents: a value exists to make a
+   * companion field compiler-required, not to be a label for copy. The
+   * accent must never be derived from `message` (#2815 review findings
+   * 4/5) — a "last word" heuristic accents whatever the message happens to
+   * end on, not necessarily the failure itself (#2469 resolution rule 3).
+   * Both current callers pass `emphasis: "mislukt"`.
+   */
+  error?: { message: string; emphasis: string };
   /** Retries the failed batch; also the load-more handler. */
   onLoadMore: () => void;
 }
 
 /**
- * The tail of a paginated listing: a failed-batch message with a retry, the
+ * The tail of a paginated listing: a failed-batch notice with a retry, the
  * in-flight spinner, and the load-more button — exactly one of the three shows
  * at a time.
  *
  * One component rather than one per listing: `/nieuws` and `/galerij` are the
  * two listings on the shared 24 + 12 contract (#2569 / decision #2431), and a
  * hand-copied second footer is how that contract grows a second look.
+ *
+ * The failed-batch notice renders through `<EmptyState tier="slot"
+ * reason="unavailable">` (#2815) — the "Tier 2 + action" register #2470's
+ * copy table asked for from the start, which the primitive didn't carry
+ * until #2815 gave the notice member an optional `action`. `onLoadMore`
+ * doubles as the retry handler, the same wiring the bespoke button used.
  */
 export function LoadMoreFooter({
   label,
@@ -29,26 +52,24 @@ export function LoadMoreFooter({
   onLoadMore,
 }: LoadMoreFooterProps) {
   if (error) {
-    // #2470's copy table calls this "Tier 2 + action", but the register it
-    // specifies doesn't exist yet: `<EmptyState tier="slot">`'s
-    // failure-notice member has no action prop at all, and `<ErrorState>` is
-    // a `min-h-[70vh]` full-page composition, not an in-flow footer. Staying
-    // bespoke here is a deliberate stopgap, not a style choice — see #2816.
-    // The retry is a substitution, not an addition: the load-more button it
-    // replaces is unreachable behind the if-chain below (#2470 resolution
-    // rule 4). `text-alert` is the palette's error token; `<Button
-    // variant="ghost" size="sm">` is the same in-surface action
-    // `<EmptyState reason="filtered">`'s own undo renders — reaching for the
-    // primitive already imported below rather than a hand-rolled underlined
-    // link gets the 24px WCAG 2.5.8 tap target for free. "Probeer opnieuw" —
-    // the locked phrasing (#2433 rule 9's 4-to-2 collapse).
     return (
-      <div className="py-4 text-center">
-        <p className="text-alert mb-2">{error}</p>
-        <Button variant="ghost" size="sm" onClick={onLoadMore}>
-          Probeer opnieuw
-        </Button>
-      </div>
+      <EmptyState
+        tier="slot"
+        reason="unavailable"
+        live
+        emphasis={{ text: error.emphasis }}
+        action={{ label: "Probeer opnieuw", onClick: onLoadMore }}
+        // The footer's own vertical air (#2815 review finding 2) — the two
+        // surviving branches below keep `py-8` / `pt-2 pb-4` of their own,
+        // and the bespoke markup this replaced had `py-4`. `<EmptyState>`'s
+        // own `px-6 py-8` sits INSIDE its dashed frame, so without this the
+        // frame's top edge sits flush against whatever renders above it
+        // (e.g. `TapedCardGrid`'s bare, margin-less root on `/nieuws` and
+        // `/galerij`).
+        className="my-8"
+      >
+        {error.message}
+      </EmptyState>
     );
   }
 
