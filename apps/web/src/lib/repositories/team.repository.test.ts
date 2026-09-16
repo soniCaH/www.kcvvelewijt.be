@@ -15,6 +15,7 @@ vi.mock("../sanity/client", () => ({
 
 import { sanityClient } from "../sanity/client";
 import {
+  TEAM_BY_SLUG_QUERY,
   TeamRepository,
   TeamRepositoryLive,
   type TeamNavVM,
@@ -105,6 +106,12 @@ describe("TeamRepository", () => {
   });
 
   describe("findBySlug", () => {
+    // PSD retires a team by archiving it; its old URL must go not-found
+    // rather than serve last season's squad (#3000).
+    it("excludes archived teams in the query", () => {
+      expect(TEAM_BY_SLUG_QUERY).toContain("archived != true");
+    });
+
     // The staff photo projection's CDN params (amendment #2485) are
     // asserted in image-cdn-params.test.ts, derived from PLAYERS_QUERY's
     // own width rather than restated as a literal here.
