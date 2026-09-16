@@ -166,6 +166,7 @@ interface InternalLinkReference {
   _type: string;
   slug?: string;
   psdId?: string;
+  archived?: boolean | null;
 }
 
 interface InternalLinkValue {
@@ -774,7 +775,12 @@ export function buildComponents({
         children: ReactNode;
         value?: InternalLinkValue;
       }) => {
-        const href = resolveInternalLinkHref(value?.reference);
+        // A team PSD retired has no page any more (#3000): keep the words,
+        // drop the link. Archived players keep theirs — /spelers still
+        // serves them.
+        const ref = value?.reference;
+        if (ref?._type === "team" && ref.archived === true) return children;
+        const href = resolveInternalLinkHref(ref);
         return (
           <Link href={href} data-article-link="internal" className="prose-link">
             {children}

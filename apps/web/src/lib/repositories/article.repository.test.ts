@@ -135,6 +135,7 @@ function makeArticleDetailRow(
         imageUrl: "https://cdn.sanity.io/team.webp",
         slug: "eerste-ploeg",
         tagline: null,
+        archived: null,
       },
     ],
     mentionedStaffMembers: [
@@ -625,6 +626,7 @@ describe("ArticleRepository", () => {
       expect(result!.mentionedTeams).toHaveLength(1);
       expect(result!.mentionedTeams![0]).toEqual({
         _id: "team-1",
+        archived: null,
         name: "Eerste ploeg",
         imageUrl: "https://cdn.sanity.io/team.webp",
         slug: "eerste-ploeg",

@@ -105,8 +105,9 @@ export function mapMentionedTeams(
   teams?: ArticleDetailVM["mentionedTeams"],
 ): RelatedTeamItem[] {
   const valid = (teams ?? []).filter((t): t is MentionedTeam => t != null);
+  // An archived team (retired in PSD) has no page any more (#3000).
   return deduplicateById(valid)
-    .filter((t) => t.name != null && t.slug != null)
+    .filter((t) => t.name != null && t.slug != null && t.archived !== true)
     .map((t) => ({
       type: "team" as const,
       source: "reference" as const,
@@ -183,8 +184,10 @@ function mapCuratedEntry(
         psdId: entry.psdId,
       } satisfies RelatedPlayerItem;
     case "team":
-      // Team without name or slug has no card label or route — skip.
-      if (entry.name == null || entry.slug == null) return null;
+      // Team without name or slug has no card label or route — skip. An
+      // archived team (retired in PSD) has no page any more either (#3000).
+      if (entry.name == null || entry.slug == null || entry.archived === true)
+        return null;
       return {
         type: "team",
         source: "editorial",
