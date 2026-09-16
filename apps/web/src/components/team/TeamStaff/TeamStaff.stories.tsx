@@ -12,21 +12,21 @@ const withPhotos: TeamStaffMemberData[] = [
     id: "1",
     firstName: "Karel",
     lastName: "Vermeulen",
-    functionTitle: "T1",
+    functionTitle: "Hoofdtrainer",
     imageUrl: PHOTOS.a,
   },
   {
     id: "2",
     firstName: "Dirk",
     lastName: "Janssens",
-    functionTitle: "T2",
+    functionTitle: "Assistent-trainer",
     imageUrl: PHOTOS.b,
   },
   {
     id: "3",
     firstName: "Peter",
     lastName: "Keepers",
-    functionTitle: "TK",
+    functionTitle: "Keeperstrainer",
   },
   {
     id: "4",
@@ -37,13 +37,18 @@ const withPhotos: TeamStaffMemberData[] = [
 ];
 
 const illustrationsOnly: TeamStaffMemberData[] = [
-  { id: "10", firstName: "Tom", lastName: "Mertens", functionTitle: "T1" },
+  {
+    id: "10",
+    firstName: "Tom",
+    lastName: "Mertens",
+    functionTitle: "Hoofdtrainer",
+  },
   { id: "11", firstName: "Greet", lastName: "Wouters", role: "afgevaardigde" },
   {
     id: "12",
     firstName: "Sven",
     lastName: "Coördinator",
-    functionTitle: "TVJO",
+    functionTitle: "Jeugdcoördinator",
   },
 ];
 
@@ -108,7 +113,7 @@ export const PartiallyLabelled: Story = {
         id: "2",
         firstName: "Piet",
         lastName: "Coördinator",
-        functionTitle: "TVJO",
+        functionTitle: "Jeugdcoördinator",
       },
       { id: "3", firstName: "Sofie", lastName: "Helper" },
       { id: "4", firstName: "Bram", lastName: "Helper" },

@@ -6,7 +6,7 @@ export interface TeamStaffMemberData {
   id: string;
   firstName: string;
   lastName: string;
-  /** PSD functionTitle code or free-text (e.g. "T1", "Hoofdtrainer"). */
+  /** PSD functionTitle, shown verbatim (e.g. "T1 - A-team", "TVJO", "Keeperstrainer"). */
   functionTitle?: string | null;
   /** Editorial role bucket fallback ("trainer" / "afgevaardigde"). */
   role?: string | null;
@@ -42,14 +42,6 @@ export interface TeamStaffProps {
   unlabelledNotice?: boolean;
 }
 
-// PSD function codes → readable Dutch labels. Mirrors the organigram role codes.
-const FUNCTION_CODE_LABELS: Record<string, string> = {
-  T1: "Hoofdtrainer",
-  T2: "Assistent-trainer",
-  TK: "Keeperstrainer",
-  TVJO: "Jeugdcoördinator",
-};
-
 // Editorial role bucket → capitalised label (fallback when functionTitle null).
 const ROLE_BUCKET_LABELS: Record<string, string> = {
   trainer: "Trainer",
@@ -58,25 +50,24 @@ const ROLE_BUCKET_LABELS: Record<string, string> = {
 
 /**
  * Resolve a staff member's display function:
- *   1. functionTitle is a known code → mapped label
- *   2. functionTitle is already-readable free text → pass through
- *   3. functionTitle null, role is a known bucket → bucket label (Trainer / …)
- *   4. functionTitle null, role is free text → pass the role through verbatim
+ *   1. functionTitle present → pass through verbatim. PSD is the writer and
+ *      its codes (`T1`, `TVJO`, …) are the club's official titles, so the
+ *      site does not translate them (#2495).
+ *   2. functionTitle null, role is a known bucket → bucket label (Trainer / …)
+ *   3. functionTitle null, role is free text → pass the role through verbatim
  *      (board titles "Voorzitter" / "Secretaris" / … live in `role`; their
  *      `functionTitle` is PSD-empty, so without this they'd fall to null)
- *   5. nothing usable → null (#2638) — the card omits the function line
+ *   4. nothing usable → null (#2638) — the card omits the function line
  *      entirely rather than shipping a last-resort "Staf" that classifies
- *      nobody. Steps 1–4 are unchanged: `role` is empty club-wide today
- *      but is the board's path elsewhere.
+ *      nobody. `role` is empty club-wide today but is the board's path
+ *      elsewhere.
  */
 export function resolveFunctionLabel(
   functionTitle: string | null | undefined,
   role: string | null | undefined,
 ): string | null {
   const ft = functionTitle?.trim();
-  if (ft) {
-    return FUNCTION_CODE_LABELS[ft.toUpperCase()] ?? ft;
-  }
+  if (ft) return ft;
   const roleText = role?.trim();
   if (roleText) {
     return ROLE_BUCKET_LABELS[roleText.toLowerCase()] ?? roleText;
