@@ -75,17 +75,15 @@ const DECLARED_ERROR_SCHEMAS: ReadonlyMap<
  * exactly the silent-permanent-degrade #2924 exists to fix (review finding
  * 2) — a wrong-version body is not "this BFF's own error shape" in any
  * sense that matters here.
+ *
+ * `S.parseJson(schema)` composes the JSON parse into the schema decode
+ * itself — malformed JSON is just another decode failure that schema
+ * reports, not a separate step this function has to `try`/`catch` around.
  */
 function decodesAsDeclaredError(status: number, text: string): boolean {
   const schema = DECLARED_ERROR_SCHEMAS.get(status);
   if (!schema) return false;
-  let json: unknown;
-  try {
-    json = JSON.parse(text);
-  } catch {
-    return false;
-  }
-  return Either.isRight(S.decodeUnknownEither(schema)(json));
+  return Either.isRight(S.decodeUnknownEither(S.parseJson(schema))(text));
 }
 
 /**
