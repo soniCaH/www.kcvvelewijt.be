@@ -80,19 +80,31 @@ async function stickyBarBottomFromLocator(bar: Locator, label: string) {
  * *animation*, not a jump — measured at 4.0s/4.7s/5.4s under ×20 CPU
  * throttling, against the 5s default budget of a subsequent
  * `expect(...).toHaveAttribute()` (#2988). `scrollend` is the browser's own
- * completion signal; a 15s fallback covers the case where the element is
- * already in place (no scroll starts, so `scrollend` never fires).
+ * completion signal.
+ *
+ * `scrollend` never fires when the element is already at the requested
+ * position — there is nothing to animate. Detected directly: if `scrollY`
+ * hasn't moved by the next frame, nothing started scrolling, so resolve
+ * immediately rather than stalling. The 5s `fallback` below only covers a
+ * genuinely stuck scroll (a real bug), and stays well under budget even
+ * called twice in one test: this test's own default timeout is
+ * Playwright's 30s, and under ×20 throttling `gotoBounded` can itself take
+ * up to 10s.
  */
 async function scrollIntoViewAndSettle(locator: Locator) {
   await locator.evaluate((el) => {
     return new Promise<void>((resolve) => {
+      const startY = window.scrollY;
       const done = () => {
         clearTimeout(fallback);
         resolve();
       };
-      const fallback = setTimeout(done, 15_000);
+      const fallback = setTimeout(done, 5_000);
       addEventListener("scrollend", done, { once: true });
       el.scrollIntoView({ block: "start" });
+      requestAnimationFrame(() => {
+        if (window.scrollY === startY) done();
+      });
     });
   });
 }

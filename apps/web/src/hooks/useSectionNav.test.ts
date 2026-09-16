@@ -59,6 +59,17 @@ function mockHeight(el: Element, height: number) {
   });
 }
 
+/** The reducer reads a section's `top` LIVE off the element, not off the
+ *  entry it was last delivered with (#2988 review) — so a test asserting
+ *  ordering between two intersecting sections must mock the element's own
+ *  `getBoundingClientRect`, not just the entry passed to `emit()`. */
+function mockTop(el: Element, top: number) {
+  Object.defineProperty(el, "getBoundingClientRect", {
+    configurable: true,
+    value: () => ({ top }) as DOMRect,
+  });
+}
+
 // `useSectionNav` is contracted to be mounted only from a component that
 // renders its `<nav>` unconditionally whenever mounted at all (the ≤1
 // section check lives one level up, in `<TeamSectionNav>` — see its own
@@ -155,20 +166,14 @@ describe("useSectionNav", () => {
   it("picks the entry with the smallest top when multiple sections intersect at once", () => {
     const a = appendSectionTarget("a");
     const b = appendSectionTarget("b");
+    mockTop(a, 50);
+    mockTop(b, 5);
 
     const rendered = renderHook(["a", "b"]);
     const spyObserverIndex = FakeIntersectionObserver.instances.length - 1;
     emit(spyObserverIndex, [
-      {
-        isIntersecting: true,
-        target: a,
-        boundingClientRect: { top: 50 } as DOMRectReadOnly,
-      },
-      {
-        isIntersecting: true,
-        target: b,
-        boundingClientRect: { top: 5 } as DOMRectReadOnly,
-      },
+      { isIntersecting: true, target: a },
+      { isIntersecting: true, target: b },
     ]);
 
     expect(rendered.result.activeId).toBe("b");
@@ -188,23 +193,6 @@ describe("useSectionNav", () => {
     ]);
 
     expect(rendered.result.activeId).toBeNull();
-  });
-
-  it("observes with only a membership threshold ([0]) — a section taller than the band can never cross a higher ratio (#2988)", () => {
-    appendSectionTarget("structuur");
-
-    renderHook(["structuur"]);
-    const spy = FakeIntersectionObserver.instances.at(-1)!;
-
-    // A section taller than the band this rootMargin leaves (e.g. #2988's
-    // measured 289px band against a 1803px-tall section, ratio capped at
-    // ≈0.16) can only ever cross threshold 0 — entering and leaving. A
-    // higher threshold (0.25, 0.6 pre-#2988) sits in the array unreachable
-    // for exactly the sections most likely to be "the one being read", so
-    // membership alone — which the reducer already turns into "topmost
-    // currently intersecting" via `boundingClientRect` — is both necessary
-    // and sufficient here.
-    expect(spy.options?.threshold).toEqual([0]);
   });
 
   describe("getStickyHeaderHeight", () => {
@@ -242,6 +230,34 @@ describe("useSectionNav", () => {
       expect(secondSpy).not.toBe(firstSpy);
       expect(secondSpy.options?.rootMargin).not.toBe(firstOptions?.rootMargin);
     });
+
+    // #2988 AC 2: "Holds after the bar's height changes (webfont swap),
+    // which rebuilds the observer." A rebuild starts from a brand-new,
+    // empty state map — this proves the REBUILT observer's own delivery is
+    // enough on its own to mark a section active, with no dependency on
+    // anything the torn-down observer had previously reported.
+    it("marks the section active from the rebuilt observer's own first delivery", () => {
+      const target = appendSectionTarget("structuur");
+
+      const rendered = renderHook(["structuur"]);
+      expect(rendered.result.activeId).toBeNull();
+
+      const navEl = FakeResizeObserver.instances[0]!.observed[0]!;
+      mockHeight(navEl, 60);
+      fireResize(0);
+
+      const rebuiltObserverIndex =
+        FakeIntersectionObserver.instances.length - 1;
+      emit(rebuiltObserverIndex, [
+        {
+          isIntersecting: true,
+          target,
+          boundingClientRect: { top: 10 } as DOMRectReadOnly,
+        },
+      ]);
+
+      expect(rendered.result.activeId).toBe("structuur");
+    });
   });
 
   describe("scroll-spy tracks full state across deliveries, not just the latest delta (#2582 review)", () => {
@@ -256,31 +272,24 @@ describe("useSectionNav", () => {
     it("does not let a stale, delta-only re-report of an earlier section override a later one that is still intersecting", () => {
       const a = appendSectionTarget("a");
       const b = appendSectionTarget("b");
+      // Fixed positions for this scenario's whole timeline — the reducer
+      // reads `top` live off the element (#2988 review), so what matters
+      // here is each element's own geometry, not what's in a given entry.
+      mockTop(a, -50);
+      mockTop(b, 100);
 
       const rendered = renderHook(["a", "b"]);
       const spyObserverIndex = FakeIntersectionObserver.instances.length - 1;
 
       // "b" (the later section) is read first — its own batch doesn't
       // mention "a" at all.
-      emit(spyObserverIndex, [
-        {
-          isIntersecting: true,
-          target: b,
-          boundingClientRect: { top: 100 } as DOMRectReadOnly,
-        },
-      ]);
+      emit(spyObserverIndex, [{ isIntersecting: true, target: b }]);
       expect(rendered.result.activeId).toBe("b");
 
       // "a" — already mostly scrolled past — briefly re-crosses a
       // threshold with its last sliver of overlap. This transient flip is
       // not itself wrong (it genuinely still overlaps at this instant).
-      emit(spyObserverIndex, [
-        {
-          isIntersecting: true,
-          target: a,
-          boundingClientRect: { top: -50 } as DOMRectReadOnly,
-        },
-      ]);
+      emit(spyObserverIndex, [{ isIntersecting: true, target: a }]);
       expect(rendered.result.activeId).toBe("a");
 
       // "a" finally exits. This batch mentions ONLY "a" — the previous,
@@ -288,13 +297,7 @@ describe("useSectionNav", () => {
       // returned, permanently stuck on "a" even though "b" was still known
       // to be intersecting. The fixed version recomputes from the full
       // state map and falls back to "b".
-      emit(spyObserverIndex, [
-        {
-          isIntersecting: false,
-          target: a,
-          boundingClientRect: { top: -50 } as DOMRectReadOnly,
-        },
-      ]);
+      emit(spyObserverIndex, [{ isIntersecting: false, target: a }]);
       expect(rendered.result.activeId).toBe("b");
     });
   });
