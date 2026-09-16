@@ -7,19 +7,24 @@ export interface LoadMoreFooterProps {
   label: string;
   hasMore: boolean;
   isLoading: boolean;
-  /** Message for a failed batch, e.g. `"Artikelen laden mislukt."`. Absent
-   *  → no error is showing. */
-  error?: string;
   /**
-   * The substring of `error` that `<EmptyState>` accents — an explicit
-   * caller-supplied word, not derived from `error` itself (#2815 review
-   * findings 4/5: a "last word" heuristic silently diverges the moment a
-   * caller's message doesn't end on the failure word — #2469 resolution
-   * rule 3 requires the accent land on the failure, not the subject, and a
-   * heuristic can't tell those apart). Both current callers pass
-   * `"mislukt"`.
+   * A failed batch: the message plus the substring of it that
+   * `<EmptyState>` accents. Absent → no error is showing. Paired into one
+   * object, not two separate optional props, on purpose (#2815 review
+   * follow-up): `emphasis` is meaningless without `message` and `message`
+   * degrades badly without `emphasis` — an omitted `errorEmphasis` used to
+   * fall back to `{ text: "" }`, which `<EmptyState>`'s notice member
+   * (`emphasis` is *required* there) accepts without complaint, silently
+   * dropping the accent and misdirecting the dev-only "not found" warning
+   * at a missing substring instead of a forgotten prop. Same shape as the
+   * `reason` admission rule this file documents: a value exists to make a
+   * companion field compiler-required, not to be a label for copy. The
+   * accent must never be derived from `message` (#2815 review findings
+   * 4/5) — a "last word" heuristic accents whatever the message happens to
+   * end on, not necessarily the failure itself (#2469 resolution rule 3).
+   * Both current callers pass `emphasis: "mislukt"`.
    */
-  errorEmphasis?: string;
+  error?: { message: string; emphasis: string };
   /** Retries the failed batch; also the load-more handler. */
   onLoadMore: () => void;
 }
@@ -44,7 +49,6 @@ export function LoadMoreFooter({
   hasMore,
   isLoading,
   error,
-  errorEmphasis,
   onLoadMore,
 }: LoadMoreFooterProps) {
   if (error) {
@@ -53,7 +57,7 @@ export function LoadMoreFooter({
         tier="slot"
         reason="unavailable"
         live
-        emphasis={{ text: errorEmphasis ?? "" }}
+        emphasis={{ text: error.emphasis }}
         action={{ label: "Probeer opnieuw", onClick: onLoadMore }}
         // The footer's own vertical air (#2815 review finding 2) — the two
         // surviving branches below keep `py-8` / `pt-2 pb-4` of their own,
@@ -64,7 +68,7 @@ export function LoadMoreFooter({
         // `/galerij`).
         className="my-8"
       >
-        {error}
+        {error.message}
       </EmptyState>
     );
   }

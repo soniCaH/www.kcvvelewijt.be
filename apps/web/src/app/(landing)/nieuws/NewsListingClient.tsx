@@ -366,8 +366,9 @@ export function NewsListingClient({
           label="Meer nieuws laden"
           hasMore={hasMore}
           isLoading={isLoading}
-          error={error?.message}
-          errorEmphasis="mislukt"
+          error={
+            error ? { message: error.message, emphasis: "mislukt" } : undefined
+          }
           onLoadMore={error ? error.retry : loadMore}
         />
       </PageContainer>

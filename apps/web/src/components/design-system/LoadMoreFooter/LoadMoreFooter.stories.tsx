@@ -39,14 +39,13 @@ export const Loading: Story = {
  * also show, so there is only ever one thing to click.
  */
 export const Error: Story = {
-  args: { error: "Artikelen laden mislukt.", errorEmphasis: "mislukt" },
+  args: { error: { message: "Artikelen laden mislukt.", emphasis: "mislukt" } },
 };
 
 /** An error outranks an in-flight state, so a retry is always reachable. */
 export const ErrorWhileLoading: Story = {
   args: {
-    error: "Artikelen laden mislukt.",
-    errorEmphasis: "mislukt",
+    error: { message: "Artikelen laden mislukt.", emphasis: "mislukt" },
     isLoading: true,
   },
 };
