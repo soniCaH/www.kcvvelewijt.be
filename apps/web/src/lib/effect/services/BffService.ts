@@ -14,6 +14,7 @@ import {
   type PlayerSeasonStats,
   type RelatedItem,
 } from "@kcvv/api-contract";
+import { guardDeclaredErrorBody } from "@/lib/effect/guard-declared-error-body";
 
 export type BffError =
   | HttpClientError.HttpClientError
@@ -85,7 +86,14 @@ export const BffServiceLive = Layer.effect(
       throw new Error(
         "KCVV_API_URL is not set — add it to .env.local before starting the app",
       );
-    const client = yield* HttpApiClient.make(PsdApi, { baseUrl: bffUrl });
+    const client = yield* HttpApiClient.make(PsdApi, {
+      baseUrl: bffUrl,
+      // #2924: a declared-error-status response whose body isn't this BFF's
+      // own error shape (a stale/misconfigured worker) must classify as
+      // transient, not decode-fail into a permanent ParseError. See
+      // guard-declared-error-body.ts for the full reasoning.
+      transformClient: guardDeclaredErrorBody,
+    });
     return {
       getMatches: (teamId: number) =>
         client.matches
