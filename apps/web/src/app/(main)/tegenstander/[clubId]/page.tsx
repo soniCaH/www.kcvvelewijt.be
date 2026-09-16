@@ -1,9 +1,12 @@
 /**
  * Opponent History Page — /tegenstander/[clubId]
  *
- * Shows all historical KCVV senior-team matches against a specific opponent
- * club, with a W/D/L summary and a season-grouped match list on the
- * retro-terrace system (#2141).
+ * Shows one self-contained section per flagship senior squad (A, then B)
+ * against a specific opponent club — its own W/D/L summary and its own
+ * season-grouped match list, on the retro-terrace system (#2141). Never one
+ * blended record: #2463 removed the page's `reduce` across squads, which had
+ * been folding Reserven's matches into the A-team's tally under a wrong
+ * "A-Ploeg" caption.
  *
  * Not in navigation. Noindex — personal statistics/preview tool.
  *
@@ -17,24 +20,29 @@ import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
-import type { Match, OpponentHistory } from "@kcvv/api-contract";
+import type { Match } from "@kcvv/api-contract";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import {
   Crest,
   EditorialHeading,
-  EmptyState,
   PageContainer,
   StripedSeam,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection";
 import { transformMatchToSchedule } from "@/components/match";
+import { selectSeniorTeams } from "@/components/home";
 import { getResultColor } from "@/lib/utils/match-display";
-import { pendingEmptyBody } from "@/lib/utils/empty-state-copy";
 import { groupBySeason } from "@/lib/utils/season";
 import { OpponentSummaryCard } from "./OpponentSummaryCard";
+import {
+  buildOpponentPageData,
+  matchCountLabel,
+  type OpponentPageData,
+  type SquadOpponentSection,
+} from "./opponent-data";
 
 /** Not-found metadata for an unparseable or unknown `clubId`. `robots` is
  *  still carried here — a 404'd opponent page must never become indexable
@@ -188,7 +196,8 @@ function SeasonBand({ label, tally }: { label: string; tally: string }) {
 }
 
 /**
- * Retrieve the opponent's head-to-head history against KCVV's senior teams.
+ * Retrieve each flagship senior squad's own head-to-head history against
+ * this opponent — one BFF read per squad, never summed together (#2463).
  *
  * Wrapped in React `cache()` so `generateMetadata` and the page component
  * share one read: they run in the same render pass with the same `clubId`,
@@ -198,110 +207,155 @@ function SeasonBand({ label, tally }: { label: string; tally: string }) {
  * `fetchMatchOrNotFound` (#2441). Per-render only — no TTL, see
  * `BffServiceLive` (#2389). Getting this wrong doubles the live PSD hops on
  * a read path that already 429s, on every cold render.
+ *
+ * Squad selection reuses `selectSeniorTeams` (the same helper the homepage
+ * first-team block and `/scheurkalender` already share) instead of a local
+ * `age === "A"` test — that local test is what let Reserven (whose Sanity
+ * `age` is also `"A"`) leak onto this page once #2414 flipped its
+ * `showInNavigation` on. All the aggregation logic itself lives in the pure,
+ * unit-tested `buildOpponentPageData` (`./opponent-data.ts`); this function
+ * stays thin Effect plumbing — fan out, catch, hand the raw reads over.
  */
 const fetchOpponentData = cache(async function fetchOpponentData(
   clubId: number,
-): Promise<{
-  opponentName: string;
-  opponentLogo?: string;
-  summary: OpponentHistory["summary"];
-  matches: Match[];
-} | null> {
+): Promise<OpponentPageData | null> {
   return await runPromise(
     Effect.gen(function* () {
       const teamRepo = yield* TeamRepository;
       const bff = yield* BffService;
 
       const allTeams = yield* teamRepo.findAll();
-      const seniorTeams = allTeams.filter(
-        (t) => t.age === "A" && t.psdId != null,
-      );
+      const seniorTeams = selectSeniorTeams(allTeams);
 
       if (seniorTeams.length === 0) return null;
 
-      // Fetch opponent history for each senior team; swallow 404s, propagate other errors
+      // Fetch opponent history for each senior squad; swallow 404s, propagate other errors
       //
       // Deliberately narrow (#2782), not converged onto `degradeIfPermanent`'s
       // three-tag split — and this is the site where widening is riskiest of
-      // all five. The catch is per team inside this bounded-concurrency
-      // fan-out (`concurrency: 3`): a genuinely unknown team/opponent pairing
-      // (`HttpNotFound`) already degrades to the `{ _tag: "failed", history:
-      // null }` sentinel below, and the page only calls `notFound()` once
-      // every senior team has failed — `successful.length === 0` further
-      // down. Widening this per-team catch would fold `ParseError`/
-      // `HttpApiDecodeError` into that same sentinel: one team's contract-
-      // decode failure would silently drop out of the summed wins/draws/
-      // losses/goalsFor/goalsAgainst totals below, alongside teams that
-      // legitimately never played this opponent — a quietly *wrong* aggregate
-      // presented as a complete one, with no signal anything failed. At this
-      // route's 15-minute ISR window (`revalidate` above), that wrong number
-      // is what every visitor sees for the whole window, not just the one
-      // request that hit the decode failure.
+      // all five. The catch is per squad inside this bounded-concurrency
+      // fan-out (`concurrency: 3`): a genuinely unknown squad/opponent
+      // pairing (`HttpNotFound`) already degrades to `history: null` below,
+      // and the page only calls `notFound()` once every squad has failed —
+      // `buildOpponentPageData` returning `null` further down. Widening this
+      // per-squad catch would fold `ParseError`/`HttpApiDecodeError` into
+      // that same sentinel: one squad's contract-decode failure would
+      // silently read as "never played this opponent" instead of a failure —
+      // no signal anything went wrong. At this route's 15-minute ISR window
+      // (`revalidate` above), that wrong read is what every visitor sees for
+      // the whole window, not just the one request that hit the decode
+      // failure.
       //
       // The ISR fallback this narrow catch protects — a rejected fan-out
       // throws, and a *cached* route keeps serving its last-good render
-      // instead of the wrong aggregate — only exists once this route has
+      // instead of the wrong read — only exists once this route has
       // successfully rendered at least once. On a cold render (first hit,
       // or right after a redeploy) there is no last-good page yet, so the
       // same throw sends the visitor straight to the error boundary instead.
       // Staying narrow is the better of two imperfect outcomes, not a
       // guarantee that throwing is free.
       const results = yield* Effect.all(
-        seniorTeams.map((team) =>
-          bff.getOpponentHistory(parseInt(team.psdId!, 10), clubId).pipe(
-            Effect.map((h) => ({ _tag: "ok" as const, history: h })),
+        seniorTeams.map((team) => {
+          // selectSeniorTeams only admits teams carrying a psdId.
+          // team.displayName is already the canonical display name
+          // (teamDisplayName, resolved by TeamRepository's toTeamNavVM) —
+          // taken as-is, never re-derived.
+          const psdId = team.psdId!;
+          const squadTeam = { psdId, squadLabel: team.displayName };
+          return bff.getOpponentHistory(parseInt(psdId, 10), clubId).pipe(
+            Effect.map((history) => ({ team: squadTeam, history })),
             Effect.catchTag("HttpNotFound", () =>
-              Effect.succeed({ _tag: "failed" as const, history: null }),
+              Effect.succeed({ team: squadTeam, history: null }),
             ),
-          ),
-        ),
+          );
+        }),
         { concurrency: 3 },
       );
 
-      const successful = results
-        .filter((r) => r._tag === "ok" && r.history != null)
-        .map((r) => r.history!);
-
-      if (successful.length === 0) return null;
-
-      // Aggregate matches from all teams (flatten)
-      const allMatches = successful.flatMap((h) => h.matches);
-
-      // Use BFF-computed summaries directly — avoids re-deriving is_home on the client
-      const wins = successful.reduce((sum, h) => sum + h.summary.wins, 0);
-      const draws = successful.reduce((sum, h) => sum + h.summary.draws, 0);
-      const losses = successful.reduce((sum, h) => sum + h.summary.losses, 0);
-      const goalsFor = successful.reduce(
-        (sum, h) => sum + h.summary.goalsFor,
-        0,
-      );
-      const goalsAgainst = successful.reduce(
-        (sum, h) => sum + h.summary.goalsAgainst,
-        0,
-      );
-
-      // Sort all matches descending by date (scheduled future matches surface first)
-      const sortedMatches = [...allMatches].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      );
-
-      // Derive opponent metadata from the most recent match (newest logo/name)
-      const newestMatch = sortedMatches[0];
-      const opponentTeam = newestMatch
-        ? newestMatch.home_team.id === clubId
-          ? newestMatch.home_team
-          : newestMatch.away_team
-        : null;
-      const fallback = successful[0]!;
-      return {
-        opponentName: opponentTeam?.name ?? fallback.opponent.name,
-        opponentLogo: opponentTeam?.logo ?? fallback.opponent.logo,
-        summary: { wins, draws, losses, goalsFor, goalsAgainst },
-        matches: sortedMatches,
-      };
+      return buildOpponentPageData(clubId, results);
     }),
   );
 });
+
+/**
+ * One flagship senior squad's self-contained section — its own `h2` heading
+ * (the canonical display name), its own unreduced `<OpponentSummaryCard>`,
+ * its own `"N wedstrijden"` count and its own season-grouped match list.
+ * Rendered once per entry in `OpponentPageData["sections"]` — A first, then
+ * B, the order `selectSeniorTeams` already guarantees (#2463).
+ *
+ * A squad section is only ever built from a non-empty `matches` array
+ * (`buildOpponentPageData` drops any squad with none), so `groupBySeason`
+ * below always yields at least one group — there is no "no matches yet"
+ * branch to render inside a section, unlike the route-level `notFound()`
+ * case above it, which still covers "no squad has any history at all".
+ *
+ * The wrapping `<section>` is this squad's only landmark — labelled with its
+ * own `squadLabel`, so two squads on one page never share an accessible
+ * name. Each season group below is a plain `<div>`, not a nested landmark:
+ * the previous single-section page gave every season group its own
+ * `<section aria-label={seasonLabel}>`, which would collide once the same
+ * season appears under both squads.
+ */
+function SquadHistorySection({
+  section,
+  className,
+}: {
+  section: SquadOpponentSection;
+  className?: string;
+}) {
+  const seasons = groupBySeason(section.matches, (m) => m.date);
+  const countLabel = matchCountLabel(section.matches.length);
+
+  return (
+    <section aria-label={section.squadLabel} className={className}>
+      <EditorialHeading level={2} size="display-sm" className="mb-4">
+        {section.squadLabel}
+      </EditorialHeading>
+
+      <OpponentSummaryCard summary={section.summary} />
+
+      <div className="mt-8 mb-5">
+        <StripedSeam height="sm" />
+      </div>
+
+      {/* level=3, not 2: the squad heading directly above already opens
+          this section (#2463) — a second consecutive h2 would be a
+          collision, not a new section (the same #2562 rule the former
+          page-wide empty state honoured). */}
+      <EditorialHeading
+        level={3}
+        size="display-sm"
+        emphasis={{ text: ".", tone: "warm" }}
+        className="mb-4"
+      >
+        {countLabel}
+      </EditorialHeading>
+
+      {seasons.map((group) => (
+        <div key={group.season.key} className="mt-5 first:mt-0">
+          <SeasonBand
+            label={group.season.label}
+            tally={seasonTally(group.items)}
+          />
+          <div className="flex flex-col gap-2.5">
+            {group.items.map((match) => (
+              // No captionLabel: every row in this section already belongs
+              // to `section.squadLabel` — repeating it per row would print
+              // the BFF's "A-Ploeg" beside this squad's own "A-ploeg", two
+              // casings of one name on one page (#2463).
+              <TeamAgendaRow
+                key={match.id}
+                match={transformMatchToSchedule(match)}
+                upcomingLabel="Gepland"
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
 
 export default async function OpponentPage({ params }: OpponentPageProps) {
   const { clubId: clubIdStr } = await params;
@@ -312,12 +366,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
   const data = await fetchOpponentData(clubId);
   if (!data) notFound();
 
-  const { opponentName, opponentLogo, summary, matches } = data;
-  const seasons = groupBySeason(matches, (m) => m.date);
-  const matchCountLabel = `${matches.length} ${
-    matches.length === 1 ? "wedstrijd" : "wedstrijden"
-  }`;
-
+  const { opponentName, opponentLogo, sections } = data;
   const pageUrl = `${SITE_CONFIG.siteUrl}/tegenstander/${clubId}`;
 
   return (
@@ -348,56 +397,13 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
           upLink={{ href: "/kalender", label: "Kalender" }}
         />
 
-        <OpponentSummaryCard summary={summary} className="mt-7" />
-
-        <div className="mt-8 mb-5">
-          <StripedSeam height="sm" />
-        </div>
-
-        <EditorialHeading
-          level={2}
-          size="display-sm"
-          emphasis={{ text: ".", tone: "warm" }}
-          className="mb-4"
-        >
-          {matchCountLabel}
-        </EditorialHeading>
-
-        {seasons.length === 0 ? (
-          // as="h3": the matchCountLabel h2 directly above already opens
-          // this section — a second consecutive h2 would be a collision,
-          // not a new section (#2562 review).
-          <EmptyState
-            tier="surface"
-            heading="Nog geen onderlinge duels gespeeld"
-            as="h3"
-          >
-            {pendingEmptyBody("KCVV tegen deze ploeg speelt", "de wedstrijd")}
-          </EmptyState>
-        ) : (
-          seasons.map((group) => (
-            <section
-              key={group.season.key}
-              aria-label={group.season.label}
-              className="mt-5 first:mt-0"
-            >
-              <SeasonBand
-                label={group.season.label}
-                tally={seasonTally(group.items)}
-              />
-              <div className="flex flex-col gap-2.5">
-                {group.items.map((match) => (
-                  <TeamAgendaRow
-                    key={match.id}
-                    match={transformMatchToSchedule(match)}
-                    captionLabel={match.kcvv_team_label}
-                    upcomingLabel="Gepland"
-                  />
-                ))}
-              </div>
-            </section>
-          ))
-        )}
+        {sections.map((section, index) => (
+          <SquadHistorySection
+            key={section.teamPsdId}
+            section={section}
+            className={index === 0 ? "mt-7" : "mt-12"}
+          />
+        ))}
       </PageContainer>
     </div>
   );
