@@ -8,7 +8,11 @@ import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient, PsdTeamClientError } from "./psd-team-client";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
-import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import {
+  KvCacheService,
+  KvError,
+  type KvCacheInterface,
+} from "../cache/kv-cache";
 import type {
   PsdClubStaffMember,
   PsdMember,
@@ -143,24 +147,57 @@ function makePsdTeamClientMock(
  * unchanged: every write `runSync` makes goes through `durable.setForever`
  * (all of its keys are TTL-less, see psd-sanity-sync.ts), which is just
  * `put` under the hood here, same as before this port existed.
+ *
+ * `get`/`set`/`setForever`/`delete` are wrapped in `Effect.tryPromise`
+ * (mapping a rejection to `KvError`), NOT `Effect.promise` — a stub typed
+ * `Effect<…, never>` could never express the failure path this port exists
+ * to make possible, and a test overriding `get`/`put`/`delete` to reject
+ * (see the error-path tests below) would surface as an uncaught defect
+ * instead of the `KvError` `runSync` actually has to handle (#2873 review).
+ * `set` forwards its `ttl` as `put`'s third argument (mirroring the real
+ * `makeDurableKv`'s `{ expirationTtl: ttl }`) so a `set`/`setForever` mix-up
+ * at a call site shows up as a 2-arg-vs-3-arg mismatch against this file's
+ * existing `toHaveBeenCalledWith("sync:team-cursor", "0")`-style
+ * assertions, rather than passing either way.
  */
 function makeKvStub() {
   const store = new Map<string, string>();
   const get = vi.fn((key: string) => Promise.resolve(store.get(key) ?? null));
-  const put = vi.fn((key: string, value: string) => {
-    store.set(key, value);
-    return Promise.resolve();
-  });
+  const put = vi.fn(
+    (key: string, value: string, _options?: { expirationTtl: number }) => {
+      store.set(key, value);
+      return Promise.resolve();
+    },
+  );
   const del = vi.fn((key: string) => {
     store.delete(key);
     return Promise.resolve();
   });
   const durable = {
-    get: (key: string) => Effect.promise(() => get(key)),
-    set: (key: string, value: string) => Effect.promise(() => put(key, value)),
+    get: (key: string) =>
+      Effect.tryPromise({
+        try: () => get(key),
+        catch: (cause) =>
+          new KvError(`KV get failed for "${key}": ${String(cause)}`, cause),
+      }),
+    set: (key: string, value: string, ttl: number) =>
+      Effect.tryPromise({
+        try: () => put(key, value, { expirationTtl: ttl }),
+        catch: (cause) =>
+          new KvError(`KV put failed for "${key}": ${String(cause)}`, cause),
+      }),
     setForever: (key: string, value: string) =>
-      Effect.promise(() => put(key, value)),
-    delete: (key: string) => Effect.promise(() => del(key)),
+      Effect.tryPromise({
+        try: () => put(key, value),
+        catch: (cause) =>
+          new KvError(`KV put failed for "${key}": ${String(cause)}`, cause),
+      }),
+    delete: (key: string) =>
+      Effect.tryPromise({
+        try: () => del(key),
+        catch: (cause) =>
+          new KvError(`KV delete failed for "${key}": ${String(cause)}`, cause),
+      }),
     list: () => Effect.succeed({ keys: [] as string[], complete: true }),
   };
   const cache: KvCacheInterface = {
@@ -1347,6 +1384,103 @@ describe("runSync", () => {
     // 900 should be archived — no protection
     expect(archiveStaff).toHaveBeenCalledOnce();
     expect(archiveStaff).toHaveBeenCalledWith(["900"]);
+  });
+
+  // ─── Durable KV error paths (#2873 review) ───────────────────────────────
+  // The `durable` port surfaces KvError instead of swallowing it — these
+  // pin that each call site in runSync still does what it always did with
+  // a KV failure: some propagate and fail the whole sync, some log and
+  // let the run complete. A test double that can never fail (Effect.promise)
+  // could not have caught a regression here.
+
+  describe("durable KV error paths (#2873 review)", () => {
+    it("fails the sync instead of silently treating a non-array accumulator value as empty — a stray `null` must not orphan every active player", async () => {
+      const kvStub = makeKvStub();
+      // Simulates a hand-written `wrangler kv key put` (or a future writer)
+      // leaving the accumulator holding valid-but-non-array JSON.
+      // `JSON.parse` succeeds, and `new Set<string>(null)` would silently
+      // yield an empty set rather than throwing — the Array.isArray guard
+      // is what turns this into a failure instead of a partial id set.
+      kvStub.store.set("sync:cycle-player-ids", "null");
+
+      const { archivePlayers, writerMock, readerMock } = makeSanityMocks();
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+      await expect(
+        Effect.runPromise(
+          runSync.pipe(
+            Effect.provide(
+              buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+            ),
+          ),
+        ),
+      ).rejects.toBeDefined();
+
+      // The sync failed before ever reaching reconciliation — archivePlayers
+      // must not have been given a chance to run against a partial id set.
+      expect(archivePlayers).not.toHaveBeenCalled();
+    });
+
+    it("fails the sync when an accumulator read itself fails (a genuine KV error, not just bad JSON)", async () => {
+      const kvStub = makeKvStub();
+      const originalGet = kvStub.get.getMockImplementation()!;
+      kvStub.get.mockImplementation((key: string) => {
+        if (key === "sync:cycle-player-ids") {
+          return Promise.reject(new Error("KV outage"));
+        }
+        return originalGet(key);
+      });
+
+      const { archivePlayers, writerMock, readerMock } = makeSanityMocks();
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+      await expect(
+        Effect.runPromise(
+          runSync.pipe(
+            Effect.provide(
+              buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+            ),
+          ),
+        ),
+      ).rejects.toBeDefined();
+
+      expect(archivePlayers).not.toHaveBeenCalled();
+    });
+
+    it("does not fail the sync when the rotation-cursor write fails — it logs and lets the next run re-read the stored value", async () => {
+      const kvStub = makeKvStub();
+      const originalPut = kvStub.put.getMockImplementation()!;
+      kvStub.put.mockImplementation(
+        (key: string, value: string, options?: { expirationTtl: number }) => {
+          if (key === "sync:team-cursor") {
+            return Promise.reject(new Error("KV outage"));
+          }
+          return originalPut(key, value, options);
+        },
+      );
+
+      const { upsertPlayer, upsertTeam, writerMock, readerMock } =
+        makeSanityMocks();
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+      await expect(
+        Effect.runPromise(
+          runSync.pipe(
+            Effect.provide(
+              buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+            ),
+          ),
+        ),
+      ).resolves.toBeUndefined();
+
+      // The rest of the sync still completed — the cursor write's failure
+      // was logged and swallowed, matching its pre-#2873 catchAll.
+      expect(upsertPlayer).toHaveBeenCalledOnce();
+      expect(upsertTeam).toHaveBeenCalledOnce();
+      // The write was attempted (and failed) — this is what proves the
+      // failure path was actually exercised, not skipped.
+      expect(kvStub.put).toHaveBeenCalledWith("sync:team-cursor", "0");
+    });
   });
 
   // ─── Team checkpoint / resume (#2900) ───────────────────────────────────

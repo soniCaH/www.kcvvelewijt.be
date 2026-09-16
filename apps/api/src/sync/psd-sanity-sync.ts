@@ -655,24 +655,41 @@ export const runSync = Effect.gen(function* () {
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
   // Reads a JSON-array accumulation key, parsing on top of the durable get —
-  // a KV error propagates as-is (no `.orElseSucceed`), a parse failure is
-  // wrapped in the SAME `KvError` type so both fail the sync the same way
-  // accumulation always has: an unreadable/corrupt accumulator must never
-  // be silently treated as "empty," or a genuine roster gets reconciled
-  // against a partial id set.
+  // a KV error propagates as-is (no `.orElseSucceed`), a parse failure or a
+  // successfully-parsed NON-ARRAY value both fail the same way, wrapped in
+  // the same `KvError` type, so accumulation fails the sync the same way it
+  // always has: an unreadable/corrupt accumulator must never be silently
+  // treated as "empty," or a genuine roster gets reconciled against a
+  // partial id set. The `Array.isArray` guard matters on its own —
+  // `new Set<string>(null)` (or any other non-array JSON value `JSON.parse`
+  // can return) silently yields an EMPTY set rather than throwing, which
+  // `JSON.parse` alone can't catch. Mirrors `readManifest`'s guard
+  // (`search/index-manifest.ts`) for exactly the same reason (#2831).
   const readAccumulatedIds = (key: string) =>
     cache.durable.get(key).pipe(
       Effect.flatMap((raw) =>
         raw === null
           ? Effect.succeed([] as string[])
           : Effect.try({
-              try: () => JSON.parse(raw) as string[],
+              try: () => JSON.parse(raw) as unknown,
               catch: (cause) =>
                 new KvError(
                   `KV read/parse failed for ${key}: ${String(cause)}`,
                   cause,
                 ),
-            }),
+            }).pipe(
+              Effect.flatMap((parsed) =>
+                Array.isArray(parsed)
+                  ? Effect.succeed(
+                      parsed.filter(
+                        (id): id is string => typeof id === "string",
+                      ),
+                    )
+                  : Effect.fail(
+                      new KvError(`KV value for ${key} is not a JSON array`),
+                    ),
+              ),
+            ),
       ),
     );
 
