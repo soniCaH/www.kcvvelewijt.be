@@ -1720,9 +1720,9 @@ describe("rule 11 catches what it claims to (#2578)", () => {
  * signals, bought here instead by narrowing *where* the rule looks
  * rather than *what* it matches.
  *
- * **`fields` is derived, not hand-typed (review round 1 finding 1).** A
- * hand-written field list checks nothing against the interface it claims
- * to hold accountable — adding `width`/`height` back to
+ * **`fields` is derived, not hand-typed.** A hand-written field list
+ * checks nothing against the interface it claims to hold accountable —
+ * adding `width`/`height` back to
  * `MatchesSliderPlaceholderVM["highlightImage"]` would leave a hand list
  * green forever, which is the exact silent-pass shape this whole rule
  * exists to close. `interfaceBody`/`fieldNamesOf`/`nestedFieldBody` below
@@ -1734,15 +1734,16 @@ describe("rule 11 catches what it claims to (#2578)", () => {
  * to update.
  *
  * **Consumers are narrowed to the one file that touches the VM type
- * itself (review round 1 finding 2).** `<FirstTeamsBlock>` never dots
- * into `MatchesSliderPlaceholderVM` or its `highlightImage` shape — it
- * receives the already-mapped `PlaceholderState`/`PlaceholderImage` from
- * `placeholder-rule.ts` and dots into *that* local, `<FirstTeamsBlock>`-
- * owned type instead. Including `FirstTeamsBlock.tsx` as a consumer let a
- * transitive copy count as a reader: deleting `lqip` from
- * `toPlaceholderImage` (`placeholder-rule.ts`) would leave
+ * itself, not every file that eventually renders it.** `<FirstTeamsBlock>`
+ * never dots into `MatchesSliderPlaceholderVM` or its `highlightImage`
+ * shape — it receives the already-mapped `PlaceholderState`/
+ * `PlaceholderImage` from `placeholder-rule.ts` and dots into *that*
+ * local, `<FirstTeamsBlock>`-owned type instead. Naming `FirstTeamsBlock.
+ * tsx` as a consumer would let a transitive copy count as a reader of the
+ * *original* VM: deleting `lqip` from `toPlaceholderImage`
+ * (`placeholder-rule.ts`) would leave
  * `MatchesSliderPlaceholderVM["highlightImage"].lqip` genuinely unread,
- * while `FirstTeamsBlock.tsx` still reads `image.lqip` off its own
+ * while `FirstTeamsBlock.tsx` would still read `image.lqip` off its own
  * `PlaceholderImage` copy — a false pass. Only `placeholder-rule.ts`
  * imports `MatchesSliderPlaceholderVM` and reads its fields directly, so
  * it is the only named consumer for both groups below.
@@ -1792,8 +1793,14 @@ interface VmFieldGroup {
 /** The `{ ... }` body of `export interface <name> { ... }` inside `source`,
  *  brace-matched so a nested inline object type (`highlightImage`'s own
  *  shape) doesn't end the extraction early. Throws loudly if `name` isn't
- *  declared as expected — the same "fail the file load, don't pass
- *  silently" contract rule 10's own `REPOSITORY_TAG` check uses. */
+ *  declared as expected, or if the interface's braces never balance before
+ *  `source` runs out — the same "fail the file load, don't pass silently"
+ *  contract rule 10's own `REPOSITORY_TAG` check uses, extended to cover
+ *  both ways this extraction can go wrong. Without the length bound, an
+ *  unterminated interface would run `i` past the end of `source` forever
+ *  (`source[i]` is `undefined` there, so neither brace branch ever fires
+ *  and `depth` never reaches 0) — hanging the test file instead of failing
+ *  it, which reads as an unexplained CI timeout rather than a red assertion. */
 function interfaceBody(source: string, name: string): string {
   const marker = `export interface ${name} {`;
   const markerIndex = source.indexOf(marker);
@@ -1806,6 +1813,11 @@ function interfaceBody(source: string, name: string): string {
   let depth = 1;
   let i = bodyStart;
   while (depth > 0) {
+    if (i >= source.length) {
+      throw new Error(
+        `${name}: unterminated interface — its opening "{" never finds a matching "}" before the file ends.`,
+      );
+    }
     if (source[i] === "{") depth++;
     else if (source[i] === "}") depth--;
     i++;
@@ -1923,7 +1935,7 @@ describe("rule 12 catches what it claims to (#2865)", () => {
     ]);
   });
 
-  it("both entries' fields are the inline shapes this rule expects, pinned against the declaration itself (review round 1 finding 5)", () => {
+  it("both entries' fields are the inline shapes this rule expects, pinned against the declaration itself", () => {
     expect(VM_FIELD_GROUPS[0]!.fields).toEqual([
       "nextSeasonKickoff",
       "announcementText",
@@ -1965,6 +1977,10 @@ describe("rule 12 catches what it claims to (#2865)", () => {
     expect(() => interfaceBody("export interface Bar {}", "Foo")).toThrow();
   });
 
+  it("throws instead of hanging on an unterminated interface", () => {
+    expect(() => interfaceBody("export interface Foo {", "Foo")).toThrow();
+  });
+
   it("throws when the named field isn't declared as an inline object", () => {
     expect(() => nestedFieldBody("flat?: string;", "flat")).toThrow();
   });
@@ -1993,7 +2009,7 @@ describe("rule 12 catches what it claims to (#2865)", () => {
     );
   });
 
-  it("reproduces #2505's own regression against the declaration, not the consumers' text (review round 1 finding 3): width/height are not declared fields of the highlightImage shape today", () => {
+  it("reproduces #2505's own regression against the declaration, not the consumers' text: width/height are not declared fields of the highlightImage shape today", () => {
     const highlightImageGroup = VM_FIELD_GROUPS.find(
       (g) => g.vmType === 'MatchesSliderPlaceholderVM["highlightImage"]',
     )!;
