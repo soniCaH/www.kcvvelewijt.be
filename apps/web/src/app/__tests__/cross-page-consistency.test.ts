@@ -1720,6 +1720,33 @@ describe("rule 11 catches what it claims to (#2578)", () => {
  * signals, bought here instead by narrowing *where* the rule looks
  * rather than *what* it matches.
  *
+ * **`fields` is derived, not hand-typed (review round 1 finding 1).** A
+ * hand-written field list checks nothing against the interface it claims
+ * to hold accountable — adding `width`/`height` back to
+ * `MatchesSliderPlaceholderVM["highlightImage"]` would leave a hand list
+ * green forever, which is the exact silent-pass shape this whole rule
+ * exists to close. `interfaceBody`/`fieldNamesOf`/`nestedFieldBody` below
+ * extract the two shapes' field names straight out of
+ * `lib/repositories/homepage.repository.ts` at collection time — the same
+ * "derive it, don't retype it" convention rule 10's `INTERFACE_METHOD`
+ * already uses one layer up. A field added to either interface shape is
+ * automatically a new `it.each` case; there is no separate list to forget
+ * to update.
+ *
+ * **Consumers are narrowed to the one file that touches the VM type
+ * itself (review round 1 finding 2).** `<FirstTeamsBlock>` never dots
+ * into `MatchesSliderPlaceholderVM` or its `highlightImage` shape — it
+ * receives the already-mapped `PlaceholderState`/`PlaceholderImage` from
+ * `placeholder-rule.ts` and dots into *that* local, `<FirstTeamsBlock>`-
+ * owned type instead. Including `FirstTeamsBlock.tsx` as a consumer let a
+ * transitive copy count as a reader: deleting `lqip` from
+ * `toPlaceholderImage` (`placeholder-rule.ts`) would leave
+ * `MatchesSliderPlaceholderVM["highlightImage"].lqip` genuinely unread,
+ * while `FirstTeamsBlock.tsx` still reads `image.lqip` off its own
+ * `PlaceholderImage` copy — a false pass. Only `placeholder-rule.ts`
+ * imports `MatchesSliderPlaceholderVM` and reads its fields directly, so
+ * it is the only named consumer for both groups below.
+ *
  * **What this covers, named explicitly, and nothing else:**
  * `MatchesSliderPlaceholderVM` and its nested `highlightImage` shape,
  * both declared in `lib/repositories/homepage.repository.ts` — the VM
@@ -1732,12 +1759,18 @@ describe("rule 11 catches what it claims to (#2578)", () => {
  *
  * **What this cannot see**, named so nobody reads it as more: a field
  * read via destructuring (`const { url } = image`) rather than dotting
- * off the value — no consumer named below does that today, but a future
- * one that did would read as unread. And a field read only inside a
- * Storybook story or a `.test.ts` file not named as a consumer would
- * also read as unread — deliberately: this rule's bar is "read by a
- * named production consumer," the field-level mirror of rule 10's "a
- * caller outside the repository's own test file."
+ * off the value — `placeholder-rule.ts` doesn't do that today, but a
+ * future consumer that did would read as unread. A field read only
+ * inside a Storybook story or a `.test.ts` file not named as a consumer
+ * would also read as unread — deliberately: this rule's bar is "read by
+ * a named production consumer," the field-level mirror of rule 10's "a
+ * caller outside the repository's own test file." And, one layer up from
+ * the transitive-copy fix above: a *second* file that started reading
+ * `MatchesSliderPlaceholderVM` directly (not through
+ * `placeholder-rule.ts`'s copy) would need adding to `consumers` by
+ * hand — this rule has no way to discover a new direct consumer on its
+ * own, the same bound rule 10's hand-picked `callerCandidates` boundary
+ * already accepts.
  */
 interface VmFieldGroup {
   /** Name used in test output only — the interface, or the inline type of
@@ -1746,38 +1779,90 @@ interface VmFieldGroup {
   /** The repository file that declares `vmType` — documentation only; not
    *  itself scanned as a consumer, mirroring rule 10's own boundary. */
   declaredIn: string;
-  /** Every field this rule holds accountable for `vmType`, in source order. */
+  /** Every field this rule holds accountable for `vmType`, in source
+   *  order — derived from `declaredIn`'s own source, never hand-typed. */
   fields: readonly string[];
-  /** The exact files known to render/consume `vmType` — hand-picked, not a
-   *  sweep of `scannableSources`, because field names alone (`alt`, `url`)
-   *  are common enough that a wider search would return false positives
-   *  unrelated to this VM (see the docblock above). */
+  /** The exact files known to read `vmType`'s fields directly — hand-
+   *  picked, not a sweep of `scannableSources`, because field names alone
+   *  (`alt`, `url`) are common enough that a wider search would return
+   *  false positives unrelated to this VM (see the docblock above). */
   consumers: readonly string[];
 }
+
+/** The `{ ... }` body of `export interface <name> { ... }` inside `source`,
+ *  brace-matched so a nested inline object type (`highlightImage`'s own
+ *  shape) doesn't end the extraction early. Throws loudly if `name` isn't
+ *  declared as expected — the same "fail the file load, don't pass
+ *  silently" contract rule 10's own `REPOSITORY_TAG` check uses. */
+function interfaceBody(source: string, name: string): string {
+  const marker = `export interface ${name} {`;
+  const markerIndex = source.indexOf(marker);
+  if (markerIndex === -1) {
+    throw new Error(
+      `${name}: expected "export interface ${name} { ... }" — the shape this rule holds accountable.`,
+    );
+  }
+  const bodyStart = markerIndex + marker.length;
+  let depth = 1;
+  let i = bodyStart;
+  while (depth > 0) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") depth--;
+    i++;
+  }
+  return source.slice(bodyStart, i - 1);
+}
+
+/** Every field name declared directly inside an interface `body` — a
+ *  single-level inline object type value (e.g. `highlightImage?: { ... }`)
+ *  is stripped first, so its own fields aren't picked up as top-level
+ *  fields of the outer interface. */
+function fieldNamesOf(body: string): string[] {
+  const topLevelOnly = body.replace(/\{[^{}]*\}/g, "");
+  return [...topLevelOnly.matchAll(/^\s*(\w+)\??:/gm)].map((m) => m[1]!);
+}
+
+/** The inline object-type body of one field inside an interface `body`
+ *  (e.g. `highlightImage`'s own `{ alt: string; url: string; ... }`).
+ *  Throws loudly if `field` isn't declared as an inline object — the same
+ *  contract `interfaceBody` uses. */
+function nestedFieldBody(body: string, field: string): string {
+  const match = new RegExp(`\\b${field}\\??:\\s*\\{([^{}]*)\\}`).exec(body);
+  if (!match) {
+    throw new Error(
+      `${field}: expected an inline object type ("${field}?: { ... }") — the shape this rule holds accountable.`,
+    );
+  }
+  return match[1]!;
+}
+
+const HOMEPAGE_REPOSITORY_FILE = "lib/repositories/homepage.repository.ts";
+const homepageRepositorySource = code.get(HOMEPAGE_REPOSITORY_FILE)!;
+const placeholderVmBody = interfaceBody(
+  homepageRepositorySource,
+  "MatchesSliderPlaceholderVM",
+);
+const highlightImageBody = nestedFieldBody(placeholderVmBody, "highlightImage");
+
+/** The one file that imports `MatchesSliderPlaceholderVM` and reads its
+ *  fields directly — see the docblock's "consumers are narrowed" section
+ *  for why `FirstTeamsBlock.tsx` is deliberately not also named here. */
+const PLACEHOLDER_VM_CONSUMERS = [
+  "components/home/FirstTeamsBlock/placeholder-rule.ts",
+] as const;
 
 const VM_FIELD_GROUPS: readonly VmFieldGroup[] = [
   {
     vmType: "MatchesSliderPlaceholderVM",
-    declaredIn: "lib/repositories/homepage.repository.ts",
-    fields: [
-      "nextSeasonKickoff",
-      "announcementText",
-      "announcementHref",
-      "highlightImage",
-    ],
-    consumers: [
-      "components/home/FirstTeamsBlock/placeholder-rule.ts",
-      "components/home/FirstTeamsBlock/FirstTeamsBlock.tsx",
-    ],
+    declaredIn: HOMEPAGE_REPOSITORY_FILE,
+    fields: fieldNamesOf(placeholderVmBody),
+    consumers: PLACEHOLDER_VM_CONSUMERS,
   },
   {
     vmType: 'MatchesSliderPlaceholderVM["highlightImage"]',
-    declaredIn: "lib/repositories/homepage.repository.ts",
-    fields: ["alt", "url", "lqip"],
-    consumers: [
-      "components/home/FirstTeamsBlock/placeholder-rule.ts",
-      "components/home/FirstTeamsBlock/FirstTeamsBlock.tsx",
-    ],
+    declaredIn: HOMEPAGE_REPOSITORY_FILE,
+    fields: fieldNamesOf(highlightImageBody),
+    consumers: PLACEHOLDER_VM_CONSUMERS,
   },
 ];
 
@@ -1821,13 +1906,14 @@ describe("a named view-model field with no reader renders nothing, silently (#28
 });
 
 /**
- * The list is hand-written, not derived, so nothing here re-runs it against
- * the live tree the way rules 5/9/10 re-derive theirs — instead this pins
- * the two claims that would make the hand list silently wrong: that the
- * named VM types are still actually declared where this rule says they are,
- * and that the detector functions still do what they claim on synthetic
- * input, the same way rule 10's and rule 11's own self-tests exercise
- * `referencesCaller`/`hasExternalArrowGlyph` rather than only the real tree.
+ * `fields` is derived (see the docblock above), so this section doesn't
+ * re-run the derivation against the live tree the way rules 5/9/10 pin
+ * theirs — instead it pins the two claims a derived list can still get
+ * silently wrong: that the two covered shapes are still exactly the ones
+ * named, and that the extraction/detector functions still do what they
+ * claim on synthetic input, the same way rule 10's and rule 11's own
+ * self-tests exercise `referencesCaller`/`hasExternalArrowGlyph` rather
+ * than only the real tree.
  */
 describe("rule 12 catches what it claims to (#2865)", () => {
   it("covers exactly the VM shapes named above, and nothing else", () => {
@@ -1837,10 +1923,50 @@ describe("rule 12 catches what it claims to (#2865)", () => {
     ]);
   });
 
-  it("both entries are declared where this rule says they are", () => {
-    const source = code.get("lib/repositories/homepage.repository.ts")!;
-    expect(source).toContain("export interface MatchesSliderPlaceholderVM");
-    expect(source).toContain("highlightImage?:");
+  it("both entries' fields are the inline shapes this rule expects, pinned against the declaration itself (review round 1 finding 5)", () => {
+    expect(VM_FIELD_GROUPS[0]!.fields).toEqual([
+      "nextSeasonKickoff",
+      "announcementText",
+      "announcementHref",
+      "highlightImage",
+    ]);
+    expect(VM_FIELD_GROUPS[1]!.fields).toEqual(["alt", "url", "lqip"]);
+  });
+
+  it("extracts top-level interface fields, skipping a nested inline object's own fields", () => {
+    const body = interfaceBody(
+      `export interface Foo {
+        a?: string;
+        nested?: {
+          x: string;
+          y?: number;
+        };
+        b?: string;
+      }`,
+      "Foo",
+    );
+    expect(fieldNamesOf(body)).toEqual(["a", "nested", "b"]);
+  });
+
+  it("extracts a nested inline object's own fields", () => {
+    const body = interfaceBody(
+      `export interface Foo {
+        nested?: {
+          x: string;
+          y?: number;
+        };
+      }`,
+      "Foo",
+    );
+    expect(fieldNamesOf(nestedFieldBody(body, "nested"))).toEqual(["x", "y"]);
+  });
+
+  it("throws when the named interface isn't declared as expected", () => {
+    expect(() => interfaceBody("export interface Bar {}", "Foo")).toThrow();
+  });
+
+  it("throws when the named field isn't declared as an inline object", () => {
+    expect(() => nestedFieldBody("flat?: string;", "flat")).toThrow();
   });
 
   it("matches a field dotted off a plain reference", () => {
@@ -1861,19 +1987,17 @@ describe("rule 12 catches what it claims to (#2865)", () => {
     expect(hasFieldAccess("image.urlMobile", "url")).toBe(false);
   });
 
-  it("reproduces #2505's own regression: width/height were projected but never read by either real consumer", () => {
+  it("flags a field with no reader anywhere in its named consumers", () => {
+    expect(fieldHasReader("bogusUnreadField", PLACEHOLDER_VM_CONSUMERS)).toBe(
+      false,
+    );
+  });
+
+  it("reproduces #2505's own regression against the declaration, not the consumers' text (review round 1 finding 3): width/height are not declared fields of the highlightImage shape today", () => {
     const highlightImageGroup = VM_FIELD_GROUPS.find(
       (g) => g.vmType === 'MatchesSliderPlaceholderVM["highlightImage"]',
     )!;
-    expect(fieldHasReader("width", highlightImageGroup.consumers)).toBe(false);
-    expect(fieldHasReader("height", highlightImageGroup.consumers)).toBe(false);
-  });
-
-  it("confirms the real consumer files still read every field this rule pins as read", () => {
-    for (const group of VM_FIELD_GROUPS) {
-      for (const field of group.fields) {
-        expect(fieldHasReader(field, group.consumers)).toBe(true);
-      }
-    }
+    expect(highlightImageGroup.fields).not.toContain("width");
+    expect(highlightImageGroup.fields).not.toContain("height");
   });
 });
