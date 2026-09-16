@@ -1,5 +1,9 @@
 import { Effect, Schedule } from "effect";
-import { HARD_TTL_LONG } from "../cache/kv-cache";
+import {
+  HARD_TTL_LONG,
+  type DurableKvScoped,
+  KvError,
+} from "../cache/kv-cache";
 
 // Same shape as sanity-index-sync.ts's UPSERT_RETRY — duplicated rather than
 // imported, since sanity-index-sync.ts imports from this module and the
@@ -30,15 +34,18 @@ const MANIFEST_RETRY = Schedule.exponential("100 millis").pipe(
  * mitigated by retrying (a retry re-reads the same stale cached value and
  * loses the same way).
  *
- * Reads `PSD_CACHE` directly rather than through `KvCacheService`:
- * `KvCacheLive.get` swallows every KV error into the same `null` a genuinely
- * absent key returns, which is indistinguishable from "no manifest yet" —
- * and the caller treats that as license to write a fresh manifest, silently
- * forgetting everything the old one tracked on a transient KV blip (#2831).
- * `readManifest` below fails instead, so the caller can skip reconciliation
+ * Goes through `KvCacheService`'s `durable` operations (#2873) rather than
+ * the SWR-path get/set/delete: those swallow every KV error into the same
+ * `null` a genuinely absent key returns, which is indistinguishable from
+ * "no manifest yet" — and the caller would then treat that as license to
+ * write a fresh manifest, silently forgetting everything the old one
+ * tracked on a transient KV blip (#2831). `durable.get` fails instead, so
+ * `readManifest` below can fail too, letting the caller skip reconciliation
  * rather than mistake "unreadable" for "empty."
  *
- * Keyed per SANITY_DATASET: the local-dev KV preview namespace is
+ * Every function below takes an already-`forDataset`-scoped `DurableKvScoped`
+ * handle rather than a raw `dataset: string` — see that method's doc comment
+ * in `cache/kv-cache.ts` for why. The local-dev KV preview namespace is
  * byte-identical to staging's `PSD_CACHE` namespace (`wrangler.toml`'s
  * `preview_id` vs `[[env.staging.kv_namespaces]].id`), so an unscoped key
  * would have a local `wrangler dev` sweep and staging read and write the
@@ -74,6 +81,8 @@ export class ManifestError extends Error {
   }
 }
 
+const toManifestError = (e: KvError) => new ManifestError(e.message, e.cause);
+
 // Reuses PSD_CACHE rather than provisioning a dedicated KV namespace for a
 // ~200-id list plus a handful of pending markers: no new wrangler.toml
 // binding, nothing for a human to create before merge.
@@ -90,14 +99,10 @@ export class ManifestError extends Error {
  * "empty," and the caller must not treat them the same way (#2831).
  */
 export const readManifest = (
-  kv: KVNamespace,
-  dataset: string,
+  kv: DurableKvScoped,
 ): Effect.Effect<string[], ManifestError> =>
-  Effect.tryPromise({
-    try: () => kv.get(manifestKey(dataset)),
-    catch: (cause) =>
-      new ManifestError(`KV get failed: ${String(cause)}`, cause),
-  }).pipe(
+  kv.get(manifestKey(kv.dataset)).pipe(
+    Effect.mapError(toManifestError),
     Effect.flatMap((raw) => {
       if (raw === null) return Effect.succeed([] as string[]);
       let parsed: unknown;
@@ -123,18 +128,12 @@ export const readManifest = (
   );
 
 export const writeManifest = (
-  kv: KVNamespace,
-  dataset: string,
+  kv: DurableKvScoped,
   ids: readonly string[],
 ): Effect.Effect<void, ManifestError> =>
-  Effect.tryPromise({
-    try: () =>
-      kv.put(manifestKey(dataset), JSON.stringify(ids), {
-        expirationTtl: HARD_TTL_LONG,
-      }),
-    catch: (cause) =>
-      new ManifestError(`KV put failed: ${String(cause)}`, cause),
-  });
+  kv
+    .set(manifestKey(kv.dataset), JSON.stringify(ids), HARD_TTL_LONG)
+    .pipe(Effect.mapError(toManifestError));
 
 /**
  * Marks an id as belonging in the manifest — the webhook's upsert path
@@ -156,16 +155,12 @@ export const writeManifest = (
  * retries are exhausted (not WARN) — by that point it's no longer routine.
  */
 export const addToManifest = (
-  kv: KVNamespace,
-  dataset: string,
+  kv: DurableKvScoped,
   id: string,
 ): Effect.Effect<void> =>
-  Effect.tryPromise({
-    try: () =>
-      kv.put(pendingKey(dataset, id), "1", { expirationTtl: HARD_TTL_LONG }),
-    catch: (cause) =>
-      new ManifestError(`KV put failed: ${String(cause)}`, cause),
-  })
+  kv
+    .set(pendingKey(kv.dataset, id), "1", HARD_TTL_LONG)
+    .pipe(Effect.mapError(toManifestError))
     .pipe(Effect.retry(MANIFEST_RETRY))
     .pipe(
       Effect.catchAll((e) =>
@@ -178,37 +173,29 @@ export const addToManifest = (
 /**
  * Lists every pending marker for this dataset, absorbed by the sweep before
  * it diffs (`sanity-index-sync.ts`) — see the module docblock. Paginates
- * via `list_complete`/`cursor` rather than assuming one page; the volume
- * between sweeps is normally tiny, but nothing here should silently drop
- * ids past KV's per-call `list` limit if it ever isn't.
+ * via the port's `list`'s `complete`/`cursor` rather than assuming one
+ * page; the volume between sweeps is normally tiny, but nothing here should
+ * silently drop ids past KV's per-call `list` limit if it ever isn't.
  */
 export const listPendingIds = (
-  kv: KVNamespace,
-  dataset: string,
+  kv: DurableKvScoped,
 ): Effect.Effect<
   { readonly ids: string[]; readonly keys: string[] },
   ManifestError
 > => {
-  const prefix = pendingKeyPrefix(dataset);
-  return Effect.tryPromise({
-    try: async () => {
-      const keys: string[] = [];
-      let cursor: string | undefined;
-      for (;;) {
-        const page: {
-          keys: { name: string }[];
-          list_complete: boolean;
-          cursor?: string;
-        } = await kv.list({ prefix, cursor });
-        for (const k of page.keys) keys.push(k.name);
-        if (page.list_complete) break;
-        cursor = page.cursor;
-      }
-      return keys;
-    },
-    catch: (cause) =>
-      new ManifestError(`KV list failed: ${String(cause)}`, cause),
-  }).pipe(
+  const prefix = pendingKeyPrefix(kv.dataset);
+  const drain = (
+    cursor: string | undefined,
+    acc: readonly string[],
+  ): Effect.Effect<string[], ManifestError> =>
+    kv.list({ prefix, cursor }).pipe(
+      Effect.mapError(toManifestError),
+      Effect.flatMap((page) => {
+        const next = [...acc, ...page.keys];
+        return page.complete ? Effect.succeed(next) : drain(page.cursor, next);
+      }),
+    );
+  return drain(undefined, []).pipe(
     Effect.map((keys) => ({
       keys,
       ids: keys.map((k) => k.slice(prefix.length)),
@@ -223,22 +210,20 @@ export const listPendingIds = (
  * problem — so failures are logged and swallowed rather than propagated.
  */
 export const deletePendingKeys = (
-  kv: KVNamespace,
+  kv: DurableKvScoped,
   keys: readonly string[],
 ): Effect.Effect<void> =>
   Effect.forEach(
     keys,
     (key) =>
-      Effect.tryPromise({
-        try: () => kv.delete(key),
-        catch: (cause) =>
-          new ManifestError(`KV delete failed: ${String(cause)}`, cause),
-      }).pipe(
-        Effect.catchAll((e) =>
-          Effect.logWarning(
-            `[index-manifest] failed to delete absorbed marker ${key}: ${String(e)}`,
+      kv
+        .delete(key)
+        .pipe(
+          Effect.catchAll((e) =>
+            Effect.logWarning(
+              `[index-manifest] failed to delete absorbed marker ${key}: ${String(e)}`,
+            ),
           ),
         ),
-      ),
     { concurrency: 5, discard: true },
   );

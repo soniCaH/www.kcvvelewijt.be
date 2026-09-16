@@ -1,6 +1,7 @@
 import { createClient } from "@sanity/client";
 import { Array as Arr, Effect, Either, Schedule } from "effect";
 import { WorkerEnvTag } from "../env";
+import { KvCacheService } from "../cache/kv-cache";
 import { reconcileOrphans } from "../reconciliation";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "./dataset-index-guard";
@@ -184,6 +185,11 @@ interface SyncOptions {
 export const runSanityIndexSync = (options?: SyncOptions) =>
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
+    const cache = yield* KvCacheService;
+    // Scoped once for the whole sweep (#2873) — every manifest/pending-marker
+    // call below shares this handle rather than repeating `env.SANITY_DATASET`
+    // at each call site, so they can't drift onto different datasets.
+    const manifestKv = cache.durable.forDataset(env.SANITY_DATASET);
 
     // Refuse the whole run when this worker's dataset doesn't match its
     // configured index (#2833). This job is unreachable on staging today
@@ -433,9 +439,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ...pageResult.map((d) => d._id),
       ];
 
-      const manifestRead = yield* Effect.either(
-        readManifest(env.PSD_CACHE, env.SANITY_DATASET),
-      );
+      const manifestRead = yield* Effect.either(readManifest(manifestKv));
 
       if (Either.isLeft(manifestRead)) {
         yield* Effect.logWarning(
@@ -453,9 +457,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         // untouched by a failed list (nothing was deleted), so they're
         // retried next sweep; not worth failing the whole reconciliation
         // over, unlike a failed manifest read.
-        const pendingRead = yield* Effect.either(
-          listPendingIds(env.PSD_CACHE, env.SANITY_DATASET),
-        );
+        const pendingRead = yield* Effect.either(listPendingIds(manifestKv));
         if (Either.isLeft(pendingRead)) {
           yield* Effect.logWarning(
             `[search-sync] Could not list pending markers this sweep, will retry next time: ${String(pendingRead.left)}`,
@@ -558,9 +560,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           ...currentIds,
         ]);
         for (const id of confirmedDeleted) nextManifest.delete(id);
-        yield* writeManifest(env.PSD_CACHE, env.SANITY_DATASET, [
-          ...nextManifest,
-        ]);
+        yield* writeManifest(manifestKv, [...nextManifest]);
 
         // Only delete the markers once the manifest write they were folded
         // into has actually landed — if writeManifest fails, this line
@@ -568,7 +568,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         // markers survive to be absorbed again next time instead of being
         // silently lost.
         if (pendingKeys.length > 0) {
-          yield* deletePendingKeys(env.PSD_CACHE, pendingKeys);
+          yield* deletePendingKeys(manifestKv, pendingKeys);
         }
       }
     }

@@ -180,14 +180,16 @@ export default {
 
     if (event.cron === "30 2 * * *") {
       // Search embedding index sync — separate invocation budget. Its
-      // reconciliation step (#2831) reads/writes its id manifest via the
-      // PSD_CACHE binding directly (env, already in envLayer) rather than
-      // through KvCacheService.
+      // reconciliation step (#2831) reads/writes its id manifest through
+      // KvCacheService's durable operations (#2873) — VectorizeServiceLive's
+      // own manifest bookkeeping needs the same service, hence KvCacheLive
+      // here too.
       const layer = Layer.mergeAll(
         EmbeddingServiceLive,
         VectorizeServiceLive,
+        KvCacheLive,
         envLayer,
-      ).pipe(Layer.provide(envLayer));
+      ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
       ctx.waitUntil(
         (async () => {
           const outcome = await settleJob("sanity-index-sync", () =>

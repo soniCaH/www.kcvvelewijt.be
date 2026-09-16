@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
+import { KvCacheService } from "../cache/kv-cache";
 import { addToManifest } from "./index-manifest";
 
 export class VectorizeError extends Error {
@@ -51,8 +52,8 @@ export const VectorizeServiceLive = Layer.effect(
   VectorizeService,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
-    const kv = env.PSD_CACHE;
-    const dataset = env.SANITY_DATASET;
+    const cache = yield* KvCacheService;
+    const manifestKv = cache.durable.forDataset(env.SANITY_DATASET);
 
     /**
      * The manifest ADD side of #2855: this is the only place `upsert`'s
@@ -84,7 +85,7 @@ export const VectorizeServiceLive = Layer.effect(
      * anything broken — see apps/api/CLAUDE.md.
      */
     const recordUpsertedIds = (ids: readonly string[]): Effect.Effect<void> =>
-      Effect.forEach(ids, (id) => addToManifest(kv, dataset, id), {
+      Effect.forEach(ids, (id) => addToManifest(manifestKv, id), {
         concurrency: 5,
         discard: true,
       });

@@ -7,6 +7,7 @@ import { TEST_SECRET, signPayload } from "../test-helpers/svix-signing";
 import { EmbeddingService } from "../search/embedding";
 import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
 import { listPendingIds } from "../search/index-manifest";
+import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
@@ -288,7 +289,13 @@ describe("handleIndexWebhook", () => {
           embed: () => Effect.succeed(FAKE_VECTOR),
         }),
         VectorizeServiceLive,
-      ).pipe(Layer.provide(makeTestEnvLayer(env)));
+      ).pipe(
+        // VectorizeServiceLive needs KvCacheService now too (#2873, manifest
+        // marker recording) — resolved here without widening WebhookLayer's
+        // declared output (EmbeddingService | VectorizeService only).
+        Layer.provide(KvCacheLive),
+        Layer.provide(makeTestEnvLayer(env)),
+      );
     }
 
     it("records a successful upsert's id as a pending manifest marker", async () => {
@@ -317,7 +324,9 @@ describe("handleIndexWebhook", () => {
       );
       expect(response.status).toBe(200);
 
-      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      const pending = await Effect.runPromise(
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
+      );
       expect(pending.ids).toEqual(["resp-transient"]);
     });
 
@@ -364,7 +373,9 @@ describe("handleIndexWebhook", () => {
       expect(responseA.status).toBe(200);
       expect(responseB.status).toBe(200);
 
-      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      const pending = await Effect.runPromise(
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
+      );
       expect(new Set(pending.ids)).toEqual(
         new Set(["concurrent-a", "concurrent-b"]),
       );

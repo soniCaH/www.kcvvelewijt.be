@@ -14,6 +14,7 @@ import {
 } from "./vectorize";
 import type { WorkerEnv } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 import {
   addToManifest,
   listPendingIds,
@@ -56,7 +57,7 @@ const mockPage = {
 };
 
 function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
-  return makeTestEnvLayer({
+  const envLayer = makeTestEnvLayer({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
     FOOTBALISTO_LOGO_CDN_URL: "",
@@ -72,6 +73,10 @@ function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
     SANITY_WEBHOOK_SECRET: "",
     ...overrides,
   });
+  // runSanityIndexSync reads/writes its manifest through KvCacheService's
+  // durable operations now (#2873) — merged in (not just provided) so it
+  // also satisfies KvCacheLive's own WorkerEnvTag requirement below.
+  return Layer.mergeAll(KvCacheLive, envLayer).pipe(Layer.provide(envLayer));
 }
 
 function makeEmbeddingMock(): EmbeddingServiceInterface {
@@ -623,7 +628,12 @@ describe("runSanityIndexSync", () => {
       // webhook's upsert path (webhooks/index-handler.ts) registering it the
       // moment it was published, the same way it registers every successful
       // upsert.
-      await Effect.runPromise(addToManifest(kv, "production", "transient-doc"));
+      await Effect.runPromise(
+        addToManifest(
+          makeDurableKv(kv).forDataset("production"),
+          "transient-doc",
+        ),
+      );
 
       // A sweep runs after "transient-doc" has both published AND expired
       // (its whole visible life fit between two sweeps) — no query returns
@@ -641,7 +651,12 @@ describe("runSanityIndexSync", () => {
 
       // Simulate the webhook registering an id via a pending marker
       // (addToManifest) — no sweep has bootstrapped a manifest yet.
-      await Effect.runPromise(addToManifest(kv, "production", "webhook-added"));
+      await Effect.runPromise(
+        addToManifest(
+          makeDurableKv(kv).forDataset("production"),
+          "webhook-added",
+        ),
+      );
 
       // The sweep runs and the id still matches its query (unlike the
       // "entire visible life fit between two sweeps" case above) — it
@@ -660,13 +675,15 @@ describe("runSanityIndexSync", () => {
       );
       expect(deleteCalls).toHaveLength(0);
 
-      const manifest = await Effect.runPromise(readManifest(kv, "production"));
+      const manifest = await Effect.runPromise(
+        readManifest(makeDurableKv(kv).forDataset("production")),
+      );
       expect(manifest).toContain("webhook-added");
 
       // The marker key itself is gone — absorbed, not left to be absorbed
       // (and no-op re-unioned) forever.
       const pendingAfter = await Effect.runPromise(
-        listPendingIds(kv, "production"),
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
       );
       expect(pendingAfter.ids).toHaveLength(0);
     });
@@ -866,7 +883,9 @@ describe("runSanityIndexSync", () => {
       );
 
       expect(deleteCalls).toHaveLength(0);
-      const manifest = await Effect.runPromise(readManifest(kv, "production"));
+      const manifest = await Effect.runPromise(
+        readManifest(makeDurableKv(kv).forDataset("production")),
+      );
       expect(new Set(manifest)).toEqual(
         new Set(["sanity-abc-123", "article-001", "page-001"]),
       );
