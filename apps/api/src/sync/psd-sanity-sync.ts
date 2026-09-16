@@ -13,6 +13,7 @@ import { SanityMutation, type SanityMutationError } from "../sanity/mutation";
 import { SanityProjection } from "../sanity/projection";
 import { PsdTeamClient } from "./psd-team-client";
 import { WorkerEnvTag } from "../env";
+import { KvCacheService, KvError } from "../cache/kv-cache";
 import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
 import { reconcileOrphans } from "../reconciliation";
 
@@ -445,6 +446,7 @@ export const runSync = Effect.gen(function* () {
   const sanityWriter = yield* SanityMutation;
   const sanityReader = yield* SanityProjection;
   const env = yield* WorkerEnvTag;
+  const cache = yield* KvCacheService;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the
   // API domain (PSD_API_BASE_URL). profilePictureURL is a relative path.
   const imageBaseUrl = env.PSD_IMAGE_BASE_URL;
@@ -452,20 +454,18 @@ export const runSync = Effect.gen(function* () {
   yield* Effect.log("sync started");
 
   // Read cursor from KV (defaults to 0 if missing or unreadable)
-  const cursorStr = yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.get(CURSOR_KEY),
-    catch: () => new Error("KV cursor read failed"),
-  }).pipe(Effect.orElseSucceed(() => null));
+  const cursorStr = yield* cache.durable
+    .get(CURSOR_KEY)
+    .pipe(Effect.orElseSucceed(() => null));
   const cursor = Number(cursorStr ?? "0");
 
   // Read the team-scoped checkpoint (#2900) — resolved against the actual
   // team only once it is known, below. A missing or unparseable value is
   // treated the same as "no checkpoint" (fresh start), never as an error:
   // this is a resumption hint, not a correctness-critical value.
-  const checkpointStr = yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.get(CHECKPOINT_KEY),
-    catch: () => new Error("KV checkpoint read failed"),
-  }).pipe(Effect.orElseSucceed(() => null));
+  const checkpointStr = yield* cache.durable
+    .get(CHECKPOINT_KEY)
+    .pipe(Effect.orElseSucceed(() => null));
   const storedCheckpoint = parseCheckpoint(checkpointStr);
 
   // Pre-fetch existing player image state to avoid redundant uploads
@@ -540,24 +540,22 @@ export const runSync = Effect.gen(function* () {
           return;
         }
         lastCheckpointFlushAt = now;
-        yield* Effect.tryPromise({
-          try: () =>
-            env.PSD_CACHE.put(
-              CHECKPOINT_KEY,
-              JSON.stringify({
-                teamId: team.id,
-                donePlayerIds: [...donePlayerIds],
-                doneStaffIds: [...doneStaffIds],
-              } satisfies TeamCheckpoint),
+        yield* cache.durable
+          .setForever(
+            CHECKPOINT_KEY,
+            JSON.stringify({
+              teamId: team.id,
+              donePlayerIds: [...donePlayerIds],
+              doneStaffIds: [...doneStaffIds],
+            } satisfies TeamCheckpoint),
+          )
+          .pipe(
+            Effect.catchAll((e) =>
+              Effect.log(
+                `checkpoint write failed — a truncated run may re-walk more members: ${String(e)}`,
+              ),
             ),
-          catch: () => new Error("KV checkpoint write failed"),
-        }).pipe(
-          Effect.catchAll((e) =>
-            Effect.log(
-              `checkpoint write failed — a truncated run may re-walk more members: ${String(e)}`,
-            ),
-          ),
-        );
+          );
       }),
     );
 
@@ -656,80 +654,60 @@ export const runSync = Effect.gen(function* () {
   );
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
-  // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
-  const existingIds = yield* Effect.tryPromise({
-    try: async () => {
-      const json = await env.PSD_CACHE.get(CYCLE_PLAYER_IDS_KEY);
-      if (json === null) return [] as string[];
-      return JSON.parse(json) as string[];
-    },
-    catch: (cause) =>
-      new Error(
-        `KV read/parse failed for ${CYCLE_PLAYER_IDS_KEY}: ${String(cause)}`,
+  // Reads a JSON-array accumulation key, parsing on top of the durable get —
+  // a KV error propagates as-is (no `.orElseSucceed`), a parse failure is
+  // wrapped in the SAME `KvError` type so both fail the sync the same way
+  // accumulation always has: an unreadable/corrupt accumulator must never
+  // be silently treated as "empty," or a genuine roster gets reconciled
+  // against a partial id set.
+  const readAccumulatedIds = (key: string) =>
+    cache.durable.get(key).pipe(
+      Effect.flatMap((raw) =>
+        raw === null
+          ? Effect.succeed([] as string[])
+          : Effect.try({
+              try: () => JSON.parse(raw) as string[],
+              catch: (cause) =>
+                new KvError(
+                  `KV read/parse failed for ${key}: ${String(cause)}`,
+                  cause,
+                ),
+            }),
       ),
-  });
+    );
+
+  // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
+  const existingIds = yield* readAccumulatedIds(CYCLE_PLAYER_IDS_KEY);
 
   const accumulatedIds = new Set<string>(existingIds);
   for (const id of playerPsdIds) accumulatedIds.add(id);
 
-  yield* Effect.tryPromise({
-    try: () =>
-      env.PSD_CACHE.put(
-        CYCLE_PLAYER_IDS_KEY,
-        JSON.stringify([...accumulatedIds]),
-      ),
-    catch: () => new Error("KV write failed"),
-  });
+  yield* cache.durable.setForever(
+    CYCLE_PLAYER_IDS_KEY,
+    JSON.stringify([...accumulatedIds]),
+  );
 
   // ─── Accumulate staff PSD IDs in KV ─────────────────────────────────
-  const existingStaffIds = yield* Effect.tryPromise({
-    try: async () => {
-      const json = await env.PSD_CACHE.get(CYCLE_STAFF_IDS_KEY);
-      if (json === null) return [] as string[];
-      return JSON.parse(json) as string[];
-    },
-    catch: (cause) =>
-      new Error(
-        `KV read/parse failed for ${CYCLE_STAFF_IDS_KEY}: ${String(cause)}`,
-      ),
-  });
+  const existingStaffIds = yield* readAccumulatedIds(CYCLE_STAFF_IDS_KEY);
 
   const accumulatedStaffIds = new Set<string>(existingStaffIds);
   for (const id of staffPsdIds) accumulatedStaffIds.add(id);
 
-  yield* Effect.tryPromise({
-    try: () =>
-      env.PSD_CACHE.put(
-        CYCLE_STAFF_IDS_KEY,
-        JSON.stringify([...accumulatedStaffIds]),
-      ),
-    catch: () => new Error("KV write failed"),
-  });
+  yield* cache.durable.setForever(
+    CYCLE_STAFF_IDS_KEY,
+    JSON.stringify([...accumulatedStaffIds]),
+  );
 
   // ─── Accumulate team PSD IDs in KV ──────────────────────────────────
-  const existingTeamIds = yield* Effect.tryPromise({
-    try: async () => {
-      const json = await env.PSD_CACHE.get(CYCLE_TEAM_IDS_KEY);
-      if (json === null) return [] as string[];
-      return JSON.parse(json) as string[];
-    },
-    catch: (cause) =>
-      new Error(
-        `KV read/parse failed for ${CYCLE_TEAM_IDS_KEY}: ${String(cause)}`,
-      ),
-  });
+  const existingTeamIds = yield* readAccumulatedIds(CYCLE_TEAM_IDS_KEY);
 
   const accumulatedTeamIds = new Set<string>(existingTeamIds);
   accumulatedTeamIds.add(String(team.id));
 
-  yield* Effect.tryPromise({
-    try: () =>
-      env.PSD_CACHE.put(
-        CYCLE_TEAM_IDS_KEY,
-        JSON.stringify([...accumulatedTeamIds]),
-      ),
-    catch: () => new Error("KV write failed"),
-  });
+  yield* cache.durable.setForever(
+    CYCLE_TEAM_IDS_KEY,
+    JSON.stringify([...accumulatedTeamIds]),
+  );
 
   // Compute next cursor (wraps at end of team list)
   const nextCursor = (teamIndex + 1) % teams.length;
@@ -742,23 +720,21 @@ export const runSync = Effect.gen(function* () {
     // the one-shot consumption point, unconditional on whether any leg
     // below actually applies the bypass (see the constant's doc comment
     // for why).
-    const orphanCapOverrideRaw = yield* Effect.tryPromise({
-      try: () => env.PSD_CACHE.get(ORPHAN_CAP_OVERRIDE_KEY),
-      catch: () => new Error("KV orphan-cap-override read failed"),
-    }).pipe(Effect.orElseSucceed(() => null));
+    const orphanCapOverrideRaw = yield* cache.durable
+      .get(ORPHAN_CAP_OVERRIDE_KEY)
+      .pipe(Effect.orElseSucceed(() => null));
     const orphanCapOverrideScopes =
       parseOrphanCapOverride(orphanCapOverrideRaw);
     if (orphanCapOverrideRaw !== null) {
-      yield* Effect.tryPromise({
-        try: () => env.PSD_CACHE.delete(ORPHAN_CAP_OVERRIDE_KEY),
-        catch: () => new Error("KV delete failed"),
-      }).pipe(
-        Effect.catchAll((e) =>
-          Effect.log(
-            `reconciliation: failed to clear the orphan-cap override key — it may still be active next cycle: ${String(e)}`,
+      yield* cache.durable
+        .delete(ORPHAN_CAP_OVERRIDE_KEY)
+        .pipe(
+          Effect.catchAll((e) =>
+            Effect.log(
+              `reconciliation: failed to clear the orphan-cap override key — it may still be active next cycle: ${String(e)}`,
+            ),
           ),
-        ),
-      );
+        );
       yield* Effect.log(
         orphanCapOverrideScopes.size > 0
           ? `reconciliation: orphan-cap override consumed — bypassing the safety cap this cycle for: ${[...orphanCapOverrideScopes].join(", ")}`
@@ -864,28 +840,29 @@ export const runSync = Effect.gen(function* () {
     );
 
     // Clear accumulation keys for next cycle (even when archival is skipped)
-    yield* Effect.tryPromise({
-      try: () =>
-        Promise.all([
-          env.PSD_CACHE.delete(CYCLE_PLAYER_IDS_KEY),
-          env.PSD_CACHE.delete(CYCLE_STAFF_IDS_KEY),
-          env.PSD_CACHE.delete(CYCLE_TEAM_IDS_KEY),
-        ]),
-      catch: () => new Error("KV delete failed"),
-    });
+    yield* Effect.all(
+      [
+        cache.durable.delete(CYCLE_PLAYER_IDS_KEY),
+        cache.durable.delete(CYCLE_STAFF_IDS_KEY),
+        cache.durable.delete(CYCLE_TEAM_IDS_KEY),
+      ],
+      { concurrency: "unbounded" },
+    );
   }
 
-  // Advance cursor only after reconciliation succeeds (if applicable)
-  yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.put(CURSOR_KEY, String(nextCursor)),
-    catch: () => new Error("KV cursor write failed"),
-  }).pipe(
-    Effect.catchAll((e) =>
-      Effect.log(
-        `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+  // Advance cursor only after reconciliation succeeds (if applicable).
+  // `setForever` — NOT `set` — is load-bearing here: a TTL on this key would
+  // silently restart the team rotation once it expired, re-syncing team 1
+  // forever (see this key's original finding, #2873).
+  yield* cache.durable
+    .setForever(CURSOR_KEY, String(nextCursor))
+    .pipe(
+      Effect.catchAll((e) =>
+        Effect.log(
+          `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+        ),
       ),
-    ),
-  );
+    );
 
   // Team fully processed AND the cursor has moved on — only now clear the
   // checkpoint (#2900 review: this used to run right after `upsertTeam`,
@@ -899,16 +876,15 @@ export const runSync = Effect.gen(function* () {
   // for correctness even so: the teamId guard earlier already discards a
   // checkpoint naming a different team, which is what the *next* team's run
   // would see if this delete itself got cut off.
-  yield* Effect.tryPromise({
-    try: () => env.PSD_CACHE.delete(CHECKPOINT_KEY),
-    catch: () => new Error("KV checkpoint delete failed"),
-  }).pipe(
-    Effect.catchAll((e) =>
-      Effect.log(
-        `checkpoint delete failed — harmless, see comment: ${String(e)}`,
+  yield* cache.durable
+    .delete(CHECKPOINT_KEY)
+    .pipe(
+      Effect.catchAll((e) =>
+        Effect.log(
+          `checkpoint delete failed — harmless, see comment: ${String(e)}`,
+        ),
       ),
-    ),
-  );
+    );
 
   yield* Effect.log(
     `sync completed — cursor advanced to ${nextCursor} (next: team index ${nextCursor})`,

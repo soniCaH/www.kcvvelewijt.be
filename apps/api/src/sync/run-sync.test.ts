@@ -8,6 +8,7 @@ import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient, PsdTeamClientError } from "./psd-team-client";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import type {
   PsdClubStaffMember,
   PsdMember,
@@ -133,25 +134,50 @@ function makePsdTeamClientMock(
   return mock;
 }
 
+/**
+ * A `KvCacheService` test double, not a hand-rolled `KVNamespace` (#2873 AC:
+ * `runSync` goes through the port now, so the test should substitute the
+ * SERVICE, not fake the raw binding underneath it). `get`/`put`/`delete`
+ * stay real `vi.fn`s so every existing assertion in this file — reading the
+ * backing `store`, or asserting on `kvStub.put`'s call args — keeps working
+ * unchanged: every write `runSync` makes goes through `durable.setForever`
+ * (all of its keys are TTL-less, see psd-sanity-sync.ts), which is just
+ * `put` under the hood here, same as before this port existed.
+ */
 function makeKvStub() {
   const store = new Map<string, string>();
-  return {
-    get: vi.fn((key: string) => Promise.resolve(store.get(key) ?? null)),
-    put: vi.fn((key: string, value: string) => {
-      store.set(key, value);
-      return Promise.resolve();
-    }),
-    delete: vi.fn((key: string) => {
-      store.delete(key);
-      return Promise.resolve();
-    }),
-    store,
-  } as unknown as KVNamespace;
+  const get = vi.fn((key: string) => Promise.resolve(store.get(key) ?? null));
+  const put = vi.fn((key: string, value: string) => {
+    store.set(key, value);
+    return Promise.resolve();
+  });
+  const del = vi.fn((key: string) => {
+    store.delete(key);
+    return Promise.resolve();
+  });
+  const durable = {
+    get: (key: string) => Effect.promise(() => get(key)),
+    set: (key: string, value: string) => Effect.promise(() => put(key, value)),
+    setForever: (key: string, value: string) =>
+      Effect.promise(() => put(key, value)),
+    delete: (key: string) => Effect.promise(() => del(key)),
+    list: () => Effect.succeed({ keys: [] as string[], complete: true }),
+  };
+  const cache: KvCacheInterface = {
+    get: () => Effect.succeed(null),
+    set: () => Effect.succeed(undefined),
+    delete: () => Effect.succeed(undefined),
+    increment: () => Effect.succeed(undefined),
+    durable: {
+      ...durable,
+      forDataset: (dataset: string) => ({ ...durable, dataset }),
+    },
+  };
+  return { get, put, delete: del, store, cache };
 }
 
-function makeEnvLayer(kvStub: KVNamespace) {
+function makeEnvLayer() {
   return makeTestEnvLayer({
-    PSD_CACHE: kvStub,
     SANITY_WEBHOOK_SECRET: "",
   });
 }
@@ -246,7 +272,7 @@ const UNKNOWN_STATUS_MEMBER: PsdMember = {
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
 function buildTestLayer(
-  kvStub: KVNamespace,
+  kvStub: ReturnType<typeof makeKvStub>,
   writerMock: SanityMutationInterface,
   readerMock: SanityProjectionInterface,
   psdMock: PsdTeamClientInterface,
@@ -255,7 +281,8 @@ function buildTestLayer(
     Layer.succeed(SanityMutation, writerMock),
     Layer.succeed(SanityProjection, readerMock),
     Layer.succeed(PsdTeamClient, psdMock),
-    makeEnvLayer(kvStub),
+    Layer.succeed(KvCacheService, kvStub.cache),
+    makeEnvLayer(),
   );
 }
 
@@ -279,7 +306,8 @@ describe("runSync", () => {
         Effect.provide(Layer.succeed(SanityMutation, writerMock)),
         Effect.provide(Layer.succeed(SanityProjection, readerMock)),
         Effect.provide(Layer.succeed(PsdTeamClient, psdMock)),
-        Effect.provide(makeEnvLayer(kvStub)),
+        Effect.provide(Layer.succeed(KvCacheService, kvStub.cache)),
+        Effect.provide(makeEnvLayer()),
       ),
     );
 

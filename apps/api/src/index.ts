@@ -205,6 +205,7 @@ export default {
         PsdTeamClientLive,
         SanityMutationLive,
         SanityProjectionLive,
+        KvCacheLive,
         envLayer,
       ).pipe(
         // PsdGateLive paces this job's PSD calls against the same global ≤5/s
