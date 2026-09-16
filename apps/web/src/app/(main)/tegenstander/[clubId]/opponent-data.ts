@@ -96,20 +96,24 @@ export function buildOpponentPageData(
 
   // Opponent identity (name/logo) is shared by the hero across every squad
   // section — derived from the single most recent match of ANY squad, same
-  // "newest logo/name wins" rule the single-card version used.
-  const newestMatch = sortMatchesDescending(
-    sections.flatMap((s) => s.matches),
-  )[0];
-  const opponentTeam = newestMatch
-    ? newestMatch.home_team.id === clubId
+  // "newest logo/name wins" rule the single-card version used. Every section
+  // is guaranteed at least one match (the filter above drops any squad with
+  // zero), so `matches[0]` — already sorted descending — is each squad's own
+  // newest match; comparing just those "heads" finds the page's newest
+  // without re-sorting every match on the page a second time.
+  const newestMatch = sections
+    .map((s) => s.matches[0]!)
+    .reduce((newest, m) =>
+      m.date.getTime() > newest.date.getTime() ? m : newest,
+    );
+  const opponentTeam =
+    newestMatch.home_team.id === clubId
       ? newestMatch.home_team
-      : newestMatch.away_team
-    : null;
-  const fallback = results.find((r) => r.history != null)!.history!;
+      : newestMatch.away_team;
 
   return {
-    opponentName: opponentTeam?.name ?? fallback.opponent.name,
-    opponentLogo: opponentTeam?.logo ?? fallback.opponent.logo,
+    opponentName: opponentTeam.name,
+    opponentLogo: opponentTeam.logo,
     sections,
   };
 }
