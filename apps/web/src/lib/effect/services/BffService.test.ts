@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { Effect } from "effect";
+import { Effect, Runtime, Cause } from "effect";
 import { BffService, BffServiceLive } from "./BffService";
+import { isPermanentBffFailure } from "@/lib/effect/classify-bff-failure";
 
 // Minimal fixture that satisfies the Match schema from @kcvv/api-contract.
 // date/time must be ISO strings because JSON.stringify converts Date objects.
@@ -53,6 +54,47 @@ function mockFetchWith(data: unknown, status = 200) {
       }),
     ),
   );
+}
+
+/** Like `mockFetchWith`, but the caller controls the raw body text —
+ * for reproducing an empty or non-JSON body on a declared-error status. */
+function mockFetchWithRawBody(body: string, status: number) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(new Response(body, { status })),
+  );
+}
+
+/**
+ * Runs `bff.getRanking(1)` against whatever `fetch` stub is currently
+ * installed and reports both how the failure classifies (per
+ * `isPermanentBffFailure`) and its `_tag`, mirroring
+ * `classify-bff-failure.test.ts`'s `runAndCatch` helper — but through the
+ * real `BffServiceLive` client rather than a synthetic fixture, so it
+ * exercises the actual decode path a stale/misconfigured worker hits.
+ */
+async function runRankingAndClassify(): Promise<{
+  tag: unknown;
+  permanent: boolean;
+}> {
+  try {
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getRanking(1);
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+  } catch (error) {
+    const permanent = isPermanentBffFailure(error);
+    // Mirror classify-bff-failure.ts's own unwrap so the tag we assert on is
+    // read the same way the classifier reads it, not by a second guess.
+    const tag = Runtime.isFiberFailure(error)
+      ? (Cause.squash(error[Runtime.FiberFailureCauseId]) as { _tag?: unknown })
+          ?._tag
+      : undefined;
+    return { tag, permanent };
+  }
+  throw new Error("expected getRanking to fail");
 }
 
 describe("BffService", () => {
@@ -384,5 +426,78 @@ describe("BffService", () => {
         }).pipe(Effect.provide(BffServiceLive)),
       ),
     ).rejects.toThrow(/KCVV_API_URL is not set/);
+  });
+
+  // #2924: fixing #2440 made `HttpNotFound` (and its 502/503/400 siblings) a
+  // genuine decode-map entry keyed on status. A response whose status
+  // matches one of those but whose body is NOT the BFF's own `{ error,
+  // _tag }` shape — a stale/misconfigured worker's unmatched-route reply,
+  // which is a normal state here (apps/api deploys prod-on-merge,
+  // staging-on-PR-only) — used to fall through as an untyped, transient
+  // `ResponseError` (pre-#2440). After #2440 it decodes-fails against the
+  // declared error schema and surfaces as a bare `ParseError`, which
+  // `PERMANENT_BFF_TAGS` treats as permanent, so `degradeIfPermanent` /
+  // `isPermanentBffFailure` swallow it silently and forever instead of
+  // throwing for ISR to retry. These cases must go back to transient without
+  // making every `ParseError` transient (that would re-break what #2440 and
+  // its predecessors settled — see the two "stays permanent" cases below).
+  describe("declared-status responses whose body is not the BFF's own shape (#2924)", () => {
+    it("empty-body 404 classifies as transient, not permanent", async () => {
+      mockFetchWithRawBody("", 404);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(false);
+      expect(tag).toBe("ResponseError");
+    });
+
+    it("HTML-body 404 classifies as transient, not permanent", async () => {
+      mockFetchWithRawBody("<html><body>404 Not Found</body></html>", 404);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(false);
+      expect(tag).toBe("ResponseError");
+    });
+
+    it("empty-body 502 classifies as transient, not permanent (not 404-specific)", async () => {
+      mockFetchWithRawBody("", 502);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(false);
+      expect(tag).toBe("ResponseError");
+    });
+
+    it("empty-body 500 (an undeclared status) still classifies as transient — unchanged", async () => {
+      mockFetchWithRawBody("", 500);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(false);
+      expect(tag).toBe("ResponseError");
+    });
+
+    it("a genuine BFF error body still decodes to its typed class and classifies as permanent — unchanged", async () => {
+      mockFetchWith({ error: "Not found", _tag: "HttpNotFound" }, 404);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(true);
+      expect(tag).toBe("HttpNotFound");
+    });
+
+    it("a success-status body that fails the success schema stays a permanent ParseError — unchanged", async () => {
+      // 200, but shaped nothing like RankingTableArray. This is a real
+      // contract-mismatch ParseError (this deploy can't decode a genuine BFF
+      // response) and must NOT be reclassified by the #2924 fix — only the
+      // declared-error-status guard above changes.
+      mockFetchWith({ not: "a ranking table" }, 200);
+
+      const { tag, permanent } = await runRankingAndClassify();
+
+      expect(permanent).toBe(true);
+      expect(tag).toBe("ParseError");
+    });
   });
 });
