@@ -12,6 +12,15 @@ export interface OpponentSummary {
 export interface OpponentSummaryCardProps {
   summary: OpponentSummary;
   className?: string;
+  /**
+   * Test hook, `"opponent-summary"` by default. `/tegenstander/[clubId]`
+   * renders one card per flagship senior squad (#2463) — two cards on one
+   * page make the default selector ambiguous, so `<SquadHistorySection>`
+   * scopes each instance by squad (e.g. `"opponent-summary-1"`, the squad's
+   * PSD id). Every other caller (the isolated component test, the stories)
+   * keeps the default.
+   */
+  testId?: string;
 }
 
 /**
@@ -28,6 +37,7 @@ export interface OpponentSummaryCardProps {
 export function OpponentSummaryCard({
   summary,
   className,
+  testId = "opponent-summary",
 }: OpponentSummaryCardProps) {
   const cells: ReadonlyArray<{
     value: number;
@@ -59,7 +69,7 @@ export function OpponentSummaryCard({
 
   return (
     <dl
-      data-testid="opponent-summary"
+      data-testid={testId}
       className={cn(
         "border-ink bg-cream shadow-paper-sm grid grid-cols-5 border-2",
         className,

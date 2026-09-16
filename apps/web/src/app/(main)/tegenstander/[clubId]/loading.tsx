@@ -1,15 +1,26 @@
 /**
  * Opponent History Page — Loading Skeleton
  *
- * Paper-register skeleton mirroring the #2141 reskin: a light hero card, the
- * five-cell summary, a striped seam, and a season-grouped row placeholder.
- * The opponent's name is data, so this renders no heading text. Bars inside
- * the `bg-cream` cards (hero, W/D/L cells, season rows) use `<Skeleton>`'s
- * default `paper-edge` fill; the list header and season-band bars sit
- * directly on the page's `bg-cream-deep` root and use `tone="deep"` instead
- * — `paper-edge` is calibrated against plain cream and is an 8/5/2 RGB delta
- * away from `cream-deep`, invisible once `animate-pulse` fades it. Card
- * chrome (borders + paper shadow) stays solid.
+ * Paper-register skeleton mirroring the #2141 reskin: a light hero card, a
+ * squad-heading bar, the five-cell summary, a striped seam, and a
+ * season-grouped row placeholder. The opponent's name — and, since #2463,
+ * the squad name too — is data, so this renders no heading text, only its
+ * chrome. Bars inside the `bg-cream` cards (hero, W/D/L cells, season rows)
+ * use `<Skeleton>`'s default `paper-edge` fill; the squad-heading, list
+ * header and season-band bars sit directly on the page's `bg-cream-deep`
+ * root and use `tone="deep"` instead — `paper-edge` is calibrated against
+ * plain cream and is an 8/5/2 RGB delta away from `cream-deep`, invisible
+ * once `animate-pulse` fades it. Card chrome (borders + paper shadow) stays
+ * solid.
+ *
+ * Deliberately stays single-section (#2463 rule): before the fetch resolves
+ * this route cannot know how many squads met the opponent, and most
+ * opponents produce exactly one section, so this only draws one squad
+ * heading + one summary card + one match list, never two. Adding the squad
+ * heading bar is the one adjustment the new per-squad layout makes
+ * structurally necessary — without it, everything below the hero sat one
+ * heading's height higher than the real render, so the page visibly
+ * shifted down the moment the fetch resolved.
  */
 
 import {
@@ -42,8 +53,13 @@ export default function OpponentLoading() {
           <Skeleton className="mt-4 h-3 w-3/4" />
         </div>
 
+        {/* Squad heading — mirrors <SquadHistorySection>'s h2: mt-7 off the
+            hero card, mb-4 before the summary card, same bar size/ground as
+            the list-header bar below (both display-sm on bg-cream-deep). */}
+        <Skeleton tone="deep" className="mt-7 mb-4 h-6 w-32" />
+
         {/* W/D/L summary */}
-        <div className="border-ink bg-cream shadow-paper-sm mt-7 grid grid-cols-5 border-2">
+        <div className="border-ink bg-cream shadow-paper-sm grid grid-cols-5 border-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
@@ -60,7 +76,8 @@ export default function OpponentLoading() {
           <StripedSeam height="sm" />
         </div>
 
-        {/* List header — sits directly on the bg-cream-deep root, so the
+        {/* Match-count heading (the h3 inside a squad section) — sits
+            directly on the bg-cream-deep root, so the
             deep tone is required (paper-edge is invisible here). */}
         <Skeleton tone="deep" className="mb-4 h-6 w-44" />
 

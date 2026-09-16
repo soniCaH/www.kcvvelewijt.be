@@ -50,4 +50,18 @@ describe("OpponentSummaryCard", () => {
     );
     expect(screen.getAllByText("0")).toHaveLength(5);
   });
+
+  it("defaults the test hook to opponent-summary, overridable via testId (#2463)", () => {
+    const { rerender } = render(<OpponentSummaryCard summary={SUMMARY} />);
+    expect(screen.getByTestId("opponent-summary")).toBeInTheDocument();
+
+    // /tegenstander renders one card per squad — a disambiguated hook lets a
+    // page-level test select one squad's card without an ambiguous
+    // getByTestId("opponent-summary") match.
+    rerender(
+      <OpponentSummaryCard summary={SUMMARY} testId="opponent-summary-1" />,
+    );
+    expect(screen.queryByTestId("opponent-summary")).not.toBeInTheDocument();
+    expect(screen.getByTestId("opponent-summary-1")).toBeInTheDocument();
+  });
 });
