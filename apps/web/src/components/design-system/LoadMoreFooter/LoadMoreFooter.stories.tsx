@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The tail of a paginated listing — exactly one of three things shows at a time: a failed-batch message with a retry, the in-flight spinner, or the load-more button. `/nieuws` and `/galerij` are the two listings on the shared 24 + 12 contract (#2569), and they render this rather than each keeping a hand-copied footer.",
+          'The tail of a paginated listing — exactly one of three things shows at a time: a failed-batch notice with a retry (rendered through `<EmptyState tier="slot" reason="unavailable">`, #2815), the in-flight spinner, or the load-more button. `/nieuws` and `/galerij` are the two listings on the shared 24 + 12 contract (#2569), and they render this rather than each keeping a hand-copied footer.',
       },
     },
   },

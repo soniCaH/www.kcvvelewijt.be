@@ -1,4 +1,5 @@
 import { Button } from "../Button";
+import { EmptyState } from "../EmptyState";
 import { Spinner } from "../Spinner";
 
 export interface LoadMoreFooterProps {
@@ -6,20 +7,41 @@ export interface LoadMoreFooterProps {
   label: string;
   hasMore: boolean;
   isLoading: boolean;
-  /** Message for a failed batch. Absent → no error is showing. */
+  /** Message for a failed batch, e.g. `"Artikelen laden mislukt."`. Absent
+   *  → no error is showing. Its own last word (before trailing punctuation)
+   *  is what `<EmptyState>` accents — every message here already ends
+   *  "… mislukt.", the same failure word convention `/zoeken`'s card uses
+   *  (#2815). */
   error?: string;
   /** Retries the failed batch; also the load-more handler. */
   onLoadMore: () => void;
 }
 
+/** The word `<EmptyState>` accents in `error` — its own last word before
+ *  trailing punctuation, mirroring `<ErrorState>`'s own `lastWord()`
+ *  default (#2815 scoping note: worth the three lines it costs). */
+function lastWord(message: string): string {
+  const words = message
+    .trim()
+    .replace(/[.!?]+$/, "")
+    .split(/\s+/);
+  return words[words.length - 1] ?? message;
+}
+
 /**
- * The tail of a paginated listing: a failed-batch message with a retry, the
+ * The tail of a paginated listing: a failed-batch notice with a retry, the
  * in-flight spinner, and the load-more button — exactly one of the three shows
  * at a time.
  *
  * One component rather than one per listing: `/nieuws` and `/galerij` are the
  * two listings on the shared 24 + 12 contract (#2569 / decision #2431), and a
  * hand-copied second footer is how that contract grows a second look.
+ *
+ * The failed-batch notice renders through `<EmptyState tier="slot"
+ * reason="unavailable">` (#2815) — the "Tier 2 + action" register #2470's
+ * copy table asked for from the start, which the primitive didn't carry
+ * until #2815 gave the notice member an optional `action`. `onLoadMore`
+ * doubles as the retry handler, the same wiring the bespoke button used.
  */
 export function LoadMoreFooter({
   label,
@@ -29,26 +51,16 @@ export function LoadMoreFooter({
   onLoadMore,
 }: LoadMoreFooterProps) {
   if (error) {
-    // #2470's copy table calls this "Tier 2 + action", but the register it
-    // specifies doesn't exist yet: `<EmptyState tier="slot">`'s
-    // failure-notice member has no action prop at all, and `<ErrorState>` is
-    // a `min-h-[70vh]` full-page composition, not an in-flow footer. Staying
-    // bespoke here is a deliberate stopgap, not a style choice — see #2816.
-    // The retry is a substitution, not an addition: the load-more button it
-    // replaces is unreachable behind the if-chain below (#2470 resolution
-    // rule 4). `text-alert` is the palette's error token; `<Button
-    // variant="ghost" size="sm">` is the same in-surface action
-    // `<EmptyState reason="filtered">`'s own undo renders — reaching for the
-    // primitive already imported below rather than a hand-rolled underlined
-    // link gets the 24px WCAG 2.5.8 tap target for free. "Probeer opnieuw" —
-    // the locked phrasing (#2433 rule 9's 4-to-2 collapse).
     return (
-      <div className="py-4 text-center">
-        <p className="text-alert mb-2">{error}</p>
-        <Button variant="ghost" size="sm" onClick={onLoadMore}>
-          Probeer opnieuw
-        </Button>
-      </div>
+      <EmptyState
+        tier="slot"
+        reason="unavailable"
+        live
+        emphasis={{ text: lastWord(error) }}
+        action={{ label: "Probeer opnieuw", onClick: onLoadMore }}
+      >
+        {error}
+      </EmptyState>
     );
   }
 
