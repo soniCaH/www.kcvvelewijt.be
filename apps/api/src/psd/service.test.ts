@@ -16,6 +16,7 @@ import {
 } from "./errors";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
   SanityProjection,
   type SanityProjectionInterface,
@@ -44,6 +45,7 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
+  durable: noopDurableKv,
 };
 
 function makeSanityMock(
@@ -679,6 +681,7 @@ describe("PsdService.getNextMatches", () => {
       },
       delete: () => Effect.succeed(undefined),
       increment: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
     };
 
     const sanityMock = makeSanityMock(["1"]);
@@ -717,6 +720,7 @@ describe("PsdService.getNextMatches", () => {
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       increment: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
     };
 
     let sanityCallCount = 0;
@@ -1458,6 +1462,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
   });
 
   it("backfills finished status + score when /info is still preview-shaped", async () => {
@@ -2077,6 +2082,7 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       increment: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
@@ -2139,6 +2145,7 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       increment: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
@@ -2189,6 +2196,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
   });
 
   it("stamps the club's own ground for a home fixture (is_home: true)", async () => {
@@ -2335,6 +2343,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       increment: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
@@ -2400,6 +2409,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       increment: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({

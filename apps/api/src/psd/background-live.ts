@@ -29,6 +29,11 @@ const backgroundStackLayer = (env: WorkerEnv) =>
         VectorizeServiceLive,
       ),
     ),
+    // VectorizeServiceLive now needs KvCacheService itself (#2873, manifest
+    // marker recording) — its own `KvCacheLive` sibling above is merged, not
+    // wired to it, so this second provide resolves that leftover requirement
+    // the same way `Layer.mergeAll` never auto-connects sibling layers.
+    Layer.provide(KvCacheLive),
     Layer.provideMerge(Layer.succeed(WorkerEnvTag, env)),
   );
 

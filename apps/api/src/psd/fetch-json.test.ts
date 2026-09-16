@@ -4,6 +4,7 @@ import { PsdService, PsdServiceLive } from "./service";
 import { PsdGateTest } from "./gate";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { UpstreamUnavailableError } from "./errors";
 import {
   SanityProjection,
@@ -24,6 +25,7 @@ const cacheMock: KvCacheInterface = {
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
+  durable: noopDurableKv,
 };
 
 const sanityMock: SanityProjectionInterface = {

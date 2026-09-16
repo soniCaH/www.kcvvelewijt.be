@@ -7,6 +7,7 @@ import {
 } from "./vectorize";
 import { listPendingIds } from "./index-manifest";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 
 function makeVectorizeMock(
   overrides: Partial<VectorizeIndex> = {},
@@ -117,7 +118,7 @@ function makeEnvLayer(
   index: VectorizeIndex,
   overrides: { kv?: KVNamespace; dataset?: string } = {},
 ) {
-  return makeTestEnvLayer({
+  const envLayer = makeTestEnvLayer({
     SEARCH_INDEX: index,
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
@@ -131,6 +132,10 @@ function makeEnvLayer(
     SANITY_API_TOKEN: "",
     SANITY_WEBHOOK_SECRET: "",
   });
+  // VectorizeServiceLive needs KvCacheService now too (#2873, manifest
+  // marker recording) — merged in here (not just provided) so it also
+  // satisfies KvCacheLive's own WorkerEnvTag requirement below.
+  return Layer.mergeAll(KvCacheLive, envLayer).pipe(Layer.provide(envLayer));
 }
 
 describe("VectorizeService", () => {
@@ -487,7 +492,9 @@ describe("VectorizeService", () => {
         }).pipe(Effect.provide(layer)),
       );
 
-      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      const pending = await Effect.runPromise(
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
+      );
       expect(new Set(pending.ids)).toEqual(new Set(["doc-abc", "doc-def"]));
     });
 
@@ -517,7 +524,9 @@ describe("VectorizeService", () => {
         }).pipe(Effect.provide(layer)),
       );
 
-      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      const pending = await Effect.runPromise(
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
+      );
       expect(pending.ids).toHaveLength(0);
     });
 
@@ -540,7 +549,9 @@ describe("VectorizeService", () => {
         }).pipe(Effect.provide(layer)),
       );
 
-      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      const pending = await Effect.runPromise(
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
+      );
       expect(pending.ids).toEqual(["doc-retry"]);
     });
 
@@ -590,7 +601,9 @@ describe("VectorizeService", () => {
 
       await Promise.all([run("concurrent-a"), run("concurrent-b")]);
 
-      const pending = await Effect.runPromise(listPendingIds(kv, "production"));
+      const pending = await Effect.runPromise(
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
+      );
       expect(new Set(pending.ids)).toEqual(
         new Set(["concurrent-a", "concurrent-b"]),
       );
@@ -667,10 +680,10 @@ describe("VectorizeService", () => {
       );
 
       const stagingPending = await Effect.runPromise(
-        listPendingIds(kv, "staging"),
+        listPendingIds(makeDurableKv(kv).forDataset("staging")),
       );
       const productionPending = await Effect.runPromise(
-        listPendingIds(kv, "production"),
+        listPendingIds(makeDurableKv(kv).forDataset("production")),
       );
       expect(stagingPending.ids).toEqual(["staging-only"]);
       expect(productionPending.ids).toEqual(["production-only"]);

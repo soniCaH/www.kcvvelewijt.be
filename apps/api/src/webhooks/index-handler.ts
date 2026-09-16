@@ -2,6 +2,7 @@ import { createClient } from "@sanity/client";
 import { Effect, Layer, Schema as S } from "effect";
 import type { WorkerEnv } from "../env";
 import { WorkerEnvTag } from "../env";
+import { KvCacheLive } from "../cache/kv-cache";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "../search/dataset-index-guard";
 import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
@@ -352,6 +353,11 @@ export async function handleIndexWebhook(
   return await Effect.runPromise(
     webhookEffect(request, env.SANITY_WEBHOOK_SECRET).pipe(
       Effect.provide(serviceLayer),
+      // KvCacheLive is here only for VectorizeServiceLive's manifest-marker
+      // write (#2873) — webhookEffect itself never asks for KvCacheService,
+      // and providing it unconditionally is harmless when `layer` is a test
+      // double whose mocked VectorizeService never reaches it.
+      Effect.provide(KvCacheLive),
       Effect.provide(envLayer),
       Effect.tapError((error) =>
         Effect.sync(() => {

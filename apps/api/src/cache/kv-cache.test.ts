@@ -9,6 +9,8 @@ import {
   HARD_TTL_DEFAULT,
   HARD_TTL_LONG,
   BG_REFRESH_TIMEOUT_MS,
+  KvError,
+  makeDurableKv,
 } from "./kv-cache";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { PsdGateService, PsdGateTest, makePsdGateLayer } from "../psd/gate";
@@ -16,16 +18,44 @@ import { GateLogic } from "../psd/gate-logic";
 import { BackgroundRunnerService } from "../psd/background";
 import { reportScheduledJobOutcome } from "../psd/job-alert";
 
-function makeMockKv() {
+/** `pageSize` caps how many keys `list` returns per call regardless of what
+ * the caller asks for — real KV pages this way too, and the port's `list`
+ * doesn't (and shouldn't) forward a `limit`, so a pagination test has to
+ * force a small page from the mock's own side instead. */
+function makeMockKv(options: { pageSize?: number } = {}) {
+  const pageSize = options.pageSize ?? Infinity;
   const store = new Map<string, string>();
   return {
     get: vi.fn(async (key: string) => store.get(key) ?? null),
-    put: vi.fn(async (key: string, value: string) => {
-      store.set(key, value);
-    }),
+    put: vi.fn(
+      async (
+        key: string,
+        value: string,
+        _options?: { expirationTtl?: number },
+      ) => {
+        store.set(key, value);
+      },
+    ),
     delete: vi.fn(async (key: string) => {
       store.delete(key);
     }),
+    list: vi.fn(
+      async ({ prefix, cursor }: { prefix?: string; cursor?: string } = {}) => {
+        const matching = [...store.keys()]
+          .filter((k) => k.startsWith(prefix ?? ""))
+          .sort();
+        const start = cursor ? Number(cursor) : 0;
+        const page = matching.slice(start, start + pageSize);
+        const nextStart = start + page.length;
+        const complete = nextStart >= matching.length;
+        return {
+          keys: page.map((name) => ({ name })),
+          list_complete: complete,
+          cursor: complete ? undefined : String(nextStart),
+          cacheStatus: null,
+        };
+      },
+    ),
     store,
   };
 }
@@ -1377,6 +1407,126 @@ describe("KvCacheService", () => {
       expect.stringMatching(DAILY_KEY),
       "1",
       { expirationTtl: 60 * 60 * 48 },
+    );
+  });
+});
+
+describe("makeDurableKv (#2873)", () => {
+  it("setForever writes with NO expiry at all — not even a long one", async () => {
+    const mockKv = makeMockKv();
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    await Effect.runPromise(durable.setForever("sync:team-cursor", "3"));
+
+    // Exactly 2 args — no `{ expirationTtl }` third argument. A TTL here
+    // would silently restart the team rotation once it expired (the
+    // original finding, #2873): `sync/psd-sanity-sync.ts`'s cursor write
+    // must produce this call shape.
+    expect(mockKv.put).toHaveBeenCalledWith("sync:team-cursor", "3");
+    expect(mockKv.put.mock.calls[0]).toHaveLength(2);
+  });
+
+  it("set writes with the given TTL", async () => {
+    const mockKv = makeMockKv();
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    await Effect.runPromise(durable.set("some:key", "value", 3600));
+
+    expect(mockKv.put).toHaveBeenCalledWith("some:key", "value", {
+      expirationTtl: 3600,
+    });
+  });
+
+  it("surfaces a KvError instead of swallowing a failed get", async () => {
+    const mockKv = makeMockKv();
+    mockKv.get = vi.fn(async () => {
+      throw new Error("KV unavailable");
+    });
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    const result = await Effect.runPromise(
+      durable.get("some:key").pipe(Effect.either),
+    );
+
+    expect(result._tag).toBe("Left");
+    expect(
+      (result as Extract<typeof result, { _tag: "Left" }>).left,
+    ).toBeInstanceOf(KvError);
+  });
+
+  it("surfaces a KvError instead of swallowing a failed list — an empty page here must never look like a drained sync loop", async () => {
+    const mockKv = makeMockKv();
+    mockKv.list = vi.fn(async () => {
+      throw new Error("KV unavailable");
+    });
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    const result = await Effect.runPromise(
+      durable.list({ prefix: "x:" }).pipe(Effect.either),
+    );
+
+    expect(result._tag).toBe("Left");
+    expect(
+      (result as Extract<typeof result, { _tag: "Left" }>).left,
+    ).toBeInstanceOf(KvError);
+  });
+
+  it("surfaces a KvError instead of swallowing a failed set/setForever/delete", async () => {
+    const mockKv = makeMockKv();
+    mockKv.put = vi.fn(async () => {
+      throw new Error("KV unavailable");
+    });
+    mockKv.delete = vi.fn(async () => {
+      throw new Error("KV unavailable");
+    });
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    const [setResult, foreverResult, deleteResult] = await Promise.all([
+      Effect.runPromise(durable.set("k", "v", 60).pipe(Effect.either)),
+      Effect.runPromise(durable.setForever("k", "v").pipe(Effect.either)),
+      Effect.runPromise(durable.delete("k").pipe(Effect.either)),
+    ]);
+
+    expect(setResult._tag).toBe("Left");
+    expect(foreverResult._tag).toBe("Left");
+    expect(deleteResult._tag).toBe("Left");
+  });
+
+  it("list drains every page in order until list_complete", async () => {
+    const mockKv = makeMockKv({ pageSize: 2 });
+    mockKv.store.set("ns:a", "1");
+    mockKv.store.set("ns:b", "1");
+    mockKv.store.set("ns:c", "1");
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    const page1 = await Effect.runPromise(durable.list({ prefix: "ns:" }));
+    expect(page1.keys).toEqual(["ns:a", "ns:b"]);
+    expect(page1.complete).toBe(false);
+    expect(page1.cursor).toBeDefined();
+
+    const page2 = await Effect.runPromise(
+      durable.list({ prefix: "ns:", cursor: page1.cursor }),
+    );
+    expect(page2.keys).toEqual(["ns:c"]);
+    expect(page2.complete).toBe(true);
+    expect(page2.cursor).toBeUndefined();
+  });
+
+  it("forDataset returns a handle carrying `.dataset`, with the same operations", async () => {
+    const mockKv = makeMockKv();
+    const durable = makeDurableKv(mockKv as unknown as KVNamespace);
+
+    const scoped = durable.forDataset("staging");
+    expect(scoped.dataset).toBe("staging");
+
+    // Same op, just called through the scoped handle — proves the caller
+    // gets a real, usable DurableKv back, not a stub.
+    await Effect.runPromise(
+      scoped.setForever("search-index:manifest:staging", "[]"),
+    );
+    expect(mockKv.put).toHaveBeenCalledWith(
+      "search-index:manifest:staging",
+      "[]",
     );
   });
 });

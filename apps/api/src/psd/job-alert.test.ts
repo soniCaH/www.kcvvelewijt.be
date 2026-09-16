@@ -8,6 +8,7 @@ import {
   type JobAlertState,
 } from "./job-alert";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 function makeCacheDouble() {
@@ -23,6 +24,7 @@ function makeCacheDouble() {
         store.delete(key);
       }),
     increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
   };
   return { cache, store };
 }
