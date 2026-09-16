@@ -211,17 +211,22 @@ const staff: TeamStaffMemberData[] = [
     id: "1",
     firstName: "Karel",
     lastName: "Vermeulen",
-    functionTitle: "T1",
+    functionTitle: "Hoofdtrainer",
     imageUrl: PHOTOS.a,
   },
   {
     id: "2",
     firstName: "Dirk",
     lastName: "Janssens",
-    functionTitle: "T2",
+    functionTitle: "Assistent-trainer",
     imageUrl: PHOTOS.b,
   },
-  { id: "3", firstName: "Peter", lastName: "Keepers", functionTitle: "TK" },
+  {
+    id: "3",
+    firstName: "Peter",
+    lastName: "Keepers",
+    functionTitle: "Keeperstrainer",
+  },
   { id: "4", firstName: "Annick", lastName: "De Ploeg", role: "afgevaardigde" },
 ];
 

@@ -2,7 +2,7 @@
  * TeamStaff unit tests.
  *
  * Covers:
- *  - resolveFunctionLabel: code map / passthrough / role-bucket fallback / null (#2638)
+ *  - resolveFunctionLabel: passthrough (#2495) / role-bucket fallback / null (#2638)
  *  - Auto-hides (null) when staff empty
  *  - Labelled-first, unlabelled-after ordering AND the unlabelled-notice
  *    line both gated by `unlabelledNotice` — off by default, so a curated
@@ -25,15 +25,11 @@ import { TeamStaff, resolveFunctionLabel } from "./TeamStaff";
 import type { TeamStaffMemberData } from "./TeamStaff";
 
 describe("resolveFunctionLabel", () => {
-  it("maps known PSD codes to readable labels", () => {
-    expect(resolveFunctionLabel("T1", undefined)).toBe("Hoofdtrainer");
-    expect(resolveFunctionLabel("T2", undefined)).toBe("Assistent-trainer");
-    expect(resolveFunctionLabel("TK", undefined)).toBe("Keeperstrainer");
-    expect(resolveFunctionLabel("TVJO", undefined)).toBe("Jeugdcoördinator");
-  });
-
-  it("is case-insensitive on the code", () => {
-    expect(resolveFunctionLabel("t1", undefined)).toBe("Hoofdtrainer");
+  // PSD owns the label: its codes are the club's official titles (#2495).
+  it("passes PSD function codes through verbatim", () => {
+    expect(resolveFunctionLabel("T1", undefined)).toBe("T1");
+    expect(resolveFunctionLabel("T2 - B-team", undefined)).toBe("T2 - B-team");
+    expect(resolveFunctionLabel("TVJO", undefined)).toBe("TVJO");
   });
 
   it("passes through already-readable free-text values", () => {
@@ -67,7 +63,7 @@ describe("resolveFunctionLabel", () => {
   });
 
   it("prefers functionTitle over role bucket", () => {
-    expect(resolveFunctionLabel("T1", "afgevaardigde")).toBe("Hoofdtrainer");
+    expect(resolveFunctionLabel("T1", "afgevaardigde")).toBe("T1");
   });
 });
 
@@ -76,7 +72,7 @@ const STAFF: TeamStaffMemberData[] = [
     id: "1",
     firstName: "Karel",
     lastName: "Coach",
-    functionTitle: "T1",
+    functionTitle: "T1 - A-team",
     imageUrl: "/player-fixtures/player-schulz.jpg",
   },
   {
@@ -133,7 +129,7 @@ describe("TeamStaff", () => {
 
   it("renders the resolved function label", () => {
     render(<TeamStaff staff={STAFF} heading="Staf" />);
-    expect(screen.getByText("Hoofdtrainer")).toBeInTheDocument();
+    expect(screen.getByText("T1 - A-team")).toBeInTheDocument();
     expect(screen.getByText("Afgevaardigde")).toBeInTheDocument();
   });
 
