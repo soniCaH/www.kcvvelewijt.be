@@ -192,8 +192,22 @@ export const SelectedDayWithReservation: Story = {
  * `tournamentMatch()` mirrors the fixture shape `CalendarWeek.stories.tsx`'s
  * `WithTournament` and `CalendarAgenda.stories.tsx`'s `WithTournament`
  * already use; its date is overridden onto the same selected day so both
- * `kind: "reservation"` and `kind: "reduced"` sit in one frame beside the
- * `kind: "match"` entries.
+ * `kind: "reservation"` and `kind: "reduced"` land in the day-detail panel
+ * together.
+ *
+ * The VR runner clips each baseline to `document.documentElement.scrollHeight`
+ * (== the viewport height for these stories), so what's actually visible
+ * differs per viewport rather than being one uniform "all four rows beside
+ * each other" frame: **tablet** (768×1024) is the only baseline tall enough
+ * to hold all four day-detail rows — the reduced/tournament row, the
+ * reservation row, and both `kind: "match"` rows — genuinely side by side.
+ * **Desktop** (1440×900) is shorter than the day-detail panel needs once a
+ * fourth row is added, so both `kind: "match"` rows fall below the fold;
+ * that baseline still locks the two reduced-register rows and the caption
+ * swap, just not beside a `kind: "match"` entry. **Mobile** (375×667) has
+ * the whole day-detail panel below the fold, same as the pre-existing
+ * `SelectedDayWithReservation--mobile` baseline — it only locks the fourth
+ * grid pip.
  */
 export const SelectedDayWithReservationAndTournament: Story = {
   args: {
