@@ -118,34 +118,61 @@ export function useSectionNav(ids: readonly string[]): UseSectionNavResult {
     // intersecting), an entries-only reducer has nothing left to fall
     // back to and simply stops updating, leaving the wrong section active.
     //
-    // Fixed by keeping every target's own last-known state in a map,
-    // updated incrementally by each delivery, and recomputing "topmost
-    // currently intersecting" from that complete map every time — so a
-    // batch that only mentions one target can never lose track of what
-    // every other target most recently reported.
-    const state = new Map<string, { intersecting: boolean; top: number }>();
+    // Fixed by keeping every target's own last-known MEMBERSHIP (not its
+    // geometry — see below) in a map, updated incrementally by each
+    // delivery, and recomputing "topmost currently intersecting" from that
+    // complete map every time — so a batch that only mentions one target
+    // can never lose track of what every other target most recently
+    // reported.
+    const state = new Map<string, { intersecting: boolean; el: Element }>();
 
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           state.set(entry.target.id, {
             intersecting: entry.isIntersecting,
-            top: entry.boundingClientRect.top,
+            el: entry.target,
           });
         }
         let topId: string | null = null;
         let topValue = Infinity;
         for (const [id, s] of state) {
-          if (s.intersecting && s.top <= topValue) {
+          if (!s.intersecting) continue;
+          // Read LIVE, not `entry.boundingClientRect` at delivery time.
+          // With `threshold: [0]` a section shorter than the band gets
+          // exactly one delivery for its whole visit — the instant it
+          // crosses the band's bottom edge — so a snapshotted `top` goes
+          // stale for the rest of that visit. Two short sections in the
+          // band at once would then tie (or mis-order) on their frozen
+          // entry-time values instead of their current position. Reading
+          // the element's own rect here instead makes "topmost" correct
+          // at decision time regardless of how long ago either delivery
+          // fired.
+          const top = s.el.getBoundingClientRect().top;
+          if (top < topValue) {
             topId = id;
-            topValue = s.top;
+            topValue = top;
           }
         }
         if (topId !== null) setActiveId(topId);
       },
       // Top inset clears the header + this bar; the bottom inset flips
       // "active" near the top third of the viewport, not the very bottom.
-      { rootMargin: `-${topInset}px 0px -55% 0px`, threshold: [0, 0.25, 0.6] },
+      //
+      // threshold is `[0]` — membership only, no ratio steps. This is NOT
+      // a fix for #2988's `activeId` staying `null`: `isIntersecting` is
+      // computed from geometry, independent of the threshold list, so a
+      // section that never delivered under `[0, 0.25, 0.6]` would not have
+      // delivered under `[0]` either — `[0]` is a strict subset, it can
+      // only remove deliveries, never add one. (#2988's actual cause is
+      // upstream of this observer entirely: hydration itself, under CPU
+      // throttling, sometimes hasn't run by the time a test's assertion
+      // window closes — see the PR for the instrumented evidence.) `[0]`
+      // is kept because, now that "topmost" is read live above rather than
+      // from a stale delivery-time snapshot, the reducer no longer needs
+      // ratio steps to keep that snapshot fresh — membership is all it
+      // consumes.
+      { rootMargin: `-${topInset}px 0px -55% 0px`, threshold: [0] },
     );
 
     targets.forEach((el) => observer.observe(el));
