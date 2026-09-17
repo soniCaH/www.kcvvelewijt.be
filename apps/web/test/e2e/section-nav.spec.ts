@@ -292,8 +292,49 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
       1,
     );
 
+    // A `goto` straight to `${slug}#${targetId}` from here would differ from
+    // the load above only in its hash — Playwright, like a real browser,
+    // treats that as a same-document fragment navigation (no reload), which
+    // would silently exercise `useHashLandingCorrection`'s same-page
+    // hash-change branch instead of its cold-load one (#2993). Planting a
+    // sentinel on `window` and navigating away to `about:blank` first forces
+    // the next `goto` to be a genuine cross-document navigation — asserted
+    // below, not just assumed, by checking the sentinel is gone.
+    await page.evaluate(() => {
+      (window as unknown as { __coldLoadSentinel?: true }).__coldLoadSentinel =
+        true;
+    });
+    await page.goto("about:blank");
+
     await gotoBounded(page, `/ploegen/${teamSlugWithNav}#${targetId}`);
+
+    // Proof this was a real cold load, not a fragment-only change: a
+    // same-document navigation would have kept the sentinel alive.
+    expect(
+      await page.evaluate(
+        () =>
+          (window as unknown as { __coldLoadSentinel?: true })
+            .__coldLoadSentinel,
+      ),
+    ).toBeUndefined();
+
     await waitForScrollSettled(page);
+
+    // `waitForScrollSettled` only proves `scrollY` stopped moving — on a
+    // genuine cold load that can resolve while the bar-aware correction
+    // (`useSectionNav`'s measure → setBarHeight → scrollPaddingTop write →
+    // notifyLayoutChange → `useHashLandingCorrection.correct()` chain) is
+    // still pending several React cycles after `load`, reading
+    // pre-correction geometry. Waiting on this assertion first is what
+    // actually waits for the correction to land — mirrors the `/hulp`
+    // cold-load test's own `aria-current` wait below (see its comment for
+    // why geometry alone can't tell "landed correctly" from "never reached
+    // the target": a stalled-short scroll leaves `targetTop` even further
+    // below the viewport, which trivially satisfies the same comparison).
+    await expect(links.nth(count - 1)).toHaveAttribute(
+      "aria-current",
+      "location",
+    );
 
     const barBottom = await stickyBarBottom(page, "team-section-nav");
     const targetTop = await page
