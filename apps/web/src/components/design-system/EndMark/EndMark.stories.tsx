@@ -51,6 +51,7 @@ export const AlignmentProof: Story = {
         <Story />
         <div
           aria-hidden="true"
+          // eslint-disable-next-line no-restricted-syntax -- 1px pointer-events-none alignment ruler, in fuchsia precisely so it cannot be mistaken for a brand colour (apps/web/DESIGN.md → Colors, the Token-Only Colour Rule)
           className="pointer-events-none absolute inset-x-12 top-1/2 h-px bg-fuchsia-500/60"
         />
       </div>

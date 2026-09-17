@@ -78,56 +78,24 @@ export function getMembersWithResponsibilities(
 }
 
 /**
- * Return the display label and CSS classes for a responsibility category.
+ * Return the display label for a responsibility category.
  *
  * @param category - The responsibility category identifier
- * @returns An object containing `label`, `colorClass`, and `bgClass` for the given category; falls back to neutral gray styling if the category is not recognized
+ * @returns An object containing `label` for the given category; falls back to "Algemeen" if the category is not recognized
  */
 export function getCategoryInfo(category: ResponsibilityPath["category"]): {
   label: string;
-  colorClass: string;
-  bgClass: string;
 } {
   const categories = {
-    medisch: {
-      label: "Medisch",
-      colorClass: "text-red-600",
-      bgClass: "bg-red-50 border-red-200",
-    },
-    sportief: {
-      label: "Sportief",
-      colorClass: "text-green-600",
-      bgClass: "bg-green-50 border-green-200",
-    },
-    administratief: {
-      label: "Administratief",
-      colorClass: "text-purple-600",
-      bgClass: "bg-purple-50 border-purple-200",
-    },
-    gedrag: {
-      label: "Gedrag",
-      colorClass: "text-orange-600",
-      bgClass: "bg-orange-50 border-orange-200",
-    },
-    algemeen: {
-      label: "Algemeen",
-      colorClass: "text-blue-600",
-      bgClass: "bg-blue-50 border-blue-200",
-    },
-    commercieel: {
-      label: "Commercieel",
-      colorClass: "text-teal-600",
-      bgClass: "bg-teal-50 border-teal-200",
-    },
+    medisch: { label: "Medisch" },
+    sportief: { label: "Sportief" },
+    administratief: { label: "Administratief" },
+    gedrag: { label: "Gedrag" },
+    algemeen: { label: "Algemeen" },
+    commercieel: { label: "Commercieel" },
   };
 
-  return (
-    categories[category] || {
-      label: "Algemeen",
-      colorClass: "text-gray-600",
-      bgClass: "bg-gray-50 border-gray-200",
-    }
-  );
+  return categories[category] || { label: "Algemeen" };
 }
 
 /**
