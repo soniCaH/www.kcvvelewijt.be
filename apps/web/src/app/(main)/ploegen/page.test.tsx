@@ -113,4 +113,29 @@ describe("/ploegen listing — Phase 6.C composition", () => {
       true,
     );
   });
+
+  it("degrades to an empty team list when runPromise rejects, instead of throwing (#2864)", async () => {
+    // A rejection here stands in for either a Sanity read failure OR an
+    // `AppLayer` construction failure (e.g. a missing `KCVV_API_URL`) — both
+    // surface identically as a rejected `runPromise`, which is exactly what
+    // `fetchTeams`'s outer try/catch must survive. `degradeSection`'s
+    // in-effect `catchAllCause` alone cannot see the latter.
+    const { runPromise } = await import("@/lib/effect/runtime");
+    vi.mocked(runPromise).mockRejectedValueOnce(
+      new Error("KCVV_API_URL is not set"),
+    );
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const element = await TeamsPage();
+    render(element);
+
+    expect(screen.queryAllByTestId("team-flagship")).toHaveLength(0);
+    expect(consoleError).toHaveBeenCalledWith(
+      "[ploegen] failed to fetch teams:",
+      expect.any(Error),
+    );
+    consoleError.mockRestore();
+  });
 });
