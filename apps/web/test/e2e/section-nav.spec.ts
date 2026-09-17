@@ -320,6 +320,22 @@ test.describe("an anchor jump lands below the bar, at the derived offset (#2478 
 
     await waitForScrollSettled(page);
 
+    // `waitForScrollSettled` only proves `scrollY` stopped moving — on a
+    // genuine cold load that can resolve while the bar-aware correction
+    // (`useSectionNav`'s measure → setBarHeight → scrollPaddingTop write →
+    // notifyLayoutChange → `useHashLandingCorrection.correct()` chain) is
+    // still pending several React cycles after `load`, reading
+    // pre-correction geometry. Waiting on this assertion first is what
+    // actually waits for the correction to land — mirrors the `/hulp`
+    // cold-load test's own `aria-current` wait below (see its comment for
+    // why geometry alone can't tell "landed correctly" from "never reached
+    // the target": a stalled-short scroll leaves `targetTop` even further
+    // below the viewport, which trivially satisfies the same comparison).
+    await expect(links.nth(count - 1)).toHaveAttribute(
+      "aria-current",
+      "location",
+    );
+
     const barBottom = await stickyBarBottom(page, "team-section-nav");
     const targetTop = await page
       .locator(`#${targetId}`)
