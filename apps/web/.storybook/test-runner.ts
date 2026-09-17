@@ -36,6 +36,12 @@ const IMAGE_LOAD_TIMEOUT_MS = 1500;
 // per-image load + decode pair below, which is what actually guarantees a
 // stable screenshot.
 const NETWORK_IDLE_TIMEOUT_MS = 3000;
+// Cap on each stage of `waitForFontsSettled` below (the targeted `fonts.load`
+// pass and the `fonts.ready` backstop each get their own budget). A missing
+// or broken face must not hang the runner — see that function's docblock for
+// why the wait needs two capped stages instead of a single `fonts.ready`
+// await.
+const FONT_LOAD_TIMEOUT_MS = 2000;
 // Cap on the one `iframe.html` navigation in `prepare`. Playwright's default is
 // 30s and the CI opening burst sits right on that cliff: every Jest worker
 // cold-launches Chromium and parses the whole preview bundle at the same
@@ -114,6 +120,93 @@ input, textarea {
   caret-color: transparent !important;
 }
 `;
+
+// Runs in the page context. `document.fonts.ready` alone is NOT a reliable
+// "fonts are applied" signal in this repo: Adobe Typekit injects its
+// `@font-face` rules ASYNCHRONOUSLY, so `ready` can resolve *before* Freight
+// is even pending — `ShareElements.tsx`'s `useAutoFit` documents the exact
+// same race (SHARE-1: "Adobe Typekit injects its @font-face ASYNCHRONOUSLY,
+// so `fonts.ready` can resolve BEFORE Freight is even pending"), and #2584
+// independently measured `ready` flipping back to "loading" at t≈600ms once
+// Freight's real fetch actually started. `VIEWPORTS` captures `mobile`
+// first, so it was the capture most likely to land inside that window — the
+// viewport order is evidence of the race, not its cause, so it stays put.
+//
+// Fix, mirroring `useAutoFit`'s `fonts.load(font, text)` + `fonts.ready`
+// backstop pattern: force every distinct font-family/weight/style
+// combination actually RENDERED on the page via a targeted `fonts.load()`
+// first — that's a real network/cache fetch of the exact face in use, not a
+// readiness flag that can race the loader — THEN fall back to `fonts.ready`
+// for anything a later reflow might still need that wasn't on screen yet.
+// Do NOT simplify this back to a bare `fonts.ready` await: that is precisely
+// the signal this function exists to replace. Both stages are soft-capped,
+// like every other wait in this runner, so a missing or broken face can't
+// hang a story.
+async function waitForFontsSettled(timeoutMs: number) {
+  const fonts = document.fonts;
+  if (!fonts) return;
+
+  // Font shorthand -> the on-screen text that actually uses it, concatenated
+  // across every contributing element. Mirrors useAutoFit's fonts.load(font,
+  // text) call (SHARE-1): passing real text means the Font Loading API's
+  // glyph probe covers what this render needs instead of the spec default
+  // sample ("BESbswy"), which matters the day any freight-* face stops
+  // declaring `unicode-range: U+0-10FFFF` (harmless no-op today, since every
+  // live face still does).
+  const textByFont = new Map<string, string>();
+  const addFace = (
+    style: string,
+    weight: string,
+    family: string,
+    text: string,
+  ) => {
+    if (!family) return;
+    textByFont.set(
+      `${style} ${weight} 16px ${family}`,
+      (textByFont.get(`${style} ${weight} 16px ${family}`) ?? "") + text,
+    );
+  };
+
+  for (const el of Array.from(document.querySelectorAll("*"))) {
+    const text = el.textContent ?? "";
+    const cs = getComputedStyle(el);
+    addFace(cs.fontStyle, cs.fontWeight, cs.fontFamily, text);
+
+    // `::first-letter` is the one pseudo-element font override in this
+    // codebase (`DropCapParagraph.tsx` sets `first-letter:font-display-big
+    // first-letter:font-black` — a different face/weight than the element
+    // itself; `globals.css` declares no other pseudo `font-family` rule, so
+    // this stays narrow rather than walking every pseudo speculatively). A
+    // plain `getComputedStyle(el)` never sees it, which left the drop cap's
+    // freight-big-pro/900 face untargeted and falling through to the `ready`
+    // backstop below — exactly the failure mode this function exists to
+    // close, on the single largest glyph in an `ArticleBody` capture.
+    const firstLetter = getComputedStyle(el, "::first-letter");
+    addFace(
+      firstLetter.fontStyle,
+      firstLetter.fontWeight,
+      firstLetter.fontFamily,
+      text.charAt(0),
+    );
+  }
+
+  // `FontFaceSet.load()` rejects its returned promise on a bad shorthand per
+  // spec (and in Chromium, the only engine this runner drives) — it does not
+  // throw synchronously, so there is nothing here to catch. A rejection just
+  // resolves out of `allSettled` below like a slow-but-successful load would.
+  const loads = Array.from(textByFont, ([font, text]) =>
+    fonts.load(font, text),
+  );
+
+  await Promise.race([
+    Promise.allSettled(loads),
+    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+  await Promise.race([
+    fonts.ready,
+    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+}
 
 const config: TestRunnerConfig = {
   setup() {
@@ -305,7 +398,7 @@ const config: TestRunnerConfig = {
     // top-border clip-path swap — would still snap on and produce a diff.
     await page.mouse.move(-1, -1);
     await waitForPageReady(page);
-    await page.evaluate(() => document.fonts?.ready);
+    await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
 
     for (const name of requestedViewports) {
       const vp = VIEWPORTS[name];
@@ -328,7 +421,14 @@ const config: TestRunnerConfig = {
         .catch(() => {
           // Fall through — the rAF wait below will still flush layout.
         });
-      await page.evaluate(() => document.fonts?.ready);
+      // Re-run the targeted font wait per viewport, not only once before the
+      // loop: a resize can swap in markup a viewport-conditional component
+      // renders only at that breakpoint (e.g. a ResizeObserver-driven
+      // change), or flip which face a responsive utility (`sm:font-display`,
+      // a weight breakpoint) resolves to — either way a face `getComputedStyle`
+      // never saw at the previous viewport, and that face is exactly the one
+      // still racing Typekit's async injection (SHARE-1).
+      await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
       // Viewport changes can re-trigger Next/Image's responsive `srcset`,
       // swapping in a different file. Without this wait the screenshot races
       // the swap and the same story flickers between runs. Capped at
