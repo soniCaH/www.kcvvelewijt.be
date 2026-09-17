@@ -424,7 +424,15 @@ const config: TestRunnerConfig = {
       // make this silently stop running.
       for (const assertion of applicableAssertions) {
         if (assertion.viewport !== name) continue;
-        const track = page.locator(assertion.trackSelector);
+        // Scoped to the story's own rendered root, not the bare document —
+        // `trackSelector` is documented (structural-assertions.ts) as
+        // resolving under `#storybook-root`, so a caller who writes a
+        // generic selector (e.g. '[role="region"]') can't accidentally
+        // match chrome outside the story or trip `trackCount !== 1` against
+        // an autodocs/composed page that renders more than one instance.
+        const track = page
+          .locator("#storybook-root")
+          .locator(assertion.trackSelector);
         const trackCount = await track.count();
         if (trackCount !== 1) {
           throw new Error(

@@ -49,10 +49,12 @@ export interface StructuralAssertion {
    * throws if `parameters.vr.viewports` excludes it, since that would be
    * another silent no-op. */
   viewport: VrViewportName;
-  /** CSS selector, relative to the story's rendered root, for the single
-   * scrollable "track" element whose `scrollWidth` vs `clientWidth` proves
-   * (or disproves) the overflow this assertion exists to guard. Must match
-   * exactly one element — `postVisit` throws otherwise. */
+  /** CSS selector, scoped to `#storybook-root` (the story's rendered root —
+   * `postVisit` queries it via `page.locator("#storybook-root").locator(
+   * trackSelector)`, never the bare document), for the single scrollable
+   * "track" element whose `scrollWidth` vs `clientWidth` proves (or
+   * disproves) the overflow this assertion exists to guard. Must match
+   * exactly one element under that root — `postVisit` throws otherwise. */
   trackSelector: string;
 }
 

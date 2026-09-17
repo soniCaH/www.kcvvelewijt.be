@@ -657,23 +657,46 @@ export const FullDivision: Story = {
 
 `postVisit` reads `story.tags`, matches it against the registry, and —
 while visiting the assertion's declared `viewport` — measures real
-`scrollWidth` vs `clientWidth` on `trackSelector` (exactly one match
-required) and throws if the invariant the tag promises doesn't hold. Two
-further throws close off ways the check could silently stop running rather
-than fail: a tagged story that also sets `parameters.vr.disable = true`
-(which returns before any assertion runs), and a tagged story whose own
-`parameters.vr.viewports` excludes the assertion's `viewport`.
+`scrollWidth` vs `clientWidth` on `trackSelector`, queried under
+`#storybook-root` (the story's own rendered root, never the bare
+document — exactly one match required there) and throws if the invariant
+the tag promises doesn't hold. Two further throws close off ways the check
+could silently stop running rather than fail: a tagged story that also sets
+`parameters.vr.disable = true` (which returns before any assertion runs),
+and a tagged story whose own `parameters.vr.viewports` excludes the
+assertion's `viewport`.
 
 **A tag with no story left carrying it is the failure mode this mechanism
 exists to close** — the guard it backstops for StandingsTable
 (`apps/web/test/e2e/scroll-arrows.spec.ts`) is itself a `test.skip()` on
-pre-season live data. `apps/web/test/vr/structural-assertions.test.ts`
-statically greps every `*.stories.tsx` file for each registered tag and
-fails the **Vitest** suite (part of `pnpm --filter @kcvv/web check-all`,
-which runs far more often than a full VR pass) the moment a tag stops being
-referenced anywhere — a renamed or deleted tagged story trips that check
-immediately instead of the runtime assertion just quietly never firing
-again.
+pre-season live data. `apps/web/test/vr/structural-assertions.test.ts` is
+the static, always-runs-in-`check-all` half — and review on #2861 found
+that a naive "does the tag string appear anywhere in the file" scan misses
+the more likely ways a tag stops actually running:
+
+- **The tag only survives in a comment.** The test strips `//`/`/* */`
+  comments (same pass as
+  `apps/web/src/app/__tests__/cross-page-consistency.test.ts`) and parses
+  real `tags: [...]` array literals out of what's left, rather than
+  grepping raw file text.
+- **The tagged story is excluded from the VR run itself.** The run is
+  `test-storybook --includeTags vr --excludeTags vr-skip`
+  (`apps/web/package.json`) — a story is only ever visited when its
+  Storybook-combined tags (meta `tags` ∪ the story's own, via
+  `combineTags`) include `vr` and exclude `vr-skip`. The test
+  approximates that union per occurrence and fails if either condition
+  doesn't hold — catching `vr-skip` added reactively to a story (or to a
+  file's meta, which disables every story in that file) after a CI
+  OOM/crash flake, and a story whose meta never opted into `vr` at all.
+- **A file extension the scan didn't look at.** The glob
+  (`**/*.stories.{js,jsx,mjs,ts,tsx}`) mirrors `.storybook/main.ts`'s own
+  `stories` entry exactly, so a tag on a plain-TS `.stories.ts` file (no
+  JSX required) isn't reported as "nowhere referenced".
+
+Any of these failing fails the **Vitest** suite — part of
+`pnpm --filter @kcvv/web check-all`, which runs far more often than a full
+VR pass — the moment a tag stops actually running, instead of the runtime
+assertion just quietly never firing again.
 
 The next component that needs this shape of guard adds an entry to
 `STRUCTURAL_ASSERTIONS` and a tag on one of its own stories — no changes to
