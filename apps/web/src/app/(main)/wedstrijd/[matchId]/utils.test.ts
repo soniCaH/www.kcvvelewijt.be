@@ -15,6 +15,7 @@ import {
 } from "./utils";
 import type { LineupPlayer } from "@/components/match/MatchLineup";
 import type { MatchLineupPlayer } from "@/lib/effect/schemas/match.schema";
+import { asRowKind } from "@/components/match/test-narrowing";
 import { createMatchDetail } from "./match-detail.fixtures";
 
 describe("transformHomeTeam", () => {
@@ -336,9 +337,9 @@ describe("matchDetailToHeroRow (#2802 review — the fourth adapter)", () => {
     });
     const row = matchDetailToHeroRow(match);
     expect(row.kind).toBe("match");
-    if (row.kind !== "match") throw new Error("expected match kind");
-    expect(row.homeTeam.name).toBe("KCVV Elewijt");
-    expect(row.awayTeam.name).toBe("KFC Turnhout");
+    const matchRow = asRowKind(row, "match", "expected match kind");
+    expect(matchRow.homeTeam.name).toBe("KCVV Elewijt");
+    expect(matchRow.awayTeam.name).toBe("KFC Turnhout");
   });
 
   it("builds the reservation branch with the single reserving team, never a fabricated opponent", () => {
@@ -349,9 +350,12 @@ describe("matchDetailToHeroRow (#2802 review — the fourth adapter)", () => {
     });
     const row = matchDetailToHeroRow(match);
     expect(row.kind).toBe("reservation");
-    if (row.kind !== "reservation")
-      throw new Error("expected reservation kind");
-    expect(row.team.name).toBe("KCVV Elewijt");
+    const reservationRow = asRowKind(
+      row,
+      "reservation",
+      "expected reservation kind",
+    );
+    expect(reservationRow.team.name).toBe("KCVV Elewijt");
   });
 
   it("builds the reduced branch resolving the other club by id, even when KCVV is listed away", () => {
@@ -364,8 +368,8 @@ describe("matchDetailToHeroRow (#2802 review — the fourth adapter)", () => {
     });
     const row = matchDetailToHeroRow(match);
     expect(row.kind).toBe("reduced");
-    if (row.kind !== "reduced") throw new Error("expected reduced kind");
-    expect(row.team.name).toBe("FC Zemst Sportief");
+    const reducedRow = asRowKind(row, "reduced", "expected reduced kind");
+    expect(reducedRow.team.name).toBe("FC Zemst Sportief");
   });
 
   it("reverts a tournament fixture to the match branch once a result exists", () => {

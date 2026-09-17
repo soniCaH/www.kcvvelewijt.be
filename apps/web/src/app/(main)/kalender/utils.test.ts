@@ -25,7 +25,11 @@ import type {
   CalendarReservation,
   CalendarReducedMatch,
 } from "./utils";
-import { asNonPlaceholder, asReduced } from "@/components/match/test-narrowing";
+import {
+  asNonPlaceholder,
+  asReduced,
+  asRowKind,
+} from "@/components/match/test-narrowing";
 import { createRawMatch } from "@/components/match/match.fixtures";
 import {
   reservationMatch,
@@ -654,9 +658,12 @@ describe("calendarMatchToScheduleMatch", () => {
       );
 
       expect(result.kind).toBe("reservation");
-      if (result.kind !== "reservation")
-        throw new Error("expected a reservation");
-      expect(result.team).toEqual({
+      const reservation = asRowKind(
+        result,
+        "reservation",
+        "expected a reservation",
+      );
+      expect(reservation.team).toEqual({
         id: 1235,
         name: "KCVV Elewijt",
       });

@@ -5,7 +5,7 @@
 import { describe, it, expect } from "vitest";
 import { transformMatchToSchedule } from "./transform";
 import type { ScheduleReservation, ScheduleReducedMatch } from "./types";
-import { asNonPlaceholder, asReduced } from "./test-narrowing";
+import { asNonPlaceholder, asReduced, asRowKind } from "./test-narrowing";
 import { createRawMatch } from "./match.fixtures";
 
 // Type-level assertion (#2802 review) — TypeScript, not vitest, is under
@@ -145,9 +145,12 @@ describe("transformMatchToSchedule", () => {
     const result = transformMatchToSchedule(placeholder);
 
     expect(result.kind).toBe("reservation");
-    if (result.kind !== "reservation")
-      throw new Error("expected a reservation");
-    expect(result.team).toEqual({
+    const reservation = asRowKind(
+      result,
+      "reservation",
+      "expected a reservation",
+    );
+    expect(reservation.team).toEqual({
       id: 1235,
       name: "KCVV Elewijt",
       logo: "https://example.com/kcvv.png",
