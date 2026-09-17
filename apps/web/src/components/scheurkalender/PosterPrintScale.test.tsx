@@ -4,7 +4,7 @@
  * The fit is the only thing standing between a long season and fixtures
  * clipped off the bottom of the poster, so both bounds get a case.
  */
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render } from "@testing-library/react";
 import { PosterPrintScale } from "./PosterPrintScale";
 import { BLOCK_HEIGHT_PX, WIDTH_FIT_SCALE } from "./poster-geometry";
@@ -85,6 +85,39 @@ describe("PosterPrintScale", () => {
     // hidden by a class on screen, and forcing an inline value would change
     // what the print stylesheet is allowed to do with it.
     expect(footer.style.display).toBe("none");
+  });
+
+  it("re-measures on a FontFaceSet loadingdone event (#2822)", () => {
+    // Stub `document.fonts` with ONLY a `loadingdone` subscription (no
+    // `ready`) — proves the re-measure comes through the shared
+    // `useWebfontSwap` trigger, not the removed `fonts.ready` check.
+    let loadingDoneHandler: (() => void) | undefined;
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: {
+        addEventListener: (event: string, handler: () => void) => {
+          if (event === "loadingdone") loadingDoneHandler = handler;
+        },
+        removeEventListener: vi.fn(),
+      },
+    });
+
+    // Mounts with a short sheet (width-fit scale)...
+    const sheet = mountSheet(200);
+    render(<PosterPrintScale />);
+    expect(readScale()).toBeCloseTo(WIDTH_FIT_SCALE, 4);
+
+    // ...then Freight swaps in and the sheet grows taller.
+    Object.defineProperty(sheet, "scrollHeight", {
+      configurable: true,
+      value: 1800,
+    });
+    loadingDoneHandler?.();
+
+    expect(readScale()).toBeCloseTo(BLOCK_HEIGHT_PX / 1800, 4);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    delete (document as any).fonts;
   });
 
   it("stops measuring once unmounted", () => {
