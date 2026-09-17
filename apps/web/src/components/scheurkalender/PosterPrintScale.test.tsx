@@ -102,22 +102,24 @@ describe("PosterPrintScale", () => {
       },
     });
 
-    // Mounts with a short sheet (width-fit scale)...
-    const sheet = mountSheet(200);
-    render(<PosterPrintScale />);
-    expect(readScale()).toBeCloseTo(WIDTH_FIT_SCALE, 4);
+    try {
+      // Mounts with a short sheet (width-fit scale)...
+      const sheet = mountSheet(200);
+      render(<PosterPrintScale />);
+      expect(readScale()).toBeCloseTo(WIDTH_FIT_SCALE, 4);
 
-    // ...then Freight swaps in and the sheet grows taller.
-    Object.defineProperty(sheet, "scrollHeight", {
-      configurable: true,
-      value: 1800,
-    });
-    loadingDoneHandler?.();
+      // ...then Freight swaps in and the sheet grows taller.
+      Object.defineProperty(sheet, "scrollHeight", {
+        configurable: true,
+        value: 1800,
+      });
+      loadingDoneHandler?.();
 
-    expect(readScale()).toBeCloseTo(BLOCK_HEIGHT_PX / 1800, 4);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (document as any).fonts;
+      expect(readScale()).toBeCloseTo(BLOCK_HEIGHT_PX / 1800, 4);
+    } finally {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (document as any).fonts;
+    }
   });
 
   it("stops measuring once unmounted", () => {

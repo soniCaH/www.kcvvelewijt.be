@@ -460,39 +460,41 @@ describe("useScrollHint", () => {
         },
       });
 
-      let currentScrollWidth = 500;
-      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
-        configurable: true,
-        get: () => currentScrollWidth,
-      });
-      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
-        configurable: true,
-        value: 500,
-      });
-      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
-        configurable: true,
-        value: 0,
-      });
+      try {
+        let currentScrollWidth = 500;
+        Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+          configurable: true,
+          get: () => currentScrollWidth,
+        });
+        Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+          configurable: true,
+          value: 500,
+        });
+        Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+          configurable: true,
+          value: 0,
+        });
 
-      let hookResult: UseScrollHintReturn | undefined;
-      render(
-        createElement(TestHost, {
-          onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
-          },
-        }),
-      );
+        let hookResult: UseScrollHintReturn | undefined;
+        render(
+          createElement(TestHost, {
+            onHook: (h: UseScrollHintReturn) => {
+              hookResult = h;
+            },
+          }),
+        );
 
-      expect(hookResult!.overflows).toBe(false);
+        expect(hookResult!.overflows).toBe(false);
 
-      // The real Freight swap lands and widens the track's content.
-      currentScrollWidth = 900;
-      act(() => loadingDoneHandler?.());
+        // The real Freight swap lands and widens the track's content.
+        currentScrollWidth = 900;
+        act(() => loadingDoneHandler?.());
 
-      expect(hookResult!.overflows).toBe(true);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (document as any).fonts;
+        expect(hookResult!.overflows).toBe(true);
+      } finally {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (document as any).fonts;
+      }
     });
   });
 

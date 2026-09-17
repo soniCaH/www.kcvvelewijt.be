@@ -86,8 +86,8 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
   // `getComputedStyle` — a forced style/layout flush — on every scroll tick
   // measures a value scrolling never touches. `measurePadding` below is
   // called by every non-scroll trigger (mount, resize, transitionend, the
-  // ResizeObserver, the MutationObserver, the font-swap promise) so the
-  // cache is refreshed whenever the padding could genuinely have changed;
+  // ResizeObserver, the MutationObserver, the shared webfont-swap trigger)
+  // so the cache is refreshed whenever the padding could genuinely have changed;
   // the scroll path (`applyMeasurement`) only ever reads it back (#2860).
   const paddingRef = useRef(0);
   // Handle of the animation frame scheduled by a pending scroll tick, so
