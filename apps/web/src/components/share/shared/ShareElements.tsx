@@ -20,10 +20,18 @@ function useAutoFit<T extends HTMLElement>(
 ) {
   const ref = useRef<T>(null);
   const [size, setSize] = useState(fontSize);
-  // Holds the current effect run's `refit` (respects that run's own
-  // `cancelled` guard below) so the webfont-swap subscription — live for
-  // the component's whole lifetime, not just one effect run — always calls
-  // into the CURRENT run rather than a stale closure from a prior one.
+  // `useWebfontSwap` already holds the LATEST callback it's given in its
+  // own internal ref — the other three consumers (`useScrollHint`,
+  // `useHashLandingCorrection`, `PosterPrintScale`) pass a render-scope
+  // `useCallback` straight in and stop there. This one can't: `fit`/`refit`
+  // are declared INSIDE the `useLayoutEffect` below because `cancelled`
+  // must belong to that specific effect run, not the component's whole
+  // lifetime — a stale run's async `fonts.load()` callback must be able to
+  // no-op after a newer run has started, which a component-lifetime flag
+  // can't express. So `refitRef` is a second, narrower bridge: it exists
+  // only to get the CURRENT run's `refit` out of the effect and into the
+  // stable callback handed to `useWebfontSwap` below — not a workaround for
+  // anything `useWebfontSwap` itself is missing.
   const refitRef = useRef<() => void>(() => {});
 
   // The shared webfont-swap trigger (#2822): a real-swap backstop for
