@@ -34,7 +34,7 @@
   },
   "lint-staged": {
     "apps/web/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix --config apps/web/eslint.config.mjs",
+      "eslint --fix --fix-type problem,suggestion,layout --config apps/web/eslint.config.mjs",
       "prettier --write"
     ],
     "apps/web/**/*.{json,md,yml,yaml}": [
