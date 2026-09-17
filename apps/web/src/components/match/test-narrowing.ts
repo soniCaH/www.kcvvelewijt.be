@@ -4,16 +4,12 @@
  * `UpcomingRow`, `CalendarMatch`, ...) now has three members —
  * `"match"`/`"reservation"`/`"reduced"` — so one generic assertion per
  * member covers all of them instead of a copy per test file.
- *
- * `asNonPlaceholder` narrows to `kind: "match"` specifically, not to
- * "not a reservation" — a `"reduced"` row is not a reservation either (it's
- * a real tournament fixture, not a self-match) but has no
- * `homeTeam`/`awayTeam`/scores, so a narrower "not a reservation" check
- * would still refuse those fields. Callers that want the full scoreboard
- * shape need `kind === "match"`; the name is kept (rather than renamed to
- * `asMatch`) so every existing call site in the test suite keeps working
- * unchanged.
  */
+
+/** Narrows `row` to the member whose `kind` matches `kind`, throwing
+ *  `message` otherwise. The one generic assertion behind every
+ *  per-member wrapper below (and usable directly for a member — e.g.
+ *  `"reservation"` — that has no named wrapper). */
 export function asRowKind<T extends { kind: string }, K extends T["kind"]>(
   row: T | undefined,
   kind: K,
@@ -23,16 +19,20 @@ export function asRowKind<T extends { kind: string }, K extends T["kind"]>(
   return row as Extract<T, { kind: K }>;
 }
 
-/** See the doc comment above `asRowKind` for why this narrows to
- *  `kind: "match"` and is not named `asMatch`. */
+/**
+ * Narrows to `kind: "match"` specifically, not to "not a reservation" — a
+ * `"reduced"` row is not a reservation either (it's a real tournament
+ * fixture, not a self-match) but has no `homeTeam`/`awayTeam`/scores, so a
+ * narrower "not a reservation" check would still refuse those fields.
+ * Callers that want the full scoreboard shape need `kind === "match"`; the
+ * name is kept (rather than renamed to `asMatch`) so every existing call
+ * site in the test suite keeps working unchanged.
+ */
 export function asNonPlaceholder<T extends { kind: string }>(
   row: T | undefined,
   message = "expected a non-placeholder row",
 ): Extract<T, { kind: "match" }> {
-  return asRowKind(row, "match" as T["kind"] & "match", message) as Extract<
-    T,
-    { kind: "match" }
-  >;
+  return asRowKind<T, T["kind"] & "match">(row, "match", message);
 }
 
 /** Narrows to `kind: "reduced"` — the tournament-fixture-with-no-result-yet
@@ -41,8 +41,5 @@ export function asReduced<T extends { kind: string }>(
   row: T | undefined,
   message = "expected a reduced row",
 ): Extract<T, { kind: "reduced" }> {
-  return asRowKind(row, "reduced" as T["kind"] & "reduced", message) as Extract<
-    T,
-    { kind: "reduced" }
-  >;
+  return asRowKind<T, T["kind"] & "reduced">(row, "reduced", message);
 }
