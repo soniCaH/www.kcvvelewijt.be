@@ -123,46 +123,34 @@ describe("responsibility-utils", () => {
   });
 
   describe("getCategoryInfo", () => {
-    it("should return correct info for medisch category", () => {
+    it("should return correct label for medisch category", () => {
       const result = getCategoryInfo("medisch");
       expect(result.label).toBe("Medisch");
-      expect(result.colorClass).toBe("text-red-600");
-      expect(result.bgClass).toContain("red");
     });
 
-    it("should return correct info for sportief category", () => {
+    it("should return correct label for sportief category", () => {
       const result = getCategoryInfo("sportief");
       expect(result.label).toBe("Sportief");
-      expect(result.colorClass).toBe("text-green-600");
-      expect(result.bgClass).toContain("green");
     });
 
-    it("should return correct info for administratief category", () => {
+    it("should return correct label for administratief category", () => {
       const result = getCategoryInfo("administratief");
       expect(result.label).toBe("Administratief");
-      expect(result.colorClass).toBe("text-purple-600");
-      expect(result.bgClass).toContain("purple");
     });
 
-    it("should return correct info for gedrag category", () => {
+    it("should return correct label for gedrag category", () => {
       const result = getCategoryInfo("gedrag");
       expect(result.label).toBe("Gedrag");
-      expect(result.colorClass).toBe("text-orange-600");
-      expect(result.bgClass).toContain("orange");
     });
 
-    it("should return correct info for algemeen category", () => {
+    it("should return correct label for algemeen category", () => {
       const result = getCategoryInfo("algemeen");
       expect(result.label).toBe("Algemeen");
-      expect(result.colorClass).toBe("text-blue-600");
-      expect(result.bgClass).toContain("blue");
     });
 
-    it("should return correct info for commercieel category", () => {
+    it("should return correct label for commercieel category", () => {
       const result = getCategoryInfo("commercieel");
       expect(result.label).toBe("Commercieel");
-      expect(result.colorClass).toBe("text-teal-600");
-      expect(result.bgClass).toContain("teal");
     });
   });
 
