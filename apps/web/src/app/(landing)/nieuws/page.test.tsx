@@ -1,13 +1,13 @@
 /**
  * A failed tag-list read must degrade to an empty page, not throw (#2863).
  *
- * `ArticleRepository.findTags` is a Sanity read — every Sanity read ends in
- * `Effect.orDie` (`lib/sanity/fetch-groq.ts`), so the effect is typed
- * `Effect<A>` with `E = never` and its failures arrive as *defects*. An
- * `Effect.catchAll` on it type-checks but never runs; only a cause-aware
- * guard (`degradeSection`) can see the failure. The tag list is a filter
- * facet, not the page's subject (the article grid is), so a failed read must
- * keep the page up with an empty category list rather than take it down.
+ * `ArticleRepository.findTags` is a Sanity read, typed `Effect<A,
+ * SanityReadError>` (#2864, `lib/sanity/fetch-groq.ts`). An `Effect.catchAll`
+ * on it would catch that typed channel but not a stray defect elsewhere in
+ * the same `Effect.gen`; only a cause-aware guard (`degradeSection`) covers
+ * both. The tag list is a filter facet, not the page's subject (the article
+ * grid is), so a failed read must keep the page up with an empty category
+ * list rather than take it down.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";

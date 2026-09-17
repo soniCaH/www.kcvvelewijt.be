@@ -181,10 +181,11 @@ export default async function HomePage() {
     runPromise(
       // Banners + the off-season placeholder share one `homePage` document
       // read (#2858 — folded from two independent round-trips). `degradeSection`,
-      // not `Effect.catchAll` — every Sanity read ends in `Effect.orDie`
-      // (`fetch-groq.ts`), so a repository method's error channel is `never`
-      // and a `catchAll` on one type-checks but never runs (review finding 1
-      // on #2505/PR #2852). A failed read now degrades both halves together,
+      // not `Effect.catchAll` — a Sanity read's `SanityReadError` (#2864,
+      // `fetch-groq.ts`) is a typed failure, but `catchAll` only catches
+      // failures in that channel, not a defect elsewhere in the same
+      // `Effect.gen`; `degradeSection`'s `catchAllCause` covers both (review
+      // finding 1 on #2505/PR #2852). A failed read now degrades both halves together,
       // where before either could survive the other's failure (two separate
       // fetches, two separate Data Cache entries) — a real trade-off, not a
       // no-op: they read the same document, so a failure that loses one would

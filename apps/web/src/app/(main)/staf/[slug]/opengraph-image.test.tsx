@@ -1,11 +1,11 @@
 /**
  * A failed staff-member read must degrade to the club card, not throw (#2863).
  *
- * `StaffRepository.findByPsdId` is a Sanity read — every Sanity read ends in
- * `Effect.orDie` (`lib/sanity/fetch-groq.ts`), so the effect is typed
- * `Effect<A>` with `E = never` and its failures arrive as *defects*. An
- * `Effect.catchAll` on it type-checks but never runs; only a cause-aware
- * guard (`degradeSection`) can see the failure. This route has no error
+ * `StaffRepository.findByPsdId` is a Sanity read, typed `Effect<A,
+ * SanityReadError>` (#2864, `lib/sanity/fetch-groq.ts`). An `Effect.catchAll`
+ * on it would catch that typed channel but not a stray defect elsewhere in
+ * the same `Effect.gen`; only a cause-aware guard (`degradeSection`) covers
+ * both. This route has no error
  * boundary to bubble into — a throw here would serve a broken image to every
  * social crawler — so a failed read must resolve to the club-branded
  * fallback card instead.
