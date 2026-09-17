@@ -9,7 +9,10 @@ import type { MatchDetail } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
 import { BffService } from "@/lib/effect/services/BffService";
-import { ArticleRepository } from "@/lib/repositories/article.repository";
+import {
+  ArticleRepository,
+  type ArticleVM,
+} from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { computeReadingTime } from "@/lib/utils/reading-time";
 import {
@@ -238,17 +241,25 @@ function shouldRenderArticleCredits(article: ArticleDetailVM): boolean {
 export async function generateStaticParams() {
   // Section (of the build), not a request-time subject: an empty list here
   // just means every slug renders on demand instead of being pre-enumerated
-  // — `dynamicParams` still serves them (#2864).
-  const articles = await runPromise(
-    degradeSection(
-      Effect.gen(function* () {
-        const repo = yield* ArticleRepository;
-        return yield* repo.findAll();
-      }),
-      [],
-      "[nieuws/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
-    ),
-  );
+  // — `dynamicParams` still serves them (#2864). The outer try/catch also
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
+  // that happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps, so an in-effect catch alone would let it fail the whole build.
+  let articles: ArticleVM[] = [];
+  try {
+    articles = await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+        [],
+        "[nieuws/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+      ),
+    );
+  } catch {
+    articles = [];
+  }
   // Exclude matchPreview/matchRecap from the prebuild set: their hero +
   // Doelpunten require a per-article PSD fetch, so prebuilding them would
   // hammer the rate-limited BFF at build time. They render on-demand via

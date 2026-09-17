@@ -38,17 +38,25 @@ interface StaffPageProps {
 export async function generateStaticParams() {
   // Section (of the build), not a request-time subject: an empty list here
   // just means every slug renders on demand instead of being pre-enumerated
-  // — `dynamicParams` still serves them (#2864).
-  const members = await runPromise(
-    degradeSection(
-      Effect.gen(function* () {
-        const repo = yield* StaffRepository;
-        return yield* repo.findAllForStaticParams();
-      }),
-      [],
-      "[staf/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
-    ),
-  );
+  // — `dynamicParams` still serves them (#2864). The outer try/catch also
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
+  // that happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps, so an in-effect catch alone would let it fail the whole build.
+  let members: { psdId: string }[] = [];
+  try {
+    members = await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findAllForStaticParams();
+        }),
+        [],
+        "[staf/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+      ),
+    );
+  } catch {
+    members = [];
+  }
   return members.map((m) => ({ slug: m.psdId }));
 }
 

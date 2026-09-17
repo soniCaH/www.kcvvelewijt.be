@@ -19,6 +19,7 @@ import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
 import { EventRepository } from "@/lib/repositories/event.repository";
+import type { EVENT_SLUGS_QUERY_RESULT } from "@/lib/sanity/sanity.types";
 import {
   PhotoGalleryRepository,
   type GalleryCardVM,
@@ -47,17 +48,25 @@ export const revalidate = 3600;
 export async function generateStaticParams() {
   // Section (of the build), not a request-time subject: an empty list here
   // just means every slug renders on demand instead of being pre-enumerated
-  // — `dynamicParams` still serves them (#2864).
-  const slugs = await runPromise(
-    degradeSection(
-      Effect.gen(function* () {
-        const repo = yield* EventRepository;
-        return yield* repo.findAllSlugs();
-      }),
-      [],
-      "[evenementen/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
-    ),
-  );
+  // — `dynamicParams` still serves them (#2864). The outer try/catch also
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
+  // that happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps, so an in-effect catch alone would let it fail the whole build.
+  let slugs: EVENT_SLUGS_QUERY_RESULT = [];
+  try {
+    slugs = await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* EventRepository;
+          return yield* repo.findAllSlugs();
+        }),
+        [],
+        "[evenementen/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+      ),
+    );
+  } catch {
+    slugs = [];
+  }
   return slugs
     .filter((row): row is { slug: string; updatedAt: string } =>
       Boolean(row.slug),

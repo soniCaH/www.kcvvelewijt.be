@@ -74,17 +74,28 @@ export default async function RootLayout({
 
   // Section read: the nav's team list, not the page itself — every route
   // renders under this layout, so a failed read degrades to an empty nav
-  // rather than taking the whole site down (#2864).
-  const allTeams: TeamNavVM[] = await runPromise(
-    degradeSection(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findAll();
-      }),
-      [],
-      "[RootLayout] failed to load team nav — degrading to empty list",
-    ),
-  );
+  // rather than taking the whole site down (#2864). The outer try/catch is
+  // not the dead-catchAll anti-pattern this ticket removes elsewhere: it
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`),
+  // which happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps — an in-effect catch cannot see a failure to provide the effect's
+  // own context. Verified empirically: with `KCVV_API_URL` unset, dropping
+  // this try/catch 500s every route instead of rendering with an empty nav.
+  let allTeams: TeamNavVM[] = [];
+  try {
+    allTeams = await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAll();
+        }),
+        [],
+        "[RootLayout] failed to load team nav — degrading to empty list",
+      ),
+    );
+  } catch {
+    allTeams = [];
+  }
 
   // Only the senior sides get their own nav entry; `Jeugd` is a plain link to
   // the directory that indexes the rest (#2415).
