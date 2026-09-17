@@ -245,21 +245,20 @@ const nextConfig: NextConfig = {
         destination: "/hulp#structuur",
         permanent: true,
       },
-      // #2227 (SEO-9) — retired Gatsby routes with no direct equivalent →
-      // nearest live page (owner decision on the issue).
+      // #3014 — the printed accident letters carry a QR code for
+      // `kcvvelewijt.be/ongeval`. 307, not 308: the print is permanent but the
+      // target may become an article, and a 308 stays cached in browsers.
       {
-        source: "/club/cashless",
-        destination: "/club/praktische-informatie",
-        permanent: true,
+        source: "/ongeval",
+        destination: "/hulp#sportongeval",
+        permanent: false,
       },
+      // #2227 (SEO-9) — retired Gatsby routes with no direct equivalent →
+      // nearest live page (owner decision on the issue). `/club/cashless` and
+      // `/club/downloads` are NOT retired: both render their CMS page (#3014).
       {
         source: "/club/cashless/voorwaarden",
-        destination: "/club/praktische-informatie",
-        permanent: true,
-      },
-      {
-        source: "/club/downloads",
-        destination: "/club",
+        destination: "/club/cashless",
         permanent: true,
       },
       // Internal kiosk displays (a, b, previous, upcoming, ranking/*) → calendar.

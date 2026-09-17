@@ -73,12 +73,9 @@ describe("next.config redirects", () => {
     const redirects = await nextConfig.redirects!();
 
     const expected = [
-      { source: "/club/cashless", destination: "/club/praktische-informatie" },
-      {
-        source: "/club/cashless/voorwaarden",
-        destination: "/club/praktische-informatie",
-      },
-      { source: "/club/downloads", destination: "/club" },
+      // #3014 — `/club/cashless` renders its CMS page again; the sub-path
+      // lands on it.
+      { source: "/club/cashless/voorwaarden", destination: "/club/cashless" },
       { source: "/kiosk", destination: "/kalender" },
       { source: "/kiosk/:path*", destination: "/kalender" },
     ];
@@ -89,6 +86,26 @@ describe("next.config redirects", () => {
       expect(match!.destination).toBe(destination);
       expect(match!.permanent).toBe(true);
     }
+  });
+
+  it("lets the /club/downloads and /club/cashless CMS pages render (#3014)", async () => {
+    const redirects = await nextConfig.redirects!();
+    const sources = redirects.map((r) => r.source);
+    // Both are live Sanity `page` docs linked from the header and the /club
+    // hub; a redirect here sends the visitor back to the page they left.
+    expect(sources).not.toContain("/club/downloads");
+    expect(sources).not.toContain("/club/cashless");
+  });
+
+  it("sends the printed /ongeval QR code to the accident path with 307 (#3014)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const match = redirects.find((r) => r.source === "/ongeval");
+    expect(match, "Missing redirect for /ongeval").toBeDefined();
+    expect(match!.destination).toBe("/hulp#sportongeval");
+    // Temporary on purpose: the QR code is printed for good and the target may
+    // move, so browsers must not cache it.
+    expect(match!.permanent).toBe(false);
   });
 
   it("drops the broken static player/staff/youth renames now handled by resolver routes (#2227)", async () => {
