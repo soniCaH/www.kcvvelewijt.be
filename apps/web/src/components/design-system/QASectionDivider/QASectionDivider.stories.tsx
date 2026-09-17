@@ -94,6 +94,7 @@ export const AlignmentProof: Story = {
         <Story />
         <div
           aria-hidden="true"
+
           className="pointer-events-none absolute inset-x-12 top-1/2 h-px bg-fuchsia-500/60"
         />
       </div>
