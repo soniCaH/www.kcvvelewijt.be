@@ -5,6 +5,7 @@ colors:
   cream: "#f5f1e6"
   cream-soft: "#ede8da"
   cream-deep: "#e1d7bf"
+  manila: "#f0e4c4"
   paper-edge: "#d9d2bd"
   ink: "#0a0a0a"
   ink-soft: "#1f1f1f"
@@ -398,7 +399,7 @@ The cost is stated rather than hidden: multiply darkens a photo that fills its f
 - **Primary:** jersey-deep fill, cream text, `4px 4px 0 0` ink shadow. Padding 0.75rem / 2rem at the default size (0.5/1.5 small, 1/2.5 large).
 - **Inverted:** cream fill, ink text, muted-ink shadow — for placement on dark surfaces.
 - **Secondary:** cream-soft fill, ink text. **Ghost:** transparent, ink text, `ink/5` hover wash.
-- **Hover:** the canonical press-down — `translate(1px, 1px)` with the shadow collapsing to none over 300ms, and for primary that is the whole hover. Primary is the only variant with no hover fill: it used to brighten 110%, but a filter-based relight necessarily lands off-token (it pushed jersey-deep to `#00884d`), so #2395 removed it rather than mint a hover green.
+- **Hover:** the canonical press-down — `translate(4px, 4px)` with the shadow collapsing to none over 300ms, and for primary that is the whole hover. Primary is the only variant with no hover fill: it used to brighten 110%, but a filter-based relight necessarily lands off-token (it pushed jersey-deep to `#00884d`), so #2395 removed it rather than mint a hover green.
 - **Focus:** a 2px jersey-deep ring at 2px offset.
 - **Disabled:** 50% opacity, `not-allowed` cursor, and every hover effect neutralised back to the resting surface so the button visibly does not react.
 - An optional trailing `→` glyph translates 4px right on group hover.
@@ -538,7 +539,7 @@ Where a notice is warranted, two more splits apply. **The tier follows the scope
 - **Do** set every rectangle's border radius to `0` and reserve curves for true circles.
 - **Do** give a shadow-casting surface a `2px` ink border, or `1.5px` on a stamp, badge or chip — never a `1px` hairline underneath a shadow, except the in-page section-nav chip, which is deliberately `1px`/`1px` (chrome, not content). A shadowless divider may still be `2px` ink; the implication runs one way only.
 - **Do** use hard offset shadows with `0` blur, in exactly the seven documented tokens.
-- **Do** press interactive surfaces into their shadow on hover (`translate(1px, 1px)` + `shadow-none`), gating only the translate behind `motion-safe:` — except the in-page section-nav chip, which never presses at all.
+- **Do** press interactive surfaces into their shadow on hover (`translate(4px, 4px)` + `shadow-none`), gating only the translate behind `motion-safe:` — except the in-page section-nav chip, which never presses at all.
 - **Do** pick the right green: `jersey` decorative only, `jersey-deep` for anything carrying text (headings, CTAs, inline prose links), `jersey-bright` for green text on ink.
 - **Do** reach for an existing primitive — taped card, ticket stub, mono label, editorial heading, tape strip, stamp badge, striped seam — before writing new markup.
 - **Do** route every page through the three container widths (680 / 1040 / 1280).
