@@ -14,12 +14,25 @@
  * `asMatch`) so every existing call site in the test suite keeps working
  * unchanged.
  */
+export function asRowKind<T extends { kind: string }, K extends T["kind"]>(
+  row: T | undefined,
+  kind: K,
+  message = `expected a "${kind}" row`,
+): Extract<T, { kind: K }> {
+  if (!row || row.kind !== kind) throw new Error(message);
+  return row as Extract<T, { kind: K }>;
+}
+
+/** See the doc comment above `asRowKind` for why this narrows to
+ *  `kind: "match"` and is not named `asMatch`. */
 export function asNonPlaceholder<T extends { kind: string }>(
   row: T | undefined,
   message = "expected a non-placeholder row",
 ): Extract<T, { kind: "match" }> {
-  if (!row || row.kind !== "match") throw new Error(message);
-  return row as Extract<T, { kind: "match" }>;
+  return asRowKind(row, "match" as T["kind"] & "match", message) as Extract<
+    T,
+    { kind: "match" }
+  >;
 }
 
 /** Narrows to `kind: "reduced"` — the tournament-fixture-with-no-result-yet
@@ -28,6 +41,8 @@ export function asReduced<T extends { kind: string }>(
   row: T | undefined,
   message = "expected a reduced row",
 ): Extract<T, { kind: "reduced" }> {
-  if (!row || row.kind !== "reduced") throw new Error(message);
-  return row as Extract<T, { kind: "reduced" }>;
+  return asRowKind(row, "reduced" as T["kind"] & "reduced", message) as Extract<
+    T,
+    { kind: "reduced" }
+  >;
 }
