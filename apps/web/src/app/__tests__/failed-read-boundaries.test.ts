@@ -12,13 +12,13 @@
  * mocked at its client, one level below every repository, so each page's own
  * `catch`/no-catch decision is what the assertion actually reads.
  *
- * **Sanity reads fail as defects, not as typed errors.** `fetchGroq` ends in
- * `Effect.orDie`, so every repository method is typed `Effect<A>` with `E =
- * never` and a `catchAll` on one is inert — which is why the two subject
- * catches this ticket removes were already unreachable, and why every section
- * degrade goes through `degradeSection` (`lib/effect/degrade.ts`). The subject
- * cases below are therefore regression cover rather than a behaviour change:
- * they fail the day someone reaches for `catchAllCause` on a subject read.
+ * **A Sanity read carries a typed `SanityReadError` (#2864).** A subject read
+ * dies via an explicit call-site `Effect.orDie`, and every section degrade
+ * goes through `degradeSection` (`lib/effect/degrade.ts`) — the compiler
+ * enforces that every call site picks one, so a `catchAllCause` reaching for
+ * a subject read now fails `type-check` rather than only this test. The
+ * subject cases below are regression cover for the render behaviour, not for
+ * the type hole itself.
  *
  * **This file pins the routes #2563 touched; it is not the growth guard.** A
  * route added later is not covered here — the rule that scales is rule 5 in
