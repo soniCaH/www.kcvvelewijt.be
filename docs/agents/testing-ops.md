@@ -628,6 +628,57 @@ crash mode cannot be addressed by adjusting fixtures alone — e.g. an edge-case
 story that intentionally exercises an unsupported path of the underlying
 component or library. Document the reason inline (one comment line).
 
+### Structural assertions — opt-in, tag-scoped DOM checks beyond pixels (#2861)
+
+`postVisit` can also assert something about a story's rendered DOM beyond
+the pixel-snapshot comparison every `vr`-tagged story already gets — e.g.
+"this scroll track must actually overflow at mobile", a property no
+screenshot diff verifies on its own. The registry lives in
+`apps/web/test/vr/structural-assertions.ts`; each entry is:
+
+```typescript
+{
+  tag: "vr-assert-mobile-overflow",
+  description: "…",
+  viewport: "mobile",
+  trackSelector: '[data-testid="standings-table"] [role="region"]',
+}
+```
+
+Opt a story in the same way `vr-skip` opts one out — a plain tag on the
+story export, never a hard-coded story id in a `postVisit` conditional:
+
+```typescript
+export const FullDivision: Story = {
+  args: { entries: fullDivision, highlightTeamId: 1235 },
+  tags: ["vr-assert-mobile-overflow"],
+};
+```
+
+`postVisit` reads `story.tags`, matches it against the registry, and —
+while visiting the assertion's declared `viewport` — measures real
+`scrollWidth` vs `clientWidth` on `trackSelector` (exactly one match
+required) and throws if the invariant the tag promises doesn't hold. Two
+further throws close off ways the check could silently stop running rather
+than fail: a tagged story that also sets `parameters.vr.disable = true`
+(which returns before any assertion runs), and a tagged story whose own
+`parameters.vr.viewports` excludes the assertion's `viewport`.
+
+**A tag with no story left carrying it is the failure mode this mechanism
+exists to close** — the guard it backstops for StandingsTable
+(`apps/web/test/e2e/scroll-arrows.spec.ts`) is itself a `test.skip()` on
+pre-season live data. `apps/web/test/vr/structural-assertions.test.ts`
+statically greps every `*.stories.tsx` file for each registered tag and
+fails the **Vitest** suite (part of `pnpm --filter @kcvv/web check-all`,
+which runs far more often than a full VR pass) the moment a tag stops being
+referenced anywhere — a renamed or deleted tagged story trips that check
+immediately instead of the runtime assertion just quietly never firing
+again.
+
+The next component that needs this shape of guard adds an entry to
+`STRUCTURAL_ASSERTIONS` and a tag on one of its own stories — no changes to
+`postVisit` itself.
+
 ### Inspecting diffs
 
 When the CI `visual-regression` job fails on a PR, the `vr-diff-comment` job
