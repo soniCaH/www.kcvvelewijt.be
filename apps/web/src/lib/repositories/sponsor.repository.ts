@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type { SPONSORS_QUERY_RESULT } from "../sanity/sanity.types";
 
@@ -27,7 +27,7 @@ export type SponsorVM = Omit<
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface SponsorRepositoryInterface {
-  readonly findAll: () => Effect.Effect<SponsorVM[]>;
+  readonly findAll: () => Effect.Effect<SponsorVM[], SanityReadError>;
 }
 
 export class SponsorRepository extends Context.Tag("SponsorRepository")<

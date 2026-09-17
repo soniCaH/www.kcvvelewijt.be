@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   TEAMS_QUERY_RESULT,
@@ -287,9 +287,14 @@ function toTeamLandingItem(
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface TeamRepositoryInterface {
-  readonly findAll: () => Effect.Effect<TeamNavVM[]>;
-  readonly findBySlug: (slug: string) => Effect.Effect<TeamDetailVM | null>;
-  readonly findAllForLanding: () => Effect.Effect<TeamLandingItem[]>;
+  readonly findAll: () => Effect.Effect<TeamNavVM[], SanityReadError>;
+  readonly findBySlug: (
+    slug: string,
+  ) => Effect.Effect<TeamDetailVM | null, SanityReadError>;
+  readonly findAllForLanding: () => Effect.Effect<
+    TeamLandingItem[],
+    SanityReadError
+  >;
   /**
    * Every non-archived team that references `memberId` — a player's or a
    * staff member's own team(s) (#2443/#2581 domain tier). See
@@ -297,7 +302,7 @@ export interface TeamRepositoryInterface {
    */
   readonly findByMemberId: (
     memberId: string,
-  ) => Effect.Effect<TeamRelationVM[]>;
+  ) => Effect.Effect<TeamRelationVM[], SanityReadError>;
 }
 
 export class TeamRepository extends Context.Tag("TeamRepository")<

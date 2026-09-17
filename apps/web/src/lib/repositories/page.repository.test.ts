@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
+import type { SanityReadError } from "../sanity/fetch-groq";
 import type { PAGE_BY_SLUG_QUERY_RESULT } from "../sanity/sanity.types";
 
 // Mock the sanity client before importing the repository
@@ -15,7 +16,9 @@ import { PageRepository, PageRepositoryLive } from "./page.repository";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(effect: Effect.Effect<A, never, PageRepository>) {
+function runWithRepo<A>(
+  effect: Effect.Effect<A, SanityReadError, PageRepository>,
+) {
   return Effect.runPromise(Effect.provide(effect, PageRepositoryLive));
 }
 

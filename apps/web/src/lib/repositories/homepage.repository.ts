@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type { HOMEPAGE_QUERY_RESULT } from "../sanity/sanity.types";
 
@@ -171,7 +171,7 @@ export interface HomepageVM {
 }
 
 export interface HomepageRepositoryInterface {
-  readonly getHomepage: () => Effect.Effect<HomepageVM>;
+  readonly getHomepage: () => Effect.Effect<HomepageVM, SanityReadError>;
 }
 
 export class HomepageRepository extends Context.Tag("HomepageRepository")<

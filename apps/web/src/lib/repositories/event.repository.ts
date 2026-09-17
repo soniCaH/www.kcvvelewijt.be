@@ -1,7 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { DateTime } from "luxon";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { CLUB_TIMEZONE, clubToday } from "../utils/dates";
 import type { EventType } from "@/components/event/event-type-style";
 import type {
@@ -227,16 +227,27 @@ export function mergeEventFeed(
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface EventRepositoryInterface {
-  readonly findAll: () => Effect.Effect<EventVM[]>;
+  readonly findAll: () => Effect.Effect<EventVM[], SanityReadError>;
   /**
    * Merged `/evenementen` feed: upcoming `event` docs + `articleType:event`
    * articles, chronological. `findAll` stays event-docs-only for the calendar
    * (Phase 6.D) and the legacy list.
    */
-  readonly findUpcomingForList: () => Effect.Effect<EventListItemVM[]>;
-  readonly findNextFeatured: () => Effect.Effect<EventVM | null>;
-  readonly findBySlug: (slug: string) => Effect.Effect<EventDetailVM | null>;
-  readonly findAllSlugs: () => Effect.Effect<EVENT_SLUGS_QUERY_RESULT>;
+  readonly findUpcomingForList: () => Effect.Effect<
+    EventListItemVM[],
+    SanityReadError
+  >;
+  readonly findNextFeatured: () => Effect.Effect<
+    EventVM | null,
+    SanityReadError
+  >;
+  readonly findBySlug: (
+    slug: string,
+  ) => Effect.Effect<EventDetailVM | null, SanityReadError>;
+  readonly findAllSlugs: () => Effect.Effect<
+    EVENT_SLUGS_QUERY_RESULT,
+    SanityReadError
+  >;
 }
 
 export class EventRepository extends Context.Tag("EventRepository")<

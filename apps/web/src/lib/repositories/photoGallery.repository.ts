@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   GALLERIES_QUERY_RESULT,
@@ -123,15 +123,20 @@ export interface PhotoGalleryRepositoryInterface {
   readonly findPaginated: (params: {
     offset: number;
     limit: number;
-  }) => Effect.Effect<GalleryCardVM[]>;
-  readonly findBySlug: (slug: string) => Effect.Effect<GalleryDetailVM | null>;
-  readonly findAllSlugs: () => Effect.Effect<GALLERY_SLUGS_QUERY_RESULT>;
+  }) => Effect.Effect<GalleryCardVM[], SanityReadError>;
+  readonly findBySlug: (
+    slug: string,
+  ) => Effect.Effect<GalleryDetailVM | null, SanityReadError>;
+  readonly findAllSlugs: () => Effect.Effect<
+    GALLERY_SLUGS_QUERY_RESULT,
+    SanityReadError
+  >;
   readonly findByLinkedMatch: (
     matchId: string,
-  ) => Effect.Effect<GalleryCardVM[]>;
+  ) => Effect.Effect<GalleryCardVM[], SanityReadError>;
   readonly findByLinkedEvent: (
     eventId: string,
-  ) => Effect.Effect<GalleryCardVM[]>;
+  ) => Effect.Effect<GalleryCardVM[], SanityReadError>;
 }
 
 export class PhotoGalleryRepository extends Context.Tag(

@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   PLAYERS_QUERY_RESULT,
@@ -209,15 +209,20 @@ export function __resetKeeperCacheForTests() {
 }
 
 export interface PlayerRepositoryInterface {
-  readonly findAll: () => Effect.Effect<PlayerVM[]>;
-  readonly findByPsdId: (psdId: string) => Effect.Effect<PlayerVM | null>;
+  readonly findAll: () => Effect.Effect<PlayerVM[], SanityReadError>;
+  readonly findByPsdId: (
+    psdId: string,
+  ) => Effect.Effect<PlayerVM | null, SanityReadError>;
   /**
    * Returns the set of PSD ids whose Sanity `player` document is flagged
    * as a keeper. PSD ids are strings in Sanity (and may not match the
    * `Match.home_team`/`away_team` `id` field type) — callers should
    * coerce to string before membership testing.
    */
-  readonly findKeeperPsdIds: () => Effect.Effect<ReadonlySet<string>>;
+  readonly findKeeperPsdIds: () => Effect.Effect<
+    ReadonlySet<string>,
+    SanityReadError
+  >;
 }
 
 export class PlayerRepository extends Context.Tag("PlayerRepository")<

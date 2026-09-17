@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
+import type { SanityReadError } from "../sanity/fetch-groq";
 import type {
   ARTICLES_QUERY_RESULT,
   ARTICLE_BY_SLUG_QUERY_RESULT,
@@ -17,7 +18,9 @@ import { ArticleRepository, ArticleRepositoryLive } from "./article.repository";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(effect: Effect.Effect<A, never, ArticleRepository>) {
+function runWithRepo<A>(
+  effect: Effect.Effect<A, SanityReadError, ArticleRepository>,
+) {
   return Effect.runPromise(Effect.provide(effect, ArticleRepositoryLive));
 }
 

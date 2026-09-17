@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
+import type { SanityReadError } from "../sanity/fetch-groq";
 import type { RESPONSIBILITY_PATHS_QUERY_RESULT } from "../sanity/sanity.types";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
@@ -19,7 +20,7 @@ import {
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
 function runWithRepo<A>(
-  effect: Effect.Effect<A, never, ResponsibilityRepository>,
+  effect: Effect.Effect<A, SanityReadError, ResponsibilityRepository>,
 ) {
   return Effect.runPromise(
     Effect.provide(effect, ResponsibilityRepositoryLive),
