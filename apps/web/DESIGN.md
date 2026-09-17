@@ -5,6 +5,7 @@ colors:
   cream: "#f5f1e6"
   cream-soft: "#ede8da"
   cream-deep: "#e1d7bf"
+  manila: "#f0e4c4"
   paper-edge: "#d9d2bd"
   ink: "#0a0a0a"
   ink-soft: "#1f1f1f"
