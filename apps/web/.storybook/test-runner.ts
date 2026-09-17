@@ -36,6 +36,12 @@ const IMAGE_LOAD_TIMEOUT_MS = 1500;
 // per-image load + decode pair below, which is what actually guarantees a
 // stable screenshot.
 const NETWORK_IDLE_TIMEOUT_MS = 3000;
+// Cap on each stage of `waitForFontsSettled` below (the targeted `fonts.load`
+// pass and the `fonts.ready` backstop each get their own budget). A missing
+// or broken face must not hang the runner — see that function's docblock for
+// why the wait needs two capped stages instead of a single `fonts.ready`
+// await.
+const FONT_LOAD_TIMEOUT_MS = 2000;
 // Cap on the one `iframe.html` navigation in `prepare`. Playwright's default is
 // 30s and the CI opening burst sits right on that cliff: every Jest worker
 // cold-launches Chromium and parses the whole preview bundle at the same
@@ -114,6 +120,59 @@ input, textarea {
   caret-color: transparent !important;
 }
 `;
+
+// Runs in the page context. `document.fonts.ready` alone is NOT a reliable
+// "fonts are applied" signal in this repo: Adobe Typekit injects its
+// `@font-face` rules ASYNCHRONOUSLY, so `ready` can resolve *before* Freight
+// is even pending — `ShareElements.tsx`'s `useAutoFit` documents the exact
+// same race (SHARE-1: "Adobe Typekit injects its @font-face ASYNCHRONOUSLY,
+// so `fonts.ready` can resolve BEFORE Freight is even pending"), and #2584
+// independently measured `ready` flipping back to "loading" at t≈600ms once
+// Freight's real fetch actually started. `VIEWPORTS` captures `mobile`
+// first, so it was the capture most likely to land inside that window — the
+// viewport order is evidence of the race, not its cause, so it stays put.
+//
+// Fix, mirroring `useAutoFit`'s `fonts.load(font, text)` + `fonts.ready`
+// backstop pattern: force every distinct font-family/weight/style
+// combination actually RENDERED on the page via a targeted `fonts.load()`
+// first — that's a real network/cache fetch of the exact face in use, not a
+// readiness flag that can race the loader — THEN fall back to `fonts.ready`
+// for anything a later reflow might still need that wasn't on screen yet.
+// Do NOT simplify this back to a bare `fonts.ready` await: that is precisely
+// the signal this function exists to replace. Both stages are soft-capped,
+// like every other wait in this runner, so a missing or broken face can't
+// hang a story.
+async function waitForFontsSettled(timeoutMs: number) {
+  const fonts = document.fonts;
+  if (!fonts) return;
+
+  const seen = new Set<string>();
+  const loads: Promise<unknown>[] = [];
+  for (const el of Array.from(document.querySelectorAll("*"))) {
+    const cs = getComputedStyle(el);
+    const family = cs.fontFamily;
+    if (!family) continue;
+    const key = `${cs.fontStyle} ${cs.fontWeight} ${family}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    try {
+      loads.push(fonts.load(`${cs.fontStyle} ${cs.fontWeight} 16px ${family}`));
+    } catch {
+      // Malformed shorthand (Font Loading API rejects some computed family
+      // lists) — skip the targeted load for this element; the `ready`
+      // backstop below still runs.
+    }
+  }
+
+  await Promise.race([
+    Promise.allSettled(loads),
+    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+  await Promise.race([
+    fonts.ready,
+    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+}
 
 const config: TestRunnerConfig = {
   setup() {
@@ -305,7 +364,7 @@ const config: TestRunnerConfig = {
     // top-border clip-path swap — would still snap on and produce a diff.
     await page.mouse.move(-1, -1);
     await waitForPageReady(page);
-    await page.evaluate(() => document.fonts?.ready);
+    await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
 
     for (const name of requestedViewports) {
       const vp = VIEWPORTS[name];
@@ -328,7 +387,11 @@ const config: TestRunnerConfig = {
         .catch(() => {
           // Fall through — the rAF wait below will still flush layout.
         });
-      await page.evaluate(() => document.fonts?.ready);
+      // Re-run the targeted font wait per viewport, not only once before the
+      // loop: a resize can lay out text that was off-screen (and so untouched
+      // by `getComputedStyle`) at the previous viewport, and that text's face
+      // is exactly the one still racing Typekit's async injection (SHARE-1).
+      await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
       // Viewport changes can re-trigger Next/Image's responsive `srcset`,
       // swapping in a different file. Without this wait the screenshot races
       // the swap and the same story flickers between runs. Capped at
