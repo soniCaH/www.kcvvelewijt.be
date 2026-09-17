@@ -10,6 +10,7 @@ import {
   type VrViewportName,
   unscopedViewportOverrideMessage,
 } from "../test/vr/viewport-scoping.ts";
+import { STRUCTURAL_ASSERTIONS } from "../test/vr/structural-assertions.ts";
 
 const VIEWPORTS: Record<VrViewportName, { width: number; height: number }> = {
   mobile: { width: 375, height: 667 },
@@ -218,7 +219,25 @@ const config: TestRunnerConfig = {
       disable?: boolean;
       viewports?: ReadonlyArray<ViewportName>;
     };
-    if (vrParams.disable) return;
+    const storyTags = (story.tags ?? []) as readonly string[];
+    // Opt-in structural assertions (#2861, see test/vr/structural-assertions.ts)
+    // — a story tag beyond the pixel-snapshot comparison below. Resolved
+    // ahead of the `vr.disable` early-return so a story can't silently
+    // combine the tag with `vr.disable` and have the assertion never run.
+    const applicableAssertions = STRUCTURAL_ASSERTIONS.filter((assertion) =>
+      storyTags.includes(assertion.tag),
+    );
+    if (vrParams.disable) {
+      if (applicableAssertions.length > 0) {
+        throw new Error(
+          `[VR] Story "${context.id}" is tagged with structural assertion(s) ` +
+            `(${applicableAssertions.map((a) => a.tag).join(", ")}) but also ` +
+            `sets parameters.vr.disable = true, which returns before those ` +
+            `assertions ever run. Remove the tag or the opt-out.`,
+        );
+      }
+      return;
+    }
 
     const allViewportNames = VR_VIEWPORT_NAMES;
     const requestedViewports = vrParams.viewports ?? allViewportNames;
@@ -258,6 +277,23 @@ const config: TestRunnerConfig = {
     );
     if (unscopedMessage) {
       throw new Error(unscopedMessage);
+    }
+
+    // A story can be tagged for a structural assertion yet scope its own
+    // `vr.viewports` to exclude the viewport that assertion needs — another
+    // shape of the same silent no-op the two throws above already guard
+    // against, so catch it the same way rather than let the assertion just
+    // never run for that story.
+    const missingAssertionViewport = applicableAssertions.find(
+      (assertion) => !requestedViewports.includes(assertion.viewport),
+    );
+    if (missingAssertionViewport) {
+      throw new Error(
+        `[VR] Story "${context.id}" is tagged ` +
+          `"${missingAssertionViewport.tag}" but parameters.vr.viewports ` +
+          `does not include "${missingAssertionViewport.viewport}", so the ` +
+          `assertion would never run. ${missingAssertionViewport.description}`,
+      );
     }
 
     await page.addStyleTag({ content: DETERMINISM_STYLESHEET });
@@ -379,6 +415,48 @@ const config: TestRunnerConfig = {
             requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
           }),
       );
+
+      // Structural assertions (#2861) scoped to this viewport — real
+      // `scrollWidth` vs `clientWidth` on a fixture, checked on every VR run
+      // regardless of what live data happens to contain that day. See
+      // test/vr/structural-assertions.ts for the mechanism and
+      // structural-assertions.test.ts for why a renamed/removed tag can't
+      // make this silently stop running.
+      for (const assertion of applicableAssertions) {
+        if (assertion.viewport !== name) continue;
+        // Scoped to the story's own rendered root, not the bare document —
+        // `trackSelector` is documented (structural-assertions.ts) as
+        // resolving under `#storybook-root`, so a caller who writes a
+        // generic selector (e.g. '[role="region"]') can't accidentally
+        // match chrome outside the story or trip `trackCount !== 1` against
+        // an autodocs/composed page that renders more than one instance.
+        const track = page
+          .locator("#storybook-root")
+          .locator(assertion.trackSelector);
+        const trackCount = await track.count();
+        if (trackCount !== 1) {
+          throw new Error(
+            `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
+              `its track selector (${assertion.trackSelector}, queried ` +
+              `under #storybook-root) matched ${trackCount} element(s) at ` +
+              `the ${name} viewport, expected exactly 1. ` +
+              `${assertion.description}`,
+          );
+        }
+        const { scrollWidth, clientWidth } = await track.evaluate((el) => ({
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth,
+        }));
+        if (scrollWidth <= clientWidth) {
+          throw new Error(
+            `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
+              `its scroll track did not overflow at the ${name} viewport ` +
+              `(scrollWidth=${scrollWidth}, clientWidth=${clientWidth}). ` +
+              `${assertion.description}`,
+          );
+        }
+      }
+
       // `fullPage: true` would extend horizontally past `vp.width` whenever
       // a story has horizontal overflow (e.g. UI/HorizontalSlider) — and
       // that overflow can be a few px wider on Apple Silicon than on x86,

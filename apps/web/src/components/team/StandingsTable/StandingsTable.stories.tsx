@@ -57,9 +57,18 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Full division with KCVV highlighted mid-table (position 6). */
+/**
+ * Full division with KCVV highlighted mid-table (position 6). Also the
+ * deterministic fixture for the mobile-overflow structural assertion
+ * (#2861, `test/vr/structural-assertions.ts`) — a real 14-team, 8-column
+ * division backstops the guard year-round, independent of whether the live
+ * season has started (see `apps/web/test/e2e/scroll-arrows.spec.ts`'s
+ * `test.skip`-carrying live-data case, which this deterministic check
+ * exists alongside).
+ */
 export const FullDivision: Story = {
   args: { entries: fullDivision, highlightTeamId: 1235 },
+  tags: ["vr-assert-mobile-overflow"],
 };
 
 /** No highlight target — renders the table without a KCVV accent row. */
