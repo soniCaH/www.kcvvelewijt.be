@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-17T09:32:42Z",
+  "generatedAt": "2026-09-17T09:54:46Z",
   "title": "Design System: KCVV Elewijt",
   "extensions": {
     "colorMeta": {
@@ -389,7 +389,7 @@
       {
         "name": "press-down",
         "value": "300ms cubic-bezier(0, 0, 0.58, 1)",
-        "purpose": "The canonical press-down on buttons and cards: translate(1px, 1px) with the shadow collapsing to none. Translate is gated behind motion-safe; the shadow collapse is not."
+        "purpose": "The canonical press-down on buttons and cards: translate(4px, 4px) with the shadow collapsing to none. Translate is gated behind motion-safe; the shadow collapse is not."
       },
       {
         "name": "reveal",
@@ -431,7 +431,7 @@
       "refersTo": "button-primary",
       "description": "The default call to action. Jersey-deep paper stamp that presses into its own shadow on hover.",
       "html": "<button class=\"ds-btn ds-btn-primary\">Word lid <span class=\"ds-btn-arrow\" aria-hidden=\"true\">→</span></button>",
-      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; font-weight: 500; padding: 12px 32px; border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; cursor: pointer; transition: all 300ms cubic-bezier(0, 0, 0.58, 1); } .ds-btn-primary { background: var(--color-jersey-deep, #008755); color: var(--color-cream, #f5f1e6); box-shadow: 4px 4px 0 0 var(--color-ink, #0a0a0a); } .ds-btn-primary:hover { filter: brightness(1.1); transform: translate(1px, 1px); box-shadow: none; } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-jersey-deep, #008755); outline-offset: 2px; } .ds-btn-arrow { transition: transform 300ms ease-out; } .ds-btn-primary:hover .ds-btn-arrow { transform: translateX(4px); }"
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; font-weight: 500; padding: 12px 32px; border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; cursor: pointer; transition: all 300ms cubic-bezier(0, 0, 0.58, 1); } .ds-btn-primary { background: var(--color-jersey-deep, #008755); color: var(--color-cream, #f5f1e6); box-shadow: 4px 4px 0 0 var(--color-ink, #0a0a0a); } .ds-btn-primary:hover { filter: brightness(1.1); transform: translate(4px, 4px); box-shadow: none; } .ds-btn-primary:focus-visible { outline: 2px solid var(--color-jersey-deep, #008755); outline-offset: 2px; } .ds-btn-arrow { transition: transform 300ms ease-out; } .ds-btn-primary:hover .ds-btn-arrow { transform: translateX(4px); }"
     },
     {
       "name": "Inverted Button",
@@ -439,7 +439,7 @@
       "refersTo": "button-inverted",
       "description": "Cream button for placement on ink or jersey-deep surfaces. Uses the muted-ink shadow so the offset stays visible against a dark field.",
       "html": "<div class=\"ds-btn-inverted-stage\"><button class=\"ds-btn ds-btn-inverted\">Bekijk kalender</button></div>",
-      "css": ".ds-btn-inverted-stage { background: var(--color-ink, #0a0a0a); padding: 28px; } .ds-btn-inverted { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; font-weight: 500; padding: 12px 32px; border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; cursor: pointer; background: var(--color-cream, #f5f1e6); color: var(--color-ink, #0a0a0a); box-shadow: 4px 4px 0 0 var(--color-ink-muted, #6b6b6b); transition: all 300ms cubic-bezier(0, 0, 0.58, 1); } .ds-btn-inverted:hover { background: var(--color-cream-soft, #ede8da); transform: translate(1px, 1px); box-shadow: none; } .ds-btn-inverted:focus-visible { outline: 2px solid var(--color-jersey-deep, #008755); outline-offset: 2px; }"
+      "css": ".ds-btn-inverted-stage { background: var(--color-ink, #0a0a0a); padding: 28px; } .ds-btn-inverted { display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; font-weight: 500; padding: 12px 32px; border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; cursor: pointer; background: var(--color-cream, #f5f1e6); color: var(--color-ink, #0a0a0a); box-shadow: 4px 4px 0 0 var(--color-ink-muted, #6b6b6b); transition: all 300ms cubic-bezier(0, 0, 0.58, 1); } .ds-btn-inverted:hover { background: var(--color-cream-soft, #ede8da); transform: translate(4px, 4px); box-shadow: none; } .ds-btn-inverted:focus-visible { outline: 2px solid var(--color-jersey-deep, #008755); outline-offset: 2px; }"
     },
     {
       "name": "Taped Card",
@@ -447,7 +447,7 @@
       "refersTo": "card-paper",
       "description": "The signature surface: cream paper, 2px ink border, hard offset shadow, a tape strip half-over the top edge, and a sub-degree resting rotation.",
       "html": "<article class=\"ds-card\"><span class=\"ds-card-tape\" aria-hidden=\"true\"></span><p class=\"ds-card-kicker\">Wedstrijdverslag</p><h3 class=\"ds-card-title\">Drie punten in de <em>slotfase</em>.</h3><p class=\"ds-card-body\">Een late kopbal van de tweede paal beslist een taaie namiddag op de Driesstraat.</p></article>",
-      "css": ".ds-card { position: relative; display: block; max-width: 340px; background: var(--color-cream, #f5f1e6); color: var(--color-ink, #0a0a0a); border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; padding: 20px; box-shadow: 6px 6px 0 0 var(--color-ink, #0a0a0a); transform: rotate(-0.25deg); transition: transform 300ms cubic-bezier(0, 0, 0.58, 1), box-shadow 300ms cubic-bezier(0, 0, 0.58, 1); } .ds-card:hover { transform: rotate(-0.25deg) translate(1px, 1px); box-shadow: none; } .ds-card-tape { position: absolute; top: 0; left: 12%; width: 96px; height: 20px; background: var(--color-jersey, #4acf52); opacity: 0.9; transform: translateY(-50%) rotate(-0.5deg); pointer-events: none; } .ds-card-kicker { margin: 0 0 10px; font-family: var(--font-family-mono, \"IBM Plex Mono\", monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; line-height: 1; text-transform: uppercase; color: var(--color-ink, #0a0a0a); } .ds-card-title { margin: 0 0 10px; font-family: var(--font-display, \"freight-display-pro\", Georgia, serif); font-size: 1.6rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; } .ds-card-title em { font-style: italic; color: var(--color-jersey-deep, #008755); } .ds-card-body { margin: 0; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; line-height: 1.6; }"
+      "css": ".ds-card { position: relative; display: block; max-width: 340px; background: var(--color-cream, #f5f1e6); color: var(--color-ink, #0a0a0a); border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; padding: 20px; box-shadow: 6px 6px 0 0 var(--color-ink, #0a0a0a); transform: rotate(-0.25deg); transition: transform 300ms cubic-bezier(0, 0, 0.58, 1), box-shadow 300ms cubic-bezier(0, 0, 0.58, 1); } .ds-card:hover { transform: rotate(-0.25deg) translate(4px, 4px); box-shadow: none; } .ds-card-tape { position: absolute; top: 0; left: 12%; width: 96px; height: 20px; background: var(--color-jersey, #4acf52); opacity: 0.9; transform: translateY(-50%) rotate(-0.5deg); pointer-events: none; } .ds-card-kicker { margin: 0 0 10px; font-family: var(--font-family-mono, \"IBM Plex Mono\", monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; line-height: 1; text-transform: uppercase; color: var(--color-ink, #0a0a0a); } .ds-card-title { margin: 0 0 10px; font-family: var(--font-display, \"freight-display-pro\", Georgia, serif); font-size: 1.6rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.025em; } .ds-card-title em { font-style: italic; color: var(--color-jersey-deep, #008755); } .ds-card-body { margin: 0; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; line-height: 1.6; }"
     },
     {
       "name": "Text Input",
@@ -754,7 +754,7 @@
       "Do set every rectangle's border radius to 0 and reserve curves for true circles.",
       "Do give a shadow-casting surface a 2px ink border, or 1.5px on a stamp, badge or chip — never a 1px hairline underneath a shadow, except the in-page section-nav chip, which is deliberately 1px/1px (chrome, not content). A shadowless divider may still be 2px ink; the implication runs one way only.",
       "Do use hard offset shadows with 0 blur, in exactly the seven documented tokens.",
-      "Do press interactive surfaces into their shadow on hover (translate(1px, 1px) + shadow-none), gating only the translate behind motion-safe: — except the in-page section-nav chip, which never presses at all, and except a list row (a full-width row in a vertical list of peers with no border-2/shadow frame of its own), which fills its background toward an existing surface token instead of translating — see The List Row Fill Rule.",
+      "Do press interactive surfaces into their shadow on hover (translate(4px, 4px) + shadow-none), gating only the translate behind motion-safe: — except the in-page section-nav chip, which never presses at all, and except a list row (a full-width row in a vertical list of peers with no border-2/shadow frame of its own), which fills its background toward an existing surface token instead of translating — see The List Row Fill Rule.",
       "Do pick the right green: jersey decorative only, jersey-deep for anything carrying text (headings, CTAs, inline prose links), jersey-bright for green text on ink.",
       "Do reach for an existing primitive — taped card, ticket stub, mono label, editorial heading, tape strip, stamp badge, striped seam — before writing new markup.",
       "Do route every page through the three container widths (680 / 1040 / 1280).",
