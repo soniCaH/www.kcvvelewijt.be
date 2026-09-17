@@ -98,6 +98,50 @@ describe("ShareName auto-fit", () => {
     }
   });
 
+  it("re-fits via the shared webfont-swap trigger when fonts.load itself is unavailable (#2822)", () => {
+    // No `fonts.load` and no `fonts.ready` at all — only `loadingdone`, so a
+    // re-fit here can ONLY have come through the shared `useWebfontSwap`
+    // backstop, not the targeted `fonts.load()` path or the old `fonts.ready`
+    // fallback this replaces.
+    let loadingDoneHandler: (() => void) | undefined;
+    let restoreWidths = fakeMeasuredWidths(920, 2000);
+    const origFonts = Object.getOwnPropertyDescriptor(document, "fonts");
+    Object.defineProperty(document, "fonts", {
+      configurable: true,
+      value: {
+        addEventListener: (event: string, handler: () => void) => {
+          if (event === "loadingdone") loadingDoneHandler = handler;
+        },
+        removeEventListener: () => {},
+      },
+    });
+    try {
+      render(
+        <ShareFrame width={1080} height={1920} register="cream">
+          <ShareName fontSize={185}>Amirgan Bouakhouf</ShareName>
+        </ShareFrame>,
+      );
+      // floor(185 * 920 / 2000) = 85, from the initial synchronous fit.
+      expect(screen.getByText("Amirgan Bouakhouf")).toHaveStyle({
+        fontSize: "85px",
+      });
+
+      // The name widens once the real Freight swap lands.
+      restoreWidths();
+      restoreWidths = fakeMeasuredWidths(920, 4000);
+      act(() => loadingDoneHandler?.());
+
+      // floor(185 * 920 / 4000) = 42, floored again to minFontSize (56).
+      expect(screen.getByText("Amirgan Bouakhouf")).toHaveStyle({
+        fontSize: "56px",
+      });
+    } finally {
+      if (origFonts) Object.defineProperty(document, "fonts", origFonts);
+      else delete (document as unknown as Record<string, unknown>).fonts;
+      restoreWidths();
+    }
+  });
+
   it("does not scale a name that already fits", () => {
     withMeasuredWidths(920, 400, () => {
       render(

@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
+import { useWebfontSwap } from "@/hooks/useWebfontSwap";
 import { DISPLAY_FONT, GRAIN_DATA_URL, MONO_FONT, TOKENS } from "../constants";
 import { useSharePalette } from "./ShareFrame";
 import { formatScore, toSameOriginImage, type CrestEntry } from "./theme";
@@ -19,6 +20,17 @@ function useAutoFit<T extends HTMLElement>(
 ) {
   const ref = useRef<T>(null);
   const [size, setSize] = useState(fontSize);
+  // Holds the current effect run's `refit` (respects that run's own
+  // `cancelled` guard below) so the webfont-swap subscription — live for
+  // the component's whole lifetime, not just one effect run — always calls
+  // into the CURRENT run rather than a stale closure from a prior one.
+  const refitRef = useRef<() => void>(() => {});
+
+  // The shared webfont-swap trigger (#2822): a real-swap backstop for
+  // whatever `fonts.load()` below doesn't cover (it can throw synchronously
+  // on a malformed computed-style shorthand, or `fonts.load` itself can be
+  // unavailable) — replaces the old, redundant `fonts.ready` backstop.
+  useWebfontSwap(() => refitRef.current());
 
   useLayoutEffect(() => {
     let cancelled = false;
@@ -51,14 +63,15 @@ function useAutoFit<T extends HTMLElement>(
     };
     fit();
     const refit = () => !cancelled && fit();
+    refitRef.current = refit;
     const fonts = typeof document !== "undefined" ? document.fonts : undefined;
     if (fonts) {
-      // Re-measure once webfonts settle. Adobe Typekit injects its @font-face
-      // ASYNCHRONOUSLY, so `fonts.ready` can resolve BEFORE Freight is even
-      // pending — the first measure then uses the narrower fallback metrics, a
-      // long name "fits", and it overflows when the wider Freight swaps in
-      // (SHARE-1). `fonts.load()` for the element's own computed font forces and
-      // awaits that specific face, so the re-fit runs against real metrics.
+      // Also force the element's own computed font to load. Adobe Typekit
+      // injects its @font-face ASYNCHRONOUSLY, so waiting only for the
+      // shared webfont-swap trigger above risks missing a batch that started
+      // before this element mounted (SHARE-1) — `fonts.load()` forces and
+      // awaits that specific face regardless, so the re-fit runs against
+      // real metrics even then.
       const el = ref.current;
       if (el && typeof fonts.load === "function") {
         const cs = getComputedStyle(el);
@@ -72,7 +85,6 @@ function useAutoFit<T extends HTMLElement>(
           // happy-dom / malformed shorthand → skip the targeted reload
         }
       }
-      fonts.ready?.then(refit).catch(() => {});
     }
     return () => {
       cancelled = true;
