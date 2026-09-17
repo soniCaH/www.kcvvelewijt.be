@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useWebfontSwap } from "@/hooks/useWebfontSwap";
 
 const SCROLL_AMOUNT = 200;
 const DEAD_ZONE = 10;
@@ -144,6 +145,11 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     applyMeasurement();
   }, [measurePadding, applyMeasurement]);
 
+  // Re-check once the real webfont swap lands (#2822) — a first paint
+  // measures with fallback-font metrics, which can under- or over-report
+  // overflow until Freight actually swaps in and reflows the track.
+  useWebfontSwap(remeasure);
+
   // The scroll path. A fast scroll fires many `scroll` events within a
   // single frame; only the last one before paint matters, so coalesce them
   // into at most one `applyMeasurement` call per animation frame instead of
@@ -176,10 +182,9 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     // #2448: the track's own border box never changes when its CONTENT gets
     // wider — a horizontally-constrained row's width is set by its parent,
     // so the track's own ResizeObserver entry stays silent for the two
-    // things that actually change overflow: a web-font swap (first paint
-    // measures with fallback metrics) and a change in item count (e.g. a
-    // Sanity-driven chip row). Observe every child's box too, and re-check
-    // once the real fonts are in.
+    // things that actually change overflow: a web-font swap (handled by
+    // `useWebfontSwap` above, not here) and a change in item count (e.g. a
+    // Sanity-driven chip row). Observe every child's box too.
     //
     // Children present at mount are not the whole story either — a crumb
     // trail that grows via `navigate()` after mount, for instance, appends
@@ -204,8 +209,6 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
       remeasure();
     });
     mutationObserver.observe(el, { childList: true });
-
-    document.fonts?.ready.then(remeasure).catch(() => {});
 
     return () => {
       el.removeEventListener("scroll", scheduleScrollCheck);

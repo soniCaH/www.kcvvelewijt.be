@@ -444,6 +444,58 @@ describe("useScrollHint", () => {
     });
   });
 
+  describe("#2822 — re-measures via the shared webfont-swap trigger", () => {
+    it("re-checks overflow on a FontFaceSet loadingdone event, not document.fonts.ready", () => {
+      // Stub `document.fonts` with ONLY a `loadingdone` subscription (no
+      // `ready` at all) — proves the hook's re-check comes through the
+      // real-swap event, not a `fonts.ready` fallback.
+      let loadingDoneHandler: (() => void) | undefined;
+      Object.defineProperty(document, "fonts", {
+        configurable: true,
+        value: {
+          addEventListener: (event: string, handler: () => void) => {
+            if (event === "loadingdone") loadingDoneHandler = handler;
+          },
+          removeEventListener: vi.fn(),
+        },
+      });
+
+      let currentScrollWidth = 500;
+      Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+        configurable: true,
+        get: () => currentScrollWidth,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+        configurable: true,
+        value: 500,
+      });
+      Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+        configurable: true,
+        value: 0,
+      });
+
+      let hookResult: UseScrollHintReturn | undefined;
+      render(
+        createElement(TestHost, {
+          onHook: (h: UseScrollHintReturn) => {
+            hookResult = h;
+          },
+        }),
+      );
+
+      expect(hookResult!.overflows).toBe(false);
+
+      // The real Freight swap lands and widens the track's content.
+      currentScrollWidth = 900;
+      act(() => loadingDoneHandler?.());
+
+      expect(hookResult!.overflows).toBe(true);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (document as any).fonts;
+    });
+  });
+
   describe("children added after mount (a growing crumb trail)", () => {
     it("re-checks overflow when a child is appended later via a MutationObserver", async () => {
       // The organigram breadcrumb's own failure mode: it mounts with a
