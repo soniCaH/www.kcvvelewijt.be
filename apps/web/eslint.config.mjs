@@ -56,6 +56,25 @@ const ARBITRARY_MOTION_VALUE_PATTERN = "(?:duration|ease|animate)-\\[";
 const UNGUARDED_LOOP_PATTERN =
   "(?<!motion-safe:)(?<!motion-reduce:)animate-(?!none\\b)";
 
+// Token-Only Colour Rule (DESIGN.md → Colors → Named Rules, #2433). This
+// system has one paper, one ink, one green and a small set of named status
+// tones — a bare Tailwind palette class is always a colour the page-set
+// doesn't have. The prefix group is every utility that takes a colour value,
+// including the three compound v4 utilities (`ring-offset-`, `inset-ring-`,
+// `text-shadow-`) whose family name doesn't sit immediately after `ring-`/
+// `text-` — `ring-offset-gray-200` has no bare `ring-<family>` or `offset-
+// <family>` substring to fall back on, so it needs its own alternative
+// (`inset-ring-*` and `text-shadow-*` already matched via the embedded
+// `ring-*`/`shadow-*` substring, but are listed explicitly so the coverage
+// is stated, not accidental). The family group is Tailwind's 22 default
+// palette families (the 5 grays plus the 17 hues); the step is 2-3 digits
+// not immediately followed by more digits, which is `[0-9]{2,3}(?![0-9])`
+// rather than `\b` — avoids doubling a second backslash on top of the ones
+// this string already needs. Same single-line/no-newline requirement as the
+// three patterns above.
+const RAW_PALETTE_CLASS_PATTERN =
+  "(?:text-shadow|text|bg|border|from|to|via|ring-offset|inset-ring|ring|divide|outline|decoration|shadow|fill|stroke|accent|caret|placeholder)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}(?![0-9])";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -136,6 +155,11 @@ const eslintConfig = [
           selector: matchesClassString(UNGUARDED_LOOP_PATTERN),
           message:
             "Unguarded loop — an animate- utility needs a motion-safe: (or motion-reduce: to remove it) guard so prefers-reduced-motion can stop it (apps/web/DESIGN.md → Motion, the Reduced-Motion Rule).",
+        },
+        {
+          selector: matchesClassString(RAW_PALETTE_CLASS_PATTERN),
+          message:
+            "Raw Tailwind palette class — every colour comes from a design token, never a bare palette class (apps/web/DESIGN.md → Colors, the Token-Only Colour Rule).",
         },
       ],
     },
