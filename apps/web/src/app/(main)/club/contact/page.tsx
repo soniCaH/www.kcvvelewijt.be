@@ -36,11 +36,14 @@ export const metadata = buildPageMetadata({
 export const revalidate = 3600;
 
 export default async function ContactPageRoute() {
+  // Subject read: the key-contacts list is this page's entire content, so a
+  // failed read takes the page down with it rather than rendering an empty
+  // contact page (#2864).
   const keyContacts = await runPromise(
     Effect.gen(function* () {
       const repo = yield* StaffRepository;
       return yield* repo.findKeyContacts();
-    }),
+    }).pipe(Effect.orDie),
   );
 
   return (

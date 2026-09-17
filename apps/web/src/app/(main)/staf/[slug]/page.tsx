@@ -36,17 +36,20 @@ interface StaffPageProps {
 }
 
 export async function generateStaticParams() {
-  try {
-    const members = await runPromise(
+  // Section (of the build), not a request-time subject: an empty list here
+  // just means every slug renders on demand instead of being pre-enumerated
+  // — `dynamicParams` still serves them (#2864).
+  const members = await runPromise(
+    degradeSection(
       Effect.gen(function* () {
         const repo = yield* StaffRepository;
         return yield* repo.findAllForStaticParams();
       }),
-    );
-    return members.map((m) => ({ slug: m.psdId }));
-  } catch {
-    return [];
-  }
+      [],
+      "[staf/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+    ),
+  );
+  return members.map((m) => ({ slug: m.psdId }));
 }
 
 export async function generateMetadata({
@@ -58,7 +61,7 @@ export async function generateMetadata({
       Effect.gen(function* () {
         const repo = yield* StaffRepository;
         return yield* repo.findByPsdId(slug);
-      }),
+      }).pipe(Effect.orDie),
     );
     if (!member)
       return {
@@ -102,11 +105,14 @@ export async function generateMetadata({
 export default async function StafPage({ params }: StaffPageProps) {
   const { slug } = await params;
 
+  // Subject read: the staff member is this page's entire content, so a
+  // failed read takes it down with it — `null` (genuinely no such member) is
+  // the only case that resolves to `notFound()` (#2864).
   const member = await runPromise(
     Effect.gen(function* () {
       const repo = yield* StaffRepository;
       return yield* repo.findByPsdId(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!member) notFound();

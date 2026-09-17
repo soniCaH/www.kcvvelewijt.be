@@ -76,6 +76,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HulpHubPage() {
+  // Subject read: both the org structure and the FAQ are this page's entire
+  // content, so a failed read takes the page down with it (#2864).
   const [members, responsibilityPaths] = await runPromise(
     Effect.gen(function* () {
       const staffRepo = yield* StaffRepository;
@@ -84,7 +86,7 @@ export default async function HulpHubPage() {
         [staffRepo.findAll(), responsibilityRepo.findAll()],
         { concurrency: 2 },
       );
-    }),
+    }).pipe(Effect.orDie),
   );
 
   const structureIndex = deriveStructureIndex(members);

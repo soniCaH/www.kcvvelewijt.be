@@ -50,18 +50,16 @@ const searchArticles = (query: string) =>
         );
         return titleMatch || tagMatch;
       })
-      .map(
-        (article): SearchResult => ({
-          id: article.id,
-          type: "article",
-          title: article.title,
-          description: undefined,
-          url: `/nieuws/${article.slug}`,
-          imageUrl: article.coverImageUrl ?? undefined,
-          tags: article.tags,
-          date: article.publishedAt ?? "",
-        }),
-      );
+      .map((article): SearchResult => ({
+        id: article.id,
+        type: "article",
+        title: article.title,
+        description: undefined,
+        url: `/nieuws/${article.slug}`,
+        imageUrl: article.coverImageUrl ?? undefined,
+        tags: article.tags,
+        date: article.publishedAt ?? "",
+      }));
   });
 
 /**
@@ -70,11 +68,15 @@ const searchArticles = (query: string) =>
  */
 const getAllPlayers = unstable_cache(
   async () => {
+    // Subject read: the player search results are this route's entire
+    // purpose, and the caller (`searchPlayers`, via `Effect.promise`) never
+    // catches a rejection either — a failure is meant to bubble to the outer
+    // `GET` try/catch below (#2864).
     const players = await runPromise(
       Effect.gen(function* () {
         const repo = yield* PlayerRepository;
         return yield* repo.findAll();
-      }),
+      }).pipe(Effect.orDie),
     );
     debugLog(`[Search API] Fetched ${players.length} players`);
     return players;
@@ -203,16 +205,14 @@ const searchTeams = (query: string) =>
           team.displayName.toLowerCase().includes(queryLower) ||
           team.name.toLowerCase().includes(queryLower),
       )
-      .map(
-        (team): SearchResult => ({
-          id: team.id,
-          type: "team",
-          title: team.displayName,
-          description: team.divisionFull ?? team.division ?? undefined,
-          url: `/ploegen/${team.slug}`,
-          imageUrl: team.teamImageUrl ?? undefined,
-        }),
-      );
+      .map((team): SearchResult => ({
+        id: team.id,
+        type: "team",
+        title: team.displayName,
+        description: team.divisionFull ?? team.division ?? undefined,
+        url: `/ploegen/${team.slug}`,
+        imageUrl: team.teamImageUrl ?? undefined,
+      }));
   });
 
 /**
@@ -344,8 +344,10 @@ export async function GET(request: NextRequest) {
       return results;
     });
 
-    // Execute the program
-    const results = await runPromise(searchProgram);
+    // Execute the program. Subject read: the results are this route's
+    // entire purpose, so an unhandled failure bubbles to the `catch` below
+    // (#2864).
+    const results = await runPromise(searchProgram.pipe(Effect.orDie));
 
     // Sort by relevance (simple: prioritize title matches)
     const sorted = results.sort((a, b) => {

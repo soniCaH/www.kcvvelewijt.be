@@ -105,11 +105,14 @@ export async function generateMetadata({
   params,
 }: TeamPageProps): Promise<Metadata> {
   const { slug } = await params;
+  // Subject read: this route's metadata is entirely about this one team, so
+  // a failed read takes it down with it — `null` (genuinely no such team) is
+  // the only case that degrades to the "niet gevonden" fallback (#2864).
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
   if (!team)
     return {
@@ -278,7 +281,12 @@ async function fetchBffData(
           Effect.catchTag("HttpNotFound", () => Effect.succeed([])),
         ),
         null,
-      ),
+        // Every permanent tag is already caught above; what's left is
+        // transient by construction and is meant to reject `runPromise`
+        // unchanged (see this function's docblock) — `Effect.orDie` only
+        // makes that pre-existing decision visible to the narrowed
+        // `runPromise` signature (#2864), it does not change what rejects.
+      ).pipe(Effect.orDie),
     ),
   ]);
 
@@ -309,11 +317,14 @@ async function fetchBffData(
 export default async function TeamPage({ params }: TeamPageProps) {
   const { slug } = await params;
 
+  // Subject read: the team is this page's entire content, so a failed read
+  // takes it down with it — `null` (genuinely no such team) is the only case
+  // that resolves to `notFound()` (#2864).
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!team) notFound();

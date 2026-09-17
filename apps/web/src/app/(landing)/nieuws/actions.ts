@@ -20,10 +20,10 @@ export async function fetchArticlesAction(params: {
   // `"use server"` makes this a public endpoint — clamp before GROQ.
   const { offset, limit } = clampListingWindow(params);
 
-  // `ArticleRepository.findPaginated` is a Sanity read (`E = never`, #2863's
-  // original bug class), but this read is left bare on purpose rather than
-  // wrapped in `degradeSection`: `NewsListingClient` is this action's only
-  // caller (its "load more" footer and its category-chip switch, both in
+  // `ArticleRepository.findPaginated`'s typed `SanityReadError` is converted
+  // to a defect here on purpose (`Effect.orDie`) rather than caught with
+  // `degradeSection`: `NewsListingClient` is this action's only caller (its
+  // "load more" footer and its category-chip switch, both in
   // `NewsListingClient.tsx`) and both call sites already `try/catch` a
   // rejection into a real "Artikelen laden mislukt." notice with a working
   // retry. Degrading here to an empty success would make both catches
@@ -43,7 +43,7 @@ export async function fetchArticlesAction(params: {
         limit: limit + 1,
         category: params.category,
       });
-    }),
+    }).pipe(Effect.orDie),
   );
 
   return paginateResults(articles, limit);

@@ -17,6 +17,7 @@ import { notFound } from "next/navigation";
 import { Effect } from "effect";
 
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { EventRepository } from "@/lib/repositories/event.repository";
 import {
   PhotoGalleryRepository,
@@ -44,32 +45,38 @@ interface EventPageProps {
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  try {
-    const slugs = await runPromise(
+  // Section (of the build), not a request-time subject: an empty list here
+  // just means every slug renders on demand instead of being pre-enumerated
+  // — `dynamicParams` still serves them (#2864).
+  const slugs = await runPromise(
+    degradeSection(
       Effect.gen(function* () {
         const repo = yield* EventRepository;
         return yield* repo.findAllSlugs();
       }),
-    );
-    return slugs
-      .filter((row): row is { slug: string; updatedAt: string } =>
-        Boolean(row.slug),
-      )
-      .map((row) => ({ slug: row.slug }));
-  } catch {
-    return [];
-  }
+      [],
+      "[evenementen/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+    ),
+  );
+  return slugs
+    .filter((row): row is { slug: string; updatedAt: string } =>
+      Boolean(row.slug),
+    )
+    .map((row) => ({ slug: row.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
   const { slug } = await params;
+  // Subject read: this route's metadata is entirely about this one event, so
+  // a failed read takes it down with it — `null` (genuinely no such event)
+  // is the only case that degrades to the "niet gevonden" fallback (#2864).
   const event = await runPromise(
     Effect.gen(function* () {
       const repo = yield* EventRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
   if (!event)
     return {
@@ -104,6 +111,10 @@ export async function generateMetadata({
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
+  // The event is the page's subject — a failed `findBySlug` (or the sibling
+  // `findAll` feed it gates) takes the page down with it via `Effect.orDie`
+  // below. `galleries` is a section and already degrades independently with
+  // its own `catchAllCause` (#2864).
   const { event, upcoming, galleries } = await runPromise(
     Effect.gen(function* () {
       const repo = yield* EventRepository;
@@ -119,7 +130,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           )
         : [];
       return { event, upcoming, galleries };
-    }),
+    }).pipe(Effect.orDie),
   );
 
   // GROQ projects `dateStart` via `coalesce(dateStart, "")`; an event with

@@ -28,12 +28,15 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+// Subject read: this route renders exactly the CMS page it fetches, so a
+// failed read takes the page down with it — `null` (genuinely no such page)
+// is the only case that resolves to `notFound()` (#2864).
 async function fetchPage(slug: string) {
   return runPromise(
     Effect.gen(function* () {
       const repo = yield* PageRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 }
 

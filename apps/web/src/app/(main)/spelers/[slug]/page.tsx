@@ -93,7 +93,7 @@ export async function generateMetadata({
       Effect.gen(function* () {
         const repo = yield* PlayerRepository;
         return yield* repo.findByPsdId(slug);
-      }),
+      }).pipe(Effect.orDie),
     );
     if (!player)
       return {
@@ -144,11 +144,14 @@ export async function generateMetadata({
 export default async function PlayerPage({ params }: PlayerPageProps) {
   const { slug } = await params;
 
+  // Subject read: the player is this page's entire content, so a failed
+  // read takes it down with it — `null` (genuinely no such player) is the
+  // only case that resolves to `notFound()` (#2864).
   const player = await runPromise(
     Effect.gen(function* () {
       const repo = yield* PlayerRepository;
       return yield* repo.findByPsdId(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!player) notFound();

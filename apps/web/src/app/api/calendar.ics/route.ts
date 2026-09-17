@@ -61,7 +61,12 @@ async function fetchMatchesUncached(
     return results.flat();
   });
 
-  return runPromise(program);
+  // Subject read: this cached function's whole return value is the matches
+  // feed, and `unstable_cache` must never commit a degraded body (see
+  // `fetchUpcomingEventsCached`'s doc below for the same rule) — the route's
+  // own outer `try/catch` in `GET` turns an unhandled failure into a 500
+  // (#2864).
+  return runPromise(program.pipe(Effect.orDie));
 }
 
 /**
@@ -109,7 +114,7 @@ const fetchUpcomingEventsCached = unstable_cache(
       Effect.gen(function* () {
         const eventRepo = yield* EventRepository;
         return yield* eventRepo.findUpcomingForList();
-      }),
+      }).pipe(Effect.orDie),
     ),
   ["ical:events"],
   { revalidate: CACHE_MAX_AGE },

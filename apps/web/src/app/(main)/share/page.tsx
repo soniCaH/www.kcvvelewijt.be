@@ -42,6 +42,10 @@ function toMatchOption(match: Match): MatchOption {
   };
 }
 
+// Subject read: both pickers are this internal tool's entire content, so a
+// failed read (Sanity players or the BFF match window) takes the page down
+// with it — this route is `force-dynamic`, so there is no ISR fallback to
+// protect either way (#2864).
 async function fetchSharePageData(): Promise<{
   matches: MatchOption[];
   players: PlayerForShare[];
@@ -87,7 +91,7 @@ async function fetchSharePageData(): Promise<{
       }));
 
       return { matches, players };
-    }),
+    }).pipe(Effect.orDie),
   );
 }
 

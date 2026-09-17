@@ -75,6 +75,14 @@ function toScheurkalenderMatch(
   };
 }
 
+/**
+ * The senior-team list is this sheet's subject — without it there is no way
+ * to know which teams to query — so its failure is uncaught by design and
+ * takes the render down to the one global boundary, same as before #2864
+ * (when it arrived as a defect). Each team's own match fan-out below is a
+ * section and stays caught: one team's fixtures failing must not blank the
+ * whole sheet.
+ */
 async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
   return runPromise(
     Effect.gen(function* () {
@@ -131,7 +139,7 @@ async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
       const season = seasonLabel(matches[0]?.date ?? clubToday());
 
       return { matches, season };
-    }),
+    }).pipe(Effect.orDie),
   );
 }
 

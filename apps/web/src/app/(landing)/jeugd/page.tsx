@@ -47,23 +47,32 @@ export const metadata = buildPageMetadata({
   path: "/jeugd",
 });
 
+/**
+ * The youth team grid is a section, not the page's subject: a failed read
+ * degrades to an empty list, which `<YouthDirectory>` already renders as no
+ * section at all, rather than taking `/jeugd` down (#2864).
+ */
 async function fetchTeams(): Promise<TeamLandingItem[]> {
-  try {
-    return await runPromise(
+  return runPromise(
+    degradeSection(
       Effect.gen(function* () {
         const repo = yield* TeamRepository;
         return yield* repo.findAllForLanding();
       }),
-    );
-  } catch (error) {
-    console.error("Failed to fetch youth teams:", error);
-    return [];
-  }
+      [],
+      "[jeugd] failed to fetch youth teams",
+    ),
+  );
 }
 
+/**
+ * The Jeugd articles feed is a section of the nav hub, not the page's
+ * subject: a failed read degrades to an empty list, which
+ * `<JeugdEditorialGrid>` already handles (#2864).
+ */
 async function fetchJeugdArticles(): Promise<ArticleVM[]> {
-  try {
-    return await runPromise(
+  return runPromise(
+    degradeSection(
       Effect.gen(function* () {
         const repo = yield* ArticleRepository;
         return yield* repo.findPaginated({
@@ -72,11 +81,10 @@ async function fetchJeugdArticles(): Promise<ArticleVM[]> {
           category: "Jeugd",
         });
       }),
-    );
-  } catch (error) {
-    console.error("Failed to fetch jeugd articles:", error);
-    return [];
-  }
+      [],
+      "[jeugd] failed to fetch jeugd articles",
+    ),
+  );
 }
 
 /**

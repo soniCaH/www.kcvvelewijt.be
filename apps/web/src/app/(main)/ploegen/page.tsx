@@ -10,6 +10,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { groupTeamsForLanding } from "@/lib/utils/group-teams";
 import { SITE_CONFIG } from "@/lib/constants";
@@ -41,17 +42,16 @@ export const metadata = buildPageMetadata({
 });
 
 async function fetchTeams() {
-  try {
-    return await runPromise(
+  return runPromise(
+    degradeSection(
       Effect.gen(function* () {
         const repo = yield* TeamRepository;
         return yield* repo.findAllForLanding();
       }),
-    );
-  } catch (error) {
-    console.error("Failed to fetch teams:", error);
-    return [];
-  }
+      [],
+      "[ploegen] failed to fetch teams",
+    ),
+  );
 }
 
 export default async function TeamsPage() {

@@ -273,7 +273,11 @@ const fetchOpponentData = cache(async function fetchOpponentData(
       );
 
       return buildOpponentPageData(clubId, results);
-    }),
+      // Subject read: the senior-team list and each squad's opponent history
+      // together are this page's entire content, so an unclassified failure
+      // takes it down with it via `Effect.orDie` — the per-squad 404 above is
+      // already resolved to a value, not left to reject (#2864).
+    }).pipe(Effect.orDie),
   );
 });
 

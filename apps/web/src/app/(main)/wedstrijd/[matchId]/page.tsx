@@ -201,6 +201,11 @@ const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
       // the union (notFound returns `never`). Same pattern as the existing
       // `apps/web/src/app/sitemap.ts` HttpNotFound handler.
       Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound())),
+      // Every other BFF error is meant to bubble/reject unchanged (see this
+      // function's own docblock) — `Effect.orDie` only makes that
+      // pre-existing decision visible to the narrowed `runPromise` signature
+      // (#2864), it does not change what rejects.
+      Effect.orDie,
     ),
   );
 });
@@ -292,6 +297,11 @@ async function fetchStandings(
         HttpApiDecodeError: (error) =>
           warnAndDegradeRankingRead("HttpApiDecodeError", error),
       }),
+      // The remaining (transient) BFF errors are meant to bubble/reject
+      // unchanged (see this function's own docblock) — `Effect.orDie` only
+      // makes that pre-existing decision visible to the narrowed
+      // `runPromise` signature (#2864), it does not change what rejects.
+      Effect.orDie,
     ),
   );
   if (tables === null) return null;
