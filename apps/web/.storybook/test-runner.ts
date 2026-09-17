@@ -437,9 +437,10 @@ const config: TestRunnerConfig = {
         if (trackCount !== 1) {
           throw new Error(
             `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
-              `its track selector (${assertion.trackSelector}) matched ` +
-              `${trackCount} element(s) at the ${name} viewport, expected ` +
-              `exactly 1. ${assertion.description}`,
+              `its track selector (${assertion.trackSelector}, queried ` +
+              `under #storybook-root) matched ${trackCount} element(s) at ` +
+              `the ${name} viewport, expected exactly 1. ` +
+              `${assertion.description}`,
           );
         }
         const { scrollWidth, clientWidth } = await track.evaluate((el) => ({
