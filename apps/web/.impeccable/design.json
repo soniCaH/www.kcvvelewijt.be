@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-17T22:09:39Z",
+  "generatedAt": "2026-09-17T09:32:42Z",
   "title": "Design System: KCVV Elewijt",
   "extensions": {
     "colorMeta": {
@@ -47,6 +47,21 @@
           "oklch(72% 0.037 90)",
           "oklch(83% 0.037 90)",
           "oklch(95% 0.037 90)"
+        ]
+      },
+      "manila": {
+        "role": "neutral",
+        "displayName": "Manila",
+        "canonical": "oklch(92.0% 0.044 90)",
+        "tonalRamp": [
+          "oklch(15% 0.044 90)",
+          "oklch(26% 0.044 90)",
+          "oklch(37% 0.044 90)",
+          "oklch(49% 0.044 90)",
+          "oklch(60% 0.044 90)",
+          "oklch(72% 0.044 90)",
+          "oklch(83% 0.044 90)",
+          "oklch(95% 0.044 90)"
         ]
       },
       "paper-edge": {
@@ -122,21 +137,6 @@
           "oklch(72% 0.128 158)",
           "oklch(83% 0.128 158)",
           "oklch(95% 0.128 158)"
-        ]
-      },
-      "jersey-link": {
-        "role": "primary",
-        "displayName": "Jersey Link",
-        "canonical": "oklch(48.7% 0.126 158)",
-        "tonalRamp": [
-          "oklch(15% 0.126 158)",
-          "oklch(26% 0.126 158)",
-          "oklch(37% 0.126 158)",
-          "oklch(49% 0.126 158)",
-          "oklch(60% 0.126 158)",
-          "oklch(72% 0.126 158)",
-          "oklch(83% 0.126 158)",
-          "oklch(95% 0.126 158)"
         ]
       },
       "jersey": {
@@ -540,13 +540,28 @@
         "section": "colors"
       },
       {
+        "name": "The Manila Rule",
+        "body": "cream-soft is the step-down; manila is a chapter, and the two are not interchangeable. A section that only needs to sit back from the page still gets cream-soft. manila exists for the one long index page that needs a visible break between its parts, and it carries two conditions: index pages only, and once per page — the chaptering argument is strong on a long index and weak on a detail page, and a second tinted band on the same page stops reading as a chapter and starts reading as a colour scheme. It is applied the same way a section already takes cream-soft: a literal bg-manila class string at the one call site, never a new prop or component. Never reach for alert-soft / warning-soft / success-soft for this — they are semantic (see Tertiary, above) and a decorative section in one of them reads as an Alert.",
+        "section": "colors"
+      },
+      {
         "name": "The Missing Italic Rule",
         "body": "Freight Big Pro ships italic at 400 and 700 only — there is no 900 italic. So a Display-size heading with an accent word switches the <em> down to Freight Display Pro italic rather than faking a heavy italic. Never pin an accent <em> to font-black.",
         "section": "typography"
       },
       {
+        "name": "The Two-Line Hero Rule",
+        "body": "leading-hero (--leading-hero: 0.85) is a ramp step, not a --text-* step — it carries no font-size of its own, so it composes with whichever display step a two-line hero's own lines already use. Reserved for heroes that are a fixed, structural two-line composition — always exactly two lines regardless of content, never a single string that happens to wrap (<PlayerHero> / <StaffHero>'s first-name-over-last-name rhythm). Never the default, and never applied to a headline whose line count depends on content length or viewport (an <EditorialHero> title can render 1–3 lines depending on what an editor typed; there is no CSS way to detect the rendered line count, so a step this tight cannot govern it). The top line — the one with a kicker or jersey number sitting above it — takes leading-hero-lead (@layer components, globals.css), which bundles the padding-top its ascender clearance needs so the guard travels with the class rather than being re-typed (and sometimes forgotten) at every call site; the second line takes bare leading-hero on purpose, since it stacks tight against the first line's own descenders and padding there would work against the \"one object\" effect this step exists for (D14/Y1, decision-sheet §8, #2617).",
+        "section": "typography"
+      },
+      {
+        "name": "The Hanging Mark Rule",
+        "body": "A pull quote's opening mark (<QuoteMark hang>) hangs outside the card's padding via a negative text-indent, applied unconditionally in every engine — so the card's actual reading column (the blockquote body) keeps a straight left edge instead of the mark's own ink notching into it. Not gated behind @supports (hanging-punctuation: first): the glyph is U+201D (Unicode category Pf), and WebKit's opening-punctuation check does not treat Pf as an opening character, so the native property is a no-op on this specific glyph in Safari — gating the fallback on it would have left Safari with no hang at all. hang is opt-in and off by default on <QuoteMark> itself (only <PullQuote> passes it): the pull is sized for <TapedCard padding=\"lg\">, and a tighter wrapper collides the glyph into its neighbours (D14/Y6, decision-sheet §8, #2617).",
+        "section": "typography"
+      },
+      {
         "name": "The One Emphasis Rule",
-        "body": "An editorial heading gets exactly one emphasis moment: an accent-coloured italic word or a highlighter stroke, never both, and never two accented words. Emphasis is authored as a Portable Text accent decorator, never as a separate \"accent word\" string field.",
+        "body": "An editorial heading gets exactly one emphasis moment: an accent-coloured italic word _or_ a highlighter stroke, never both, and never two accented words. Emphasis is authored as a Portable Text accent decorator, never as a separate \"accent word\" string field.",
         "section": "typography"
       },
       {
@@ -561,7 +576,12 @@
       },
       {
         "name": "The 11px Floor Rule",
-        "body": "Nothing sentence-case sets below 11px. Uppercase tracked mono is allowed exactly one step under it, at 10px (text-label-sm), and nothing goes lower. The exemption is not a loophole — it is a measurement. Caps fill the full cap-height where lowercase fills only the x-height, so 11px uppercase reads as equal in weight to 16px lowercase body rather than subordinate to it; a label sitting directly above a paragraph needs the 10px step to actually recede. Point size alone is the wrong metric for legibility here. Element sizing inside a diagram (VolledigOrganigram) is not type and is not governed by this rule.",
+        "body": "Nothing sentence-case sets below 11px. Uppercase tracked mono is allowed exactly one step under it, at 10px (text-label-sm), and nothing goes lower. The exemption is not a loophole — it is a measurement. Caps fill the full cap-height where lowercase fills only the x-height, so 11px uppercase reads as _equal_ in weight to 16px lowercase body rather than subordinate to it; a label sitting directly above a paragraph needs the 10px step to actually recede. Point size alone is the wrong metric for legibility here. Element sizing inside a diagram (VolledigOrganigram) is not type and is not governed by this rule.",
+        "section": "typography"
+      },
+      {
+        "name": "The Chrome Fits The Bar Rule",
+        "body": "<SiteHeader>'s desktop row is the only type on the site sized by a fit constraint instead of by the ramp, and its literal, breakpoint-stepped values are legal there for that reason: the wordmark at 20px → 24px → 28px, and 11px → 13px → 14px on both the nav link and the Word lid CTA beside it, stepping at xl and 2xl. The binding limit is § Navigation's — the desktop row must never wrap at lg — and the room that grows is horizontal: the row's gap-4 xl:gap-8 2xl:gap-10 and px-4 xl:px-8. It is never vertical. --sticky-header-h is a single 65px constant with no breakpoint variant, so the bar's height is a ceiling on this ramp rather than a source of new room — apply that test before proposing a fourth step. Neither ramp can be written wholly in tokens, which is why neither is; but the two cases are not equally strong, and the weaker one is stated here so nobody has to rediscover it. The nav ramp is the strong case: it walks across three roles and two of its steps have no token at all (11px is text-label's size but neither its tracking nor its weight, 13px has nothing, 14px is text-mono-md's). The wordmark is the weak one — text-xl is 20px and text-2xl is 24px, so its first two steps could be named utilities today, and only 28px has nothing (text-3xl is 30px). It keeps three literals anyway, because splitting one ramp across two notations reads as two systems inside a single class attribute and hides that the three values are one ramp — and #2418 suppresses the wordmark's attribute either way, so the split buys nothing. No --text-* step is minted for either: a step only the header may use makes the ramp less trustworthy to read, not more — see #2396 decision 4, _\"add no steps beyond label-sm\"_. The exception does not travel. It is exactly two sites in SiteHeader.tsx, each carrying a comment pointing back here: <Wordmark>'s own class attribute, and the CHROME_NAV_TYPE constant that the nav links and the Word lid CTA both consume — they sit in the same row under the same limit, so the recipe is named once rather than copied. The nav link and the CTA sit inside the lg:grid desktop row; <Wordmark> is one shared component rendered three times — the mobile row, the desktop row, and the drawer's header slot — and its xl: / 2xl: steps resolve only from 1280px, above the lg:hidden that retires the mobile row, so in practice mobile renders its base 20px. That is convention, not enforcement: <NavTakeover> carries no lg:hidden and drawerOpen is never reset on a viewport change, so a drawer opened below lg and then widened past xl does render the ramp — a pre-existing defect in the drawer's lifecycle, not a licence (#2850). A literal text-[…] anywhere else is still drift, including <NavTakeover>'s own item (text-[22px]) and <SiteFooter>'s wordmark (text-[32px] md:text-[44px]), a second literal ramp this rule does not cover and which DESIGN.md documents nowhere — both tracked at #2848. Only sizes are exempted. The nav's tracking-[0.04em] is 2 of 18 uses across 12 files and belongs to the tracking decision (#2663), not here; § Navigation stays the home for the nav's weight and tracking. One known imprecision this rule does not repair: the frontmatter's nav-link.typography resolves to {typography.label}, the nearest step rather than the nav's real values, because no token describes the ramp — do not \"fix\" it by minting one. Decided on #2664, built by #2847.",
         "section": "typography"
       },
       {
@@ -570,8 +590,18 @@
         "section": "layout"
       },
       {
+        "name": "The Reading-Measure Exemption Rule",
+        "body": "ch is banned as a reading measure (#2436): it resolves against the current font's zero-glyph advance, so the same value renders at a different pixel width in serif italic than in sans, and again at a different type size — drift invisible in review. Anything a visitor reads as a paragraph takes var(--container-prose) instead, never a ch value.",
+        "section": "layout"
+      },
+      {
         "name": "The Full-Bleed Never Wraps Rule",
         "body": "Striped seams and coloured bands are viewport-wide by definition. Wrapping one in a max-width container is always a bug.",
+        "section": "layout"
+      },
+      {
+        "name": "The Derived Anchor Offset Rule",
+        "body": "An in-page anchor's landing offset is scroll-padding-top on <html>, published at runtime by whichever sticky bar sits above the target — never a hand-written scroll-mt-* typed on the target itself. useSectionNav measures its own bar's rendered height and adds it to --sticky-header-h (the header's own token), so the offset tracks the bar's real, current height — including a trailing slot wrapping to its own line — instead of a typed guess that drifts the moment the bar's content changes. Three different hand-written values (scroll-mt-24, scroll-mt-32, scroll-mt-[6.5rem]) existed before this rule and were all wrong in different directions, which is the evidence a typed-per-section number does not stay correct. A route with no section nav (/jeugd#visie) falls back to a header-only base rule in globals.css. Decided on #2478, built by #2584.",
         "section": "layout"
       },
       {
@@ -581,13 +611,58 @@
       },
       {
         "name": "The Press-Down Rule",
-        "body": "Interactive paper does not rise on hover; it presses. The surface translates +1px, +1px (buttons and cards) or +1px/+2px (fields) and its shadow collapses to none, so it appears pushed flat against the page. The translate is gated behind motion-safe:; the shadow collapse is not, so reduced-motion users keep the affordance. This is the canonical hover for interactive paper; a list row (a full-width row in a vertical list of peers carrying no border-2/shadow frame of its own) is the one scoped exception — see The List Row Fill Rule.",
+        "body": "Interactive paper does not rise on hover; it presses. The surface translates +4px, +4px (buttons and cards — Tailwind's translate-x-1/translate-y-1, PRESS_DOWN_CLASSES) or +1px/+2px (fields) and its shadow collapses to none, so it appears pushed flat against the page. The translate is gated behind motion-safe:; the shadow collapse is not, so reduced-motion users keep the affordance. One named exception: the in-page section-nav chip (<SectionNavChip>, § Navigation) never presses — no translate, no shadow collapse, at rest or active — because it is chrome rather than the content-you-operate register the press-down exists for. It is deliberately quieter than <FilterTabs>'s chip, which keeps the full press-down. #2478.",
         "section": "elevation"
       },
       {
         "name": "The Complete Vocabulary Rule",
         "body": "The seven tokens above are the entire shadow system — there is nothing else to reach for. The pre-redesign blurred family (--shadow-sm, --shadow-DEFAULT, --shadow-md, --shadow-lg, --shadow-card-hover, --shadow-input, --shadow-input-focus, --shadow-soft) and the orphaned asymmetric pair (--shadow-photo-tape, --shadow-photo-tape-lift) were removed from globals.css; all ten had zero consumers. Adding a blurred token back is a change to the design language, not a convenience.",
         "section": "elevation"
+      },
+      {
+        "name": "The Three Speeds Rule",
+        "body": "Exactly three durations exist for an on-demand transition, one per job: 150ms for chrome, 300ms for the press, 500ms for arrival. There is no fourth. 240ms is not a speed — it folds into 300ms. A loop is not on demand, so it does not draw from this scale; loop periods are answered under the Loop Rule below.",
+        "section": "motion"
+      },
+      {
+        "name": "The One Curve Rule",
+        "body": "Every motion that starts on demand uses cubic-bezier(0, 0, 0.58, 1) — the plain CSS ease-out. There is no second curve for interaction. This is not Tailwind's ease-out: Tailwind v4 ships cubic-bezier(0, 0, 0.2, 1), a different, harder deceleration, so the --ease-* namespace is reset in globals.css and only this curve re-declared — otherwise the class name would lie about which curve it applies. cubic-bezier(0.22, 1, 0.36, 1) (easeOutQuint) is removed everywhere it appeared: it front-loads roughly 90% of its travel into the first quarter of the duration, which is what made every duration on a short press feel identical before this rule existed. The curve, not the duration, was the finding that produced this rule (#2508).",
+        "section": "motion"
+      },
+      {
+        "name": "The Loop Rule",
+        "body": "Only three things loop, and all three mean the same thing: the system is busy. The scarf, the dots and the skeleton pulse. Decoration does not loop — a new decorative loop is not banned outright, but it requires its own decision and is never a default. A loop that travels uses linear; a loop that breathes uses ease-in-out. These are raw CSS values written directly in the keyframes and animation rules, never Tailwind utilities — the project ships exactly one ease utility, ease-out; --ease-in-out is not re-declared, so ease-in-out as a class compiles to nothing. Two of the three loops breathe, and both stay on the compositor: the dots animate opacity and transform, the skeleton pulse opacity alone. A breathing loop animates nothing else — both properties are composited, so a hidden tab costs nothing and no separate \"stop when hidden\" rule is needed. The scarf is the exception, not a fourth member of that allow-list: it travels by animating background-position, a paint property, on the main thread, every frame. That is affordable only because the scarf has exactly one mount and runs only for the duration of a search request in flight — bounded, not free. Each loop's period is its own choice, not the Three Speeds scale: the scarf runs 1.5s, the dots 1.2s (staggered 0.15s / 0.3s per dot), the pulse 2s. A fourth loop picks its own period the same way; nothing here fixes one.",
+        "section": "motion"
+      },
+      {
+        "name": "The Waiting-Device Rule",
+        "body": "Three devices wait, and they are not interchangeable — each has exactly one home. A page arriving waits as a skeleton: its real opening, unshimmered, with motion-safe:animate-pulse bars where its data will be. A request the visitor made waits as <Spinner>: the compact dots inline — the scarf only in search. Nothing else waits: a page that simply arrives made no request, so it has nothing to spin about.",
+        "section": "motion"
+      },
+      {
+        "name": "The Reduced-Motion Rule",
+        "body": "Under prefers-reduced-motion: reduce, every loop stops and everything that travels arrives instantly. Colour and border transitions survive. A colour fade is not motion and causes no vestibular problem; suppressing the 43 transition-colors uses on this site would make it read as broken for exactly the users this rule protects. It is the same split the Press-Down Rule already makes on one primitive — the translate gated behind motion-safe:, the shadow collapse not — stated here once for the whole system instead of once per primitive.",
+        "section": "motion"
+      },
+      {
+        "name": "The Squeegee Wipe Rule",
+        "body": "A section scrolled into view arrives like ink pulled across paper — <SectionWipeReveal> sweeps a clip-path: inset() open, left to right, timed by Arrival (500ms, var(--ease-out)). It must degrade to \"already visible\": the resting, unclassed state carries no clip at all, so the class it adds only ever _triggers_ the sweep and is never what hides the content. That means no JS, an unsupported IntersectionObserver, and an observer that is armed but never calls back all leave the section fully visible by construction — there is no failure mode that leaves a section permanently clipped. A section already inside the viewport at mount is measured before the observer is created; if it is already visible, no observer is attached, so it can never animate in after the fact. Reduced motion follows the Reduced-Motion Rule above (the gesture is absent, not shortened — a clip-path sweep travels, so it does not get the colour/border carve-out). Built for <SponsorTiers> on /sponsors (#2623); not yet adopted site-wide — see the PR for the named, bounded set of call sites this shipped with.",
+        "section": "motion"
+      },
+      {
+        "name": "The List Row Fill Rule",
+        "body": "The canonical hover for interactive paper is the Press-Down Rule's translate-into-shadow, and that stays canonical everywhere except list rows — a full-width row in a vertical list of peers that carries no border-2/shadow frame of its own (the shared hairline between rows belongs to the list, not the row). Translating one such row reads as the list breaking apart, so a list row fills instead of moving: hover deepens its background toward an existing surface token (e.g. cream-soft, or the row's own tint one step darker), never a new one minted for this rule, and nothing about the row's box changes size or position — the resting state already reserves whatever the fill adds, so there is no shift to gate. This is a background-colour change, which the Motion Vocabulary already classes as Chrome (150ms, var(--ease-out)), not a fourth speed. focus-visible gets the same fill as hover, plus an inset outline (outline-offset-[-2px], so the ring draws inside the row and can never clip a neighbour in this gap-free list) — the fill alone is easy to miss against a busy row, and a keyboard user is entitled to the identical cue a mouse user gets, not merely an equivalent one. Because it is colour, not translate, none of this is gated behind motion-safe: — the Reduced-Motion Rule above already keeps colour and border transitions everywhere, including here. A card — anything that carries its own border-2 + shadow, however it is arranged or named in code — is never a candidate for this rule and keeps the press-down; this is a single scoped exception, not a second hover vocabulary. Built for <CalendarAgenda>'s AgendaMatchRow/AgendaEventRow (#2624) — the \"labelled wall\" agenda list, deliberately unbordered so a dense day reads as a list rather than a stack of cards. <MatchStripView>'s own flush row list ships this rule's outline half (focus-visible:outline-2 focus-visible:outline-offset-[-2px]) but not the fill half; its rows predate this rule.",
+        "section": "motion"
+      },
+      {
+        "name": "The Namespace Rule",
+        "body": "A Tailwind v4 motion namespace this project does not reset is Tailwind's design, not this project's. @theme resets --ease-* and --animate-* to initial, then re-declares only what the rules above sanction: one curve, and animate-pulse alone among the loop utilities (animate-bounce and animate-ping generate nothing — both had zero consumers). --default-transition-duration and --default-transition-timing-function are not namespaces to reset — they are two singular keys, pinned rather than reset, to 150ms and var(--ease-out), so an author who forgets an explicit duration class still lands on a sanctioned value instead of Tailwind's own default. Scoped to motion: a token not declared under --ease-* or --animate-* in globals.css may not be used for interaction or loop timing. This is not yet a whole-system rule — --shadow-*, --radius-*, --color-* and --blur-* remain fully unreset and unowned (Tailwind's blurred shadow-sm–shadow-2xl and rounded rounded-sm–rounded-3xl compile today, in tension with the No Blur and Sharp Corner Rules; bg-gray-100 / text-slate-500 compile in tension with the No-Grey-UI Rule), and --text-* / --leading-* (#2490) and --font-mono (#2520) are named, owned and tracked elsewhere. Closing the rest of the namespace list is not this section's job.",
+        "section": "motion"
+      },
+      {
+        "name": "The Person-Photo Rule",
+        "body": "A photo _of a person_ additionally multiplies onto the cream it sits on — squad and staff cards, the player and staff detail heroes, the organigram card and its detail panel, and a pull-quote's subject avatar. Multiply erases white, so a studio cutout's matte disappears into the paper and the subject sits on the page rather than in a white box. It applies club-wide and without exception (#2901): <PlayerCard>'s blendPhoto prop survives as an escape hatch but has no production call site.",
+        "section": "shapes"
       },
       {
         "name": "The Sharp Corner Rule",
@@ -601,8 +676,48 @@
       },
       {
         "name": "The Shadow Needs Ink Rule",
-        "body": "Measured order-independently in apps/web/src product code (Storybook and tests excluded, since a demo wrapper is not a shipped surface, and counted per class attribute so Tailwind's arbitrary ordering — or a cva() variant split across a base class and a state class — can't hide a match): a 2px ink border appears 163 times against a combined 96 for the three ways a 1px hairline is drawn (border-paper-edge 32, alpha-ink ink/10–ink/15 10, full-opacity border-ink 54). 2px ink is the more common weight, not the rarer one — the reverse of what an earlier draft of this rule stated, which counted only the literal adjacent string border-2 border-ink and so missed most real uses. The one direction that does hold: nothing that casts a shadow in this codebase uses a 1px hairline border — a shadow-casting surface takes 2px ink, or 1.5px on a stamp, badge or chip, with no exception found. The converse does not hold: a 2px ink border does not imply a shadow. Of the 163, only 71 also carry a shadow token; the other 92 are shadowless dividers, mostly loading-skeleton frames and border-t-2/border-b-2 section rules. So the test a reviewer can actually run is one-directional — giving a surface a shadow means giving it 2px ink (or 1.5px on a small badge) underneath; the absence of a shadow says nothing about the border weight.",
+        "body": "Measured order-independently in apps/web/src product code (Storybook and tests excluded, since a demo wrapper is not a shipped surface, and counted per class attribute so Tailwind's arbitrary ordering — or a cva() variant split across a base class and a state class — can't hide a match): a 2px ink border appears 163 times against a combined 96 for the three ways a 1px hairline is drawn (border-paper-edge 32, alpha-ink ink/10–ink/15 10, full-opacity border-ink 54). 2px ink is the more common weight, not the rarer one — the reverse of what an earlier draft of this rule stated, which counted only the literal adjacent string border-2 border-ink and so missed most real uses. The one direction that does hold, with one named exception: a shadow-casting surface takes 2px ink, or 1.5px on a stamp, badge or chip. The exception is the in-page section-nav chip (<SectionNavChip>, § Navigation) — border (1px) with a 1px offset shadow, on purpose: it is deliberately quieter than every other shadow-casting object on the site, chrome rather than content, so it takes the chip's own lighter weight instead of the 1.5px a badge-scale object would otherwise use. #2478. The converse does not hold either way: a 2px ink border does not imply a shadow. Of the 163, only 71 also carry a shadow token; the other 92 are shadowless dividers, mostly loading-skeleton frames and border-t-2/border-b-2 section rules. So the test a reviewer can actually run is one-directional — giving a surface a shadow means giving it 2px ink (or 1.5px on a small badge, or 1px on the section-nav chip) underneath; the absence of a shadow says nothing about the border weight.",
         "section": "shapes"
+      },
+      {
+        "name": "The One Table Skin Rule",
+        "body": "There is one register for a table, the quiet one, on cream: font-mono text-xs throughout, border-b-2 border-ink under the header row, border-b border-paper-edge between body rows, uppercase tracked headers at font-normal weight (never the UA-default bold a bare <th> inherits when nothing else says otherwise), no frame, no zebra, no dotted dividers. A <caption> takes the kicker register — font-mono, text-label, font-medium, leading-none, uppercase, text-ink-muted, left-aligned, pb-2 below it — identically wherever it appears.",
+        "section": "components"
+      },
+      {
+        "name": "The Subject, Not The Route Rule",
+        "body": "The artefact follows the document the card was built from, never the page it happens to render on — getCardSubjectArtefact takes a subject, not a route or a page, as its only input, so the same player document resolves to the same jersey figure wherever a card is built from it. #2574 ships the primitive and the helper; it does not wire any production call site to pass a subject through yet — the divergence this makes it possible to close (the same player reading as a photo card in the squad grid and a meaningless hatch in a related-content row) is a documented open item, not a closed one. Read the shipping PR before assuming a card anywhere renders an artefact today.",
+        "section": "imagery"
+      },
+      {
+        "name": "The Player Draws One Figure Rule",
+        "body": "A player's <JerseyIllustration> seed is built through playerFigureSeed, never a free-form string — the same identity resolver <SquadGrid>'s <PlayerCard> and <PlayerHero> already use, so a given player draws the same figure wherever the illustration renders them, today and if the seed derivation ever changes.",
+        "section": "imagery"
+      },
+      {
+        "name": "The Document Has Nothing To Show Rule",
+        "body": "A document is the one subject kind with no artefact, and that is not a gap — there is no illustration for \"a piece of writing\". The hatch is correct for exactly this one case, which is why it stays <NewsCard>'s own default rather than becoming a fifth artefact.",
+        "section": "imagery"
+      },
+      {
+        "name": "The Person Resolves One Level Finer Rule",
+        "body": "\"Person → jersey illustration\" is one level too coarse: a player document takes the jersey, a staff document takes a coat off the same figure — same head, torso and shoulder bumps; only the garment-front lines (collar + shirt pattern vs. lapels/placket/notch ticks) and the two-pass palette (inverted: ink underprint, jersey-deep overprint) change. The key is always the document type, never the route and never role text — a role string is missing or generic (\"Staf\") for most of the site's imageless staff cards, so it cannot carry this decision.",
+        "section": "imagery"
+      },
+      {
+        "name": "The Contained, Never Covered Rule",
+        "body": "A crest is object-contain at every size, including this artefact's ~121px card scale (measured on a 288px card, #2462) — never object-cover, which would crop a square transparent logo the way #2462's own worked example predicted. The team shirt is likewise sized to sit inside its slot rather than fill it edge to edge. The person figure is the exception to \"contained\": <JerseyIllustration variant=\"card\"> fills its slot edge to edge on purpose, matching how it already renders in <SquadGrid>'s <PlayerCard> and in <PlayerHero> — this rule governs the crest and the shirt, not every artefact uniformly.",
+        "section": "imagery"
+      },
+      {
+        "name": "The Slot Keeps Its Ratio Rule",
+        "body": "The artefact fills the card's existing image region; it never switches that region to a different aspect ratio per subject kind. This is what keeps a slider's cards sharing a top edge — the one thing the rejected \"go typographic\" candidate at #2462 gave away.",
+        "section": "imagery"
+      },
+      {
+        "name": "The Placeholder Crest Is Accepted, Unqualified Rule",
+        "body": "A club's logo — a real crest, PSD's generic grey-shield placeholder for an unknown club id, or (rarer) a real per-club URL that happens to decode to a fully transparent image — renders through the exact same path, at every scale, with no detection of any kind: no byte-hashing, no redirect-target check, no ?v= sniffing, no deny-list. Judged on render, not on rate: neither failure mode reads as a defect at any measured size, so there is no threshold to defend and nothing to substitute it with. A missing or wrong crest is upstream data work in PSD, not a render-time concern — see getCardSubjectArtefact's docblock for the six ways a detector was tried and found insufficient.",
+        "section": "imagery"
       },
       {
         "name": "The Section Radius Rule",
@@ -621,7 +736,7 @@
       },
       {
         "name": "The Either-Or Rule",
-        "body": "A figure with a caption needs no alt; a figure without one carries everything the caption would have said. Look for the same shape elsewhere: a sponsor tile renders a logo with an alt or a visible wordmark, never both — which is why formatSponsorAlt survives, since when the logo paints, the alt is the only naming on the tile.",
+        "body": "A figure with a caption needs no alt; a figure without one carries everything the caption would have said. Look for the same shape elsewhere: a sponsor tile renders a logo _with_ an alt or a visible wordmark, never both — which is why formatSponsorAlt survives, since when the logo paints, the alt is the only naming on the tile.",
         "section": "imagery"
       },
       {
@@ -630,23 +745,24 @@
         "section": "imagery"
       },
       {
-        "name": "The List Row Fill Rule",
-        "body": "The canonical hover for interactive paper is the Press-Down Rule's translate-into-shadow, and that stays canonical everywhere except list rows — a full-width row in a vertical list of peers that carries no border-2/shadow frame of its own. Such a row fills its background toward an existing surface token instead of translating, with no change to its size or position. focus-visible gets the same fill as hover, plus an inset outline (outline-offset-[-2px]). This is a Chrome-speed (150ms, var(--ease-out)) colour change, not a fourth speed, and is never gated behind motion-safe: since colour transitions survive reduced motion. A card — anything carrying its own border-2 and shadow — is never a candidate for this rule and keeps the press-down. Built for <CalendarAgenda>'s AgendaMatchRow/AgendaEventRow (#2624).",
-        "section": "motion"
+        "name": "The Silence Is An Answer Rule",
+        "body": "A client-initiated failure — a search, a submit, a copy-to-clipboard — gets a visible notice only when nothing else already recovers the visitor's intent. The test: does anything else on screen still let the visitor finish what they were doing? If yes, render nothing; the silence is the answer, not a gap to fill. Three sites are ratified under this test, by name, and stay silent on purpose: /hulp's HubSearch (falls back to keyword search — the PRD floor, #2057 decision 7o8), /zoeken's semantic augment (useSemanticAugment — the lexical results below still serve), and /nieuws/[slug]'s navigator.share rejection (ArticleMetadata — a dismissed share sheet is not a failure, and the sibling Facebook link is the explicit alternative). A fourth site follows the same test, not the shape of these three.",
+        "section": "failure-emptiness"
       }
     ],
     "dos": [
       "Do set every rectangle's border radius to 0 and reserve curves for true circles.",
-      "Do give a shadow-casting surface a 2px ink border, or 1.5px on a stamp, badge or chip — never a 1px hairline underneath a shadow. A shadowless divider may still be 2px ink; the implication runs one way only.",
+      "Do give a shadow-casting surface a 2px ink border, or 1.5px on a stamp, badge or chip — never a 1px hairline underneath a shadow, except the in-page section-nav chip, which is deliberately 1px/1px (chrome, not content). A shadowless divider may still be 2px ink; the implication runs one way only.",
       "Do use hard offset shadows with 0 blur, in exactly the seven documented tokens.",
-      "Do press interactive surfaces into their shadow on hover (translate(1px, 1px) + shadow-none), gating only the translate behind motion-safe: — except a list row (a full-width row in a vertical list of peers with no border-2/shadow frame of its own), which fills its background toward an existing surface token instead of translating.",
+      "Do press interactive surfaces into their shadow on hover (translate(1px, 1px) + shadow-none), gating only the translate behind motion-safe: — except the in-page section-nav chip, which never presses at all, and except a list row (a full-width row in a vertical list of peers with no border-2/shadow frame of its own), which fills its background toward an existing surface token instead of translating — see The List Row Fill Rule.",
       "Do pick the right green: jersey decorative only, jersey-deep for anything carrying text (headings, CTAs, inline prose links), jersey-bright for green text on ink.",
       "Do reach for an existing primitive — taped card, ticket stub, mono label, editorial heading, tape strip, stamp badge, striped seam — before writing new markup.",
       "Do route every page through the three container widths (680 / 1040 / 1280).",
-      "Do keep photographs in colour with the newsprint warm-tint; greyscale-to-colour-on-hover belongs to sponsor logos alone.",
+      "Do keep photographs in colour with the newsprint warm-tint; greyscale-to-colour-on-hover belongs to sponsor logos alone — except on /sponsors itself, see the Don't below.",
       "Do author heading emphasis as a Portable Text accent decorator, one emphasis per heading.",
       "Do use Phosphor Fill icons from the single icon source.",
-      "Do give an image alt=\"\" when its own section already names it, and describe the moment when nothing else does."
+      "Do give an image alt=\"\" when its own section already names it, and describe the moment when nothing else does.",
+      "Do reach for getCardSubjectArtefact before hand-rolling a no-photo treatment for a new card — a fifth artefact or a second mapping is exactly the drift #2462 closed."
     ],
     "donts": [
       "Don't introduce a blurred shadow, a gradient fill, or a glassmorphic surface — those are the SaaS anti-reference.",
@@ -660,11 +776,12 @@
       "Don't add a new typeface. Freight Sans Pro, Freight Display Pro, Freight Big Pro and IBM Plex Mono are the whole set.",
       "Don't build a 16px semibold sans \"section label\" register between display serif and 11px mono.",
       "Don't reintroduce a neutral grey. gray-100, foundation-gray-light and the four table-* tokens have all been deleted; a section that needs to step down from the page gets cream-soft, not a grey.",
-      "Don't rely on hover to reveal anything necessary — the primary usage scene is a phone, outdoors.",
+      "Don't rely on hover to reveal anything necessary — the primary usage scene is a phone, outdoors. Sponsor logos are the one exception: a logo is fully legible in greyscale, so the colour reveal is brand flavour rather than information. On /sponsors, where the logos are the content, they render in colour at rest.",
       "Don't use emoji as icons.",
       "Don't feed a heading, a card title or a caption back into the image beside it — a duplicated sentence spends the reader's attention twice for nothing.",
       "Don't give an artefact an accessible name. The jersey illustration and the monogram disc identify nobody, so they take aria-hidden, not a label.",
-      "Don't add an alt field to a cover image. A cover is never alone, and an optional field that is correct when empty only invites a half-filled one."
+      "Don't add an alt field to a cover image. A cover is never alone, and an optional field that is correct when empty only invites a half-filled one.",
+      "Don't try to tell a real crest apart from PSD's placeholder shield. No byte-hashing, no redirect-target check, no ?v= sniffing, no deny-list — #2472 tried six variants of this and rejected all of them; a missing crest is upstream data work, not a render-time concern."
     ]
   }
 }
