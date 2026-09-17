@@ -38,6 +38,9 @@ function useAutoFit<T extends HTMLElement>(
   // whatever `fonts.load()` below doesn't cover (it can throw synchronously
   // on a malformed computed-style shorthand, or `fonts.load` itself can be
   // unavailable) — replaces the old, redundant `fonts.ready` backstop.
+  // `useWebfontSwap` itself also guarantees at least one call even when
+  // nothing is loading (see its own docblock) — safe here because `refit`
+  // just re-probes the DOM and is a no-op when nothing has changed.
   useWebfontSwap(() => refitRef.current());
 
   useLayoutEffect(() => {

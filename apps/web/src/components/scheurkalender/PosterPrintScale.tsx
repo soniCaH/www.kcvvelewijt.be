@@ -27,10 +27,12 @@ import {
  * Measuring cannot wait for the print layout (`beforeprint` fires before it),
  * and the on-screen sheet is a different width at every viewport, so the height
  * is read with the print width forced on — one forced reflow per measurement.
- * It runs on mount, again once the real webfont swap lands (via the shared
- * `useWebfontSwap` trigger, #2822 — a no-op when nothing was loading), and
- * again before printing; the page is a private tool one person opens to
- * export a poster, so that costs nothing worth caching against.
+ * It runs on mount, again via the shared `useWebfontSwap` trigger (#2822 —
+ * fires at least once even when nothing was loading, so this always gets a
+ * second measurement regardless of font state, plus another if a real swap
+ * lands later), and again before printing; the page is a private tool one
+ * person opens to export a poster, so that costs nothing worth caching
+ * against.
  */
 export function PosterPrintScale() {
   const applyScale = useCallback(() => {

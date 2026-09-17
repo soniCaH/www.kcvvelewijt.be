@@ -28,10 +28,14 @@ export interface UseHashLandingCorrectionResult {
  * - **`notifyLayoutChange()`**, called by a consumer with its own geometry
  *   (`useSectionNav`'s sticky bar resizing, e.g. `<HubSearch>` mounting
  *   once the hero scrolls out of view).
- * - **A late webfont swap**, via the shared `useWebfontSwap` hook (a
- *   `FontFaceSet` `loadingdone` subscription — see its own docblock for why
- *   `fonts.ready` isn't used instead). Matters even on a route with no bar
- *   at all (`/jeugd#visie`).
+ * - **A late webfont swap**, via the shared `useWebfontSwap` hook — see its
+ *   own docblock for why it composes a `FontFaceSet` `loadingdone`
+ *   subscription (the authoritative signal for a real swap) with a
+ *   `fonts.ready` floor (a guaranteed extra call even when nothing is
+ *   loading). An extra/early `correct()` call from that floor is harmless
+ *   here: it no-ops outside the armed window below, and a repeat
+ *   `scrollIntoView()` to an already-reached target is a no-op too. Matters
+ *   even on a route with no bar at all (`/jeugd#visie`).
  *
  * `<useSectionNav>` composes this for its own bar-resize case;
  * `<JeugdVisie>` (no bar, no nav) uses it directly for the webfont case.
@@ -67,8 +71,8 @@ export function useHashLandingCorrection(
     document.getElementById(hash)?.scrollIntoView({ block: "start" });
   }, []);
 
-  // The shared webfont-swap trigger (#2822) — see its own docblock for why
-  // `loadingdone`, not `document.fonts.ready`.
+  // The shared webfont-swap trigger (#2822) — see its own docblock for the
+  // loadingdone + fonts.ready composition.
   useWebfontSwap(correct);
 
   // Wired once: a cold load with the hash already in the URL arms and
