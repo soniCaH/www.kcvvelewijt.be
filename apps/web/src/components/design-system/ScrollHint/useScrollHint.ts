@@ -124,14 +124,30 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     // include whatever padding that same decision already applied, or the
     // rail sustains itself forever once triggered. Padding on the track
     // widens scrollWidth by exactly its own width once content overflows
-    // the padded content area, while clientWidth does not move (it is
-    // fixed by the track's own layout, not by its padding) — so a track
+    // the padded content area, while clientWidth does not move — so a track
     // that would fit unpadded at a wider viewport can still read as
     // overflowing purely from padding a PRIOR, narrower measurement added.
     // Reading the padding actually on the element (rather than assuming a
     // fixed rail width) keeps this correct for any consumer, railed or not.
     // `paddingRef` is cached rather than re-read here — see the comment on
     // its declaration above — because scroll ticks cannot change it.
+    //
+    // **"clientWidth does not move" is a CONTRACT, not a law (#3016).** It
+    // holds while the padding shrinks the track's content box, which is the
+    // ordinary `box-sizing: border-box` case: the border box is fixed by
+    // the track's own layout and the padding is carved out of it. It does
+    // NOT hold when the padding instead grows the border box — a wrapper
+    // that is a flex item keeps `min-width: auto`, so the rail padding
+    // raises its automatic minimum size and scrollWidth and clientWidth
+    // move together. Their difference is then unchanged, subtracting the
+    // padding from scrollWidth alone counts it once instead of letting it
+    // cancel, and the verdict inverts on every re-measure: measured on
+    // `/hulp` at 500px, 616 − 80 − 586 = −50 (no rail) alternating with
+    // 536 − 0 − 513 = 23 (rail), ~3 flips a second while a chip is hovered
+    // (a hover transition fires `transitionend`, which re-measures here).
+    // `<ScrollRail>` holds up its half of the contract with `min-w-0` on
+    // its wrapper; a consumer that pads the track itself must keep the
+    // track's border box independent of that padding the same way.
     setOverflows(scrollWidth - paddingRef.current - clientWidth > DEAD_ZONE);
 
     setRemainingLeft(Math.min(maxRemainingPx, rLeft));

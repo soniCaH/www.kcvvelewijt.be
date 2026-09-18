@@ -470,7 +470,17 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
           }
           showCounts={false}
           ariaLabel="Filter op doelgroep"
-          className="flex-1"
+          // `basis-full` below `sm`, sharing the line above it — the layout
+          // `flex-1` alone used to produce by accident (#3016). A flex item
+          // keeps `min-width: auto`, so this rail's own arrow gutter fed
+          // back into the floor its parent sized it to: the row dropped to
+          // its own line and ran 37px past the page edge with it (measured
+          // at a 500px viewport). `<ScrollRail>` now pins `min-w-0`, so the
+          // row shrinks to its share instead — which on its own would have
+          // moved it up beside the label on phones. Spelling the wrap out
+          // keeps the two `/hulp` chip rows aligned there, on purpose this
+          // time.
+          className="grow basis-full sm:basis-0"
         />
       </div>
 
