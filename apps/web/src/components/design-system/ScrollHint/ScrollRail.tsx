@@ -64,6 +64,13 @@ export interface ScrollRailProps {
  *
  * Consumers: `<FilterTabs>` (chip row), `<TeamSectionNav>`, the organigram
  * breadcrumb.
+ *
+ * **Two ways a consumer can still un-fix #3016**, neither of which errors:
+ * passing a `min-w-*` of its own in `className` (tailwind-merge lands the
+ * caller's last, dropping the `min-w-0` below), or wrapping this component
+ * in its own flex-item `<div>` — `min-width: auto` then lives on that
+ * wrapper, out of reach. No consumer does either today; if one needs to,
+ * carry `min-width: 0` down to whichever box is the flex item.
  */
 export function ScrollRail({
   as: Tag = "div",
@@ -87,7 +94,15 @@ export function ScrollRail({
   } = useScrollHint<HTMLElement>({ maxRemainingPx: MAX_FADE_PX });
 
   return (
-    <div className={cn("relative", className)}>
+    // `min-w-0` is load-bearing, not cosmetic (#3016). It holds the track's
+    // border box independent of the rail padding applied below — the
+    // premise `applyMeasurement` documents and subtracts against, and the
+    // one a flex-item wrapper breaks, because `min-width: auto` lets that
+    // same padding raise the floor the parent sizes it to. `/hulp`'s
+    // audience row was that shape: `clientWidth` 506 ↔ 586 with the rail,
+    // arrows mounting and unmounting ~3× a second under a held hover. See
+    // the `setOverflows` comment in `useScrollHint` for the arithmetic.
+    <div className={cn("relative min-w-0", className)}>
       {overflows && (
         <>
           <div

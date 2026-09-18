@@ -31,6 +31,26 @@ describe("ScrollRail", () => {
     delete (HTMLElement.prototype as any).clientWidth;
   });
 
+  /**
+   * #3016 — `min-w-0` keeps the track's border box independent of the rail
+   * padding this component applies to that same element. Without it, a
+   * wrapper that is a flex item keeps `min-width: auto`, the rail padding
+   * raises its automatic minimum size, and `useScrollHint`'s overflow
+   * verdict inverts on every re-measure — the arrows mount and unmount for
+   * as long as anything on the row is hovered. Asserted on the class
+   * because the guarantee is the class: jsdom computes no layout, so the
+   * geometry this prevents cannot be reproduced in a unit test.
+   */
+  it("pins min-w-0 on the wrapper so the rail padding cannot resize the track", () => {
+    render(
+      <ScrollRail ariaLabel="Track">
+        <span>Item</span>
+      </ScrollRail>,
+    );
+    const wrapper = screen.getByLabelText("Track").parentElement;
+    expect(wrapper).toHaveClass("min-w-0");
+  });
+
   it("renders children inside the track", () => {
     render(
       <ScrollRail>

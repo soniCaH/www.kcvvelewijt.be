@@ -669,6 +669,86 @@ describe("useScrollHint", () => {
       // the dead zone — genuinely overflowing, padding aside.
       expect(hookResult!.overflows).toBe(true);
     });
+
+    /**
+     * #3016 — the invariant a rail must satisfy: applying it must not
+     * change the verdict that decides whether to apply it. Anything else
+     * is a loop, because a hover transition fires `transitionend`,
+     * `transitionend` re-measures, and a re-measure that flips the state
+     * animates the rail padding into the next flip.
+     *
+     * **What this locks, precisely:** that the verdict stays padding-
+     * independent across the whole dead-zone boundary, not just at the two
+     * single points the two tests above pin. Both columns hold the track's
+     * own border box fixed, so the rail adds its 80px to `scrollWidth`
+     * only and the padding the hook subtracts back out is exactly the
+     * padding the rail added. Deleting that subtraction fails the 600px
+     * and 645px cases — which is the point: the cheap way to "fix" this
+     * file after such a change is to relax these, and that would take the
+     * #2860 guard above with it.
+     *
+     * **What it cannot reach:** the geometry that actually shipped the
+     * oscillation, where `clientWidth` moves *with* the padding (506 ↔ 586
+     * on `/hulp`). jsdom computes no layout, so that shape is
+     * unrepresentable here — it is prevented structurally instead, by the
+     * `min-w-0` `<ScrollRail>` pins on its wrapper, and asserted in
+     * `ScrollRail.test.tsx`.
+     */
+    it.each([
+      { content: 600, note: "fits with room to spare" },
+      { content: 645, note: "over by 5px — inside the dead zone" },
+      { content: 655, note: "over by 15px — just past the dead zone" },
+      { content: 900, note: "well past the dead zone" },
+    ])(
+      "reaches the same verdict with and without the rail — $content px content, $note",
+      ({ content }) => {
+        Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+          configurable: true,
+          value: 640,
+        });
+        Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
+          configurable: true,
+          value: 0,
+        });
+
+        const verdictWithRail = (railPx: number) => {
+          Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
+            configurable: true,
+            value: content + railPx,
+          });
+          let hookResult: UseScrollHintReturn | undefined;
+          function Host({
+            onHook,
+          }: {
+            onHook: (h: UseScrollHintReturn) => void;
+          }) {
+            const hook = useScrollHint();
+            useEffect(() => {
+              onHook(hook);
+            });
+            return createElement("div", {
+              ref: hook.scrollRef,
+              style: {
+                paddingLeft: `${railPx / 2}px`,
+                paddingRight: `${railPx / 2}px`,
+              },
+            });
+          }
+          const { unmount } = render(
+            createElement(Host, {
+              onHook: (h: UseScrollHintReturn) => {
+                hookResult = h;
+              },
+            }),
+          );
+          const verdict = hookResult!.overflows;
+          unmount();
+          return verdict;
+        };
+
+        expect(verdictWithRail(80)).toBe(verdictWithRail(0));
+      },
+    );
   });
 
   describe("remeasureOn — extra re-check triggers a ResizeObserver cannot see", () => {

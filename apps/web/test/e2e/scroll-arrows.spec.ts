@@ -232,6 +232,86 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     await assertRailArrowMatchesOverflow(wrapper, group);
   });
 
+  // #3016 — the one property no unit test in this repo can reach. The rail
+  // padding is applied to the very element `useScrollHint` measures, so a
+  // wrapper that is a flex item lets that padding grow the track's own
+  // border box (`min-width: auto` floors the item at its min-content size)
+  // instead of shrinking its content box. `scrollWidth` and `clientWidth`
+  // then move together, the hook's padding subtraction counts the gutter
+  // twice, and the verdict inverts on every re-measure — which a hover
+  // triggers, because the chip's `transition-all` fires `transitionend` and
+  // `useScrollHint` re-measures on it. `/hulp`'s audience row shipped that
+  // shape: the arrows mounted and unmounted ~3x a second for as long as a
+  // chip stayed hovered. jsdom computes no layout, so `ScrollRail.test.tsx`
+  // can only assert the `min-w-0` that prevents it; whether the real
+  // geometry actually holds is a browser question.
+  //
+  // Deliberately NOT pinned to the dead-zone boundary: landing content
+  // within 10px of the track width would need the CMS copy, the webfont
+  // metrics and the viewport all held still — the fragility this file's
+  // header rejects — and the defect never needed the boundary anyway (it
+  // fired at a 30px margin). A row that plainly overflows is the honest
+  // case, and the one that regresses.
+  test("FilterTabs on /hulp — a held chip hover must not oscillate the arrows (#3016)", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await gotoBounded(page, "/hulp");
+
+    const group = page.getByRole("group", { name: /doelgroep/i });
+    await expect(group).toBeVisible();
+    const wrapper = group.locator("..");
+
+    // Both /hulp chip rows are hardcoded (`AUDIENCE_TABS`/`CATEGORY_TABS`),
+    // not CMS-driven, so unlike the routes above this one can assert the
+    // precondition outright: five chips either overflow a 360px phone or
+    // the rest of this test is measuring nothing.
+    const { overflows } = await readOverflow(group);
+    expect(overflows).toBe(true);
+    await assertRailArrowMatchesOverflow(wrapper, group);
+
+    // Hover by position, not label — the audience labels are domain copy
+    // (`HUB_AUDIENCE_FILTERS`) and this test is about geometry, not wording.
+    await group.locator("button").nth(1).hover();
+
+    // One hover is enough: the loop is self-sustaining once started (each
+    // flip animates the rail padding, whose `transitionend` drives the
+    // next). At the shipped ~320ms period this window caught ~9 flips.
+    const flips = await group.evaluate(async (track, sampleMs) => {
+      const railWrapper = track.parentElement!;
+      const arrowCount = () =>
+        [...railWrapper.children].filter((n) => n.tagName === "BUTTON").length;
+      let last = arrowCount();
+      let transitions = 0;
+      const start = performance.now();
+      await new Promise<void>((resolve) => {
+        const tick = () => {
+          const now = arrowCount();
+          if (now !== last) {
+            transitions += 1;
+            last = now;
+          }
+          if (performance.now() - start < sampleMs) {
+            requestAnimationFrame(tick);
+          } else {
+            resolve();
+          }
+        };
+        requestAnimationFrame(tick);
+      });
+      return transitions;
+    }, 3000);
+
+    expect(flips).toBe(0);
+
+    // The same `min-width: auto` floor also pushed this row past the page's
+    // own edge (37px at a 500px viewport) — one assertion, same root cause.
+    const bleed = await page.evaluate(
+      () => document.body.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(bleed).toBeLessThanOrEqual(0);
+  });
+
   test("HorizontalSlider (RelatedRow) on /nieuws/[slug] — desktop and mobile", async ({
     page,
   }) => {
