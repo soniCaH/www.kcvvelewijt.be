@@ -24,7 +24,12 @@ import { BRAND, SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  // 500 is not decorative: the locked mono kicker / pill / field-label /
+  // caption register is `font-medium`, and 12 call sites pair it with
+  // `font-mono`. CSS weight matching resolves a missing 500 DOWNWARD to
+  // 400, so leaving it out renders that register at regular the moment the
+  // real face starts rendering at all (#2520).
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-ibm-plex-mono",
 });

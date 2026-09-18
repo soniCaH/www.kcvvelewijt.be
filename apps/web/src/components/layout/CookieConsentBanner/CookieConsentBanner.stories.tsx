@@ -27,7 +27,7 @@ function stubCookieConsent() {
 }
 
 const baseBtn: CSSProperties = {
-  fontFamily: "var(--font-family-mono)",
+  fontFamily: "var(--font-mono)",
   fontSize: 12,
   fontWeight: 600,
   letterSpacing: "0.05em",
@@ -253,7 +253,7 @@ function MockPreferencesModal() {
           <span
             aria-hidden
             style={{
-              fontFamily: "var(--font-family-mono)",
+              fontFamily: "var(--font-mono)",
               fontWeight: 700,
               width: 28,
               height: 28,
