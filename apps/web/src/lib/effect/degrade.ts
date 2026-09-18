@@ -8,13 +8,12 @@ import { Effect } from "effect";
  * This is the section half — the subject half is a bare read with no handler at
  * all, which is the whole point of not having a `degradePage` next to this.
  *
- * **Why `catchAllCause` and not `catchAll`.** Every Sanity read ends in
- * `Effect.orDie` (`lib/sanity/fetch-groq.ts`), so a repository method is typed
- * `Effect<A>` — `E = never` — and its failures arrive as *defects*. An
- * `Effect.catchAll` on one type-checks, reads like a guard, and never runs. The
- * site had eight of those before #2563 and the compiler flagged none of them,
- * which is why the correct spelling lives here under a name rather than being
- * re-derived per call site.
+ * **Why `catchAllCause` and not `catchAll`.** A Sanity read's own failure is
+ * now a typed `SanityReadError` (`lib/sanity/fetch-groq.ts`, #2864) that
+ * `catchAll` would catch — but `catchAllCause` also catches a genuine defect
+ * (an unexpected throw elsewhere in the same `Effect.gen`), which `catchAll`
+ * would let crash the page regardless. One spelling covers both, so it lives
+ * here under a name rather than being re-derived per call site.
  *
  * `note` is logged with the cause because these are defects: a section that
  * quietly disappears may be a Sanity blip, or may be a broken GROQ projection
@@ -44,13 +43,14 @@ export const degradeSection = <A, E, R>(
 export const READ_FAILED: unique symbol = Symbol("READ_FAILED");
 
 /**
- * `degradeSection`, always falling back to `READ_FAILED`. Same `E = never`
- * restriction as `degradeSection` above — Sanity reads (`Effect.orDie`
- * defects) only, not a general error-channel handler; a read with a real
- * error channel (e.g. a BFF call) should keep its own `Effect.catchAll`.
+ * `degradeSection`, always falling back to `READ_FAILED`. `E` is generic,
+ * same as `degradeSection` above — a Sanity read's `SanityReadError`
+ * (`lib/sanity/fetch-groq.ts`) included, since #2864 gave it a typed error
+ * channel. Not a substitute for a BFF call's own `Effect.catchAll`/
+ * `Effect.catchTags` — those classify permanent vs. transient first.
  */
-export const degradeSectionFlagged = <A, R>(
-  self: Effect.Effect<A, never, R>,
+export const degradeSectionFlagged = <A, E, R>(
+  self: Effect.Effect<A, E, R>,
   note: string,
 ): Effect.Effect<A | typeof READ_FAILED, never, R> =>
-  degradeSection<A | typeof READ_FAILED, never, R>(self, READ_FAILED, note);
+  degradeSection<A | typeof READ_FAILED, E, R>(self, READ_FAILED, note);

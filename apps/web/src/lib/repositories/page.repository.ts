@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import type {
   PAGES_QUERY_RESULT,
   PAGE_BY_SLUG_QUERY_RESULT,
@@ -59,8 +59,10 @@ export type PageListItemVM = Omit<
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface PageRepositoryInterface {
-  readonly findAll: () => Effect.Effect<PageListItemVM[]>;
-  readonly findBySlug: (slug: string) => Effect.Effect<PageVM | null>;
+  readonly findAll: () => Effect.Effect<PageListItemVM[], SanityReadError>;
+  readonly findBySlug: (
+    slug: string,
+  ) => Effect.Effect<PageVM | null, SanityReadError>;
 }
 
 export class PageRepository extends Context.Tag("PageRepository")<

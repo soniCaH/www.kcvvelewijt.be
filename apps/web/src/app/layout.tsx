@@ -15,6 +15,7 @@ import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoad
 import { EmptyStateUndoTracker } from "@/components/analytics/EmptyStateUndoTracker";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import {
   TeamRepository,
   type TeamNavVM,
@@ -71,13 +72,26 @@ export default async function RootLayout({
 }>) {
   const typekitId = process.env.NEXT_PUBLIC_TYPEKIT_ID;
 
+  // Section read: the nav's team list, not the page itself — every route
+  // renders under this layout, so a failed read degrades to an empty nav
+  // rather than taking the whole site down (#2864). The outer try/catch is
+  // not the dead-catchAll anti-pattern this ticket removes elsewhere: it
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`),
+  // which happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps — an in-effect catch cannot see a failure to provide the effect's
+  // own context. Verified empirically: with `KCVV_API_URL` unset, dropping
+  // this try/catch 500s every route instead of rendering with an empty nav.
   let allTeams: TeamNavVM[] = [];
   try {
     allTeams = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findAll();
-      }),
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAll();
+        }),
+        [],
+        "[RootLayout] failed to load team nav — degrading to empty list",
+      ),
     );
   } catch {
     allTeams = [];

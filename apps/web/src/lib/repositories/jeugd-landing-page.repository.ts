@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import type { JEUGD_LANDING_PAGE_QUERY_RESULT } from "../sanity/sanity.types";
 
 // ─── GROQ Query ──────────────────────────────────────────────────────────────
@@ -72,7 +72,10 @@ export function toEditorialCardsVM(
 // ─── Repository ──────────────────────────────────────────────────────────────
 
 export interface JeugdLandingPageRepositoryInterface {
-  readonly getEditorialCards: () => Effect.Effect<EditorialCardConfig[] | null>;
+  readonly getEditorialCards: () => Effect.Effect<
+    EditorialCardConfig[] | null,
+    SanityReadError
+  >;
 }
 
 export class JeugdLandingPageRepository extends Context.Tag(

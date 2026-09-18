@@ -88,11 +88,14 @@ export function pickFirstTeamPsdId(
 export const getTeamMatches = cache(async function getTeamMatches(
   psdId: number,
 ): Promise<readonly Match[]> {
+  // Rejects on purpose (see this function's own docblock) — each call site
+  // owns its own fallback. `Effect.orDie` only makes that pre-existing
+  // decision visible to the narrowed `runPromise` signature (#2864).
   return runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
       return yield* bff.getMatches(psdId);
-    }),
+    }).pipe(Effect.orDie),
   );
 });
 
@@ -117,11 +120,17 @@ export const getTeamMatches = cache(async function getTeamMatches(
 export const getFirstTeamStripData = cache(
   async function getFirstTeamStripData(): Promise<MatchStripData | null> {
     try {
+      // This whole function's `try` already degrades any failure (Sanity or
+      // BFF) to `null` — the strip is chrome, not a page subject (see this
+      // function's own docblock). `Effect.orDie` only makes that
+      // pre-existing decision visible to the narrowed `runPromise` signature
+      // (#2864); the surrounding `try/catch` is what still does the actual
+      // degrading.
       const teams = await runPromise(
         Effect.gen(function* () {
           const repo = yield* TeamRepository;
           return yield* repo.findAll();
-        }),
+        }).pipe(Effect.orDie),
       );
 
       const psdId = pickFirstTeamPsdId(teams);

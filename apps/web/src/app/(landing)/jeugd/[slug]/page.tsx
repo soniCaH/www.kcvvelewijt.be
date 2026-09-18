@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Effect } from "effect";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { runPromise } from "@/lib/effect/runtime";
@@ -33,7 +34,9 @@ export default async function LegacyYouthRedirect({
   params,
 }: LegacyYouthProps) {
   const { slug } = await params;
-  const rows = await runPromise(fetchYouthTeamRows());
+  // Subject read: this route exists only to resolve the redirect target, so a
+  // failed read takes the page down with it (#2864).
+  const rows = await runPromise(fetchYouthTeamRows().pipe(Effect.orDie));
   const target = resolveYouthSlug(slug, rows);
   if (!target) notFound();
   permanentRedirect(`/ploegen/${target}`);

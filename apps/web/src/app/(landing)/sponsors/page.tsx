@@ -43,12 +43,13 @@ export default async function SponsorsPageRoute() {
   // subject, and under ISR a caught failure *succeeds* — the empty wall would
   // be written into the cache and hold for the full window below. A throw
   // leaves the last good render in place, so the failure is a blip rather than
-  // a day of blank sponsor slots.
+  // a day of blank sponsor slots. `Effect.orDie` makes that decision visible
+  // at the call site (#2864) rather than implicit inside `fetchGroq`.
   const sponsors = await runPromise(
     Effect.gen(function* () {
       const repo = yield* SponsorRepository;
       return yield* repo.findAll();
-    }),
+    }).pipe(Effect.orDie),
   );
 
   const allSponsors = sponsors.map(mapToSponsor).sort(sortByTierThenName);

@@ -20,7 +20,9 @@ import { Effect } from "effect";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { PhotoGalleryRepository } from "@/lib/repositories/photoGallery.repository";
+import type { GALLERY_SLUGS_QUERY_RESULT } from "@/lib/sanity/sanity.types";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
@@ -75,32 +77,47 @@ const descriptionComponents: PortableTextComponents = {
 };
 
 export async function generateStaticParams() {
+  // Section (of the build), not a request-time subject: an empty list here
+  // just means every slug renders on demand instead of being pre-enumerated
+  // — `dynamicParams` still serves them (#2864). The outer try/catch also
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
+  // that happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps, so an in-effect catch alone would let it fail the whole build.
+  let slugs: GALLERY_SLUGS_QUERY_RESULT = [];
   try {
-    const slugs = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* PhotoGalleryRepository;
-        return yield* repo.findAllSlugs();
-      }),
+    slugs = await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* PhotoGalleryRepository;
+          return yield* repo.findAllSlugs();
+        }),
+        [],
+        "[galerij/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+      ),
     );
-    return slugs
-      .filter((row): row is { slug: string; updatedAt: string } =>
-        Boolean(row.slug),
-      )
-      .map((row) => ({ slug: row.slug }));
   } catch {
-    return [];
+    slugs = [];
   }
+  return slugs
+    .filter((row): row is { slug: string; updatedAt: string } =>
+      Boolean(row.slug),
+    )
+    .map((row) => ({ slug: row.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: GalleryPageProps): Promise<Metadata> {
   const { slug } = await params;
+  // Subject read: this route's metadata is entirely about this one gallery,
+  // so a failed read takes it down with it — `null` (genuinely no such
+  // gallery) is the only case that degrades to the "niet gevonden" fallback
+  // (#2864).
   const gallery = await runPromise(
     Effect.gen(function* () {
       const repo = yield* PhotoGalleryRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
   if (!gallery)
     return {
@@ -132,11 +149,14 @@ export async function generateMetadata({
 
 export default async function GalleryDetailPage({ params }: GalleryPageProps) {
   const { slug } = await params;
+  // Subject read: the gallery is this page's entire content, so a failed
+  // read takes it down with it — `null` (genuinely no such gallery) is the
+  // only case that resolves to `notFound()` (#2864).
   const gallery = await runPromise(
     Effect.gen(function* () {
       const repo = yield* PhotoGalleryRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!gallery) notFound();

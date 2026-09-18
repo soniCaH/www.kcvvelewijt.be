@@ -53,9 +53,10 @@ export default async function Image({ params }: ImageProps) {
 
   // An OG route has no error boundary to bubble into — a throw here serves a
   // broken image to every social crawler, so it degrades to the club card.
-  // `TeamRepository.findBySlug` is a Sanity read (`E = never`, #2863), so the
-  // guard must be `degradeSection` — a plain `Effect.catchAll` type-checks but
-  // never runs against it.
+  // `TeamRepository.findBySlug` carries a typed `SanityReadError` (#2864), so
+  // the guard must be `degradeSection` — a plain `Effect.catchAll` would only
+  // catch that channel, not a stray defect elsewhere in the same
+  // `Effect.gen`.
   const card = await runPromise(
     degradeSection(
       Effect.gen(function* () {

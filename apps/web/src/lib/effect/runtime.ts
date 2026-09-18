@@ -56,10 +56,19 @@ export const AppLayer = Layer.mergeAll(
 );
 export const runtime = ManagedRuntime.make(AppLayer);
 
-export const runPromise = <A, E>(
+/**
+ * Every route runs its Sanity/BFF reads through here. `E` is pinned to
+ * `never`: an effect that reaches this call with an unhandled error channel
+ * is a compile error, not a runtime defect discovered in production (#2864).
+ * A **section** read must be routed through `degradeSection`
+ * (`lib/effect/degrade.ts`) before it gets here; a **subject** read that
+ * should take the page down calls `Effect.orDie` itself, at the call site,
+ * with a one-line reason (#2433 rule 2/3).
+ */
+export const runPromise = <A>(
   effect: Effect.Effect<
     A,
-    E,
+    never,
     | BffService
     | PlayerRepository
     | TeamRepository

@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   ORGANIGRAM_NODES_QUERY_RESULT,
@@ -202,10 +202,18 @@ export function toStaffDetailVM(
 // ─── Repository ───────────────────────────────────────────────────────────────
 
 export interface StaffRepositoryInterface {
-  readonly findAll: () => Effect.Effect<OrgChartNode[]>;
-  readonly findByPsdId: (psdId: string) => Effect.Effect<StaffDetailVM | null>;
-  readonly findKeyContacts: () => Effect.Effect<KeyContactVM[]>;
-  readonly findAllForStaticParams: () => Effect.Effect<{ psdId: string }[]>;
+  readonly findAll: () => Effect.Effect<OrgChartNode[], SanityReadError>;
+  readonly findByPsdId: (
+    psdId: string,
+  ) => Effect.Effect<StaffDetailVM | null, SanityReadError>;
+  readonly findKeyContacts: () => Effect.Effect<
+    KeyContactVM[],
+    SanityReadError
+  >;
+  readonly findAllForStaticParams: () => Effect.Effect<
+    { psdId: string }[],
+    SanityReadError
+  >;
 }
 
 export class StaffRepository extends Context.Tag("StaffRepository")<

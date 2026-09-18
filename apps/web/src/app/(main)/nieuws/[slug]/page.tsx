@@ -7,8 +7,12 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { MatchDetail } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { BffService } from "@/lib/effect/services/BffService";
-import { ArticleRepository } from "@/lib/repositories/article.repository";
+import {
+  ArticleRepository,
+  type ArticleVM,
+} from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { computeReadingTime } from "@/lib/utils/reading-time";
 import {
@@ -235,27 +239,37 @@ function shouldRenderArticleCredits(article: ArticleDetailVM): boolean {
  * @returns An array of `{ slug: string }` objects for static route generation; returns an empty array if articles cannot be retrieved.
  */
 export async function generateStaticParams() {
+  // Section (of the build), not a request-time subject: an empty list here
+  // just means every slug renders on demand instead of being pre-enumerated
+  // — `dynamicParams` still serves them (#2864). The outer try/catch also
+  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
+  // that happens outside the effect `degradeSection`'s `catchAllCause`
+  // wraps, so an in-effect catch alone would let it fail the whole build.
+  let articles: ArticleVM[] = [];
   try {
-    const articles = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* ArticleRepository;
-        return yield* repo.findAll();
-      }),
+    articles = await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+        [],
+        "[nieuws/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
+      ),
     );
-    // Exclude matchPreview/matchRecap from the prebuild set: their hero +
-    // Doelpunten require a per-article PSD fetch, so prebuilding them would
-    // hammer the rate-limited BFF at build time. They render on-demand via
-    // ISR instead, on the route `revalidate` at the bottom of this file.
-    // See #1470 / feedback_no_psd_prerendering.
-    return articles
-      .filter(
-        (a) =>
-          a.articleType !== "matchPreview" && a.articleType !== "matchRecap",
-      )
-      .map((a) => ({ slug: a.slug }));
   } catch {
-    return [];
+    articles = [];
   }
+  // Exclude matchPreview/matchRecap from the prebuild set: their hero +
+  // Doelpunten require a per-article PSD fetch, so prebuilding them would
+  // hammer the rate-limited BFF at build time. They render on-demand via
+  // ISR instead, on the route `revalidate` at the bottom of this file.
+  // See #1470 / feedback_no_psd_prerendering.
+  return articles
+    .filter(
+      (a) => a.articleType !== "matchPreview" && a.articleType !== "matchRecap",
+    )
+    .map((a) => ({ slug: a.slug }));
 }
 
 /**
@@ -266,11 +280,15 @@ export async function generateStaticParams() {
  */
 export async function generateMetadata({ params }: ArticlePageProps) {
   const { slug } = await params;
+  // Subject read: this route's metadata is entirely about this one article,
+  // so a failed read takes it down with it — `null` (genuinely no such
+  // article) is the only case that degrades to the "niet gevonden" fallback
+  // (#2864).
   const article = await runPromise(
     Effect.gen(function* () {
       const repo = yield* ArticleRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
   if (!article)
     return {
@@ -317,11 +335,14 @@ export async function generateMetadata({ params }: ArticlePageProps) {
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
 
+  // Subject read: the article is this page's entire content, so a failed
+  // read takes it down with it — `null` (genuinely no such article) is the
+  // only case that resolves to `notFound()` (#2864).
   const article = await runPromise(
     Effect.gen(function* () {
       const repo = yield* ArticleRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!article) notFound();

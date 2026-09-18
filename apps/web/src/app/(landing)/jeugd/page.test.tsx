@@ -148,4 +148,68 @@ describe("/jeugd page — cream tracer composition", () => {
       screen.getByRole("region", { name: "Schrijf je in" }),
     ).toBeInTheDocument();
   });
+
+  // #2864: a rejection here stands in for either a Sanity read failure OR an
+  // `AppLayer` construction failure (e.g. a missing `KCVV_API_URL`) — both
+  // surface identically as a rejected `runPromise`, which is exactly what
+  // each fetcher's outer try/catch must survive. `degradeSection`'s
+  // in-effect `catchAllCause` alone cannot see the latter.
+  describe("runPromise rejecting mid-fetch degrades instead of throwing", () => {
+    it("teams read: falls back to an empty list", async () => {
+      vi.mocked(runPromise).mockRejectedValueOnce(
+        new Error("KCVV_API_URL is not set"),
+      );
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      const { container } = render(await JeugdPage());
+
+      expect(
+        container.querySelector('[data-testid="youth-directory"]'),
+      ).not.toBeInTheDocument();
+      expect(consoleError).toHaveBeenCalledWith(
+        "[jeugd] failed to fetch youth teams:",
+        expect.any(Error),
+      );
+      consoleError.mockRestore();
+    });
+
+    it("Jeugd-articles read: falls back to an empty list", async () => {
+      vi.mocked(runPromise)
+        .mockResolvedValueOnce([]) // teams
+        .mockRejectedValueOnce(new Error("KCVV_API_URL is not set")); // articles
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      render(await JeugdPage());
+
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+      expect(consoleError).toHaveBeenCalledWith(
+        "[jeugd] failed to fetch jeugd articles:",
+        expect.any(Error),
+      );
+      consoleError.mockRestore();
+    });
+
+    it("editorial-config read: falls back to null (pinned nav cards)", async () => {
+      vi.mocked(runPromise)
+        .mockResolvedValueOnce([]) // teams
+        .mockResolvedValueOnce([]) // articles
+        .mockRejectedValueOnce(new Error("KCVV_API_URL is not set")); // editorial config
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      render(await JeugdPage());
+
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+      expect(consoleError).toHaveBeenCalledWith(
+        "[jeugd] editorial-cards lookup failed:",
+        expect.any(Error),
+      );
+      consoleError.mockRestore();
+    });
+  });
 });

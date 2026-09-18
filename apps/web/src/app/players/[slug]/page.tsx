@@ -1,3 +1,4 @@
+import { Effect } from "effect";
 import { notFound, permanentRedirect } from "next/navigation";
 
 import { runPromise } from "@/lib/effect/runtime";
@@ -18,7 +19,9 @@ export default async function LegacyPlayersRedirect({
   params,
 }: LegacyPlayerProps) {
   const { slug } = await params;
-  const rows = await runPromise(fetchPlayerRows());
+  // Subject read: this route exists only to resolve the redirect target, so a
+  // failed read takes the page down with it (#2864).
+  const rows = await runPromise(fetchPlayerRows().pipe(Effect.orDie));
   const psdId = resolvePersonPsdId(slug, rows);
   if (!psdId) notFound();
   permanentRedirect(`/spelers/${psdId}`);

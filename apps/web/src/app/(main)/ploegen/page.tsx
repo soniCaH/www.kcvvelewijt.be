@@ -10,6 +10,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { groupTeamsForLanding } from "@/lib/utils/group-teams";
 import { SITE_CONFIG } from "@/lib/constants";
@@ -41,15 +42,25 @@ export const metadata = buildPageMetadata({
 });
 
 async function fetchTeams() {
+  // The outer try/catch is not the dead-catchAll anti-pattern this ticket
+  // removes elsewhere: it covers `AppLayer` construction failing (e.g. a
+  // missing `KCVV_API_URL`), which happens outside the effect
+  // `degradeSection`'s `catchAllCause` wraps — an in-effect catch cannot see
+  // a failure to provide the effect's own context (#2864, same mechanism as
+  // `app/layout.tsx`'s nav-teams read).
   try {
     return await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findAllForLanding();
-      }),
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAllForLanding();
+        }),
+        [],
+        "[ploegen] failed to fetch teams",
+      ),
     );
   } catch (error) {
-    console.error("Failed to fetch teams:", error);
+    console.error("[ploegen] failed to fetch teams:", error);
     return [];
   }
 }

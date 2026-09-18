@@ -155,7 +155,7 @@ async function fetchCalendarData(): Promise<CalendarData> {
         feed,
         teams: teamInfos,
       };
-    }),
+    }).pipe(Effect.orDie),
   );
 }
 

@@ -36,11 +36,16 @@ interface BoardPageConfig {
  * @returns The fetched team object from Sanity
  */
 async function fetchBoardTeamOrNotFound(slug: string) {
+  // Subject read: the board team is this page's entire content, so a failed
+  // read takes it down with it (#2864). `generateMetadata` below still
+  // degrades gracefully — its own try/catch treats any non-Next.js throw
+  // (this `Effect.orDie` defect included) as "fall back to generic
+  // metadata," same as it already did for a genuinely-missing team.
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!team) notFound();

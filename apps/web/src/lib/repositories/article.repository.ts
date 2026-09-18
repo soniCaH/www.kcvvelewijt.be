@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   ARTICLES_QUERY_RESULT,
@@ -372,20 +372,27 @@ export function toHomepageArticles(
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface ArticleRepositoryInterface {
-  readonly findAll: () => Effect.Effect<ArticleVM[]>;
-  readonly findBySlug: (slug: string) => Effect.Effect<ArticleDetailVM | null>;
+  readonly findAll: () => Effect.Effect<ArticleVM[], SanityReadError>;
+  readonly findBySlug: (
+    slug: string,
+  ) => Effect.Effect<ArticleDetailVM | null, SanityReadError>;
   readonly findPaginated: (params: {
     offset: number;
     limit: number;
     category?: string;
-  }) => Effect.Effect<ArticleVM[]>;
-  readonly findTags: () => Effect.Effect<ARTICLE_TAGS_QUERY_RESULT>;
-  readonly findRelated: (documentId: string) => Effect.Effect<ArticleVM[]>;
+  }) => Effect.Effect<ArticleVM[], SanityReadError>;
+  readonly findTags: () => Effect.Effect<
+    ARTICLE_TAGS_QUERY_RESULT,
+    SanityReadError
+  >;
+  readonly findRelated: (
+    documentId: string,
+  ) => Effect.Effect<ArticleVM[], SanityReadError>;
   /** Match preview/recap articles linked to a PSD match by its string id
    *  (#1914). Returns 0–2 rows, newest-first. */
   readonly findByLinkedMatch: (
     matchId: string,
-  ) => Effect.Effect<MatchArticleVM[]>;
+  ) => Effect.Effect<MatchArticleVM[], SanityReadError>;
 }
 
 export class ArticleRepository extends Context.Tag("ArticleRepository")<

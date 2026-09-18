@@ -60,11 +60,13 @@ export const metadata = buildPageMetadata({
 export const revalidate = 3600;
 
 export default async function EvenementenPage() {
+  // Subject read: the events feed is this page's entire content, so a
+  // failed read takes the page down with it (#2864).
   const events = await runPromise(
     Effect.gen(function* () {
       const repo = yield* EventRepository;
       return yield* repo.findUpcomingForList();
-    }),
+    }).pipe(Effect.orDie),
   );
 
   return (

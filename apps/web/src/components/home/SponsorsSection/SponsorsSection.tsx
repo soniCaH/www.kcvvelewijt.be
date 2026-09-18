@@ -12,9 +12,9 @@ export interface SponsorsSectionProps {
 export async function SponsorsSection({ className }: SponsorsSectionProps) {
   const sponsors = await runPromise(
     // `degradeSection`, not `Effect.catchAll` — `SponsorRepository.findAll()`
-    // is typed `Effect<SponsorVM[]>` (every Sanity read ends in
-    // `Effect.orDie`), so a `catchAll` on it type-checks but never runs
-    // (#2505 round-3 review finding M1).
+    // carries a typed `SanityReadError` (#2864), and a `catchAll` would only
+    // catch that channel, not a stray defect elsewhere in the same
+    // `Effect.gen` (#2505 round-3 review finding M1).
     degradeSection(
       Effect.gen(function* () {
         const repo = yield* SponsorRepository;

@@ -65,8 +65,10 @@ const ARTICLE_ROW_CEILING = 1000;
 /**
  * Each group is a *section* of the contents page, so a failed read degrades to
  * an absent group and keeps the other three (#2433 rule 3). `degradeSection`
- * and not `Effect.catchAll`: every Sanity read ends in `Effect.orDie`, so the
- * failure arrives as a defect and a `catchAll` would type-check and never run.
+ * and not `Effect.catchAll`: a Sanity read's typed `SanityReadError` (#2864)
+ * is only half the failure surface `catchAll` would need to see — a stray
+ * defect elsewhere in the same `Effect.gen` would still slip past it, where
+ * `degradeSection`'s `catchAllCause` catches both.
  */
 async function fetchSiteContents() {
   return runPromise(

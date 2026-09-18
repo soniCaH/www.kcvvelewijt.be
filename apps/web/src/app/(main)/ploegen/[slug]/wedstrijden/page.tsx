@@ -27,11 +27,14 @@ export async function generateMetadata({
   params,
 }: WedstrijdenPageProps): Promise<Metadata> {
   const { slug } = await params;
+  // Subject read: this route's metadata is entirely about this one team, so
+  // a failed read takes it down with it — `null` (genuinely no such team) is
+  // the only case that degrades to the "niet gevonden" fallback (#2864).
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
   if (!team)
     return {
@@ -102,11 +105,14 @@ export default async function WedstrijdenPage({
 }: WedstrijdenPageProps) {
   const { slug } = await params;
 
+  // Subject read: the team is this page's entire content, so a failed read
+  // takes it down with it — `null` (genuinely no such team) is the only case
+  // that resolves to `notFound()` (#2864).
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }),
+    }).pipe(Effect.orDie),
   );
 
   if (!team) notFound();
@@ -134,7 +140,11 @@ export default async function WedstrijdenPage({
           // the strictly worse false 404; it buys no ISR staleness escape.
           Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound())),
         );
-      }),
+        // `force-dynamic`: a transient failure always hits the error
+        // boundary on this exact request either way, same as before —
+        // `Effect.orDie` only makes that pre-existing decision visible to
+        // the narrowed `runPromise` signature (#2864).
+      }).pipe(Effect.orDie),
     );
   }
 

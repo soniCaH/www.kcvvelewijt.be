@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
+import type { SanityReadError } from "../sanity/fetch-groq";
 import type { JEUGD_LANDING_PAGE_QUERY_RESULT } from "../sanity/sanity.types";
 
 // Mock the sanity client before importing the repository
@@ -20,7 +21,7 @@ import {
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
 function runWithRepo<A>(
-  effect: Effect.Effect<A, never, JeugdLandingPageRepository>,
+  effect: Effect.Effect<A, SanityReadError, JeugdLandingPageRepository>,
 ) {
   return Effect.runPromise(
     Effect.provide(effect, JeugdLandingPageRepositoryLive),

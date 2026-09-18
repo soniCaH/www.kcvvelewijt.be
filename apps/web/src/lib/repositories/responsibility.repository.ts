@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq } from "../sanity/fetch-groq";
+import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import type { RESPONSIBILITY_PATHS_QUERY_RESULT } from "../sanity/sanity.types";
 import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 
@@ -151,7 +151,7 @@ export function toResponsibilityPath(p: PathRow): ResponsibilityPath {
 }
 
 export interface ResponsibilityRepositoryInterface {
-  readonly findAll: () => Effect.Effect<ResponsibilityPath[]>;
+  readonly findAll: () => Effect.Effect<ResponsibilityPath[], SanityReadError>;
 }
 
 export class ResponsibilityRepository extends Context.Tag(
