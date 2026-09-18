@@ -292,9 +292,28 @@
   --font-family-body:
     "freight-sans-pro", "Freight Sans Fallback", -apple-system, system-ui,
     "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
-  --font-family-mono:
-    var(--font-ibm-plex-mono), "Consolas", "Liberation Mono", "Courier",
-    monospace;
+  /* `--font-mono`, NOT `--font-family-mono`: this is Tailwind v4's own theme
+     key for the mono family, and occupying it is the whole fix (#2520). Under
+     the old name Tailwind's namespace stayed unreset, so the generated
+     `font-mono` utility fell back to the built-in `ui-monospace, SFMono-…`
+     stack — IBM Plex Mono rendered on zero elements, on every page, for every
+     visitor. The hand-written `.font-mono` override that used to fight it
+     from `@layer base` is deleted below; a base rule can never beat a
+     utility, which is why nobody could catch this by reading the CSS.
+
+     The `var()` fallback is load-bearing too. `--font-ibm-plex-mono` is set
+     by `next/font` on `<html>` in `app/layout.tsx`, which Storybook never
+     renders — and a `var()` on an undefined property with NO fallback makes
+     the whole declaration invalid at computed-value time, so the
+     `"Consolas", …` tail is never reached and `font-family` silently
+     inherits the body face. Measured: `var(--nope), "Consolas", monospace`
+     computes to the inherited font, `var(--nope, "IBM Plex Mono"),
+     "Consolas", monospace` computes to the list. Without the fallback this
+     fix would put Freight Sans on every `font-mono` element in Storybook —
+     and Storybook is where the VR baselines are captured. */
+  --font-mono:
+    var(--font-ibm-plex-mono, "IBM Plex Mono"), "Consolas", "Liberation Mono",
+    "Courier", monospace;
 
   /* Font sizes live in ONE place — the `--text-*` ramp further down. The
      `--font-size-*` ladder that used to sit here generated no utilities (it is
@@ -401,7 +420,7 @@
   /* Font families — Freight Display/Big ride the Adobe Typekit kit. Each is
      backed by the metric-matched "Freight Display Fallback" (size-adjusted
      Georgia) so the async swap doesn't jolt (#2174). `--font-family-body`
-     (Freight Sans) + `--font-family-mono` (IBM Plex) are defined above. */
+     (Freight Sans) + `--font-mono` (IBM Plex) are defined above. */
   --font-display:
     "freight-display-pro", "Freight Display Fallback", georgia,
     "Times New Roman", serif;
@@ -867,9 +886,9 @@
     font-family: var(--font-family-body);
   }
 
-  .font-mono {
-    font-family: var(--font-family-mono);
-  }
+  /* `.font-body` stays because `font-body` is not a Tailwind namespace — no
+     generated utility competes with it. `.font-mono` is gone (#2520):
+     `font-mono` IS one, and `--font-mono` above now feeds it directly. */
 
   /* Paragraph Styles */
   p {
@@ -1523,7 +1542,7 @@ html {
 /* Buttons in the retro register: mono uppercase. */
 #cc-main .cm__btn,
 #cc-main .pm__btn {
-  font-family: var(--font-family-mono);
+  font-family: var(--font-mono);
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;

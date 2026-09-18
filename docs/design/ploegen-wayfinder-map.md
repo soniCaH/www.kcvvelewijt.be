@@ -2,7 +2,6 @@
 
 > Filed as [#2536](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2536), tickets [#2537–#2544](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2536). **The issue is canonical — update it there, not here.** Source: `/impeccable critique` on `src/app/(main)/ploegen`, dual-agent run, scored **15/36 ("Poor", 42%)** with heuristic 10 `n/a`. Snapshot at `apps/web/.impeccable/critique/2026-08-12T12-56-34Z__src-app-main-ploegen.md`.
 
-
 Working notes: `docs/design/ploegen-wayfinder-map.md` (committed). Critique snapshot: `apps/web/.impeccable/critique/2026-08-12T12-56-34Z__src-app-main-ploegen.md` — **generated and not committed**, so it may not exist in a fresh checkout. This issue is canonical.
 
 Baseline measured 2026-08-12 against `main` at `e19f8235`. Source: `/impeccable critique` on `src/app/(main)/ploegen`, dual-agent run, scored **15/36 ("Poor", 42%)** with heuristic 10 `n/a`. Live evidence from `kcvv-nextjs.vercel.app` across all 18 team routes plus the two `/wedstrijden` sub-routes, spanning the shape range: the flagship senior side (368KB, standings + matches + squad + staff), the reserves, and the sparsest youth pages (U6, U9, U10P with an empty squad).
@@ -27,33 +26,33 @@ What that chrome frames: the squad grid is the page's largest surface and holds 
 
 Measured across all 18 team pages:
 
-| Route | `<h1>` | `<title>` |
-| --- | --- | --- |
-| `/ploegen/eerste-elftallen-a` | `A-ploeg.` | Eerste Elftallen A |
-| `/ploegen/reserven` | **`A-ploeg.`** | Reserven |
-| `/ploegen/kcvve-u17` | `U17.` | KCVVE U17 |
-| `/ploegen/kcvve-u16` | **`U17.`** | KCVVE U16 |
-| `/ploegen/kcvve-u10` | `U10.` | KCVVE U10 |
-| `/ploegen/kcvve-u10p` | **`U10.`** | KCVVE U10P |
+| Route                         | `<h1>`         | `<title>`          |
+| ----------------------------- | -------------- | ------------------ |
+| `/ploegen/eerste-elftallen-a` | `A-ploeg.`     | Eerste Elftallen A |
+| `/ploegen/reserven`           | **`A-ploeg.`** | Reserven           |
+| `/ploegen/kcvve-u17`          | `U17.`         | KCVVE U17          |
+| `/ploegen/kcvve-u16`          | **`U17.`**     | KCVVE U16          |
+| `/ploegen/kcvve-u10`          | `U10.`         | KCVVE U10          |
+| `/ploegen/kcvve-u10p`         | **`U10.`**     | KCVVE U10P         |
 
 **Two different causes, and they need different answers.** Reserven is **code**: its Sanity `name` is plainly `"Reserven"` (confirmed against the JSON-LD `SportsTeam.name` and the `<title>`), so `nameSuffix` returns `"RESERVEN"`, the A/B suffix test fails, and the fallback at `TeamHero.tsx:56` catches `age === "A"` and returns `"A-ploeg"`. U16→U17 and U10P→U10 are **data**: for youth, `computeCategory` returns the Sanity `age` verbatim (`TeamHero.tsx:43-46`), and `kcvve-u16` carries `age = "U17"`.
 
 Whether that last one is even wrong is an open question — a Belgian side named U16 may legitimately play a U17 competition. Nobody has checked, which is why [what competitive data does PSD actually hold per team](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2537) exists before [Decide what a team page calls its team](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2539) decides anything.
 
-A supporter clicking *Reserven* from `/ploegen` lands on a page headed `A-ploeg.` and reasonably concludes the click failed. PRODUCT.md stakes the club's uncopyable asset on data "rendered as first-class pages (`/ploegen/[slug]`)", and its third success criterion is "show the club is serious".
+A supporter clicking _Reserven_ from `/ploegen` lands on a page headed `A-ploeg.` and reasonably concludes the click failed. PRODUCT.md stakes the club's uncopyable asset on data "rendered as first-class pages (`/ploegen/[slug]`)", and its third success criterion is "show the club is serious".
 
 ### Every gated section erases itself, seam and all
 
-`page.tsx:160-175` derives five section flags once and feeds **both** the render gates and the sticky nav list — genuinely good discipline, and it is why every anchor on every page resolves to a real DOM id. But the gate is total. `StandingsTable.tsx:15` returns `null` on an empty array, `page.tsx:215` then drops the section *and its `StripedSeam`*, and `page.tsx:170` drops the nav entry. Nothing is left behind: not a heading, not a line of copy.
+`page.tsx:160-175` derives five section flags once and feeds **both** the render gates and the sticky nav list — genuinely good discipline, and it is why every anchor on every page resolves to a real DOM id. But the gate is total. `StandingsTable.tsx:15` returns `null` on an empty array, `page.tsx:215` then drops the section _and its `StripedSeam`_, and `page.tsx:170` drops the nav entry. Nothing is left behind: not a heading, not a line of copy.
 
 Measured section presence:
 
-| URL | `#klassement` | `#wedstrijden` | `#spelers` | `#staf` | `#info` |
-| --- | --- | --- | --- | --- | --- |
-| `…/eerste-elftallen-a` | ✗ | ✓ | ✓ | ✓ | ✗ |
-| `…/reserven` | ✗ | ✓ | ✓ | ✓ | ✗ |
-| `…/kcvve-u9` | ✗ | ✗ | ✓ | ✓ | ✗ |
-| `…/kcvve-u6` | ✗ | ✗ | ✓ | ✓ | ✗ |
+| URL                    | `#klassement` | `#wedstrijden` | `#spelers` | `#staf` | `#info` |
+| ---------------------- | ------------- | -------------- | ---------- | ------- | ------- |
+| `…/eerste-elftallen-a` | ✗             | ✓              | ✓          | ✓       | ✗       |
+| `…/reserven`           | ✗             | ✓              | ✓          | ✓       | ✗       |
+| `…/kcvve-u9`           | ✗             | ✗              | ✓          | ✓       | ✗       |
+| `…/kcvve-u6`           | ✗             | ✗              | ✓          | ✓       | ✗       |
 
 `#klassement` and `#info` exist on **zero** pages. A youth parent gets two sections; a first-team supporter gets three. Nothing distinguishes "the season hasn't started" from "the sync is broken", which is the trap PRODUCT principle #3 was written against.
 
@@ -69,7 +68,7 @@ A mother of a U8, checking training times on a Thursday evening. Every step meas
 - Staff is three cards, **two of which read `STAF`** — the last-resort label at `TeamStaff.tsx:63`. She cannot tell which one is the trainer, and there is no phone or email on the page.
 - The largest, most prominent band on her child's page is **"Word lid — Sluit je aan bij de jeugd van Elewijt"** at display-lg on jersey-deep. Her child joined last season.
 
-She leaves with nothing, having been sold a membership she already has. PRODUCT.md names youth parents as a **co-equal primary audience** whose first listed need is *schedule*.
+She leaves with nothing, having been sold a membership she already has. PRODUCT.md names youth parents as a **co-equal primary audience** whose first listed need is _schedule_.
 
 ### The detector agrees with the design world, which is itself the useful signal
 
@@ -143,7 +142,7 @@ Per the charting decision, **the mechanical defects are deliberately held here r
 - `<title>`, `<h1>` and the OG card giving three different names for the same team.
 - Five team `<title>`s carrying a double space (`KCVVE  U15`, `KCVVE  U13`, `KCVVE  U11 `, `KCVVE  U9`, `KCVVE  U6`) — stray whitespace in the Sanity `name` field.
 - The hero meta pill and the tagline rendering verbatim identical strings (`"3e Nationale VV A"` twice; `"Reserven VV AH"` twice).
-- Whether `<h1>` uniqueness across a route family deserves a test. `nav-reachability.test.ts` guards that every nav destination *resolves*; nothing guards that every destination is *distinguishable*.
+- Whether `<h1>` uniqueness across a route family deserves a test. `nav-reachability.test.ts` guards that every nav destination _resolves_; nothing guards that every destination is _distinguishable_.
 
 **Graduates from [Decide what a section says when it has nothing to say](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2540):**
 
@@ -163,7 +162,7 @@ Per the charting decision, **the mechanical defects are deliberately held here r
 - The missing back link on `/ploegen/[slug]/wedstrijden`, mirroring the JSON-LD breadcrumb that already exists at `wedstrijden/page.tsx:139`.
 - `aria-current` on the section nav (grep returns nothing).
 - Sticky-chrome arithmetic: header 65px + section nav 47.75px = **112.75px** against a `scroll-margin-top` of 104px at five sites, so an anchor jump lands ~8px behind the bar. The nav also sits 1px under the header. Worth a `--sticky-chrome` custom property so the two cannot drift again.
-- `Reserven` — a senior side — filed under `<h2>Jeugdwerking</h2>` on `/ploegen`, as the *first* group above Bovenbouw.
+- `Reserven` — a senior side — filed under `<h2>Jeugdwerking</h2>` on `/ploegen`, as the _first_ group above Bovenbouw.
 - The `YouthDirectory` sub-line: `:108-113` gates on a comparison true for all 16 cards because every name carries the "KCVVE " prefix. 13 cards repeat the caption, 1 contradicts it, only 2 are load-bearing — and for those 2 the discriminator sits at 10px under a 24px display line. The hierarchy is exactly inverted.
 
 **Not yet attached to any ticket — genuinely still fog:**
@@ -177,14 +176,14 @@ Per the charting decision, **the mechanical defects are deliberately held here r
 
 ## Out of scope
 
-- **IBM Plex Mono rendering nowhere.** `document.fonts.check` is false on all six pages and 43–210 `.font-mono` elements per page fall back to the system stack. Site-wide, already owned by [#2533](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2533) and [#2520](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2520) — recorded here only because every type judgement on this surface is currently made against the wrong face.
+- **IBM Plex Mono rendering nowhere — RESOLVED 2026-09-18 by #2520.** The token now occupies Tailwind's `--font-mono` namespace and the face renders. Every type judgement recorded on this surface before that date was made against the wrong face and is worth re-reading. Original finding, kept as the record: `document.fonts.check` is false on all six pages and 43–210 `.font-mono` elements per page fall back to the system stack. Site-wide, already owned by [#2533](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2533) and [#2520](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2520) — recorded here only because every type judgement on this surface is currently made against the wrong face.
 - **The focus ring.** Real keyboard Tab yields Chrome's default `outline: rgb(0,95,204) auto 1px` rather than DESIGN.md's 2px jersey-deep ring at 2px offset; only 1 of 87 focusable elements on the A-team page opts into the spec'd utility. Site-wide, owned by [#2530](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2530).
 - **The sub-11px register.** 7 detector findings here (9px at `PlayerCard.tsx:74`, `TeamAgendaRow.tsx:382,405`, `TeamStaff.tsx:113,120`; 10px at `TeamAgendaRow.tsx:148`, `YouthDirectory.tsx:110`), plus 53 elements at ≤11px on the A-team page and 154 on the fixture page. Owned by [#2490](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2490) ticket 2; counting them here would double-count one cluster.
-- **Staff function codes rendering raw** (`T1 - A-team`). Already filed and measured as [#2495](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2495). [Decide how the squad and staff describe people the data doesn't classify](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2541) covers only the *different* case its fix does not reach — the last-resort `STAF` label.
+- **Staff function codes rendering raw** (`T1 - A-team`). Already filed and measured as [#2495](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2495). [Decide how the squad and staff describe people the data doesn't classify](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2541) covers only the _different_ case its fix does not reach — the last-resort `STAF` label.
 - **Where training times live now that #2476 deleted the Trainingsschema block.** Owned by [#2483](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2483). It is a hard dependency of this map's destination, so [Decide what the end of a youth team page is for](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2543) must read it before deciding the youth page's tail — but it is not this map's to decide.
 - **Match-data freshness** ([#2403](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2403)) and **meaning carried by colour alone** ([#2404](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2404)) — both already filed against the homepage and both apply verbatim to `TeamAgendaRow` here. Solve once, there.
 - **Scroll-arrow behaviour** ([#2447](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2447), [#2448](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2448)) and **`text-white` on jersey-deep** ([#2421](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2421) — `#ffffff` is the one off-palette colour in `<main>`, 11× on the A-team page).
-- **Commissioning club photography** ([#2411](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2411)). [how the squad grid reads when most players have no photo](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2542) asks how the squad grid reads *given* the photo coverage the club has; it does not ask for more photos.
+- **Commissioning club photography** ([#2411](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2411)). [how the squad grid reads when most players have no photo](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2542) asks how the squad grid reads _given_ the photo coverage the club has; it does not ask for more photos.
 - **`/tegenstander/[clubId]`** ([#2463](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2463), [#2464](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2464)) — linked from the fixture rows, but its own surface.
 - **`/spelers/[slug]`.** 29 squad cards on the A-team page link into it and it was never critiqued; that is a sibling map, not this one.
 
@@ -194,16 +193,16 @@ Per the charting decision, **the mechanical defects are deliberately held here r
 
 Five of the eight are on the frontier today. Nothing is claimed yet.
 
-| # | Ticket | Type | Status |
-| --- | --- | --- | --- |
-| 1 | [research: what competitive data does PSD actually hold per team](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2537) | `research` | **closed** |
-| 2 | [research: what PSD sends for player position and staff function](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2538) | `research` | **closed** |
-| 3 | [Decide what a team page calls its team](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2539) | `grilling` | **closed 2026-08-13** |
-| 4 | [Decide what a section says when it has nothing to say](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2540) | `grilling` | **frontier** |
-| 5 | [Decide how the squad and staff describe people the data doesn't classify](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2541) | `grilling` | **frontier** |
-| 6 | [prototype: how the squad grid reads when most players have no photo](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2542) | `prototype` | **frontier** |
-| 7 | [Decide what the end of a youth team page is for](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2543) | `grilling` | **frontier** |
-| 8 | [Decide whether the team surface's wayfinding still holds](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2544) | `grilling` | **frontier** |
+| #   | Ticket                                                                                                                                | Type        | Status                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------------- |
+| 1   | [research: what competitive data does PSD actually hold per team](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2537)          | `research`  | **closed**            |
+| 2   | [research: what PSD sends for player position and staff function](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2538)          | `research`  | **closed**            |
+| 3   | [Decide what a team page calls its team](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2539)                                   | `grilling`  | **closed 2026-08-13** |
+| 4   | [Decide what a section says when it has nothing to say](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2540)                    | `grilling`  | **frontier**          |
+| 5   | [Decide how the squad and staff describe people the data doesn't classify](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2541) | `grilling`  | **frontier**          |
+| 6   | [prototype: how the squad grid reads when most players have no photo](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2542)      | `prototype` | **frontier**          |
+| 7   | [Decide what the end of a youth team page is for](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2543)                          | `grilling`  | **frontier**          |
+| 8   | [Decide whether the team surface's wayfinding still holds](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2544)                 | `grilling`  | **frontier**          |
 
 Both research tickets are AFK and can be fired in parallel — they unblock three of the four remaining decisions between them. **Start there**: the emptiness decision is the map's centre of gravity, and deciding it without knowing whether a U6 side even has a league is deciding against a guess.
 

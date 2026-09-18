@@ -63,7 +63,7 @@ The samples below render live from the CSS variables.
 <FontSample label="font-display" cssVar="--font-display" size="2.5rem" weight={900} sample="Laatste nieuws." note="Editorial headlines, hero display lines (Freight Display Pro)" />
 <FontSample label="font-display-big" cssVar="--font-display-big" size="2.5rem" weight={900} sample="KCVV" note="Oversized magazine display (Freight Big Pro)" />
 <FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text (Freight Sans Pro)" />
-<FontSample label="font-mono" cssVar="--font-family-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts (IBM Plex Mono)" />
+<FontSample label="font-mono" cssVar="--font-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts (IBM Plex Mono)" />
 
 > **Display vs Big — when to use which.** `--font-display` (Freight Display) is the default heading serif for all heading *text* — editorial headlines, section titles, hero lines, the italic accent word, and global `h1–h6` (weights 600–700). `--font-display-big` (Freight Big) is the heavier poster cut, **always `font-black` (900)**, reserved for the single largest heading tier (`<EditorialHeading size="display-2xl">`) and every big **number** — `<NumberDisplay>`, match scores, standings points, jersey-number discs, and monogram badges (numbers add `lining-nums`, not `tabular-nums` — #2610).
 
@@ -191,7 +191,7 @@ mobile and desktop without manual breakpoints.
 
 The legacy Quasimoda / Stenciletta Typekit families were retired in #2154 —
 headings now set in Freight Display via `--font-display`. The
-`--font-display` / `--font-display-big` / `--font-family-body` / `--font-family-mono`
+`--font-display` / `--font-display-big` / `--font-family-body` / `--font-mono`
 tokens are the canonical vocabulary for every primitive.
 
 ### Visual samples
@@ -217,8 +217,8 @@ exercised on the display rows.
 </div>
 
 <div style={{ background: 'var(--color-cream)', padding: '2rem', borderRadius: '8px', marginBottom: '24px', border: '1px solid var(--color-paper-edge)' }}>
-  <div style={{ fontFamily: 'var(--font-family-mono)', fontSize: 'var(--text-label)', letterSpacing: 'var(--text-label--letter-spacing)', textTransform: 'uppercase', lineHeight: 'var(--text-label--line-height)', color: 'var(--color-ink)', marginBottom: '0.5rem' }}>INTERVIEW · SNELTREIN · 8 MIN</div>
-  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink-muted)' }}>--font-family-mono · --text-label · uppercase + 0.08em tracking</div>
+  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-label)', letterSpacing: 'var(--text-label--letter-spacing)', textTransform: 'uppercase', lineHeight: 'var(--text-label--line-height)', color: 'var(--color-ink)', marginBottom: '0.5rem' }}>INTERVIEW · SNELTREIN · 8 MIN</div>
+  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink-muted)' }}>--font-mono · --text-label · uppercase + 0.08em tracking</div>
 </div>
 
 ### Token reference

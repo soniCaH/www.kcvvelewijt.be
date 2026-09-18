@@ -14,12 +14,26 @@ Baseline measured 2026-08-12 against `main` at `bb64b0da`. Live evidence from `k
 
 ### IBM Plex Mono renders nowhere on the site — this is not an article-page finding, it is the biggest one the walk found
 
+> **RESOLVED 2026-09-18 by #2520.** `--font-mono` is now the declared token and
+> the losing `.font-mono` base override is gone. Re-measured on a production
+> build of `/kalender`: 73 of 73 `.font-mono` elements resolve to IBM Plex Mono,
+> `document.fonts.check('12px "IBM Plex Mono"')` is `true`, and the ten digits
+> share one advance width instead of nine. **Everything below this line is the
+> walk's original record of the defect — the token names, line numbers and
+> measurements in it are historical and no longer describe the code.**
+
 Two `.font-mono` rules ship, and the wrong one wins:
 
 ```css
-.font-mono{font-family:var(--font-family-mono)}   /* ours, @layer base */
-.font-mono{font-family:var(--font-mono)}          /* Tailwind's, @layer utilities — wins */
---font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+.font-mono {
+  font-family: var(--font-family-mono);
+} /* ours, @layer base */
+.font-mono {
+  font-family: var(--font-mono);
+} /* Tailwind's, @layer utilities — wins */
+--font-mono:
+  ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+  "Courier New", monospace;
 ```
 
 `globals.css:651` defines `.font-mono` inside `@layer base` (the block runs 569–678), so Tailwind v4's generated utility in `@layer utilities` overrides it by layer order. That utility reads `--font-mono`, which **is defined nowhere in the repo** — so Tailwind's default stack holds. The project's own variable, `--font-family-mono` (`globals.css:273`), is correct and points at IBM Plex; it is simply not the name Tailwind looks up.
@@ -28,11 +42,11 @@ This is the **fourth instance of the same bug class** the design walks keep find
 
 Confirmed three independent ways, so this is not a reading of the source:
 
-| Evidence | Result |
-| --- | --- |
-| Deployed CSS bundle | Both `.font-mono` rules present; `--font-mono:ui-monospace, SFMono-Regular…` shipped verbatim |
-| Live DOM, 4 articles | **0 of 411** elements resolve to any IBM Plex face; all 36 `.font-mono` elements compute to the Tailwind default stack |
-| `document.fonts` | All 16 registered `IBM Plex Mono` FontFace entries report `unloaded`; `document.fonts.check('12px "IBM Plex Mono"')` is `false` |
+| Evidence             | Result                                                                                                                          |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Deployed CSS bundle  | Both `.font-mono` rules present; `--font-mono:ui-monospace, SFMono-Regular…` shipped verbatim                                   |
+| Live DOM, 4 articles | **0 of 411** elements resolve to any IBM Plex face; all 36 `.font-mono` elements compute to the Tailwind default stack          |
+| `document.fonts`     | All 16 registered `IBM Plex Mono` FontFace entries report `unloaded`; `document.fonts.check('12px "IBM Plex Mono"')` is `false` |
 
 **Blast radius: 251 uses across 105 files** (excluding tests and stories). DESIGN.md calls this register "the system's connective tissue" and "the most-used non-body style in the system" — every kicker, date, score, timestamp, pill, stamp, table header and nav item on every page. The photocopied-team-sheet texture the entire fanzine world runs on is not shipping, and has never shipped.
 
@@ -105,10 +119,10 @@ The fix should be visually inert: the title is already its own flex child, so pr
 
 The typeset map (#2490, ticket 11) scoped a browser session to measure what `--container-prose: 680px` actually yields at 16px Freight Sans Pro, explicitly refusing to pre-judge. **It has now been measured**, and the answer should be folded back there rather than re-derived:
 
-| Viewport | Column | Characters per line |
-| --- | --- | --- |
-| 1440px | 680px (exact) | **109** (drop-cap paragraph), **101–103** (Q&A answers, 636px) |
-| 500px | 343px | 73 |
+| Viewport | Column        | Characters per line                                            |
+| -------- | ------------- | -------------------------------------------------------------- |
+| 1440px   | 680px (exact) | **109** (drop-cap paragraph), **101–103** (Q&A answers, 636px) |
+| 500px    | 343px         | 73                                                             |
 
 So the 680px cap is behaving exactly as declared — the container is not the problem, and per #2436 it is locked anyway. The drift is pairing a locked 680px measure with a 16px body size. The 45–75 CPL guidance is roughly half what desktop delivers, and it gets **worse** as the viewport widens toward the cap.
 
@@ -225,7 +239,7 @@ Ordered cheapest-and-most-constraining first. Nothing is claimed yet.
    `resolveInternalLinkHref` already routes `player`/`team`/`staffMember`/`article`/`page`, and no article uses it. The B-squad reveal names ~25 players and links none. Outcome: an authoring affordance (editors mark links in Studio), automatic resolution against the PSD roster at render time, or a decision that neither is worth the authoring friction. Weigh against PRODUCT.md's "authoring friction is a real product constraint" — automatic resolution has zero editor cost and a false-positive risk; manual has the inverse. **Ties directly to the club's #1 positioning claim.** _Blocked by nothing, but it is the highest-leverage design decision in the map._
 
 9. **Fix the article's tap targets, and decide the floor site-wide** · `wayfinder:grilling` — [#2529](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2529)
-    The two 16×16 share controls are the worst instance, but 34 of 36 interactive elements at 1440 and 22 of 26 at 390 sit under 44×44 including footer and header. PRODUCT.md's "generous tap targets" and "no unlabelled icons" are the constraint; no WCAG level is a target, so the number must be argued from the sideline-phone scene rather than cited. Outcome: a minimum hit area, whether visible text labels are mandatory on solitary controls, and the list of sites to lift. _Fixing only the article's two controls is available immediately if the site-wide decision stalls._
+   The two 16×16 share controls are the worst instance, but 34 of 36 interactive elements at 1440 and 22 of 26 at 390 sit under 44×44 including footer and header. PRODUCT.md's "generous tap targets" and "no unlabelled icons" are the constraint; no WCAG level is a target, so the number must be argued from the sideline-phone scene rather than cited. Outcome: a minimum hit area, whether visible text labels are mandatory on solitary controls, and the list of sites to lift. _Fixing only the article's two controls is available immediately if the site-wide decision stalls._
 
 10. **Bring the focus ring back on-system** · `wayfinder:task` — [#2530](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2530)
     Every focusable element renders the UA default `outline: auto 1px rgb(31,31,31)`; DESIGN.md specifies a 2px jersey-deep ring at 2px offset. Site-wide, visible either way, so this is correctness-of-system rather than accessibility. Pairs naturally with #2529 — both are "the interactive layer was never brought on-system", on the same elements.
@@ -236,9 +250,9 @@ Ordered cheapest-and-most-constraining first. Nothing is claimed yet.
 ## Not yet specified
 
 - **What primitives editors are improvising around, and what replaces them.** Filed as [#2528](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2528) and **withdrawn to fog the same day** — a consequence of two pending decisions, not a question statable sharply yet. The symptoms are measured (22 `🔄` table icons, `💚🤍` as a sign-off, a bare `forms.gle` CTA); what replaces them is downstream of #2525 and #2526. Graduates when both land. The `htmlTable` block accepting arbitrary authored HTML is the pressure point.
-- **Ticket 1 almost certainly needs the VR bot, not a local run.** Restoring IBM Plex Mono changes the metrics of every mono glyph on every page — the definition of a site-wide token change. Per the #2380 precedent a site-wide change goes through the bot (~10min native) rather than an unscoped local run, which the guard refuses anyway. Confirm before starting; this may be the single largest baseline sweep the redesign has needed.
-- **Whether `--font-family-mono` should be renamed or shadowed.** Defining `--font-mono` in `@theme` fixes it, but leaves two variables naming one concept. Renaming is cleaner and touches `globals.css:273,652,1122` plus `ArticleCredits.tsx:33`'s doc comment. Decide inside ticket 1.
-- **Whether any *other* Tailwind namespace is still unreset.** Four instances found so far across three maps (`--text-*`, `--leading-*`, `--animate-*`, `--font-mono`). Nobody has enumerated Tailwind v4's full namespace list against `globals.css` to find the fifth. This deserves its own audit rather than a fifth accidental discovery.
+- ~~**Ticket 1 almost certainly needs the VR bot, not a local run.**~~ **Confirmed by the owner before the #2520 build; baselines were regenerated on CI.** Original reasoning kept: Restoring IBM Plex Mono changes the metrics of every mono glyph on every page — the definition of a site-wide token change. Per the #2380 precedent a site-wide change goes through the bot (~10min native) rather than an unscoped local run, which the guard refuses anyway. Confirm before starting; this may be the single largest baseline sweep the redesign has needed.
+- ~~**Whether `--font-family-mono` should be renamed or shadowed.**~~ **Decided in #2520: renamed.** One name owns the family and the base-layer override that existed only to fight the namespace was deleted with it. `.font-body` stays, because `font-body` is not a Tailwind namespace and nothing competes with it.
+- **Whether any _other_ Tailwind namespace is still unreset.** Four instances found so far across three maps (`--text-*`, `--leading-*`, `--animate-*`, `--font-mono`). Nobody has enumerated Tailwind v4's full namespace list against `globals.css` to find the fifth. This deserves its own audit rather than a fifth accidental discovery.
 - **Whether the byline should exist at all.** `ArticleMetadata` hard-defaults the author to "KCVV ELEWIJT" while the hero and credits on the same page say "Kevin" — the page contradicts itself in three places. Is a per-article byline something the club wants, or should the `author` field go rather than be papered over with a default? Folds into ticket 6 or spins a sibling.
 - **Whether the article body needs its entrance animation.** `ArticleBodyMotion` is correctly built and fail-safe, but it hides `p, h2, h3` behind a 500ms transition on a surface whose stated scene is a weak connection. A delight-map question, not this map's.
 - **The `/nieuws` index shows "A-PLOEG" twice** in its filter row — the known Sanity title-case / GROQ case-sensitivity trap. Index-scope, out of this map's target, but it is the last thing a reader sees before entering an article and nobody owns it yet.
