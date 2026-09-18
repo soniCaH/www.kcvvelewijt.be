@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import { useWebfontSwap } from "./useWebfontSwap";
 
 /** How long a hash navigation stays eligible for a corrective re-scroll
  *  after it fires — long enough to absorb a bar resize or a late webfont
@@ -27,9 +28,14 @@ export interface UseHashLandingCorrectionResult {
  * - **`notifyLayoutChange()`**, called by a consumer with its own geometry
  *   (`useSectionNav`'s sticky bar resizing, e.g. `<HubSearch>` mounting
  *   once the hero scrolls out of view).
- * - **A late webfont swap**, via the `FontFaceSet` `loadingdone` event —
- *   see the note above `useEffect` below for why `fonts.ready` isn't used
- *   instead. Matters even on a route with no bar at all (`/jeugd#visie`).
+ * - **A late webfont swap**, via the shared `useWebfontSwap` hook — see its
+ *   own docblock for why it composes a `FontFaceSet` `loadingdone`
+ *   subscription (the authoritative signal for a real swap) with a
+ *   `fonts.ready` floor (a guaranteed extra call even when nothing is
+ *   loading). An extra/early `correct()` call from that floor is harmless
+ *   here: it no-ops outside the armed window below, and a repeat
+ *   `scrollIntoView()` to an already-reached target is a no-op too. Matters
+ *   even on a route with no bar at all (`/jeugd#visie`).
  *
  * `<useSectionNav>` composes this for its own bar-resize case;
  * `<JeugdVisie>` (no bar, no nav) uses it directly for the webfont case.
@@ -65,6 +71,10 @@ export function useHashLandingCorrection(
     document.getElementById(hash)?.scrollIntoView({ block: "start" });
   }, []);
 
+  // The shared webfont-swap trigger (#2822) — see its own docblock for the
+  // loadingdone + fonts.ready composition.
+  useWebfontSwap(correct);
+
   // Wired once: a cold load with the hash already in the URL arms and
   // corrects immediately (the browser's own pre-hydration jump already
   // completed, so there is no live animation to fight). A same-page hash
@@ -74,25 +84,13 @@ export function useHashLandingCorrection(
   // actually caused a short landing on a route with no resize or font race
   // at all, the first time this was tried unconditionally on every
   // hashchange.
-  //
-  // `loadingdone` — not `document.fonts.ready` — for the webfont trigger:
-  // `ready` can resolve almost immediately for an already-cached fallback
-  // face, well before the *real* webfont's own network fetch even starts
-  // (measured on `/jeugd#visie`: `fonts.ready` was already "loaded" at
-  // t≈0ms, then flipped back to "loading" and only genuinely settled at
-  // t≈600ms once Freight itself — loaded async via Adobe Typekit — actually
-  // swapped in and reflowed the content above the target). `loadingdone`
-  // fires for every such batch, including the one that matters, for as
-  // long as this effect stays mounted.
   useEffect(() => {
     if (window.location.hash) arm();
     correct();
-    document.fonts?.addEventListener?.("loadingdone", correct);
 
     const onHashChange = () => arm();
     window.addEventListener("hashchange", onHashChange);
     return () => {
-      document.fonts?.removeEventListener?.("loadingdone", correct);
       window.removeEventListener("hashchange", onHashChange);
       clearTimeout(disarmTimerRef.current);
     };

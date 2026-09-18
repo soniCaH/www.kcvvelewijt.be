@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { useWebfontSwap } from "@/hooks/useWebfontSwap";
 import {
   BLOCK_HEIGHT_PX,
   BLOCK_WIDTH_PX,
@@ -26,56 +27,59 @@ import {
  * Measuring cannot wait for the print layout (`beforeprint` fires before it),
  * and the on-screen sheet is a different width at every viewport, so the height
  * is read with the print width forced on — one forced reflow per measurement.
- * It runs on mount, again if the web fonts were still loading, and again before
- * printing; the page is a private tool one person opens to export a poster, so
- * that costs nothing worth caching against.
+ * It runs on mount, again via the shared `useWebfontSwap` trigger (#2822 —
+ * fires at least once even when nothing was loading, so this always gets a
+ * second measurement regardless of font state, plus another if a real swap
+ * lands later), and again before printing; the page is a private tool one
+ * person opens to export a poster, so that costs nothing worth caching
+ * against.
  */
 export function PosterPrintScale() {
+  const applyScale = useCallback(() => {
+    const sheet = document.querySelector<HTMLElement>(".sk-poster-sheet");
+    if (!sheet) return;
+
+    // The dateline is `hidden print:block`, so on screen it contributes no
+    // height. Left out of the measurement it is left out of the fit, and the
+    // sheet prints that much too tall — the last fixtures fall off the
+    // bottom. Force it in for the reading, exactly like the width.
+    const footer = sheet.querySelector<HTMLElement>(".sk-poster-footer");
+    const previousWidth = sheet.style.width;
+    const previousFooterDisplay = footer?.style.display ?? "";
+    sheet.style.width = `${SHEET_WIDTH_PX}px`;
+    if (footer) footer.style.display = "block";
+    const sheetHeight = sheet.scrollHeight;
+    sheet.style.width = previousWidth;
+    if (footer) footer.style.display = previousFooterDisplay;
+
+    // Never scale up past the block: a short season should print at the
+    // locked type size, not stretch to fill the sheet.
+    const scale = Math.min(
+      BLOCK_WIDTH_PX / SHEET_WIDTH_PX,
+      BLOCK_HEIGHT_PX / sheetHeight,
+    );
+    document.documentElement.style.setProperty(
+      "--sk-poster-scale",
+      String(scale),
+    );
+  }, []);
+
+  // Web fonts change the height — re-measure via the shared webfont-swap
+  // trigger (#2822) once the real swap lands. Nothing to guard for a warm
+  // cache: `loadingdone` simply never fires when there is nothing left to
+  // load, so this costs nothing extra there either.
+  useWebfontSwap(applyScale);
+
   useEffect(() => {
-    const applyScale = () => {
-      const sheet = document.querySelector<HTMLElement>(".sk-poster-sheet");
-      if (!sheet) return;
-
-      // The dateline is `hidden print:block`, so on screen it contributes no
-      // height. Left out of the measurement it is left out of the fit, and the
-      // sheet prints that much too tall — the last fixtures fall off the
-      // bottom. Force it in for the reading, exactly like the width.
-      const footer = sheet.querySelector<HTMLElement>(".sk-poster-footer");
-      const previousWidth = sheet.style.width;
-      const previousFooterDisplay = footer?.style.display ?? "";
-      sheet.style.width = `${SHEET_WIDTH_PX}px`;
-      if (footer) footer.style.display = "block";
-      const sheetHeight = sheet.scrollHeight;
-      sheet.style.width = previousWidth;
-      if (footer) footer.style.display = previousFooterDisplay;
-
-      // Never scale up past the block: a short season should print at the
-      // locked type size, not stretch to fill the sheet.
-      const scale = Math.min(
-        BLOCK_WIDTH_PX / SHEET_WIDTH_PX,
-        BLOCK_HEIGHT_PX / sheetHeight,
-      );
-      document.documentElement.style.setProperty(
-        "--sk-poster-scale",
-        String(scale),
-      );
-    };
-
     // Measure on mount, not only on `beforeprint`. WebKit never fires that
     // event, so on Safari — the likely "Save as PDF" route on a Mac — the
     // sheet would keep the width-only fallback and clip; the same gap opens if
     // Cmd+P beats hydration. Nothing about the measurement needs print state,
     // so taking it early costs one reflow and closes both.
     applyScale();
-    // Web fonts change the height. Only wait for them if they are still
-    // loading — on a warm cache they are done before this runs, and the
-    // already-resolved promise would just re-measure to the same answer.
-    if (document.fonts && document.fonts.status !== "loaded") {
-      void document.fonts.ready.then(applyScale);
-    }
     window.addEventListener("beforeprint", applyScale);
     return () => window.removeEventListener("beforeprint", applyScale);
-  }, []);
+  }, [applyScale]);
 
   return null;
 }
