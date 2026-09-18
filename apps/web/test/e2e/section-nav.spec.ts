@@ -214,6 +214,33 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
     const hulp = nav.getByRole("link", { name: "Hulp" });
 
     await scrollIntoViewAndSettle(page.locator("#structuur"));
+    // TEMP DIAGNOSTIC (#2520) — remove before merge.
+    console.log(
+      "DIAG " +
+        JSON.stringify(
+          await page.evaluate(() => {
+            const el = document.querySelector("#structuur");
+            const r = el?.getBoundingClientRect();
+            return {
+              scrollY: Math.round(scrollY),
+              maxScrollY: Math.round(
+                document.documentElement.scrollHeight - innerHeight,
+              ),
+              docH: document.documentElement.scrollHeight,
+              viewportH: innerHeight,
+              structuurTop: r ? Math.round(r.top) : null,
+              structuurH: r ? Math.round(r.height) : null,
+              band: Math.round(innerHeight * 0.45),
+              scrollMarginTop: el ? getComputedStyle(el).scrollMarginTop : null,
+              scrollBehavior: getComputedStyle(document.documentElement)
+                .scrollBehavior,
+              sectionIds: [...document.querySelectorAll("[id]")]
+                .map((n) => n.id)
+                .filter((i) => ["hulp", "structuur"].includes(i)),
+            };
+          }),
+        ),
+    );
     await expect(structuur).toHaveAttribute("aria-current", "location");
     await expect(hulp).not.toHaveAttribute("aria-current");
 
