@@ -114,7 +114,7 @@ async function stickyBarBottomFromLocator(bar: Locator, label: string) {
  *  fails the test against a page that is still moving. */
 const SCROLL_START_GRACE_MS = 500;
 
-async function scrollIntoViewAndSettle(locator: Locator) {
+async function scrollIntoViewAndSettle(page: Page, locator: Locator) {
   await locator.evaluate((el, graceMs) => {
     return new Promise<void>((resolve) => {
       const startY = window.scrollY;
@@ -137,6 +137,18 @@ async function scrollIntoViewAndSettle(locator: Locator) {
       requestAnimationFrame(probe);
     });
   }, SCROLL_START_GRACE_MS);
+
+  // `scrollend` is the right signal, but the 5s fallback above is SHORTER
+  // than this page's own worst case — the docblock's measurements top out at
+  // 5.4s under ×20 CPU throttling — so on a loaded runner the fallback fires
+  // while the animation is still running and the helper returns early. That
+  // is what actually failed in CI (#2520): `#structuur` was still on its way,
+  // the 5s auto-retry on the assertion after it ran out before the scroll
+  // landed, and the failure screenshots were byte-identical across runs
+  // because an interrupted time-based animation stops in the same place.
+  // Waiting for `scrollY` to genuinely stop is the signal that does not
+  // depend on guessing a duration.
+  await waitForScrollSettled(page);
 }
 
 /**
@@ -192,7 +204,7 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
     // latter scrolls the *minimum* distance needed, which for a short
     // trailing section can leave it short of the spy's `-55%` bottom band
     // entirely, so `aria-current` never appears.
-    await scrollIntoViewAndSettle(page.locator(`#${targetId}`));
+    await scrollIntoViewAndSettle(page, page.locator(`#${targetId}`));
     // The scroll-spy IntersectionObserver settles asynchronously.
     await expect(lastLink).toHaveAttribute("aria-current", "location");
 
@@ -213,40 +225,13 @@ test.describe("scroll-spy fills the chip that is actually being read (#2478 rule
     const structuur = nav.getByRole("link", { name: "Structuur" });
     const hulp = nav.getByRole("link", { name: "Hulp" });
 
-    await scrollIntoViewAndSettle(page.locator("#structuur"));
-    // TEMP DIAGNOSTIC (#2520) — remove before merge.
-    console.log(
-      "DIAG " +
-        JSON.stringify(
-          await page.evaluate(() => {
-            const el = document.querySelector("#structuur");
-            const r = el?.getBoundingClientRect();
-            return {
-              scrollY: Math.round(scrollY),
-              maxScrollY: Math.round(
-                document.documentElement.scrollHeight - innerHeight,
-              ),
-              docH: document.documentElement.scrollHeight,
-              viewportH: innerHeight,
-              structuurTop: r ? Math.round(r.top) : null,
-              structuurH: r ? Math.round(r.height) : null,
-              band: Math.round(innerHeight * 0.45),
-              scrollMarginTop: el ? getComputedStyle(el).scrollMarginTop : null,
-              scrollBehavior: getComputedStyle(document.documentElement)
-                .scrollBehavior,
-              sectionIds: [...document.querySelectorAll("[id]")]
-                .map((n) => n.id)
-                .filter((i) => ["hulp", "structuur"].includes(i)),
-            };
-          }),
-        ),
-    );
+    await scrollIntoViewAndSettle(page, page.locator("#structuur"));
     await expect(structuur).toHaveAttribute("aria-current", "location");
     await expect(hulp).not.toHaveAttribute("aria-current");
 
     // Scrolling back up flips the fill again — it tracks reading position on
     // every pass, not just the first jump.
-    await scrollIntoViewAndSettle(page.locator("#hulp"));
+    await scrollIntoViewAndSettle(page, page.locator("#hulp"));
     await expect(hulp).toHaveAttribute("aria-current", "location");
     await expect(structuur).not.toHaveAttribute("aria-current");
   });
