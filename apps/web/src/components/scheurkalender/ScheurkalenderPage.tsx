@@ -50,7 +50,8 @@ export interface ScheurkalenderMatch {
 export interface ScheurkalenderPageProps {
   /** Full-season A + B league fixtures, pre-sorted by date then time. */
   matches: ScheurkalenderMatch[];
-  /** Season label for the masthead, e.g. "26/27". */
+  /** Season label for the masthead, e.g. `’26/’27` — the bare label from
+   *  `deriveSeason`, with no leading "Seizoen" (#2546). */
   season: string;
 }
 

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { toMatchDisplayZone } from "@/lib/utils/dates";
+import { deriveSeason } from "@/lib/utils/season";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { cn } from "@/lib/utils/cn";
 import { reservationView } from "@/lib/utils/match-display";
@@ -105,14 +106,6 @@ function formatStubDate(date: Date): StubDateParts {
   };
 }
 
-function formatSeasonLabel(date: Date): string {
-  const dt = toMatchDisplayZone(date);
-  const startYear = dt.month >= 7 ? dt.year : dt.year - 1;
-  const endYear = startYear + 1;
-  const tail = (y: number) => y.toString().slice(-2).padStart(2, "0");
-  return `’${tail(startYear)}/’${tail(endYear)}`;
-}
-
 function buildCompetitionMeta(
   competition: string | undefined,
   kcvvTeamLabel: string | undefined,
@@ -121,7 +114,7 @@ function buildCompetitionMeta(
   const parts: string[] = [];
   if (competition) parts.push(competition);
   if (kcvvTeamLabel) parts.push(kcvvTeamLabel);
-  parts.push(formatSeasonLabel(date));
+  parts.push(deriveSeason(date).label);
   return parts;
 }
 
