@@ -83,16 +83,39 @@ async function stickyBarBottomFromLocator(bar: Locator, label: string) {
  * completion signal.
  *
  * `scrollend` never fires when the element is already at the requested
- * position — there is nothing to animate. Detected directly: if `scrollY`
- * hasn't moved by the next frame, nothing started scrolling, so resolve
- * immediately rather than stalling. The 5s `fallback` below only covers a
- * genuinely stuck scroll (a real bug), and stays well under budget even
- * called twice in one test: this test's own default timeout is
- * Playwright's 30s, and under ×20 throttling `gotoBounded` can itself take
- * up to 10s.
+ * position — there is nothing to animate — so that case has to be detected
+ * rather than waited for. It is detected by watching `scrollY` for a grace
+ * period: if it has not moved at all within `SCROLL_START_GRACE_MS`,
+ * nothing is going to.
+ *
+ * **That grace period cannot be one frame (#2520).** The previous version
+ * resolved immediately if `scrollY` was unchanged on the very next
+ * animation frame, which reads a smooth scroll that has not advanced a
+ * pixel yet as "already in position". Measured on `/hulp` at ×20 CPU
+ * throttling: the helper returned with `scrollY` still **0** while
+ * `#structuur` sat 1017px down the page, far outside the spy's 405px band.
+ * Locally the 5s auto-retry on the assertion that follows swallowed it —
+ * the scroll finished inside the retry window — so it passed anyway. On a
+ * slower CI runner it does not, and the test fails against a page that is
+ * merely still scrolling. It surfaced on the branch that gave `font-mono` a
+ * real webfont, because the extra font work is exactly the kind of load
+ * that costs the animation its first frame.
+ *
+ * The 5s `fallback` still covers a genuinely stuck scroll (a real bug), and
+ * the whole thing stays well under budget even called twice in one test:
+ * this test's own default timeout is Playwright's 30s, and under ×20
+ * throttling `gotoBounded` can itself take up to 10s.
  */
+/** How long to let a smooth scroll get off the mark before concluding
+ *  there was nothing to scroll. Generous on purpose: under ×20 CPU
+ *  throttling a single frame can take longer than 200ms, and the cost of
+ *  being wrong in this direction is only a short wait on the
+ *  already-in-position path, while being wrong in the other direction
+ *  fails the test against a page that is still moving. */
+const SCROLL_START_GRACE_MS = 500;
+
 async function scrollIntoViewAndSettle(locator: Locator) {
-  await locator.evaluate((el) => {
+  await locator.evaluate((el, graceMs) => {
     return new Promise<void>((resolve) => {
       const startY = window.scrollY;
       const done = () => {
@@ -102,11 +125,18 @@ async function scrollIntoViewAndSettle(locator: Locator) {
       const fallback = setTimeout(done, 5_000);
       addEventListener("scrollend", done, { once: true });
       el.scrollIntoView({ block: "start" });
-      requestAnimationFrame(() => {
-        if (window.scrollY === startY) done();
-      });
+
+      // Poll for the scroll to START. Once `scrollY` moves, the animation is
+      // under way and `scrollend` above is the thing that resolves us.
+      const deadline = performance.now() + graceMs;
+      const probe = () => {
+        if (window.scrollY !== startY) return;
+        if (performance.now() >= deadline) return done();
+        requestAnimationFrame(probe);
+      };
+      requestAnimationFrame(probe);
     });
-  });
+  }, SCROLL_START_GRACE_MS);
 }
 
 /**
