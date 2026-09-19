@@ -256,7 +256,9 @@ function MinimalOpening({
     <>
       {/* Its own element above the opening, not inside the <header> — the
           up-link names the parent, the header opens this page (#2428 §5).
-          The opening owns the gap below it, same reasoning as `mb-10` below. */}
+          The opening owns the gap below it, same reasoning as `mb-10` below.
+          The gap *above* it is `<UpLink>`'s own now (#2877) — a caller must
+          not also wrap this in a padded container, or the two stack. */}
       {upLink ? (
         <UpLink
           href={upLink.href}
@@ -511,7 +513,8 @@ export function PageHero(props: PageHeroProps) {
   return (
     <>
       {/* Its own element above the card, not inside it — the up-link names
-          the parent, the card is this page's own front door (#2428 §5). */}
+          the parent, the card is this page's own front door (#2428 §5). The
+          gap above it is `<UpLink tone="ink">`'s own now (#2877). */}
       {upLink ? (
         <UpLink
           href={upLink.href}

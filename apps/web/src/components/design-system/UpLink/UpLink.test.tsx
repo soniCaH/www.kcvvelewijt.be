@@ -52,6 +52,19 @@ describe("UpLink", () => {
     });
   });
 
+  it("carries its own 48px/64px top air on the ink tone (#2877)", () => {
+    render(<UpLink href="/nieuws" label="Nieuws" />);
+    expect(screen.getByTestId("up-link").className).toContain("mt-12");
+    expect(screen.getByTestId("up-link").className).toContain("lg:mt-16");
+  });
+
+  it("gains no top air on the cream tone — the dark band's own padding is the air (#2877)", () => {
+    render(<UpLink href="/club" label="De club" tone="cream" />);
+    const className = screen.getByTestId("up-link").className;
+    expect(className).not.toContain("mt-12");
+    expect(className).not.toContain("lg:mt-16");
+  });
+
   it("shows a visible focus ring on keyboard focus, per tone", () => {
     const { rerender } = render(<UpLink href="/nieuws" label="Nieuws" />);
     expect(screen.getByTestId("up-link").className).toContain(
