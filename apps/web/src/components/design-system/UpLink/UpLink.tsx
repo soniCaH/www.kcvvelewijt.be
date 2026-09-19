@@ -47,13 +47,18 @@ export interface UpLinkProps {
 // it only ever renders inside a dark opening band, whose own padding is
 // already the air.
 //
-// Exported so `<PageHeroSkeleton>`'s shimmer up-link (the one route whose
-// label is data, not fixed copy) can carry the identical offset without a
-// second copy of the literal drifting out of step with this one (#2877).
-export const UP_LINK_TOP_AIR_CLASS = "mt-12 lg:mt-16";
+// Exported as a map, not a string, so `<PageHeroSkeleton>`'s shimmer up-link
+// (the one route whose label is data, not fixed copy) asks this file which
+// tone gets air instead of holding its own copy of that rule (#2877 review
+// round 2): a bare string would still let the two files disagree about
+// *which* tone the value belongs to, even while sharing the value itself.
+export const UP_LINK_TOP_AIR: Record<UpLinkTone, string> = {
+  ink: "mt-12 lg:mt-16",
+  cream: "",
+};
 
 const TONE_CLASS: Record<UpLinkTone, string> = {
-  ink: `${UP_LINK_TOP_AIR_CLASS} border-ink bg-cream text-ink shadow-paper-sm focus-visible:outline-jersey-deep`,
+  ink: `${UP_LINK_TOP_AIR.ink} border-ink bg-cream text-ink shadow-paper-sm focus-visible:outline-jersey-deep`,
   cream:
     "border-cream bg-transparent text-cream shadow-[4px_4px_0_0_var(--color-warm)] focus-visible:outline-warm",
 };
