@@ -3,23 +3,15 @@
  * Central export point for all layout components
  */
 
-// SiteHeader
-export { SiteHeader } from "./SiteHeader";
+// SiteHeader, NavTakeover(+Item), SiteFooter, CookieConsentBanner and
+// AccentStrip are deliberately NOT re-exported here: every consumer
+// (app/layout.tsx included) imports each directly from its own subpath,
+// e.g. "@/components/layout/SiteHeader" — see the `Alert` barrel
+// (../design-system/Alert/index.ts) for the same pattern. Only the types
+// stay.
 export type { SiteHeaderProps } from "./SiteHeader";
-
-// NavTakeover
-export { NavTakeover, NavTakeoverItem } from "./NavTakeover";
 export type { NavTakeoverProps, NavTakeoverItemProps } from "./NavTakeover";
-
-// SiteFooter
-export { SiteFooter } from "./SiteFooter";
 export type { SiteFooterProps } from "./SiteFooter";
-
-// CookieConsentBanner
-export { CookieConsentBanner } from "./CookieConsentBanner";
-
-// AccentStrip
-export { AccentStrip } from "./AccentStrip";
 
 // PageHero
 export { PageHero } from "./PageHero";

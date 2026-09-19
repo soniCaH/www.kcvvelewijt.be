@@ -29,8 +29,9 @@ export type { LabelProps } from "./Label";
 export { Textarea } from "./Textarea";
 export type { TextareaProps, TextareaResize } from "./Textarea";
 
-// TextareaCounter
-export { TextareaCounter } from "./TextareaCounter";
+// TextareaCounter — not re-exported: every consumer imports it directly
+// from "./TextareaCounter" (see the `Alert` barrel docblock,
+// ./Alert/index.ts, for why an unconsumed barrel re-export isn't free here).
 export type { TextareaCounterProps } from "./TextareaCounter";
 
 // Select
@@ -38,27 +39,24 @@ export { Select } from "./Select";
 export type { SelectProps, SelectSize } from "./Select";
 
 // AlertBadge — `Alert` itself is not re-exported (#2580); see Alert/index.ts's
-// own comment.
-export { AlertBadge } from "./Alert";
+// own comment. `AlertBadge` (the value) is unconsumed through this barrel too
+// (every importer uses "./Alert" directly) — dropped for the same reason.
 export type {
   AlertBadgeProps,
   AlertBadgeVariant,
   AlertBadgeSize,
 } from "./Alert";
 
-// BracketAffordance
-export {
-  BracketAffordance,
-  BRACKET_GLYPH,
-  bracketAffordanceHtml,
-} from "./BracketAffordance";
+// BracketAffordance — not re-exported: `BracketAffordance`, `BRACKET_GLYPH`
+// and `bracketAffordanceHtml` are each only imported directly from
+// "./BracketAffordance".
 export type {
   BracketAffordanceProps,
   BracketAffordanceGlyph,
 } from "./BracketAffordance";
 
-// SectionTransition
-export { SectionTransition } from "./SectionTransition";
+// SectionTransition — not re-exported: only imported directly from
+// "./SectionTransition".
 export type {
   SectionTransitionProps,
   SectionBg,
@@ -81,25 +79,21 @@ export type { SectionKickerProps } from "./SectionKicker";
 export { SectionWipeReveal } from "./SectionWipeReveal";
 export type { SectionWipeRevealProps } from "./SectionWipeReveal";
 
-// HorizontalSlider
-export { HorizontalSlider } from "./HorizontalSlider";
+// HorizontalSlider — not re-exported: only imported directly from
+// "./HorizontalSlider".
 export type { HorizontalSliderProps } from "./HorizontalSlider";
 
-// DownloadButton
-export { DownloadButton } from "./DownloadButton";
+// DownloadButton — not re-exported: only imported directly from
+// "./DownloadButton".
 export type { DownloadButtonProps } from "./DownloadButton";
 
 // LinkButton
 export { LinkButton } from "./LinkButton";
 export type { LinkButtonProps } from "./LinkButton";
 
-// ScrollHint
-export {
-  useScrollHint,
-  ScrollArrowButton,
-  ScrollRail,
-  ScrollOverlay,
-} from "./ScrollHint";
+// ScrollHint — not re-exported: `useScrollHint`, `ScrollArrowButton`,
+// `ScrollRail` and `ScrollOverlay` are each only imported directly from
+// "./ScrollHint".
 export type {
   UseScrollHintReturn,
   ScrollArrowButtonProps,
@@ -115,16 +109,15 @@ export type { PageContainerProps, PageContainerWidth } from "./PageContainer";
 export { DashedDivider, DottedDivider } from "./Divider";
 export type { DividerProps, DividerStyle, DividerColor } from "./Divider";
 
-// EndMark
-export { EndMark } from "./EndMark";
+// EndMark — not re-exported: only imported directly from "./EndMark".
 export type { EndMarkProps } from "./EndMark";
 
 // ExternalMark
 export { ExternalMark } from "./ExternalMark";
 export type { ExternalMarkProps } from "./ExternalMark";
 
-// HighlighterStroke
-export { HighlighterStroke } from "./HighlighterStroke";
+// HighlighterStroke — not re-exported: only imported directly from
+// "./HighlighterStroke".
 export type {
   HighlighterStrokeProps,
   HighlighterStrokeColor,
@@ -179,15 +172,16 @@ export type { EditorialHeroShellProps } from "./EditorialHeroShell";
 export { EditorialKicker } from "./EditorialKicker";
 export type { EditorialKickerProps } from "./EditorialKicker";
 
-// EditorialLead
-export { EditorialLead, truncateLead } from "./EditorialLead";
+// EditorialLead — `truncateLead` not re-exported: its only consumer
+// (EditorialLead.test.tsx) imports it directly from "./EditorialLead".
+export { EditorialLead } from "./EditorialLead";
 export type { EditorialLeadProps } from "./EditorialLead";
 
-// MonoStar
-export { MonoStar } from "./MonoStar";
+// MonoStar — not re-exported: every consumer imports it directly from
+// "./MonoStar/MonoStar".
 
-// EditorialLink
-export { EditorialLink } from "./EditorialLink";
+// EditorialLink — not re-exported: only imported directly from
+// "./EditorialLink".
 export type { EditorialLinkProps, EditorialLinkTone } from "./EditorialLink";
 
 // MonoLabel
@@ -199,8 +193,7 @@ export type {
   MonoLabelTone,
 } from "./MonoLabel";
 
-// QuoteMark
-export { QuoteMark } from "./QuoteMark";
+// QuoteMark — not re-exported: only imported directly from "./QuoteMark".
 export type { QuoteMarkProps, QuoteMarkColor } from "./QuoteMark";
 
 // RemovableChip
@@ -227,8 +220,7 @@ export type {
   StripedSeamColorPair,
 } from "./StripedSeam";
 
-// TapeStrip
-export { TapeStrip } from "./TapeStrip";
+// TapeStrip — not re-exported: only imported directly from "./TapeStrip".
 export type {
   TapeStripProps,
   TapeStripColor,
@@ -296,8 +288,8 @@ export type {
   PullQuotePlacement,
 } from "./PullQuote";
 
-// NumberDisplay
-export { NumberDisplay } from "./NumberDisplay";
+// NumberDisplay — not re-exported: only imported directly from
+// "./NumberDisplay".
 export type {
   NumberDisplayProps,
   NumberDisplaySize,
@@ -305,8 +297,8 @@ export type {
   NumberDisplayAs,
 } from "./NumberDisplay";
 
-// DropCapParagraph
-export { DropCapParagraph } from "./DropCapParagraph";
+// DropCapParagraph — not re-exported: only imported directly from
+// "./DropCapParagraph".
 export type {
   DropCapParagraphProps,
   DropCapParagraphTone,

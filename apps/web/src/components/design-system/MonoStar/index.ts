@@ -1,1 +1,0 @@
-export { MonoStar } from "./MonoStar";

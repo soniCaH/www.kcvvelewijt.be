@@ -1,6 +1,8 @@
 export { HubSearch } from "./HubSearch";
 export type { HubSearchProps, HubSearchVariant } from "./HubSearch";
-export { searchHub, searchMembers, searchResponsibilities } from "./hub-search";
+// `searchHub`, `searchMembers` and `searchResponsibilities` are deliberately
+// NOT re-exported here: every consumer (HubSearch.tsx, hub-search.test.ts)
+// imports each directly from "./hub-search".
 export type {
   HubSearchResult,
   HubMemberResult,

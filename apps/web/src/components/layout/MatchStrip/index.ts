@@ -1,5 +1,8 @@
-export { MatchStrip } from "./MatchStrip";
-export { MatchStripView } from "./MatchStripView";
+// `MatchStrip`, `MatchStripView` and `MatchStripSkeleton` are deliberately
+// NOT re-exported here: every consumer imports each directly from its own
+// subpath (e.g. "@/components/layout/MatchStrip/MatchStripView") — see the
+// `Alert` barrel (../../design-system/Alert/index.ts) for the same pattern.
+// `MatchStripSlot` stays: app/(landing)/layout.tsx imports it through this
+// barrel path.
 export type { MatchStripViewProps } from "./MatchStripView";
-export { MatchStripSkeleton } from "./MatchStripSkeleton";
 export { MatchStripSlot } from "./MatchStripSlot";
