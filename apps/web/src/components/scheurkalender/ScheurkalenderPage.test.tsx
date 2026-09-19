@@ -58,7 +58,7 @@ const fixtures: ScheurkalenderMatch[] = [
   },
 ];
 
-const renderPage = (matches = fixtures, season = "26/27") =>
+const renderPage = (matches = fixtures, season = "’26/’27") =>
   render(<ScheurkalenderPage matches={matches} season={season} />);
 
 describe("ScheurkalenderPage", () => {
@@ -66,7 +66,7 @@ describe("ScheurkalenderPage", () => {
     it("renders the season + A & B subtitle", () => {
       renderPage();
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(
-        "KCVV Elewijt — Competitie 26/27",
+        "KCVV Elewijt — Competitie ’26/’27",
       );
       expect(screen.getByText("A & B · Wedstrijdkalender")).toBeInTheDocument();
     });

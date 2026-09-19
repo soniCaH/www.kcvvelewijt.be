@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { groupBySeason, type Season } from "./season";
+import { deriveSeason, groupBySeason, type Season } from "./season";
 
 /**
  * The only caller groups BFF matches, whose dates the Workers app builds with
@@ -16,9 +16,11 @@ const kickoff = (
   hour = 15,
 ): Date => new Date(Date.UTC(year, monthIndex, day, hour));
 
-// `deriveSeason` is module-private (only `groupBySeason` consumes it), so we
-// assert its boundary + label behaviour through the public API: a single-item
-// group's `.season` is exactly what `deriveSeason` produced for that date.
+// `deriveSeason` is exported since #2546 (three call sites now share it), but
+// these boundary assertions keep going through `groupBySeason` — a single-item
+// group's `.season` is exactly what `deriveSeason` produced for that date, so
+// they cover both the derivation and the grouping that wraps it. The direct
+// callers are covered separately at the bottom of this file.
 const seasonOf = (date: Date): Season =>
   groupBySeason([date], (d) => d)[0]!.season;
 
@@ -26,14 +28,14 @@ describe("season derivation (via groupBySeason)", () => {
   it("places a spring match (Jan–Jun) in the season that started the prior July", () => {
     expect(seasonOf(kickoff(2026, 4, 18))).toEqual({
       key: "2025-2026",
-      label: "Seizoen '25–'26",
+      label: "’25/’26",
     });
   });
 
   it("places an autumn match (Jul–Dec) in the season that starts that July", () => {
     expect(seasonOf(kickoff(2025, 10, 24))).toEqual({
       key: "2025-2026",
-      label: "Seizoen '25–'26",
+      label: "’25/’26",
     });
   });
 
@@ -48,12 +50,19 @@ describe("season derivation (via groupBySeason)", () => {
   it("lands an August cup match in the upcoming season", () => {
     expect(seasonOf(kickoff(2026, 7, 5))).toEqual({
       key: "2026-2027",
-      label: "Seizoen '26–'27",
+      label: "’26/’27",
     });
   });
 
-  it("formats the label with two-digit years and an en-dash", () => {
-    expect(seasonOf(kickoff(2024, 8, 1)).label).toBe("Seizoen '24–'25");
+  it("formats the label with two-digit years, typographic apostrophes and a slash", () => {
+    expect(seasonOf(kickoff(2024, 8, 1)).label).toBe("’24/’25");
+  });
+
+  it("leaves the word 'Seizoen' to the surface", () => {
+    // #2546: the band on `/tegenstander/[clubId]` prepends it; `<MatchHero>`'s
+    // meta line and `/scheurkalender`'s masthead deliberately do not. A helper
+    // that baked it in could not serve all three.
+    expect(seasonOf(kickoff(2025, 10, 24)).label).not.toContain("Seizoen");
   });
 
   /**
@@ -111,5 +120,29 @@ describe("groupBySeason", () => {
 
   it("returns an empty array for no items", () => {
     expect(groupBySeason([], (m: { date: Date }) => m.date)).toEqual([]);
+  });
+});
+
+/**
+ * `/scheurkalender` hands `deriveSeason` a `YYYY-MM-DD` string rather than a
+ * Date (#2546). Its own local copy read that string through `toDisplayZone`,
+ * while this helper reads through `toMatchDisplayZone` — the two disagree on a
+ * true instant, so the swap is only behaviour-preserving because a date-only
+ * string has no time to re-zone. These pin that, on the one boundary where
+ * being wrong costs a whole season.
+ */
+describe("deriveSeason — date-only string input", () => {
+  it("reads a YYYY-MM-DD string the same way it reads a Date", () => {
+    expect(deriveSeason("2025-10-24")).toEqual(
+      deriveSeason(kickoff(2025, 9, 24, 0)),
+    );
+  });
+
+  it("keeps 30 June in the season that is ending", () => {
+    expect(deriveSeason("2026-06-30").key).toBe("2025-2026");
+  });
+
+  it("moves 1 July into the season that is starting", () => {
+    expect(deriveSeason("2026-07-01").key).toBe("2026-2027");
   });
 });

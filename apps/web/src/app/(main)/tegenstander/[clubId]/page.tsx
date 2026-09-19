@@ -342,7 +342,9 @@ function SquadHistorySection({
       {seasons.map((group) => (
         <div key={group.season.key} className="mt-5 first:mt-0">
           <SeasonBand
-            label={group.season.label}
+            // The helper returns the bare `’25/’26`; this band is the one
+            // surface with room for the word, so it supplies it (#2546).
+            label={`Seizoen ${group.season.label}`}
             tally={seasonTally(group.items)}
           />
           <div className="flex flex-col gap-2.5">

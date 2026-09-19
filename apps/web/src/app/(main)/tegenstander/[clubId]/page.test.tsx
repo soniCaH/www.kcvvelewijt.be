@@ -163,6 +163,26 @@ describe("/tegenstander/[clubId] renders one section per senior squad (#2463)", 
     expect(screen.queryByText(/Reserven/)).not.toBeInTheDocument();
   });
 
+  it("prints the season band as Seizoen + the bare helper label", async () => {
+    // #2546 AC 3: `deriveSeason` returns `’25/’26` with no leading word, and
+    // this band is the one surface that adds it back. `season.test.ts` pins
+    // the helper's half (the label omits it); without this, dropping the
+    // `Seizoen ${…}` template here would ship silently — `SeasonBand` has no
+    // story and therefore no VR baseline either.
+    mockGetOpponentHistory.mockImplementation((teamId: number) =>
+      teamId === 1
+        ? Effect.succeed(history(1, [match(1, "2026-02-14")]))
+        : Effect.fail(new HttpNotFound({ error: "unknown" })),
+    );
+
+    const element = await OpponentPage({
+      params: Promise.resolve({ clubId: String(CLUB_ID) }),
+    });
+    render(element);
+
+    expect(screen.getByText("Seizoen ’25/’26")).toBeInTheDocument();
+  });
+
   it("gives every landmark a unique accessible name", async () => {
     // Both squads met this opponent in the SAME season — the exact
     // collision the old per-season <section aria-label={seasonLabel}>

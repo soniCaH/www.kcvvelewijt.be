@@ -140,13 +140,17 @@ A youth season is split in two by the winter break, and **the second half is fre
 
 ### Season
 
-Which football year it currently is (e.g. "25/26"). **Not a datum any document stores.** Every season label the site renders is derived client-side from a date the surface already holds, never read from a stored "current season" field:
+Which football year it currently is (e.g. `’25/’26`). **Not a datum any document stores.** Every season label the site renders is derived client-side from a date the surface already holds, never read from a stored "current season" field.
 
-| surface                                          | derives from         |
-| ------------------------------------------------ | -------------------- |
-| `MatchHero.formatSeasonLabel(date)`              | the match's own date |
-| `groupBySeason()` (`lib/utils/season.ts`)        | each match's date    |
-| `/scheurkalender` `seasonLabel(matches[0].date)` | the first fixture    |
+**One derivation owns it: `deriveSeason(date)` in `lib/utils/season.ts`** (#2546). It returns `{ key, label }` — `key` (`"2025-2026"`) for grouping and sorting, `label` (`’25/’26`) for display — and the boundary is `month >= 7`, because Belgian amateur cup fixtures start in July, so an August Beker match belongs to the _upcoming_ season.
+
+| surface                                      | derives from         | supplies the word "Seizoen"? |
+| -------------------------------------------- | -------------------- | ---------------------------- |
+| `<MatchHero>`'s meta line                    | the match's own date | no — bare label              |
+| `groupBySeason()` → `/tegenstander/[clubId]` | each match's date    | yes — the band prepends it   |
+| `/scheurkalender` masthead                   | the first fixture    | no — bare label              |
+
+The word is the **surface's** to add, never the helper's: only the opponent-history band has room for it. Until #2546 this was three separate derivations of the same boundary in three shapes (`Seizoen '25–'26`, `25/26`, `’25/’26`); `<MatchHero>`'s spelling won as the incumbent on the only public in-scope route.
 
 **Removed:** `team` used to carry a `season` field (`readOnly`, "gesynchroniseerd vanuit PSD"). It never had a writer — absent from `PsdTeam`, never written by `psd-sanity-sync.ts` — so it went dark on all 26 production documents and stayed that way through an entire redesign. Deleted in #2567 along with every reader of it: a `TeamHero` meta pill, `TeamHero`'s decorative artefact-column stub, both `TeamFlagship` cards on `/ploegen`, `PlayerHero`'s ticket-stub on `/spelers/[slug]` (fed by `team.season` through the player query's `currentTeam` projection, not a player-owned field), and that GROQ projection itself. None of the five moved a pixel when the field went. If a future feature needs "what season is it right now" as a genuine input (not derived from a date already in hand), it needs a real writer — PSD's own `/seasons` endpoint is an internal id-resolver, not a display source — before the field comes back. See **The Writer Rule** in `apps/web/CLAUDE.md` for the general principle this follows.
 

@@ -18,11 +18,8 @@ import { TeamRepository } from "@/lib/repositories/team.repository";
 import { selectSeniorTeams } from "@/components/home/FirstTeamsBlock/first-teams";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { KCVV_CLUB_ID } from "@/lib/constants";
-import {
-  clubToday,
-  toDisplayZone,
-  toMatchDisplayZone,
-} from "@/lib/utils/dates";
+import { clubToday, toMatchDisplayZone } from "@/lib/utils/dates";
+import { deriveSeason } from "@/lib/utils/season";
 import {
   ScheurkalenderPage,
   type ScheurkalenderMatch,
@@ -44,14 +41,6 @@ interface ScheurkalenderData {
 /** "B" for the squad whose name ends in " B", "A" for the first team. */
 function squadLabel(name: string): "A" | "B" {
   return name.trim().endsWith(" B") ? "B" : "A";
-}
-
-/** Belgian season label (e.g. "25/26") for the calendar day in `isoDate`. */
-function seasonLabel(isoDate: string): string {
-  const dt = toDisplayZone(isoDate);
-  const startYear = dt.month >= 7 ? dt.year : dt.year - 1;
-  const twoDigit = (year: number) => String(year % 100).padStart(2, "0");
-  return `${twoDigit(startYear)}/${twoDigit(startYear + 1)}`;
 }
 
 function toScheurkalenderMatch(
@@ -136,7 +125,18 @@ async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
           (a.time ?? "").localeCompare(b.time ?? ""),
       );
 
-      const season = seasonLabel(matches[0]?.date ?? clubToday());
+      // The bare label — this masthead has no room for the word "Seizoen"
+      // (#2546). `date` is already `YYYY-MM-DD` normalised through
+      // `toMatchDisplayZone` above, which is the zone `deriveSeason` reads.
+      // `find`, not `matches[0]`: `toScheurkalenderMatch` writes `date: ""`
+      // for a BFF date Luxon cannot parse, and `""` sorts first under
+      // `localeCompare` — so the anchor could be the one broken fixture.
+      // `??` does not catch it either (`""` is not nullish), and
+      // `deriveSeason("")` yields `’NaN/’NaN`, which would print in the
+      // masthead and the print footer (#2546 review).
+      const season = deriveSeason(
+        matches.find((match) => match.date)?.date ?? clubToday(),
+      ).label;
 
       return { matches, season };
     }).pipe(Effect.orDie),
