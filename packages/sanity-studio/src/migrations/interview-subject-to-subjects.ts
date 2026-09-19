@@ -28,7 +28,7 @@ type Patch = ReturnType<typeof at>
 const DEFAULT_KEY_LENGTH = 12
 const KEY_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789'
 
-export function defaultGenKey(): string {
+function defaultGenKey(): string {
   let out = ''
   for (let i = 0; i < DEFAULT_KEY_LENGTH; i += 1) {
     out += KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)]

@@ -18,7 +18,7 @@ import {useTemplates} from './use-templates'
  * Tool and lands the editor in a new draft. (Sanity's own structure
  * tool follows the same pattern.)
  */
-export function LauncherTool(): JSX.Element {
+function LauncherTool(): JSX.Element {
   const templates = useTemplates()
   const router = useRouter()
 
