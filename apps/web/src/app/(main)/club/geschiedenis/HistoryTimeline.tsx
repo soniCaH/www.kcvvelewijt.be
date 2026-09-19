@@ -23,7 +23,9 @@ import { PageHero } from "@/components/layout/PageHero";
  */
 export function HeritageHero() {
   return (
-    <PageContainer className="pt-12 sm:pt-16">
+    // Top air is the up-link chip's own now (#2877) — this container
+    // supplies none.
+    <PageContainer>
       <PageHero
         register="minimal"
         // "De club" dropped from the kicker (review round 2, #2570): the

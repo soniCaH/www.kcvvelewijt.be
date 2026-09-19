@@ -170,7 +170,9 @@ export default async function WedstrijdenPage({
 
       <AgendaScrollToNext nextMatchId={nextMatch?.id ?? null} />
 
-      <PageContainer className="py-12 sm:py-16">
+      {/* Top air is the up-link chip's own now (#2877) — this container
+          keeps only its bottom padding. */}
+      <PageContainer className="pb-12 sm:pb-16">
         {/* No kicker: the up-link `<PageHero>` renders above itself already
             names the parent team, so a second `{displayName}` label would
             say it twice (#2442 rule 6 — this is the route's own

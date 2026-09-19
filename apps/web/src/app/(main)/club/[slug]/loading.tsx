@@ -33,7 +33,9 @@ export default function ClubPageLoading() {
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Pagina laden…" />
 
-      <PageContainer className="pt-10 pb-12">
+      {/* Top air is the up-link chip's own now (#2877) — this container
+          keeps only its bottom padding, matching the real page. */}
+      <PageContainer className="pb-12">
         <PageHeroSkeleton
           register="band"
           tone="cream"

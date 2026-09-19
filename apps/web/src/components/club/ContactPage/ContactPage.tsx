@@ -205,8 +205,9 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
     <div className="bg-cream min-h-screen">
       {/* Hero — no kicker: the up-link above already names the parent
           ("‹ De club"), so a "Club" kicker on the same line would say it
-          twice (#2442 rule 6). */}
-      <PageContainer className="pt-10 pb-12">
+          twice (#2442 rule 6). Top air is the chip's own now (#2877) —
+          this container keeps only its bottom padding. */}
+      <PageContainer className="pb-12">
         <PageHero
           headline={CONTACT_HEADLINE}
           lead={CONTACT_LEAD}

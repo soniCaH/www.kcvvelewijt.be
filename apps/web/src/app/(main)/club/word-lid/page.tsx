@@ -38,7 +38,9 @@ export const metadata = buildPageMetadata({
 
 export default function WordLidPage() {
   return (
-    <div className="bg-cream py-12 sm:py-16">
+    // Top air is the up-link chip's own now (#2877) — this root keeps only
+    // its bottom padding.
+    <div className="bg-cream pb-12 sm:pb-16">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },
