@@ -30,10 +30,10 @@ export default function ArticleDetailLoading() {
 
       {/* Up-link — real, unshimmered: its label is fixed copy, not data
           (review round 2, #2570). Mirrors the real page's own container:
-          the container owns the top air (`pt-12 lg:pt-16`), and no bottom
-          padding here — `<EditorialHeroShell>`'s own flat `pt-12 pb-6`
-          below already supplies the gap (#2876). */}
-      <PageContainer width="default" className="pt-12 lg:pt-16">
+          the top air is `<UpLink>`'s own now (#2877), so this container
+          supplies none — `<EditorialHeroShell>`'s own flat `pt-12 pb-6`
+          below already supplies the gap beneath it (#2876). */}
+      <PageContainer width="default">
         <UpLink href="/nieuws" label="Nieuws" />
       </PageContainer>
 

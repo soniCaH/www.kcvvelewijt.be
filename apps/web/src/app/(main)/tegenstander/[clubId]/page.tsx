@@ -390,7 +390,11 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
           { name: opponentName, url: pageUrl },
         ])}
       />
-      <PageContainer className="pt-8 pb-8">
+      {/* Top air is the up-link chip's own now (#2877) — `<PageHero>`
+          renders it above this opening at `tone="ink"`, so this container
+          keeps only its bottom padding. Matches the skeleton's offset
+          exactly, so the chip does not move when the page resolves. */}
+      <PageContainer className="pb-8">
         <PageHero
           kicker="Onderlinge geschiedenis"
           headline={opponentName}
