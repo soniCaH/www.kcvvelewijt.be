@@ -280,7 +280,7 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
  * Drops any entry `matchToEntry` couldn't parse, the same way
  * `eventsToEntries` drops an unparseable event.
  */
-export function matchesToEntries(
+function matchesToEntries(
   matches: readonly Match[],
   side: MatchSide = "all",
 ): TimedIcalEntry[] {
@@ -363,9 +363,7 @@ function eventToEntry(item: EventListItemVM): IcalEntry | undefined {
  * `mergeEventFeed`'s sort), so no re-filter/re-sort happens here — only the
  * per-item map, dropping any entry `eventToEntry` couldn't parse.
  */
-export function eventsToEntries(
-  events: readonly EventListItemVM[],
-): IcalEntry[] {
+function eventsToEntries(events: readonly EventListItemVM[]): IcalEntry[] {
   return events
     .map(eventToEntry)
     .filter((entry): entry is IcalEntry => entry !== undefined);
@@ -409,7 +407,7 @@ function emitEntry(cal: ReturnType<typeof ical>, entry: IcalEntry): void {
  * (`resolveFeedVariant`), threaded through once for `NAME`/`X-WR-CALDESC`
  * rather than re-derived here.
  */
-export function generateIcal(
+function generateIcal(
   items: readonly IcalEntry[],
   variant: FeedVariant = "matches",
 ): string {

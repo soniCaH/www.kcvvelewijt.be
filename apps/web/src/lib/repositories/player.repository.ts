@@ -192,7 +192,7 @@ export function toPlayerVM(
 // If a future tag-driven invalidation is wired up (e.g. from the PSD sync
 // worker), promote this to `unstable_cache` with a `keepers` tag and drop
 // the module-scope cache.
-export const KEEPER_PSD_IDS_QUERY = defineQuery(
+const KEEPER_PSD_IDS_QUERY = defineQuery(
   `*[_type == "player" && keeper == true && archived != true].psdId`,
 );
 

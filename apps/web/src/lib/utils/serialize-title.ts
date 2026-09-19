@@ -18,9 +18,3 @@ export function serializeTitle(value: TitleValue): string {
   const children = (block as PortableTextBlock).children as TitleSpan[];
   return children.map((c) => c.text ?? "").join("");
 }
-
-export function isPortableTextTitle(
-  value: TitleValue,
-): value is PortableTextBlock[] {
-  return Array.isArray(value);
-}

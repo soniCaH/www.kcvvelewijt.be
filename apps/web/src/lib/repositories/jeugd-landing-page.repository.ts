@@ -5,7 +5,7 @@ import type { JEUGD_LANDING_PAGE_QUERY_RESULT } from "../sanity/sanity.types";
 
 // ─── GROQ Query ──────────────────────────────────────────────────────────────
 
-export const JEUGD_LANDING_PAGE_QUERY =
+const JEUGD_LANDING_PAGE_QUERY =
   defineQuery(`*[_type == "jeugdLandingPage"][0] {
   editorialCards[] {
     tag, title, description, arrowText, href,
@@ -56,7 +56,7 @@ function toEditorialCardConfig(card: RawCard): EditorialCardConfig | null {
   };
 }
 
-export function toEditorialCardsVM(
+function toEditorialCardsVM(
   data: JEUGD_LANDING_PAGE_QUERY_RESULT,
 ): EditorialCardConfig[] | null {
   if (!data || !data.editorialCards) return null;

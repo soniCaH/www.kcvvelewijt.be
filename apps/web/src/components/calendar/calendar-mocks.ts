@@ -4,16 +4,10 @@ import type {
 } from "@/app/(main)/kalender/utils";
 import { fixtureImage } from "@test-fixtures/images";
 
-export const kcvv = {
+const kcvv = {
   id: 1,
   name: "KCVV Elewijt A",
   logo: fixtureImage("sponsor-logo", 0),
-};
-
-export const opponent = {
-  id: 2,
-  name: "Racing Mechelen",
-  logo: fixtureImage("sponsor-logo", 1),
 };
 
 export const tournamentOpponent = {

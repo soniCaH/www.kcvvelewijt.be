@@ -90,7 +90,7 @@ function toBannerSlotVM(slot: RawSlot): BannerSlotVM | null {
   };
 }
 
-export function toBannersVM(data: HOMEPAGE_QUERY_RESULT): HomepageBannersVM {
+function toBannersVM(data: HOMEPAGE_QUERY_RESULT): HomepageBannersVM {
   if (!data) {
     return { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null };
   }

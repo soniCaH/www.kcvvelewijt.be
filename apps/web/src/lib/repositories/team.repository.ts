@@ -60,13 +60,13 @@ export const TEAM_BY_SLUG_QUERY =
 // `getNextMatches`), so a deliberately hidden team (e.g. `showInNavigation:
 // false`) must not resurface as a "PLOEG" card on a member's own profile
 // (review round 1, #2788).
-export const TEAMS_BY_MEMBER_QUERY =
+const TEAMS_BY_MEMBER_QUERY =
   defineQuery(`*[_type == "team" && archived != true && showInNavigation != false && references($memberId)] | order(name asc) {
   _id, name, displayName, "slug": slug.current, tagline,
   "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))
 }`);
 
-export const TEAMS_LANDING_QUERY =
+const TEAMS_LANDING_QUERY =
   defineQuery(`*[_type == "team" && archived != true && showInNavigation != false && defined(age)] | order(name asc) {
   _id, psdId, name, displayName, "slug": slug.current, age,
   division, divisionFull, tagline,
@@ -170,7 +170,7 @@ function toTeamRelationVM(
   };
 }
 
-export function toTeamNavVM(row: TEAMS_QUERY_RESULT[number]): TeamNavVM {
+function toTeamNavVM(row: TEAMS_QUERY_RESULT[number]): TeamNavVM {
   const name = row.name ?? "";
   const slug = row.slug ?? "";
   return {

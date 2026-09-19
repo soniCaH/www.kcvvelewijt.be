@@ -125,6 +125,11 @@ function titleOf(test: TestCase): string {
   return test.titlePath().slice(3).filter(Boolean).join(" › ");
 }
 
+// Loaded by Playwright via a config file-path string
+// (test/e2e/playwright.config.ts's `reporter: [..., ["../reporters/github-summary.ts"]]`),
+// not a static import — knip can't see that consumer, so this default
+// export reads as unused. Kept deliberately; a Playwright custom reporter
+// must be the module's default export.
 export default class GithubSummaryReporter implements Reporter {
   /** Keyed by id: a retried test reaches `onTestEnd` once per attempt. */
   private readonly tests = new Map<string, TestCase>();

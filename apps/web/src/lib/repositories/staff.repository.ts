@@ -39,7 +39,7 @@ const KEY_CONTACT_ROLE_CODES = [
   "pr-verantwoordelijke",
 ] as const;
 
-export const KEY_CONTACTS_QUERY =
+const KEY_CONTACTS_QUERY =
   defineQuery(`*[_type == "organigramNode" && active == true && roleCode in $roleCodes]{
   title,
   roleCode,
@@ -49,7 +49,7 @@ export const KEY_CONTACTS_QUERY =
   }
 }[count(members) > 0] | order(title asc)`);
 
-export const STAFF_MEMBER_BY_PSD_ID_QUERY =
+const STAFF_MEMBER_BY_PSD_ID_QUERY =
   defineQuery(`*[_type == "staffMember" && psdId == $psdId && archived != true][0] {
   _id, psdId, firstName, lastName, email, phone, bio,
   "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",
@@ -61,7 +61,7 @@ export const STAFF_MEMBER_BY_PSD_ID_QUERY =
   "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
 }`);
 
-export const STAFF_MEMBERS_PSDID_QUERY =
+const STAFF_MEMBERS_PSDID_QUERY =
   defineQuery(`*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {
   _id, psdId
 }`);
@@ -167,7 +167,7 @@ export function toOrgChartNode(
   };
 }
 
-export function toStaffDetailVM(
+function toStaffDetailVM(
   row: NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>,
 ): StaffDetailVM {
   const psdId = row.psdId != null ? String(row.psdId).trim() : "";

@@ -24,7 +24,7 @@ import type {
 // Sliced: galleries never drop off the list, so `/galerij` is the one other
 // listing whose payload grows without a bound and it takes the same
 // 24 + 12 load-more contract as `/nieuws` (#2569 / decision #2431).
-export const GALLERIES_QUERY =
+const GALLERIES_QUERY =
   defineQuery(`*[_type == "photoGallery" && defined(slug.current)] | order(publishedAt desc) [$offset...$end] {
   "id": _id,
   "title": coalesce(title, ""),
@@ -50,7 +50,7 @@ export const GALLERIES_QUERY =
  * projection here: a match is not a Sanity document, so it never becomes a
  * card from this side either ("Gallery in, match out", #2443 resolution).
  */
-export const GALLERY_BY_SLUG_QUERY =
+const GALLERY_BY_SLUG_QUERY =
   defineQuery(`*[_type == "photoGallery" && slug.current == $slug][0] {
   "id": _id,
   "updatedAt": _updatedAt,
@@ -77,13 +77,13 @@ export const GALLERY_BY_SLUG_QUERY =
 }`);
 
 /** Slug-only query for `generateStaticParams`. */
-export const GALLERY_SLUGS_QUERY = defineQuery(
+const GALLERY_SLUGS_QUERY = defineQuery(
   `*[_type == "photoGallery" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }`,
 );
 
 // Galleries linked to a PSD match, oldest-first (chronological per spec: a match
 // can have warmup / match / viering galleries). Same card shape as GALLERIES_QUERY.
-export const GALLERIES_BY_MATCH_QUERY =
+const GALLERIES_BY_MATCH_QUERY =
   defineQuery(`*[_type == "photoGallery" && linkedMatch == $matchId && defined(slug.current)] | order(publishedAt asc) {
   "id": _id,
   "title": coalesce(title, ""),
@@ -95,7 +95,7 @@ export const GALLERIES_BY_MATCH_QUERY =
 }`);
 
 // Galleries linked to an event document, oldest-first. Same card shape.
-export const GALLERIES_BY_EVENT_QUERY =
+const GALLERIES_BY_EVENT_QUERY =
   defineQuery(`*[_type == "photoGallery" && linkedEvent._ref == $eventId && defined(slug.current)] | order(publishedAt asc) {
   "id": _id,
   "title": coalesce(title, ""),

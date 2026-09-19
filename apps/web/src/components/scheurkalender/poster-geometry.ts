@@ -14,7 +14,7 @@
  */
 
 /** CSS px per millimetre — print CSS resolves `px` at a fixed 96 dpi. */
-export const PX_PER_MM = 96 / 25.4;
+const PX_PER_MM = 96 / 25.4;
 
 /**
  * The poster block between the InDesign sponsor blocks

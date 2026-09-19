@@ -52,7 +52,7 @@ export const ARTICLES_QUERY =
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }
 }`);
 
-export const ARTICLE_TAGS_QUERY = defineQuery(
+const ARTICLE_TAGS_QUERY = defineQuery(
   `array::unique(*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])`,
 );
 
@@ -61,7 +61,7 @@ export const ARTICLE_TAGS_QUERY = defineQuery(
 // section on /jeugd (`app/(landing)/jeugd/page.tsx`). Archive UX assumes
 // strict date ordering so readers can scan by publication date; the
 // featured-first rule applies only to the homepage feed (ARTICLES_QUERY).
-export const ARTICLES_PAGINATED_QUERY =
+const ARTICLES_PAGINATED_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,
   "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
@@ -83,7 +83,7 @@ export const RELATED_ARTICLES_QUERY =
 // newest-first so a same-type duplicate (data anomaly) keeps the most
 // recent. `pt::text(title)` flattens the constrained-PT title to a plain
 // string — the hero heading renders verbatim, no accent decorator.
-export const MATCH_ARTICLES_QUERY =
+const MATCH_ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && linkedMatch == $matchId && articleType in ["matchPreview", "matchRecap"] && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
   "id": _id,
   "title": coalesce(pt::text(title), title, ""),

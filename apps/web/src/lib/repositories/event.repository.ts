@@ -46,7 +46,7 @@ export const NEXT_FEATURED_EVENT_QUERY = defineQuery(`
  * `eventType` + `location` drive the `<EventHero>` pill, kicker and location
  * line (#1967); a missing `eventType` falls back to "Andere" at render time.
  */
-export const EVENT_BY_SLUG_QUERY =
+const EVENT_BY_SLUG_QUERY =
   defineQuery(`*[_type == "event" && slug.current == $slug][0] {
   "id": _id,
   "updatedAt": _updatedAt,
@@ -68,7 +68,7 @@ export const EVENT_BY_SLUG_QUERY =
  * uses a stricter `coalesce(dateEnd, dateStart) > now()` filter so historical
  * events are not re-crawled, but the routes themselves stay reachable.
  */
-export const EVENT_SLUGS_QUERY = defineQuery(
+const EVENT_SLUGS_QUERY = defineQuery(
   `*[_type == "event" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }`,
 );
 
