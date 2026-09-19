@@ -11,9 +11,9 @@ import { WorkerEnvTag } from "../env";
  */
 
 /** Verified sender — apex `kcvvelewijt.be` (see docs/prd/email-delivery.md). */
-export const DEFAULT_FROM = "KCVV Elewijt <noreply@kcvvelewijt.be>";
+const DEFAULT_FROM = "KCVV Elewijt <noreply@kcvvelewijt.be>";
 
-export class EmailDeliveryError extends Error {
+class EmailDeliveryError extends Error {
   readonly _tag = "EmailDeliveryError" as const;
   constructor(
     message: string,

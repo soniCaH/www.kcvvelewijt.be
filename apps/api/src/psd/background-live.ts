@@ -37,7 +37,7 @@ const backgroundStackLayer = (env: WorkerEnv) =>
     Layer.provideMerge(Layer.succeed(WorkerEnvTag, env)),
   );
 
-export const makeBackgroundRunner = (
+const makeBackgroundRunner = (
   env: WorkerEnv,
   ctx: ExecutionContext,
 ): BackgroundRunner => {

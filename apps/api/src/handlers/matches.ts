@@ -150,7 +150,7 @@ export function nextMatchesTtl(
 }
 
 /** True when the detail already carries report data (a non-empty lineup or events). */
-export function hasMatchReportData(detail: MatchDetail): boolean {
+function hasMatchReportData(detail: MatchDetail): boolean {
   const lineup = detail.lineup;
   const hasLineup =
     lineup !== undefined && (lineup.home.length > 0 || lineup.away.length > 0);

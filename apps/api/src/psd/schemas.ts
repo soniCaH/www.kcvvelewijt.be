@@ -15,7 +15,7 @@ export class FootbalistoClub extends S.Class<FootbalistoClub>(
   version: S.optional(S.NullOr(S.Number)),
 }) {}
 
-export class FootbalistoRankingClub extends S.Class<FootbalistoRankingClub>(
+class FootbalistoRankingClub extends S.Class<FootbalistoRankingClub>(
   "FootbalistoRankingClub",
 )({
   id: S.Number,
@@ -23,7 +23,7 @@ export class FootbalistoRankingClub extends S.Class<FootbalistoRankingClub>(
   name: S.NullOr(S.String),
 }) {}
 
-export class FootbalistoRankingTeam extends S.Class<FootbalistoRankingTeam>(
+class FootbalistoRankingTeam extends S.Class<FootbalistoRankingTeam>(
   "FootbalistoRankingTeam",
 )({
   id: S.Number,
@@ -56,7 +56,7 @@ export class FootbalistoRankingCompetition extends S.Class<FootbalistoRankingCom
 
 export const FootbalistoRankingArray = S.Array(FootbalistoRankingCompetition);
 
-export class FootbalistoEventAction extends S.Class<FootbalistoEventAction>(
+class FootbalistoEventAction extends S.Class<FootbalistoEventAction>(
   "FootbalistoEventAction",
 )({
   type: S.String,
@@ -130,7 +130,7 @@ export class PsdCompetition extends S.Class<PsdCompetition>("PsdCompetition")({
 
 export const PsdCompetitionsSchema = S.Array(PsdCompetition);
 
-export class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetailGeneral>(
+class FootbalistoMatchDetailGeneral extends S.Class<FootbalistoMatchDetailGeneral>(
   "FootbalistoMatchDetailGeneral",
 )({
   id: S.Number,
@@ -197,17 +197,6 @@ const PsdGameBaseFields = {
   // Separate boolean — a game can be cancelled with goals already set (e.g. 0-0)
   cancelled: S.optional(S.NullOr(S.Boolean)),
 };
-
-/**
- * Raw game from PSD — external contract.
- * Clubs are nullable because PSD returns null for "ghost" matches
- * (opponent forfeited/removed from league).
- */
-export class PsdRawGame extends S.Class<PsdRawGame>("PsdRawGame")({
-  ...PsdGameBaseFields,
-  homeClub: S.NullOr(FootbalistoClub),
-  awayClub: S.NullOr(FootbalistoClub),
-}) {}
 
 /**
  * Validated game — internal contract.

@@ -23,7 +23,7 @@ export class PsdTeamClientError extends Error {
   }
 }
 
-export class PsdTeamClientValidationError extends Error {
+class PsdTeamClientValidationError extends Error {
   readonly _tag = "PsdTeamClientValidationError" as const;
   constructor(
     message: string,

@@ -47,7 +47,7 @@ function refSuffix(ref: string | undefined): string {
  *
  * ponytail: O(n) with two sets; a squad is ~25 entries.
  */
-export function mergePreservingOrder(
+function mergePreservingOrder(
   existingKeys: readonly string[],
   psdIds: readonly string[],
 ): string[] {

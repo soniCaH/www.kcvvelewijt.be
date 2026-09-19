@@ -34,7 +34,7 @@ export const TTL = {
 /** Persisted negative marker TTL (seconds). Suppresses re-storming after a failed
  * refresh: subsequent requests serve stale without re-fanning until it expires.
  * (KV's minimum expirationTtl is 60 s.) */
-export const NEG_MARKER_TTL = 120; // 2 min
+const NEG_MARKER_TTL = 120; // 2 min
 
 /** Time (seconds) a value may sit PAST ITS SOFT TTL before we escalate logs
  * WARN→ERROR and emit a slow-drift Slack nudge — refreshes are not landing and
@@ -43,7 +43,7 @@ export const NEG_MARKER_TTL = 120; // 2 min
  * Measured relative to the soft TTL, not as absolute age (#2335): a healthy
  * 24 h-softTtl key (`MATCHES_TEAM`, `RANKING`) is stale by design between
  * refreshes, so an absolute rule would nudge on every normal cycle. */
-export const DRIFT_NUDGE_THRESHOLD = 60 * 60 * 24; // 24 h (#2329)
+const DRIFT_NUDGE_THRESHOLD = 60 * 60 * 24; // 24 h (#2329)
 
 /** Ceiling on a background (SWR) refresh fetch, so a slow one takes the normal
  * failure path (negative marker + escalating log) instead of being silently
@@ -63,7 +63,7 @@ export const DRIFT_NUDGE_THRESHOLD = 60 * 60 * 24; // 24 h (#2329)
 export const BG_REFRESH_TIMEOUT_MS = 12_000;
 
 /** Dedup window for the slow-drift nudge: at most one Slack ping per day per key. */
-export const NUDGE_MARKER_TTL = 60 * 60 * 24; // 24 h
+const NUDGE_MARKER_TTL = 60 * 60 * 24; // 24 h
 
 export interface KvCacheInterface {
   readonly get: (key: string) => Effect.Effect<string | null>;
