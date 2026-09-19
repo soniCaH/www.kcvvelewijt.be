@@ -34,8 +34,6 @@ export default function EventDetailLoading() {
     <div className="bg-cream">
       <LoadingAnnouncement label="Evenement laden…" />
 
-      {/* Top air is `<UpLink>`'s own now (#2877) — this container keeps
-          only its bottom padding. */}
       <PageContainer as="main" className="pb-12">
         {/* Real, unshimmered — its label is fixed copy, not data (review
             round 2, #2570). Always the container's left edge, even though

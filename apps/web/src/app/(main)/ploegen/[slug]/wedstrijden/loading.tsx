@@ -33,8 +33,6 @@ export default function WedstrijdenLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijden laden…" />
 
-      {/* Top air is the up-link chip's own now (#2877) — this container
-          keeps only its bottom padding, matching the real page. */}
       <PageContainer className="pb-12 sm:pb-16">
         {/* No kicker (the real hero has none — the up-link carries the team
             name instead, #2442 rule 6) and a shimmer stand-in for the

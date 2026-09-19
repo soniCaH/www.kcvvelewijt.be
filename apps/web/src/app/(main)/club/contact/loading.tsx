@@ -45,8 +45,7 @@ export default function ContactLoading() {
       <LoadingAnnouncement label="Contactpagina laden…" />
 
       {/* PageHero + up-link — real, unshimmered (fixed copy / a fixed
-          per-route fact, neither is data). Top air is the chip's own now
-          (#2877) — this container keeps only its bottom padding. */}
+          per-route fact, neither is data). */}
       <PageContainer className="pb-12">
         <PageHero
           headline={CONTACT_HEADLINE}

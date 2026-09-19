@@ -612,9 +612,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
       <MatchStripSlot />
 
-      {/* Top air is `<UpLink>`'s own now (#2877) — this section keeps only
-          its bottom padding. The skeleton mirrors this offset exactly, so
-          the chip does not move when the page resolves. */}
       <PageContainer className="pb-12 lg:pb-16">
         <UpLink href="/kalender" label="Kalender" className="mb-6" />
         <MatchHero match={heroRow} />

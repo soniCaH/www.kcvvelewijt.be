@@ -254,9 +254,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         params={analyticsParams}
       />
       <MatchStripSlot />
-      {/* Top air is `<UpLink>`'s own now (#2877) — this section keeps only
-          its bottom padding (`pb-12 lg:pb-16`), the gap before whatever
-          follows the hero. */}
       <PageContainer as="section" className="pb-12 lg:pb-16">
         <UpLink href="/ploegen" label="Ploegen" className="mb-6" />
         <PlayerHero

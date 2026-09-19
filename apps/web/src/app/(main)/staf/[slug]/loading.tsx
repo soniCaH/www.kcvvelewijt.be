@@ -20,9 +20,7 @@ export default function StaffDetailLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Stafprofiel laden…" />
 
-      {/* Hero footprint — figure left, text right (mirrors PlayerHero). Top
-          air is `<UpLink>`'s own now (#2877), so this container keeps only
-          its bottom padding. */}
+      {/* Hero footprint — figure left, text right (mirrors PlayerHero). */}
       <PageContainer as="section" className="pb-12 lg:pb-16">
         {/* Real, unshimmered — its label is fixed copy, not data
             (review round 2, #2570). */}

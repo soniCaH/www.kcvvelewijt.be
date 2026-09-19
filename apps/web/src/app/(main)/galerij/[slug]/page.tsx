@@ -219,8 +219,6 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
         imageCount={images.length}
       />
 
-      {/* Top air is the up-link chip's own now (#2877) — this container
-          keeps only its bottom padding. */}
       <PageContainer as="main" className="pb-12 sm:pb-16">
         <PageHero
           register="minimal"

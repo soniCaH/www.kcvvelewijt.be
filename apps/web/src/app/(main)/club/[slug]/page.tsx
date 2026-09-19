@@ -100,8 +100,7 @@ export default async function DynamicClubPage({ params }: Props) {
           itself already names the parent ("‹ De club"), so a "Club" kicker
           would say it twice (#2442 rule 6). `pb-12` reserves the rhythm
           before the full-bleed seam (StripedSeam carries no margin of its
-          own). Top air is the up-link chip's own now (#2877) — this
-          container keeps only its bottom padding. */}
+          own). */}
       <PageContainer className="pb-12">
         <PageHero
           headline={page.title}

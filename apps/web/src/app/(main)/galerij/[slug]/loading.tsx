@@ -22,8 +22,6 @@ export default function GalleryDetailLoading() {
     <div className="bg-cream">
       <LoadingAnnouncement label="Fotogalerij laden…" />
 
-      {/* Top air is the up-link chip's own now (#2877) — this container
-          keeps only its bottom padding, matching the real page. */}
       <PageContainer as="main" className="pb-12 sm:pb-16">
         {/* Kicker + headline bars — the shared <PageHeroSkeleton
             register="minimal"> rather than a second hand-drawn copy of its

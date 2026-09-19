@@ -182,8 +182,6 @@ export default async function EventDetailPage({ params }: EventPageProps) {
 
       <EventViewTracker eventSlug={event.slug} eventType={event.eventType} />
 
-      {/* Top air is `<UpLink>`'s own now (#2877) — this container keeps
-          only its bottom padding. */}
       <PageContainer as="main" className="pb-12">
         {/* Always the container's left edge, even though EventHero itself
             is centred (#2442 rule 3). */}

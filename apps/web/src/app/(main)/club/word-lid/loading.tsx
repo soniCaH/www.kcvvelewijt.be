@@ -21,8 +21,6 @@ import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm"
 
 export default function WordLidLoading() {
   return (
-    // Top air is the up-link chip's own now (#2877) — this root keeps only
-    // its bottom padding, matching the real page.
     <div className="bg-cream pb-12 sm:pb-16">
       <LoadingAnnouncement label="Word lid laden…" />
 
