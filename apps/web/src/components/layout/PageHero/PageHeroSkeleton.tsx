@@ -6,7 +6,11 @@ import {
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { DottedDivider } from "@/components/design-system/Divider";
 import { Skeleton } from "@/components/design-system/Skeleton";
-import { UpLink, type UpLinkProps } from "@/components/design-system/UpLink";
+import {
+  UpLink,
+  UP_LINK_TOP_AIR_CLASS,
+  type UpLinkProps,
+} from "@/components/design-system/UpLink";
 import type { PageHeroRegister, PageHeroSize, PageHeroTone } from "./PageHero";
 
 /**
@@ -125,11 +129,18 @@ function UpLinkSlot({
   }
   if (shimmer) {
     // Matches <UpLink>'s own footprint: border-2 + py-2 around an 11px line
-    // box ≈ 31px tall, chip-width rather than full-bleed.
+    // box ≈ 31px tall, chip-width rather than full-bleed. Also matches its
+    // top air (#2877) — `ink` gets the same `UP_LINK_TOP_AIR_CLASS` the real
+    // chip carries, `cream` none, so the one route that takes this shimmer
+    // path (`/ploegen/[slug]/wedstrijden`, whose up-link label is the team
+    // display name) doesn't jump when the real chip replaces it.
     return (
       <Skeleton
         tone={tone === "cream" ? "dark" : "cream"}
-        className="mb-6 h-[31px] w-28"
+        className={cn(
+          tone === "ink" ? UP_LINK_TOP_AIR_CLASS : undefined,
+          "mb-6 h-[31px] w-28",
+        )}
       />
     );
   }
