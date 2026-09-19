@@ -2017,3 +2017,241 @@ describe("rule 12 catches what it claims to (#2865)", () => {
     expect(highlightImageGroup.fields).not.toContain("height");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule 13 (#2877) — the up-link's own top air is not doubled by its container
+// ---------------------------------------------------------------------------
+
+/**
+ * #2877 moved the up-link chip's top air off every route and onto the chip
+ * itself (`<UpLink tone="ink">`'s own `mt-12 lg:mt-16`). #2570 had mounted the
+ * chip inside whatever container each route already had, and the padding
+ * drifted across four undocumented values in a single day (#2877's own
+ * decision comment) — the same failure mode Rule 9 exists for, one line
+ * higher up the page. Closing the door #2570 came through, not just cleaning
+ * up what walked through it once, is what makes this a rule rather than a
+ * one-off tidy-up.
+ *
+ * Two call shapes, reusing Rule 9's own vocabulary for them
+ * (`UP_LINK_TAG_HREF` / `UP_LINK_PROP_HREF`), but scanned per file rather
+ * than per bundle: unlike Rule 9, which must resolve an up-link's *target*
+ * across a page/component split to compare it against the page's own
+ * breadcrumb trail, this rule only needs to know whether a padded container
+ * sits in the *same* file as the chip it hosts — and in every real instance
+ * on this tree, it does, because the container and the chip are always
+ * written in the same JSX return.
+ *
+ * **What "enclosing container" means here.** Not the nearest JSX parent of
+ * any kind — the nearest STILL-OPEN ancestor element at the point the
+ * up-link occurrence starts, found by walking every tag in the file in
+ * document order and tracking a simple open/close stack (a self-closing tag
+ * never pushes). For a literal `<UpLink href=… />` this is whatever element
+ * wraps the chip. For `upLink={{ href: …, … }}` passed to `<PageHero>`, the
+ * match sits *inside* that component's own still-open opening tag — which
+ * this scan has not finished reading yet, so it is not yet on the stack —
+ * so the stack's top at that point is `<PageHero>`'s own wrapping element
+ * instead. That is exactly the container this rule needs to check: a route
+ * never sees `<PageHero>`'s internals, only what it wraps `<PageHero>` in.
+ *
+ * **`<PageHero>` and `<PageHeroSkeleton>` are excluded as files, not
+ * matched-and-exempted.** Both render `<UpLink tone="cream">` internally for
+ * the `band`/`dark` register, inside a `<PageContainer>` that legitimately
+ * carries `py-14 sm:py-20` — the dark band's own air, locked by #2426/#2442
+ * and left pixel-unchanged by #2877's own AC ("the ten `PageHero` routes
+ * that render the chip inside the dark band are pixel-unchanged"). That
+ * composition is the shared machinery this rule protects *callers* from
+ * re-inventing, not a caller itself: a route passes `upLink={…}` to
+ * `<PageHero>` and never writes this internal wrapping, so it cannot
+ * re-introduce the fault the rule exists to catch. Rule 9 makes the same
+ * kind of judgement call when it drops barrels rather than following them.
+ *
+ * **The one caller-level exemption: `/club/ultras` (`UltrasHero.tsx`).**
+ * #2877's own issue text puts this route out of scope by name — 96→128px,
+ * "a marketing hero... ruled by the dark-band family's own air rule, not by
+ * this decision" — and its `<UpLink tone="cream">` genuinely sits inside a
+ * `py-24 sm:py-32` container the way this rule would otherwise forbid.
+ * Pinned by declaration, Rule 8's shape: naming the file alone is not
+ * enough, since a *second*, unrelated up-link fault landing in the same
+ * file later would then pass silently too if the file were dropped from the
+ * scan outright instead of held to its one known occurrence.
+ */
+const UP_LINK_JSX_TAG = /<\/?([A-Za-z][\w.]*)\b([^>]*)>/g;
+const UP_LINK_SITE = /<UpLink\b|\bupLink=\{/g;
+/** Non-global twin of `UP_LINK_SITE`, for a stateless presence check. */
+const UP_LINK_SITE_TEST = /<UpLink\b|\bupLink=\{/;
+
+/**
+ * The nearest still-open JSX ancestor's own attribute text at `matchIndex`
+ * in `source` — `undefined` at the top level (no wrapping element, or the
+ * up-link is the outermost thing the file renders).
+ */
+function enclosingElementAttrs(
+  source: string,
+  matchIndex: number,
+): string | undefined {
+  const stack: { name: string; attrs: string }[] = [];
+  for (const tag of source.matchAll(UP_LINK_JSX_TAG)) {
+    if (tag.index >= matchIndex) break;
+    const [full, name, attrs] = tag;
+    if (full!.startsWith("</")) {
+      if (stack.at(-1)?.name === name) stack.pop();
+    } else if (!full!.endsWith("/>")) {
+      stack.push({ name: name!, attrs: attrs! });
+    }
+  }
+  return stack.at(-1)?.attrs;
+}
+
+/** A Tailwind class token — an optional `variant:` chain, then `pt-`/`py-`.
+ *  Matches `pt-12`, `lg:pt-16`, `sm:py-16` — not `pb-12` or `pt-2` used as
+ *  part of a longer, unrelated utility name (the leading boundary is a
+ *  Tailwind class separator: start-of-string or whitespace). */
+const PADS_TOP = /(?:^|\s)(?:[\w-]+:)*(?:pt|py)-/;
+
+/** Every up-link occurrence in `source` whose enclosing container's
+ *  `className` carries `pt-*`/`py-*` — the match index of each violation. */
+function enclosingPaddingViolations(source: string): number[] {
+  const violations: number[] = [];
+  for (const m of source.matchAll(UP_LINK_SITE)) {
+    const attrs = enclosingElementAttrs(source, m.index);
+    const classNameMatch = attrs ? /className="([^"]*)"/.exec(attrs) : null;
+    if (classNameMatch && PADS_TOP.test(classNameMatch[1]!)) {
+      violations.push(m.index);
+    }
+  }
+  return violations;
+}
+
+/** The exact count of up-link occurrences the exempt file is pinned to —
+ *  Rule 8's shape: a file dropped from the scan by name alone could grow a
+ *  second, undocumented occurrence with a real fault and no test would see
+ *  it. */
+const UP_LINK_PADDING_EXEMPT_DECLARATIONS: Record<string, number> = {
+  "app/(main)/club/ultras/UltrasHero.tsx": 1,
+};
+
+/** The shared opening's own defining files — excluded as files (see the
+ *  docblock above), not matched-and-exempted. */
+const UP_LINK_PADDING_DEFINING_FILES = new Set([
+  "components/layout/PageHero/PageHero.tsx",
+  "components/layout/PageHero/PageHeroSkeleton.tsx",
+]);
+
+/** Every production file that renders an up-link at all, minus the defining
+ *  files and the one pinned exemption. */
+const upLinkSiteFiles = productionSources.filter(
+  (relPath) =>
+    !UP_LINK_PADDING_DEFINING_FILES.has(relPath) &&
+    !(relPath in UP_LINK_PADDING_EXEMPT_DECLARATIONS) &&
+    UP_LINK_SITE_TEST.test(code.get(relPath)!),
+);
+
+describe("the up-link's top air is not doubled by its own container (#2877)", () => {
+  it.each(upLinkSiteFiles)(
+    "%s — no pt-*/py-* on the up-link's enclosing container",
+    (relPath) => {
+      expect(enclosingPaddingViolations(code.get(relPath)!)).toEqual([]);
+    },
+  );
+});
+
+/**
+ * Held to its exact pinned count, the same shape rule 8's exemptions use —
+ * see `UP_LINK_PADDING_EXEMPT_DECLARATIONS`'s own docblock for why.
+ */
+describe("rule 13's exemption is pinned to its exact occurrence count (#2877)", () => {
+  it.each(Object.entries(UP_LINK_PADDING_EXEMPT_DECLARATIONS))(
+    "%s — matches the up-link site pattern exactly %i time(s)",
+    (relPath, count) => {
+      const occurrences = [...code.get(relPath)!.matchAll(UP_LINK_SITE)].length;
+      expect(occurrences).toBe(count);
+    },
+  );
+});
+
+describe("rule 13 catches what it claims to (#2877)", () => {
+  it("flags a literal <UpLink> wrapped in a container with pt-*", () => {
+    const source = `
+      <PageContainer className="pt-12 lg:pt-16">
+        <UpLink href="/nieuws" label="Nieuws" />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toHaveLength(1);
+  });
+
+  it("flags upLink={{ ... }} passed to <PageHero> wrapped in a container with py-*", () => {
+    const source = `
+      <PageContainer className="py-12 sm:py-16">
+        <PageHero headline="X" upLink={{ href: "/club", label: "De club" }} />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toHaveLength(1);
+  });
+
+  it("does not flag a container that carries only bottom padding", () => {
+    const source = `
+      <PageContainer className="pb-12 lg:pb-16">
+        <UpLink href="/nieuws" label="Nieuws" />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toEqual([]);
+  });
+
+  it("does not flag a container with no className at all", () => {
+    const source = `
+      <PageContainer>
+        <UpLink href="/nieuws" label="Nieuws" />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toEqual([]);
+  });
+
+  it("does not flag a bare div class that merely contains 'pt-' as a substring of a longer utility", () => {
+    // Guards the word-boundary in PADS_TOP — a hypothetical utility name
+    // that merely starts with the same two letters must not false-positive.
+    const source = `
+      <div className="optional-pt-note">
+        <UpLink href="/nieuws" label="Nieuws" />
+      </div>
+    `;
+    expect(enclosingPaddingViolations(source)).toEqual([]);
+  });
+
+  it("resolves through the still-open <PageHero> tag to the real outer container", () => {
+    // The `upLink=` match sits inside <PageHero>'s own unclosed opening tag,
+    // so the still-open ancestor at that point must be <PageContainer>, not
+    // <PageHero> itself — <PageHero> never finishes opening before the match.
+    const source = `<PageContainer className="pt-8"><PageHero upLink={{ href: "/a", label: "A" }} /></PageContainer>`;
+    const upLinkIndex = source.indexOf("upLink=");
+    expect(enclosingElementAttrs(source, upLinkIndex)).toContain(
+      'className="pt-8"',
+    );
+  });
+
+  it("counts every violation in a file with more than one occurrence", () => {
+    const source = `
+      <PageContainer className="pt-8">
+        <UpLink href="/a" label="A" />
+      </PageContainer>
+      <PageContainer className="py-8">
+        <UpLink href="/b" label="B" />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toHaveLength(2);
+  });
+
+  it("does not walk past a closed container into an outer one that would otherwise have flagged it", () => {
+    // The inner <div> (no className) closes before <UpLink> — its own
+    // still-open ancestor at that point is the outer <PageContainer>, whose
+    // pt-8 padding IS what a route would need to give up, so this case
+    // stays a violation (it is not a false negative to guard against; the
+    // point is that stack-popping on </div> is exercised at all).
+    const source = `
+      <PageContainer className="pt-8">
+        <div></div>
+        <UpLink href="/a" label="A" />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toHaveLength(1);
+  });
+});
