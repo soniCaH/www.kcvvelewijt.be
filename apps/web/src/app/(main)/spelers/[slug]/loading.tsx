@@ -2,11 +2,13 @@
  * Player Detail Page — Loading Skeleton (Phase 6.A).
  *
  * Mirrors the new `/spelers/[slug]` composition at the chrome level —
- * `<PlayerHero>` block, `<StripedSeam>`, and a bio paragraph footprint.
- * Subject-specific surfaces (photo, name, bio text, ink quote card) are
- * intentionally NOT skeletonised: their auto-hide branches mean a single
- * skeleton can't accurately predict what will render. The player's name is
- * data, so `<PlayerHero>`'s own `<h1>` never renders here — bars only.
+ * `<MatchStripSlot>` (its own `MatchStripSkeleton` fallback drawn directly
+ * here, #3023), `<PlayerHero>` block, `<StripedSeam>`, and a bio paragraph
+ * footprint. Subject-specific surfaces (photo, name, bio text, ink quote
+ * card) are intentionally NOT skeletonised: their auto-hide branches mean a
+ * single skeleton can't accurately predict what will render. The player's
+ * name is data, so `<PlayerHero>`'s own `<h1>` never renders here — bars
+ * only.
  */
 
 import {
@@ -15,11 +17,18 @@ import {
   LoadingAnnouncement,
   UpLink,
 } from "@/components/design-system";
+import { MatchStripSkeleton } from "@/components/layout/MatchStrip/MatchStripSkeleton";
 
 export default function PlayerDetailLoading() {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Spelersprofiel laden…" />
+
+      {/* MatchStripSlot — the real page mounts the Suspense-wrapped strip
+          here; its own fallback IS `<MatchStripSkeleton />`, so this
+          skeleton draws it directly rather than reinventing a placeholder
+          (#3023, closing the gap #2877 deferred). */}
+      <MatchStripSkeleton />
 
       <PageContainer as="section" className="pb-12 lg:pb-16">
         {/* Real, unshimmered — its label is fixed copy, not data
