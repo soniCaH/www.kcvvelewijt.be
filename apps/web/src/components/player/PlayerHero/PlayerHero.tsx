@@ -47,19 +47,22 @@
  * breadcrumb chip #2428/#2442 puts on this same page, one navigational and
  * one inert (#2535).
  *
- * **The number slot is reserved, not hidden (#2532/#2585).** A shirt number
- * is a fact the club declares by hand — `jerseyNumber` has a real writer
- * (the Studio field, `packages/sanity-schemas/src/player.ts`), it simply
- * hasn't been written yet for every player document today (352 total, 278
- * non-archived, zero with `jerseyNumber` set — measured 2026-09-20). Per
- * #2535's keep-side discriminator (a writer exists → render the absence,
- * never drop the slot) this hero always renders the number cell: filled,
- * `<NumberDisplay>` as before; empty, `<EmptyState tier="slot"
- * background="cream-soft">` — #2427/#2562's Tier 2 held-open register,
- * `cream-soft` because the cell stands alone on the page rather than
- * inside an already-framed surface, the same choice `<CompetitiveStatusLine>`
- * makes. `/wedstrijd/[matchId]` is unaffected — that route keeps rendering
- * whatever the match sheet reported, a different fact (#2532 rule 3).
+ * **The number cell hides when empty, it is not reserved (#2532/#2585,
+ * amended by the #2585 owner decision of 2026-09-20).** A shirt number is
+ * a fact the club declares by hand — `jerseyNumber` has a real writer
+ * (the Studio field, `packages/sanity-schemas/src/player.ts`) — but the
+ * #2535 keep-side discriminator that would justify reserving the cell
+ * (a writer exists, it simply hasn't written yet) does not hold here:
+ * youth teams have no fixed shirt numbers at all, so most of the roster
+ * has no writer and never will, and live production measured 352 player
+ * documents, 278 non-archived, zero with `jerseyNumber` set (2026-09-20)
+ * — the empty branch is not a temporary gap, it is the only case today.
+ * A reserved slot there would be exactly the `team.season` failure this
+ * repo's Writer Rule exists to prevent: a permanent empty box on the
+ * large majority of profiles. So the number renders when present and
+ * nothing renders when it isn't — no dashed box, no placeholder copy.
+ * `/wedstrijd/[matchId]` is unaffected either way — that route reports
+ * whatever the match sheet says, a different fact (#2532 rule 3).
  */
 
 import { Fragment } from "react";
@@ -68,7 +71,6 @@ import { cn } from "@/lib/utils/cn";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { NumberDisplay } from "@/components/design-system/NumberDisplay";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
-import { EmptyState } from "@/components/design-system/EmptyState";
 import {
   JerseyIllustration,
   playerFigureSeed,
@@ -99,7 +101,9 @@ export interface PlayerHeroProps {
   /**
    * Editorial squad number, typed by hand by the club — not PSD-sourced
    * (#2532). Absent on every player document today, since nothing seeds
-   * it; the hero still reserves the cell rather than dropping it (#2585).
+   * it, and permanently absent for youth players, who have no fixed
+   * shirt number at all — the number cell hides rather than reserving a
+   * slot with no writer (#2585 owner decision, 2026-09-20).
    */
   jerseyNumber?: number;
   /** Active-team label resolved by the page (e.g. "A-Ploeg", "U17"). */
@@ -212,6 +216,10 @@ export function PlayerHero({
         ) : null}
 
         {jerseyNumber !== undefined ? (
+          // Hides, not reserves — #2585 owner decision (2026-09-20): most
+          // of the roster (youth) has no writer for this field and never
+          // will, so a held-open slot here would be a permanent empty box
+          // on the large majority of profiles, not a temporary gap.
           <span data-testid="player-hero-number" className="block">
             <NumberDisplay
               value={jerseyNumber}
@@ -220,27 +228,7 @@ export function PlayerHero({
               tone="jersey-deep"
             />
           </span>
-        ) : (
-          // Reserved, not hidden — #2532/#2585. The number cell always
-          // renders; an unfilled `jerseyNumber` reads as a known gap
-          // (Tier 2), not a render failure or a dropped row. The slot's
-          // documented contract is `flex-1` inside a `flex` host (see
-          // <CompetitiveStatusLine>'s docblock) — sized here to hug its
-          // own text rather than stretch to the full hero column, so a
-          // reserved chip roughly stands in for the number it holds the
-          // place of instead of reading as a full-width banner. Height
-          // is tied to the same `--text-display-2xl` token the filled
-          // <NumberDisplay> renders at, so the two states land at
-          // comparable line-heights across viewports.
-          <div
-            data-testid="player-hero-number-slot"
-            className="flex h-[var(--text-display-2xl)] w-fit"
-          >
-            <EmptyState tier="slot" background="cream-soft">
-              Nog geen rugnummer
-            </EmptyState>
-          </div>
-        )}
+        ) : null}
 
         {/* 6.d1 — 2-line stacked rhythm. `leading-hero-lead` / `leading-hero`
             (D14/Y1, #2617) are the ramp's tight-leading sibling step,

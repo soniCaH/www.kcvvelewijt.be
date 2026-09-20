@@ -240,14 +240,11 @@ describe("PlayerHero", () => {
       expect(screen.getByTestId("player-hero-number").textContent).toContain(
         "8",
       );
-      expect(
-        screen.queryByTestId("player-hero-number-slot"),
-      ).not.toBeInTheDocument();
     });
   });
 
-  describe("Reserved number slot (#2532/#2585)", () => {
-    it("reserves the slot instead of dropping the row when jerseyNumber is absent", () => {
+  describe("Number cell hides when empty (#2532/#2585 owner decision, 2026-09-20)", () => {
+    it("renders nothing for the number cell when jerseyNumber is absent — no reserved slot", () => {
       render(
         <PlayerHero
           id="player-test"
@@ -256,10 +253,13 @@ describe("PlayerHero", () => {
           position="Middenvelder"
         />,
       );
-      expect(screen.getByTestId("player-hero-number-slot")).toBeInTheDocument();
       expect(
         screen.queryByTestId("player-hero-number"),
       ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("player-hero-number-slot"),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Nog geen rugnummer")).not.toBeInTheDocument();
     });
   });
 

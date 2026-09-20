@@ -8,7 +8,9 @@
  *  - U8 minor without photo → minor + illustration combined (`MinorU8Illustration`)
  *  - Long Dutch surname stress (`LongSurname`)
  *  - No authored/synced position → meta cell omitted, not defaulted (`NoPosition`, #2567)
- *  - No editorial jerseyNumber → reserved Tier 2 slot, not dropped (`NoJerseyNumber`, #2532/#2585)
+ *  - No editorial jerseyNumber → number cell hides entirely, the only case
+ *    in production today (`NoJerseyNumber`, #2532/#2585 owner decision
+ *    2026-09-20)
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -146,10 +148,10 @@ export const NoPosition: Story = {
 
 /**
  * No editorial `jerseyNumber` — every player document today, since
- * nothing seeds the field (352 total, 278 non-archived, zero with
- * `jerseyNumber` set — measured 2026-09-20; #2532/#2585). The hero
- * reserves the number cell (`<EmptyState tier="slot"
- * background="cream-soft">`) rather than dropping the row.
+ * nothing seeds the field and youth teams have no fixed shirt number at
+ * all (352 total, 278 non-archived, zero with `jerseyNumber` set —
+ * measured 2026-09-20; #2532/#2585 owner decision, 2026-09-20). The
+ * number cell hides entirely — no placeholder, no reserved box.
  */
 export const NoJerseyNumber: Story = {
   args: {
