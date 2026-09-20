@@ -20,7 +20,22 @@
  * else (moves to `font-mono`, which aligns by construction, not by class).
  * `tabular-nums` was already banned solo by the old Y4; this version bans
  * `lining-nums` and the rest of the `font-variant-numeric` value set too,
- * with no "unless paired with X" escape hatch.
+ * with no "unless paired with X" escape hatch. "Zero figure-style utilities
+ * anywhere" only held for TS/TSX until review (CodeRabbit, PR #3028) caught
+ * that first-party CSS was never scanned — closed with a small literal scan
+ * over every `**\/*.css` file, glob-driven like `sourceFiles` rather than
+ * hardcoded to `globals.css`, so a second stylesheet stays covered without
+ * an edit here. `@apply`-aware CSS class extraction was requested too and
+ * deliberately skipped: `globals.css` uses `@apply` zero times, so building
+ * a parser for a construct that does not occur would be untested machinery
+ * (#2572 — build the check the rule needs, not a sample-of-one generaliser).
+ *
+ * A different, still-open gap this file cannot close: `ShareElements.tsx`
+ * sets `fontVariantNumeric: "lining-nums"` as a JS style object, not a
+ * class-list string. The file IS scanned (see `productionSources`), but a
+ * style object has no class-list bag to find — that gap is inline-style
+ * shaped, not a missing glob, and is already the documented, out-of-scope
+ * (#2470) exemption named in DESIGN.md/Typography.mdx.
  *
  * This file is intentionally separate from `cross-page-consistency.test.ts`:
  * #2578 owns that file this wave, and every later ticket that wants a
@@ -39,6 +54,14 @@ const srcDir = resolve(__dirname, "../..");
 const globalsCss = readFileSync(resolve(srcDir, "app/globals.css"), "utf8");
 
 const SELF = "app/__tests__/detail-tokens-consistency.test.ts";
+
+/**
+ * Every first-party `.css` file, globbed rather than hardcoded to
+ * `globals.css` (#2579 review — CodeRabbit) — so a second stylesheet added
+ * later is covered automatically instead of needing this file edited. There
+ * is exactly one today; the glob exists for the one after it.
+ */
+const cssFiles = globSync(["**/*.css"], { cwd: srcDir }).sort();
 
 /**
  * Every first-party `.ts`/`.tsx` source file, minus this guard. `.ts`
@@ -831,6 +854,38 @@ describe("zero figure-style utilities anywhere — alignment comes from the face
     const bags = findBagSpans(source).map(classTokens);
     const violated = bags.some((bag) =>
       FIGURE_STYLE_UTILITIES.some((utility) => bag.has(utility)),
+    );
+    expect(violated).toBe(false);
+  });
+
+  // #2579 review (CodeRabbit): `sourceFiles`/`bagsByFile` above are TS/TSX
+  // only — first-party CSS was never scanned, so the "zero figure-style
+  // utilities anywhere" claim was broader than the guard's actual coverage.
+  // A literal scan over every first-party .css file closes that: no class-
+  // list parsing needed, since a CSS file has no JSX bags to build — a plain
+  // substring check on each banned token is the whole rule.
+  it.each(cssFiles)(
+    "%s — no figure-style utility appears anywhere",
+    (relPath) => {
+      const css = readFileSync(resolve(srcDir, relPath), "utf8");
+      for (const utility of FIGURE_STYLE_UTILITIES) {
+        expect(css.includes(utility)).toBe(false);
+      }
+    },
+  );
+
+  it("fixture: a figure-style token in CSS text is caught", () => {
+    const css = ".score { font-variant-numeric: tabular-nums; }";
+    const violated = FIGURE_STYLE_UTILITIES.some((utility) =>
+      css.includes(utility),
+    );
+    expect(violated).toBe(true);
+  });
+
+  it("fixture: CSS with no figure-style token passes", () => {
+    const css = ".score { font-family: var(--font-mono); }";
+    const violated = FIGURE_STYLE_UTILITIES.some((utility) =>
+      css.includes(utility),
     );
     expect(violated).toBe(false);
   });
