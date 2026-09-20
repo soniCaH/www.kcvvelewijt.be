@@ -4,7 +4,7 @@
  * Mirrors the Phase 6.B composition of `wedstrijd/[matchId]/page.tsx`:
  *   <MatchStripSlot>            ← full-bleed next-fixture band (`MatchStripSkeleton`
  *                                  fallback drawn directly here, #3023)
- *     → <MatchHero>             ← single TapedCard (stub + score body)
+ *   <MatchHero>                 ← single TapedCard (stub + score body)
  *     → <StripedSeam>
  *     → <MatchLineupSection>     ← kicker + heading + 2-col lineup rows
  *     → <StripedSeam>
@@ -52,17 +52,18 @@ export default function MatchDetailLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijd laden…" />
 
-      {/* MatchStripSlot — the real page mounts the Suspense-wrapped strip
-          here; its own fallback IS `<MatchStripSkeleton />`, so this
-          skeleton draws it directly rather than reinventing a placeholder
-          (#3023, closing the gap #2877 deferred). */}
+      {/* MatchStripSlot's own fallback — see its docblock (#3023). */}
       <MatchStripSkeleton />
 
       {/* MatchHero — single TapedCard with a dashed stub + score body. Top
           air is `<UpLink>`'s own now (#2877) — this container keeps only
-          its bottom padding, matching the real page's chip offset and field
-          colour exactly (no `bg-cream-soft` — the page's equivalent
-          container carries none, #3023). */}
+          its bottom padding, matching the page's exactly: no field colour
+          (no `bg-cream-soft` — the page's equivalent container carries
+          none either) and `pb-12 lg:pb-16` (#3023). The element type does
+          not match — `as="section"` here, a plain `<div>` on the page — see
+          `apps/web/src/app/__tests__/cross-page-consistency.test.ts`'s rule
+          15, which asserts the className match directly against the page's
+          own source rather than repeating the values here. */}
       <PageContainer as="section" className="pb-12 lg:pb-16">
         {/* Real, unshimmered — its label is fixed copy, not data
             (review round 2, #2570). */}

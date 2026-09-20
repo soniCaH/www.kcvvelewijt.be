@@ -7,9 +7,14 @@ import { MatchStripView } from "./MatchStripView";
  * the cached `getFirstTeamStripData()` helper. Returns `null` when neither is
  * available, producing zero DOM (the strip slot reserves no space).
  *
- * The strip is rendered by the `(landing)` route group only — detail-page
- * route groups omit the slot entirely. See spec
- * `docs/design/mockups/phase-3-c-header-and-matchstrip/matchstrip-locked.md`.
+ * Where this mounts is `<MatchStripSlot>`'s call — see its own docblock
+ * (not repeated here, so the two can't drift the way they did in #3023):
+ * the `(landing)` route group mounts it once via `layout.tsx`, and three
+ * bespoke detail routes mount it inline. The original phase-3.C spec,
+ * `docs/design/mockups/phase-3-c-header-and-matchstrip/matchstrip-locked.md`,
+ * predates that inline usage and is a point-in-time locked decision record,
+ * not living documentation — read it for the strip's original design intent,
+ * not for where it renders today.
  *
  * Also computes `matchDay` (#2616) — whether the next fixture falls on
  * today's calendar day — and passes it down as a plain boolean prop rather

@@ -24,10 +24,7 @@ export default function PlayerDetailLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Spelersprofiel laden…" />
 
-      {/* MatchStripSlot — the real page mounts the Suspense-wrapped strip
-          here; its own fallback IS `<MatchStripSkeleton />`, so this
-          skeleton draws it directly rather than reinventing a placeholder
-          (#3023, closing the gap #2877 deferred). */}
+      {/* MatchStripSlot's own fallback — see its docblock (#3023). */}
       <MatchStripSkeleton />
 
       <PageContainer as="section" className="pb-12 lg:pb-16">
