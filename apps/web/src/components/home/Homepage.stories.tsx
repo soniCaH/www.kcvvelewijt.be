@@ -30,7 +30,7 @@ import {
 } from "@/components/sponsors/SponsorsBlock/SponsorsBlock.mocks";
 import { SectionStack } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
-import { fixtureImage } from "@test-fixtures/images";
+import { fixtureImage, fixtureImageSize } from "@test-fixtures/images";
 
 // Phase 4.5.C.1 (#1754) — rebuilds the `Pages/Homepage` story for the
 // new R4.B spine + R1.B hero. The carousel is retired; the hero is now
@@ -218,7 +218,8 @@ const Homepage = ({
     content: (
       <BannerSlot
         image={fixtureImage("stadium-hero", 0)}
-        mobileImage={fixtureImage("stadium-hero", 0)}
+        width={fixtureImageSize("stadium-hero", 0).width}
+        height={fixtureImageSize("stadium-hero", 0).height}
         alt="Banner A"
         href="/sponsors"
       />
@@ -260,7 +261,8 @@ const Homepage = ({
     content: (
       <BannerSlot
         image={fixtureImage("stadium-hero", 1)}
-        mobileImage={fixtureImage("stadium-hero", 1)}
+        width={fixtureImageSize("stadium-hero", 1).width}
+        height={fixtureImageSize("stadium-hero", 1).height}
         alt="Banner B"
         href="/sponsors"
       />
@@ -284,7 +286,8 @@ const Homepage = ({
     content: (
       <BannerSlot
         image={fixtureImage("crowd-atmosphere", 0)}
-        mobileImage={fixtureImage("crowd-atmosphere", 0)}
+        width={fixtureImageSize("crowd-atmosphere", 0).width}
+        height={fixtureImageSize("crowd-atmosphere", 0).height}
         alt="Banner C"
         href="/sponsors"
       />

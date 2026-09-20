@@ -62,6 +62,31 @@ const FIXTURES: Record<FixtureShape, readonly string[]> = (() => {
 })();
 
 /**
+ * Pixel sizes for the same pools, in the same order, so `fixtureImageSize`
+ * and `fixtureImage` always agree for a given `(shape, index)`. Built in one
+ * pass over the same manifest rather than by re-deriving an index later —
+ * two loops could drift apart if the manifest ever grew a filter.
+ */
+const FIXTURE_SIZES: Record<
+  FixtureShape,
+  readonly { readonly width: number; readonly height: number }[]
+> = (() => {
+  const acc: Partial<
+    Record<FixtureShape, { width: number; height: number }[]>
+  > = {};
+  for (const entry of manifest.fixtures) {
+    (acc[entry.shape] ??= []).push({
+      width: entry.width,
+      height: entry.height,
+    });
+  }
+  return acc as Record<
+    FixtureShape,
+    readonly { readonly width: number; readonly height: number }[]
+  >;
+})();
+
+/**
  * Returns a deterministic local fixture path for the given shape.
  *
  * `index` lets a story pick a specific fixture so siblings render
@@ -77,6 +102,31 @@ export const fixtureImage = (
   index: number = 0,
 ): string => {
   const pool = FIXTURES[shape];
+  if (!pool || pool.length === 0) {
+    throw new Error(
+      `No fixture images registered for shape "${shape}". Run \`pnpm --filter @kcvv/web fixtures:sync\` to populate the pool.`,
+    );
+  }
+  return pool[index % pool.length]!;
+};
+
+/**
+ * The pixel size of the fixture `fixtureImage(shape, index)` returns, read
+ * from the same manifest entry.
+ *
+ * Needed by any component that carries intrinsic `width`/`height` on its
+ * `<img>` to reserve a box before the image loads — `<BannerSlot>` since
+ * #2928, which has no fixed `aspect-[]` ratio to reserve it any other way.
+ * Stories must not hardcode these numbers: `pnpm --filter @kcvv/web
+ * fixtures:sync` can repopulate a pool, and a stale literal would silently
+ * reserve the wrong box, reintroducing the exact layout shift the
+ * `width`/`height` pair exists to prevent.
+ */
+export const fixtureImageSize = (
+  shape: FixtureShape,
+  index: number = 0,
+): { width: number; height: number } => {
+  const pool = FIXTURE_SIZES[shape];
   if (!pool || pool.length === 0) {
     throw new Error(
       `No fixture images registered for shape "${shape}". Run \`pnpm --filter @kcvv/web fixtures:sync\` to populate the pool.`,
