@@ -144,8 +144,9 @@ export const player = defineType({
       jerseyNumber: 'jerseyNumber',
     },
     // The subtitle is the only fill-progress signal an editor has across
-    // 294 player documents (#2585) — `jerseyNumber` has no other UI that
-    // surfaces "which of the 294 are still empty" without opening each one.
+    // 352 player documents, 278 non-archived (#2585) — `jerseyNumber` has
+    // no other UI that surfaces which are still empty without opening
+    // each one. Zero carry a value today.
     prepare({firstName, lastName, media, jerseyNumber}) {
       return {
         title: `${firstName ?? ''} ${lastName ?? ''}`.trim(),

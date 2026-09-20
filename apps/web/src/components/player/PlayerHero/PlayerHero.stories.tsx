@@ -145,10 +145,11 @@ export const NoPosition: Story = {
 };
 
 /**
- * No editorial `jerseyNumber` — the majority case in production today,
- * since nothing seeds the field (#2532/#2585). The hero reserves the
- * number cell (`<EmptyState tier="slot" background="cream-soft">`) rather
- * than dropping the row.
+ * No editorial `jerseyNumber` — every player document today, since
+ * nothing seeds the field (352 total, 278 non-archived, zero with
+ * `jerseyNumber` set — measured 2026-09-20; #2532/#2585). The hero
+ * reserves the number cell (`<EmptyState tier="slot"
+ * background="cream-soft">`) rather than dropping the row.
  */
 export const NoJerseyNumber: Story = {
   args: {
