@@ -34,6 +34,11 @@
 >
 > Master plan §5.3 has been rewritten to reflect the locked composition;
 > §5.4's "one EditorialHero" thesis has been retracted in the same edit.
+>
+> **Post-closure code note (2026-09-20):** `tone="jersey"` was removed from
+> `<NumberDisplay>` by #3031 — the `<NumberDisplay … tone="jersey">` shirt-number
+> snippets below are historical record only; current code renders
+> `tone="jersey-deep"`.
 
 ---
 

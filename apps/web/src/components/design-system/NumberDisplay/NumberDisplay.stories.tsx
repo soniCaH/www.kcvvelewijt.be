@@ -30,7 +30,7 @@ export const Playground: Story = {
 };
 
 export const JerseyNumber: Story = {
-  args: { value: 8, prefix: "#", size: "display-2xl", tone: "jersey" },
+  args: { value: 8, prefix: "#", size: "display-2xl", tone: "jersey-deep" },
 };
 
 export const StatCounter: Story = {

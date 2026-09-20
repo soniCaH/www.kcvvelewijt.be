@@ -29,8 +29,10 @@ describe("NumberDisplay", () => {
   });
 
   it("respects tone prop", () => {
-    const { container } = render(<NumberDisplay value={1} tone="jersey" />);
-    expect(container.firstChild).toHaveAttribute("data-tone", "jersey");
+    const { container } = render(
+      <NumberDisplay value={1} tone="jersey-deep" />,
+    );
+    expect(container.firstChild).toHaveAttribute("data-tone", "jersey-deep");
   });
 
   it("renders prefix when provided", () => {
