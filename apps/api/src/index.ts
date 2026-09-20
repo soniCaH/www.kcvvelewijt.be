@@ -33,7 +33,11 @@ import { EmailTransportLive } from "./email/resend";
 import { EmbeddingServiceLive } from "./search/embedding";
 import { VectorizeServiceLive } from "./search/vectorize";
 import { AiAnswerServiceLive } from "./search/ai-answer";
-import { runSanityIndexSync } from "./search/sanity-index-sync";
+import {
+  runSanityIndexSync,
+  type PrunePhaseOutcome,
+} from "./search/sanity-index-sync";
+import { pruneJobOutcome, type JobOutcome } from "./search/prune-outcome";
 import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
@@ -137,9 +141,6 @@ export default {
     const jobAlertLayer = Layer.mergeAll(KvCacheLive, envLayer).pipe(
       Layer.provide(envLayer),
     );
-    type JobOutcome =
-      { readonly ok: true } | { readonly ok: false; readonly error: unknown };
-
     // Settles a scheduled job into an outcome instead of throwing, so the
     // caller reports from a `const` rather than a `let` straddling a
     // try/catch. Logging the failure here keeps both crons on one format.
@@ -195,33 +196,24 @@ export default {
           // Captured by the run() closure below so it survives settleJob's
           // discarded return value — undefined unless the sweep actually
           // resolved (a thrown/failed sweep never reaches its `return`).
-          let pruneRefused: boolean | undefined;
+          let prunePhase: PrunePhaseOutcome | undefined;
           const outcome = await settleJob("sanity-index-sync", async () => {
             const result = await Effect.runPromise(
               Effect.provide(runSanityIndexSync(), layer),
             );
-            pruneRefused = result.pruneRefused;
+            prunePhase = result.prunePhase;
           });
           // Reported strictly AFTER the sync settles — see the comment on
           // reportJobOutcome above.
           await reportJobOutcome("sanity-index-sync", outcome);
           // Own job name (#2855): the sweep itself succeeded even when the
-          // prune was refused, so conflating the two would mark a healthy
-          // indexing run as failed. Only reported when the sweep resolved —
-          // if it failed outright, "sanity-index-sync" above already
-          // covers it and whether the prune step even ran is unknown.
-          if (pruneRefused !== undefined) {
-            await reportJobOutcome(
-              "search-index-prune",
-              pruneRefused
-                ? {
-                    ok: false,
-                    error: new Error(
-                      "search-index-prune: refused — delete set exceeded the safety cap",
-                    ),
-                  }
-                : { ok: true },
-            );
+          // prune was refused/failed, so conflating the two would mark a
+          // healthy indexing run as failed. pruneJobOutcome returns null
+          // (nothing reported) both when the sweep failed outright and when
+          // reconciliation never ran this sweep — see its doc comment.
+          const pruneOutcome = pruneJobOutcome(prunePhase);
+          if (pruneOutcome !== null) {
+            await reportJobOutcome("search-index-prune", pruneOutcome);
           }
           if (!outcome.ok) throw outcome.error;
         })(),
