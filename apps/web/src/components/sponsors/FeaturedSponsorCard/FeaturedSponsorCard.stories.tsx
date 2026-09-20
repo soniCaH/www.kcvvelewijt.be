@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The single "In de kijker" marquee card in the `/sponsors` hero (7.d5 F3). A jersey-deep banner tab over a cream-soft body: logo inset (or italic-name fallback) → italic-display name → optional ~3-line `description` blurb → mono "Bezoek website" when a `url` is present. When linked, the whole card presses down on hover (canonical paper-stamp).',
+          'The single "In de kijker" marquee card in the `/sponsors` hero (7.d5 F3). A jersey-deep banner tab over a cream-soft body: logo inset (or italic-name fallback) → italic-display name → optional ~2-line `description` blurb (#2549 rule 3) → mono "Bezoek website" when a `url` is present. When linked, the whole card presses down on hover (canonical paper-stamp).',
       },
     },
   },
