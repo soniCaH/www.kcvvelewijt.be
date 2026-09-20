@@ -71,3 +71,29 @@ describe("PageHeroSkeleton — up-link accessibility (#2799 review round 3)", ()
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 });
+
+/**
+ * Regression coverage for #2877: the shimmer up-link placeholder
+ * (`/ploegen/[slug]/wedstrijden`, the one route whose label is data) must
+ * carry the same top air as the real `<UpLink>` it stands in for, or the
+ * chip jumps 48px (64px at `lg`) the moment the real chip replaces it —
+ * exactly the shift AC4 exists to prevent.
+ */
+describe("PageHeroSkeleton — shimmer up-link top air (#2877)", () => {
+  it("carries the ink chip's own top air when the shimmer stands in for it", () => {
+    const { container } = render(
+      <PageHeroSkeleton register="minimal" upLinkShimmer />,
+    );
+    expect(container.firstElementChild?.className).toContain("mt-12");
+    expect(container.firstElementChild?.className).toContain("lg:mt-16");
+  });
+
+  it("gains no top air on the cream (dark-band) shimmer", () => {
+    const { container } = render(
+      <PageHeroSkeleton register="minimal" tone="dark" upLinkShimmer />,
+    );
+    const className = container.firstElementChild?.className ?? "";
+    expect(className).not.toContain("mt-12");
+    expect(className).not.toContain("lg:mt-16");
+  });
+});

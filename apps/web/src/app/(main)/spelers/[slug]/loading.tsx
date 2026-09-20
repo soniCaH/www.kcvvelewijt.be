@@ -21,7 +21,7 @@ export default function PlayerDetailLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Spelersprofiel laden…" />
 
-      <PageContainer as="section" className="py-12 lg:py-16">
+      <PageContainer as="section" className="pb-12 lg:pb-16">
         {/* Real, unshimmered — its label is fixed copy, not data
             (review round 2, #2570). */}
         <UpLink href="/ploegen" label="Ploegen" className="mb-6" />

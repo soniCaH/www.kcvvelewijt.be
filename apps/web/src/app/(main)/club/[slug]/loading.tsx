@@ -33,7 +33,7 @@ export default function ClubPageLoading() {
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Pagina laden…" />
 
-      <PageContainer className="pt-10 pb-12">
+      <PageContainer className="pb-12">
         <PageHeroSkeleton
           register="band"
           tone="cream"

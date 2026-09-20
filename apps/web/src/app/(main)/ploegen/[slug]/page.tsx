@@ -552,15 +552,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
       <MatchStripSlot />
 
-      {/* Top air is the container's job, not `<UpLink>`'s own (#2570 review
-          round 2 left the chip with no padding of its own; that decision
-          stands). `pt-12 lg:pt-16` matches the pair the sibling detail
-          routes (`/spelers/[slug]`, `/wedstrijd/[matchId]`) already carry,
-          so the chip clears the full-bleed `<MatchStripSlot>` band above it
-          instead of butting against it (#2876). No bottom padding here —
-          `<TeamHero>`'s own `py-8 sm:py-12` (passed via `className` below)
-          supplies the gap below the chip. */}
-      <PageContainer className="pt-12 lg:pt-16">
+      {/* Top air is `<UpLink>`'s own now (#2877) — that is what clears the
+          full-bleed `<MatchStripSlot>` band above it, so this container
+          supplies none. No bottom padding here either — `<TeamHero>`'s own
+          `py-8 sm:py-12` (passed via `className` below) supplies the gap
+          below the chip. */}
+      <PageContainer>
         <UpLink href="/ploegen" label="Ploegen" />
         <TeamHero
           displayName={displayName}

@@ -612,7 +612,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
 
       <MatchStripSlot />
 
-      <PageContainer className="py-12 lg:py-16">
+      <PageContainer className="pb-12 lg:pb-16">
         <UpLink href="/kalender" label="Kalender" className="mb-6" />
         <MatchHero match={heroRow} />
       </PageContainer>

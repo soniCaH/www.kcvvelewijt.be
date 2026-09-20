@@ -56,12 +56,12 @@ export default function TeamDetailLoading() {
 
       {/* Real, unshimmered — its label is fixed copy, not data (review
           round 2, #2570). Same container width as the section below
-          (default = container-wide). The container owns the top air
-          (`pt-12 lg:pt-16`, matching the real page and the sibling detail
-          routes); the hero section below supplies its own bottom gap via
-          `py-8 sm:py-12` (matching `<TeamHero>`'s own), so nothing here adds
-          a bottom margin (#2876). */}
-      <PageContainer className="pt-12 lg:pt-16">
+          (default = container-wide). The top air is `<UpLink>`'s own now
+          (#2877), so this container supplies none; the hero section below
+          supplies its own bottom gap via `py-8 sm:py-12` (matching
+          `<TeamHero>`'s own), so nothing here adds a bottom margin
+          (#2876). */}
+      <PageContainer>
         <UpLink href="/ploegen" label="Ploegen" />
       </PageContainer>
 

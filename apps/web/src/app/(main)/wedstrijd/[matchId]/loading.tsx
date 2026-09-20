@@ -49,8 +49,15 @@ export default function MatchDetailLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijd laden…" />
 
-      {/* MatchHero — single TapedCard with a dashed stub + score body. */}
-      <PageContainer as="section" className="bg-cream-soft py-8">
+      {/* MatchHero — single TapedCard with a dashed stub + score body. Top
+          air is `<UpLink>`'s own now (#2877) — this container keeps only
+          its bottom padding, matching the real page's chip offset exactly.
+          That is the chip's own offset only: the real page also renders a
+          `<MatchStripSlot />` above this container that this skeleton has
+          no equivalent for, so the page as a whole still shifts by the
+          strip's height on resolve — a pre-existing gap, not one this
+          ticket closes (see #2877's "file it if it still stands"). */}
+      <PageContainer as="section" className="bg-cream-soft pb-8">
         {/* Real, unshimmered — its label is fixed copy, not data
             (review round 2, #2570). */}
         <UpLink href="/kalender" label="Kalender" className="mb-6" />

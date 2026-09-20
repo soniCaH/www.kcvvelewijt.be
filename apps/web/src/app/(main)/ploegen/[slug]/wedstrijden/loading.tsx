@@ -33,7 +33,7 @@ export default function WedstrijdenLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijden laden…" />
 
-      <PageContainer className="py-12 sm:py-16">
+      <PageContainer className="pb-12 sm:pb-16">
         {/* No kicker (the real hero has none — the up-link carries the team
             name instead, #2442 rule 6) and a shimmer stand-in for the
             up-link itself: unlike every other route's up-link label, this

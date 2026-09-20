@@ -215,10 +215,10 @@ export default async function StafPage({ params }: StaffPageProps) {
         })}
       />
 
-      {/* Hero — person-profile (B). Container width + padding match the
+      {/* Hero — person-profile (B). Container width matches the
           `/spelers/[slug]` hero section; the bottom padding reserves the
           rhythm before the full-bleed seam. */}
-      <PageContainer as="section" className="py-12 lg:py-16">
+      <PageContainer as="section" className="pb-12 lg:pb-16">
         <UpLink href="/hulp" label="Hulp" className="mb-6" />
         <StaffHero
           id={member.id}

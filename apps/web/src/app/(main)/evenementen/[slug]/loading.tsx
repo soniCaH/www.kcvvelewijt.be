@@ -34,7 +34,7 @@ export default function EventDetailLoading() {
     <div className="bg-cream">
       <LoadingAnnouncement label="Evenement laden…" />
 
-      <PageContainer as="main" className="py-12">
+      <PageContainer as="main" className="pb-12">
         {/* Real, unshimmered — its label is fixed copy, not data (review
             round 2, #2570). Always the container's left edge, even though
             EventHero itself is centred (#2442 rule 3). */}

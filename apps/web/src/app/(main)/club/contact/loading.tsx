@@ -46,7 +46,7 @@ export default function ContactLoading() {
 
       {/* PageHero + up-link — real, unshimmered (fixed copy / a fixed
           per-route fact, neither is data). */}
-      <PageContainer className="pt-10 pb-12">
+      <PageContainer className="pb-12">
         <PageHero
           headline={CONTACT_HEADLINE}
           lead={CONTACT_LEAD}

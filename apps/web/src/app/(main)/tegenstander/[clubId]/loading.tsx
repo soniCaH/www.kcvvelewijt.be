@@ -36,7 +36,9 @@ export default function OpponentLoading() {
     <div className="bg-cream-deep min-h-screen">
       <LoadingAnnouncement label="Tegenstander laden…" />
 
-      <PageContainer className="pt-8 pb-8">
+      {/* Matches the real page's chip offset exactly (#2877) — the chip
+          does not move when the page resolves. */}
+      <PageContainer className="pb-8">
         {/* Real, unshimmered — its label is fixed copy, not data (review
             round 2, #2570). */}
         <UpLink href="/kalender" label="Kalender" className="mb-6" />

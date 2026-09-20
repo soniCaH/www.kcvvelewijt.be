@@ -206,7 +206,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
       {/* Hero — no kicker: the up-link above already names the parent
           ("‹ De club"), so a "Club" kicker on the same line would say it
           twice (#2442 rule 6). */}
-      <PageContainer className="pt-10 pb-12">
+      <PageContainer className="pb-12">
         <PageHero
           headline={CONTACT_HEADLINE}
           lead={CONTACT_LEAD}

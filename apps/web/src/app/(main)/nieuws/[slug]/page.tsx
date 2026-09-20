@@ -557,13 +557,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
       {/* Same width + gutters as `<EditorialHeroShell width="wide">` below it,
           so the chip lands at the container's left edge above the opening
-          (#2428/#2442). The container owns the top air (`pt-12 lg:pt-16`,
-          matching the sibling detail routes) — `<UpLink>` still carries none
-          of its own (review round 2). No bottom padding here — the hero's
-          own `pt-12` immediately below already supplies the gap, the same
+          (#2428/#2442). The top air is `<UpLink>`'s own now (#2877) — this
+          container supplies none, top or bottom: the hero's own `pt-12`
+          immediately below already supplies the gap beneath it, the same
           way `<TeamHero>`'s own `py-8 sm:py-12` does for
           `/ploegen/[slug]` (#2876). */}
-      <PageContainer width="default" className="pt-12 lg:pt-16">
+      <PageContainer width="default">
         <UpLink href="/nieuws" label="Nieuws" />
       </PageContainer>
       {renderArticleHero({

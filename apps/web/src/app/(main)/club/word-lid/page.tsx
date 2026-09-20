@@ -38,7 +38,7 @@ export const metadata = buildPageMetadata({
 
 export default function WordLidPage() {
   return (
-    <div className="bg-cream py-12 sm:py-16">
+    <div className="bg-cream pb-12 sm:pb-16">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },

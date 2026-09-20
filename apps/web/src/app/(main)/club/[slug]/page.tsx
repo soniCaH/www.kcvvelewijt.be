@@ -101,7 +101,7 @@ export default async function DynamicClubPage({ params }: Props) {
           would say it twice (#2442 rule 6). `pb-12` reserves the rhythm
           before the full-bleed seam (StripedSeam carries no margin of its
           own). */}
-      <PageContainer className="pt-10 pb-12">
+      <PageContainer className="pb-12">
         <PageHero
           headline={page.title}
           image={page.heroImageUrl ?? undefined}
