@@ -2276,3 +2276,213 @@ describe("rule 13 catches what it claims to (#2877)", () => {
     expect(enclosingPaddingViolations(source)).toHaveLength(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule 14 (#3023) — a route that mounts <MatchStripSlot /> inline draws its
+// Suspense fallback in its own loading.tsx
+// ---------------------------------------------------------------------------
+
+/**
+ * `(landing)/layout.tsx` mounts `<MatchStripSlot />` once for its whole route
+ * group, so a landing-surface `loading.tsx` needs no placeholder of its own —
+ * a layout persists across its group's loading state. Three detail routes
+ * (`/wedstrijd/[matchId]`, `/spelers/[slug]`, `/ploegen/[slug]`) instead
+ * mount the slot *inline*, once each, because they render a bespoke hero
+ * rather than the shared `<PageHero>` — an inline mount does NOT persist
+ * across its own page's loading state, so its `loading.tsx` shifts the whole
+ * page down by the strip's height on resolve unless it draws the same
+ * fallback the slot itself would: `<MatchStripSkeleton />`. That gap shipped
+ * with all three routes (#2570) and was still open when #2877 fixed a
+ * different reflow on the same three files — filed as its own ticket there
+ * ("file it if it still stands after this lands") and closed here.
+ *
+ * One parameterized guard, not three near-identical per-route test files
+ * (#3023 review round 2): the rule is a whole-tree invariant — "every
+ * inline mount has a matching skeleton" — not three separate per-route
+ * facts, and phrasing it that way is what makes a fourth inline-mounting
+ * route added later covered automatically instead of needing a fourth copy
+ * of the same test.
+ *
+ * Detection is source-level, on purpose: `<MatchStripSlot` appearing in a
+ * `page.tsx`'s own text is exactly what makes a mount inline rather than
+ * inherited — a route that only gets the slot from a layout never writes
+ * that tag itself, so filtering `productionSources` for the literal JSX
+ * open tag already separates the two cases with no need to walk the layout
+ * chain the way Rule 5's `layoutChain()` does for its own, different
+ * question (whether a BFF read reaches a route at all).
+ */
+const MATCH_STRIP_SLOT_INLINE_JSX = /<MatchStripSlot\b/;
+const MATCH_STRIP_SKELETON_JSX = /<MatchStripSkeleton\b/;
+/** The hero container every one of these three routes opens on — used only
+ *  to confirm the skeleton is drawn ABOVE it, not merely present somewhere
+ *  in the file. */
+const FIRST_PAGE_CONTAINER_JSX = /<PageContainer\b/;
+
+/** Every `page.tsx` that mounts `<MatchStripSlot />` in its own source. */
+const inlineMatchStripPages = productionSources.filter(
+  (relPath) =>
+    /(^|\/)page\.tsx$/.test(relPath) &&
+    MATCH_STRIP_SLOT_INLINE_JSX.test(code.get(relPath)!),
+);
+
+/** `page.tsx` → its sibling `loading.tsx`, same directory. */
+const siblingLoadingFile = (pagePath: string): string =>
+  pagePath.replace(/page\.tsx$/, "loading.tsx");
+
+describe("an inline <MatchStripSlot /> mount has a matching skeleton in loading.tsx (#3023)", () => {
+  it.each(inlineMatchStripPages)(
+    "%s — sibling loading.tsx renders <MatchStripSkeleton /> above its hero container",
+    (pagePath) => {
+      const loadingPath = siblingLoadingFile(pagePath);
+      expect(code.has(loadingPath), `missing sibling ${loadingPath}`).toBe(
+        true,
+      );
+      const loadingSource = code.get(loadingPath)!;
+      const skeletonMatch = MATCH_STRIP_SKELETON_JSX.exec(loadingSource);
+      expect(
+        skeletonMatch,
+        `${loadingPath}: no <MatchStripSkeleton />`,
+      ).not.toBeNull();
+      const heroMatch = FIRST_PAGE_CONTAINER_JSX.exec(loadingSource);
+      expect(
+        heroMatch,
+        `${loadingPath}: no <PageContainer> hero`,
+      ).not.toBeNull();
+      expect(skeletonMatch!.index).toBeLessThan(heroMatch!.index);
+    },
+  );
+});
+
+/**
+ * Pinned by name, Rule 5's shape: the derived list is what makes a fourth
+ * route covered automatically, but an edit that silently emptied the filter
+ * would read as a pass on every route unless something asserts the three
+ * known routes are actually in it.
+ */
+describe("rule 14 checks the routes it claims to (#3023)", () => {
+  it.each([
+    ["app/(main)/wedstrijd/[matchId]/page.tsx"],
+    ["app/(main)/spelers/[slug]/page.tsx"],
+    ["app/(main)/ploegen/[slug]/page.tsx"],
+  ])("covers %s", (relPath) => {
+    expect(inlineMatchStripPages).toContain(relPath);
+  });
+
+  it("does not cover a landing-surface page that only inherits the slot from its layout", () => {
+    const sponsors = "app/(landing)/sponsors/page.tsx";
+    expect(MATCH_STRIP_SLOT_INLINE_JSX.test(code.get(sponsors)!)).toBe(false);
+    expect(inlineMatchStripPages).not.toContain(sponsors);
+  });
+});
+
+describe("rule 14 catches what it claims to (#3023)", () => {
+  it("flags a loading.tsx with no <MatchStripSkeleton /> at all", () => {
+    const loadingSource = `<PageContainer><UpLink href="/a" label="A" /></PageContainer>`;
+    expect(MATCH_STRIP_SKELETON_JSX.test(loadingSource)).toBe(false);
+  });
+
+  it("flags a <MatchStripSkeleton /> placed AFTER the hero instead of above it", () => {
+    const loadingSource = `
+      <PageContainer><UpLink href="/a" label="A" /></PageContainer>
+      <MatchStripSkeleton />
+    `;
+    const skeletonIndex = MATCH_STRIP_SKELETON_JSX.exec(loadingSource)!.index;
+    const heroIndex = FIRST_PAGE_CONTAINER_JSX.exec(loadingSource)!.index;
+    expect(skeletonIndex).toBeGreaterThan(heroIndex);
+  });
+
+  it("does not flag a loading.tsx with <MatchStripSkeleton /> correctly above the hero", () => {
+    const loadingSource = `
+      <MatchStripSkeleton />
+      <PageContainer><UpLink href="/a" label="A" /></PageContainer>
+    `;
+    const skeletonIndex = MATCH_STRIP_SKELETON_JSX.exec(loadingSource)!.index;
+    const heroIndex = FIRST_PAGE_CONTAINER_JSX.exec(loadingSource)!.index;
+    expect(skeletonIndex).toBeLessThan(heroIndex);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rule 15 (#3023) — /wedstrijd/[matchId]'s loading hero container matches the
+// page's, derived from source rather than hardcoded
+// ---------------------------------------------------------------------------
+
+/**
+ * #3023 also closed a same-file mismatch on this one route: the loading
+ * container carried `bg-cream-soft pb-8`, the page's carried neither the
+ * field colour nor that padding value (`pb-12 lg:pb-16`). A test that
+ * hardcodes those literal tokens passes forever even after the page's own
+ * value changes next — reading `page.tsx` itself, every run, is what a
+ * review round 2 finding on this exact PR asked for, so the guard cannot go
+ * stale the way the docblock comment it replaced did.
+ *
+ * Not folded into Rule 13's ancestor walk: Rule 13 catches *doubled* top air
+ * from any `pt-*`/`py-*` anywhere in the ancestor chain above an up-link.
+ * This is a narrower, stricter claim — the hero container's own `className`
+ * matches its counterpart file byte-for-byte, `bg-*` included — and only
+ * `/wedstrijd/[matchId]` has ever had this particular fault, so it is not
+ * generalised to a whole-tree scan the way Rule 14 is.
+ *
+ * The extractor is tolerant of `as="section"` being present (`loading.tsx`)
+ * or absent (`page.tsx` — a plain `<div>`, `<PageContainer>`'s default):
+ * that element-type difference is deliberate (#3023 review round 2, finding
+ * 5) and not what this rule checks.
+ */
+const WEDSTRIJD_PAGE = "app/(main)/wedstrijd/[matchId]/page.tsx";
+const WEDSTRIJD_LOADING = "app/(main)/wedstrijd/[matchId]/loading.tsx";
+
+/** The `className` of the first `<PageContainer>` that wraps a hero
+ *  `<UpLink>` in `source` — empty string when the container carries no
+ *  `className` attribute at all, matching `enclosingPaddingViolations`'
+ *  own shape (operates on source text directly, so a self-test can call it
+ *  with a synthetic snippet instead of duplicating the regex). */
+function extractHeroContainerClassName(source: string): string {
+  const span = /<PageContainer\b[^>]*>[\s\S]*?<UpLink\b/.exec(source);
+  if (!span) {
+    throw new Error("no <PageContainer> found wrapping <UpLink>");
+  }
+  return /className="([^"]*)"/.exec(span[0])?.[1] ?? "";
+}
+
+/** `extractHeroContainerClassName`, reading straight from `code`. */
+const heroContainerClassName = (relPath: string): string =>
+  extractHeroContainerClassName(code.get(relPath)!);
+
+describe("wedstrijd loading hero container matches the page's exactly (#3023)", () => {
+  it("carries the identical className the page's hero container carries", () => {
+    expect(heroContainerClassName(WEDSTRIJD_LOADING)).toBe(
+      heroContainerClassName(WEDSTRIJD_PAGE),
+    );
+  });
+});
+
+describe("rule 15 catches what it claims to (#3023)", () => {
+  it("extracts a container's className up to, not including, the up-link's own", () => {
+    // A regex bug that kept matching past <UpLink> would instead pick up its
+    // own className ("mb-6") — asserting the hero's is what's returned
+    // catches that class of mistake.
+    const source = `<PageContainer className="pb-12 lg:pb-16"><UpLink href="/a" label="A" className="mb-6" /></PageContainer>`;
+    expect(extractHeroContainerClassName(source)).toBe("pb-12 lg:pb-16");
+  });
+
+  it('tolerates as="section" on one side and its absence on the other', () => {
+    const loading = `<PageContainer as="section" className="pb-12 lg:pb-16"><UpLink href="/a" label="A" /></PageContainer>`;
+    const page = `<PageContainer className="pb-12 lg:pb-16"><UpLink href="/a" label="A" /></PageContainer>`;
+    expect(extractHeroContainerClassName(loading)).toBe(
+      extractHeroContainerClassName(page),
+    );
+  });
+
+  it("returns empty string for a container with no className at all", () => {
+    const source = `<PageContainer><UpLink href="/a" label="A" /></PageContainer>`;
+    expect(extractHeroContainerClassName(source)).toBe("");
+  });
+
+  it("would fail on a real drift — bg-cream-soft/pb-8 reintroduced on loading only", () => {
+    const loading = `<PageContainer as="section" className="bg-cream-soft pb-8"><UpLink href="/a" label="A" /></PageContainer>`;
+    const page = `<PageContainer className="pb-12 lg:pb-16"><UpLink href="/a" label="A" /></PageContainer>`;
+    expect(extractHeroContainerClassName(loading)).not.toBe(
+      extractHeroContainerClassName(page),
+    );
+  });
+});
