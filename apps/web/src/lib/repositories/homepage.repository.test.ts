@@ -38,19 +38,19 @@ function makeHomepageResult(
   return {
     bannerSlotA: {
       imageUrl: "https://cdn.sanity.io/banner-a.webp",
-      imageUrlMobile: "https://cdn.sanity.io/banner-a-mobile.webp",
+      imageDimensions: { width: 1920, height: 427 },
       alt: "Banner A alt",
       href: "https://example.com/a",
     },
     bannerSlotB: {
       imageUrl: "https://cdn.sanity.io/banner-b.webp",
-      imageUrlMobile: "https://cdn.sanity.io/banner-b-mobile.webp",
+      imageDimensions: { width: 1920, height: 427 },
       alt: "Banner B alt",
       href: null,
     },
     bannerSlotC: {
       imageUrl: "https://cdn.sanity.io/banner-c.webp",
-      imageUrlMobile: "https://cdn.sanity.io/banner-c-mobile.webp",
+      imageDimensions: { width: 1920, height: 427 },
       alt: "Banner C alt",
       href: "https://example.com/c",
     },
@@ -62,30 +62,46 @@ function makeHomepageResult(
 }
 
 describe("HOMEPAGE_QUERY", () => {
-  it("includes hotspot-aware CDN crop params for all three banner slots", () => {
+  it("fits rather than crops every banner slot, and carries the asset's own dimensions (#2928)", () => {
     const query = HOMEPAGE_QUERY as unknown as string;
-    // Banners render in a fixed 6:1 `object-cover` frame (<BannerSlot>) from
-    // the `md` breakpoint up, so the URL bakes a 6:1 focalpoint crop —
-    // otherwise the browser center-crops and ignores the editorial hotspot
-    // (same bug fixed on article cover images).
-    const cropParams = `"?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="`;
+    // The slot has no house ratio: a banner renders at the asset's own shape,
+    // identically at every breakpoint. `fit=max` scales down to the width cap
+    // and never crops or upscales — so there is exactly ONE url per slot, and
+    // it must carry no crop, no focalpoint and no height.
+    const fitParams = `"?w=1200&q=80&fm=webp&fit=max"`;
     const matches = query.match(
-      /image\.asset->url \+ "\?w=1200&h=200&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="/g,
+      /image\.asset->url \+ "\?w=1200&q=80&fm=webp&fit=max"/g,
     );
     expect(matches).toHaveLength(3);
-    expect(query).toContain(`"imageUrl": image.asset->url + ${cropParams}`);
-  });
+    expect(query).toContain(`"imageUrl": image.asset->url + ${fitParams}`);
 
-  it("includes a taller 3:1 mobile crop per slot (#2401 item 2)", () => {
-    const query = HOMEPAGE_QUERY as unknown as string;
-    const mobileCropParams = `"?w=720&h=240&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="`;
-    const matches = query.match(
-      /image\.asset->url \+ "\?w=720&h=240&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x="/g,
+    // The regression guards, scoped to the three banner projections — NOT to
+    // the whole query, which still legitimately crops
+    // `matchesSliderPlaceholder.highlightImage` to a 1344x320 hero. That is a
+    // different image with a different job; only the banner slots lost their
+    // crop in #2928.
+    //
+    // Each string below was in the banner projections before #2928, and each
+    // on its own reintroduces a crop: the first line of the live banner's
+    // quote was cut off on every phone precisely because the mobile url
+    // carved a second, narrower shape out of the same file.
+    const bannerProjections =
+      query.match(/"bannerSlot[ABC]": bannerSlot[ABC]->\s*\{[^}]*\}/g) ?? [];
+    expect(bannerProjections).toHaveLength(3);
+    for (const projection of bannerProjections) {
+      expect(projection).not.toContain("fit=crop");
+      expect(projection).not.toContain("crop=focalpoint");
+      expect(projection).not.toContain("imageUrlMobile");
+      expect(projection).not.toContain("hotspot");
+    }
+
+    // Dimensions are not decoration — they become the <img>'s intrinsic
+    // width/height, which is the only thing reserving the box before the
+    // bytes land now that no `aspect-[]` ratio does it.
+    const dimensionMatches = query.match(
+      /"imageDimensions": image\.asset->metadata\.dimensions\{width, height\}/g,
     );
-    expect(matches).toHaveLength(3);
-    expect(query).toContain(
-      `"imageUrlMobile": image.asset->url + ${mobileCropParams}`,
-    );
+    expect(dimensionMatches).toHaveLength(3);
   });
 
   it("also projects the matchesSliderPlaceholder fields (#2858 — folded into the same round-trip)", () => {
@@ -152,21 +168,24 @@ describe("HomepageRepository", () => {
 
       expect(banners.bannerSlotA).toEqual<BannerSlotVM>({
         imageUrl: "https://cdn.sanity.io/banner-a.webp",
-        imageUrlMobile: "https://cdn.sanity.io/banner-a-mobile.webp",
+        imageWidth: 1920,
+        imageHeight: 427,
         alt: "Banner A alt",
         href: "https://example.com/a",
       });
 
       expect(banners.bannerSlotB).toEqual<BannerSlotVM>({
         imageUrl: "https://cdn.sanity.io/banner-b.webp",
-        imageUrlMobile: "https://cdn.sanity.io/banner-b-mobile.webp",
+        imageWidth: 1920,
+        imageHeight: 427,
         alt: "Banner B alt",
         href: undefined,
       });
 
       expect(banners.bannerSlotC).toEqual<BannerSlotVM>({
         imageUrl: "https://cdn.sanity.io/banner-c.webp",
-        imageUrlMobile: "https://cdn.sanity.io/banner-c-mobile.webp",
+        imageWidth: 1920,
+        imageHeight: 427,
         alt: "Banner C alt",
         href: "https://example.com/c",
       });
@@ -212,7 +231,7 @@ describe("HomepageRepository", () => {
         makeHomepageResult({
           bannerSlotA: {
             imageUrl: null,
-            imageUrlMobile: "https://cdn.sanity.io/banner-a-mobile.webp",
+            imageDimensions: { width: 1920, height: 427 },
             alt: "Banner A alt",
             href: null,
           },
@@ -229,12 +248,12 @@ describe("HomepageRepository", () => {
       expect(banners.bannerSlotA).toBeNull();
     });
 
-    it("null imageUrlMobile in a slot produces null for that slot too (#2401 item 2 — CSS box and CDN crop must agree)", async () => {
+    it("a slot with no asset dimensions produces null for that slot (#2928 — no intrinsic size, no box to reserve)", async () => {
       mockFetch.mockResolvedValueOnce(
         makeHomepageResult({
           bannerSlotA: {
             imageUrl: "https://cdn.sanity.io/banner-a.webp",
-            imageUrlMobile: null,
+            imageDimensions: null,
             alt: "Banner A alt",
             href: null,
           },
@@ -248,6 +267,10 @@ describe("HomepageRepository", () => {
         }),
       );
 
+      // Rendering it anyway would put an <img> with no width/height on the
+      // page, and with no fixed ratio on the slot the whole homepage below
+      // the banner would jump when the image finally decoded. Dropping the
+      // slot is the supported state; a layout shift is not.
       expect(banners.bannerSlotA).toBeNull();
     });
 

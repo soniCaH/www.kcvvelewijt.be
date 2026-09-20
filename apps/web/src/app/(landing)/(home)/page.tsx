@@ -542,7 +542,8 @@ function toBannerSection(
       >
         <BannerSlot
           image={banner.imageUrl}
-          mobileImage={banner.imageUrlMobile}
+          width={banner.imageWidth}
+          height={banner.imageHeight}
           alt={banner.alt}
           href={banner.href}
           slot={slot}

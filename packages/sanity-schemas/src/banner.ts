@@ -16,9 +16,15 @@ export const banner = defineType({
       title: 'Banner image',
       type: 'image',
       group: 'inhoud',
-      options: {hotspot: true},
+      // No `hotspot` — nothing crops this image any more (#2928), so there is
+      // no frame for a focal point to steer. Leaving the picker on would have
+      // offered editors a control with no effect, which is worse than not
+      // offering it: the live `bannerSlotA` banner was filed as "set the
+      // hotspot" precisely because the control implied it could fix a crop it
+      // could not.
+
       description:
-        'De bannerafbeelding (bijv. een webshop- of sponsoractie). Wordt op de homepage volledig in kleur getoond in een breed, liggend kader (verhouding ~6:1). Gebruik een brede afbeelding zodat ze niet ongelukkig bijgesneden wordt.',
+        'De bannerafbeelding (bijv. een webshop- of sponsoractie). Wordt op de homepage getoond precies zoals je ze uploadt — er wordt niets bijgesneden, op gsm en op desktop hetzelfde. Kies dus zelf de verhouding: een liggende afbeelding werkt het best, en staat er tekst in, hou ze dan niet te smal zodat ze ook op een gsm leesbaar blijft.',
       // #2401 review finding 1 — a `validation` callback returns an ARRAY of
       // two independent `Rule` chains, not one chain with two calls tacked
       // on. Each `Rule` instance carries its own `_level`, and every check
@@ -39,10 +45,11 @@ export const banner = defineType({
           .error(
             'Verplicht. Zonder afbeelding is er geen banner om te tonen en blijft de bannerslot op de homepage leeg.',
           ),
-        // #2401 item 2 — the 6:1 house ratio (2026-07-13, reaffirmed
-        // 2026-09-10) is a description above, not an enforced rule. This
-        // warns (never blocks) when the uploaded asset is materially
-        // narrower than the slot expects — see `validateBannerAspectRatio`.
+        // #2928 — the slot has no house ratio at all now. This warns (never
+        // blocks) only when the asset is so tall it would dominate the page,
+        // or so thin that artwork inside it is unreadable — see
+        // `validateBannerAspectRatio` for why the old "must be ~6:1" advice
+        // was actively harmful.
         // Its own `Rule` instance, so `.warning()` actually governs it.
         r.warning().custom((value) => validateBannerAspectRatio(value as never)),
       ],
