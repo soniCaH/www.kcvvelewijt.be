@@ -285,7 +285,7 @@ describe("loading.tsx envelope drift guard", () => {
       // round 2, replacing the absence that made it fall through to
       // `/club`'s own skeleton. Top air is the up-link chip's own now
       // (#2877), so the root keeps only its bottom padding.
-      expectedRootClass: "bg-cream pb-12 sm:pb-16",
+      expectedRootClass: "bg-cream pb-12 lg:pb-16",
       announcement: "Word lid laden…",
     },
   ];
