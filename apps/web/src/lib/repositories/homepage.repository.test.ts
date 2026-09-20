@@ -85,10 +85,23 @@ describe("HOMEPAGE_QUERY", () => {
     // on its own reintroduces a crop: the first line of the live banner's
     // quote was cut off on every phone precisely because the mobile url
     // carved a second, narrower shape out of the same file.
+    // `[^}]*` would stop at the FIRST `}` — the one closing
+    // `dimensions{width, height}` — so each "projection" would end two lines
+    // in and the guards below would never scan `alt`, `href`, or anything a
+    // future edit adds after them. A reintroduced mobile crop url placed
+    // below `imageDimensions` would pass green. This allows exactly one level
+    // of nesting instead, which is what the projection actually contains, and
+    // does not depend on indentation the way anchoring on `\n    }` would.
     const bannerProjections =
-      query.match(/"bannerSlot[ABC]": bannerSlot[ABC]->\s*\{[^}]*\}/g) ?? [];
+      query.match(
+        /"bannerSlot[ABC]": bannerSlot[ABC]->\s*\{(?:[^{}]|\{[^{}]*\})*\}/g,
+      ) ?? [];
     expect(bannerProjections).toHaveLength(3);
     for (const projection of bannerProjections) {
+      // Pins the capture to the WHOLE projection. Without this, a regex that
+      // silently truncated would still satisfy every assertion below by
+      // scanning almost nothing.
+      expect(projection).toContain("href");
       expect(projection).not.toContain("fit=crop");
       expect(projection).not.toContain("crop=focalpoint");
       expect(projection).not.toContain("imageUrlMobile");

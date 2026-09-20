@@ -89,7 +89,7 @@ export function validateBannerAspectRatio(
         `Deze afbeelding is erg smal (verhouding ≈ ${ratio.toFixed(1)}:1). ` +
         `De banner wordt getoond zoals je ze uploadt, dus ze wordt een dunne strook ` +
         `waarin tekst nauwelijks leesbaar is. Gebruik een minder extreme verhouding ` +
-        `(smaller dan ${MAX_ACCEPTABLE_RATIO}:1).`,
+        `(niet breder dan ${MAX_ACCEPTABLE_RATIO}:1).`,
     }
   }
 

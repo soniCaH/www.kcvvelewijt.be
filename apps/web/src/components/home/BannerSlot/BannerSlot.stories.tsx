@@ -8,6 +8,15 @@ const meta = {
   // It matters more now — with no fixed `aspect-[]` box, the rendered height
   // comes entirely from the asset's own `width`/`height`, so a regression
   // here is a silently wrong page height rather than a wrong crop (#2928).
+  //
+  // #2928 removed a `MobileRatio` story that existed to capture the SECOND,
+  // narrower crop the mobile breakpoint used to be served. There is one URL
+  // now, so "the phone gets the same picture at the same ratio" is already
+  // proved by comparing each story's own `--desktop` and `--mobile`
+  // baselines: they must differ in width and in nothing else. A dedicated
+  // mobile story would have been argument-identical to `WithLink` and
+  // captured a byte-identical image — a baseline to maintain that guards
+  // nothing.
   tags: ["autodocs", "vr"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof BannerSlot>;
@@ -48,31 +57,6 @@ export const NoLink: Story = {
     width: WIDE_W,
     height: WIDE_H,
     alt: "Summer camp 2026",
-  },
-};
-
-// The regression guard for #2928. This used to be `MobileRatio`, and it
-// existed to capture a SECOND, taller crop (3:1) that the mobile breakpoint
-// was served instead of the desktop 6:1 — two shapes from one file, which is
-// what cut the first line off the live banner's quote at every hotspot value.
-//
-// Its job is now the opposite: prove the phone gets the SAME picture at the
-// SAME ratio as the desktop, just narrower. Compared against `WithLink`'s
-// baseline, the two captures must differ only in width.
-//
-// `vr.viewports` (not the Storybook-10-removed
-// `parameters.viewport.defaultViewport`, which the VR runner does not read)
-// locks this story to the runner's "mobile" viewport.
-export const Mobile: Story = {
-  args: {
-    image: WIDE_FIXTURE,
-    width: WIDE_W,
-    height: WIDE_H,
-    alt: "Summer camp 2026",
-    href: "https://example.com",
-  },
-  parameters: {
-    vr: { viewports: ["mobile"] },
   },
 };
 
