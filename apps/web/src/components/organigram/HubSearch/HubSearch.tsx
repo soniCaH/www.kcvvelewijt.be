@@ -35,7 +35,10 @@ import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
-import { SECTION_NAV_CHIP_SHADOW_CLASS } from "@/components/design-system/section-nav";
+import {
+  SECTION_NAV_CHIP_SHADOW_CLASS,
+  SECTION_NAV_TRAILING_SLOT_PADDING,
+} from "@/components/design-system/section-nav";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import {
@@ -463,10 +466,14 @@ export function HubSearch({
   );
 
   return (
-    <div className={`relative ${className}`}>
+    // `min-w-0` on the nav root, not left to the call site: the bar row it
+    // sits in carries no `flex-wrap` (#2821), so this wrapper *must* be
+    // allowed to shrink. A second consumer that forgot it in its `className`
+    // would push the chips off the row.
+    <div className={`relative ${isHero ? "" : "min-w-0"} ${className}`}>
       <div
         className={`border-ink bg-cream flex items-center gap-2 ${boxBorder} ${boxShadow} ${
-          isHero ? "px-3 py-3" : "px-2.5 py-2"
+          isHero ? "px-3 py-3" : SECTION_NAV_TRAILING_SLOT_PADDING
         }`}
       >
         <span className="text-jersey-deep flex-shrink-0">
@@ -495,7 +502,12 @@ export function HubSearch({
               ? `${listboxId}-opt-${selectedIndex}`
               : undefined
           }
-          className={`text-ink placeholder:text-ink-muted w-full bg-transparent focus:outline-none ${
+          // `min-w-0` is load-bearing since #2821 dropped the bar row's
+          // `flex-wrap`: a flex item's default `min-width: auto` floors an
+          // `<input>` at its intrinsic ~20-character width, so without this
+          // the field and its caret render straight through the box's own
+          // border at viewports below ~375px instead of the box squeezing.
+          className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent focus:outline-none ${
             isHero ? "text-[15px]" : "text-[13px]"
           }`}
         />
