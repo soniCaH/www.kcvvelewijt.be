@@ -144,13 +144,23 @@ export default {
     // Settles a scheduled job into an outcome instead of throwing, so the
     // caller reports from a `const` rather than a `let` straddling a
     // try/catch. Logging the failure here keeps both crons on one format.
-    const settleJob = async (
+    // Carries `run()`'s resolved value on success (#2855 review) — a
+    // caller that needs it (the search-index sweep's prunePhase) reads it
+    // off `outcome.value` from a `const`, rather than a `let` declared
+    // above the call and assigned inside `run()`'s closure, which is
+    // exactly the pattern this function exists to avoid. The PSD sync's
+    // `run()` resolves nothing useful, so its outcome is `{ ok: true,
+    // value: undefined }` and its call site is unaffected.
+    type SettledJob<T> =
+      | { readonly ok: true; readonly value: T }
+      | { readonly ok: false; readonly error: unknown };
+    const settleJob = async <T>(
       job: string,
-      run: () => Promise<unknown>,
-    ): Promise<JobOutcome> => {
+      run: () => Promise<T>,
+    ): Promise<SettledJob<T>> => {
       try {
-        await run();
-        return { ok: true };
+        const value = await run();
+        return { ok: true, value };
       } catch (error) {
         console.error(
           `[scheduled] ${job} failed:`,
@@ -193,19 +203,18 @@ export default {
       ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
       ctx.waitUntil(
         (async () => {
-          // Captured by the run() closure below so it survives settleJob's
-          // discarded return value — undefined unless the sweep actually
-          // resolved (a thrown/failed sweep never reaches its `return`).
-          let prunePhase: PrunePhaseOutcome | undefined;
-          const outcome = await settleJob("sanity-index-sync", async () => {
-            const result = await Effect.runPromise(
-              Effect.provide(runSanityIndexSync(), layer),
-            );
-            prunePhase = result.prunePhase;
-          });
+          const outcome = await settleJob("sanity-index-sync", () =>
+            Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)),
+          );
           // Reported strictly AFTER the sync settles — see the comment on
           // reportJobOutcome above.
           await reportJobOutcome("sanity-index-sync", outcome);
+          // Undefined when the sweep failed outright (never reached its
+          // `return`, so there's no `.value` to read) — `pruneJobOutcome`
+          // treats that the same as its own "not-run" case: report nothing.
+          const prunePhase: PrunePhaseOutcome | undefined = outcome.ok
+            ? outcome.value.prunePhase
+            : undefined;
           // Own job name (#2855): the sweep itself succeeded even when the
           // prune was refused/failed, so conflating the two would mark a
           // healthy indexing run as failed. pruneJobOutcome returns null
