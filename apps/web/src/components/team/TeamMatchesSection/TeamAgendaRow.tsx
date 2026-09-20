@@ -315,8 +315,11 @@ export function TeamAgendaRow({
       aria-label={`${day} ${month}`}
     >
       {/* Day-of-month is a TAG on the stub, not the row's subject (#2516
-          rule 4) — mono, matching `MatchStripView`'s and `CalendarMonth`'s
-          already-conformant day stubs. */}
+          rule 4) — mono, same FAMILY as `MatchStripView`'s and
+          `CalendarMonth`'s already-conformant day stubs (#2579 review:
+          not the same weight — `MatchStripView`'s stub is `font-bold`,
+          this one carries no explicit weight class, i.e. 400; rule 5
+          leaves weight to the surface, so that's not unified here). */}
       <span
         className={cn(
           "font-mono text-[18px] leading-none",

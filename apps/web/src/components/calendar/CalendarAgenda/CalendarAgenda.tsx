@@ -181,8 +181,9 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
           <span
             // A score beside the fixture row is a TAG (#2516 rule 1) — mono,
             // which aligns by construction (#2579 supersedes #2610's
-            // lining-nums).
-            className="text-ink shrink-0 font-mono text-[15px] font-black"
+            // lining-nums). font-bold, not font-black (#2579 review): IBM
+            // Plex Mono loads only up to 700, so 900 was already clamping.
+            className="text-ink shrink-0 font-mono text-[15px] font-bold"
             style={
               underline ? { boxShadow: underline, padding: "0 4px" } : undefined
             }

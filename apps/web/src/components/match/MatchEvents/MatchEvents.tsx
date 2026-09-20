@@ -414,11 +414,18 @@ function EventRow({
   const isHome = event.team === "home";
   const nameTint = highlighted ? "text-jersey-deep" : "text-ink";
   return (
-    <div className="grid grid-cols-[36px_22px_1fr_1fr_22px_20px] items-center gap-3 py-3 md:gap-4">
+    <div className="grid grid-cols-[56px_22px_1fr_1fr_22px_20px] items-center gap-3 py-3 md:gap-4">
       {/* Minute — a TAG beside a scorer (#2516 rule 1), not the surface's
           subject, so it moves to mono: alignment and figure shape come from
-          the face, not a class (#2579 supersedes #2610's lining-nums). */}
-      <span className="text-ink font-mono text-[18px] leading-none font-black tracking-[-0.025em]">
+          the face, not a class (#2579 supersedes #2610's lining-nums).
+          The first track widened 36px -> 56px (#2579 review) — measured on
+          the served kit, IBM Plex Mono at 18px/900 renders a stoppage-time
+          minute ("45+2'") at ~52px, which the old 36px track (sized for the
+          narrower Freight Big glyphs it replaced) clipped into the icon
+          column next to it. font-bold, not font-black: IBM Plex Mono
+          self-hosts only 400/500/600/700 (app/layout.tsx), so a requested
+          900 was already clamping to 700. */}
+      <span className="text-ink font-mono text-[18px] leading-none font-bold tracking-[-0.025em]">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
 
@@ -483,11 +490,12 @@ function SingleSideEventRow({
   highlighted: boolean;
 }) {
   return (
-    <div className="grid grid-cols-[36px_22px_1fr] items-center gap-3 py-3 md:gap-4">
+    <div className="grid grid-cols-[56px_22px_1fr] items-center gap-3 py-3 md:gap-4">
       {/* Minute — a TAG beside a scorer (#2516 rule 1); mono, same as the
           two-sided row's minute above (#2579 supersedes #2610's
-          lining-nums). */}
-      <span className="text-ink font-mono text-[18px] leading-none font-black tracking-[-0.025em]">
+          lining-nums). First track widened 36px -> 56px (#2579 review) —
+          see EventRow's identical note above. */}
+      <span className="text-ink font-mono text-[18px] leading-none font-bold tracking-[-0.025em]">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
       <span className="flex items-center justify-center">

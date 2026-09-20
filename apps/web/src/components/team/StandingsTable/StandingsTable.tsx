@@ -274,15 +274,18 @@ export function StandingsTable({
                       : entry.goal_difference}
                   </td>
 
-                  {/* Points — mono black (inherited from the table), pinned
-                      right (anchor group). A standings column is the
+                  {/* Points — mono bold (inherited mono from the table),
+                      pinned right (anchor group). A standings column is the
                       textbook case for rule 3 (#2516): alignment comes from
                       the mono face, by construction, never from a
                       figure-style class — `tabular-nums` did nothing here,
-                      and #2579 removes it from every cell in this table. */}
+                      and #2579 removes it from every cell in this table.
+                      font-bold, not font-black (#2579 review): IBM Plex
+                      Mono loads only up to 700, so 900 was already
+                      clamping to 700. */}
                   <td
                     className={cn(
-                      "text-ink bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-black",
+                      "text-ink bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-bold",
                       isKcvv && KCVV_TINT,
                     )}
                   >

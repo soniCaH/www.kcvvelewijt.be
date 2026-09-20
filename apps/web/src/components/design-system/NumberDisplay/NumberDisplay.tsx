@@ -45,7 +45,8 @@ export function NumberDisplay({
     <span
       className={cn(
         // <NumberDisplay> is the SUBJECT of its surface (#2516 rule 1: the
-        // raffle stats on /club/ultras, /club/word-lid), so it keeps its
+        // raffle stats on /club/ultras via RaffleCallout, and the shirt
+        // number on /spelers/[slug] via PlayerHero.tsx), so it keeps its
         // display face and adds no font-variant-numeric class at all (#2579).
         // No class needed to get oldstyle figures — the family's default
         // figure set already IS oldstyle, measured byte-identical to
