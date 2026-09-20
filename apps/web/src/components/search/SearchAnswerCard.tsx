@@ -75,7 +75,7 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
         Slim antwoord
       </span>
 
-      <p className="text-ink font-display mt-2.5 mr-10 text-[16.5px] leading-relaxed font-medium break-words italic">
+      <p className="text-ink font-display mt-2.5 mr-10 text-[16.5px] leading-relaxed font-medium italic">
         {clampAnswer(answer)}
       </p>
 

@@ -272,10 +272,11 @@ function DualAvatar({
 
 // `w-full` is load-bearing: the card is `flex-col items-center`, so without it
 // this <p> sizes to max-content and a long role ("Communicatieverantwoordelijke")
-// spills out past the card border instead of wrapping. `hyphens-auto` goes in
-// ALONE — pairing it with `break-words` suppresses the hyphen (see #2269).
+// spills out past the card border instead of wrapping. #2549 rule 5 measured
+// `hyphens-auto` as a no-op here (`VERANTWOORDELIJKE` fits its 126px box at
+// 124px even under the wider SF Mono fallback, #2533 addendum) — deleted.
 const SUBLABEL =
-  "text-ink-muted mt-1.5 w-full font-mono text-[11px] tracking-[0.06em] uppercase hyphens-auto";
+  "text-ink-muted mt-1.5 w-full font-mono text-[11px] tracking-[0.06em] uppercase";
 
 // ─── Component ───────────────────────────────────────────────────────────────
 

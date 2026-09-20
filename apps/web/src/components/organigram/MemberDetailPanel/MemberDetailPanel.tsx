@@ -284,7 +284,7 @@ export function MemberDetailPanel({
                 imageUrl={activeHolder?.imageUrl}
               />
               <div className="min-w-0">
-                <p className="font-display text-[23px] leading-none font-black break-words italic">
+                <p className="font-display text-[23px] leading-none font-black italic">
                   {isVacant ? node.title : activeName}
                 </p>
                 {(isVacant || node.roleCode) && (

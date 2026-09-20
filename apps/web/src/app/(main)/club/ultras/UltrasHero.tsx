@@ -77,7 +77,7 @@ export function UltrasHero({ joinHref, upLink }: UltrasHeroProps) {
             `leading-hero` step (0.85) — this headline isn't a fixed 2-line
             composition, it wraps by content length, so the tight-leading
             step (never the default) does not apply here. */}
-        <h1 className="font-display-big text-cream text-display-2xl leading-[0.95] font-black hyphens-auto uppercase">
+        <h1 className="font-display-big text-cream text-display-2xl leading-[0.95] font-black uppercase">
           De <span className="text-warm">luidste</span> hoek
         </h1>
 
