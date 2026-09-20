@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { HubSearch } from "./HubSearch";
+import { HubSearchQueryProvider } from "./HubSearchQueryProvider";
 import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
@@ -366,5 +368,123 @@ describe("HubSearch", () => {
     const status = screen.getByRole("status");
     expect(status).toHaveAttribute("aria-live", "polite");
     expect(status).toHaveTextContent(/\d+ resulta(at|ten)/);
+  });
+});
+
+/**
+ * The hub mounts `<HubSearch>` twice — hero + sticky nav — and hands the
+ * search over as the hero scrolls behind the pinned chrome (#3043). Before
+ * that handoff each instance held its own query and popup state, so the hero's
+ * listbox stayed open over the header with no visible input under it.
+ */
+describe("HubSearch — the hub handoff (#3043)", () => {
+  beforeEach(() => {
+    FakeIntersectionObserver.reset();
+    vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  const HERO_PLACEHOLDER = "Zoek een naam, functie of vraag…";
+  const NAV_PLACEHOLDER = "Zoek…";
+
+  function renderPair() {
+    render(
+      <HubSearchQueryProvider>
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+          variant="hero"
+        />
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+          variant="nav"
+          placeholder={NAV_PLACEHOLDER}
+        />
+      </HubSearchQueryProvider>,
+    );
+    const hero = screen.getByPlaceholderText(HERO_PLACEHOLDER);
+    const nav = screen.getByPlaceholderText(NAV_PLACEHOLDER);
+    return {
+      hero,
+      nav,
+      heroRoot: hero.closest("div.relative") as HTMLElement,
+      navRoot: nav.closest("div.relative") as HTMLElement,
+    };
+  }
+
+  /** The observer watching one instance's own wrapper. */
+  function observerFor(root: HTMLElement) {
+    const observer = FakeIntersectionObserver.instances.find((instance) =>
+      instance.observed.includes(root),
+    );
+    if (!observer) throw new Error("no IntersectionObserver for that wrapper");
+    return observer;
+  }
+
+  function scrollBehindChrome(root: HTMLElement) {
+    act(() => {
+      observerFor(root).trigger([{ isIntersecting: false }]);
+    });
+  }
+
+  it("shares one query, so what is typed in the hero shows in the nav copy", () => {
+    const { hero, nav } = renderPair();
+    fireEvent.focus(hero);
+    fireEvent.change(hero, { target: { value: "mijn kind is geblesseerd" } });
+
+    expect(nav).toHaveValue("mijn kind is geblesseerd");
+  });
+
+  it("closes the hero popup when the hero box tucks behind the pinned chrome, and keeps the nav copy's", () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    const { hero, heroRoot, navRoot } = renderPair();
+    fireEvent.focus(hero);
+    fireEvent.change(hero, { target: { value: "in" } });
+    expect(heroRoot.querySelector('[role="listbox"]')).toBeInTheDocument();
+
+    scrollBehindChrome(heroRoot);
+
+    expect(heroRoot.querySelector('[role="listbox"]')).not.toBeInTheDocument();
+    expect(navRoot.querySelector('[role="listbox"]')).toBeInTheDocument();
+  });
+
+  it("leaves the caret where it was — the handoff never focuses the nav copy", () => {
+    const { hero, nav, heroRoot } = renderPair();
+    fireEvent.focus(hero);
+    fireEvent.change(hero, { target: { value: "in" } });
+
+    scrollBehindChrome(heroRoot);
+
+    // Owner call: moving focus would raise the software keyboard on a phone,
+    // which scrolls the page again — the gesture that started the handoff.
+    expect(nav).not.toHaveFocus();
+  });
+
+  it("stops the off-screen instance embedding the shared query, so one search runs per keystroke", () => {
+    const { hero, heroRoot } = renderPair();
+    fireEvent.focus(hero);
+    fireEvent.change(hero, { target: { value: "in" } });
+    mockSemantic.search.mockClear();
+
+    scrollBehindChrome(heroRoot);
+
+    expect(mockSemantic.search).toHaveBeenCalledWith("");
+  });
+
+  it("renders the popup below the sticky header's own z-index, never level with it", () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    const { hero, heroRoot } = renderPair();
+    fireEvent.focus(hero);
+    fireEvent.change(hero, { target: { value: "in" } });
+
+    // `<SiteHeader>` is `z-50`; at an equal z-index paint order would hand this
+    // popup the header.
+    const listbox = heroRoot.querySelector('[role="listbox"]');
+    expect(listbox).toHaveClass("z-40");
+    expect(listbox).not.toHaveClass("z-50");
   });
 });

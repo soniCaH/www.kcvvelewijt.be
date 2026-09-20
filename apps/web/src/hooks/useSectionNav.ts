@@ -22,6 +22,24 @@ export function getStickyHeaderHeight(): number {
     : FALLBACK_HEADER_HEIGHT_PX;
 }
 
+/** The whole pinned strip — header **plus** any sticky section bar below it.
+ *
+ *  `useSectionNav` already publishes that sum to `documentElement`'s
+ *  `scroll-padding-top` (`calc(var(--sticky-header-h) + <bar>px)`) and keeps it
+ *  measured through resizes, so reading it back is how a consumer outside the
+ *  bar learns the bar's height without the page plumbing it down. Falls back to
+ *  the header alone on a page with no section nav — and under happy-dom, where
+ *  `scroll-padding-top` resolves to `auto`. */
+export function getStickyTopInset(): number {
+  if (typeof window === "undefined") return FALLBACK_HEADER_HEIGHT_PX;
+  const parsed = parseFloat(
+    window.getComputedStyle(document.documentElement).scrollPaddingTop,
+  );
+  return Number.isFinite(parsed) && parsed > 0
+    ? parsed
+    : getStickyHeaderHeight();
+}
+
 export interface UseSectionNavResult {
   /** Attach to the sticky bar's own outer element (its `<nav>`). Call this
    *  hook only from a component that renders the bar unconditionally

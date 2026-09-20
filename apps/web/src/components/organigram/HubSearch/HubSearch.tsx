@@ -34,7 +34,9 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
+import { getStickyTopInset } from "@/hooks/useSectionNav";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { useHubSearchQueryContext } from "./HubSearchQueryProvider";
 import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
   SECTION_NAV_TRAILING_SLOT_PADDING,
@@ -218,13 +220,44 @@ export function HubSearch({
   maxResults = 5,
   className = "",
 }: HubSearchProps) {
-  const [value, setValue] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [debouncedValue, setDebouncedValue] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
+
+  // The query + popup state are the hub's, not this instance's, whenever a
+  // `<HubSearchQueryProvider>` is above us: `/hulp` mounts this component
+  // twice (hero, sticky nav) and hands the search over mid-scroll (#3043).
+  // Both `useState`s stay unconditional — only which pair we read is a branch.
+  const shared = useHubSearchQueryContext();
+  const [localValue, setLocalValue] = useState("");
+  const [localOpen, setLocalOpen] = useState(false);
+  const value = shared ? shared.query : localValue;
+  const setValue = shared ? shared.setQuery : setLocalValue;
+  const isFocused = shared ? shared.open : localOpen;
+  const setIsFocused = shared ? shared.setOpen : setLocalOpen;
+
+  // Which of the two instances is on screen. The popup is `absolute` inside
+  // this wrapper, so an off-screen instance that kept it open would leave a
+  // listbox floating over the pinned header and section bar (#3043). Starts
+  // `true` so the popup is never suppressed before the observer first reports
+  // (and on any runtime without `IntersectionObserver`).
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    // Inset by the pinned strip: "visible" has to mean *not tucked behind the
+    // header and section bar*, or the popup survives until the box clears the
+    // viewport entirely — long after it has disappeared under the chrome.
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { rootMargin: `-${getStickyTopInset()}px 0px 0px 0px` },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   // Null outside a `<HubMemberPanel>` (e.g. Storybook) → person-select falls back
   // to a plain scroll to the directory.
   const panel = useHubMemberPanel();
@@ -246,9 +279,12 @@ export function HubSearch({
     executedQuery,
     search: runSemantic,
   } = useSemanticSearch({ type: "responsibility", limit: maxResults });
+  // Only the on-screen instance embeds the query. Both share it under a
+  // `<HubSearchQueryProvider>`, so without this gate every keystroke would
+  // fire two `/api/search` requests once the nav copy mounts (#3043).
   useEffect(() => {
-    runSemantic(trimmed);
-  }, [trimmed, runSemantic]);
+    runSemantic(visible ? trimmed : "");
+  }, [trimmed, visible, runSemantic]);
 
   const pathById = useMemo(
     () => new Map(responsibilityPaths.map((p) => [p.id, p])),
@@ -292,7 +328,7 @@ export function HubSearch({
     ? [answerForward, ...rows]
     : rows;
   const navItems = showShimmer ? memberResults : items;
-  const showResults = isFocused && trimmed.length > 0;
+  const showResults = isFocused && visible && trimmed.length > 0;
 
   // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
   // the list — the shimmer→settled flip, an answer-forward card sliding into
@@ -326,7 +362,10 @@ export function HubSearch({
     };
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, []);
+    // `setIsFocused` is a `useState` setter either way — the shared one from
+    // `<HubSearchQueryProvider>` or this instance's own — so its identity is
+    // stable and the listener is still attached exactly once.
+  }, [setIsFocused]);
 
   const select = (result: HubSearchResult) => {
     // `organigram_search_used` — length only, no query content (PRD §6).
@@ -470,7 +509,10 @@ export function HubSearch({
     // sits in carries no `flex-wrap` (#2821), so this wrapper *must* be
     // allowed to shrink. A second consumer that forgot it in its `className`
     // would push the chips off the row.
-    <div className={`relative ${isHero ? "" : "min-w-0"} ${className}`}>
+    <div
+      ref={rootRef}
+      className={`relative ${isHero ? "" : "min-w-0"} ${className}`}
+    >
       <div
         className={`border-ink bg-cream flex items-center gap-2 ${boxBorder} ${boxShadow} ${
           isHero ? "px-3 py-3" : SECTION_NAV_TRAILING_SLOT_PADDING
@@ -540,7 +582,13 @@ export function HubSearch({
           id={listboxId}
           role="listbox"
           aria-label="Zoekresultaten"
-          className={`border-ink bg-cream absolute z-50 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[4px_4px_0_0_var(--color-ink)]`}
+          // `z-40`, NOT `z-50`: `<SiteHeader>` is `sticky top-0 z-50` and this
+          // popup is not inside it, so at an equal z-index paint order decides
+          // — and a popup later in the document wins, covering the header
+          // (#3043). One step below it can never do that; it still clears the
+          // page's own `z-10`/`z-20` content. The `nav` instance is scoped by
+          // the section bar's own `z-30` stacking context either way.
+          className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[4px_4px_0_0_var(--color-ink)]`}
         >
           {showShimmer ? (
             <>
