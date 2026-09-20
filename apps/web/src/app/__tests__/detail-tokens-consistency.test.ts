@@ -1,18 +1,34 @@
 /**
- * Detail-tokens consistency guard (#2610)
+ * Detail-tokens consistency guard (#2610, Y4 superseded by #2579)
  *
- * #2610 ships four "free tier" CSS-discipline rules (decision-sheet §8 D0 —
- * C6, S8, M6, Y4): a jersey-deep `::selection` inverted inside ink/jersey
+ * #2610 shipped four "free tier" CSS-discipline rules (decision-sheet §8 D0
+ * — C6, S8, M6, Y4): a jersey-deep `::selection` inverted inside ink/jersey
  * bands, a hover that adds a border always reserving the width at rest, a
- * hovered underline thickening rather than jumping, and scores/tables in a
- * working figure set instead of the kit's inert `tabular-nums`. This file
- * grows by one `describe` block per detail as each lands — C6, S8, M6, Y4.
+ * hovered underline thickening rather than jumping, and — Y4, as it stood
+ * then — scores/tables pairing `tabular-nums` with `lining-nums` or a mono
+ * face, since the kit ships no `tnum` feature and `tabular-nums` alone does
+ * nothing.
+ *
+ * **Y4 is rewritten by #2579, not merely satisfied.** #2516 (the decision
+ * #2579 builds) measured `lining-nums` itself: on the two display faces it
+ * changes digit widths but never equalises them (spread 47.4 → 37.4 on
+ * `freight-big-pro`), so it was never a working alignment switch either —
+ * only true monospace is, by construction. The rule is now zero-tolerance:
+ * no `font-variant-numeric` utility ships anywhere. A number is either the
+ * *subject* of its surface (keeps its display face, no figure class — the
+ * family's default figure set is already oldstyle) or a *tag* on something
+ * else (moves to `font-mono`, which aligns by construction, not by class).
+ * `tabular-nums` was already banned solo by the old Y4; this version bans
+ * `lining-nums` and the rest of the `font-variant-numeric` value set too,
+ * with no "unless paired with X" escape hatch.
  *
  * This file is intentionally separate from `cross-page-consistency.test.ts`:
  * #2578 owns that file this wave, and every later ticket that wants a
  * detail-token rule should append here rather than open a third file.
  *
  * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2610
+ * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2579
+ * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2516
  */
 
 import { describe, it, expect } from "vitest";
@@ -23,22 +39,23 @@ const srcDir = resolve(__dirname, "../..");
 const globalsCss = readFileSync(resolve(srcDir, "app/globals.css"), "utf8");
 
 const SELF = "app/__tests__/detail-tokens-consistency.test.ts";
-/** #2637 owns this tree this wave — it still carries bare `tabular-nums`
- *  (`StandingsTable`, `PlayerCard`, `TeamAgendaRow`, `YouthDirectory`) that
- *  #2610 does not touch. Fold it back into scope once #2637 lands. */
-const TEAM_OWNED = /^components\/team\//;
 
 /**
- * Every first-party `.ts`/`.tsx` source file, minus this guard and #2637's
- * tree. `.ts` matters as much as `.tsx` here — `fieldChrome.ts`,
- * `button-styles.ts` and `press-down.ts` are dedicated class-string modules
- * (no JSX at all) that a `**\/*.tsx`-only glob would silently never scan,
- * `fieldChrome.ts` being the exact file globals.css's own S8 comment names
- * as an audited site (#2610 review, round 1).
+ * Every first-party `.ts`/`.tsx` source file, minus this guard. `.ts`
+ * matters as much as `.tsx` here — `fieldChrome.ts`, `button-styles.ts` and
+ * `press-down.ts` are dedicated class-string modules (no JSX at all) that a
+ * `**\/*.tsx`-only glob would silently never scan, `fieldChrome.ts` being
+ * the exact file globals.css's own S8 comment names as an audited site
+ * (#2610 review, round 1).
+ *
+ * `components/team/` used to be excluded here while #2637 owned it for a
+ * separate wave — that ticket shipped (closed), so the tree is back in
+ * scope: it is exactly where `StandingsTable`, `PlayerCard`, `TeamAgendaRow`
+ * and `YouthDirectory` live, four of #2579's thirteen files.
  */
 const sourceFiles = globSync(["**/*.tsx", "**/*.ts"], { cwd: srcDir })
   .sort()
-  .filter((relPath) => relPath !== SELF && !TEAM_OWNED.test(relPath));
+  .filter((relPath) => relPath !== SELF);
 
 /** Shipped behaviour only — no tests, no stories. */
 const productionSources = sourceFiles.filter(
@@ -736,34 +753,85 @@ describe("hover-underline-thicken exists, is layered, and respects reduced motio
 });
 
 // ---------------------------------------------------------------------------
-// Y4 — scores and tabulated numbers read in a consistent figure set;
-// tabular-nums never ships alone (measured inert on every face this site
-// uses — decision-sheet §8, docs/design/mockups/2516-numerals/candidates.html).
-// Expression-scoped, like S8: `lining-nums` (or a mono face) must sit in the
-// SAME class-list expression as `tabular-nums`, not merely the same file.
+// Y4 (rewritten by #2579) — zero figure-style utilities anywhere. Every
+// `font-variant-numeric` value — `tabular-nums`, `lining-nums`,
+// `oldstyle-nums`, `proportional-nums`, `slashed-zero`, `diagonal-fractions`,
+// `stacked-fractions` — is banned outright, full stop. No pairing excuses it
+// (that was the old Y4's rule, and #2516 measured that `lining-nums` doesn't
+// even deliver a working tabular set on either display face — see the file
+// header). Alignment for a column of figures comes from choosing a mono
+// face, which is monospaced by construction, never from a class. A number
+// that is the *subject* of its surface keeps its display face and inherits
+// that family's default figure set (already oldstyle, measured identical to
+// `oldstyle-nums` on every Freight face — no class needed to get it).
 // ---------------------------------------------------------------------------
 
-describe("tabular-nums never ships without lining-nums or a mono face, in the same expression (Y4)", () => {
+/** The complete `font-variant-numeric` figure-style value set Tailwind v4
+ *  generates a utility for. `normal-nums` (the reset value) and `ordinal`
+ *  (a glyph-shape feature unrelated to digit width/spacing) are deliberately
+ *  excluded — this rule bans figure-STYLE utilities, not the whole
+ *  namespace. */
+const FIGURE_STYLE_UTILITIES = [
+  "tabular-nums",
+  "lining-nums",
+  "oldstyle-nums",
+  "proportional-nums",
+  "slashed-zero",
+  "diagonal-fractions",
+  "stacked-fractions",
+] as const;
+
+describe("zero figure-style utilities anywhere — alignment comes from the face, not a class (Y4)", () => {
   it.each(productionSources)(
-    "%s — every tabular-nums finds lining-nums or font-mono in its own class-list expression",
+    "%s — no class-list expression carries a font-variant-numeric figure-style utility",
     (relPath) => {
       const bags = bagsByFile.get(relPath)!;
       for (const bag of bags) {
-        if (!bag.has("tabular-nums")) continue;
-        const worksAnotherWay = bag.has("lining-nums") || bag.has("font-mono");
-        expect(worksAnotherWay).toBe(true);
+        for (const utility of FIGURE_STYLE_UTILITIES) {
+          expect(bag.has(utility)).toBe(false);
+        }
       }
     },
   );
 
-  it("fixture: tabular-nums on one element is not excused by lining-nums on an unrelated one", () => {
+  // Bisected against two deliberately-broken fixtures — one direct class
+  // literal, one nested inside a cn(...) conditional — to prove the rule
+  // actually goes red before trusting it goes green on the real tree.
+
+  it("fixture: catches a direct class literal", () => {
+    const source = `<span className="font-display-big tabular-nums" />`;
+    const bags = findBagSpans(source).map(classTokens);
+    const violated = bags.some((bag) =>
+      FIGURE_STYLE_UTILITIES.some((utility) => bag.has(utility)),
+    );
+    expect(violated).toBe(true);
+  });
+
+  it("fixture: catches a figure-style utility nested inside a cn(...) conditional branch", () => {
     const source = `
-      <span className="font-display tabular-nums" />
-      <span className="lining-nums" />
+      <span
+        className={cn(
+          "font-display-big font-black",
+          isScore ? "lining-nums" : "text-ink-muted",
+        )}
+      />
     `;
     const bags = findBagSpans(source).map(classTokens);
-    const tabularBag = bags.find((b) => b.has("tabular-nums"))!;
-    expect(tabularBag.has("lining-nums")).toBe(false);
-    expect(tabularBag.has("font-mono")).toBe(false);
+    const violated = bags.some((bag) =>
+      FIGURE_STYLE_UTILITIES.some((utility) => bag.has(utility)),
+    );
+    expect(violated).toBe(true);
+  });
+
+  it("fixture: a clean mono tag and a clean display-face subject both pass", () => {
+    const source = `
+      <span className="font-mono text-mono-sm" />
+      <span className="font-display-big font-black" />
+    `;
+    const bags = findBagSpans(source).map(classTokens);
+    const violated = bags.some((bag) =>
+      FIGURE_STYLE_UTILITIES.some((utility) => bag.has(utility)),
+    );
+    expect(violated).toBe(false);
   });
 });
