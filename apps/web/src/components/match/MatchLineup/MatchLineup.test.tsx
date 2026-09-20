@@ -94,6 +94,10 @@ describe("MatchLineup", () => {
     });
   });
 
+  // RULED (#3029): #2621 governs the lineup row's shirt number, not #2516
+  // rule 1's "a shirt number beside a name" tag example — a shirt number
+  // here is an identity mark, not a datum being tagged, so it keeps the
+  // display register.
   describe("shirt number register (#2621)", () => {
     it.each<[number | undefined, string]>([
       [9, "9"],

@@ -419,10 +419,14 @@ export function HeroMatchScoreBar({
         />
         <span
           className={cn(
-            // lining-nums, not tabular-nums (#2610) — the inert figure-set
-            // fix; see globals.css's reserved-border block for the sibling
-            // decision this ships alongside.
-            "font-display-big text-ink min-w-[60px] text-center leading-none font-black tracking-[-0.01em] lining-nums",
+            // A score inside an article's hero score bar is a TAG on the
+            // article, not the page's subject (#2516 rule 1) — mono (#2579
+            // supersedes #2610's lining-nums).
+            // font-bold, not font-black (#2579 review): IBM Plex Mono self-
+            // hosts only 400/500/600/700 (app/layout.tsx), so a requested
+            // 900 was already clamping to 700 — font-bold names what
+            // actually renders instead of a dead heavier-weight class.
+            "text-ink min-w-[60px] text-center font-mono leading-none font-bold tracking-[-0.01em]",
             hasScore ? "text-[24px]" : "text-[16px]",
           )}
         >

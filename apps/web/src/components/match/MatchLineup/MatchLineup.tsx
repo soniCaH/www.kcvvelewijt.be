@@ -257,11 +257,20 @@ function PlayerRow({ player }: { player: LineupPlayer }) {
           name; an absent one (see `formatShirtNumber`) is `aria-hidden` so
           it never joins the row's text. The keeper hint ships as a
           separate `sr-only` sibling either way, so a numberless KCVV
-          keeper still announces "Keeper" rather than "— Keeper". */}
+          keeper still announces "Keeper" rather than "— Keeper".
+
+          RULED (#3029): #2621 governs here, not #2516 rule 1. #2516 rule 1's
+          "a shirt number beside a name" tag example does not reach the
+          lineup row — the owner's ruling is that a shirt number in this
+          context is an identity mark, not a datum being tagged, so it
+          keeps the display register #2621 gave it. `lining-nums` stays
+          deleted regardless — that's #2516 rule 2 (no font-variant-numeric
+          utility, anywhere), which was never in dispute and is enforced
+          tree-wide by the Y4 guard independent of this family question. */}
       <span
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center",
-          "font-display text-[15px] leading-none font-black italic lining-nums",
+          "font-display text-[15px] leading-none font-black italic",
           numberBg,
         )}
       >

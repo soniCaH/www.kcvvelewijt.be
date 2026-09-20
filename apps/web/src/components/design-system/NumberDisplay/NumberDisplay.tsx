@@ -10,7 +10,6 @@ export interface NumberDisplayProps {
   size?: NumberDisplaySize;
   tone?: NumberDisplayTone;
   prefix?: string;
-  suffix?: string;
   label?: string;
   as?: NumberDisplayAs;
   className?: string;
@@ -34,7 +33,6 @@ export function NumberDisplay({
   size = "display-xl",
   tone = "ink",
   prefix,
-  suffix,
   label,
   as = "span",
   className,
@@ -46,12 +44,20 @@ export function NumberDisplay({
   const numberSection = (
     <span
       className={cn(
-        // Lining figures (#2174, tabular-nums dropped in #2610): equal-height
-        // digits so stat numbers read uniformly (vs the oldstyle default used
-        // in prose). `tabular-nums` did nothing here — the kit ships no
-        // `tnum` feature on any face this site uses — so it's removed rather
-        // than kept as dead weight.
-        "font-display-big inline-flex items-baseline gap-1.5 font-black lining-nums",
+        // <NumberDisplay> is the SUBJECT of its surface (#2516 rule 1: the
+        // raffle stats on /club/ultras via RaffleCallout, and the shirt
+        // number on /spelers/[slug] via PlayerHero.tsx), so it keeps its
+        // display face and adds no font-variant-numeric class at all (#2579).
+        // No class needed to get oldstyle figures — the family's default
+        // figure set already IS oldstyle, measured byte-identical to
+        // `oldstyle-nums` on every Freight face. `lining-nums` used to be
+        // set here on the (measured false) premise that it delivered an
+        // equal-width tabular set; #2516 re-measured it and found the
+        // opposite — on `freight-big-pro` it changes digit widths without
+        // ever equalising them (spread 47.4 → 37.4). `tabular-nums` was
+        // never a candidate either: the kit ships no `tnum` feature on any
+        // face this site uses.
+        "font-display-big inline-flex items-baseline gap-1.5 font-black",
         SIZE_CLASS[size],
         TONE_CLASS[tone],
       )}
@@ -67,11 +73,6 @@ export function NumberDisplay({
           </span>
         ))}
       <span>{value}</span>
-      {suffix && (
-        <span className="font-display text-[0.55em] font-semibold italic">
-          {suffix}
-        </span>
-      )}
     </span>
   );
 

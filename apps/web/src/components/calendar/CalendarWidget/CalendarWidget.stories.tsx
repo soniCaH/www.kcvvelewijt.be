@@ -174,10 +174,10 @@ export const AgendaView: Story = {
  * A finished match's score alongside the week's scheduled `vs` fixtures
  * (#2884) — the three-story baseline set above only ever set
  * `scoreDisplay: { type: "vs" }`, so `CalendarWeek`'s composed week-grid card
- * (the `{ type: "score" }` branch touched by #2610's `lining-nums` fix) had
- * no `CalendarWidget` baseline exercising it. Own `feedWithPlayedMatch`, not
- * the shared `feed`, so this is the only story whose baseline carries the
- * score row.
+ * (the `{ type: "score" }` branch, now mono per #2579's subject/tag rule —
+ * previously #2610's `lining-nums` fix) had no `CalendarWidget` baseline
+ * exercising it. Own `feedWithPlayedMatch`, not the shared `feed`, so this
+ * is the only story whose baseline carries the score row.
  */
 export const WeekViewWithPlayedMatch: Story = {
   args: { feed: feedWithPlayedMatch },

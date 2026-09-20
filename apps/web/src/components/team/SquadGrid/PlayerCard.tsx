@@ -111,7 +111,11 @@ export function PlayerCard({
           <span
             data-testid="player-card-number"
             aria-hidden="true"
-            className="bg-jersey-deep text-cream border-ink font-display-big absolute top-1.5 left-1.5 grid h-[26px] w-[26px] place-items-center border-[1.5px] text-sm font-black tabular-nums"
+            // A shirt number beside a name is a TAG, not the card's subject
+            // (#2516 rule 1) — mono (#2579 supersedes #2610's tabular-nums).
+            // font-bold, not font-black (#2579 review): IBM Plex Mono loads
+            // only up to 700, so 900 was already clamping to 700.
+            className="bg-jersey-deep text-cream border-ink absolute top-1.5 left-1.5 grid h-[26px] w-[26px] place-items-center border-[1.5px] font-mono text-sm font-bold"
           >
             {jerseyNumber}
           </span>

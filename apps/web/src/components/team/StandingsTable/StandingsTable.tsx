@@ -231,7 +231,7 @@ export function StandingsTable({
                   {/* Position — pinned left (anchor group) */}
                   <td
                     className={cn(
-                      "text-ink-muted bg-cream sticky left-0 z-10 w-12 py-2 pr-2 pl-4 tabular-nums",
+                      "text-ink-muted bg-cream sticky left-0 z-10 w-12 py-2 pr-2 pl-4",
                       isKcvv && cn(KCVV_TINT, KCVV_ACCENT_RULE),
                     )}
                   >
@@ -255,31 +255,37 @@ export function StandingsTable({
                   </td>
 
                   {/* M */}
-                  <td className="text-ink py-2 pr-2 text-right tabular-nums">
+                  <td className="text-ink py-2 pr-2 text-right">
                     {entry.played}
                   </td>
 
-                  <td className="text-ink py-2 pr-2 text-right tabular-nums">
-                    {entry.won}
-                  </td>
-                  <td className="text-ink py-2 pr-2 text-right tabular-nums">
+                  <td className="text-ink py-2 pr-2 text-right">{entry.won}</td>
+                  <td className="text-ink py-2 pr-2 text-right">
                     {entry.drawn}
                   </td>
-                  <td className="text-ink py-2 pr-2 text-right tabular-nums">
+                  <td className="text-ink py-2 pr-2 text-right">
                     {entry.lost}
                   </td>
 
                   {/* Goal difference */}
-                  <td className="text-ink py-2 pr-2 text-right tabular-nums">
+                  <td className="text-ink py-2 pr-2 text-right">
                     {entry.goal_difference > 0
                       ? `+${entry.goal_difference}`
                       : entry.goal_difference}
                   </td>
 
-                  {/* Points — display-big black, pinned right (anchor group) */}
+                  {/* Points — mono bold (inherited mono from the table),
+                      pinned right (anchor group). A standings column is the
+                      textbook case for rule 3 (#2516): alignment comes from
+                      the mono face, by construction, never from a
+                      figure-style class — `tabular-nums` did nothing here,
+                      and #2579 removes it from every cell in this table.
+                      font-bold, not font-black (#2579 review): IBM Plex
+                      Mono loads only up to 700, so 900 was already
+                      clamping to 700. */}
                   <td
                     className={cn(
-                      "font-display-big text-ink bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-black tabular-nums",
+                      "text-ink bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-bold",
                       isKcvv && KCVV_TINT,
                     )}
                   >

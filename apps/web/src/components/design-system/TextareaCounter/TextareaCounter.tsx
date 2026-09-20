@@ -35,7 +35,9 @@ export function TextareaCounter({
       data-over={over || undefined}
       className={cn(
         "pointer-events-none absolute right-3.5 bottom-2 px-1 py-px",
-        "bg-cream/85 font-mono text-[11px] leading-none tabular-nums",
+        // Already mono; #2579 drops `tabular-nums` (inert on this kit — no
+        // `tnum` feature — and mono aligns by construction).
+        "bg-cream/85 font-mono text-[11px] leading-none",
         over ? "text-alert" : "text-ink/60",
         className,
       )}

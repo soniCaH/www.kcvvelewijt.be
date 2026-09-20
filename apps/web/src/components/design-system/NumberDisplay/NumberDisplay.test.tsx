@@ -38,11 +38,6 @@ describe("NumberDisplay", () => {
     expect(screen.getByText("#")).toBeInTheDocument();
   });
 
-  it("renders suffix when provided", () => {
-    render(<NumberDisplay value={28} suffix="+" />);
-    expect(screen.getByText("+")).toBeInTheDocument();
-  });
-
   it("renders label when provided", () => {
     render(<NumberDisplay value={28} label="WEDSTRIJDEN" />);
     expect(screen.getByText("WEDSTRIJDEN")).toBeInTheDocument();

@@ -314,9 +314,15 @@ export function TeamAgendaRow({
       )}
       aria-label={`${day} ${month}`}
     >
+      {/* Day-of-month is a TAG on the stub, not the row's subject (#2516
+          rule 4) — mono, same FAMILY as `MatchStripView`'s and
+          `CalendarMonth`'s already-conformant day stubs (#2579 review:
+          not the same weight — `MatchStripView`'s stub is `font-bold`,
+          this one carries no explicit weight class, i.e. 400; rule 5
+          leaves weight to the surface, so that's not unified here). */}
       <span
         className={cn(
-          "font-display-big text-[18px] leading-none",
+          "font-mono text-[18px] leading-none",
           featured ? "text-white" : "text-ink",
         )}
       >
@@ -514,18 +520,23 @@ export function TeamAgendaRow({
   // One score/time-slot recipe, reused by the normal row's desktop span, its
   // mobile span, and the placeholder's single span — each supplies its own
   // size/padding, but the size always lives INSIDE the `showUpcomingLabel`
-  // ternary's non-mono branch, never appended after via a second `cn()`
-  // call. `cn` is `twMerge`: appending a size class after the fact once
-  // silently overrode the 11px mono register with the display face's size
-  // whenever `upcomingLabel` was set, making "GEPLAND" render at 18px on
+  // ternary's branch, never appended after via a second `cn()` call. `cn` is
+  // `twMerge`: appending a size class after the fact once silently overrode
+  // the 11px mono register with the other branch's size whenever
+  // `upcomingLabel` was set, making "GEPLAND" render at 18px on
   // `/tegenstander`.
+  //
+  // A score in this row is a TAG, not the row's subject (#2516 rule 1) — the
+  // non-upcoming branch used to be `font-display-big tabular-nums`; #2579
+  // moves it to mono, which aligns by construction, and drops the class,
+  // which was inert (the kit ships no `tnum` feature on any face).
   const scoreSlotClass = (paddingClass: string, sizeClass: string) =>
     cn(
       "shrink-0 leading-none",
       paddingClass,
       showUpcomingLabel
         ? "font-mono text-[11px] font-semibold tracking-wider uppercase"
-        : cn("font-display-big tabular-nums", sizeClass),
+        : cn("font-mono", sizeClass),
       scoreToneClass,
     );
 

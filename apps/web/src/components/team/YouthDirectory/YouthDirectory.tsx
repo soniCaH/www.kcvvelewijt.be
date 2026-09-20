@@ -192,7 +192,12 @@ export function YouthDirectory({
                       data-tone={cardTone}
                       className={cn(
                         TONE_CLASS[cardTone],
-                        "font-display-big mt-2 text-center text-2xl font-black tabular-nums",
+                        // Not a figure (#2516 review) — `caption` renders a
+                        // string like "U21", not a number, so it keeps its
+                        // display face and never carried a real figure-style
+                        // rule to begin with. `tabular-nums` was inert dead
+                        // weight; #2579 drops it.
+                        "font-display-big mt-2 text-center text-2xl font-black",
                       )}
                     >
                       {caption}

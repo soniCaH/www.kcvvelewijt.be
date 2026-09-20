@@ -132,10 +132,10 @@ function WeekMatchCard({ match }: { match: CalendarMatch }) {
             {match.time}
           </span>
         )}
-        {/* lining-nums, not tabular-nums (#2610) — the kit's tabular figures
-            are inert. */}
+        {/* A score in a compact week card is a TAG (#2516 rule 1) — mono
+            (#2579 supersedes #2610's lining-nums). */}
         {match.scoreDisplay.type === "score" && (
-          <span className="text-ink font-display text-[11px] font-bold lining-nums">
+          <span className="text-ink font-mono text-[11px] font-bold">
             {match.scoreDisplay.home}-{match.scoreDisplay.away}
           </span>
         )}

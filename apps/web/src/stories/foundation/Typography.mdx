@@ -49,10 +49,25 @@ async, each is backed by a metric-matched (`size-adjust`) fallback — `Freight 
 > families were retired in #2154. Headings use Freight Display via
 > `--font-display`; **body moved from Montserrat to Freight Sans Pro in #2174**
 > (`--font-family-body`), reversing master-design decision-log entry 19.
-> Freight Sans defaults to oldstyle figures in prose; stat surfaces opt into
-> lining figures (`lining-nums`) — `tabular-nums` does nothing on any face
-> this site uses (the kit ships no `tnum` feature) and is not part of the
-> fix (#2610).
+> Every Freight face defaults to oldstyle figures — measured byte-identical
+> to the `oldstyle-nums` utility on all three — and **no
+> `font-variant-numeric` utility is ever written in web CSS** (#2579,
+> superseding #2610's `lining-nums` fix): `tabular-nums` does nothing on any
+> face this site uses (the kit ships no `tnum` feature), and `lining-nums`
+> changes digit widths on both display faces without ever equalising them,
+> so it was never a working tabular set either. A number that is its
+> surface's own **subject** keeps its display face and this default
+> oldstyle set; a number that **tags** something else (a score in a row, a
+> squad-card shirt number beside a name, a standings cell) renders
+> `font-mono` instead, which aligns by construction rather than by class.
+> **Named exception:** the *lineup row's* shirt number (not the squad
+> card's) stays in the display register — #2621/#3029 ruled it an identity
+> mark, not a tagged datum. Scoped to that one surface only; see DESIGN.md's
+> Subject/Tag Rule for the full reasoning. **Another exception, by
+> construction:** `/share`'s satori-rendered card sets `fontVariantNumeric`
+> as an inline style — a different renderer entirely, out of scope per
+> #2470 and structurally outside what the class-list guard (`Y4`,
+> `detail-tokens-consistency.test.ts`) can see.
 
 ---
 
@@ -65,7 +80,7 @@ The samples below render live from the CSS variables.
 <FontSample label="font-body" cssVar="--font-family-body" size="1rem" weight={400} sample="De wedstrijd begint om 15:00. Alle supporters zijn welkom op het veld van KCVV Elewijt." note="Default body text (Freight Sans Pro)" />
 <FontSample label="font-mono" cssVar="--font-mono" size="1.25rem" weight={700} sample="2 — 1   90′   45+2′" note="Scores, timestamps, countdowns, keyboard shortcuts (IBM Plex Mono)" />
 
-> **Display vs Big — when to use which.** `--font-display` (Freight Display) is the default heading serif for all heading *text* — editorial headlines, section titles, hero lines, the italic accent word, and global `h1–h6` (weights 600–700). `--font-display-big` (Freight Big) is the heavier poster cut, **always `font-black` (900)**, reserved for the single largest heading tier (`<EditorialHeading size="display-2xl">`) and every big **number** — `<NumberDisplay>`, match scores, standings points, jersey-number discs, and monogram badges (numbers add `lining-nums`, not `tabular-nums` — #2610).
+> **Display vs Big — when to use which.** `--font-display` (Freight Display) is the default heading serif for all heading *text* — editorial headlines, section titles, hero lines, the italic accent word, and global `h1–h6` (weights 600–700). `--font-display-big` (Freight Big) is the heavier poster cut, **always `font-black` (900)**, reserved for the single largest heading tier (`<EditorialHeading size="display-2xl">`) and a number that is its surface's own **subject** — `<NumberDisplay>` and the match-detail hero score are the two sites #2579's audited 23-site/13-file inventory keeps on this face. A number that instead **tags** something else — a fixture-row score, a jersey-number disc beside a name, a standings cell, a day-of-month stub — renders `font-mono`, not `font-display-big`, and neither register ever adds a `font-variant-numeric` class (#2579, superseding #2610's `lining-nums` fix — see the callout above). **Not exhaustive:** `MatchHero.tsx`'s stub date (weekday + day-of-month, one span) and `OpponentSummaryCard.tsx`'s 28px stat cells still render `font-display-big` and were never part of #2516's audited inventory — both look like tag candidates under rule 1, not confirmed exceptions, and are open gaps for a follow-up rather than sites this ticket silently expanded into.
 
 ---
 
