@@ -135,7 +135,7 @@ vi.mock("@/lib/repositories/staff.repository", async (importOriginal) => {
 
 import SponsorsPage from "@/app/(landing)/sponsors/page";
 import CalendarPage from "@/app/(main)/kalender/page";
-import JeugdPage from "@/app/(landing)/jeugd/page";
+import JeugdPage from "@/app/(landing)/jeugd/(index)/page";
 import PlayerPage from "@/app/(main)/spelers/[slug]/page";
 import StaffPage from "@/app/(main)/staf/[slug]/page";
 import MatchPage from "@/app/(main)/wedstrijd/[matchId]/page";

@@ -21,10 +21,19 @@ interface LegacyYouthProps {
  */
 /**
  * #2963: this route has no not-found metadata of its own, so an unknown age
- * token inherited the root layout's indexable metadata — and `(landing)` has
- * a `loading.tsx`, whose Suspense boundary flushes the shell (and its 200)
- * before `notFound()` runs. A resolver either redirects or 404s, so static
- * noindex metadata is always correct here; no second read is needed.
+ * token inherited the root layout's indexable metadata. A resolver either
+ * redirects or 404s, so static noindex metadata is always correct here; no
+ * second read is needed.
+ *
+ * **This route no longer soft-404s (#2791).** The earlier note here said
+ * `(landing)`'s `loading.tsx` flushed the shell, and its 200, before
+ * `notFound()` could run. That was true until #2791 moved that file into the
+ * `(home)` route group and `jeugd/loading.tsx` into `jeugd/(index)`: nothing
+ * above `/jeugd/[slug]` is a Suspense boundary now, and neither layout in the
+ * chain carries one, so an unknown age token returns a real **404** rather
+ * than a 200. That is the outcome #2968 wants, arrived at sideways — it is
+ * not a licence to assume the other `#2963` sites moved with it. Every one of
+ * them still sits under its own `loading.tsx` and still soft-404s.
  */
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
