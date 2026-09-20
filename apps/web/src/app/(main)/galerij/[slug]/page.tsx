@@ -219,7 +219,7 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
         imageCount={images.length}
       />
 
-      <PageContainer as="main" className="pb-12 sm:pb-16">
+      <PageContainer as="main" className="pb-12 lg:pb-16">
         <PageHero
           register="minimal"
           kicker="KCVV Elewijt · Beelden"
