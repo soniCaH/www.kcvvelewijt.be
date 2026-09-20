@@ -281,3 +281,60 @@ describe("/wedstrijd/[matchId] classifies a failed ranking read (#2778)", () => 
     expect(screen.getByText(/even niet beschikbaar/i)).toBeInTheDocument();
   });
 });
+
+describe("/wedstrijd/[matchId] maps an unknown match id to a real notFound(), not a 500 (#3034)", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockGetMatchDetail.mockReset();
+    mockGetRanking.mockReset();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  // Root cause: `Effect.catchTag("HttpNotFound", () => Effect.sync(() =>
+  // notFound()))` throws Next's sentinel *inside* the Effect fiber.
+  // `ManagedRuntime.runPromise` never rejects with the error a defect threw —
+  // it rejects with a fresh `FiberFailureImpl` that copies only
+  // `message`/`name`/`stack`, dropping the non-standard `.digest` property
+  // `isHTTPAccessFallbackError` (`next/dist/client/components/http-access-
+  // fallback`) keys off. `app-render.tsx`'s catch can then no longer
+  // recognise the rejection as `NEXT_HTTP_ERROR_FALLBACK` and falls through
+  // to `res.statusCode = 500` — a real 500 for a route that should 404.
+  //
+  // This asserts the fix at the one place `MatchPage` actually reaches it:
+  // the rejection the page's own `await fetchMatchOrNotFound(...)` produces
+  // for a genuinely-unknown id must carry `notFound()`'s own `.digest`, not
+  // an unrecognisable `FiberFailure` wrapper.
+  it("a HttpNotFound match-detail read rejects with notFound()'s own digest", async () => {
+    mockGetMatchDetail.mockReturnValue(
+      Effect.fail(new HttpNotFound({ error: "unknown match id" })),
+    );
+
+    const rejection = await MatchPage({
+      params: Promise.resolve({ matchId: "99999999" }),
+    }).then(
+      () => {
+        throw new Error("expected MatchPage to reject");
+      },
+      (error: unknown) => error,
+    );
+
+    expect(Runtime.isFiberFailure(rejection)).toBe(false);
+    expect(rejection).toMatchObject({
+      digest: expect.stringMatching(/^NEXT_HTTP_ERROR_FALLBACK;404/),
+    });
+  });
+
+  it("a real match id still resolves — the fix does not touch the success path", async () => {
+    mockGetMatchDetail.mockReturnValue(
+      Effect.succeed(leagueMatchFixture(3424)),
+    );
+    mockGetRanking.mockReturnValue(Effect.succeed([]));
+
+    await expect(
+      MatchPage({ params: Promise.resolve({ matchId: "3424" }) }),
+    ).resolves.toBeTruthy();
+  });
+});

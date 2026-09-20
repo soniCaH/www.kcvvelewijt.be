@@ -48,22 +48,41 @@ const PERMANENT_TAGS: ReadonlySet<BffError["_tag"]> = new Set(
 );
 
 /**
+ * Unwraps a rejected `Effect.runPromise`'s `FiberFailure` back to the value
+ * `Cause.squash` produces off it — the one shared three-step unwrap
+ * (`Runtime.isFiberFailure` guard, `Runtime.FiberFailureCauseId` symbol,
+ * `Cause.squash`) every consumer that needs to inspect *what* a rejection
+ * actually was needs. Returns `undefined` for anything that is not a
+ * `FiberFailure` at all (defensive: a plain `TypeError`, a value thrown by
+ * non-Effect code) rather than throwing, so callers can treat "not a
+ * FiberFailure" as their own not-applicable case.
+ *
+ * Generic — not BFF-specific — but lives here because `isPermanentBffFailure`
+ * below was this repo's first consumer of the unwrap. `runtime.ts`'s
+ * `runPromise` is the second (#3034); two independent hand-copies of the same
+ * three-step unwrap is exactly the peer-drift root `CLAUDE.md` warns about —
+ * the next person to touch one would silently not touch the other.
+ */
+export function squashFiberFailure(error: unknown): unknown {
+  return Runtime.isFiberFailure(error)
+    ? Cause.squash(error[Runtime.FiberFailureCauseId])
+    : undefined;
+}
+
+/**
  * True when a value caught from a rejected `Effect.runPromise` carries one of
  * `PERMANENT_BFF_TAGS`.
  *
- * `Effect.runPromise` rejects with a `FiberFailure`, not the tagged error
- * itself — the tag is one `Cause.squash` away, behind the
- * `Runtime.FiberFailureCauseId` symbol. A value that is not a `FiberFailure`
- * at all (defensive: a plain `TypeError`, a value thrown by non-Effect code)
- * reads as **not** permanent, so it still throws and gets the ISR-fallback
- * treatment rather than silently degrading on a shape this function does not
- * recognise.
+ * A value that is not a `FiberFailure` at all (`squashFiberFailure` returns
+ * `undefined`) reads as **not** permanent, so it still throws and gets the
+ * ISR-fallback treatment rather than silently degrading on a shape this
+ * function does not recognise.
  *
  * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2636 — finding 3
  */
 export function isPermanentBffFailure(error: unknown): boolean {
-  if (!Runtime.isFiberFailure(error)) return false;
-  const squashed = Cause.squash(error[Runtime.FiberFailureCauseId]);
+  const squashed = squashFiberFailure(error);
+  if (squashed === undefined) return false;
   const tag = (squashed as { _tag?: unknown })?._tag;
   return typeof tag === "string" && PERMANENT_TAGS.has(tag as BffError["_tag"]);
 }
