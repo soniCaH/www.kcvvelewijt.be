@@ -348,7 +348,10 @@ function StripDate({
   return (
     <span
       className={cn(
-        "text-mono-sm w-14 shrink-0 font-mono font-bold whitespace-nowrap tabular-nums",
+        // Day-of-month tag (#2516 rule 4) — already mono; #2579 drops
+        // `tabular-nums`, which did nothing (the kit ships no `tnum`
+        // feature) and mono aligns by construction anyway.
+        "text-mono-sm w-14 shrink-0 font-mono font-bold whitespace-nowrap",
         dark ? "text-cream" : "text-ink",
         today && "uppercase",
       )}

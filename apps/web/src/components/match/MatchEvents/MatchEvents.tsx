@@ -415,9 +415,10 @@ function EventRow({
   const nameTint = highlighted ? "text-jersey-deep" : "text-ink";
   return (
     <div className="grid grid-cols-[36px_22px_1fr_1fr_22px_20px] items-center gap-3 py-3 md:gap-4">
-      {/* Minute — display-big numeric, tight tracking. lining-nums, not
-          tabular-nums (#2610) — the kit's tabular figures are inert. */}
-      <span className="font-display-big text-ink text-[18px] leading-none font-black tracking-[-0.025em] lining-nums">
+      {/* Minute — a TAG beside a scorer (#2516 rule 1), not the surface's
+          subject, so it moves to mono: alignment and figure shape come from
+          the face, not a class (#2579 supersedes #2610's lining-nums). */}
+      <span className="text-ink font-mono text-[18px] leading-none font-black tracking-[-0.025em]">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
 
@@ -483,9 +484,10 @@ function SingleSideEventRow({
 }) {
   return (
     <div className="grid grid-cols-[36px_22px_1fr] items-center gap-3 py-3 md:gap-4">
-      {/* lining-nums, not tabular-nums (#2610) — the kit's tabular figures
-          are inert. */}
-      <span className="font-display-big text-ink text-[18px] leading-none font-black tracking-[-0.025em] lining-nums">
+      {/* Minute — a TAG beside a scorer (#2516 rule 1); mono, same as the
+          two-sided row's minute above (#2579 supersedes #2610's
+          lining-nums). */}
+      <span className="text-ink font-mono text-[18px] leading-none font-black tracking-[-0.025em]">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
       <span className="flex items-center justify-center">

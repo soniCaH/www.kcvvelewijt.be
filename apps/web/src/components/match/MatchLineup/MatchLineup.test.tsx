@@ -94,13 +94,13 @@ describe("MatchLineup", () => {
     });
   });
 
-  describe("shirt number register (#2621)", () => {
+  describe("shirt number register (#2516 rule 1, superseding D7/#2621)", () => {
     it.each<[number | undefined, string]>([
       [9, "9"],
       [0, "—"],
       [undefined, "—"],
     ])(
-      "sets shirt number %s in the display register, rendering %s",
+      "sets shirt number %s in the mono register (a TAG beside the player's name), rendering %s",
       (number, expected) => {
         const lineup: LineupPlayer[] = [
           {
@@ -122,9 +122,9 @@ describe("MatchLineup", () => {
           textNode.getAttribute("aria-hidden") === "true"
             ? textNode.parentElement!
             : textNode;
-        expect(badge).toHaveClass("font-display");
-        expect(badge).toHaveClass("italic");
-        expect(badge).not.toHaveClass("font-mono");
+        expect(badge).toHaveClass("font-mono");
+        expect(badge).not.toHaveClass("font-display");
+        expect(badge).not.toHaveClass("italic");
         expect(screen.queryByText("0")).not.toBeInTheDocument();
       },
     );

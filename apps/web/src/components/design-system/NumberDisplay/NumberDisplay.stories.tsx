@@ -51,10 +51,6 @@ export const WithPrefix: Story = {
   args: { value: 55, prefix: "nr.", size: "display-xl", tone: "ink" },
 };
 
-export const WithSuffix: Story = {
-  args: { value: 28, suffix: "+", size: "display-xl", tone: "jersey-deep" },
-};
-
 export const LabeledRow: Story = {
   args: { value: 0 },
   render: () => (

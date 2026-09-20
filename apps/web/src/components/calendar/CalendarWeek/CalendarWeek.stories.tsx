@@ -112,10 +112,10 @@ export const WithTournament: Story = {
 };
 
 /**
- * A finished match with a score, among the week's scheduled ones (#2610) —
- * `weekMatches` above only exercises `scoreDisplay: { type: "vs" }`, so no
- * story previously rendered the `{ type: "score" }` branch this row's
- * lining-nums fix touches.
+ * A finished match with a score, among the week's scheduled ones (#2610,
+ * now mono per #2579's subject/tag rule) — `weekMatches` above only
+ * exercises `scoreDisplay: { type: "vs" }`, so no story previously rendered
+ * the `{ type: "score" }` branch this row's mono treatment touches.
  */
 export const WithPlayedMatch: Story = {
   args: {

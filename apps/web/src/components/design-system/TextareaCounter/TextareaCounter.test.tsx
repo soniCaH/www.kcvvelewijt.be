@@ -33,10 +33,10 @@ describe("TextareaCounter", () => {
     expect(screen.getByText("1/2")).toHaveAttribute("aria-hidden", "true");
   });
 
-  it("uses font-mono with tabular-nums for stable digit width", () => {
+  it("uses font-mono for stable digit width — no figure-style class needed, mono aligns by construction (#2579)", () => {
     render(<TextareaCounter current={1} max={2} />);
     const el = screen.getByText("1/2");
     expect(el).toHaveClass("font-mono");
-    expect(el).toHaveClass("tabular-nums");
+    expect(el).not.toHaveClass("tabular-nums");
   });
 });

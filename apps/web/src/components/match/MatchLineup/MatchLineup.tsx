@@ -248,20 +248,21 @@ function PlayerRow({ player }: { player: LineupPlayer }) {
         )}
       </span>
 
-      {/* Jersey number — set in the display register (D7, #2621): a shirt
-          number reads the way a number looks on a shirt, black italic,
-          while counts elsewhere on the page (minutes played, etc.) stay
-          mono. bg-warm for keepers, bg-ink for outfielders. The slot always
-          renders at a fixed size so a row without a number never shifts
-          against a row that has one. A known number stays the accessible
-          name; an absent one (see `formatShirtNumber`) is `aria-hidden` so
-          it never joins the row's text. The keeper hint ships as a
-          separate `sr-only` sibling either way, so a numberless KCVV
-          keeper still announces "Keeper" rather than "— Keeper". */}
+      {/* Jersey number — a shirt number beside a player's name is a TAG on
+          that name, not the row's subject (#2516 rule 1), so it reads in
+          mono like every other tag on this page (minutes played, etc.),
+          superseding D7/#2621's display-register italic treatment. bg-warm
+          for keepers, bg-ink for outfielders. The slot always renders at a
+          fixed size so a row without a number never shifts against a row
+          that has one. A known number stays the accessible name; an absent
+          one (see `formatShirtNumber`) is `aria-hidden` so it never joins
+          the row's text. The keeper hint ships as a separate `sr-only`
+          sibling either way, so a numberless KCVV keeper still announces
+          "Keeper" rather than "— Keeper". */}
       <span
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center",
-          "font-display text-[15px] leading-none font-black italic lining-nums",
+          "font-mono text-[15px] leading-none font-black",
           numberBg,
         )}
       >

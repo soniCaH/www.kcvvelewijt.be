@@ -179,9 +179,11 @@ function ScoreRegion({
       return (
         <div
           data-score-state="numeric"
-          // lining-nums, not tabular-nums (#2610): the kit's tabular figures
-          // are inert (no `tnum` feature); lining-nums is the working switch.
-          className="font-display-big text-ink flex items-baseline gap-2 text-[34px] leading-none font-black lining-nums"
+          // The scoreline is the SUBJECT of this page (#2516 rule 1), so it
+          // keeps its display face and adds no font-variant-numeric class
+          // (#2579 supersedes #2610's lining-nums here — see
+          // NumberDisplay.tsx for the full measurement this rests on).
+          className="font-display-big text-ink flex items-baseline gap-2 text-[34px] leading-none font-black"
         >
           {hasScores ? null : <span className="sr-only">vs</span>}
           <span aria-hidden={!hasScores}>
