@@ -248,21 +248,35 @@ function PlayerRow({ player }: { player: LineupPlayer }) {
         )}
       </span>
 
-      {/* Jersey number — a shirt number beside a player's name is a TAG on
-          that name, not the row's subject (#2516 rule 1), so it reads in
-          mono like every other tag on this page (minutes played, etc.),
-          superseding D7/#2621's display-register italic treatment. bg-warm
-          for keepers, bg-ink for outfielders. The slot always renders at a
-          fixed size so a row without a number never shifts against a row
-          that has one. A known number stays the accessible name; an absent
-          one (see `formatShirtNumber`) is `aria-hidden` so it never joins
-          the row's text. The keeper hint ships as a separate `sr-only`
-          sibling either way, so a numberless KCVV keeper still announces
-          "Keeper" rather than "— Keeper". */}
+      {/* Jersey number — set in the display register (D7, #2621): a shirt
+          number reads the way a number looks on a shirt, black italic,
+          while counts elsewhere on the page (minutes played, etc.) stay
+          mono. bg-warm for keepers, bg-ink for outfielders. The slot always
+          renders at a fixed size so a row without a number never shifts
+          against a row that has one. A known number stays the accessible
+          name; an absent one (see `formatShirtNumber`) is `aria-hidden` so
+          it never joins the row's text. The keeper hint ships as a
+          separate `sr-only` sibling either way, so a numberless KCVV
+          keeper still announces "Keeper" rather than "— Keeper".
+
+          #2579 REVIEW — OPEN CONFLICT, not settled here (see the decision
+          issue this comment's neighbouring commit links): #2516 rule 1
+          names "a shirt number beside a name" as its own tag example,
+          which would send this to mono. But #2621 — filed *after* #2516's
+          decision closed, and shipped sixteen days later — is the more
+          recent, more specific, supporter-facing call: "a shirt number
+          reads the way a number looks on a shirt — the display register,
+          black italic — while counts elsewhere stay mono." A later
+          decision cannot be superseded by an earlier one, so this reverts
+          to #2621's treatment pending an owner ruling. `lining-nums` is
+          NOT restored alongside it — that deletion is #2516 rule 2 (no
+          font-variant-numeric utility, anywhere), which is uncontested and
+          already enforced tree-wide by the Y4 guard regardless of how the
+          family question resolves. */}
       <span
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center",
-          "font-mono text-[15px] leading-none font-black",
+          "font-display text-[15px] leading-none font-black italic",
           numberBg,
         )}
       >

@@ -94,13 +94,19 @@ describe("MatchLineup", () => {
     });
   });
 
-  describe("shirt number register (#2516 rule 1, superseding D7/#2621)", () => {
+  // #2579 REVIEW — OPEN CONFLICT: #2516 rule 1 names this datum ("a shirt
+  // number beside a name") as a tag example, but #2621 — filed after #2516
+  // closed and shipped sixteen days later — is the more recent, more
+  // specific call, and a later decision cannot be superseded by an earlier
+  // one. Reverted to #2621's display register pending an owner ruling; see
+  // the decision issue linked from #2579 and from this branch's PR.
+  describe("shirt number register (#2621)", () => {
     it.each<[number | undefined, string]>([
       [9, "9"],
       [0, "—"],
       [undefined, "—"],
     ])(
-      "sets shirt number %s in the mono register (a TAG beside the player's name), rendering %s",
+      "sets shirt number %s in the display register, rendering %s",
       (number, expected) => {
         const lineup: LineupPlayer[] = [
           {
@@ -122,9 +128,9 @@ describe("MatchLineup", () => {
           textNode.getAttribute("aria-hidden") === "true"
             ? textNode.parentElement!
             : textNode;
-        expect(badge).toHaveClass("font-mono");
-        expect(badge).not.toHaveClass("font-display");
-        expect(badge).not.toHaveClass("italic");
+        expect(badge).toHaveClass("font-display");
+        expect(badge).toHaveClass("italic");
+        expect(badge).not.toHaveClass("font-mono");
         expect(screen.queryByText("0")).not.toBeInTheDocument();
       },
     );
