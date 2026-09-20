@@ -1,9 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useEffect } from "react";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { HubSearch } from "./HubSearch";
-import { HubSearchQueryProvider } from "./HubSearchQueryProvider";
+import {
+  HubSearchQueryProvider,
+  useHubSearchTopInsetPublisher,
+} from "./HubSearchQueryProvider";
 import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
@@ -71,6 +75,16 @@ function typeQuery(text: string) {
   fireEvent.focus(input);
   fireEvent.change(input, { target: { value: text } });
   return input;
+}
+
+/** Stands in for `<OrganigramSectionNav>`, the real publisher of the
+ *  pinned strip's height. */
+function InsetPublisher({ value }: { value: number }) {
+  const publish = useHubSearchTopInsetPublisher();
+  useEffect(() => {
+    publish(value);
+  }, [publish, value]);
+  return null;
 }
 
 describe("HubSearch", () => {
@@ -379,6 +393,15 @@ describe("HubSearch", () => {
  */
 describe("HubSearch — the hub handoff (#3043)", () => {
   beforeEach(() => {
+    // `mockSemantic` is module-level: reset it here too, or a `setSemantic`
+    // from one test leaks into the next (and out of this describe).
+    vi.clearAllMocks();
+    setSemantic({
+      results: [],
+      loading: false,
+      error: false,
+      executedQuery: "",
+    });
     FakeIntersectionObserver.reset();
     vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
   });
@@ -387,7 +410,9 @@ describe("HubSearch — the hub handoff (#3043)", () => {
     vi.unstubAllGlobals();
   });
 
-  const HERO_PLACEHOLDER = "Zoek een naam, functie of vraag…";
+  // The real page's hero placeholder (`OrganigramHero.tsx`), not the
+  // component default — the test should break if the page stops passing it.
+  const HERO_PLACEHOLDER = 'bv. "mijn kind is geblesseerd" of een naam…';
   const NAV_PLACEHOLDER = "Zoek…";
 
   function renderPair() {
@@ -397,6 +422,7 @@ describe("HubSearch — the hub handoff (#3043)", () => {
           members={HUB_SEARCH_MEMBERS}
           responsibilityPaths={HUB_SEARCH_PATHS}
           variant="hero"
+          placeholder={HERO_PLACEHOLDER}
         />
         <HubSearch
           members={HUB_SEARCH_MEMBERS}
@@ -411,23 +437,29 @@ describe("HubSearch — the hub handoff (#3043)", () => {
     return {
       hero,
       nav,
-      heroRoot: hero.closest("div.relative") as HTMLElement,
-      navRoot: nav.closest("div.relative") as HTMLElement,
+      heroRoot: hero.closest("[data-hub-search]") as HTMLElement,
+      navRoot: nav.closest("[data-hub-search]") as HTMLElement,
     };
   }
 
-  /** The observer watching one instance's own wrapper. */
-  function observerFor(root: HTMLElement) {
-    const observer = FakeIntersectionObserver.instances.find((instance) =>
+  /** The LIVE observer watching one instance's own wrapper, if it has one —
+   *  the last constructed, since the effect rebuilds when the section nav
+   *  publishes its measured inset and the earlier one is disconnected. */
+  function observersFor(root: HTMLElement) {
+    return FakeIntersectionObserver.instances.filter((instance) =>
       instance.observed.includes(root),
     );
-    if (!observer) throw new Error("no IntersectionObserver for that wrapper");
-    return observer;
+  }
+
+  function observerFor(root: HTMLElement) {
+    return observersFor(root).at(-1);
   }
 
   function scrollBehindChrome(root: HTMLElement) {
+    const observer = observerFor(root);
+    if (!observer) throw new Error("no IntersectionObserver for that wrapper");
     act(() => {
-      observerFor(root).trigger([{ isIntersecting: false }]);
+      observer.trigger([{ isIntersecting: false }]);
     });
   }
 
@@ -439,7 +471,71 @@ describe("HubSearch — the hub handoff (#3043)", () => {
     expect(nav).toHaveValue("mijn kind is geblesseerd");
   });
 
-  it("closes the hero popup when the hero box tucks behind the pinned chrome, and keeps the nav copy's", () => {
+  it("never watches the nav copy — it lives inside the strip that would inset it away", () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    const { hero, navRoot } = renderPair();
+
+    // The nav copy sits INSIDE the sticky bar, i.e. above the observer root's
+    // own top edge. Observing it would report "not intersecting" on the first
+    // delivery and never flip, so the handed-off popup would never render.
+    expect(observerFor(navRoot)).toBeUndefined();
+
+    fireEvent.focus(hero);
+    fireEvent.change(hero, { target: { value: "in" } });
+    expect(navRoot.querySelector('[role="listbox"]')).toBeInTheDocument();
+  });
+
+  it("insets its observer by the strip the section nav measured, not by a guess", () => {
+    const TOP_INSET = 117;
+    render(
+      <HubSearchQueryProvider>
+        <InsetPublisher value={TOP_INSET} />
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+          variant="hero"
+          placeholder={HERO_PLACEHOLDER}
+        />
+      </HubSearchQueryProvider>,
+    );
+    const heroRoot = screen
+      .getByPlaceholderText(HERO_PLACEHOLDER)
+      .closest("[data-hub-search]") as HTMLElement;
+
+    // The geometry is the feature: an observer that insets by the header alone
+    // leaves the popup painting over the section bar for the bar's own height.
+    expect(observerFor(heroRoot)?.options?.rootMargin).toBe(
+      `-${TOP_INSET}px 0px 0px 0px`,
+    );
+    // The bar measures itself after first paint, so the observer built against
+    // the `0`-seeded inset must be torn down, not left running alongside.
+    expect(
+      observersFor(heroRoot)
+        .slice(0, -1)
+        .every((observer) => observer.disconnected),
+    ).toBe(true);
+  });
+
+  it("suppresses no popup when there is no sticky chrome to hide behind", () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    render(
+      <HubSearch
+        members={HUB_SEARCH_MEMBERS}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+        placeholder={HERO_PLACEHOLDER}
+      />,
+    );
+    const root = screen
+      .getByPlaceholderText(HERO_PLACEHOLDER)
+      .closest("[data-hub-search]") as HTMLElement;
+
+    // Storybook and any other provider-less host: a box rendered near the top
+    // of the viewport must not lose its popup to an inset that assumes a
+    // header the page does not have.
+    expect(observerFor(root)?.options?.rootMargin).toBe("-0px 0px 0px 0px");
+  });
+
+  it("closes the hero popup when the hero box tucks behind the chrome, and keeps the nav copy's", () => {
     setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
     const { hero, heroRoot, navRoot } = renderPair();
     fireEvent.focus(hero);
@@ -452,16 +548,36 @@ describe("HubSearch — the hub handoff (#3043)", () => {
     expect(navRoot.querySelector('[role="listbox"]')).toBeInTheDocument();
   });
 
-  it("leaves the caret where it was — the handoff never focuses the nav copy", () => {
-    const { hero, nav, heroRoot } = renderPair();
+  it("keeps a press on a nav result alive — the hero's outside-click must not close the shared popup", () => {
+    setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
+    const { hero, heroRoot, navRoot } = renderPair();
     fireEvent.focus(hero);
     fireEvent.change(hero, { target: { value: "in" } });
+    scrollBehindChrome(heroRoot);
+
+    const option = navRoot.querySelector('[role="option"]') as HTMLElement;
+    // Both instances listen on `document` for an outside `mousedown`. Sharing
+    // `open` means the hero's listener would close the nav's popup here,
+    // unmounting the row before its `click` could ever fire `select()`.
+    fireEvent.mouseDown(option);
+
+    expect(navRoot.querySelector('[role="listbox"]')).toBeInTheDocument();
+  });
+
+  it("releases the caret instead of handing it over, so no invisible input keeps focus", () => {
+    const { hero, nav, heroRoot } = renderPair();
+    fireEvent.focus(hero);
+    hero.focus();
+    fireEvent.change(hero, { target: { value: "in" } });
+    expect(hero).toHaveFocus();
 
     scrollBehindChrome(heroRoot);
 
-    // Owner call: moving focus would raise the software keyboard on a phone,
-    // which scrolls the page again — the gesture that started the handoff.
+    // Owner call (#3043): the caret does not jump to the nav copy — moving it
+    // would raise the software keyboard on a phone. It is dropped instead, so
+    // the box the visitor can no longer see does not keep keyboard focus.
     expect(nav).not.toHaveFocus();
+    expect(hero).not.toHaveFocus();
   });
 
   it("stops the off-screen instance embedding the shared query, so one search runs per keystroke", () => {

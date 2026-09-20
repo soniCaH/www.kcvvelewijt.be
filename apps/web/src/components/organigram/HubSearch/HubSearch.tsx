@@ -34,9 +34,8 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
-import { getStickyTopInset } from "@/hooks/useSectionNav";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
-import { useHubSearchQueryContext } from "./HubSearchQueryProvider";
+import { useHubSearchQuery } from "./HubSearchQueryProvider";
 import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
   SECTION_NAV_TRAILING_SLOT_PADDING,
@@ -230,34 +229,52 @@ export function HubSearch({
   // The query + popup state are the hub's, not this instance's, whenever a
   // `<HubSearchQueryProvider>` is above us: `/hulp` mounts this component
   // twice (hero, sticky nav) and hands the search over mid-scroll (#3043).
-  // Both `useState`s stay unconditional — only which pair we read is a branch.
-  const shared = useHubSearchQueryContext();
-  const [localValue, setLocalValue] = useState("");
-  const [localOpen, setLocalOpen] = useState(false);
-  const value = shared ? shared.query : localValue;
-  const setValue = shared ? shared.setQuery : setLocalValue;
-  const isFocused = shared ? shared.open : localOpen;
-  const setIsFocused = shared ? shared.setOpen : setLocalOpen;
+  const {
+    query: value,
+    setQuery: setValue,
+    open: isFocused,
+    setOpen: setIsFocused,
+    topInset,
+  } = useHubSearchQuery();
 
-  // Which of the two instances is on screen. The popup is `absolute` inside
-  // this wrapper, so an off-screen instance that kept it open would leave a
-  // listbox floating over the pinned header and section bar (#3043). Starts
-  // `true` so the popup is never suppressed before the observer first reports
-  // (and on any runtime without `IntersectionObserver`).
-  const [visible, setVisible] = useState(true);
+  const isHero = variant === "hero";
+
+  // Whether this instance's box is still on screen. The popup is `absolute`
+  // inside this wrapper, so an instance that kept it open after scrolling away
+  // would leave a listbox floating over the pinned chrome (#3043).
+  //
+  // Only the `hero` variant can scroll away. The `nav` variant *is* the pinned
+  // chrome — it lives inside the sticky section bar, above the inset line — so
+  // observing it would report "not intersecting" on the first delivery and
+  // never flip, silently killing the very popup this handoff exists to show.
+  const [heroScrolledAway, setHeroScrolledAway] = useState(false);
+  const visible = !isHero || !heroScrolledAway;
   useEffect(() => {
     const el = rootRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-    // Inset by the pinned strip: "visible" has to mean *not tucked behind the
-    // header and section bar*, or the popup survives until the box clears the
-    // viewport entirely — long after it has disappeared under the chrome.
+    if (!isHero || !el || typeof IntersectionObserver === "undefined") return;
+    // Inset by the pinned strip, so "gone" means *tucked behind the header and
+    // section bar* rather than clear of the viewport — the box disappears a
+    // whole screen earlier than that. `topInset` comes from the section nav,
+    // which measures its own bar and re-publishes on resize, so this observer
+    // rebuilds with it instead of snapshotting a half-measured value.
     const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { rootMargin: `-${getStickyTopInset()}px 0px 0px 0px` },
+      ([entry]) => {
+        setHeroScrolledAway(!entry.isIntersecting);
+        // Release the caret rather than hand it to the nav copy (owner call):
+        // an input the visitor cannot see must not keep keyboard focus, and
+        // blurring also drops the software keyboard the handoff just hid
+        // behind the chrome.
+        if (
+          !entry.isIntersecting &&
+          document.activeElement === inputRef.current
+        )
+          inputRef.current?.blur();
+      },
+      { rootMargin: `-${topInset}px 0px 0px 0px` },
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [isHero, topInset]);
   // Null outside a `<HubMemberPanel>` (e.g. Storybook) → person-select falls back
   // to a plain scroll to the directory.
   const panel = useHubMemberPanel();
@@ -353,6 +370,17 @@ export function HubSearch({
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
       const target = event.target as Node;
+      // `[data-hub-search]`, not just this instance's own refs: the hub shares
+      // one `open` flag across both copies, so an instance that only checked
+      // itself would close the OTHER copy's popup on a mousedown inside it —
+      // unmounting the row before its `click` could fire `select()` (#3043).
+      // The two instances are one control; a press inside either is inside.
+      if (
+        target instanceof Element &&
+        target.closest("[data-hub-search]") !== null
+      ) {
+        return;
+      }
       if (
         !dropdownRef.current?.contains(target) &&
         !inputRef.current?.contains(target)
@@ -433,7 +461,6 @@ export function HubSearch({
         ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
         : "Geen resultaten";
 
-  const isHero = variant === "hero";
   // #2478 rule 5 addendum: the `nav` instance sits in a section nav's chip
   // row (<OrganigramSectionNav>) and takes the light chip's exact paper
   // weight — 1px border, 1px shadow — so the bar reads as one row of one
@@ -511,6 +538,7 @@ export function HubSearch({
     // would push the chips off the row.
     <div
       ref={rootRef}
+      data-hub-search
       className={`relative ${isHero ? "" : "min-w-0"} ${className}`}
     >
       <div

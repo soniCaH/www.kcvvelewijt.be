@@ -23,6 +23,7 @@ import {
   SECTION_NAV_BAR_CLASSES,
 } from "@/components/design-system";
 import { HubSearch } from "../HubSearch";
+import { useHubSearchTopInsetPublisher } from "../HubSearch/HubSearchQueryProvider";
 import { useSectionNav } from "@/hooks/useSectionNav";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
@@ -52,6 +53,16 @@ export function OrganigramSectionNav({
   // once. Hidden by default; only the observer callback toggles it (no flash,
   // no set-state-in-effect).
   const [heroOutOfView, setHeroOutOfView] = useState(false);
+
+  // This bar is the only thing on the page that measures its own height, so
+  // it publishes the pinned strip (header + bar) for the hub's searches: the
+  // hero copy needs it to know when its box has tucked behind the chrome
+  // rather than merely left the viewport (#3043). Republished on resize, so
+  // that observer is never left holding the `0`-seeded first measurement.
+  const publishTopInset = useHubSearchTopInsetPublisher();
+  useEffect(() => {
+    publishTopInset(topInset);
+  }, [topInset, publishTopInset]);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
