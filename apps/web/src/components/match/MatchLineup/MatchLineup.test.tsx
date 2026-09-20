@@ -94,12 +94,10 @@ describe("MatchLineup", () => {
     });
   });
 
-  // #2579 REVIEW — OPEN CONFLICT: #2516 rule 1 names this datum ("a shirt
-  // number beside a name") as a tag example, but #2621 — filed after #2516
-  // closed and shipped sixteen days later — is the more recent, more
-  // specific call, and a later decision cannot be superseded by an earlier
-  // one. Reverted to #2621's display register pending an owner ruling; see
-  // the decision issue linked from #2579 and from this branch's PR.
+  // RULED (#3029): #2621 governs the lineup row's shirt number, not #2516
+  // rule 1's "a shirt number beside a name" tag example — a shirt number
+  // here is an identity mark, not a datum being tagged, so it keeps the
+  // display register.
   describe("shirt number register (#2621)", () => {
     it.each<[number | undefined, string]>([
       [9, "9"],

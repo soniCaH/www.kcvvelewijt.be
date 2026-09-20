@@ -259,20 +259,14 @@ function PlayerRow({ player }: { player: LineupPlayer }) {
           separate `sr-only` sibling either way, so a numberless KCVV
           keeper still announces "Keeper" rather than "— Keeper".
 
-          #2579 REVIEW — OPEN CONFLICT, not settled here (see the decision
-          issue this comment's neighbouring commit links): #2516 rule 1
-          names "a shirt number beside a name" as its own tag example,
-          which would send this to mono. But #2621 — filed *after* #2516's
-          decision closed, and shipped sixteen days later — is the more
-          recent, more specific, supporter-facing call: "a shirt number
-          reads the way a number looks on a shirt — the display register,
-          black italic — while counts elsewhere stay mono." A later
-          decision cannot be superseded by an earlier one, so this reverts
-          to #2621's treatment pending an owner ruling. `lining-nums` is
-          NOT restored alongside it — that deletion is #2516 rule 2 (no
-          font-variant-numeric utility, anywhere), which is uncontested and
-          already enforced tree-wide by the Y4 guard regardless of how the
-          family question resolves. */}
+          RULED (#3029): #2621 governs here, not #2516 rule 1. #2516 rule 1's
+          "a shirt number beside a name" tag example does not reach the
+          lineup row — the owner's ruling is that a shirt number in this
+          context is an identity mark, not a datum being tagged, so it
+          keeps the display register #2621 gave it. `lining-nums` stays
+          deleted regardless — that's #2516 rule 2 (no font-variant-numeric
+          utility, anywhere), which was never in dispute and is enforced
+          tree-wide by the Y4 guard independent of this family question. */}
       <span
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center",

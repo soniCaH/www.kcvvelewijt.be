@@ -58,8 +58,12 @@ async, each is backed by a metric-matched (`size-adjust`) fallback — `Freight 
 > so it was never a working tabular set either. A number that is its
 > surface's own **subject** keeps its display face and this default
 > oldstyle set; a number that **tags** something else (a score in a row, a
-> shirt number beside a name, a standings cell) renders `font-mono` instead,
-> which aligns by construction rather than by class. **One exception, by
+> squad-card shirt number beside a name, a standings cell) renders
+> `font-mono` instead, which aligns by construction rather than by class.
+> **Named exception:** the *lineup row's* shirt number (not the squad
+> card's) stays in the display register — #2621/#3029 ruled it an identity
+> mark, not a tagged datum. Scoped to that one surface only; see DESIGN.md's
+> Subject/Tag Rule for the full reasoning. **Another exception, by
 > construction:** `/share`'s satori-rendered card sets `fontVariantNumeric`
 > as an inline style — a different renderer entirely, out of scope per
 > #2470 and structurally outside what the class-list guard (`Y4`,
