@@ -50,7 +50,8 @@
  * **The number slot is reserved, not hidden (#2532/#2585).** A shirt number
  * is a fact the club declares by hand — `jerseyNumber` has a real writer
  * (the Studio field, `packages/sanity-schemas/src/player.ts`), it simply
- * hasn't been written yet for most of the 294 player documents. Per
+ * hasn't been written yet for every player document today (352 total, 278
+ * non-archived, zero with `jerseyNumber` set — measured 2026-09-20). Per
  * #2535's keep-side discriminator (a writer exists → render the absence,
  * never drop the slot) this hero always renders the number cell: filled,
  * `<NumberDisplay>` as before; empty, `<EmptyState tier="slot"
@@ -97,9 +98,8 @@ export interface PlayerHeroProps {
   birthDate?: string;
   /**
    * Editorial squad number, typed by hand by the club — not PSD-sourced
-   * (#2532). Absent for most of the 294 player documents today, since
-   * nothing seeds it; the hero still reserves the cell rather than
-   * dropping it (#2585).
+   * (#2532). Absent on every player document today, since nothing seeds
+   * it; the hero still reserves the cell rather than dropping it (#2585).
    */
   jerseyNumber?: number;
   /** Active-team label resolved by the page (e.g. "A-Ploeg", "U17"). */
@@ -223,12 +223,23 @@ export function PlayerHero({
         ) : (
           // Reserved, not hidden — #2532/#2585. The number cell always
           // renders; an unfilled `jerseyNumber` reads as a known gap
-          // (Tier 2), not a render failure or a dropped row.
-          <span data-testid="player-hero-number-slot" className="block">
+          // (Tier 2), not a render failure or a dropped row. The slot's
+          // documented contract is `flex-1` inside a `flex` host (see
+          // <CompetitiveStatusLine>'s docblock) — sized here to hug its
+          // own text rather than stretch to the full hero column, so a
+          // reserved chip roughly stands in for the number it holds the
+          // place of instead of reading as a full-width banner. Height
+          // is tied to the same `--text-display-2xl` token the filled
+          // <NumberDisplay> renders at, so the two states land at
+          // comparable line-heights across viewports.
+          <div
+            data-testid="player-hero-number-slot"
+            className="flex h-[var(--text-display-2xl)] w-fit"
+          >
             <EmptyState tier="slot" background="cream-soft">
               Nog geen rugnummer
             </EmptyState>
-          </span>
+          </div>
         )}
 
         {/* 6.d1 — 2-line stacked rhythm. `leading-hero-lead` / `leading-hero`
