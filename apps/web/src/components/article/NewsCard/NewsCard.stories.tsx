@@ -288,18 +288,19 @@ export const MatchPreviewType: Story = {
   tags: ["vr"],
 };
 
-// Regression guard: long Dutch compounds in a narrow featured card (the 3-up
-// "Uitgelicht" row width) must hyphenate at a dictionary point WITH a visible
-// hyphen — not hard-cut mid-word. The title carries `hyphens-auto` alone; if
-// `break-words` is ever re-added, its per-character emergency breaks win the
-// greedy line-breaker and the hyphens disappear ("Voorbeschou / wing"), which
-// this baseline catches. Wrapped at ~200px to force the overflow the wide
-// standalone canvas would otherwise hide.
-//
-// `lang="nl"` is set on the wrapper because `hyphens: auto` needs a language
-// dictionary and Storybook's iframe root has no `lang` (the real app sets it
-// on `<html>` in layout.tsx). Scoping it here keeps this guard faithful to
-// production without re-baselining every other hyphenating story.
+// Regression guard: a long Dutch compound title in a narrow card must clamp
+// cleanly via `line-clamp-3`, with no mid-word hyphen or break. #2549 rule 5
+// measured this exact word ("Voorbeschouwing") against the loaded Typekit
+// faces and found `hyphens-auto` an inert no-op at every REAL slot width on
+// this site (319px+) — every long word already fits a whole line on its own
+// there — so the title carries neither `hyphens-auto` nor `break-words` any
+// more. That finding does not extend below 319px: at the previous 200px
+// canvas (narrower than any real `<NewsCard>` consumer — `<RelatedRow>`'s
+// 288px slider slot is the site's narrowest) the word genuinely cannot fit a
+// line, so removing the hyphenator produced a real mid-word clip
+// ("Voorbesch / op de"). Wrapped at 288px — the narrowest real slot, not an
+// arbitrary stress width — so this guard exercises production reality
+// instead of a width nothing on the site ever renders at.
 export const LongCompoundTitle: Story = {
   args: {
     ...phase4SharedArgs,
@@ -309,7 +310,7 @@ export const LongCompoundTitle: Story = {
   },
   decorators: [
     (StoryFn) => (
-      <div className="w-[200px]" lang="nl">
+      <div className="w-[288px]">
         <StoryFn />
       </div>
     ),

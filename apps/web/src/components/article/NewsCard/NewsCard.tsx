@@ -334,13 +334,11 @@ export const NewsCard = ({
           level={HEADING_LEVEL[as]}
           size={headingSize}
           tone={headingTone}
-          // `hyphens-auto` (no `break-words`) — long Dutch compounds
-          // (e.g. "Voorbeschouwing") hyphenate at a dictionary point with a
-          // visible hyphen. `break-words` is deliberately omitted: its
-          // per-character emergency breaks out-compete hyphenation in the
-          // greedy line-breaker, producing hyphen-less mid-word clips
-          // ("Voorbeschou / wing"). `line-clamp-3` still caps the height.
-          className="line-clamp-3 hyphens-auto"
+          // #2549 rule 5: `hyphens-auto` measured as a no-op here — every
+          // long Dutch compound on this site (e.g. "Voorbeschouwing")
+          // already fits a whole line on its own, so the hyphenator is
+          // never consulted. Deleted; `line-clamp-3` still caps the height.
+          className="line-clamp-3"
         >
           {title}
         </EditorialHeading>
@@ -348,7 +346,7 @@ export const NewsCard = ({
         {dek && (
           <p
             className={cn(
-              "text-body-md line-clamp-3",
+              "text-body-md line-clamp-2",
               // Full-opacity cream on dark surfaces — opacity-reduced cream
               // (e.g. `text-cream/85`) trips axe contrast on bg-jersey-deep.
               isDark ? "text-cream" : "text-ink-soft",
