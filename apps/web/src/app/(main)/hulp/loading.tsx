@@ -23,7 +23,21 @@ export default function HulpLoading() {
       {/* Sticky two-door nav placeholder — the real bar is `bg-cream-deep`
           at `py-2` (#2478 rule 4); `<PageContainer width="index">` and the
           light chip's own classes so this can never drift from the real
-          bar's shape. */}
+          bar's shape.
+
+          Two corrections from #2821, both so the bar does not change height
+          on the hand-over from this skeleton to the real nav:
+
+          - **No trailing slot.** The real `<OrganigramSectionNav>` renders
+            none at first paint — its `<HubSearch variant="nav">` is gated on
+            `heroOutOfView`, which starts `false`. The old `h-9 w-44`
+            stand-in was 36px, taller than both the chip beside it and the
+            33px slot it stood in for, so it drove this bar to 54px against
+            the real bar's 52px.
+          - **`h-[19.25px]`, not `h-3`.** The chip's height is set by its
+            content box, and the real chip's content is an 11px line at
+            `--line-height-loose: 1.75` = 19.25px. A 12px block made this
+            chip 26px against the real 33.25px. */}
       <div className="border-ink bg-cream-deep border-b-2" aria-hidden>
         <PageContainer width="index" className="flex items-center gap-3 py-2">
           <div
@@ -32,7 +46,7 @@ export default function HulpLoading() {
               SECTION_NAV_CHIP_SHADOW_CLASS,
             )}
           >
-            <Skeleton className="h-3 w-10" />
+            <Skeleton className="h-[19.25px] w-10" />
           </div>
           <div
             className={cn(
@@ -40,9 +54,8 @@ export default function HulpLoading() {
               SECTION_NAV_CHIP_SHADOW_CLASS,
             )}
           >
-            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-[19.25px] w-16" />
           </div>
-          <Skeleton className="ml-auto h-9 w-44" />
         </PageContainer>
       </div>
 

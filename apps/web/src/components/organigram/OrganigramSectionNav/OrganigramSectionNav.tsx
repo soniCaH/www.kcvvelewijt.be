@@ -77,10 +77,12 @@ export function OrganigramSectionNav({
       aria-label="Secties van de hub"
       className={cn(SECTION_NAV_BAR_CLASSES, className)}
     >
-      <PageContainer
-        width="index"
-        className="flex flex-wrap items-center gap-3 py-2"
-      >
+      {/* No `flex-wrap`: the trailing search carries `min-w-0`, so with no
+          wrap it squeezes (~177px on a 375px viewport, against ~154px of
+          chips) instead of dropping to a second line and taking the bar
+          from 52px to 106px mid-scroll. #2821 — the narrow-viewport half
+          of the same defect the slot's height fixes at wide widths. */}
+      <PageContainer width="index" className="flex items-center gap-3 py-2">
         <ul className="flex items-center gap-2">
           {SECTIONS.map((section) => (
             <SectionNavChip

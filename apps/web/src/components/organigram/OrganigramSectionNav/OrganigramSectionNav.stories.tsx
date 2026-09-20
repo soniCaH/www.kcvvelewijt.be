@@ -58,3 +58,41 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+/**
+ * The trailing slot revealed — the state `Default` can never capture.
+ *
+ * `<HubSearch variant="nav">` is gated on `heroOutOfView`, and the shared
+ * decorator renders `#hub-hero` in view at scroll 0, so `Default`'s three VR
+ * baselines contain no slot at all. That left the one thing #2821 changed —
+ * the slot's height against the chip's, and the row that no longer wraps —
+ * with zero visual coverage, while `section-nav.ts` claimed these baselines
+ * were what caught a drift.
+ *
+ * This story parks `#hub-hero` entirely above the viewport, so the observer
+ * reports it out of view on the first callback and the slot mounts at scroll
+ * 0, where a screenshot can see it. It overrides the shared decorator rather
+ * than adding to it, so nothing else is on screen to confuse the diff.
+ *
+ * Watch for two things in the baseline: the slot is **not taller than the
+ * chips beside it** (that is the rule), and at mobile width it stays **on the
+ * chips' row** instead of dropping to a second line.
+ */
+export const RevealedSearch: Story = {
+  decorators: [
+    (Story) => (
+      <div className="bg-cream min-h-[120vh]">
+        <div id="hub-hero" className="absolute -top-[300px] h-[200px] w-full" />
+        <Story />
+        <section id="hulp" className="mx-auto max-w-[70rem] px-4 py-20">
+          <h2 className="font-display text-ink text-3xl font-bold">Hulp</h2>
+        </section>
+        <section id="structuur" className="mx-auto max-w-[70rem] px-4 py-20">
+          <h2 className="font-display text-ink text-3xl font-bold">
+            Structuur
+          </h2>
+        </section>
+      </div>
+    ),
+  ],
+};
