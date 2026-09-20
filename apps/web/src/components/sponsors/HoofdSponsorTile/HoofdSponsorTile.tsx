@@ -42,7 +42,7 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
             sizes="(max-width: 640px) 80vw, (max-width: 1024px) 45vw, 30vw"
           />
         ) : (
-          <span className="font-display text-ink line-clamp-2 text-lg italic">
+          <span className="font-display text-ink line-clamp-3 text-lg italic">
             {sponsor.name}
           </span>
         )}

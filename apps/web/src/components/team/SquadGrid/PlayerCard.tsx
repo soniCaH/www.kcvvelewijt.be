@@ -122,8 +122,11 @@ export function PlayerCard({
         ) : null}
       </div>
 
-      {/* Name — first semibold + last italic (6.A rhythm) */}
-      <p className="font-display text-ink mt-2 leading-[1.05]">
+      {/* Name — first semibold + last italic (6.A rhythm). `line-clamp-3`
+          (#2549 rule 3 — normal-type headline, the card's subject): moot in
+          practice, a real name measures one line at this card's width, but
+          the card clamps rather than cutting per rule 1. */}
+      <p className="font-display text-ink mt-2 line-clamp-3 leading-[1.05]">
         <span className="font-semibold">{firstName}</span>{" "}
         <em className="font-normal italic">{lastName}</em>
       </p>

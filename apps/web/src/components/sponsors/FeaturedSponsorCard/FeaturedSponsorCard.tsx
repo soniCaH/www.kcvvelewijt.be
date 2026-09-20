@@ -45,7 +45,7 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
               sizes="(max-width: 1024px) 80vw, 320px"
             />
           ) : (
-            <span className="font-display text-ink line-clamp-2 text-center text-xl italic">
+            <span className="font-display text-ink line-clamp-3 text-center text-xl italic">
               {sponsor.name}
             </span>
           )}
@@ -56,7 +56,7 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
         </p>
 
         {sponsor.description && (
-          <p className="text-ink-soft mt-1.5 line-clamp-3 text-[13px] leading-normal">
+          <p className="text-ink-soft mt-1.5 line-clamp-2 text-[13px] leading-normal">
             {sponsor.description}
           </p>
         )}

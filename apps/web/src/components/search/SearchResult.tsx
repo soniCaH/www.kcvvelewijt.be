@@ -94,7 +94,7 @@ export const SearchResult = ({ result, onClick }: SearchResultProps) => {
             Rendered raw (not via <EditorialHeading>) so mixed-type result
             titles — player/staff names especially — don't get a trailing
             period appended. */}
-        <h3 className="font-display mt-1 line-clamp-2 text-[17px] leading-snug font-bold">
+        <h3 className="font-display mt-1 line-clamp-3 text-[17px] leading-snug font-bold">
           {result.title}
         </h3>
 
