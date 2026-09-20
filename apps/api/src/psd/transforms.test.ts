@@ -232,6 +232,50 @@ describe("transformFootbalistoMatchDetail — strict date validation", () => {
   });
 });
 
+describe("transformFootbalistoMatchDetail — lineup shirt number (#2532/#2585)", () => {
+  // `0` is not a number: PSD sends a literal `0` on the match sheet for a
+  // player it never recorded a shirt number for, not a real squad number.
+  it("folds a literal `0` from PSD to undefined, not a real shirt number", () => {
+    const detail = transformFootbalistoMatchDetail({
+      general: {
+        id: 300,
+        date: "2026-03-15 15:00",
+        homeClub: club,
+        awayClub: { id: 2, name: "FC Other" },
+        goalsHomeTeam: null,
+        goalsAwayTeam: null,
+        status: 0,
+        viewGameReport: false,
+      },
+      lineup: {
+        home: [{ playerName: "De Smet", number: 0, status: "basis" }],
+        away: [],
+      },
+    } as never);
+    expect(detail.lineup?.home[0]?.number).toBeUndefined();
+  });
+
+  it("keeps a real shirt number, including the lowest valid one", () => {
+    const detail = transformFootbalistoMatchDetail({
+      general: {
+        id: 301,
+        date: "2026-03-15 15:00",
+        homeClub: club,
+        awayClub: { id: 2, name: "FC Other" },
+        goalsHomeTeam: null,
+        goalsAwayTeam: null,
+        status: 0,
+        viewGameReport: false,
+      },
+      lineup: {
+        home: [{ playerName: "De Smet", number: 1, status: "basis" }],
+        away: [],
+      },
+    } as never);
+    expect(detail.lineup?.home[0]?.number).toBe(1);
+  });
+});
+
 describe("deriveOwnClubId", () => {
   const kcvv = { id: 1235, name: "KCVV Elewijt" };
   const opponentA = { id: 456, name: "FC Opponent A" };

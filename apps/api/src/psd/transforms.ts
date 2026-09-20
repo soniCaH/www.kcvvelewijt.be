@@ -484,7 +484,11 @@ function transformLineupPlayer(
   return {
     id: player.playerId ?? undefined,
     name: player.playerName,
-    number: player.number ?? undefined,
+    // `0` is not a number (#2532 decision rule 5, #2585): PSD sends 0 for
+    // "not recorded" on the match sheet, not a real shirt number. `??`
+    // alone only catches `null`/`undefined` and lets 0 straight through —
+    // the truthiness check below also folds that case to `undefined`.
+    number: player.number ? player.number : undefined,
     minutesPlayed: player.minutesPlayed ?? undefined,
     isCaptain: player.captain ?? false,
     status: transformLineupStatus(player.status, player.changed),
