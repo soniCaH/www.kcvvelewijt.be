@@ -67,7 +67,11 @@ pnpm --filter @kcvv/api dev                        # wrangler dev on :8787
 
 ### Releasing a stuck prune safety cap
 
-The sweep refuses to prune (and logs a WARN) when a sweep's delete set exceeds `max(PRUNE_SAFETY_FLOOR, previousManifest.length × PRUNE_SAFETY_CAP_FRACTION)` (`search/sanity-index-sync.ts`) — a truncated fetch and a genuine bulk deactivation look identical from inside the sweep. **This does not self-heal**: the same input recomputes the same refusal every night until something changes. After investigating and confirming the delete set is legitimate (not a truncated/regressed fetch), release it with:
+The sweep refuses to prune (and logs a WARN) when a sweep's delete set exceeds `max(PRUNE_SAFETY_FLOOR, previousManifest.length × PRUNE_SAFETY_CAP_FRACTION)` (`search/sanity-index-sync.ts`) — a truncated fetch and a genuine bulk deactivation look identical from inside the sweep. **This does not self-heal**: the same input recomputes the same refusal every night until something changes.
+
+**The refusal alerts (#2855).** A refusal now reports a failed outcome through `reportScheduledJobOutcome` (`psd/job-alert.ts`) under its own job name, `search-index-prune` — separate from `sanity-index-sync`, because the sweep itself still succeeded (it did index) and conflating the two would mark a healthy indexing run as failed. `index.ts`'s `scheduled()` handler reads `runSanityIndexSync()`'s resolved `pruneRefused` flag and reports it strictly after the sweep settles, the same way it reports `sanity-index-sync` itself: Slack-pings once on the first refusal, debounces on every subsequent one, and pings again once a sweep resolves with `pruneRefused: false` — so the release lever below is something you're told to act on, not something you have to discover by reading logs. This is only reported when the sweep actually resolves; if the whole sweep fails outright, `sanity-index-sync`'s own failure report already covers it.
+
+After investigating and confirming the delete set is legitimate (not a truncated/regressed fetch), release it with:
 
 ```bash
 # Production (SANITY_DATASET=production)

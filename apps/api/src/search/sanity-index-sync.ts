@@ -219,6 +219,12 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // skip (#2831).
     let reconciliationSafe = true;
 
+    // Whether the manifest-diff prune refused this sweep (safety cap
+    // exceeded). Reported by the caller (index.ts) under its own job name
+    // (#2855) — the sweep itself still resolves successfully, since it did
+    // index; a refusal is a prune-side problem, not an indexing one.
+    let pruneRefused = false;
+
     /**
      * Runs one Sanity fetch, degrading a failure to an empty result so
      * indexing continues for the phases that did succeed — and recording
@@ -513,6 +519,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
               'see apps/api/CLAUDE.md ("Releasing a stuck prune safety cap") for the release lever once the cause is understood.',
           },
         );
+        pruneRefused = manifestReconciliation.action === "skipped";
         const manifestConfirmedIds =
           manifestReconciliation.action === "removed"
             ? manifestReconciliation.confirmedIds
@@ -594,4 +601,10 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ),
       );
     }
+
+    // Indexing succeeded regardless of `pruneRefused` — a cap refusal is a
+    // prune-side problem, not an indexing one, so it must not fail this
+    // Effect (#2855). The caller (index.ts) reports it under its own
+    // job-alert name instead.
+    return { pruneRefused };
   });

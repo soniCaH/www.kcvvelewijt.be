@@ -779,6 +779,63 @@ describe("runSanityIndexSync", () => {
       expect(deleteCalls4).toHaveLength(0);
     });
 
+    it("resolves with pruneRefused: true when the safety cap refuses the prune (#2855) — the sweep's own Effect still succeeds", async () => {
+      const kv = makeKvNamespaceMock();
+      const manyDocs = Array.from({ length: 30 }, (_, i) => ({
+        ...mockDoc,
+        _id: `resp-${i}`,
+      }));
+
+      // Bootstrap: 30 responsibilities tracked.
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch(manyDocs) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // Only 4 of 30 come back — same truncated-fetch shape as the refusal
+      // test above, which exceeds max(25, 30*50%=15)=25.
+      const fourRemain = manyDocs.slice(0, 4);
+      const { mock: mock2 } = makeVectorizeCapture();
+      const result = await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch(fourRemain) }, mock2, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // Refused, reported to the caller — but as a resolved value, not a
+      // failure: indexing itself succeeded, so the Effect must not fail.
+      expect(result.pruneRefused).toBe(true);
+    });
+
+    it("resolves with pruneRefused: false when a prune happens without hitting the safety cap", async () => {
+      const kv = makeKvNamespaceMock();
+
+      // Bootstrap: one responsibility tracked.
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // It no longer matches the query — a normal, uncapped prune.
+      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const result = await Effect.runPromise(
+        sweep({}, mock2, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      expect(deleteCalls.flat()).toEqual(["sanity-abc-123"]);
+      expect(result.pruneRefused).toBe(false);
+    });
+
     it("lets an oversized excluded-ids set through the safety cap while still refusing an oversized manifest diff — scoped independently", async () => {
       const kv = makeKvNamespaceMock();
       const stableDocs = [mockDoc, { ...mockDoc, _id: "stable-2" }];

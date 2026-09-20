@@ -192,12 +192,37 @@ export default {
       ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
       ctx.waitUntil(
         (async () => {
-          const outcome = await settleJob("sanity-index-sync", () =>
-            Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)),
-          );
+          // Captured by the run() closure below so it survives settleJob's
+          // discarded return value — undefined unless the sweep actually
+          // resolved (a thrown/failed sweep never reaches its `return`).
+          let pruneRefused: boolean | undefined;
+          const outcome = await settleJob("sanity-index-sync", async () => {
+            const result = await Effect.runPromise(
+              Effect.provide(runSanityIndexSync(), layer),
+            );
+            pruneRefused = result.pruneRefused;
+          });
           // Reported strictly AFTER the sync settles — see the comment on
           // reportJobOutcome above.
           await reportJobOutcome("sanity-index-sync", outcome);
+          // Own job name (#2855): the sweep itself succeeded even when the
+          // prune was refused, so conflating the two would mark a healthy
+          // indexing run as failed. Only reported when the sweep resolved —
+          // if it failed outright, "sanity-index-sync" above already
+          // covers it and whether the prune step even ran is unknown.
+          if (pruneRefused !== undefined) {
+            await reportJobOutcome(
+              "search-index-prune",
+              pruneRefused
+                ? {
+                    ok: false,
+                    error: new Error(
+                      "search-index-prune: refused — delete set exceeded the safety cap",
+                    ),
+                  }
+                : { ok: true },
+            );
+          }
           if (!outcome.ok) throw outcome.error;
         })(),
       );
