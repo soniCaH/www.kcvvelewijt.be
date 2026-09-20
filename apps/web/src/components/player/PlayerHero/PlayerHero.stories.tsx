@@ -8,6 +8,7 @@
  *  - U8 minor without photo → minor + illustration combined (`MinorU8Illustration`)
  *  - Long Dutch surname stress (`LongSurname`)
  *  - No authored/synced position → meta cell omitted, not defaulted (`NoPosition`, #2567)
+ *  - No editorial jerseyNumber → reserved Tier 2 slot, not dropped (`NoJerseyNumber`, #2532/#2585)
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
@@ -139,6 +140,24 @@ export const NoPosition: Story = {
     photoUrl: REAL_PLAYER_PHOTOS.mendesMouro,
     birthDate: "2001-06-10",
     jerseyNumber: 5,
+    teamLabel: "A-Ploeg",
+  },
+};
+
+/**
+ * No editorial `jerseyNumber` — the majority case in production today,
+ * since nothing seeds the field (#2532/#2585). The hero reserves the
+ * number cell (`<EmptyState tier="slot" background="cream-soft">`) rather
+ * than dropping the row.
+ */
+export const NoJerseyNumber: Story = {
+  args: {
+    id: "player-thomas-wouters",
+    firstName: "Thomas",
+    lastName: "Wouters",
+    position: "Verdediger",
+    photoUrl: REAL_PLAYER_PHOTOS.schulz,
+    birthDate: "2000-01-18",
     teamLabel: "A-Ploeg",
   },
 };

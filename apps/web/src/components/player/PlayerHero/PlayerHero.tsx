@@ -46,6 +46,19 @@
  * not reduced to `teamLabel` alone: that would duplicate the up-link
  * breadcrumb chip #2428/#2442 puts on this same page, one navigational and
  * one inert (#2535).
+ *
+ * **The number slot is reserved, not hidden (#2532/#2585).** A shirt number
+ * is a fact the club declares by hand — `jerseyNumber` has a real writer
+ * (the Studio field, `packages/sanity-schemas/src/player.ts`), it simply
+ * hasn't been written yet for most of the 294 player documents. Per
+ * #2535's keep-side discriminator (a writer exists → render the absence,
+ * never drop the slot) this hero always renders the number cell: filled,
+ * `<NumberDisplay>` as before; empty, `<EmptyState tier="slot"
+ * background="cream-soft">` — #2427/#2562's Tier 2 held-open register,
+ * `cream-soft` because the cell stands alone on the page rather than
+ * inside an already-framed surface, the same choice `<CompetitiveStatusLine>`
+ * makes. `/wedstrijd/[matchId]` is unaffected — that route keeps rendering
+ * whatever the match sheet reported, a different fact (#2532 rule 3).
  */
 
 import { Fragment } from "react";
@@ -54,6 +67,7 @@ import { cn } from "@/lib/utils/cn";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { NumberDisplay } from "@/components/design-system/NumberDisplay";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
+import { EmptyState } from "@/components/design-system/EmptyState";
 import {
   JerseyIllustration,
   playerFigureSeed,
@@ -81,6 +95,12 @@ export interface PlayerHeroProps {
   photoUrl?: string;
   /** ISO date string `YYYY-MM-DD`. Omitted → birthDate cell drops. */
   birthDate?: string;
+  /**
+   * Editorial squad number, typed by hand by the club — not PSD-sourced
+   * (#2532). Absent for most of the 294 player documents today, since
+   * nothing seeds it; the hero still reserves the cell rather than
+   * dropping it (#2585).
+   */
   jerseyNumber?: number;
   /** Active-team label resolved by the page (e.g. "A-Ploeg", "U17"). */
   teamLabel?: string;
@@ -200,7 +220,16 @@ export function PlayerHero({
               tone="jersey-deep"
             />
           </span>
-        ) : null}
+        ) : (
+          // Reserved, not hidden — #2532/#2585. The number cell always
+          // renders; an unfilled `jerseyNumber` reads as a known gap
+          // (Tier 2), not a render failure or a dropped row.
+          <span data-testid="player-hero-number-slot" className="block">
+            <EmptyState tier="slot" background="cream-soft">
+              Nog geen rugnummer
+            </EmptyState>
+          </span>
+        )}
 
         {/* 6.d1 — 2-line stacked rhythm. `leading-hero-lead` / `leading-hero`
             (D14/Y1, #2617) are the ramp's tight-leading sibling step,

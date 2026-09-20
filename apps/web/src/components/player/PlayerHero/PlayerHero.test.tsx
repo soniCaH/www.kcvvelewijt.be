@@ -240,6 +240,26 @@ describe("PlayerHero", () => {
       expect(screen.getByTestId("player-hero-number").textContent).toContain(
         "8",
       );
+      expect(
+        screen.queryByTestId("player-hero-number-slot"),
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe("Reserved number slot (#2532/#2585)", () => {
+    it("reserves the slot instead of dropping the row when jerseyNumber is absent", () => {
+      render(
+        <PlayerHero
+          id="player-test"
+          firstName="Maxim"
+          lastName="Breugelmans"
+          position="Middenvelder"
+        />,
+      );
+      expect(screen.getByTestId("player-hero-number-slot")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("player-hero-number"),
+      ).not.toBeInTheDocument();
     });
   });
 
