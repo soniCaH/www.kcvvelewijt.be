@@ -79,6 +79,7 @@ export const player = defineType({
       type: 'number',
       group: 'redactioneel',
       description: 'Rugnummer van de speler. Redactioneel — PSD levert dit niet aan, vul het zelf in.',
+      validation: (r) => r.min(1).max(99).integer(),
     }),
     defineField({
       name: 'transparentImage',
@@ -140,9 +141,17 @@ export const player = defineType({
       firstName: 'firstName',
       lastName: 'lastName',
       media: 'transparentImage',
+      jerseyNumber: 'jerseyNumber',
     },
-    prepare({firstName, lastName, media}) {
-      return {title: `${firstName ?? ''} ${lastName ?? ''}`.trim(), media}
+    // The subtitle is the only fill-progress signal an editor has across
+    // 294 player documents (#2585) — `jerseyNumber` has no other UI that
+    // surfaces "which of the 294 are still empty" without opening each one.
+    prepare({firstName, lastName, media, jerseyNumber}) {
+      return {
+        title: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
+        subtitle: jerseyNumber ? `#${jerseyNumber}` : 'Geen rugnummer',
+        media,
+      }
     },
   },
 })
