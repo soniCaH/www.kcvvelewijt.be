@@ -2081,14 +2081,16 @@ const UP_LINK_SITE = /<UpLink\b|\bupLink=\{/g;
 const UP_LINK_SITE_TEST = /<UpLink\b|\bupLink=\{/;
 
 /**
- * The nearest still-open JSX ancestor's own attribute text at `matchIndex`
- * in `source` — `undefined` at the top level (no wrapping element, or the
- * up-link is the outermost thing the file renders).
+ * Every still-open JSX ancestor's own attribute text at `matchIndex` in
+ * `source`, outermost first — empty when the up-link is the outermost thing
+ * the file renders. **Every** ancestor, not just the nearest one: a route
+ * that wraps the chip in an intermediate element with no `className` of its
+ * own (a bare `<div>`, say) still has the *outer* container's padding
+ * sitting directly above the chip, and checking only the innermost ancestor
+ * would walk straight past it (#2877 review round 3 — six of this ticket's
+ * own routes render the chip through exactly one such wrapper).
  */
-function enclosingElementAttrs(
-  source: string,
-  matchIndex: number,
-): string | undefined {
+function enclosingAncestorAttrs(source: string, matchIndex: number): string[] {
   const stack: { name: string; attrs: string }[] = [];
   for (const tag of source.matchAll(UP_LINK_JSX_TAG)) {
     if (tag.index >= matchIndex) break;
@@ -2099,7 +2101,7 @@ function enclosingElementAttrs(
       stack.push({ name: name!, attrs: attrs! });
     }
   }
-  return stack.at(-1)?.attrs;
+  return stack.map((frame) => frame.attrs);
 }
 
 /** A Tailwind class token — an optional `variant:` chain, then `pt-`/`py-`.
@@ -2108,16 +2110,18 @@ function enclosingElementAttrs(
  *  Tailwind class separator: start-of-string or whitespace). */
 const PADS_TOP = /(?:^|\s)(?:[\w-]+:)*(?:pt|py)-/;
 
-/** Every up-link occurrence in `source` whose enclosing container's
- *  `className` carries `pt-*`/`py-*` — the match index of each violation. */
+/** Every up-link occurrence in `source` where ANY enclosing ancestor's
+ *  `className` carries `pt-*`/`py-*` — the match index of each violation.
+ *  Checks the whole ancestor chain, not just the nearest element, so a
+ *  padded container one wrapper removed from the chip still counts. */
 function enclosingPaddingViolations(source: string): number[] {
   const violations: number[] = [];
   for (const m of source.matchAll(UP_LINK_SITE)) {
-    const attrs = enclosingElementAttrs(source, m.index);
-    const classNameMatch = attrs ? /className="([^"]*)"/.exec(attrs) : null;
-    if (classNameMatch && PADS_TOP.test(classNameMatch[1]!)) {
-      violations.push(m.index);
-    }
+    const padded = enclosingAncestorAttrs(source, m.index).some((attrs) => {
+      const classNameMatch = /className="([^"]*)"/.exec(attrs);
+      return classNameMatch && PADS_TOP.test(classNameMatch[1]!);
+    });
+    if (padded) violations.push(m.index);
   }
   return violations;
 }
@@ -2217,15 +2221,17 @@ describe("rule 13 catches what it claims to (#2877)", () => {
     expect(enclosingPaddingViolations(source)).toEqual([]);
   });
 
-  it("resolves through the still-open <PageHero> tag to the real outer container", () => {
-    // The `upLink=` match sits inside <PageHero>'s own unclosed opening tag,
-    // so the still-open ancestor at that point must be <PageContainer>, not
-    // <PageHero> itself — <PageHero> never finishes opening before the match.
+  it("resolves through a self-closing <PageHero> tag to the real outer container", () => {
+    // <PageHero upLink={…} /> is one complete, self-closing match — it never
+    // gets pushed onto the ancestor stack itself, so <PageContainer> is the
+    // only (and correctly still-open) ancestor at the `upLink=` position.
     const source = `<PageContainer className="pt-8"><PageHero upLink={{ href: "/a", label: "A" }} /></PageContainer>`;
     const upLinkIndex = source.indexOf("upLink=");
-    expect(enclosingElementAttrs(source, upLinkIndex)).toContain(
-      'className="pt-8"',
-    );
+    expect(
+      enclosingAncestorAttrs(source, upLinkIndex).some((attrs) =>
+        attrs.includes('className="pt-8"'),
+      ),
+    ).toBe(true);
   });
 
   it("counts every violation in a file with more than one occurrence", () => {
@@ -2250,6 +2256,21 @@ describe("rule 13 catches what it claims to (#2877)", () => {
       <PageContainer className="pt-8">
         <div></div>
         <UpLink href="/a" label="A" />
+      </PageContainer>
+    `;
+    expect(enclosingPaddingViolations(source)).toHaveLength(1);
+  });
+
+  it("flags padding on an OUTER ancestor even through an unrelated intermediate wrapper (#2877 review round 3)", () => {
+    // The nearest ancestor is the bare <div> — no className, no violation if
+    // only the innermost ancestor were checked. The outer <PageContainer>'s
+    // pt-12 lg:pt-16 is still exactly the double-air fault this rule exists
+    // to catch: the wrapper does not neutralise it.
+    const source = `
+      <PageContainer className="pt-12 lg:pt-16">
+        <div>
+          <UpLink href="/a" label="A" />
+        </div>
       </PageContainer>
     `;
     expect(enclosingPaddingViolations(source)).toHaveLength(1);
