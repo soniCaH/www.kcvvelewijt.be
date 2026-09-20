@@ -9,6 +9,7 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "knip": "knip --include dependencies,devDependencies,optionalPeerDependencies,unlisted,binaries",
+    "knip:code": "knip",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -4,8 +4,7 @@
 //
 // preserveAspectRatio="none" lets the stroke stretch across any underlying
 // word; with no large curves the stretch doesn't visibly distort.
-export const STROKE_PATH =
-  "M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z";
+const STROKE_PATH = "M 1 4.7 L 50 4.3 L 99 4.0 L 99 10.8 L 50 11.1 L 1 11.0 Z";
 
 export type HighlighterStrokeColor = "jersey" | "jersey-deep" | "ink" | "cream";
 

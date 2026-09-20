@@ -1,3 +1,6 @@
+// Re-exported for the top-level design-system barrel, which
+// `.design-sync/entry.ts` wildcards onto `window.KcvvDS` — see the note at
+// the top of ../index.ts.
 export { useScrollHint } from "./useScrollHint";
 export type {
   UseScrollHintOptions,

@@ -201,5 +201,3 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
     </div>
   );
 }
-
-export { TABLE_SANITIZE_OPTIONS };

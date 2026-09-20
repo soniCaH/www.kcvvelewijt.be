@@ -84,11 +84,3 @@ export const fixtureImage = (
   }
   return pool[index % pool.length]!;
 };
-
-/** Pool counts per shape — useful for diagnostic stories / tests. */
-export const fixturePoolSize = (shape: FixtureShape): number =>
-  FIXTURES[shape]?.length ?? 0;
-
-/** All fixtures for a shape (read-only). */
-export const fixturesForShape = (shape: FixtureShape): readonly string[] =>
-  FIXTURES[shape] ?? [];

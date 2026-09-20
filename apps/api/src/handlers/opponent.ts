@@ -17,7 +17,7 @@ const opponentHistoryCache = TypedKvCache(OpponentHistory);
 // this deploys.
 const CACHE_VERSION = "v2";
 
-export const getOpponentHistoryHandler = (
+const getOpponentHistoryHandler = (
   teamId: number,
   clubId: number,
 ): Effect.Effect<

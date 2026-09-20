@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils/cn";
  *  on jersey-deep/ink (dark-ground) surfaces. */
 export type AccentTone = "jersey-deep" | "warm";
 
-export const ACCENT_TONE_CLASS: Record<AccentTone, string> = {
+const ACCENT_TONE_CLASS: Record<AccentTone, string> = {
   "jersey-deep": "text-jersey-deep",
   warm: "text-warm",
 };

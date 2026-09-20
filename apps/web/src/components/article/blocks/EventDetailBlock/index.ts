@@ -1,6 +1,8 @@
+// `hasEventFactContent` is deliberately NOT re-exported here: its only
+// consumers (EventDetailBlock.tsx itself, EventDetailBlock.test.tsx) import
+// it directly from "./EventDetailBlock".
 export {
   EventDetailBlock,
   deriveIsPast,
-  hasEventFactContent,
   type EventDetailBlockProps,
 } from "./EventDetailBlock";

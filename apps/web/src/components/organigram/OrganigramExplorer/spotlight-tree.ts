@@ -102,7 +102,7 @@ export function primaryFocusId(tree: SpotlightTree): string {
 }
 
 /** Parent id of a node, or null for the root / unknown nodes. */
-export function parentIdOf(tree: SpotlightTree, id: string): string | null {
+function parentIdOf(tree: SpotlightTree, id: string): string | null {
   return tree.parentOf.get(id) ?? null;
 }
 
@@ -205,12 +205,7 @@ export function edgeSiblingTarget(
 
 /** Keys the spotlight stage handles for navigation (Enter/Escape are owned by the component). */
 export type SpotlightNavKey =
-  | "ArrowUp"
-  | "ArrowDown"
-  | "ArrowLeft"
-  | "ArrowRight"
-  | "Home"
-  | "End";
+  "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight" | "Home" | "End";
 
 /**
  * Route a navigation key to its target node id (or null when the move is

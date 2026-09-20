@@ -27,7 +27,8 @@ export type {
   FeaturedEventBandEvent,
 } from "./FeaturedEventBand";
 
-export { NewsCard } from "@/components/article/NewsCard";
+// `NewsCard` is deliberately NOT re-exported here: every consumer imports it
+// directly from "@/components/article" or "@/components/article/NewsCard".
 export type { NewsCardProps } from "@/components/article/NewsCard";
 
 export { BannerSlot } from "./BannerSlot";

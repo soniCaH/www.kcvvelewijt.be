@@ -6,7 +6,7 @@ import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
-export const RESPONSIBILITY_PATHS_QUERY =
+const RESPONSIBILITY_PATHS_QUERY =
   defineQuery(`*[_type == "responsibility" && active == true] | order(title asc) {
   "id": slug.current,
   "role": audience,
@@ -125,7 +125,7 @@ function toContact(c: ContactRow): Contact {
   }
 }
 
-export function toResponsibilityPath(p: PathRow): ResponsibilityPath {
+function toResponsibilityPath(p: PathRow): ResponsibilityPath {
   const relatedPaths = ((p.relatedPaths ?? []) as (string | null)[]).filter(
     (s): s is string => s != null,
   );

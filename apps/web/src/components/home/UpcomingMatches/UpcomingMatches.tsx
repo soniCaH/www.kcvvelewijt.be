@@ -80,5 +80,3 @@ export const UpcomingMatches = ({
     </section>
   );
 };
-
-export { KCVV_TEAM_ID, DEFAULT_VISIBLE };

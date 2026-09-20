@@ -21,7 +21,7 @@ import type {
  * inherits the consuming route's `revalidate` instead — the same shape
  * `TeamRepository.findAllForLanding` and the event lists use.
  */
-export const PAGES_QUERY =
+const PAGES_QUERY =
   defineQuery(`*[_type == "page" && defined(slug.current)] | order(title asc) {
   "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),
   "updatedAt": _updatedAt

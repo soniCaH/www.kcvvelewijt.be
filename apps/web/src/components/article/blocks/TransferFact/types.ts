@@ -71,7 +71,9 @@ export type ResolvedTransfer =
     };
 
 export const KCVV_CLUB_NAME = "KCVV Elewijt";
-export const KCVV_CLUB_LOGO_URL = "/images/logos/kcvv-logo.png";
+// Not consumed outside this file (unlike KCVV_CLUB_NAME, which
+// types.test.ts and callers of resolveTransfer's result read directly).
+const KCVV_CLUB_LOGO_URL = "/images/logos/kcvv-logo.png";
 
 const KCVV_SIDE: TransferSide = {
   name: KCVV_CLUB_NAME,

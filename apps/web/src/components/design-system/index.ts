@@ -1,6 +1,15 @@
 /**
  * UI Components Barrel Export
  * Central export point for all base UI components
+ *
+ * Every value exported here is re-exported wholesale by
+ * `.design-sync/entry.ts` (`export * from "@/components/design-system"`)
+ * onto `window.KcvvDS.<Name>` for the design-sync converter — see
+ * `.design-sync/NOTES.md` and `.design-sync/config.json`'s `overrides`
+ * (which names several of these components directly, e.g. `ClippedCard`,
+ * `StampBadge`). knip.jsonc declares that file (and dts-entry.d.ts) as a
+ * real entry point precisely so this barrel's exports are checked against
+ * that consumer too, not just in-app imports (#2934).
  */
 
 // Button
@@ -29,7 +38,8 @@ export type { LabelProps } from "./Label";
 export { Textarea } from "./Textarea";
 export type { TextareaProps, TextareaResize } from "./Textarea";
 
-// TextareaCounter
+// TextareaCounter — re-exported (design-sync's entry.ts wildcards this
+// whole barrel onto `window.KcvvDS`; see the note at the top of this file).
 export { TextareaCounter } from "./TextareaCounter";
 export type { TextareaCounterProps } from "./TextareaCounter";
 
@@ -38,7 +48,8 @@ export { Select } from "./Select";
 export type { SelectProps, SelectSize } from "./Select";
 
 // AlertBadge — `Alert` itself is not re-exported (#2580); see Alert/index.ts's
-// own comment.
+// own comment. `AlertBadge` is re-exported here for design-sync (see note
+// at top of file).
 export { AlertBadge } from "./Alert";
 export type {
   AlertBadgeProps,

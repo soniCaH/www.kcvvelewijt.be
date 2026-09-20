@@ -1,6 +1,15 @@
 /**
  * Layout Components Barrel Export
  * Central export point for all layout components
+ *
+ * Every value exported here is re-exported wholesale by
+ * `.design-sync/entry.ts` (`export * from "@/components/layout"`) onto
+ * `window.KcvvDS.<Name>` for the design-sync converter —
+ * `.design-sync/config.json`'s `overrides` names several of these directly
+ * (`AccentStrip`, `CookieConsentBanner`, `NavTakeover`, `SiteFooter`,
+ * `SiteHeader`). knip.jsonc declares that file (and dts-entry.d.ts) as a
+ * real entry point so this barrel is checked against that consumer too,
+ * not just in-app imports (#2934).
  */
 
 // SiteHeader

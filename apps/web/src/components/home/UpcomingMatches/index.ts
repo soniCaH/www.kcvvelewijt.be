@@ -1,4 +1,6 @@
 export { UpcomingMatches } from "./UpcomingMatches";
 export type { UpcomingMatchesProps } from "./UpcomingMatches";
-export { UpcomingMatchesClient } from "./UpcomingMatchesClient";
+// `UpcomingMatchesClient` is deliberately NOT re-exported here: its
+// consumers (UpcomingMatches.tsx, reservation-never-links.test.tsx) both
+// import it directly from "./UpcomingMatchesClient".
 export type { UpcomingMatchesClientProps } from "./UpcomingMatchesClient";

@@ -116,7 +116,7 @@ export function TimelineItem({
  * shadow). The date / era label renders as a `<MonoLabel>` ink chip (era names
  * and years both render as chips, per the data).
  */
-export function TimelineCard({
+function TimelineCard({
   date,
   children,
 }: {

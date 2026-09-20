@@ -41,7 +41,7 @@ import {
   PhotoGalleryRepositoryLive,
 } from "../repositories/photoGallery.repository";
 
-export const AppLayer = Layer.mergeAll(
+const AppLayer = Layer.mergeAll(
   BffServiceLive,
   PlayerRepositoryLive,
   TeamRepositoryLive,
@@ -54,7 +54,7 @@ export const AppLayer = Layer.mergeAll(
   PageRepositoryLive,
   PhotoGalleryRepositoryLive,
 );
-export const runtime = ManagedRuntime.make(AppLayer);
+const runtime = ManagedRuntime.make(AppLayer);
 
 /**
  * Every route runs its Sanity/BFF reads through here. `E` is pinned to

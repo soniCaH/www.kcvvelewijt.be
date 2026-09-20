@@ -34,7 +34,7 @@
  */
 
 /** Default-state chrome (rest, hover, focus, filled, disabled). */
-export const fieldChromeIdle = [
+const fieldChromeIdle = [
   // Base — sharp corners, white surface, transitions
   "font-body w-full border-2 bg-white transition-all duration-150 focus:outline-hidden",
   "text-ink placeholder:text-ink/40",
@@ -62,7 +62,7 @@ export const fieldChromeIdle = [
 ].join(" ");
 
 /** Error-state chrome — replaces idle when `error` prop is set. */
-export const fieldChromeError = [
+const fieldChromeError = [
   // Base
   "font-body w-full border-2 bg-white transition-all duration-150 focus:outline-hidden",
   "text-ink placeholder:text-ink/40",

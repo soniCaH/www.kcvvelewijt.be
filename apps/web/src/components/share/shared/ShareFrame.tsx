@@ -3,7 +3,6 @@
 import React, { createContext, useContext } from "react";
 import {
   BODY_FONT,
-  DISPLAY_FONT,
   GRAIN_DATA_URL,
   KCVV_LOGO,
   MONO_FONT,
@@ -18,9 +17,6 @@ import {
   type ShareRegister,
   type ShareSentiment,
 } from "./theme";
-
-/** Re-exported for templates that compose the crest matchup. */
-export { KCVV_LOGO };
 
 const SharePaletteContext = createContext<SharePalette>(
   resolvePalette("cream", "neutral"),
@@ -184,7 +180,7 @@ export function ShareFrame({
 }
 
 /** Round club crest (KCVV logo) used in the top bar. */
-export function Crest({ size = 96 }: { size?: number }) {
+function Crest({ size = 96 }: { size?: number }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -370,5 +366,3 @@ export function ShareFoot({
     </div>
   );
 }
-
-export { DISPLAY_FONT };
