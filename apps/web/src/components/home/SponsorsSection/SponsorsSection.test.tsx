@@ -1,7 +1,7 @@
 /**
  * A failed sponsors read must degrade, not take the page down (#2505 round-3
  * review finding M1). `<SponsorsSection>` is mocked out of
- * `apps/web/src/app/(landing)/page.test.tsx` (it is an async Server
+ * `apps/web/src/app/(landing)/(home)/page.test.tsx` (it is an async Server
  * Component react-dom's `render()` cannot resolve below the root), which
  * left its own guard with no coverage anywhere — this file is that coverage.
  */

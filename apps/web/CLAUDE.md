@@ -184,7 +184,7 @@ Three independent test layers, each owning a specific concern. Don't blur them �
 
 ### Import the module under test at module scope
 
-**Never `await import()` a page, layout, or route module inside an `it()` body** — Vitest charges dynamic imports against `testTimeout`, while top-level imports are paid during the untimed collect phase. A page graph takes ~3 s to resolve, so an in-body import fails deterministically under CI contention (#2362). The same goes for any module the code under test dynamically imports. Hoist it below the `vi.mock` calls (Vitest hoists those above all module-level code). Prefer a static `import`; use `await import()` only when a mock factory closes over a `const` in the file, which a static import would hoist above → TDZ (see `(main)/ploegen/page.test.tsx`).
+**Never `await import()` a page, layout, or route module inside an `it()` body** — Vitest charges dynamic imports against `testTimeout`, while top-level imports are paid during the untimed collect phase. A page graph takes ~3 s to resolve, so an in-body import fails deterministically under CI contention (#2362). The same goes for any module the code under test dynamically imports. Hoist it below the `vi.mock` calls (Vitest hoists those above all module-level code). Prefer a static `import`; use `await import()` only when a mock factory closes over a `const` in the file, which a static import would hoist above → TDZ (see `(main)/ploegen/(index)/page.test.tsx`).
 
 ### Running the suites
 

@@ -34,7 +34,7 @@ export interface UitgelichtArticle {
 /**
  * The `articleType` values the homepage spine handles, re-exported so the two
  * barrels above this file (`FeaturedUitgelichtRow/index.ts`, `home/index.ts`)
- * and `app/(landing)/page.tsx`'s exhaustive `toUitgelichtArticleType` guard
+ * and `app/(landing)/(home)/page.tsx`'s exhaustive `toUitgelichtArticleType` guard
  * keep their import path.
  *
  * It is the canonical union now, not a local mirror: `BG_BY_TYPE` below and

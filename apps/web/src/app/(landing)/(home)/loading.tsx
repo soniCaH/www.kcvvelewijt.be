@@ -16,9 +16,17 @@
  * Index width (1280) throughout. Every bar is `<Skeleton>` (#2432 §5/§6) — the
  * one primitive owning the fill token, the `motion-safe:` gate and
  * `aria-hidden`. This file's own `<h1>` is data-driven copy today, not a fixed
- * headline, so it renders no heading text — but its fallback is scoped to this
- * segment alone (`(landing)/loading.tsx` is not shared with `/nieuws`,
- * `/jeugd`, `/sponsors`, which each have their own).
+ * headline, so it renders no heading text.
+ *
+ * **Scoped by its directory, not by its siblings.** It sits in the `(home)`
+ * route group so it wraps the homepage alone. Before #2791 it sat directly on
+ * `(landing)/`, where it was the Suspense boundary for that segment's whole
+ * subtree and shipped `Startpagina laden…` into the streamed HTML of
+ * `/nieuws`, `/jeugd` and `/sponsors` — measured on the deployed app, all
+ * three. An earlier version of this docblock claimed the opposite, reasoning
+ * that those routes each own a `loading.tsx`; a child owning its own fallback
+ * does **not** cancel the parent's (#2432 §1). The route group is what scopes
+ * it. Do not move this file back up a level.
  */
 
 import {

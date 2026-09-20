@@ -124,7 +124,7 @@ export const SETTLED_LOOKAHEAD_MS = 72 * 60 * 60 * 1000;
  *
  * Returns `null` — rather than throwing — on the impossible branch: this runs
  * inside a `filter` on the homepage's render path, outside any error boundary
- * (`app/(landing)/page.tsx` only wraps the *fetch* in `catchAll`). Dropping one
+ * (`app/(landing)/(home)/page.tsx` only wraps the *fetch* in `catchAll`). Dropping one
  * match from a chrome block is a better failure than a 500 on the homepage.
  * The `never` assignment keeps the compile-time guarantee either way.
  */

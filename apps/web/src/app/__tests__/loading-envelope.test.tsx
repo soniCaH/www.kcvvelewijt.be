@@ -15,10 +15,15 @@
  *     `sr-only`) with its declared Dutch label.
  *   - **No wrong-page `<h1>`.** A `loading.tsx` whose fallback also ships in a
  *     sibling segment's streamed HTML (#2432 §1 — the six-file leak this
- *     ticket could not fully close by moving files, see the PR body) must
+ *     ticket could not close by moving files mid-wave) must
  *     never render a heading naming a *different* page. `/club` and
  *     `/club/[slug]` are the two concrete fixes: both now render bars, never
  *     a real `<h1>`.
+ *
+ * Closed structurally by #2791, which finished #2573's deferred acceptance
+ * criterion: seven segments moved their `page.tsx` + `loading.tsx` pair into a
+ * route group, and the placement guard below now asserts the rule itself
+ * rather than a growing list of per-route content checks.
  *
  * @see docs/prd/loading-skeleton-consistency.md — original Phase 4 guard
  * @see https://github.com/kcvvelewijt/www.kcvvelewijt.be/issues/2573
@@ -28,14 +33,14 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import type { ComponentType } from "react";
 import { globSync } from "node:fs";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 
 // ---------------------------------------------------------------------------
 // Loading components
 // ---------------------------------------------------------------------------
-import ClubLoading from "../(main)/club/loading";
-import JeugdLoading from "../(landing)/jeugd/loading";
-import PloegenLoading from "../(main)/ploegen/loading";
+import ClubLoading from "../(main)/club/(index)/loading";
+import JeugdLoading from "../(landing)/jeugd/(index)/loading";
+import PloegenLoading from "../(main)/ploegen/(index)/loading";
 import HulpLoading from "../(main)/hulp/loading";
 import KalenderLoading from "../(main)/kalender/loading";
 import NieuwsLoading from "../(landing)/nieuws/loading";
@@ -47,21 +52,21 @@ import ClubDetailLoading from "../(main)/club/[slug]/loading";
 import AngelsLoading from "../(main)/club/angels/loading";
 import BestuurLoading from "../(main)/club/bestuur/loading";
 import JeugdbestuurLoading from "../(main)/club/jeugdbestuur/loading";
-import PloegenDetailLoading from "../(main)/ploegen/[slug]/loading";
+import PloegenDetailLoading from "../(main)/ploegen/[slug]/(detail)/loading";
 import SpelersDetailLoading from "../(main)/spelers/[slug]/loading";
 import StafDetailLoading from "../(main)/staf/[slug]/loading";
 import TegenstanderLoading from "../(main)/tegenstander/[clubId]/loading";
 import WedstrijdLoading from "../(main)/wedstrijd/[matchId]/loading";
-import HomepageLoading from "../(landing)/loading";
+import HomepageLoading from "../(landing)/(home)/loading";
 import ContactLoading from "../(main)/club/contact/loading";
 import GeschiedenisLoading from "../(main)/club/geschiedenis/loading";
 import UltrasLoading from "../(main)/club/ultras/loading";
-import EvenementenLoading from "../(main)/evenementen/loading";
+import EvenementenLoading from "../(main)/evenementen/(index)/loading";
 import EvenementDetailLoading from "../(main)/evenementen/[slug]/loading";
 import WedstrijdenLoading from "../(main)/ploegen/[slug]/wedstrijden/loading";
 import PrivacyLoading from "../(main)/privacy/loading";
 import ShareLoading from "../(main)/share/loading";
-import GalerijLoading from "../(main)/galerij/loading";
+import GalerijLoading from "../(main)/galerij/(index)/loading";
 import GalerijDetailLoading from "../(main)/galerij/[slug]/loading";
 import WordLidLoading from "../(main)/club/word-lid/loading";
 
@@ -350,6 +355,81 @@ describe("loading.tsx envelope drift guard", () => {
   });
 
   // -------------------------------------------------------------------------
+  // Placement guard (#2791) — no loading.tsx may wrap a descendant page
+  // -------------------------------------------------------------------------
+
+  /**
+   * A child whose path is nothing but route groups and `page.tsx` serves the
+   * segment's *own* URL, so it is not a descendant: `jeugd/(index)/page.tsx`
+   * is `/jeugd` itself. Anything deeper is a real descendant even when it
+   * opens with a route group — `(detail)/[slug]/page.tsx` is `/jeugd/[slug]`,
+   * and every page an `app/loading.tsx` would wrap sits under `(main)` or
+   * `(landing)`. A leading-anchored `(group)/` strip discounted both, which
+   * blinded the guard to exactly the `app/loading.tsx` case the whole-app
+   * glob below exists to catch.
+   */
+  const isOwnRoutePage = (descendant: string) =>
+    /^(\([^)]*\)\/)+page\.tsx$/.test(descendant);
+
+  /**
+   * The structural half of "no skeleton announces a different page than the
+   * one asked for" (#2432 §2). A `loading.tsx` is the Suspense boundary for
+   * its segment's **whole subtree**, so Next ships its markup in the streamed
+   * HTML of every descendant route — and a child owning its own `loading.tsx`
+   * does not cancel the parent's (#2432 §1), which is why the content-level
+   * mitigation alone was never enough.
+   *
+   * Asserted as a filesystem rule rather than per-route content checks,
+   * because the failure mode is placement: a skeleton is correct where it
+   * sits and wrong one directory up. Seven segments broke this before #2791
+   * — `(landing)`, `(landing)/jeugd`, `(main)/club`, `(main)/evenementen`,
+   * `(main)/ploegen`, `(main)/ploegen/[slug]`, and `(main)/galerij`, the last
+   * of which neither #2573's acceptance criteria nor #2791's triage had
+   * found. Four of the seven shipped a genuinely wrong `<h1>`: `Onze ploegen.`
+   * on a team page, `Evenementen.` on an event, `Fotogalerij.` on a gallery.
+   *
+   * The fix is always the same: move `page.tsx` **and** its sibling
+   * `loading.tsx` into a route group together. `loading.tsx` cannot move
+   * alone — orphaned from its page it stops being a fallback for anything.
+   */
+  it("no loading.tsx wraps a descendant page.tsx (#2791)", () => {
+    const appDir = resolve(__dirname, "..");
+    // The whole app dir, not just `(main)`/`(landing)`: the worst offender
+    // this rule can have is `app/loading.tsx`, which would wrap every route
+    // including the three root-level legacy resolvers (`player/[slug]`,
+    // `players/[slug]`, `staff/[slug]`) that live outside both groups and own
+    // no fallback. A two-group glob would stay green through exactly that.
+    const loadingFiles = globSync("**/loading.tsx", { cwd: appDir });
+    const offenders = loadingFiles
+      .map((file) => {
+        const segment = dirname(file);
+        const descendants = globSync("*/**/page.tsx", {
+          cwd: resolve(appDir, segment),
+        }).filter((d) => !isOwnRoutePage(d));
+        return descendants.length > 0
+          ? `${file} wraps ${descendants.length} descendant page(s): ${descendants.join(", ")}`
+          : null;
+      })
+      .filter((x): x is string => x !== null)
+      .sort();
+    expect(
+      offenders,
+      `a loading.tsx must sit in a route group beside its own page.tsx, never on a segment that has descendant routes:\n${offenders.join("\n")}`,
+    ).toEqual([]);
+  });
+
+  it("the own-route filter keeps pages nested under a route group (#2791)", () => {
+    // Same URL as the segment — not a descendant.
+    expect(isOwnRoutePage("(index)/page.tsx")).toBe(true);
+    expect(isOwnRoutePage("(landing)/(home)/page.tsx")).toBe(true);
+    // Real descendants — the filter must not swallow these.
+    expect(isOwnRoutePage("(index)/[slug]/page.tsx")).toBe(false);
+    expect(isOwnRoutePage("(detail)/[slug]/page.tsx")).toBe(false);
+    expect(isOwnRoutePage("(main)/club/bestuur/page.tsx")).toBe(false);
+    expect(isOwnRoutePage("wedstrijden/page.tsx")).toBe(false);
+  });
+
+  // -------------------------------------------------------------------------
   // Completeness guard — fail if a loading.tsx is added but not tested
   // -------------------------------------------------------------------------
 
@@ -362,8 +442,12 @@ describe("loading.tsx envelope drift guard", () => {
     const expectedRouteNames = new Set(
       routes.map(({ name }) => name.replace(/^\//, "")),
     );
+    // Strips *every* route group, not just the leading `(main)`/`(landing)`:
+    // since #2791 the page-owning skeletons sit one level deeper, inside
+    // `(home)`/`(index)`/`(detail)`, and a leading-only strip would read
+    // `(main)/ploegen/(index)/loading.tsx` as the route `ploegen/(index)`.
     const stripGroup = (file: string) =>
-      file.replace(/^\((main|landing)\)\//, "").replace(/\/?loading\.tsx$/, "");
+      file.replace(/\([^)]*\)\//g, "").replace(/\/?loading\.tsx$/, "");
     const onDiskRouteNames = new Set(loadingFiles.map(stripGroup));
     const missingFiles = loadingFiles
       .filter((f) => !expectedRouteNames.has(stripGroup(f)))
