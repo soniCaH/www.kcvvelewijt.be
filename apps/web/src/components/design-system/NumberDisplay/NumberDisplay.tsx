@@ -2,7 +2,18 @@ import { createElement } from "react";
 import { cn } from "@/lib/utils/cn";
 
 export type NumberDisplaySize = "display-2xl" | "display-xl" | "display-lg";
-export type NumberDisplayTone = "jersey" | "jersey-deep" | "ink" | "cream";
+/**
+ * `jersey` (the bright decorative green, `#4acf52`) is deliberately absent.
+ * DESIGN.md's Two-Greens Rule reserves it for decoration only — stripe
+ * patterns, tape strips, spinner bars — and forbids it from ever carrying
+ * text (1.80:1 on cream, illegible at any size). `<NumberDisplay>` only
+ * ever renders text, so there is no ground on which `jersey` is legitimate
+ * here: `jersey-deep` (cream) carries any text-bearing green this
+ * component needs. Green-on-ink text would need `jersey-bright`, but no
+ * call site renders `<NumberDisplay>` on an ink ground today — add that
+ * tone when one does, rather than reintroducing `jersey` for it (#3031).
+ */
+export type NumberDisplayTone = "jersey-deep" | "ink" | "cream";
 export type NumberDisplayAs = "span" | "div" | "p";
 
 export interface NumberDisplayProps {
@@ -22,7 +33,6 @@ const SIZE_CLASS: Record<NumberDisplaySize, string> = {
 };
 
 const TONE_CLASS: Record<NumberDisplayTone, string> = {
-  jersey: "text-jersey",
   "jersey-deep": "text-jersey-deep",
   ink: "text-ink",
   cream: "text-cream",
