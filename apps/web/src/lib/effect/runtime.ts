@@ -1,5 +1,6 @@
-import { Effect, Layer, ManagedRuntime, Runtime, Cause } from "effect";
+import { Effect, Layer, ManagedRuntime } from "effect";
 import { unstable_rethrow } from "next/navigation";
+import { squashFiberFailure } from "./classify-bff-failure";
 import { BffService, BffServiceLive } from "./services/BffService";
 import {
   PlayerRepository,
@@ -70,23 +71,51 @@ const runtime = ManagedRuntime.make(AppLayer);
  * (#3034).** `ManagedRuntime.runPromise` never rejects with the error a
  * defect actually threw — it rejects with a fresh `FiberFailureImpl` that
  * copies only `message`/`name`/`stack` off the `Cause` (see
- * `effect/internal/runtime.ts`'s `fiberFailure`). `notFound()` (and
- * `forbidden()`/`unauthorized()`/`redirect()`) throw a plain `Error` whose
- * *only* load-bearing part is a non-standard `.digest` string —
- * `isHTTPAccessFallbackError`/`isRedirectError` in
- * `next/dist/client/components/*` key off exactly that property, which
- * `FiberFailureImpl` drops. A route wrapping `Effect.catchTag("HttpNotFound",
- * () => Effect.sync(() => notFound()))` therefore has its `notFound()` call
- * silently turned into an unrecognised error by the time it reaches
- * `app-render.tsx`'s catch, which falls through to `res.statusCode = 500` —
- * a real 500 where a 404 (soft or hard) was intended.
+ * `effect/internal/runtime.ts`'s `fiberFailure`). `notFound()` throws a plain
+ * `Error` whose *only* load-bearing part is a non-standard `.digest`
+ * string — `isHTTPAccessFallbackError` in
+ * `next/dist/client/components/http-access-fallback` keys off exactly that
+ * property, which `FiberFailureImpl` drops. A route wrapping
+ * `Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound()))`
+ * therefore has its `notFound()` call silently turned into an unrecognised
+ * error by the time it reaches `app-render.tsx`'s catch, which falls through
+ * to `res.statusCode = 500` — a real 500 where a 404 (soft or hard) was
+ * intended.
  *
- * `Cause.squash` unwraps the `FiberFailure` back to the original thrown
- * value; `unstable_rethrow` re-throws that value only when it recognises one
- * of Next's own signals and is a no-op otherwise, so every other failure
- * (a genuine BFF/Sanity error) keeps flowing through as the same
- * `FiberFailure` it always has — `isPermanentBffFailure` and friends, which
- * key off that shape, are unaffected.
+ * `squashFiberFailure` unwraps the `FiberFailure` back to the original
+ * thrown value; that value is handed to Next's own `unstable_rethrow`
+ * (`next/navigation`), the public API for exactly this — a `try/catch`
+ * swallowing one of Next's control-flow sentinels.
+ *
+ * **The actual predicate is wider than "the squashed value is one of Next's
+ * signals".** `unstable_rethrow`'s own last two lines are
+ * `if (error instanceof Error && 'cause' in error) unstable_rethrow(error.cause)`
+ * — it walks the *whole* `.cause` chain, re-throwing on the first match
+ * anywhere in it (`isRedirectError` / `isHTTPAccessFallbackError`, or a few
+ * other Next-internal signals `unstable_rethrow` also recognises), with no
+ * cycle guard. So a genuinely different failure whose `.cause` happens to
+ * *wrap* one of Next's sentinels is reclassified as that sentinel too — the
+ * outer error's own message/tag is discarded, and this repo has a real
+ * carrier for that shape already: `SanityReadError`
+ * (`lib/sanity/fetch-groq.ts`) is an `Error` subclass constructed with a
+ * `cause` on every instance, so the chain-walk runs on every single Sanity
+ * defect that reaches here (today it always bottoms out on a non-Next cause
+ * and falls through unchanged — nothing in this repo constructs a
+ * self-referencing `cause`, or a `cause` that is itself one of Next's own
+ * errors). Deliberately not narrowed to a stricter check of our own: matching
+ * `unstable_rethrow`'s actual semantics is correct — reimplementing the
+ * `NEXT_HTTP_ERROR_FALLBACK`-style digest matching ourselves would silently
+ * drift from Next's own on the next Next upgrade, a worse failure than the
+ * latent one this fixes. Every other failure (one whose cause chain, if it
+ * has one, never bottoms out on a Next signal) keeps flowing through as the
+ * same `FiberFailure` it always has — `isPermanentBffFailure` and friends,
+ * which key off that shape, are unaffected.
+ *
+ * **Only `notFound()` and `redirect()` are pinned by `runtime.test.ts`.**
+ * No route in this app throws `forbidden()`/`unauthorized()` through an
+ * Effect chain today, so their restoration is not asserted here — it rests
+ * entirely on `unstable_rethrow` recognising them the same way, not on
+ * anything this module tests or maintains itself.
  */
 export const runPromise = <A>(
   effect: Effect.Effect<
@@ -106,8 +135,9 @@ export const runPromise = <A>(
   >,
 ) =>
   runtime.runPromise(effect).catch((error: unknown) => {
-    if (Runtime.isFiberFailure(error)) {
-      unstable_rethrow(Cause.squash(error[Runtime.FiberFailureCauseId]));
+    const squashed = squashFiberFailure(error);
+    if (squashed !== undefined) {
+      unstable_rethrow(squashed);
     }
     throw error;
   });
