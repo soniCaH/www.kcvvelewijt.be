@@ -1,6 +1,20 @@
 /**
  * Cream-paper skeleton matching the upcoming-state strip dimensions.
  * Rendered as the Suspense fallback while `getFirstTeamStripData()` resolves.
+ *
+ * `min-h-[40px]` (48px from `lg`) is a single fixed reservation; the real
+ * strip's height is data-dependent and this cannot be clairvoyant about it
+ * (`loading.tsx` never sees the fetch — same #2642 rule the detail-route
+ * skeletons that mount this follow). It matches exactly when the resolved
+ * strip renders one row (only a result or only a fixture); the common
+ * in-season mobile case renders both as two stacked rows (~80px) and the
+ * no-fixture case renders zero DOM (`<MatchStrip>` returns `null`) — both
+ * are a known, deliberately unclosed residual shift — see #3027. A fixed
+ * two-row mobile footprint here would fix the common case but still
+ * over-reserve the empty-season one, and would also change the `(landing)`
+ * route group's own loading state, which is a bigger change than a single
+ * reservation height; #3027 proposes a stable reserved band on
+ * `<MatchStripSlot>` itself instead.
  */
 export function MatchStripSkeleton() {
   return (

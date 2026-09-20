@@ -10,7 +10,7 @@ describe("MatchStripSkeleton", () => {
     expect(skeleton?.className).toContain("motion-safe:animate-pulse");
   });
 
-  it("reserves the same height as the real strip (min-h-[40px])", () => {
+  it("reserves min-h-[40px] — exact only for a single-row real strip (result or fixture alone), not the common two-row mobile case (#3027)", () => {
     const { container } = render(<MatchStripSkeleton />);
     const skeleton = container.firstElementChild;
     expect(skeleton?.className).toContain("min-h-[40px]");
