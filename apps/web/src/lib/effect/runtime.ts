@@ -1,4 +1,5 @@
-import { Effect, Layer, ManagedRuntime } from "effect";
+import { Effect, Layer, ManagedRuntime, Runtime, Cause } from "effect";
+import { unstable_rethrow } from "next/navigation";
 import { BffService, BffServiceLive } from "./services/BffService";
 import {
   PlayerRepository,
@@ -64,6 +65,28 @@ const runtime = ManagedRuntime.make(AppLayer);
  * (`lib/effect/degrade.ts`) before it gets here; a **subject** read that
  * should take the page down calls `Effect.orDie` itself, at the call site,
  * with a one-line reason (#2433 rule 2/3).
+ *
+ * **Restores Next's own control-flow signals before they leave Effect-land
+ * (#3034).** `ManagedRuntime.runPromise` never rejects with the error a
+ * defect actually threw — it rejects with a fresh `FiberFailureImpl` that
+ * copies only `message`/`name`/`stack` off the `Cause` (see
+ * `effect/internal/runtime.ts`'s `fiberFailure`). `notFound()` (and
+ * `forbidden()`/`unauthorized()`/`redirect()`) throw a plain `Error` whose
+ * *only* load-bearing part is a non-standard `.digest` string —
+ * `isHTTPAccessFallbackError`/`isRedirectError` in
+ * `next/dist/client/components/*` key off exactly that property, which
+ * `FiberFailureImpl` drops. A route wrapping `Effect.catchTag("HttpNotFound",
+ * () => Effect.sync(() => notFound()))` therefore has its `notFound()` call
+ * silently turned into an unrecognised error by the time it reaches
+ * `app-render.tsx`'s catch, which falls through to `res.statusCode = 500` —
+ * a real 500 where a 404 (soft or hard) was intended.
+ *
+ * `Cause.squash` unwraps the `FiberFailure` back to the original thrown
+ * value; `unstable_rethrow` re-throws that value only when it recognises one
+ * of Next's own signals and is a no-op otherwise, so every other failure
+ * (a genuine BFF/Sanity error) keeps flowing through as the same
+ * `FiberFailure` it always has — `isPermanentBffFailure` and friends, which
+ * key off that shape, are unaffected.
  */
 export const runPromise = <A>(
   effect: Effect.Effect<
@@ -81,7 +104,13 @@ export const runPromise = <A>(
     | PageRepository
     | PhotoGalleryRepository
   >,
-) => runtime.runPromise(effect);
+) =>
+  runtime.runPromise(effect).catch((error: unknown) => {
+    if (Runtime.isFiberFailure(error)) {
+      unstable_rethrow(Cause.squash(error[Runtime.FiberFailureCauseId]));
+    }
+    throw error;
+  });
 
 export {
   BffService,
