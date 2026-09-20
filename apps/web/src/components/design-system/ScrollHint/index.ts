@@ -1,16 +1,17 @@
-// The values (`useScrollHint`, `ScrollArrowButton`, `ScrollRail`,
-// `ScrollOverlay`) are deliberately NOT re-exported here: every consumer
-// (HorizontalSlider.tsx and friends) imports each one directly from its own
-// file, e.g. "@/components/design-system/ScrollHint/useScrollHint" — see the
-// `Alert` barrel (../Alert/index.ts) for the same pattern. Only the types
-// stay, for the top-level design-system barrel's `export type` re-export.
+// Re-exported for the top-level design-system barrel, which
+// `.design-sync/entry.ts` wildcards onto `window.KcvvDS` — see the note at
+// the top of ../index.ts.
+export { useScrollHint } from "./useScrollHint";
 export type {
   UseScrollHintOptions,
   UseScrollHintReturn,
 } from "./useScrollHint";
+export { ScrollArrowButton } from "./ScrollArrowButton";
 export type {
   ScrollArrowButtonProps,
   ScrollArrowButtonRegister,
 } from "./ScrollArrowButton";
+export { ScrollRail } from "./ScrollRail";
 export type { ScrollRailProps } from "./ScrollRail";
+export { ScrollOverlay } from "./ScrollOverlay";
 export type { ScrollOverlayProps } from "./ScrollOverlay";
