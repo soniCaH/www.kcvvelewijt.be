@@ -4,7 +4,7 @@ import { FilterTabsSkeleton, Skeleton } from "@/components/design-system";
  * `<EventsBrowser>` loading skeleton — the filter chip row + month-grouped
  * ticket list only (not the page's opening, which is static and renders
  * outside any loading boundary). The route's ONLY caller now:
- * `apps/web/src/app/(main)/evenementen/loading.tsx` (the navigation-triggered
+ * `apps/web/src/app/(main)/evenementen/(index)/loading.tsx` (the navigation-triggered
  * full-page skeleton). `page.tsx` no longer wraps `<EventsBrowser>` in a
  * local `<Suspense>` — that component reads its active facet from
  * `window.location` on mount rather than `useSearchParams` (#2564 review

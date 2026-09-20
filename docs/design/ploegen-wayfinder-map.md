@@ -106,7 +106,7 @@ grep -rn "level={2}\|<h2" src/components/team/StandingsTable src/components/team
   src/components/team/SquadGrid src/components/team/TeamStaff
 
 # No active state and no focus style on the sticky nav — expect zero hits
-grep -n "aria-current\|focus" "src/app/(main)/ploegen/[slug]/TeamSectionNav.tsx"
+grep -n "aria-current\|focus" "src/app/(main)/ploegen/[slug]/(detail)/TeamSectionNav.tsx"
 
 # Detector over this surface (expect exit 2, 7 × design-system-font-size, all shipped)
 DETECT=$(ls -d ~/.claude-personal/plugins/cache/impeccable/impeccable/*/skills/impeccable | tail -1)

@@ -422,7 +422,7 @@ describe("rule 3 catches what it claims to (#2601)", () => {
  * **Three things it cannot see, named so nobody reads it as more than it is:**
  *
  * - **The same route announcing itself twice across two files.**
- *   `(main)/club/loading.tsx` renders an opening for *all six* `/club/*`
+ *   `(main)/club/(index)/loading.tsx` renders an opening for *all six* `/club/*`
  *   children, so their streamed HTML carries two `<h1>`s and a loading board
  *   page announces itself as the `/club` index. Reaching that needs the import
  *   graph; the fix is #2432's (moving segment `loading.tsx` files into route
@@ -450,7 +450,7 @@ describe("rule 3 catches what it claims to (#2601)", () => {
  * never receives more than one. Exempted deliberately rather than by a rule
  * loose enough to let a real second heading through.
  */
-const HOMEPAGE = "app/(landing)/page.tsx";
+const HOMEPAGE = "app/(landing)/(home)/page.tsx";
 
 /** Every opening tag of a level-1 heading, with its attributes. */
 const H1_TAG = /<h1\b[^>]*>/g;
@@ -603,11 +603,11 @@ describe("a BFF-fed route caps its cache window (#2563)", () => {
  */
 describe("rule 5 checks the routes it claims to (#2563)", () => {
   it.each([
-    ["app/(landing)/page.tsx"],
-    ["app/(landing)/jeugd/page.tsx"],
+    ["app/(landing)/(home)/page.tsx"],
+    ["app/(landing)/jeugd/(index)/page.tsx"],
     ["app/(landing)/sponsors/page.tsx"],
     ["app/(main)/nieuws/[slug]/page.tsx"],
-    ["app/(main)/ploegen/[slug]/page.tsx"],
+    ["app/(main)/ploegen/[slug]/(detail)/page.tsx"],
     ["app/(main)/spelers/[slug]/page.tsx"],
     ["app/(main)/wedstrijd/[matchId]/page.tsx"],
   ])("covers %s", (relPath) => {
@@ -2363,7 +2363,7 @@ describe("rule 14 checks the routes it claims to (#3023)", () => {
   it.each([
     ["app/(main)/wedstrijd/[matchId]/page.tsx"],
     ["app/(main)/spelers/[slug]/page.tsx"],
-    ["app/(main)/ploegen/[slug]/page.tsx"],
+    ["app/(main)/ploegen/[slug]/(detail)/page.tsx"],
   ])("covers %s", (relPath) => {
     expect(inlineMatchStripPages).toContain(relPath);
   });

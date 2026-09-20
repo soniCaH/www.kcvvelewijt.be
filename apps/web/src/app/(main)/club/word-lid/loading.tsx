@@ -21,7 +21,7 @@ import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm"
 
 export default function WordLidLoading() {
   return (
-    <div className="bg-cream pb-12 sm:pb-16">
+    <div className="bg-cream pb-12 lg:pb-16">
       <LoadingAnnouncement label="Word lid laden…" />
 
       <PageContainer width="prose">

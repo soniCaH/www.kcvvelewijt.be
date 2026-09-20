@@ -58,7 +58,7 @@ const ARTICLE_TAGS_QUERY = defineQuery(
 
 // Intentionally pure chronological order — paginated listings power the
 // /nieuws archive (`app/(landing)/nieuws/actions.ts`) and the youth-news
-// section on /jeugd (`app/(landing)/jeugd/page.tsx`). Archive UX assumes
+// section on /jeugd (`app/(landing)/jeugd/(index)/page.tsx`). Archive UX assumes
 // strict date ordering so readers can scan by publication date; the
 // featured-first rule applies only to the homepage feed (ARTICLES_QUERY).
 const ARTICLES_PAGINATED_QUERY =

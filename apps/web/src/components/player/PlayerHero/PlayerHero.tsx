@@ -197,7 +197,7 @@ export function PlayerHero({
               value={jerseyNumber}
               prefix="#"
               size="display-2xl"
-              tone="jersey"
+              tone="jersey-deep"
             />
           </span>
         ) : null}

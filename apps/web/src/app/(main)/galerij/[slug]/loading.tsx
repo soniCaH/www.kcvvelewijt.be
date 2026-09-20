@@ -22,7 +22,7 @@ export default function GalleryDetailLoading() {
     <div className="bg-cream">
       <LoadingAnnouncement label="Fotogalerij laden…" />
 
-      <PageContainer as="main" className="pb-12 sm:pb-16">
+      <PageContainer as="main" className="pb-12 lg:pb-16">
         {/* Kicker + headline bars — the shared <PageHeroSkeleton
             register="minimal"> rather than a second hand-drawn copy of its
             OpeningBars. The date line below it is this route's own (the
