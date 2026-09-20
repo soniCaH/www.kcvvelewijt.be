@@ -108,7 +108,10 @@ function ReservationAgendaRow({
             {match.team}
           </span>
         )}
-        <span className="text-ink-muted min-w-0 truncate font-mono text-[11px] font-semibold tracking-wide uppercase">
+        <span
+          title={subject}
+          className="text-ink-muted min-w-0 truncate font-mono text-[11px] font-semibold tracking-wide uppercase"
+        >
           {subject}
         </span>
       </span>
@@ -174,7 +177,10 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
             {match.team}
           </span>
         )}
-        <span className="text-ink min-w-0 truncate text-[13px] font-semibold">
+        <span
+          title={`${match.homeTeam.name} — ${match.awayTeam.name}`}
+          className="text-ink min-w-0 truncate text-[13px] font-semibold"
+        >
           {match.homeTeam.name} — {match.awayTeam.name}
         </span>
         {isPlayed && hasScore && (
@@ -221,7 +227,10 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
       )}
     >
       <span className="text-ink-muted font-mono text-[11px]">{when}</span>
-      <span className="text-ink min-w-0 truncate text-[15px] font-semibold">
+      <span
+        title={event.title}
+        className="text-ink min-w-0 truncate text-[15px] font-semibold"
+      >
         {event.title}
       </span>
       <EventTypeTag eventType={event.eventType} />

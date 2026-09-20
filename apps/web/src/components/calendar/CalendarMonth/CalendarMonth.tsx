@@ -186,7 +186,10 @@ function SelectedDayDetail({
                     {time}
                   </span>
                 )}
-                <span className="text-ink min-w-0 flex-1 truncate text-base font-semibold">
+                <span
+                  title={event.title}
+                  className="text-ink min-w-0 flex-1 truncate text-base font-semibold"
+                >
                   {event.title}
                 </span>
                 <EventTypeTag eventType={event.eventType} />

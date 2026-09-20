@@ -284,7 +284,10 @@ function PlayerRow({ player }: { player: LineupPlayer }) {
 
       {/* Player name */}
       <span className="text-ink flex min-w-0 flex-1 items-center gap-1.5">
-        <span className="font-display min-w-0 truncate text-[15px] italic">
+        <span
+          title={player.name}
+          className="font-display min-w-0 truncate text-[15px] italic"
+        >
           {player.name}
           {player.isCaptain && (
             <span className="text-ink-muted ml-1.5 font-mono text-[10px] tracking-[0.16em] not-italic">
