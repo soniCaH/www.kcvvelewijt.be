@@ -37,7 +37,12 @@ export default function PlayerDetailLoading() {
         >
           <div className="flex flex-col gap-5">
             <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-24 w-32" />
+            {/* Matches the reserved number cell's own measured footprint
+                (170x96px desktop, `PlayerHero.tsx`'s `w-fit
+                h-[var(--text-display-2xl)]` slot host) — every player
+                document today renders that state, not the filled
+                <NumberDisplay> one (#2585). */}
+            <Skeleton className="h-24 w-[170px]" />
             <div className="space-y-2">
               <Skeleton className="h-12 w-3/4" />
               <Skeleton className="h-10 w-2/3" />
