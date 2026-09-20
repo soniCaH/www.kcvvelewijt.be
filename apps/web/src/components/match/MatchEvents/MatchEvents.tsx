@@ -521,14 +521,23 @@ function SingleSideEventRow({
  * desktop-hover full form of whatever `truncate` shortened (#2549 rule 4).
  * Kept as a second function, not derived from the JSX, because a `title`
  * attribute can't render React nodes.
+ *
+ * Matches `<EventDescription>`'s actual output (#2586 review), not just its
+ * visible parts list: omits any absent field entirely (no leading space,
+ * no lone punctuation) rather than joining a blank placeholder, and never
+ * reintroduces the `⇆` connector — that glyph is `aria-hidden` in the real
+ * row (two separate text nodes carry the meaning), so putting it back into
+ * `title` would re-expose content the row deliberately hides.
  */
 function eventDescriptionText(event: MatchEvent): string {
   switch (event.type) {
     case "goal": {
-      const parts = [event.player ?? ""];
-      if (event.isPenalty) parts.push("(strafschop)");
-      if (event.isOwnGoal) parts.push("(e.d.)");
-      if (event.assist) parts.push(`(assist: ${event.assist})`);
+      const parts = [
+        event.player,
+        event.isPenalty ? "(strafschop)" : undefined,
+        event.isOwnGoal ? "(e.d.)" : undefined,
+        event.assist ? `(assist: ${event.assist})` : undefined,
+      ].filter((part): part is string => Boolean(part));
       return parts.join(" ");
     }
     case "yellow_card":
@@ -536,7 +545,9 @@ function eventDescriptionText(event: MatchEvent): string {
     case "red_card":
       return event.player ?? "";
     case "substitution":
-      return `${event.playerIn ?? ""} ⇆ ${event.playerOut ?? ""}`;
+      return [event.playerIn, event.playerOut]
+        .filter((part): part is string => Boolean(part))
+        .join(" ");
     default:
       return assertNever(event.type);
   }
