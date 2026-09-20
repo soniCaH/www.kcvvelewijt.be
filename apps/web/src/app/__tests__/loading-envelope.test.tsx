@@ -359,6 +359,19 @@ describe("loading.tsx envelope drift guard", () => {
   // -------------------------------------------------------------------------
 
   /**
+   * A child whose path is nothing but route groups and `page.tsx` serves the
+   * segment's *own* URL, so it is not a descendant: `jeugd/(index)/page.tsx`
+   * is `/jeugd` itself. Anything deeper is a real descendant even when it
+   * opens with a route group — `(detail)/[slug]/page.tsx` is `/jeugd/[slug]`,
+   * and every page an `app/loading.tsx` would wrap sits under `(main)` or
+   * `(landing)`. A leading-anchored `(group)/` strip discounted both, which
+   * blinded the guard to exactly the `app/loading.tsx` case the whole-app
+   * glob below exists to catch.
+   */
+  const isOwnRoutePage = (descendant: string) =>
+    /^(\([^)]*\)\/)+page\.tsx$/.test(descendant);
+
+  /**
    * The structural half of "no skeleton announces a different page than the
    * one asked for" (#2432 §2). A `loading.tsx` is the Suspense boundary for
    * its segment's **whole subtree**, so Next ships its markup in the streamed
@@ -390,14 +403,9 @@ describe("loading.tsx envelope drift guard", () => {
     const offenders = loadingFiles
       .map((file) => {
         const segment = dirname(file);
-        // A route group directly beneath the segment is that segment's *own*
-        // route, not a descendant — `(landing)/jeugd/(index)/page.tsx` serves
-        // `/jeugd` itself. Counting it would name the innocent file in the
-        // failure message, and would flag a segment whose only child is its
-        // own route group.
         const descendants = globSync("*/**/page.tsx", {
           cwd: resolve(appDir, segment),
-        }).filter((d) => !/^\([^)]*\)\//.test(d));
+        }).filter((d) => !isOwnRoutePage(d));
         return descendants.length > 0
           ? `${file} wraps ${descendants.length} descendant page(s): ${descendants.join(", ")}`
           : null;
@@ -408,6 +416,17 @@ describe("loading.tsx envelope drift guard", () => {
       offenders,
       `a loading.tsx must sit in a route group beside its own page.tsx, never on a segment that has descendant routes:\n${offenders.join("\n")}`,
     ).toEqual([]);
+  });
+
+  it("the own-route filter keeps pages nested under a route group (#2791)", () => {
+    // Same URL as the segment — not a descendant.
+    expect(isOwnRoutePage("(index)/page.tsx")).toBe(true);
+    expect(isOwnRoutePage("(landing)/(home)/page.tsx")).toBe(true);
+    // Real descendants — the filter must not swallow these.
+    expect(isOwnRoutePage("(index)/[slug]/page.tsx")).toBe(false);
+    expect(isOwnRoutePage("(detail)/[slug]/page.tsx")).toBe(false);
+    expect(isOwnRoutePage("(main)/club/bestuur/page.tsx")).toBe(false);
+    expect(isOwnRoutePage("wedstrijden/page.tsx")).toBe(false);
   });
 
   // -------------------------------------------------------------------------
