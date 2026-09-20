@@ -49,12 +49,20 @@ export function EditorialHeroShell({
           headline (e.g. "doorzettingsvermogen") from blowing out the
           `60fr_40fr` ratio — default grid-item `min-width: auto` resolves to
           min-content and lets fr columns expand past their fraction.
-          #2549 rule 5 measured `hyphens-auto` as a no-op here — this exact
-          word (150px) already fits a whole line at this column's width
-          (319px+), so the hyphenator was never consulted. Deleted. */}
+          `hyphens-auto` then asks the browser to hyphenate the headline using
+          the page's `lang="nl"` dictionary so long Dutch compound words split
+          on syllable boundaries (door-zet-tings-ver-mo-gen) rather than
+          overflowing the column.
+          RESTORED (#2586 review): deleting this changed real rendered
+          content, not just pixels — `ui-editorialheroshell--with-cover--
+          mobile.png` went from a clean two-line "place- / holder." hyphen
+          break to a reflowed one-line "placeholder." (46,932 changed pixels,
+          not antialiasing noise). The mobile single-column width is well
+          below the desktop 60fr/40fr split this comment's "319px+" measured
+          at, so the no-op premise doesn't hold there. */}
       <div
         className={cn(
-          "flex min-w-0 flex-col gap-3",
+          "flex min-w-0 flex-col gap-3 hyphens-auto",
           // On mobile, drop the editorial column below the cover; reset to
           // its natural first position on the desktop two-column grid.
           coverFirstOnMobile && "order-2 lg:order-1",
