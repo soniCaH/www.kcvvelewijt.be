@@ -117,13 +117,18 @@ describe("useSemanticAugment", () => {
     expect(run().kind).toBe("none");
   });
 
-  it("returns 'none' while a fetch is in flight (executedQuery mismatch)", () => {
+  it("returns 'pending' while a fetch is in flight (executedQuery mismatch) — distinct from a settled 'none' (#2824)", () => {
     setHook({
       executedQuery: "",
       answer: "stale",
       results: [result({ score: 0.9 })],
     });
-    expect(run().kind).toBe("none");
+    expect(run().kind).toBe("pending");
+  });
+
+  it("returns 'none', not 'pending', below the 2-char floor even when executedQuery hasn't caught up", () => {
+    setHook({ executedQuery: "" });
+    expect(run("a").kind).toBe("none");
   });
 
   it("de-dups results whose URL already appears in the lexical results", () => {

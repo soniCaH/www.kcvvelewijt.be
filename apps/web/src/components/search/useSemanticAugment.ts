@@ -9,7 +9,8 @@
  * fetch:
  *  - `answer`  → the `✦ Slim antwoord` prose card, ABOVE the lexical results
  *  - `related` → low-confidence "Gerelateerd" links, BELOW the lexical results
- *  - `none`    → nothing (lexical only)
+ *  - `none`    → nothing (lexical only), settled with nothing worth showing
+ *  - `pending` → still waiting on the debounce + fetch for the current query
  *
  * Score gate (the result carries `score`; `answer` only arrives ≥ 0.5):
  *  - top ≥ 0.5 + answer → `answer`
@@ -21,11 +22,21 @@
  * articles can overlap — pages/responsibilities are never in lexical search.
  *
  * Triggered by the COMMITTED query (submit / URL `?q=`), not per keystroke.
- * The `executedQuery` gate avoids acting on stale/in-flight results, so there's
- * no empty-state flash mid-flight. A POST error / 503 settles with empty
- * results → `none`, so lexical search is never affected (PRD silent-fallback).
+ * `executedQuery` is the settlement gate: `useSemanticSearch` only updates it
+ * once a fetch resolves, and does so on BOTH success and failure (see its own
+ * `catch` block), so `executedQuery === trimmed` means "settled" regardless
+ * of outcome — there is no separate "failed" state to account for here. Below
+ * that gate, `trimmed !== executedQuery` is reported as `pending`, not `none`
+ * — the two used to be conflated, which is exactly what let a lexical failure
+ * fire `search_failed`/render its notice off a semantic answer that simply
+ * hadn't arrived yet (#2824 review; the semantic POST debounces 300ms before
+ * it even starts, so in the real request order the lexical GET almost always
+ * settles first). A POST error / 503 still settles to `none` (empty results),
+ * so lexical search is never blocked — `/api/search`'s POST proxy itself caps
+ * the semantic fetch at 15s (`AbortSignal.timeout(15_000)`,
+ * `app/api/search/route.ts`), so `pending` cannot last unbounded either.
  *
- * Ratified silence, one of three: DESIGN.md → "The Silence Is An Answer
+ * Ratified silence, one of four: DESIGN.md → "The Silence Is An Answer
  * Rule" (#2470/#2580) — the lexical results below still serve, so this
  * augment's own failure recovers nothing worth telling the visitor about.
  * `error` is deliberately not destructured from `useSemanticSearch` below —
@@ -52,7 +63,8 @@ export interface SemanticRelatedItem {
 export type SemanticAugment =
   | { kind: "answer"; answer: string; sources: SearchAnswerSource[] }
   | { kind: "related"; items: SemanticRelatedItem[] }
-  | { kind: "none" };
+  | { kind: "none" }
+  | { kind: "pending" };
 
 /**
  * Derive a destination URL from a semantic hit's type + slug. Mirrors the
@@ -87,8 +99,15 @@ export function useSemanticAugment(
     search(trimmed);
   }, [trimmed, search]);
 
-  // Only act on results that have SETTLED for the current query.
-  if (executedQuery !== trimmed || trimmed.length < 2) return { kind: "none" };
+  // Below the 2-char floor there is no augment fetch to wait on at all — the
+  // search is empty, not merely unsettled.
+  if (trimmed.length < 2) return { kind: "none" };
+
+  // Still waiting on the debounce + fetch for THIS query. Distinct from
+  // `none` (see docblock) — a caller that needs to know whether an answer
+  // will suppress something of its own (`SearchInterface`, #2824) must wait
+  // for this to clear before treating "no answer yet" as "no answer".
+  if (executedQuery !== trimmed) return { kind: "pending" };
 
   // Gate on the genuine top score (BEFORE de-dup) — using `!(x >= n)` so a
   // missing / NaN score is treated as below-threshold rather than slipping

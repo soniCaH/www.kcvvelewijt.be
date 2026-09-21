@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
 import { createMockSearchResponse } from "@/../tests/helpers/search.helpers";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 const mockTrackEvent = vi.mocked(trackEvent);
@@ -71,11 +72,15 @@ vi.mock("next/image", () => ({
 }));
 
 // The semantic augment lane has its own fetch (POST /api/search) and tests
-// (useSemanticAugment.test.ts). Stub it to "none" here so its request doesn't
-// disturb the lexical fetch-count assertions in this file.
+// (useSemanticAugment.test.ts). Stub it to "none" by default here so its
+// request doesn't disturb the lexical fetch-count assertions in this file.
+// A `vi.fn()`, not a fixed arrow, so the #2824 suppression/`search_failed`
+// tests below can override the returned `kind` per test via
+// `mockUseSemanticAugment.mockReturnValue(...)`.
 vi.mock("./useSemanticAugment", () => ({
-  useSemanticAugment: () => ({ kind: "none" }),
+  useSemanticAugment: vi.fn(() => ({ kind: "none" })),
 }));
+const mockUseSemanticAugment = vi.mocked(useSemanticAugment);
 
 describe("SearchInterface", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
@@ -87,6 +92,12 @@ describe("SearchInterface", () => {
     // Setup fetch mock using vi.stubGlobal for proper cleanup
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
+
+    // `vi.clearAllMocks()` below (afterEach) clears calls but not a
+    // `mockReturnValue` implementation set by an earlier test — re-assert
+    // the file-wide default explicitly so #2824's per-test overrides never
+    // leak into an unrelated test.
+    mockUseSemanticAugment.mockReturnValue({ kind: "none" });
   });
 
   afterEach(() => {
@@ -882,6 +893,230 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Failed search — semantic-answer suppression & search_failed (#2824)", () => {
+    // The REAL request order (review finding on the first version of this
+    // PR): the semantic POST debounces 300ms before it even starts
+    // (`useSemanticSearch`), so on a genuine lexical failure `augment` is
+    // still "pending" — not yet "answer"/"related"/"none" — when `error`
+    // first goes true. Every scenario below drives the mock through that
+    // same sequence: start "pending", let the lexical fetch fail and
+    // settle, assert the notice/event both wait, THEN settle `augment` to
+    // its final kind and assert the outcome. A test that starts `augment`
+    // already settled (the shape the previous version of this file used)
+    // would pass against a component that gets the ordering wrong — this is
+    // exactly how that regression shipped.
+    //
+    // Round 3: while waiting, the results-slot spinner (`role="status"`)
+    // stays up instead of leaving a bare gap — so it can no longer be used
+    // to detect "the lexical fetch has settled" (it's visible through both
+    // `isLoading` and the wait that follows). `submitFailingSearch` below
+    // waits on the submit button re-enabling instead, which only happens
+    // once the lexical fetch settles either way, and asserts the spinner
+    // is still up and the notice/event are still absent at that point. Each
+    // scenario then asserts the spinner is gone once `augment` settles.
+    const failedSearchCalls = () =>
+      mockTrackEvent.mock.calls.filter(
+        ([eventName]) => eventName === "search_failed",
+      );
+
+    async function submitFailingSearch(
+      user: ReturnType<typeof userEvent.setup>,
+    ) {
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
+
+      // The results-area spinner (`role="status"`) now stays up through
+      // BOTH `isLoading` and the post-failure `awaitingSemantic` wait — by
+      // design, so there's no gap or flash between them (#2824 review,
+      // round 3) — so its presence alone can't distinguish "still fetching"
+      // from "lexical failed, waiting on the semantic lane". The submit
+      // button can: `<SearchForm isLoading>` is deliberately NOT wired to
+      // `awaitingSemantic` (the form must stay usable/retriable through the
+      // wait), so it re-enables the instant the lexical fetch settles,
+      // whichever way, while the spinner is still showing. That's the
+      // signal this waits on.
+      await waitFor(() => {
+        expect(submitButton).toBeEnabled();
+      });
+
+      // `error` is now true, but the semantic lane (still mocked "pending")
+      // hasn't settled — the spinner must still be up, and neither the
+      // notice nor the count may appear yet.
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+      expect(failedSearchCalls()).toHaveLength(0);
+    }
+
+    /** Settle the mocked semantic lane to its final kind and force the
+     * re-render that picks it up, without touching `error`/`isLoading`/
+     * `query` — re-asserting the same URL query is a legitimate real-world
+     * trigger (e.g. the semantic fetch's own `setState` landing on an
+     * otherwise-idle component). */
+    function settleAugment(next: SemanticAugment) {
+      mockUseSemanticAugment.mockReturnValue(next);
+      act(() => {
+        setMockSearchParams({ q: "test" });
+      });
+    }
+
+    it("suppresses the failure notice once the semantic lane settles to a high-confidence answer, and still counts the failure", async () => {
+      const user = userEvent.setup();
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      await submitFailingSearch(user);
+
+      settleAugment({
+        kind: "answer",
+        answer: "Het eerste elftal speelt zaterdag om 15u.",
+        sources: [],
+      });
+
+      // The answer card carries the visitor — it and the filters render
+      // unchanged (AC bullet 1).
+      await waitFor(() => {
+        expect(screen.getByText("Slim antwoord")).toBeInTheDocument();
+      });
+      expect(screen.getByRole("group")).toBeInTheDocument();
+
+      // The wait is over — the spinner is gone, replaced by the answer.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+      // The failure notice never rendered, at any point in the sequence.
+      expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+
+      // The failure is still counted, with the TRUE answer_shown value —
+      // not the `false` it would have carried had this fired while
+      // "pending".
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: true },
+        ],
+      ]);
+    });
+
+    it("renders the failure notice, once settled, when the semantic lane has no high-confidence answer", async () => {
+      const user = userEvent.setup();
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      await submitFailingSearch(user);
+
+      // The semantic lane resolved but scored below the "answer" threshold
+      // (`useSemanticAugment`'s `related`/`none` split).
+      settleAugment({ kind: "none" });
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Slim antwoord")).not.toBeInTheDocument();
+      // The wait is over — the spinner is gone, replaced by the notice.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: false },
+        ],
+      ]);
+    });
+
+    it("renders the failure notice, once settled, when both the lexical and semantic lanes are down", async () => {
+      const user = userEvent.setup();
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      await submitFailingSearch(user);
+
+      // The semantic lane's own fetch failing settles to `{ kind: "none" }`
+      // too (`useSemanticAugment`'s documented "POST error / 503 → none"
+      // fallback, and `useSemanticSearch`'s `catch` sets `executedQuery`
+      // just like its success path does) — same branch as the no-answer
+      // case above, exercised here under its own name because the AC lists
+      // it as a distinct scenario.
+      settleAugment({ kind: "none" });
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      // The wait is over — the spinner is gone, replaced by the notice.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: false },
+        ],
+      ]);
+    });
+
+    it("never suppresses the notice for the low-confidence 'Gerelateerd' lane", async () => {
+      const user = userEvent.setup();
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      await submitFailingSearch(user);
+
+      settleAugment({ kind: "related", items: [] });
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      // The wait is over — the spinner is gone, replaced by the notice
+      // (alongside "Gerelateerd", which never suppresses it).
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: false },
+        ],
+      ]);
+    });
+
+    it("fires search_failed exactly once per failed search, even once already-settled and later re-settled again", async () => {
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      const user = userEvent.setup();
+      await submitFailingSearch(user);
+
+      settleAugment({ kind: "none" });
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      // The wait is over — the spinner is gone, replaced by the notice.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()[0]).toEqual([
+        "search_failed",
+        { query_text: "test", query_length: 4, answer_shown: false },
+      ]);
+
+      // `augment.kind` (an effect dependency) changes again — this is not a
+      // real production sequence (a settled fetch doesn't un-settle), but it
+      // is the most direct way to prove `failureTrackedRef` — not just
+      // "the deps didn't change" — is what's blocking a second fire.
+      settleAugment({ kind: "answer", answer: "Antwoord", sources: [] });
+
+      await waitFor(() => {
+        expect(screen.getByText("Slim antwoord")).toBeInTheDocument();
+      });
+
+      expect(failedSearchCalls()).toHaveLength(1);
     });
   });
 
