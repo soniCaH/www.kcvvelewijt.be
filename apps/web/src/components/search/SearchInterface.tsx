@@ -84,6 +84,17 @@ export const SearchInterface = ({
   const [error, setError] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
 
+  // The (trimmed) query a fetch has actually resolved against, or `null` if
+  // none has yet. On the very first commit of a URL-preset query — a shared
+  // link, a refresh, or a back/forward into `/zoeken?q=...` — `results` is
+  // still its initial `[]` and `isLoading`/`error` are still `false`,
+  // indistinguishable from a settled empty result set (#2918). Comparing
+  // this against the live `query` (not a plain boolean) also covers a query
+  // change that arrives via the render-time URL sync below rather than
+  // through `handleSearch`: `results` would otherwise still hold the
+  // PREVIOUS query's answer for one commit.
+  const [lastSettledQuery, setLastSettledQuery] = useState<string | null>(null);
+
   // AbortController ref for cancelling in-flight requests
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -110,6 +121,11 @@ export const SearchInterface = ({
       setTotalCount(0);
       setError(false);
       setIsLoading(false);
+      // A stale `lastSettledQuery` from a previous query would otherwise
+      // survive this reset and wrongly match again if the visitor returns
+      // to that exact query later (e.g. clear, then browser forward) —
+      // #2918 review.
+      setLastSettledQuery(null);
       return;
     }
 
@@ -144,6 +160,7 @@ export const SearchInterface = ({
       if (!controller.signal.aborted) {
         setResults(data.results);
         setTotalCount(data.count);
+        setLastSettledQuery(searchQuery.trim());
       }
     } catch (error) {
       // Don't update state if request was aborted
@@ -178,9 +195,13 @@ export const SearchInterface = ({
   const augment = useSemanticAugment(query, lexicalUrls);
 
   // Track analytics based on filtered results (respects active filter)
-  // Only fires after a successful fetch (no load, no error)
+  // Only fires after a successful fetch (no load, no error) for the query
+  // currently on screen — `lastSettledQuery !== query.trim()` covers the
+  // pre-fetch window on mount/URL-sync where `results` is stale or still
+  // its initial `[]` (#2918).
   useEffect(() => {
     if (!query || query.trim().length < 2 || isLoading || error) return;
+    if (lastSettledQuery !== query.trim()) return;
 
     if (filteredResults.length > 0) {
       trackResultsShown(filteredResults.length, query.trim());
@@ -193,6 +214,7 @@ export const SearchInterface = ({
     query,
     isLoading,
     error,
+    lastSettledQuery,
     trackResultsShown,
     trackNoResults,
   ]);
