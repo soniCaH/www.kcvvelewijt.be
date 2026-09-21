@@ -9,6 +9,7 @@
  * related.
  */
 
+import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -60,17 +61,28 @@ export async function generateStaticParams() {
   return members.map((m) => ({ slug: m.psdId }));
 }
 
-export async function generateMetadata({
-  params,
-}: StaffPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  try {
-    const member = await runPromise(
+// Subject read: the staff member is this page's entire content, so a failed
+// read takes it down with it via `Effect.orDie` (#2864). Wrapped in React
+// `cache()` so the same-segment `layout.tsx` (existence check, #2968),
+// `generateMetadata` below, and the page component share one read per
+// request instead of three (#2441).
+export const fetchStaffMemberOrNull = cache(
+  async function fetchStaffMemberOrNull(slug: string) {
+    return runPromise(
       Effect.gen(function* () {
         const repo = yield* StaffRepository;
         return yield* repo.findByPsdId(slug);
       }).pipe(Effect.orDie),
     );
+  },
+);
+
+export async function generateMetadata({
+  params,
+}: StaffPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const member = await fetchStaffMemberOrNull(slug);
     if (!member)
       return {
         title: "Stafmedewerker niet gevonden",
@@ -115,13 +127,10 @@ export default async function StafPage({ params }: StaffPageProps) {
 
   // Subject read: the staff member is this page's entire content, so a
   // failed read takes it down with it — `null` (genuinely no such member) is
-  // the only case that resolves to `notFound()` (#2864).
-  const member = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* StaffRepository;
-      return yield* repo.findByPsdId(slug);
-    }).pipe(Effect.orDie),
-  );
+  // the only case that resolves to `notFound()` (#2864). The same-segment
+  // `layout.tsx` already ran this exact check before the shell flushed
+  // (#2968); `cache()` means this call reuses that read.
+  const member = await fetchStaffMemberOrNull(slug);
 
   if (!member) notFound();
 

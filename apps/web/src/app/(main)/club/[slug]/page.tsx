@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
 import { notFound } from "next/navigation";
@@ -30,15 +31,18 @@ interface Props {
 
 // Subject read: this route renders exactly the CMS page it fetches, so a
 // failed read takes the page down with it — `null` (genuinely no such page)
-// is the only case that resolves to `notFound()` (#2864).
-async function fetchPage(slug: string) {
+// is the only case that resolves to `notFound()` (#2864). Wrapped in React
+// `cache()` so the same-segment `layout.tsx` (existence check, #2968),
+// `generateMetadata`, and the page component share one read per request
+// instead of three (#2441).
+export const fetchPage = cache(async function fetchPage(slug: string) {
   return runPromise(
     Effect.gen(function* () {
       const repo = yield* PageRepository;
       return yield* repo.findBySlug(slug);
     }).pipe(Effect.orDie),
   );
-}
+});
 
 // Deliberately empty — CMS pages are not enumerated at build time, so a new
 // page goes live without a redeploy. Required all the same: without this export

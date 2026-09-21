@@ -3,6 +3,7 @@
  * Displays individual news articles from Sanity
  */
 
+import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { MatchDetail } from "@kcvv/api-contract";
@@ -278,18 +279,29 @@ export async function generateStaticParams() {
  * @param params - Route parameters (resolve to obtain the article slug) used to locate the article
  * @returns A metadata object with `title`, `description`, and an `openGraph` object containing `title`, `description`, `type`, optional `publishedTime`, `authors`, and `images`. If the article cannot be found, returns a title indicating the article was not found.
  */
+// Subject read: the article is this page's entire content, so a failed
+// read takes it down with it via `Effect.orDie` (#2864). Wrapped in React
+// `cache()` so the same-segment `layout.tsx` (existence check, #2968),
+// `generateMetadata` below, and the page component share one read per
+// request instead of three (#2441).
+export const fetchArticleOrNull = cache(async function fetchArticleOrNull(
+  slug: string,
+) {
+  return runPromise(
+    Effect.gen(function* () {
+      const repo = yield* ArticleRepository;
+      return yield* repo.findBySlug(slug);
+    }).pipe(Effect.orDie),
+  );
+});
+
 export async function generateMetadata({ params }: ArticlePageProps) {
   const { slug } = await params;
   // Subject read: this route's metadata is entirely about this one article,
   // so a failed read takes it down with it — `null` (genuinely no such
   // article) is the only case that degrades to the "niet gevonden" fallback
   // (#2864).
-  const article = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* ArticleRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  const article = await fetchArticleOrNull(slug);
   if (!article)
     return {
       title: "Artikel niet gevonden",
@@ -337,13 +349,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   // Subject read: the article is this page's entire content, so a failed
   // read takes it down with it — `null` (genuinely no such article) is the
-  // only case that resolves to `notFound()` (#2864).
-  const article = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* ArticleRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  // only case that resolves to `notFound()` (#2864). The same-segment
+  // `layout.tsx` already ran this exact check before the shell flushed
+  // (#2968); `cache()` means this call reuses that read.
+  const article = await fetchArticleOrNull(slug);
 
   if (!article) notFound();
 

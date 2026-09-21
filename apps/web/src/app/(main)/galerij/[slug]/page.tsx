@@ -14,7 +14,7 @@
  */
 
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { cache, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
@@ -105,6 +105,22 @@ export async function generateStaticParams() {
     .map((row) => ({ slug: row.slug }));
 }
 
+// Subject read: the gallery is this page's entire content, so a failed
+// read takes it down with it via `Effect.orDie` (#2864). Wrapped in React
+// `cache()` so the same-segment `layout.tsx` (existence check, #2968),
+// `generateMetadata` below, and the page component share one read per
+// request instead of three (#2441).
+export const fetchGalleryOrNull = cache(async function fetchGalleryOrNull(
+  slug: string,
+) {
+  return runPromise(
+    Effect.gen(function* () {
+      const repo = yield* PhotoGalleryRepository;
+      return yield* repo.findBySlug(slug);
+    }).pipe(Effect.orDie),
+  );
+});
+
 export async function generateMetadata({
   params,
 }: GalleryPageProps): Promise<Metadata> {
@@ -113,12 +129,7 @@ export async function generateMetadata({
   // so a failed read takes it down with it — `null` (genuinely no such
   // gallery) is the only case that degrades to the "niet gevonden" fallback
   // (#2864).
-  const gallery = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* PhotoGalleryRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  const gallery = await fetchGalleryOrNull(slug);
   if (!gallery)
     return {
       title: "Galerij niet gevonden",
@@ -151,13 +162,10 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
   const { slug } = await params;
   // Subject read: the gallery is this page's entire content, so a failed
   // read takes it down with it — `null` (genuinely no such gallery) is the
-  // only case that resolves to `notFound()` (#2864).
-  const gallery = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* PhotoGalleryRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  // only case that resolves to `notFound()` (#2864). The same-segment
+  // `layout.tsx` already ran this exact check before the shell flushed
+  // (#2968); `cache()` means this call reuses that read.
+  const gallery = await fetchGalleryOrNull(slug);
 
   if (!gallery) notFound();
 
