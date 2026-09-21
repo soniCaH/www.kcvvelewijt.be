@@ -26,6 +26,9 @@ export const client = createClient({
   projectId: "vhb33jaz",
   dataset,
   apiVersion: "2024-01-01",
+  // As of API version v2025-02-19, @sanity/client's default perspective changed
+  // from "raw" to "published" — pin it explicitly so drafts never reach a guard.
+  perspective: "published",
   token: resolveToken(),
   useCdn: false,
 });
