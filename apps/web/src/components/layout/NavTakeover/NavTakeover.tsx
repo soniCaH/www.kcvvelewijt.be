@@ -38,23 +38,50 @@ export interface NavTakeoverProps {
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-/** Fallback for `--breakpoint-lg` under vitest/happy-dom, where no
- *  stylesheet is loaded. The token itself (`globals.css`) is the real
- *  source of truth — the two `lg:` Tailwind variants already in this file's
- *  siblings derive from it, and so does the auto-close below. */
-const FALLBACK_BREAKPOINT_LG_PX = 1024;
-
-/** Reads `--breakpoint-lg` off the DOM so the auto-close effect below never
- *  repeats the number Tailwind's own `lg:` variants already derive it from. */
-function getBreakpointLgPx(): number {
+/**
+ * Tailwind v4 only emits a `@theme` variable into `:root` for a name its
+ * source scanner sees used somewhere in a file it scans — on `main`,
+ * `globals.css` is the only file naming `--breakpoint-lg`, and Tailwind does
+ * NOT emit it there. It reaches the DOM at all (confirmed against this
+ * branch's own `.next` build output) only because this exact string literal
+ * also appears here, which the scanner treats as a second "use" of the
+ * token. **Keep it a literal, in a file under Tailwind's content scan**
+ * (`apps/web/src/**`) — building it dynamically (e.g. `"--breakpoint-" +
+ * name`) or moving it into a constant in a file Tailwind doesn't scan would
+ * silently stop the emission, and the auto-close below would go quiet with
+ * no failing test (#2850 review finding F1).
+ *
+ * Returns `null` — rather than guessing a number — when the property can't
+ * be read as a trustworthy pixel value: empty (no stylesheet loaded, e.g.
+ * under vitest/happy-dom) or a non-`px` unit (`rem`, `em`, unitless, …),
+ * which `parseFloat` would otherwise silently mis-parse (`"64rem"` →
+ * `64`, not `1024`). Callers treat `null` as "unknown" and skip the
+ * auto-close rather than guess — a wrong guess would close the drawer the
+ * instant it opens on every phone, which is worse than never auto-closing.
+ */
+function readBreakpointLgPx(): number | null {
   const raw = window
     .getComputedStyle(document.documentElement)
     .getPropertyValue("--breakpoint-lg")
     .trim();
+  if (!raw.endsWith("px")) return null;
   const parsed = parseFloat(raw);
-  return Number.isFinite(parsed) && parsed > 0
-    ? parsed
-    : FALLBACK_BREAKPOINT_LG_PX;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+/**
+ * Re-derives "is the viewport currently at/above `lg`" fresh, rather than
+ * remembering *why* a close happened — see the focus-return effect below,
+ * which needs this to answer correctly for every way the panel can close
+ * (Escape, the ✕, a nav tap, or the breakpoint effect itself), not only the
+ * one path this file controls.
+ */
+function isDesktopViewport(): boolean {
+  const breakpointLgPx = readBreakpointLgPx();
+  if (breakpointLgPx === null) return false;
+  return (
+    window.matchMedia?.(`(min-width: ${breakpointLgPx}px)`)?.matches ?? false
+  );
 }
 
 export const NavTakeover = ({
@@ -100,18 +127,27 @@ export const NavTakeover = ({
   // armed while merely invisible, so the panel would silently reappear the
   // next time the viewport narrowed back past `lg`. Only listens while
   // actually open, so it costs nothing while closed.
-  const closedByBreakpointRef = useRef(false);
+  //
+  // Checks the CURRENT match immediately, not only future `change` events
+  // (mirrors `useIsPhoneViewport` in `CalendarWidget.tsx` and the
+  // phone-check effect in `OrganigramExplorer.tsx`) — a page can come out
+  // of the back/forward cache already at/above `lg` with this panel already
+  // open (rotate a tablet, follow a link, press Back), and a listener that
+  // only reacts to a `change` event would never fire for a state that was
+  // already true the moment it subscribed.
   useEffect(() => {
     if (!open) return;
 
-    const mq = window.matchMedia(`(min-width: ${getBreakpointLgPx()}px)`);
-    const closeOnDesktop = (e: MediaQueryListEvent) => {
-      if (!e.matches) return;
-      closedByBreakpointRef.current = true;
-      onOpenChange(false);
+    const breakpointLgPx = readBreakpointLgPx();
+    if (breakpointLgPx === null) return;
+
+    const mq = window.matchMedia(`(min-width: ${breakpointLgPx}px)`);
+    const closeIfDesktop = () => {
+      if (mq.matches) onOpenChange(false);
     };
-    mq.addEventListener("change", closeOnDesktop);
-    return () => mq.removeEventListener("change", closeOnDesktop);
+    closeIfDesktop();
+    mq.addEventListener("change", closeIfDesktop);
+    return () => mq.removeEventListener("change", closeIfDesktop);
   }, [open, onOpenChange]);
 
   // Track the previous `open` value so we only return focus on a true→false
@@ -120,13 +156,15 @@ export const NavTakeover = ({
   const prevOpenRef = useRef(open);
   useEffect(() => {
     if (prevOpenRef.current && !open) {
-      // The breakpoint effect above sets this ref synchronously, just before
-      // it calls `onOpenChange` — so by the time this effect runs, it can
-      // tell "the user closed it" from "the viewport grew past `lg` while it
-      // was open" apart, and send focus to `autoCloseFocusRef` instead of
-      // the now-hidden `returnFocusRef` trigger for the latter.
-      if (closedByBreakpointRef.current) {
-        closedByBreakpointRef.current = false;
+      // `returnFocusRef` (the hamburger) is `lg:hidden` at/above `lg`, so it
+      // cannot receive focus there. Re-checking the viewport here — instead
+      // of remembering *why* this particular close happened, e.g. via a ref
+      // set by the effect above — means the right target is picked
+      // regardless of what caused the close (Escape, the ✕, a nav tap, or
+      // the breakpoint effect itself), and can never go stale the way such
+      // a ref could if a caller ever ignored one `onOpenChange(false)` call
+      // (#2850 review finding F7).
+      if (isDesktopViewport()) {
         autoCloseFocusRef?.current?.focus();
       } else {
         returnFocusRef?.current?.focus();

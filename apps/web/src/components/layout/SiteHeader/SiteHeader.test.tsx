@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SiteHeader } from "./SiteHeader";
 
@@ -162,25 +162,54 @@ describe("SiteHeader", () => {
   // viewport (or rotates a tablet) past it used to keep the takeover
   // mounted, overlaying the desktop row. Nothing else in this suite drives
   // an actual viewport change, so this is the one test that does.
+  //
+  // happy-dom's real `MediaQueryList`, under vitest's environment, does not
+  // track `window.innerWidth` mutations (verified empirically in
+  // `NavTakeover.test.tsx`), so — matching the existing `window.matchMedia`
+  // mock in `CalendarWidget.test.tsx` — this stubs a controllable one
+  // instead of trying to drive a real resize.
   describe("drawer retires itself when the viewport crosses into `lg`", () => {
-    const ORIGINAL_INNER_WIDTH = window.innerWidth;
+    let originalMatchMedia: typeof window.matchMedia;
+
+    beforeEach(() => {
+      originalMatchMedia = window.matchMedia;
+    });
 
     afterEach(() => {
-      window.innerWidth = ORIGINAL_INNER_WIDTH;
+      window.matchMedia = originalMatchMedia;
       document.documentElement.style.removeProperty("--breakpoint-lg");
     });
 
     it("closes the takeover and moves focus to the desktop nav's first link, not the now-hidden hamburger", async () => {
       document.documentElement.style.setProperty("--breakpoint-lg", "900px");
-      window.innerWidth = 500;
+      let matches = false;
+      const listeners = new Set<(event: { matches: boolean }) => void>();
+      window.matchMedia = vi.fn().mockReturnValue({
+        get matches() {
+          return matches;
+        },
+        addEventListener: vi.fn(
+          (type: string, cb: (event: { matches: boolean }) => void) => {
+            if (type === "change") listeners.add(cb);
+          },
+        ),
+        removeEventListener: vi.fn(
+          (type: string, cb: (event: { matches: boolean }) => void) => {
+            if (type === "change") listeners.delete(cb);
+          },
+        ),
+      } as unknown as MediaQueryList);
+
       const user = userEvent.setup();
       render(<SiteHeader seniorTeams={seniorTeams} />);
 
       await user.click(screen.getByRole("button", { name: /open menu/i }));
       expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-      window.innerWidth = 1000;
-      fireEvent(window, new Event("resize"));
+      act(() => {
+        matches = true;
+        listeners.forEach((cb) => cb({ matches: true }));
+      });
 
       expect(screen.queryByRole("dialog")).toBeNull();
       expect(document.activeElement).toBe(
