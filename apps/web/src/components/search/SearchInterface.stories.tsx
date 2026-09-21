@@ -10,6 +10,7 @@ import { within } from "storybook/test";
 import { SearchInterface } from "./SearchInterface";
 import type { SearchResponse } from "@/types/search";
 import { fixtureImage } from "@test-fixtures/images";
+import { focusSearchInput } from "./search-form-vr-focus";
 
 const meta = {
   title: "Features/Search/SearchInterface",
@@ -250,7 +251,14 @@ export const WithSmartAnswer: Story = {
   beforeEach() {
     return mockFetch(mockResponse, { semantic: smartAnswerResponse });
   },
-  play: waitForSemantic(/slim antwoord/i),
+  // VR determinism (#3033): after the semantic card settles, pin the nested
+  // <SearchForm>'s focus-ring state deliberately rather than leave it to
+  // whether the runner's page happens to hold window focus at mount time —
+  // see search-form-vr-focus.ts.
+  play: async (context) => {
+    await waitForSemantic(/slim antwoord/i)(context);
+    focusSearchInput(context.canvasElement);
+  },
 };
 
 /**
