@@ -6,7 +6,6 @@ import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import type { Match } from "@kcvv/api-contract";
-import { TeamRepository } from "@/lib/repositories/team.repository";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { PageContainer } from "@/components/design-system/PageContainer";
@@ -18,6 +17,7 @@ import { transformMatchToSchedule } from "@/components/match";
 import type { ScheduleRow } from "@/components/match/types";
 import { findNextMatch } from "@/components/team/TeamMatchesSection/match-visibility";
 import { AgendaScrollToNext } from "./AgendaScrollToNext";
+import { fetchTeamOrNull } from "../team-data";
 
 interface WedstrijdenPageProps {
   params: Promise<{ slug: string }>;
@@ -30,18 +30,15 @@ export async function generateMetadata({
   // Subject read: this route's metadata is entirely about this one team, so
   // a failed read takes it down with it — `null` (genuinely no such team) is
   // the only case that degrades to the "niet gevonden" fallback (#2864).
-  const team = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* TeamRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  // `fetchTeamOrNull` (`../team-data.ts`) is shared with the same-segment
+  // `layout.tsx` and this page's own subject read via `cache()` (#2968).
+  const team = await fetchTeamOrNull(slug);
   if (!team)
     return {
       title: "Team niet gevonden",
-      // #2963: this branch renders under a 200 (a `loading.tsx`
-      // Suspense boundary flushes the shell before `notFound()` runs),
-      // so noindex is what actually keeps it out of the index.
+      // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
+      // gets a real 404 here, but this noindex stays in case a future
+      // `loading.tsx`/ancestor boundary ever reintroduces the soft 200.
       robots: { index: false, follow: false },
     };
 
@@ -107,13 +104,10 @@ export default async function WedstrijdenPage({
 
   // Subject read: the team is this page's entire content, so a failed read
   // takes it down with it — `null` (genuinely no such team) is the only case
-  // that resolves to `notFound()` (#2864).
-  const team = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* TeamRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  // that resolves to `notFound()` (#2864). The same-segment `layout.tsx`
+  // already ran this exact check before the shell flushed (#2968);
+  // `cache()` means this call reuses that read.
+  const team = await fetchTeamOrNull(slug);
 
   if (!team) notFound();
 

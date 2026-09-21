@@ -114,9 +114,9 @@ export async function generateMetadata({
   if (isNaN(numericId)) {
     return {
       title: "Wedstrijd niet gevonden",
-      // #2963: this branch renders under a 200 (a `loading.tsx` Suspense
-      // boundary flushes the shell before `notFound()` runs), so noindex is
-      // what actually keeps it out of the index.
+      // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
+      // gets a real 404 here, but this noindex stays in case a future
+      // `loading.tsx`/ancestor boundary ever reintroduces the soft 200.
       robots: { index: false, follow: false },
     };
   }
@@ -140,8 +140,10 @@ export async function generateMetadata({
     };
   } catch {
     // Also swallows the `notFound()` sentinel for an unknown matchId, which is
-    // fine: the page component awaits the same memoized promise and re-throws
-    // it, so the 404 still renders — with exactly this title.
+    // fine: the same-segment `layout.tsx` (#2968) awaits the same memoized
+    // promise ahead of this metadata read and is what actually turns it into
+    // the real 404 — this catch only needs a title to show while that
+    // happens, not to re-derive the outcome.
     //
     // #2963: deliberately NOT noindex. This `catch` cannot tell an unknown
     // match from a BFF read failure — an unknown PSD id returns 200 with an
@@ -188,7 +190,7 @@ export async function generateMetadata({
  * genuinely reachable for a bogus `matchId`, not dead code shadowed by a
  * decode error arriving first.
  */
-const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
+export const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
   matchId: number,
 ): Promise<MatchDetail> {
   return runPromise(

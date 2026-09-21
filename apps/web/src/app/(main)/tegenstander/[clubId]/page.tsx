@@ -216,7 +216,7 @@ function SeasonBand({ label, tally }: { label: string; tally: string }) {
  * unit-tested `buildOpponentPageData` (`./opponent-data.ts`); this function
  * stays thin Effect plumbing — fan out, catch, hand the raw reads over.
  */
-const fetchOpponentData = cache(async function fetchOpponentData(
+export const fetchOpponentData = cache(async function fetchOpponentData(
   clubId: number,
 ): Promise<OpponentPageData | null> {
   return await runPromise(

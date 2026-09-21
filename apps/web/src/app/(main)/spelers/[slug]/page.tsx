@@ -28,6 +28,7 @@
  *    (deleted); RelatedArticles ships unchanged.
  */
 
+import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -84,23 +85,37 @@ export async function generateStaticParams() {
   return [];
 }
 
+// Subject read: the player is this page's entire content, so a failed read
+// takes it down with it via `Effect.orDie` (#2864). Wrapped in React
+// `cache()` so the same-segment `layout.tsx` (existence check, #2968),
+// `generateMetadata` below, and the page component share one read per
+// request instead of three — `@effect/platform` always attaches an
+// `AbortSignal`, which opts the request out of Next's own `fetch`
+// memoization (same pattern as `/wedstrijd/[matchId]`'s
+// `fetchMatchOrNotFound`, #2441).
+export const fetchPlayerOrNull = cache(async function fetchPlayerOrNull(
+  slug: string,
+) {
+  return runPromise(
+    Effect.gen(function* () {
+      const repo = yield* PlayerRepository;
+      return yield* repo.findByPsdId(slug);
+    }).pipe(Effect.orDie),
+  );
+});
+
 export async function generateMetadata({
   params,
 }: PlayerPageProps): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const player = await runPromise(
-      Effect.gen(function* () {
-        const repo = yield* PlayerRepository;
-        return yield* repo.findByPsdId(slug);
-      }).pipe(Effect.orDie),
-    );
+    const player = await fetchPlayerOrNull(slug);
     if (!player)
       return {
         title: "Speler niet gevonden",
-        // #2963: this branch renders under a 200 (a `loading.tsx`
-        // Suspense boundary flushes the shell before `notFound()` runs),
-        // so noindex is what actually keeps it out of the index.
+        // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
+        // gets a real 404 here, but this noindex stays in case a future
+        // `loading.tsx`/ancestor boundary ever reintroduces the soft 200.
         robots: { index: false, follow: false },
       };
 
@@ -146,13 +161,11 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 
   // Subject read: the player is this page's entire content, so a failed
   // read takes it down with it — `null` (genuinely no such player) is the
-  // only case that resolves to `notFound()` (#2864).
-  const player = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* PlayerRepository;
-      return yield* repo.findByPsdId(slug);
-    }).pipe(Effect.orDie),
-  );
+  // only case that resolves to `notFound()` (#2864). The same-segment
+  // `layout.tsx` already ran this exact check before the shell flushed
+  // (#2968); `cache()` means this call reuses that read rather than firing
+  // a second one.
+  const player = await fetchPlayerOrNull(slug);
 
   if (!player) notFound();
 
