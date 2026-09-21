@@ -195,6 +195,22 @@ describe("JeugdEditorialGrid", () => {
     expect(screen.getByText("Bovenbouw")).toBeInTheDocument();
   });
 
+  it("wires a photo to exactly the three approved nav tiles (#2965)", () => {
+    const { container } = render(<JeugdEditorialGrid articles={[]} />);
+
+    // "Word lid van KCVV", "Ons leerplan" and "Trainingen & ProSoccerData"
+    // each ship a day-one stand-in photo; the other three nav tiles
+    // ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?")
+    // render no filler photo and keep today's flat bg-jersey-deep + glyph.
+    const covers = Array.from(container.querySelectorAll("img")).map((img) =>
+      img.getAttribute("src"),
+    );
+    expect(covers).toContain("/images/jeugd/word-lid-kids-met-bal.jpg");
+    expect(covers).toContain("/images/jeugd/leerplan-jeugdtraining.jpg");
+    expect(covers).toContain("/images/jeugd/trainingen-drie-trainers.jpg");
+    expect(covers).toHaveLength(3);
+  });
+
   it("renders the shared 3-up grid at the dense hub gutter (#2569)", () => {
     const { container } = render(<JeugdEditorialGrid articles={[]} />);
 
