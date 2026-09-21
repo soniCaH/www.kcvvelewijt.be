@@ -71,6 +71,57 @@ export const WithAccentAndKicker: Story = {
 };
 
 /**
+ * A real production h2 (*KCVV Elewijt B stelt de kern voor*, #2526) — 351px
+ * on one line, wider than a phone's column. It wraps, balanced and centred
+ * between the glyphs, instead of running off the screen.
+ */
+export const LongTitle: Story = {
+  args: {
+    title: [
+      {
+        _type: "block",
+        _key: "t3",
+        style: "normal",
+        markDefs: [],
+        children: [
+          {
+            _type: "span",
+            _key: "s1",
+            text: "Doorstroming + jong talent vanuit de U21",
+            marks: [],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+/**
+ * One long compound word, narrower than a phone's column can hold on one
+ * line (#2526 review) — it hyphenates instead of painting over the glyphs.
+ */
+export const LongCompoundWord: Story = {
+  args: {
+    title: [
+      {
+        _type: "block",
+        _key: "t4",
+        style: "normal",
+        markDefs: [],
+        children: [
+          {
+            _type: "span",
+            _key: "s1",
+            text: "Seizoensvoorbereiding",
+            marks: [],
+          },
+        ],
+      },
+    ],
+  },
+};
+
+/**
  * Dotted variant — between-row separator inside `<QASection>` per the
  * 5.A.2 / 5.B.int spec. No title, no `✦` glyphs. Used to break up
  * consecutive `<QARow>`s without visually competing with the major
