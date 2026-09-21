@@ -336,9 +336,10 @@ export const NewsCard = ({
           tone={headingTone}
           // An article headline is free-text/unbounded — an editor can
           // write a longer compound tomorrow — so per DESIGN.md's
-          // Hyphenation Rule it carries `hyphens-auto`, ALONE, never paired
-          // with `break-words` (#2269). `line-clamp-3` still caps the height.
-          className="line-clamp-3 hyphens-auto"
+          // Hyphenation Rule it carries `hyphens-auto` AND `break-words`,
+          // verified in Chrome and Safari (#2269). `line-clamp-3` still
+          // caps the height.
+          className="line-clamp-3 break-words hyphens-auto"
         >
           {title}
         </EditorialHeading>

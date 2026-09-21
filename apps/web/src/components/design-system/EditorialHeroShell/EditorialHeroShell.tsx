@@ -50,13 +50,14 @@ export function EditorialHeroShell({
           `60fr_40fr` ratio — default grid-item `min-width: auto` resolves to
           min-content and lets fr columns expand past their fraction. The
           headline this shell frames is free-text/unbounded, so per
-          DESIGN.md's Hyphenation Rule it carries `hyphens-auto`, using the
-          page's `lang="nl"` dictionary so long Dutch compound words split on
+          DESIGN.md's Hyphenation Rule it carries `hyphens-auto` AND
+          `break-words`, verified in Chrome and Safari — using the page's
+          `lang="nl"` dictionary so long Dutch compound words split on
           syllable boundaries (door-zet-tings-ver-mo-gen) rather than
           overflowing the column. */}
       <div
         className={cn(
-          "flex min-w-0 flex-col gap-3 hyphens-auto",
+          "flex min-w-0 flex-col gap-3 break-words hyphens-auto",
           // On mobile, drop the editorial column below the cover; reset to
           // its natural first position on the desktop two-column grid.
           coverFirstOnMobile && "order-2 lg:order-1",
