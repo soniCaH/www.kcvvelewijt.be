@@ -90,10 +90,6 @@ export type { SectionHeaderProps } from "./SectionHeader";
 export { SectionKicker } from "./SectionKicker";
 export type { SectionKickerProps } from "./SectionKicker";
 
-// SectionWipeReveal
-export { SectionWipeReveal } from "./SectionWipeReveal";
-export type { SectionWipeRevealProps } from "./SectionWipeReveal";
-
 // HorizontalSlider
 export { HorizontalSlider } from "./HorizontalSlider";
 export type { HorizontalSliderProps } from "./HorizontalSlider";

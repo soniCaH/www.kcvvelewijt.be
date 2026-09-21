@@ -17,9 +17,9 @@ session can work from it without replaying the conversation that produced it.
 Three things to know before you do:
 
 - **`/to-spec` is `disable-model-invocation: true`.** You type it; an agent cannot reach for it.
-- **It synthesises the *current conversation*.** If you run it in a fresh session, point it at this
+- **It synthesises the _current conversation_.** If you run it in a fresh session, point it at this
   file and at `decision-sheet.md` §8 first — otherwise it has nothing to synthesise.
-- **Do NOT use KCVV's own `/spec`.** That one refines *open issues* and cannot receive a closed
+- **Do NOT use KCVV's own `/spec`.** That one refines _open issues_ and cannot receive a closed
   decision set. This is the same trap documented for the #2425 wayfinder map.
 
 **These skills are frequently missing from the session's skills list.** They are still installed —
@@ -32,7 +32,7 @@ made that mistake once, with a `find -maxdepth 4` that never reached the cache.)
 
 Ten units. Dependencies are stated; everything else is parallel.
 
-### Unit 1 — M9, the accessibility defect *(ship first)*
+### Unit 1 — M9, the accessibility defect _(ship first)_
 
 **69 of 113 `animate-pulse` uses are unguarded by `motion-safe:`.** This is not a design upgrade
 wearing an idea's clothes — it is a reduced-motion defect that ships today on every skeleton and
@@ -48,7 +48,7 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 - **Y4** figure sets applied consistently — scores and tables to mono or `lining-nums`, in-prose
   dates left oldstyle. Applying a documented rule, not deciding one.
 
-### Unit 3 — Two documentation debts *(gates other units)*
+### Unit 3 — Two documentation debts _(gates other units)_
 
 - **C3 — write the rule-weight split into `DESIGN.md`.** Measured: `border-paper-edge` **90** uses
   vs `border-2 border-ink` **16**. The split already exists — hairlines separate rows and sections,
@@ -60,7 +60,7 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 
 ### Unit 4 — Substrate
 
-- **T3** — the page ground gets texture *for the first time*. The existing speckle token at 5% plus
+- **T3** — the page ground gets texture _for the first time_. The existing speckle token at 5% plus
   a broad low-frequency mottle (`baseFrequency 0.014`, 4 octaves) **in ink at 9% multiply**. Two
   custom properties and one rule on `body`. No asset, no request, no fallback.
   - **Note for review:** ink at 9% over cream is a desaturated darkening. Three cream-tone
@@ -77,16 +77,16 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 - **T6** — one new **non-semantic** tint token, manila `#f0e4c4`, plus a `SectionBg` option.
   **Index pages only, once per page.** Do not reuse `alert-soft` / `warning-soft` / `success-soft`:
   `globals.css` states they exist to give the three Alert variants their soft bodies.
-  `cream-soft` keeps its job as the step-down; the tint is a *chapter*, not a step.
+  `cream-soft` keeps its job as the step-down; the tint is a _chapter_, not a step.
 - **C5 / D6a** — age-band tones on **both** the group bar and the card kicker.
   - Build is a 4-entry map from `getYouthDivision()` (`src/lib/utils/group-teams.ts`) to an existing
-    token. **Handle the `null` branch** — it returns null for senior codes *and* for `U5`.
+    token. **Handle the `null` branch** — it returns null for senior codes _and_ for `U5`.
   - **Two open sub-questions for build time**, both recorded in §8: the tone set reuses
     `--color-alert` and `--color-warning`; and `jersey-deep` as the Bovenbouw tone means three of
     four bands lose the green kicker they have today while one keeps it — and that token is also
     `--color-jersey-link`.
 
-### Unit 6 — Match day *(the largest single item)*
+### Unit 6 — Match day _(the largest single item)_
 
 **Scope it as a checkpoint against `docs/design/mockups/phase-3-c-header-and-matchstrip/matchstrip-locked.md`, with a Storybook story per ground — not as an edit.**
 
@@ -95,7 +95,7 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
   Belgian wall-clock and a naive UTC comparison flips the label at the wrong hour.
 - On that day the fixture row reads `Vandaag · 15:00 · De Dries` and the strip takes
   `--color-jersey-deep-dark` (#133d28).
-- **It is a dark-ground variant of *both* layouts**, roughly a dozen class swaps behind one boolean:
+- **It is a dark-ground variant of _both_ layouts**, roughly a dozen class swaps behind one boolean:
   CTA `primary → inverted`, arrows and dividers to cream alphas, team names and score to cream,
   slide label to a cream alpha, meta line to `warm`.
 - Day-granular, so the homepage's `revalidate = 900` is harmless — worst case the label appears
@@ -126,10 +126,12 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 > **Y1 and Y8 go in `@theme` as ramp steps.** Never hand-applied `leading-*` / `tracking-*` — that
 > drift is what #2417 repaired.
 
-### Unit 9 — Motion *(blocked on M1, Unit 3)*
+### Unit 9 — Motion _(blocked on M1, Unit 3)_
 
 - **M4** — squeegee wipe (`clip-path: inset()`) on section entry. **Must degrade to "already
   visible"** — a section that never animates must never stay hidden.
+  **Retired 2026-09-21 (#2623)** — built, then deleted. Read the decision sheet's M4 note before
+  proposing it again.
 - **M7** — background-fill hover for **list rows only**. **Must be documented as scoped** or it
   erodes the canonical press-down everywhere else.
 
@@ -147,12 +149,12 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 
 ## 3. Gates — sequence these, do not build them first
 
-| Gate | Blocks | Why |
-|---|---|---|
-| **#2598** homepage overflow | **Y3** only | Ghost numerals depend on `overflow: hidden` clipping rather than overflowing — the exact unresolved defect. Y2 and S1 were the other two exposed moves and both are now rejected, so the blast radius is down to one item. |
-| **M1** Motion section | **M4, M7** | Two gestures are not a vocabulary until the rule exists. |
-| **`matchstrip-locked.md`** | **Unit 6** | Locked component; needs a checkpoint, not an edit. |
-| **StripedSeam purpose split** | **T7** | Two devices answering the same question on the same surface. |
+| Gate                          | Blocks      | Why                                                                                                                                                                                                                        |
+| ----------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **#2598** homepage overflow   | **Y3** only | Ghost numerals depend on `overflow: hidden` clipping rather than overflowing — the exact unresolved defect. Y2 and S1 were the other two exposed moves and both are now rejected, so the blast radius is down to one item. |
+| **M1** Motion section         | **M4, M7**  | Two gestures are not a vocabulary until the rule exists.                                                                                                                                                                   |
+| **`matchstrip-locked.md`**    | **Unit 6**  | Locked component; needs a checkpoint, not an edit.                                                                                                                                                                         |
+| **StripedSeam purpose split** | **T7**      | Two devices answering the same question on the same surface.                                                                                                                                                               |
 
 **#2599 (two-line match row) is no longer a gate.** Everything that would have landed on that row
 closed on its own merits: M2 and M10 (no data for "in progress"), M3, S3 (already built), C1
@@ -165,16 +167,16 @@ closed on its own merits: M2 and M10 (no data for "in progress"), M3, S3 (alread
 **Before accepting any "new chrome" proposal from this research corpus, grep for what already renders
 in that position.** Six of the corpus's proposals were already shipped:
 
-| Proposal | Already there |
-|---|---|
-| §5B wire strip | `MatchStripSlot` — a band under the nav, locked spec |
-| S1 spec table | `MatchHero` takes the exact field set; `MatchEventsSection` owns goals/cards |
-| D1 print-nav footer | `VerderLezenRow` + `EndMark` |
-| S3 corner ribbon | `MatchStatusBadge`, rotated 2°, on `MatchHero` |
-| C3 two rule weights | 1px hairlines already beat 2px borders **90 : 16** |
-| M5 wipe-in underline | `EditorialLink`'s masked `STROKE_PATH` sweep — M5 would be a **downgrade** |
+| Proposal             | Already there                                                                |
+| -------------------- | ---------------------------------------------------------------------------- |
+| §5B wire strip       | `MatchStripSlot` — a band under the nav, locked spec                         |
+| S1 spec table        | `MatchHero` takes the exact field set; `MatchEventsSection` owns goals/cards |
+| D1 print-nav footer  | `VerderLezenRow` + `EndMark`                                                 |
+| S3 corner ribbon     | `MatchStatusBadge`, rotated 2°, on `MatchHero`                               |
+| C3 two rule weights  | 1px hairlines already beat 2px borders **90 : 16**                           |
+| M5 wipe-in underline | `EditorialLink`'s masked `STROKE_PATH` sweep — M5 would be a **downgrade**   |
 
-Three more rested on premises the code contradicts: §4.3's *"our border is 2px everywhere"*, T2's
+Three more rested on premises the code contradicts: §4.3's _"our border is 2px everywhere"_, T2's
 `multiply` (does the opposite of its stated intent — its own cited source has the right operator),
 and §5B's `● LIVE` (no in-progress state exists in `MatchStatus`, and `PRODUCT.md:56` forbids live
 scores).
@@ -197,7 +199,7 @@ scores).
 
 ---
 
-## 6. What is explicitly *not* next
+## 6. What is explicitly _not_ next
 
 The 23 rejections are recorded with reasons in §8 so they are not re-proposed. The ones most likely
 to come back, and the one-line answer to each:

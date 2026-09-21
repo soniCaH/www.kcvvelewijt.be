@@ -1219,55 +1219,6 @@
   }
 }
 
-/* §8 D16 M4 — the squeegee wipe (#2623). `<SectionWipeReveal>` adds
-   `section-wipe-reveal--run` only once an IntersectionObserver confirms a
-   section has scrolled into view (and never for a section already visible
-   at first paint, which never gets an observer at all). Unlike the two
-   blocks above, the unclassed resting state carries NO clip-path — the
-   class exists only to *trigger* the entrance, never to hide content, so
-   no JS / an unsupported IntersectionObserver / an observer that never
-   calls back all leave the section fully visible by construction (#2623's
-   acceptance: "the resting state is visible and the animation removes the
-   clip, not the other way round").
-
-   `animation-fill-mode: backwards`, deliberately NOT `both`/`forwards`
-   (#2888 review round 1, finding 1): `inset(0 0 0 0)` is not `none` — it
-   still clips to the exact border box, so a `both`/`forwards` fill kept
-   that clip forever after the sweep finished and silently sliced every
-   offset paper shadow, rotated `TapedCard` corner, press-down translate and
-   `focus-visible` ring on an edge tile. `backwards` only ever applies the
-   `from` keyframe during the (zero-length) delay before the animation
-   starts — with no `animation-delay` that window is instantaneous, so the
-   "no unclipped flash before the sweep starts" property still holds — and
-   once the animation completes the element reverts to the ordinary
-   cascade, where `clip-path` is unset. The resting state after the sweep
-   is therefore genuinely unclipped, matching the class's own job: trigger
-   the entrance, never hide the content. Arrival (500ms, var(--ease-out))
-   — DESIGN.md → Motion. */
-@keyframes section-wipe-reveal {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .section-wipe-reveal--run {
-    animation: section-wipe-reveal 500ms var(--ease-out) backwards;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  /* Safety net matching §7.5's own — belt-and-braces in case JS ever adds
-     --run before the media-query check resolves. */
-  .section-wipe-reveal--run {
-    animation: none;
-    clip-path: none;
-  }
-}
-
 /* ===== Phases 5 + 6 (#1331, #1332): Overview-row stack =======================
 
    Consecutive `transferFact` / `eventFact` overview rows fuse into a
