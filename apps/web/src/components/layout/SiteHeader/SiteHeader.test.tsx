@@ -73,6 +73,19 @@ describe("SiteHeader", () => {
     expect(desktopLink).toHaveClass("justify-center");
   });
 
+  it("cancels the desktop Zoeken hit area's added width with -mx-[13px] so the nav→icon and icon→CTA gaps stay at the grid gap (review finding, #3071)", () => {
+    render(<SiteHeader />);
+    const searchLinks = screen.getAllByRole("link", { name: /zoeken/i });
+    const desktopLink = searchLinks.find(
+      (link) => link.getAttribute("data-nav-source") === "desktop",
+    );
+    expect(desktopLink).toBeDefined();
+    // (44 - 18) / 2 = 13px added per side by h-11 w-11 around the 18px
+    // icon — cancelled with a matching negative margin, hit area only,
+    // no layout shift (the same idiom the desktop nav links use above).
+    expect(desktopLink!.className).toMatch(/-mx-\[13px\]/);
+  });
+
   it("renders Word lid link to /club/word-lid on desktop", () => {
     render(<SiteHeader />);
     const wordLid = screen.getAllByRole("link", { name: /word lid/i });
