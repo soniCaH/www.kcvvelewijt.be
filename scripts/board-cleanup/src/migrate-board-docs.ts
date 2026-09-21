@@ -14,7 +14,8 @@
  *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts          # dry-run
  *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts --execute # real run
  */
-import { client } from "./sanity-client.js";
+import { stripDraftPrefix } from "./draft-id.js";
+import { client, draftAwareClient } from "./sanity-client.js";
 
 const DRY_RUN = !process.argv.includes("--execute");
 
@@ -141,9 +142,13 @@ async function fetchDoc(id: string): Promise<SanityDoc | null> {
   return client.fetch<SanityDoc | null>(`*[_id == $id][0]`, { id });
 }
 
-/** Find all documents referencing a given ID. */
+/**
+ * Find all documents referencing a given ID. Draft-aware: a draft referrer
+ * must be relinked too, or deepReplaceRef(..., draftOldId, newId) below never
+ * has a match and that draft is left pointing at a document step 6 deletes (#2839).
+ */
 async function findReferencingDocs(docId: string): Promise<SanityDoc[]> {
-  return client.fetch<SanityDoc[]>(`*[references($docId)]`, { docId });
+  return draftAwareClient.fetch<SanityDoc[]>(`*[references($docId)]`, { docId });
 }
 
 /** Relink all references from oldId → newId across the dataset. */
@@ -442,11 +447,20 @@ async function step6_deleteOldDocs() {
   }
 
   // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking).
-  // Excludes drafts.* explicitly — deleteDoc() already targets both id shapes for a
-  // published id, so a drafts.* row here would otherwise be logged and deleted twice (#2839).
-  const remainingBoardDocs = await client.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
-    `*[_type == "staffMember" && _id match "staff-board-*" && !(_id in path("drafts.**"))] { _id, firstName, lastName } | order(lastName asc)`
+  // Draft-aware: a staff-board-* document that exists only as a draft must not be
+  // skipped here, or it survives the delete this step exists to perform. De-duplicate
+  // by stripped id instead of filtering drafts out — deleteDoc() already deletes both
+  // id shapes for one logical document, so a published+draft pair must log/delete once (#2839).
+  const remainingBoardDocsRaw = await draftAwareClient.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
+    `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`
   );
+  const seenIds = new Set<string>();
+  const remainingBoardDocs = remainingBoardDocsRaw.filter((doc) => {
+    const id = stripDraftPrefix(doc._id);
+    if (seenIds.has(id)) return false;
+    seenIds.add(id);
+    return true;
+  });
 
   console.log(`\n  Deleting ${remainingBoardDocs.length} remaining board docs...`);
   for (const doc of remainingBoardDocs) {
