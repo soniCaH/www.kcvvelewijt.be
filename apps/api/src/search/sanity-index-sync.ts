@@ -180,6 +180,41 @@ interface SyncOptions {
   fetchExcludedArticleIds?: () => Promise<string[]>;
 }
 
+/**
+ * The manifest-diff prune's outcome this sweep, for the caller (index.ts)
+ * to turn into a `search-index-prune` job-alert report (#2855). Tri-state,
+ * not a boolean — "the prune never ran" and "the prune ran and is healthy"
+ * must stay distinguishable, or a degraded-fetch sweep (reconciliation
+ * skipped wholesale — see `reconciliationSafe` — or a failed manifest read)
+ * would report the SAME `ok: true` a genuinely healthy prune does, firing a
+ * false recovery ping while a cap refusal from a prior night is still
+ * latched (review finding on #2855; the Sanity 503 class the owner decision
+ * cited, 2026-09-18 run 35318911017).
+ *
+ * - `"not-run"` — reconciliation was skipped entirely this sweep (a
+ *   degraded fetch or a failed manifest read). The caller must report
+ *   nothing: this proves nothing about whether a cap refusal released.
+ * - `"refused"` — the safety cap tripped. Carries the counts/ratio that
+ *   tripped it so the job-alert message conveys magnitude instead of a
+ *   fixed string.
+ * - `"zero-confirmed"` — the manifest-diff delete ran (not refused) but
+ *   Vectorize rejected every chunk after retries (`deleteBatched` degrades
+ *   this to a log-and-skip) — zero vectors actually left the index under a
+ *   job literally named `search-index-prune`. Must not be reported healthy.
+ * - `"ok"` — nothing to prune, or a prune that landed (at least one
+ *   confirmed delete, or no orphans found at all).
+ */
+export type PrunePhaseOutcome =
+  | { readonly kind: "not-run" }
+  | {
+      readonly kind: "refused";
+      readonly orphanCount: number;
+      readonly activeCount: number;
+      readonly ratio: number;
+    }
+  | { readonly kind: "zero-confirmed"; readonly requestedCount: number }
+  | { readonly kind: "ok" };
+
 // ─── Sync effect ─────────────────────────────────────────────────────────────
 
 export const runSanityIndexSync = (options?: SyncOptions) =>
@@ -218,6 +253,14 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // there is no separate "remember to flag it" step for a future phase to
     // skip (#2831).
     let reconciliationSafe = true;
+
+    // Reported by the caller (index.ts) under its own job name (#2855) —
+    // the sweep itself still resolves successfully regardless of this
+    // value, since it did index; a prune problem is not an indexing one.
+    // Stays "not-run" unless the reconciliation block below actually
+    // reaches the manifest-diff call — see PrunePhaseOutcome's doc comment
+    // for why the default must NOT be "healthy".
+    let prunePhase: PrunePhaseOutcome = { kind: "not-run" };
 
     /**
      * Runs one Sanity fetch, degrading a failure to an empty result so
@@ -513,6 +556,30 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
               'see apps/api/CLAUDE.md ("Releasing a stuck prune safety cap") for the release lever once the cause is understood.',
           },
         );
+        if (manifestReconciliation.action === "skipped") {
+          prunePhase = {
+            kind: "refused",
+            orphanCount: manifestReconciliation.orphanCount,
+            activeCount: manifestReconciliation.activeCount,
+            ratio: manifestReconciliation.ratio,
+          };
+        } else if (
+          manifestReconciliation.action === "removed" &&
+          manifestReconciliation.requestedIds.length > 0 &&
+          manifestReconciliation.confirmedIds.length === 0
+        ) {
+          // Ran (not refused), but every delete chunk failed after retries
+          // (deleteBatched degrades that to a log-and-skip) — zero vectors
+          // actually left the index. Not healthy, even though nothing was
+          // "refused".
+          prunePhase = {
+            kind: "zero-confirmed",
+            requestedCount: manifestReconciliation.requestedIds.length,
+          };
+        } else {
+          // action "none" (no orphans) or "removed" with ≥1 confirmed.
+          prunePhase = { kind: "ok" };
+        }
         const manifestConfirmedIds =
           manifestReconciliation.action === "removed"
             ? manifestReconciliation.confirmedIds
@@ -594,4 +661,10 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ),
       );
     }
+
+    // Indexing succeeded regardless of `prunePhase` — a prune problem is a
+    // prune-side problem, not an indexing one, so it must not fail this
+    // Effect (#2855). The caller (index.ts) reports it under its own
+    // job-alert name instead.
+    return { prunePhase };
   });

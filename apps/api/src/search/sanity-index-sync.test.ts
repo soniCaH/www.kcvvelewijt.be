@@ -779,6 +779,126 @@ describe("runSanityIndexSync", () => {
       expect(deleteCalls4).toHaveLength(0);
     });
 
+    it("resolves prunePhase: { kind: 'refused', ... } when the safety cap refuses the prune (#2855) — the sweep's own Effect still succeeds", async () => {
+      const kv = makeKvNamespaceMock();
+      const manyDocs = Array.from({ length: 30 }, (_, i) => ({
+        ...mockDoc,
+        _id: `resp-${i}`,
+      }));
+
+      // Bootstrap: 30 responsibilities tracked.
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch(manyDocs) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // Only 4 of 30 come back — same truncated-fetch shape as the refusal
+      // test above, which exceeds max(25, 30*50%=15)=25.
+      const fourRemain = manyDocs.slice(0, 4);
+      const { mock: mock2 } = makeVectorizeCapture();
+      const result = await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch(fourRemain) }, mock2, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // Refused, reported to the caller — but as a resolved value, not a
+      // failure: indexing itself succeeded, so the Effect must not fail.
+      // Carries the magnitude (26/30) so the job-alert message can too.
+      expect(result.prunePhase).toEqual({
+        kind: "refused",
+        orphanCount: 26,
+        activeCount: 30,
+        ratio: 26 / 30,
+      });
+    });
+
+    it("resolves prunePhase: { kind: 'ok' } when a prune happens without hitting the safety cap", async () => {
+      const kv = makeKvNamespaceMock();
+
+      // Bootstrap: one responsibility tracked.
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // It no longer matches the query — a normal, uncapped prune.
+      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      const result = await Effect.runPromise(
+        sweep({}, mock2, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      expect(deleteCalls.flat()).toEqual(["sanity-abc-123"]);
+      expect(result.prunePhase).toEqual({ kind: "ok" });
+    });
+
+    it("resolves prunePhase: { kind: 'not-run' } when a degraded fetch skips reconciliation entirely (#2855 review) — NOT { kind: 'ok' }", async () => {
+      // A truncated/failed fetch (e.g. Sanity 503) sets reconciliationSafe
+      // = false and skips reconciliation wholesale — this must not be
+      // reported the same way a genuinely healthy prune is, or a sweep like
+      // this resets an open refusal streak with a false recovery ping while
+      // the cap stays latched.
+      const { mock } = makeVectorizeCapture();
+      const result = await Effect.runPromise(
+        sweep(
+          {
+            fetchArticles: async () => {
+              throw new Error("Sanity 503");
+            },
+          },
+          mock,
+          {
+            SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+            PSD_CACHE: makeKvNamespaceMock(),
+          },
+        ),
+      );
+
+      expect(result.prunePhase).toEqual({ kind: "not-run" });
+    });
+
+    it("resolves prunePhase: { kind: 'zero-confirmed', ... } when the delete ran but Vectorize rejected every chunk after retries", async () => {
+      const kv = makeKvNamespaceMock();
+
+      // Bootstrap: one responsibility tracked.
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      // It drops out, dry-run off, but Vectorize's delete is down — every
+      // deleteByIds call fails, even after retries (same shape as "keeps a
+      // dropped id pending…" above). Not refused (below the cap), but
+      // nothing actually left the index.
+      const { mock: failingVectorize } = makeVectorizeCapture({
+        deleteByIds: () => Effect.fail(new VectorizeError("Vectorize outage")),
+      });
+      const result = await Effect.runPromise(
+        sweep({}, failingVectorize, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      expect(result.prunePhase).toEqual({
+        kind: "zero-confirmed",
+        requestedCount: 1,
+      });
+    });
+
     it("lets an oversized excluded-ids set through the safety cap while still refusing an oversized manifest diff — scoped independently", async () => {
       const kv = makeKvNamespaceMock();
       const stableDocs = [mockDoc, { ...mockDoc, _id: "stable-2" }];

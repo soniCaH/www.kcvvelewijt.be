@@ -33,7 +33,11 @@ import { EmailTransportLive } from "./email/resend";
 import { EmbeddingServiceLive } from "./search/embedding";
 import { VectorizeServiceLive } from "./search/vectorize";
 import { AiAnswerServiceLive } from "./search/ai-answer";
-import { runSanityIndexSync } from "./search/sanity-index-sync";
+import {
+  runSanityIndexSync,
+  type PrunePhaseOutcome,
+} from "./search/sanity-index-sync";
+import { pruneJobOutcome, type JobOutcome } from "./search/prune-outcome";
 import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
@@ -137,19 +141,26 @@ export default {
     const jobAlertLayer = Layer.mergeAll(KvCacheLive, envLayer).pipe(
       Layer.provide(envLayer),
     );
-    type JobOutcome =
-      { readonly ok: true } | { readonly ok: false; readonly error: unknown };
-
     // Settles a scheduled job into an outcome instead of throwing, so the
     // caller reports from a `const` rather than a `let` straddling a
     // try/catch. Logging the failure here keeps both crons on one format.
-    const settleJob = async (
+    // Carries `run()`'s resolved value on success (#2855 review) — a
+    // caller that needs it (the search-index sweep's prunePhase) reads it
+    // off `outcome.value` from a `const`, rather than a `let` declared
+    // above the call and assigned inside `run()`'s closure, which is
+    // exactly the pattern this function exists to avoid. The PSD sync's
+    // `run()` resolves nothing useful, so its outcome is `{ ok: true,
+    // value: undefined }` and its call site is unaffected.
+    type SettledJob<T> =
+      | { readonly ok: true; readonly value: T }
+      | { readonly ok: false; readonly error: unknown };
+    const settleJob = async <T>(
       job: string,
-      run: () => Promise<unknown>,
-    ): Promise<JobOutcome> => {
+      run: () => Promise<T>,
+    ): Promise<SettledJob<T>> => {
       try {
-        await run();
-        return { ok: true };
+        const value = await run();
+        return { ok: true, value };
       } catch (error) {
         console.error(
           `[scheduled] ${job} failed:`,
@@ -198,6 +209,21 @@ export default {
           // Reported strictly AFTER the sync settles — see the comment on
           // reportJobOutcome above.
           await reportJobOutcome("sanity-index-sync", outcome);
+          // Undefined when the sweep failed outright (never reached its
+          // `return`, so there's no `.value` to read) — `pruneJobOutcome`
+          // treats that the same as its own "not-run" case: report nothing.
+          const prunePhase: PrunePhaseOutcome | undefined = outcome.ok
+            ? outcome.value.prunePhase
+            : undefined;
+          // Own job name (#2855): the sweep itself succeeded even when the
+          // prune was refused/failed, so conflating the two would mark a
+          // healthy indexing run as failed. pruneJobOutcome returns null
+          // (nothing reported) both when the sweep failed outright and when
+          // reconciliation never ran this sweep — see its doc comment.
+          const pruneOutcome = pruneJobOutcome(prunePhase);
+          if (pruneOutcome !== null) {
+            await reportJobOutcome("search-index-prune", pruneOutcome);
+          }
           if (!outcome.ok) throw outcome.error;
         })(),
       );
