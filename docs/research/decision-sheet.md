@@ -1035,6 +1035,12 @@ has no gutter on a phone, so the device only exists in the minority scene).
 - **M4 — squeegee wipe: yes.** A `clip-path: inset()` wipe on section entry — ink pulled across
   paper. Needs `IntersectionObserver` or `animation-timeline: view()`, and **must degrade to "already
   visible"**: a section that never animates must never stay hidden.
+  **Retired 2026-09-21 (#2623) — do not re-propose without reading that ruling.** The timed build
+  (PR #2888) never fired on its one call site, which is already in view at mount, and where it did
+  fire it showed the section, blanked it, then swept it open. A timed wipe that may never pre-hide
+  must fire after the section is visible, so the flash is structural. A scroll-linked
+  `animation-timeline: view()` rebuild was prototyped and works, but it repaints the clip on every
+  scroll frame on the cheap phones this site is read on. Deleted.
 - **M7 — background-fill row hover: yes.** For list rows, where translating the whole row reads as
   the list coming apart. **Must be documented as scoped to list rows** or it erodes the canonical
   press-down everywhere else — §4.2's own warning, and the condition on this acceptance.

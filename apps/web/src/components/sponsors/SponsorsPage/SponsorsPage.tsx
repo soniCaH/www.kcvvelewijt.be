@@ -10,20 +10,10 @@
  * `className` prop nobody passed, and its one caller is this page. The
  * "Word sponsor" action lives in the band below, so this passes no `undo`.
  * Replaces the legacy dark-header + `SectionStack`/`diagonal` composition.
- *
- * `<SponsorTiers>` is #2623's named adoption site for `<SectionWipeReveal>`
- * (M4, the squeegee wipe) — the wall sits below the fold on first paint on
- * every viewport this page ships, so it is a real scroll-entry candidate
- * rather than a component already in view at mount. See #2623's PR for why
- * this is the only call site this branch adopts.
  */
 
 import { StripedSeam } from "@/components/design-system/StripedSeam";
-import {
-  EmptyState,
-  PageContainer,
-  SectionWipeReveal,
-} from "@/components/design-system";
+import { EmptyState, PageContainer } from "@/components/design-system";
 import { SponsorHero } from "../SponsorHero";
 import { SponsorTiers } from "../SponsorTiers";
 import { SponsorCtaBand } from "../SponsorCtaBand";
@@ -50,9 +40,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
             <div className="mb-10 sm:mb-12">
               <StripedSeam colorPair="ink-cream" height="md" />
             </div>
-            <SectionWipeReveal>
-              <SponsorTiers sponsors={sponsors} />
-            </SectionWipeReveal>
+            <SponsorTiers sponsors={sponsors} />
           </>
         ) : (
           <EmptyState tier="surface" heading="Nog geen sponsors">
