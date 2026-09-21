@@ -19,11 +19,14 @@ export interface EditorialHubCardProps {
   arrowText: string;
   variant: EditorialHubCardVariant;
   /**
-   * Cover photo. News variant: newsprint colour — never greyscale. Nav
-   * variant (#2965): a `jersey-deep-dark` scrim keeps the pill and glyph
-   * legible on top; absent (the default) renders today's flat
-   * `bg-jersey-deep` panel, unchanged — see `getCardSubjectArtefact`'s sibling
-   * rule in DESIGN.md § The Imageless Card.
+   * Cover photo — newsprint colour on both variants, never greyscale (that
+   * treatment is reserved for sponsor logos). This is the one recipe for
+   * giving a `nav` card a photo: pass `imageUrl` and it renders behind a
+   * `jersey-deep-dark` scrim with the icon and pill kept on top; omit it (the
+   * default) and the card keeps the flat `bg-jersey-deep` panel, unchanged —
+   * see DESIGN.md § The Imageless Card → "No Filler Photo, Ever Rule"
+   * (#2965). A `nav` consumer never gets a photo by switching to
+   * `variant="news"` instead.
    */
   imageUrl?: string;
   /**
@@ -71,10 +74,12 @@ const DEFAULT_NEWS_SIZES =
  *   Bubbles in the latest articles. (Greyscale→hover is reserved for sponsor
  *   logos only — never news cards/listings.)
  * - **nav** — a centered Phosphor-fill glyph and a cream tag pill. Pinned
- *   navigation links. A tile whose `NavCardConfig` carries an `image` (#2965)
- *   shows it behind a `jersey-deep-dark` scrim, glyph and pill on top; a tile
- *   with none keeps the flat `bg-jersey-deep` panel — no filler photo, ever
- *   (owner decision, #2965).
+ *   navigation links. Passing `imageUrl` (#2965) shows the photo behind a
+ *   `jersey-deep-dark` scrim, glyph and pill kept on top; omitting it (the
+ *   default) keeps the flat `bg-jersey-deep` panel — no filler photo, ever
+ *   (owner decision, #2965). This is the one recipe for a photographic nav
+ *   tile, on the primitive itself — never a per-consumer `variant="news"`
+ *   flip.
  *
  * Both share the paper-card chrome: `border-2 border-ink`, `shadow-paper`, and
  * the canonical press-down hover. Titles `line-clamp-3` (#2549 rule 3 —
@@ -132,24 +137,29 @@ export function EditorialHubCard({
             : "bg-cream-deep items-start",
         )}
       >
+        {imageUrl && (
+          // One cover <Image>, shared by both variants — DESIGN.md's
+          // "photographs get a newsprint treatment" names no per-variant
+          // exception, so a nav-tile photo gets the same warm-tint filter as
+          // a news cover. Decorative either way (the card's own title names
+          // the tile), never greyscale (that treatment is sponsor-logo only).
+          <Image
+            src={imageUrl}
+            alt=""
+            fill
+            sizes={sizes ?? DEFAULT_NEWS_SIZES}
+            className="object-cover"
+            style={{ filter: "var(--filter-photo-newsprint)" }}
+          />
+        )}
         {isNav ? (
           <>
             {imageUrl && (
-              // Decorative — the card's own title names the tile (#2965),
-              // same as the news cover; no newsprint filter here, the mock's
-              // treatment is a plain photo behind the scrim.
-              <Image
-                src={imageUrl}
-                alt=""
-                fill
-                sizes={sizes ?? DEFAULT_NEWS_SIZES}
-                className="object-cover"
-              />
-            )}
-            {imageUrl && (
-              // jersey-deep-dark scrim (~62%, tuned against the real photos)
-              // keeps the pill and glyph legible over a photo. The no-image
-              // branch below renders neither this nor the <Image> — the flat
+              // Flat jersey-deep-dark scrim (~62%) keeps the pill and glyph
+              // legible over a photo — deliberately flat, not
+              // `--gradient-jersey-deep-overlay` (see DESIGN.md's "No Filler
+              // Photo, Ever Rule"). The no-image branch below renders
+              // neither this nor the <Image> above — the flat
               // `bg-jersey-deep` fallback stays byte-for-byte unchanged.
               <span
                 aria-hidden="true"
@@ -165,23 +175,9 @@ export function EditorialHubCard({
             {imageUrl ? <span className="relative z-10">{icon}</span> : icon}
           </>
         ) : (
-          <>
-            {imageUrl && (
-              // Newsprint COLOUR — news covers are never greyscale (that
-              // treatment is reserved for sponsor logos).
-              <Image
-                src={imageUrl}
-                alt=""
-                fill
-                sizes={sizes ?? DEFAULT_NEWS_SIZES}
-                className="object-cover"
-                style={{ filter: "var(--filter-photo-newsprint)" }}
-              />
-            )}
-            <span className="relative z-10 m-2.5">
-              <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
-            </span>
-          </>
+          <span className="relative z-10 m-2.5">
+            <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
+          </span>
         )}
       </div>
 

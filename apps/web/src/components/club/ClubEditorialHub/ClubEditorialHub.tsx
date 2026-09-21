@@ -37,11 +37,15 @@ export type ClubHubCard = ClubHubNewsCard | ClubHubNavCard;
  * this array, nothing else. The three `news` cards are spaced one per row so no
  * row above the fold is glyph-only.
  *
- * To give a `nav` card a photo once one exists, flip its `variant` to `"news"`
- * and swap `iconName` for `imageUrl` (a `@/lib/sanity/images` export, or a
- * `/images/…` path under `public/`). The story maps every `news` card onto a
- * local asset so VR stays deterministic — see `ClubEditorialHub.stories.tsx`.
- * Either change needs a scoped VR re-capture of `features-club-clubeditorialhub`.
+ * A `nav` card gets a photo through the shared primitive, not by becoming a
+ * `news` card: `<EditorialHubCard variant="nav" imageUrl="…">` renders the
+ * photo behind a `jersey-deep-dark` scrim with the glyph and pill kept on top
+ * — the one recipe for a photographic nav tile, see `EditorialHubCard`'s own
+ * docblock and DESIGN.md § The Imageless Card → "No Filler Photo, Ever Rule"
+ * (#2965). `ClubHubNavCard` above carries no `imageUrl` field yet, so wiring
+ * one through is the actual change here, not a `variant` flip — this
+ * docblock states the recipe, it doesn't add the field. Either change needs
+ * a scoped VR re-capture of `features-club-clubeditorialhub`.
  *
  * The hub must stay a superset of the `De club` dropdown — #2409 deletes that
  * panel and relies on this grid to index the same routes. Jeugdbestuur ·
