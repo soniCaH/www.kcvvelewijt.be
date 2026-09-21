@@ -58,7 +58,10 @@ export default function ArticleDetailLoading() {
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
-      {/* Metadata rule — wide (1040): date · reading time · share. */}
+      {/* Metadata rule — wide (1040): date · reading time · share. The
+          share side carries the real `<ArticleMetadata>` button's own
+          `py-3.5` (#2529 — DESIGN.md "The Tap Target Rule") so the row
+          doesn't grow when the real 44px "Delen" button replaces it. */}
       <div
         aria-hidden="true"
         className="border-paper-edge w-full border-y py-3"
@@ -68,7 +71,10 @@ export default function ArticleDetailLoading() {
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-3 w-16" />
           </div>
-          <Skeleton className="h-3 w-20" />
+          <div className="flex items-center gap-2 py-3.5">
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-3 w-12" />
+          </div>
         </PageContainer>
       </div>
 

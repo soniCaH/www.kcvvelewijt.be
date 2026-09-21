@@ -1,6 +1,6 @@
 "use client";
 
-import { FacebookLogo, ShareNetwork } from "@/lib/icons.redesign";
+import { ShareNetwork } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 
@@ -41,12 +41,19 @@ const DEFAULT_AUTHOR = "KCVV Elewijt";
 /**
  * Design §7.6 — article metadata bar. Single row with 1px `paper-edge`
  * rules above and below. Left cluster: date · author · reading time, mono
- * small-caps. Right cluster: share icons (Share2 for the Web Share API,
- * Facebook for direct sharing). No breadcrumb — that role belongs to the
- * "< Terug naar nieuws" back link on the hero and the type-specific kicker.
+ * small-caps. Right cluster: one labelled "Delen" button (ShareNetwork icon
+ * + visible text, same mono small-caps register as the facts cluster) that
+ * triggers the Web Share API, or the Facebook sharer fallback where Web
+ * Share is unavailable. No breadcrumb — that role belongs to the "< Terug
+ * naar nieuws" back link on the hero and the type-specific kicker.
  *
- * No Twitter/X icon — KCVV has no Twitter/X account (see club-identity memory).
- * Instagram is not a URL-share target either, so the cluster stays at Share2 + Facebook.
+ * No separate Facebook control (#2529 — DESIGN.md "The Tap Target Rule"):
+ * `handleNativeShare`'s Facebook-sharer fallback already covers the
+ * desktop browsers without Web Share, and a phone's native share sheet
+ * already lists Facebook — a second icon-only Facebook link duplicated a
+ * path every visitor already has. No Twitter/X icon either — KCVV has no
+ * Twitter/X account (see club-identity memory). Instagram is not a
+ * URL-share target.
  */
 export const ArticleMetadata = ({
   author = DEFAULT_AUTHOR,
@@ -70,9 +77,9 @@ export const ArticleMetadata = ({
   // Synchronously branch on Web Share availability so the fallback
   // `window.open` runs inside the user-gesture tick (avoids Chromium's
   // popup-blocker on desktop). `navigator.share`'s promise rejection is
-  // treated as a dismissal and NOT a trigger for opening another window —
-  // the Facebook `<a>` next to this button is the explicit non-native
-  // alternative for users who cancel the native sheet.
+  // treated as a dismissal and NOT a trigger for opening the Facebook
+  // fallback window — the OS share sheet the user just dismissed already
+  // offered every channel it supports, Facebook included.
   const handleNativeShare = () => {
     if (!shareConfig) return;
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -85,8 +92,7 @@ export const ArticleMetadata = ({
         .catch(() => {
           // User dismissed the sheet — leave the click as a no-op. Ratified
           // silence, one of three: DESIGN.md → "The Silence Is An Answer
-          // Rule" (#2470/#2580) — a dismissal is not a failure, and the
-          // sibling Facebook link is the explicit alternative.
+          // Rule" (#2470/#2580) — a dismissal is not a failure.
         });
       return;
     }
@@ -121,26 +127,21 @@ export const ArticleMetadata = ({
         </ul>
 
         {shareConfig && (
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleNativeShare}
-              aria-label="Delen"
-              className="text-ink-soft hover:text-jersey-deep transition-colors"
-            >
-              <ShareNetwork size={16} />
-            </button>
-            <a
-              href={`${FACEBOOK_SHARER}${encodeURIComponent(shareConfig.url)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Delen op Facebook"
-              onClick={() => trackShare("facebook")}
-              className="text-ink-soft hover:text-jersey-deep transition-colors"
-            >
-              <FacebookLogo size={16} />
-            </a>
-          </div>
+          // `py-3.5` is the hit area, not a negative-margin trick (#2529 —
+          // DESIGN.md "The Tap Target Rule"): the 16px icon/text-xs row
+          // plus 14px top/bottom padding totals the 44px minimum, and the
+          // padded box (not just its visible content) is what the row's
+          // own `gap-y-2` separates from the facts line above when this
+          // bar wraps on a phone — a negative margin would reach back
+          // into that gap instead of respecting it.
+          <button
+            type="button"
+            onClick={handleNativeShare}
+            className="text-ink-soft hover:text-jersey-deep flex items-center gap-2 py-3.5 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase transition-colors"
+          >
+            <ShareNetwork size={16} aria-hidden="true" />
+            Delen
+          </button>
         )}
       </div>
     </nav>
