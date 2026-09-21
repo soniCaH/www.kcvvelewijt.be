@@ -16,7 +16,7 @@ export interface ArticleMetadataProps {
   date?: string;
   /** Reading time, e.g. "4 min lezen". Optional — omitted when empty. */
   readingTime?: string;
-  /** Share configuration — URL to share. When provided, Share2 + Facebook icons render. */
+  /** Share configuration — URL to share. When provided, the Delen button renders. */
   shareConfig?: {
     url: string;
     /** Title used by `navigator.share()`. Falls back to `author` when absent. */
@@ -37,6 +37,14 @@ export interface ArticleMetadataProps {
 const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
 
 const DEFAULT_AUTHOR = "KCVV Elewijt";
+
+/**
+ * The bar's own mono small-caps register — shared verbatim by the facts
+ * cluster and the `Delen` button so the two never drift (the pattern
+ * `SiteHeader`'s `CHROME_NAV_TYPE` uses for its own shared row type).
+ */
+const MONO_SMALL_CAPS =
+  "font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase";
 
 /**
  * Design §7.6 — article metadata bar. Single row with 1px `paper-edge`
@@ -96,9 +104,13 @@ export const ArticleMetadata = ({
         });
       return;
     }
-    // Fallback when Web Share API is unavailable (most desktop browsers).
+    // Fallback when Web Share API is unavailable — Chrome and Firefox on
+    // macOS/Linux (owner's decision comment, #2529); Safari on macOS and
+    // Edge on Windows already have Web Share and take the branch above.
     // Runs in the same click event tick, so the popup is allowed. Emits
-    // the `facebook` channel because the fallback is a Facebook sharer.
+    // the `facebook` channel because the fallback is a Facebook sharer —
+    // as of #2529 this means "no Web Share, fell back to the sharer", not
+    // "tapped a Facebook-specific icon" (there is no longer one).
     trackShare("facebook");
     window.open(
       `${FACEBOOK_SHARER}${encodeURIComponent(shareConfig.url)}`,
@@ -110,10 +122,29 @@ export const ArticleMetadata = ({
   return (
     <nav
       aria-label="Artikelinfo"
-      className={cn("border-paper-edge w-full border-y py-3", className)}
+      className={cn(
+        "border-paper-edge w-full border-y",
+        // `py-3.5` only when the `Delen` button actually renders — it's
+        // container-owned space for THAT button's own `-my-3.5` overhang
+        // (see below). Without `shareConfig` there is no overhang to
+        // contain, so the bar keeps its original `py-3` — never grow a
+        // container's padding for a control that isn't there.
+        shareConfig ? "py-3.5" : "py-3",
+        className,
+      )}
     >
-      <div className="mx-auto flex w-full max-w-[var(--container-wide)] flex-wrap items-center justify-between gap-y-2 px-4 md:px-8">
-        <ul className="text-ink-muted flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase">
+      <div
+        className={cn(
+          "mx-auto flex w-full max-w-[var(--container-wide)] flex-wrap items-center justify-between px-4 md:px-8",
+          shareConfig ? "gap-y-3.5" : "gap-y-2",
+        )}
+      >
+        <ul
+          className={cn(
+            "text-ink-muted flex flex-wrap items-center gap-x-3 gap-y-1",
+            MONO_SMALL_CAPS,
+          )}
+        >
           {facts.map((fact, i) => (
             <li key={`${i}-${fact}`} className="flex items-center gap-x-3">
               {i > 0 && (
@@ -127,17 +158,28 @@ export const ArticleMetadata = ({
         </ul>
 
         {shareConfig && (
-          // `py-3.5` is the hit area, not a negative-margin trick (#2529 —
-          // DESIGN.md "The Tap Target Rule"): the 16px icon/text-xs row
-          // plus 14px top/bottom padding totals the 44px minimum, and the
-          // padded box (not just its visible content) is what the row's
-          // own `gap-y-2` separates from the facts line above when this
-          // bar wraps on a phone — a negative margin would reach back
-          // into that gap instead of respecting it.
+          // 44px hit area via `py-3.5` (#2529 — DESIGN.md "The Tap Target
+          // Rule"), cancelled from the layout with `-my-3.5` — hit area
+          // only, no layout shift, the same idiom `SiteHeader`'s nav links
+          // use (`-my-2 py-2`, #2394). Without the cancelling margin the
+          // padded box counted toward the row's own flow height, growing
+          // the whole bar ~28px (review finding on #3071).
+          //
+          // The row's `gap-y-3.5` (matching the button's own 14px
+          // overhang) and the nav's own `py-3.5` (matching it again) are
+          // the container-owned space the cancelled-out hit area is
+          // allowed to spill into: 14px of gap above the button's line
+          // when the bar wraps, so the invisible hit box reaches the facts
+          // line's edge without crossing it, and 14px of the nav's own
+          // padding on both sides, so it reaches the nav's own border
+          // without crossing into the hero or the article body next to it.
           <button
             type="button"
             onClick={handleNativeShare}
-            className="text-ink-soft hover:text-jersey-deep flex items-center gap-2 py-3.5 font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase transition-colors"
+            className={cn(
+              "text-ink-soft hover:text-jersey-deep -my-3.5 flex items-center gap-2 py-3.5 transition-colors",
+              MONO_SMALL_CAPS,
+            )}
           >
             <ShareNetwork size={16} aria-hidden="true" />
             Delen

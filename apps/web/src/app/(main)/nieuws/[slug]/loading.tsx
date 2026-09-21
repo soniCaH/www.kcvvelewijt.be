@@ -59,22 +59,22 @@ export default function ArticleDetailLoading() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Metadata rule — wide (1040): date · reading time · share. The
-          share side carries the real `<ArticleMetadata>` button's own
-          `py-3.5` (#2529 — DESIGN.md "The Tap Target Rule") so the row
-          doesn't grow when the real 44px "Delen" button replaces it. */}
+          real `<ArticleMetadata>` cancels its `Delen` button's 44px hit
+          area with a matching negative margin (#2529 — DESIGN.md "The Tap
+          Target Rule"), so the row's own flow height is unchanged from
+          before that button existed — `py-3.5` here matches the real
+          nav's own bumped padding (also cancelling part of the button's
+          overhang), but the share side needs no extra wrapper padding. */}
       <div
         aria-hidden="true"
-        className="border-paper-edge w-full border-y py-3"
+        className="border-paper-edge w-full border-y py-3.5"
       >
         <PageContainer className="flex items-center justify-between gap-4">
           <div className="flex gap-4">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-3 w-16" />
           </div>
-          <div className="flex items-center gap-2 py-3.5">
-            <Skeleton className="h-4 w-4" />
-            <Skeleton className="h-3 w-12" />
-          </div>
+          <Skeleton className="h-3 w-20" />
         </PageContainer>
       </div>
 
