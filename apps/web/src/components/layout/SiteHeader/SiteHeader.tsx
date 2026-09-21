@@ -80,6 +80,12 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const headerRef = useRef<HTMLElement>(null);
+  // Where NavTakeover sends focus when it retires itself because the
+  // viewport crossed into `lg` while the drawer was open (#2850) —
+  // `hamburgerRef` above is `lg:hidden` at that width, so it can no longer
+  // receive focus. The desktop row's first entry is the nearest equivalent
+  // "where the nav starts" for a visitor who was just inside the takeover.
+  const firstDesktopNavLinkRef = useRef<HTMLAnchorElement>(null);
   const { trackNavClick } = useNavigationAnalytics();
 
   // One native listener on the (always-mounted) `<header>` reads the inert
@@ -166,9 +172,10 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
 
           <nav aria-label="Hoofdnavigatie" className="flex w-full">
             <ul className="m-0 flex w-full list-none items-center justify-between gap-x-4 gap-y-0 py-0 pr-0 pl-6 xl:gap-x-8 xl:pl-10 2xl:gap-x-10 2xl:pl-12">
-              {menuItems.map((item) => (
+              {menuItems.map((item, index) => (
                 <li key={item.href} className="relative min-w-0">
                   <Link
+                    ref={index === 0 ? firstDesktopNavLinkRef : undefined}
                     href={item.href}
                     // The active entry is marked by colour alone otherwise —
                     // the flat nav also lost the `aria-current` the dropdown
@@ -228,6 +235,7 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
         onOpenChange={setDrawerOpen}
         wordmark={<Wordmark />}
         returnFocusRef={hamburgerRef}
+        autoCloseFocusRef={firstDesktopNavLinkRef}
       >
         {menuItems.map((item) => (
           <NavTakeoverItem

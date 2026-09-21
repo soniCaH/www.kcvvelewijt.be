@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SiteHeader } from "./SiteHeader";
 
@@ -156,5 +156,36 @@ describe("SiteHeader", () => {
     expect(
       screen.getAllByRole("link", { name: "Wedstrijden" })[0],
     ).toHaveAttribute("href", "/kalender");
+  });
+
+  // #2850 — a visitor who opens the drawer below `lg` and then widens the
+  // viewport (or rotates a tablet) past it used to keep the takeover
+  // mounted, overlaying the desktop row. Nothing else in this suite drives
+  // an actual viewport change, so this is the one test that does.
+  describe("drawer retires itself when the viewport crosses into `lg`", () => {
+    const ORIGINAL_INNER_WIDTH = window.innerWidth;
+
+    afterEach(() => {
+      window.innerWidth = ORIGINAL_INNER_WIDTH;
+      document.documentElement.style.removeProperty("--breakpoint-lg");
+    });
+
+    it("closes the takeover and moves focus to the desktop nav's first link, not the now-hidden hamburger", async () => {
+      document.documentElement.style.setProperty("--breakpoint-lg", "900px");
+      window.innerWidth = 500;
+      const user = userEvent.setup();
+      render(<SiteHeader seniorTeams={seniorTeams} />);
+
+      await user.click(screen.getByRole("button", { name: /open menu/i }));
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      window.innerWidth = 1000;
+      fireEvent(window, new Event("resize"));
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+      expect(document.activeElement).toBe(
+        screen.getAllByRole("link", { name: "Nieuws" })[0],
+      );
+    });
   });
 });
