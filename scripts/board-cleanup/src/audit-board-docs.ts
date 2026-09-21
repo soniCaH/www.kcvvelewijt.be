@@ -1,7 +1,7 @@
 import { writeFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
-import { client } from "./sanity-client.js";
+import { client, draftAwareClient } from "./sanity-client.js";
 
 interface BoardDoc {
   _id: string;
@@ -36,8 +36,10 @@ interface TeamDoc {
 }
 
 async function main() {
-  // 1. Fetch all remaining board docs
-  const boardDocs = await client.fetch<BoardDoc[]>(`
+  // 1. Fetch all remaining board docs. Draft-aware: referencedBy must see draft
+  // referrers, because migrate-board-docs.ts step 6c's premise ("should be
+  // unreferenced after relinking") is checked by this audit (#2839).
+  const boardDocs = await draftAwareClient.fetch<BoardDoc[]>(`
     *[_type == "staffMember" && _id match "staff-board-*"] {
       _id,
       firstName,

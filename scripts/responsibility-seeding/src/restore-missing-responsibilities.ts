@@ -29,7 +29,8 @@
  */
 
 import { createHash } from "crypto";
-import { client, dataset } from "./sanity-client";
+import { stripDraftPrefix } from "./draft-id";
+import { client, dataset, draftAwareClient } from "./sanity-client";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -277,14 +278,19 @@ async function main() {
   console.log(`[restore] All ${nodeIds.length} organigram position(s) resolve.`);
 
   // A slug collision would mean the topic is already covered and this script's
-  // premise is stale — stop rather than publish a duplicate question.
+  // premise is stale — stop rather than publish a duplicate question. Draft-aware:
+  // a slug already taken by a draft-only `responsibility` is exactly the collision
+  // this guard exists to catch (#2839).
   const slugs = responsibilities.map((doc) => doc.slug.current);
-  const clashes = await client.fetch<Array<{ _id: string; slug: string }>>(
+  const clashes = await draftAwareClient.fetch<Array<{ _id: string; slug: string }>>(
     '*[_type == "responsibility" && slug.current in $slugs]{_id, "slug": slug.current}',
     { slugs },
   );
+  // Tolerate a `drafts.` prefix here rather than relying on the client option
+  // alone — a draft of a document this script just wrote (e.g. from a previous
+  // run, or opened in Studio) must not read as a foreign clash.
   const foreign = clashes.filter(
-    (c) => !responsibilities.some((doc) => doc._id === c._id),
+    (c) => !responsibilities.some((doc) => doc._id === stripDraftPrefix(c._id)),
   );
   if (foreign.length > 0) {
     console.error(

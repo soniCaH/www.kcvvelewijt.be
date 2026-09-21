@@ -14,7 +14,8 @@
  *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts          # dry-run
  *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts --execute # real run
  */
-import { client } from "./sanity-client.js";
+import { stripDraftPrefix, uniqueBaseIds } from "./draft-id.js";
+import { client, draftAwareClient } from "./sanity-client.js";
 
 const DRY_RUN = !process.argv.includes("--execute");
 
@@ -141,9 +142,13 @@ async function fetchDoc(id: string): Promise<SanityDoc | null> {
   return client.fetch<SanityDoc | null>(`*[_id == $id][0]`, { id });
 }
 
-/** Find all documents referencing a given ID. */
+/**
+ * Find all documents referencing a given ID. Draft-aware: a draft referrer
+ * must be relinked too, or deepReplaceRef(..., draftOldId, newId) below never
+ * has a match and that draft is left pointing at a document step 6 deletes (#2839).
+ */
 async function findReferencingDocs(docId: string): Promise<SanityDoc[]> {
-  return client.fetch<SanityDoc[]>(`*[references($docId)]`, { docId });
+  return draftAwareClient.fetch<SanityDoc[]>(`*[references($docId)]`, { docId });
 }
 
 /** Relink all references from oldId → newId across the dataset. */
@@ -441,15 +446,24 @@ async function step6_deleteOldDocs() {
     await deleteDoc(id);
   }
 
-  // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking)
-  const remainingBoardDocs = await client.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
+  // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking).
+  // Draft-aware: a staff-board-* document that exists only as a draft must not be
+  // skipped here, or it survives the delete this step exists to perform. Reduced to
+  // BASE ids via uniqueBaseIds — deleteDoc() only deletes both id shapes when handed
+  // the base id, so passing a drafts.* id here (whichever row the query happened to
+  // sort first) would delete the draft twice and leave the published doc behind (#2839).
+  const remainingBoardDocsRaw = await draftAwareClient.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
     `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`
   );
+  const remainingBoardIds = uniqueBaseIds(remainingBoardDocsRaw.map((doc) => doc._id));
+  const nameByBaseId = new Map(
+    remainingBoardDocsRaw.map((doc) => [stripDraftPrefix(doc._id), `${doc.firstName} ${doc.lastName}`]),
+  );
 
-  console.log(`\n  Deleting ${remainingBoardDocs.length} remaining board docs...`);
-  for (const doc of remainingBoardDocs) {
-    console.log(`    ${doc._id} (${doc.firstName} ${doc.lastName})`);
-    await deleteDoc(doc._id);
+  console.log(`\n  Deleting ${remainingBoardIds.length} remaining board docs...`);
+  for (const id of remainingBoardIds) {
+    console.log(`    ${id} (${nameByBaseId.get(id)})`);
+    await deleteDoc(id);
   }
 }
 

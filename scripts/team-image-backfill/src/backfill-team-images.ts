@@ -104,10 +104,18 @@ async function fetchDrupalTeams(): Promise<DrupalTeam[]> {
   });
 }
 
-/** Pull current (non-archived) Sanity teams. */
+/**
+ * Pull current (non-archived) Sanity teams, published only.
+ *
+ * A drafts.* twin must never enter this list: it would double the age-band
+ * candidates and trip the "ambiguous" guard in `matchTeam` below on a team
+ * that is not actually ambiguous. The client's `perspective: "published"`
+ * already excludes it — this filter makes that true independent of the
+ * client option too (#2839).
+ */
 async function fetchSanityTeams(): Promise<SanityTeam[]> {
   return client.fetch(
-    `*[_type == "team" && archived != true]{
+    `*[_type == "team" && archived != true && !(_id in path("drafts.**"))]{
       _id, name, age, "slug": slug.current, "hasImage": defined(teamImage)
     } | order(age asc, name asc)`,
   );

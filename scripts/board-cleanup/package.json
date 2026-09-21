@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "audit": "tsx src/audit-board-docs.ts",
-    "migrate": "tsx src/migrate-board-docs.ts"
+    "migrate": "tsx src/migrate-board-docs.ts",
+    "test": "tsx --test src/*.test.ts"
   },
   "dependencies": {
     "@sanity/client": "8.6.1"

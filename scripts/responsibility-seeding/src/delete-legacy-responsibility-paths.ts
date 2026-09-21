@@ -18,7 +18,8 @@
  *   SANITY_DATASET=staging  pnpm delete-legacy -- --confirm
  */
 
-import { client, dataset } from "./sanity-client";
+import { stripDraftPrefix } from "./draft-id";
+import { client, dataset, draftAwareClient } from "./sanity-client";
 
 /** The six topics that existed only as `responsibilityPath`. */
 const RESTORED_SLUGS = [
@@ -55,7 +56,9 @@ async function main() {
   }
   console.log(`[delete-legacy] All ${RESTORED_SLUGS.length} restored topic(s) are active.`);
 
-  const docs = await client.fetch<LegacyDoc[]>(
+  // Draft-aware: a legacy document that survives only as a draft must still be
+  // deleted, or it is left dangling once this script reports success (#2839).
+  const docs = await draftAwareClient.fetch<LegacyDoc[]>(
     '*[_type == "responsibilityPath"]{_id, "slug": slug.current} | order(_id asc)',
   );
 
@@ -64,10 +67,10 @@ async function main() {
     return;
   }
 
-  // Every id in this set is `responsibility-path-*`: the migration preserved
-  // `_id`, so a document under any other prefix would mean the query caught
-  // something this script was not written for.
-  const unexpected = docs.filter((d) => !d._id.startsWith("responsibility-path-"));
+  // Every id in this set is `responsibility-path-*` once a `drafts.` prefix is
+  // stripped: the migration preserved `_id`, so a document under any other
+  // shape would mean the query caught something this script was not written for.
+  const unexpected = docs.filter((d) => !stripDraftPrefix(d._id).startsWith("responsibility-path-"));
   if (unexpected.length > 0) {
     console.error(
       `[delete-legacy] Refusing to run. Unexpected _id shape: ${unexpected.map((d) => d._id).join(", ")}`,
