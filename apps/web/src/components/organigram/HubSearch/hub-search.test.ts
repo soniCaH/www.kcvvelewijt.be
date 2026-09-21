@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import {
   searchMembers,
   searchResponsibilities,
-  searchHub,
   dedupeMembersByPerson,
   mapSemanticResults,
   interleaveResults,
@@ -194,36 +193,8 @@ describe("searchResponsibilities", () => {
   });
 });
 
-describe("searchHub", () => {
-  it("interleaves people and answers (person, answer, person, answer)", () => {
-    // "inschrijven" matches the answer keyword; "bestuur" matches members.
-    // Use a query that hits both: "in" is too short — craft mixed data instead.
-    const mixedMembers: OrgChartNode[] = [
-      {
-        id: "secretaris",
-        title: "Secretaris inschrijvingen",
-        department: "hoofdbestuur",
-        members: [{ id: "s-1", name: "Inge De Wit" }],
-      },
-    ];
-    const results = searchHub("inschrijv", mixedMembers, paths, 5);
-    expect(results[0].type).toBe("member");
-    expect(results[1].type).toBe("responsibility");
-  });
-
-  it("returns answers even when no people match", () => {
-    const results = searchHub("blessure", members, paths, 5);
-    expect(results.every((r) => r.type === "responsibility")).toBe(true);
-    expect(results[0].type).toBe("responsibility");
-  });
-
-  it("returns [] when nothing matches", () => {
-    expect(searchHub("zzzzz", members, paths, 5)).toEqual([]);
-  });
-});
-
-// #3092 — a word an editor wrote into a path's title, question or keywords must
-// find that path whatever the semantic lane ranks.
+// #3092 — a word an editor wrote into a path's title or keywords must find
+// that path whatever the semantic lane ranks.
 describe("findLiteralAnswers", () => {
   it("finds a path by a keyword it literally carries", () => {
     const results = findLiteralAnswers("verzekering", paths, 5);

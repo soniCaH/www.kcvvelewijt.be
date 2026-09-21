@@ -315,6 +315,17 @@ describe("HubSearch", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps a literal keyword hit when the endpoint errors (#3092)", async () => {
+    // "ongeval" is a keyword of the blessure path; the keyword fallback alone
+    // never matches a keyword inside a longer query.
+    setSemantic({ error: true });
+    renderSearch();
+    typeQuery("ongeval gehad");
+    expect(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    ).toBeInTheDocument();
+  });
+
   it("scrolls to #structuur and tracks query_length when a person is chosen", async () => {
     setSemantic({ results: [hit("inschrijven", 0.42)], executedQuery: "in" });
     renderSearch();

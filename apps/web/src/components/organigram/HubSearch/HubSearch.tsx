@@ -19,8 +19,8 @@
  * keyword** (`searchMembers`). A strong top answer (score ≥ 0.5) renders
  * **answer-forward** — its own CMS summary + contact inline (never an LLM
  * answer; avoids hallucination on club procedures). On endpoint failure the
- * answer lane **falls back to keyword** (`searchHub`) — the PRD floor — with no
- * smart hint. Selecting a person scrolls to `#structuur`; an answer deep-links
+ * answer lane **falls back to keyword** (`searchResponsibilities`, literal hits
+ * still merged in) — the PRD floor — with no smart hint. Selecting a person scrolls to `#structuur`; an answer deep-links
  * the finder accordion by slug (`<HulpFinder>` opens it on `hashchange`, #2056).
  */
 
@@ -52,8 +52,8 @@ import {
   interleaveResults,
   mapSemanticResults,
   mergeAnswers,
-  searchHub,
   searchMembers,
+  searchResponsibilities,
   type HubMemberResult,
   type HubResponsibilityResult,
   type HubSearchResult,
@@ -330,8 +330,8 @@ export function HubSearch({
     () => searchMembers(debouncedValue, members, maxResults),
     [debouncedValue, members, maxResults],
   );
-  // Answers the query names literally — title, keyword, question (#3092).
-  // Sync and local, so they show before the semantic lane settles.
+  // Answers the query names literally — title or keyword (#3092). Sync and
+  // local, so they show before the semantic lane settles.
   const literalAnswers = useMemo(
     () => findLiteralAnswers(debouncedValue, responsibilityPaths, maxResults),
     [debouncedValue, responsibilityPaths, maxResults],
@@ -353,19 +353,37 @@ export function HubSearch({
     semanticAnswers[0].score >= ANSWER_FORWARD_MIN_SCORE
       ? semanticAnswers[0]
       : null;
+  // The fallback's keyword hits take the semantic lane's place, so a literal
+  // hit survives an endpoint failure too.
   const answers = useMemo(
-    () => mergeAnswers(literalAnswers, semanticAnswers, maxResults),
-    [literalAnswers, semanticAnswers, maxResults],
+    () =>
+      mergeAnswers(
+        literalAnswers,
+        usingFallback
+          ? searchResponsibilities(
+              debouncedValue,
+              responsibilityPaths,
+              maxResults,
+            )
+          : semanticAnswers,
+        maxResults,
+      ),
+    [
+      literalAnswers,
+      usingFallback,
+      debouncedValue,
+      responsibilityPaths,
+      semanticAnswers,
+      maxResults,
+    ],
   );
 
-  const rows: HubSearchResult[] = usingFallback
-    ? searchHub(debouncedValue, members, responsibilityPaths, maxResults)
-    : interleaveResults(
-        memberResults,
-        answerForward
-          ? answers.filter((a) => a.path.id !== answerForward.path.id)
-          : answers,
-      );
+  const rows: HubSearchResult[] = interleaveResults(
+    memberResults,
+    answerForward
+      ? answers.filter((a) => a.path.id !== answerForward.path.id)
+      : answers,
+  );
 
   // The answer lane has "settled" for the current query once the hook's
   // executedQuery matches it (or we're on the sync keyword fallback). Until then

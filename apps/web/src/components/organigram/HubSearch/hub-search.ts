@@ -387,21 +387,3 @@ export function interleaveResults(
 
   return combined;
 }
-
-/**
- * Unified KEYWORD hub search: ranks people and answers independently, then
- * interleaves them. `maxResults` caps each category. Used as the graceful
- * fallback when the semantic endpoint is unavailable (#2057); the answer lane is
- * otherwise semantic.
- */
-export function searchHub(
-  query: string,
-  members: OrgChartNode[],
-  paths: ResponsibilityPath[],
-  maxResults: number,
-): HubSearchResult[] {
-  return interleaveResults(
-    searchMembers(query, members, maxResults),
-    searchResponsibilities(query, paths, maxResults),
-  );
-}
