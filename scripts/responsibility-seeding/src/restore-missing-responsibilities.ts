@@ -29,6 +29,7 @@
  */
 
 import { createHash } from "crypto";
+import { stripDraftPrefix } from "./draft-id";
 import { client, dataset } from "./sanity-client";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -283,8 +284,11 @@ async function main() {
     '*[_type == "responsibility" && slug.current in $slugs]{_id, "slug": slug.current}',
     { slugs },
   );
+  // Tolerate a `drafts.` prefix here rather than relying on the client's
+  // `perspective: "published"` alone (#2839) — a draft of a document this
+  // script just wrote must not read as a foreign clash.
   const foreign = clashes.filter(
-    (c) => !responsibilities.some((doc) => doc._id === c._id),
+    (c) => !responsibilities.some((doc) => doc._id === stripDraftPrefix(c._id)),
   );
   if (foreign.length > 0) {
     console.error(
