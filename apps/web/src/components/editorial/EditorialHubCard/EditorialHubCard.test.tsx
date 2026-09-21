@@ -120,5 +120,52 @@ describe("EditorialHubCard", () => {
       expect(pill).toBeInTheDocument();
       expect(pill).toHaveTextContent("");
     });
+
+    // #2965: NavCardConfig.image is optional — present renders a photo behind
+    // a scrim, absent keeps the flat bg-jersey-deep panel byte-for-byte.
+    it("renders a photo + scrim behind the glyph and pill when imageUrl is set", () => {
+      const { container } = render(
+        <EditorialHubCard
+          variant="nav"
+          href="/club/word-lid"
+          tag="Aansluiten"
+          title="Word lid van KCVV"
+          arrowText="Schrijf je in"
+          icon={navGlyph}
+          imageUrl="/images/jeugd/word-lid-kids-met-bal.jpg"
+        />,
+      );
+      const cover = container.querySelector("img");
+      expect(cover).toHaveAttribute(
+        "src",
+        "/images/jeugd/word-lid-kids-met-bal.jpg",
+      );
+      // Decorative — the card's own title names the tile (#2965).
+      expect(cover).toHaveAttribute("alt", "");
+      expect(screen.getByTestId("nav-glyph")).toBeInTheDocument();
+      expect(screen.getByText("Aansluiten")).toBeInTheDocument();
+    });
+
+    it("keeps the flat bg-jersey-deep panel byte-for-byte with no imageUrl", () => {
+      const { container } = render(
+        <EditorialHubCard
+          variant="nav"
+          href="/hulp#structuur"
+          tag="Structuur"
+          title="Organigram"
+          arrowText="Zoek het op"
+          icon={navGlyph}
+        />,
+      );
+      // No <img>, no scrim — the panel is exactly the pill + the bare glyph,
+      // today's markup, unchanged (#2965 "preserved byte-for-byte").
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      const panel = container.querySelector(".bg-jersey-deep")!;
+      expect(panel).toBeInTheDocument();
+      expect(panel.children).toHaveLength(2);
+      // The glyph is the panel's direct child — not wrapped in the extra
+      // stacking-context <span> the imageUrl branch adds.
+      expect(panel.querySelector(":scope > svg")).not.toBeNull();
+    });
   });
 });
