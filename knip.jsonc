@@ -69,24 +69,6 @@
     // export has no import site knip can see. See the comment on
     // `GithubSummaryReporter` itself.
     "apps/web/test/reporters/github-summary.ts": ["exports"],
-    // #3025's sweep: `MatchLineup`, `MatchStatusBadge`, `MatchHero`,
-    // `MatchEvents`, `MatchLineupSection`, `MatchEventsSection`,
-    // `MatchStandingsSection`, `OrganigramExplorer`, `SpotlightNodeCard`
-    // and `VolledigOrganigram` all have stories, so decision #1's rule
-    // re-adds their barrel re-exports even though nothing in this repo
-    // imports them through that path today (every current consumer still
-    // imports each directly from its own subpath) — unlike
-    // `design-system/index.ts` / `layout/index.ts`, these two barrels
-    // aren't wildcarded by `.design-sync/entry.ts` (design-sync's scope is
-    // UI + Layout only; see `.design-sync/NOTES.md`), so knip has no real
-    // consumer to trace here and would otherwise flag them as dead. `ignoreIssues`
-    // (not a barrel trim) is the correct tool: the re-export is intentional
-    // public surface, not orphaned code.
-    "apps/web/src/components/match/index.ts": ["exports"],
-    "apps/web/src/components/match/MatchLineup/index.ts": ["exports"],
-    "apps/web/src/components/organigram/OrganigramExplorer/index.ts": [
-      "exports",
-    ],
   },
   "workspaces": {
     ".": {
