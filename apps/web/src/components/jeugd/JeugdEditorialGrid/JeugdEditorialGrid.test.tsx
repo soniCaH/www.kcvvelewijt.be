@@ -267,6 +267,37 @@ describe("JeugdEditorialGrid", () => {
       expect(hrefs).toContain("/sanity/route-2");
     });
 
+    it("forwards a Sanity nav card's image to the photo treatment (#2965)", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({
+          title: "Sanity nav met foto",
+          href: "/sanity/met-foto",
+          imageUrl: "https://cdn.example.com/nav-cover.jpg",
+        }),
+      ];
+
+      const { container } = render(
+        <JeugdEditorialGrid articles={[]} editorialConfig={config} />,
+      );
+
+      const cover = container.querySelector(
+        'img[src="https://cdn.example.com/nav-cover.jpg"]',
+      );
+      expect(cover).toBeInTheDocument();
+      expect(cover).toHaveAttribute("alt", "");
+    });
+
+    it("renders no photo for a Sanity nav card with no image (7j3 default)", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({ title: "Sanity nav zonder foto", imageUrl: null }),
+      ];
+
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
+
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(screen.getByText("Sanity nav zonder foto")).toBeInTheDocument();
+    });
+
     it("renders an empty pill for a Sanity nav card with no tag", () => {
       const config: EditorialCardConfig[] = [
         makeNavConfig({ title: "Geen tag", tag: null, href: "/ergens" }),

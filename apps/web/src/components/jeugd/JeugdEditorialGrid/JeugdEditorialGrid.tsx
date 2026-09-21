@@ -200,6 +200,10 @@ function buildItemsFromConfig(
           title={entry.title}
           arrowText={entry.arrowText ?? "Ontdek"}
           icon={<NavGlyph name={DEFAULT_NAV_GLYPH} />}
+          // Same `editorialCards.image` field the article-slot query already
+          // reads (#2965 code review) — absent stays the flat tile, same
+          // contract as the hardcoded NAV_CARDS.
+          imageUrl={entry.imageUrl ?? undefined}
         />,
       );
     } else {
