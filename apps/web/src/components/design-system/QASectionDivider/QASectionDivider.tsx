@@ -115,7 +115,7 @@ export function QASectionDivider({
         <span
           data-divider="rule"
           aria-hidden="true"
-          className="bg-ink h-px flex-1 self-center"
+          className="bg-ink h-px min-w-4 flex-1 self-center"
         />
         <span
           data-divider="glyph"
@@ -126,7 +126,15 @@ export function QASectionDivider({
         </span>
         <span
           data-divider="title"
-          className="font-display px-1.5 text-[22px] leading-none font-semibold whitespace-nowrap italic"
+          // Wraps rather than runs off (#2526): display type is never cut
+          // (#2549 rule 2). A long h2 such as "Doorstroming + jong talent
+          // vanuit de U21" is 351px on one line; `text-balance` splits it
+          // evenly between the glyphs, and `leading-none` holds on two lines.
+          // An h2 is editor free text, so DESIGN.md's Hyphenation Rule applies:
+          // `hyphens-auto` + `break-words` keep one long compound
+          // ("Seizoensvoorbereiding") off the glyphs. #2269's "break-words
+          // suppresses the hyphen" did not reproduce (#2586).
+          className="font-display min-w-0 px-1.5 text-center text-[22px] leading-none font-semibold text-balance break-words hyphens-auto italic"
         >
           {spans.map((span, i) => {
             const isAccent = (span.marks ?? []).includes("accent");
@@ -155,7 +163,7 @@ export function QASectionDivider({
         <span
           data-divider="rule"
           aria-hidden="true"
-          className="bg-ink h-px flex-1 self-center"
+          className="bg-ink h-px min-w-4 flex-1 self-center"
         />
       </div>
       {kicker ? (

@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Article reading column</title>
+    <style>
+      :root {
+        --cream: #f5f1e6;
+        --cream-soft: #ede8da;
+        --ink: #0a0a0a;
+        --muted: #5b574d;
+        --deep: #007c46;
+        --alert: #b84a3a;
+        --edge: #d9d2bf;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font:
+          16px/1.5 -apple-system,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+      }
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 32px 16px 80px;
+      }
+      h1 {
+        font:
+          700 34px/1.1 Georgia,
+          serif;
+        margin: 0 0 8px;
+      }
+      .lede {
+        max-width: 760px;
+        color: var(--muted);
+        margin: 0 0 28px;
+      }
+      section {
+        border: 2px solid var(--ink);
+        box-shadow: 6px 6px 0 var(--ink);
+        background: #fff9ee;
+        padding: 20px;
+        margin: 0 0 36px;
+      }
+      section.pick {
+        border-color: var(--deep);
+        box-shadow: 6px 6px 0 var(--deep);
+      }
+      section.reject {
+        opacity: 0.85;
+      }
+      .tag {
+        display: inline-block;
+        font:
+          700 12px/1 ui-monospace,
+          Menlo,
+          monospace;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 8px;
+        border: 2px solid var(--ink);
+        margin-bottom: 10px;
+      }
+      .pick .tag {
+        background: var(--deep);
+        color: #fff;
+        border-color: var(--deep);
+      }
+      .reject .tag {
+        background: var(--alert);
+        color: #fff;
+        border-color: var(--alert);
+      }
+      h2 {
+        font:
+          700 24px/1.2 Georgia,
+          serif;
+        margin: 0 0 6px;
+      }
+      p.says {
+        margin: 0 0 16px;
+        max-width: 820px;
+      }
+      .shots {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      figure {
+        margin: 0;
+      }
+      figcaption {
+        font:
+          600 12px/1.4 ui-monospace,
+          Menlo,
+          monospace;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      figure img {
+        display: block;
+        border: 1px solid var(--edge);
+      }
+      .w390 img {
+        width: 390px;
+      }
+      .w320 img {
+        width: 320px;
+      }
+      .w1440 img {
+        width: 100%;
+        max-width: 1000px;
+      }
+      ul.facts {
+        margin: 14px 0 0;
+        padding-left: 20px;
+        max-width: 820px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 900px;
+        font-size: 15px;
+        background: #fff9ee;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px dashed var(--edge);
+      }
+      th {
+        font:
+          700 12px/1.2 ui-monospace,
+          Menlo,
+          monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      td.num {
+        font-family: ui-monospace, Menlo, monospace;
+      }
+      .bad {
+        color: var(--alert);
+        font-weight: 700;
+      }
+      .good {
+        color: var(--deep);
+        font-weight: 700;
+      }
+      .twin {
+        display: flex;
+        gap: 28px;
+        flex-wrap: wrap;
+      }
+      .twin section {
+        flex: 1 1 480px;
+      }
+      @media (max-width: 700px) {
+        .w390 img {
+          width: 100%;
+          max-width: 390px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>The article text: add decoration, or keep it quiet?</h1>
+      <p class="lede">
+        Screenshots of <strong>live</strong> articles on a phone. Ticket #2526
+        asks for either a rule (“one decoration per ~400 words”) or a written
+        decision that the text stays quiet.
+      </p>
+
+      <section class="pick">
+        <span class="tag">What “decoration” means — one article, twice</span>
+        <h2>“Word trainer bij de plezantste compagnie!” (~250 words)</h2>
+        <p class="says">
+          Left is the live article. Right is the same text with the four fanzine
+          pieces added — each one copied from a live page, nothing invented:
+        </p>
+        <ol class="facts">
+          <li>
+            <strong>Quote card</strong> — framed card, green quote mark, italic
+            text. Editors have it: style <code>Citaat</code>.
+          </li>
+          <li>
+            <strong>Green words</strong> — a key phrase in bold green italic.
+            <em>Not</em> in the editor's menu today.
+          </li>
+          <li>
+            <strong>Star heading</strong> —
+            <code>✦ Wie zoeken we? ✦</code> between two rules. Editors have it:
+            style <code>Tussentitel (groene divider)</code>. This article used
+            <code>Kop 3</code> instead.
+          </li>
+          <li>
+            <strong>Striped band</strong> — the black-and-cream stripe from
+            above the green call-to-action bands. <em>Not</em> in the editor's
+            menu.
+          </li>
+        </ol>
+        <div class="shots" style="margin-top: 16px">
+          <figure class="w390">
+            <figcaption>390px — today (live)</figcaption>
+            <img src="deco-today.png" alt="" />
+          </figure>
+          <figure class="w390">
+            <figcaption>390px — with all four pieces</figcaption>
+            <img src="deco-decorated.png" alt="" />
+          </figure>
+        </div>
+      </section>
+
+      <div class="twin">
+        <section>
+          <span class="tag">The long article (~530 words)</span>
+          <h2>It already uses the tools</h2>
+          <p class="says">
+            Star-and-rule section headings, framed photos with tape and shadow,
+            the big first letter. The editor placed them where the story turns.
+          </p>
+          <div class="shots">
+            <figure class="w390">
+              <figcaption>
+                390px — <em>KCVV Elewijt B stelt de kern voor</em>, first half
+              </figcaption>
+              <img src="body-bkern-top-390.png" alt="" />
+            </figure>
+          </div>
+        </section>
+        <section>
+          <span class="tag">A short article (~80 words)</span>
+          <h2>A notice, not a story</h2>
+          <p class="says">
+            Most announcements are 80–250 words. A decoration rule of one per
+            400 words asks for none here — and a notice this short reads best
+            plain.
+          </p>
+          <div class="shots">
+            <figure class="w390">
+              <figcaption>
+                390px — <em>Meetrainen met de plezantste compagnie</em>
+              </figcaption>
+              <img src="short-meetrainen-390.png" alt="" />
+            </figure>
+          </div>
+        </section>
+      </div>
+
+      <section>
+        <span class="tag">The numbers — last 9 articles</span>
+        <table>
+          <tr>
+            <th>Type</th>
+            <th>Count</th>
+            <th>Length</th>
+            <th>What the text holds</th>
+          </tr>
+          <tr>
+            <td>Interview</td>
+            <td class="num">4</td>
+            <td class="num">almost all Q&amp;A</td>
+            <td>
+              Q&amp;A blocks — already fully designed (name badge, question
+              styling, act dividers)
+            </td>
+          </tr>
+          <tr>
+            <td>Announcement</td>
+            <td class="num">4</td>
+            <td class="num">80–250 words</td>
+            <td>paragraphs, a table or one photo</td>
+          </tr>
+          <tr>
+            <td>Announcement (squad)</td>
+            <td class="num">1</td>
+            <td class="num">~530 words</td>
+            <td>6 section headings, 5 framed photos</td>
+          </tr>
+        </table>
+      </section>
+
+      <section>
+        <span class="tag">Found on the way — a bug, fixed either way</span>
+        <h2>A long section heading runs off the screen</h2>
+        <p class="says">
+          The heading is forbidden to wrap.
+          <code>Doorstroming + jong talent vanuit de U21</code> loses its
+          closing star on a normal phone and half its words on a small one. The
+          site's own rule (#2549) says display text wraps, it is never cut.
+        </p>
+        <div class="shots">
+          <figure class="w320">
+            <figcaption>320px today</figcaption>
+            <img src="wrap-today-320.png" alt="" />
+          </figure>
+          <figure class="w320">
+            <figcaption>
+              320px fixed — wraps, centred between the stars
+            </figcaption>
+            <img src="wrap-wrap-320.png" alt="" />
+          </figure>
+        </div>
+        <div class="shots" style="margin-top: 16px">
+          <figure class="w390">
+            <figcaption>390px today</figcaption>
+            <img src="wrap-today-390.png" alt="" />
+          </figure>
+          <figure class="w390">
+            <figcaption>390px fixed</figcaption>
+            <img src="wrap-wrap-390.png" alt="" />
+          </figure>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
