@@ -326,6 +326,14 @@ Enforced statically: `cross-page-consistency.test.ts` fails on any bare `ch` max
 
 **The Derived Anchor Offset Rule.** An in-page anchor's landing offset is `scroll-padding-top` on `<html>`, published at runtime by whichever sticky bar sits above the target — never a hand-written `scroll-mt-*` typed on the target itself. `useSectionNav` measures its own bar's rendered height and adds it to `--sticky-header-h` (the header's own token), so the offset tracks the bar's real, current height — including a trailing slot wrapping to its own line — instead of a typed guess that drifts the moment the bar's content changes. Three different hand-written values (`scroll-mt-24`, `scroll-mt-32`, `scroll-mt-[6.5rem]`) existed before this rule and were all wrong in different directions, which is the evidence a typed-per-section number does not stay correct. A route with no section nav (`/jeugd#visie`) falls back to a header-only base rule in `globals.css`. Decided on [#2478](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2478), built by [#2584](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2584).
 
+**The Tap Target Rule.** Argued from the usage scene, not a spec: a thumb pad is ~44px on a phone held outdoors, and an icon gives no text to aim at.
+
+- An icon-only control gets a 44 × 44 hit area.
+- A text link gets at least 24px of height — the words are the target.
+- A control that stands alone shows a word, not only an icon (`apps/web/PRODUCT.md` → Accessibility & Inclusion: "no unlabelled icons").
+
+Applied narrowly, not as a blanket 44px-everywhere pass: growing every link to 44px would add roughly 320px to the phone footer (19 rows × ~17px) and 5px to the desktop header against its 65px `--sticky-header-h` ceiling, to fix controls that already work — since #2394, every text link already clears 24px (footer 27, desktop nav 39, up-link chip 32, `Privacy`/`Cookie-instellingen` 24), and the phone header's icons are already 44 × 44 (`SiteHeader.tsx`: menu `min-h-11 min-w-11`, search `h-11 w-11`). The rule closed the three controls that were still icon-only and under 24px: `ArticleMetadata`'s share control (merged from two 16px icons into one labelled `Delen` button, 44px tall via padding — not a negative-margin trick, since that would let the hit area bleed into the facts line above when the bar wraps; use the row's own `gap-y` instead) and `SiteHeader`'s desktop `Zoeken` link (`h-11 w-11`, icon size unchanged). Decided on [#2529](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2529).
+
 ## Elevation & Depth
 
 The system is **flat-graphic, not lifted**. Depth is drawn, not simulated: a hard offset rectangle of pure ink with zero blur radius, exactly as a print designer would fake a drop shadow with a second black box. There is no ambient light, no spread, no colour bleed.
