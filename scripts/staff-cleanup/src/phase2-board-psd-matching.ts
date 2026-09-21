@@ -42,16 +42,19 @@ async function main() {
   console.log("║  Phase 2 — Board→PSD Matching Report (#1212)     ║");
   console.log("╚═══════════════════════════════════════════════════╝\n");
 
-  // Fetch all board docs (non-archived, with the staff-board- prefix)
+  // Fetch all board docs (non-archived, with the staff-board- prefix). Drafts are
+  // excluded explicitly: a drafts.* twin here would double a name's candidate
+  // count and trip the "Multiple PSD matches" guard below on a match that isn't
+  // actually ambiguous, feeding a wrong report into phase2-execute-migration (#2839).
   const boardDocs = await client.fetch<StaffDoc[]>(
-    `*[_type == "staffMember" && _id match "staff-board-*"]{
+    `*[_type == "staffMember" && _id match "staff-board-*" && !(_id in path("drafts.**"))]{
       _id, firstName, lastName, photo, psdId
     }`
   );
 
-  // Fetch all PSD docs (active)
+  // Fetch all PSD docs (active), same reasoning.
   const psdDocs = await client.fetch<StaffDoc[]>(
-    `*[_type == "staffMember" && _id match "staffMember-psd-*" && !archived]{
+    `*[_type == "staffMember" && _id match "staffMember-psd-*" && !archived && !(_id in path("drafts.**"))]{
       _id, firstName, lastName, photo, psdId
     }`
   );

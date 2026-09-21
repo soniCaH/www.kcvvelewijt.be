@@ -441,9 +441,11 @@ async function step6_deleteOldDocs() {
     await deleteDoc(id);
   }
 
-  // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking)
+  // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking).
+  // Excludes drafts.* explicitly — deleteDoc() already targets both id shapes for a
+  // published id, so a drafts.* row here would otherwise be logged and deleted twice (#2839).
   const remainingBoardDocs = await client.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
-    `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`
+    `*[_type == "staffMember" && _id match "staff-board-*" && !(_id in path("drafts.**"))] { _id, firstName, lastName } | order(lastName asc)`
   );
 
   console.log(`\n  Deleting ${remainingBoardDocs.length} remaining board docs...`);
