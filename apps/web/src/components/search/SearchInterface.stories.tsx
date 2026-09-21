@@ -10,6 +10,7 @@ import { within } from "storybook/test";
 import { SearchInterface } from "./SearchInterface";
 import type { SearchResponse } from "@/types/search";
 import { fixtureImage } from "@test-fixtures/images";
+import { forceSearchFocusRing } from "./search-form-vr-focus";
 
 const meta = {
   title: "Features/Search/SearchInterface",
@@ -18,6 +19,16 @@ const meta = {
     layout: "fullscreen",
   },
   tags: ["autodocs", "vr"],
+  // VR determinism (#3033): every story here renders the nested
+  // <SearchForm> (via <SearchMasthead>) under the `vr` tag above, so force
+  // its focus-ring to a state the story declares rather than one dependent
+  // on the runner's real frame focus, for all of them — not just the one
+  // story an earlier pass happened to observe flaking. Composes with any
+  // story-level `play` below (Storybook runs the meta-level one first).
+  // See search-form-vr-focus.ts.
+  play: async ({ canvasElement }) => {
+    forceSearchFocusRing(canvasElement);
+  },
 } satisfies Meta<typeof SearchInterface>;
 
 export default meta;

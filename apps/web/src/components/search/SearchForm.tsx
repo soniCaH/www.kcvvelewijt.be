@@ -80,9 +80,28 @@ export const SearchForm = ({
   return (
     <form
       onSubmit={handleSubmit}
+      // Stable selector hook for VR determinism only (#3033) — never read
+      // by application code. Lets a Storybook decorator find this exact
+      // element without depending on it being the page's only <form>. See
+      // search-form-vr-focus.ts for what sets `data-vr-force-ring` on it.
+      data-search-form
       className={cn(
         searchFieldShellClasses,
         "focus-within:ring-warm transition-shadow focus-within:ring-2",
+        // VR determinism (#3033): Chromium only paints `:focus-within`
+        // when the frame rendering the page is itself focused/active, not
+        // merely when `document.activeElement` is set inside it — an
+        // environment property of whichever headless VR worker renders a
+        // given story, not something a story can force with a script
+        // `.focus()` call (React already performs that call for
+        // `autoFocus` on mount; it never relies on the native `autofocus`
+        // HTML attribute). `data-vr-force-ring` is never rendered by this
+        // component; a Storybook decorator sets it directly on this
+        // element for VR-tagged stories only, painting the ring from a
+        // state the story chooses instead of one dependent on the
+        // runner's frame focus. A real visitor's `/zoeken` never gets
+        // this attribute, so `focus-within:` above is untouched there.
+        "data-[vr-force-ring=true]:ring-warm data-[vr-force-ring=true]:ring-2",
       )}
     >
       <input

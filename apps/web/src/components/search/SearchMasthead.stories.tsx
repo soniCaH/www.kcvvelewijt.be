@@ -9,6 +9,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { SearchMasthead } from "./SearchMasthead";
 import { SearchForm } from "./SearchForm";
+import { forceSearchFocusRing } from "./search-form-vr-focus";
 
 const meta = {
   title: "Features/Search/SearchMasthead",
@@ -19,6 +20,12 @@ const meta = {
   tags: ["autodocs", "vr"],
   args: {
     children: <SearchForm onSearch={fn()} />,
+  },
+  // VR determinism (#3033): force the nested <SearchForm>'s focus-ring to
+  // a state the story declares rather than one dependent on the runner's
+  // real frame focus — see search-form-vr-focus.ts.
+  play: async ({ canvasElement }) => {
+    forceSearchFocusRing(canvasElement);
   },
 } satisfies Meta<typeof SearchMasthead>;
 
