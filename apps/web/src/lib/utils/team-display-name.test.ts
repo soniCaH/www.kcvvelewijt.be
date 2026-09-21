@@ -140,4 +140,19 @@ describe("teamDisplayName", () => {
       }),
     ).toBe("U9 Groen");
   });
+
+  // #2599 review — the lone-letter branch's retired guard used to exist for
+  // exactly this hypothetical slug (a trailing letter after an age token),
+  // so it wouldn't be misread as the senior "A-ploeg". The age-token search
+  // now catches it first: "U9 A" reads as a variant U9 side (the same way
+  // "U8 Wit" does) and can no longer be confused with the senior team.
+  it("reads a trailing letter after an age token as a variant U-side, not the senior A-ploeg", () => {
+    expect(
+      teamDisplayName({
+        displayName: null,
+        slug: "kcvve-u9-a",
+        name: "KCVVE U9 A",
+      }),
+    ).toBe("U9 A");
+  });
 });
