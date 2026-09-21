@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import {
   EditorialHeading,
@@ -71,12 +71,15 @@ const LIST_ROW_FOCUS_CLASSES =
  * opponent, no venue tag, no link (mirrors #2606 decision 5: nothing at
  * `/wedstrijd/{id}` was worth clicking through to from a list row).
  *
- * Responsive (#2599, one `sm` breakpoint like `AgendaMatchRow`): below `sm`
- * the left margin stacks kickoff time over squad label (`[56px_1fr_auto]`,
- * matching `AgendaMatchRow`'s own mobile margin) so a mixed-squad day's edge
- * reads the same whether a row is a real match or a reservation. At `sm`+
- * the row is unchanged — one line, squad label inline beside the crest,
- * `[52px_1fr_auto]`.
+ * Responsive (#2599, one `sm` breakpoint like `AgendaMatchRow`), one grid
+ * rather than two duplicated layouts (#2599 review — the two never diverged
+ * beyond the column width and where the squad chip sits, so a second DOM
+ * tree bought nothing but doubled text nodes for every query against this
+ * row): `[56px_1fr_auto]` below `sm`, `[52px_1fr_auto]` at `sm`+. The squad
+ * chip sits under the kickoff time below `sm` (matching `AgendaMatchRow`'s
+ * own mobile margin, so a mixed-squad day's edge reads the same whether a
+ * row is a real match or a reservation) and swaps to inline beside the
+ * crest at `sm`+ via `sm:hidden`/`hidden sm:inline`.
  *
  * Also renders a tournament fixture (#2696/#2715/#2802, `kind === "reduced"`
  * — `competitionType === "tournament"` with no result yet, never a string
@@ -98,64 +101,40 @@ function ReservationAgendaRow({
   const crestTeam = match.club;
   const when = match.time ?? formatMatchTime(match.date) ?? "";
 
-  // The subject cell is identical on both layouts bar the squad chip, which
-  // moves into the mobile left margin instead of sitting inline — built once
-  // so the two layouts below can't drift on how the crest/subject render.
-  const subjectCell = (showSquadChip: boolean) => (
-    <span className="flex min-w-0 items-center gap-2">
-      <Crest name={crestTeam.name} logo={crestTeam.logo} size={18} />
-      {/* Same squad chip `AgendaMatchRow` renders below — without it a
-          reservation among a mixed-squad day's other rows (crest + subject
-          + time) cannot be told apart from any other squad's
-          reservation. */}
-      {showSquadChip && match.team && (
-        <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
-          {match.team}
-        </span>
-      )}
-      <span
-        title={subject}
-        className="text-ink-muted min-w-0 truncate font-mono text-[11px] font-semibold tracking-wide uppercase"
-      >
-        {subject}
-      </span>
-    </span>
-  );
-
   return (
     <div
       data-row-kind={match.kind}
-      className="border-paper-edge border-b border-dashed last:border-b-0"
+      className="border-paper-edge grid grid-cols-[56px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 last:border-b-0 sm:grid-cols-[52px_1fr_auto]"
     >
-      {/* Below sm (#2599): time-over-squad margin, matching AgendaMatchRow's
-          own mobile left column so the two row kinds share one edge. */}
-      <div
-        data-layout="mobile"
-        className="grid grid-cols-[56px_1fr_auto] items-center gap-3 px-2 py-2 sm:hidden"
-      >
-        <div className="flex flex-col gap-0.5">
-          <span className="text-ink-muted font-mono text-[11px] leading-none">
-            {when}
+      <div className="flex flex-col gap-0.5">
+        <span className="text-ink-muted font-mono text-[11px] leading-none sm:leading-normal">
+          {when}
+        </span>
+        {/* Same squad chip the crest cell renders inline at sm+ — without it
+            a reservation among a mixed-squad day's other rows (crest +
+            subject + time) cannot be told apart from any other squad's
+            reservation. Below sm it lives in the margin instead. */}
+        {match.team && (
+          <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide sm:hidden">
+            {match.team}
           </span>
-          {match.team && (
-            <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide">
-              {match.team}
-            </span>
-          )}
-        </div>
-        {subjectCell(false)}
-        <span />
+        )}
       </div>
-
-      {/* sm+ (#2599): unchanged one-line row. */}
-      <div
-        data-layout="desktop"
-        className="hidden grid-cols-[52px_1fr_auto] items-center gap-3 px-2 py-2 sm:grid"
-      >
-        <span className="text-ink-muted font-mono text-[11px]">{when}</span>
-        {subjectCell(true)}
-        <span />
-      </div>
+      <span className="flex min-w-0 items-center gap-2">
+        <Crest name={crestTeam.name} logo={crestTeam.logo} size={18} />
+        {match.team && (
+          <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] font-semibold tracking-wide sm:inline">
+            {match.team}
+          </span>
+        )}
+        <span
+          title={subject}
+          className="text-ink-muted min-w-0 truncate font-mono text-[11px] font-semibold tracking-wide uppercase"
+        >
+          {subject}
+        </span>
+      </span>
+      <span />
     </div>
   );
 }
@@ -203,9 +182,27 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
       ? OUTCOME_TINT.light[outcome]
       : undefined;
 
+  // The `aria-label` replaces the row's contents as its accessible name
+  // (#2599 review) — below `sm` the visible content is two unpaired lists
+  // (home/away names, then their scores each on their own line), so without
+  // a built label a screen reader hears "09:15 U10 FC Zemst Sportief KCVV
+  // Elewijt 5 3" rather than a paired result. Mirrors `<TeamAgendaRow>`'s
+  // `scoreboardLabel` / `<MatchStripView>`'s own built label: state the
+  // kickoff, the squad (if any), then the two names paired with their own
+  // score — or, for an unplayed match, the two names alone (the kickoff
+  // already opens the label, so there's nothing to fabricate a score for).
+  const scoreboardLabel =
+    isPlayed && hasScore
+      ? `${match.homeTeam.name} ${match.homeScore} – ${match.awayTeam.name} ${match.awayScore}`
+      : `${match.homeTeam.name} – ${match.awayTeam.name}`;
+  const rowLabel = [when, match.team, scoreboardLabel]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Link
       href={`/wedstrijd/${match.id}`}
+      aria-label={rowLabel}
       data-testid="agenda-match-row"
       onClick={() => trackKalenderItemClick("match")}
       className={cn(
@@ -269,14 +266,24 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
         </div>
         {isPlayed && hasScore ? (
           <div
-            className="text-ink flex flex-col items-center justify-center gap-0.5 px-2 py-1 font-mono text-[16px] leading-tight font-bold"
-            // `inset ... 999px` (not `backgroundColor`) so the fill reuses
-            // the exact same CSS mechanism (`box-shadow`) `OUTCOME_UNDERLINE`
-            // already uses above — one recipe, a bigger spread, rather than
-            // a second property carrying the same tint two different ways.
+            data-outcome={outcome ?? undefined}
+            className={cn(
+              "text-ink flex flex-col items-center justify-center gap-0.5 px-2 py-1 font-mono text-[16px] leading-tight font-bold",
+              // A real `background-color`, not `box-shadow`: a shadow-based
+              // fill would silently beat any later `shadow-*`/`ring-*` on
+              // this box and sits outside DESIGN.md's shadow vocabulary.
+              // Read via a CSS custom property (`--score-tint`, the
+              // `TapedCardGrid`/`TapeStrip` `--tape-left` pattern) rather
+              // than passed straight to `backgroundColor`: the test
+              // environment (happy-dom, `vitest.config.ts`) validates a
+              // `background-color` value and silently drops
+              // `color-mix(...)`, but a custom property's value is never
+              // parsed, so it survives.
+              boxTint && "bg-[var(--score-tint)]",
+            )}
             style={
               boxTint
-                ? { boxShadow: `inset 0 0 0 999px ${boxTint}` }
+                ? ({ "--score-tint": boxTint } as CSSProperties)
                 : undefined
             }
           >

@@ -194,14 +194,7 @@ describe("CalendarAgenda", () => {
     expect(row!.tagName).not.toBe("A");
     expect(row!.querySelector("a")).toBeNull();
     expect(row).toHaveTextContent("Tornooi");
-    // Checked per `data-layout` (#2599), not against the whole row: below
-    // `sm` and at `sm`+ are two separate DOM trees (CSS picks one; jsdom
-    // renders both), each showing the club name once — the row as a whole
-    // legitimately carries it twice, once per layout, which is not the bug
-    // this assertion guards against.
-    for (const layout of row!.querySelectorAll("[data-layout]")) {
-      expect(layout.textContent).not.toMatch(/KCVV Elewijt.*KCVV Elewijt/);
-    }
+    expect(row!.textContent).not.toMatch(/KCVV Elewijt.*KCVV Elewijt/);
     expect(screen.queryByTestId("agenda-match-row")).toBeNull();
     // The default fixture's squad ("U7") must still show — a mixed-squad day
     // (`AgendaMatchRow` renders this chip for every real row) otherwise
@@ -415,6 +408,56 @@ describe("CalendarAgenda", () => {
       return layout as HTMLElement;
     }
 
+    // #2599 review: below `sm` the visible content is two unpaired lists
+    // (names, then scores each on their own line), so the row needs one
+    // built accessible name — the same thing `<TeamAgendaRow>`'s
+    // `scoreboardLabel` and `<MatchStripView>`'s own built label do — rather
+    // than letting the browser compute one from unpaired text nodes.
+    it("builds one accessible name for the link: time, squad, then the paired result", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              time: "09:15",
+              team: "U10",
+              homeTeam: { id: 1, name: "FC Zemst Sportief" },
+              awayTeam: { id: 2, name: "KCVV Elewijt" },
+              isHome: false,
+              status: "finished",
+              homeScore: 5,
+              awayScore: 3,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const row = screen.getByTestId("agenda-match-row");
+      expect(row).toHaveAccessibleName(
+        "09:15, U10, FC Zemst Sportief 5 – KCVV Elewijt 3",
+      );
+    });
+
+    it("omits the fabricated score from the accessible name for an unplayed match", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              time: "09:15",
+              team: "U10",
+              status: "scheduled",
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const row = screen.getByTestId("agenda-match-row");
+      expect(row).toHaveAccessibleName("09:15, U10, KCVV Elewijt – Zemst");
+    });
+
     it("widens the left column to 56px so a two-word squad label fits on one line", () => {
       render(
         <CalendarAgenda
@@ -476,9 +519,7 @@ describe("CalendarAgenda", () => {
       const away = within(layout).getByText("1");
       // Same box — one tint behind both numbers, not one underline per line.
       expect(home.parentElement).toBe(away.parentElement);
-      expect(home.parentElement!.getAttribute("style") ?? "").toContain(
-        "jersey-deep",
-      );
+      expect(home.parentElement).toHaveAttribute("data-outcome", "win");
     });
 
     it("renders no box at all for a draw — win/loss only, per the owner decision", () => {
@@ -499,7 +540,12 @@ describe("CalendarAgenda", () => {
       );
       const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
       const [home] = within(layout).getAllByText("1");
-      expect(home.parentElement!.getAttribute("style")).toBeNull();
+      // The box exists and is still marked with its outcome (a draw still
+      // shows both numbers), but carries no tint — "none for a draw" per
+      // the owner's decision, unlike the desktop underline which still
+      // marks a draw with the muted stop.
+      expect(home.parentElement).toHaveAttribute("data-outcome", "draw");
+      expect(home.parentElement!.className).not.toContain("bg-[var(");
     });
 
     it("renders no score box for an unplayed match", () => {
@@ -518,7 +564,7 @@ describe("CalendarAgenda", () => {
       expect(scoreSlot).toBeEmptyDOMElement();
     });
 
-    it("moves the reservation row's squad chip into the same time-over-squad left margin", () => {
+    it("moves the reservation row's squad chip into the same time-over-squad left margin below sm", () => {
       const { container } = render(
         <CalendarAgenda
           {...baseProps}
@@ -534,14 +580,24 @@ describe("CalendarAgenda", () => {
           events={[]}
         />,
       );
+      // One grid (#2599 review), not a duplicated mobile/desktop pair — the
+      // 56px/52px column swap and the squad chip's position both live on
+      // this single row via responsive classes.
       const row = container.querySelector('[data-row-kind="reservation"]')!;
-      const layout = row.querySelector('[data-layout="mobile"]')!;
-      expect(layout.className).toContain("grid-cols-[56px_1fr_auto]");
-      // Squad chip sits in the left margin (with the time), not inline next
-      // to the crest/subject — the exact swap `AgendaMatchRow`'s own mobile
+      expect(row.className).toContain("grid-cols-[56px_1fr_auto]");
+      expect(row.className).toContain("sm:grid-cols-[52px_1fr_auto]");
+      // Squad chip sits in the left margin below sm (with the time, hidden
+      // at sm+); the crest cell's own copy is the inverse (hidden below sm,
+      // inline at sm+) — the exact swap `AgendaMatchRow`'s own mobile
       // layout makes.
-      const [leftMargin] = layout.children;
-      expect(leftMargin).toHaveTextContent("U8 Groen");
+      const [leftMargin, crestCell] = row.children;
+      const marginChip = within(leftMargin as HTMLElement).getByText(
+        "U8 Groen",
+      );
+      expect(marginChip.className).toContain("sm:hidden");
+      const inlineChip = within(crestCell as HTMLElement).getByText("U8 Groen");
+      expect(inlineChip.className).toContain("hidden");
+      expect(inlineChip.className).toContain("sm:inline");
     });
   });
 
