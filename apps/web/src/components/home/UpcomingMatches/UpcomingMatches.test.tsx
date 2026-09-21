@@ -290,7 +290,7 @@ describe("UpcomingMatches", () => {
     render(<UpcomingMatches matches={mockUpcomingTwelve} />);
     await user.click(chip(/U21/));
     expect(trackEvent).toHaveBeenCalledWith("match_agenda_filter", {
-      filter_type: "U21",
+      filter_type: "u21",
       count: 2,
     });
   });

@@ -133,7 +133,7 @@ Repeat for each row in the table below.
 | Contact type       | `contact_type`       | `responsibility_contact_clicked` ("email" / "phone")                                  |
 | Dwell seconds      | `dwell_seconds`      | `responsibility_dwell`                                                                |
 | Had results        | `had_results`        | `responsibility_abandon`                                                              |
-| Filter type        | `filter_type`        | `search_filter_changed`                                                               |
+| Filter type        | `filter_type`        | `search_filter_changed`, `match_agenda_filter`, `empty_state_undo` (slugs)            |
 | Result type        | `result_type`        | `search_result_clicked`, `related_content_click`                                      |
 | Result title       | `result_title`       | `search_result_clicked`                                                               |
 | Organigram view    | `view`               | Organigram events                                                                     |
