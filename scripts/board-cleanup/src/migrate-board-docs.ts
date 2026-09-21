@@ -14,7 +14,7 @@
  *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts          # dry-run
  *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts --execute # real run
  */
-import { stripDraftPrefix } from "./draft-id.js";
+import { stripDraftPrefix, uniqueBaseIds } from "./draft-id.js";
 import { client, draftAwareClient } from "./sanity-client.js";
 
 const DRY_RUN = !process.argv.includes("--execute");
@@ -448,24 +448,22 @@ async function step6_deleteOldDocs() {
 
   // 6c. Delete all remaining staff-board-* documents (should be unreferenced after relinking).
   // Draft-aware: a staff-board-* document that exists only as a draft must not be
-  // skipped here, or it survives the delete this step exists to perform. De-duplicate
-  // by stripped id instead of filtering drafts out — deleteDoc() already deletes both
-  // id shapes for one logical document, so a published+draft pair must log/delete once (#2839).
+  // skipped here, or it survives the delete this step exists to perform. Reduced to
+  // BASE ids via uniqueBaseIds — deleteDoc() only deletes both id shapes when handed
+  // the base id, so passing a drafts.* id here (whichever row the query happened to
+  // sort first) would delete the draft twice and leave the published doc behind (#2839).
   const remainingBoardDocsRaw = await draftAwareClient.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
     `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`
   );
-  const seenIds = new Set<string>();
-  const remainingBoardDocs = remainingBoardDocsRaw.filter((doc) => {
-    const id = stripDraftPrefix(doc._id);
-    if (seenIds.has(id)) return false;
-    seenIds.add(id);
-    return true;
-  });
+  const remainingBoardIds = uniqueBaseIds(remainingBoardDocsRaw.map((doc) => doc._id));
+  const nameByBaseId = new Map(
+    remainingBoardDocsRaw.map((doc) => [stripDraftPrefix(doc._id), `${doc.firstName} ${doc.lastName}`]),
+  );
 
-  console.log(`\n  Deleting ${remainingBoardDocs.length} remaining board docs...`);
-  for (const doc of remainingBoardDocs) {
-    console.log(`    ${doc._id} (${doc.firstName} ${doc.lastName})`);
-    await deleteDoc(doc._id);
+  console.log(`\n  Deleting ${remainingBoardIds.length} remaining board docs...`);
+  for (const id of remainingBoardIds) {
+    console.log(`    ${id} (${nameByBaseId.get(id)})`);
+    await deleteDoc(id);
   }
 }
 
