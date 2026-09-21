@@ -37,7 +37,17 @@ export default function PlayerDetailLoading() {
         >
           <div className="flex flex-col gap-5">
             <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-24 w-32" />
+            {/* No number-cell bar — #2642's rule ("a skeleton draws only
+                what it can know before the fetch") applies here exactly
+                as it already does to the photo/name/bio surfaces this
+                file's own header comment calls out: jerseyNumber is an
+                auto-hide branch (#2585 owner decision, 2026-09-20 — the
+                number cell hides when absent, it is not reserved), not a
+                fixed opening. Drawing any shaped bar here — sized to the
+                filled state or to a since-removed reserved slot — would
+                mispromise a number cell on essentially every load, since
+                production measures zero of 352 player documents with
+                jerseyNumber set. */}
             <div className="space-y-2">
               <Skeleton className="h-12 w-3/4" />
               <Skeleton className="h-10 w-2/3" />

@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {editorialBioOf, PULLQUOTE_BIO_HELP} from './blocks/editorial-marks'
+import {playerPreviewSelect, preparePlayerPreview} from './preview/player-preview'
 
 export const player = defineType({
   name: 'player',
@@ -79,6 +80,7 @@ export const player = defineType({
       type: 'number',
       group: 'redactioneel',
       description: 'Rugnummer van de speler. Redactioneel — PSD levert dit niet aan, vul het zelf in.',
+      validation: (r) => r.min(1).max(99).integer(),
     }),
     defineField({
       name: 'transparentImage',
@@ -136,13 +138,7 @@ export const player = defineType({
     }),
   ],
   preview: {
-    select: {
-      firstName: 'firstName',
-      lastName: 'lastName',
-      media: 'transparentImage',
-    },
-    prepare({firstName, lastName, media}) {
-      return {title: `${firstName ?? ''} ${lastName ?? ''}`.trim(), media}
-    },
+    select: playerPreviewSelect,
+    prepare: preparePlayerPreview,
   },
 })

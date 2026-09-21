@@ -46,6 +46,23 @@
  * not reduced to `teamLabel` alone: that would duplicate the up-link
  * breadcrumb chip #2428/#2442 puts on this same page, one navigational and
  * one inert (#2535).
+ *
+ * **The number cell hides when empty, it is not reserved (#2532/#2585,
+ * amended by the #2585 owner decision of 2026-09-20).** A shirt number is
+ * a fact the club declares by hand — `jerseyNumber` has a real writer
+ * (the Studio field, `packages/sanity-schemas/src/player.ts`) — but the
+ * #2535 keep-side discriminator that would justify reserving the cell
+ * (a writer exists, it simply hasn't written yet) does not hold here:
+ * youth teams have no fixed shirt numbers at all, so most of the roster
+ * has no writer and never will, and live production measured 352 player
+ * documents, 278 non-archived, zero with `jerseyNumber` set (2026-09-20)
+ * — the empty branch is not a temporary gap, it is the only case today.
+ * A reserved slot there would be exactly the `team.season` failure this
+ * repo's Writer Rule exists to prevent: a permanent empty box on the
+ * large majority of profiles. So the number renders when present and
+ * nothing renders when it isn't — no dashed box, no placeholder copy.
+ * `/wedstrijd/[matchId]` is unaffected either way — that route reports
+ * whatever the match sheet says, a different fact (#2532 rule 3).
  */
 
 import { Fragment } from "react";
@@ -81,6 +98,13 @@ export interface PlayerHeroProps {
   photoUrl?: string;
   /** ISO date string `YYYY-MM-DD`. Omitted → birthDate cell drops. */
   birthDate?: string;
+  /**
+   * Editorial squad number, typed by hand by the club — not PSD-sourced
+   * (#2532). Absent on every player document today, since nothing seeds
+   * it, and permanently absent for youth players, who have no fixed
+   * shirt number at all — the number cell hides rather than reserving a
+   * slot with no writer (#2585 owner decision, 2026-09-20).
+   */
   jerseyNumber?: number;
   /** Active-team label resolved by the page (e.g. "A-Ploeg", "U17"). */
   teamLabel?: string;
@@ -192,6 +216,10 @@ export function PlayerHero({
         ) : null}
 
         {jerseyNumber !== undefined ? (
+          // Hides, not reserves — #2585 owner decision (2026-09-20): most
+          // of the roster (youth) has no writer for this field and never
+          // will, so a held-open slot here would be a permanent empty box
+          // on the large majority of profiles, not a temporary gap.
           <span data-testid="player-hero-number" className="block">
             <NumberDisplay
               value={jerseyNumber}

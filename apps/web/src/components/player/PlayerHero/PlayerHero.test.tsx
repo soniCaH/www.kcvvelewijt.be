@@ -243,6 +243,26 @@ describe("PlayerHero", () => {
     });
   });
 
+  describe("Number cell hides when empty (#2532/#2585 owner decision, 2026-09-20)", () => {
+    it("renders nothing for the number cell when jerseyNumber is absent — no reserved slot", () => {
+      render(
+        <PlayerHero
+          id="player-test"
+          firstName="Maxim"
+          lastName="Breugelmans"
+          position="Middenvelder"
+        />,
+      );
+      expect(
+        screen.queryByTestId("player-hero-number"),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId("player-hero-number-slot"),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText("Nog geen rugnummer")).not.toBeInTheDocument();
+    });
+  });
+
   describe("No ticket-stub (#2567)", () => {
     it("never renders a ticket-stub, even with a team label", () => {
       // `team.season` was deleted (never had a writer); the stub isn't
