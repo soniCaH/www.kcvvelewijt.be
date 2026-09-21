@@ -462,6 +462,36 @@ describe("PsdService.getTeamMatches", () => {
       expect(result.left._tag).toBe("UpstreamUnavailable");
     }
   });
+
+  it("fails when PSD 404s the /seasons endpoint itself, instead of answering []", async () => {
+    // `classifyHttpError` maps any 404 to the same `ResourceNotFound` tag as
+    // "no active season" — the shape the code must NOT absorb here. Unlike
+    // the no-active-season case (a real 200 with no matching season), this
+    // is a 404 on the seasons fetch itself: a retired endpoint, wrong base
+    // URL, or an auth redirect landing on a 404 page. Degrading it to `[]`
+    // would tell every `/ploegen/*/wedstrijden` page "no matches" while PSD
+    // is unreachable, which is worse than the 404 this fix was meant to
+    // absorb.
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      statusText: "Not Found",
+    });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("ResourceNotFound");
+      // Distinguishes it from the no-active-season case, which always
+      // carries resourceType "season" / resourceId "current".
+      if (result.left._tag === "ResourceNotFound") {
+        expect(result.left.resourceType).toBe("psd-resource");
+      }
+    }
+    // Never reaches the games endpoint — the season lookup itself failed.
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("PsdService.getNextMatches", () => {

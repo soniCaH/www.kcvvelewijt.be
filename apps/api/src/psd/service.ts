@@ -195,6 +195,22 @@ function fetchJson<A, I>(
   });
 }
 
+// Identifies the single `ResourceNotFoundError` raised by `getCurrentSeason`
+// below when PSD's `/seasons` holds no season spanning today (a gap between
+// seasons, or the next one unpublished) — as opposed to every other
+// `ResourceNotFound`, e.g. a 404 on the seasons endpoint itself
+// (`classifyHttpError`) or an empty body on some other resource
+// (`emptyBodyIsNotFound`). Colocated with the raise site so the two field
+// values used to tell them apart cannot drift out of sync.
+const NO_ACTIVE_SEASON_RESOURCE = {
+  resourceType: "season",
+  resourceId: "current",
+} as const;
+
+const isNoActiveSeasonError = (error: ResourceNotFoundError): boolean =>
+  error.resourceType === NO_ACTIVE_SEASON_RESOURCE.resourceType &&
+  error.resourceId === NO_ACTIVE_SEASON_RESOURCE.resourceId;
+
 export const PsdServiceLive = Layer.effect(
   PsdService,
   Effect.gen(function* () {
@@ -251,8 +267,7 @@ export const PsdServiceLive = Layer.effect(
           return yield* Effect.fail(
             new ResourceNotFoundError({
               message: "No active season found",
-              resourceType: "season",
-              resourceId: "current",
+              ...NO_ACTIVE_SEASON_RESOURCE,
             }),
           );
         yield* cache.set(cacheKey, JSON.stringify(current), 60 * 60 * 24);
@@ -528,10 +543,17 @@ export const PsdServiceLive = Layer.effect(
           // say so, rather than letting `getCurrentSeason`'s
           // `ResourceNotFoundError` map to `HttpNotFound` and take every
           // `/ploegen/*/wedstrijden` page to an error boundary for the 24h
-          // the seasons cache holds (#3041). After this, `HttpNotFound` on
-          // this read means only one thing: PSD 404'd the endpoint itself.
+          // the seasons cache holds (#3041). Only that specific case is
+          // absorbed — `isNoActiveSeasonError` re-fails any other
+          // `ResourceNotFound` (e.g. PSD 404ing the `/seasons` endpoint
+          // itself) unchanged, so `HttpNotFound` on this read still means
+          // PSD 404'd the endpoint.
           const season = yield* getCurrentSeason().pipe(
-            Effect.catchTag("ResourceNotFound", () => Effect.succeed(null)),
+            Effect.catchTag("ResourceNotFound", (error) =>
+              isNoActiveSeasonError(error)
+                ? Effect.succeed(null)
+                : Effect.fail(error),
+            ),
           );
           if (season === null) return [];
 
