@@ -1635,5 +1635,55 @@ describe("SearchInterface", () => {
         ],
       ]);
     });
+
+    it("does not resurrect a stale search_no_results after the query drops below the 2-char threshold and returns to a previously-settled query", async () => {
+      const user = userEvent.setup();
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      setMockSearchParams({ q: "test" });
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(1);
+      });
+
+      // Drop below the 2-char threshold — the clear button routes through
+      // `handleSearch("")`, which hits `performSearch`'s short-query reset
+      // branch. That branch resets `results`/`isLoading`/`error` but (before
+      // the fix) leaves `lastSettledQuery` at "test".
+      const clearButton = screen.getByRole("button", {
+        name: /wis zoekopdracht/i,
+      });
+      await user.click(clearButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/niet zeker waar te/i)).toBeInTheDocument();
+      });
+
+      // Return to the exact same, previously-settled query — e.g. browser
+      // forward — without ever going through `handleSearch` again, so
+      // nothing re-primes `lastSettledQuery` before this commit lands.
+      const secondResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => secondResponse,
+      });
+      act(() => {
+        setMockSearchParams({ q: "test" });
+      });
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(2);
+      });
+
+      // Zero search_no_results anywhere in this sequence — the bug fires it
+      // on the commit BEFORE the refetch settles, so asserting only at the
+      // end (after the correct event lands) would miss it.
+      expect(noResultsCalls()).toHaveLength(0);
+    });
   });
 });

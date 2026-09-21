@@ -121,6 +121,11 @@ export const SearchInterface = ({
       setTotalCount(0);
       setError(false);
       setIsLoading(false);
+      // A stale `lastSettledQuery` from a previous query would otherwise
+      // survive this reset and wrongly match again if the visitor returns
+      // to that exact query later (e.g. clear, then browser forward) —
+      // #2918 review.
+      setLastSettledQuery(null);
       return;
     }
 
