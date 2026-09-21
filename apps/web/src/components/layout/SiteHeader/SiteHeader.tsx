@@ -212,7 +212,19 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
               href="/zoeken"
               aria-label="Zoeken"
               data-nav-source="desktop"
-              className="text-ink hover:text-jersey-deep inline-flex items-center transition-colors"
+              // 44×44 hit area (#2529 — DESIGN.md "The Tap Target Rule"):
+              // same `h-11 w-11` pattern as the mobile search link above,
+              // icon size unchanged. The row's own fixed
+              // `h-[calc(var(--sticky-header-h)-1px)]` already exceeds 44px,
+              // so the box centers within it with no row-height change.
+              // `-mx-[13px]` cancels the (44 - 18) / 2 = 13px the box adds
+              // on each side — hit area only, no layout shift, the same
+              // idiom the desktop nav links above use (`-my-2 py-2`) — so
+              // the nav→icon and icon→CTA gaps stay at the grid's own gap
+              // (review finding on #3071: the un-cancelled box widened both
+              // to ~29px and shrank the nav column enough to truncate more
+              // 14ch-capped team labels at 1024px).
+              className="text-ink hover:text-jersey-deep -mx-[13px] inline-flex h-11 w-11 items-center justify-center transition-colors"
             >
               <MagnifyingGlass size={18} aria-hidden="true" />
             </Link>

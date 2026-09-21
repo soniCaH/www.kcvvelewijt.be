@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Article share buttons</title>
+<style>
+  :root { --cream:#f5f1e6; --cream-soft:#ede8da; --ink:#0a0a0a; --muted:#5b574d; --deep:#007c46; --alert:#b84a3a; --edge:#d9d2bf; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--ink); font:16px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:32px 16px 80px; }
+  h1 { font:700 34px/1.1 Georgia, serif; margin:0 0 8px; }
+  .lede { max-width:760px; color:var(--muted); margin:0 0 28px; }
+  section { border:2px solid var(--ink); box-shadow:6px 6px 0 var(--ink); background:#fff9ee; padding:20px; margin:0 0 36px; }
+  section.pick { border-color:var(--deep); box-shadow:6px 6px 0 var(--deep); }
+  section.reject { opacity:.85; }
+  .tag { display:inline-block; font:700 12px/1 ui-monospace, Menlo, monospace; letter-spacing:.08em; text-transform:uppercase; padding:6px 8px; border:2px solid var(--ink); margin-bottom:10px; }
+  .pick .tag { background:var(--deep); color:#fff; border-color:var(--deep); }
+  .reject .tag { background:var(--alert); color:#fff; border-color:var(--alert); }
+  h2 { font:700 24px/1.2 Georgia, serif; margin:0 0 6px; }
+  p.says { margin:0 0 16px; max-width:820px; }
+  .shots { display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+  figure { margin:0; }
+  figcaption { font:600 12px/1.4 ui-monospace, Menlo, monospace; color:var(--muted); margin-bottom:6px; }
+  figure img { display:block; border:1px solid var(--edge); }
+  .w390 img { width:390px; } .w1440 img { width:100%; max-width:1000px; }
+  ul.facts { margin:14px 0 0; padding-left:20px; max-width:820px; }
+  table { border-collapse:collapse; width:100%; max-width:900px; font-size:15px; background:#fff9ee; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px dashed var(--edge); }
+  th { font:700 12px/1.2 ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.06em; }
+  td.num { font-family:ui-monospace, Menlo, monospace; }
+  .bad { color:var(--alert); font-weight:700; } .good { color:var(--deep); font-weight:700; }
+  .twin { display:flex; gap:28px; flex-wrap:wrap; }
+  .twin section { flex:1 1 480px; }
+  @media (max-width:700px){ .w390 img{ width:100%; max-width:390px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Article share buttons, and the tap-size rule</h1>
+  <p class="lede">Screenshots of a <strong>live</strong> article, rebuilt in the browser per option. The red dashed box is the area a finger can hit — drawn only to show it, it does not ship. Ticket #2529.</p>
+
+  <section>
+    <span class="tag">Today</span>
+    <h2>Two 16px icons, no words</h2>
+    <p class="says">The only two controls on an article. A thumb is about 44px wide; these are 16px. An older supporter may not know the share icon.</p>
+    <div class="shots">
+      <figure class="w390"><figcaption>390px phone</figcaption><img src="today-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li><strong>They do the same thing for many people.</strong> On a computer whose browser cannot share (Chrome and Firefox on Mac), <code>Delen</code> already opens Facebook — exactly what the Facebook icon does. On a phone, <code>Delen</code> opens the phone's own share menu, which already lists WhatsApp, Facebook and Messenger.</li>
+    </ul>
+  </section>
+
+  <div class="twin">
+  <section class="pick">
+    <span class="tag">Option 1 — my pick</span>
+    <h2>One button: “Delen”</h2>
+    <p class="says">Icon plus the word, in the same small caps as the date line. Hit area 44px tall. The Facebook icon goes.</p>
+    <div class="shots"><figure class="w390"><figcaption>390px</figcaption><img src="A-390.png" alt=""></figure></div>
+    <ul class="facts">
+      <li class="good">One control, one word. Nothing to recognise.</li>
+      <li class="good">Nobody loses Facebook on a phone — it is in the share menu.</li>
+      <li class="bad">Safari on a Mac and Edge on Windows open the system share menu, which may not list Facebook. Those few lose the one-click Facebook path.</li>
+    </ul>
+  </section>
+  <section>
+    <span class="tag">Option 2</span>
+    <h2>Two buttons: “Delen” + “Facebook”</h2>
+    <p class="says">Both get a word and a 44px hit area.</p>
+    <div class="shots"><figure class="w390"><figcaption>390px</figcaption><img src="B-390.png" alt=""></figure></div>
+    <ul class="facts">
+      <li class="good">Keeps a direct Facebook path on every computer.</li>
+      <li class="bad">Two buttons that do the same thing for most visitors.</li>
+    </ul>
+  </section>
+  </div>
+
+  <section>
+    <span class="tag">Desktop</span>
+    <h2>Option 2 on a computer (Option 1 is the same, minus “Facebook”)</h2>
+    <figure class="w1440"><figcaption>1440px</figcaption><img src="B-1440.png" alt=""></figure>
+  </section>
+
+  <section>
+    <span class="tag">The rule</span>
+    <h2>Measured on the live article page</h2>
+    <table>
+      <tr><th>What</th><th>Today</th><th>Below 24px?</th></tr>
+      <tr><td>Phone header: menu, search icons</td><td class="num">44 × 44</td><td class="num good">no</td></tr>
+      <tr><td>Footer links</td><td class="num">27 tall</td><td class="num good">no</td></tr>
+      <tr><td>Desktop header links</td><td class="num">39 tall</td><td class="num good">no</td></tr>
+      <tr><td>Up-link chip “Nieuws”</td><td class="num">32 tall</td><td class="num good">no</td></tr>
+      <tr><td><strong>Share icons</strong></td><td class="num bad">16 × 16</td><td class="num bad">yes</td></tr>
+      <tr><td><strong>Desktop search icon</strong></td><td class="num bad">18 × 18</td><td class="num bad">yes</td></tr>
+    </table>
+    <ul class="facts">
+      <li>Every text link already clears 24px (fixed in #2394). The only offenders are <strong>icon-only</strong> controls — and the phone header already gives its icons 44 × 44.</li>
+      <li><strong>Proposed rule:</strong> an icon-only control gets a 44 × 44 hit area; a text link gets at least 24px of height. A control that stands alone shows a word, not just an icon.</li>
+      <li>Why 44 for icons: a thumb pad is ~44px on a phone held at the pitch, and an icon gives no text to aim at. Why 24 is enough for text links: the words themselves are the target, and they sit in lists where 44 each would stretch the footer by ~320px on a phone.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
