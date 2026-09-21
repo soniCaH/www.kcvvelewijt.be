@@ -239,14 +239,30 @@ export const SearchInterface = ({
   // reads the same `augment.kind === "answer"` expression the notice's own
   // gate uses, so the two can never disagree about what the visitor saw.
   //
+  // Waits for `augment` to SETTLE (`kind !== "pending"`) before firing at
+  // all. In the real request order the semantic POST debounces 300ms before
+  // it even starts, so on a genuine lexical failure `augment` is almost
+  // always still "pending" when `error` first goes true — firing off a
+  // still-pending augment reported `answer_shown: false` for a search an
+  // answer was about to suppress (review finding on the first version of
+  // this PR: the two states could disagree in the common case, not just in
+  // a rare race). `useSemanticAugment`'s own settlement gate covers both a
+  // successful AND a failed semantic fetch (`useSemanticSearch`'s `catch`
+  // also updates `executedQuery`), so a fully-down semantic lane still
+  // settles to `none` and this effect still fires — AC 3 keeps working. The
+  // semantic POST proxy caps that wait at 15s
+  // (`AbortSignal.timeout(15_000)`, `app/api/search/route.ts`), so this
+  // cannot stall the count indefinitely.
+  //
   // Fire-once via `failureTrackedRef` (reset alongside every `setError(false)`
-  // in `performSearch`), not just via the effect deps: `augment` settles
-  // from its own, independent fetch and can still change after `error` has
-  // already gone `true`, which would otherwise re-run this effect and
-  // double-count the same failed search (mirrors the re-fire discipline
+  // in `performSearch`), not just via the effect deps: `augment.kind` is an
+  // effect dependency and changes at least once more as it settles from
+  // "pending" to its final kind, which would otherwise re-run this effect
+  // and double-count the same failed search (mirrors the re-fire discipline
   // #2913/#2918 applied to `search_results_shown`/`search_no_results`).
   useEffect(() => {
     if (!error || isLoading) return;
+    if (augment.kind === "pending") return;
     if (failureTrackedRef.current) return;
 
     failureTrackedRef.current = true;
@@ -474,17 +490,31 @@ export const SearchInterface = ({
                 is explicitly NOT a recovery — it never suppresses. The
                 failure is still counted either way via `search_failed`
                 (`useSearchAnalytics`), so suppressing the notice costs no
-                visibility. */}
-            {error && !isLoading && augment.kind !== "answer" && (
-              <EmptyState
-                tier="surface"
-                heading="Zoeken mislukt"
-                emphasis={{ text: "mislukt" }}
-                live="assertive"
-              >
-                Er ging iets mis bij het zoeken — probeer opnieuw.
-              </EmptyState>
-            )}
+                visibility.
+
+                `augment.kind !== "pending"` is load-bearing, not incidental:
+                the semantic POST debounces 300ms before it even starts, so
+                on a genuine failure the lexical GET settles well before the
+                semantic lane does. Without this guard the notice would
+                render — `live="assertive"` announces it to a screen reader
+                immediately — and then vanish moments later once the answer
+                arrives, which is precisely what this rule exists to avoid
+                (review finding on the first version of this PR). See the
+                matching `augment.kind === "pending"` guard on the
+                `search_failed` effect above, which the same fix applies to. */}
+            {error &&
+              !isLoading &&
+              augment.kind !== "pending" &&
+              augment.kind !== "answer" && (
+                <EmptyState
+                  tier="surface"
+                  heading="Zoeken mislukt"
+                  emphasis={{ text: "mislukt" }}
+                  live="assertive"
+                >
+                  Er ging iets mis bij het zoeken — probeer opnieuw.
+                </EmptyState>
+              )}
 
             {/* Results */}
             {!isLoading && !error && (
