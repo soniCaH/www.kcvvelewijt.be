@@ -1510,4 +1510,130 @@ describe("SearchInterface", () => {
       ]);
     });
   });
+
+  describe("Results-tracking effect on the URL-preset mount path (#2918)", () => {
+    // A shared link, a page refresh, or a back/forward into `/zoeken?q=...`
+    // mounts (or re-syncs) with `query` already set from the URL, but before
+    // the mount-fetch effect has even run. On that first commit `results` is
+    // still its initial `[]`, `isLoading` is still `false`, and `error` is
+    // still `false` — indistinguishable from a settled empty result set. The
+    // #2913 tests above deliberately drive the component through
+    // type-and-submit, where `handleSearch` sets `isLoading` synchronously in
+    // the same tick as `query`, so they never exercise this window.
+    const noResultsCalls = () =>
+      mockTrackEvent.mock.calls.filter(
+        ([eventName]) => eventName === "search_no_results",
+      );
+    const resultsShownCalls = () =>
+      mockTrackEvent.mock.calls.filter(
+        ([eventName]) => eventName === "search_results_shown",
+      );
+
+    it("emits no search_no_results at all when the URL-preset query has results", async () => {
+      const mockResponse = createMockSearchResponse("test");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      setMockSearchParams({ q: "test" });
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(1);
+      });
+      expect(resultsShownCalls()).toEqual([
+        [
+          "search_results_shown",
+          { results_count: mockResponse.count, query_text: "test" },
+        ],
+      ]);
+      expect(noResultsCalls()).toHaveLength(0);
+    });
+
+    it("emits exactly one search_no_results, after the fetch settles, when the URL-preset query has no results", async () => {
+      const mockResponse = createMockSearchResponse("nothing", []);
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      setMockSearchParams({ q: "nothing" });
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/geen treffers/i)).toBeInTheDocument();
+      });
+
+      expect(noResultsCalls()).toEqual([
+        [
+          "search_no_results",
+          { query_text: "nothing", query_length: "nothing".length },
+        ],
+      ]);
+    });
+
+    it("does not double-fire under React StrictMode's dev-only mount→cleanup→remount cycle", async () => {
+      const mockResponse = createMockSearchResponse("nothing", []);
+      fetchMock.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      setMockSearchParams({ q: "nothing" });
+      render(
+        <StrictMode>
+          <SearchInterface />
+        </StrictMode>,
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/geen treffers/i)).toBeInTheDocument();
+      });
+
+      expect(noResultsCalls()).toHaveLength(1);
+    });
+
+    it("does not emit a bogus search_no_results for the stale-results commit when back/forward lands on a different query", async () => {
+      const firstResponse = createMockSearchResponse("first");
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => firstResponse,
+      });
+
+      setMockSearchParams({ q: "first" });
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(resultsShownCalls()).toHaveLength(1);
+      });
+
+      // Simulate browser back/forward to a query this component never
+      // fetched before, without ever going through `handleSearch` (so
+      // `isLoading` is not set synchronously in the same tick as `query`).
+      const secondResponse = createMockSearchResponse("second", []);
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => secondResponse,
+      });
+      act(() => {
+        setMockSearchParams({ q: "second" });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/geen treffers/i)).toBeInTheDocument();
+      });
+
+      // Exactly one no-results event for "second" — never one for "first"'s
+      // stale (non-empty) results mislabelled under the new query text, and
+      // never a spurious extra firing from the render where `query` had
+      // already moved to "second" but `results` had not yet caught up.
+      expect(noResultsCalls()).toEqual([
+        [
+          "search_no_results",
+          { query_text: "second", query_length: "second".length },
+        ],
+      ]);
+    });
+  });
 });
