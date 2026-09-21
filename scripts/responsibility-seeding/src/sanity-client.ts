@@ -32,3 +32,12 @@ export const client = createClient({
   token: resolveToken(),
   useCdn: false,
 });
+
+/**
+ * Draft-aware variant of `client`, for the few call sites that must see
+ * drafts.* documents on purpose — e.g. a slug-clash check that must catch a
+ * slug already taken by a draft-only document, or a legacy-document sweep
+ * that must not leave a draft-only twin behind. Each call site names the
+ * reason next to the call (#2839).
+ */
+export const draftAwareClient = client.withConfig({ perspective: "raw" });
