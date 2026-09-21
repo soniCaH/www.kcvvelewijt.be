@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
+import type { SearchResultType } from "@/types/search";
 
 export function useSearchAnalytics() {
   const trackSearchSubmitted = useCallback((queryText: string) => {
@@ -44,11 +45,16 @@ export function useSearchAnalytics() {
     [],
   );
 
-  const trackFilterChanged = useCallback((filterType: string) => {
-    trackEvent("search_filter_changed", {
-      filter_type: filterType,
-    });
-  }, []);
+  // A closed union of slug-shaped values — `filter_type` is shared with
+  // `match_agenda_filter` and `empty_state_undo`, which both send slugs (#2719).
+  const trackFilterChanged = useCallback(
+    (filterType: SearchResultType | "all") => {
+      trackEvent("search_filter_changed", {
+        filter_type: filterType,
+      });
+    },
+    [],
+  );
 
   const trackResultClicked = useCallback(
     (resultType: string, resultTitle: string, index: number) => {

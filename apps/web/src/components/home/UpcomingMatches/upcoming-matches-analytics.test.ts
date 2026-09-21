@@ -28,8 +28,19 @@ describe("upcoming-matches-analytics", () => {
   it("fires match_agenda_filter with the facet and its resulting count", () => {
     trackAgendaFilter("U15", 3);
     expect(trackEvent).toHaveBeenCalledWith("match_agenda_filter", {
-      filter_type: "U15",
+      filter_type: "u15",
       count: 3,
+    });
+  });
+
+  // `filter_type` is one GA4 dimension shared with `empty_state_undo` and
+  // `search_filter_changed`, which both send slugs — so the squad label is
+  // slugged too, or `A-Ploeg` and `a-ploeg` split into two rows (#2719).
+  it("slugs the squad label into the shared filter_type vocabulary", () => {
+    trackAgendaFilter("A-Ploeg", 2);
+    expect(trackEvent).toHaveBeenCalledWith("match_agenda_filter", {
+      filter_type: "a-ploeg",
+      count: 2,
     });
   });
 

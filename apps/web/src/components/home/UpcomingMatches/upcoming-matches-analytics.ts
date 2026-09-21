@@ -1,4 +1,5 @@
 import { trackEvent } from "@/lib/analytics/track-event";
+import { slugify } from "@/lib/utils/slugify";
 
 /**
  * Analytics for the homepage "Komende wedstrijden" agenda (#2398).
@@ -21,9 +22,13 @@ const AGENDA_SOURCE = "home_agenda";
  * `"all"` for the reset; `count` is the number of fixtures the choice leaves
  * visible, so a facet that empties the list is distinguishable from one nobody
  * presses.
+ *
+ * The label is slugged ("A-Ploeg" → "a-ploeg"): `filter_type` is one GA4
+ * dimension shared with `empty_state_undo` and `search_filter_changed`, which
+ * both send slugs (#2719).
  */
 export function trackAgendaFilter(filter: string, count: number): void {
-  trackEvent("match_agenda_filter", { filter_type: filter, count });
+  trackEvent("match_agenda_filter", { filter_type: slugify(filter), count });
 }
 
 /**
