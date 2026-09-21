@@ -61,6 +61,18 @@ describe("SiteHeader", () => {
     });
   });
 
+  it("gives the desktop Zoeken link a 44×44 hit area — icon size unchanged (#2529 — Tap Target Rule)", () => {
+    render(<SiteHeader />);
+    const searchLinks = screen.getAllByRole("link", { name: /zoeken/i });
+    const desktopLink = searchLinks.find(
+      (link) => link.getAttribute("data-nav-source") === "desktop",
+    );
+    expect(desktopLink).toBeDefined();
+    expect(desktopLink).toHaveClass("h-11");
+    expect(desktopLink).toHaveClass("w-11");
+    expect(desktopLink).toHaveClass("justify-center");
+  });
+
   it("renders Word lid link to /club/word-lid on desktop", () => {
     render(<SiteHeader />);
     const wordLid = screen.getAllByRole("link", { name: /word lid/i });

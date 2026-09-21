@@ -212,7 +212,12 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
               href="/zoeken"
               aria-label="Zoeken"
               data-nav-source="desktop"
-              className="text-ink hover:text-jersey-deep inline-flex items-center transition-colors"
+              // 44×44 hit area (#2529 — DESIGN.md "The Tap Target Rule"):
+              // same `h-11 w-11` pattern as the mobile search link above,
+              // icon size unchanged. The row's own fixed
+              // `h-[calc(var(--sticky-header-h)-1px)]` already exceeds 44px,
+              // so this centers within it with no row-height change.
+              className="text-ink hover:text-jersey-deep inline-flex h-11 w-11 items-center justify-center transition-colors"
             >
               <MagnifyingGlass size={18} aria-hidden="true" />
             </Link>
