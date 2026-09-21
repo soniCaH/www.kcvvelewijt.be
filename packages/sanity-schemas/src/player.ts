@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {editorialBioOf, PULLQUOTE_BIO_HELP} from './blocks/editorial-marks'
+import {playerPreviewSelect, preparePlayerPreview} from './preview/player-preview'
 
 export const player = defineType({
   name: 'player',
@@ -137,22 +138,7 @@ export const player = defineType({
     }),
   ],
   preview: {
-    select: {
-      firstName: 'firstName',
-      lastName: 'lastName',
-      media: 'transparentImage',
-      jerseyNumber: 'jerseyNumber',
-    },
-    // The subtitle is the only fill-progress signal an editor has across
-    // 352 player documents, 278 non-archived (#2585) — `jerseyNumber` has
-    // no other UI that surfaces which are still empty without opening
-    // each one. Zero carry a value today.
-    prepare({firstName, lastName, media, jerseyNumber}) {
-      return {
-        title: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
-        subtitle: jerseyNumber ? `#${jerseyNumber}` : 'Geen rugnummer',
-        media,
-      }
-    },
+    select: playerPreviewSelect,
+    prepare: preparePlayerPreview,
   },
 })
