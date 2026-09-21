@@ -16,7 +16,7 @@ import { SPONSOR_TILE_GRID_CLASS } from "@/components/sponsors/SponsorTile";
 
 export default function SponsorsLoading() {
   return (
-    <PageContainer width="index" className="py-10 sm:py-14">
+    <PageContainer width="index" className="py-12 sm:py-16">
       <LoadingAnnouncement label="Sponsors laden…" />
 
       <div className="mb-10 grid items-start gap-8 sm:mb-12 lg:grid-cols-[1fr_minmax(280px,360px)] lg:gap-12">

@@ -55,7 +55,7 @@ export function StaffRoles({
   if (positions.length === 0 && responsibilities.length === 0) return null;
 
   return (
-    <PageContainer as="section" className={cn("py-12", className)}>
+    <PageContainer as="section" className={cn("py-12 sm:py-16", className)}>
       <EditorialHeading
         level={2}
         size="display-md"

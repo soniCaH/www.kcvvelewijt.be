@@ -441,7 +441,7 @@ export const SearchInterface = ({
       </SearchMasthead>
 
       {/* Results region on cream, below the band. */}
-      <PageContainer width="index" className="space-y-8 py-12">
+      <PageContainer width="index" className="space-y-8 py-12 sm:py-16">
         {/* Show results only if query is valid (>= 2 chars) */}
         {query.trim().length >= 2 && (
           <>

@@ -42,7 +42,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
 
   return (
     <SponsorsAnalytics>
-      <PageContainer width="index" className="py-10 sm:py-14">
+      <PageContainer width="index" className="py-12 sm:py-16">
         <SponsorHero featured={featured} />
 
         {hasSponsors ? (

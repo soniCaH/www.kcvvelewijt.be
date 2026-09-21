@@ -93,7 +93,7 @@ export function MatchStandingsSection(props: MatchStandingsSectionProps) {
   return (
     <PageContainer
       as="section"
-      className={cn("bg-cream py-10 md:py-14", className)}
+      className={cn("bg-cream py-12 sm:py-16", className)}
     >
       <MonoLabelRow
         items={[{ label: "KLASSEMENT" }]}

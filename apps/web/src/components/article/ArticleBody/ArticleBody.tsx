@@ -820,7 +820,7 @@ export function ArticleBody({
   return (
     <div
       data-article-body="true"
-      className={cn("bg-cream w-full px-4 py-12 lg:px-0 lg:py-16", className)}
+      className={cn("bg-cream w-full px-4 py-12 sm:py-16 lg:px-0", className)}
     >
       <div
         className="mx-auto w-full"

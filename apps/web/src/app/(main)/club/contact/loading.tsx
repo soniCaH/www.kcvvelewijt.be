@@ -57,7 +57,7 @@ export default function ContactLoading() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Clubgegevens card + map — 2-col. */}
-      <PageContainer className="py-12">
+      <PageContainer className="py-12 sm:py-16">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="border-ink bg-cream shadow-paper-sm space-y-4 border-2 p-6 md:p-8">
             <Skeleton className="h-8 w-48" />
@@ -72,7 +72,7 @@ export default function ContactLoading() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Contacteer ons — 3-col contact-card grid. */}
-      <PageContainer className="py-12">
+      <PageContainer className="py-12 sm:py-16">
         <Skeleton className="mb-6 h-8 w-56" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -84,7 +84,7 @@ export default function ContactLoading() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Kom naar ons — 2-col venue card grid. */}
-      <PageContainer className="py-12">
+      <PageContainer className="py-12 sm:py-16">
         <Skeleton className="mb-6 h-8 w-56" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (

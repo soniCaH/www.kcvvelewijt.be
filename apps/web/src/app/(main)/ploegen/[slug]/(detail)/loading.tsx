@@ -112,7 +112,7 @@ export default function TeamDetailLoading() {
           the same Sanity + PSD fetch this fallback covers (#2642). Neutral
           bars only; no card, table or section shape that would promise a
           structure the fetch may not deliver. */}
-      <PageContainer className="py-10">
+      <PageContainer className="py-12 sm:py-16">
         <SkeletonBars />
       </PageContainer>
     </div>

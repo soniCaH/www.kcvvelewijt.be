@@ -625,7 +625,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 // the one `inCompetition` state where it wouldn't be), but TS
                 // narrows the variable, not a property read off the record.
                 ariaLabel={sectionLabels.klassement!}
-                className="py-10 focus:outline-none"
+                className="py-12 focus:outline-none sm:py-16"
               >
                 <SectionHeader
                   title={sectionLabels.klassement!}
@@ -652,7 +652,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                   id="wedstrijden"
                   tabIndex={-1}
                   ariaLabel={sectionLabels.wedstrijden}
-                  className="py-10 focus:outline-none"
+                  className="py-12 focus:outline-none sm:py-16"
                 >
                   <SectionHeader
                     title={sectionLabels.wedstrijden}
@@ -680,7 +680,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
               id="spelers"
               tabIndex={-1}
               ariaLabel={sectionLabels.spelers}
-              className="py-10 focus:outline-none"
+              className="py-12 focus:outline-none sm:py-16"
             >
               <SectionHeader title={sectionLabels.spelers} size="display-md" />
               <SquadGrid players={team.players} />
@@ -697,7 +697,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             id="staf"
             tabIndex={-1}
             ariaLabel={sectionLabels.staf}
-            className="py-10 focus:outline-none"
+            className="py-12 focus:outline-none sm:py-16"
           >
             <SectionHeader title={sectionLabels.staf} size="display-md" />
             {/* `unlabelledNotice` (#2638): ProSoccerData is PSD's
@@ -720,7 +720,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         id="info"
         tabIndex={-1}
         ariaLabel={sectionLabels.info}
-        className="py-10 focus:outline-none"
+        className="py-12 focus:outline-none sm:py-16"
       >
         <SectionHeader title={sectionLabels.info} size="display-md" />
         <TeamEditorial
@@ -754,7 +754,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             eventName="team_enrolment_cta_in_view"
             params={analyticsParams}
           >
-            <PageContainer as="section" className="py-10">
+            <PageContainer as="section" className="py-12 sm:py-16">
               <TeamEnrolmentCta
                 teamType={team.teamType}
                 teamSlug={slug}
