@@ -306,13 +306,17 @@ export const article = defineType({
               },
               {
                 name: "internalLink",
-                title: "Internal link",
+                title: "Link naar speler, staf, ploeg of pagina",
                 type: "object",
                 icon: UserIcon,
                 fields: [
                   {
                     name: "reference",
-                    title: "Reference",
+                    title: "Naar",
+                    // #2527: the only way a name in an article becomes a link —
+                    // nothing links automatically — so say what the link does.
+                    description:
+                      "De naam wordt een link naar hun pagina. Ze verschijnen ook onderaan dit artikel, en dit artikel verschijnt op hún pagina. Link bij een squadvoorstelling elke naam.",
                     type: "reference",
                     to: [
                       { type: "player" },
