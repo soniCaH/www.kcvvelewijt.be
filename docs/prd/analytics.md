@@ -101,7 +101,7 @@ Article ids are hashed via `hashMemberId`; no editorial strings flow into params
 | Event Name              | Trigger                        | Parameters                                                              |
 | ----------------------- | ------------------------------ | ----------------------------------------------------------------------- |
 | `article_view`          | Article detail page mount      | `article_type`, `article_id_hashed`, `has_subject`, `subject_kind?`     |
-| `article_share`         | Share icon click               | `article_type`, `article_id_hashed`, `channel` ("native" \| "facebook") |
+| `article_share`         | `Delen` button click           | `article_type`, `article_id_hashed`, `channel` ("native" \| "facebook") |
 | `related_article_click` | Related grid card click        | `article_type`, `related_article_id_hashed`, `position`                 |
 | `event_cta_click`       | Event ticket/signup link click | `article_id_hashed`, `event_date`, `has_ticket_url`                     |
 
@@ -110,6 +110,16 @@ Article ids are hashed via `hashMemberId`; no editorial strings flow into params
 `related_article_click` fires alongside the page-agnostic
 `related_content_click` so BI continuity with non-article source pages is
 preserved.
+
+**`article_share`'s `channel: "facebook"` changed meaning in #2529.** Before
+#2529 it meant "tapped the Facebook-specific icon" (a second, always-visible
+control next to the share icon). Since #2529 removed that icon, it means
+"Web Share was unavailable, so the click fell back to the Facebook sharer"
+(Chrome/Firefox on macOS/Linux; Safari/macOS and Edge/Windows have Web Share
+and emit `"native"` instead). Read a drop in GA4's Facebook-share count
+after #2529 as this definition change, not as fewer visitors sharing to
+Facebook — the Facebook sharer is still one tap away for every browser that
+lacks Web Share, just no longer behind its own icon.
 
 ### Events list (`/evenementen`, Priority 5 — "which event categories draw interest?")
 
