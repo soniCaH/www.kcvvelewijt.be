@@ -5,6 +5,3 @@
 // types. Keep in sync with .design-sync/entry.ts (the esbuild bundle entry).
 export * from "./dist-types/components/design-system";
 export * from "./dist-types/components/layout";
-export * from "./dist-types/components/design-system/QASectionDivider";
-export * from "./dist-types/components/design-system/SubjectAvatar";
-export { CookiePreferencesButton } from "./dist-types/components/layout/SiteFooter/CookiePreferencesButton";
