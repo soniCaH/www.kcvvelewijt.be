@@ -194,7 +194,14 @@ describe("CalendarAgenda", () => {
     expect(row!.tagName).not.toBe("A");
     expect(row!.querySelector("a")).toBeNull();
     expect(row).toHaveTextContent("Tornooi");
-    expect(row!.textContent).not.toMatch(/KCVV Elewijt.*KCVV Elewijt/);
+    // Checked per `data-layout` (#2599), not against the whole row: below
+    // `sm` and at `sm`+ are two separate DOM trees (CSS picks one; jsdom
+    // renders both), each showing the club name once — the row as a whole
+    // legitimately carries it twice, once per layout, which is not the bug
+    // this assertion guards against.
+    for (const layout of row!.querySelectorAll("[data-layout]")) {
+      expect(layout.textContent).not.toMatch(/KCVV Elewijt.*KCVV Elewijt/);
+    }
     expect(screen.queryByTestId("agenda-match-row")).toBeNull();
     // The default fixture's squad ("U7") must still show — a mixed-squad day
     // (`AgendaMatchRow` renders this chip for every real row) otherwise
@@ -393,6 +400,149 @@ describe("CalendarAgenda", () => {
     );
     const score = screen.getByText("1 – 1");
     expect(score.getAttribute("style") ?? "").not.toContain("box-shadow");
+  });
+
+  // Below-`sm` stacked layout (#2599, owner decision 2026-09-21). jsdom's
+  // `matchMedia` ignores width (docs/agents/... memory: happy-dom/jsdom
+  // can't prove a breakpoint switch), so these assert the mobile DOM tree
+  // itself — reached via `[data-layout="mobile"]` — rather than a rendered
+  // viewport; the actual breakpoint switch is proved in the PR body against
+  // a real browser/VR capture.
+  describe("mobile stacked row (#2599)", () => {
+    function mobileLayout(row: HTMLElement): HTMLElement {
+      const layout = row.querySelector('[data-layout="mobile"]');
+      expect(layout).not.toBeNull();
+      return layout as HTMLElement;
+    }
+
+    it("widens the left column to 56px so a two-word squad label fits on one line", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[makeMatch({ id: 1, team: "U8 Groen" })]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      expect(layout.className).toContain("grid-cols-[56px_1fr_auto]");
+      expect(layout).toHaveTextContent("U8 Groen");
+    });
+
+    it("stacks home over away, in that order, with no venue tag", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              homeTeam: { id: 1, name: "FC Zemst Sportief" },
+              awayTeam: { id: 2, name: "KCVV Elewijt" },
+              isHome: false,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      const names = Array.from(layout.querySelectorAll("[title]")).map((el) =>
+        el.getAttribute("title"),
+      );
+      // Home first, away second — the row's own order, never `isHome`
+      // (rule 2: "the order conveys home/away", detail-ia-locked.md §3).
+      expect(names).toEqual(["FC Zemst Sportief", "KCVV Elewijt"]);
+      expect(
+        layout.querySelector('[data-testid="match-venue-tag"]'),
+      ).toBeNull();
+    });
+
+    it("tints the whole score box for a win, and shows the two scores stacked", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              status: "finished",
+              homeScore: 3,
+              awayScore: 1,
+              isHome: true,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      const home = within(layout).getByText("3");
+      const away = within(layout).getByText("1");
+      // Same box — one tint behind both numbers, not one underline per line.
+      expect(home.parentElement).toBe(away.parentElement);
+      expect(home.parentElement!.getAttribute("style") ?? "").toContain(
+        "jersey-deep",
+      );
+    });
+
+    it("renders no box at all for a draw — win/loss only, per the owner decision", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              status: "finished",
+              homeScore: 1,
+              awayScore: 1,
+              isHome: true,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      const [home] = within(layout).getAllByText("1");
+      expect(home.parentElement!.getAttribute("style")).toBeNull();
+    });
+
+    it("renders no score box for an unplayed match", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[makeMatch({ id: 1, status: "scheduled" })]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      // The third grid column is the score slot — for an unplayed match it's
+      // an empty placeholder span, never the tinted box.
+      const scoreSlot = layout.lastElementChild!;
+      expect(scoreSlot.tagName).toBe("SPAN");
+      expect(scoreSlot).toBeEmptyDOMElement();
+    });
+
+    it("moves the reservation row's squad chip into the same time-over-squad left margin", () => {
+      const { container } = render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            reservationMatch({
+              id: 90,
+              date: "2026-09-12T09:30:00",
+              club: { id: 1235, name: "KCVV Elewijt" },
+              competition: "Tornooi",
+              team: "U8 Groen",
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const row = container.querySelector('[data-row-kind="reservation"]')!;
+      const layout = row.querySelector('[data-layout="mobile"]')!;
+      expect(layout.className).toContain("grid-cols-[56px_1fr_auto]");
+      // Squad chip sits in the left margin (with the time), not inline next
+      // to the crest/subject — the exact swap `AgendaMatchRow`'s own mobile
+      // layout makes.
+      const [leftMargin] = layout.children;
+      expect(leftMargin).toHaveTextContent("U8 Groen");
+    });
   });
 
   describe("kalender_item_click", () => {

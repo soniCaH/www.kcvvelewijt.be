@@ -227,6 +227,29 @@ export const PlayedTournament: Story = {
 };
 
 /**
+ * The mobile left margin widened to 56px (#2599, owner decision
+ * 2026-09-21) so a two-word squad label — `U8 Groen`, `Reserven` — fits on
+ * one line instead of clipping the way the old 52px column did. Also covers
+ * a drawn mobile score box (2 – 2): win/loss tint the whole box, a draw
+ * renders none at all.
+ */
+export const LongSquadLabel: Story = {
+  args: {
+    ...baseProps,
+    matches: [
+      match(95, "2026-09-05T11:30:00", "U8 Groen", "KFC Putte"),
+      match(96, "2026-09-05T14:00:00", "Reserven", "VC Bertem-Leefdaal", {
+        status: "finished",
+        homeScore: 2,
+        awayScore: 2,
+        scoreDisplay: { type: "score", home: 2, away: 2 },
+      }),
+    ],
+    events: [],
+  },
+};
+
+/**
  * The List Row Fill Rule's keyboard-focus half (DESIGN.md § Motion, #2624):
  * a real `element.focus()` — not a synthetic pointer event — so it triggers
  * genuine `:focus-visible` and lands the fill + inset outline the static VR
