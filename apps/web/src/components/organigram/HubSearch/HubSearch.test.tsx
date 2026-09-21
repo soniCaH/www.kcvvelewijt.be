@@ -191,12 +191,57 @@ describe("HubSearch", () => {
   });
 
   it("shimmers (no empty-state flash) while the answer lane is still resolving", async () => {
-    // executedQuery !== the typed query → not settled yet, nothing stale to show.
+    // executedQuery !== the typed query → not settled yet, nothing stale to
+    // show, and "bezeerd" is literally in no path (#3092 renders those at once).
     setSemantic({ results: [], executedQuery: "" });
     renderSearch();
-    typeQuery("blessure");
+    typeQuery("bezeerd");
     expect(await screen.findByText(/Slim zoeken/i)).toBeInTheDocument();
     expect(screen.queryByText(/Geen resultaten/)).not.toBeInTheDocument();
+  });
+
+  // #3092 — an editor's keyword must find its path whatever semantic ranks.
+  it("shows a literal keyword hit the semantic lane left out", async () => {
+    setSemantic({
+      results: [hit("inschrijven", 0.44)],
+      executedQuery: "ongeval",
+    });
+    renderSearch();
+    typeQuery("ongeval");
+    expect(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Hoe schrijf ik mijn kind in?"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders a literal hit at once, and says it is still searching", async () => {
+    setSemantic({ results: [], executedQuery: "" });
+    renderSearch();
+    typeQuery("verzekering");
+    expect(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Slim zoeken/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Slim gezocht/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps a confident semantic answer as the forward card, with the literal hit after it", async () => {
+    setSemantic({
+      results: [hit("inschrijven", 0.82)],
+      executedQuery: "ongeval",
+    });
+    renderSearch();
+    typeQuery("ongeval");
+    expect(
+      await screen.findByText(/Lees volledig antwoord/i),
+    ).toBeInTheDocument();
+    // The literal lane waits out the 200ms typing debounce.
+    expect(
+      await screen.findByText("Wat moet ik doen bij een blessure?"),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("Hoe schrijf ik mijn kind in?")).toHaveLength(1);
   });
 
   it("keyboard-selects the answer-forward card (ArrowDown + Enter)", async () => {

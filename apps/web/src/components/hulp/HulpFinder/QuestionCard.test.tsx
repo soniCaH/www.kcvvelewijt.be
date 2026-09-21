@@ -7,6 +7,7 @@ const path: ResponsibilityPath = {
   id: "inschrijven",
   category: "administratief",
   role: [],
+  title: "Inschrijven",
   question: "Hoe schrijf ik mijn kind in?",
   keywords: [],
   summary: "Inschrijven kan het hele seizoen door.",

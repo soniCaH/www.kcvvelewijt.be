@@ -10,7 +10,12 @@
  * The **answer lane is semantic** (#2057, decision 7o8): the query is embedded
  * (`bge-m3`) and matched against the `responsibility` Vectorize index via
  * `useSemanticSearch` → `POST /api/search`, so natural language ("mijn kind
- * heeft zich bezeerd") matches without keyword overlap. The **people lane stays
+ * heeft zich bezeerd") matches without keyword overlap. **Literal hits ride on
+ * top of it** (#3092): an answer whose title, keyword or question contains the
+ * whole query leads the lane, and one whose keyword appears as a whole word in
+ * the query is always listed (`findLiteralAnswers` → `mergeAnswers`) — an
+ * editor's keyword finds its path whatever the embedding ranks, and shows
+ * before the semantic lane settles. The **people lane stays
  * keyword** (`searchMembers`). A strong top answer (score ≥ 0.5) renders
  * **answer-forward** — its own CMS summary + contact inline (never an LLM
  * answer; avoids hallucination on club procedures). On endpoint failure the
@@ -43,8 +48,10 @@ import {
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import {
+  findLiteralAnswers,
   interleaveResults,
   mapSemanticResults,
+  mergeAnswers,
   searchHub,
   searchMembers,
   type HubMemberResult,
@@ -323,6 +330,12 @@ export function HubSearch({
     () => searchMembers(debouncedValue, members, maxResults),
     [debouncedValue, members, maxResults],
   );
+  // Answers the query names literally — title, keyword, question (#3092).
+  // Sync and local, so they show before the semantic lane settles.
+  const literalAnswers = useMemo(
+    () => findLiteralAnswers(debouncedValue, responsibilityPaths, maxResults),
+    [debouncedValue, responsibilityPaths, maxResults],
+  );
   const semanticAnswers = useMemo(
     () => mapSemanticResults(semanticResults, pathById),
     [semanticResults, pathById],
@@ -332,18 +345,26 @@ export function HubSearch({
   // #2057 decision 7o8) — no answer-forward, no smart hint. Ratified silence,
   // one of three: DESIGN.md → "The Silence Is An Answer Rule" (#2470/#2580).
   const usingFallback = semanticError;
+  // A confident semantic answer keeps the forward card; literal hits follow
+  // it in the lane (#3092), so a generic keyword never takes its place.
   const answerForward =
     !usingFallback &&
     semanticAnswers[0] &&
     semanticAnswers[0].score >= ANSWER_FORWARD_MIN_SCORE
       ? semanticAnswers[0]
       : null;
+  const answers = useMemo(
+    () => mergeAnswers(literalAnswers, semanticAnswers, maxResults),
+    [literalAnswers, semanticAnswers, maxResults],
+  );
 
   const rows: HubSearchResult[] = usingFallback
     ? searchHub(debouncedValue, members, responsibilityPaths, maxResults)
     : interleaveResults(
         memberResults,
-        answerForward ? semanticAnswers.slice(1) : semanticAnswers,
+        answerForward
+          ? answers.filter((a) => a.path.id !== answerForward.path.id)
+          : answers,
       );
 
   // The answer lane has "settled" for the current query once the hook's
@@ -351,7 +372,10 @@ export function HubSearch({
   // we shimmer only when there's nothing stale to show — so the empty state
   // never flashes during the debounce window, and refining keeps prior results.
   const answersSettled = usingFallback || executedQuery === trimmed;
-  const showShimmer = !answersSettled && semanticAnswers.length === 0;
+  const showShimmer =
+    !answersSettled &&
+    semanticAnswers.length === 0 &&
+    literalAnswers.length === 0;
 
   const items: HubSearchResult[] = answerForward
     ? [answerForward, ...rows]
@@ -661,7 +685,15 @@ export function HubSearch({
           ) : items.length > 0 ? (
             <>
               {!usingFallback &&
-                smartHint(answerForward ? "Beste match" : "Slim gezocht")}
+                smartHint(
+                  // Literal hits can render before the semantic lane settles
+                  // (#3092) — say it is still searching until it has.
+                  !answersSettled
+                    ? "Slim zoeken…"
+                    : answerForward
+                      ? "Beste match"
+                      : "Slim gezocht",
+                )}
               {forwardCard}
               {rows.map((result, i) => {
                 const index = answerForward ? i + 1 : i;

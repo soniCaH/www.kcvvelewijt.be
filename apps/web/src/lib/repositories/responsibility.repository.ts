@@ -9,6 +9,7 @@ import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 const RESPONSIBILITY_PATHS_QUERY =
   defineQuery(`*[_type == "responsibility" && active == true] | order(title asc) {
   "id": slug.current,
+  title,
   "role": audience,
   question,
   keywords,
@@ -131,6 +132,7 @@ function toResponsibilityPath(p: PathRow): ResponsibilityPath {
   );
   return {
     id: p.id ?? "",
+    title: p.title ?? "",
     role: (p.role ?? []) as ResponsibilityPath["role"],
     question: p.question ?? "",
     keywords: p.keywords ?? [],

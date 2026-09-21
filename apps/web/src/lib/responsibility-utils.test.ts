@@ -14,6 +14,7 @@ describe("responsibility-utils", () => {
     {
       id: "path-1",
       role: ["speler"],
+      title: "Path 1",
       question: "test question 1",
       keywords: ["test"],
       summary: "Test summary 1",
@@ -29,6 +30,7 @@ describe("responsibility-utils", () => {
     {
       id: "path-2",
       role: ["ouder"],
+      title: "Path 2",
       question: "test question 2",
       keywords: ["test"],
       summary: "Test summary 2",
@@ -55,6 +57,7 @@ describe("responsibility-utils", () => {
     {
       id: "path-3",
       role: ["trainer"],
+      title: "Path 3",
       question: "test question 3",
       keywords: ["test"],
       summary: "Test summary 3",

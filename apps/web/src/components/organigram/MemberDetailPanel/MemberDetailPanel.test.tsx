@@ -76,6 +76,7 @@ function responsibility(
 ): ResponsibilityPath {
   return {
     id,
+    title: question,
     role: ["niet-lid"],
     question,
     keywords: [],

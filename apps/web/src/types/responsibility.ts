@@ -90,6 +90,8 @@ export interface SolutionStep {
 export interface ResponsibilityPath {
   /** Unique identifier */
   id: string;
+  /** Editor's short name for the path. Not rendered — it is a search field (#3092). */
+  title: string;
   /** User role (who is asking) */
   role: UserRole[];
   /** The question/scenario */

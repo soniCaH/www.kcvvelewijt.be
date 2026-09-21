@@ -7,6 +7,7 @@ const medical: ResponsibilityPath = {
   id: "blessure",
   category: "medisch",
   role: ["ouder", "speler"],
+  title: "Blessure",
   question: "Mijn kind is geblesseerd tijdens de match — wat nu?",
   keywords: ["blessure"],
   summary:
@@ -34,6 +35,7 @@ const admin: ResponsibilityPath = {
   id: "inschrijven",
   category: "administratief",
   role: ["ouder", "niet-lid"],
+  title: "Inschrijven",
   question: "Hoe schrijf ik mijn kind in?",
   keywords: ["inschrijven"],
   summary: "Inschrijven kan het hele seizoen door.",

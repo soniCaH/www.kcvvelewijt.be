@@ -12,6 +12,7 @@ function mk(id: string, category: ResponsibilityPath["category"]) {
     id,
     category,
     role: [],
+    title: id,
     question: id,
     keywords: [],
     summary: "",

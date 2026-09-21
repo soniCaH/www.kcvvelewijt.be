@@ -34,6 +34,7 @@ export const HUB_SEARCH_PATHS: ResponsibilityPath[] = [
   {
     id: "inschrijven",
     role: ["niet-lid", "ouder"],
+    title: "Inschrijven als nieuw lid",
     question: "Hoe schrijf ik mijn kind in?",
     keywords: ["inschrijven", "lid worden", "aansluiten"],
     summary:
@@ -45,6 +46,7 @@ export const HUB_SEARCH_PATHS: ResponsibilityPath[] = [
   {
     id: "blessure",
     role: ["speler", "ouder"],
+    title: "Sportongeval",
     question: "Wat moet ik doen bij een blessure?",
     keywords: ["blessure", "ongeval", "verzekering"],
     summary:
