@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { Effect, Layer, Schema as S } from "effect";
 import { getRankingHandler } from "./ranking";
 import { PsdService, type PsdServiceInterface } from "../psd/service";
@@ -6,8 +6,9 @@ import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { testEnvLayer } from "../test-helpers/env-layer";
 import { PsdGateTest } from "../psd/gate";
+import { BackgroundRunnerService } from "../psd/background";
 import { RankingTableArray, type RankingTable } from "@kcvv/api-contract";
-import { UpstreamUnavailableError } from "../psd/errors";
+import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
 
 const rankingTables: readonly RankingTable[] = [
   {
@@ -57,7 +58,22 @@ const cacheMock: KvCacheInterface = {
   durable: noopDurableKv,
 };
 
+/** Map-backed KV, so a second read can hit what the first one stored. */
+function makeMemoryCache(store = new Map<string, string>()): KvCacheInterface {
+  return {
+    get: (key) => Effect.succeed(store.get(key) ?? null),
+    set: (key, value) => Effect.sync(() => void store.set(key, value)),
+    delete: (key) => Effect.sync(() => void store.delete(key)),
+    increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
+  };
+}
+
 describe("getRankingHandler", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("yields PsdService and returns every ranking table", async () => {
     const result = await Effect.runPromise(
       getRankingHandler(1).pipe(
@@ -97,6 +113,154 @@ describe("getRankingHandler", () => {
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("ResourceNotFound");
     }
+  });
+
+  // #3059 — a team with no table (onderbouw/middenbouw, U19) used to reach
+  // PSD on every read, because "no table" was raised inside the cache and
+  // never stored. Once PSD's daily quota ran out those reads turned into
+  // 503s and took 11 team pages down, while every team WITH a table kept
+  // serving its cached copy.
+  it.each([
+    [
+      "an empty table list",
+      () => Effect.succeed([] as readonly RankingTable[]),
+    ],
+    [
+      "a PSD 404",
+      () =>
+        Effect.fail(
+          new ResourceNotFoundError({
+            message: "HTTP 404: Not Found",
+            resourceType: "psd-resource",
+            resourceId: "/teams/1/ranking",
+          }),
+        ),
+    ],
+  ])(
+    "caches %s, so the next read of a team with no table never reaches PSD",
+    async (_label, getRanking) => {
+      let psdCalls = 0;
+      const service = makeServiceMock({
+        getRanking: () => {
+          psdCalls++;
+          return getRanking();
+        },
+      });
+      const [first, second] = await Effect.runPromise(
+        Effect.gen(function* () {
+          const cache = makeMemoryCache();
+          const run = Effect.either(
+            getRankingHandler(1).pipe(
+              Effect.provide(Layer.succeed(PsdService, service)),
+              Effect.provide(Layer.succeed(KvCacheService, cache)),
+              Effect.provide(PsdGateTest),
+              Effect.provide(testEnvLayer),
+            ),
+          );
+          return [yield* run, yield* run] as const;
+        }),
+      );
+
+      expect(psdCalls).toBe(1);
+      // The wire contract does not move: both reads still answer 404.
+      for (const result of [first, second]) {
+        expect(result._tag).toBe("Left");
+        if (result._tag === "Left") {
+          expect(result.left._tag).toBe("ResourceNotFound");
+        }
+      }
+    },
+  );
+
+  // #3059 review — the "no table" answer must never cost a team the table it
+  // already has. A refresh that briefly answers empty (a PSD glitch, or every
+  // row failing to decode) runs in the background, keeps the cached table,
+  // and never writes the no-table note.
+  it("keeps a cached table when a background refresh answers empty", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const store = new Map<string, string>();
+    let answer: readonly RankingTable[] = rankingTables;
+    const layers = Layer.mergeAll(
+      Layer.succeed(
+        PsdService,
+        makeServiceMock({ getRanking: () => Effect.succeed(answer) }),
+      ),
+      Layer.succeed(KvCacheService, makeMemoryCache(store)),
+      PsdGateTest,
+      testEnvLayer,
+    );
+    const pending: Promise<unknown>[] = [];
+    const runner = Layer.succeed(BackgroundRunnerService, {
+      fork: (_label, effect) =>
+        Effect.sync(() => {
+          // The refresh only needs what `layers` provides; the fork's
+          // declared env is wider (same cast as kv-cache.test.ts).
+          pending.push(
+            Effect.runPromise(
+              Effect.provide(effect, layers) as unknown as Effect.Effect<void>,
+            ),
+          );
+        }),
+    });
+    const read = () =>
+      Effect.runPromise(
+        Effect.either(
+          getRankingHandler(1).pipe(
+            Effect.provide(layers),
+            Effect.provide(runner),
+          ),
+        ),
+      );
+
+    expect((await read())._tag).toBe("Right");
+    answer = [];
+    vi.setSystemTime(Date.now() + 25 * 60 * 60 * 1000); // past TTL.RANKING
+    const stale = await read();
+    expect(pending).toHaveLength(1); // the refresh really ran
+    await Promise.all(pending);
+    const after = await read();
+
+    for (const result of [stale, after]) {
+      expect(result._tag).toBe("Right");
+      if (result._tag === "Right") {
+        expect(result.right[0]?.competition_id).toBe(222464);
+      }
+    }
+    expect(store.has("ranking:none:team:1")).toBe(false);
+  });
+
+  // Without a background runner a stale read refreshes inline, and its 404
+  // reaches the handler even though the table is still cached. The note must
+  // not hide that table.
+  it("never writes the no-table note while a table is cached", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const store = new Map<string, string>();
+    let answer: readonly RankingTable[] = rankingTables;
+    const read = () =>
+      Effect.runPromise(
+        Effect.either(
+          getRankingHandler(1).pipe(
+            Effect.provide(
+              Layer.succeed(
+                PsdService,
+                makeServiceMock({ getRanking: () => Effect.succeed(answer) }),
+              ),
+            ),
+            Effect.provide(
+              Layer.succeed(KvCacheService, makeMemoryCache(store)),
+            ),
+            Effect.provide(PsdGateTest),
+            Effect.provide(testEnvLayer),
+          ),
+        ),
+      );
+
+    expect((await read())._tag).toBe("Right");
+    answer = [];
+    vi.setSystemTime(Date.now() + 25 * 60 * 60 * 1000); // past TTL.RANKING
+    await read(); // inline refresh answers empty
+
+    expect(store.has("ranking:none:team:1")).toBe(false);
   });
 
   it("propagates UpstreamUnavailableError from service", async () => {
