@@ -291,6 +291,8 @@ A slot may carry **both** `hyphens-auto` and `break-words` when its content is D
 
 Hyphenation follows the `lang` attribute, which is where its dictionary comes from. The app sets `lang="nl"` on `<html>` in `app/layout.tsx` — the source of truth — and Storybook's preview iframe is aligned to it in `.storybook/preview.ts` (its own template ships hardcoded `lang="en"`, with nothing in `apps/web/.storybook/` overriding it otherwise). A hyphenation baseline taken under the wrong language is not a baseline of what ships.
 
+`lang` decides whether a hyphenation dictionary is consulted, but the dictionary itself belongs to the rendering browser, not the page — the capture browser and a visitor's browser can disagree about whether a given word breaks and where. Measured on #2586: in real desktop Chrome, `lang="nl"` hyphenates `COMMUNICATIEVERANTWOORDELIJKE` at 130px IBM Plex Mono as `COMMUNICATIEVER-` / `ANTWOORDELIJKE` and `lang="en"` does not hyphenate it at all, yet the Playwright capture of that same component is byte-identical either way — so a VR baseline validates layout, overflow and line count, never the break point. Do not cite a passing VR run as evidence a hyphen is correct; the check that does answer it is rendering the real string at the real width in a real browser, which is how this rule was settled.
+
 ## Layout
 
 The body is a single centred column at one of exactly three widths, chosen by the page's role: **680px** for reading (articles, forms, legal), **1040px** for detail pages (the default), and **1280px** for card-grid indexes and landing pages. Every page routes through one container primitive; hand-rolled `mx-auto max-w-*` wrappers are drift.
