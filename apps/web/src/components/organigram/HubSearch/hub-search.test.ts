@@ -2,10 +2,11 @@ import { describe, it, expect } from "vitest";
 import {
   searchMembers,
   searchResponsibilities,
-  searchHub,
   dedupeMembersByPerson,
   mapSemanticResults,
   interleaveResults,
+  findLiteralAnswers,
+  mergeAnswers,
 } from "./hub-search";
 import type { HubMemberResult } from "./hub-search";
 import type { OrgChartNode } from "@/types/organigram";
@@ -36,6 +37,7 @@ const members: OrgChartNode[] = [
 const paths: ResponsibilityPath[] = [
   {
     id: "inschrijven",
+    title: "Inschrijven als nieuw lid",
     role: ["niet-lid", "ouder"],
     question: "Hoe schrijf ik mijn kind in?",
     keywords: ["inschrijven", "lid worden"],
@@ -46,6 +48,7 @@ const paths: ResponsibilityPath[] = [
   },
   {
     id: "blessure",
+    title: "Sportongeval",
     role: ["speler", "ouder"],
     question: "Wat als mijn kind geblesseerd is?",
     keywords: ["blessure", "ongeval", "verzekering"],
@@ -177,6 +180,12 @@ describe("searchResponsibilities", () => {
     expect(results[0].matchedFields).toContain("Trefwoorden");
   });
 
+  it("matches on the title and labels Titel (#3092)", () => {
+    const results = searchResponsibilities("sportongeval", paths, 5);
+    expect(results[0].path.id).toBe("blessure");
+    expect(results[0].matchedFields).toContain("Titel");
+  });
+
   it("returns no matches for a short query that appears nowhere", () => {
     // "xy" is < 3 chars (skipped by the per-word pass) and absent from every
     // fixture field, so the full-query substring pass finds nothing either.
@@ -184,31 +193,144 @@ describe("searchResponsibilities", () => {
   });
 });
 
-describe("searchHub", () => {
-  it("interleaves people and answers (person, answer, person, answer)", () => {
-    // "inschrijven" matches the answer keyword; "bestuur" matches members.
-    // Use a query that hits both: "in" is too short — craft mixed data instead.
-    const mixedMembers: OrgChartNode[] = [
-      {
-        id: "secretaris",
-        title: "Secretaris inschrijvingen",
-        department: "hoofdbestuur",
-        members: [{ id: "s-1", name: "Inge De Wit" }],
-      },
+// #3092 — a word an editor wrote into a path's title or keywords must find
+// that path whatever the semantic lane ranks.
+describe("findLiteralAnswers", () => {
+  it("finds a path by a keyword it literally carries", () => {
+    const results = findLiteralAnswers("verzekering", paths, 5);
+    expect(results.map((r) => r.path.id)).toEqual(["blessure"]);
+    expect(results[0].matchedFields).toEqual(["Trefwoorden"]);
+  });
+
+  it("finds a path by its title, case-insensitively and trimmed", () => {
+    const results = findLiteralAnswers("  SportOngeval ", paths, 5);
+    expect(results.map((r) => r.path.id)).toEqual(["blessure"]);
+    expect(results[0].matchedFields).toEqual(["Titel"]);
+  });
+
+  it("never matches on the question — a sentence full of common words", () => {
+    expect(findLiteralAnswers("mijn kind geblesseerd", paths, 5)).toEqual([]);
+    expect(findLiteralAnswers("wat", paths, 5)).toEqual([]);
+  });
+
+  it("ranks a title hit above a keyword hit", () => {
+    const two: ResponsibilityPath[] = [
+      { ...paths[0], id: "k", title: "B", keywords: ["afmelden"] },
+      { ...paths[0], id: "t", title: "Afmelden", keywords: [] },
     ];
-    const results = searchHub("inschrijv", mixedMembers, paths, 5);
-    expect(results[0].type).toBe("member");
-    expect(results[1].type).toBe("responsibility");
+    expect(
+      findLiteralAnswers("afmelden", two, 5).map((r) => r.path.id),
+    ).toEqual(["t", "k"]);
   });
 
-  it("returns answers even when no people match", () => {
-    const results = searchHub("blessure", members, paths, 5);
-    expect(results.every((r) => r.type === "responsibility")).toBe(true);
-    expect(results[0].type).toBe("responsibility");
+  it("ignores a match that only sits in the summary prose", () => {
+    expect(findLiteralAnswers("correspondent", paths, 5)).toEqual([]);
   });
 
-  it("returns [] when nothing matches", () => {
-    expect(searchHub("zzzzz", members, paths, 5)).toEqual([]);
+  it("ignores queries shorter than 3 characters", () => {
+    expect(findLiteralAnswers("in", paths, 5)).toEqual([]);
+  });
+
+  it("caps to maxResults", () => {
+    const two: ResponsibilityPath[] = [
+      { ...paths[0], id: "a", keywords: ["afmelden"] },
+      { ...paths[0], id: "b", keywords: ["afmelden"] },
+    ];
+    expect(findLiteralAnswers("afmelden", two, 1)).toHaveLength(1);
+  });
+
+  it("matches a keyword stored with a decomposed accent against a typed one", () => {
+    const decomposed: ResponsibilityPath[] = [
+      { ...paths[0], id: "allergie", keywords: ["allergiee\u0308n"] },
+    ];
+    expect(
+      findLiteralAnswers("allergieën", decomposed, 5).map((r) => r.path.id),
+    ).toEqual(["allergie"]);
+    expect(
+      findLiteralAnswers("mijn allergieën zijn erg", decomposed, 5).map(
+        (r) => r.path.id,
+      ),
+    ).toEqual(["allergie"]);
+  });
+
+  it("finds a path whose keyword is a whole word inside the query, as a weak hit", () => {
+    const results = findLiteralAnswers(
+      "ik had een ongeval op training",
+      paths,
+      5,
+    );
+    expect(results.map((r) => r.path.id)).toEqual(["blessure"]);
+    expect(results[0].score).toBeLessThan(10);
+  });
+
+  it("does not treat a keyword inside a longer word as a whole-word hit", () => {
+    expect(findLiteralAnswers("twee ongevallen gezien", paths, 5)).toEqual([]);
+  });
+});
+
+describe("mergeAnswers", () => {
+  const lit = (id: string) => ({
+    type: "responsibility" as const,
+    path: paths.find((p) => p.id === id)!,
+    score: 30,
+    matchedFields: ["Trefwoorden"],
+  });
+  const sem = (id: string, score: number) => ({
+    type: "responsibility" as const,
+    path: paths.find((p) => p.id === id)!,
+    score,
+    matchedFields: [],
+  });
+
+  it("puts literal hits first, then the semantic ones", () => {
+    expect(
+      mergeAnswers([lit("blessure")], [sem("inschrijven", 0.4)], 5).map(
+        (r) => r.path.id,
+      ),
+    ).toEqual(["blessure", "inschrijven"]);
+  });
+
+  it("keeps each path once, as its literal hit", () => {
+    const merged = mergeAnswers(
+      [lit("blessure")],
+      [sem("blessure", 0.9), sem("inschrijven", 0.4)],
+      5,
+    );
+    expect(merged.map((r) => r.path.id)).toEqual(["blessure", "inschrijven"]);
+    expect(merged[0].matchedFields).toEqual(["Trefwoorden"]);
+  });
+
+  it("orders tied strong hits by their semantic score", () => {
+    const tied = [lit("inschrijven"), lit("blessure")];
+    expect(
+      mergeAnswers(
+        tied,
+        [sem("blessure", 0.57), sem("inschrijven", 0.46)],
+        5,
+      ).map((r) => r.path.id),
+    ).toEqual(["blessure", "inschrijven"]);
+  });
+
+  it("places a weak hit by semantic rank, or after the semantic hits when it has none", () => {
+    const weak = { ...lit("blessure"), score: 1 };
+    expect(
+      mergeAnswers([weak], [sem("inschrijven", 0.4)], 5).map((r) => r.path.id),
+    ).toEqual(["inschrijven", "blessure"]);
+  });
+
+  it("never cuts a literal hit at the cap — a plain semantic hit gives way", () => {
+    const weak = { ...lit("blessure"), score: 1 };
+    expect(
+      mergeAnswers([weak], [sem("inschrijven", 0.4)], 1).map((r) => r.path.id),
+    ).toEqual(["blessure"]);
+  });
+
+  it("caps the merged lane to maxResults", () => {
+    expect(
+      mergeAnswers([lit("blessure")], [sem("inschrijven", 0.4)], 1).map(
+        (r) => r.path.id,
+      ),
+    ).toEqual(["blessure"]);
   });
 });
 

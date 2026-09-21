@@ -66,6 +66,7 @@ function makeContact(
 function makePathRow(overrides: Partial<PathRow> = {}): PathRow {
   return {
     id: "blessure-melden",
+    title: "Blessure melden",
     role: ["speler", "ouder"],
     question: "Hoe meld ik een blessure?",
     keywords: ["blessure", "dokter"],
@@ -115,6 +116,7 @@ describe("ResponsibilityRepository", () => {
 
       expect(path).toEqual<ResponsibilityPath>({
         id: "blessure-melden",
+        title: "Blessure melden",
         role: ["speler", "ouder"],
         question: "Hoe meld ik een blessure?",
         keywords: ["blessure", "dokter"],
@@ -328,6 +330,13 @@ describe("ResponsibilityRepository", () => {
       expect(path.icon).toBeUndefined();
       expect(path.primaryContact).toEqual({ contactType: "manual" });
       expect(path.steps[0].contact).toEqual({ contactType: "manual" });
+    });
+
+    // The hub search lowercases the title (#3092); a null one must not crash it.
+    it("maps a null title to an empty string", async () => {
+      mockFetch.mockResolvedValueOnce([makePathRow({ title: null })]);
+      const [path] = await runFindAll();
+      expect(path.title).toBe("");
     });
 
     it("relatedPaths resolved to slugs", async () => {
