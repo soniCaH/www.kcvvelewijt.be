@@ -139,6 +139,25 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("teams", "max");
   });
 
+  it("busts /hulp on a help-path change", async () => {
+    // The hulp finder read is untagged and the page leans on
+    // `revalidate = 3600`, so the path bust is the only lever.
+    const res = await POST(
+      makeRequest({ _type: "responsibility", slug: "sportongeval" }),
+    );
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/hulp");
+  });
+
+  it("busts /hulp + the staff tag on an organigram change", async () => {
+    // ORGANIGRAM_NODES_QUERY is the read carrying `staff`; it feeds the
+    // structuur panel and the search index.
+    const res = await POST(makeRequest({ _type: "organigramNode" }));
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/hulp");
+    expect(revalidateTag).toHaveBeenCalledWith("staff", "max");
+  });
+
   it("acks unknown types with 200 and revalidates nothing", async () => {
     const res = await POST(makeRequest({ _type: "mysteryType" }));
     expect(res.status).toBe(200);

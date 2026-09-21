@@ -36,6 +36,14 @@ interface WebhookBody {
 const CONTENTS = "/inhoud";
 
 /**
+ * The hulp finder (#2495) renders every active `responsibility` and resolves
+ * each contact through its `organigramNode`, so both types change what that
+ * page says. RESPONSIBILITY_PATHS_QUERY carries no tag and the page leans on
+ * `revalidate = 3600` alone, so busting the path is the only lever for it.
+ */
+const HULP = "/hulp";
+
+/**
  * Maps a document `_type` to the paths + content tags to revalidate. `slugs`
  * holds every slug to bust a detail page for (current + previous, so renames
  * and deletes clear the stale URL too).
@@ -93,6 +101,14 @@ function targets(
         paths: ["/galerij", ...detail("/galerij")],
         tags: [SANITY_TAGS.galleries],
       };
+    case "responsibility":
+      return { paths: [HULP], tags: [] };
+    // An organigram edit also moves the org chart, and that read
+    // (ORGANIGRAM_NODES_QUERY, via StaffRepository.findAll) is the one thing
+    // carrying the `staff` tag — `/hulp`'s structuur panel and the search
+    // index both consume it.
+    case "organigramNode":
+      return { paths: [HULP], tags: [SANITY_TAGS.staff] };
     default:
       return null;
   }
