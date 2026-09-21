@@ -188,7 +188,7 @@ export async function generateMetadata({
  * genuinely reachable for a bogus `matchId`, not dead code shadowed by a
  * decode error arriving first.
  */
-const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
+export const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
   matchId: number,
 ): Promise<MatchDetail> {
   return runPromise(
