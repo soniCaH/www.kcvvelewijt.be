@@ -2560,11 +2560,19 @@ describe("rule 15 catches what it claims to (#3023)", () => {
  *   of the same background take a seam is a render judgement — colour and
  *   adjacency aren't in the source text this file scans — so it stays a
  *   manual check, done once per route at migration time (recorded in this
- *   ticket's PR body), not a standing rule here.
- * - **A retired pair reappearing on a file this list doesn't name.** A
- *   `py-10 md:py-14`-shaped section added to a brand-new file would pass
- *   silently, the same way rule 12 accepts a fresh, unlisted VM going
- *   unchecked.
+ *   ticket's PR body), not a standing rule here. `BestuurPage.tsx` is the
+ *   one case this migration itself created: its description was `pt-12`
+ *   only, so padding both sides (rule 1) would have doubled the gap between
+ *   it and the members section below into a new violation with no seam —
+ *   merged into one section instead (review finding 1) rather than left for
+ *   a human to catch on the next pass.
+ *
+ * A **second, tree-wide check** below closes most of the first bullet's gap
+ * — it can't tell a *new* section from any other `py-*` use, but it can tell
+ * a *retired* one apart from everything else, because the nine retired
+ * pairs are specific enough that nothing legitimate collides with them
+ * (verified empirically: zero false positives across the whole tree at the
+ * point this rule was added).
  */
 const SECTION_SPACING_BASE = "py-12";
 const SECTION_SPACING_VARIANT = "sm:py-16";
@@ -2628,7 +2636,11 @@ const SECTION_SPACING_SITES: Record<string, number> = {
   "app/(main)/hulp/page.tsx": 1,
   "app/(main)/ploegen/[slug]/(detail)/page.tsx": 6,
   "components/club/ContactPage/ContactPage.tsx": 3,
-  "components/club/BestuurPage/BestuurPage.tsx": 2,
+  // 1, not 2 — the description and members were two same-colour sections
+  // stacking with no seam once both padded both sides, a rule-3 violation
+  // this ticket's own migration would otherwise introduce (review finding
+  // 1); merged into one section instead.
+  "components/club/BestuurPage/BestuurPage.tsx": 1,
   "app/(main)/club/(index)/page.tsx": 3,
   "components/match/MatchStandingsSection/MatchStandingsSection.tsx": 1,
   "components/match/MatchEventsSection/MatchEventsSection.tsx": 1,
@@ -2654,20 +2666,143 @@ describe("every section pads both sides with the one spacing value (#2571)", () 
 });
 
 /**
+ * Rule 16's second half (review finding 4): the pinned site list above
+ * proves the 35 named sites carry the value; this proves nothing ELSE in
+ * the tree still carries one of the nine pairs it replaced. Tree-wide by
+ * design, not a hand-list — unlike the positive check, a retired pair is
+ * specific enough (two exact tokens, `sm:`/`md:`/`lg:` included) that a
+ * blind scan doesn't return the false positives a bare `py-*` sweep would
+ * (measured: zero false positives across `apps/web/src` when this rule was
+ * added, loading.tsx included except the one exemption below).
+ *
+ * Scoped to `productionSources` (drops stories/tests, matching every other
+ * rule here) minus the homepage — `app/(landing)/(home)/` and
+ * `components/home/` — which #2402 owns and #2479 excluded outright: its
+ * `py-12 md:py-16` / `py-16 md:py-20` bands, and `SponsorsBlock`'s homepage
+ * caller pinning its own pre-#2571 `py-16 sm:py-16 md:py-20` (review
+ * finding 2), are that ticket's values to change, not a violation this one
+ * should flag.
+ */
+const RETIRED_SECTION_PADDING_PAIRS: readonly (readonly [string, string])[] = [
+  ["py-8", "sm:py-12"],
+  ["py-10", "sm:py-14"],
+  ["py-10", "md:py-14"],
+  ["py-12", "md:py-16"],
+  ["py-12", "lg:py-16"],
+  ["py-14", "sm:py-20"],
+  ["py-16", "md:py-20"],
+  ["py-16", "lg:py-24"],
+  ["py-24", "sm:py-32"],
+];
+
+/** True when `base` and `variant` land on the same source line — the same
+ *  token-boundary, same-line test `sectionSpacingOccurrences` uses for the
+ *  target value, applied here to a retired one instead. */
+function hasPairOnSameLine(
+  source: string,
+  base: string,
+  variant: string,
+): boolean {
+  const baseToken = new RegExp(`\\b${base}\\b`);
+  const variantToken = new RegExp(`\\b${variant}\\b`);
+  return source
+    .split("\n")
+    .some((line) => baseToken.test(line) && variantToken.test(line));
+}
+
+/** True when `source` carries any of the nine retired pairs at all. */
+function hasAnyRetiredPair(source: string): boolean {
+  return RETIRED_SECTION_PADDING_PAIRS.some(([base, variant]) =>
+    hasPairOnSameLine(source, base, variant),
+  );
+}
+
+/**
+ * Every file that legitimately still carries exactly one retired pair, and
+ * which one — rule 8's shape: pinned by declaration, not by file alone, so
+ * a *second*, undocumented retired pair landing in the same file later
+ * still fails.
+ *
+ * - `UltrasHero.tsx` — the marketing hero's own `py-24 sm:py-32` (#2877:
+ *   "ruled by the dark-band family's own air rule, not by this decision").
+ * - `ploegen/[slug]/(detail)/page.tsx` + its `loading.tsx` — `<TeamHero>`'s
+ *   own `py-8 sm:py-12` (#2876) and the skeleton that mirrors it exactly.
+ * - `PageHero.tsx` + `PageHeroSkeleton.tsx` — the dark-band register's own
+ *   `py-14 sm:py-20` (#2426/#2442), the shared opening every route composes
+ *   rather than reimplements.
+ * - `ErrorState.tsx` — excluded outright by #2433, untouched by #2479.
+ * - `nieuws/[slug]/loading.tsx` — mirrors `<RelatedRow>`'s own footprint,
+ *   and `<RelatedRow>` itself carries a *different*, asymmetric shape
+ *   (`pt-8 pb-16 lg:pt-10 lg:pb-24`, ART-1, #2237) that predates and is
+ *   untouched by #2479 — this skeleton's `py-16 lg:py-24` already drifted
+ *   from the component it mirrors before this ticket existed. Fixing a
+ *   loading skeleton against a page/component #2571 doesn't touch is
+ *   #2432's call, not this ticket's; named here rather than silently
+ *   passed.
+ */
+const RETIRED_PAIR_EXEMPTIONS: Record<string, readonly [string, string]> = {
+  "app/(main)/club/ultras/UltrasHero.tsx": ["py-24", "sm:py-32"],
+  "app/(main)/ploegen/[slug]/(detail)/page.tsx": ["py-8", "sm:py-12"],
+  "app/(main)/ploegen/[slug]/(detail)/loading.tsx": ["py-8", "sm:py-12"],
+  "components/layout/PageHero/PageHero.tsx": ["py-14", "sm:py-20"],
+  "components/layout/PageHero/PageHeroSkeleton.tsx": ["py-14", "sm:py-20"],
+  "components/design-system/ErrorState/ErrorState.tsx": ["py-16", "md:py-20"],
+  "app/(main)/nieuws/[slug]/loading.tsx": ["py-16", "lg:py-24"],
+};
+
+/** The homepage — excluded outright, not matched-and-exempted (#2402/#2479
+ *  own it; there is no "one homepage pair" to pin the way the seven table
+ *  entries above pin one hero/skeleton pair each). */
+const isHomepageSource = (relPath: string): boolean =>
+  relPath.startsWith("app/(landing)/(home)/") ||
+  relPath.startsWith("components/home/");
+
+const retiredPairScannableSources = productionSources.filter(
+  (relPath) =>
+    !(relPath in RETIRED_PAIR_EXEMPTIONS) && !isHomepageSource(relPath),
+);
+
+describe("no retired section-padding pair remains, outside the homepage (#2571)", () => {
+  it.each(retiredPairScannableSources)(
+    "%s — carries none of the nine retired py-* pairs",
+    (relPath) => {
+      expect(hasAnyRetiredPair(code.get(relPath)!)).toBe(false);
+    },
+  );
+});
+
+/**
+ * Held to its exact pinned pair, rule 8's/rule 13's shape — a file that has
+ * genuinely lost its one retired pair (fixed, or the component it mirrors
+ * changed again) must have the entry removed, and this fails loudly the day
+ * that happens rather than quietly stop testing a file that no longer needs
+ * the carve-out.
+ */
+describe("rule 16's retired-pair exemptions are pinned to their exact pair (#2571)", () => {
+  it.each(Object.entries(RETIRED_PAIR_EXEMPTIONS))(
+    "%s — still actually carries %s %s",
+    (relPath, [base, variant]) => {
+      expect(scannableSources).toContain(relPath);
+      expect(hasPairOnSameLine(code.get(relPath)!, base, variant)).toBe(true);
+    },
+  );
+});
+
+/**
  * The map is derived by hand (rule 12's own shape), so an edit that emptied
  * it would read as a pass on every site. Pinned totals, plus the detector's
  * own coverage against the shapes it must tell apart — the same self-test
  * convention every other rule in this file carries.
  */
 describe("rule 16 catches what it claims to (#2571)", () => {
-  it("covers 26 files and 36 sites in total", () => {
+  it("covers 26 files and 35 sites in total", () => {
     const files = Object.keys(SECTION_SPACING_SITES);
     const sites = Object.values(SECTION_SPACING_SITES).reduce(
       (a, b) => a + b,
       0,
     );
     expect(files).toHaveLength(26);
-    expect(sites).toBe(36);
+    expect(sites).toBe(35);
   });
 
   it("counts a contiguous pair on one line", () => {
@@ -2724,5 +2859,64 @@ describe("rule 16 catches what it claims to (#2571)", () => {
   it("does not count the two tokens when they land on different lines", () => {
     const source = ['className="py-12"', 'className="sm:py-16"'].join("\n");
     expect(sectionSpacingOccurrences(source)).toBe(0);
+  });
+
+  it("covers all nine retired pairs, and none of them is the target value", () => {
+    expect(RETIRED_SECTION_PADDING_PAIRS).toHaveLength(9);
+    expect(RETIRED_SECTION_PADDING_PAIRS).not.toContainEqual([
+      SECTION_SPACING_BASE,
+      SECTION_SPACING_VARIANT,
+    ]);
+  });
+
+  it("flags each retired pair on its own line", () => {
+    for (const [base, variant] of RETIRED_SECTION_PADDING_PAIRS) {
+      expect(
+        hasPairOnSameLine(`className="${base} ${variant}"`, base, variant),
+      ).toBe(true);
+    }
+  });
+
+  it("does not flag a retired pair's tokens split across two lines", () => {
+    const source = ['className="py-10"', 'className="md:py-14"'].join("\n");
+    expect(hasPairOnSameLine(source, "py-10", "md:py-14")).toBe(false);
+  });
+
+  it("hasAnyRetiredPair matches any one of the nine, not only the first", () => {
+    expect(hasAnyRetiredPair('className="py-16 lg:py-24"')).toBe(true);
+    expect(hasAnyRetiredPair('className="py-24 sm:py-32"')).toBe(true);
+  });
+
+  it("hasAnyRetiredPair leaves the target value and unrelated padding alone", () => {
+    expect(hasAnyRetiredPair('className="py-12 sm:py-16"')).toBe(false);
+    expect(hasAnyRetiredPair('className="px-4 py-2"')).toBe(false);
+  });
+
+  it("isHomepageSource matches both homepage roots and nothing else", () => {
+    expect(isHomepageSource("app/(landing)/(home)/page.tsx")).toBe(true);
+    expect(isHomepageSource("components/home/BannerSlot/BannerSlot.tsx")).toBe(
+      true,
+    );
+    expect(isHomepageSource("app/(landing)/jeugd/(index)/page.tsx")).toBe(
+      false,
+    );
+    expect(isHomepageSource("components/homepage/Foo.tsx")).toBe(false);
+  });
+
+  it("every exemption is a real, scannable file", () => {
+    for (const relPath of Object.keys(RETIRED_PAIR_EXEMPTIONS)) {
+      expect(scannableSources).toContain(relPath);
+    }
+  });
+
+  it("reproduces the bisect: a throwaway retired pair in an unlisted file is caught", () => {
+    // The exact check this ticket's review asked to see fail before it
+    // passes — a #2571 review round 1 regression reproduction, not a
+    // synthetic snippet: a retired pair landing on a file this rule does
+    // scan (not a story, not a test, not the homepage, not a pinned
+    // exemption) must be visible to `hasAnyRetiredPair`.
+    const relPath = "components/staff/StaffRoles/StaffRoles.tsx";
+    expect(retiredPairScannableSources).toContain(relPath);
+    expect(hasAnyRetiredPair('className="py-10 md:py-14"')).toBe(true);
   });
 });

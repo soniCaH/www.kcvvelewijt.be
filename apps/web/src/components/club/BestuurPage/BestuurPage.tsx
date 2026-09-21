@@ -83,30 +83,42 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
-      {showDescription ? (
+      {/* Description + members are ONE section, not two same-colour ones
+          stacking (#2479 rule 3). Before this ticket the description was
+          `pt-12`-only, so the two read as one continuous block with the
+          members section's own top padding as the only gap between them;
+          padding both sides of the description too (rule 1, no one-sided
+          sections) would otherwise double that gap into a new violation
+          with no seam and no colour change to justify it. Merged instead —
+          `mt-12` on the members block reproduces the old 48px rhythm as an
+          internal gap rather than a second section boundary. */}
+      {showDescription || hasMembers ? (
         <PageContainer as="section" className="py-12 sm:py-16">
-          {/* Shared by /club/bestuur, /club/angels and /club/jeugdbestuur (#2436).
-              The rule + gutter sit outside the clamp so the text column measures
-              the full prose token, not the token minus its own padding. */}
-          <div className="border-jersey-deep border-l-4 pl-6">
-            <div className="text-ink font-body max-w-[var(--container-prose)] text-base leading-relaxed [&_p]:mb-4 [&_p:last-child]:mb-0">
-              <PortableText value={body} components={bodyComponents} />
+          {showDescription ? (
+            // Shared by /club/bestuur, /club/angels and /club/jeugdbestuur
+            // (#2436). The rule + gutter sit outside the clamp so the text
+            // column measures the full prose token, not the token minus its
+            // own padding.
+            <div className="border-jersey-deep border-l-4 pl-6">
+              <div className="text-ink font-body max-w-[var(--container-prose)] text-base leading-relaxed [&_p]:mb-4 [&_p:last-child]:mb-0">
+                <PortableText value={body} components={bodyComponents} />
+              </div>
             </div>
-          </div>
-        </PageContainer>
-      ) : null}
+          ) : null}
 
-      {hasMembers ? (
-        <PageContainer as="section" className="py-12 sm:py-16">
-          <EditorialHeading
-            level={2}
-            size="display-md"
-            emphasis={{ text: "." }}
-            className="mb-6"
-          >
-            De leden
-          </EditorialHeading>
-          <TeamStaff staff={staff} heading="De leden" />
+          {hasMembers ? (
+            <div className={showDescription ? "mt-12" : undefined}>
+              <EditorialHeading
+                level={2}
+                size="display-md"
+                emphasis={{ text: "." }}
+                className="mb-6"
+              >
+                De leden
+              </EditorialHeading>
+              <TeamStaff staff={staff} heading="De leden" />
+            </div>
+          ) : null}
         </PageContainer>
       ) : null}
 

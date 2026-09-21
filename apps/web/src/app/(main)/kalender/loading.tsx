@@ -23,18 +23,19 @@ export default function CalendarLoading() {
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Kalender laden…" />
 
-      <PageContainer width="index" className="pt-10">
+      {/* One merged container now, matching the real page (#2571) — the
+          opening and the listing are ONE padded section, not two stacked on
+          the same colour. */}
+      <PageContainer width="index" className="py-12 sm:py-16">
         <PageHero
           kicker="Kalender"
           headline="Wedstrijdkalender"
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
           image="/images/youth-trainers.jpg"
         />
-      </PageContainer>
 
-      <PageContainer width="index" className="py-10">
         {/* Matches CalendarWidget's root <div className="space-y-4"> */}
-        <div className="space-y-4">
+        <div className="mt-10 space-y-4">
           {/* Type filter chips (Alles · Wedstrijden · Clubevent ·
               Supportersactiviteit · Jeugdwerking · Andere) — the shared
               <FilterTabsSkeleton> (#2564 review item 4), so this can't drift

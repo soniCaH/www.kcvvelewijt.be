@@ -103,7 +103,7 @@ export default function MatchDetailLoading() {
       {/* MatchLineupSection — kicker + heading + 2 columns of 11 lineup rows. */}
       <PageContainer
         as="section"
-        className="bg-cream py-10 md:py-14"
+        className="bg-cream py-12 sm:py-16"
         aria-hidden="true"
       >
         <SectionHeadingSkeleton />
@@ -131,7 +131,7 @@ export default function MatchDetailLoading() {
       {/* MatchEventsSection — kicker + heading + timeline rows. */}
       <PageContainer
         as="section"
-        className="bg-cream py-10 md:py-14"
+        className="bg-cream py-12 sm:py-16"
         aria-hidden="true"
       >
         <SectionHeadingSkeleton />
@@ -151,7 +151,7 @@ export default function MatchDetailLoading() {
       {/* MatchStandingsSection — kicker + heading + head-to-head table rows. */}
       <PageContainer
         as="section"
-        className="bg-cream py-10 md:py-14"
+        className="bg-cream py-12 sm:py-16"
         aria-hidden="true"
       >
         <SectionHeadingSkeleton />

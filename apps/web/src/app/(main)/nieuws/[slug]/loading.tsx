@@ -72,11 +72,12 @@ export default function ArticleDetailLoading() {
         </PageContainer>
       </div>
 
-      {/* Prose body — narrow reading column (680). */}
+      {/* Prose body — narrow reading column (680). Matches `<ArticleBody>`'s
+          own `py-12 sm:py-16` (#2571). */}
       <PageContainer
         as="section"
         width="prose"
-        className="bg-cream py-10 lg:py-14"
+        className="bg-cream py-12 sm:py-16"
         aria-hidden="true"
       >
         <div className="space-y-3">

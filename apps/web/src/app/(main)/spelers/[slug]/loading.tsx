@@ -60,7 +60,7 @@ export default function PlayerDetailLoading() {
       <Skeleton className="h-[18px] w-full" />
       <PageContainer
         as="section"
-        className="bg-cream py-12 lg:py-16"
+        className="bg-cream py-12 sm:py-16"
         aria-hidden="true"
       >
         <div className="space-y-3">

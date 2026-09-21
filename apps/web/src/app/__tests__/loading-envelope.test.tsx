@@ -181,7 +181,7 @@ describe("loading.tsx envelope drift guard", () => {
       // mirroring the rebuilt /sponsors page (no SectionStack envelope). Outer
       // container is a `<PageContainer width="index">` (page's index width).
       expectedRootClass:
-        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] py-10 sm:py-14",
+        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] py-12 sm:py-16",
       announcement: "Sponsors laden…",
     },
     {

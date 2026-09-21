@@ -649,7 +649,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <section
                       data-qa-tail-section="true"
                       aria-label="Q&A"
-                      className="bg-cream w-full px-4 pb-12 lg:px-0 lg:pb-16"
+                      className="bg-cream w-full px-4 pb-12 sm:pb-16 lg:px-0"
                     >
                       <div
                         className="mx-auto w-full"

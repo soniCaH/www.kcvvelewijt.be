@@ -46,7 +46,7 @@ export default function ClubPageLoading() {
 
       {/* Body skeleton — mirrors <ArticleBody>'s `bg-cream` shell + the
           `--container-prose` reading column. */}
-      <div className="bg-cream w-full px-4 py-12 lg:px-0 lg:py-16">
+      <div className="bg-cream w-full px-4 py-12 sm:py-16 lg:px-0">
         <div
           className="mx-auto w-full space-y-4"
           style={{ maxWidth: "var(--container-prose)" }}
