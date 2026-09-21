@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import {
   EditorialHeading,
@@ -13,6 +13,7 @@ import {
   getResultColor,
   isPlayedMatch,
   isSettledMatch,
+  OUTCOME_TINT,
   OUTCOME_UNDERLINE,
   reservationView,
 } from "@/lib/utils/match-display";
@@ -68,9 +69,17 @@ const LIST_ROW_FOCUS_CLASSES =
 /**
  * A pitch-reservation placeholder's reduced agenda row (#2606, #2688) — no
  * opponent, no venue tag, no link (mirrors #2606 decision 5: nothing at
- * `/wedstrijd/{id}` was worth clicking through to from a list row). Same
- * `[52px_1fr_auto]` grid as `AgendaMatchRow` so the two rows still line up in
- * the same day group.
+ * `/wedstrijd/{id}` was worth clicking through to from a list row).
+ *
+ * Responsive (#2599, one `sm` breakpoint like `AgendaMatchRow`), one grid
+ * rather than two duplicated layouts (#2599 review — the two never diverged
+ * beyond the column width and where the squad chip sits, so a second DOM
+ * tree bought nothing but doubled text nodes for every query against this
+ * row): `[56px_1fr_auto]` below `sm`, `[52px_1fr_auto]` at `sm`+. The squad
+ * chip sits under the kickoff time below `sm` (matching `AgendaMatchRow`'s
+ * own mobile margin, so a mixed-squad day's edge reads the same whether a
+ * row is a real match or a reservation) and swaps to inline beside the
+ * crest at `sm`+ via `sm:hidden`/`hidden sm:inline`.
  *
  * Also renders a tournament fixture (#2696/#2715/#2802, `kind === "reduced"`
  * — `competitionType === "tournament"` with no result yet, never a string
@@ -91,20 +100,30 @@ function ReservationAgendaRow({
   const { subject } = reservationView(match, otherClub);
   const crestTeam = match.club;
   const when = match.time ?? formatMatchTime(match.date) ?? "";
+
   return (
     <div
       data-row-kind={match.kind}
-      className="border-paper-edge grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 last:border-b-0"
+      className="border-paper-edge grid grid-cols-[56px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 last:border-b-0 sm:grid-cols-[52px_1fr_auto]"
     >
-      <span className="text-ink-muted font-mono text-[11px]">{when}</span>
+      <div className="flex flex-col gap-0.5">
+        <span className="text-ink-muted font-mono text-[11px] leading-none sm:leading-normal">
+          {when}
+        </span>
+        {/* Same squad chip the crest cell renders inline at sm+ — without it
+            a reservation among a mixed-squad day's other rows (crest +
+            subject + time) cannot be told apart from any other squad's
+            reservation. Below sm it lives in the margin instead. */}
+        {match.team && (
+          <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide sm:hidden">
+            {match.team}
+          </span>
+        )}
+      </div>
       <span className="flex min-w-0 items-center gap-2">
         <Crest name={crestTeam.name} logo={crestTeam.logo} size={18} />
-        {/* Same squad chip `AgendaMatchRow` renders below — without it a
-            reservation among a mixed-squad day's other rows (crest + subject
-            + time) cannot be told apart from any other squad's
-            reservation. */}
         {match.team && (
-          <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
+          <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] font-semibold tracking-wide sm:inline">
             {match.team}
           </span>
         )}
@@ -153,57 +172,176 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
   // assigns the score the way a second club name or a Thuis/Uit tag does
   // elsewhere, so per the placement rule this row stays quiet.
   const underline = outcome ? OUTCOME_UNDERLINE.light[outcome] : undefined;
+  // The mobile score box (#2599, owner decision) fills solid behind both
+  // stacked numbers instead of underlining one line — and only for a
+  // decisive result. "None for a draw" is the owner's own wording: unlike
+  // the desktop underline above (which still marks a draw with the muted
+  // stop), the mobile box stays untinted for a draw.
+  const boxTint =
+    outcome === "win" || outcome === "loss"
+      ? OUTCOME_TINT.light[outcome]
+      : undefined;
+
+  // The `aria-label` replaces the row's contents as its accessible name
+  // (#2599 review) — below `sm` the visible content is two unpaired lists
+  // (home/away names, then their scores each on their own line), so without
+  // a built label a screen reader hears "09:15 U10 FC Zemst Sportief KCVV
+  // Elewijt 5 3" rather than a paired result. Mirrors `<TeamAgendaRow>`'s
+  // `scoreboardLabel` / `<MatchStripView>`'s own built label: state the
+  // kickoff, the squad (if any), then the two names paired with their own
+  // score — or, for an unplayed match, the two names alone (the kickoff
+  // already opens the label, so there's nothing to fabricate a score for).
+  const scoreboardLabel =
+    isPlayed && hasScore
+      ? `${match.homeTeam.name} ${match.homeScore} – ${match.awayTeam.name} ${match.awayScore}`
+      : `${match.homeTeam.name} – ${match.awayTeam.name}`;
+  const rowLabel = [when, match.team, scoreboardLabel]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <Link
       href={`/wedstrijd/${match.id}`}
+      aria-label={rowLabel}
       data-testid="agenda-match-row"
       onClick={() => trackKalenderItemClick("match")}
       className={cn(
-        "border-paper-edge grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 no-underline transition-colors last:border-b-0",
+        "border-paper-edge block border-b border-dashed no-underline transition-colors last:border-b-0",
         "hover:bg-cream-soft/50 focus-visible:bg-cream-soft/50",
         LIST_ROW_FOCUS_CLASSES,
       )}
     >
-      <span className="text-ink-muted font-mono text-[11px]">{when}</span>
-      <span className="flex min-w-0 items-center gap-2">
-        <Crest
-          name={match.homeTeam.name}
-          logo={match.homeTeam.logo}
-          size={18}
-        />
-        {match.team && (
-          <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
-            {match.team}
+      {/*
+        Below sm (#2599, owner decision 2026-09-21): stacked, home over away.
+        Rule 1 — a 56px left margin (not 52px) so "U8 Groen"/"Reserven" fit
+        one line. Rule 2 — both clubs stacked, home on top (`match.homeTeam`
+        is always the home side, so the row order already is that — no
+        `isHome` branching needed here). Rule 3 — the score stacked per club,
+        one number per line, the whole box tinted (not a box at all for an
+        unplayed match). Rule 5 — no `<MatchVenueTag>`: the stack order
+        already says home/away, the same rule `<TeamAgendaRow>`'s desktop
+        scoreboard follows (detail-ia-locked.md §3, "no venue indicator").
+      */}
+      <div
+        data-layout="mobile"
+        className="grid grid-cols-[56px_1fr_auto] items-center gap-3 px-2 py-2 sm:hidden"
+      >
+        <div className="flex flex-col gap-0.5">
+          <span className="text-ink-muted font-mono text-[11px] leading-none">
+            {when}
           </span>
-        )}
-        <span
-          title={`${match.homeTeam.name} — ${match.awayTeam.name}`}
-          className="text-ink min-w-0 truncate text-[13px] font-semibold"
-        >
-          {match.homeTeam.name} — {match.awayTeam.name}
-        </span>
-        {isPlayed && hasScore && (
+          {match.team && (
+            <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide">
+              {match.team}
+            </span>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-1">
           <span
-            // A score beside the fixture row is a TAG (#2516 rule 1) — mono,
-            // which aligns by construction (#2579 supersedes #2610's
-            // lining-nums). font-bold, not font-black (#2579 review): IBM
-            // Plex Mono loads only up to 700, so 900 was already clamping.
-            className="text-ink shrink-0 font-mono text-[15px] font-bold"
+            className="flex min-w-0 items-center gap-1.5"
+            title={match.homeTeam.name}
+          >
+            <Crest
+              name={match.homeTeam.name}
+              logo={match.homeTeam.logo}
+              size={18}
+            />
+            <span className="text-ink min-w-0 truncate text-[13px] font-semibold">
+              {match.homeTeam.name}
+            </span>
+          </span>
+          <span
+            className="flex min-w-0 items-center gap-1.5"
+            title={match.awayTeam.name}
+          >
+            <Crest
+              name={match.awayTeam.name}
+              logo={match.awayTeam.logo}
+              size={18}
+            />
+            <span className="text-ink min-w-0 truncate text-[13px] font-semibold">
+              {match.awayTeam.name}
+            </span>
+          </span>
+        </div>
+        {isPlayed && hasScore ? (
+          <div
+            data-outcome={outcome ?? undefined}
+            className={cn(
+              "text-ink flex flex-col items-center justify-center gap-0.5 px-2 py-1 font-mono text-[16px] leading-tight font-bold",
+              // A real `background-color`, not `box-shadow`: a shadow-based
+              // fill would silently beat any later `shadow-*`/`ring-*` on
+              // this box and sits outside DESIGN.md's shadow vocabulary.
+              // Read via a CSS custom property (`--score-tint`, the
+              // `TapedCardGrid`/`TapeStrip` `--tape-left` pattern) rather
+              // than passed straight to `backgroundColor`: the test
+              // environment (happy-dom, `vitest.config.ts`) validates a
+              // `background-color` value and silently drops
+              // `color-mix(...)`, but a custom property's value is never
+              // parsed, so it survives.
+              boxTint && "bg-[var(--score-tint)]",
+            )}
             style={
-              underline ? { boxShadow: underline, padding: "0 4px" } : undefined
+              boxTint
+                ? ({ "--score-tint": boxTint } as CSSProperties)
+                : undefined
             }
           >
-            {match.homeScore} – {match.awayScore}
-          </span>
+            <span>{match.homeScore}</span>
+            <span>{match.awayScore}</span>
+          </div>
+        ) : (
+          <span />
         )}
-        {match.competition && (
-          <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] tracking-wide uppercase sm:inline">
-            {match.competition}
+      </div>
+
+      {/* sm+ (#2599): today's one-line row, unchanged. */}
+      <div
+        data-layout="desktop"
+        className="hidden grid-cols-[52px_1fr_auto] items-center gap-3 px-2 py-2 sm:grid"
+      >
+        <span className="text-ink-muted font-mono text-[11px]">{when}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          <Crest
+            name={match.homeTeam.name}
+            logo={match.homeTeam.logo}
+            size={18}
+          />
+          {match.team && (
+            <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
+              {match.team}
+            </span>
+          )}
+          <span
+            title={`${match.homeTeam.name} — ${match.awayTeam.name}`}
+            className="text-ink min-w-0 truncate text-[13px] font-semibold"
+          >
+            {match.homeTeam.name} — {match.awayTeam.name}
           </span>
-        )}
-      </span>
-      <MatchVenueTag isHome={isHome} />
+          {isPlayed && hasScore && (
+            <span
+              // A score beside the fixture row is a TAG (#2516 rule 1) — mono,
+              // which aligns by construction (#2579 supersedes #2610's
+              // lining-nums). font-bold, not font-black (#2579 review): IBM
+              // Plex Mono loads only up to 700, so 900 was already clamping.
+              className="text-ink shrink-0 font-mono text-[15px] font-bold"
+              style={
+                underline
+                  ? { boxShadow: underline, padding: "0 4px" }
+                  : undefined
+              }
+            >
+              {match.homeScore} – {match.awayScore}
+            </span>
+          )}
+          {match.competition && (
+            <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] tracking-wide uppercase sm:inline">
+              {match.competition}
+            </span>
+          )}
+        </span>
+        <MatchVenueTag isHome={isHome} />
+      </div>
     </Link>
   );
 }

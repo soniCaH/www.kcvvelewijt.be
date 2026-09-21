@@ -30,12 +30,20 @@ interface TeamNameSource {
   name: string;
 }
 
+/** Title-case one lowercase slug segment (`wit` → `Wit`, `groen` → `Groen`). */
+function capitalizeSegment(segment: string): string {
+  return segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase();
+}
+
 /**
- * Label derived from the slug's last segment — which is also what drops the
- * `kcvve-` prefix, so no separate strip is needed:
+ * Label derived from the slug — which is also what drops the `kcvve-`
+ * prefix, so no separate strip is needed:
  *
- * - an age token → uppercased (`kcvve-u16` → `U16`, `kcvve-u10p` → `U10P`)
- * - a lone letter → `X-ploeg` (`eerste-elftallen-a` → `A-ploeg`)
+ * - an age token anywhere in the slug → that token uppercased, plus every
+ *   segment after it title-cased (`kcvve-u16` → `U16`, `kcvve-u10p` →
+ *   `U10P`, `kcvve-u8-wit` → `U8 Wit`)
+ * - a lone letter (no age token) → `X-ploeg` (`eerste-elftallen-a` →
+ *   `A-ploeg`)
  * - anything else → the federation `name` (`reserven` → `Reserven`)
  *
  * This is `firstTeamLabel` (#2211) *extended*: it only ever recognised the lone
@@ -43,21 +51,50 @@ interface TeamNameSource {
  * where the five double-space names (`KCVVE  U15`) came from. A slug cannot
  * contain a double space, so recognising the age token retires them.
  *
- * The lone-letter branch is gated on the slug naming no age band, and that
- * guard is load-bearing rather than defensive: PSD slugifies the team name, and
- * the club has already fielded variant youth sides this way (`kcvve-u7-wit`,
- * `kcvve-u9-groen`, both archived). The day PSD syncs a `KCVVE U9 A`, an
- * ungated branch would head `/ploegen/kcvve-u9-a` with `A-ploeg.` — the exact
- * collision this helper exists to close, reintroduced with nobody editing
- * anything. Such a side falls through to its name until an editor writes a
- * `displayName`, which is what the field is for.
+ * **The age token used to have to be the slug's last segment** (#2599 review):
+ * that missed a colour-distinguished duplicate — `kcvve-u8-wit` /
+ * `kcvve-u8-groen`, both live in production — whose age token sits mid-slug
+ * with a colour segment after it, so it fell through to the raw federation
+ * `name` (`KCVVE U8 Wit`) exactly like the lone-letter guard's comment below
+ * already warned `kcvve-u7-wit`/`kcvve-u9-groen` would. Those two were marked
+ * "archived" when this comment was written; `kcvve-u8-wit`/`kcvve-u8-groen`
+ * are not, so the fall-through was live on both `/kalender` and `/ploegen` —
+ * matching this helper everywhere it's read fixes both call sites in one
+ * source rather than stripping the prefix again in a consuming row.
+ *
+ * **The lone-letter branch's own guard is retired (#2599 review).** It used
+ * to read `!segments.some(/^u\d{1,2}$/i)` — added when the age token could
+ * only be the slug's *last* segment, specifically so a future `kcvve-u9-a`
+ * would fall through to the raw name instead of the lone-letter branch
+ * mis-reading its trailing `a` as the senior A-ploeg. Now that the age-token
+ * search above runs first and matches anywhere in the slug, `kcvve-u9-a` is
+ * already caught there — `ageIndex` finds `u9`, and the branch returns
+ * `"U9 A"` before the lone-letter branch ever runs. That makes the guard's
+ * condition unreachable: by the time execution reaches the lone-letter
+ * check, `ageIndex === -1` already proved no segment matches
+ * `/^u\d{1,2}[a-z]?$/i`, which is `/^u\d{1,2}$/i`'s superset — so
+ * `segments.some(/^u\d{1,2}$/i)` can never be true there either, and the
+ * `&&` it gated never once evaluates `false`. Deleted rather than kept as
+ * defensive dead code — `"U9 A"` is also the *better* answer than the old
+ * fallback to the raw federation name: it reads as a variant U9 side, the
+ * same way `"U8 Wit"` does, and it can no longer be confused with the
+ * senior team because the age token renders ahead of the letter.
  */
 function slugLabel(slug: string, name: string): string {
   const segments = slug.split("-");
   const tail = segments.at(-1) ?? "";
-  if (/^u\d{1,2}[a-z]?$/i.test(tail)) return tail.toUpperCase();
-  if (/^[a-z]$/i.test(tail) && !segments.some((s) => /^u\d{1,2}$/i.test(s)))
-    return `${tail.toUpperCase()}-ploeg`;
+  const ageIndex = segments.findIndex((s) => /^u\d{1,2}[a-z]?$/i.test(s));
+  if (ageIndex !== -1) {
+    return segments
+      .slice(ageIndex)
+      .map((segment) =>
+        /^u\d{1,2}[a-z]?$/i.test(segment)
+          ? segment.toUpperCase()
+          : capitalizeSegment(segment),
+      )
+      .join(" ");
+  }
+  if (/^[a-z]$/i.test(tail)) return `${tail.toUpperCase()}-ploeg`;
   return name;
 }
 

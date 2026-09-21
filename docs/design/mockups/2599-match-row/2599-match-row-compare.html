@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendar match row</title>
+<style>
+  :root { --cream:#f5f1e6; --cream-soft:#ede8da; --ink:#0a0a0a; --muted:#5b574d; --deep:#007c46; --alert:#b84a3a; --edge:#d9d2bf; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--ink); font:16px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width:1180px; margin:0 auto; padding:32px 16px 80px; }
+  h1 { font:700 34px/1.1 Georgia, serif; margin:0 0 8px; }
+  .lede { max-width:760px; color:var(--muted); margin:0 0 28px; }
+  section { border:2px solid var(--ink); box-shadow:6px 6px 0 var(--ink); background:#fff9ee; padding:20px; margin:0 0 36px; }
+  section.pick { border-color:var(--deep); box-shadow:6px 6px 0 var(--deep); }
+  section.reject { opacity:.85; }
+  .tag { display:inline-block; font:700 12px/1 ui-monospace, Menlo, monospace; letter-spacing:.08em; text-transform:uppercase; padding:6px 8px; border:2px solid var(--ink); margin-bottom:10px; }
+  .pick .tag { background:var(--deep); color:#fff; border-color:var(--deep); }
+  .reject .tag { background:var(--alert); color:#fff; border-color:var(--alert); }
+  h2 { font:700 24px/1.2 Georgia, serif; margin:0 0 6px; }
+  p.says { margin:0 0 16px; max-width:820px; }
+  .shots { display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+  figure { margin:0; }
+  figcaption { font:600 12px/1.4 ui-monospace, Menlo, monospace; color:var(--muted); margin-bottom:6px; }
+  figure img { display:block; border:1px solid var(--edge); }
+  .w320 img { width:320px; } .w390 img { width:390px; }
+  ul.facts { margin:14px 0 0; padding-left:20px; max-width:820px; }
+  table { border-collapse:collapse; width:100%; max-width:900px; font-size:15px; background:#fff9ee; }
+  th, td { text-align:left; padding:8px 10px; border-bottom:1px dashed var(--edge); }
+  th { font:700 12px/1.2 ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.06em; }
+  td.num { font-family:ui-monospace, Menlo, monospace; }
+  .bad { color:var(--alert); font-weight:700; } .good { color:var(--deep); font-weight:700; }
+  .twin { display:flex; gap:28px; flex-wrap:wrap; }
+  .twin section { flex:1 1 480px; }
+  @media (max-width:700px){ .w390 img{ width:100%; max-width:390px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>The calendar list on a phone</h1>
+  <p class="lede">These are screenshots of the <strong>live</strong> <code>/kalender</code> page (real fonts, real data, Saturday 5 September), rebuilt in the browser for each option. A phone opens the calendar in this list view by default, so every phone visitor sees this row. Ticket #2599.</p>
+
+  <section>
+    <span class="tag">Today</span>
+    <h2>The row shows no opponent</h2>
+    <p class="says">On 320px most rows show one letter (<code>F..</code>, <code>K</code>, <code>l</code>). On 390px most rows show <code>KCVV Ele…</code> — our own club, which is always one of the two sides. A parent cannot see who their child plays.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px — small phone</figcaption><img src="today-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px — normal phone</figcaption><img src="today-390.png" alt=""></figure>
+    </div>
+  </section>
+
+  <div class="twin">
+  <section class="pick">
+    <span class="tag">Round 3 — A · my pick</span>
+    <h2>Drop THUIS / UIT</h2>
+    <p class="says">The stack already says it: our green crest on top = home, at the bottom = away. The desktop team page follows exactly this rule today — <em>"no venue indicator, the order conveys home/away"</em>. The team page only adds a marker on phones because there it shows the opponent alone, so the order is gone.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px</figcaption><img src="G-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px</figcaption><img src="G-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li class="good">Names cut on 320px: <strong>24</strong> of 154 lines (with the box: 101). Fixes the one weak spot of home over away.</li>
+      <li class="bad">A parent who does not know "home team first" must learn it once.</li>
+    </ul>
+  </section>
+  <section>
+    <span class="tag">Round 3 — B</span>
+    <h2>Small house / bus icon</h2>
+    <p class="says">The icon the team page already uses on phones. Quiet, grey, 14px.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px</figcaption><img src="H-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px</figcaption><img src="H-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li class="good">Says home/away for people who do not read the order. 35 of 154 cut on 320px.</li>
+      <li class="bad">Says the same thing twice. Breaks the team page's own rule (a marker only when the order is missing).</li>
+    </ul>
+  </section>
+  </div>
+
+  <h2 style="font:700 20px Georgia,serif;margin:0 0 16px">Round 2 (decided: colour the whole score box)</h2>
+  <div class="twin">
+  <section class="pick">
+    <span class="tag">Round 2 — A · my pick</span>
+    <h2>Colour the whole score box</h2>
+    <p class="says">Home over away is decided. The win/loss colour now fills the box behind both numbers — green won, brick lost, none for a draw — so it sits in the same place on every row. The box sits right against a fixed-width <code>THUIS</code>/<code>UIT</code>, so the scores line up down the list.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px</figcaption><img src="E-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px</figcaption><img src="E-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li class="good">You see how the whole Saturday went at a glance — a column of green and brick.</li>
+      <li class="good">Every other score on the site carries this colour (team page, homepage strip, calendar on desktop).</li>
+    </ul>
+  </section>
+  <section>
+    <span class="tag">Round 2 — B</span>
+    <h2>No colour</h2>
+    <p class="says">Same row, plain numbers. The stacked numbers already show who won.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px</figcaption><img src="F-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px</figcaption><img src="F-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li class="good">Calmest version.</li>
+      <li class="bad">The only score on the site without the win/loss colour.</li>
+      <li class="bad">You must compare two numbers per row to know how we did.</li>
+    </ul>
+  </section>
+  </div>
+
+  <h2 style="font:700 20px Georgia,serif;margin:0 0 16px">Round 1 (decided: home over away)</h2>
+  <div class="twin">
+  <section class="pick">
+    <span class="tag">Option 1 — your pick</span>
+    <h2>Home over away</h2>
+    <p class="says">Time and our team in the left margin. Both clubs stacked, home on top. Each club's goals on its own line. The win/loss colour sits under <em>our</em> number.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px</figcaption><img src="C-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px</figcaption><img src="C-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li class="good">You read a result straight off the rows: <code>FC Zemst 5 / KCVV 3</code>. No need to decode <code>5 – 3</code> plus <code>UIT</code>.</li>
+      <li class="good">The order already says home or away — the same rule as the desktop team page ("the order conveys home/away").</li>
+      <li class="good">Every football app does this. Same height as Option 2.</li>
+      <li class="bad">On a 320px phone it cuts twice as many names (see table): score and <code>THUIS</code> sit side by side, so the names get ~30px less.</li>
+      <li class="bad">The opponent jumps between the top and bottom line, so you cannot run your eye down one line to read who we play.</li>
+      <li>Build fix needed: the scores jump sideways between <code>UIT</code> and <code>THUIS</code> rows (look at 390px). A fixed-width tag column fixes that.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="tag">Option 2</span>
+    <h2>Opponent alone, two lines</h2>
+    <p class="says">Time and our team in the left margin. The opponent only in the middle. Score over <code>THUIS</code>/<code>UIT</code> on the right.</p>
+    <div class="shots">
+      <figure class="w320"><figcaption>320px</figcaption><img src="D-320.png" alt=""></figure>
+      <figure class="w390"><figcaption>390px</figcaption><img src="D-390.png" alt=""></figure>
+    </div>
+    <ul class="facts">
+      <li class="good">Most room for the name. Opponent always in the same spot.</li>
+      <li class="good">Same rule as the phone rows on the team page, homepage strip and week view.</li>
+      <li class="bad">The middle is one line in a two-line row — the extra height holds nothing there.</li>
+      <li class="bad">A result needs decoding: <code>5 – 3</code> + <code>UIT</code> means we scored 3.</li>
+    </ul>
+  </section>
+  </div>
+
+  <section>
+    <span class="tag">The numbers</span>
+    <h2>Measured on all 77 rows of the live page</h2>
+    <table>
+      <tr><th></th><th>Names cut, 320px</th><th>Names cut, 390px</th><th>Row height</th><th>14-match Saturday</th></tr>
+      <tr><td>Today</td><td class="num bad">77 / 77 rows (47 show almost nothing)</td><td class="num bad">76 / 77 rows</td><td class="num">42px</td><td class="num">591px</td></tr>
+      <tr><td><strong>Option 1</strong> home over away</td><td class="num">89 / 154 name lines</td><td class="num good">6 / 154 name lines</td><td class="num">70px</td><td class="num">986px</td></tr>
+      <tr><td><strong>Option 2</strong> opponent alone</td><td class="num">39 / 77 names</td><td class="num good">6 / 77 names</td><td class="num">67px</td><td class="num">940px</td></tr>
+    </table>
+    <ul class="facts">
+      <li>On 390px both options only cut the very long names, like <code>Boortmeerbeek-Hever-Schi…</code> (37 letters). The difference is only on small 320px phones.</li>
+      <li>The "6.D density lock" that the ticket worries about chose <em>show every row, never fold rows away</em> over folding a busy day. It never ruled on row height. A taller row does not break it.</li>
+      <li>Also fixed in the same change: the calendar calls two teams <code>KCVVE U8 Wit</code> / <code>KCVVE U8 Groen</code>; everywhere else they are <code>U8 Wit</code> / <code>U8 Groen</code>.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

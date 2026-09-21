@@ -162,6 +162,32 @@ export function matchRowKind(match: MatchRowKindSource): ScheduleRow["kind"] {
 }
 
 /**
+ * The raw win/draw/loss tint colour — the same `color-mix()` expression
+ * `OUTCOME_UNDERLINE` below wraps into a 9px inset underline. Split out
+ * (#2599) so a consumer that wants a *solid* tint instead of an underline
+ * (`<CalendarAgenda>`'s mobile score box, which fills the whole box behind
+ * both stacked numbers rather than drawing a line under one) can reuse the
+ * exact colour without hand-copying the mix a second time. `OUTCOME_UNDERLINE`
+ * is derived from this record, not the other way round, so the two can never
+ * disagree on what "win" looks like.
+ */
+export const OUTCOME_TINT: Record<
+  "light" | "dark",
+  Record<MatchOutcome, string>
+> = {
+  light: {
+    win: "color-mix(in srgb, var(--color-jersey-deep) 34%, var(--color-cream))",
+    draw: "color-mix(in srgb, var(--color-ink-muted) 34%, var(--color-cream))",
+    loss: "color-mix(in srgb, var(--color-alert) 38%, var(--color-cream))",
+  },
+  dark: {
+    win: "color-mix(in srgb, var(--color-jersey-deep) 55%, var(--color-jersey-deep-dark))",
+    draw: "color-mix(in srgb, var(--color-ink-muted) 55%, var(--color-jersey-deep-dark))",
+    loss: "color-mix(in srgb, var(--color-alert) 55%, var(--color-jersey-deep-dark))",
+  },
+};
+
+/**
  * Inset underline that tints a finished match's scoreline by KCVV-perspective
  * outcome (win = jersey-deep, loss = alert, draw = ink-muted — all three mixed
  * toward the ground so the patch stays legible on both cream and jersey-deep
@@ -201,14 +227,14 @@ export const OUTCOME_UNDERLINE: Record<
   Record<MatchOutcome, string>
 > = {
   light: {
-    win: "inset 0 -9px 0 color-mix(in srgb, var(--color-jersey-deep) 34%, var(--color-cream))",
-    draw: "inset 0 -9px 0 color-mix(in srgb, var(--color-ink-muted) 34%, var(--color-cream))",
-    loss: "inset 0 -9px 0 color-mix(in srgb, var(--color-alert) 38%, var(--color-cream))",
+    win: `inset 0 -9px 0 ${OUTCOME_TINT.light.win}`,
+    draw: `inset 0 -9px 0 ${OUTCOME_TINT.light.draw}`,
+    loss: `inset 0 -9px 0 ${OUTCOME_TINT.light.loss}`,
   },
   dark: {
-    win: "inset 0 -9px 0 color-mix(in srgb, var(--color-jersey-deep) 55%, var(--color-jersey-deep-dark))",
-    draw: "inset 0 -9px 0 color-mix(in srgb, var(--color-ink-muted) 55%, var(--color-jersey-deep-dark))",
-    loss: "inset 0 -9px 0 color-mix(in srgb, var(--color-alert) 55%, var(--color-jersey-deep-dark))",
+    win: `inset 0 -9px 0 ${OUTCOME_TINT.dark.win}`,
+    draw: `inset 0 -9px 0 ${OUTCOME_TINT.dark.draw}`,
+    loss: `inset 0 -9px 0 ${OUTCOME_TINT.dark.loss}`,
   },
 };
 

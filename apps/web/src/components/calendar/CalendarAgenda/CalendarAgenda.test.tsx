@@ -395,6 +395,212 @@ describe("CalendarAgenda", () => {
     expect(score.getAttribute("style") ?? "").not.toContain("box-shadow");
   });
 
+  // Below-`sm` stacked layout (#2599, owner decision 2026-09-21). jsdom's
+  // `matchMedia` ignores width (docs/agents/... memory: happy-dom/jsdom
+  // can't prove a breakpoint switch), so these assert the mobile DOM tree
+  // itself — reached via `[data-layout="mobile"]` — rather than a rendered
+  // viewport; the actual breakpoint switch is proved in the PR body against
+  // a real browser/VR capture.
+  describe("mobile stacked row (#2599)", () => {
+    function mobileLayout(row: HTMLElement): HTMLElement {
+      const layout = row.querySelector('[data-layout="mobile"]');
+      expect(layout).not.toBeNull();
+      return layout as HTMLElement;
+    }
+
+    // #2599 review: below `sm` the visible content is two unpaired lists
+    // (names, then scores each on their own line), so the row needs one
+    // built accessible name — the same thing `<TeamAgendaRow>`'s
+    // `scoreboardLabel` and `<MatchStripView>`'s own built label do — rather
+    // than letting the browser compute one from unpaired text nodes.
+    it("builds one accessible name for the link: time, squad, then the paired result", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              time: "09:15",
+              team: "U10",
+              homeTeam: { id: 1, name: "FC Zemst Sportief" },
+              awayTeam: { id: 2, name: "KCVV Elewijt" },
+              isHome: false,
+              status: "finished",
+              homeScore: 5,
+              awayScore: 3,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const row = screen.getByTestId("agenda-match-row");
+      expect(row).toHaveAccessibleName(
+        "09:15, U10, FC Zemst Sportief 5 – KCVV Elewijt 3",
+      );
+    });
+
+    it("omits the fabricated score from the accessible name for an unplayed match", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              time: "09:15",
+              team: "U10",
+              status: "scheduled",
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const row = screen.getByTestId("agenda-match-row");
+      expect(row).toHaveAccessibleName("09:15, U10, KCVV Elewijt – Zemst");
+    });
+
+    it("widens the left column to 56px so a two-word squad label fits on one line", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[makeMatch({ id: 1, team: "U8 Groen" })]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      expect(layout.className).toContain("grid-cols-[56px_1fr_auto]");
+      expect(layout).toHaveTextContent("U8 Groen");
+    });
+
+    it("stacks home over away, in that order, with no venue tag", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              homeTeam: { id: 1, name: "FC Zemst Sportief" },
+              awayTeam: { id: 2, name: "KCVV Elewijt" },
+              isHome: false,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      const names = Array.from(layout.querySelectorAll("[title]")).map((el) =>
+        el.getAttribute("title"),
+      );
+      // Home first, away second — the row's own order, never `isHome`
+      // (rule 2: "the order conveys home/away", detail-ia-locked.md §3).
+      expect(names).toEqual(["FC Zemst Sportief", "KCVV Elewijt"]);
+      expect(
+        layout.querySelector('[data-testid="match-venue-tag"]'),
+      ).toBeNull();
+    });
+
+    it("tints the whole score box for a win, and shows the two scores stacked", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              status: "finished",
+              homeScore: 3,
+              awayScore: 1,
+              isHome: true,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      const home = within(layout).getByText("3");
+      const away = within(layout).getByText("1");
+      // Same box — one tint behind both numbers, not one underline per line.
+      expect(home.parentElement).toBe(away.parentElement);
+      expect(home.parentElement).toHaveAttribute("data-outcome", "win");
+    });
+
+    it("renders no box at all for a draw — win/loss only, per the owner decision", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            makeMatch({
+              id: 1,
+              status: "finished",
+              homeScore: 1,
+              awayScore: 1,
+              isHome: true,
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      const [home] = within(layout).getAllByText("1");
+      // The box exists and is still marked with its outcome (a draw still
+      // shows both numbers), but carries no tint — "none for a draw" per
+      // the owner's decision, unlike the desktop underline which still
+      // marks a draw with the muted stop.
+      expect(home.parentElement).toHaveAttribute("data-outcome", "draw");
+      expect(home.parentElement!.className).not.toContain("bg-[var(");
+    });
+
+    it("renders no score box for an unplayed match", () => {
+      render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[makeMatch({ id: 1, status: "scheduled" })]}
+          events={[]}
+        />,
+      );
+      const layout = mobileLayout(screen.getByTestId("agenda-match-row"));
+      // The third grid column is the score slot — for an unplayed match it's
+      // an empty placeholder span, never the tinted box.
+      const scoreSlot = layout.lastElementChild!;
+      expect(scoreSlot.tagName).toBe("SPAN");
+      expect(scoreSlot).toBeEmptyDOMElement();
+    });
+
+    it("moves the reservation row's squad chip into the same time-over-squad left margin below sm", () => {
+      const { container } = render(
+        <CalendarAgenda
+          {...baseProps}
+          matches={[
+            reservationMatch({
+              id: 90,
+              date: "2026-09-12T09:30:00",
+              club: { id: 1235, name: "KCVV Elewijt" },
+              competition: "Tornooi",
+              team: "U8 Groen",
+            }),
+          ]}
+          events={[]}
+        />,
+      );
+      // One grid (#2599 review), not a duplicated mobile/desktop pair — the
+      // 56px/52px column swap and the squad chip's position both live on
+      // this single row via responsive classes.
+      const row = container.querySelector('[data-row-kind="reservation"]')!;
+      expect(row.className).toContain("grid-cols-[56px_1fr_auto]");
+      expect(row.className).toContain("sm:grid-cols-[52px_1fr_auto]");
+      // Squad chip sits in the left margin below sm (with the time, hidden
+      // at sm+); the crest cell's own copy is the inverse (hidden below sm,
+      // inline at sm+) — the exact swap `AgendaMatchRow`'s own mobile
+      // layout makes.
+      const [leftMargin, crestCell] = row.children;
+      const marginChip = within(leftMargin as HTMLElement).getByText(
+        "U8 Groen",
+      );
+      expect(marginChip.className).toContain("sm:hidden");
+      const inlineChip = within(crestCell as HTMLElement).getByText("U8 Groen");
+      expect(inlineChip.className).toContain("hidden");
+      expect(inlineChip.className).toContain("sm:inline");
+    });
+  });
+
   describe("kalender_item_click", () => {
     beforeEach(() => vi.clearAllMocks());
 
