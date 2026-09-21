@@ -42,6 +42,7 @@ import {
   deriveStructureIndex,
 } from "@/components/organigram/OrganigramHero";
 import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { HubSearchQueryProvider } from "@/components/organigram/HubSearch";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
 import { OrganigramOverview } from "@/components/organigram/OrganigramExplorer";
 import { HulpFinder } from "@/components/hulp/HulpFinder";
@@ -93,7 +94,13 @@ export default async function HulpHubPage() {
   const faqEntries = responsibilityPathsToFaqEntries(responsibilityPaths);
 
   return (
-    <>
+    // The hub mounts `<HubSearch>` twice — in `<OrganigramHero>` and, once
+    // the hero scrolls away, in `<OrganigramSectionNav>`. This provider is
+    // the one query and popup state they share, so the copy on screen
+    // carries what the visitor typed instead of a stale dropdown floating
+    // over the pinned chrome (#3043). Scoped to the page because the two
+    // instances sit in different subtrees.
+    <HubSearchQueryProvider>
       <PageViewTracker eventName="hub_view" />
       <JsonLd
         data={buildBreadcrumbJsonLd([
@@ -210,6 +217,6 @@ export default async function HulpHubPage() {
           href="/club/contact"
         />
       </HubMemberPanel>
-    </>
+    </HubSearchQueryProvider>
   );
 }
