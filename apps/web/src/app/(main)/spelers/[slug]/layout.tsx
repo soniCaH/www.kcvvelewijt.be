@@ -15,8 +15,14 @@ interface PlayerLayoutProps {
  * `node_modules/next/dist/docs/.../loading.md`). Running the check here puts
  * it in the render shell, before `page.tsx`'s sibling `loading.tsx` opens
  * that boundary and commits the response to `200`. `loading.tsx` itself is
- * untouched — the skeleton still shows on a slow read, it just no longer
- * decides the status code.
+ * untouched, and — on this route specifically — still has something to
+ * cover: `PlayerPage` fetches related articles *after* this existence
+ * check, so a slow related-articles read still shows the skeleton. That is
+ * not true on every route this pattern was applied to — `/tegenstander`,
+ * `/club/[slug]` and `/galerij/[slug]` have no read left after this same
+ * check, so their skeletons are effectively retired. See the "Skeleton
+ * trade-off" note in PR #3057's body for the full reasoning; not repeated
+ * on every file.
  *
  * `fetchPlayerOrNull` is wrapped in React `cache()`, so this call, the
  * page's own `generateMetadata`, and `PlayerPage` itself share one read per
