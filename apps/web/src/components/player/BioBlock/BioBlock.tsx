@@ -71,7 +71,7 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
     <section
       data-testid="bioblock"
       data-has-pullquote={hasPullquote ? "true" : "false"}
-      className={cn("bg-cream w-full px-4 py-12 lg:px-8 lg:py-16", className)}
+      className={cn("bg-cream w-full px-4 py-12 sm:py-16 lg:px-8", className)}
     >
       <div
         className={cn(

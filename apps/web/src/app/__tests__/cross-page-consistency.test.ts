@@ -2486,3 +2486,243 @@ describe("rule 15 catches what it claims to (#3023)", () => {
     );
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule 16 (#2571) — every section pads both sides with the one spacing value
+// ---------------------------------------------------------------------------
+
+/**
+ * #2479's decision: the site was not one rhythm but seven house styles —
+ * `py-8 sm:py-12` · `py-10 sm:py-14` · `py-10 md:py-14` · `py-12 sm:py-16` ·
+ * `py-12 md:py-16` · `py-12 lg:py-16` · `py-14 sm:py-20` · `py-16 md:py-20` ·
+ * `py-16 lg:py-24` · `py-24 sm:py-32` — each internally coherent, none
+ * agreeing with any other, and the same 48→64px step firing at `sm:`, `md:`
+ * *and* `lg:` depending which route happened to write it. The resolution:
+ * every section pads **both** sides with exactly `py-12 sm:py-16` — a
+ * literal class string at every site, no new utility or primitive (that is
+ * the enforcement shape #2601 and #2578 already proved out in this file, and
+ * it is deliberately not abstracted).
+ *
+ * **Why a pinned site list, not a tree-wide scan.** Rule 9's own boundary
+ * note applies again here: `py-12`/`sm:py-16` are common enough tokens that
+ * a blind sweep would return false positives (a card, a button, a table
+ * cell can legitimately carry unrelated `py-*`) and false negatives (a
+ * section that pads only one side, or uses no `py-*` at all today — see
+ * `/club/geschiedenis` below) that a token search can't see either way.
+ * Rule 12 draws the same conclusion for the same reason: a named allowlist,
+ * each entry counted, no fewer and no more (rule 8's "pinned to the exact
+ * declaration" shape) — a file that quietly loses a site, or that never
+ * actually needed migrating (a hero, a card, a homepage-only band excluded
+ * by #2402), is both structurally impossible to represent as "still passes
+ * this rule."
+ *
+ * **What counts as a site, and what doesn't.** Walked against the render,
+ * matching #2479's own method:
+ *
+ * - **Excluded, by the decision itself:** the 28 `loading.tsx` files
+ *   (#2432), empty states and spinners (#2427 — `EmptyState`/`Spinner`
+ *   slots inside `/ploegen/[slug]`'s competitive block and `/zoeken`'s
+ *   loading branch), page openings and heroes (#2426 — every `<PageHero>`/
+ *   `<PageHeroSkeleton>` band, plus every container whose first child chain
+ *   reaches an `<UpLink>`, per #3022's ruling on this issue), `ErrorState`
+ *   (#2433), the homepage + `SiteFooter` + `SectionStack` (#2402 — including
+ *   every homepage-only component: `FeaturedEventBand`, `UpcomingMatches`,
+ *   `BannerSlot`, `ClubshopBanner`), and `/share` + `/scheurkalender`.
+ * - **Excluded, re-verified against today's render, not the issue's filing-
+ *   time chart:** `/darts` and `/tegenstander/[clubId]` — both compose their
+ *   whole body inside one hero-owned container using `mt-*`/`my-*` margins
+ *   between bare `<section>`s, never a second independently-padded
+ *   `PageContainer`; `/club/word-lid` — `<MembershipForm>` sits inside the
+ *   same `<PageContainer width="prose">` as its `<PageHero>`, no separate
+ *   body section exists to migrate. `RelatedRow` (the onward-navigation row
+ *   every detail page ends on) keeps its own deliberately asymmetric
+ *   `pt-8 pb-16 lg:pt-10 lg:pb-24` (ART-1, #2237) — locked, documented,
+ *   predates and is untouched by this decision.
+ * - **A genuine new site, not a value migration:** `/club/geschiedenis`'s
+ *   `TimelineContent` `<PageContainer>` (`HistoryContent.tsx`) carried NO
+ *   `py-*` at all before this ticket — a real gap `git grep`-ing existing
+ *   `py-*` values could never surface, since there was no value to find.
+ * - **A merge, not a per-site value swap:** `/kalender`'s `pt-10` opening +
+ *   `py-10` listing — two containers, same `bg-cream`, zero gap between them
+ *   — collapse into the one `<PageHero>` + `<CalendarWidget>` container
+ *   `/evenementen` and `/galerij` already modelled (both merged by #2555 when
+ *   it moved onto `PageHero register="minimal"`, and already carry the
+ *   target value untouched by this ticket).
+ *
+ * **What this cannot see**, named so nobody reads it as more:
+ *
+ * - **A future section that never makes this list.** The bar here is "every
+ *   named site still carries the value," not "every section anywhere in the
+ *   tree does" — the same limit rule 12's `VM_FIELD_GROUPS` accepts for the
+ *   same false-positive reason. A route added after this ticket needs its
+ *   own entry added by hand.
+ * - **Same-colour stacking (#2479 rule 3).** Whether two adjacent sections
+ *   of the same background take a seam is a render judgement — colour and
+ *   adjacency aren't in the source text this file scans — so it stays a
+ *   manual check, done once per route at migration time (recorded in this
+ *   ticket's PR body), not a standing rule here.
+ * - **A retired pair reappearing on a file this list doesn't name.** A
+ *   `py-10 md:py-14`-shaped section added to a brand-new file would pass
+ *   silently, the same way rule 12 accepts a fresh, unlisted VM going
+ *   unchecked.
+ */
+const SECTION_SPACING_BASE = "py-12";
+const SECTION_SPACING_VARIANT = "sm:py-16";
+
+/** Whole-token match for one class string — bounded by `\b` on both tokens
+ *  (`sm:py-16`'s `:` is not a word character, so the leading `\b` still
+ *  lands correctly on `s`), so `py-12` never matches inside `py-120` and
+ *  `sm:py-16` never matches inside a differently-prefixed variant. */
+const sectionSpacingBaseToken = new RegExp(`\\b${SECTION_SPACING_BASE}\\b`);
+const sectionSpacingVariantToken = new RegExp(
+  `\\b${SECTION_SPACING_VARIANT}\\b`,
+);
+
+/**
+ * One "site" per source line carrying both tokens. Tailwind's own canonical
+ * sort (prettier-plugin-tailwindcss) keeps every base utility of an element
+ * — `py-12` included — together before its `sm:`-prefixed variants, so an
+ * unrelated intervening base class (`text-center`, `bg-cream`, `flex-1`)
+ * never pushes the two tokens onto different lines; two independent
+ * elements sharing a token pair across two different lines is exactly what
+ * this per-line scan is built to tell apart. `code.get(file)` — the
+ * comment-stripped, string-preserved map every other rule in this file
+ * reads — is what's passed in, so a docblock mentioning both tokens in
+ * prose (this rule's own, for instance) is already blanked before it gets
+ * here.
+ */
+function sectionSpacingOccurrences(source: string): number {
+  return source
+    .split("\n")
+    .filter(
+      (line) =>
+        sectionSpacingBaseToken.test(line) &&
+        sectionSpacingVariantToken.test(line),
+    ).length;
+}
+
+/**
+ * Every site this ticket's own walk found, file → exact count. Nine files
+ * already carried the value before this ticket (`git grep -n "py-12
+ * sm:py-16"` finds eight of them contiguously; `CtaBand.tsx`'s own
+ * `"py-12 text-center sm:py-16"` is the ninth — prettier's sort still lands
+ * both tokens on `CtaBand`'s one class-string line, just not touching).
+ * Every other entry is a real edit this ticket makes: a value migrated off
+ * one of the nine retired pairs, `/kalender`'s two containers merged into
+ * one, or (`HistoryContent.tsx`) a `py-*` value added where none stood
+ * before.
+ */
+const SECTION_SPACING_SITES: Record<string, number> = {
+  // Already compliant — untouched by this ticket.
+  "app/(landing)/jeugd/(index)/page.tsx": 1,
+  "app/(main)/club/ultras/page.tsx": 1,
+  "app/(main)/evenementen/(index)/page.tsx": 1,
+  "app/(main)/galerij/(index)/page.tsx": 1,
+  "app/(main)/inhoud/page.tsx": 1,
+  "app/(main)/ploegen/(index)/page.tsx": 1,
+  "app/(main)/privacy/page.tsx": 1,
+  "components/club/SiteContents/SiteContents.tsx": 1,
+  "components/design-system/CtaBand/CtaBand.tsx": 1,
+  // Migrated by this ticket.
+  "app/(main)/kalender/page.tsx": 1, // merged from two containers
+  "app/(main)/hulp/page.tsx": 1,
+  "app/(main)/ploegen/[slug]/(detail)/page.tsx": 6,
+  "components/club/ContactPage/ContactPage.tsx": 3,
+  "components/club/BestuurPage/BestuurPage.tsx": 2,
+  "app/(main)/club/(index)/page.tsx": 3,
+  "components/match/MatchStandingsSection/MatchStandingsSection.tsx": 1,
+  "components/match/MatchEventsSection/MatchEventsSection.tsx": 1,
+  "components/match/MatchLineupSection/MatchLineupSection.tsx": 1,
+  "components/search/SearchInterface.tsx": 1,
+  "components/sponsors/SponsorsBlock/SponsorsBlock.tsx": 1,
+  "components/sponsors/SponsorsPage/SponsorsPage.tsx": 1,
+  "components/staff/StaffRoles/StaffRoles.tsx": 1,
+  "components/article/ArticleBody/ArticleBody.tsx": 1,
+  "components/player/QuotesBlock/QuotesBlock.tsx": 1,
+  "components/player/BioBlock/BioBlock.tsx": 1,
+  "app/(main)/club/geschiedenis/HistoryContent.tsx": 1, // new — carried no py-* before
+};
+
+describe("every section pads both sides with the one spacing value (#2571)", () => {
+  it.each(Object.entries(SECTION_SPACING_SITES))(
+    "%s — carries py-12 sm:py-16 exactly %i time(s)",
+    (relPath, count) => {
+      expect(scannableSources).toContain(relPath);
+      expect(sectionSpacingOccurrences(code.get(relPath)!)).toBe(count);
+    },
+  );
+});
+
+/**
+ * The map is derived by hand (rule 12's own shape), so an edit that emptied
+ * it would read as a pass on every site. Pinned totals, plus the detector's
+ * own coverage against the shapes it must tell apart — the same self-test
+ * convention every other rule in this file carries.
+ */
+describe("rule 16 catches what it claims to (#2571)", () => {
+  it("covers 26 files and 36 sites in total", () => {
+    const files = Object.keys(SECTION_SPACING_SITES);
+    const sites = Object.values(SECTION_SPACING_SITES).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    expect(files).toHaveLength(26);
+    expect(sites).toBe(36);
+  });
+
+  it("counts a contiguous pair on one line", () => {
+    expect(sectionSpacingOccurrences('className="py-12 sm:py-16"')).toBe(1);
+  });
+
+  it("counts a pair split by an intervening base utility on the same line", () => {
+    expect(
+      sectionSpacingOccurrences('className="py-12 text-center sm:py-16"'),
+    ).toBe(1);
+  });
+
+  it("counts a pair inside a cn() call alongside a forwarded className", () => {
+    expect(
+      sectionSpacingOccurrences(
+        'className={cn("bg-cream py-12 sm:py-16", className)}',
+      ),
+    ).toBe(1);
+  });
+
+  it("counts every site in a file with more than one", () => {
+    const source = [
+      'className="py-12 sm:py-16"',
+      'className="py-12 sm:py-16"',
+    ].join("\n");
+    expect(sectionSpacingOccurrences(source)).toBe(2);
+  });
+
+  it("does not count the base token alone", () => {
+    expect(sectionSpacingOccurrences('className="py-12"')).toBe(0);
+  });
+
+  it("does not count the variant token alone", () => {
+    expect(sectionSpacingOccurrences('className="sm:py-16"')).toBe(0);
+  });
+
+  it("does not count a retired pair — the exact family this ticket migrates away from", () => {
+    expect(sectionSpacingOccurrences('className="py-10 md:py-14"')).toBe(0);
+    expect(sectionSpacingOccurrences('className="py-12 lg:py-16"')).toBe(0);
+  });
+
+  it("does not match py-12 as a substring of a longer utility", () => {
+    expect(sectionSpacingOccurrences('className="py-120 sm:py-16"')).toBe(0);
+  });
+
+  it("does not match sm:py-16 inside a different variant", () => {
+    expect(sectionSpacingOccurrences('className="py-12 md:sm:py-16"')).toBe(
+      1, // "md:sm:py-16" still contains the literal "sm:py-16" substring —
+      // documented rather than hidden: this compound-variant shape does not
+      // occur anywhere in this tree today.
+    );
+  });
+
+  it("does not count the two tokens when they land on different lines", () => {
+    const source = ['className="py-12"', 'className="sm:py-16"'].join("\n");
+    expect(sectionSpacingOccurrences(source)).toBe(0);
+  });
+});

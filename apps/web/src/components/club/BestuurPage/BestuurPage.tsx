@@ -84,7 +84,7 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {showDescription ? (
-        <PageContainer as="section" className="pt-12">
+        <PageContainer as="section" className="py-12 sm:py-16">
           {/* Shared by /club/bestuur, /club/angels and /club/jeugdbestuur (#2436).
               The rule + gutter sit outside the clamp so the text column measures
               the full prose token, not the token minus its own padding. */}
@@ -97,7 +97,7 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
       ) : null}
 
       {hasMembers ? (
-        <PageContainer as="section" className="py-12">
+        <PageContainer as="section" className="py-12 sm:py-16">
           <EditorialHeading
             level={2}
             size="display-md"

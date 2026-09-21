@@ -49,7 +49,7 @@ export function QuotesBlock({ bio, playerName, className }: QuotesBlockProps) {
   return (
     <section
       data-testid="quotesblock"
-      className={cn("bg-cream w-full px-4 py-12 lg:px-8 lg:py-16", className)}
+      className={cn("bg-cream w-full px-4 py-12 sm:py-16 lg:px-8", className)}
     >
       <div className="mx-auto flex w-full max-w-[var(--container-wide)] flex-col gap-8">
         <EditorialHeading

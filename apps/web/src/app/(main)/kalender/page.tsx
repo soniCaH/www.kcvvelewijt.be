@@ -173,17 +173,25 @@ export default async function CalendarPage() {
       {itemListEntries.length > 0 && (
         <JsonLd data={buildItemListJsonLd(itemListEntries)} />
       )}
-      <PageContainer width="index" className="pt-10">
+      {/* The opening and the listing are ONE padded section, not two stacked
+          on the same colour (#2479 rule 3, this ticket's own merge —
+          /kalender was not in #2426's minimal list, so its pt-10 opening +
+          py-10 listing was never merged the way /evenementen and /galerij
+          were by #2555). */}
+      <PageContainer width="index" className="py-12 sm:py-16">
         <PageHero
           kicker="Kalender"
           headline="Wedstrijdkalender"
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
           image="/images/youth-trainers.jpg"
         />
-      </PageContainer>
-
-      <PageContainer width="index" className="py-10">
-        <CalendarWidget feed={data.feed} teams={data.teams} />
+        {/* The taped-card hero owns no bottom margin of its own (unlike
+            `register="minimal"`'s baked-in `mb-10`) — matches that same
+            value so the gap below the card reads the same as every other
+            hero-to-content transition on the site. */}
+        <div className="mt-10">
+          <CalendarWidget feed={data.feed} teams={data.teams} />
+        </div>
       </PageContainer>
     </div>
   );

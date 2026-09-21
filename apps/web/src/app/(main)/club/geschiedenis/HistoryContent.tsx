@@ -24,7 +24,7 @@ const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
 function TimelineContent() {
   return (
-    <PageContainer>
+    <PageContainer className="py-12 sm:py-16">
       {/* 1909 - 1941 */}
       <TimelineSection>
         <TimelineItem date="1909 - 1935" side="left">

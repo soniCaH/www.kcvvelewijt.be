@@ -127,7 +127,7 @@ export default async function HulpHubPage() {
           members={members}
           responsibilityPaths={responsibilityPaths}
         />
-        <PageContainer width="index" className="py-10 sm:py-14">
+        <PageContainer width="index" className="py-12 sm:py-16">
           <OrganigramHero
             members={members}
             responsibilityPaths={responsibilityPaths}
