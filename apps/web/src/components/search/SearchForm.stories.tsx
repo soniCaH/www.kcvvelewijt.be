@@ -9,7 +9,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { SearchForm } from "./SearchForm";
-import { focusSearchInput } from "./search-form-vr-focus";
+import { forceSearchFocusRing } from "./search-form-vr-focus";
 
 const meta = {
   title: "Features/Search/SearchForm",
@@ -28,11 +28,11 @@ const meta = {
       </div>
     ),
   ],
-  // VR determinism (#3033): pin the focus-ring state deliberately rather
-  // than leave it to whether the runner's page happens to hold window
-  // focus at mount time — see search-form-vr-focus.ts.
+  // VR determinism (#3033): force the focus-ring to a state the story
+  // declares rather than one dependent on the runner's real frame focus —
+  // see search-form-vr-focus.ts.
   play: async ({ canvasElement }) => {
-    focusSearchInput(canvasElement);
+    forceSearchFocusRing(canvasElement);
   },
 } satisfies Meta<typeof SearchForm>;
 

@@ -1,30 +1,30 @@
 /**
  * search-form-vr-focus Tests
  *
- * Focus: `focusSearchInput` actually moves DOM focus onto the nested
- * `<input>` (the property `:focus-within` matches against), and is a no-op
- * when no input exists rather than throwing.
+ * Focus: `forceSearchFocusRing` sets `data-vr-force-ring="true"` on the
+ * `[data-search-form]` hook nested inside the given root (the attribute
+ * SearchForm.tsx's `data-[vr-force-ring=true]:ring-warm` variant reacts to),
+ * and is a no-op when no such hook exists rather than throwing.
  */
 
 import { describe, it, expect } from "vitest";
-import { focusSearchInput } from "./search-form-vr-focus";
+import { forceSearchFocusRing } from "./search-form-vr-focus";
 
-describe("focusSearchInput", () => {
-  it("focuses the input nested inside the given root", () => {
+describe("forceSearchFocusRing", () => {
+  it("sets data-vr-force-ring=true on the [data-search-form] hook nested inside the root", () => {
     const root = document.createElement("div");
-    root.innerHTML = `<form><input type="text" /></form>`;
-    document.body.append(root);
+    root.innerHTML = `<form data-search-form><input type="text" /></form>`;
 
-    focusSearchInput(root);
+    forceSearchFocusRing(root);
 
-    expect(document.activeElement).toBe(root.querySelector("input"));
-
-    root.remove();
+    expect(root.querySelector("form")?.getAttribute("data-vr-force-ring")).toBe(
+      "true",
+    );
   });
 
-  it("does not throw when the root has no input", () => {
+  it("does not throw when the root has no [data-search-form] hook", () => {
     const root = document.createElement("div");
 
-    expect(() => focusSearchInput(root)).not.toThrow();
+    expect(() => forceSearchFocusRing(root)).not.toThrow();
   });
 });

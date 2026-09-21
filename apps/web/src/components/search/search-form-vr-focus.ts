@@ -1,23 +1,31 @@
 /**
  * VR determinism helper (#3033).
  *
- * `SearchForm`'s `<input autoFocus>` only paints the
- * `focus-within:ring-warm focus-within:ring-2` ring when the page rendering
- * the story actually holds window/document focus at mount time — the native
- * HTML `autofocus` attribute's focus-taking algorithm is itself gated on
- * that (https://html.spec.whatwg.org/#autofocusing-a-form-associated-element).
- * Under the headless VR runner that is an environment property of whichever
- * worker happens to render a given story, not something the story declares,
- * so the same story produces a ring-present or ring-absent baseline
- * depending on capture timing (#3033).
+ * Chromium only paints `:focus-within` (and therefore SearchForm's
+ * `focus-within:ring-warm focus-within:ring-2`) when the frame rendering the
+ * page is itself focused/active — not merely when `document.activeElement`
+ * is set inside it. A script-invoked `element.focus()` does not change that:
+ * React already performs that exact call imperatively on mount for
+ * `autoFocus` (React never emits the native `autofocus` HTML attribute on a
+ * client render — it omits it and calls `domElement.focus()` itself during
+ * commit), so an *additional* `.focus()` call in a `play` function is
+ * redundant with what `autoFocus` already does, not a fix for it. Whether
+ * the ring paints still depends on whether the headless VR worker's page
+ * holds real frame focus at screenshot time — an environment property of
+ * whichever worker renders a given story, not something a story can force
+ * by calling `.focus()` again.
  *
- * A script-invoked `element.focus()` is not subject to that restriction — it
- * always sets `document.activeElement`, which is what `:focus-within`
- * matches against — so calling it explicitly in a Storybook `play` function
- * pins the ring to a state the story chooses instead of one the runner
- * happens to produce. This never touches `SearchForm`'s own `autoFocus`
- * prop, which keeps firing unaided for a real visitor on `/zoeken`.
+ * The fix instead bypasses `:focus-within` for the VR render entirely.
+ * `SearchForm`'s `<form>` carries a `data-search-form` selector hook and a
+ * `data-[vr-force-ring=true]:ring-warm data-[vr-force-ring=true]:ring-2`
+ * Tailwind variant (see SearchForm.tsx) that the component itself never
+ * sets. Setting `data-vr-force-ring="true"` on that hook paints the ring
+ * unconditionally, independent of the runner's real frame focus.
+ * Storybook-only — SearchForm's own `autoFocus` prop and `focus-within:`
+ * classes are untouched, so a real visitor on `/zoeken` is unaffected.
  */
-export function focusSearchInput(root: ParentNode): void {
-  root.querySelector<HTMLInputElement>("input")?.focus();
+export function forceSearchFocusRing(root: ParentNode): void {
+  root
+    .querySelector<HTMLFormElement>("[data-search-form]")
+    ?.setAttribute("data-vr-force-ring", "true");
 }
