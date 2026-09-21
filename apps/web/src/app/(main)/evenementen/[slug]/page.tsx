@@ -11,6 +11,7 @@
  * `/events/[slug]` 301s here (see `next.config.ts`).
  */
 
+import { cache } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -74,6 +75,25 @@ export async function generateStaticParams() {
     .map((row) => ({ slug: row.slug }));
 }
 
+// Subject read: the event is this page's entire content, so a failed read
+// takes it down with it via `Effect.orDie` (#2864). Wrapped in React
+// `cache()` so the same-segment `layout.tsx` (existence check, #2968),
+// `generateMetadata` below, and the page component (its own first read; see
+// `EventDetailPage`) share one `findBySlug` per request instead of three
+// (#2441). The page's `upcoming`/`galleries` reads are a second, necessary
+// call — they depend on the event's id and only run once existence is
+// confirmed.
+export const fetchEventOrNull = cache(async function fetchEventOrNull(
+  slug: string,
+) {
+  return runPromise(
+    Effect.gen(function* () {
+      const repo = yield* EventRepository;
+      return yield* repo.findBySlug(slug);
+    }).pipe(Effect.orDie),
+  );
+});
+
 export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
@@ -81,12 +101,7 @@ export async function generateMetadata({
   // Subject read: this route's metadata is entirely about this one event, so
   // a failed read takes it down with it — `null` (genuinely no such event)
   // is the only case that degrades to the "niet gevonden" fallback (#2864).
-  const event = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* EventRepository;
-      return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
-  );
+  const event = await fetchEventOrNull(slug);
   if (!event)
     return {
       title: "Evenement niet gevonden",
@@ -120,32 +135,39 @@ export async function generateMetadata({
 
 export default async function EventDetailPage({ params }: EventPageProps) {
   const { slug } = await params;
-  // The event is the page's subject — a failed `findBySlug` (or the sibling
-  // `findAll` feed it gates) takes the page down with it via `Effect.orDie`
-  // below. `galleries` is a section and already degrades independently with
-  // its own `catchAllCause` (#2864).
-  const { event, upcoming, galleries } = await runPromise(
-    Effect.gen(function* () {
-      const repo = yield* EventRepository;
-      const event = yield* repo.findBySlug(slug);
-      // Skip the (upcoming-only) feed fetch for a missing event — the page 404s.
-      const upcoming = event ? yield* repo.findAll() : [];
-      // Photo galleries linked to this event (#1471), chronological. Resilient:
-      // a Sanity hiccup degrades to "no galleries" rather than failing the page.
-      const galleries: GalleryCardVM[] = event
-        ? yield* PhotoGalleryRepository.pipe(
-            Effect.flatMap((repo) => repo.findByLinkedEvent(event.id)),
-            Effect.catchAllCause(() => Effect.succeed<GalleryCardVM[]>([])),
-          )
-        : [];
-      return { event, upcoming, galleries };
-    }).pipe(Effect.orDie),
-  );
+  // The event is the page's subject — a failed `findBySlug` takes the page
+  // down with it via `Effect.orDie` in `fetchEventOrNull`. The same-segment
+  // `layout.tsx` already ran this exact check before the shell flushed
+  // (#2968); `cache()` means this call reuses that read rather than firing a
+  // second one.
+  const event = await fetchEventOrNull(slug);
 
   // GROQ projects `dateStart` via `coalesce(dateStart, "")`; an event with
   // `dateStart` cleared in Studio (or written via the API bypassing schema
-  // validation) would render `Invalid DateTime`. Treat as 404 instead.
+  // validation) would render `Invalid DateTime`. Treat as 404 instead. Kept
+  // here too (not only in the layout) so this early return still short-
+  // circuits the reads below for the type-narrowing compiler as much as for
+  // runtime — `layout.tsx` applies the identical check first.
   if (!event || !event.dateStart) notFound();
+
+  // `upcoming`/`galleries` depend on the now-confirmed event id, so they run
+  // as their own read rather than folding into `fetchEventOrNull` above.
+  // `galleries` is a section and degrades independently with its own
+  // `catchAllCause` (#2864); `upcoming` shares the event's subject-read fate
+  // via `Effect.orDie`.
+  const { upcoming, galleries } = await runPromise(
+    Effect.gen(function* () {
+      const repo = yield* EventRepository;
+      const upcoming = yield* repo.findAll();
+      // Photo galleries linked to this event (#1471), chronological. Resilient:
+      // a Sanity hiccup degrades to "no galleries" rather than failing the page.
+      const galleries: GalleryCardVM[] = yield* PhotoGalleryRepository.pipe(
+        Effect.flatMap((repo) => repo.findByLinkedEvent(event.id)),
+        Effect.catchAllCause(() => Effect.succeed<GalleryCardVM[]>([])),
+      );
+      return { upcoming, galleries };
+    }).pipe(Effect.orDie),
+  );
 
   const canonicalUrl = `${SITE_CONFIG.siteUrl}/evenementen/${event.slug}`;
   const otherEvents = upcoming.filter((other) => other.id !== event.id);
