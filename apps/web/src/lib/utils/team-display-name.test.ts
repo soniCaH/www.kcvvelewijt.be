@@ -109,4 +109,35 @@ describe("teamDisplayName", () => {
       }),
     ).toBe("FC WEITSE GANS");
   });
+
+  // #2599 — production carries `kcvve-u8-wit` / `kcvve-u8-groen` (not
+  // archived, unlike the `kcvve-u7-wit` / `kcvve-u9-groen` pair the module
+  // comment names): the age token sits mid-slug with a colour segment after
+  // it, which the last-segment-only check used to miss entirely.
+  it("keeps a colour segment after the age token instead of falling back to the federation name", () => {
+    expect(
+      teamDisplayName({
+        displayName: null,
+        slug: "kcvve-u8-wit",
+        name: "KCVVE U8 Wit",
+      }),
+    ).toBe("U8 Wit");
+    expect(
+      teamDisplayName({
+        displayName: null,
+        slug: "kcvve-u8-groen",
+        name: "KCVVE U8 Groen",
+      }),
+    ).toBe("U8 Groen");
+  });
+
+  it("title-cases a lowercase colour segment after the age token", () => {
+    expect(
+      teamDisplayName({
+        displayName: null,
+        slug: "kcvve-u9-groen",
+        name: "KCVVE U9 groen",
+      }),
+    ).toBe("U9 Groen");
+  });
 });
