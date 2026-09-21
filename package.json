@@ -34,9 +34,8 @@
     ]
   },
   "lint-staged": {
-    "//apps/web/**/*.{js,jsx,ts,tsx}": "eslint --fix-type excludes the 'directive' fix category as a #3013 stopgap: from repo root, --config apps/web/eslint.config.mjs resolves eslint.config.mjs's files/ignores relative to cwd (not the config file), so apps/web/src files silently miss its rules here and eslint --fix then deletes valid eslint-disable comments as 'unused'. Remove once #3013 fixes the underlying cwd mismatch.",
     "apps/web/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix --fix-type problem,suggestion,layout --config apps/web/eslint.config.mjs",
+      "eslint --fix --config apps/web/eslint.config.mjs",
       "prettier --write"
     ],
     "apps/web/**/*.{json,md,yml,yaml}": [
