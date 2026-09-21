@@ -1,39 +1,36 @@
 /**
- * `/ploegen/[slug]/wedstrijden` — pins a path #3034's `runPromise` fix made
- * live on a route that ticket does not target (review finding 5).
+ * `/ploegen/[slug]/wedstrijden` — pins that a failed **matches** read never
+ * 404s a team whose own lookup succeeded (#3041).
  *
- * `page.tsx:141`'s `Effect.catchTag("HttpNotFound", () => Effect.sync(() =>
- * notFound()))` predates #3034. Before that fix, `runPromise` rejected with a
- * digest-less `FiberFailure` regardless of what threw inside the Effect chain
- * — this exact `notFound()` call was dead in practice, indistinguishable from
- * any other bug: the route's own 500 error boundary rendered either way, so a
- * team whose *matches* read 404s could never actually reach the not-found
- * page. It is live now.
+ * The route used to carry `Effect.catchTag("HttpNotFound", () =>
+ * Effect.sync(() => notFound()))` on this read. That call was dead in
+ * practice until #3034 fixed `runPromise` to preserve `notFound()`'s digest,
+ * which made it live on a route #3034 did not target — so the first version
+ * of this suite pinned the 404 rather than endorsing it.
  *
- * This is a **behaviour change on a route #3034 does not target**, and it is
- * not obviously the right one — see the open questions this suite does NOT
- * resolve, named in the #3034 PR body and tracked separately:
+ * #3041 removed the `catchTag`. Three facts decided it:
  *
- * - `page.tsx:130-136`'s own comment argues *against* 404-ing a team whose
- *   lookup just succeeded (`ParseError`/`HttpApiDecodeError` are deliberately
- *   left un-caught for exactly that reason) — yet `HttpNotFound` on the same
- *   read still takes the whole page down. `classify-bff-failure.ts:5-8`
- *   documents `HttpNotFound` here as "a mistyped or stale psdId in Sanity",
- *   and every other route's convention for that tag is to degrade the
- *   section (an empty schedule), not 404 the page.
- * - `generateMetadata` (`page.tsx:38-45`) only emits the "Team niet gevonden"
- *   title/`noindex` on its own `!team` branch. This newly-live path resolves
- *   the SAME team successfully in `generateMetadata`, so the not-found BODY
- *   below now renders under the real team's title/metadata.
+ * - `getMatches` is a **list** read. PSD answers an unknown team id with
+ *   `200 []`, which decodes cleanly; only `/games/{id}/info` opts into
+ *   `emptyBodyIsNotFound` (#2911). So `HttpNotFound` here can never carry the
+ *   "stale `psdId` in Sanity" meaning `classify-bff-failure.ts` documents.
+ * - The only remaining producer is PSD 404-ing the endpoint itself — an
+ *   outage. Degrading that to `[]` would render "Nog geen wedstrijden
+ *   gepland" for a team with a full fixture list.
+ * - `page.tsx`'s own neighbouring comment already decided the principle for
+ *   `ParseError`/`HttpApiDecodeError`: a 404 for a team whose lookup just
+ *   succeeded is the strictly worse outcome. `HttpNotFound` was the lone
+ *   exception to a rule the file had already written down.
  *
- * This file only pins what the route does today — the digest survives, so
- * the route now reaches its not-found boundary instead of a 500 — without
- * taking a position on whether "not-found" is the right outcome at all.
+ * So all three permanent tags now share one path: the error boundary. This
+ * suite pins that, and pins that #3034's digest fix itself is untouched —
+ * the `!team` branch still reaches the not-found page with its digest
+ * intact.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer, Runtime } from "effect";
-import { HttpNotFound } from "@kcvv/api-contract";
+import { HttpBadGateway, HttpNotFound } from "@kcvv/api-contract";
 import type { TeamDetailVM } from "@/lib/repositories/team.repository";
 
 const { mockFindBySlug, mockGetMatches } = vi.hoisted(() => ({
@@ -99,7 +96,7 @@ function teamFixture(psdId: string): TeamDetailVM {
   };
 }
 
-describe("/ploegen/[slug]/wedstrijden — a HttpNotFound matches read is now live (#3034)", () => {
+describe("/ploegen/[slug]/wedstrijden — a failed matches read never 404s a resolved team (#3041)", () => {
   beforeEach(() => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -110,22 +107,60 @@ describe("/ploegen/[slug]/wedstrijden — a HttpNotFound matches read is now liv
     vi.restoreAllMocks();
   });
 
-  it("rejects with notFound()'s own digest instead of a digest-less FiberFailure", async () => {
-    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
-    mockGetMatches.mockReturnValue(
-      Effect.fail(new HttpNotFound({ error: "unknown psd team id" })),
-    );
-
-    const rejection = await WedstrijdenPage({
-      params: Promise.resolve({ slug: "kcvv-elewijt-u13" }),
-    }).then(
+  /** Rejection shape of one render, or a thrown marker if it resolved. */
+  async function renderAndCatch(slug = "kcvv-elewijt-u13") {
+    return WedstrijdenPage({ params: Promise.resolve({ slug }) }).then(
       () => {
         throw new Error("expected WedstrijdenPage to reject");
       },
       (error: unknown) => error,
     );
+  }
+
+  it("sends an HttpNotFound matches read to the error boundary, not to the not-found page", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
+    mockGetMatches.mockReturnValue(
+      Effect.fail(new HttpNotFound({ error: "psd 404'd the endpoint" })),
+    );
+
+    const rejection = await renderAndCatch();
 
     expect(mockGetMatches).toHaveBeenCalledWith(9401);
+    // A 404 digest here would render "Pagina niet gevonden" under the real
+    // team's own title and indexable metadata — `generateMetadata` resolves
+    // the same team separately and only noindexes its own `!team` branch.
+    expect(rejection).not.toMatchObject({
+      digest: expect.stringMatching(/^NEXT_HTTP_ERROR_FALLBACK;404/),
+    });
+  });
+
+  it("treats HttpNotFound exactly like the other permanent tags on the same read", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
+
+    mockGetMatches.mockReturnValue(
+      Effect.fail(new HttpNotFound({ error: "psd 404'd the endpoint" })),
+    );
+    const notFoundRejection = await renderAndCatch();
+
+    mockGetMatches.mockReturnValue(
+      Effect.fail(new HttpBadGateway({ error: "upstream decode failed" })),
+    );
+    const badGatewayRejection = await renderAndCatch();
+
+    // The whole point of #3041: no tag on this read gets its own path.
+    expect(Runtime.isFiberFailure(notFoundRejection)).toBe(
+      Runtime.isFiberFailure(badGatewayRejection),
+    );
+  });
+
+  it("still reaches the not-found page with its digest intact when the TEAM is unknown", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(null));
+
+    const rejection = await renderAndCatch("geen-zo-een-ploeg");
+
+    // #3034's `runPromise` digest fix is route-agnostic and stays as it is —
+    // #3041 only removed this route's opt-in for the *matches* read.
+    expect(mockGetMatches).not.toHaveBeenCalled();
     expect(Runtime.isFiberFailure(rejection)).toBe(false);
     expect(rejection).toMatchObject({
       digest: expect.stringMatching(/^NEXT_HTTP_ERROR_FALLBACK;404/),
