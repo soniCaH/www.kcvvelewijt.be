@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 
 const mockRun = vi.fn();
 const mockReset = vi.fn();
@@ -76,6 +76,52 @@ describe("CookieConsentBanner", () => {
     expect(consentModal.showPreferencesBtn).toBe("Beheer voorkeuren");
     expect(preferencesModal.acceptAllBtn).toBe("Alles accepteren");
     expect(preferencesModal.savePreferencesBtn).toBe("Sla op");
+  });
+
+  // #2675: every other close on the site is the Phosphor Fill `X`; the
+  // library draws its own thin stroke X and exposes no option for it, so the
+  // house icon is swapped in when the preferences modal is built.
+  function libraryModal() {
+    const modal = document.createElement("div");
+    modal.innerHTML =
+      '<button class="pm__close-btn" aria-label="Sluiten"><span><svg viewBox="0 0 24 24"><path d="M 19.5 4.5 L 4.5 19.5"/></svg></span></button>';
+    document.body.append(modal);
+    return modal;
+  }
+
+  it("swaps the preferences close's library X for the house close icon", () => {
+    render(<CookieConsentBanner />);
+    const modal = libraryModal();
+
+    act(() => {
+      mockRun.mock.calls[0][0].onModalReady({
+        modalName: "preferencesModal",
+        modal,
+      });
+    });
+
+    const icons = modal.querySelectorAll(".pm__close-btn svg");
+    expect(icons).toHaveLength(1);
+    expect(icons[0].getAttribute("viewBox")).toBe("0 0 256 256");
+    expect(modal.querySelector(".pm__close-btn")).toHaveAccessibleName(
+      "Sluiten",
+    );
+  });
+
+  it("leaves the consent modal's markup to the library", () => {
+    render(<CookieConsentBanner />);
+    const modal = libraryModal();
+
+    act(() => {
+      mockRun.mock.calls[0][0].onModalReady({
+        modalName: "consentModal",
+        modal,
+      });
+    });
+
+    expect(modal.querySelector("svg")?.getAttribute("viewBox")).toBe(
+      "0 0 24 24",
+    );
   });
 
   it("renders nothing visible", () => {

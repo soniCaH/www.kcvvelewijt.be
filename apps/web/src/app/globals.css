@@ -1602,6 +1602,24 @@ html {
   transform: none;
 }
 
+/* The preferences close carries the house close icon (#2675) — the same
+   Phosphor Fill `X`, at the same 20px, as the menu's close. CookieConsentBanner
+   portals it in place of the library's stroke X. `fill` and `width` undo the
+   library's `#cc-main svg`; `stroke` and `transform` need !important because
+   the library's `.pm__close-btn svg` (scale .5) and its :hover stroke load
+   after globals.css at equal or higher specificity, and a stroke on a filled
+   glyph would outline it. */
+#cc-main .pm__close-btn span {
+  align-items: center;
+  justify-content: center;
+}
+#cc-main .pm__close-btn svg {
+  fill: currentColor;
+  width: 20px;
+  stroke: none !important;
+  transform: none !important;
+}
+
 /* ──────────────────────────────────────────────────────────────────────────
    Volledig organigram — pure-CSS box tree (Phase 7 · #2054)
    Connector elbows drawn with ::before/::after on the <li>s (the canonical

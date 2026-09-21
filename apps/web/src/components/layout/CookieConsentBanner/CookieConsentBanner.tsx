@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import * as CookieConsent from "vanilla-cookieconsent";
 // Import the library CSS statically — do NOT switch to a dynamic `import()` inside the effect.
 // CookieConsent.run() injects the modal and focuses its accept button synchronously; if the CSS
@@ -9,6 +10,7 @@ import * as CookieConsent from "vanilla-cookieconsent";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { bracketAffordanceHtml } from "@/components/design-system/BracketAffordance";
 import { updateConsentState } from "@/lib/analytics/gtm-consent";
+import { X } from "@/lib/icons.redesign";
 
 // Tracks whether CookieConsent.run() has resolved; used by CookiePreferencesButton
 // to guard showPreferences() calls before initialization completes.
@@ -31,6 +33,13 @@ function syncConsentState() {
 }
 
 export function CookieConsentBanner() {
+  // The preferences modal's close button (#2675). The library draws its own
+  // thin stroke X there and has no option to replace it, so the house close
+  // icon — the Phosphor Fill `X` every other close on the site uses — is
+  // portalled in once the modal is built. `globals.css` undoes the library's
+  // `svg` styling for it.
+  const [closeIconHost, setCloseIconHost] = useState<HTMLElement | null>(null);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -60,6 +69,13 @@ export function CookieConsentBanner() {
 
       onConsent: syncConsentState,
       onChange: syncConsentState,
+      onModalReady: ({ modalName, modal }) => {
+        if (modalName !== "preferencesModal" || !isMounted) return;
+        const host = modal.querySelector<HTMLElement>(".pm__close-btn span");
+        if (!host) return;
+        host.replaceChildren();
+        setCloseIconHost(host);
+      },
 
       language: {
         default: "nl",
@@ -114,5 +130,7 @@ export function CookieConsentBanner() {
     };
   }, []);
 
-  return null;
+  return closeIconHost
+    ? createPortal(<X size={20} aria-hidden="true" />, closeIconHost)
+    : null;
 }

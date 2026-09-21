@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import type { Decorator, Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BRACKET_GLYPH } from "@/components/design-system/BracketAffordance";
+import { X } from "@/lib/icons.redesign";
 import { CookieConsentBanner } from "./CookieConsentBanner";
 
 /**
@@ -250,13 +251,13 @@ function MockPreferencesModal() {
           <h2 style={{ ...heading, fontSize: "1.3rem", margin: 0 }}>
             Cookie-voorkeuren
           </h2>
+          {/* The house close icon, as the live modal portals it in (#2675);
+              40px is the library's `.pm__close-btn` box. */}
           <span
             aria-hidden
             style={{
-              fontFamily: "var(--font-mono)",
-              fontWeight: 700,
-              width: 28,
-              height: 28,
+              width: 40,
+              height: 40,
               display: "grid",
               placeItems: "center",
               border: "2px solid var(--color-ink)",
@@ -264,7 +265,7 @@ function MockPreferencesModal() {
               boxShadow: "var(--shadow-paper-sm)",
             }}
           >
-            ✕
+            <X size={20} aria-hidden="true" />
           </span>
         </div>
         <div style={{ padding: "18px 20px", maxHeight: 320, overflow: "auto" }}>

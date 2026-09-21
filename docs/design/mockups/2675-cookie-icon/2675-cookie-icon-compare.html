@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>#2675 cookie banner icon</title>
+    <style>
+      :root {
+        --cream: #f5f1e6;
+        --cream-soft: #ede8da;
+        --ink: #0a0a0a;
+        --muted: #5c5a55;
+        --jersey: #007c46;
+        --alert: #b84a3a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font:
+          16px/1.5 system-ui,
+          sans-serif;
+        padding: 32px 16px;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0 0 4px;
+      }
+      p.lead {
+        color: var(--muted);
+        margin: 0 0 28px;
+        max-width: 70ch;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+      }
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .col {
+        border: 2px solid var(--ink);
+        background: #fff8;
+        padding: 16px;
+        box-shadow: 6px 6px 0 var(--ink);
+      }
+      .col.rec {
+        outline: 4px solid var(--jersey);
+        outline-offset: 4px;
+      }
+      .tag {
+        font:
+          600 12px/1 ui-monospace,
+          monospace;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--jersey);
+      }
+      .col h2 {
+        font-size: 20px;
+        margin: 6px 0 8px;
+      }
+      .col ul {
+        margin: 0 0 12px;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .shots {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .shots img {
+        width: 100%;
+        border: 1px solid var(--ink);
+        display: block;
+      }
+      .cap {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: var(--muted);
+        margin: 4px 0 0;
+      }
+      .zoom {
+        margin-top: 12px;
+      }
+      .zoom img {
+        max-width: 100%;
+        border: 1px solid var(--ink);
+        display: block;
+      }
+      .bad {
+        color: var(--alert);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>#2675 — does the cookie banner get an icon?</h1>
+    <p class="lead"><b>Decided 2026-09-21: A.</b></p>
+    <p class="lead">
+      Live site, real fonts, iPhone-width screenshots. Only one control is in
+      question: <b>[×] ALLEEN NOODZAKELIJK</b>. Found while checking: the
+      preferences screen already has a cross (top right) — the library's thin
+      one, not ours. Every other close on the site (menu, search, alert,
+      organigram) uses our filled X.
+    </p>
+    <div class="grid">
+      <div class="col">
+        <span class="tag">Today</span>
+        <h2>Bracket alone, library's thin close</h2>
+        <ul>
+          <li>Banner: <code>[×] ALLEEN NOODZAKELIJK</code></li>
+          <li>Preferences: thin library X, top right</li>
+        </ul>
+        <div class="shots">
+          <div>
+            <img src="cm-today-390.png" />
+            <p class="cap">first banner</p>
+          </div>
+          <div>
+            <img src="pm-today-390.png" />
+            <p class="cap">Beheer voorkeuren</p>
+          </div>
+        </div>
+        <div class="zoom">
+          <img src="pm-today-390-crop.png" />
+          <p class="cap">the library's close — off-system</p>
+        </div>
+      </div>
+
+      <div class="col rec">
+        <span class="tag">A · recommended</span>
+        <h2>No icon on the button. Our own X on the close.</h2>
+        <ul>
+          <li>Banner: unchanged</li>
+          <li>Preferences: close gets the same filled X as the menu</li>
+          <li>One cross style on the whole site</li>
+        </ul>
+        <div class="shots">
+          <div>
+            <img src="cm-today-390.png" />
+            <p class="cap">first banner (unchanged)</p>
+          </div>
+          <div>
+            <img src="pm-close-390.png" />
+            <p class="cap">Beheer voorkeuren</p>
+          </div>
+        </div>
+        <div class="zoom">
+          <img src="after-pm-390-top.png" />
+          <p class="cap">as built — real library, local dev, 2026-09-21</p>
+        </div>
+        <div class="zoom" style="display: flex; gap: 8px">
+          <div>
+            <img src="pm-close-390-crop.png" />
+            <p class="cap">cookie close (new)</p>
+          </div>
+          <div>
+            <img src="ref-menu-close-390-crop.png" />
+            <p class="cap">menu close (live today)</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <span class="tag">B</span>
+        <h2>Icon beside the bracket</h2>
+        <ul>
+          <li>Banner: <code>☒ [×] ALLEEN NOODZAKELIJK</code></li>
+          <li class="bad">Two crosses in a row on one button</li>
+          <li class="bad">Preferences screen: 3 different crosses</li>
+        </ul>
+        <div class="shots">
+          <div>
+            <img src="cm-icon-390.png" />
+            <p class="cap">first banner</p>
+          </div>
+          <div>
+            <img src="pm-icon-390.png" />
+            <p class="cap">Beheer voorkeuren</p>
+          </div>
+        </div>
+        <div class="zoom">
+          <img src="cm-icon-390-crop.png" />
+          <p class="cap">the button up close</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
