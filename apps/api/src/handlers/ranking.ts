@@ -11,7 +11,12 @@ import {
   ResourceNotFoundError,
   type BffError,
 } from "../psd/errors";
-import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
+import {
+  HARD_TTL_DEFAULT,
+  KvCacheService,
+  TTL,
+  TypedKvCache,
+} from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { PsdGateService } from "../psd/gate";
 import { withErrorMapping } from "./error-mapping";
@@ -53,9 +58,15 @@ export const getRankingHandler = (
     return tables;
   });
 
+  // The note holds when it was written and stays in KV for the 7-day hard
+  // TTL, like any cached value: fresh for `TTL.RANKING`, stale after. A stale
+  // note sends the read back to PSD, but if PSD is down it still answers —
+  // "stale is the floor" (#2321) — so an expired note on a day the quota is
+  // spent cannot take the page down again.
   return Effect.gen(function* () {
     const kv = yield* KvCacheService;
-    if ((yield* kv.get(noTableKey)) !== null) return yield* noTable;
+    const notedAt = Number((yield* kv.get(noTableKey)) ?? NaN);
+    if (Date.now() - notedAt < TTL.RANKING * 1000) return yield* noTable;
     return yield* rankingCache
       .getOrFetch(cacheKey, fetchRanking, TTL.RANKING, undefined, {
         shouldServeStale,
@@ -63,8 +74,14 @@ export const getRankingHandler = (
       .pipe(
         Effect.tapErrorTag("ResourceNotFound", () =>
           Effect.flatMap(kv.get(cacheKey), (table) =>
-            table === null ? kv.set(noTableKey, "1", TTL.RANKING) : Effect.void,
+            table === null
+              ? kv.set(noTableKey, String(Date.now()), HARD_TTL_DEFAULT)
+              : Effect.void,
           ),
+        ),
+        Effect.catchIf(
+          (error) => !Number.isNaN(notedAt) && shouldServeStale(error),
+          () => Effect.fail(noTable),
         ),
       );
   });

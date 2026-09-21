@@ -263,6 +263,68 @@ describe("getRankingHandler", () => {
     expect(store.has("ranking:none:team:1")).toBe(false);
   });
 
+  // #3059 follow-up — "stale is the floor" (#2321) for the note too. Once it
+  // expires, the next read needs PSD; if PSD's quota is spent at that moment
+  // the team still has no table, so the expired note answers.
+  describe("an expired no-table note", () => {
+    const expiredNote = () =>
+      new Map([
+        ["ranking:none:team:1", String(Date.now() - 25 * 60 * 60 * 1000)],
+      ]);
+    const readWith = (
+      store: Map<string, string>,
+      getRanking: PsdServiceInterface["getRanking"],
+    ) =>
+      Effect.runPromise(
+        Effect.either(
+          getRankingHandler(1).pipe(
+            Effect.provide(
+              Layer.succeed(PsdService, makeServiceMock({ getRanking })),
+            ),
+            Effect.provide(
+              Layer.succeed(KvCacheService, makeMemoryCache(store)),
+            ),
+            Effect.provide(PsdGateTest),
+            Effect.provide(testEnvLayer),
+          ),
+        ),
+      );
+
+    it("still answers 404 when PSD is down", async () => {
+      let psdCalls = 0;
+      const result = await readWith(expiredNote(), () => {
+        psdCalls++;
+        return Effect.fail(
+          new UpstreamUnavailableError({ message: "HTTP 429", status: 429 }),
+        );
+      });
+      expect(psdCalls).toBe(1); // it did try PSD first
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left._tag).toBe("ResourceNotFound");
+      }
+    });
+
+    it("gives way to a table PSD now publishes", async () => {
+      const result = await readWith(expiredNote(), () =>
+        Effect.succeed(rankingTables),
+      );
+      expect(result._tag).toBe("Right");
+    });
+
+    it("still reports PSD being down when there was never a note", async () => {
+      const result = await readWith(new Map(), () =>
+        Effect.fail(
+          new UpstreamUnavailableError({ message: "HTTP 429", status: 429 }),
+        ),
+      );
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left._tag).toBe("UpstreamUnavailable");
+      }
+    });
+  });
+
   it("propagates UpstreamUnavailableError from service", async () => {
     const result = await Effect.runPromise(
       Effect.either(
