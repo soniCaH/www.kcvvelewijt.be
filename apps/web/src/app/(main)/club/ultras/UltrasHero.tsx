@@ -76,7 +76,10 @@ export function UltrasHero({ joinHref, upLink }: UltrasHeroProps) {
             it is this hero's own hand-tuned value, not the two-line-hero
             `leading-hero` step (0.85) — this headline isn't a fixed 2-line
             composition, it wraps by content length, so the tight-leading
-            step (never the default) does not apply here. */}
+            step (never the default) does not apply here.
+            No `hyphens-auto`: "De luidste hoek" is a literal in this
+            component, not free text — bounded, longest word 7 characters,
+            provably fits (DESIGN.md's Hyphenation Rule). */}
         <h1 className="font-display-big text-cream text-display-2xl leading-[0.95] font-black uppercase">
           De <span className="text-warm">luidste</span> hoek
         </h1>

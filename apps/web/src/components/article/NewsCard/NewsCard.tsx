@@ -334,21 +334,10 @@ export const NewsCard = ({
           level={HEADING_LEVEL[as]}
           size={headingSize}
           tone={headingTone}
-          // `hyphens-auto` (no `break-words`) — long Dutch compounds
-          // (e.g. "Voorbeschouwing") hyphenate at a dictionary point with a
-          // visible hyphen. `break-words` is deliberately omitted: its
-          // per-character emergency breaks out-compete hyphenation in the
-          // greedy line-breaker, producing hyphen-less mid-word clips
-          // ("Voorbeschou / wing"). `line-clamp-3` still caps the height.
-          //
-          // RESTORED (#2586 review): #2549's "every real slot is >=319px so
-          // this is a no-op" premise does not hold for every `<NewsCard>`
-          // consumer. `<NewsGrid>`'s `sm:grid-cols-3` gives a ~143px text
-          // column at a 640px viewport (well under any width the decision
-          // measured) — narrow enough that "Voorbeschouwing" cannot fit a
-          // whole line, so the hyphenator is genuinely consulted there.
-          // Without it, `line-clamp-3`'s `overflow: hidden` clips the word
-          // mid-syllable with no hyphen instead of wrapping it cleanly.
+          // An article headline is free-text/unbounded — an editor can
+          // write a longer compound tomorrow — so per DESIGN.md's
+          // Hyphenation Rule it carries `hyphens-auto`, ALONE, never paired
+          // with `break-words` (#2269). `line-clamp-3` still caps the height.
           className="line-clamp-3 hyphens-auto"
         >
           {title}

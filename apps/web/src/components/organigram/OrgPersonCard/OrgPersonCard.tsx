@@ -272,19 +272,10 @@ function DualAvatar({
 
 // `w-full` is load-bearing: the card is `flex-col items-center`, so without it
 // this <p> sizes to max-content and a long role ("Communicatieverantwoordelijke")
-// spills out past the card border instead of wrapping. `hyphens-auto` goes in
-// ALONE — pairing it with `break-words` suppresses the hyphen (see #2269).
-//
-// RESTORED (#2586 review): the #2549 measurement this comment used to cite
-// ("VERANTWOORDELIJKE fits its 126px box at 124px") measured the word AFTER
-// hyphenation split it, not the whole 29-char "Communicatieverantwoordelijke"
-// fixture (~210px at 11px mono + 0.06em tracking) against the real
-// `grid-cols-[repeat(auto-fill,minmax(160px,1fr))]` column (~136px after
-// `p-3`). Without `hyphens-auto` that word cannot break at all and spills
-// past the card border — confirmed on `features-organigram-
-// structuredirectory--default--tablet.png`, which was already rendering the
-// hyphenated "COMMUNICATIEVER-" / "ANTWOORDELIJKE" break before this
-// declaration was ever touched. Deleting it was the bug, not the fix.
+// spills out past the card border instead of wrapping. A role title is
+// free-text/unbounded — the club can name a longer one tomorrow — so per
+// DESIGN.md's Hyphenation Rule it carries `hyphens-auto`, ALONE, never
+// paired with `break-words` (#2269).
 const SUBLABEL =
   "text-ink-muted mt-1.5 w-full font-mono text-[11px] tracking-[0.06em] uppercase hyphens-auto";
 

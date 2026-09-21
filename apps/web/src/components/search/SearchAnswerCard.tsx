@@ -75,15 +75,10 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
         Slim antwoord
       </span>
 
-      {/* RESTORED break-words (#2586 review): `answer` is free-form model
-          output from `/api/search`, not a drilled fixture — it can contain
-          a URL, an e-mail, or an ad-hoc compound with no natural break
-          point. The card is `overflow-hidden` and this `<p>` carries `mr-10`
-          on top of the card padding, so at 320px the column is ~230px; a
-          single ~15-char unbreakable token exceeds that and silently clips
-          without a wrap opportunity. This is exactly what the docblock
-          above ("length-clamped so it wraps gracefully instead of clipping
-          at narrow widths") already promises. */}
+      {/* `answer` is model output — free-text/unbounded (a URL, an e-mail,
+          an ad-hoc compound) — so per DESIGN.md's Hyphenation Rule it needs
+          a break declaration; the card is `overflow-hidden`, so the
+          alternative is a silent clip. */}
       <p className="text-ink font-display mt-2.5 mr-10 text-[16.5px] leading-relaxed font-medium break-words italic">
         {clampAnswer(answer)}
       </p>

@@ -283,14 +283,11 @@ export function MemberDetailPanel({
                 name={activeName}
                 imageUrl={activeHolder?.imageUrl}
               />
-              {/* RESTORED break-words (#2586 review): the vacant-node fixture
-                  that ships no baseline diff is 24 chars / 260px in a 275px
-                  column — 15px of accidental slack. The real fixture title
-                  "Communicatieverantwoordelijke" (29 chars, staff-members.fixture.ts)
-                  scales to ~314px with no break opportunity. The panel is
-                  `overflow-y-auto`, which forces `overflow-x: auto` too, so
-                  without a break a long title gets a horizontal scrollbar or
-                  a silent clip instead of wrapping. */}
+              {/* A vacant node's title / an active holder's name is
+                  free-text/unbounded — per DESIGN.md's Hyphenation Rule it
+                  needs a break declaration rather than the bare default, or
+                  the panel's `overflow-y-auto` (which forces
+                  `overflow-x: auto` too) gets a horizontal scrollbar. */}
               <div className="min-w-0">
                 <p className="font-display text-[23px] leading-none font-black break-words italic">
                   {isVacant ? node.title : activeName}
