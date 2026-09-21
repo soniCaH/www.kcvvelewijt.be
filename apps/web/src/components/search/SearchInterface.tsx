@@ -208,6 +208,17 @@ export const SearchInterface = ({
   );
   const augment = useSemanticAugment(query, lexicalUrls);
 
+  // The lexical fetch has already failed, but the semantic lane hasn't
+  // settled yet — so it's still unknown whether an answer is about to
+  // suppress the failure notice (#2824 review, round 2). Derived once and
+  // reused by both the results-slot spinner (keep it up, no empty gap
+  // while this is true) and the notice gate (stay suppressed while this is
+  // true) below, so the two conditions can never disagree about what's on
+  // screen. Bounded by the semantic POST proxy's own 15s cap
+  // (`AbortSignal.timeout(15_000)`, `app/api/search/route.ts`) — this can't
+  // leave the spinner up indefinitely.
+  const awaitingSemantic = error && !isLoading && augment.kind === "pending";
+
   // Track analytics based on filtered results (respects active filter)
   // Only fires after a successful fetch (no load, no error) for the query
   // currently on screen — `lastSettledQuery !== query.trim()` covers the
@@ -239,10 +250,12 @@ export const SearchInterface = ({
   // reads the same `augment.kind === "answer"` expression the notice's own
   // gate uses, so the two can never disagree about what the visitor saw.
   //
-  // Waits for `augment` to SETTLE (`kind !== "pending"`) before firing at
-  // all. In the real request order the semantic POST debounces 300ms before
-  // it even starts, so on a genuine lexical failure `augment` is almost
-  // always still "pending" when `error` first goes true — firing off a
+  // Waits out `awaitingSemantic` before firing at all — same derived value
+  // the results-slot spinner and the notice gate below use, so this effect
+  // can never fire while either of those is still showing the wait state.
+  // In the real request order the semantic POST debounces 300ms before it
+  // even starts, so on a genuine lexical failure `augment` is almost always
+  // still "pending" when `error` first goes true — firing off a
   // still-pending augment reported `answer_shown: false` for a search an
   // answer was about to suppress (review finding on the first version of
   // this PR: the two states could disagree in the common case, not just in
@@ -262,12 +275,19 @@ export const SearchInterface = ({
   // #2913/#2918 applied to `search_results_shown`/`search_no_results`).
   useEffect(() => {
     if (!error || isLoading) return;
-    if (augment.kind === "pending") return;
+    if (awaitingSemantic) return;
     if (failureTrackedRef.current) return;
 
     failureTrackedRef.current = true;
     trackSearchFailed(query.trim(), augment.kind === "answer");
-  }, [error, isLoading, augment.kind, query, trackSearchFailed]);
+  }, [
+    error,
+    isLoading,
+    awaitingSemantic,
+    augment.kind,
+    query,
+    trackSearchFailed,
+  ]);
 
   /**
    * Handle search submit
@@ -451,8 +471,21 @@ export const SearchInterface = ({
                 mount (Waiting-Device Rule, DESIGN.md → Motion); every other
                 in-flight request uses variant="compact". Explicit here so
                 the call site says so, rather than relying on the prop's
-                default. */}
-            {isLoading && (
+                default.
+
+                Also covers `awaitingSemantic` (#2824 review, round 3): once
+                the lexical fetch has failed, this slot stays empty until
+                the semantic lane settles too (see the notice gate below) —
+                without the spinner, that's several seconds of a bare gap on
+                a slow LLM call (bounded by the semantic proxy's 15s cap,
+                `app/api/search/route.ts`). Keeping the scarf up through
+                that wait, then resolving straight to the answer card or the
+                notice, means no gap and no flash — never an empty area, and
+                never two different "waiting" treatments back to back. Not
+                passed to `<SearchForm isLoading>` above — the form (and a
+                retry) must stay usable through this wait, only the results
+                slot is idle. */}
+            {(isLoading || awaitingSemantic) && (
               <div className="flex justify-center py-12">
                 <Spinner size="lg" variant="primary" />
               </div>
@@ -492,19 +525,24 @@ export const SearchInterface = ({
                 (`useSearchAnalytics`), so suppressing the notice costs no
                 visibility.
 
-                `augment.kind !== "pending"` is load-bearing, not incidental:
-                the semantic POST debounces 300ms before it even starts, so
-                on a genuine failure the lexical GET settles well before the
-                semantic lane does. Without this guard the notice would
-                render — `live="assertive"` announces it to a screen reader
-                immediately — and then vanish moments later once the answer
-                arrives, which is precisely what this rule exists to avoid
-                (review finding on the first version of this PR). See the
-                matching `augment.kind === "pending"` guard on the
-                `search_failed` effect above, which the same fix applies to. */}
+                `!awaitingSemantic` (`error && !isLoading && augment.kind
+                === "pending"`, derived once above and shared with the
+                spinner block right above this one) is load-bearing, not
+                incidental: the semantic POST debounces 300ms before it even
+                starts, so on a genuine failure the lexical GET settles well
+                before the semantic lane does. Without this guard the notice
+                would render — `live="assertive"` announces it to a screen
+                reader immediately — and then vanish moments later once the
+                answer arrives, which is precisely what this rule exists to
+                avoid (review finding on the first version of this PR). The
+                spinner above stays up for exactly that same window (review,
+                round 3), so the visitor sees the scarf, never a gap, until
+                this resolves one way or the other. See the matching
+                `awaitingSemantic` guard on the `search_failed` effect
+                above, which the same fix applies to. */}
             {error &&
               !isLoading &&
-              augment.kind !== "pending" &&
+              !awaitingSemantic &&
               augment.kind !== "answer" && (
                 <EmptyState
                   tier="surface"

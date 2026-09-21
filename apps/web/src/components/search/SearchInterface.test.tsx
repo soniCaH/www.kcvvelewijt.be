@@ -908,6 +908,15 @@ describe("SearchInterface", () => {
     // already settled (the shape the previous version of this file used)
     // would pass against a component that gets the ordering wrong — this is
     // exactly how that regression shipped.
+    //
+    // Round 3: while waiting, the results-slot spinner (`role="status"`)
+    // stays up instead of leaving a bare gap — so it can no longer be used
+    // to detect "the lexical fetch has settled" (it's visible through both
+    // `isLoading` and the wait that follows). `submitFailingSearch` below
+    // waits on the submit button re-enabling instead, which only happens
+    // once the lexical fetch settles either way, and asserts the spinner
+    // is still up and the notice/event are still absent at that point. Each
+    // scenario then asserts the spinner is gone once `augment` settles.
     const failedSearchCalls = () =>
       mockTrackEvent.mock.calls.filter(
         ([eventName]) => eventName === "search_failed",
@@ -921,15 +930,27 @@ describe("SearchInterface", () => {
 
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
-      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
 
-      // Wait for the lexical fetch to settle (the loading spinner, `role=
-      // "status"`, unmounts once `isLoading` flips back to false) — `error`
-      // is now true, but the semantic lane (still mocked "pending") hasn't
-      // settled, so neither the notice nor the count may appear yet.
+      // The results-area spinner (`role="status"`) now stays up through
+      // BOTH `isLoading` and the post-failure `awaitingSemantic` wait — by
+      // design, so there's no gap or flash between them (#2824 review,
+      // round 3) — so its presence alone can't distinguish "still fetching"
+      // from "lexical failed, waiting on the semantic lane". The submit
+      // button can: `<SearchForm isLoading>` is deliberately NOT wired to
+      // `awaitingSemantic` (the form must stay usable/retriable through the
+      // wait), so it re-enables the instant the lexical fetch settles,
+      // whichever way, while the spinner is still showing. That's the
+      // signal this waits on.
       await waitFor(() => {
-        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+        expect(submitButton).toBeEnabled();
       });
+
+      // `error` is now true, but the semantic lane (still mocked "pending")
+      // hasn't settled — the spinner must still be up, and neither the
+      // notice nor the count may appear yet.
+      expect(screen.getByRole("status")).toBeInTheDocument();
       expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
       expect(failedSearchCalls()).toHaveLength(0);
     }
@@ -964,6 +985,9 @@ describe("SearchInterface", () => {
       });
       expect(screen.getByRole("group")).toBeInTheDocument();
 
+      // The wait is over — the spinner is gone, replaced by the answer.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
       // The failure notice never rendered, at any point in the sequence.
       expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
 
@@ -994,6 +1018,8 @@ describe("SearchInterface", () => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
       expect(screen.queryByText("Slim antwoord")).not.toBeInTheDocument();
+      // The wait is over — the spinner is gone, replaced by the notice.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(failedSearchCalls()).toHaveLength(1);
@@ -1022,6 +1048,8 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
+      // The wait is over — the spinner is gone, replaced by the notice.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(failedSearchCalls()).toHaveLength(1);
@@ -1044,6 +1072,9 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
+      // The wait is over — the spinner is gone, replaced by the notice
+      // (alongside "Gerelateerd", which never suppresses it).
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
       await waitFor(() => {
         expect(failedSearchCalls()).toHaveLength(1);
       });
@@ -1065,6 +1096,8 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
+      // The wait is over — the spinner is gone, replaced by the notice.
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
       await waitFor(() => {
         expect(failedSearchCalls()).toHaveLength(1);
       });
