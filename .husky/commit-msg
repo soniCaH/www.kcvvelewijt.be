@@ -1,38 +1,49 @@
-# Run commitlint and capture the exit code
-npx --no -- commitlint --edit ${1}
-COMMITLINT_EXIT_CODE=$?
-
-# If commitlint failed, show helpful examples
-if [ $COMMITLINT_EXIT_CODE -ne 0 ]; then
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "📝 COMMIT MESSAGE FORMAT"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  echo "Format:  type(scope): subject"
-  echo ""
-  echo "Examples:"
-  echo "  ✅ feat(news): add article detail page"
-  echo "  ✅ fix(sponsors): resolve logo alignment issue"
-  echo "  ✅ docs(config): update setup instructions"
-  echo "  ✅ test(sponsors): add visual regression tests"
-  echo "  ✅ feat(events): add event detail page"
-  echo ""
-  echo "Types:"
-  echo "  feat fix docs style refactor perf test build ci chore revert"
-  echo ""
-  echo "Scopes:"
-  echo "  news matches events teams players sponsors calendar ranking"
-  echo "  search sync analytics studio api ui schema config deps deps-dev"
-  echo ""
-  echo "Rules:"
-  echo "  • Use lowercase"
-  echo "  • Subject in imperative mood (\"add\" not \"added\")"
-  echo "  • No period at the end"
-  echo "  • Keep subject under 72 characters"
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
+# Husky runs this file as `sh -e "$s"` (see `.husky/_/h`), so a bare failing
+# command aborts the script on the spot. Capturing `$?` on the next line never
+# ran, and everything below it was dead code — a malformed commit message
+# failed without ever printing the format help it exists to print (#3013).
+# The `if` keeps the failure inside a tested condition, where errexit does not
+# apply.
+if npx --no -- commitlint --edit "$1"; then
+  exit 0
+else
+  status=$?
 fi
 
-exit $COMMITLINT_EXIT_CODE
+# 127 is `npx` missing from PATH, not a malformed message. Husky's wrapper
+# prints its own PATH diagnostic for that code (`.husky/_/h`), and the format
+# help below would be a lie stacked on top of it.
+if [ "$status" -eq 127 ]; then
+  exit "$status"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "📝 COMMIT MESSAGE FORMAT"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Format:  type(scope): subject"
+echo ""
+echo "Examples:"
+echo "  ✅ feat(news): add article detail page"
+echo "  ✅ fix(sponsors): resolve logo alignment issue"
+echo "  ✅ docs(config): update setup instructions"
+echo "  ✅ test(sponsors): add visual regression tests"
+echo "  ✅ feat(events): add event detail page"
+echo ""
+echo "Types:"
+echo "  feat fix docs style refactor perf test build ci chore revert"
+echo ""
+echo "Scopes:"
+echo "  news matches events teams players sponsors calendar ranking"
+echo "  search sync analytics studio api ui schema config deps deps-dev"
+echo ""
+echo "Rules:"
+echo "  • Use lowercase"
+echo "  • Subject in imperative mood (\"add\" not \"added\")"
+echo "  • No period at the end"
+echo "  • Keep the whole first line at most 100 characters"
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+exit "$status"

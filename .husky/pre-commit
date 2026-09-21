@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+# Husky runs this file as `sh -e "$s"` (see `.husky/_/h`), so errexit is already
+# live for a real commit — this line is belt-and-braces, not the thing that
+# makes the hook able to fail. It is here because the script reads as if it
+# cannot fail: its last command is an `echo`, and a script's exit status is its
+# last command's, so anyone running it directly (`bash .husky/pre-commit`) or
+# adding a command below would get a green tick over a failed check. The same
+# misreading already cost us `.husky/commit-msg`'s help block (#3013).
+set -e
+
 # Branch guard first — before lint-staged and a full monorepo type-check, so a
 # commit that was never going to land does not cost a type-check to find out.
 # Bypass with ALLOW_MAIN_COMMIT=1; see .husky/branch-guard.sh.
