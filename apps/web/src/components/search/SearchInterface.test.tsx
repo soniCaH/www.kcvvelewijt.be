@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
 import { createMockSearchResponse } from "@/../tests/helpers/search.helpers";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { useSemanticAugment } from "./useSemanticAugment";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 const mockTrackEvent = vi.mocked(trackEvent);
@@ -71,11 +72,15 @@ vi.mock("next/image", () => ({
 }));
 
 // The semantic augment lane has its own fetch (POST /api/search) and tests
-// (useSemanticAugment.test.ts). Stub it to "none" here so its request doesn't
-// disturb the lexical fetch-count assertions in this file.
+// (useSemanticAugment.test.ts). Stub it to "none" by default here so its
+// request doesn't disturb the lexical fetch-count assertions in this file.
+// A `vi.fn()`, not a fixed arrow, so the #2824 suppression/`search_failed`
+// tests below can override the returned `kind` per test via
+// `mockUseSemanticAugment.mockReturnValue(...)`.
 vi.mock("./useSemanticAugment", () => ({
-  useSemanticAugment: () => ({ kind: "none" }),
+  useSemanticAugment: vi.fn(() => ({ kind: "none" })),
 }));
+const mockUseSemanticAugment = vi.mocked(useSemanticAugment);
 
 describe("SearchInterface", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
@@ -87,6 +92,12 @@ describe("SearchInterface", () => {
     // Setup fetch mock using vi.stubGlobal for proper cleanup
     fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
+
+    // `vi.clearAllMocks()` below (afterEach) clears calls but not a
+    // `mockReturnValue` implementation set by an earlier test — re-assert
+    // the file-wide default explicitly so #2824's per-test overrides never
+    // leak into an unrelated test.
+    mockUseSemanticAugment.mockReturnValue({ kind: "none" });
   });
 
   afterEach(() => {
@@ -882,6 +893,169 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe("Failed search — semantic-answer suppression & search_failed (#2824)", () => {
+    const failedSearchCalls = () =>
+      mockTrackEvent.mock.calls.filter(
+        ([eventName]) => eventName === "search_failed",
+      );
+
+    it("suppresses the failure notice when the semantic lane returns a high-confidence answer, and still counts the failure", async () => {
+      const user = userEvent.setup();
+      mockUseSemanticAugment.mockReturnValue({
+        kind: "answer",
+        answer: "Het eerste elftal speelt zaterdag om 15u.",
+        sources: [],
+      });
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      // The answer card carries the visitor — it and the filters render
+      // unchanged (AC bullet 1).
+      await waitFor(() => {
+        expect(screen.getByText("Slim antwoord")).toBeInTheDocument();
+      });
+      expect(screen.getByRole("group")).toBeInTheDocument();
+
+      // The failure notice does not render at all.
+      expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+
+      // The failure is still counted, with answer_shown: true.
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: true },
+        ],
+      ]);
+    });
+
+    it("keeps rendering the failure notice exactly as today when the semantic lane has no high-confidence answer", async () => {
+      const user = userEvent.setup();
+      // Default mock — the semantic lane resolved but scored below the
+      // "answer" threshold (`useSemanticAugment`'s `related`/`none` split).
+      mockUseSemanticAugment.mockReturnValue({ kind: "none" });
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Slim antwoord")).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: false },
+        ],
+      ]);
+    });
+
+    it("keeps rendering the failure notice when both the lexical and semantic lanes are down", async () => {
+      const user = userEvent.setup();
+      // The semantic lane's own fetch failing settles to `{ kind: "none" }`
+      // too (`useSemanticAugment`'s documented "POST error / 503 → none"
+      // fallback) — same branch as the no-answer case above, exercised here
+      // under its own name because the AC lists it as a distinct scenario.
+      mockUseSemanticAugment.mockReturnValue({ kind: "none" });
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()).toEqual([
+        [
+          "search_failed",
+          { query_text: "test", query_length: 4, answer_shown: false },
+        ],
+      ]);
+    });
+
+    it("never suppresses the notice for the low-confidence 'Gerelateerd' lane", async () => {
+      const user = userEvent.setup();
+      mockUseSemanticAugment.mockReturnValue({
+        kind: "related",
+        items: [],
+      });
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+    });
+
+    it("fires search_failed exactly once per failed search, and does not re-fire when the semantic lane settles after the notice has already fired", async () => {
+      mockUseSemanticAugment.mockReturnValue({ kind: "none" });
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+
+      setMockSearchParams({ q: "test" });
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      await waitFor(() => {
+        expect(failedSearchCalls()).toHaveLength(1);
+      });
+      expect(failedSearchCalls()[0]).toEqual([
+        "search_failed",
+        { query_text: "test", query_length: 4, answer_shown: false },
+      ]);
+
+      // The semantic lane's own (independent) fetch settles to a
+      // high-confidence answer AFTER the lexical failure already fired
+      // search_failed. Force a re-render without touching
+      // `error`/`isLoading`/`query` — re-asserting the same URL query is a
+      // legitimate no-op trigger (e.g. a benign history replace) — and
+      // confirm the fire-once guard holds even though `augment.kind` (an
+      // effect dependency) changed.
+      mockUseSemanticAugment.mockReturnValue({
+        kind: "answer",
+        answer: "Antwoord",
+        sources: [],
+      });
+      act(() => {
+        setMockSearchParams({ q: "test" });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText("Slim antwoord")).toBeInTheDocument();
+      });
+
+      expect(failedSearchCalls()).toHaveLength(1);
     });
   });
 

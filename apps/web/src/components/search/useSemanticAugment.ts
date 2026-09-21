@@ -25,7 +25,7 @@
  * no empty-state flash mid-flight. A POST error / 503 settles with empty
  * results → `none`, so lexical search is never affected (PRD silent-fallback).
  *
- * Ratified silence, one of three: DESIGN.md → "The Silence Is An Answer
+ * Ratified silence, one of four: DESIGN.md → "The Silence Is An Answer
  * Rule" (#2470/#2580) — the lexical results below still serve, so this
  * augment's own failure recovers nothing worth telling the visitor about.
  * `error` is deliberately not destructured from `useSemanticSearch` below —

@@ -55,7 +55,12 @@ export const SearchInterface = ({
   // `useCallback(…, [])`. The results-tracking effect and `handleSearch`
   // below depend on these trackers directly rather than on `analytics`, so a
   // render that changes nothing else doesn't re-run them (#2913).
-  const { trackResultsShown, trackNoResults, trackSearchSubmitted } = analytics;
+  const {
+    trackResultsShown,
+    trackNoResults,
+    trackSearchSubmitted,
+    trackSearchFailed,
+  } = analytics;
 
   // URL is the source of truth for query + active type; `initialQuery` /
   // `initialType` props are ignored when the URL has no params (documented by
@@ -105,6 +110,13 @@ export const SearchInterface = ({
   // a render.
   const lastRequestedQueryRef = useRef<string | null>(null);
 
+  // Guards the `search_failed` fire-once behaviour (#2824): reset at the
+  // start of every `performSearch` attempt (alongside `setError(false)`),
+  // flipped once the failed-search effect below has reported this attempt.
+  // A ref, not state — re-running the effect when `augment` settles later
+  // must be able to see this without itself causing a render.
+  const failureTrackedRef = useRef(false);
+
   /**
    * Perform search
    * Note: Always fetches unfiltered results for accurate counts across all types
@@ -126,6 +138,7 @@ export const SearchInterface = ({
       // to that exact query later (e.g. clear, then browser forward) —
       // #2918 review.
       setLastSettledQuery(null);
+      failureTrackedRef.current = false;
       return;
     }
 
@@ -140,6 +153,7 @@ export const SearchInterface = ({
 
     setIsLoading(true);
     setError(false);
+    failureTrackedRef.current = false;
 
     try {
       // Always fetch unfiltered results (no type param)
@@ -218,6 +232,26 @@ export const SearchInterface = ({
     trackResultsShown,
     trackNoResults,
   ]);
+
+  // Count a lexical search failure (#2824) — fires whether or not the
+  // failed-search notice below is suppressed by a high-confidence semantic
+  // answer, so suppressing the notice costs no visibility. `answer_shown`
+  // reads the same `augment.kind === "answer"` expression the notice's own
+  // gate uses, so the two can never disagree about what the visitor saw.
+  //
+  // Fire-once via `failureTrackedRef` (reset alongside every `setError(false)`
+  // in `performSearch`), not just via the effect deps: `augment` settles
+  // from its own, independent fetch and can still change after `error` has
+  // already gone `true`, which would otherwise re-run this effect and
+  // double-count the same failed search (mirrors the re-fire discipline
+  // #2913/#2918 applied to `search_results_shown`/`search_no_results`).
+  useEffect(() => {
+    if (!error || isLoading) return;
+    if (failureTrackedRef.current) return;
+
+    failureTrackedRef.current = true;
+    trackSearchFailed(query.trim(), augment.kind === "answer");
+  }, [error, isLoading, augment.kind, query, trackSearchFailed]);
 
   /**
    * Handle search submit
@@ -409,27 +443,39 @@ export const SearchInterface = ({
             )}
 
             {/* Error state — only <SearchResults> below is gone on this
-                branch (filters, a semantic answer card, and "Gerelateerd"
-                links above/below this slot are NOT guarded by `error` and
-                keep rendering). tier "surface" is still the right register
-                for it: it's the exact same slot `<SearchNoResultsCard>`
-                already occupies for the "genuinely zero matches" case
-                (also tier "surface", SearchNoResultsCard.tsx), so a failed
-                fetch and an empty one read as the same weight in the same
-                place, per #2427's tier split. No action row: the search
-                form above (in <SearchMasthead>) already survives with the
-                query intact, so a second "probeer opnieuw" here would be
-                redundant chrome (#2470 resolution rule 4). Replaces the
-                ticket-stub <Alert> — its last production consumer (#2580).
-                `live="assertive"` stays explicit here (tier "surface" has
-                no failure discriminant to derive it from, unlike tier
-                "slot"'s `reason="unavailable"` — #2815) and matches the
+                branch (filters and "Gerelateerd" links above/below this slot
+                are NOT guarded by `error` and keep rendering). tier "surface"
+                is still the right register for it: it's the exact same slot
+                `<SearchNoResultsCard>` already occupies for the "genuinely
+                zero matches" case (also tier "surface",
+                SearchNoResultsCard.tsx), so a failed fetch and an empty one
+                read as the same weight in the same place, per #2427's tier
+                split. No action row: the search form above (in
+                <SearchMasthead>) already survives with the query intact, so
+                a second "probeer opnieuw" here would be redundant chrome
+                (#2470 resolution rule 4). Replaces the ticket-stub <Alert> —
+                its last production consumer (#2580). `live="assertive"`
+                stays explicit here (tier "surface" has no failure
+                discriminant to derive it from, unlike tier "slot"'s
+                `reason="unavailable"` — #2815) and matches the
                 <Alert variant="error"> this replaces: the visitor just
                 pressed "Zoeken", so the failure needs an immediate
                 announcement. `emphasis` (#2815) moves the accent off the
                 auto-appended period and onto "mislukt" — the failure word,
-                not the punctuation. */}
-            {error && !isLoading && (
+                not the punctuation.
+
+                `augment.kind !== "answer"` (#2824) is the fourth ratified
+                site under DESIGN.md's Silence Is An Answer Rule: when the
+                semantic lane already answered the visitor's question (the
+                "Slim antwoord" card above), the failed lexical search told
+                them nothing they could act on that the answer hadn't
+                already recovered, so the notice is suppressed. The low-
+                confidence "Gerelateerd" lane (`augment.kind === "related"`)
+                is explicitly NOT a recovery — it never suppresses. The
+                failure is still counted either way via `search_failed`
+                (`useSearchAnalytics`), so suppressing the notice costs no
+                visibility. */}
+            {error && !isLoading && augment.kind !== "answer" && (
               <EmptyState
                 tier="surface"
                 heading="Zoeken mislukt"
