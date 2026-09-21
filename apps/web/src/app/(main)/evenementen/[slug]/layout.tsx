@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { fetchEventOrNull } from "./page";
+import { fetchEventOrNull, isEventNotFound } from "./page";
 
 interface EventLayoutProps {
   children: React.ReactNode;
@@ -13,9 +13,10 @@ interface EventLayoutProps {
  * sibling route group, not an ancestor of this `[slug]` segment
  * (#2791/#3037), so there is no boundary above this layout.
  *
- * Mirrors `page.tsx`'s own not-found condition exactly: an event whose
- * `dateStart` was cleared in Studio renders `Invalid DateTime` downstream,
- * so it 404s here too, not only on a missing document.
+ * Calls `page.tsx`'s own `isEventNotFound` rather than repeating its
+ * compound condition here — the two used to be two independent
+ * `!event || !event.dateStart` copies, which is exactly the kind of
+ * duplicate that can drift when one side is tightened later (#2968 review).
  */
 export default async function EventLayout({
   children,
@@ -23,6 +24,6 @@ export default async function EventLayout({
 }: EventLayoutProps) {
   const { slug } = await params;
   const event = await fetchEventOrNull(slug);
-  if (!event || !event.dateStart) notFound();
+  if (isEventNotFound(event)) notFound();
   return children;
 }

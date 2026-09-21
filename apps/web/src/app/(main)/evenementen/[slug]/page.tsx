@@ -19,7 +19,10 @@ import { Effect } from "effect";
 
 import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
-import { EventRepository } from "@/lib/repositories/event.repository";
+import {
+  EventRepository,
+  type EventDetailVM,
+} from "@/lib/repositories/event.repository";
 import type { EVENT_SLUGS_QUERY_RESULT } from "@/lib/sanity/sanity.types";
 import {
   PhotoGalleryRepository,
@@ -94,6 +97,20 @@ export const fetchEventOrNull = cache(async function fetchEventOrNull(
   );
 });
 
+/**
+ * The one not-found condition for this route — kept in one place, next to
+ * the cached fetch, because it is compound (#2968 review): a missing
+ * document, or one whose `dateStart` was cleared in Studio. GROQ projects
+ * `dateStart` via `coalesce(dateStart, "")`, so a cleared field arrives as
+ * `""`, not `null` — left unchecked, it would render `Invalid DateTime`
+ * instead of a clean 404. Both `layout.tsx` and this page call this one
+ * function so a future tightening of the condition can't drift between the
+ * two the way two independent `!event || !event.dateStart` copies could.
+ */
+export function isEventNotFound(event: EventDetailVM | null): event is null {
+  return !event || !event.dateStart;
+}
+
 export async function generateMetadata({
   params,
 }: EventPageProps): Promise<Metadata> {
@@ -105,9 +122,9 @@ export async function generateMetadata({
   if (!event)
     return {
       title: "Evenement niet gevonden",
-      // #2963: this branch renders under a 200 (a `loading.tsx`
-      // Suspense boundary flushes the shell before `notFound()` runs),
-      // so noindex is what actually keeps it out of the index.
+      // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
+      // gets a real 404 here, but this noindex stays in case a future
+      // `loading.tsx`/ancestor boundary ever reintroduces the soft 200.
       robots: { index: false, follow: false },
     };
 
@@ -142,13 +159,12 @@ export default async function EventDetailPage({ params }: EventPageProps) {
   // second one.
   const event = await fetchEventOrNull(slug);
 
-  // GROQ projects `dateStart` via `coalesce(dateStart, "")`; an event with
-  // `dateStart` cleared in Studio (or written via the API bypassing schema
-  // validation) would render `Invalid DateTime`. Treat as 404 instead. Kept
-  // here too (not only in the layout) so this early return still short-
-  // circuits the reads below for the type-narrowing compiler as much as for
-  // runtime — `layout.tsx` applies the identical check first.
-  if (!event || !event.dateStart) notFound();
+  // Same-segment `layout.tsx` already ran `isEventNotFound` before the
+  // shell flushed (#2968); repeated here (not only there) so this early
+  // return still short-circuits the reads below and narrows `event` for the
+  // compiler, not because the two might disagree — they call the same
+  // function.
+  if (isEventNotFound(event)) notFound();
 
   // `upcoming`/`galleries` depend on the now-confirmed event id, so they run
   // as their own read rather than folding into `fetchEventOrNull` above.

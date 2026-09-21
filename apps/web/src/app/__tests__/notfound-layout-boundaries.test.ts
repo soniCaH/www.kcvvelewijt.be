@@ -77,6 +77,11 @@ vi.mock("@/app/(main)/galerij/[slug]/page", () => ({
 
 vi.mock("@/app/(main)/evenementen/[slug]/page", () => ({
   fetchEventOrNull: mockFetchEvent,
+  // Real predicate re-implemented here (not imported) so this file stays a
+  // pure mock of the module — same semantics as `isEventNotFound` in
+  // `page.tsx`: a missing event, or one whose `dateStart` was cleared.
+  isEventNotFound: (event: { dateStart?: string } | null) =>
+    !event || !event.dateStart,
 }));
 
 vi.mock("@/app/(main)/tegenstander/[clubId]/page", () => ({
