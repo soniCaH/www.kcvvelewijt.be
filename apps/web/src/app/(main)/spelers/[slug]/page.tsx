@@ -113,9 +113,9 @@ export async function generateMetadata({
     if (!player)
       return {
         title: "Speler niet gevonden",
-        // #2963: this branch renders under a 200 (a `loading.tsx`
-        // Suspense boundary flushes the shell before `notFound()` runs),
-        // so noindex is what actually keeps it out of the index.
+        // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
+        // gets a real 404 here, but this noindex stays in case a future
+        // `loading.tsx`/ancestor boundary ever reintroduces the soft 200.
         robots: { index: false, follow: false },
       };
 
