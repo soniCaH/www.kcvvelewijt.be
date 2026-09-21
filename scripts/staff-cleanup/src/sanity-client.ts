@@ -32,3 +32,11 @@ export const client = createClient({
   token: resolveToken(),
   useCdn: false,
 });
+
+/**
+ * Draft-aware variant of `client`, for the few call sites that must see
+ * drafts.* documents on purpose — e.g. reading a document that only exists
+ * as a draft, or a referrer query that must not miss a draft referrer. Each
+ * call site names the reason next to the call (#2839).
+ */
+export const draftAwareClient = client.withConfig({ perspective: "raw" });

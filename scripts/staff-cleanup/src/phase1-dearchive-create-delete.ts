@@ -7,7 +7,7 @@
  *
  * Run: SANITY_API_TOKEN=... SANITY_DATASET=staging tsx src/phase1-dearchive-create-delete.ts
  */
-import { client } from "./sanity-client";
+import { client, draftAwareClient } from "./sanity-client";
 
 // ─── 1. Dearchive list ──────────────────────────────────────────────────────
 
@@ -181,7 +181,10 @@ async function createManualStaff() {
 async function deleteDraftDuplicate() {
   console.log("\n=== Step 3: Deleting draft duplicate ===\n");
 
-  const exists = await client.fetch<{ _id: string } | null>(
+  // DRAFT_DUPLICATE_ID is literally a drafts.* id — the published-perspective
+  // `client` never sees it, so this existence check must use the draft-aware
+  // client or it always reports "not found" (#2839).
+  const exists = await draftAwareClient.fetch<{ _id: string } | null>(
     `*[_id == $id][0]{ _id }`,
     { id: DRAFT_DUPLICATE_ID }
   );

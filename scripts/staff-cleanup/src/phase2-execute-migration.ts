@@ -6,7 +6,7 @@
  * 2. Relink all references from board doc → PSD doc
  * 3. Delete board doc (published + draft)
  */
-import { client } from "./sanity-client";
+import { client, draftAwareClient } from "./sanity-client";
 import { readFileSync } from "fs";
 
 interface MatchEntry {
@@ -72,8 +72,10 @@ async function migrateOne(match: MatchEntry, index: number) {
     }
   }
 
-  // 2. Relink references
-  const referencingDocs = await client.fetch<SanityDoc[]>(
+  // 2. Relink references. Draft-aware: a draft referrer must be relinked too,
+  // or deepReplaceRef(..., draftBoardId, psdId) below never has a match to
+  // act on and that draft is left pointing at the board doc step 3 deletes (#2839).
+  const referencingDocs = await draftAwareClient.fetch<SanityDoc[]>(
     `*[references($boardId)]`,
     { boardId }
   );

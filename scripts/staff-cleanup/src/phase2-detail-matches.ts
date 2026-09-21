@@ -4,7 +4,7 @@
  * 2. Does the PSD doc already have a photo?
  * 3. Which documents reference the board doc?
  */
-import { client } from "./sanity-client";
+import { client, draftAwareClient } from "./sanity-client";
 import { readFileSync } from "fs";
 
 interface MatchEntry {
@@ -34,8 +34,10 @@ async function main() {
       { id: match.psdId }
     );
 
-    // Find references to the board doc
-    const refs = await client.fetch<RefDoc[]>(
+    // Find references to the board doc. Draft-aware: this count feeds the
+    // "Refs to relink" line a human signs off on before phase2-execute-migration
+    // runs — undercounting it here is worse than the original bug (#2839).
+    const refs = await draftAwareClient.fetch<RefDoc[]>(
       `*[references($boardId)]{ _id, _type }`,
       { boardId: match.boardId }
     );
