@@ -33,3 +33,18 @@ export { AccentStrip } from "./AccentStrip";
 // PageHero
 export { PageHero } from "./PageHero";
 export type { PageHeroProps, PageHeroSize } from "./PageHero";
+
+// CookiePreferencesButton
+export { CookiePreferencesButton } from "./SiteFooter/CookiePreferencesButton";
+
+// MatchStripSlot (@/components/layout/MatchStrip) is deliberately NOT
+// re-exported here. It renders `<MatchStrip>`, an async server component
+// that reads first-team fixture data via the BFF (see MatchStrip.tsx's own
+// docblock) — a render chain that cannot run in a browser bundle. This is
+// the named exception from #3025's "a component with a story belongs in
+// its barrel" ruling (#3025's own comparison table: story coverage exists
+// via composed context, e.g. MatchStripInContext.stories.tsx, but the
+// server-only render chain wins). Re-exporting it here would drag that
+// chain into the design-sync client bundle (`.design-sync/entry.ts`
+// wildcards this barrel onto `window.KcvvDS`). Don't "fix" this by adding
+// the export back — #3027 tracks `MatchStripSlot` itself.

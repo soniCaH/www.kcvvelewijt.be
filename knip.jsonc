@@ -4,25 +4,28 @@
   // dependencies). Config decisions recorded here so a re-run stays readable:
   //
   // 1. Barrels are NOT declared as entry points. An unconsumed re-export in a
-  //    barrel is still worth flagging and trimming here — reviewed
-  //    2026-09-20 against the current state: apps/web's package.json now
-  //    declares `"sideEffects": ["**/*.css"]` (#2935/#2956, landed
-  //    2026-09-14), so everything but CSS is tree-shakeable and an unread
-  //    barrel re-export no longer actually reaches the shipped bundle. The
+  //    barrel is still worth flagging here — but the trim is not automatic.
+  //    Ruled by the design-system owner on #3025 (2026-09-21), closing the
+  //    re-decide #2934 left open: **a component with a story belongs in its
+  //    barrel**, full stop — a barrel is the client-safe public API, not
+  //    "only what something in this repo currently imports". The one
+  //    exception is a component that cannot run in a browser bundle because
+  //    it, or something it renders, does server-only work (e.g.
+  //    `MatchStripSlot`, absent from `@/components/layout` because it
+  //    renders the async, BFF-reading `<MatchStrip>` — see that barrel's own
+  //    comment). A barrel export with no story and no consumer is still
+  //    dead weight and gets trimmed. The superseded basis for the old
+  //    "trim on unconsumed" policy — that an unread re-export "forces a
+  //    component into the shared webpack chunk on every route" — doesn't
+  //    apply: apps/web's package.json declares
+  //    `"sideEffects": ["**/*.css"]` (#2935/#2956, landed 2026-09-14), so
+  //    everything but CSS is tree-shakeable regardless of barrel exports.
+  //    That bundle-cost narrative is gone from this file and from the
   //    `Alert` barrel's docblock (apps/web/src/components/design-system/
-  //    Alert/index.ts) predates that change and still cites the old bundle
-  //    cost — it's stale, not wrong about the historical reasoning, and is
-  //    corrected alongside this comment. The policy stands anyway, on a
-  //    different basis: barrel hygiene (a re-export with no reader is dead
-  //    weight for the next person reading the barrel) and knip/tool speed
-  //    (fewer false "this is part of the public surface" signals). Because
-  //    the original evidence didn't survive the branch it was decided on,
-  //    #3025 asks the design-system owner to re-decide this
-  //    with the current facts rather than leaving a superseded rationale
-  //    standing. Barrel `exports` findings are triaged like any other —
-  //    trimmed to what a consumer actually imports through that path, not
-  //    exempted — except where a real consumer needs the wildcard surface;
-  //    see point 3.
+  //    Alert/index.ts), which is where it originated. See point 3 for why
+  //    `.design-sync/entry.ts`'s wildcard is the real consumer that makes
+  //    "unconsumed" the wrong test for these two barrels in the first
+  //    place.
   // 2. `types` (unused exported TYPE, not field) is excluded globally below.
   //    It carries no runtime cost (erased at build) and is 616 of ~900
   //    findings, almost entirely barrel type re-exports mirroring the same

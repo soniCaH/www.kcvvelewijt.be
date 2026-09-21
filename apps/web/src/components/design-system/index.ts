@@ -47,11 +47,13 @@ export type { TextareaCounterProps } from "./TextareaCounter";
 export { Select } from "./Select";
 export type { SelectProps, SelectSize } from "./Select";
 
-// AlertBadge — `Alert` itself is not re-exported (#2580); see Alert/index.ts's
-// own comment. `AlertBadge` is re-exported here for design-sync (see note
-// at top of file).
-export { AlertBadge } from "./Alert";
+// Alert / AlertBadge — see Alert/index.ts's own comment for why `Alert`
+// (no production consumers, but has a story) is re-exported under #3025's
+// "a component with a story belongs in its barrel" rule.
+export { Alert, AlertBadge } from "./Alert";
 export type {
+  AlertProps,
+  AlertVariant,
   AlertBadgeProps,
   AlertBadgeVariant,
   AlertBadgeSize,
@@ -365,3 +367,17 @@ export type { LoadingAnnouncementProps } from "./LoadingAnnouncement";
 // UpLink
 export { UpLink } from "./UpLink";
 export type { UpLinkProps, UpLinkTone } from "./UpLink";
+
+// QASectionDivider
+export { QASectionDivider } from "./QASectionDivider";
+export type { QASectionDividerProps } from "./QASectionDivider";
+
+// SubjectAvatar
+export {
+  SubjectAvatar,
+  type SubjectAvatarProps,
+  type SubjectAvatarScale,
+  SubjectAvatarCluster,
+  type SubjectAvatarClusterProps,
+  type SubjectAvatarClusterMember,
+} from "./SubjectAvatar";

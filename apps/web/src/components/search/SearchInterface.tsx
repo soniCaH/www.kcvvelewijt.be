@@ -55,7 +55,12 @@ export const SearchInterface = ({
   // `useCallback(…, [])`. The results-tracking effect and `handleSearch`
   // below depend on these trackers directly rather than on `analytics`, so a
   // render that changes nothing else doesn't re-run them (#2913).
-  const { trackResultsShown, trackNoResults, trackSearchSubmitted } = analytics;
+  const {
+    trackResultsShown,
+    trackNoResults,
+    trackSearchSubmitted,
+    trackSearchFailed,
+  } = analytics;
 
   // URL is the source of truth for query + active type; `initialQuery` /
   // `initialType` props are ignored when the URL has no params (documented by
@@ -105,6 +110,13 @@ export const SearchInterface = ({
   // a render.
   const lastRequestedQueryRef = useRef<string | null>(null);
 
+  // Guards the `search_failed` fire-once behaviour (#2824): reset at the
+  // start of every `performSearch` attempt (alongside `setError(false)`),
+  // flipped once the failed-search effect below has reported this attempt.
+  // A ref, not state — re-running the effect when `augment` settles later
+  // must be able to see this without itself causing a render.
+  const failureTrackedRef = useRef(false);
+
   /**
    * Perform search
    * Note: Always fetches unfiltered results for accurate counts across all types
@@ -126,6 +138,7 @@ export const SearchInterface = ({
       // to that exact query later (e.g. clear, then browser forward) —
       // #2918 review.
       setLastSettledQuery(null);
+      failureTrackedRef.current = false;
       return;
     }
 
@@ -140,6 +153,7 @@ export const SearchInterface = ({
 
     setIsLoading(true);
     setError(false);
+    failureTrackedRef.current = false;
 
     try {
       // Always fetch unfiltered results (no type param)
@@ -194,6 +208,17 @@ export const SearchInterface = ({
   );
   const augment = useSemanticAugment(query, lexicalUrls);
 
+  // The lexical fetch has already failed, but the semantic lane hasn't
+  // settled yet — so it's still unknown whether an answer is about to
+  // suppress the failure notice (#2824 review, round 2). Derived once and
+  // reused by both the results-slot spinner (keep it up, no empty gap
+  // while this is true) and the notice gate (stay suppressed while this is
+  // true) below, so the two conditions can never disagree about what's on
+  // screen. Bounded by the semantic POST proxy's own 15s cap
+  // (`AbortSignal.timeout(15_000)`, `app/api/search/route.ts`) — this can't
+  // leave the spinner up indefinitely.
+  const awaitingSemantic = error && !isLoading && augment.kind === "pending";
+
   // Track analytics based on filtered results (respects active filter)
   // Only fires after a successful fetch (no load, no error) for the query
   // currently on screen — `lastSettledQuery !== query.trim()` covers the
@@ -217,6 +242,51 @@ export const SearchInterface = ({
     lastSettledQuery,
     trackResultsShown,
     trackNoResults,
+  ]);
+
+  // Count a lexical search failure (#2824) — fires whether or not the
+  // failed-search notice below is suppressed by a high-confidence semantic
+  // answer, so suppressing the notice costs no visibility. `answer_shown`
+  // reads the same `augment.kind === "answer"` expression the notice's own
+  // gate uses, so the two can never disagree about what the visitor saw.
+  //
+  // Waits out `awaitingSemantic` before firing at all — same derived value
+  // the results-slot spinner and the notice gate below use, so this effect
+  // can never fire while either of those is still showing the wait state.
+  // In the real request order the semantic POST debounces 300ms before it
+  // even starts, so on a genuine lexical failure `augment` is almost always
+  // still "pending" when `error` first goes true — firing off a
+  // still-pending augment reported `answer_shown: false` for a search an
+  // answer was about to suppress (review finding on the first version of
+  // this PR: the two states could disagree in the common case, not just in
+  // a rare race). `useSemanticAugment`'s own settlement gate covers both a
+  // successful AND a failed semantic fetch (`useSemanticSearch`'s `catch`
+  // also updates `executedQuery`), so a fully-down semantic lane still
+  // settles to `none` and this effect still fires — AC 3 keeps working. The
+  // semantic POST proxy caps that wait at 15s
+  // (`AbortSignal.timeout(15_000)`, `app/api/search/route.ts`), so this
+  // cannot stall the count indefinitely.
+  //
+  // Fire-once via `failureTrackedRef` (reset alongside every `setError(false)`
+  // in `performSearch`), not just via the effect deps: `augment.kind` is an
+  // effect dependency and changes at least once more as it settles from
+  // "pending" to its final kind, which would otherwise re-run this effect
+  // and double-count the same failed search (mirrors the re-fire discipline
+  // #2913/#2918 applied to `search_results_shown`/`search_no_results`).
+  useEffect(() => {
+    if (!error || isLoading) return;
+    if (awaitingSemantic) return;
+    if (failureTrackedRef.current) return;
+
+    failureTrackedRef.current = true;
+    trackSearchFailed(query.trim(), augment.kind === "answer");
+  }, [
+    error,
+    isLoading,
+    awaitingSemantic,
+    augment.kind,
+    query,
+    trackSearchFailed,
   ]);
 
   /**
@@ -401,44 +471,88 @@ export const SearchInterface = ({
                 mount (Waiting-Device Rule, DESIGN.md → Motion); every other
                 in-flight request uses variant="compact". Explicit here so
                 the call site says so, rather than relying on the prop's
-                default. */}
-            {isLoading && (
+                default.
+
+                Also covers `awaitingSemantic` (#2824 review, round 3): once
+                the lexical fetch has failed, this slot stays empty until
+                the semantic lane settles too (see the notice gate below) —
+                without the spinner, that's several seconds of a bare gap on
+                a slow LLM call (bounded by the semantic proxy's 15s cap,
+                `app/api/search/route.ts`). Keeping the scarf up through
+                that wait, then resolving straight to the answer card or the
+                notice, means no gap and no flash — never an empty area, and
+                never two different "waiting" treatments back to back. Not
+                passed to `<SearchForm isLoading>` above — the form (and a
+                retry) must stay usable through this wait, only the results
+                slot is idle. */}
+            {(isLoading || awaitingSemantic) && (
               <div className="flex justify-center py-12">
                 <Spinner size="lg" variant="primary" />
               </div>
             )}
 
             {/* Error state — only <SearchResults> below is gone on this
-                branch (filters, a semantic answer card, and "Gerelateerd"
-                links above/below this slot are NOT guarded by `error` and
-                keep rendering). tier "surface" is still the right register
-                for it: it's the exact same slot `<SearchNoResultsCard>`
-                already occupies for the "genuinely zero matches" case
-                (also tier "surface", SearchNoResultsCard.tsx), so a failed
-                fetch and an empty one read as the same weight in the same
-                place, per #2427's tier split. No action row: the search
-                form above (in <SearchMasthead>) already survives with the
-                query intact, so a second "probeer opnieuw" here would be
-                redundant chrome (#2470 resolution rule 4). Replaces the
-                ticket-stub <Alert> — its last production consumer (#2580).
-                `live="assertive"` stays explicit here (tier "surface" has
-                no failure discriminant to derive it from, unlike tier
-                "slot"'s `reason="unavailable"` — #2815) and matches the
+                branch (filters and "Gerelateerd" links above/below this slot
+                are NOT guarded by `error` and keep rendering). tier "surface"
+                is still the right register for it: it's the exact same slot
+                `<SearchNoResultsCard>` already occupies for the "genuinely
+                zero matches" case (also tier "surface",
+                SearchNoResultsCard.tsx), so a failed fetch and an empty one
+                read as the same weight in the same place, per #2427's tier
+                split. No action row: the search form above (in
+                <SearchMasthead>) already survives with the query intact, so
+                a second "probeer opnieuw" here would be redundant chrome
+                (#2470 resolution rule 4). Replaces the ticket-stub <Alert> —
+                its last production consumer (#2580). `live="assertive"`
+                stays explicit here (tier "surface" has no failure
+                discriminant to derive it from, unlike tier "slot"'s
+                `reason="unavailable"` — #2815) and matches the
                 <Alert variant="error"> this replaces: the visitor just
                 pressed "Zoeken", so the failure needs an immediate
                 announcement. `emphasis` (#2815) moves the accent off the
                 auto-appended period and onto "mislukt" — the failure word,
-                not the punctuation. */}
-            {error && !isLoading && (
-              <EmptyState
-                tier="surface"
-                heading="Zoeken mislukt"
-                emphasis={{ text: "mislukt" }}
-                live="assertive"
-              >
-                Er ging iets mis bij het zoeken — probeer opnieuw.
-              </EmptyState>
-            )}
+                not the punctuation.
+
+                `augment.kind !== "answer"` (#2824) is the fourth ratified
+                site under DESIGN.md's Silence Is An Answer Rule: when the
+                semantic lane already answered the visitor's question (the
+                "Slim antwoord" card above), the failed lexical search told
+                them nothing they could act on that the answer hadn't
+                already recovered, so the notice is suppressed. The low-
+                confidence "Gerelateerd" lane (`augment.kind === "related"`)
+                is explicitly NOT a recovery — it never suppresses. The
+                failure is still counted either way via `search_failed`
+                (`useSearchAnalytics`), so suppressing the notice costs no
+                visibility.
+
+                `!awaitingSemantic` (`error && !isLoading && augment.kind
+                === "pending"`, derived once above and shared with the
+                spinner block right above this one) is load-bearing, not
+                incidental: the semantic POST debounces 300ms before it even
+                starts, so on a genuine failure the lexical GET settles well
+                before the semantic lane does. Without this guard the notice
+                would render — `live="assertive"` announces it to a screen
+                reader immediately — and then vanish moments later once the
+                answer arrives, which is precisely what this rule exists to
+                avoid (review finding on the first version of this PR). The
+                spinner above stays up for exactly that same window (review,
+                round 3), so the visitor sees the scarf, never a gap, until
+                this resolves one way or the other. See the matching
+                `awaitingSemantic` guard on the `search_failed` effect
+                above, which the same fix applies to. */}
+            {error &&
+              !isLoading &&
+              !awaitingSemantic &&
+              augment.kind !== "answer" && (
+                <EmptyState
+                  tier="surface"
+                  heading="Zoeken mislukt"
+                  emphasis={{ text: "mislukt" }}
+                  live="assertive"
+                >
+                  Er ging iets mis bij het zoeken — probeer opnieuw.
+                </EmptyState>
+              )}
 
             {/* Results */}
             {!isLoading && !error && (

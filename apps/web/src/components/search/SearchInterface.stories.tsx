@@ -29,6 +29,11 @@ type Story = StoryObj<typeof meta>;
 // waiting, the VR screenshot races that second render and captures a
 // results-only frame — a large top/height diff (flaky, seen on #2282). Wait
 // for the settled semantic surface before the runner screenshots.
+//
+// Since #2824 this also covers the failed-search notice: it now waits for
+// the semantic lane to settle too (`augment.kind !== "pending"`), so it can
+// stay suppressed if a high-confidence answer is about to arrive — the same
+// debounce, same race, same fix (`FetchError` below).
 const waitForSemantic =
   (pattern: RegExp): NonNullable<Story["play"]> =>
   async ({ canvasElement }) => {
@@ -325,6 +330,12 @@ export const Loading: Story = {
 
 /**
  * API returns a 500 — displays the inline error message.
+ *
+ * `mockFetchError` fails every fetch regardless of method, so both the
+ * lexical GET and the semantic POST 500 — the semantic lane settles to
+ * `{ kind: "none" }` (no answer), which is what keeps the notice showing
+ * here rather than being suppressed (#2824's `WithSmartAnswer`-shaped
+ * suppression case has its own story if one is ever added).
  */
 export const FetchError: Story = {
   args: {
@@ -334,4 +345,10 @@ export const FetchError: Story = {
   beforeEach() {
     return mockFetchError();
   },
+  // The notice now waits for the semantic lane to settle too (#2824) —
+  // without this, the VR runner can screenshot the in-between window where
+  // the lexical fetch has already failed but the semantic POST (300ms
+  // debounce + its own round trip) hasn't settled yet, capturing neither
+  // the notice nor anything else in its place.
+  play: waitForSemantic(/mislukt/i),
 };
