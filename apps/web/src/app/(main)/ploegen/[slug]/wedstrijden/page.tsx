@@ -126,20 +126,34 @@ export default async function WedstrijdenPage({
     rawMatches = await runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
-        return yield* bff.getMatches(psdTeamId).pipe(
-          // Deliberately narrow (#2782), not converged onto
-          // `degradeIfPermanent`'s three-tag split: `team` above already
-          // resolved from Sanity, so a `ParseError`/`HttpApiDecodeError`
-          // here means only the matches read failed, not the team. Catching
-          // those too would still call `notFound()` — "Pagina niet
-          // gevonden" for a team whose lookup just succeeded. This route is
-          // `force-dynamic` (below), so unlike the ISR routes among these
-          // five it has no last-good page to fall back to either way — a
-          // thrown transient failure always hits the error boundary on
-          // this exact request, same as today. Staying narrow only avoids
-          // the strictly worse false 404; it buys no ISR staleness escape.
-          Effect.catchTag("HttpNotFound", () => Effect.sync(() => notFound())),
-        );
+        // No `catchTag` at all (#3041), and none of `degradeIfPermanent`'s
+        // three-tag split either: `team` above already resolved from Sanity,
+        // so every permanent tag on THIS read — `ParseError`,
+        // `HttpApiDecodeError` and `HttpNotFound` alike — means only the
+        // matches read failed, not the team. Calling `notFound()` for any of
+        // them renders "Pagina niet gevonden" for a team whose lookup just
+        // succeeded, and under that team's own indexable metadata, since
+        // `generateMetadata` resolves the same subject separately.
+        //
+        // `HttpNotFound` used to be the one exception. It cannot mean what
+        // `classify-bff-failure.ts` documents it to mean here — a stale
+        // `psdId` in Sanity — because `getMatches` is a LIST read: PSD answers
+        // an unknown team id with `200 []`, which decodes cleanly, and only
+        // `/games/{id}/info` opts into `emptyBodyIsNotFound`.
+        //
+        // It had a second producer that DID deserve degrading: `getTeamMatches`
+        // opens on `getCurrentSeason()`, whose "No active season found"
+        // `ResourceNotFoundError` maps to the same `HttpNotFound`. That is a
+        // season gap, not a failure — the team really has no fixtures. It is
+        // answered as `[]` at the only layer that can tell the two apart, the
+        // BFF (`apps/api/src/psd/service.ts`, #3041), so it never arrives here
+        // as an error at all.
+        //
+        // What reaches this read as `HttpNotFound` is therefore PSD 404-ing the
+        // endpoint itself — an outage. Degrading THAT to `[]` would print "Nog
+        // geen wedstrijden gepland" for a team with a full fixture list, so the
+        // absence is left to the error boundary to report honestly.
+        return yield* bff.getMatches(psdTeamId);
         // `force-dynamic`: a transient failure always hits the error
         // boundary on this exact request either way, same as before —
         // `Effect.orDie` only makes that pre-existing decision visible to
