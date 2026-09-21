@@ -27,6 +27,23 @@ export function useSearchAnalytics() {
     });
   }, []);
 
+  // A lexical search failure (#2824) — fires whether or not the notice was
+  // suppressed by a high-confidence semantic answer, so the suppression
+  // (see SearchInterface's failed-search gating) costs no visibility.
+  // `answer_shown` is collected but deliberately NOT registered as a GA4
+  // custom dimension (taxonomy already at the 50-dimension cap) — the raw
+  // event count is the alarm.
+  const trackSearchFailed = useCallback(
+    (queryText: string, answerShown: boolean) => {
+      trackEvent("search_failed", {
+        query_text: sanitizeQuery(queryText),
+        query_length: queryText.length,
+        answer_shown: answerShown,
+      });
+    },
+    [],
+  );
+
   const trackFilterChanged = useCallback((filterType: string) => {
     trackEvent("search_filter_changed", {
       filter_type: filterType,
@@ -48,6 +65,7 @@ export function useSearchAnalytics() {
     trackSearchSubmitted,
     trackResultsShown,
     trackNoResults,
+    trackSearchFailed,
     trackFilterChanged,
     trackResultClicked,
   };

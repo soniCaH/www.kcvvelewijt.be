@@ -74,6 +74,51 @@ describe("useSearchAnalytics", () => {
     });
   });
 
+  describe("search_failed", () => {
+    it("fires with sanitized query_text, query_length, and answer_shown true", () => {
+      const { result } = renderHook(() => useSearchAnalytics());
+
+      act(() => {
+        result.current.trackSearchFailed("KCVV Elewijt", true);
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("search_failed", {
+        query_text: "kcvv elewijt",
+        query_length: 12,
+        answer_shown: true,
+      });
+    });
+
+    it("fires with answer_shown false when no semantic answer suppressed the notice", () => {
+      const { result } = renderHook(() => useSearchAnalytics());
+
+      act(() => {
+        result.current.trackSearchFailed("xyznonexistent", false);
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("search_failed", {
+        query_text: "xyznonexistent",
+        query_length: 14,
+        answer_shown: false,
+      });
+    });
+
+    it("truncates query_text to 50 characters", () => {
+      const { result } = renderHook(() => useSearchAnalytics());
+      const longQuery = "a".repeat(80);
+
+      act(() => {
+        result.current.trackSearchFailed(longQuery, false);
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("search_failed", {
+        query_text: "a".repeat(50),
+        query_length: 80,
+        answer_shown: false,
+      });
+    });
+  });
+
   describe("search_filter_changed", () => {
     it("fires with filter_type", () => {
       const { result } = renderHook(() => useSearchAnalytics());
