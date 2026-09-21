@@ -288,18 +288,20 @@ export const MatchPreviewType: Story = {
   tags: ["vr"],
 };
 
-// Regression guard: long Dutch compounds in a narrow featured card (the 3-up
-// "Uitgelicht" row width) must hyphenate at a dictionary point WITH a visible
-// hyphen — not hard-cut mid-word. The title carries `hyphens-auto` alone; if
-// `break-words` is ever re-added, its per-character emergency breaks win the
-// greedy line-breaker and the hyphens disappear ("Voorbeschou / wing"), which
-// this baseline catches. Wrapped at ~200px to force the overflow the wide
-// standalone canvas would otherwise hide.
-//
-// `lang="nl"` is set on the wrapper because `hyphens: auto` needs a language
-// dictionary and Storybook's iframe root has no `lang` (the real app sets it
-// on `<html>` in layout.tsx). Scoping it here keeps this guard faithful to
-// production without re-baselining every other hyphenating story.
+// Regression guard (#2586 review — corrected): a long Dutch compound title
+// must hyphenate at a dictionary point with a visible hyphen, not hard-clip
+// mid-word, in the narrowest column a real `<NewsCard>` consumer produces.
+// That is NOT a fixed per-card slot width — `<NewsGrid>`'s `sm:grid-cols-3`
+// (`max-w-[1280px] px-4 md:px-8`) gives a ~187px card at a 640px viewport
+// ((640 - 32 padding - 48 gaps) / 3), well under any width #2549's original
+// drill measured. Wrapped at 187px to reproduce that real danger zone, not
+// an arbitrary stress width and not the wider 288px this guard was briefly
+// (incorrectly) widened to — at 288px "Voorbeschouwing" fits one line and
+// the guard proves nothing. `lang="nl"` is set on the wrapper because
+// `hyphens: auto` needs a language dictionary and Storybook's iframe root
+// has no `lang` (the real app sets it on `<html>` in layout.tsx). Scoping it
+// here keeps this guard faithful to production without re-baselining every
+// other hyphenating story.
 export const LongCompoundTitle: Story = {
   args: {
     ...phase4SharedArgs,
@@ -309,7 +311,7 @@ export const LongCompoundTitle: Story = {
   },
   decorators: [
     (StoryFn) => (
-      <div className="w-[200px]" lang="nl">
+      <div className="w-[187px]" lang="nl">
         <StoryFn />
       </div>
     ),

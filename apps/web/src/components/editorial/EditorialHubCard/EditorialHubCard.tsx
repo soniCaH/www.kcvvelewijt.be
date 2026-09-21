@@ -67,8 +67,9 @@ const DEFAULT_NEWS_SIZES =
  *   cream tag pill; no photo. Pinned navigation links.
  *
  * Both share the paper-card chrome: `border-2 border-ink`, `shadow-paper`, and
- * the canonical press-down hover. Titles `line-clamp-2` so a grid row stays
- * even regardless of article-title length.
+ * the canonical press-down hover. Titles `line-clamp-3` (#2549 rule 3 —
+ * normal-type headline) so a grid row stays even regardless of
+ * article-title length.
  */
 export function EditorialHubCard({
   href,
@@ -151,7 +152,7 @@ export function EditorialHubCard({
       </div>
 
       <div className="flex flex-col gap-2 p-3.5">
-        <span className="text-ink font-display line-clamp-2 text-lg leading-tight font-extrabold italic">
+        <span className="text-ink font-display line-clamp-3 text-lg leading-tight font-extrabold italic">
           {title}
         </span>
         <span className="text-jersey-deep text-label inline-flex items-center gap-1 font-mono leading-none font-medium uppercase">

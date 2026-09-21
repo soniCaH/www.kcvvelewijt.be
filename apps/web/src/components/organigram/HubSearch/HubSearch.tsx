@@ -160,10 +160,22 @@ function MemberRow({
         )}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="font-display text-ink block truncate font-semibold">
+        <span
+          title={name}
+          className="font-display text-ink block truncate font-semibold"
+        >
           {name}
         </span>
-        <span className="text-ink-muted block truncate font-mono text-[11px] tracking-wide uppercase">
+        <span
+          title={`${result.member.title}${
+            result.extraPositions > 0
+              ? ` · +${result.extraPositions} ${
+                  result.extraPositions === 1 ? "functie" : "functies"
+                }`
+              : ""
+          }`}
+          className="text-ink-muted block truncate font-mono text-[11px] tracking-wide uppercase"
+        >
           {result.member.title}
           {result.extraPositions > 0 &&
             ` · +${result.extraPositions} ${
@@ -499,7 +511,7 @@ export function HubSearch({
       <span className="font-display text-ink mt-1 block text-[15px] leading-tight font-semibold italic">
         {answerForward.path.question}
       </span>
-      <span className="text-ink-soft mt-1 line-clamp-2 block text-xs leading-relaxed">
+      <span className="text-ink-soft mt-1 line-clamp-1 block text-xs leading-relaxed">
         {answerForward.path.summary}
       </span>
       <span className="mt-2 flex items-center justify-between gap-2">
@@ -508,7 +520,12 @@ export function HubSearch({
             <span className="border-ink bg-cream-soft text-jersey-deep font-display flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] text-[11px] font-black">
               {initials(forwardContactInfo.name)}
             </span>
-            <span className="text-ink-muted truncate font-mono text-[11px] tracking-wide uppercase">
+            <span
+              title={`${forwardContactInfo.name}${
+                forwardContactInfo.sub ? ` · ${forwardContactInfo.sub}` : ""
+              }`}
+              className="text-ink-muted truncate font-mono text-[11px] tracking-wide uppercase"
+            >
               {forwardContactInfo.name}
               {forwardContactInfo.sub ? ` · ${forwardContactInfo.sub}` : ""}
             </span>

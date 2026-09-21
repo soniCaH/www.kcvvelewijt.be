@@ -436,6 +436,7 @@ function EventRow({
 
       {/* Home name slot — left-aligned italic display. */}
       <span
+        title={isHome ? eventDescriptionText(event) : undefined}
         className={cn(
           "font-display min-w-0 truncate text-[15px] italic",
           nameTint,
@@ -447,6 +448,7 @@ function EventRow({
 
       {/* Away name slot — right-aligned italic display. */}
       <span
+        title={!isHome ? eventDescriptionText(event) : undefined}
         className={cn(
           "font-display min-w-0 truncate text-right text-[15px] italic",
           nameTint,
@@ -502,6 +504,7 @@ function SingleSideEventRow({
         {showIcon && <EventGlyph type={event.type} />}
       </span>
       <span
+        title={eventDescriptionText(event)}
         className={cn(
           "font-display min-w-0 truncate text-[15px] italic",
           highlighted ? "text-jersey-deep" : "text-ink",
@@ -511,6 +514,43 @@ function SingleSideEventRow({
       </span>
     </div>
   );
+}
+
+/**
+ * Plain-text mirror of `<EventDescription>`, for the row's `title` — the
+ * desktop-hover full form of whatever `truncate` shortened (#2549 rule 4).
+ * Kept as a second function, not derived from the JSX, because a `title`
+ * attribute can't render React nodes.
+ *
+ * Matches `<EventDescription>`'s actual output (#2586 review), not just its
+ * visible parts list: omits any absent field entirely (no leading space,
+ * no lone punctuation) rather than joining a blank placeholder, and never
+ * reintroduces the `⇆` connector — that glyph is `aria-hidden` in the real
+ * row (two separate text nodes carry the meaning), so putting it back into
+ * `title` would re-expose content the row deliberately hides.
+ */
+function eventDescriptionText(event: MatchEvent): string {
+  switch (event.type) {
+    case "goal": {
+      const parts = [
+        event.player,
+        event.isPenalty ? "(strafschop)" : undefined,
+        event.isOwnGoal ? "(e.d.)" : undefined,
+        event.assist ? `(assist: ${event.assist})` : undefined,
+      ].filter((part): part is string => Boolean(part));
+      return parts.join(" ");
+    }
+    case "yellow_card":
+    case "second_yellow":
+    case "red_card":
+      return event.player ?? "";
+    case "substitution":
+      return [event.playerIn, event.playerOut]
+        .filter((part): part is string => Boolean(part))
+        .join(" ");
+    default:
+      return assertNever(event.type);
+  }
 }
 
 /**

@@ -272,10 +272,12 @@ function DualAvatar({
 
 // `w-full` is load-bearing: the card is `flex-col items-center`, so without it
 // this <p> sizes to max-content and a long role ("Communicatieverantwoordelijke")
-// spills out past the card border instead of wrapping. `hyphens-auto` goes in
-// ALONE — pairing it with `break-words` suppresses the hyphen (see #2269).
+// spills out past the card border instead of wrapping. A role title is
+// free-text/unbounded — the club can name a longer one tomorrow — so per
+// DESIGN.md's Hyphenation Rule it carries `hyphens-auto` AND `break-words`,
+// verified in Chrome and Safari (#2269).
 const SUBLABEL =
-  "text-ink-muted mt-1.5 w-full font-mono text-[11px] tracking-[0.06em] uppercase hyphens-auto";
+  "text-ink-muted mt-1.5 w-full font-mono text-[11px] tracking-[0.06em] uppercase hyphens-auto break-words";
 
 // ─── Component ───────────────────────────────────────────────────────────────
 

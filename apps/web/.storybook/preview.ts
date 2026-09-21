@@ -2,6 +2,16 @@ import type { Preview } from "@storybook/nextjs-vite";
 import { MINIMAL_VIEWPORTS } from "storybook/viewport";
 import "../src/app/globals.css";
 
+// Storybook's preview iframe template ships hardcoded `<html lang="en">`
+// (@storybook/builder-vite/input/iframe.html) — nothing in this directory
+// ever overrides it. The app sets `lang="nl"` on `<html>` in
+// `app/layout.tsx`, which is the source of truth. `hyphens: auto` picks its
+// dictionary from `lang`, so an un-aligned preview hyphenates Dutch copy
+// with English rules — a hyphenation baseline taken under the wrong
+// language is not a baseline of what ships. Runs at module scope, before
+// any story renders.
+document.documentElement.lang = "nl";
+
 const preview: Preview = {
   initialGlobals: {
     viewport: { value: "responsive" },

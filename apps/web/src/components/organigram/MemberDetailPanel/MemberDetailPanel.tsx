@@ -283,8 +283,14 @@ export function MemberDetailPanel({
                 name={activeName}
                 imageUrl={activeHolder?.imageUrl}
               />
+              {/* A vacant node's title / an active holder's name is
+                  free-text/unbounded — per DESIGN.md's Hyphenation Rule it
+                  carries `hyphens-auto` AND `break-words`, verified in
+                  Chrome and Safari, or the panel's `overflow-y-auto` (which
+                  forces `overflow-x: auto` too) gets a horizontal
+                  scrollbar. */}
               <div className="min-w-0">
-                <p className="font-display text-[23px] leading-none font-black break-words italic">
+                <p className="font-display text-[23px] leading-none font-black break-words hyphens-auto italic">
                   {isVacant ? node.title : activeName}
                 </p>
                 {(isVacant || node.roleCode) && (

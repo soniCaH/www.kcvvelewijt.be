@@ -75,7 +75,18 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
         Slim antwoord
       </span>
 
-      <p className="text-ink font-display mt-2.5 mr-10 text-[16.5px] leading-relaxed font-medium break-words italic">
+      {/* `answer` is model output — Dutch prose that can also contain an
+          arbitrary token (a URL, an e-mail, a coined compound) — so this is
+          the one slot DESIGN.md's Hyphenation Rule pairs `hyphens-auto`
+          WITH `break-words`: hyphenate by Dutch rules first, and only fall
+          through to an unbroken-anywhere break when there is no
+          hyphenation point at all (e.g. inside a URL's non-dictionary
+          segment). Verified in Chrome against the real faces at the real
+          widths — the pairing renders the hyphen, not the plain break
+          (#2269's "break-words suppresses the hyphen" does not reproduce
+          here); the card is `overflow-hidden`, so the alternative to both
+          is a silent clip. */}
+      <p className="text-ink font-display mt-2.5 mr-10 text-[16.5px] leading-relaxed font-medium break-words hyphens-auto italic">
         {clampAnswer(answer)}
       </p>
 

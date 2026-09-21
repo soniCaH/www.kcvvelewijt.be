@@ -210,7 +210,10 @@ export const DownloadButton = ({
           </span>
         </span>
         <div className="flex min-w-0 flex-1 flex-col">
-          <span className="font-display text-ink truncate text-[18px] font-bold italic">
+          <span
+            title={displayLabel}
+            className="font-display text-ink truncate text-[18px] font-bold italic"
+          >
             {displayLabel}
           </span>
           <span className="text-ink-muted mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase">
