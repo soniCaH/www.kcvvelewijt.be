@@ -675,7 +675,10 @@
      Three stops at 88/65/92 alpha steps; third stop lands on the
      desaturated `--color-jersey-deep-dark`. Reusable on any future
      jersey-deep photographic surface. Consumer overrides direction
-     (e.g. `to bottom` on mobile) at the call site. */
+     (e.g. `to bottom` on mobile) at the call site. NOT used by the #2965
+     nav-tile photo scrim (`EditorialHubCard`) — that one is a flat
+     `bg-jersey-deep-dark/62` per the owner's mock, so this token stays
+     unclaimed for the next surface that wants the gradient specifically. */
   --gradient-jersey-deep-overlay: linear-gradient(
     135deg,
     color-mix(in srgb, var(--color-jersey-deep) 88%, transparent) 0%,

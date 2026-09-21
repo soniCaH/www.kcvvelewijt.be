@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>#2965 — Ontdek onze jeugd: wat doen we met de zes navigatietegels?</title>
+<style>
+:root{--cream:#f5f1e6;--cream-soft:#ede8da;--cream-deep:#e1d7bf;--ink:#0a0a0a;--ink-muted:#6b6b6b;
+--paper-edge:#d9d2bd;--jersey-deep:#007c46;--jersey-deep-dark:#133d28;--warm:#f0c264;--alert:#b84a3a;
+--fd:Georgia,"Times New Roman",serif;--fb:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+--fm:ui-monospace,"SF Mono",Menlo,monospace}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 24px 120px;background:var(--cream);color:var(--ink);font-family:var(--fb);line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto}
+h1{font-family:var(--fd);font-size:34px;margin:0 0 8px;letter-spacing:-.01em}
+.kicker{font-family:var(--fm);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--jersey-deep);margin:0 0 10px}
+.lede{max-width:70ch;font-size:15px;margin:0 0 18px}
+.facts{border:2px solid var(--ink);background:var(--cream-soft);padding:14px 18px;font-size:13px;margin-bottom:40px}
+.facts ul{margin:8px 0 0;padding-left:18px}.facts li{margin-bottom:5px}
+code{font-family:var(--fm);font-size:.92em;background:var(--cream-deep);padding:1px 5px}
+.panel{border-top:2px solid var(--ink);padding-top:20px;margin-bottom:64px}
+.panel-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.tag{font-family:var(--fm);font-size:12px;font-weight:700;background:var(--ink);color:var(--cream);padding:2px 8px}
+.tag.rec{background:var(--jersey-deep)}
+h2{font-family:var(--fd);font-size:23px;margin:0}
+.note{font-size:13.5px;color:var(--ink-muted);max-width:70ch;margin:6px 0 20px}
+.stage{background:var(--cream);border:2px solid var(--paper-edge);padding:26px}
+/* --- cards --- */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.card{display:flex;flex-direction:column;text-decoration:none;color:inherit;background:var(--cream-soft);
+border:2px solid var(--ink);box-shadow:6px 6px 0 0 var(--ink);transition:transform .15s,box-shadow .15s}
+.card:hover{transform:translate(3px,3px);box-shadow:3px 3px 0 0 var(--ink)}
+.top{position:relative;aspect-ratio:16/9;border-bottom:2px solid var(--ink);display:flex;align-items:center;justify-content:center}
+.top-flat{background:var(--jersey-deep)}
+.top-photo{background-size:cover;background-position:center}
+.scrim{position:absolute;inset:0;background:rgba(19,61,40,.62)}
+.glyph{position:relative;color:var(--cream)}
+.weak{position:absolute;bottom:8px;left:10px;z-index:3;background:var(--alert);color:#fff;font-family:var(--fm);font-size:9px;text-transform:uppercase;letter-spacing:.06em;padding:3px 6px;line-height:1}
+.pill{position:absolute;top:10px;left:10px;z-index:2;background:var(--cream-soft);color:var(--ink);
+border:1px solid var(--paper-edge);font-family:var(--fm);font-size:10px;font-weight:500;text-transform:uppercase;
+letter-spacing:.04em;padding:4px 8px;line-height:1}
+.body{display:flex;flex-direction:column;gap:7px;padding:14px}
+.date{font-family:var(--fm);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-muted)}
+.title{font-family:var(--fd);font-size:18px;font-weight:800;font-style:italic;line-height:1.2}
+.arrow{font-family:var(--fm);font-size:11px;font-weight:500;text-transform:uppercase;color:var(--jersey-deep)}
+/* --- shortcuts --- */
+.sc-head{margin:34px 0 12px;border-top:2px solid var(--ink);padding-top:12px}
+.sc-kicker{font-family:var(--fm);font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--jersey-deep)}
+.sc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sc{display:flex;align-items:center;gap:11px;text-decoration:none;color:inherit;background:var(--cream-soft);
+border:2px solid var(--ink);padding:12px 14px;transition:transform .15s,box-shadow .15s;box-shadow:4px 4px 0 0 var(--ink)}
+.sc:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 0 var(--ink)}
+.scg{flex:0 0 22px;width:22px;height:22px;color:var(--jersey-deep)}
+.sc-t{font-family:var(--fb);font-size:14px;font-weight:600;flex:1;line-height:1.25}
+.sc-a{font-family:var(--fm);color:var(--jersey-deep)}
+/* --- legend --- */
+.legend{border:2px solid var(--ink);background:var(--cream-soft);padding:20px 24px}
+.legend h3{font-family:var(--fd);font-size:19px;margin:0 0 10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:10px 0 18px}
+th,td{border:1px solid var(--paper-edge);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--cream-deep);font-family:var(--fm);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.q{border-left:5px solid var(--jersey-deep);padding:10px 0 10px 14px;margin-top:16px;font-size:15px}
+@media(max-width:820px){.grid,.grid-3,.sc-row{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.grid,.grid-3,.sc-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="kicker">#2965 · /jeugd · Ontdek onze jeugd</p>
+  <h1>Zes van de negen tegels zijn een icoon op een groen vlak.</h1>
+  <p class="lede">Dit is het blok <em>Ontdek onze jeugd</em> zoals het vandaag op productie staat, en de twee manieren
+  om de oorspronkelijke klacht op te lossen: <em>“almost none have graphics”</em>. Echte foto’s, echte iconen,
+  echte teksten — rechtstreeks uit de live pagina gehaald.</p>
+
+  <div class="facts">
+    <b>Wat er al opgelost is (#2960 / #2963)</b>
+    <ul>
+      <li><code>Onze jeugdvisie</code> → vervangen door <code>Ons leerplan</code>, de PDF. De self-link is weg.</li>
+      <li><code>Trainingen &amp; ProSoccerData</code> → <code>/hulp#prosoccerdata-gebruiken</code>. De 404 is weg.</li>
+      <li><code>Blessure of afmelding?</code> → <code>Blessure of medisch attest?</code> met <code>?categorie=medisch</code>. Geen dubbel doel meer.</li>
+      <li><code>Herfststage 2023</code> is uit slot 3 verdwenen — een artikel van dec 2025 is doorgeschoven.</li>
+    </ul>
+    <b style="display:block;margin-top:12px">Wat overblijft</b>
+    <ul>
+      <li><b>6 van de 9 tegels dragen geen beeld.</b> De originele klacht, onaangeroerd.</li>
+      <li><b>4 van die 6 gaan naar dezelfde pagina</b> — <code>/hulp</code>, met een ander anker.</li>
+      <li>Eerdere uitspraak (Phase 4.5): pure typografie op kaartformaat leest als <em>“we vonden geen foto”</em>.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="tag">Vandaag</span><h2>Wat er nu staat</h2></div>
+    <p class="note">Drie artikelkaarten met een echte foto, zes navigatiekaarten met een icoon van 40&nbsp;px op
+    <code>bg-jersey-deep</code>. Het 16:9-vlak belooft een beeld en levert er geen.</p>
+    <div class="stage"><div class="grid"><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/f6974423a9283357bb8739f288e72f373b447be1-6048x4024.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">04 mrt 2026</span><span class="title">Meetrainen met de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/club/word-lid">
+  <div class="top top-flat">
+    <span class="pill">Aansluiten</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Word lid van KCVV</span><span class="arrow">Schrijf je in <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/14729fbf60a99c7576ea7ca75f0684c39ae07444-1966x951.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">30 dec 2025</span><span class="title">Word trainer bij de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/downloads/leerplan-jeugdopleiding-2019.pdf">
+  <div class="top top-flat">
+    <span class="pill">Visie</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40A8,8,0,0,0,168,96H136V32a8,8,0,0,0-16,0V96H88a8,8,0,0,0-5.66,13.66Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Ons leerplan</span><span class="arrow">Download <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/e21e9752ebbfec870179c6709d0f046d37893f4f-1961x911.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">25 mrt 2024</span><span class="title">Kop(zorgen) in het voetbal</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp#prosoccerdata-gebruiken">
+  <div class="top top-flat">
+    <span class="pill">Praktisch</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,39.38,24.79-17.05a88.41,88.41,0,0,1,36.18,27l-8,26.94c-.2,0-.41.1-.61.17l-22.82,7.41a7.59,7.59,0,0,0-1,.4L136,88.62c0-.2,0-.41,0-.62V64C136,63.79,136,63.58,136,63.38ZM95.24,46.33,120,63.38c0,.2,0,.41,0,.62V88c0,.21,0,.42,0,.62L91.44,108.29a7.59,7.59,0,0,0-1-.4l-22.82-7.41c-.2-.07-.41-.12-.61-.17l-8-26.94A88.41,88.41,0,0,1,95.24,46.33Zm-13,129.09H53.9a87.4,87.4,0,0,1-13.79-43.07l22-16.88a5.77,5.77,0,0,0,.58.22l22.83,7.42a7.83,7.83,0,0,0,.93.22l10.79,31.42c-.15.18-.3.36-.44.55L82.7,174.71A7.8,7.8,0,0,0,82.24,175.42ZM150.69,213a88.16,88.16,0,0,1-45.38,0L95.25,184.6c.13-.16.27-.31.39-.48l14.11-19.42a7.66,7.66,0,0,0,.46-.7h35.58a7.66,7.66,0,0,0,.46.7l14.11,19.42c.12.17.26.32.39.48Zm23.07-37.61a7.8,7.8,0,0,0-.46-.71L159.19,155.3c-.14-.19-.29-.37-.44-.55l10.79-31.42a7.83,7.83,0,0,0,.93-.22l22.83-7.42a5.77,5.77,0,0,0,.58-.22l22,16.88a87.4,87.4,0,0,1-13.79,43.07Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Trainingen &amp; ProSoccerData</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp#structuur">
+  <div class="top top-flat">
+    <span class="pill">Structuur</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M144,96V80H128a8,8,0,0,0-8,8v80a8,8,0,0,0,8,8h16V160a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16v48a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V192H128a24,24,0,0,1-24-24V136H72v8a16,16,0,0,1-16,16H24A16,16,0,0,1,8,144V112A16,16,0,0,1,24,96H56a16,16,0,0,1,16,16v8h32V88a24,24,0,0,1,24-24h16V48a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16V96a16,16,0,0,1-16,16H160A16,16,0,0,1,144,96Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Organigram</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp">
+  <div class="top top-flat">
+    <span class="pill">Hulp</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Wie contacteer ik?</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp?categorie=medisch#hulp">
+  <div class="top top-flat">
+    <span class="pill">Medisch</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232,108v40a16,16,0,0,1-16,16H164v52a16,16,0,0,1-16,16H108a16,16,0,0,1-16-16V164H40a16,16,0,0,1-16-16V108A16,16,0,0,1,40,92H92V40a16,16,0,0,1,16-16h40a16,16,0,0,1,16,16V92h52A16,16,0,0,1,232,108Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Blessure of medisch attest?</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="tag">Optie A — ideaal</span><h2>Beeld op elke tegel</h2></div>
+    <p class="note">Hetzelfde raster van 3×3. De zes navigatiekaarten krijgen een echte clubfoto achter een donker
+    scherm, zodat het icoon en de pill leesbaar blijven. <b>De foto’s hieronder zijn de beste die vandaag in de fotobibliotheek zitten.</b>
+    Voor drie tegels — <em>Organigram</em>, <em>Wie contacteer ik?</em> en <em>Blessure of medisch attest?</em> — bestaat er
+    geen foto die dat begrip écht toont. Die zijn rood gemarkeerd: dat is precies het risico van deze optie.</p>
+    <div class="stage"><div class="grid"><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/f6974423a9283357bb8739f288e72f373b447be1-6048x4024.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">04 mrt 2026</span><span class="title">Meetrainen met de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/club/word-lid">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/3fc21b20528baa1a5f13da28231e21f9f48bcb87-1640x720.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Aansluiten</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Word lid van KCVV</span><span class="arrow">Schrijf je in <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/14729fbf60a99c7576ea7ca75f0684c39ae07444-1966x951.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">30 dec 2025</span><span class="title">Word trainer bij de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/downloads/leerplan-jeugdopleiding-2019.pdf">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/3200a9160d25f73a0cc6a0daebc116fa99bb23c6-2048x1362.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Visie</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40A8,8,0,0,0,168,96H136V32a8,8,0,0,0-16,0V96H88a8,8,0,0,0-5.66,13.66Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Ons leerplan</span><span class="arrow">Download <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/e21e9752ebbfec870179c6709d0f046d37893f4f-1961x911.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">25 mrt 2024</span><span class="title">Kop(zorgen) in het voetbal</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp#prosoccerdata-gebruiken">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/0f2030e7425590dba1ddb9b4714aeb2bd5af4369-2752x1536.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Praktisch</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,39.38,24.79-17.05a88.41,88.41,0,0,1,36.18,27l-8,26.94c-.2,0-.41.1-.61.17l-22.82,7.41a7.59,7.59,0,0,0-1,.4L136,88.62c0-.2,0-.41,0-.62V64C136,63.79,136,63.58,136,63.38ZM95.24,46.33,120,63.38c0,.2,0,.41,0,.62V88c0,.21,0,.42,0,.62L91.44,108.29a7.59,7.59,0,0,0-1-.4l-22.82-7.41c-.2-.07-.41-.12-.61-.17l-8-26.94A88.41,88.41,0,0,1,95.24,46.33Zm-13,129.09H53.9a87.4,87.4,0,0,1-13.79-43.07l22-16.88a5.77,5.77,0,0,0,.58.22l22.83,7.42a7.83,7.83,0,0,0,.93.22l10.79,31.42c-.15.18-.3.36-.44.55L82.7,174.71A7.8,7.8,0,0,0,82.24,175.42ZM150.69,213a88.16,88.16,0,0,1-45.38,0L95.25,184.6c.13-.16.27-.31.39-.48l14.11-19.42a7.66,7.66,0,0,0,.46-.7h35.58a7.66,7.66,0,0,0,.46.7l14.11,19.42c.12.17.26.32.39.48Zm23.07-37.61a7.8,7.8,0,0,0-.46-.71L159.19,155.3c-.14-.19-.29-.37-.44-.55l10.79-31.42a7.83,7.83,0,0,0,.93-.22l22.83-7.42a5.77,5.77,0,0,0,.58-.22l22,16.88a87.4,87.4,0,0,1-13.79,43.07Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Trainingen &amp; ProSoccerData</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp#structuur">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/474c7ff4a9d9c0475076fa62cf1db7e59c80648a-2528x1696.png?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Structuur</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M144,96V80H128a8,8,0,0,0-8,8v80a8,8,0,0,0,8,8h16V160a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16v48a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V192H128a24,24,0,0,1-24-24V136H72v8a16,16,0,0,1-16,16H24A16,16,0,0,1,8,144V112A16,16,0,0,1,24,96H56a16,16,0,0,1,16,16v8h32V88a24,24,0,0,1,24-24h16V48a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16V96a16,16,0,0,1-16,16H160A16,16,0,0,1,144,96Z"/></svg>
+    <span class="weak">beeld past niet echt</span>
+  </div>
+  <div class="body"><span class="title">Organigram</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/1d02a9847f745963de0557337c70a947f045bd85-2818x1583.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Hulp</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></svg>
+    <span class="weak">beeld past niet echt</span>
+  </div>
+  <div class="body"><span class="title">Wie contacteer ik?</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp?categorie=medisch#hulp">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/0587b0cca722bb93adde8bde7605faea491bce42-1920x1080.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Medisch</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232,108v40a16,16,0,0,1-16,16H164v52a16,16,0,0,1-16,16H108a16,16,0,0,1-16-16V164H40a16,16,0,0,1-16-16V108A16,16,0,0,1,40,92H92V40a16,16,0,0,1,16-16h40a16,16,0,0,1,16,16V92h52A16,16,0,0,1,232,108Z"/></svg>
+    <span class="weak">beeld past niet echt</span>
+  </div>
+  <div class="body"><span class="title">Blessure of medisch attest?</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="tag rec">Wat er landt</span><h2>Optie A met terugval — dit is het echte resultaat</h2></div>
+    <p class="note">Een tegel krijgt een foto <b>als er een is</b>. Is er geen, dan blijft het groene vlak met het icoon
+    precies zoals vandaag — geen opvulfoto, geen lege plek. Vandaag betekent dat: drie tegels met beeld, drie groen.
+    Elke nieuwe foto is één regel code later.</p>
+    <div class="stage"><div class="grid"><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/f6974423a9283357bb8739f288e72f373b447be1-6048x4024.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">04 mrt 2026</span><span class="title">Meetrainen met de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/club/word-lid">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/3fc21b20528baa1a5f13da28231e21f9f48bcb87-1640x720.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Aansluiten</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Word lid van KCVV</span><span class="arrow">Schrijf je in <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/14729fbf60a99c7576ea7ca75f0684c39ae07444-1966x951.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">30 dec 2025</span><span class="title">Word trainer bij de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/downloads/leerplan-jeugdopleiding-2019.pdf">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/3200a9160d25f73a0cc6a0daebc116fa99bb23c6-2048x1362.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Visie</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40A8,8,0,0,0,168,96H136V32a8,8,0,0,0-16,0V96H88a8,8,0,0,0-5.66,13.66Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Ons leerplan</span><span class="arrow">Download <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/e21e9752ebbfec870179c6709d0f046d37893f4f-1961x911.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">25 mrt 2024</span><span class="title">Kop(zorgen) in het voetbal</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp#prosoccerdata-gebruiken">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/0f2030e7425590dba1ddb9b4714aeb2bd5af4369-2752x1536.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="scrim"></span>
+    <span class="pill">Praktisch</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,39.38,24.79-17.05a88.41,88.41,0,0,1,36.18,27l-8,26.94c-.2,0-.41.1-.61.17l-22.82,7.41a7.59,7.59,0,0,0-1,.4L136,88.62c0-.2,0-.41,0-.62V64C136,63.79,136,63.58,136,63.38ZM95.24,46.33,120,63.38c0,.2,0,.41,0,.62V88c0,.21,0,.42,0,.62L91.44,108.29a7.59,7.59,0,0,0-1-.4l-22.82-7.41c-.2-.07-.41-.12-.61-.17l-8-26.94A88.41,88.41,0,0,1,95.24,46.33Zm-13,129.09H53.9a87.4,87.4,0,0,1-13.79-43.07l22-16.88a5.77,5.77,0,0,0,.58.22l22.83,7.42a7.83,7.83,0,0,0,.93.22l10.79,31.42c-.15.18-.3.36-.44.55L82.7,174.71A7.8,7.8,0,0,0,82.24,175.42ZM150.69,213a88.16,88.16,0,0,1-45.38,0L95.25,184.6c.13-.16.27-.31.39-.48l14.11-19.42a7.66,7.66,0,0,0,.46-.7h35.58a7.66,7.66,0,0,0,.46.7l14.11,19.42c.12.17.26.32.39.48Zm23.07-37.61a7.8,7.8,0,0,0-.46-.71L159.19,155.3c-.14-.19-.29-.37-.44-.55l10.79-31.42a7.83,7.83,0,0,0,.93-.22l22.83-7.42a5.77,5.77,0,0,0,.58-.22l22,16.88a87.4,87.4,0,0,1-13.79,43.07Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Trainingen &amp; ProSoccerData</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp#structuur">
+  <div class="top top-flat">
+    <span class="pill">Structuur</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M144,96V80H128a8,8,0,0,0-8,8v80a8,8,0,0,0,8,8h16V160a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16v48a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V192H128a24,24,0,0,1-24-24V136H72v8a16,16,0,0,1-16,16H24A16,16,0,0,1,8,144V112A16,16,0,0,1,24,96H56a16,16,0,0,1,16,16v8h32V88a24,24,0,0,1,24-24h16V48a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16V96a16,16,0,0,1-16,16H160A16,16,0,0,1,144,96Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Organigram</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp">
+  <div class="top top-flat">
+    <span class="pill">Hulp</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Wie contacteer ik?</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="/hulp?categorie=medisch#hulp">
+  <div class="top top-flat">
+    <span class="pill">Medisch</span>
+    <svg class="glyph" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232,108v40a16,16,0,0,1-16,16H164v52a16,16,0,0,1-16,16H108a16,16,0,0,1-16-16V164H40a16,16,0,0,1-16-16V108A16,16,0,0,1,40,92H92V40a16,16,0,0,1,16-16h40a16,16,0,0,1,16,16V92h52A16,16,0,0,1,232,108Z"/></svg>
+    
+  </div>
+  <div class="body"><span class="title">Blessure of medisch attest?</span><span class="arrow">Zoek het op <span aria-hidden="true">&rarr;</span></span></div>
+</a></div></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><span class="tag">Optie B</span><h2>Drie kaarten, en de rest als snelkoppeling</h2></div>
+    <p class="note">De drie artikels blijven kaarten. De zes navigatielinks worden een compacte rij. Een kaart belooft
+    een beeld; een rij doet dat niet. Geen nieuw beeldmateriaal nodig, en de vier <code>/hulp</code>-links staan
+    eindelijk naast elkaar in plaats van verspreid over het raster.</p>
+    <div class="stage"><div class="grid grid-3"><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/f6974423a9283357bb8739f288e72f373b447be1-6048x4024.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">04 mrt 2026</span><span class="title">Meetrainen met de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/14729fbf60a99c7576ea7ca75f0684c39ae07444-1966x951.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">30 dec 2025</span><span class="title">Word trainer bij de plezantste compagnie</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a><a class="card" href="#">
+  <div class="top top-photo" style="background-image:url('https://cdn.sanity.io/images/vhb33jaz/production/e21e9752ebbfec870179c6709d0f046d37893f4f-1961x911.jpg?w=640&h=360&fit=crop&crop=entropy&auto=format')"><span class="pill pill-news">Nieuws</span></div>
+  <div class="body"><span class="date">25 mrt 2024</span><span class="title">Kop(zorgen) in het voetbal</span><span class="arrow">Lees meer <span aria-hidden="true">&rarr;</span></span></div>
+</a></div><div class="sc-head"><span class="sc-kicker">Snel naar</span></div><div class="sc-row"><a class="sc" href="/club/word-lid"><svg class="scg" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M64.12,147.8a4,4,0,0,1-4,4.2H16a8,8,0,0,1-7.8-6.17,8.35,8.35,0,0,1,1.62-6.93A67.79,67.79,0,0,1,37,117.51a40,40,0,1,1,66.46-35.8,3.94,3.94,0,0,1-2.27,4.18A64.08,64.08,0,0,0,64,144C64,145.28,64,146.54,64.12,147.8Zm182-8.91A67.76,67.76,0,0,0,219,117.51a40,40,0,1,0-66.46-35.8,3.94,3.94,0,0,0,2.27,4.18A64.08,64.08,0,0,1,192,144c0,1.28,0,2.54-.12,3.8a4,4,0,0,0,4,4.2H240a8,8,0,0,0,7.8-6.17A8.33,8.33,0,0,0,246.17,138.89Zm-89,43.18a48,48,0,1,0-58.37,0A72.13,72.13,0,0,0,65.07,212,8,8,0,0,0,72,224H184a8,8,0,0,0,6.93-12A72.15,72.15,0,0,0,157.19,182.07Z"/></svg><span class="sc-t">Word lid van KCVV</span><span class="sc-a" aria-hidden="true">&rarr;</span></a><a class="sc" href="/downloads/leerplan-jeugdopleiding-2019.pdf"><svg class="scg" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40A8,8,0,0,0,168,96H136V32a8,8,0,0,0-16,0V96H88a8,8,0,0,0-5.66,13.66Z"/></svg><span class="sc-t">Ons leerplan</span><span class="sc-a" aria-hidden="true">&rarr;</span></a><a class="sc" href="/hulp#prosoccerdata-gebruiken"><svg class="scg" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm8,39.38,24.79-17.05a88.41,88.41,0,0,1,36.18,27l-8,26.94c-.2,0-.41.1-.61.17l-22.82,7.41a7.59,7.59,0,0,0-1,.4L136,88.62c0-.2,0-.41,0-.62V64C136,63.79,136,63.58,136,63.38ZM95.24,46.33,120,63.38c0,.2,0,.41,0,.62V88c0,.21,0,.42,0,.62L91.44,108.29a7.59,7.59,0,0,0-1-.4l-22.82-7.41c-.2-.07-.41-.12-.61-.17l-8-26.94A88.41,88.41,0,0,1,95.24,46.33Zm-13,129.09H53.9a87.4,87.4,0,0,1-13.79-43.07l22-16.88a5.77,5.77,0,0,0,.58.22l22.83,7.42a7.83,7.83,0,0,0,.93.22l10.79,31.42c-.15.18-.3.36-.44.55L82.7,174.71A7.8,7.8,0,0,0,82.24,175.42ZM150.69,213a88.16,88.16,0,0,1-45.38,0L95.25,184.6c.13-.16.27-.31.39-.48l14.11-19.42a7.66,7.66,0,0,0,.46-.7h35.58a7.66,7.66,0,0,0,.46.7l14.11,19.42c.12.17.26.32.39.48Zm23.07-37.61a7.8,7.8,0,0,0-.46-.71L159.19,155.3c-.14-.19-.29-.37-.44-.55l10.79-31.42a7.83,7.83,0,0,0,.93-.22l22.83-7.42a5.77,5.77,0,0,0,.58-.22l22,16.88a87.4,87.4,0,0,1-13.79,43.07Z"/></svg><span class="sc-t">Trainingen &amp; ProSoccerData</span><span class="sc-a" aria-hidden="true">&rarr;</span></a><a class="sc" href="/hulp#structuur"><svg class="scg" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M144,96V80H128a8,8,0,0,0-8,8v80a8,8,0,0,0,8,8h16V160a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16v48a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V192H128a24,24,0,0,1-24-24V136H72v8a16,16,0,0,1-16,16H24A16,16,0,0,1,8,144V112A16,16,0,0,1,24,96H56a16,16,0,0,1,16,16v8h32V88a24,24,0,0,1,24-24h16V48a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16V96a16,16,0,0,1-16,16H160A16,16,0,0,1,144,96Z"/></svg><span class="sc-t">Organigram</span><span class="sc-a" aria-hidden="true">&rarr;</span></a><a class="sc" href="/hulp"><svg class="scg" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168,112a56,56,0,1,1-56-56A56,56,0,0,1,168,112Zm61.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88,88,0,1,1,11.32-11.31l50.06,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></svg><span class="sc-t">Wie contacteer ik?</span><span class="sc-a" aria-hidden="true">&rarr;</span></a><a class="sc" href="/hulp?categorie=medisch#hulp"><svg class="scg" width="40" height="40" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232,108v40a16,16,0,0,1-16,16H164v52a16,16,0,0,1-16,16H108a16,16,0,0,1-16-16V164H40a16,16,0,0,1-16-16V108A16,16,0,0,1,40,92H92V40a16,16,0,0,1,16-16h40a16,16,0,0,1,16,16V92h52A16,16,0,0,1,232,108Z"/></svg><span class="sc-t">Blessure of medisch attest?</span><span class="sc-a" aria-hidden="true">&rarr;</span></a></div></div>
+  </div>
+
+  <div class="legend">
+    <h3>Waar het op neerkomt</h3>
+    <table>
+      <tr><th></th><th>Optie A — beeld op elke tegel</th><th>Optie B — kaarten + snelkoppelingen</th></tr>
+      <tr><th>Nieuw beeldmateriaal</th><td>6 beelden kiezen of maken, voor abstracte begrippen (leerplan, organigram, contact)</td><td>Geen</td></tr>
+      <tr><th>“Ontbrekende foto”-gevoel</th><td>Opgelost, zolang elk beeld echt past</td><td>Verdwijnt vanzelf — geen kaartvorm, geen belofte</td></tr>
+      <tr><th>4× <code>/hulp</code></th><td>Blijft verspreid over het raster</td><td>Staan samen, leest als één set</td></tr>
+      <tr><th>Raster</th><td>Blijft 3×3</td><td>3 kaarten + rij van 6</td></tr>
+      <tr><th>Risico</th><td>Een generieke foto leest als opvulling — erger dan een icoon</td><td>De zes links krijgen minder gewicht op de pagina</td></tr>
+      <tr><th>Onderhoud</th><td>Elke nieuwe tegel heeft een beeld nodig</td><td>Een tegel toevoegen is één regel</td></tr>
+    </table>
+    <div class="q"><b>Beslist (eigenaar, 20&nbsp;sep&nbsp;2026):</b> optie&nbsp;A, met terugval op het groene vlak zolang er geen
+    foto is. Het raster blijft 3×3. Er komt geen opvulfoto: liever een eerlijk icoon dan een beeld dat niets zegt.
+    Zie het paneel <em>Wat er landt</em> — dat is de toestand op de dag van oplevering.</div>
+  </div>
+</div>
+</body></html>

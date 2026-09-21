@@ -104,3 +104,20 @@ export const NavNoTag: Story = {
     iconName: "TreeStructure",
   },
 };
+
+/**
+ * Nav variant with a photo (#2965) — a `jersey-deep-dark` scrim keeps the
+ * glyph and pill legible on top. Present only on the three approved day-one
+ * tiles; every other nav tile stays the flat `NavNoTag`/`Nav` treatment.
+ */
+export const NavWithImage: Story = {
+  args: {
+    variant: "nav",
+    href: "/club/word-lid",
+    tag: "Aansluiten",
+    title: "Word lid van KCVV",
+    arrowText: "Schrijf je in",
+    iconName: "UsersThree",
+    imageUrl: "/images/jeugd/word-lid-kids-met-bal.jpg",
+  },
+};

@@ -195,6 +195,22 @@ describe("JeugdEditorialGrid", () => {
     expect(screen.getByText("Bovenbouw")).toBeInTheDocument();
   });
 
+  it("wires a photo to exactly the three approved nav tiles (#2965)", () => {
+    const { container } = render(<JeugdEditorialGrid articles={[]} />);
+
+    // "Word lid van KCVV", "Ons leerplan" and "Trainingen & ProSoccerData"
+    // each ship a day-one stand-in photo; the other three nav tiles
+    // ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?")
+    // render no filler photo and keep today's flat bg-jersey-deep + glyph.
+    const covers = Array.from(container.querySelectorAll("img")).map((img) =>
+      img.getAttribute("src"),
+    );
+    expect(covers).toContain("/images/jeugd/word-lid-kids-met-bal.jpg");
+    expect(covers).toContain("/images/jeugd/leerplan-jeugdtraining.jpg");
+    expect(covers).toContain("/images/jeugd/trainingen-drie-trainers.jpg");
+    expect(covers).toHaveLength(3);
+  });
+
   it("renders the shared 3-up grid at the dense hub gutter (#2569)", () => {
     const { container } = render(<JeugdEditorialGrid articles={[]} />);
 
@@ -249,6 +265,37 @@ describe("JeugdEditorialGrid", () => {
         .map((l) => l.getAttribute("href"));
       expect(hrefs).toContain("/sanity/route-1");
       expect(hrefs).toContain("/sanity/route-2");
+    });
+
+    it("forwards a Sanity nav card's image to the photo treatment (#2965)", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({
+          title: "Sanity nav met foto",
+          href: "/sanity/met-foto",
+          imageUrl: "https://cdn.example.com/nav-cover.jpg",
+        }),
+      ];
+
+      const { container } = render(
+        <JeugdEditorialGrid articles={[]} editorialConfig={config} />,
+      );
+
+      const cover = container.querySelector(
+        'img[src="https://cdn.example.com/nav-cover.jpg"]',
+      );
+      expect(cover).toBeInTheDocument();
+      expect(cover).toHaveAttribute("alt", "");
+    });
+
+    it("renders no photo for a Sanity nav card with no image (7j3 default)", () => {
+      const config: EditorialCardConfig[] = [
+        makeNavConfig({ title: "Sanity nav zonder foto", imageUrl: null }),
+      ];
+
+      render(<JeugdEditorialGrid articles={[]} editorialConfig={config} />);
+
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(screen.getByText("Sanity nav zonder foto")).toBeInTheDocument();
     });
 
     it("renders an empty pill for a Sanity nav card with no tag", () => {
