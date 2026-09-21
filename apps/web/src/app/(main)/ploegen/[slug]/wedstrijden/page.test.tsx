@@ -23,14 +23,22 @@
  *   exception to a rule the file had already written down.
  *
  * So all three permanent tags now share one path: the error boundary. This
- * suite pins that, and pins that #3034's digest fix itself is untouched —
- * the `!team` branch still reaches the not-found page with its digest
- * intact.
+ * suite pins that, and pins that the route's own team-level 404 still
+ * reaches the not-found page. That last case does NOT exercise #3034's
+ * `runPromise` digest fix — `page.tsx`'s `!team` branch throws outside the
+ * Effect chain — so it is a route contract, not a guard on that fix;
+ * `runtime.test.ts` owns the fix itself.
+ *
+ * The season-gap producer of `HttpNotFound` on this read is answered as `[]`
+ * in the BFF instead (`apps/api/src/psd/service.ts`, covered by
+ * `apps/api/src/psd/service.test.ts`), so it never reaches this route as an
+ * error at all.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer, Runtime } from "effect";
-import { HttpBadGateway, HttpNotFound } from "@kcvv/api-contract";
+import { HttpNotFound } from "@kcvv/api-contract";
+import { HttpApiError } from "@effect/platform";
 import type { TeamDetailVM } from "@/lib/repositories/team.repository";
 
 const { mockFindBySlug, mockGetMatches } = vi.hoisted(() => ({
@@ -132,25 +140,37 @@ describe("/ploegen/[slug]/wedstrijden — a failed matches read never 404s a res
     expect(rejection).not.toMatchObject({
       digest: expect.stringMatching(/^NEXT_HTTP_ERROR_FALLBACK;404/),
     });
+    // Positive half: it is a died Effect reaching the error boundary, which
+    // is the outcome this route now shares across every permanent tag.
+    expect(Runtime.isFiberFailure(rejection)).toBe(true);
   });
 
   it("treats HttpNotFound exactly like the other permanent tags on the same read", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
 
+    // Both tags are in `PERMANENT_BFF_TAGS` (`classify-bff-failure.ts`) — the
+    // comparison is only worth anything against a real permanent peer, not
+    // against a transient one like `HttpBadGateway`.
     mockGetMatches.mockReturnValue(
       Effect.fail(new HttpNotFound({ error: "psd 404'd the endpoint" })),
     );
     const notFoundRejection = await renderAndCatch();
 
     mockGetMatches.mockReturnValue(
-      Effect.fail(new HttpBadGateway({ error: "upstream decode failed" })),
+      Effect.fail(
+        new HttpApiError.HttpApiDecodeError({
+          issues: [],
+          message: "bad shape",
+        }),
+      ),
     );
-    const badGatewayRejection = await renderAndCatch();
+    const decodeRejection = await renderAndCatch();
 
-    // The whole point of #3041: no tag on this read gets its own path.
-    expect(Runtime.isFiberFailure(notFoundRejection)).toBe(
-      Runtime.isFiberFailure(badGatewayRejection),
-    );
+    // The whole point of #3041: no tag on this read gets its own path, and
+    // the shared path is the error boundary — asserted as `true`, not merely
+    // as "the same as each other", which two `false`s would also satisfy.
+    expect(Runtime.isFiberFailure(notFoundRejection)).toBe(true);
+    expect(Runtime.isFiberFailure(decodeRejection)).toBe(true);
   });
 
   it("still reaches the not-found page with its digest intact when the TEAM is unknown", async () => {
@@ -158,8 +178,10 @@ describe("/ploegen/[slug]/wedstrijden — a failed matches read never 404s a res
 
     const rejection = await renderAndCatch("geen-zo-een-ploeg");
 
-    // #3034's `runPromise` digest fix is route-agnostic and stays as it is —
-    // #3041 only removed this route's opt-in for the *matches* read.
+    // This pins the route's own contract, NOT #3034's `runPromise` fix: the
+    // `!team` branch calls `notFound()` outside the Effect chain, so the
+    // throw never passes through `runPromise` and the digest restoration is
+    // not exercised here. `runtime.test.ts` owns that.
     expect(mockGetMatches).not.toHaveBeenCalled();
     expect(Runtime.isFiberFailure(rejection)).toBe(false);
     expect(rejection).toMatchObject({

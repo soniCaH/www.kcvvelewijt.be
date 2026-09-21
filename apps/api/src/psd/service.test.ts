@@ -167,6 +167,32 @@ function runService<A>(
 }
 
 describe("PsdService.getTeamMatches", () => {
+  it("answers [] when PSD holds no season spanning today, instead of failing", async () => {
+    // The gap between two seasons, or the next one not yet published. There
+    // are genuinely no fixtures — letting `getCurrentSeason`'s
+    // `ResourceNotFoundError` escape would map to `HttpNotFound` and take
+    // every `/ploegen/*/wedstrijden` page to an error boundary (#3041).
+    const expiredSeasons = [
+      {
+        id: 41,
+        name: "2023-2024",
+        start: new Date(Date.now() - 1000 * 60 * 60 * 24 * 400).toISOString(),
+        end: new Date(Date.now() - 1000 * 60 * 60 * 24 * 40).toISOString(),
+      },
+    ];
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => expiredSeasons,
+    });
+
+    const result = await runService((svc) => svc.getTeamMatches(1));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") expect(result.right).toEqual([]);
+    // The games endpoint is never reached — there is no season id to ask for.
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it("returns normalized Match array from mocked HTTP responses", async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => seasons })

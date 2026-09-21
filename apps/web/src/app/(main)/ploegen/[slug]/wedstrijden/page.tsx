@@ -135,14 +135,23 @@ export default async function WedstrijdenPage({
         // succeeded, and under that team's own indexable metadata, since
         // `generateMetadata` resolves the same subject separately.
         //
-        // `HttpNotFound` used to be the one exception. It could not mean what
+        // `HttpNotFound` used to be the one exception. It cannot mean what
         // `classify-bff-failure.ts` documents it to mean here — a stale
         // `psdId` in Sanity — because `getMatches` is a LIST read: PSD answers
         // an unknown team id with `200 []`, which decodes cleanly, and only
-        // `/games/{id}/info` opts into `emptyBodyIsNotFound`. The one thing
-        // left that can produce the tag is PSD 404-ing the endpoint itself,
-        // i.e. an outage. Degrading that to `[]` would print "Nog geen
-        // wedstrijden gepland" for a team with a full fixture list, so the
+        // `/games/{id}/info` opts into `emptyBodyIsNotFound`.
+        //
+        // It had a second producer that DID deserve degrading: `getTeamMatches`
+        // opens on `getCurrentSeason()`, whose "No active season found"
+        // `ResourceNotFoundError` maps to the same `HttpNotFound`. That is a
+        // season gap, not a failure — the team really has no fixtures. It is
+        // answered as `[]` at the only layer that can tell the two apart, the
+        // BFF (`apps/api/src/psd/service.ts`, #3041), so it never arrives here
+        // as an error at all.
+        //
+        // What reaches this read as `HttpNotFound` is therefore PSD 404-ing the
+        // endpoint itself — an outage. Degrading THAT to `[]` would print "Nog
+        // geen wedstrijden gepland" for a team with a full fixture list, so the
         // absence is left to the error boundary to report honestly.
         return yield* bff.getMatches(psdTeamId);
         // `force-dynamic`: a transient failure always hits the error

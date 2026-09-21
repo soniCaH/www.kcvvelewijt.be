@@ -521,7 +521,20 @@ export const PsdServiceLive = Layer.effect(
     return {
       getTeamMatches: (teamId: number) =>
         Effect.gen(function* () {
-          const season = yield* getCurrentSeason();
+          // "No active season" is not a failed read — PSD's `/seasons` simply
+          // holds no season spanning today, which happens in the gap between
+          // two seasons and while the next one is unpublished. A team then
+          // genuinely has no fixtures, so this answers `[]` and lets the page
+          // say so, rather than letting `getCurrentSeason`'s
+          // `ResourceNotFoundError` map to `HttpNotFound` and take every
+          // `/ploegen/*/wedstrijden` page to an error boundary for the 24h
+          // the seasons cache holds (#3041). After this, `HttpNotFound` on
+          // this read means only one thing: PSD 404'd the endpoint itself.
+          const season = yield* getCurrentSeason().pipe(
+            Effect.catchTag("ResourceNotFound", () => Effect.succeed(null)),
+          );
+          if (season === null) return [];
+
           const data = yield* countedFetch(
             `${base}/games/team/${teamId}/seasons/${season.id}`,
             PsdMatchListSchema,
