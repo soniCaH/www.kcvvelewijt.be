@@ -10,7 +10,7 @@
     "test": "tsx --test src/*.test.ts"
   },
   "dependencies": {
-    "@sanity/client": "8.6.1"
+    "@sanity/client": "8.6.2"
   },
   "devDependencies": {
     "tsx": "4.23.12"
