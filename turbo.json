@@ -18,7 +18,26 @@
     "test": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
-      "inputs": ["src/**", "tests/**", "vitest.config.*"]
+      // $TURBO_DEFAULT$ (every git-tracked file in the package) rather than a
+      // hand-kept whitelist: the old list read "tests/**" but apps/web keeps 9
+      // test files under "test/" plus a root next.config.test.ts, so 10 files
+      // could change without busting the cache (#3096). A whitelist drifts;
+      // the default does not.
+      //
+      // The one exclusion is apps/web's 3 044 VR baseline PNGs. Nothing in the
+      // Vitest suite reads them — only .storybook/test-runner.ts and
+      // scripts/vr-docker.mjs do — so hashing them just means every baseline
+      // update needlessly busts the unit-test cache.
+      //
+      // $TURBO_ROOT$/.husky/** is hashed because apps/web's hook tests spawn
+      // the real scripts: check-branch.test.ts:38 executes
+      // .husky/branch-guard.sh, and pre-commit.test.ts / wave-check.test.ts do
+      // the same. Without it a .husky edit serves a cached green (#3096).
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!test/vr/__snapshots__/**",
+        "$TURBO_ROOT$/.husky/**"
+      ]
     },
     "lint": {
       "dependsOn": ["^build"]
@@ -52,6 +71,13 @@
     "@kcvv/web#build": {
       "dependsOn": ["^build", "@kcvv/studio#typegen"],
       "outputs": [".next/**", "!.next/cache/**"],
+      // Same baseline exclusion as `test` above: `next build` never reads the
+      // VR snapshots, but they are 3 044 of this package's 4 464 default
+      // inputs, so without this every baseline update forces a full rebuild.
+      // test/fixtures/** is deliberately still hashed — src/components/
+      // calendar/calendar-mocks.ts imports it through the @test-fixtures
+      // alias, so it is a real build input.
+      "inputs": ["$TURBO_DEFAULT$", "!test/vr/__snapshots__/**"],
       "env": [
         "KCVV_API_URL",
         "NEXT_PUBLIC_SANITY_PROJECT_ID",

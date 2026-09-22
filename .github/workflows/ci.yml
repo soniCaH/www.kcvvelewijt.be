@@ -3,18 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [main]
-    # Docs-only changes don't affect the API/Studio deploys this workflow runs.
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
   pull_request:
     branches: [main]
     # ready_for_review is included so marking a draft PR ready triggers CI even
     # without a new push (jobs are draft-gated below).
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
 
 # Cancel superseded runs on the same ref so repeated pushes to a PR branch don't
 # each pay for a full pipeline. Main is exempted (cancel-in-progress: false) so
@@ -34,6 +27,48 @@ env:
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
+  # Docs-only filtering lives HERE, at job level, not on the `on:` triggers.
+  # GitHub reports a job skipped by `if:` as Success, but a workflow that never
+  # triggered at all leaves its checks permanently "Pending" — so a required
+  # check behind `paths-ignore` blocks every docs-only PR forever. Job-level
+  # gating keeps the same "don't burn a runner on docs" behaviour while staying
+  # safe to mark required (#3084).
+  # Same shape and same action as `visual-regression-changes` below.
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # paths-filter reads the PR's file list through the REST API, which the
+    # action documents as requiring `pull-requests: read`. It survives on
+    # `contents: read` alone today only because this repo is public — the
+    # listFiles call would 403 the moment it isn't.
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Detect non-docs paths
+        id: filter
+        uses: dorny/paths-filter@v4.0.3
+        with:
+          # `every` = a file counts only if it matches ALL patterns, so these
+          # two negations together mean "not markdown AND not under docs/".
+          # That reproduces the old `paths-ignore: ["**.md", "docs/**"]`
+          # exactly. Plain `!` negations need this quantifier: with the default
+          # `some`, one negation matching is enough and every docs-only change
+          # would still count as code.
+          predicate-quantifier: "every"
+          filters: |
+            code:
+              - '!**/*.md'
+              - '!docs/**'
+
   # Quality checks + build merged into one job: `build` previously did its own
   # checkout + install and ran only after this job, so merging removes a whole
   # redundant install cycle per run. Steps fail-fast, so a lint/type/test
@@ -43,7 +78,10 @@ jobs:
     name: Quality Checks + Build
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    needs: [changes]
+    if: |
+      needs.changes.outputs.code == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
 
     steps:
@@ -165,11 +203,15 @@ jobs:
   visual-regression-changes:
     name: VR — Detect visual changes
     runs-on: ubuntu-latest
-    # REDESIGN-DISABLED: gated off via the RUN_VISUAL_REGRESSION repo variable.
-    if: ${{ vars.RUN_VISUAL_REGRESSION == 'true' && github.event_name == 'pull_request' }}
-    # Reading the diff is all this job does; paths-filter goes through the API.
+    # Gated on `changes` too: without it this job would newly fire on docs-only
+    # PRs, which the old workflow-level paths-ignore used to stop dead.
+    needs: [changes]
+    if: ${{ needs.changes.outputs.code == 'true' && vars.RUN_VISUAL_REGRESSION == 'true' && github.event_name == 'pull_request' }}
+    # Reading the diff is all this job does; paths-filter goes through the API,
+    # so it needs the same `pull-requests: read` as `changes` above.
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       visual: ${{ steps.filter.outputs.visual }}
     steps:
