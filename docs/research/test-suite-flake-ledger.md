@@ -43,7 +43,7 @@ commit** counts as a flake below.
 
 | Measure | Value |
 | --- | --- |
-| Flakes recorded | **24** |
+| Flakes recorded | **25** |
 | Testing-related issues swept | 120 (of 1 090 in the queue) |
 | Green `e2e.yml` runs on `main` that hid a retry | **7 of 12** (58 %) |
 | Of those, `OrganigramSectionNav on /hulp` | **6 of 7** |
@@ -85,6 +85,7 @@ exists but is bounded. **fixed** = the cause is gone.
 | 18 | Five parallel `docker compose run --build` calls on a stale VR image froze ~16 min at 0 % CPU | Local wave | 2026-09-21 | K — shared Docker lane, no gate | **live**, unfiled | One serial build afterwards finished in ~8 min (wave evidence, map Notes) |
 | 19 | `SearchInterface.test.tsx` (StrictMode timing) fails under sibling agents' `check-all`, passes alone | Local wave | 2026-09-21 | C — CPU contention against a `waitFor` budget | **live**, unfiled, not yet reproduced under a controlled contention test | Reported independently by two wave agents. The file does use `StrictMode` + four `waitFor` blocks, which is the shape #2362 described |
 | 20 | `vr -u` accepts sub-threshold diffs and leaves stale baselines; parallel captures add sub-pixel noise to unrelated baselines | Local wave / VR | 2026-09-21 | K — shared CPU during capture | **live**, unfiled | Wave evidence, map Notes |
+| 25 | The E2E suite has **no fixed subjects** — every run rediscovers them from live data, so it tests a different article and a different event each time | E2E | 2026-09-22 | A — live data, cold render | **live**, unfiled | `helpers/fixtures.ts` takes `firstSlugUnder()` from the live `/sitemap.xml`; `sitemap.ts` orders articles `publishedAt desc` and events by a `now() - 24h` cutoff. Found by [#3081](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3081), **not** by this ledger's own sweep |
 | 22 | `apps/api` has a `lint` script that runs nowhere — not in `ci.yml`, not in `lint-staged` — and fails locally on a stale `.bin/eslint` shim | CI coverage | 2026-09-22 | J — the green light does not cover the code | **live** ([#3097](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3097), open, `needs-triage`) | `ci.yml` lints `@kcvv/web`, `@kcvv/studio` and `@kcvv/sanity-studio` only; `apps/api/package.json` declares no `eslint` dependency |
 | 23 | Nothing lints, type-checks or tests anything under `scripts/` | CI coverage | 2026-09-21 | J — the green light does not cover the code | **live** ([#3056](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3056), open) | `pnpm-workspace.yaml` lists only `apps/*` and `packages/*`, so no `scripts/*` package is a workspace member and `turbo`/`check-all`/CI never reach it |
 | 24 | `section-nav.spec.ts`'s "cold load with a hash" test never cold-loaded — a `goto` differing only in its hash is a same-document navigation, so it exercised the wrong branch | E2E | 2026-09-16 | J — a test that cannot fail | **fixed** ([#2993](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2993), closed 2026-09-17) | The test now plants a `window.__coldLoadSentinel`, navigates to `about:blank`, and **asserts** the sentinel is gone — proof of a genuine cross-document load, not an assumption |
@@ -100,7 +101,12 @@ The E2E suite runs `next start` against **live** Sanity and the **deployed** BFF
 fan-out route can exceed a 30 s test timeout for reasons that have nothing to do with the commit.
 `/kalender` is `force-dynamic` with a 19-call fan-out, so even Playwright's retry hits it cold.
 
-- Members: rows 2, 3. **Live risk remains** — the fix bounded the *wait*, not the *data*.
+- Members: rows 2, 3, 25. **Live risk remains** — the fix bounded the *wait*, not the *data*.
+- Row 25 was missed by this ledger and found by [#3081](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3081)
+  reading the fixture helper rather than the failure history. Worth noting **how**: a suite that picks
+  a *different subject every run* produces no repeating failure signature, so it leaves no trace in CI
+  history at all. A flake ledger built from failures is structurally blind to this class — only
+  reading the code finds it.
 - Feeds: [Grilling: E2E data — live production data or deterministic fixtures?](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3087)
 
 ### B — Hydration and layout race the assertion budget (E2E)
