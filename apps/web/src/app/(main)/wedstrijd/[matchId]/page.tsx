@@ -3,7 +3,7 @@
  *
  * Page shape (Variant A "shared shell, per-section auto-hide"):
  *
- *   MatchStripSlot                 ← top only, mirrors /spelers/[slug]
+ *   MatchStripSlot                 ← top only, mounted by ./layout.tsx (#3027)
  *   <MatchHero>                    ← state-aware; never auto-hides
  *   <StripedSeam>                  ← only when a body section will render
  *   <MatchLineupSection>           ← auto-hides on empty (typically upcoming)
@@ -77,7 +77,6 @@ import {
   matchArticlesToRelatedRow,
   mapGalleriesToRelatedRow,
 } from "@/lib/utils/article-related-items";
-import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import {
   matchDetailToHeroRow,
@@ -611,8 +610,6 @@ export default async function MatchPage({ params }: MatchPageProps) {
           })}
         />
       )}
-
-      <MatchStripSlot />
 
       <PageContainer className="pb-12 lg:pb-16">
         <UpLink href="/kalender" label="Kalender" className="mb-6" />

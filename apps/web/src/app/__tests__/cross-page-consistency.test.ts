@@ -547,7 +547,7 @@ describe("rule 4 catches what it claims to (#2555)", () => {
  * this to "the page file names `BffService`" is what let #2433 count 8 BFF
  * routes: `(landing)/layout.tsx` mounts `<MatchStripSlot>` for the whole group,
  * so `/sponsors` and `/jeugd` inherit a BFF read without naming one, and
- * `/spelers/[slug]` mounts the same slot inline. Its read goes through a
+ * `/spelers/[slug]` mounts the same slot from its own segment layout. Its read goes through a
  * per-render `cache()`, not a TTL, so it lands in each page's ISR entry. The
  * layout chain is walked here because it is the mechanism; the component graph
  * below the page is not, so a *new* BFF-reading component would need its name
@@ -2278,127 +2278,48 @@ describe("rule 13 catches what it claims to (#2877)", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Rule 14 (#3023) — a route that mounts <MatchStripSlot /> inline draws its
-// Suspense fallback in its own loading.tsx
+// Rule 14 (#3027) — <MatchStripSlot /> mounts in a layout, never a page
 // ---------------------------------------------------------------------------
 
 /**
- * `(landing)/layout.tsx` mounts `<MatchStripSlot />` once for its whole route
- * group, so a landing-surface `loading.tsx` needs no placeholder of its own —
- * a layout persists across its group's loading state. Three detail routes
- * (`/wedstrijd/[matchId]`, `/spelers/[slug]`, `/ploegen/[slug]`) instead
- * mount the slot *inline*, once each, because they render a bespoke hero
- * rather than the shared `<PageHero>` — an inline mount does NOT persist
- * across its own page's loading state, so its `loading.tsx` shifts the whole
- * page down by the strip's height on resolve unless it draws the same
- * fallback the slot itself would: `<MatchStripSkeleton />`. That gap shipped
- * with all three routes (#2570) and was still open when #2877 fixed a
- * different reflow on the same three files — filed as its own ticket there
- * ("file it if it still stands after this lands") and closed here.
+ * A `loading.tsx` wraps its segment's page but not its segment's layout, so a
+ * slot mounted from a layout stays on screen — with its real data — while the
+ * page below it loads. A slot mounted inline in a `page.tsx` does not: its
+ * `loading.tsx` then has to draw a stand-in, and no stand-in can know the
+ * strip's height before the fetch (zero rows, one, or two stacked on mobile),
+ * so the page jumped on resolve (#3023 drew one, #3027 removed the need).
  *
- * One parameterized guard, not three near-identical per-route test files
- * (#3023 review round 2): the rule is a whole-tree invariant — "every
- * inline mount has a matching skeleton" — not three separate per-route
- * facts, and phrasing it that way is what makes a fourth inline-mounting
- * route added later covered automatically instead of needing a fourth copy
- * of the same test.
- *
- * Detection is source-level, on purpose: `<MatchStripSlot` appearing in a
- * `page.tsx`'s own text is exactly what makes a mount inline rather than
- * inherited — a route that only gets the slot from a layout never writes
- * that tag itself, so filtering `productionSources` for the literal JSX
- * open tag already separates the two cases with no need to walk the layout
- * chain the way Rule 5's `layoutChain()` does for its own, different
- * question (whether a BFF read reaches a route at all).
+ * `(landing)/layout.tsx` covers the landing group; the three bespoke detail
+ * routes each mount it from their own same-segment layout (`ploegen/[slug]`
+ * from `(detail)/`, so its `wedstrijden` sibling stays strip-less). The list
+ * is pinned by name: a fifth mount is a decision to make here, not a drift.
+ * Source-level on purpose — `code` strips comments, so only real JSX counts.
  */
-const MATCH_STRIP_SLOT_INLINE_JSX = /<MatchStripSlot\b/;
+const MATCH_STRIP_SLOT_JSX = /<MatchStripSlot\b/;
 const MATCH_STRIP_SKELETON_JSX = /<MatchStripSkeleton\b/;
-/** The hero container every one of these three routes opens on — used only
- *  to confirm the skeleton is drawn ABOVE it, not merely present somewhere
- *  in the file. */
-const FIRST_PAGE_CONTAINER_JSX = /<PageContainer\b/;
 
-/** Every `page.tsx` that mounts `<MatchStripSlot />` in its own source. */
-const inlineMatchStripPages = productionSources.filter(
-  (relPath) =>
-    /(^|\/)page\.tsx$/.test(relPath) &&
-    MATCH_STRIP_SLOT_INLINE_JSX.test(code.get(relPath)!),
-);
+const filesMatching = (fileRe: RegExp, jsxRe: RegExp): string[] =>
+  productionSources
+    .filter((relPath) => fileRe.test(relPath) && jsxRe.test(code.get(relPath)!))
+    .sort();
 
-/** `page.tsx` → its sibling `loading.tsx`, same directory. */
-const siblingLoadingFile = (pagePath: string): string =>
-  pagePath.replace(/page\.tsx$/, "loading.tsx");
-
-describe("an inline <MatchStripSlot /> mount has a matching skeleton in loading.tsx (#3023)", () => {
-  it.each(inlineMatchStripPages)(
-    "%s — sibling loading.tsx renders <MatchStripSkeleton /> above its hero container",
-    (pagePath) => {
-      const loadingPath = siblingLoadingFile(pagePath);
-      expect(code.has(loadingPath), `missing sibling ${loadingPath}`).toBe(
-        true,
-      );
-      const loadingSource = code.get(loadingPath)!;
-      const skeletonMatch = MATCH_STRIP_SKELETON_JSX.exec(loadingSource);
-      expect(
-        skeletonMatch,
-        `${loadingPath}: no <MatchStripSkeleton />`,
-      ).not.toBeNull();
-      const heroMatch = FIRST_PAGE_CONTAINER_JSX.exec(loadingSource);
-      expect(
-        heroMatch,
-        `${loadingPath}: no <PageContainer> hero`,
-      ).not.toBeNull();
-      expect(skeletonMatch!.index).toBeLessThan(heroMatch!.index);
-    },
-  );
-});
-
-/**
- * Pinned by name, Rule 5's shape: the derived list is what makes a fourth
- * route covered automatically, but an edit that silently emptied the filter
- * would read as a pass on every route unless something asserts the three
- * known routes are actually in it.
- */
-describe("rule 14 checks the routes it claims to (#3023)", () => {
-  it.each([
-    ["app/(main)/wedstrijd/[matchId]/page.tsx"],
-    ["app/(main)/spelers/[slug]/page.tsx"],
-    ["app/(main)/ploegen/[slug]/(detail)/page.tsx"],
-  ])("covers %s", (relPath) => {
-    expect(inlineMatchStripPages).toContain(relPath);
+describe("<MatchStripSlot /> mounts in a layout, never a page (#3027)", () => {
+  it("mounts from exactly these layouts", () => {
+    expect(filesMatching(/\.tsx$/, MATCH_STRIP_SLOT_JSX)).toEqual(
+      [
+        "app/(landing)/layout.tsx",
+        "app/(main)/ploegen/[slug]/(detail)/layout.tsx",
+        "app/(main)/spelers/[slug]/layout.tsx",
+        "app/(main)/wedstrijd/[matchId]/layout.tsx",
+      ].sort(),
+    );
   });
 
-  it("does not cover a landing-surface page that only inherits the slot from its layout", () => {
-    const sponsors = "app/(landing)/sponsors/page.tsx";
-    expect(MATCH_STRIP_SLOT_INLINE_JSX.test(code.get(sponsors)!)).toBe(false);
-    expect(inlineMatchStripPages).not.toContain(sponsors);
-  });
-});
-
-describe("rule 14 catches what it claims to (#3023)", () => {
-  it("flags a loading.tsx with no <MatchStripSkeleton /> at all", () => {
-    const loadingSource = `<PageContainer><UpLink href="/a" label="A" /></PageContainer>`;
-    expect(MATCH_STRIP_SKELETON_JSX.test(loadingSource)).toBe(false);
-  });
-
-  it("flags a <MatchStripSkeleton /> placed AFTER the hero instead of above it", () => {
-    const loadingSource = `
-      <PageContainer><UpLink href="/a" label="A" /></PageContainer>
-      <MatchStripSkeleton />
-    `;
-    const skeletonIndex = MATCH_STRIP_SKELETON_JSX.exec(loadingSource)!.index;
-    const heroIndex = FIRST_PAGE_CONTAINER_JSX.exec(loadingSource)!.index;
-    expect(skeletonIndex).toBeGreaterThan(heroIndex);
-  });
-
-  it("does not flag a loading.tsx with <MatchStripSkeleton /> correctly above the hero", () => {
-    const loadingSource = `
-      <MatchStripSkeleton />
-      <PageContainer><UpLink href="/a" label="A" /></PageContainer>
-    `;
-    const skeletonIndex = MATCH_STRIP_SKELETON_JSX.exec(loadingSource)!.index;
-    const heroIndex = FIRST_PAGE_CONTAINER_JSX.exec(loadingSource)!.index;
-    expect(skeletonIndex).toBeLessThan(heroIndex);
+  it("leaves no loading.tsx drawing a stand-in for it", () => {
+    expect(MATCH_STRIP_SKELETON_JSX.test("<MatchStripSkeleton />")).toBe(true);
+    expect(
+      filesMatching(/(^|\/)loading\.tsx$/, MATCH_STRIP_SKELETON_JSX),
+    ).toEqual([]);
   });
 });
 

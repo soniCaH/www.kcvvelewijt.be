@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { fetchPlayerOrNull } from "./page";
 
 interface PlayerLayoutProps {
@@ -27,6 +28,11 @@ interface PlayerLayoutProps {
  * `fetchPlayerOrNull` is wrapped in React `cache()`, so this call, the
  * page's own `generateMetadata`, and `PlayerPage` itself share one read per
  * request instead of three.
+ *
+ * It also mounts `<MatchStripSlot />` above the page, for the same reason
+ * the check lives here: this layout sits outside the sibling `loading.tsx`,
+ * so the strip stays on screen with its real data while the page loads,
+ * instead of a stand-in guessing its height (#3027).
  */
 export default async function PlayerLayout({
   children,
@@ -35,5 +41,10 @@ export default async function PlayerLayout({
   const { slug } = await params;
   const player = await fetchPlayerOrNull(slug);
   if (!player) notFound();
-  return children;
+  return (
+    <>
+      <MatchStripSlot />
+      {children}
+    </>
+  );
 }

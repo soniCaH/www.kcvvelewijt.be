@@ -3,15 +3,15 @@ import { MatchStrip } from "./MatchStrip";
 import { MatchStripSkeleton } from "./MatchStripSkeleton";
 
 /**
- * Suspense-wrapped slot for the next-fixture band. Mounted on landing
- * surfaces (homepage + section indexes) immediately below the
- * `<SiteHeader />` via `(landing)/layout.tsx`, and inline at the top of the
- * three bespoke detail routes (`/wedstrijd/[matchId]`, `/spelers/[slug]`,
- * `/ploegen/[slug]`) that each render their own hero rather than the shared
- * `<PageHero>` — see each page's own docblock for why. Their `loading.tsx`
- * skeletons render this slot's fallback, `<MatchStripSkeleton />`, directly
- * at the same position (#3023): a layout-mounted `<MatchStripSlot>` persists
- * across its group's loading state on its own, but an inline one does not.
+ * Suspense-wrapped slot for the next-fixture band. Mounted only from layouts
+ * (#3027): once for the landing surfaces (homepage + section indexes) via
+ * `(landing)/layout.tsx`, and at the top of the three bespoke detail routes
+ * (`/wedstrijd/[matchId]`, `/spelers/[slug]`, `/ploegen/[slug]`) via each
+ * one's own segment layout. A layout sits outside its segment's
+ * `loading.tsx`, so the real strip stays on screen while the page loads; a
+ * `page.tsx` mount would need a stand-in there, and no stand-in can know the
+ * strip's data-dependent height. `cross-page-consistency.test.ts` Rule 14
+ * pins the four mounts.
  */
 export function MatchStripSlot() {
   return (

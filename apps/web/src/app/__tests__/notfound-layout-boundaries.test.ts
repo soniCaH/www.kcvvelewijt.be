@@ -105,12 +105,21 @@ import EventLayout from "@/app/(main)/evenementen/[slug]/layout";
 import OpponentLayout from "@/app/(main)/tegenstander/[clubId]/layout";
 import MatchLayout from "@/app/(main)/wedstrijd/[matchId]/layout";
 import TeamSegmentLayout from "@/app/(main)/ploegen/[slug]/layout";
+import { MatchStripSlot } from "@/components/layout/MatchStrip";
 
 /** A stable, identity-checkable stand-in for `children` — proves a resolving
  * layout passes it through untouched rather than swallowing or replacing it. */
 const CHILDREN = createElement("div", { "data-testid": "children-sentinel" });
 
 const NOT_FOUND_DIGEST = /^NEXT_HTTP_ERROR_FALLBACK;404/;
+
+/** The two detail layouts that also mount the strip (#3027) return a
+ * fragment: `<MatchStripSlot />` first, then `children`, still untouched. */
+const STRIP_THEN_CHILDREN = expect.objectContaining({
+  props: {
+    children: [expect.objectContaining({ type: MatchStripSlot }), CHILDREN],
+  },
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -129,14 +138,14 @@ describe("(main)/spelers/[slug]/layout — #2968", () => {
     });
   });
 
-  it("passes children through for a known slug", async () => {
+  it("mounts the strip, then passes children through, for a known slug", async () => {
     mockFetchPlayer.mockResolvedValue({ id: "player-1" });
     await expect(
       PlayerLayout({
         children: CHILDREN,
         params: Promise.resolve({ slug: "42" }),
       }),
-    ).resolves.toBe(CHILDREN);
+    ).resolves.toEqual(STRIP_THEN_CHILDREN);
   });
 });
 
@@ -345,14 +354,14 @@ describe("(main)/wedstrijd/[matchId]/layout — #2968", () => {
     });
   });
 
-  it("passes children through for a known matchId", async () => {
+  it("mounts the strip, then passes children through, for a known matchId", async () => {
     mockFetchMatchOrNotFound.mockResolvedValue({ id: 3424 });
     await expect(
       MatchLayout({
         children: CHILDREN,
         params: Promise.resolve({ matchId: "3424" }),
       }),
-    ).resolves.toBe(CHILDREN);
+    ).resolves.toEqual(STRIP_THEN_CHILDREN);
   });
 });
 
