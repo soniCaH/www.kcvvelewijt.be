@@ -22,6 +22,7 @@
  */
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -84,6 +85,22 @@ let stubPath = "";
  */
 let seq = 0;
 
+/**
+ * Ask the OS for a free port, then release it. A base port plus a counter
+ * handed every Vitest process the same four numbers, so two worktrees in a
+ * wave bound the same ports and one lost with `EADDRINUSE` (#3109).
+ */
+function freePort(): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const s = createServer();
+    s.once("error", reject);
+    s.listen(0, "127.0.0.1", () => {
+      const { port } = s.address() as { port: number };
+      s.close(() => resolve(port));
+    });
+  });
+}
+
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), "psd-sync-fixture-"));
   stubPath = join(dir, "stub.mjs");
@@ -94,9 +111,9 @@ afterAll(() => {
   if (dir) rmSync(dir, { recursive: true, force: true });
 });
 
-function run(args: string[]) {
+async function run(args: string[]) {
   const n = seq++;
-  const port = 8890 + n;
+  const port = await freePort();
   const hitsFile = join(dir, `hits-${n}.txt`);
   const logPath = join(dir, `sync-${n}.log`);
   writeFileSync(hitsFile, "", "utf8");
@@ -119,8 +136,8 @@ function hitsOf(hitsFile: string) {
 }
 
 describe("trigger-psd-sync.sh", () => {
-  it("requests /__scheduled exactly once — the readiness probe never fires the cron (#2890)", () => {
-    const r = run(["0"]);
+  it("requests /__scheduled exactly once — the readiness probe never fires the cron (#2890)", async () => {
+    const r = await run(["0"]);
     expect(r.status).toBe(0);
 
     const hits = hitsOf(r.hitsFile);
@@ -134,15 +151,15 @@ describe("trigger-psd-sync.sh", () => {
     expect(hits).toEqual(["/__scheduled"]);
   });
 
-  it("names the target dataset before it writes, so production is never a surprise", () => {
-    const r = run(["0"]);
+  it("names the target dataset before it writes, so production is never a surprise", async () => {
+    const r = await run(["0"]);
     expect(r.status).toBe(0);
     expect(r.stdout).toContain("Sanity dataset :");
     expect(r.stdout).toContain("fixture mode — skipping the KV cursor write");
   });
 
-  it("summarises what actually committed, players and staff counted separately (#2895)", () => {
-    const r = run(["0"]);
+  it("summarises what actually committed, players and staff counted separately (#2895)", async () => {
+    const r = await run(["0"]);
     expect(r.status).toBe(0);
     expect(r.stdout).toContain("processing team 1/21: 1 (Test Team)");
     expect(r.stdout).toContain("team 1: 3 players, 1 staff");
@@ -152,8 +169,8 @@ describe("trigger-psd-sync.sh", () => {
     expect(r.stdout).toContain("rate-limited (429)      : players 0, staff 1");
   });
 
-  it("refuses a missing or non-numeric team index rather than syncing the wrong team", () => {
-    expect(run([]).status).toBe(64);
-    expect(run(["first-team"]).status).toBe(64);
+  it("refuses a missing or non-numeric team index rather than syncing the wrong team", async () => {
+    expect((await run([])).status).toBe(64);
+    expect((await run(["first-team"])).status).toBe(64);
   });
 });

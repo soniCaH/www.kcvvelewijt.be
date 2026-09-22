@@ -32,6 +32,13 @@ const TEST_CALLS = TEST_CALL_FORMS.flatMap((form) =>
 // keeps exiting 0, and nothing is checked ever again.
 const IN_BODY_ROUTE_IMPORT = `:matches(${TEST_CALLS}) ImportExpression > Literal[value=/\\/(page|layout|route|robots|sitemap|opengraph-image)$/]`;
 
+// A test may not bind a fixed TCP port (#3109). Every Vitest process computes
+// the same number, so parallel worktrees in a wave collide on `EADDRINUSE`.
+// `.listen(0)` asks the OS for a free port and stays allowed.
+// ponytail: catches a literal only — `listen(PORT)` or `listen({ port: 8890 })`
+// slips past; widen the selector if either shape ever appears in a test.
+const FIXED_PORT_LISTEN = "CallExpression[callee.property.name='listen'][arguments.0.type='Literal'][arguments.0.value!=0]";
+
 // Motion Vocabulary bans — DESIGN.md → Motion (#2658). #2650's `@theme`
 // resets (`--ease-*: initial`, `--animate-*: initial`) already make most of
 // Tailwind's motion utilities compile to nothing, but four gaps survive a
@@ -182,7 +189,7 @@ const eslintConfig = [
   },
   {
     // Test-file rules: img rules off (we mock Next.js Image), plus the
-    // module-scope import guard above.
+    // module-scope import guard and the fixed-port ban above.
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     rules: {
       "@next/next/no-img-element": "off",
@@ -193,6 +200,11 @@ const eslintConfig = [
           selector: IN_BODY_ROUTE_IMPORT,
           message:
             "Hoist this page/route module import to module scope — Vitest charges an in-body dynamic import against testTimeout, which breaks under CI contention (apps/web/CLAUDE.md).",
+        },
+        {
+          selector: FIXED_PORT_LISTEN,
+          message:
+            "A test may not bind a fixed TCP port — parallel worktrees collide on it (#3109). Listen on port 0 and read the port the OS assigned.",
         },
       ],
     },
