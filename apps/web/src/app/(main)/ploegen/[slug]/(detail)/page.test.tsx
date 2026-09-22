@@ -92,7 +92,7 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
   return {
     ...actual,
     TeamRepositoryLive: Layer.succeed(actual.TeamRepository, {
-      findAll: () => Effect.succeed([]), // not read by the page (the strip lives in ./layout.tsx)
+      findAll: () => Effect.succeed([]), // only for the interface shape; the page reads none of it
       findBySlug: mockFindBySlug,
       findAllForLanding: () => Effect.succeed([]),
       findByMemberId: () => Effect.succeed([]),

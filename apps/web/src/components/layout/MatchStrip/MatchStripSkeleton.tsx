@@ -6,8 +6,9 @@
  *
  * `min-h-[40px]` (48px from `lg`) is one fixed reservation against a
  * data-dependent strip: exact for one row, short for the two stacked mobile
- * rows, and over for the zero-DOM no-fixture case. That only shows when the
- * strip's own read is slow — a cached read resolves in the same render.
+ * rows, and over for the zero-DOM no-fixture case. It shows on any streamed
+ * render while the strip's read is in flight — `getFirstTeamStripData()` is
+ * per-request `cache()` only, no TTL. An ISR-served page arrives complete.
  */
 export function MatchStripSkeleton() {
   return (

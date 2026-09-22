@@ -47,4 +47,4 @@ export { CookiePreferencesButton } from "./SiteFooter/CookiePreferencesButton";
 // server-only render chain wins). Re-exporting it here would drag that
 // chain into the design-sync client bundle (`.design-sync/entry.ts`
 // wildcards this barrel onto `window.KcvvDS`). Don't "fix" this by adding
-// the export back — #3027 tracks `MatchStripSlot` itself.
+// the export back.

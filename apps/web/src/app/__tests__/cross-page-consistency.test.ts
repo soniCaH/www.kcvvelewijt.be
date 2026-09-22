@@ -2315,6 +2315,17 @@ describe("<MatchStripSlot /> mounts in a layout, never a page (#3027)", () => {
     );
   });
 
+  it.each(filesMatching(/\.tsx$/, MATCH_STRIP_SLOT_JSX))(
+    "%s — renders the strip above {children}",
+    (relPath) => {
+      const source = code.get(relPath)!;
+      const slot = MATCH_STRIP_SLOT_JSX.exec(source)!.index;
+      const children = source.indexOf("{children}");
+      expect(children, `${relPath}: no {children}`).toBeGreaterThan(-1);
+      expect(slot).toBeLessThan(children);
+    },
+  );
+
   it("leaves no loading.tsx drawing a stand-in for it", () => {
     expect(MATCH_STRIP_SKELETON_JSX.test("<MatchStripSkeleton />")).toBe(true);
     expect(
