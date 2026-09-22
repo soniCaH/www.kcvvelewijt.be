@@ -38,8 +38,13 @@ jobs:
     name: Detect code changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # paths-filter reads the PR's file list through the REST API, which the
+    # action documents as requiring `pull-requests: read`. It survives on
+    # `contents: read` alone today only because this repo is public — the
+    # listFiles call would 403 the moment it isn't.
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       code: ${{ steps.filter.outputs.code }}
     steps:
@@ -202,9 +207,11 @@ jobs:
     # PRs, which the old workflow-level paths-ignore used to stop dead.
     needs: [changes]
     if: ${{ needs.changes.outputs.code == 'true' && vars.RUN_VISUAL_REGRESSION == 'true' && github.event_name == 'pull_request' }}
-    # Reading the diff is all this job does; paths-filter goes through the API.
+    # Reading the diff is all this job does; paths-filter goes through the API,
+    # so it needs the same `pull-requests: read` as `changes` above.
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       visual: ${{ steps.filter.outputs.visual }}
     steps:
