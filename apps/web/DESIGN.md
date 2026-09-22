@@ -506,7 +506,7 @@ A rotated, content-bearing paper stamp that pins over the edge of a card — 14p
 
 ### Striped Seam
 
-A full-bleed 45° two-tone stripe band (12 / 18 / 24 / 28px tall) rendered as an SVG pattern, used as a section rule. Four pairs: ink-cream (default, high contrast), jersey-cream, jersey-tonal-dark, and cream-jersey-deep. The angle can flip so a top and bottom seam lean toward each other and "tape" a section shut.
+A full-bleed 45° two-tone stripe band (12 / 18 / 24 / 28px tall) rendered as an SVG pattern, used as a section rule. Four pairs: ink-cream (default, high contrast), jersey-cream, jersey-tonal-dark, and cream-jersey-deep. The seam carries two meanings, and both belong to it. **One seam between two blocks** says "the page continues, new subject". **A flipped pair around a block** — the angle flips so the top and bottom seams lean toward each other — "tapes" the section as a discrete package: it ends. No second edge device is needed for either (D3b / T7, decision-sheet §8, #2625).
 
 ## The Imageless Card
 
@@ -585,6 +585,7 @@ Where a notice is warranted, two more splits apply. **The tier follows the scope
 - **Don't** set `jersey` (`#4acf52`) as a text colour, and don't put it on cream.
 - **Don't** draw a green divider **between repeating rows** — a list, a table, a run of section rules. Rendered and rejected (C2): at that density a line of green hairlines reads as a green section, which the Rare Green Rule forbids. A green hairline **under a heading that labels a group** is allowed and already ships (`SiteFooter`, `HulpFinder`): it marks one boundary, not a rhythm. The test is repetition — if a reader would see two of them stacked, it is green on a run and it is wrong.
 - **Don't** wrap a striped seam or a coloured band in a max-width container.
+- **Don't** add a cut, torn or trimmed band edge. Rendered and rejected (D3b / T7, decision-sheet §8, #2625): the striped seam already carries both meanings — one seam says "the page continues", a flipped pair tapes the section as a discrete package — so an edge would be a second device for a job that is taken.
 - **Don't** invent a container width outside 680 / 1040 / 1280 (chrome's 1440 is header and footer only).
 - **Don't** pin a Display-size heading's italic accent to a heavy weight — Freight Big Pro has no 900 italic.
 - **Don't** add a new typeface. Freight Sans Pro, Freight Display Pro, Freight Big Pro and IBM Plex Mono are the whole set.

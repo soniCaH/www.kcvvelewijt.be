@@ -5,7 +5,7 @@ session can work from it without replaying the conversation that produced it.
 
 - **Decisions:** [`decision-sheet.md` §8](./decision-sheet.md)
 - **Evidence:** 23 HTML comparison pages in `docs/design/mockups/research-d-series/`
-- **Outcome:** 43 items ruled on — **14 accepted, 23 rejected, 6 found already built**
+- **Outcome:** 50 items ruled on — **23 accepted, 23 rejected, 4 found already built**
 
 ---
 
@@ -65,12 +65,8 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
   custom properties and one rule on `body`. No asset, no request, no fallback.
   - **Note for review:** ink at 9% over cream is a desaturated darkening. Three cream-tone
     alternatives were rendered side by side and lost. See the boxed note in §8 before re-litigating.
-- **T7** — the trimmed band edge (`D — guillotine + nicks`): ~3px nicks across a **600px tile**,
-  `mask-repeat: repeat-x` so tooth size never scales with the viewport, plus **~24px of new bottom
-  padding** or the edge eats the last line.
-  - **Blocked on a design question, not a build one:** `StripedSeam` already says "this section is
-    taped to the page". Resolve the purpose split first — proposed, not decided: seam for a section
-    that continues, trim for a section that ends.
+- **T7** — the trimmed band edge: **rejected** on #2625. `StripedSeam` already does both jobs: one seam
+  says "the page continues", a flipped pair tapes the section as a discrete package. Nothing to build.
 
 ### Unit 5 — Colour
 
@@ -149,12 +145,11 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 
 ## 3. Gates — sequence these, do not build them first
 
-| Gate                          | Blocks      | Why                                                                                                                                                                                                                        |
-| ----------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **#2598** homepage overflow   | **Y3** only | Ghost numerals depend on `overflow: hidden` clipping rather than overflowing — the exact unresolved defect. Y2 and S1 were the other two exposed moves and both are now rejected, so the blast radius is down to one item. |
-| **M1** Motion section         | **M4, M7**  | Two gestures are not a vocabulary until the rule exists.                                                                                                                                                                   |
-| **`matchstrip-locked.md`**    | **Unit 6**  | Locked component; needs a checkpoint, not an edit.                                                                                                                                                                         |
-| **StripedSeam purpose split** | **T7**      | Two devices answering the same question on the same surface.                                                                                                                                                               |
+| Gate                        | Blocks      | Why                                                                                                                                                                                                                        |
+| --------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **#2598** homepage overflow | **Y3** only | Ghost numerals depend on `overflow: hidden` clipping rather than overflowing — the exact unresolved defect. Y2 and S1 were the other two exposed moves and both are now rejected, so the blast radius is down to one item. |
+| **M1** Motion section       | **M4, M7**  | Two gestures are not a vocabulary until the rule exists.                                                                                                                                                                   |
+| **`matchstrip-locked.md`**  | **Unit 6**  | Locked component; needs a checkpoint, not an edit.                                                                                                                                                                         |
 
 **#2599 (two-line match row) is no longer a gate.** Everything that would have landed on that row
 closed on its own merits: M2 and M10 (no data for "in progress"), M3, S3 (already built), C1

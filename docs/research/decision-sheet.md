@@ -566,7 +566,7 @@ Triaging §1 separately would have counted every idea twice:
 | 4 leader-dot index            | S5 (+ D6 / §5C) |     | 9 ghost numerals    | Y3          |
 | 5 `::selection`               | C6              |     | 10 "verder op p. 4" | D1          |
 
-So the real surface is **§4's 40 ideas plus §5's three signature moves**, with §1 read as a priority
+So the real surface is **§4's 47 ideas plus §5's three signature moves**, with §1 read as a priority
 ordering over them.
 
 ### Two open issues constrain what may be prototyped
@@ -597,9 +597,9 @@ no layout width by construction.
 | --- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | D1  | Two-ink registration — scope (§5A / T1 / §1·3) | **A — none.** `d1-two-ink.html`                                                                         |
 | D2  | Ink temperature (C4)                           | **A — `#0a0a0a` stays.** `d2-warm-ink.html`                                                             |
-| D3  | Which print artefacts survive (T3 / T5 / T7)   | **T3 yes · T5 no · T7 yes.** `d3-print-artefacts.html`                                                  |
+| D3  | Which print artefacts survive (T3 / T5 / T7)   | **T3 yes · T5 no · T7 no.** `d3-print-artefacts.html`                                                   |
 | D3a | Mottle execution                               | **Broad noise, in ink, 9% multiply.** `d3a-mottle.html`                                                 |
-| D3b | Band-edge execution                            | **D — trimmed: guillotine + nicks.** `d3b-torn-edge.html`                                               |
+| D3b | Band-edge execution                            | **Rejected — the seam already does both jobs.** `d3b-torn-edge.html`                                    |
 | D4  | A fluoro accent (C1)                           | **A — no fluoro.** `d4-fluoro.html`                                                                     |
 | D5  | A fifth band ground (T6)                       | **C — one new non-semantic tint.** `d5-tinted-bands.html`                                               |
 | D6  | A colour per team (C5)                         | **C — tone per age band.** `d6-per-item-accent.html`                                                    |
@@ -651,7 +651,7 @@ Two things worth keeping from the exercise:
 - **The seven `--shadow-paper-*` tokens resolve to `var(--color-ink)`**, so an ink change is
   simultaneously a shadow change. No ink proposal can be scoped to text.
 
-**D3 — the paper gets a texture, the band gets an edge, the crest stays clean.**
+**D3 — the paper gets a texture; the band edge and the crest stay clean.**
 
 **The correction that reframed T3: there is no texture on the paper today.**
 `--pattern-paper-grain` is wired into exactly one rule — `.taped-figure::after`, 4% opacity,
@@ -674,22 +674,23 @@ paper a texture for the first time"**, and the speckle layer is as new as the mo
   > `d3a-mottle.html` first; it was considered and rejected on the render, not overlooked.
 
 - **T5 — rejected.** No photocopy degradation on the crest, at any size. §4.1's texture section is
-  now closed apart from the two above.
+  now closed apart from T3 above.
 
-- **T7 — accepted, but as the smallest version: `D — trimmed`.** Not a tear. An effectively straight
-  edge carrying three or four ~3px nicks across a 600px tile: paper cut by a machine that has cut a
-  lot of paper. Two execution fixes are part of the decision, not incidental:
-  1. **The mask tiles at a fixed 600px** (`mask-repeat: repeat-x`) rather than stretching to the
-     element. A stretched mask makes tooth size a function of viewport width — fine teeth on a
-     phone, coarse on a desktop — which is half of why the first attempt read badly.
-  2. **The band needs ~24px of bottom padding it does not have today**, or the edge eats the last
-     line. This is a layout change, not a decoration.
+- **T7 — rejected.** No cut, torn or trimmed band edge. Ruled by the owner on 2026-09-20 against
+  the render ([#2625](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2625)): the smallest
+  version, `D — trimmed` in `d3b-torn-edge.html`, did not blend into the design style. The render
+  stays as the source this was ruled against.
 
-  **Still open, and it is a design question rather than a build one:** `StripedSeam` already says
-  "this section is taped to the page". A cut edge is a second device answering the same question on
-  the same surface. Per the project's own rule — one treatment per _purpose_, not one treatment for
-  everything — the two need different jobs before both ship. The natural split is seam for a section
-  that continues and trim for a section that ends, but that is a proposal, not a decision.
+  The structural reason matters more than the verdict. The proposed split (seam for a section that
+  continues, trim for a section that ends) does not hold, because `StripedSeam` already carries both
+  meanings. One seam between two blocks reads "the page continues, new subject". A flipped pair
+  around a block reads "this is a discrete package, it ends": the `flip` prop exists so "the top and
+  bottom stripes lean toward each other and visually 'tape' the section as a discrete package". The
+  seam alone satisfies one treatment per _purpose_. Giving "ends" to a cut edge would first mean
+  taking it off the seam, which nobody asked for.
+
+  Nothing was built, so nothing is removed. The two execution constraints (the 600px-tiled mask,
+  the ~24px of extra bottom padding) die with it.
 
 **D4 — no fluoro. C1 closes.**
 
@@ -1084,23 +1085,26 @@ section whatever the pixel count says, which is what the Rare Green Rule exists 
 
 ### Coverage — the pass is complete
 
-All 43 items in §1, §4 and §5 are ruled on. §1 needed no separate treatment (it is a ranking of §4
+All 50 items in §4 and §5 are ruled on. §1 needed no separate treatment (it is a ranking of §4
 and §5, as recorded above). §6's sixteen rejections were already reasoned and are untouched.
 
-|               | Accepted                 | Rejected             | Already built     |
-| ------------- | ------------------------ | -------------------- | ----------------- |
-| §4.1 Texture  | T3, T7                   | T1, T2*, T4, T5, T6* | —                 |
-| §4.2 Motion   | M1, M4, M6, M7, M9       | M2, M3, M8, M10      | M5                |
-| §4.3 Colour   | C5, C6                   | C1, C2, C4           | C3 (undocumented) |
-| §4.4 Shape    | S2, S5, S8               | S1, S4, S6, S7       | S3                |
-| §4.5 Delights | D4, D6, D7               | D2, D5, D8, D9       | D1                |
-| §4.6 Type     | Y1, Y4, Y6, Y8           | Y2, Y5, Y7           | —                 |
-| §5 Signatures | B (reduced), C (reduced) | A                    | —                 |
+|               | Accepted                 | Rejected        | Already built     |
+| ------------- | ------------------------ | --------------- | ----------------- |
+| §4.1 Texture  | T2*, T3, T6*             | T1, T4, T5, T7  | —                 |
+| §4.2 Motion   | M1, M4, M6, M7, M9       | M2, M3, M8, M10 | M5                |
+| §4.3 Colour   | C5, C6                   | C1, C2, C4      | C3 (undocumented) |
+| §4.4 Shape    | S2, S5, S8               | S1, S4, S6, S7  | S3                |
+| §4.5 Delights | D4, D6, D7               | D2, D5, D8, D9  | D1                |
+| §4.6 Type     | Y1, Y3, Y4, Y6, Y8       | Y2, Y5, Y7      | —                 |
+| §5 Signatures | B (reduced), C (reduced) | A               | —                 |
 
 \* T2 accepted in altered form (`lighten`, not `multiply`); T6 accepted with a new non-semantic
 token rather than the proposed status tints.
 
-**Fourteen accepted, twenty-three rejected, six already built.**
+**Twenty-three accepted, twenty-three rejected, four already built: fifty items.** Recounted from the
+table on #2625; the earlier tally (fourteen / twenty-three / six of 43) did not add up to it. The
+pattern below names six already-shipped devices because two of them, S1 and §5B's wire strip, also
+sit in the Rejected and Accepted columns.
 
 ### The pattern worth carrying into the spec
 
