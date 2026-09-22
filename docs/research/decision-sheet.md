@@ -566,7 +566,7 @@ Triaging §1 separately would have counted every idea twice:
 | 4 leader-dot index            | S5 (+ D6 / §5C) |     | 9 ghost numerals    | Y3          |
 | 5 `::selection`               | C6              |     | 10 "verder op p. 4" | D1          |
 
-So the real surface is **§4's 40 ideas plus §5's three signature moves**, with §1 read as a priority
+So the real surface is **§4's 47 ideas plus §5's three signature moves**, with §1 read as a priority
 ordering over them.
 
 ### Two open issues constrain what may be prototyped
@@ -1085,23 +1085,26 @@ section whatever the pixel count says, which is what the Rare Green Rule exists 
 
 ### Coverage — the pass is complete
 
-All 43 items in §1, §4 and §5 are ruled on. §1 needed no separate treatment (it is a ranking of §4
+All 50 items in §4 and §5 are ruled on. §1 needed no separate treatment (it is a ranking of §4
 and §5, as recorded above). §6's sixteen rejections were already reasoned and are untouched.
 
-|               | Accepted                 | Rejected                 | Already built     |
-| ------------- | ------------------------ | ------------------------ | ----------------- |
-| §4.1 Texture  | T3                       | T1, T2*, T4, T5, T6*, T7 | —                 |
-| §4.2 Motion   | M1, M4, M6, M7, M9       | M2, M3, M8, M10          | M5                |
-| §4.3 Colour   | C5, C6                   | C1, C2, C4               | C3 (undocumented) |
-| §4.4 Shape    | S2, S5, S8               | S1, S4, S6, S7           | S3                |
-| §4.5 Delights | D4, D6, D7               | D2, D5, D8, D9           | D1                |
-| §4.6 Type     | Y1, Y4, Y6, Y8           | Y2, Y5, Y7               | —                 |
-| §5 Signatures | B (reduced), C (reduced) | A                        | —                 |
+|               | Accepted                 | Rejected        | Already built     |
+| ------------- | ------------------------ | --------------- | ----------------- |
+| §4.1 Texture  | T2*, T3, T6*             | T1, T4, T5, T7  | —                 |
+| §4.2 Motion   | M1, M4, M6, M7, M9       | M2, M3, M8, M10 | M5                |
+| §4.3 Colour   | C5, C6                   | C1, C2, C4      | C3 (undocumented) |
+| §4.4 Shape    | S2, S5, S8               | S1, S4, S6, S7  | S3                |
+| §4.5 Delights | D4, D6, D7               | D2, D5, D8, D9  | D1                |
+| §4.6 Type     | Y1, Y3, Y4, Y6, Y8       | Y2, Y5, Y7      | —                 |
+| §5 Signatures | B (reduced), C (reduced) | A               | —                 |
 
 \* T2 accepted in altered form (`lighten`, not `multiply`); T6 accepted with a new non-semantic
 token rather than the proposed status tints.
 
-**Thirteen accepted, twenty-four rejected, six already built.**
+**Twenty-three accepted, twenty-three rejected, four already built: fifty items.** Recounted from the
+table on #2625; the earlier tally (fourteen / twenty-three / six of 43) did not add up to it. The
+pattern below names six already-shipped devices because two of them, S1 and §5B's wire strip, also
+sit in the Rejected and Accepted columns.
 
 ### The pattern worth carrying into the spec
 
