@@ -508,6 +508,8 @@ A rotated, content-bearing paper stamp that pins over the edge of a card — 14p
 
 A full-bleed 45° two-tone stripe band (12 / 18 / 24 / 28px tall) rendered as an SVG pattern, used as a section rule. Four pairs: ink-cream (default, high contrast), jersey-cream, jersey-tonal-dark, and cream-jersey-deep. The angle can flip so a top and bottom seam lean toward each other and "tape" a section shut.
 
+The seam carries two meanings, and both belong to it. **One seam between two blocks** says "the page continues, new subject". **A flipped pair around a block** says "this is a discrete package, it ends". No second edge device is needed for either (D3b / T7, `docs/research/decision-sheet.md` §8, [#2625](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2625)).
+
 ## The Imageless Card
 
 **A card without a photo shows its own subject's artefact, not a generic texture.** A person (player or staff) takes the jersey-illustration figure; a team takes the shirt; a club (an opponent) takes its crest, contained on `bg-cream-soft`. Two subject kinds have nothing to depict. A document (an article, a page, a gallery, an event) gets the 135° jersey-deep hatch. A nav tile — a destination, not a document, e.g. the pinned nav cards on `/jeugd` — gets the flat `bg-jersey-deep` panel with its Phosphor-fill glyph instead (#2965; see "No Filler Photo, Ever Rule" below): the difference from the hatch is that a nav tile's fallback graduates to a real photo the moment one exists, where a document's hatch never does. One helper, `getCardSubjectArtefact` (`apps/web/src/lib/utils/card-subject-artefact.tsx`), maps subject kind to artefact — nothing enforces that a call site uses it instead of hand-rolling its own no-photo treatment, so treat it as the offered path, not a guarantee. A card learns "render this instead of the hatch" via its `artefact` slot.
@@ -585,6 +587,7 @@ Where a notice is warranted, two more splits apply. **The tier follows the scope
 - **Don't** set `jersey` (`#4acf52`) as a text colour, and don't put it on cream.
 - **Don't** draw a green divider **between repeating rows** — a list, a table, a run of section rules. Rendered and rejected (C2): at that density a line of green hairlines reads as a green section, which the Rare Green Rule forbids. A green hairline **under a heading that labels a group** is allowed and already ships (`SiteFooter`, `HulpFinder`): it marks one boundary, not a rhythm. The test is repetition — if a reader would see two of them stacked, it is green on a run and it is wrong.
 - **Don't** wrap a striped seam or a coloured band in a max-width container.
+- **Don't** add a cut, torn or trimmed band edge. Rendered and rejected (D3b / T7, decision-sheet §8, [#2625](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2625)): the striped seam already says both "the page continues" and "this section ends", so an edge would be a second device for a job that is taken.
 - **Don't** invent a container width outside 680 / 1040 / 1280 (chrome's 1440 is header and footer only).
 - **Don't** pin a Display-size heading's italic accent to a heavy weight — Freight Big Pro has no 900 italic.
 - **Don't** add a new typeface. Freight Sans Pro, Freight Display Pro, Freight Big Pro and IBM Plex Mono are the whole set.
