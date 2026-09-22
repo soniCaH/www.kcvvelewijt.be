@@ -674,7 +674,7 @@ paper a texture for the first time"**, and the speckle layer is as new as the mo
   > `d3a-mottle.html` first; it was considered and rejected on the render, not overlooked.
 
 - **T5 — rejected.** No photocopy degradation on the crest, at any size. §4.1's texture section is
-  now closed apart from the two above.
+  now closed apart from T3 above.
 
 - **T7 — rejected.** No cut, torn or trimmed band edge. Ruled by the owner on 2026-09-20 against
   the render ([#2625](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2625)): the smallest
