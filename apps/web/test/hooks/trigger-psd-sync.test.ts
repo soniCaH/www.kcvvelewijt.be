@@ -21,7 +21,13 @@
  * and nothing real is synced.
  */
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -89,11 +95,8 @@ let seq = 0;
  * Ask the OS for a free port, then release it. A base port plus a counter
  * handed every Vitest process the same four numbers, so two worktrees in a
  * wave bound the same ports and one lost with `EADDRINUSE` (#3109). The lint
- * rule against fixed ports cannot see a port passed to the stub through argv,
- * so keep it OS-assigned here.
- *
- * Binds with no host, like the stub, so the probe checks the same dual-stack
- * address the stub will take.
+ * rule cannot see a port passed through argv, so this stays OS-assigned. No
+ * host, like the stub, so the probe checks the same dual-stack address.
  * ponytail: the port is free when checked, not reserved. Another process can
  * take it before the stub binds; the OS hands out ephemeral ports in rotation,
  * so this is rare. If it bites, have the stub listen on 0 and the script read
@@ -137,7 +140,10 @@ async function run(args: string[]) {
       TRIGGER_PSD_SYNC_LOG: logPath,
     },
   });
-  return { ...result, hitsFile, logPath };
+  // The stub's own errors (`EADDRINUSE`) land only in this log. A refused
+  // argument exits before the script creates it.
+  const log = existsSync(logPath) ? readFileSync(logPath, "utf8") : "";
+  return { ...result, hitsFile, log };
 }
 
 function hitsOf(hitsFile: string) {
@@ -147,8 +153,7 @@ function hitsOf(hitsFile: string) {
 describe("trigger-psd-sync.sh", () => {
   it("requests /__scheduled exactly once — the readiness probe never fires the cron (#2890)", async () => {
     const r = await run(["0"]);
-    // The stub's own errors (`EADDRINUSE`) live only in this log.
-    expect(r.status, readFileSync(r.logPath, "utf8")).toBe(0);
+    expect(r.status, r.log).toBe(0);
 
     const hits = hitsOf(r.hitsFile);
 
@@ -163,14 +168,14 @@ describe("trigger-psd-sync.sh", () => {
 
   it("names the target dataset before it writes, so production is never a surprise", async () => {
     const r = await run(["0"]);
-    expect(r.status, readFileSync(r.logPath, "utf8")).toBe(0);
+    expect(r.status, r.log).toBe(0);
     expect(r.stdout).toContain("Sanity dataset :");
     expect(r.stdout).toContain("fixture mode — skipping the KV cursor write");
   });
 
   it("summarises what actually committed, players and staff counted separately (#2895)", async () => {
     const r = await run(["0"]);
-    expect(r.status, readFileSync(r.logPath, "utf8")).toBe(0);
+    expect(r.status, r.log).toBe(0);
     expect(r.stdout).toContain("processing team 1/21: 1 (Test Team)");
     expect(r.stdout).toContain("team 1: 3 players, 1 staff");
     expect(r.stdout).toContain("images committed        : players 2, staff 1");
