@@ -64,9 +64,10 @@ export interface FeaturedEventBandProps {
  * The held-open dark-ground notice for a failed read. Not routed through
  * `<EmptyState tier="slot" reason="unavailable">` — that register is
  * ink-only (`border-ink/30` frame, `text-ink-soft` body, a `text-jersey-deep`
- * accent span with no prop to swap it) and is explicitly documented as wrong
- * on a dark-green band (`EmptyState.tsx`'s own file docblock, "parked: the
- * dark-ground slot register"); `jersey-deep` is this band's own background.
+ * accent span with no prop to swap it), and stays that way by design on a
+ * dark-green band: the decided dark-ground answer is `HELD_OPEN_FRAME`
+ * instead (#3103; see `EmptyState.tsx`'s own file docblock). `jersey-deep`
+ * is this band's own background.
  * `<FirstTeamsBlock>` — the band directly above this one on the homepage
  * spine, on the same dark-green family (`jersey-deep-dark`) — solves the
  * identical problem, so this notice imports its `HELD_OPEN_FRAME` constant

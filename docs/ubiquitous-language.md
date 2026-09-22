@@ -408,6 +408,18 @@ The Studio-authored content that lets an editor fill the homepage "Eerste ploege
 
 **Render rule:** read only on `<FirstTeamsBlock>`'s no-rows path, and only when the match read did not fail — a failed read (`unavailable`) always wins and suppresses this notice, image included, so an outage never claims the feed is merely empty.
 
+### Held-Open Frame
+
+The dashed `border-cream/40` frame a homepage dark band draws in place of a missing slot, so the band keeps its height on a failed or empty read — the dark-ground counterpart of `<EmptyState tier="slot">`'s own ink-only register.
+
+| Code              | Notes                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `HELD_OPEN_FRAME` | `apps/web/src/components/home/FirstTeamsBlock/FirstTeamsBlock.tsx` — the one constant, imported verbatim, never hand-copied |
+
+**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) and `FeaturedEventBand` (`jersey-deep` band) both import this same export rather than each hand-rolling their own dashed frame.
+
+**Distinct from `<EmptyState>`'s tiers**, which stay ink-only by decision — `<EmptyState tier="slot">` does not grow a matching dark axis for two callers on one homepage ([#3103]). Reopen only if a dark consumer appears off the homepage.
+
 ### Responsibility
 
 A help/guidance topic that directs users to the right contact person. Displayed at `/hulp`.
@@ -604,3 +616,4 @@ Each content type has its own visibility logic. There is no universal "published
 [#2801]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2801
 [#2802]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2802
 [#2924]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2924
+[#3103]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/3103

@@ -70,28 +70,25 @@ export interface FirstTeamsBlockProps {
 }
 
 /**
- * The held-open dashed frame — #2427's tier-2 register: an empty slot inside a
- * populated page keeps its shape so the absence reads as a known gap rather
- * than a render failure. Shared by the per-slot `<SkipCard>` and the whole-band
- * notice so the two can't drift, the way `FIRST_TEAMS_ROW_GRID` is below —
- * and exported for the same reason `FIRST_TEAMS_ROW_GRID` is: `<
- * FeaturedEventBand>`'s own dark-ground notice (`jersey-deep`, #2944) reuses
- * this constant rather than hand-rolling a third copy of the same utility
- * string. Import it via `@/components/home/FirstTeamsBlock`, not by copying
- * the value.
+ * The held-open frame for the homepage's dark grounds — an empty slot inside
+ * a populated dark band keeps its shape so the absence reads as a known gap
+ * rather than a render failure, the dark-ground counterpart of `<EmptyState
+ * tier="slot">`'s own ink-only register. Shared by the per-slot `<SkipCard>`
+ * and the whole-band notice so the two can't drift, the way
+ * `FIRST_TEAMS_ROW_GRID` is below — and exported for the same reason
+ * `FIRST_TEAMS_ROW_GRID` is: `<FeaturedEventBand>`'s own dark-ground notice
+ * (`jersey-deep`, #2944) reuses this constant rather than hand-rolling a
+ * third copy of the same utility string. Import it via
+ * `@/components/home/FirstTeamsBlock`, not by copying the value.
  *
- * **Parked: this is the dark-ground register `<EmptyState>` tier "slot"
- * doesn't have yet (#2690/#2804).** `<EmptyState tier="slot">` is ink-only
- * (`border-ink-muted` / `border-ink bg-cream-soft`) — both wrong on a
- * dark-green ground. This file is the one place that would adopt a dark axis
- * if `<EmptyState>` grew one; see the admission-rule/parked note in
- * `EmptyState.tsx`'s own docblock for the other end of this hand-off.
- * **Not migrated here** — that is #2402's call. `SkipCard` `text-cream/65`,
- * band note `text-cream/80` stay this file's own (not exported — only the
- * frame itself is shared). VR guard to name: this file's `NoMatches`,
- * `FeedUnavailable` and the five `Placeholder*` stories, plus
- * `FeaturedEventBand`'s own `FeedUnavailable` story — three viewports each —
- * ink-on-dark-green would be a loud diff.
+ * **This is the decided dark-ground answer (#3103)**, not a stand-in for a
+ * dark axis on `<EmptyState tier="slot">` — that tier stays ink-only by
+ * design; see `EmptyState.tsx`'s own docblock for the other end of this
+ * hand-off. `SkipCard` `text-cream/65`, band note `text-cream/80` stay this
+ * file's own (not exported — only the frame itself is shared). VR guard to
+ * name: this file's `NoMatches`, `FeedUnavailable` and the five
+ * `Placeholder*` stories, plus `FeaturedEventBand`'s own `FeedUnavailable`
+ * story — three viewports each — ink-on-dark-green would be a loud diff.
  */
 export const HELD_OPEN_FRAME =
   "border-cream/40 border-2 border-dashed text-center";
