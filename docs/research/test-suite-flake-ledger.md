@@ -4,6 +4,11 @@
 > [Test suite walk map (#3078)](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3078).
 > Measured 2026-09-22 against `main` at `ec15a8a8`. Nothing here is decided — this is the evidence
 > the tool and policy decisions stand on.
+>
+> **Revised the same day**, at the owner's request, on two points: the issue queue is now swept in
+> full (1 090 issues) instead of by keyword, and [#3077](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3077)
+> — the one **open, `ready`** testing ticket — gets its own section on what the measurement changes
+> about its brief.
 
 ## Method
 
@@ -16,9 +21,17 @@ Three sources, in this order:
 2. **Green runs.** Playwright reports a test that fails then passes as `flaky` and still exits 0, so
    the twelve most recent **successful** `e2e.yml` runs on `main` were downloaded in full and grepped
    for `retry #1` / `flaky`.
-3. **Issues.** Every issue matching `flake`, `flaky`, `non-deterministic`, `timeout`, `re-run`,
-   `intermittent`, plus the Evidence list in the map's Notes. Each fix claim was checked against the
-   file it claims to have changed.
+3. **The whole issue queue.** All **1 090** issues (69 open, 1 021 closed) were pulled with their
+   titles and labels and swept locally on 18 terms — `test`, `e2e`, `playwright`, `vitest`,
+   `storybook`, `visual regression`, `baseline`, `snapshot`, `main is red`, `check-all`, `happy-dom`,
+   `jsdom`, `coverage`, `deterministic`, `fixture`, `flake`, `flaky`, `retry` — plus every issue
+   carrying the `ci-failure` label. That yielded **120** testing-related issues. Each fix claim was
+   then checked against the file it claims to have changed.
+
+   > A first pass searched only seven words (`flake`, `flaky`, `non-deterministic`, `timeout`,
+   > `re-run`, `intermittent`) and **missed five issues**, including one that had already filed a row
+   > of this ledger (#3096) and two of the three `main is red` incidents. The full sweep is what the
+   > numbers below rest on.
 
 **A caution this method earned.** A visual-regression failure on a feature branch is usually a *real*
 diff, not a flake. Three recent VR reds were opened and read — `CalendarWidget › Route Skeleton` at
@@ -30,6 +43,8 @@ commit** counts as a flake below.
 
 | Measure | Value |
 | --- | --- |
+| Flakes recorded | **24** |
+| Testing-related issues swept | 120 (of 1 090 in the queue) |
 | Green `e2e.yml` runs on `main` that hid a retry | **7 of 12** (58 %) |
 | Of those, `OrganigramSectionNav on /hulp` | **6 of 7** |
 | `e2e.yml` runs re-run by hand since 2026-06-01 | 8 (7 went green on attempt 2) |
@@ -38,8 +53,10 @@ commit** counts as a flake below.
 | Classes with at least one live member | **8** (B, C, G, H, I, J, K, L) |
 | Classes fully closed by a named fix | 3 (D, E, F); A is mitigated only |
 
-Two of the live classes have never been filed as an issue: the `next build` prerender fetch, and the
-Cloudflare deploy step. Both turn `ci.yml` red on `main`.
+**All three `main is red` incidents ever filed were flakes, not regressions.** #2883 (2026-09-09)
+and #3017 (2026-09-18) were both `next build` failing on a live Sanity read; #3094 (2026-09-21) was
+one Storybook story stalling past jest's 120 s cap. Each auto-closed when `main` went green again, so
+none of them left a root-cause ticket behind — which is why class H had no issue until this ledger.
 
 ## The ledger
 
@@ -52,22 +69,25 @@ exists but is bounded. **fixed** = the cause is gone.
 | 2 | `routes.spec.ts › static routes › /kalender` — `page.goto` exceeds the 30 s test timeout | E2E | 2026-09-14 ([run 34815386797](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/34815386797)) | A — live data, cold render | **mitigated** ([#2977](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2977), [#2985](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2985)) | Three re-runs in 36 h (09-14 ×2, 09-15); `gotoBounded` now bounds the `load` wait. No recurrence in the sampled window |
 | 3 | `routes.spec.ts › dynamic routes › /wedstrijd/[matchId]` | E2E | 2026-09-14 | A — live data, cold render | **mitigated** ([#2977](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2977)) | Logged in #2977's evidence table; same fix as row 2 |
 | 4 | `scroll-arrows.spec.ts:315 › HorizontalSlider (RelatedRow) on /nieuws/[slug]` | E2E | 2026-09-21 ([run 35657013551](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/35657013551)) | B — measurement races layout | **live**, unfiled | Retried once in the sampled green runs; passed on retry, so it never showed in the checks list |
-| 5 | `EditorialHero › Transfer Extension › smoke-test` — jest's 120 s per-test cap blown in the VR runner | VR | 2026-09-21 ([run 35666231670](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/35666231670)) | G — VR runner stall | **live**, unfiled | Turned `main` red and auto-filed [#3094](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3094); attempt 2 on the same commit passed 3041/3042 snapshots |
+| 5 | `EditorialHero › Transfer Extension › smoke-test` — jest's 120 s per-test cap blown in the VR runner | VR | 2026-09-21 ([run 35666231670](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/35666231670)) | G — VR runner stall | **live**; no root-cause issue — only the auto-filed [#3094](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3094), auto-closed on the next green | Turned `main` red; attempt 2 on the same commit passed 3041/3042 snapshots |
 | 6 | Six unrelated baselines drift 0.17–0.84 % (`EditorialHubCard` ×5, `OpponentSummaryCard`) | VR | 2026-09-04 ([run 33850598103](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/33850598103)) | D — font swap races the capture | **fixed** ([#2834](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2834), closed 2026-09-17) | Same commit, attempt 2 green, and no baseline-update run touched the branch in between. `test-runner.ts` now runs `waitForFontsSettled` (a capped `fonts.load` pass, then `fonts.ready` as a backstop). No sub-1 % drift seen after 09-17 |
 | 7 | Every mono element screenshotted in a substitute face | VR | before 2026-09-20 | D — font never loaded in Storybook | **fixed** ([#3030](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3030), closed 2026-09-20) | Storybook loaded Typekit only; IBM Plex Mono comes from `next/font` in a layout Storybook never renders |
 | 8 | `SearchForm` stories screenshot with or without the `autoFocus` ring | VR | 2026-09-20 | E — focus state is an environment property | **fixed** ([#3033](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3033), closed 2026-09-21) | The ring depended on whether the headless page held focus, and on landing mid-`transition-shadow` |
 | 9 | `NewsGrid --tablet` baselines diff ~1.6 % on PRs that do not touch NewsGrid | VR | 2026-04 | F — image load/decode races the shot | **fixed** ([#1731](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1731), closed 2026-05-12) | Baseline re-capture reported `1527/1527 pass, 0 updated`. Fix: blur-up placeholder off in Storybook + `await img.decode()` per image |
 | 10 | A remote placeholder image 503s during capture and a broken baseline is committed as truth | VR | 2026-04 | F — third-party image host | **fixed** ([#1704](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1704)) | Remote `placehold.co`/Picsum URLs replaced by a Sanity-sourced local fixture pool |
 | 11 | `sitemap.test.ts`, `canonical-urls.test.ts`, `metadata.test.ts` blow a 5 s budget on module import and live network I/O | Vitest | 2026-08 | C — work outside the test body, charged to the timeout | **fixed** ([#2362](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2362) → [#2367](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2367) → [#2378](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2378)) | #2362's natural experiment: same module, top-level import 21 ms vs in-body import most of 5 000 ms. Closed by hoisting the last 6 sites and an eslint rule that forbids the pattern |
-| 12 | `next build` fails prerendering `/nieuws/[slug]` — `Sanity fetch failed: TypeError: fetch failed` | CI build | 2026-09-08 ([run 34212702776](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/34212702776)) | H — build-time live network | **live**, unfiled | Attempt 2 on the same commit built clean |
+| 12 | `next build` fails prerendering a route — `Sanity fetch failed` — three times: `TypeError: fetch failed` on a PR (2026-09-08), the same on `main` (2026-09-09), `HTTP 503 Service Unavailable` on `main` (2026-09-18) | CI build | 2026-09-08 ([run 34212702776](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/34212702776)) | H — build-time live network | **live**; no root-cause issue — only the auto-filed [#2883](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2883) and [#3017](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3017), both auto-closed on the next green | Attempt 2 on the same commit built clean ([34212702776](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/34212702776)). #2982's own verification pass reached the same verdict for [35318911017](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/35318911017): "not a test flake… an upstream 503" |
 | 13 | `Deploy to Cloudflare Workers (staging)` — Cloudflare API returns an error | CI deploy | 2026-09-05 ([run 33966123182](https://github.com/soniCaH/www.kcvvelewijt.be/actions/runs/33966123182)) | I — third-party API transient | **live**, unfiled | Attempt 2 deployed clean |
 | 14 | `packages/sanity-studio` had a test red on `main` since 2026-07-02 with CI fully green | CI coverage | 2026-07-02 | J — the green light does not cover the code | **fixed** ([#2735](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2735), closed 2026-08-27) | `ci.yml` ran lint, type-check and build for the Studio, but no tests |
 | 15 | A `flaky` E2E test exits the job 0 and nothing says so | CI reporting | 2026-09-15 | J — the green light hides its own condition | **mitigated** ([#2971](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2971)) | `retries: 1` is still set (`playwright.config.ts:17`); a `github-summary.ts` reporter now prints the condition, but the check itself is still green |
 | 16 | 31 `test.skip` data guards silently drop E2E coverage when the dataset is thin | E2E coverage | 2026-09-15 | J — the green light covers less than it claims | **live** | Counted today: `homepage` 7, `section-nav` 6, `scroll-arrows` 6, `routes` 5, `evenementen` 3, `wedstrijden` 3, `article-detail` 1 |
-| 17 | Turbo's `test` task does not hash `apps/web/test/**` | CI caching | 2026-09-22 | J — a cached green can be stale | **live**, unfiled | `turbo.json` line 21: `"inputs": ["src/**", "tests/**", "vitest.config.*"]` — the E2E and reporter sources live in `test/`, singular |
+| 17 | Turbo's `test` task hashes neither `apps/web/test/**` nor `.husky/**`, so a cached green can skip changed tests | CI caching | 2026-09-22 | J — a cached green can be stale | **live** ([#3096](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3096), open, `needs-triage`) | `turbo.json` line 21: `"inputs": ["src/**", "tests/**", "vitest.config.*"]` — the E2E and reporter sources live in `test/`, singular. #3096 measured 0 of 1 253 hashed inputs under `test/` |
 | 18 | Five parallel `docker compose run --build` calls on a stale VR image froze ~16 min at 0 % CPU | Local wave | 2026-09-21 | K — shared Docker lane, no gate | **live**, unfiled | One serial build afterwards finished in ~8 min (wave evidence, map Notes) |
 | 19 | `SearchInterface.test.tsx` (StrictMode timing) fails under sibling agents' `check-all`, passes alone | Local wave | 2026-09-21 | C — CPU contention against a `waitFor` budget | **live**, unfiled, not yet reproduced under a controlled contention test | Reported independently by two wave agents. The file does use `StrictMode` + four `waitFor` blocks, which is the shape #2362 described |
 | 20 | `vr -u` accepts sub-threshold diffs and leaves stale baselines; parallel captures add sub-pixel noise to unrelated baselines | Local wave / VR | 2026-09-21 | K — shared CPU during capture | **live**, unfiled | Wave evidence, map Notes |
+| 22 | `apps/api` has a `lint` script that runs nowhere — not in `ci.yml`, not in `lint-staged` — and fails locally on a stale `.bin/eslint` shim | CI coverage | 2026-09-22 | J — the green light does not cover the code | **live** ([#3097](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3097), open, `needs-triage`) | `ci.yml` lints `@kcvv/web`, `@kcvv/studio` and `@kcvv/sanity-studio` only; `apps/api/package.json` declares no `eslint` dependency |
+| 23 | Nothing lints, type-checks or tests anything under `scripts/` | CI coverage | 2026-09-21 | J — the green light does not cover the code | **live** ([#3056](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3056), open) | `pnpm-workspace.yaml` lists only `apps/*` and `packages/*`, so no `scripts/*` package is a workspace member and `turbo`/`check-all`/CI never reach it |
+| 24 | `section-nav.spec.ts`'s "cold load with a hash" test never cold-loaded — a `goto` differing only in its hash is a same-document navigation, so it exercised the wrong branch | E2E | 2026-09-16 | J — a test that cannot fail | **fixed** ([#2993](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2993), closed 2026-09-17) | The test now plants a `window.__coldLoadSentinel`, navigates to `about:blank`, and **asserts** the sentinel is gone — proof of a genuine cross-document load, not an assumption |
 | 21 | happy-dom gaps met in one day: `matchMedia` ignores width, `hashchange` never fires, `background-color: color-mix()` is dropped | Vitest | 2026-09-21 | L — test environment is not the browser | **live**, unfiled | Wave evidence, map Notes. Each one forces a test to be written around the environment instead of the behaviour |
 
 ## The classes
@@ -93,6 +113,7 @@ throttle** — row 1 has since failed on unthrottled CI at 7.5 s, twice in one e
 
 - Members: rows 1 (worst offender in the whole suite), 4.
 - This is the single biggest source of noise: 6 of 7 hidden retries.
+- Open ticket: [#3077](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3077) — see below.
 
 ### C — Work outside the test body, charged to the timeout (Vitest)
 
@@ -128,14 +149,19 @@ story mounting and the shot.
 A story that never settles burns jest's 120 s per-test cap and takes `main` red with it. Distinct
 from D/E/F: there is no pixel diff at all, the capture never happens.
 
-- Member: row 5. **Live and unfiled** — it fired 2026-09-21 and auto-opened `main is red` (#3094).
+- Member: row 5. **Live.** It fired 2026-09-21, auto-opened `main is red` (#3094), and that issue
+  auto-closed on the next green — so no ticket carries the cause.
 
 ### H — The build reaches the live network (CI)
 
-`next build` prerenders `/nieuws/[slug]` by fetching Sanity. One transient `fetch failed` fails the
-build. `check-all` includes `next build`, so this is a test-suite problem, not only a deploy one.
+`next build` prerenders routes by fetching Sanity. One transient `fetch failed` or `HTTP 503` fails
+the build. `check-all` includes `next build`, so this is a test-suite problem, not only a deploy one.
 
-- Member: row 12. **Live and unfiled.**
+- Member: row 12, seen three times (2026-09-08 on a PR, 2026-09-09 and 2026-09-18 on `main`).
+- **This is the single biggest cause of a red `main`** — two of the three `main is red` incidents
+  ever filed. Both auto-closed on the next green, which is exactly why the class stayed invisible.
+- #2982's verification pass already read the 2026-09-18 one correctly ("not a test flake… an
+  upstream 503") — and then closed, because its acceptance criterion was about E2E, not the build.
 
 ### I — Third-party API transient (CI)
 
@@ -146,11 +172,16 @@ on work that has nothing to do with the Worker.
 
 ### J — The green light does not mean what it says (CI)
 
-Four independent ways for a green check to cover less than it claims: a workspace whose tests never
-run, a retry that turns a failure into silence, a thin dataset that skips the test, and a cache key
-that misses the directory the tests live in.
+Seven independent ways for a green check to cover less than it claims: a workspace whose tests never
+run, a retry that turns a failure into silence, a thin dataset that skips the test, a cache key that
+misses the directory the tests live in, a lint script wired to nothing, a whole `scripts/` tree
+outside the workspace, and a test that cannot fail.
 
-- Members: rows 14 (fixed), 15 (mitigated), 16 (live), 17 (live).
+- Members: rows 14 (fixed), 15 (mitigated), 16 (live), 17 (live, #3096), 22 (live, #3097),
+  23 (live, #3056), 24 (fixed, #2993).
+- This is the **largest** class by member count, and the one the `main is red` issues belong to as a
+  reporting failure: an auto-filed issue that auto-closes on the next green records that CI was red,
+  never why.
 - Feeds: [Grilling: the flake policy](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3089) and
   [Grilling: what does each test layer promise, and what must a red check mean?](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3086)
 
@@ -169,6 +200,35 @@ happy-dom gaps that force tests to be written around the environment rather than
 - Member: row 21. **Live and unfiled.**
 - Feeds: [Research: fast, isolated Vitest in a Turborepo monorepo](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3083)
 
+## #3077 is the one open ticket this ledger re-scopes
+
+[#3077](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3077) is **open** and labelled `bug` +
+`ready` — so the AFK queue can pick it up as written. As written, it describes **one** failure: PR
+#3069's run failed, a plain re-run went green. The measurement says something stronger, and an agent
+briefed on the issue alone would aim at the wrong thing:
+
+| #3077 says | The ledger measures |
+| --- | --- |
+| "flakes on CI" | Fails its **first** attempt in roughly half of all `main` E2E runs |
+| One sighting (2026-09-21) | Five workflow re-runs in three weeks — 09-04, 09-15, 09-18, 09-21 ×2 — plus 6 retried-but-green runs in the last 12 sampled |
+| "passed on rerun" | It fails on the **retry too**. Only a fresh workflow run clears it. `retries: 1` does not cover it |
+| Implicitly a test-level fix | #3002 already fixed the animation race **and** a real ordering bug in `useSectionNav`; #3003 then measured that what remains is the test's own 5 s budget racing hydration, and closed on "CI never throttles" |
+
+**The two things the ledger adds to its brief:**
+
+1. **#3003's closing reason no longer holds.** It closed because CI never applies a ×20 CPU
+   throttle. CI does not need to: row 1 has since failed on unthrottled CI at 7.5 s, twice in one
+   evening, on both tries. Any brief that cites #3003 as "settled" is citing a stale conclusion.
+2. **It is not "a flake", it is a broken test.** A ~50 % first-attempt failure rate is not noise
+   around a working assertion. Whatever is decided in
+   [Grilling: the flake policy](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3089) — quarantine,
+   a deterministic wait, or moving the assertion down a layer as
+   [#3085](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3085) proposes (geometry specs to
+   Storybook `play`) — row 1 is the case it has to answer first.
+
+Row 4 (`scroll-arrows.spec.ts:315`) is the same class and has no ticket. Anything done for #3077
+should be checked against it before it is called done.
+
 ## What this ledger changes
 
 1. **Row 1 is not "a flake", it is a broken test.** It failed on both tries five times in three
@@ -176,8 +236,32 @@ happy-dom gaps that force tests to be written around the environment rather than
    the noisiest test starts here.
 2. **`retries: 1` is load-bearing and invisible.** Without it, 7 of the last 12 `main` E2E runs go
    red. That is the honest number for the current suite.
-3. **Three live classes have no issue at all** (G, H, I), plus rows 4, 17, 19, 20 and 21. The flake
-   history undercounts itself, because a flake that clears on re-run leaves no artifact behind
-   unless someone reads the log.
-4. **The classes that ended, ended with a rule, not a retry** — #2378's eslint rule (C), #1704's
-   local fixture pool (F), #2735's missing CI step (J). None of them ended with a raised timeout.
+3. **The flake history undercounts itself.** Rows 4, 19, 20 and 21 have no issue at all; classes G,
+   H and I have only auto-filed `main is red` issues that auto-closed on the next green, recording
+   *that* CI was red and never *why*. A flake that clears on a re-run leaves no artifact behind
+   unless somebody reads the log — so the issue queue is a **lagging** record of the suite's
+   condition, not a complete one. A first, keyword-only pass over that queue missed five issues.
+4. **Every class that actually ended, ended with a rule, not a retry** — #2378's eslint rule (C),
+   #1704's local fixture pool (F), #2735's missing CI step (J), and the same shape again in
+   #2658 (one eslint entry plus one `globals.css` test for the motion vocabulary), #2803 (a VR story
+   that scopes its viewport must declare it in `vr.viewports`) and #2865 (the repository-orphan guard
+   extended to projected VM fields). None of them ended with a raised timeout.
+
+## Adjacent, found by the sweep, not flakes
+
+The full queue sweep surfaced these. They are real, they are testing work, and they belong in the
+map's **Not yet specified → Coverage gaps**, not in a flake ledger — a missing story is not a
+non-deterministic one.
+
+- **Missing VR coverage of a branch that exists**: [#2884](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2884)
+  (`CalendarWidget` has no played-match story, so its score branch is never captured),
+  [#2978](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2978) (`CalendarMonth` never renders a
+  reservation/reduced-match pip), [#2861](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2861)
+  (a CMS-independent guard that the standings table overflows on mobile).
+- **Baseline churn after a design change**: [#2771](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2771)
+  — recapture every `EditorialHeading` consumer as #2769 fallout. Cost, not noise.
+- **Environment history**: [#2168](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2168) dropped
+  jsdom, which is how the suite arrived at happy-dom and therefore at class L.
+- **CI cost**: [#1707](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1707) cached the pnpm
+  store — input for
+  [Grilling: speed and cost budgets](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3091).
