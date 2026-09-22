@@ -1,14 +1,32 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { SANITY_TAGS } from "@/lib/sanity/cache-tags";
 
 /**
+ * How long to wait before revalidating (#2959). Our reads go through Sanity's
+ * API CDN (`useCdn: true`), which can answer a query it served recently with
+ * the pre-publish result for up to ~75 s (`max-age=60`,
+ * `stale-while-revalidate=15`). A regeneration inside that window re-caches
+ * the OLD page for its whole `revalidate`: 1 h, or 24 h on `/staf` and
+ * `/galerij`. Measured on `/hulp`, 2026-09-22: the hook landed 1 s after the
+ * publish and the page still rebuilt stale 36 s later.
+ *
+ * Once, late — not "now and again later": Next dedupes a repeat revalidate of
+ * the same tag within one request, so a second call in `after()` would
+ * silently do nothing.
+ */
+const REVALIDATE_DELAY_SECONDS = 90;
+
+/** The deferred revalidation keeps the function alive past the response. */
+export const maxDuration = 120;
+
+/**
  * Sanity → Next.js on-demand revalidation (issue #1921, Scope E). A Sanity
  * webhook POSTs here on publish/delete; we verify its HMAC signature and
  * revalidate the affected paths + content tags so editor changes appear
- * immediately despite the long ISR intervals (Scope A) and tagged repo caches
- * (Scope B).
+ * within ~90 s (see `REVALIDATE_DELAY_SECONDS`) despite the long ISR intervals
+ * (Scope A) and tagged repo caches (Scope B).
  *
  * The webhook itself is configured by hand in the Sanity console — see the
  * issue's "Scope E manual step" for the exact URL / projection / secret.
@@ -166,14 +184,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, revalidated: false, type });
   }
 
-  for (const path of target.paths) revalidatePath(path);
-  // Next 16 requires a cache-life profile; "max" is the documented value for
-  // an on-demand purge from a route handler (updateTag is Server-Action only).
-  for (const tag of target.tags) revalidateTag(tag, "max");
+  // Sanity gets its 200 now; the bust lands once the API CDN window has passed.
+  after(async () => {
+    await new Promise((resolve) =>
+      setTimeout(resolve, REVALIDATE_DELAY_SECONDS * 1000),
+    );
+    for (const path of target.paths) revalidatePath(path);
+    // Next 16 requires a cache-life profile; "max" is the documented value for
+    // an on-demand purge from a route handler (updateTag is Server-Action only).
+    for (const tag of target.tags) revalidateTag(tag, "max");
+  });
 
   return NextResponse.json({
     ok: true,
     revalidated: true,
+    inSeconds: REVALIDATE_DELAY_SECONDS,
     type,
     paths: target.paths,
     tags: target.tags,
