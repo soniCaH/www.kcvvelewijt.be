@@ -121,6 +121,9 @@ jobs:
       - name: Run tests
         run: npx turbo test --filter=@kcvv/web -- --coverage
 
+      - name: Lint API
+        run: npx turbo lint --filter=@kcvv/api
+
       - name: Type check API
         run: npx turbo type-check --filter=@kcvv/api
 
