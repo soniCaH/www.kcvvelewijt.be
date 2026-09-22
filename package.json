@@ -41,7 +41,7 @@
     "apps/web/**/*.{json,md,yml,yaml}": [
       "prettier --write"
     ],
-    "apps/api/**/*.{js,ts}": [
+    "apps/api/**/*.{js,mjs,ts}": [
       "eslint --fix --config apps/api/eslint.config.mjs",
       "prettier --write"
     ],
