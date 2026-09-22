@@ -13,7 +13,7 @@
   .lede { max-width:760px; color:var(--muted); margin:0 0 28px; }
   section { border:2px solid var(--ink); box-shadow:6px 6px 0 var(--ink); background:#fff9ee; padding:20px; margin:0 0 36px; }
   section.pick { border-color:var(--deep); box-shadow:6px 6px 0 var(--deep); }
-  section.reject { opacity:.85; }
+  section.reject { border-color:var(--edge); box-shadow:6px 6px 0 var(--edge); }
   .tag { display:inline-block; font:700 12px/1 ui-monospace, Menlo, monospace; letter-spacing:.08em; text-transform:uppercase; padding:6px 8px; border:2px solid var(--ink); margin-bottom:10px; }
   .pick .tag { background:var(--deep); color:#fff; border-color:var(--deep); }
   .reject .tag { background:var(--alert); color:#fff; border-color:var(--alert); }
@@ -44,14 +44,14 @@
     <span class="tag">Already decided — not the question</span>
     <h2>Every article already ends the same way</h2>
     <p class="says">Text → <code>EINDE ARTIKEL</code> → credits (interviews) → <strong>“Blijf nog even hangen.”</strong> row → footer. Decided in #2443 and built. The empty endings this ticket complained about are gone — the interview now ends like this too:</p>
-    <div class="shots"><figure class="w390"><figcaption>390px — interview, today</figcaption><img src="end-interview.png" alt=""></figure></div>
+    <div class="shots"><figure class="w390"><figcaption>390px — interview, today</figcaption><img src="end-interview.png" alt="The interview article's ending on a phone: the last answer, a '💚🤍 #KCVVE' sign-off, the EINDE GESPREK closer, the credits (door Kevin, met Vincent Haegeman, 27 april 2026), then the 'Blijf nog even hangen.' row with a news card."></figure></div>
   </section>
 
   <section>
     <span class="tag">Today — the real problem</span>
     <h2>The one thing we want a parent to do is a raw web address</h2>
     <p class="says"><code>Inschrijven kan via deze link: https://forms.gle/LXxf2Sd25rvpM14FA</code> — small green text. In the last 15 months, 2 of 9 articles were recruitment (<em>Meetrainen…</em>, <em>Word trainer…</em>). Recruiting players and volunteers is the site's first goal. Editors have no button block today — only inline text links.</p>
-    <div class="shots"><figure class="w390"><figcaption>390px — today</figcaption><img src="end-meetrainen.png" alt=""></figure></div>
+    <div class="shots"><figure class="w390"><figcaption>390px — today</figcaption><img src="end-meetrainen.png" alt="The recruitment article's ending on a phone today: after a 'Planning' link, the line 'Inschrijven kan via deze link:' followed by a bare forms.gle web address in small green text, then EINDE ARTIKEL and the 'Blijf nog even hangen.' row."></figure></div>
   </section>
 
   <div class="twin">
@@ -59,7 +59,7 @@
     <span class="tag">Option 1 — my pick</span>
     <h2>An optional “call to action” band, filled in by the editor</h2>
     <p class="says">The same green band the youth, sponsor and membership pages already use (<code>CtaBand</code>). An article gets at most one, and only if the editor fills it in: a question, one line, a button label, a link. It sits after the credits, before “Blijf nog even hangen.”</p>
-    <div class="shots"><figure class="w390"><figcaption>390px</figcaption><img src="cta-A-390.png" alt=""></figure></div>
+    <div class="shots"><figure class="w390"><figcaption>390px</figcaption><img src="cta-A-390.png" alt="Option 1 on a phone: after EINDE ARTIKEL, a full-width dark green band with a striped top edge asks 'Kom eens gratis meetrainen?', gives one line of text and a yellow 'Schrijf je in' button; the 'Blijf nog even hangen.' row follows."></figure></div>
     <ul class="facts">
       <li class="good">A big, clear button for the one action — for an older supporter on a phone.</li>
       <li class="good">No new look: an existing band, used on 5 pages.</li>
@@ -72,7 +72,7 @@
     <span class="tag">Option 2</span>
     <h2>No new field — write a proper link sentence</h2>
     <p class="says">The editor replaces the raw address with a sentence: <code>Schrijf je in voor een gratis training</code>. The ending stays exactly as it is.</p>
-    <div class="shots"><figure class="w390"><figcaption>390px</figcaption><img src="cta-B-390.png" alt=""></figure></div>
+    <div class="shots"><figure class="w390"><figcaption>390px</figcaption><img src="cta-B-390.png" alt="Option 2 on a phone: the bare web address is replaced by two green link sentences, 'Bekijk de trainingsplanning' and 'Schrijf je in voor een gratis training'; the ending is otherwise unchanged."></figure></div>
     <ul class="facts">
       <li class="good">No code. Fixable in Sanity in two minutes.</li>
       <li class="bad">The club's most important ask stays a small green line in the text.</li>
@@ -83,7 +83,7 @@
   <section>
     <span class="tag">Desktop</span>
     <h2>Option 1 on a computer</h2>
-    <figure class="w1440"><figcaption>1440px (the thin green line is the reading-progress bar, caught by the screenshot)</figcaption><img src="cta-A-1440.png" alt=""></figure>
+    <figure class="w1440"><figcaption>1440px (the thin green line is the reading-progress bar, caught by the screenshot)</figcaption><img src="cta-A-1440.png" alt="Option 1 on a desktop: the dark green call-to-action band spans the full width between EINDE ARTIKEL and the three-card 'Blijf nog even hangen.' row; a thin green reading-progress line crosses the cards."></figure>
   </section>
 
   <section class="reject">
