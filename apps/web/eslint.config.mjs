@@ -34,10 +34,14 @@ const IN_BODY_ROUTE_IMPORT = `:matches(${TEST_CALLS}) ImportExpression > Literal
 
 // A test may not bind a fixed TCP port (#3109). Every Vitest process computes
 // the same number, so parallel worktrees in a wave collide on `EADDRINUSE`.
-// `.listen(0)` asks the OS for a free port and stays allowed.
-// ponytail: catches a literal only — `listen(PORT)` or `listen({ port: 8890 })`
-// slips past; widen the selector if either shape ever appears in a test.
-const FIXED_PORT_LISTEN = "CallExpression[callee.property.name='listen'][arguments.0.type='Literal'][arguments.0.value!=0]";
+// `.listen(0)` asks the OS for a free port and stays allowed; so does a socket
+// path, whose literal starts with a quote. Caught as the first `.listen()`
+// argument: `8890`, `8890 + n`, `{ port: 8890 }`.
+// ponytail: an AST rule only sees the `.listen()` call site. A port read from a
+// const, or handed to a child process through argv/env (the #3109 fixture's
+// own shape), slips past — the fixture's comment carries that half.
+const FIXED_PORT = "Literal[raw=/^[1-9]/]";
+const FIXED_PORT_LISTEN = `CallExpression[callee.property.name='listen'] > :first-child:matches(${FIXED_PORT}, BinaryExpression:has(> ${FIXED_PORT}), ObjectExpression:has(> Property[key.name='port'][value.raw=/^[1-9]/]))`;
 
 // Motion Vocabulary bans — DESIGN.md → Motion (#2658). #2650's `@theme`
 // resets (`--ease-*: initial`, `--animate-*: initial`) already make most of
