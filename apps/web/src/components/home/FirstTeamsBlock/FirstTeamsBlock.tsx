@@ -70,25 +70,22 @@ export interface FirstTeamsBlockProps {
 }
 
 /**
- * The held-open frame for the homepage's dark grounds — an empty slot inside
- * a populated dark band keeps its shape so the absence reads as a known gap
- * rather than a render failure, the dark-ground counterpart of `<EmptyState
- * tier="slot">`'s own ink-only register. Shared by the per-slot `<SkipCard>`
- * and the whole-band notice so the two can't drift, the way
- * `FIRST_TEAMS_ROW_GRID` is below — and exported for the same reason
- * `FIRST_TEAMS_ROW_GRID` is: `<FeaturedEventBand>`'s own dark-ground notice
- * (`jersey-deep`, #2944) reuses this constant rather than hand-rolling a
- * third copy of the same utility string. Import it via
+ * The held-open frame (#2427 tier 2) for the homepage's dark grounds — an
+ * empty slot inside a populated dark band keeps its shape so the absence
+ * reads as a known gap rather than a render failure, the dark-ground
+ * counterpart of `<EmptyState tier="slot">`'s own ink-only register. Shared
+ * by the per-slot `<SkipCard>` and the whole-band notice so the two can't
+ * drift, the way `FIRST_TEAMS_ROW_GRID` is below — and exported for the
+ * same reason `FIRST_TEAMS_ROW_GRID` is: `<FeaturedEventBand>`'s own
+ * dark-ground notice (`jersey-deep`, #2944) reuses this constant rather
+ * than hand-rolling a third copy of the same utility string. Import it via
  * `@/components/home/FirstTeamsBlock`, not by copying the value.
  *
  * **This is the decided dark-ground answer (#3103)**, not a stand-in for a
  * dark axis on `<EmptyState tier="slot">` — that tier stays ink-only by
  * design; see `EmptyState.tsx`'s own docblock for the other end of this
  * hand-off. `SkipCard` `text-cream/65`, band note `text-cream/80` stay this
- * file's own (not exported — only the frame itself is shared). VR guard to
- * name: this file's `NoMatches`, `FeedUnavailable` and the five
- * `Placeholder*` stories, plus `FeaturedEventBand`'s own `FeedUnavailable`
- * story — three viewports each — ink-on-dark-green would be a loud diff.
+ * file's own (not exported — only the frame itself is shared).
  */
 export const HELD_OPEN_FRAME =
   "border-cream/40 border-2 border-dashed text-center";

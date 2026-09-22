@@ -59,8 +59,8 @@
  *   `href?: never`/`onClick?: never` mutual exclusion) — a notice's frame is
  *   not configurable, since only the cream case is in scope here; the
  *   dark-ground held-open frame is `HELD_OPEN_FRAME`, decided by #3103 (see
- *   below). `emphasis` accents the
- *   failure itself, not the subject (rule 3) — see below. `action` (#2815)
+ *   below). `emphasis` accents the failure itself, not the subject (rule 3)
+ *   — see below. `action` (#2815)
  *   is an **optional** retry button, mirroring the shape tier "surface"'s
  *   `EmptyStateAction` uses for its undo minus the undo-only analytics
  *   fields (`EmptyStateSlotNoticeAction` below) — added so `<LoadMoreFooter>`
@@ -105,27 +105,23 @@
  * `border-ink-muted` / `border-ink bg-cream-soft`) — both wrong on a
  * dark-green band, and that stays true by design. Tier "surface" already
  * solved its own version via `surface="inverse"` (#2562); tier "slot" does
- * not grow a matching dark axis. Two places hand-roll the dark-ground held-
- * open frame instead: `FirstTeamsBlock`, on the homepage's
+ * not grow a matching dark axis. Two places hand-roll the dark-ground
+ * held-open frame instead: `FirstTeamsBlock`, on the homepage's
  * `jersey-deep-dark` band (see its `HELD_OPEN_FRAME` docblock in
  * `FirstTeamsBlock.tsx`), and `FeaturedEventBand`, on the homepage's
  * `jersey-deep` band (see `FeaturedEventUnavailableNotice`'s docblock in
  * `FeaturedEventBand.tsx`, #2944) — the second import of `FirstTeamsBlock`'s
- * own exported `HELD_OPEN_FRAME`, not a second hand-copy of the value; two
- * consumers is the constant's own signal to exist (review finding on
- * #2944), not a signal that this tier needs a dark axis of its own. Two
- * callers, both on the homepage's dark bands, is not a primitive's signal —
- * a `tier="slot"` dark variant on a component with ~13 callers, shaped for
- * two, is exactly the speculative API #2690 itself refused. Carry
- * `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`) verbatim when
- * reaching for the dark-ground held-open frame; the two files' own text
- * tones (`SkipCard` `text-cream/65`, band note `text-cream/80`) stay
- * per-file. Reopen only if a dark consumer appears off the homepage — a
- * third site is the signal this tier's own dark axis would need. VR guard to
- * name: `FirstTeamsBlock` stories
- * `NoMatches`, `FeedUnavailable` and the five `Placeholder*` stories
- * (#2505), and `FeaturedEventBand`'s own `FeedUnavailable` story (#2944) —
- * three viewports each — ink-on-dark-green would be a loud diff.
+ * own exported `HELD_OPEN_FRAME`, not a second hand-copy of the value:
+ * "two consumers is the primitive's own signal to exist" (review finding on
+ * #2944), read there as a signal for the constant, not for this tier —
+ * #3103 overrode the open question by deciding tier "slot" keeps no dark
+ * axis of its own; a `tier="slot"` dark variant on a component with ~13
+ * callers, shaped for two, is exactly the speculative API #2690 itself
+ * refused. Carry `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`)
+ * verbatim when reaching for the dark-ground held-open frame; the two
+ * files' own text tones (`SkipCard` `text-cream/65`, band note
+ * `text-cream/80`) stay per-file. Reopen only if a dark consumer appears
+ * off the homepage.
  *
  * **Not every failure notice on cream goes through this register.**
  * `<CompetitiveStatusLine>` (#2540/#2636) is a deliberate non-adopter: its
@@ -159,7 +155,7 @@
  * (`FEATURED_EVENT_READ_FAILED`), and passes that apart as `unavailable` —
  * the band holds its shape and names the reason on a failed read, exactly
  * this rule's shape, and still drops silently on a genuinely empty calendar.
- * It reaches that hold-open register through its own dark-ground notice
+ * It reaches that held-open frame through its own dark-ground notice
  * rather than through `<EmptyState tier="slot" reason="unavailable">`
  * itself — that member is ink-only by decision (see above) and this band's
  * `bg-jersey-deep` ground is exactly the dark-ground case `HELD_OPEN_FRAME`

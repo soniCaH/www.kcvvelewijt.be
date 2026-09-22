@@ -410,13 +410,13 @@ The Studio-authored content that lets an editor fill the homepage "Eerste ploege
 
 ### Held-Open Frame
 
-The dashed `border-cream/40` frame a homepage dark band draws in place of a missing slot, so the band keeps its height on a failed or empty read — the dark-ground counterpart of `<EmptyState tier="slot">`'s own ink-only register.
+The held-open shape rule (#2427 tier 2) — an empty slot inside a populated page or band keeps its shape so the absence reads as a known gap, not a render failure — has two renderings: `<EmptyState tier="slot">` on ink/cream grounds, and the dashed `border-cream/40` `HELD_OPEN_FRAME` constant on the homepage's dark bands.
 
 | Code              | Notes                                                                                                                       |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `HELD_OPEN_FRAME` | `apps/web/src/components/home/FirstTeamsBlock/FirstTeamsBlock.tsx` — the one constant, imported verbatim, never hand-copied |
 
-**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) and `FeaturedEventBand` (`jersey-deep` band) both import this same export rather than each hand-rolling their own dashed frame.
+**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) and `FeaturedEventBand` (`jersey-deep` band) both import this same export rather than each hand-rolling their own dashed frame — but they don't hold it on the same cases. `FirstTeamsBlock` draws it on every no-rows cause, a genuinely empty feed included. `FeaturedEventBand` draws it only on a failed read (`unavailable`); a genuinely empty calendar still drops the band silently (`null`).
 
 **Distinct from `<EmptyState>`'s tiers**, which stay ink-only by decision — `<EmptyState tier="slot">` does not grow a matching dark axis for two callers on one homepage ([#3103]). Reopen only if a dark consumer appears off the homepage.
 

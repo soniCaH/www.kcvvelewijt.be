@@ -10,9 +10,10 @@
  * `EditorialHeading.tsx`'s own (then-unexported) `splitOnEmphasis` plus a
  * second `ACCENT_TONE_CLASS` map minus the `warm` entry. #2469 rule 2 locks
  * the accent as jersey-deep on cream / warm on dark for both call sites —
- * one tone map means the day a dark-ground tier-2 register lands (#2402,
- * parked via #2690/#2804), there is one place to add it, not two to keep
- * in sync.
+ * one tone map keeps `<EditorialHeading>`'s own dark-ground `warm` accent in
+ * sync with `<EmptyState>`'s cream-only jersey-deep accent without a second
+ * copy to drift. No dark axis is planned for `<EmptyState>` itself (#3103);
+ * reopen only if a dark consumer appears off the homepage.
  *
  * Deliberately minimal: this is the plain accent only — `<em
  * className="font-display italic {tone}">`. `<EditorialHeading>`'s
