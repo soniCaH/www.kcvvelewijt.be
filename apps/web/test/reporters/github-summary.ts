@@ -17,7 +17,7 @@
  * visible first; decide what to do about it from real numbers.
  */
 
-import { appendFileSync } from "node:fs";
+import { appendFileSync, writeFileSync } from "node:fs";
 import { relative } from "node:path";
 import type { FullResult, Reporter, TestCase } from "@playwright/test/reporter";
 
@@ -33,7 +33,7 @@ export interface TallyEntry {
 
 export interface RunTally {
   passed: number;
-  failed: number;
+  failed: TallyEntry[];
   flaky: TallyEntry[];
   skipped: TallyEntry[];
   /** Playwright's verdict for the whole run. A suite that never started
@@ -57,7 +57,8 @@ function list(entries: TallyEntry[]): string {
  * actually run" arithmetic are testable without a browser.
  */
 export function summaryMarkdown(tally: RunTally): string {
-  const { passed, failed, flaky, skipped, status } = tally;
+  const { passed, flaky, skipped, status } = tally;
+  const failed = tally.failed.length;
   const unverified = flaky.length + skipped.length;
   const total = passed + failed + unverified;
   // A run is only green when nothing failed AND Playwright itself is happy —
@@ -98,6 +99,9 @@ export function summaryMarkdown(tally: RunTally): string {
     );
   }
 
+  if (failed > 0) {
+    lines.push("#### Failed", list(tally.failed), "");
+  }
   if (flaky.length > 0) {
     lines.push(
       "#### Flaky",
@@ -140,11 +144,14 @@ export default class GithubSummaryReporter implements Reporter {
 
   onEnd(result: FullResult): void {
     const summaryFile = process.env.GITHUB_STEP_SUMMARY;
-    if (!summaryFile) return;
+    // The same tally as JSON, uploaded as the `e2e-tally` artifact so the
+    // red-main alert can name what failed (#3134).
+    const tallyFile = process.env.E2E_TALLY_FILE;
+    if (!summaryFile && !tallyFile) return;
 
     const tally: RunTally = {
       passed: 0,
-      failed: 0,
+      failed: [],
       flaky: [],
       skipped: [],
       status: result.status,
@@ -166,13 +173,14 @@ export default class GithubSummaryReporter implements Reporter {
           });
           break;
         case "unexpected":
-          tally.failed += 1;
+          tally.failed.push(entry);
           break;
         default:
           tally.passed += 1;
       }
     }
 
-    appendFileSync(summaryFile, `${summaryMarkdown(tally)}\n`);
+    if (summaryFile) appendFileSync(summaryFile, `${summaryMarkdown(tally)}\n`);
+    if (tallyFile) writeFileSync(tallyFile, JSON.stringify(tally));
   }
 }

@@ -3,7 +3,7 @@ import { summaryMarkdown, type RunTally } from "./github-summary";
 
 const clean: RunTally = {
   passed: 54,
-  failed: 0,
+  failed: [],
   flaky: [],
   skipped: [],
   status: "passed",
@@ -23,7 +23,7 @@ describe("summaryMarkdown", () => {
     const md = summaryMarkdown({
       ...clean,
       passed: 50,
-      failed: 0,
+      failed: [],
       flaky: [
         { title: "OrganigramSectionNav on /hulp", location: "a.spec.ts:140" },
       ],
@@ -87,18 +87,38 @@ describe("summaryMarkdown", () => {
     const md = summaryMarkdown({
       ...clean,
       passed: 3,
-      failed: 2,
+      failed: [
+        { title: "one", location: "a.spec.ts:1" },
+        { title: "two", location: "a.spec.ts:2" },
+      ],
       status: "failed",
     });
     expect(md).toContain("**2 of 5 tests failed.**");
     expect(md).not.toContain("passed on the first attempt");
   });
 
+  it("names each failed test", () => {
+    const md = summaryMarkdown({
+      ...clean,
+      failed: [
+        {
+          title: "OrganigramSectionNav on /hulp",
+          location: "section-nav.spec.ts:217",
+        },
+      ],
+      status: "failed",
+    });
+    expect(md).toContain("#### Failed");
+    expect(md).toContain(
+      "`section-nav.spec.ts:217` — OrganigramSectionNav on /hulp",
+    );
+  });
+
   it("drops the 'left this job green' claim when the run is red", () => {
     const md = summaryMarkdown({
       ...clean,
       passed: 1,
-      failed: 1,
+      failed: [{ title: "y", location: "y.spec.ts:1" }],
       status: "failed",
       skipped: [{ title: "x", location: "x.spec.ts:1" }],
     });
