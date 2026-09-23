@@ -11,8 +11,12 @@
 //   1. Plant a stale baseline — the committed PNG with a few pixels flipped,
 //      far below the 0.05 % threshold, so the comparison PASSES.
 //   2. Run `vr:update:story` for that one component.
-//   3. The planted pixels must be gone: the runner rewrote the PNG.
-// The component's baselines are restored from git afterwards, pass or fail.
+//   3. The PNG must be back to the committed pixels, exactly. Exact matters:
+//      it proves the fresh capture matched the committed baseline, so the
+//      comparison against the planted PNG PASSED and the rewrite came from
+//      `updatePassedSnapshot` — not from `-u` rewriting a failing snapshot.
+// The component's baselines are restored from git afterwards, pass or fail,
+// so the script refuses to start when any of them has uncommitted changes.
 //
 // Run: pnpm --filter @kcvv/web run vr:accept:sub-threshold  (needs Docker)
 import { spawnSync } from "node:child_process";
@@ -20,68 +24,85 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
-const PREFIX = "features-articles-articlecredits";
-const BASELINE = `test/vr/__snapshots__/${PREFIX}--no-fields--mobile.png`;
-// 10 of 250 125 pixels (375×667) is 0.004 % — well under the 0.05 % threshold.
+// The runner scopes by component (one test file each), not by story id.
+const COMPONENT = "features-articles-articlecredits";
+const SNAPSHOTS = `test/vr/__snapshots__/${COMPONENT}--*`;
+const BASELINE = `test/vr/__snapshots__/${COMPONENT}--no-fields--mobile.png`;
 const PLANTED = 10;
+// Mirrors `failureThreshold` (percent) in .storybook/test-runner.ts.
+const FAILURE_THRESHOLD = 0.0005;
 
 const cwd = join(dirname(fileURLToPath(import.meta.url)), "..");
 const path = join(cwd, BASELINE);
 
-const run = (command, args) => {
-  const { status, error } = spawnSync(command, args, { cwd, stdio: "inherit" });
+const run = (command, args, stdio = "inherit") => {
+  const { status, stdout, error } = spawnSync(command, args, {
+    cwd,
+    stdio,
+    encoding: "utf8",
+  });
   if (error) throw error;
-  return status;
+  return { status, stdout };
 };
 
-const pixels = async () => {
-  const { data, info } = await sharp(path)
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  return { data, info };
-};
+const pixels = () => sharp(path).raw().toBuffer({ resolveWithObject: true });
 
-/** Inverts the first PLANTED pixels of the top row — a maximal per-pixel diff. */
-const plant = async () => {
-  const { data, info } = await pixels();
-  for (let i = 0; i < PLANTED * info.channels; i++) data[i] = 255 - data[i];
-  await sharp(data, { raw: info }).png().toFile(path);
-};
+const dirty = run("git", ["status", "--porcelain", "--", SNAPSHOTS], "pipe");
+if (dirty.status !== 0 || dirty.stdout.trim()) {
+  console.error(
+    `Refusing: ${SNAPSHOTS} has uncommitted changes, and this script restores them from git.\n${dirty.stdout}`,
+  );
+  process.exit(1);
+}
 
-const plantedPixelsSurvive = async (original) => {
-  const { data, info } = await pixels();
-  for (let i = 0; i < PLANTED * info.channels; i++) {
-    if (data[i] !== original[i]) return true;
-  }
-  return false;
-};
-
-let failed = true;
 try {
-  const { data: original } = await pixels();
-  await plant();
-  if (!(await plantedPixelsSurvive(original))) {
-    throw new Error("Setup failed: the planted pixels did not land.");
+  const { data: original, info } = await pixels();
+  const ratio = PLANTED / (info.width * info.height);
+  if (ratio >= FAILURE_THRESHOLD) {
+    throw new Error(
+      `Setup: ${PLANTED} planted pixels is ${ratio * 100} % — not under the threshold.`,
+    );
   }
 
-  const status = run("node", ["scripts/vr-docker.mjs", "update:story", PREFIX]);
+  // Inverts the first PLANTED pixels of the top row — a maximal per-pixel diff.
+  const planted = PLANTED * info.channels;
+  const stale = Buffer.from(original);
+  for (let i = 0; i < planted; i++) stale[i] = 255 - stale[i];
+  await sharp(stale, { raw: info }).png().toFile(path);
+
+  const { status } = run("node", [
+    "scripts/vr-docker.mjs",
+    "update:story",
+    COMPONENT,
+  ]);
   if (status !== 0) throw new Error(`vr:update:story exited ${status}.`);
 
-  if (await plantedPixelsSurvive(original)) {
+  const { data: after } = await pixels();
+  if (after.equals(original)) {
+    console.log(
+      `\nPASS: ${BASELINE} was rewritten despite a sub-threshold drift.`,
+    );
+  } else if (after.equals(stale)) {
     console.error(
       `\nFAIL: ${BASELINE} still carries the planted sub-threshold drift.\n` +
         "`-u` left a stale baseline — is `updatePassedSnapshot: true` set in .storybook/test-runner.ts?",
     );
+    process.exitCode = 1;
   } else {
-    console.log(
-      `\nPASS: ${BASELINE} was rewritten despite a sub-threshold drift.`,
+    console.error(
+      `\nINCONCLUSIVE: the fresh capture of ${BASELINE} differs from the committed baseline,\n` +
+        "so the rewrite may have come from a failing comparison. Recapture that baseline first.",
     );
-    failed = false;
+    process.exitCode = 1;
   }
 } catch (error) {
   console.error(`\nFAIL: ${error.message}`);
+  process.exitCode = 1;
 } finally {
-  run("git", ["checkout", "--", `test/vr/__snapshots__/${PREFIX}--*`]);
+  if (run("git", ["checkout", "--", SNAPSHOTS]).status !== 0) {
+    console.error(
+      `\nRESTORE FAILED: ${BASELINE} may still hold planted pixels. Run: git checkout -- "${SNAPSHOTS}"`,
+    );
+    process.exitCode = 1;
+  }
 }
-
-process.exit(failed ? 1 : 0);
