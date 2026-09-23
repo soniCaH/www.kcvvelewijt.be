@@ -273,11 +273,11 @@ function FixtureRow({ match }: { match: ScheurkalenderMatch }) {
         </span>
       </div>
       <div className="text-ink flex-1 text-sm leading-tight">
-        <span className={match.kcvvIsHome ? "font-extrabold" : "text-ink-soft"}>
+        <span className={match.kcvvIsHome ? "font-extrabold" : undefined}>
           {home}
         </span>
         <span className="text-ink-muted mx-[7px] text-xs">&ndash;</span>
-        <span className={match.kcvvIsHome ? "text-ink-soft" : "font-extrabold"}>
+        <span className={match.kcvvIsHome ? undefined : "font-extrabold"}>
           {away}
         </span>
       </div>

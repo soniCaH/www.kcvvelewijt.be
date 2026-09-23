@@ -251,7 +251,7 @@ function VenueGlyph({ home, dark = false }: { home: boolean; dark?: boolean }) {
       aria-label={home ? HOME_AWAY_A11Y_NAME.home : HOME_AWAY_A11Y_NAME.away}
       className={cn(
         "h-4 w-4 shrink-0",
-        dark ? "text-cream/70" : "text-ink-muted",
+        dark ? "text-cream-quiet" : "text-ink-muted",
       )}
     />
   );
@@ -393,7 +393,7 @@ function StripDate({
           <span
             className={cn(
               "font-medium uppercase",
-              dark ? "text-cream/70" : "text-ink-muted",
+              dark ? "text-cream-quiet" : "text-ink-muted",
             )}
           >
             {month}
@@ -408,7 +408,7 @@ function StripDate({
           <span
             className={cn(
               "block text-[9px] leading-tight tracking-[0.06em] uppercase",
-              dark ? "text-cream/70" : "text-ink",
+              dark ? "text-cream-quiet" : "text-ink",
             )}
           >
             {outcomeWord ?? MATCH_KIND_WORD[kind]}
@@ -484,7 +484,7 @@ function LedgerLinkRow({
   // different alphas across the file with nothing recording whether the
   // difference was a decision or a typo.
   const text = matchDay ? "text-cream" : "text-ink";
-  const muted = matchDay ? "text-cream/70" : "text-ink-muted";
+  const muted = matchDay ? "text-cream-quiet" : "text-ink-muted";
   const hairline = matchDay ? "border-cream/15" : "border-ink/15";
 
   // The `aria-label` replaces the row's contents as its accessible name, so the

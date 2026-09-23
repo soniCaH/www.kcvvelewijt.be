@@ -130,7 +130,7 @@ const ICON_TITLE = "text-ink text-[1.05rem] font-bold";
 // vertical margins do not apply to a non-replaced inline box, so `mt-2` on
 // this anchor silently did nothing once it stopped being `inline-flex`.
 const INLINE_LINK = "prose-link text-sm";
-const CARD_BODY = "text-ink-soft text-[0.95rem] leading-relaxed";
+const CARD_BODY = "text-ink text-[0.95rem] leading-relaxed";
 const CROSS_LINK =
   "group border-ink bg-cream-soft hover:bg-cream-deep flex items-center justify-between gap-3 border p-3 transition-colors";
 
@@ -161,7 +161,7 @@ function CrossLink({
     <Link href={href} className={CROSS_LINK}>
       <span>
         <span className="text-ink block text-[0.9rem] font-bold">{title}</span>
-        <span className="text-ink-soft mt-0.5 block text-[0.8rem]">{sub}</span>
+        <span className="text-ink mt-0.5 block text-[0.8rem]">{sub}</span>
       </span>
       <ArrowRight
         size={16}
@@ -310,7 +310,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
                 <p className="text-ink mt-1 font-bold">{card.name}</p>
               ) : null}
               {card.description ? (
-                <p className="text-ink-soft mt-1 text-sm leading-relaxed">
+                <p className="text-ink mt-1 text-sm leading-relaxed">
                   {card.description}
                 </p>
               ) : null}

@@ -214,7 +214,7 @@ export function YouthDirectory({
                       for it — that field is a code (`3NA`), which says nothing
                       at 10px. */}
                     {team.divisionFull ? (
-                      <p className="text-ink-soft mt-0.5 text-center font-mono text-[10px] leading-tight tracking-[0.08em] uppercase">
+                      <p className="text-ink-muted mt-0.5 text-center font-mono text-[10px] leading-tight tracking-[0.08em] uppercase">
                         {team.divisionFull}
                       </p>
                     ) : null}

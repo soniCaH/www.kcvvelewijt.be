@@ -232,7 +232,7 @@ export function MembershipForm({
         <h2 className="font-display mb-3 text-[32px] leading-[1.05] font-black">
           Bedankt voor je interesse!
         </h2>
-        <p className="text-ink-soft text-body-md">
+        <p className="text-ink text-body-md">
           We hebben je aanvraag goed ontvangen en sturen je een
           bevestigingsmail. Iemand van de club neemt binnenkort contact op.
         </p>

@@ -311,7 +311,7 @@ const ReservationMatchRow = ({
           content — see the same pattern on `<TeamAgendaRow>`'s placeholder
           branch and `<MatchStripView>`'s `ReservationLedgerRow`. */}
       <div aria-hidden="true" className="contents">
-        <span className="text-ink/70 col-span-1 row-start-1 font-mono text-xs font-bold tracking-wide uppercase sm:col-auto sm:row-auto sm:min-w-[10rem]">
+        <span className="text-ink-muted col-span-1 row-start-1 font-mono text-xs font-bold tracking-wide uppercase sm:col-auto sm:row-auto sm:min-w-[10rem]">
           {dateLabel}
           {match.time ? ` · ${match.time}` : ""}
         </span>
@@ -319,7 +319,7 @@ const ReservationMatchRow = ({
         <span className="text-ink col-span-2 row-start-2 font-sans text-base leading-tight sm:col-auto sm:row-auto">
           <span className="font-bold">{match.team.name}</span>
           {caption && (
-            <span className="text-ink/60 mt-0.5 block text-xs font-medium">
+            <span className="text-ink-muted mt-0.5 block text-xs font-medium">
               {caption}
             </span>
           )}
@@ -372,7 +372,7 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
         "sm:grid-cols-[auto_1fr_auto] sm:gap-x-4",
       )}
     >
-      <span className="text-ink/70 col-span-1 row-start-1 font-mono text-xs font-bold tracking-wide uppercase sm:col-auto sm:row-auto sm:min-w-[10rem]">
+      <span className="text-ink-muted col-span-1 row-start-1 font-mono text-xs font-bold tracking-wide uppercase sm:col-auto sm:row-auto sm:min-w-[10rem]">
         {when}
       </span>
 
@@ -380,12 +380,12 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
         <span className={cn(homeIsKcvv && "font-bold")}>
           {match.homeTeam.name}
         </span>
-        <span className="text-ink/60 mx-2">—</span>
+        <span className="text-ink-muted mx-2">—</span>
         <span className={cn(awayIsKcvv && "font-bold")}>
           {match.awayTeam.name}
         </span>
         {caption && (
-          <span className="text-ink/60 mt-0.5 block text-xs font-medium">
+          <span className="text-ink-muted mt-0.5 block text-xs font-medium">
             {caption}
           </span>
         )}

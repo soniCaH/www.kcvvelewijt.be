@@ -476,7 +476,7 @@ describe("findBagSpans / extractBalanced — expression-scoping fixtures (#2610 
       "  className={`flex-1 rounded-none border-2 px-4 ${",
       "    aspect === opt.value",
       '      ? "border-ink bg-jersey-deep text-cream"',
-      '      : "border-ink/30 text-ink-soft hover:border-ink bg-cream"',
+      '      : "border-ink/30 text-ink hover:border-ink bg-cream"',
       "  }`}",
       "/>",
     ].join("\n");

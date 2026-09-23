@@ -296,7 +296,7 @@ export function MemberDetailPanel({
                 {(isVacant || node.roleCode) && (
                   <p className="mt-1.5 flex items-center gap-1.5">
                     {isVacant && (
-                      <span className="text-cream/85 font-mono text-[11px] tracking-[0.04em] uppercase">
+                      <span className="text-cream-quiet font-mono text-[11px] tracking-[0.04em] uppercase">
                         Vacante functie
                       </span>
                     )}
@@ -315,7 +315,7 @@ export function MemberDetailPanel({
           <div className="flex flex-col gap-4 px-4 py-4">
             {isVacant ? (
               <>
-                <p className="text-ink-soft text-sm leading-relaxed">
+                <p className="text-ink text-sm leading-relaxed">
                   Deze plek is vrij — misschien iets voor jou?
                 </p>
                 <Link

@@ -242,7 +242,7 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
             </p>
           )}
           {gallery.descriptionRich && gallery.descriptionRich.length > 0 && (
-            <div className="text-body-md text-ink-soft mt-6 max-w-prose space-y-3">
+            <div className="text-body-md text-ink mt-6 max-w-prose space-y-3">
               <PortableText
                 value={gallery.descriptionRich}
                 components={descriptionComponents}

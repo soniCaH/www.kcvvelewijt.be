@@ -63,7 +63,7 @@ export interface FeaturedEventBandProps {
 /**
  * The held-open dark-ground notice for a failed read. Not routed through
  * `<EmptyState tier="slot" reason="unavailable">` — that register is
- * ink-only (`border-ink/30` frame, `text-ink-soft` body, a `text-jersey-deep`
+ * ink-only (`border-ink/30` frame, `text-ink` body, a `text-jersey-deep`
  * accent span with no prop to swap it), and stays that way by design on a
  * dark-green band: the decided dark-ground answer is `HELD_OPEN_FRAME`
  * instead (#3103; see `EmptyState.tsx`'s own file docblock). `jersey-deep`
@@ -106,7 +106,7 @@ function FeaturedEventUnavailableNotice() {
           </EditorialHeading>
         </div>
         <div className={`${HELD_OPEN_FRAME} px-4 py-8`}>
-          <p className="text-cream/80">
+          <p className="text-cream">
             Het eerstvolgende evenement is even niet beschikbaar. Probeer het
             later opnieuw.
           </p>

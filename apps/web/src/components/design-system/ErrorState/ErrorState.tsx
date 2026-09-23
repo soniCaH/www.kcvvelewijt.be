@@ -149,7 +149,7 @@ export function ErrorState({
         {/* No own reading-measure clamp: the `max-w-[40rem]` wrapper above
             already owns this composition's width (DESIGN.md "The
             Reading-Measure Exemption Rule", #2645). */}
-        <p className="text-ink-soft text-body-md mt-3.5">{body}</p>
+        <p className="text-ink text-body-md mt-3.5">{body}</p>
 
         <ActionRow actions={actions} />
       </div>

@@ -41,18 +41,18 @@ export const metadata = buildPageMetadata({
 /**
  * Cream/ink prose styling for the legal copy. Replaces the legacy
  * typography-plugin prose treatment with design-system tokens only: H2s in
- * Freight Display 700, body in Archivo (ink-soft), links jersey-deep, dotted
+ * Freight Display 700, body in Archivo (ink), links jersey-deep, dotted
  * section rules spaced via the `[role=separator]` child selector.
  */
 const proseClasses = [
-  "text-ink-soft",
+  "text-ink",
   "[&_[role=separator]]:my-7",
   "[&_h2]:mt-0 [&_h2]:mb-2.5 [&_h2]:font-display [&_h2]:font-bold [&_h2]:text-ink",
   "[&_h2]:text-display-sm",
   "[&_p]:mt-3 [&_p]:text-body-md",
   "[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5",
   "[&_li]:text-body-md",
-  "[&_strong]:font-semibold [&_strong]:text-ink",
+  "[&_strong]:font-semibold",
 ].join(" ");
 
 export default function PrivacyPage() {

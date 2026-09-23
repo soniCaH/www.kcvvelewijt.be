@@ -252,7 +252,7 @@ export function HeroTransferClubRow({ resolved }: HeroTransferClubRowProps) {
           isKcvv={resolved.kcvvOnly.isKcvv}
         />
         {resolved.until ? (
-          <span className="text-ink-soft text-body-md italic">
+          <span className="text-ink-muted text-body-md italic">
             · verlengd tot {resolved.until}
           </span>
         ) : null}
@@ -313,7 +313,7 @@ export function HeroTransferMetaLine({ feature }: HeroTransferMetaLineProps) {
   return (
     <p
       data-testid="hero-transfer-meta-line"
-      className="text-ink-soft text-body-md mt-3"
+      className="text-ink-muted text-body-md mt-3"
     >
       {segments.map((segment, idx) => (
         <span key={`${idx}-${segment}`}>

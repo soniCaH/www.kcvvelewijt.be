@@ -422,7 +422,7 @@ function renderEmbed(
           data-testid="video-block"
           data-source="embed-unknown"
         >
-          <p className="text-ink-soft text-sm">
+          <p className="text-ink text-sm">
             Video-embed (provider niet ondersteund). Controleer of de link van
             YouTube of Vimeo komt.
           </p>

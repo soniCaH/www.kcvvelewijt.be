@@ -70,7 +70,7 @@ export function SearchMasthead({
         {children}
 
         {hint && (
-          <p className="text-cream/70 text-mono-sm mt-3.5 font-mono tracking-[0.03em]">
+          <p className="text-cream-quiet text-mono-sm mt-3.5 font-mono tracking-[0.03em]">
             {hint}
           </p>
         )}

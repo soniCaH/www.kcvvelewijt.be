@@ -100,7 +100,7 @@ export const SearchResult = ({ result, onClick }: SearchResultProps) => {
 
         {/* Snippet */}
         {result.description && (
-          <p className="text-ink-soft mt-1 line-clamp-2 text-sm leading-snug">
+          <p className="text-ink mt-1 line-clamp-2 text-sm leading-snug">
             {result.description}
           </p>
         )}

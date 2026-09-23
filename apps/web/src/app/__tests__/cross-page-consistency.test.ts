@@ -722,7 +722,7 @@ function hasBareChMaxWidth(source: string): boolean {
  */
 const CH_EXEMPT_DECLARATIONS: Record<string, readonly string[]> = {
   "components/organigram/OrganigramExplorer/VolledigOrganigram.tsx": [
-    '<p className="text-ink-soft max-w-[60ch] text-sm leading-relaxed">',
+    '<p className="text-ink max-w-[60ch] text-sm leading-relaxed">',
   ],
   "components/layout/SiteHeader/SiteHeader.tsx": [
     'const NAV_LABEL_TRUNCATE = "block max-w-[14ch] truncate";',
@@ -795,7 +795,7 @@ describe("rule 8's exemptions are pinned to their exact declarations (#2645)", (
 describe("rule 8 catches what it claims to (#2645)", () => {
   it.each([
     ['<p className="max-w-[52ch] text-xl">'],
-    ['className={cn("text-ink-soft max-w-[46ch] mt-2")}'],
+    ['className={cn("text-ink max-w-[46ch] mt-2")}'],
     ['const NAV_LABEL_TRUNCATE = "block max-w-[14ch] truncate";'],
     // Fractional and leading-dot forms are valid Tailwind arbitrary values
     // (and valid CSS) — `\d+` alone walked straight past them.
@@ -826,7 +826,7 @@ describe("rule 8 catches what it claims to (#2645)", () => {
 
   it("a second, undocumented `ch` in an exempt file changes the count the pinned check relies on", () => {
     const oneApproved =
-      '<p className="text-ink-soft max-w-[60ch] text-sm leading-relaxed">';
+      '<p className="text-ink max-w-[60ch] text-sm leading-relaxed">';
     const withASecondOne = `${oneApproved}\n<span className="max-w-[30ch]">`;
     expect(chOccurrences(oneApproved)).toBe(1);
     expect(chOccurrences(withASecondOne)).toBe(2);
@@ -2850,5 +2850,44 @@ describe("rule 16 catches what it claims to (#2571)", () => {
     const relPath = "components/staff/StaffRoles/StaffRoles.tsx";
     expect(retiredPairScannableSources).toContain(relPath);
     expect(hasAnyRetiredPair('className="py-10 md:py-14"')).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Rule 17 (#2568) — the soft ink token is never a text colour
+// ---------------------------------------------------------------------------
+
+/**
+ * Two tiers of text colour, not three (#2551, DESIGN.md → The Two-Tier Text
+ * Rule). `ink-soft` sits 1.20:1 from `ink`, so as a text colour it is not a
+ * tier at all. The token itself stays — it is a dark surface layered on a dark
+ * surface (`globals.css`'s `.kcvv-spinner-scarf--white`) — so only the `text-`
+ * utility is banned, with any variant prefix (`hover:`, `file:`). The eslint
+ * rule in `apps/web/eslint.config.mjs` catches it at the keyboard; this holds
+ * it in the tree, tests and stories included.
+ */
+const TEXT_INK_SOFT = /(?<![\w-])text-ink-soft(?![\w-])/;
+
+describe("the soft ink token is never a text colour (#2568)", () => {
+  it.each(scannableSources)("%s — no text-ink-soft", (relPath) => {
+    expect(TEXT_INK_SOFT.test(code.get(relPath)!)).toBe(false);
+  });
+});
+
+describe("rule 17 catches what it claims to (#2568)", () => {
+  it.each([
+    ['<p className="text-ink-soft text-sm">'],
+    ['className={cn("mt-1", isDark ? "text-cream" : "text-ink-soft")}'],
+    ['"hover:text-ink-soft file:text-ink-soft"'],
+  ])("flags %s", (snippet) => {
+    expect(TEXT_INK_SOFT.test(snippet)).toBe(true);
+  });
+
+  it.each([
+    ['<div className="bg-ink-soft">'],
+    ['"text-ink text-ink-muted"'],
+    ['"text-ink-softer"'],
+  ])("leaves %s alone", (snippet) => {
+    expect(TEXT_INK_SOFT.test(snippet)).toBe(false);
   });
 });

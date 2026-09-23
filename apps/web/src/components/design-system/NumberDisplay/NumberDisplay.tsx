@@ -90,7 +90,11 @@ export function NumberDisplay({
     <span
       className={cn(
         "text-mono-sm font-mono leading-none tracking-[0.08em] uppercase",
-        tone === "cream" ? "text-cream/70" : "text-ink-muted",
+        // ponytail: full cream, not `text-cream-quiet` — the only cream
+        // consumer sits on jersey-deep, where full cream is the one text
+        // colour (DESIGN.md → The Whole-Cream Rule, #2551). Ceiling: a
+        // deep-dark consumer would want the quiet label — add a prop then.
+        tone === "cream" ? "text-cream" : "text-ink-muted",
       )}
     >
       {label}

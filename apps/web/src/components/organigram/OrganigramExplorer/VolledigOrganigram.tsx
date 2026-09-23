@@ -171,7 +171,7 @@ export function VolledigOrganigram({
             `var(--container-prose)` was tried and reverted (#2560 / PR
             #2644) — at 680 the caption claims the whole row, the button
             group wraps to a second line, and the chart shifts down. */}
-        <p className="text-ink-soft max-w-[60ch] text-sm leading-relaxed">
+        <p className="text-ink max-w-[60ch] text-sm leading-relaxed">
           De volledige rapporteringsstructuur in één overzicht. Klik een functie
           om ze in de verkenner te openen, of druk het geheel af.
         </p>

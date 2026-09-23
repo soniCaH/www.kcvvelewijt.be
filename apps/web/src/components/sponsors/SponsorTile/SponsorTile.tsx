@@ -62,7 +62,7 @@ export const SponsorTile = ({
       sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 18vw"
     />
   ) : (
-    <span className="font-display text-ink/80 line-clamp-3 text-center text-sm italic">
+    <span className="font-display text-ink line-clamp-3 text-center text-sm italic">
       {sponsor.name}
     </span>
   );
