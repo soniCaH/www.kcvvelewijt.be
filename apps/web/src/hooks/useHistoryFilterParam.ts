@@ -15,6 +15,8 @@ export interface UseHistoryFilterParamOptions<T extends string> {
   fallback: T;
   /** Pathname this hook reads/writes, e.g. `"/evenementen"`. */
   route: string;
+  /** Hash appended on every write, unless a call to the setter overrides it. */
+  hash?: string;
 }
 
 /**
@@ -27,7 +29,7 @@ export interface UseHistoryFilterParamOptions<T extends string> {
  * its value is read, opts the WHOLE subtree into client-side rendering,
  * throwing away prerendered HTML for every visitor (#2564 finding 1). This
  * is the mode a static/ISR route that must stay prerendered needs
- * (`/evenementen`); a route that already accepts `useSearchParams()`'s cost
+ * (`/evenementen`, `/hulp`); a route that already accepts `useSearchParams()`'s cost
  * for this facet should use `useRouterFilterParam` instead, which is simpler
  * (no local state at all) precisely because `useSearchParams()` already
  * does the reactive tracking this hook has to do by hand.
@@ -35,7 +37,8 @@ export interface UseHistoryFilterParamOptions<T extends string> {
  * `value` is local state, seeded once on mount from the live URL (a
  * one-time deep-link restore that costs one extra render only for a visitor
  * who arrives on one, never for anyone else — the seed is a no-op guard, not
- * an unconditional write) and re-synced on `popstate`.
+ * an unconditional write) and re-synced whenever the URL moves under it
+ * (back/forward, or a same-route `<Link>`).
  *
  * A caller whose own async orchestration already owns the read side (e.g.
  * `NewsListingClient`'s fetch-then-write `applyCategory`) should call
@@ -49,7 +52,7 @@ export function useHistoryFilterParam<T extends string>(
   values: readonly T[],
   options: UseHistoryFilterParamOptions<T>,
 ): [T, SetFilterParam<T>] {
-  const { fallback, route } = options;
+  const { fallback, route, hash } = options;
   const [value, setLocalValue] = useState<T>(fallback);
 
   // Deep-link restore on first mount: a one-time read of the URL (an
@@ -68,14 +71,22 @@ export function useHistoryFilterParam<T extends string>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Browser back/forward — re-reads the URL and updates state WITHOUT
-  // writing it again (the browser already moved it).
+  // Re-read the URL, WITHOUT writing it again, whenever it moves under us:
+  // browser back/forward (`popstate`), and a Next `<Link>` to this same route
+  // (the header's "Hulp" while already on `/hulp?categorie=…`). Next keeps the
+  // page mounted for that one and fires no `popstate`, so only the Navigation
+  // API's `currententrychange` sees it; where that API is missing, the facet
+  // stays stale until the next write, as it did before.
   useEffect(() => {
-    const onPopState = () => {
+    const resync = () => {
       setLocalValue(narrowParam(readParam(name), values, fallback));
     };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
+    window.addEventListener("popstate", resync);
+    window.navigation?.addEventListener("currententrychange", resync);
+    return () => {
+      window.removeEventListener("popstate", resync);
+      window.navigation?.removeEventListener("currententrychange", resync);
+    };
   }, [name, values, fallback]);
 
   const setValue = useCallback<SetFilterParam<T>>(
@@ -84,11 +95,11 @@ export function useHistoryFilterParam<T extends string>(
       setLocalValue(next);
       writeHistoryFilterParam(name, next, fallback, {
         route,
-        hash: overrides?.hash,
+        hash: overrides?.hash ?? hash,
         replace: overrides?.replace,
       });
     },
-    [value, name, fallback, route],
+    [value, name, fallback, route, hash],
   );
 
   return [value, setValue];

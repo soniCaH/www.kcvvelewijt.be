@@ -2,17 +2,15 @@
 
 import { useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { narrowParam, type SetFilterParam } from "./filterParam";
+import { narrowParam } from "./filterParam";
 
 export interface UseRouterFilterParamOptions<T extends string> {
   /** The value that means "no filter" — deleted from the querystring rather
    *  than round-tripped as an explicit param, and this hook's return value
    *  whenever the param is absent or fails to narrow against `values`. */
   fallback: T;
-  /** Pathname this hook reads/writes, e.g. `"/hulp"`. */
+  /** Pathname this hook reads/writes, e.g. `"/kalender"`. */
   route: string;
-  /** Hash appended on every write, unless a call to the setter overrides it. */
-  hash?: string;
 }
 
 /**
@@ -25,7 +23,7 @@ export interface UseRouterFilterParamOptions<T extends string> {
  * reactive to `router.push`/`replace` and browser back/forward, so this
  * needs no local state, no mount effect, no `popstate` listener. Only
  * correct on a route that already accepts calling `useSearchParams()` for
- * this facet: wrapped in its own local `<Suspense>` (`/hulp`, `/zoeken`), or
+ * this facet: wrapped in its own local `<Suspense>`, or
  * `force-dynamic` (`/kalender`, where it resolves during the per-request
  * server render with no bailout and no `<Suspense>` needed at all). A
  * static/ISR route that must stay prerendered needs `useHistoryFilterParam`
@@ -39,11 +37,10 @@ export interface UseRouterFilterParamOptions<T extends string> {
  * back/forward, so the guard stays consistent with what the hook just
  * rendered. The setter's merge base for building the NEXT url is the live
  * `window.location.search` instead: `useSearchParams()` cannot see a param
- * written via a raw `history.replaceState` outside Next's router (e.g.
- * `HubMemberPanel`'s `?member=`/`?holder=` deep-link on `/hulp`, which
- * `HulpFinder`'s own filter chips share a route with) — merging from
+ * written via a raw `history.replaceState` outside Next's router (e.g. a
+ * panel's `?member=` deep-link on the same route) — merging from
  * `useSearchParams()` would silently drop it from every filter write for as
- * long as the member panel stayed open. The live URL has the opposite gap:
+ * long as that panel stayed open. The live URL has the opposite gap:
  * it cannot see a `router.push` this hook itself already issued but that
  * hasn't landed yet, so merging from it risks reverting an in-flight write
  * to a sibling param on the SAME route (e.g. `/kalender`'s `?view=` versus
@@ -52,24 +49,19 @@ export interface UseRouterFilterParamOptions<T extends string> {
  * `?member=` deterministically for the panel's entire open duration is
  * strictly worse than that race, so this hook accepts the race and keeps
  * the live-URL merge.
- *
- * The setter accepts a per-call `{ hash, replace }` override — the wrinkle
- * that shaped this API: `HulpFinder`'s `#<slug>` deep-link needs to write the
- * same `?categorie=` param a chip click does, but land on its own hash via
- * `replace` instead of `push`.
  */
 export function useRouterFilterParam<T extends string>(
   name: string,
   values: readonly T[],
   options: UseRouterFilterParamOptions<T>,
-): [T, SetFilterParam<T>] {
-  const { fallback, route, hash } = options;
+): [T, (next: T) => void] {
+  const { fallback, route } = options;
   const router = useRouter();
   const searchParams = useSearchParams();
   const value = narrowParam(searchParams.get(name), values, fallback);
 
-  const setValue = useCallback<SetFilterParam<T>>(
-    (next, overrides) => {
+  const setValue = useCallback(
+    (next: T) => {
       if (next === value) return; // dedup guard — compares against the useSearchParams()-derived value above
       // Merge base is the LIVE window.location.search, not `searchParams` —
       // it's the only source that can see a param written via a raw
@@ -78,13 +70,9 @@ export function useRouterFilterParam<T extends string>(
       if (next === fallback) params.delete(name);
       else params.set(name, next);
       const qs = params.toString();
-      const finalHash = overrides?.hash ?? hash;
-      const path = `${route}${qs ? `?${qs}` : ""}${finalHash ? `#${finalHash}` : ""}`;
-
-      if (overrides?.replace) router.replace(path, { scroll: false });
-      else router.push(path, { scroll: false });
+      router.push(`${route}${qs ? `?${qs}` : ""}`, { scroll: false });
     },
-    [value, fallback, name, route, hash, router],
+    [value, fallback, name, route, router],
   );
 
   return [value, setValue];

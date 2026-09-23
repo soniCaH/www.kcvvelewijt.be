@@ -87,6 +87,29 @@ describe("useHistoryFilterParam", () => {
     expect(pushStateSpy).not.toHaveBeenCalled();
   });
 
+  it("appends the default hash on write, unless a call overrides it", () => {
+    const pushStateSpy = vi.spyOn(window.history, "pushState");
+    const { result } = renderHook(() =>
+      useHistoryFilterParam("type", VALUES, {
+        fallback: "a",
+        route: "/evenementen",
+        hash: "lijst",
+      }),
+    );
+    act(() => result.current[1]("b"));
+    expect(pushStateSpy).toHaveBeenLastCalledWith(
+      window.history.state,
+      "",
+      "/evenementen?type=b#lijst",
+    );
+    act(() => result.current[1]("c", { hash: "item" }));
+    expect(pushStateSpy).toHaveBeenLastCalledWith(
+      window.history.state,
+      "",
+      "/evenementen?type=c#item",
+    );
+  });
+
   it("updates its own value immediately on write (pushState doesn't trigger a re-render on its own)", () => {
     const { result } = renderHook(() =>
       useHistoryFilterParam("type", VALUES, {
@@ -128,6 +151,27 @@ describe("useHistoryFilterParam", () => {
 
     expect(result.current[0]).toBe("a");
     expect(pushStateSpy).not.toHaveBeenCalled();
+  });
+
+  it("re-syncs when a same-route <Link> moves the URL (Navigation API currententrychange)", () => {
+    // happy-dom has no Navigation API; a bare EventTarget is all the hook uses.
+    const navigation = new EventTarget();
+    vi.stubGlobal("navigation", navigation);
+    const { result } = renderHook(() =>
+      useHistoryFilterParam("type", VALUES, {
+        fallback: "a",
+        route: "/evenementen",
+      }),
+    );
+    act(() => result.current[1]("b"));
+
+    window.history.replaceState({}, "", "/evenementen");
+    act(() => {
+      navigation.dispatchEvent(new Event("currententrychange"));
+    });
+
+    expect(result.current[0]).toBe("a");
+    vi.unstubAllGlobals();
   });
 
   it("preserves an unrelated live URL param on write", () => {

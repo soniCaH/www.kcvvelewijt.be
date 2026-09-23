@@ -1,87 +1,29 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { useSyncExternalStore } from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  type MockInstance,
+} from "vitest";
+import { act, render, screen, fireEvent } from "@testing-library/react";
 import { HulpFinder } from "./HulpFinder";
 import { FINDER_FIXTURE_PATHS } from "./__fixtures__/paths.fixture";
 import { trackEvent } from "@/lib/analytics/track-event";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
-// `category` is purely URL-derived (#2564 review item 5), so a mocked
-// `push`/`replace` that doesn't ALSO update what `useSearchParams` returns —
-// and notify React of it — would leave every "click a category chip, see it
-// take effect" test asserting against stale params. This tiny store mirrors
-// real Next.js: pushing/replacing updates the params AND triggers a
-// re-render in every mounted `useSearchParams()` consumer, exactly the way
-// the real router does after a client-side navigation.
-const searchParamsStore = vi.hoisted(() => {
-  let current = new URLSearchParams();
-  const listeners = new Set<() => void>();
-  return {
-    get: () => current,
-    set: (next: URLSearchParams) => {
-      current = next;
-      listeners.forEach((listener) => listener());
-    },
-    subscribe: (listener: () => void) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-  };
-});
-
-function paramsFromUrl(url: string): URLSearchParams {
-  const query = url.split("?")[1]?.split("#")[0] ?? "";
-  return new URLSearchParams(query);
+// Both facets live in the URL and are written with `history.pushState` /
+// `replaceState`, so the tests drive the real `window.history` and spy on it
+// rather than mocking the Next router.
+function setUrl(url: string) {
+  window.history.replaceState({}, "", url);
 }
 
-function hashFromUrl(url: string): string {
-  const hashIndex = url.indexOf("#");
-  return hashIndex === -1 ? "" : url.slice(hashIndex);
-}
-
-// `pushParam` (the component under test) intentionally reads the LIVE
-// `window.location.search`, not `useSearchParams()`'s return value — that's
-// what lets the panel's `?member`/`?holder` deep-link (written via
-// `history.replaceState`, which `useSearchParams` never observes) survive a
-// filter change. A real Next.js app keeps `window.location` and
-// `useSearchParams()` in lockstep automatically; this mock has to do that
-// syncing by hand — search AND hash both — or a click that merges in a new
-// param would only see the ONE param it just set (dropping whatever else
-// `useSearchParams()` was reporting), and a dropped hash would wipe out
-// `reveal()`'s own `#<id>` on the very next chip click.
-function applyUrl(url: string) {
-  const params = paramsFromUrl(url);
-  searchParamsStore.set(params);
-  // Property assignment, not `history.replaceState` — happy-dom doesn't
-  // resolve a relative `history.replaceState` target against the test
-  // environment's default `about:blank` origin (it silently no-ops), but
-  // direct `location.search`/`.hash` assignment updates `window.location`
-  // reliably regardless of origin.
-  window.location.search = params.toString();
-  window.location.hash = hashFromUrl(url);
-}
-
-function setMockSearchParams(params: URLSearchParams) {
-  applyUrl(`/hulp?${params.toString()}`);
-}
-
-const mockPush = vi.fn((url: string) => applyUrl(url));
-const mockReplace = vi.fn((url: string) => applyUrl(url));
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    replace: mockReplace,
-    prefetch: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-  }),
-  usePathname: () => "/hulp",
-  useSearchParams: () =>
-    useSyncExternalStore(searchParamsStore.subscribe, searchParamsStore.get),
-}));
+/** The URL argument of the last `pushState` (or `replaceState`) call. */
+const lastUrl = (spy: MockInstance<History["pushState"]>) =>
+  String(spy.mock.lastCall?.[2]);
 
 let mockPanel: {
   openMemberById: ReturnType<typeof vi.fn>;
@@ -114,18 +56,25 @@ vi.mock("@/hooks/useResponsibilityAnalytics", () => ({
 // happy-dom doesn't implement scrollIntoView — stub it so the finder's
 // scroll-into-view effects don't throw, and so we can assert them.
 const scrollIntoView = vi.fn();
+let pushState: MockInstance<History["pushState"]>;
+let replaceState: MockInstance<History["replaceState"]>;
 beforeEach(() => {
   Element.prototype.scrollIntoView = scrollIntoView;
   scrollIntoView.mockClear();
-  mockPush.mockClear();
   vi.mocked(trackEvent).mockClear();
   trackView.mockClear();
   trackContactClicked.mockClear();
   trackOrganigramLink.mockClear();
   trackStepLinkClicked.mockClear();
-  setMockSearchParams(new URLSearchParams());
+  setUrl("/hulp");
   mockPanel = null;
-  window.location.hash = "";
+  pushState = vi.spyOn(window.history, "pushState");
+  replaceState = vi.spyOn(window.history, "replaceState");
+});
+
+afterEach(() => {
+  pushState.mockRestore();
+  replaceState.mockRestore();
 });
 
 const q = (re: RegExp) => screen.getByRole("button", { name: re });
@@ -190,7 +139,11 @@ describe("HulpFinder", () => {
   it("fires responsibility_contact_clicked from the answer's contact", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/hoe schrijf ik mijn kind in/i));
-    fireEvent.click(screen.getByRole("link", { name: /e-mail/i }));
+    const email = screen.getByRole("link", { name: /e-mail/i });
+    // Following the `mailto:` would move happy-dom off the origin, and every
+    // later relative `replaceState` in this file would then silently no-op.
+    email.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(email);
     expect(trackContactClicked).toHaveBeenCalledWith("inschrijven", "email");
   });
 
@@ -215,7 +168,7 @@ describe("HulpFinder", () => {
   });
 
   it("shows a per-category empty state when the active audience empties a category", () => {
-    setMockSearchParams(new URLSearchParams("audience=supporter"));
+    setUrl("/hulp?audience=supporter");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     // No medisch path is tagged 'supporter' → the category is empty for them.
     fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
@@ -231,7 +184,7 @@ describe("HulpFinder", () => {
     // (`EmptyStateUndoTracker`, tested on its own) — this host's job is only
     // to supply `analyticsSource`/`analyticsFacet`, rendered as inert
     // `data-*` attributes.
-    setMockSearchParams(new URLSearchParams("audience=supporter"));
+    setUrl("/hulp?audience=supporter");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
 
@@ -251,8 +204,8 @@ describe("HulpFinder", () => {
     // audience ("Speler"), not the generic "deze rol" (#2427 rule 5, #2562
     // review — the category branch already did this, the audience branch
     // hadn't). `audience` reads from the URL (`?audience=`), so it is seeded
-    // via `setMockSearchParams`, matching the sibling audience test below.
-    setMockSearchParams(new URLSearchParams("audience=speler"));
+    // via `setUrl`, matching the sibling audience test below.
+    setUrl("/hulp?audience=speler");
     const pathsWithoutSpelerRole = FINDER_FIXTURE_PATHS.filter(
       (p) => !p.role.includes("speler"),
     );
@@ -269,7 +222,7 @@ describe("HulpFinder", () => {
   });
 
   it("marks the audience undo with the hulp_audience source + active facet for the global analytics listener (#2719)", () => {
-    setMockSearchParams(new URLSearchParams("audience=speler"));
+    setUrl("/hulp?audience=speler");
     const pathsWithoutSpelerRole = FINDER_FIXTURE_PATHS.filter(
       (p) => !p.role.includes("speler"),
     );
@@ -292,7 +245,7 @@ describe("HulpFinder", () => {
     // "untouched" means the pushed URL KEEPS `categorie=medisch` — dropping
     // it would be exactly the clobber round-1 finding 2 was about. The one
     // thing that must NOT reappear is `audience=`.
-    setMockSearchParams(new URLSearchParams("audience=speler"));
+    setUrl("/hulp?audience=speler");
     const pathsWithoutSpelerRole = FINDER_FIXTURE_PATHS.filter(
       (p) => !p.role.includes("speler"),
     );
@@ -305,14 +258,8 @@ describe("HulpFinder", () => {
     );
 
     // `audience` is gone from the pushed URL; `categorie=medisch` survives.
-    expect(mockPush).toHaveBeenLastCalledWith(
-      expect.not.stringContaining("audience="),
-      { scroll: false },
-    );
-    expect(mockPush).toHaveBeenLastCalledWith(
-      expect.stringContaining("categorie=medisch"),
-      { scroll: false },
-    );
+    expect(lastUrl(pushState)).not.toContain("audience=");
+    expect(lastUrl(pushState)).toContain("categorie=medisch");
     // The category selection survives the undo click.
     expect(screen.getByRole("button", { name: "Medisch" })).toHaveAttribute(
       "aria-pressed",
@@ -321,7 +268,7 @@ describe("HulpFinder", () => {
   });
 
   it("filters by the ?audience param (hero deep-link)", () => {
-    setMockSearchParams(new URLSearchParams("audience=supporter"));
+    setUrl("/hulp?audience=supporter");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     expect(q(/ik wil sponsor worden/i)).toBeInTheDocument();
     expect(qMaybe(/hoe schrijf ik mijn kind in/i)).not.toBeInTheDocument();
@@ -330,23 +277,17 @@ describe("HulpFinder", () => {
   it("an audience chip writes the ?audience param", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(screen.getByRole("button", { name: "Ouder" }));
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringContaining("audience=ouder"),
-      { scroll: false },
-    );
+    expect(lastUrl(pushState)).toBe("/hulp?audience=ouder#hulp");
   });
 
   it("a category chip writes the ?categorie param", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.stringContaining("categorie=medisch"),
-      { scroll: false },
-    );
+    expect(lastUrl(pushState)).toBe("/hulp?categorie=medisch#hulp");
   });
 
   it("seeds the active category from ?categorie= (e.g. after browser back)", () => {
-    setMockSearchParams(new URLSearchParams("categorie=medisch"));
+    setUrl("/hulp?categorie=medisch");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     expect(screen.getByRole("button", { name: "Medisch" })).toHaveAttribute(
       "aria-pressed",
@@ -356,7 +297,7 @@ describe("HulpFinder", () => {
   });
 
   it("gains an explicit 'Alles' reset chip on the audience row (#2429/#2564)", () => {
-    setMockSearchParams(new URLSearchParams("audience=ouder"));
+    setUrl("/hulp?audience=ouder");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     // Both rows now carry an "Alles" chip.
     expect(screen.getAllByRole("button", { name: "Alles" }).length).toBe(2);
@@ -365,14 +306,11 @@ describe("HulpFinder", () => {
     // toggle-off-by-reclicking idiom is retired in favour of "Alles" as the
     // one reset, matching every other absorbed row.
     fireEvent.click(screen.getByRole("button", { name: "Ouder" }));
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(pushState).not.toHaveBeenCalled();
 
     const allesButtons = screen.getAllByRole("button", { name: "Alles" });
     fireEvent.click(allesButtons[0]!);
-    expect(mockPush).toHaveBeenCalledWith(
-      expect.not.stringContaining("audience="),
-      { scroll: false },
-    );
+    expect(lastUrl(pushState)).toBe("/hulp#hulp");
   });
 
   it("keeps the #<slug> deep-linked category after an unrelated audience chip click (#2564 review finding 2)", () => {
@@ -380,7 +318,7 @@ describe("HulpFinder", () => {
     // WITHOUT touching ?categorie=), then press an audience chip — an
     // unrelated ?audience= URL push must not clobber the revealed category
     // back to "Alles".
-    window.location.hash = "#blessure";
+    setUrl("/hulp#blessure");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
 
     expect(q(/mijn kind is geblesseerd/i)).toBeInTheDocument();
@@ -402,8 +340,7 @@ describe("HulpFinder", () => {
     // Reproduction: filter on an audience the question isn't tagged for, then
     // pick it in the search. The category chip switched but the question was
     // filtered out before the category list was built, so nothing rendered.
-    setMockSearchParams(new URLSearchParams("audience=supporter"));
-    window.location.hash = "#blessure"; // role: ouder + speler, not supporter
+    setUrl("/hulp?audience=supporter#blessure"); // role: ouder + speler, not supporter
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
 
     expect(q(/mijn kind is geblesseerd/i)).toBeInTheDocument();
@@ -423,12 +360,44 @@ describe("HulpFinder", () => {
     // already-right category, so that reveal changes no state and the scroll
     // effect — keyed on `[openId, category]` — has no reason to run: the
     // reveal has to scroll (and disarm `pendingScroll`) itself.
-    window.location.hash = "#blessure";
+    setUrl("/hulp#blessure");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
 
     scrollIntoView.mockClear();
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     expect(scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("a #<slug> deep-link rewrites the URL in place — both params, the slug hash, no new history entry", () => {
+    setUrl("/hulp?audience=supporter#blessure");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    expect(pushState).not.toHaveBeenCalled();
+    expect(window.location.pathname + window.location.search).toBe(
+      "/hulp?categorie=medisch",
+    );
+    expect(window.location.hash).toBe("#blessure");
+  });
+
+  it("keeps the member panel's ?member= param on a filter press", () => {
+    setUrl("/hulp?member=node-gc");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
+    expect(lastUrl(pushState)).toBe(
+      "/hulp?member=node-gc&categorie=medisch#hulp",
+    );
+  });
+
+  it("restores both previous facets on browser back (popstate)", () => {
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ouder" }));
+    fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
+    act(() => {
+      setUrl("/hulp");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    for (const alles of screen.getAllByRole("button", { name: "Alles" })) {
+      expect(alles).toHaveAttribute("aria-pressed", "true");
+    }
   });
 
   it("shows an empty state when there are no paths", () => {

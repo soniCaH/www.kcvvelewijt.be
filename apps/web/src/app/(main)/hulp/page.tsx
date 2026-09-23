@@ -15,7 +15,6 @@
  */
 
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Effect } from "effect";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
@@ -155,16 +154,12 @@ export default async function HulpHubPage() {
               hierboven op een naam, functie of vraag.
             </p>
 
-            {/* `<HulpFinder>` reads `?audience` via `useSearchParams`, so it must
-                sit under a Suspense boundary on this statically-rendered (ISR) route. */}
+            {/* Prerendered with the page: the finder keeps its facets in the
+                URL without `useSearchParams()`, so it ships in the HTML instead
+                of a placeholder that the hydrated finder would push ~1900px
+                down the page. */}
             <div className="mt-8">
-              <Suspense
-                fallback={
-                  <div className="border-ink bg-cream h-40 border-2 shadow-[3px_3px_0_0_var(--color-ink)] motion-safe:animate-pulse" />
-                }
-              >
-                <HulpFinder responsibilityPaths={responsibilityPaths} />
-              </Suspense>
+              <HulpFinder responsibilityPaths={responsibilityPaths} />
             </div>
           </section>
 
