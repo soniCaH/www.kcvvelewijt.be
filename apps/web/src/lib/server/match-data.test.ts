@@ -17,7 +17,13 @@ vi.mock("@/components/match/transform", () => ({
   }),
 }));
 
+import { Effect, Layer } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { SanityReadError } from "@/lib/sanity/fetch-groq";
+import {
+  TeamRepository,
+  type TeamRepositoryInterface,
+} from "@/lib/repositories/team.repository";
 import type { Match } from "@/lib/effect/schemas";
 import {
   getFirstTeamStripData,
@@ -123,6 +129,33 @@ describe("getFirstTeamStripData", () => {
 
     expect(data?.result?.id).toBe(1);
     expect(data?.fixture?.id).toBe(2);
+  });
+
+  it("degrades a failed Sanity teams read in-effect, so runPromise never sees a defect (#3135)", async () => {
+    // At build, a Sanity defect reaching `runPromise` bails the whole page to
+    // on-demand rendering — too much for a strip. Run the real effect against
+    // a failing repository: it must resolve to "no teams", not reject.
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    runPromiseMock.mockImplementationOnce((effect) =>
+      Effect.runPromise(
+        effect.pipe(
+          Effect.provide(
+            Layer.succeed(TeamRepository, {
+              findAll: () =>
+                Effect.fail(
+                  new SanityReadError({ cause: new Error("HTTP 503") }),
+                ),
+            } as unknown as TeamRepositoryInterface),
+          ),
+        ) as Effect.Effect<unknown>,
+      ),
+    );
+
+    expect(await getFirstTeamStripData()).toBeNull();
+    // `null` alone would also come out of the outer `try/catch`; the point is
+    // that the read itself resolved.
+    await expect(runPromiseMock.mock.results[0]!.value).resolves.toEqual([]);
+    warn.mockRestore();
   });
 
   it("runs exactly two fetches: the team list, then that team's feed", async () => {

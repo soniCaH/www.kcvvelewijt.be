@@ -188,10 +188,12 @@ The rule, enforced by `apps/web/src/app/__tests__/isr-route-config.test.ts`:
 - **Every `generateStaticParams` returns exactly `[]`.** The build renders no slug page, so it reads
   nothing for those routes; each slug renders on its first request and ISR caches it. A failed first
   request is a 500 that is never cached.
-- **At build, `runPromise` turns a `SanityReadError` defect into `connection()`** (pinned by
-  `runtime.test.ts`), so Next leaves that one prerendered page out and serves it on demand,
-  uncached, until the next deploy. A code defect still dies — a red build still means the code is
-  wrong. At runtime nothing changes.
+- **At build, `runPromise` turns a transient `SanityReadError` defect into `connection()`**
+  (pinned by `runtime.test.ts`), so Next leaves that one prerendered page out and serves it on
+  demand, uncached, until the next deploy. Transient means transport, 5xx or 429
+  (`SanityReadError.transient`). A permanent Sanity failure (an invalid GROQ query, a bad token) and
+  a code defect still die — a red build still means the code or config is wrong. At runtime nothing
+  changes.
 
 Skipping just the failed slug was measured and rejected: the only hook (`connection()` at build)
 flips the **whole** dynamic route to `no-store`. Proof: `next build` against a non-existent Sanity

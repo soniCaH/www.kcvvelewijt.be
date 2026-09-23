@@ -121,8 +121,10 @@ const runtime = ManagedRuntime.make(AppLayer);
  * `SanityReadError` awaits `connection()`, which throws Next's dynamic-usage
  * signal: Next skips that one page and serves it on demand, uncached, until
  * the next deploy prerenders it again. Nothing degraded is written to the ISR
- * cache. Only a `SanityReadError` takes that exit — any other defect (a code
- * bug) still rejects as before, so a red build still means the code is wrong.
+ * cache. Only a **transient** `SanityReadError` (transport, 5xx, 429 — see
+ * `SanityReadError.transient`) takes that exit. A permanent one (an invalid
+ * GROQ query, a bad token) and any other defect (a code bug) still reject as
+ * before, so a red build still means the code or config is wrong.
  * Outside the build nothing changes: a runtime failure throws and ISR keeps
  * serving the last good page. A slug route never reaches this at build — its
  * `generateStaticParams` returns `[]` (`isr-route-config.test.ts`).
@@ -157,6 +159,7 @@ export const runPromise = <A>(
       // At build, `connection()` throws Next's own dynamic-usage signal (#3135).
       if (
         squashed instanceof SanityReadError &&
+        squashed.transient &&
         process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD
       ) {
         await connection();

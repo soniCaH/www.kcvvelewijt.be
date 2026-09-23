@@ -176,6 +176,17 @@ describe("runPromise during `next build`", () => {
     expect(connection).toHaveBeenCalledOnce();
   });
 
+  it("leaves a permanent Sanity failure alone — an invalid GROQ query still fails the build", async () => {
+    vi.stubEnv("NEXT_PHASE", PHASE_PRODUCTION_BUILD);
+    const invalidQuery = Effect.fail(
+      new SanityReadError({
+        cause: Object.assign(new Error("HTTP 400"), { statusCode: 400 }),
+      }),
+    ).pipe(Effect.orDie);
+    expect(Runtime.isFiberFailure(await rejectionOf(invalidQuery))).toBe(true);
+    expect(connection).not.toHaveBeenCalled();
+  });
+
   it("leaves a code defect alone — a red build still means the code is wrong", async () => {
     vi.stubEnv("NEXT_PHASE", PHASE_PRODUCTION_BUILD);
     const rejection = await rejectionOf(
