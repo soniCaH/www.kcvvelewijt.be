@@ -195,9 +195,8 @@ Three independent test layers, each owning a specific concern. Don't blur them �
 Rules worth knowing before you get there, because getting them wrong costs a CI round:
 
 - **VR baselines ship in the same PR as the code**, captured locally via Docker. Never open the PR first and capture after, and never reach for `@kcvv-bot update-vr-baselines` for a baseline your own change caused — that bot is for drift you cannot reproduce locally.
-- **Scope every capture** — a full run is ~40 min. Filter by story-ID prefix with `-u <prefix>` (`vr -u ui-button`) — the pattern only scopes when it follows `-u`. A bare positional in check mode is silently ignored (the full suite runs), and a `--testPathPatterns=` flag is rejected outright.
+- **Every capture goes through a wrapper script** — `pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>`, or `vr:update:single` below the 8 GB Docker floor. `apps/web/scripts/vr-docker.mjs` refuses anything unscoped (`vr:check` always, the update modes without a story-id pattern), and `VR_FULL_RUN=1` is the only override. A full run is ~40 min on CI's native amd64 and ~2.5 h locally under the emulated pin. Reaching the runner directly captures on arm64 and will not match CI. See "The unscoped guard" in `docs/agents/testing-ops.md` (#2380, #3140).
 - **On an unpinned VR container, do not treat a local VR failure as a regression** without first checking the story against CI's render — arm64 on Apple Silicon drifts on display-serif stories. With the `platform: linux/amd64` pin (the committed default) a local failure is real. See "The amd64 pin — scoped runs only" in `docs/agents/testing-ops.md` (#2370).
-- **Unscoped local VR runs are refused** by `apps/web/scripts/vr-docker.mjs` — `vr:check` always, the update modes without a story-id pattern. Scope with `pnpm vr:update:story -- <story-id-prefix>`; `VR_FULL_RUN=1` is the only override. See "The unscoped guard" in `docs/agents/testing-ops.md` (#2380).
 
 <!-- BEGIN:nextjs-agent-rules -->
 

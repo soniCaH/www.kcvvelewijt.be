@@ -29,7 +29,7 @@
     "fixtures:sync": "tsx scripts/sync-fixture-images.ts",
     "vr:build-storybook": "rm -rf storybook-static && storybook build",
     "vr:run": "concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 120000 --includeTags vr --excludeTags vr-skip\"",
-    "vr:run:update": "concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 120000 --includeTags vr --excludeTags vr-skip -u\"",
+    "vr:run:update": "[ \"$CI\" = true ] || { echo >&2 'vr:run:update is CI-only. Capture locally with: pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>'; exit 1; }; concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 120000 --includeTags vr --excludeTags vr-skip -u\"",
     "vr:run:single": "concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 120000 --includeTags vr --excludeTags vr-skip --maxWorkers=1\"",
     "vr:check": "node scripts/vr-docker.mjs check",
     "vr:update": "node scripts/vr-docker.mjs update",

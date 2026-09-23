@@ -75,7 +75,7 @@ Before writing any new file that lands in a folder with two or more existing pee
 - New user-facing feature? It needs analytics — events, GTM, and GA4 — per the PRD requirement.
 - Schema change? Edit packages/sanity-schemas/src/<file>.ts only. Both studios consume it; there are no per-studio copies.
 - Adding or removing a dependency? Do NOT let pnpm rewrite the lockfile. Run the add once to resolve the version, then `git checkout origin/main -- pnpm-lock.yaml`, hand-insert the 3 blocks (importers / packages / snapshots) in prettier style at their alphabetical positions, and validate with `corepack pnpm install --frozen-lockfile` — it must print "Already up to date" without rewriting.
-- Visual change to a VR-tagged story? Capture the new baselines in THIS PR, scoped: `-u <story-id-prefix>`. Never run an unscoped update — it rewrites unrelated baselines.
+- Visual change to a VR-tagged story? Capture the new baselines in THIS PR, through the workspace script and nothing else: `pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>`. That script is what puts the capture inside the pinned amd64 container — reaching the runner directly captures on arm64 and will not match CI. An unscoped update is refused, because it would rewrite unrelated baselines.
 - Changed the architecture CLAUDE.md describes (new package, renamed path, schema ownership)? Update .claude/CLAUDE.md in this PR.
 - Renamed or removed a route, or changed a club fact? Re-verify apps/web/public/llms.txt against the live route tree.
 - Touched a plan or doc file? Re-read it and confirm its paths, script names, and snippets still match the tree.

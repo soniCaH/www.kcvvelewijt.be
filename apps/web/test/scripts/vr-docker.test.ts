@@ -3,8 +3,13 @@
  * Guard fixture for `apps/web/scripts/vr-docker.mjs` (#2380). `decide()` is the
  * pure decision; the two spawn cases prove it is wired to the CLI's exit code
  * and that a refusal never reaches the Storybook build or Docker.
+ *
+ * The last block covers the other half of the same hazard: `vr:run:update` in
+ * `package.json`, which bypasses this wrapper entirely and is gated on CI
+ * instead (#3140).
  */
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -97,6 +102,36 @@ describe("decide", () => {
 
   it("rejects an unknown mode", () => {
     expect(() => decide({ mode: "nope", args: [] })).toThrow(/nope/);
+  });
+});
+
+describe("the native update script", () => {
+  /** `vr:run:update`'s CI gate, run on its own — never the capture behind it. */
+  const guard = () => {
+    const { scripts } = JSON.parse(
+      readFileSync(join(dirname(SCRIPT), "..", "package.json"), "utf8"),
+    ) as { scripts: Record<string, string> };
+    const [gate] = scripts["vr:run:update"].split("; concurrently");
+    return (CI: string) =>
+      spawnSync("sh", ["-c", `${gate}; echo REACHED_CAPTURE`], {
+        encoding: "utf8",
+        env: { ...process.env, CI },
+      });
+  };
+
+  // vr:run:update is `test-storybook -u` with no wrapper and no container, so
+  // run on a developer's Mac it rewrites every baseline on arm64 (#2370). CI is
+  // the only place it is correct, and Actions always sets CI=true (#3140).
+  it("refuses outside CI, before reaching the capture", () => {
+    const result = guard()("");
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).not.toContain("REACHED_CAPTURE");
+    expect(result.stderr).toContain("vr:update:story");
+  });
+
+  it("lets CI through", () => {
+    expect(guard()("true").stdout).toContain("REACHED_CAPTURE");
   });
 });
 

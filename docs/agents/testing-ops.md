@@ -201,7 +201,12 @@ through `apps/web/scripts/vr-docker.mjs`, which refuses an unscoped local run
 - **The update modes are refused without a positional pattern.** Flags do not
   count; `pnpm vr:update -- --maxWorkers=1` is still unscoped.
 
-`VR_FULL_RUN=1` is the only override, for a deliberate full local run:
+**The refusal is a guard, not a budget.** The pin that buys byte-identity is
+the same pin that costs the wall-clock, so no speed-up ever reopens the
+unscoped local run.
+
+`VR_FULL_RUN=1` is the only override, and a deliberate human one — when the
+guard blocks an agent the answer is a scoped run, never this variable:
 
 ```bash
 VR_FULL_RUN=1 pnpm --filter @kcvv/web run vr:update
@@ -209,7 +214,15 @@ VR_FULL_RUN=1 pnpm --filter @kcvv/web run vr:update
 
 CI is unaffected — `.github/workflows/ci.yml` and `vr-baseline-update.yml` call
 `vr:ci` / `vr:ci:update`, which run `vr:run*` directly without Docker. The guard
-decision is a pure function covered by `apps/web/test/scripts/vr-docker.test.ts`.
+decision is a pure function covered by `apps/web/test/scripts/vr-docker.test.ts`,
+and `apps/web/test/scripts/vr-command-surface.test.ts` holds this file and the
+rest of the agent instruction surface to the wrapper — no doc may hand out the
+raw runner, the raw container command or an argument-carrying `-u` (#3140).
+
+`vr:run:update` — the one script that writes baselines without this wrapper —
+refuses to start unless `CI` is exactly `true`. A developer can still set it by
+hand, so the arm64 capture it would produce locally is blocked by default, not
+impossible (#3140).
 
 The wrapper exists as a script rather than a prefix on the package.json script
 bodies because pnpm appends `-- <args>` to the **end** of the script string — a
@@ -218,39 +231,66 @@ guard in front of the `&&` chain would never see the scoping pattern.
 ### Scoping a VR run
 
 A full capture is ~40 min — ~2.5 h locally under the amd64 pin — so always
-scope. **The pattern must follow `-u` — never a `--testPathPattern(s)=` flag,
-and never a bare positional on its own.** In check mode (no `-u`) a bare
-positional pattern is silently ignored and the whole suite runs — which is why
-the guard refuses check mode outright (see "The unscoped guard" above).
-
-`test-storybook` parses its CLI with commander against a closed option
-allowlist (`--maxWorkers`, `--testTimeout`, `-u`, `--includeTags`,
-`--excludeTags`, `--listTests`, `--ci`, `--shard`, … — see
-`getParsedCliOptions` in `node_modules/@storybook/test-runner/dist/test-storybook.js`).
-Any unrecognised `--flag` prints the help text and exits 1 — including Jest's
-own `--testPathPatterns`, which is **not** passed through. Positional operands
-(`program.args`) are forwarded to Jest, but only positionals following `-u`
-scope (see above) — making `-u <prefix>` the only working channel (#2370).
-
-The regex matches the synthetic test files the runner writes to a temp dir, one
-per story **title** (component), named from the story ID:
-`features-share-goalkcvvtemplate.test.js`, `ui-button.test.js`. It does **not**
-match source `.stories.tsx` paths, and it cannot select a single story export
-within a component. Anchor tightly — `ui-button` also matches nothing else, but
-`share` would pull in every `features-share-*` file.
+scope, and always through the workspace script:
 
 ```bash
-# Which files would run? Fast, exits before launching Chromium.
-docker compose -f docker-compose.vr.yml run --build --rm vr --listTests features-share
-
-# Iterate without the ~2 min Storybook rebuild that the pnpm scripts always do
-# (only valid while apps/web/src is unchanged — otherwise rebuild first).
-docker compose -f docker-compose.vr.yml run --build --rm vr -u --maxWorkers=1 features-share
+pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>
 ```
 
-Tag-based scoping is the other axis: `--includeTags` / `--excludeTags`, or the
-`STORYBOOK_INCLUDE_TAGS` / `STORYBOOK_EXCLUDE_TAGS` / `STORYBOOK_SKIP_TAGS`
-env vars (comma-separated) for the docker-compose `environment:` block.
+That script, and its low-memory twin `vr:update:single` below the 8 GB Docker
+floor, are the only ways to write a scoped baseline locally — the full-run
+override above (`VR_FULL_RUN=1 … vr:update`) is the one unscoped path. Each owns three things,
+and every raw form drops at least one: the runner flag, the Storybook rebuild,
+and the `docker compose` call carrying `platform: linux/amd64`. Reach the runner
+directly — a bare flag, or `vr:run:update` — and the capture renders on arm64,
+which does not match CI (#2370). Hand-write the container run and the pin still
+holds, but the rebuild and the scoping guard are gone (#2380).
+
+The runner's CLI is why the wrapper has to own that flag. `test-storybook`
+parses it with commander against a closed option allowlist (`--maxWorkers`,
+`--testTimeout`, `--includeTags`, `--excludeTags`, `--listTests`, `--ci`,
+`--shard`, … — see `getParsedCliOptions` in
+`node_modules/@storybook/test-runner/dist/test-storybook.js`). Any unrecognised
+`--flag` prints the help text and exits 1 — including Jest's own
+`--testPathPatterns`, which is **not** passed through. Positional operands
+(`program.args`) do reach Jest, but only the ones following the update flag
+scope; a bare positional in check mode is silently dropped and the whole suite
+runs instead.
+
+The pattern is a regex over the synthetic test files the runner writes to a
+temp dir, one per story **title** (component), named from the story ID:
+`features-share-goalkcvvtemplate.test.js`, `ui-button.test.js`. It does **not**
+match source `.stories.tsx` paths, and it cannot select a single story export
+within a component. Anchor tightly — `ui-button` matches nothing else, but
+`share` would pull in every `features-share-*` file.
+
+To test a prefix before spending the capture, match it against the story index
+rather than the runner — no container, no rebuild, instant. Filter on the tags
+the run itself selects on, or the answer counts stories the capture never
+visits:
+
+```bash
+jq -r '.entries[] | select((.tags // []) | index("vr") and (index("vr-skip") | not)) | .id' \
+  apps/web/storybook-static/index.json | grep '^features-share'
+```
+
+The tag pair is restated there; `apps/web/package.json`'s `--includeTags vr
+--excludeTags vr-skip` is the authoritative copy, so re-read that if the two
+ever disagree. `index.json` is a build output and `vr:build-storybook` opens by
+deleting it — run `pnpm --filter @kcvv/web run vr:build-storybook` first if it
+is not there.
+
+Tag-based scoping is the other axis, and it goes through the same script. The
+wrapper forwards extra options, and `--includeTags` is on its value-option list,
+so the flag's value is not mistaken for the scoping pattern:
+
+```bash
+pnpm --filter @kcvv/web run vr:update:story -- --includeTags <tag> <story-id-prefix>
+```
+
+The `STORYBOOK_INCLUDE_TAGS` / `STORYBOOK_EXCLUDE_TAGS` / `STORYBOOK_SKIP_TAGS`
+env vars (comma-separated) are that same axis read from the compose file's
+`environment:` block — CI's channel, not a local one.
 
 ### Captures are viewport-clipped, not full-page
 
@@ -399,7 +439,7 @@ This precedent was established in the Phase 2 tracer-bullet PR (#1568).
 
 ### Opt-in via the `vr` tag
 
-The VR suite runs `test-storybook --includeTags vr`, so only story files tagged
+The VR suite runs with `--includeTags vr`, so only story files tagged
 with `vr` in their meta participate. Add the tag at the meta level:
 
 ```typescript
@@ -679,8 +719,8 @@ the more likely ways a tag stops actually running:
   `apps/web/src/app/__tests__/cross-page-consistency.test.ts`) and parses
   real `tags: [...]` array literals out of what's left, rather than
   grepping raw file text.
-- **The tagged story is excluded from the VR run itself.** The run is
-  `test-storybook --includeTags vr --excludeTags vr-skip`
+- **The tagged story is excluded from the VR run itself.** The run carries
+  `--includeTags vr --excludeTags vr-skip`
   (`apps/web/package.json`) — a story is only ever visited when its
   Storybook-combined tags (meta `tags` ∪ the story's own, via
   `combineTags`) include `vr` and exclude `vr-skip`. The test
