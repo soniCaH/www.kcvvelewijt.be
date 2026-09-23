@@ -525,6 +525,14 @@ export function HubSearch({
     ? "shadow-[4px_4px_0_0_var(--color-ink)]"
     : SECTION_NAV_CHIP_SHADOW_CLASS;
   const iconSize = isHero ? 20 : 16;
+  // The field's end margin while the clear button shows: it stops the field's
+  // box short of that button's 44px hit area, so a tap at the end of the text
+  // never lands on the button instead of the field. Derived, not free: the hit
+  // area reaches (44 − box) / 2 + 6px past the button's layout slot, of which
+  // the row's `gap-2` absorbs 8px — 4px left for the 32px hero button (20px
+  // icon), 6px for the 28px nav one (16px icon). Change `iconSize`, the gap or
+  // the pull-back and this must follow (tap-targets.spec.ts measures it).
+  const clearGiveBack = isHero ? "mr-1" : "mr-1.5";
   const dropdownWidth = isHero
     ? "w-full"
     : "right-0 w-[24rem] max-w-[calc(100vw-1.5rem)]";
@@ -638,7 +646,7 @@ export function HubSearch({
           // border at viewports below ~375px instead of the box squeezing.
           className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent focus:outline-none ${
             isHero ? "text-[15px]" : "text-[13px]"
-          }`}
+          } ${value ? clearGiveBack : ""}`}
         />
         {value && (
           <button
@@ -649,8 +657,9 @@ export function HubSearch({
               inputRef.current?.focus();
             }}
             aria-label="Wissen"
-            // Pull-back padding widens the tap target without shifting layout (B4).
-            className="text-ink-muted hover:text-ink -m-1.5 flex-shrink-0 p-1.5 transition-colors"
+            // Pull-back padding widens the visible box without shifting layout
+            // (B4); `hit-area` grows the tap target to 44px on top of it.
+            className="hit-area text-ink-muted hover:text-ink -m-1.5 flex-shrink-0 p-1.5 transition-colors"
           >
             <X size={iconSize} aria-hidden />
           </button>
