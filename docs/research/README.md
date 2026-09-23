@@ -4,6 +4,10 @@ Produced 2026-08-13 from a multi-agent research sweep over 130+ club websites an
 design references. **This file is the front door.** A new session should not read the whole corpus —
 it is ~7,900 lines.
 
+> **This directory holds two corpora.** Everything down to *The finding that reframes everything*
+> is the **website / design** corpus (2026-08). The **test-suite** corpus (2026-09) has its own index at
+> the bottom of this file.
+
 ## Reading order
 
 0. **[`handoff.md`](./handoff.md)** — if you are here to _build_, start and stop here. Ten build
@@ -102,3 +106,27 @@ slugs), jersey numbers (0). Three more club practices exist only in a PSD letter
 **The gap between this site and the research recommendations is mostly content and authoring habits,
 not code** — and with one author (C15), that argues for evergreen pages and system-generated content
 over anything with a publishing cadence. Any spec should reflect that ordering.
+
+## Test-suite corpus — 2026-09
+
+Produced by [Test suite walk — findings map](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3078), a `/wayfinder` map whose 22 tickets are all
+closed. **The map is the front door for this corpus**, not this file: it carries every ruling as a
+one-line gist with a link to the ticket holding the detail, plus the handoff contract for the spec
+session. Read it first; open a document here only when a ruling needs its source.
+
+| Document | What it establishes |
+| --- | --- |
+| [`test-suite-inventory.md`](./test-suite-inventory.md) | The 2026-09-22 baseline: counts, runtimes, skips, retries, where each check runs |
+| [`test-suite-flake-ledger.md`](./test-suite-flake-ledger.md) | Every known flake, its layer, root-cause class and status |
+| [`test-layer-balance.md`](./test-layer-balance.md) | What belongs in unit, component, contract, VR and E2E |
+| [`e2e-determinism.md`](./e2e-determinism.md) | Keep Playwright; move E2E onto deterministic data |
+| [`vr-tooling-and-determinism.md`](./vr-tooling-and-determinism.md) | Keep `@storybook/test-runner` and the amd64 pin; tune in place |
+| [`vitest-runner-and-environment.md`](./vitest-runner-and-environment.md) | Keep Vitest and happy-dom; two of four "gaps" are Vitest's own shim |
+| [`ci-for-a-turborepo-monorepo.md`](./ci-for-a-turborepo-monorepo.md) | Keep Actions and the one-job shape; four ordered changes |
+| [`testmode-spike.md`](./testmode-spike.md) | What `next/experimental/testmode` does and does not reach |
+| [`vr-diff-story-map.md`](./vr-diff-story-map.md) | A diff→stories map is possible, and the verdict is still *keep the full run* |
+| [`agent-layer-suite-command-sweep.md`](./agent-layer-suite-command-sweep.md) | 35 agent-facing suite commands: 7 wrong, 12 bypassing, 1 stale |
+
+**One of these is alive; nine are frozen.** `test-suite-flake-ledger.md` is the **register of the unit
+of work** — a flake class is the unit, never an occurrence — and it is edited as classes open and
+close. The other nine are dated evidence: cite them, do not revise them.
