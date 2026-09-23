@@ -149,7 +149,7 @@ export default async function HulpHubPage() {
             >
               Veelgestelde vragen
             </EditorialHeading>
-            <p className="text-ink-soft mt-3 max-w-[var(--container-prose)] text-base leading-relaxed">
+            <p className="text-ink mt-3 max-w-[var(--container-prose)] text-base leading-relaxed">
               Kies je rol of een categorie en blader door de antwoorden — elk
               antwoord geeft je de stappen én de juiste contactpersoon. Of zoek
               hierboven op een naam, functie of vraag.
@@ -188,7 +188,7 @@ export default async function HulpHubPage() {
             >
               Het organigram — wie-is-wie
             </EditorialHeading>
-            <p className="text-ink-soft mt-3 max-w-[var(--container-prose)] text-base leading-relaxed">
+            <p className="text-ink mt-3 max-w-[var(--container-prose)] text-base leading-relaxed">
               Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
             </p>
 

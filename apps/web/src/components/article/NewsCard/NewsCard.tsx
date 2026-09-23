@@ -350,7 +350,7 @@ export const NewsCard = ({
               "text-body-md line-clamp-2",
               // Full-opacity cream on dark surfaces — opacity-reduced cream
               // (e.g. `text-cream/85`) trips axe contrast on bg-jersey-deep.
-              isDark ? "text-cream" : "text-ink-soft",
+              isDark ? "text-cream" : "text-ink",
             )}
           >
             {dek}

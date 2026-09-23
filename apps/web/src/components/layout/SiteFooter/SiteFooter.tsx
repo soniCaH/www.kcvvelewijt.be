@@ -67,7 +67,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                     <Link
                       href={link.href}
                       data-footer-column={column.heading}
-                      className="text-ink-soft hover:text-jersey-deep hover:decoration-jersey-deep -my-1 inline-block py-1 text-[14px] leading-snug font-medium underline decoration-transparent underline-offset-2 transition-colors duration-150"
+                      className="text-ink hover:text-jersey-deep hover:decoration-jersey-deep -my-1 inline-block py-1 text-[14px] leading-snug font-medium underline decoration-transparent underline-offset-2 transition-colors duration-150"
                     >
                       {link.label}
                     </Link>
@@ -89,7 +89,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                 defend, and 1909 is inherited via mergers — see PRODUCT.md
                 "Origin is told, never asserted" (#2435). */}
             <span>KCVV Elewijt</span>
-            <span aria-hidden="true" className="text-cream/40 mx-2">
+            <span aria-hidden="true" className="text-cream-quiet mx-2">
               ·
             </span>
             <span>{FOOTER_ADDRESS_LINE}</span>
@@ -97,7 +97,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
           <div className="flex items-center gap-4">
             <Link
               href="/privacy"
-              className="text-cream/85 hover:text-cream inline-flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-colors md:text-[10.5px]"
+              className="text-cream-quiet hover:text-cream inline-flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-colors md:text-[10.5px]"
             >
               Privacy
             </Link>
@@ -113,7 +113,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                 >
                   {/* 44px tap target (MOB-5); the 24px bordered box stays the
                       visual so the dense colofon is unchanged. */}
-                  <span className="border-cream/85 text-cream/85 group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
+                  <span className="border-cream-quiet text-cream-quiet group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
                     <FacebookLogo className="h-3 w-3" aria-hidden="true" />
                   </span>
                 </a>
@@ -128,7 +128,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                 >
                   {/* 44px tap target (MOB-5); the 24px bordered box stays the
                       visual so the dense colofon is unchanged. */}
-                  <span className="border-cream/85 text-cream/85 group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
+                  <span className="border-cream-quiet text-cream-quiet group-hover/social:border-cream group-hover/social:text-cream inline-flex h-6 w-6 items-center justify-center border transition-colors">
                     <InstagramLogo className="h-3 w-3" aria-hidden="true" />
                   </span>
                 </a>

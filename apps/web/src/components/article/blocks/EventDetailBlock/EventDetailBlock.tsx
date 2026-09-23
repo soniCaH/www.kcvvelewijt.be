@@ -254,7 +254,7 @@ function SessionsGrid({ sessions }: { sessions: ResolvedSession[] }) {
             <dd className="text-ink m-0 font-serif text-[14px] leading-tight font-bold italic">
               {session.date.weekday.replace(/^./, (c) => c.toUpperCase())}
             </dd>
-            <dd className="text-ink-soft m-0 font-mono text-[11px] leading-tight tracking-[0.06em]">
+            <dd className="text-ink-muted m-0 font-mono text-[11px] leading-tight tracking-[0.06em]">
               {time ?? "—"}
             </dd>
           </div>
@@ -312,7 +312,7 @@ function Note({ blocks }: { blocks: PortableTextBlock[] }) {
   return (
     <div
       data-event-detail-note="true"
-      className="text-ink-soft font-serif text-[15px] leading-[1.5] italic"
+      className="text-ink font-serif text-[15px] leading-[1.5] italic"
     >
       <PortableText value={blocks} />
     </div>

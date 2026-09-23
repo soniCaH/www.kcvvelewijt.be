@@ -41,11 +41,11 @@ export const metadata = buildPageMetadata({
 /**
  * Cream/ink prose styling for the legal copy. Replaces the legacy
  * typography-plugin prose treatment with design-system tokens only: H2s in
- * Freight Display 700, body in Archivo (ink-soft), links jersey-deep, dotted
+ * Freight Display 700, body in Archivo (ink), links jersey-deep, dotted
  * section rules spaced via the `[role=separator]` child selector.
  */
 const proseClasses = [
-  "text-ink-soft",
+  "text-ink",
   "[&_[role=separator]]:my-7",
   "[&_h2]:mt-0 [&_h2]:mb-2.5 [&_h2]:font-display [&_h2]:font-bold [&_h2]:text-ink",
   "[&_h2]:text-display-sm",

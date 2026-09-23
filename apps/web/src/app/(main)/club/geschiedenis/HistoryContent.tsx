@@ -543,7 +543,7 @@ function TimelineContent() {
         <h2 className="text-ink-muted text-mono-sm border-ink/30 mb-4 border-l-2 pl-4 font-mono tracking-[0.08em] uppercase">
           Credits
         </h2>
-        <p className="text-body-md text-ink-soft">
+        <p className="text-body-md text-ink">
           Met dank aan Martijn van den Berg voor de foto&apos;s en teksten over
           de geschiedenis van KCVV Elewijt!
         </p>

@@ -223,11 +223,11 @@ function Kicker({ children, tone }: { children: string; tone: PageHeroTone }) {
 
 /**
  * The lead's colour follows the field, and both registers that can sit on dark
- * read it from here — two definitions of `text-cream/85` is how a tone drifts.
+ * read it from here — two definitions of one lead tone is how a tone drifts.
  */
 const LEAD_TONE_CLASS: Record<PageHeroTone, string> = {
-  cream: "text-ink-soft",
-  dark: "text-cream/85",
+  cream: "text-ink",
+  dark: "text-cream",
 };
 
 /** `register="minimal"` — no band, no photo. Content starts immediately. */
@@ -483,7 +483,7 @@ export function PageHero(props: PageHeroProps) {
       {showLead ? (
         <p
           className={cn(
-            "font-display text-ink-soft mt-3.5 leading-[1.38] italic",
+            "font-display text-ink mt-3.5 leading-[1.38] italic",
             showImage
               ? "text-[1.05rem]"
               : "max-w-[var(--container-prose)] text-[1.25rem]",

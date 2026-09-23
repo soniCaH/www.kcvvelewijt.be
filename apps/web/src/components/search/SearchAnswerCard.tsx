@@ -107,7 +107,7 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
         </ul>
       )}
 
-      <p className="text-ink-soft mt-2.5 flex items-center gap-1.5 font-mono text-[10px] leading-snug">
+      <p className="text-ink-muted mt-2.5 flex items-center gap-1.5 font-mono text-[10px] leading-snug">
         <Warning size={12} aria-hidden className="text-alert flex-shrink-0" />
         {DISCLAIMER}
       </p>

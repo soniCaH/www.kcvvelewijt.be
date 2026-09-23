@@ -170,7 +170,7 @@ export function TimelineImage({
       >
         {children}
       </TapedFigure>
-      <figcaption className="text-body-sm text-ink-soft mt-3 px-1 text-center italic">
+      <figcaption className="text-body-sm text-ink-muted mt-3 px-1 text-center italic">
         {caption}
       </figcaption>
     </figure>

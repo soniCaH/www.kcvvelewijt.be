@@ -332,7 +332,7 @@ export function OrganigramExplorer({
         as="nav"
         className="border-cream/10 border-b"
         ariaLabel="Rapporteringslijn"
-        trackClassName="text-cream/75 flex items-center gap-1 px-4 py-2 font-mono text-[11px]"
+        trackClassName="text-cream-quiet flex items-center gap-1 px-4 py-2 font-mono text-[11px]"
         arrowClassName="shadow-[var(--shadow-paper-sm-soft)] hover:shadow-[3px_3px_0_0_var(--color-ink-muted)]"
         fadeFromClassName="from-jersey-deep-dark"
       >
@@ -343,7 +343,7 @@ export function OrganigramExplorer({
               key={node.id}
               className="flex items-center gap-1 whitespace-nowrap"
             >
-              {i > 0 && <span className="text-cream/40">▸</span>}
+              {i > 0 && <span className="text-cream-quiet">▸</span>}
               {isLast ? (
                 <span aria-current="true" className="text-warm font-semibold">
                   {node.title}
@@ -390,12 +390,12 @@ export function OrganigramExplorer({
                 data-node-id={view.parent.id}
                 onClick={() => navigate(view.parent!.id)}
                 aria-label={`Omhoog naar ${view.parent.title}`}
-                className="border-cream/45 hover:border-cream text-cream/85 flex items-center gap-1.5 border bg-black/15 px-3 py-1.5 font-mono text-[11px] tracking-[0.04em] uppercase"
+                className="border-cream/45 hover:border-cream text-cream-quiet flex items-center gap-1.5 border bg-black/15 px-3 py-1.5 font-mono text-[11px] tracking-[0.04em] uppercase"
               >
                 <CaretUp size={11} aria-hidden /> {view.parent.title}
               </button>
             ) : (
-              <span className="text-cream/40 font-mono text-[11px] tracking-[0.06em] uppercase">
+              <span className="text-cream-quiet font-mono text-[11px] tracking-[0.06em] uppercase">
                 Hoogste niveau
               </span>
             )}
@@ -409,7 +409,7 @@ export function OrganigramExplorer({
                 onClick={() => navigate(siblingTarget(tree, focusId, -1))}
                 disabled={view.focusIndex <= 0}
                 aria-label="Vorige functie"
-                className="border-cream/35 text-cream/70 enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
+                className="border-cream/35 text-cream-quiet enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
               >
                 <CaretLeft size={14} aria-hidden />
               </button>
@@ -445,7 +445,7 @@ export function OrganigramExplorer({
                     type="button"
                     onClick={() => setSiblingsOpen((v) => !v)}
                     aria-expanded={siblingsOpen}
-                    className="text-cream/70 hover:text-cream font-mono text-[11px]"
+                    className="text-cream-quiet hover:text-cream font-mono text-[11px]"
                   >
                     {view.focusIndex + 1} / {view.siblings.length} ·{" "}
                     {siblingsOpen ? "verberg" : "alle functies"}
@@ -487,7 +487,7 @@ export function OrganigramExplorer({
                                 <ArrowRight size={10} aria-hidden />
                               </Link>
                             ) : (
-                              <span className="text-cream/75 font-mono text-[11px]">
+                              <span className="text-cream-quiet font-mono text-[11px]">
                                 {member.name?.trim() || "—"}
                               </span>
                             )}
@@ -504,7 +504,7 @@ export function OrganigramExplorer({
                 onClick={() => navigate(siblingTarget(tree, focusId, 1))}
                 disabled={view.focusIndex >= view.siblings.length - 1}
                 aria-label="Volgende functie"
-                className="border-cream/35 text-cream/70 enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
+                className="border-cream/35 text-cream-quiet enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
               >
                 <CaretRight size={14} aria-hidden />
               </button>
@@ -524,7 +524,7 @@ export function OrganigramExplorer({
                         "border px-2 py-1 font-mono text-[11px] uppercase",
                         sib.id === focusId
                           ? "border-warm bg-warm text-ink"
-                          : "border-cream/35 text-cream/80 hover:border-cream",
+                          : "border-cream/35 text-cream-quiet hover:border-cream",
                       )}
                     >
                       {sib.title}

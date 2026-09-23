@@ -149,7 +149,7 @@ function TeamLineup({
     <div className="flex flex-col">
       {/* Team-column header: mono caps, ink top border. Stylistic seam between
           the section heading above and the player rows below. */}
-      <h3 className="border-ink text-ink/70 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
+      <h3 className="border-ink text-ink-muted border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
         {teamName}
       </h3>
 
@@ -173,7 +173,7 @@ function TeamLineup({
           {substitutes.length > 0 && (
             <div className="mt-6">
               {/* BANK divider — separates starters from bench. */}
-              <h4 className="border-ink text-ink/70 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
+              <h4 className="border-ink text-ink-muted border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
                 Bank
               </h4>
               <ol className="list-none space-y-1">

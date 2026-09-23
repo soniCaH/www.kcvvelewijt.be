@@ -321,7 +321,7 @@ function ReservationHero({
           )}
 
           {venue && (
-            <div className="text-ink/75 font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
+            <div className="text-ink-muted font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
               {venue}
             </div>
           )}
@@ -409,7 +409,7 @@ function FullHero({
           )}
 
           {venue && (
-            <div className="text-ink/75 font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
+            <div className="text-ink-muted font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
               {venue}
             </div>
           )}

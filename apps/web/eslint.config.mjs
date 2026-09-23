@@ -94,6 +94,16 @@ const UNGUARDED_LOOP_PATTERN =
 const RAW_PALETTE_CLASS_PATTERN =
   "(?:text-shadow|text|bg|border|from|to|via|ring-offset|inset-ring|ring|divide|outline|decoration|shadow|fill|stroke|accent|caret|placeholder)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-[0-9]{2,3}(?![0-9])";
 
+// Two-Tier Text Rule (DESIGN.md → Colors → Named Rules, #2551/#2568). Text
+// has two tiers: `text-ink`/`text-ink-muted` on cream, `text-cream`/
+// `text-cream-quiet` on dark. `text-ink-soft` is not a tier (1.20:1 from ink),
+// and every `text-cream/NN` is either the rejected `/85` or a hand-rolled copy
+// of the `cream-quiet` token. The `ink-soft` token itself stays for surfaces,
+// so only the `text-` utility is banned. `\\x2F` is `/`: esquery ends a regex
+// at the first slash, escaped or not.
+const TEXT_INK_SOFT_PATTERN = "(?<![\\w-])text-ink-soft(?![\\w-])";
+const TEXT_CREAM_ALPHA_PATTERN = "(?<![\\w-])text-cream\\x2F[0-9]";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -195,6 +205,16 @@ const eslintConfig = [
           selector: matchesClassString(RAW_PALETTE_CLASS_PATTERN),
           message:
             "Raw Tailwind palette class — every colour comes from a design token, never a bare palette class (apps/web/DESIGN.md → Colors, the Token-Only Colour Rule).",
+        },
+        {
+          selector: matchesClassString(TEXT_INK_SOFT_PATTERN),
+          message:
+            "text-ink-soft is not a text tier — body voice is text-ink, metadata is text-ink-muted (apps/web/DESIGN.md → Colors, the Two-Tier Text Rule). bg-ink-soft stays allowed.",
+        },
+        {
+          selector: matchesClassString(TEXT_CREAM_ALPHA_PATTERN),
+          message:
+            "Fractional cream text — on dark, body voice is text-cream and metadata is text-cream-quiet, never on jersey-deep (apps/web/DESIGN.md → Colors, the Two-Tier Text Rule and the Whole-Cream Rule).",
         },
       ],
     },

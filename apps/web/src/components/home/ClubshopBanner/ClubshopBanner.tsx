@@ -67,7 +67,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
               Onze clubkledij
             </EditorialHeading>
 
-            <p className="text-cream/90 mb-6 max-w-2xl text-base leading-relaxed">
+            <p className="text-cream mb-6 max-w-2xl text-base leading-relaxed">
               Beschikbaar via Brandsfit, onze kledingpartner.
             </p>
 

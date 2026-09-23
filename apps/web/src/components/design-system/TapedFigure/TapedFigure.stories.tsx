@@ -36,7 +36,7 @@ const photoPlaceholder = (
     }}
     aria-label="Sample editorial photo"
   >
-    <span className="text-cream/60 font-mono text-[11px] tracking-[0.08em] uppercase">
+    <span className="text-cream-quiet font-mono text-[11px] tracking-[0.08em] uppercase">
       Editoriaal beeld
     </span>
   </div>

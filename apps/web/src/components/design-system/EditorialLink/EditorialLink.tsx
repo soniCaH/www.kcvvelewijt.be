@@ -18,7 +18,7 @@ export interface EditorialLinkProps extends Omit<
 
 const TEXT_TONE: Record<EditorialLinkTone, string> = {
   light: "text-jersey-deep",
-  dark: "text-cream/85",
+  dark: "text-cream",
 };
 
 // Hit area, not spacing (#2394). The label is set at `leading-none` —

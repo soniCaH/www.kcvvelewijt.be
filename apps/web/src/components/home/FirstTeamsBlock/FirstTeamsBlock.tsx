@@ -84,8 +84,8 @@ export interface FirstTeamsBlockProps {
  * **This is the decided dark-ground answer (#3103)**, not a stand-in for a
  * dark axis on `<EmptyState tier="slot">` — that tier stays ink-only by
  * design; see `EmptyState.tsx`'s own docblock for the other end of this
- * hand-off. `SkipCard` `text-cream/65`, band note `text-cream/80` stay this
- * file's own (not exported — only the frame itself is shared).
+ * hand-off. `SkipCard` `text-cream-quiet`, band note `text-cream` (#2551)
+ * stay this file's own (not exported — only the frame itself is shared).
  */
 export const HELD_OPEN_FRAME =
   "border-cream/40 border-2 border-dashed text-center";
@@ -93,7 +93,7 @@ export const HELD_OPEN_FRAME =
 function SkipCard({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`${HELD_OPEN_FRAME} text-cream/65 flex items-center justify-center px-4 py-3 font-mono text-xs tracking-wide uppercase`}
+      className={`${HELD_OPEN_FRAME} text-cream-quiet flex items-center justify-center px-4 py-3 font-mono text-xs tracking-wide uppercase`}
     >
       {children}
     </div>
@@ -235,7 +235,7 @@ function PlaceholderNotice({
           />
         </div>
       ) : null}
-      <p className="text-cream/80">{renderPlaceholderCopy(state)}</p>
+      <p className="text-cream">{renderPlaceholderCopy(state)}</p>
     </div>
   );
 }
@@ -248,7 +248,7 @@ function FirstTeamRow({ team }: { team: FirstTeamVM }) {
           {team.label}
         </span>
         {team.division ? (
-          <span className="text-cream/70 text-label mt-1 font-mono uppercase">
+          <span className="text-cream-quiet text-label mt-1 font-mono uppercase">
             {team.division}
           </span>
         ) : null}

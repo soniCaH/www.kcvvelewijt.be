@@ -245,7 +245,7 @@ describe("PageHero", () => {
         "text-cream",
       );
       expect(screen.getByText(/Alle wedstrijden en activiteiten/)).toHaveClass(
-        "text-cream/85",
+        "text-cream",
       );
     });
 

@@ -294,7 +294,7 @@ export function MatchEvents({
             instead of collapsing to one line beside a full column
             (#2562 review). */}
         <div className="flex flex-col">
-          <h3 className="border-ink text-ink/70 mb-2 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
+          <h3 className="border-ink text-ink-muted mb-2 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
             {homeTeamName}
           </h3>
           <EventList
@@ -304,7 +304,7 @@ export function MatchEvents({
           />
         </div>
         <div className="flex flex-col">
-          <h3 className="border-ink text-ink/70 mb-2 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
+          <h3 className="border-ink text-ink-muted mb-2 border-t pt-2 pb-3 font-mono text-[10px] tracking-[0.16em] uppercase">
             {awayTeamName}
           </h3>
           <EventList

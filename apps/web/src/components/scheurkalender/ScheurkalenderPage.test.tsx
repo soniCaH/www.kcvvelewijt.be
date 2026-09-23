@@ -273,7 +273,7 @@ describe("ScheurkalenderPage", () => {
       renderPage();
       // Match 3: KCVV A away at KSV Rumbeke → opponent first, KCVV second.
       const opponent = screen.getByText(/KSV Rumbeke/);
-      expect(opponent.className).toContain("text-ink-soft");
+      expect(opponent.className).not.toContain("font-extrabold");
       expect(opponent.nextElementSibling?.nextElementSibling).toHaveTextContent(
         "KCVV Elewijt A",
       );

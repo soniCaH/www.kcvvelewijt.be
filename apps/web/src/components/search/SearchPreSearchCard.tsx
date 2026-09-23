@@ -32,7 +32,7 @@ export function SearchPreSearchCard() {
         Niet zeker waar te beginnen?
       </EditorialHeading>
 
-      <p className="text-ink-soft mt-3 font-mono text-[11px] font-semibold tracking-[0.13em] uppercase">
+      <p className="text-ink-muted mt-3 font-mono text-[11px] font-semibold tracking-[0.13em] uppercase">
         Zoek bijvoorbeeld naar
       </p>
 

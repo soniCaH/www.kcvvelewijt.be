@@ -84,7 +84,7 @@ export function UltrasHero({ joinHref, upLink }: UltrasHeroProps) {
           De <span className="text-warm">luidste</span> hoek
         </h1>
 
-        <p className="text-cream/85 text-body-lg max-w-xl">
+        <p className="text-cream text-body-lg max-w-xl">
           Positief aanmoedigen van onze ploeg — vocaal, met trommels, met
           sfeermateriaal.
         </p>

@@ -177,7 +177,7 @@ export const ArticleMetadata = ({
             type="button"
             onClick={handleNativeShare}
             className={cn(
-              "text-ink-soft hover:text-jersey-deep -my-3.5 flex items-center gap-2 py-3.5 transition-colors",
+              "text-ink hover:text-jersey-deep -my-3.5 flex items-center gap-2 py-3.5 transition-colors",
               MONO_SMALL_CAPS,
             )}
           >

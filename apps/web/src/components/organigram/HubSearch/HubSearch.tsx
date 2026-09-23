@@ -553,7 +553,7 @@ export function HubSearch({
       <span className="font-display text-ink mt-1 block text-[15px] leading-tight font-semibold italic">
         {answerForward.path.question}
       </span>
-      <span className="text-ink-soft mt-1 line-clamp-1 block text-xs leading-relaxed">
+      <span className="text-ink mt-1 line-clamp-1 block text-xs leading-relaxed">
         {answerForward.path.summary}
       </span>
       <span className="mt-2 flex items-center justify-between gap-2">

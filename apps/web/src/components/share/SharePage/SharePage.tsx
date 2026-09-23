@@ -625,7 +625,7 @@ export function SharePage({ matches, players }: SharePageProps) {
   };
 
   const labelClass =
-    "font-mono text-sm font-semibold uppercase tracking-wide text-ink-soft";
+    "font-mono text-sm font-semibold uppercase tracking-wide text-ink";
   const previewWidth = captureWidth * TEMPLATE_SCALE;
   const previewHeight = captureHeight * TEMPLATE_SCALE;
 
@@ -655,7 +655,7 @@ export function SharePage({ matches, players }: SharePageProps) {
               className={`flex-1 rounded-none border-2 px-4 py-3 font-mono text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
                 aspect === opt.value
                   ? "border-ink bg-jersey-deep text-cream"
-                  : "border-ink/30 text-ink-soft hover:border-ink bg-cream"
+                  : "border-ink/30 text-ink hover:border-ink bg-cream"
               }`}
             >
               {opt.label}
@@ -679,7 +679,7 @@ export function SharePage({ matches, players }: SharePageProps) {
               className={`flex min-h-[72px] flex-col items-center gap-1 rounded-none border-2 p-3 font-mono text-sm font-semibold transition-all duration-300 ${
                 selectedTemplateId === t.id
                   ? "border-ink bg-jersey-deep/10 text-jersey-deep"
-                  : "border-ink/30 text-ink-soft hover:border-ink bg-cream"
+                  : "border-ink/30 text-ink hover:border-ink bg-cream"
               }`}
             >
               <t.icon
@@ -864,7 +864,7 @@ export function SharePage({ matches, players }: SharePageProps) {
                 className={`flex w-full items-center gap-3 px-4 py-2 text-left font-mono text-sm transition-colors ${
                   selectedPlayerId === p.id
                     ? "bg-jersey-deep/10 text-jersey-deep"
-                    : "text-ink-soft hover:bg-cream-soft"
+                    : "text-ink hover:bg-cream-soft"
                 }`}
               >
                 <span className="min-w-[2rem] text-center text-lg font-bold">
@@ -922,7 +922,7 @@ export function SharePage({ matches, players }: SharePageProps) {
             accept="image/*"
             onChange={handleFileChange}
             aria-label="Foto uploaden"
-            className="text-ink-soft file:border-ink file:bg-cream file:text-ink-soft block w-full font-mono text-sm file:mr-4 file:rounded-none file:border-2 file:px-4 file:py-2 file:font-semibold"
+            className="text-ink file:border-ink file:bg-cream file:text-ink block w-full font-mono text-sm file:mr-4 file:rounded-none file:border-2 file:px-4 file:py-2 file:font-semibold"
           />
           {uploadedImageUrl && (
             <button

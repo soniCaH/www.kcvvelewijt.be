@@ -375,6 +375,11 @@
   --color-cream: #f5f1e6;
   --color-cream-soft: #ede8da;
   --color-cream-deep: #e1d7bf;
+  /* The quiet voice on dark — `ink-muted`'s mirror (#2551 rule 3). An alpha,
+     never a hex: it must adapt to jersey-deep-dark and to ink alike. Same
+     `oklab` mix Tailwind emits for `text-cream/70`, so it renders identically.
+     Never on `jersey-deep` — there, full cream is the only text colour. */
+  --color-cream-quiet: color-mix(in oklab, var(--color-cream) 70%, transparent);
 
   /* Manila — a non-semantic warm paper stock (#2614, decision D5/T6). Warmer
      and more saturated than `--color-cream-deep`, with no Alert variant to

@@ -90,7 +90,7 @@ export function QuestionCard({
           aria-labelledby={headerId}
           className="border-paper-edge border-t-2 border-dashed p-4"
         >
-          <p className="text-ink-soft mb-3 text-[14px] leading-relaxed">
+          <p className="text-ink mb-3 text-[14px] leading-relaxed">
             {path.summary}
           </p>
 

@@ -77,7 +77,7 @@ export function OrganigramHero({
               607px, well under 680, so the grid column is what actually
               binds there. This clamp only takes over below `lg`, roughly an
               816–1023px viewport, before the grid columns apply. */}
-          <p className="text-cream/80 font-display max-w-[var(--container-prose)] text-[16px] leading-[1.4] italic">
+          <p className="text-cream font-display max-w-[var(--container-prose)] text-[16px] leading-[1.4] italic">
             {lead}
           </p>
 
@@ -93,7 +93,7 @@ export function OrganigramHero({
                 user who'd rather browse knows the finder is right below. */}
             <a
               href="#hulp"
-              className="text-cream/70 hover:text-cream inline-flex w-fit items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] uppercase transition-colors"
+              className="text-cream-quiet hover:text-cream inline-flex w-fit items-center gap-1.5 font-mono text-[11px] tracking-[0.04em] uppercase transition-colors"
             >
               {/* Inline SVG (not @/lib/icons.redesign) — this hero is a server
                   component; Phosphor's createContext can't run server-side. */}

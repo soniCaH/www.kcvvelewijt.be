@@ -40,7 +40,7 @@ export interface EditorialLeadProps {
 
 export function EditorialLead({ children }: EditorialLeadProps) {
   return (
-    <p className="text-ink-soft max-w-[var(--container-prose)] font-serif text-xl leading-snug italic">
+    <p className="text-ink max-w-[var(--container-prose)] font-serif text-xl leading-snug italic">
       {children}
     </p>
   );

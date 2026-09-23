@@ -71,7 +71,7 @@ export function CtaBand({
             {heading}
           </EditorialHeading>
 
-          <p className="text-cream/90 mx-auto mb-7 max-w-xl text-base leading-relaxed">
+          <p className="text-cream mx-auto mb-7 max-w-xl text-base leading-relaxed">
             {lead}
           </p>
 

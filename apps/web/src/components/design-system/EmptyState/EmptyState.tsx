@@ -53,7 +53,7 @@
  *   failure state independently rather than sharing one wire value. Frame is
  *   fixed at `border-2 border-dashed border-ink/30` (rule 6 — the
  *   already-precedented dashed value on cream, `tegenstander/[clubId]/
- *   loading.tsx:65`), text `text-ink-soft text-body-md` matching
+ *   loading.tsx:65`), text `text-ink text-body-md` matching
  *   `<ErrorState>`'s own body line. `background` is not accepted on this
  *   member (`never`, mirroring `_internal/stateAction.ts`'s
  *   `href?: never`/`onClick?: never` mutual exclusion) — a notice's frame is
@@ -119,8 +119,8 @@
  * callers, shaped for two, is exactly the speculative API #2690 itself
  * refused. Carry `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`)
  * verbatim when reaching for the dark-ground held-open frame; the two
- * files' own text tones (`SkipCard` `text-cream/65`, band note
- * `text-cream/80`) stay per-file. Reopen only if a dark consumer appears
+ * files' own text tones (`SkipCard` `text-cream-quiet`, band note
+ * `text-cream`, #2551) stay per-file. Reopen only if a dark consumer appears
  * off the homepage.
  *
  * **Not every failure notice on cream goes through this register.**
@@ -500,7 +500,7 @@ function SlotNoticeEmptyState({
       <p
         {...live_}
         className={cn(
-          "border-ink/30 text-ink-soft text-body-md border-2 border-dashed px-6 py-8 text-center",
+          "border-ink/30 text-ink text-body-md border-2 border-dashed px-6 py-8 text-center",
           className,
         )}
       >
@@ -522,7 +522,7 @@ function SlotNoticeEmptyState({
           one is announced as text with no signal a control exists at all
           (#2815 review finding 3). The bespoke markup this replaced had the
           same property: the retry button sat outside any live region. */}
-      <p {...live_} className="text-ink-soft text-body-md">
+      <p {...live_} className="text-ink text-body-md">
         {sentence}
       </p>
       <div className="mt-4">
@@ -616,7 +616,7 @@ function SurfaceEmptyState(props: EmptyStateSurfaceProps) {
             {heading}
           </EditorialHeading>
 
-          <div className="text-ink-soft mt-3 max-w-[var(--container-prose)] text-[14.5px] leading-relaxed">
+          <div className="text-ink mt-3 max-w-[var(--container-prose)] text-[14.5px] leading-relaxed">
             {children}
           </div>
 
