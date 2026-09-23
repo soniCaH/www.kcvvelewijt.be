@@ -26,7 +26,7 @@ The owner's addendum of 2026-09-22 rejects that framing, and names this ticket's
 anti-pattern:
 
 > **No research ticket may presuppose the installed tool.** … Every research ticket answers the
-> outward question first — *is this the right layer, and the right tool, for this kind of project?*
+> outward question first — _is this the right layer, and the right tool, for this kind of project?_
 > … **"Keep what we have, here is the evidence" is a perfectly good verdict**: stability has real
 > value, and a flake that is ours rather than the tool's must be named as ours.
 
@@ -40,9 +40,9 @@ does all four things this repo needs at once — ESM/TS with no transform config
 `projects` model that matches a pnpm monorepo, and per-file isolation — and the two alternatives that
 could replace it (`node:test`, Bun) fail on the DOM requirement or on the second-runtime cost, while
 Jest's ESM support is still, in its own words, experimental. **Two of the four "happy-dom gaps" do not
-reproduce**: `matchMedia` *does* evaluate width (the suite drives it with a bare `window.innerWidth =`
+reproduce**: `matchMedia` _does_ evaluate width (the suite drives it with a bare `window.innerWidth =`
 assignment, which Vitest's own environment shim swallows before happy-dom ever sees it), and
-`hashchange` *does* fire (one macrotask later, which a synchronous assertion misses) — the two that do
+`hashchange` _does_ fire (one macrotask later, which a synchronous assertion misses) — the two that do
 reproduce, `color-mix()` and layout, are not fixed by jsdom, which is strictly worse here because it
 does not implement `matchMedia` **at all**. Only **2 of 370** web test files need real layout, and
 [#3086](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3086) already re-homes both to Storybook
@@ -52,7 +52,7 @@ almost all of them there** — `--no-isolate` is 4.6× faster and fails 178 test
 inside the run-to-run noise, and the one knob worth setting is `--maxWorkers=2` for wave agents,
 because four uncapped agents ask for 28 worker processes on 8 cores. The named contention flake is
 ours but **did not reproduce**: `SearchInterface.test.tsx` survived nine runs at 3.5–4× CPU
-starvation, so the fix is still the rule (fake timers + `userEvent`'s `advanceTimers`, then *delete*
+starvation, so the fix is still the rule (fake timers + `userEvent`'s `advanceTimers`, then _delete_
 the four raised `waitFor` budgets) while the reproduction to attempt is four concurrent `check-all`
 runs — `next build`'s memory, not CPU; the cheapest real wins are unrelated to any tool choice: an
 `engines` field (the Node-20 `globSync` defect, five files) and `$TURBO_DEFAULT$` on `test.inputs`
@@ -69,22 +69,22 @@ This is the ground every recommendation below stands on, so it is stated first a
 `packages/sanity-studio/vitest.config.ts` (11 lines) and `packages/api-contract/vitest.config.ts`
 (13 lines). There is **no** `vitest.workspace.*` and **no** `test.projects` anywhere in the repo.
 
-So: what *are* the defaults in 4.1.11? Read from the installed package, not from the website.
+So: what _are_ the defaults in 4.1.11? Read from the installed package, not from the website.
 
-| Option | Default in 4.1.11 | Read from |
-| --- | --- | --- |
-| `pool` | `"forks"` | `vitest/dist/chunks/coverage.DM_a_rWm.js:180` — `resolved.pool ??= "forks";` |
-| `isolate` | `true` | `vitest/dist/chunks/defaults.9aQKnqFk.js` — `configDefaults.isolate` |
-| `environment` | `"node"` | same file — `configDefaults.environment` |
-| `maxWorkers` | `max(availableParallelism − 1, 1)` in run mode; `max(⌊n/2⌋, 1)` in watch | `cli-api.CnMVyzaz.js` — `resolveMaxWorkers()` / `getDefaultThreadsCount()` |
-| `minWorkers` | **removed in 4.0** | [migration guide](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/guide/migration.md) — "Only `maxWorkers` has any effect" |
-| `maxConcurrency` | `5` | `defaults.9aQKnqFk.js` — `configDefaults.maxConcurrency` |
-| `testTimeout` | `5_000` (node) / `15_000` (browser) | `coverage.DM_a_rWm.js:538` |
-| `hookTimeout` | `10_000` (node) / `30_000` (browser) | `coverage.DM_a_rWm.js:539` |
-| `teardownTimeout` | `10_000` | `defaults.9aQKnqFk.js` |
-| `fileParallelism` | `true` | [`docs/config/fileparallelism.md`](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/config/fileparallelism.md) |
-| `sequence.concurrent` | `false` | [`docs/config/sequence.md`](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/config/sequence.md) |
-| `poolOptions.*.singleThread`/`singleFork` | **removed in 4.0** | migration guide — "now `maxWorkers: 1, isolate: false`" |
+| Option                                    | Default in 4.1.11                                                        | Read from                                                                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `pool`                                    | `"forks"`                                                                | `vitest/dist/chunks/coverage.DM_a_rWm.js:180` — `resolved.pool ??= "forks";`                                                      |
+| `isolate`                                 | `true`                                                                   | `vitest/dist/chunks/defaults.9aQKnqFk.js` — `configDefaults.isolate`                                                              |
+| `environment`                             | `"node"`                                                                 | same file — `configDefaults.environment`                                                                                          |
+| `maxWorkers`                              | `max(availableParallelism − 1, 1)` in run mode; `max(⌊n/2⌋, 1)` in watch | `cli-api.CnMVyzaz.js` — `resolveMaxWorkers()` / `getDefaultThreadsCount()`                                                        |
+| `minWorkers`                              | **removed in 4.0**                                                       | [migration guide](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/guide/migration.md) — "Only `maxWorkers` has any effect" |
+| `maxConcurrency`                          | `5`                                                                      | `defaults.9aQKnqFk.js` — `configDefaults.maxConcurrency`                                                                          |
+| `testTimeout`                             | `5_000` (node) / `15_000` (browser)                                      | `coverage.DM_a_rWm.js:538`                                                                                                        |
+| `hookTimeout`                             | `10_000` (node) / `30_000` (browser)                                     | `coverage.DM_a_rWm.js:539`                                                                                                        |
+| `teardownTimeout`                         | `10_000`                                                                 | `defaults.9aQKnqFk.js`                                                                                                            |
+| `fileParallelism`                         | `true`                                                                   | [`docs/config/fileparallelism.md`](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/config/fileparallelism.md)              |
+| `sequence.concurrent`                     | `false`                                                                  | [`docs/config/sequence.md`](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/config/sequence.md)                            |
+| `poolOptions.*.singleThread`/`singleFork` | **removed in 4.0**                                                       | migration guide — "now `maxWorkers: 1, isolate: false`"                                                                           |
 
 Three of these matter more than the rest:
 
@@ -101,33 +101,33 @@ Three of these matter more than the rest:
 
 ### 1.1 What the runner actually has to do here
 
-| Constraint | Measured |
-| --- | --- |
-| Test files / tests | 460 files, 14 662 tests across 4 workspaces (#3079); `apps/web` alone 370 / 13 608 |
-| Languages | TypeScript throughout, `"type": "module"` in 3 of 4 tested workspaces, ESM-only deps (Effect, `@sanity/client`) |
-| Environments needed | a DOM for 2 workspaces (`apps/web`, `packages/sanity-studio`), node for 2 (`apps/api`, `packages/api-contract`) |
-| Build tooling already present | Vite — via `@vitejs/plugin-react` in web and sanity-studio, and `@storybook/nextjs-vite` for Storybook |
-| Where the time goes | import **60 %**, environment 17 %, setup 11 %, assertions **9 %** (measured §3.2) |
-| Monorepo driver | Turborepo 2.10.12, pnpm 10.34.5 workspaces |
+| Constraint                    | Measured                                                                                                        |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Test files / tests            | 460 files, 14 662 tests across 4 workspaces (#3079); `apps/web` alone 370 / 13 608                              |
+| Languages                     | TypeScript throughout, `"type": "module"` in 3 of 4 tested workspaces, ESM-only deps (Effect, `@sanity/client`) |
+| Environments needed           | a DOM for 2 workspaces (`apps/web`, `packages/sanity-studio`), node for 2 (`apps/api`, `packages/api-contract`) |
+| Build tooling already present | Vite — via `@vitejs/plugin-react` in web and sanity-studio, and `@storybook/nextjs-vite` for Storybook          |
+| Where the time goes           | import **60 %**, environment 17 %, setup 11 %, assertions **9 %** (measured §3.2)                               |
+| Monorepo driver               | Turborepo 2.10.12, pnpm 10.34.5 workspaces                                                                      |
 
 The last two rows decide most of this section. **Assertions are 9 % of the CPU.** A runner swap that
 made assertion execution twice as fast would buy ~4 % of wall time. The cost is module resolution and
-transform, which is a *bundler* problem, not a *runner* problem — and the repo already runs Vite for
+transform, which is a _bundler_ problem, not a _runner_ problem — and the repo already runs Vite for
 two other reasons.
 
 ### 1.2 The four live alternatives, on merit
 
-| | Vitest 4.1.11 (installed) | Jest 30 | `node:test` (Node 24) | Bun test |
-| --- | --- | --- | --- | --- |
-| ESM/TS | native via Vite; no transform config in this repo | **"experimental support for ECMAScript Modules… may have bugs and lack features"**, still needs `node --experimental-vm-modules` ([ECMAScriptModules.md](https://github.com/jestjs/jest/blob/v30.5.2/docs/ECMAScriptModules.md)) | native ESM; type-stripping default since 22.18/23.6, stable 24.12 ([typescript.html](https://nodejs.org/docs/latest-v24.x/api/typescript.html)) | native |
-| DOM environment | `environment: 'happy-dom' \| 'jsdom'`, or real browser via `projects` | `jest-environment-jsdom` | **none** ([test.html](https://nodejs.org/docs/latest-v24.x/api/test.html) documents no DOM) | happy-dom via `--preload` only |
-| Isolation default | per file, `isolate: true` | per file (child processes; `--workerThreads` is `:::caution experimental`) | per file (`isolation: 'process'`) | **all files share one global and one module registry** unless `--isolate`/`--parallel` ([bun docs](https://github.com/oven-sh/bun/blob/main/docs/test/index.mdx)) |
-| Pools | `forks` / `threads` / `vmThreads` / `vmForks` | child process, or experimental worker threads | child processes, `--test-concurrency` | single process, or `--parallel` |
-| Sharding | `--shard i/n` + `--reporter=blob --merge-reports` | `--shard i/n` (needs a sequencer with `shard`) | not documented | not documented |
-| Coverage | v8 (installed) or istanbul | v8/babel | **Stability 1 – Experimental** | built-in; threshold check silently skipped without the `text` reporter |
-| Monorepo model | `test.projects`, `--project` with globs and negation | `projects` | none | none |
-| Mocking | `vi.mock` hoisted, `vi.stubGlobal`, `vi.useFakeTimers` | `jest.mock` | `mock.method`, `mock.timers` | jest-compatible, **no `__mocks__`, no auto-mocking** |
-| Reuses the repo's Vite config | yes | no | no | no |
+|                               | Vitest 4.1.11 (installed)                                             | Jest 30                                                                                                                                                                                                                          | `node:test` (Node 24)                                                                                                                           | Bun test                                                                                                                                                          |
+| ----------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ESM/TS                        | native via Vite; no transform config in this repo                     | **"experimental support for ECMAScript Modules… may have bugs and lack features"**, still needs `node --experimental-vm-modules` ([ECMAScriptModules.md](https://github.com/jestjs/jest/blob/v30.5.2/docs/ECMAScriptModules.md)) | native ESM; type-stripping default since 22.18/23.6, stable 24.12 ([typescript.html](https://nodejs.org/docs/latest-v24.x/api/typescript.html)) | native                                                                                                                                                            |
+| DOM environment               | `environment: 'happy-dom' \| 'jsdom'`, or real browser via `projects` | `jest-environment-jsdom`                                                                                                                                                                                                         | **none** ([test.html](https://nodejs.org/docs/latest-v24.x/api/test.html) documents no DOM)                                                     | happy-dom via `--preload` only                                                                                                                                    |
+| Isolation default             | per file, `isolate: true`                                             | per file (child processes; `--workerThreads` is `:::caution experimental`)                                                                                                                                                       | per file (`isolation: 'process'`)                                                                                                               | **all files share one global and one module registry** unless `--isolate`/`--parallel` ([bun docs](https://github.com/oven-sh/bun/blob/main/docs/test/index.mdx)) |
+| Pools                         | `forks` / `threads` / `vmThreads` / `vmForks`                         | child process, or experimental worker threads                                                                                                                                                                                    | child processes, `--test-concurrency`                                                                                                           | single process, or `--parallel`                                                                                                                                   |
+| Sharding                      | `--shard i/n` + `--reporter=blob --merge-reports`                     | `--shard i/n` (needs a sequencer with `shard`)                                                                                                                                                                                   | not documented                                                                                                                                  | not documented                                                                                                                                                    |
+| Coverage                      | v8 (installed) or istanbul                                            | v8/babel                                                                                                                                                                                                                         | **Stability 1 – Experimental**                                                                                                                  | built-in; threshold check silently skipped without the `text` reporter                                                                                            |
+| Monorepo model                | `test.projects`, `--project` with globs and negation                  | `projects`                                                                                                                                                                                                                       | none                                                                                                                                            | none                                                                                                                                                              |
+| Mocking                       | `vi.mock` hoisted, `vi.stubGlobal`, `vi.useFakeTimers`                | `jest.mock`                                                                                                                                                                                                                      | `mock.method`, `mock.timers`                                                                                                                    | jest-compatible, **no `__mocks__`, no auto-mocking**                                                                                                              |
+| Reuses the repo's Vite config | yes                                                                   | no                                                                                                                                                                                                                               | no                                                                                                                                              | no                                                                                                                                                                |
 
 ### 1.3 The three facts that decide it
 
@@ -144,11 +144,11 @@ Three of the four tested workspaces declare `"type": "module"`, and the dependen
 top of `ECMAScriptModules.md` has not moved. Adopting it would mean either `--experimental-vm-modules`
 across six workspaces or reintroducing a CJS transform pipeline that Vite currently makes unnecessary.
 Jest is also the runner under `@storybook/test-runner`, so the repo already has it — and that is an
-argument for *not* making it the unit runner too: the VR layer's 120 s story-stall (#3094) is a Jest
+argument for _not_ making it the unit runner too: the VR layer's 120 s story-stall (#3094) is a Jest
 timeout, and keeping the two layers on different runners keeps that blast radius small.
 
 **3 — Bun would add a second runtime to buy back a fraction of 9 %.** Bun's own docs state the
-default is *no* isolation ("all files share one global and one module registry… Isolating every file
+default is _no_ isolation ("all files share one global and one module registry… Isolating every file
 is how Jest and Vitest behave by default"), which is the opposite of what a contention-flaky suite
 wants. DOM support is a `--preload` of the same happy-dom this repo already runs, so it changes
 nothing about §2. Turborepo's Bun support arrived as package-manager support in beta
@@ -190,12 +190,12 @@ The map records four happy-dom gaps met during the 2026-09-21 wave. All four wer
 the installed `happy-dom@20.11.12` under the installed `vitest@4.1.11`, in a throwaway project outside
 the repo (command in §11). **Two do not reproduce as described.**
 
-| Wave's claim | Re-measured | Verdict |
-| --- | --- | --- |
-| `matchMedia` ignores width | `happyDOM.setViewport({width: 500})` flips `matchMedia("(min-width: 501px)").matches` to `false`, and fires a window `resize`. A bare `window.innerWidth = 500` does not. | **Ours** (§2.2) — plus one real upstream bug |
-| `hashchange` never fires | Fires — on the next macrotask. `location.hash = "#x"` then a synchronous assert sees 0 listeners called; after `await new Promise(r => setTimeout(r, 0))`, 1. | **Ours** (§2.3) |
-| `color-mix()` backgrounds are dropped | `el.style.backgroundColor = "color-mix(in srgb, red 50%, blue)"` → `""`; the `rgb()` control round-trips. | **Real** (§2.4) |
-| no layout / `getBoundingClientRect` | Returns all zeros for a 300px-wide appended element. | **Real** (§2.4) |
+| Wave's claim                          | Re-measured                                                                                                                                                               | Verdict                                      |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `matchMedia` ignores width            | `happyDOM.setViewport({width: 500})` flips `matchMedia("(min-width: 501px)").matches` to `false`, and fires a window `resize`. A bare `window.innerWidth = 500` does not. | **Ours** (§2.2) — plus one real upstream bug |
+| `hashchange` never fires              | Fires — on the next macrotask. `location.hash = "#x"` then a synchronous assert sees 0 listeners called; after `await new Promise(r => setTimeout(r, 0))`, 1.             | **Ours** (§2.3)                              |
+| `color-mix()` backgrounds are dropped | `el.style.backgroundColor = "color-mix(in srgb, red 50%, blue)"` → `""`; the `rgb()` control round-trips.                                                                 | **Real** (§2.4)                              |
+| no layout / `getBoundingClientRect`   | Returns all zeros for a 300px-wide appended element.                                                                                                                      | **Real** (§2.4)                              |
 
 ### 2.2 `matchMedia`: the suite drives it through a shim that eats the write
 
@@ -217,26 +217,26 @@ Object.defineProperty(global, key, {
     return win[key];
   },
   set(v) {
-    overrideObject.set(key, v);   // <- never reaches happy-dom's BrowserWindow
+    overrideObject.set(key, v); // <- never reaches happy-dom's BrowserWindow
   },
   configurable: true,
 });
 ```
 
 and, four lines later, `global.window = global`. So in a Vitest DOM test `window.innerWidth = 500`
-writes into Vitest's `overrideObject` map. `window.innerWidth` then *reads back* 500 — which is why
+writes into Vitest's `overrideObject` map. `window.innerWidth` then _reads back_ 500 — which is why
 the observation looked like a happy-dom failure — while happy-dom's `BrowserWindow` still holds 1024,
 and `MediaQueryList.matches`, which evaluates live against that window, never moves. **This is
 environment-agnostic: the same shim would swallow the same assignment under jsdom.**
 
 Measured, under real Vitest (§11, `env.test.ts` / `env2.test.ts`):
 
-| Action | `window.innerWidth` | `matchMedia("(min-width: 501px)").matches` | `resize` fired |
-| --- | --- | --- | --- |
-| start | 1024 | `true` | — |
-| `window.innerWidth = 500` | 500 | `true` ❌ | no |
-| … + `dispatchEvent(new Event("resize"))` | 500 | `true` ❌ | (manual) |
-| `window.happyDOM.setViewport({ width: 500 })` | 500 | **`false`** ✅ | **yes** |
+| Action                                        | `window.innerWidth` | `matchMedia("(min-width: 501px)").matches` | `resize` fired |
+| --------------------------------------------- | ------------------- | ------------------------------------------ | -------------- |
+| start                                         | 1024                | `true`                                     | —              |
+| `window.innerWidth = 500`                     | 500                 | `true` ❌                                  | no             |
+| … + `dispatchEvent(new Event("resize"))`      | 500                 | `true` ❌                                  | (manual)       |
+| `window.happyDOM.setViewport({ width: 500 })` | 500                 | **`false`** ✅                             | **yes**        |
 
 **And there is one real upstream bug underneath it.** `MediaQueryList.addEventListener` seeds its
 comparison state to a literal instead of the current value
@@ -257,7 +257,7 @@ addEventListener(type, listener) {
         ...
 ```
 
-So for a query that is **already matching** when the listener is attached, the first transition *away*
+So for a query that is **already matching** when the listener is attached, the first transition _away_
 from matching produces `matches === false === matchesState` and is suppressed. Measured, all three
 assertions passing (§11, `env3.test.ts`):
 
@@ -270,8 +270,8 @@ That is worth an upstream issue; it is six lines to reproduce. It is also exactl
 is why three test files ended up hand-rolling a `mockMatchMedia`.
 
 **The rule this class closes with** (per #3086 clause 2 — a class closes with a rule or not at all):
-*never assign to `window.innerWidth`/`innerHeight` in a test; drive the viewport with
-`window.happyDOM.setViewport({ width })`, and drive an MQL `change` transition explicitly.* The first
+_never assign to `window.innerWidth`/`innerHeight` in a test; drive the viewport with
+`window.happyDOM.setViewport({ width })`, and drive an MQL `change` transition explicitly._ The first
 half is enforceable with the `no-restricted-syntax` machinery already at
 `apps/web/eslint.config.mjs:33` — an `AssignmentExpression[left.property.name=/^inner(Width|Height)$/]`
 selector, the same shape as `IN_BODY_ROUTE_IMPORT`. The second half stays a stub until happy-dom seeds
@@ -305,17 +305,17 @@ jsdom is explicit that it is the same:
 
 ### 2.5 What the 370 files actually assert
 
-| | Files |
-| --- | ---: |
-| Total `apps/web` test files (excluding `test/e2e`) | 370 |
-| Touch `@testing-library`, `document.`, `window.` or `screen.` | 254 |
-| Pure — no DOM reference at all | **116** |
-| Call `render(` | 237 (2 836 call sites) |
-| Reference `getBoundingClientRect` | **2** |
-| Reference `color-mix` | **1** |
-| Reference `getComputedStyle` | **1** |
-| Reference `matchMedia` | 6 |
-| Reference `hashchange` | 5 |
+|                                                               |                  Files |
+| ------------------------------------------------------------- | ---------------------: |
+| Total `apps/web` test files (excluding `test/e2e`)            |                    370 |
+| Touch `@testing-library`, `document.`, `window.` or `screen.` |                    254 |
+| Pure — no DOM reference at all                                |                **116** |
+| Call `render(`                                                | 237 (2 836 call sites) |
+| Reference `getBoundingClientRect`                             |                  **2** |
+| Reference `color-mix`                                         |                  **1** |
+| Reference `getComputedStyle`                                  |                  **1** |
+| Reference `matchMedia`                                        |                      6 |
+| Reference `hashchange`                                        |                      5 |
 
 The three "environment" rows do not mean what they look like:
 
@@ -323,10 +323,10 @@ The three "environment" rows do not mean what they look like:
   `src/app/(main)/ploegen/[slug]/(detail)/TeamSectionNav.test.tsx`) both stub it with
   `Object.defineProperty`. These are the scroll-spy geometry tests — the exact behaviour #3086 sends
   to Storybook `play` against a fixture.
-- The **1** `color-mix` file asserts a *class name*, not a computed style:
+- The **1** `color-mix` file asserts a _class name_, not a computed style:
   `expect(cell.className).toContain("bg-[color-mix")` (`StandingsTable.test.tsx:299`). A real browser
   would not make this test better; it would make it a VR baseline, which already exists.
-- The **1** `getComputedStyle` file spies on the *call count* to prove a hot path does not read layout
+- The **1** `getComputedStyle` file spies on the _call count_ to prove a hot path does not read layout
   (`useScrollHint.test.ts:913`). It needs a spy, not a layout engine.
 
 **So: after #3086 re-homes the two geometry files, the number of `apps/web` test files that need a
@@ -362,7 +362,7 @@ in the spec.
 
 [#3085](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3085) recommended moving VR to Vitest
 browser mode; [#3082](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3082) refuted that for VR
-specifically, with sources. Whether browser mode is right for *component* tests is this ticket's to
+specifically, with sources. Whether browser mode is right for _component_ tests is this ticket's to
 answer, and the answer is **no, and not yet**:
 
 - **There is no test to move.** §2.5: zero files need a real browser once the two geometry files are
@@ -370,8 +370,8 @@ answer, and the answer is **no, and not yet**:
 - **Vitest still tells you to hedge.** "Early Development… It is recommended that users augment their
   Vitest browser experience with a standalone browser-side test runner like WebdriverIO, Cypress or
   Playwright" — [`docs/guide/browser/why.md`](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/guide/browser/why.md).
-  (The *feature* lost its experimental tag in 4.0; that page's Drawbacks section did not.)
-- **Its isolation is coarser than what happy-dom gives today**: "Vitest opens a *single* page to run
+  (The _feature_ lost its experimental tag in 4.0; that page's Drawbacks section did not.)
+- **Its isolation is coarser than what happy-dom gives today**: "Vitest opens a _single_ page to run
   all tests that are defined in the same file… isolation is restricted to a single test file, not to
   every individual test" ([`config/browser/playwright.md`](https://github.com/vitest-dev/vitest/blob/v4.1.11/docs/config/browser/playwright.md)).
   That is the same grain as today, but with a browser context instead of a fork — strictly more
@@ -379,7 +379,7 @@ answer, and the answer is **no, and not yet**:
 - **It would fight the wave, not help it.** 370 Chromium contexts on a machine already running four
   agents is the contention problem of §3, amplified.
 
-**Where browser mode *is* the right answer is the seam #3086 already chose: Storybook `play`.**
+**Where browser mode _is_ the right answer is the seam #3086 already chose: Storybook `play`.**
 `@storybook/addon-vitest` is installed and registered at `apps/web/.storybook/main.ts:18` and is
 **dark** — no `storybookTest` plugin, no `projects`, no `browser:` block anywhere in the repo. Two
 facts sharpen its cost, both first-party:
@@ -420,14 +420,14 @@ coverage, Docker not running, desktop idle apart from the editor (1-min load ave
 first run). Each row is one full `vitest run` of all 370 files; the command is in §11. Every run was
 370/370 files and 13 608/13 608 tests green unless the table says otherwise.
 
-| # | Flags | Wall | Result |
-| --- | --- | ---: | --- |
-| 1 | *(none — the repo's actual config)* | **98.6 s** | 370 / 370 files, 13 608 / 13 608 tests green |
-| 2 | `--pool=threads` | **92.4 s** | green |
-| 3 | `--pool=threads --no-isolate` | **14.3 s** | **38 files failed, 267 tests failed** |
-| 4 | `--no-isolate` *(forks)* | **21.6 s** | **27 files failed, 178 tests failed** |
-| 5 | `--maxWorkers=2` | **208.1 s** | green |
-| 6 | *(none — repeat of #1, for variance)* | **106.3 s** | green |
+| #   | Flags                                 |        Wall | Result                                       |
+| --- | ------------------------------------- | ----------: | -------------------------------------------- |
+| 1   | _(none — the repo's actual config)_   |  **98.6 s** | 370 / 370 files, 13 608 / 13 608 tests green |
+| 2   | `--pool=threads`                      |  **92.4 s** | green                                        |
+| 3   | `--pool=threads --no-isolate`         |  **14.3 s** | **38 files failed, 267 tests failed**        |
+| 4   | `--no-isolate` _(forks)_              |  **21.6 s** | **27 files failed, 178 tests failed**        |
+| 5   | `--maxWorkers=2`                      | **208.1 s** | green                                        |
+| 6   | _(none — repeat of #1, for variance)_ | **106.3 s** | green                                        |
 
 Three things this says:
 
@@ -447,7 +447,7 @@ it is not the shipped default. Not worth a config line on this evidence; worth r
 if anyone wants it.
 
 **`--maxWorkers=2` costs 2.1× wall time for one agent.** That is the honest price of §3.3's
-recommendation — and it is a price paid *per agent* to stop four agents from asking for 28 workers on
+recommendation — and it is a price paid _per agent_ to stop four agents from asking for 28 workers on
 8 cores. Note its phase totals are much lower than the default's (import 215 s of CPU against 382 s),
 which is the contention showing up as wasted CPU rather than as wall time.
 
@@ -455,13 +455,13 @@ which is the contention showing up as wasted CPU rather than as wall time.
 
 Vitest's own phase accounting, run #1 (CPU-seconds summed across workers, so they exceed wall time):
 
-| Phase | CPU-s | Share |
-| --- | ---: | ---: |
-| import | 382.4 | **60 %** |
-| environment (happy-dom boot × 370 files) | 105.7 | 17 % |
-| setup (`tests/setup.ts` × 370) | 69.8 | 11 % |
-| **tests (the assertions themselves)** | **59.9** | **9 %** |
-| transform | 16.0 | 3 % |
+| Phase                                    |    CPU-s |    Share |
+| ---------------------------------------- | -------: | -------: |
+| import                                   |    382.4 | **60 %** |
+| environment (happy-dom boot × 370 files) |    105.7 |     17 % |
+| setup (`tests/setup.ts` × 370)           |     69.8 |     11 % |
+| **tests (the assertions themselves)**    | **59.9** |  **9 %** |
+| transform                                |     16.0 |      3 % |
 
 This is the number that disqualifies most of §1. **Nine per cent of the CPU is the thing a runner
 actually runs.** Sixty per cent is resolving and evaluating a module graph, which Jest, Bun and
@@ -490,8 +490,8 @@ Three levers, in order of how much they buy:
    `next/font/google` globally, 4 test files call `vi.setSystemTime`, and `test/hooks/*` spawn real
    processes and write temp dirs. Sharing a module registry across 370 files in that shape trades a
    contention flake for an ordering flake, which is worse — an ordering flake does not reproduce alone
-   *or* under load.
-3. **`--shard` is for CI, not for the wave.** It splits *files* across machines and cannot be combined
+   _or_ under load.
+3. **`--shard` is for CI, not for the wave.** It splits _files_ across machines and cannot be combined
    with watch; with `--reporter=blob --merge-reports` it is the right answer for the CI job in #3091,
    and it does nothing for four processes on one box.
 
@@ -513,12 +513,12 @@ The ledger's row 19 — `SearchInterface.test.tsx` fails under sibling agents, p
 reproduce. That does not make the file sound; here is why it is structurally fragile, which is visible
 without running anything:
 
-| | Count |
-| --- | ---: |
-| `waitFor(` call sites in the whole `apps/web` suite | 107, in **6** files |
-| … of those, in `SearchInterface.test.tsx` alone | **80** |
-| Files using `vi.useFakeTimers()` | **9** of 370 |
-| Files using `advanceTimersByTime` | 5 |
+|                                                      |                                                                Count |
+| ---------------------------------------------------- | -------------------------------------------------------------------: |
+| `waitFor(` call sites in the whole `apps/web` suite  |                                                  107, in **6** files |
+| … of those, in `SearchInterface.test.tsx` alone      |                                                               **80** |
+| Files using `vi.useFakeTimers()`                     |                                                         **9** of 370 |
+| Files using `advanceTimersByTime`                    |                                                                    5 |
 | `waitFor` timeouts raised above the 1 000 ms default | 4, all in `SearchInterface.test.tsx` (1 000, 1 000, 2 000, 3 000 ms) |
 
 `SearchInterface.test.tsx` is 1 924 lines, uses **real timers**, drives `userEvent.type()` character by
@@ -546,11 +546,13 @@ So the rewrite is:
 vi.useFakeTimers();
 const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 // …type…
-await act(async () => { await vi.advanceTimersByTimeAsync(350); });   // the debounce, deterministically
+await act(async () => {
+  await vi.advanceTimersByTimeAsync(350);
+}); // the debounce, deterministically
 expect(fetchMock).toHaveBeenCalledTimes(1);
 ```
 
-Written that way the 350 ms is *simulated*, so the assertion no longer has a wall-clock budget at all
+Written that way the 350 ms is _simulated_, so the assertion no longer has a wall-clock budget at all
 and `{ timeout: 1000 }` can be deleted rather than raised — which is what #3086 clause 2 and the
 ledger's "every class that ended, ended with a rule" both require. Second half of the rule: prefer
 `findBy*` (which retries until the element exists) over `waitFor` wrapping a `getBy*` — the suite
@@ -558,7 +560,7 @@ already uses `findBy*` in 11 files / 92 sites, so this is a convention to state,
 
 A third, cheaper rule covers the other named contention flakes:
 `player-figure-variant.test.ts` holds one 1 405 ms property-style test (#3079's slowest-test table) —
-a CPU-bound loop, not a timer — and the external-embed page tests race real `fetch`. The first wants a
+a CPU-bound loop, not a timer (fixed by #3128) — and the external-embed page tests race real `fetch`. The first wants a
 bounded iteration count, the second wants `vi.stubGlobal("fetch", …)`; neither wants a timeout.
 
 ### 3.5 Trying to reproduce row 19 — and failing
@@ -570,11 +572,11 @@ worth more than a confirmation would have been, so it is recorded in full.
 loops — 28 because that is exactly what a four-agent wave asks of these 8 cores (4 × `maxWorkers` 7).
 An intermediate run at 8 loops is included.
 
-| Condition | 1-min load | Wall | Result |
-| --- | ---: | ---: | --- |
-| idle × 3 | 3–14 | 4.76 / 4.74 / 5.04 s | 62 / 62 green, 3 of 3 |
-| 8 busy loops × 3 | ~17 | 7.60 / 7.49 / 7.85 s | 62 / 62 green, 3 of 3 |
-| **28 busy loops × 3** | **~57** | **16.52 / 17.25 / 19.19 s** | **62 / 62 green, 3 of 3** |
+| Condition             | 1-min load |                        Wall | Result                    |
+| --------------------- | ---------: | --------------------------: | ------------------------- |
+| idle × 3              |       3–14 |        4.76 / 4.74 / 5.04 s | 62 / 62 green, 3 of 3     |
+| 8 busy loops × 3      |        ~17 |        7.60 / 7.49 / 7.85 s | 62 / 62 green, 3 of 3     |
+| **28 busy loops × 3** |    **~57** | **16.52 / 17.25 / 19.19 s** | **62 / 62 green, 3 of 3** |
 
 A **3.5–4× wall-clock slowdown did not break a single assertion**, in nine runs. So the honest reading of row 19 is:
 
@@ -583,7 +585,7 @@ A **3.5–4× wall-clock slowdown did not break a single assertion**, in nine ru
   not in dispute and is visible without running anything.
 - **But pure CPU starvation is not sufficient to trip it**, at least not at 3.5×. Something else in
   the wave is doing the work. The most likely candidate, and the one this experiment deliberately did
-  not reproduce, is that `check-all` ends in `next build` — a *memory*-hungry step, not a CPU-hungry
+  not reproduce, is that `check-all` ends in `next build` — a _memory_-hungry step, not a CPU-hungry
   one — and four concurrent Next builds on a 32 GB machine push the box into swap, where a 350 ms
   debounce and a 1 000 ms budget are no longer separated by 650 ms of anything.
 - **So row 19 stays open, and its brief should change.** The reproduction to attempt is four
@@ -623,18 +625,18 @@ total hashed inputs : 1253
 
 The ten files Vitest runs that Turbo does not hash:
 
-| # | File |
-| --- | --- |
-| 1 | `apps/web/test/hooks/check-branch.test.ts` |
-| 2 | `apps/web/test/hooks/pre-commit.test.ts` |
-| 3 | `apps/web/test/hooks/trigger-psd-sync.test.ts` |
-| 4 | `apps/web/test/hooks/wave-check.test.ts` |
-| 5 | `apps/web/test/reporters/github-summary.test.ts` |
-| 6 | `apps/web/test/scripts/analytics-taxonomy.test.ts` |
-| 7 | `apps/web/test/scripts/vr-docker.test.ts` |
-| 8 | `apps/web/test/vr/structural-assertions.test.ts` |
-| 9 | `apps/web/test/vr/viewport-scoping.test.ts` |
-| 10 | `apps/web/next.config.test.ts` (package root; imports `next.config.ts`) |
+| #   | File                                                                    |
+| --- | ----------------------------------------------------------------------- |
+| 1   | `apps/web/test/hooks/check-branch.test.ts`                              |
+| 2   | `apps/web/test/hooks/pre-commit.test.ts`                                |
+| 3   | `apps/web/test/hooks/trigger-psd-sync.test.ts`                          |
+| 4   | `apps/web/test/hooks/wave-check.test.ts`                                |
+| 5   | `apps/web/test/reporters/github-summary.test.ts`                        |
+| 6   | `apps/web/test/scripts/analytics-taxonomy.test.ts`                      |
+| 7   | `apps/web/test/scripts/vr-docker.test.ts`                               |
+| 8   | `apps/web/test/vr/structural-assertions.test.ts`                        |
+| 9   | `apps/web/test/vr/viewport-scoping.test.ts`                             |
+| 10  | `apps/web/next.config.test.ts` (package root; imports `next.config.ts`) |
 
 Plus every fixture under `test/fixtures/`, and — because four of these spawn the real scripts — the
 repo-root files they execute, which are outside the package and unhashable by any `src/`-relative glob.
@@ -650,7 +652,7 @@ one. The decisive doc fact is that `inputs` is not additive:
 > must reconstruct the globs from `.gitignore` as desired or use `$TURBO_DEFAULT$`"
 > — [reference/configuration#inputs](https://turborepo.dev/docs/reference/configuration#inputs)
 
-So the present list did not *narrow* the default, it **replaced** it — which is why
+So the present list did not _narrow_ the default, it **replaced** it — which is why
 `next.config.test.ts` at the package root is missing too, and why adding `"test/**"` would fix nine
 files and leave the tenth and every future one. `$TURBO_DEFAULT$` restores the whole-package default
 and then `$TURBO_ROOT$/…` entries reach the out-of-package files; that is the shape #3096's brief
@@ -659,7 +661,7 @@ move (`test/` → `tests/`) would fix the nine but not `next.config.test.ts`, an
 worth of imports to buy a narrower fix. **Not both — `inputs` only.**
 
 Worth recording, because it is not in the Turborepo docs: the "missing input → silent stale hit"
-failure mode is an *accepted* limitation, not a bug being fixed —
+failure mode is an _accepted_ limitation, not a bug being fixed —
 [vercel/turborepo#14059](https://github.com/vercel/turborepo/issues/14059) reports a silent cache hit
 from an undeclared input and was **closed as "not planned"**. There is no warning to wait for.
 
@@ -669,7 +671,7 @@ from an undeclared input and was **closed as "not planned"**. There is no warnin
 and `packages/sanity-studio` has its own three-step version. `turbo.json` defines only `build`, `dev`,
 `lint`, `test`, `type-check` and package-scoped overrides. So `check-all` today is: four serial npm
 invocations, four Node startups, **zero** Turbo orchestration, and zero caching of the chain — while
-each individual step, run through Turbo, *would* be cached.
+each individual step, run through Turbo, _would_ be cached.
 
 **Yes, and the reason is not caching — it is that `&&` forces an order the dependency graph does not
 require.** `lint`, `type-check` and `test` are independent of each other; only `build` has a real
@@ -682,7 +684,7 @@ in your task configurations" — i.e. `dependsOn`, not `&&`.
 Two honest caveats, both of which the grilling ticket should weigh:
 
 - **There is no official "ci"/"check" composite-task example** in the Turborepo docs. The closest
-  first-party pattern is the *transit node* in the repo's own agent-skills reference
+  first-party pattern is the _transit node_ in the repo's own agent-skills reference
   ([`skills/turborepo/references/configuration/tasks.md`](https://github.com/vercel/turborepo/blob/main/skills/turborepo/references/configuration/tasks.md)):
   a scriptless `transit` task that others `dependsOn`, so tasks stay parallel with correct caching.
   The plainer option is to stop defining `check-all` as a script at all and let the caller run
@@ -708,7 +710,7 @@ staying in node. Assessed:
 **It is sound, and the repo has the measurement to prove the gap.** `apps/api` fakes KV with a
 `Map`-backed double whose `put` signature is `(key, value, _options?: { expirationTtl?: number })` —
 the TTL argument is **discarded** (`apps/api/src/cache/kv-cache.test.ts:28-38`). Every TTL assertion in
-that file therefore checks that the right number was *passed*, never that anything expires. And
+that file therefore checks that the right number was _passed_, never that anything expires. And
 `apps/api/src/psd/gate-do.ts` — the `PsdGate` Durable Object that implements single-flight, 59 lines,
 bound in `wrangler.toml:52-54` and again for staging at `:99-101` — has **no test file at all**. Two
 more bindings (`AI`, `SEARCH_INDEX`/Vectorize) are in the same position. So the layer is not
@@ -733,7 +735,7 @@ speculative; it is aimed at three untested runtime primitives.
   `isolatedStorage`/`singleWorker`: "Storage isolation is now per test file instead of per test". That
   is contentious enough to have its own open issue
   ([workers-sdk#12889](https://github.com/cloudflare/workers-sdk/issues/12889)). For a cache layer,
-  per-*test* storage isolation is precisely what you want, and it is no longer on offer.
+  per-_test_ storage isolation is precisely what you want, and it is no longer on offer.
 
 **Assessment:** adopt it, scoped hard. The split rule #3086 wrote ("a path that touches KV, TTL or
 single-flight runs in workerd; pure logic stays in node") is right, and the file counts say it is
@@ -782,18 +784,18 @@ ledger and it is a ten-minute change.**
 Clause 3 says all six workspaces answer, and "none, and why" is valid while silence is not. Three are
 currently silent. Proposed answers, for the spec to adopt or reject:
 
-| Workspace | Test files | Config | Which layers apply |
-| --- | ---: | --- | --- |
-| `apps/web` | 370 | `vitest.config.ts`, happy-dom | Static, Build, Vitest/happy-dom, Storybook (VR + `play`), E2E |
-| `apps/api` | 39 | `vitest.config.ts`, node | Static, Vitest/node, **Contract (workerd)** for the KV/TTL/single-flight paths (§5) |
-| `packages/api-contract` | 5 | `vitest.config.ts`, node default | Static, Vitest/node, **Contract** — it is the schema both sides round-trip |
-| `packages/sanity-studio` | 46 | `vitest.config.ts`, happy-dom | Static, Vitest/happy-dom. **No VR, no E2E** — it renders inside Sanity's shell, which this repo does not own |
-| `packages/sanity-schemas` | **0** | **none** | **Static only, and that is a decision, not an omission.** Schema *shape* is checked by `tsgo` and by Sanity TypeGen, whose output (`apps/web/src/lib/sanity/sanity.types.ts`) is consumed by 370 typed tests one workspace over. A schema definition with no behaviour has nothing a unit test would add. Revisit the day a schema grows a `validation` rule or a custom input — those are behaviour |
-| `apps/studio` / `apps/studio-staging` | **0** | **none** | **Mostly "none", with one hole — see below** |
+| Workspace                             | Test files | Config                           | Which layers apply                                                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------------------- | ---------: | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web`                            |        370 | `vitest.config.ts`, happy-dom    | Static, Build, Vitest/happy-dom, Storybook (VR + `play`), E2E                                                                                                                                                                                                                                                                                                                                        |
+| `apps/api`                            |         39 | `vitest.config.ts`, node         | Static, Vitest/node, **Contract (workerd)** for the KV/TTL/single-flight paths (§5)                                                                                                                                                                                                                                                                                                                  |
+| `packages/api-contract`               |          5 | `vitest.config.ts`, node default | Static, Vitest/node, **Contract** — it is the schema both sides round-trip                                                                                                                                                                                                                                                                                                                           |
+| `packages/sanity-studio`              |         46 | `vitest.config.ts`, happy-dom    | Static, Vitest/happy-dom. **No VR, no E2E** — it renders inside Sanity's shell, which this repo does not own                                                                                                                                                                                                                                                                                         |
+| `packages/sanity-schemas`             |      **0** | **none**                         | **Static only, and that is a decision, not an omission.** Schema _shape_ is checked by `tsgo` and by Sanity TypeGen, whose output (`apps/web/src/lib/sanity/sanity.types.ts`) is consumed by 370 typed tests one workspace over. A schema definition with no behaviour has nothing a unit test would add. Revisit the day a schema grows a `validation` rule or a custom input — those are behaviour |
+| `apps/studio` / `apps/studio-staging` |      **0** | **none**                         | **Mostly "none", with one hole — see below**                                                                                                                                                                                                                                                                                                                                                         |
 
 **`apps/studio` does not get a clean "none", and the reason is worth the paragraph.** Its
 `sanity.config.ts` is 38 lines (staging's is 42) and is a genuine configuration shell, so the
-parity claim between the two studios is a *structural* one that belongs in a static check rather than
+parity claim between the two studios is a _structural_ one that belongs in a static check rather than
 a Vitest suite. But the workspace also carries executable code that mutates production Sanity:
 
 - **`apps/studio/migrations/` — 26 migrations, 722 lines.** **15 of 26** are the pattern working
@@ -819,15 +821,15 @@ one that turns out to hide real untested code.
 
 "Keep" is an option with a cost, so it is priced alongside the others.
 
-| Option | What moves | Cost | Buys |
-| --- | --- | --- | --- |
-| **Keep Vitest + happy-dom** (recommended) | nothing moves; 3 rules + 3 config lines | **~2 days**: one lint rule (`innerWidth` assignment), one fake-timer rewrite of `SearchInterface.test.tsx` (1 924 lines, 80 `waitFor` sites), `engines`, `test.inputs`, `--maxWorkers` for the wave | closes the `matchMedia` class with a rule; makes ledger row 19 unrepeatable *by construction* rather than by evidence (§3.5 could not starve it); closes the Node-20 defect; closes the #3096 cache hole |
-| Vitest → Jest 30 | 460 files; every `vi.*` → `jest.*`; `vitest.config.ts` ×4 → `jest.config` ×4; ESM via `--experimental-vm-modules`; a transform pipeline Vite currently makes unnecessary | **6–10 weeks**, and a permanent second config surface | nothing this repo lacks |
-| Vitest → `node:test` | impossible for 416 of 460 files (no DOM); would split the repo across two runners for the 44 node-only files | — | — |
-| Vitest → Bun test | 460 files + a second runtime pinned in CI, Vercel and every agent worktree; default no-isolation is the wrong direction for a contention-flaky suite | **4–8 weeks** + ongoing runtime drift | a fraction of the 9 % that is assertions |
-| happy-dom → jsdom | `environment` string ×2 + re-fixing everything `matchMedia`-shaped | ~1 week | **a regression** — jsdom does not implement `matchMedia` (§2.6) |
-| happy-dom → browser mode (component tests) | 237 `render(`-calling files into Chromium contexts; `@vitest/browser-playwright`; a Playwright browser per agent worktree | **4–6 weeks** + a large per-file runtime increase under a 4-agent wave | 0 files that need it after #3086 (§2.5) |
-| Wire `@storybook/addon-vitest` (for `play` only) | `storybookTest` plugin + a `projects` entry + `browser:` block; **208** stories become browser tests, not 11 | **~1 week**, and a new CI job's worth of runtime | the seam #3086's geometry move needs — this is the one migration worth buying, and it is #3082's/#3086's call, not this ticket's |
+| Option                                           | What moves                                                                                                                                                               | Cost                                                                                                                                                                                                | Buys                                                                                                                                                                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Keep Vitest + happy-dom** (recommended)        | nothing moves; 3 rules + 3 config lines                                                                                                                                  | **~2 days**: one lint rule (`innerWidth` assignment), one fake-timer rewrite of `SearchInterface.test.tsx` (1 924 lines, 80 `waitFor` sites), `engines`, `test.inputs`, `--maxWorkers` for the wave | closes the `matchMedia` class with a rule; makes ledger row 19 unrepeatable _by construction_ rather than by evidence (§3.5 could not starve it); closes the Node-20 defect; closes the #3096 cache hole |
+| Vitest → Jest 30                                 | 460 files; every `vi.*` → `jest.*`; `vitest.config.ts` ×4 → `jest.config` ×4; ESM via `--experimental-vm-modules`; a transform pipeline Vite currently makes unnecessary | **6–10 weeks**, and a permanent second config surface                                                                                                                                               | nothing this repo lacks                                                                                                                                                                                  |
+| Vitest → `node:test`                             | impossible for 416 of 460 files (no DOM); would split the repo across two runners for the 44 node-only files                                                             | —                                                                                                                                                                                                   | —                                                                                                                                                                                                        |
+| Vitest → Bun test                                | 460 files + a second runtime pinned in CI, Vercel and every agent worktree; default no-isolation is the wrong direction for a contention-flaky suite                     | **4–8 weeks** + ongoing runtime drift                                                                                                                                                               | a fraction of the 9 % that is assertions                                                                                                                                                                 |
+| happy-dom → jsdom                                | `environment` string ×2 + re-fixing everything `matchMedia`-shaped                                                                                                       | ~1 week                                                                                                                                                                                             | **a regression** — jsdom does not implement `matchMedia` (§2.6)                                                                                                                                          |
+| happy-dom → browser mode (component tests)       | 237 `render(`-calling files into Chromium contexts; `@vitest/browser-playwright`; a Playwright browser per agent worktree                                                | **4–6 weeks** + a large per-file runtime increase under a 4-agent wave                                                                                                                              | 0 files that need it after #3086 (§2.5)                                                                                                                                                                  |
+| Wire `@storybook/addon-vitest` (for `play` only) | `storybookTest` plugin + a `projects` entry + `browser:` block; **208** stories become browser tests, not 11                                                             | **~1 week**, and a new CI job's worth of runtime                                                                                                                                                    | the seam #3086's geometry move needs — this is the one migration worth buying, and it is #3082's/#3086's call, not this ticket's                                                                         |
 
 **The cost of staying** is not zero and should be stated: happy-dom's `MediaQueryList` seed bug stays
 until upstream fixes it, so `matchMedia` transitions keep being hand-stubbed in three files; there is
