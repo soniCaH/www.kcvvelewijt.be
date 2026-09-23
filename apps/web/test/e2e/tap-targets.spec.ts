@@ -32,17 +32,28 @@ async function measureHitArea(control: Locator): Promise<HitMeasurement> {
     };
     // Walk out from the centre along its row and column until a point stops
     // resolving to the control — the real extents, pseudo-element included.
+    // Hit testing resolves to whole pixels, so walk whole pixels from a
+    // rounded centre: a fractional start would shave a pixel off one side,
+    // and sub-pixel steps overshoot the real edge.
+    const px = Math.round(cx);
+    const py = Math.round(cy);
     const reach = (dx: number, dy: number) => {
       let n = 0;
-      while (n < 60 && hits(cx + dx * (n + 1), cy + dy * (n + 1))) n++;
+      while (n < 60 && hits(px + dx * (n + 1), py + dy * (n + 1))) n++;
       return n;
     };
-    const width = reach(-1, 0) + reach(1, 0) + 1;
-    const height = reach(0, -1) + reach(0, 1) + 1;
-    const left = cx - reach(-1, 0);
-    const right = cx + reach(1, 0) + 1;
-    const top = cy - reach(0, -1);
-    const bottom = cy + reach(0, 1) + 1;
+    const [l, rt, t, b] = [
+      reach(-1, 0),
+      reach(1, 0),
+      reach(0, -1),
+      reach(0, 1),
+    ];
+    const width = l + rt + 1;
+    const height = t + b + 1;
+    const left = px - l;
+    const right = px + rt + 1;
+    const top = py - t;
+    const bottom = py + b + 1;
 
     let covered = 0;
     let total = 0;
@@ -124,9 +135,13 @@ for (const viewport of VIEWPORTS) {
 
     test("ContactCard E-mail / Bel on /hulp", async ({ page }) => {
       await gotoBounded(page, "/hulp");
+      // Fail, not skip: the /hulp answers are CMS content that always carry
+      // contacts, so finding none means the card or its labels broke.
       const actions = await openAnswerWithContact(page);
-      test.skip(!actions, "no answer on /hulp carries a contact today");
-      for (const action of await actions!.all()) await expectTapTarget(action);
+      if (!actions) {
+        throw new Error("no answer on /hulp rendered a ContactCard action");
+      }
+      for (const action of await actions.all()) await expectTapTarget(action);
     });
 
     test("OrganigramExplorer Vorige / Volgende functie", async ({ page }) => {
@@ -157,14 +172,18 @@ for (const viewport of VIEWPORTS) {
     test("HubSearch clear button in the sticky section bar", async ({
       page,
     }) => {
-      await gotoBounded(page, "/hulp");
-      await page
-        .locator("#structuur")
-        .evaluate((el) => el.scrollIntoView({ block: "start" }));
+      // A cold load with the hash lands past the hero however slow hydration
+      // is; a manual scroll fired before hydration can be undone by it, and
+      // the bar mounts its search only once the hero is out of view.
+      await gotoBounded(page, "/hulp#structuur");
       const nav = page.locator('nav[aria-label="Secties van de hub"]');
-      await nav.locator('[role="combobox"]').fill("trainer");
+      const field = nav.locator('[role="combobox"]');
+      await expect(field).toBeVisible();
+      await field.fill("trainer");
       await page.keyboard.press("Escape");
-      await expectTapTarget(nav.locator('button[aria-label="Wissen"]'));
+      const clear = nav.locator('button[aria-label="Wissen"]');
+      await expect(clear).toBeVisible();
+      await expectTapTarget(clear);
     });
 
     test("CalendarWidget period arrows on /kalender", async ({ page }) => {
