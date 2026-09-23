@@ -581,6 +581,11 @@ const config: TestRunnerConfig = {
         // hairlines, layout reflows, gradient breaks) produce >0.05% diffs.
         failureThreshold: 0.0005,
         failureThresholdType: "percent",
+        // Without this, `-u` skips any capture that PASSES the threshold, so a
+        // sub-threshold drift leaves the stale PNG on disk (flake ledger row
+        // 20, #3136). Proved by
+        // `pnpm --filter @kcvv/web run vr:accept:sub-threshold`.
+        updatePassedSnapshot: true,
       });
     }
   },

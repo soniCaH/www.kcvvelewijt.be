@@ -170,7 +170,9 @@ tests), same commit, same image tag:
 
 The 0/57 row means architecture was the sole cause of the drift: pinned local
 renders are **byte-identical to the committed baselines CI passes against**,
-so a scoped local capture is trustworthy on Apple Silicon. Two consequences:
+so a scoped local capture is trustworthy on Apple Silicon. (Measured before
+#3136, when `-u` rewrote only captures that failed the 0.05 % gate — so 0/57
+proves "under the gate", not strictly byte-identical.) Two consequences:
 
 - **Scoped runs only — enforced (#2380).** Emulation costs ~3.6×: the ~40 min
   full suite projects to ~2.5 h. The full suite is CI's job; see "The unscoped
@@ -189,7 +191,8 @@ through `apps/web/scripts/vr-docker.mjs`, which refuses an unscoped local run
   bare positional is silently dropped (see "Scoping a VR run" below), so every
   local `vr:check` is the full ~2.5 h suite. To check one component, run a
   scoped **update** and read `git status test/vr/__snapshots__/`: modified =
-  drift, untracked = new. Discard **by prefix**, never the whole directory —
+  drift, untracked = new. Since #3136 (`updatePassedSnapshot: true`), modified
+  means **any** pixel change, including drift under the 0.05 % gate. Discard **by prefix**, never the whole directory —
   a blanket `git checkout -- test/vr/__snapshots__/` also throws away baselines
   you legitimately updated earlier on the branch:
 
