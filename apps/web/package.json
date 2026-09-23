@@ -37,7 +37,8 @@
     "vr:update:story": "node scripts/vr-docker.mjs update:story",
     "vr:ci": "pnpm run vr:run",
     "vr:ci:update": "pnpm run vr:run:update",
-    "vr:diff": "node scripts/vr-diff.mjs"
+    "vr:diff": "node scripts/vr-diff.mjs",
+    "vr:accept:sub-threshold": "node scripts/vr-accept-sub-threshold.mjs"
   },
   "dependencies": {
     "@effect/platform": "0.97.2",
