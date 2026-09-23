@@ -210,7 +210,7 @@ describe("MatchStripView", () => {
   // the result side, so the strip must render a result that has no scoreline.
   // The desktop slider defaults to that slide, so returning nothing left an
   // empty gap between the crests for the hours after every kickoff.
-  describe("result awaiting its score (#2390)", () => {
+  describe("result awaiting its score (#2390, #2587)", () => {
     const awaiting: ScheduleMatch = {
       ...result,
       time: "19:30",
@@ -219,30 +219,68 @@ describe("MatchStripView", () => {
       awayScore: undefined,
     };
 
-    it("shows the kickoff time in place of the missing scoreline", () => {
+    it("shows the waiting glyph in place of the missing scoreline, not the kickoff", () => {
       render(<MatchStripView data={{ result: awaiting, fixture: null }} />);
-      // Both layouts render, so the time appears on the mobile row and the
+      // Both layouts render, so the glyph appears on the mobile row and the
       // desktop slide alike — neither may be blank.
-      expect(screen.getAllByText("19:30")).toHaveLength(2);
+      expect(screen.getAllByText("–")).toHaveLength(2);
+      expect(screen.queryByText("19:30")).toBeNull();
     });
 
-    it("invents no scoreline, in the row's accessible name either", () => {
+    it("keeps the stub caption on 'Uitslag' — the w-14 stub is sized to 'Volgende'", () => {
+      render(<MatchStripView data={{ result: awaiting, fixture: null }} />);
+      const link = screen.getByRole("link", { name: /RC Mechelen/ });
+      // Exact match: the stub's own line reads "Uitslag", not the phrase.
+      expect(within(link).getByText("Uitslag")).toBeInTheDocument();
+    });
+
+    it("invents no scoreline, and carries the waiting state in the accessible name", () => {
       render(<MatchStripView data={{ result: awaiting, fixture: null }} />);
       expect(screen.queryByText(/\d+\s*–\s*\d+/)).toBeNull();
       expect(
         screen.getByRole("link", {
-          name: /Uitslag.*KCVV Elewijt tegen RC Mechelen/,
+          name: /^Uitslag volgt .*: KCVV Elewijt tegen RC Mechelen$/,
         }),
       ).toBeInTheDocument();
     });
 
-    it("falls back to vs. when the feed carries neither score nor time", () => {
+    it("gives the desktop slide the waiting phrase for assistive tech — it has no aria-label", () => {
+      render(<MatchStripView data={{ result: awaiting, fixture: null }} />);
+      const slide = document.querySelector('[aria-live="polite"]');
+      expect(slide?.textContent).toContain("Uitslag volgt");
+    });
+
+    it("keeps a finished match PSD closed without a score on its kickoff", () => {
+      render(
+        <MatchStripView
+          data={{ result: { ...awaiting, status: "finished" }, fixture: null }}
+        />,
+      );
+      expect(screen.getAllByText("19:30")).toHaveLength(2);
+      expect(screen.queryByText("–")).toBeNull();
+    });
+
+    it("never falls back to vs. for the waiting state, even without a time", () => {
       render(
         <MatchStripView
           data={{ result: { ...awaiting, time: undefined }, fixture: null }}
         />,
       );
+      expect(screen.queryByText("vs.")).toBeNull();
+      expect(screen.getAllByText("–")).toHaveLength(2);
+    });
+
+    it("lets an exceptional status keep the old fallback — nothing is owed a score", () => {
+      render(
+        <MatchStripView
+          data={{
+            result: { ...awaiting, status: "postponed", time: undefined },
+            fixture: null,
+          }}
+        />,
+      );
       expect(screen.getAllByText("vs.").length).toBeGreaterThan(0);
+      expect(screen.queryByRole("link", { name: /Uitslag volgt/ })).toBeNull();
     });
   });
 

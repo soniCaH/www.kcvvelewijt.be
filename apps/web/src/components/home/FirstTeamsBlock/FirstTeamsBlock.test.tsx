@@ -105,9 +105,9 @@ describe("FirstTeamsBlock", () => {
   });
 
   // #2390 — a kicked-off match takes the result slot before its score is
-  // published. <TeamAgendaRow> was expected to degrade on its own here rather
-  // than be changed, so this pins that: kickoff time, and no invented score.
-  it("renders a kicked-off match in the result slot as a kickoff time, not a score", () => {
+  // published. #2587 — the row says the result is coming: the waiting glyph
+  // and "Uitslag volgt", never the kickoff time, and still no invented score.
+  it("renders a kicked-off match in the result slot as awaiting its result, not a kickoff or a score", () => {
     render(
       <FirstTeamsBlock
         teams={[
@@ -130,7 +130,9 @@ describe("FirstTeamsBlock", () => {
         ]}
       />,
     );
-    expect(screen.getAllByText("19:30").length).toBeGreaterThan(0);
+    expect(screen.queryByText("19:30")).not.toBeInTheDocument();
+    expect(screen.getAllByText("–").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Uitslag volgt").length).toBeGreaterThan(0);
     expect(screen.getAllByText("FC Zemst Sportief").length).toBeGreaterThan(0);
     // It occupies the result slot, so the fixture side is the one left empty.
     expect(screen.getByText("Geen geplande wedstrijd")).toBeInTheDocument();

@@ -331,6 +331,21 @@ export const MATCH_KIND_WORD = {
 export const MATCH_DAY_WORD = "Vandaag";
 
 /**
+ * A match in the result slot that has kicked off while PSD still owes its
+ * score (#2587) — `pickLastResult` (`first-teams.ts`) hands the slot that match
+ * on purpose. The phrase replaces `MATCH_KIND_WORD.result` as the caption's
+ * opening word, the glyph replaces the kickoff time the score slot used to
+ * print. Named once here, like `MATCH_DAY_WORD`, so `<TeamAgendaRow>` and
+ * `<MatchStripView>` never hand-spell either.
+ *
+ * The phrase says a result is coming, never when: PSD's publication delay is
+ * not knowable web-side (#2403). Not `vs.` for the glyph — that stays the
+ * last resort for a feed with neither score nor time, and reads future-tense.
+ */
+export const RESULT_PENDING_WORD = "Uitslag volgt";
+export const RESULT_PENDING_GLYPH = "–";
+
+/**
  * Which slot a match row is filling — the *surface's* answer, not the match's.
  *
  * These cannot be derived from `status`, and a row that tries gets it wrong:
@@ -340,6 +355,26 @@ export const MATCH_DAY_WORD = "Vandaag";
  * card beside it (#2404). The column knows; the row has to be told.
  */
 export type MatchRowKind = keyof typeof MATCH_KIND_WORD;
+
+/**
+ * Whether a row is the result slot holding a match that has kicked off while
+ * PSD still owes its score (#2587) — the one definition `<TeamAgendaRow>` and
+ * `<MatchStripView>` both call, so the two surfaces cannot disagree about it.
+ *
+ * `kind` is the caller's slot, never derived: `matchSlot` (`first-teams.ts`)
+ * routes a past-kickoff `scheduled` match to the result slot on purpose
+ * (#2390), and `isPlayedMatch("scheduled")` is false, so a status-only check
+ * cannot see this row at all (#2404). `scheduled` is then the whole status
+ * test: every exceptional status keeps its own marker, and a match PSD closed
+ * as `finished` without a score may never get one — "Uitslag volgt" there
+ * would be a promise nothing keeps.
+ */
+export function isResultPending(
+  kind: MatchRowKind | undefined,
+  status: MatchStatus,
+): boolean {
+  return kind === "result" && status === "scheduled";
+}
 
 /**
  * The one home/away vocabulary (#2398 AC4). Four surfaces state this same fact

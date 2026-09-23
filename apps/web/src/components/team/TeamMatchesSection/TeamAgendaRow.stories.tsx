@@ -160,7 +160,8 @@ export const KindLabelledFixture: Story = {
  * match that has kicked off while PSD still calls it `scheduled`, sitting in
  * the *result* slot because `pickLastResult` puts it there. Deriving from
  * status would label this "Volgende" — beside the real fixture, also
- * "Volgende". The slot says "Uitslag" and waits for the score.
+ * "Volgende". The slot says "Uitslag volgt" and shows `–` in the demoted
+ * mono register where a score will go, not the kickoff time (#2587).
  */
 export const KindLabelledAwaitingScore: Story = {
   args: { match: { ...upcoming, id: 10 }, kind: "result" },

@@ -484,7 +484,8 @@ describe("deriveFirstTeamVM", () => {
 
   it("leaves scores undefined on the ScheduleMatch when the source has none", () => {
     // A finished match without a recorded scoreline stays scoreless — the row
-    // then falls back to the kickoff time rather than inventing an outcome.
+    // then falls back to the kickoff time rather than inventing an outcome
+    // (not "Uitslag volgt": PSD closed it, a score may never come — #2587).
     const noScore = deriveFirstTeamVM(
       team,
       [
