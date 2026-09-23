@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import {
   ARTICLE_TYPES,
   discoverRouteFixtures,
@@ -78,6 +78,23 @@ test.describe("static routes", () => {
 
   test("/hulp", async ({ page }) => {
     await smokeTest(page, { path: "/hulp" });
+  });
+
+  // The finder must ship in the prerendered HTML. Rendered client-only, it
+  // arrives ~1900px taller than its placeholder and shoves the rest of the
+  // page down after hydration. Raw HTML, no browser JS: a unit test mocks
+  // this seam away.
+  test("/hulp prerenders the finder", async ({ request }) => {
+    const html = await (await request.get("/hulp")).text();
+    // Only the finder's own section: a bailout elsewhere on the page is not
+    // this test's business.
+    const section = html.slice(
+      html.indexOf('id="hulp"'),
+      html.indexOf('id="structuur"'),
+    );
+    expect(section).toContain('aria-label="Filter op categorie"');
+    expect(section).toContain('aria-label="Filter op doelgroep"');
+    expect(section).not.toContain("BAILOUT_TO_CLIENT_SIDE_RENDERING");
   });
 
   test("/zoeken", async ({ page }) => {

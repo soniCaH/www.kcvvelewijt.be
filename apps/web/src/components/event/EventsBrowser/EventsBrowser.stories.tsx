@@ -85,21 +85,26 @@ export const Populated: Story = {
  * without restoring the URL afterwards this leaks into whatever story runs
  * next in the same page and seeds ITS mount from a stale `?type=`. Confirmed
  * empirically: the `Empty` story's own baseline rendered this story's
- * "Jeugdwerking" copy until the restore below was added.
+ * "Jeugdwerking" copy until the restore was added.
+ *
+ * The restore is `beforeEach`'s cleanup, which runs when the story is torn
+ * down — after the screenshot. Restoring inside `play` is too early: the
+ * browser reports the URL change, the component re-reads the URL, and the
+ * filter snaps back to "Alles" before the snapshot.
  */
 export const FilteredToZero: Story = {
   args: {
     events: EVENTS.filter((event) => event.eventType !== "Jeugdwerking"),
   },
-  play: async ({ canvasElement }) => {
+  beforeEach: () => {
     const originalUrl =
       window.location.pathname + window.location.search + window.location.hash;
+    return () =>
+      window.history.replaceState(window.history.state, "", originalUrl);
+  },
+  play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "Jeugdwerking" }));
-    // Restore — after the snapshot-worthy state above has rendered, so this
-    // doesn't affect this story's own screenshot, only what the NEXT story
-    // reads on its own mount.
-    window.history.replaceState(window.history.state, "", originalUrl);
   },
 };
 

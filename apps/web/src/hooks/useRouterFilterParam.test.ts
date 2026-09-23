@@ -6,11 +6,10 @@ type Facet = "a" | "b" | "c";
 const VALUES: readonly Facet[] = ["a", "b", "c"];
 
 const mockPush = vi.fn();
-const mockReplace = vi.fn();
 let mockSearchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush, replace: mockReplace }),
+  useRouter: () => ({ push: mockPush }),
   useSearchParams: () => mockSearchParams,
 }));
 
@@ -128,36 +127,5 @@ describe("useRouterFilterParam", () => {
     const params = new URLSearchParams(pushedUrl.split("?")[1]);
     expect(params.get("member")).toBe("president");
     expect(params.get("categorie")).toBe("b");
-  });
-
-  it("appends the default hash on write", () => {
-    const { result } = renderHook(() =>
-      useRouterFilterParam("type", VALUES, {
-        fallback: "a",
-        route: "/hulp",
-        hash: "hulp",
-      }),
-    );
-    act(() => result.current[1]("b"));
-    expect(mockPush).toHaveBeenCalledWith("/hulp?type=b#hulp", {
-      scroll: false,
-    });
-  });
-
-  it("lets a call override the hash and use replace instead of push", () => {
-    const { result } = renderHook(() =>
-      useRouterFilterParam("type", VALUES, {
-        fallback: "a",
-        route: "/hulp",
-        hash: "hulp",
-      }),
-    );
-    act(() =>
-      result.current[1]("b", { hash: "some-question-id", replace: true }),
-    );
-    expect(mockReplace).toHaveBeenCalledWith("/hulp?type=b#some-question-id", {
-      scroll: false,
-    });
-    expect(mockPush).not.toHaveBeenCalled();
   });
 });

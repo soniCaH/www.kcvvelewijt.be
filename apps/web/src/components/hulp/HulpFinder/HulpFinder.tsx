@@ -34,14 +34,13 @@ import {
   type MouseEvent,
 } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight } from "@/lib/icons.redesign";
 import {
   EmptyState,
   FilterTabs,
   type FilterTab,
 } from "@/components/design-system";
-import { useRouterFilterParam } from "@/hooks/useRouterFilterParam";
+import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
 import { filteredEmptyBody } from "@/lib/utils/empty-state-copy";
 import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
@@ -68,7 +67,7 @@ type CategoryFilter = "alles" | CategoryKey;
 type AudienceFilter = "alles" | UserRole;
 /** Every valid `?audience=` value — hoisted to a module constant (rather
  *  than computed inline at the hook call site) so it's referentially
- *  stable across renders; `useRouterFilterParam` takes it as a plain
+ *  stable across renders; `useHistoryFilterParam` takes it as a plain
  *  `values` array, not a dependency to re-derive (#2783 review finding 7). */
 const AUDIENCE_VALUES: readonly UserRole[] = HUB_AUDIENCE_FILTERS.map(
   (option) => option.value,
@@ -108,7 +107,6 @@ export interface HulpFinderProps {
 }
 
 export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
-  const router = useRouter();
   const panel = useHubMemberPanel();
   const {
     trackView,
@@ -117,29 +115,13 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
     trackStepLinkClicked,
   } = useResponsibilityAnalytics();
 
-  // Both facets are purely URL-derived via `useRouterFilterParam` (#2779) —
-  // no local state, no render-phase resync of their own. `category` used to
-  // carry both of those (#2564 review item 5) so that `reveal()` (the
-  // `#<slug>` question deep-link) could set it without writing
-  // `?categorie=`. That mirror is what let an unrelated `?audience=` push
-  // clobber a revealed category back to "alles" (round-1 finding 2):
-  // reading the whole `searchParams` object, the resync saw ANY url change
-  // as a reason to re-derive from a `?categorie=` the deep-link never
-  // wrote. `reveal()` below writes the param it already implies instead
-  // (via the shared setter's `{ hash, replace }` override), so there is
-  // nothing left to mirror.
-  //
-  // Both hook instances read `value` from `useSearchParams()` (reactive,
-  // consistent with what just rendered — #2783 review finding 1) but merge
-  // each WRITE from the live `window.location.search` instead (#2783 review
-  // round 2): `useSearchParams()` never observes `HubMemberPanel`'s
-  // `?member=`/`?holder=` deep-link, written via a raw `history.replaceState`
-  // outside Next's router, and this route hosts both — merging from
-  // `useSearchParams()` would silently drop it from the URL on every filter
-  // click made while the member panel is open. See `useRouterFilterParam`'s
-  // own docblock for the full reasoning and the (narrow, same-widget,
-  // pre-#2779-equivalent) trade-off that source choice accepts instead.
-  const [category, setCategoryParam] = useRouterFilterParam<CategoryFilter>(
+  // Both facets live in the URL, written with `history.pushState` rather
+  // than the router. Reading them through `useSearchParams()` would opt the
+  // finder out of prerendering on this ISR route: the server HTML would carry
+  // a small placeholder, and the page would grow by the whole finder once it
+  // hydrates. Each write merges from the live `window.location.search`, so
+  // `HubMemberPanel`'s `?member=`/`?holder=` survives a filter press.
+  const [category, setCategoryParam] = useHistoryFilterParam<CategoryFilter>(
     CATEGORY_PARAM,
     CATEGORY_ORDER,
     { fallback: "alles", route: "/hulp", hash: "hulp" },
@@ -154,7 +136,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   const scrollToTopRef = useRef(false);
 
   const [audienceParam, setAudienceParam] =
-    useRouterFilterParam<AudienceFilter>(AUDIENCE_PARAM, AUDIENCE_VALUES, {
+    useHistoryFilterParam<AudienceFilter>(AUDIENCE_PARAM, AUDIENCE_VALUES, {
       fallback: "alles",
       route: "/hulp",
       hash: "hulp",
@@ -191,16 +173,14 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
 
   // #<slug> deep-link: reveal + open the question (switching to its category so
   // it renders, since "Alles" only shows the top-3 per category). Writes
-  // `?categorie=` via the shared `useRouterFilterParam` setter only when the
-  // category actually needs to change — the hash itself is already correct
+  // `?categorie=` via the shared setter only when the category actually
+  // needs to change — the hash itself is already correct
   // by the time this runs (a real `hashchange`, or the hash present on
   // first load, both move `window.location.hash` natively before this
   // fires). `replace`, not `push`: landing on a deep link isn't an action
-  // to undo, so it shouldn't cost the visitor a back-press — the wrinkle
-  // that shaped this hook's `{ hash, replace }` setter override (#2779):
-  // every chip press below lands on the section anchor via the hook's
-  // default `hash: "hulp"`, but `reveal()` needs its own question's `#<id>`
-  // instead, via `replace` where every chip press uses `push`.
+  // to undo, so it shouldn't cost the visitor a back-press. Every chip press
+  // below pushes and lands on `#hulp`; `reveal()` replaces and keeps its own
+  // question's `#<id>`.
   const reveal = useCallback(
     (rawId: string) => {
       const id = rawId.replace(/^#/, "");
@@ -238,16 +218,13 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
       // A render is coming and the card already renders where it is, so the
       // scroll effect will drain `pendingScroll` — no url write needed.
       if (!wrongCategory && !wrongAudience) return;
-      // ONE url write for both params, not two `useRouterFilterParam`
-      // setters: each of those merges from the live `window.location.search`,
-      // which `router.replace` has not updated yet by the time the second one
-      // runs — the second write would drop the first one's param.
-      const params = new URLSearchParams(window.location.search);
-      params.set(CATEGORY_PARAM, path.category);
-      if (wrongAudience) params.delete(AUDIENCE_PARAM);
-      router.replace(`/hulp?${params.toString()}#${id}`, { scroll: false });
+      // Two setter calls are safe: `replaceState` is synchronous, so the
+      // second one merges from a URL that already carries the first's param.
+      const write = { hash: id, replace: true };
+      if (wrongCategory) setCategoryParam(path.category, write);
+      if (wrongAudience) setAudienceParam("alles", write);
     },
-    [pathById, category, audience, router],
+    [pathById, category, audience, setCategoryParam, setAudienceParam],
   );
 
   useEffect(() => {
@@ -287,7 +264,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   }, [category]);
 
   // Dedup guard: re-pressing the already-active audience chip is a no-op —
-  // no redundant history entry (repo analytics policy) — `useRouterFilterParam`'s
+  // no redundant history entry (repo analytics policy) — the hook's
   // own internal dedup guard covers this too, but this call site guard
   // documents the intent and matches every other absorbed row. The row's
   // own "Alles" chip (added on absorption into `<FilterTabs>`, #2429/#2564)
