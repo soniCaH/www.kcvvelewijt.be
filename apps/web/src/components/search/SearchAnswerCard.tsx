@@ -12,7 +12,7 @@
  *  - The italic pull-quote keeps AA contrast (ink on cream); the card's −0.5°
  *    rotation is cosmetic only — it never reorders the DOM, and the answer is
  *    length-clamped so it wraps gracefully instead of clipping at narrow widths.
- *  - The disclaimer stays legible (ink-soft, not rotated).
+ *  - The disclaimer stays legible (full ink, not rotated — a sentence is body voice, #2551).
  *  - Sources are real, keyboard-focusable links with a visible focus ring.
  */
 
@@ -107,7 +107,7 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
         </ul>
       )}
 
-      <p className="text-ink-muted mt-2.5 flex items-center gap-1.5 font-mono text-[10px] leading-snug">
+      <p className="text-ink mt-2.5 flex items-center gap-1.5 font-mono text-[10px] leading-snug">
         <Warning size={12} aria-hidden className="text-alert flex-shrink-0" />
         {DISCLAIMER}
       </p>

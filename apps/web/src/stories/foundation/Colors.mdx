@@ -64,7 +64,10 @@ soft status tints below, which stay reserved to the Alert variants.
 ## Ink (text + dark interludes)
 
 `ink` is the primary text colour on cream and the fill for dark interlude
-panels. `ink-muted` is bylines / metadata / dividers.
+panels. `ink-muted` is the quiet voice: bylines / metadata. Two tiers, not
+three — `ink-soft` is a surface only, never a text colour (DESIGN.md → The
+Two-Tier Text Rule). On dark, `cream` is the voice and `cream-quiet` (cream at
+70% alpha, never on jersey-deep) the quiet voice.
 
 <SwatchRow items={[
   { name: 'ink (primary text + dark bg)', variable: '--color-ink', hex: '#0a0a0a' },
@@ -198,8 +201,8 @@ interludes, not on the cream surface.
       <td><code>--color-ink-soft</code></td>
       <td><code>#1f1f1f</code></td>
       <td><div style={{ background: 'var(--color-ink-soft)', height: '2.5rem', width: '100%', border: '1px solid var(--color-paper-edge)' }} /></td>
-      <td>Layered dark surfaces</td>
-      <td>14.6:1 — AAA all sizes</td>
+      <td>Layered dark surfaces — never text</td>
+      <td>— (surface only)</td>
     </tr>
     <tr>
       <td><code>--color-ink-muted</code></td>
@@ -241,8 +244,7 @@ interludes, not on the cream surface.
 
 > `--color-jersey-deep` reads **4.69:1** on cream and is the one green that
 > carries text at any size — headings, CTAs and inline prose links. It is still
-> a green, not a body colour: running copy on cream stays `--color-ink` or
-> `--color-ink-soft`, and green remains an event rather than a surface
+> a green, not a body colour: running copy on cream stays `--color-ink`, and green remains an event rather than a surface
 > treatment (see the Rare Green Rule in DESIGN.md).
 
 ---

@@ -98,11 +98,13 @@ const RAW_PALETTE_CLASS_PATTERN =
 // has two tiers: `text-ink`/`text-ink-muted` on cream, `text-cream`/
 // `text-cream-quiet` on dark. `text-ink-soft` is not a tier (1.20:1 from ink),
 // and every `text-cream/NN` is either the rejected `/85` or a hand-rolled copy
-// of the `cream-quiet` token. The `ink-soft` token itself stays for surfaces,
+// of the `cream-quiet` token — arbitrary (`/[0.85]`) and re-alpha'd
+// (`text-cream-quiet/80`) forms included. The `ink-soft` token itself stays for surfaces,
 // so only the `text-` utility is banned. `\\x2F` is `/`: esquery ends a regex
 // at the first slash, escaped or not.
 const TEXT_INK_SOFT_PATTERN = "(?<![\\w-])text-ink-soft(?![\\w-])";
-const TEXT_CREAM_ALPHA_PATTERN = "(?<![\\w-])text-cream\\x2F[0-9]";
+const TEXT_CREAM_ALPHA_PATTERN =
+  "(?<![\\w-])text-cream(?:-quiet)?\\x2F(?:[0-9]|\\[)";
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;

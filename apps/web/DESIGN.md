@@ -10,6 +10,7 @@ colors:
   ink: "#0a0a0a"
   ink-soft: "#1f1f1f"
   ink-muted: "#6b6b6b"
+  cream-quiet: "color-mix(in oklab, #f5f1e6 70%, transparent)"
   jersey: "#4acf52"
   jersey-deep: "#007c46"
   jersey-bright: "#22c55e"

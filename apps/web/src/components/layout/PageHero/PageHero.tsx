@@ -483,7 +483,8 @@ export function PageHero(props: PageHeroProps) {
       {showLead ? (
         <p
           className={cn(
-            "font-display text-ink mt-3.5 leading-[1.38] italic",
+            "font-display mt-3.5 leading-[1.38] italic",
+            LEAD_TONE_CLASS.cream,
             showImage
               ? "text-[1.05rem]"
               : "max-w-[var(--container-prose)] text-[1.25rem]",

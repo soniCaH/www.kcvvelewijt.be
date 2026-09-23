@@ -52,7 +52,7 @@ const proseClasses = [
   "[&_p]:mt-3 [&_p]:text-body-md",
   "[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-1.5 [&_ul]:pl-5",
   "[&_li]:text-body-md",
-  "[&_strong]:font-semibold [&_strong]:text-ink",
+  "[&_strong]:font-semibold",
 ].join(" ");
 
 export default function PrivacyPage() {
