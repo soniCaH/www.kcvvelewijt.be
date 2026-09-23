@@ -25,6 +25,7 @@
  * Out of scope: `docs/research/`, `docs/prd/` and `docs/plans/`. Those are dated
  * records, and quoting the raw form is what a record is for.
  */
+import { spawnSync } from "node:child_process";
 import { globSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -102,12 +103,24 @@ const FORBIDDEN: {
   },
 ];
 
-const bypasses = (file: string): string[] =>
-  readFileSync(join(ROOT, file), "utf8")
+// A match is judged inside its own command: backticks, pipes, `&&` and `;`
+// end one, so a `git push -u` cannot exempt a capture sharing its line.
+const segments = (line: string): string[] => line.split(/`|\|\||&&|[|;]/);
+
+const bypasses = (file: string, source: string): string[] =>
+  source
+    // A trailing `\` continues the command, so `docker compose … \` + `run vr`
+    // is one command, not two harmless halves.
+    // ponytail: joining shifts later line numbers by one per continuation; the
+    // offending text is printed too. Map lines back if that ever misleads.
+    .replace(/\\\n\s*/g, " ")
     .split("\n")
     .flatMap((text, index) =>
-      FORBIDDEN.filter(
-        (rule) => rule.pattern.test(text) && !rule.unless?.test(text),
+      FORBIDDEN.filter((rule) =>
+        segments(text).some(
+          (segment) =>
+            rule.pattern.test(segment) && !rule.unless?.test(segment),
+        ),
       ).map(
         (rule) =>
           `${file}:${index + 1} names ${rule.what}\n    ${text.trim()}\n    use instead: ${rule.instead}`,
@@ -129,6 +142,46 @@ describe("the visual-regression command surface", () => {
   });
 
   it.each(SURFACE)("%s reaches VR only through the wrapper", (file) => {
-    expect(bypasses(file).join("\n")).toBe("");
+    expect(
+      bypasses(file, readFileSync(join(ROOT, file), "utf8")).join("\n"),
+    ).toBe("");
+  });
+
+  it("follows a command across a line continuation", () => {
+    const found = bypasses(
+      "x.md",
+      "docker compose -f docker-compose.vr.yml \\\n  run vr",
+    );
+    expect(found.join("\n")).toContain("the raw container command");
+  });
+
+  it("does not let a git -u exempt a capture on the same line", () => {
+    const found = bypasses(
+      "x.md",
+      "git push -u origin feat && test-storybook -u Features-Foo",
+    );
+    expect(found.join("\n")).toContain("the raw update flag");
+    expect(bypasses("x.md", "git push -u origin feat")).toEqual([]);
+  });
+});
+
+describe("the vr:run:update CI guard", () => {
+  const script = JSON.parse(
+    readFileSync(join(ROOT, "apps/web/package.json"), "utf8"),
+  ).scripts["vr:run:update"] as string;
+  // Only the guard runs: the capture after it is swapped for a marker.
+  const guard = `${script.slice(0, script.indexOf("; concurrently"))}; echo REACHED`;
+  const run = (ci: string) =>
+    spawnSync("sh", ["-c", guard], { env: { ...process.env, CI: ci } });
+
+  it("refuses CI=false before the capture", () => {
+    const result = run("false");
+    expect(result.status).toBe(1);
+    expect(result.stdout.toString()).not.toContain("REACHED");
+    expect(result.stderr.toString()).toContain("vr:update:story");
+  });
+
+  it("lets CI=true through", () => {
+    expect(run("true").stdout.toString()).toContain("REACHED");
   });
 });

@@ -220,8 +220,9 @@ rest of the agent instruction surface to the wrapper — no doc may hand out the
 raw runner, the raw container command or an argument-carrying `-u` (#3140).
 
 `vr:run:update` — the one script that writes baselines without this wrapper —
-refuses to start unless `CI` is set, so the arm64 capture it would produce on a
-developer machine is impossible rather than merely undocumented (#3140).
+refuses to start unless `CI` is exactly `true`. A developer can still set it by
+hand, so the arm64 capture it would produce locally is blocked by default, not
+impossible (#3140).
 
 The wrapper exists as a script rather than a prefix on the package.json script
 bodies because pnpm appends `-- <args>` to the **end** of the script string — a
@@ -237,7 +238,8 @@ pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>
 ```
 
 That script, and its low-memory twin `vr:update:single` below the 8 GB Docker
-floor, are the only ways to write a baseline locally. Each owns three things,
+floor, are the only ways to write a scoped baseline locally — the full-run
+override above (`VR_FULL_RUN=1 … vr:update`) is the one unscoped path. Each owns three things,
 and every raw form drops at least one: the runner flag, the Storybook rebuild,
 and the `docker compose` call carrying `platform: linux/amd64`. Reach the runner
 directly — a bare flag, or `vr:run:update` — and the capture renders on arm64,
