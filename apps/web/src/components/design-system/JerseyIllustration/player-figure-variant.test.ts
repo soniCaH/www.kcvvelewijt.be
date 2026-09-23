@@ -113,106 +113,135 @@ describe("playerFigureSeed — the seed's one owner", () => {
   });
 });
 
+// Property loops collect violations and assert once: one `expect()` per seed
+// per lever spent the 5 s timeout on assertion bookkeeping under a wave
+// (#3128). Checks are written `!(in range)` so a NaN counts as a violation, and
+// only the first 20 are printed so one widened bound stays readable.
+const FIRST = 20;
+
 describe("generateRawPlayerFigureVariant — lever ranges", () => {
   // Sample a broad seed range rather than just the squad — the ranges are a
   // property of the PRNG draw, not of any one name.
   const seeds = Array.from({ length: 2000 }, (_, i) => i * 104_729); // scattered, not sequential
+  const variants = seeds.map((seed) => ({
+    seed,
+    v: generateRawPlayerFigureVariant(seed),
+  }));
+
+  const SPANS = [
+    ["scale", 0.84, 1.16],
+    ["offsetX", -9, 9],
+    ["offsetY", -7, 7],
+    ["rotation", -0.9, 0.9],
+    ["underprintOpacity", 0.74, 1],
+    ["overprintOpacity", 0.82, 1],
+    ["registrationX", -3, 4],
+    ["registrationY", -3, 4],
+    ["headTilt", -5, 5],
+    ["headDy", -6, 6],
+    ["shoulderWidth", 0.88, 1.12],
+    ["build", 0.86, 1.14],
+    ["lean", -3, 3],
+    ["drop", -14, 16],
+  ] as const;
+  const CHOICES = [
+    ["flip", [1, -1]],
+    ["stripeCount", STRIPE_COUNTS],
+    ["sleeve", SLEEVE_LENGTHS],
+    ["pattern", SHIRT_PATTERNS],
+  ] as const;
+
+  it("checks every lever the variant carries — a new lever needs a span", () => {
+    expect([...SPANS, ...CHOICES].map(([lever]) => lever).sort()).toEqual(
+      Object.keys(variants[0].v).sort(),
+    );
+  });
 
   it("keeps every lever inside its documented span", () => {
-    for (const seed of seeds) {
-      const v = generateRawPlayerFigureVariant(seed);
-      expect(v.scale).toBeGreaterThanOrEqual(0.84);
-      expect(v.scale).toBeLessThanOrEqual(1.16);
-      expect(v.rotation).toBeGreaterThanOrEqual(-0.9);
-      expect(v.rotation).toBeLessThanOrEqual(0.9);
-      expect(v.underprintOpacity).toBeGreaterThanOrEqual(0.74);
-      expect(v.underprintOpacity).toBeLessThanOrEqual(1);
-      expect(v.overprintOpacity).toBeGreaterThanOrEqual(0.82);
-      expect(v.overprintOpacity).toBeLessThanOrEqual(1);
-      expect(v.registrationX).toBeGreaterThanOrEqual(-3);
-      expect(v.registrationX).toBeLessThanOrEqual(4);
-      expect(v.registrationY).toBeGreaterThanOrEqual(-3);
-      expect(v.registrationY).toBeLessThanOrEqual(4);
-      expect([1, -1]).toContain(v.flip);
-      expect(v.headTilt).toBeGreaterThanOrEqual(-5);
-      expect(v.headTilt).toBeLessThanOrEqual(5);
-      expect(v.headDy).toBeGreaterThanOrEqual(-6);
-      expect(v.headDy).toBeLessThanOrEqual(6);
-      expect(v.shoulderWidth).toBeGreaterThanOrEqual(0.88);
-      expect(v.shoulderWidth).toBeLessThanOrEqual(1.12);
-      expect(v.build).toBeGreaterThanOrEqual(0.86);
-      expect(v.build).toBeLessThanOrEqual(1.14);
-      expect(v.lean).toBeGreaterThanOrEqual(-3);
-      expect(v.lean).toBeLessThanOrEqual(3);
-      expect(v.drop).toBeGreaterThanOrEqual(-14);
-      expect(v.drop).toBeLessThanOrEqual(16);
-      expect(STRIPE_COUNTS).toContain(v.stripeCount);
-      expect(SLEEVE_LENGTHS).toContain(v.sleeve);
-      expect(SHIRT_PATTERNS).toContain(v.pattern);
+    const bad: string[] = [];
+    for (const { seed, v } of variants) {
+      for (const [lever, min, max] of SPANS) {
+        if (!(v[lever] >= min && v[lever] <= max)) {
+          bad.push(
+            `seed ${seed}: ${lever} ${v[lever]} outside [${min}, ${max}]`,
+          );
+        }
+      }
+      for (const [lever, allowed] of CHOICES) {
+        if (!(allowed as readonly unknown[]).includes(v[lever])) {
+          bad.push(
+            `seed ${seed}: ${lever} ${v[lever]} not one of ${allowed.join(", ")}`,
+          );
+        }
+      }
     }
+    expect(bad.slice(0, FIRST)).toEqual([]);
   });
 
   it("draws long sleeves roughly 45% of the time", () => {
-    const longCount = seeds.filter(
-      (seed) => generateRawPlayerFigureVariant(seed).sleeve === "long",
-    ).length;
-    const share = longCount / seeds.length;
+    const longCount = variants.filter(({ v }) => v.sleeve === "long").length;
+    const share = longCount / variants.length;
     expect(share).toBeGreaterThan(0.35);
     expect(share).toBeLessThan(0.55);
   });
 
   it("draws every shirt pattern and both sleeve lengths across a sample", () => {
-    const variants = seeds.map((seed) => generateRawPlayerFigureVariant(seed));
     for (const pattern of SHIRT_PATTERNS) {
-      expect(variants.some((v) => v.pattern === pattern)).toBe(true);
+      expect(variants.some(({ v }) => v.pattern === pattern)).toBe(true);
     }
     for (const sleeve of SLEEVE_LENGTHS) {
-      expect(variants.some((v) => v.sleeve === sleeve)).toBe(true);
+      expect(variants.some(({ v }) => v.sleeve === sleeve)).toBe(true);
     }
     for (const count of STRIPE_COUNTS) {
-      expect(variants.some((v) => v.stripeCount === count)).toBe(true);
+      expect(variants.some(({ v }) => v.stripeCount === count)).toBe(true);
     }
   });
 });
 
 describe("containment guard — the top edge (#2542 addendum)", () => {
-  const seeds = Array.from({ length: 3000 }, (_, i) => i * 65_537);
+  const boxes = Array.from({ length: 3000 }, (_, i) => i * 65_537).map(
+    (seed) => ({
+      seed,
+      box: computeFigureBoundingBox(
+        applyContainmentGuard(generateRawPlayerFigureVariant(seed)),
+      ),
+    }),
+  );
 
   it("never lets the head clear the top margin, across a wide seed range", () => {
-    for (const seed of seeds) {
-      const guarded = applyContainmentGuard(
-        generateRawPlayerFigureVariant(seed),
-      );
-      const box = computeFigureBoundingBox(guarded);
-      expect(box.minY).toBeGreaterThanOrEqual(CONTAINMENT_MARGIN - BOX_EPSILON);
-    }
+    const bad = boxes
+      .filter(({ box }) => !(box.minY >= CONTAINMENT_MARGIN - BOX_EPSILON))
+      .map(({ seed, box }) => `seed ${seed}: minY ${box.minY}`);
+    expect(bad.slice(0, FIRST)).toEqual([]);
   });
 
   it("never lets a shoulder cross the side margins, across a wide seed range", () => {
-    for (const seed of seeds) {
-      const guarded = applyContainmentGuard(
-        generateRawPlayerFigureVariant(seed),
-      );
-      const box = computeFigureBoundingBox(guarded);
-      expect(box.minX).toBeGreaterThanOrEqual(CONTAINMENT_MARGIN - BOX_EPSILON);
-      expect(box.maxX).toBeLessThanOrEqual(
-        FIGURE_VIEWBOX_WIDTH - CONTAINMENT_MARGIN + BOX_EPSILON,
-      );
-    }
+    const bad = boxes
+      .filter(
+        ({ box }) =>
+          !(
+            box.minX >= CONTAINMENT_MARGIN - BOX_EPSILON &&
+            box.maxX <= FIGURE_VIEWBOX_WIDTH - CONTAINMENT_MARGIN + BOX_EPSILON
+          ),
+      )
+      .map(({ seed, box }) => `seed ${seed}: x ${box.minX}..${box.maxX}`);
+    expect(bad.slice(0, FIRST)).toEqual([]);
   });
 });
 
 describe("bottom clamp — the ground line (#2590 correction)", () => {
-  const seeds = Array.from({ length: 3000 }, (_, i) => i * 65_537);
-
   it("never lets the figure stop short of the viewBox bottom", () => {
-    for (const seed of seeds) {
-      const variant = computePlayerFigureVariant(String(seed));
-      const box = computeFigureBoundingBox(variant);
-      expect(box.maxY).toBeGreaterThanOrEqual(
-        FIGURE_VIEWBOX_HEIGHT - BOX_EPSILON,
+    const bad: string[] = [];
+    for (let i = 0; i < 3000; i += 1) {
+      const seed = i * 65_537;
+      const box = computeFigureBoundingBox(
+        computePlayerFigureVariant(String(seed)),
       );
+      if (!(box.maxY >= FIGURE_VIEWBOX_HEIGHT - BOX_EPSILON)) {
+        bad.push(`seed ${seed}: maxY ${box.maxY}`);
+      }
     }
+    expect(bad.slice(0, FIRST)).toEqual([]);
   });
 
   it("leaves a figure that already bleeds past the bottom untouched", () => {

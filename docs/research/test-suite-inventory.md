@@ -38,28 +38,28 @@ Per-file distribution, local: median 57 ms, p90 317 ms, 2 files over 5 s, 1 over
 
 ### 2.2 `apps/web` — slowest 20 files
 
-| Local ms | CI ms | File                                                                             | Note                                                   |
-| -------: | ----: | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
-|   12 957 | 8 638 | `test/hooks/pre-commit.test.ts`                                                  | spawns real ESLint through lint-staged                 |
-|    7 079 | 6 333 | `test/hooks/trigger-psd-sync.test.ts`                                            | spawns the shell script                                |
-|    4 838 | 1 658 | `test/hooks/check-branch.test.ts`                                                | spawns the hook                                        |
-|    4 023 | 4 269 | `src/components/search/SearchInterface.test.tsx`                                 | StrictMode timing, `waitFor` 1–3 s budgets             |
-|    3 764 | 5 241 | `src/components/share/SharePage/SharePage.test.tsx`                              |                                                        |
-|    2 803 | 2 862 | `src/components/organigram/HubSearch/HubSearch.test.tsx`                         |                                                        |
-|    1 951 | 1 462 | `src/components/design-system/JerseyIllustration/player-figure-variant.test.ts`  | one 1.4 s property-style test (known starvation flake) |
-|    1 855 |     — | `test/hooks/wave-check.test.ts`                                                  | spawns `git merge-tree`                                |
-|    1 104 | 1 082 | `src/components/hulp/HulpFinder/HulpFinder.test.tsx`                             |                                                        |
-|      873 |     — | `src/components/layout/MatchStrip/MatchStripView.test.tsx`                       |                                                        |
-|      778 | 1 375 | `src/components/calendar/CalendarWidget/CalendarWidget.test.tsx`                 |                                                        |
-|      624 |   743 | `src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.test.tsx` |                                                        |
-|      608 |     — | `src/app/(main)/club/geschiedenis/HistoryContent.test.tsx`                       |                                                        |
-|      593 |   702 | `src/components/search/SearchForm.test.tsx`                                      |                                                        |
-|      589 | 1 361 | `src/components/home/UpcomingMatches/UpcomingMatches.test.tsx`                   |                                                        |
-|      581 |   842 | `src/components/club/ContactPage/ContactPage.test.tsx`                           |                                                        |
-|      547 |   665 | `src/components/team/TeamMatchesSection/TeamAgendaRow.test.tsx`                  |                                                        |
-|      519 |     — | `src/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid.test.tsx`            |                                                        |
-|      508 |     — | `src/components/organigram/MemberDetailPanel/MemberDetailPanel.test.tsx`         |                                                        |
-|      496 |     — | `src/components/event/EventsBrowser/EventsBrowser.test.tsx`                      |                                                        |
+| Local ms | CI ms | File                                                                             | Note                                                 |
+| -------: | ----: | -------------------------------------------------------------------------------- | ---------------------------------------------------- |
+|   12 957 | 8 638 | `test/hooks/pre-commit.test.ts`                                                  | spawns real ESLint through lint-staged               |
+|    7 079 | 6 333 | `test/hooks/trigger-psd-sync.test.ts`                                            | spawns the shell script                              |
+|    4 838 | 1 658 | `test/hooks/check-branch.test.ts`                                                | spawns the hook                                      |
+|    4 023 | 4 269 | `src/components/search/SearchInterface.test.tsx`                                 | StrictMode timing, `waitFor` 1–3 s budgets           |
+|    3 764 | 5 241 | `src/components/share/SharePage/SharePage.test.tsx`                              |                                                      |
+|    2 803 | 2 862 | `src/components/organigram/HubSearch/HubSearch.test.tsx`                         |                                                      |
+|    1 951 | 1 462 | `src/components/design-system/JerseyIllustration/player-figure-variant.test.ts`  | one 1.4 s property-style test (flake fixed by #3128) |
+|    1 855 |     — | `test/hooks/wave-check.test.ts`                                                  | spawns `git merge-tree`                              |
+|    1 104 | 1 082 | `src/components/hulp/HulpFinder/HulpFinder.test.tsx`                             |                                                      |
+|      873 |     — | `src/components/layout/MatchStrip/MatchStripView.test.tsx`                       |                                                      |
+|      778 | 1 375 | `src/components/calendar/CalendarWidget/CalendarWidget.test.tsx`                 |                                                      |
+|      624 |   743 | `src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.test.tsx` |                                                      |
+|      608 |     — | `src/app/(main)/club/geschiedenis/HistoryContent.test.tsx`                       |                                                      |
+|      593 |   702 | `src/components/search/SearchForm.test.tsx`                                      |                                                      |
+|      589 | 1 361 | `src/components/home/UpcomingMatches/UpcomingMatches.test.tsx`                   |                                                      |
+|      581 |   842 | `src/components/club/ContactPage/ContactPage.test.tsx`                           |                                                      |
+|      547 |   665 | `src/components/team/TeamMatchesSection/TeamAgendaRow.test.tsx`                  |                                                      |
+|      519 |     — | `src/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid.test.tsx`            |                                                      |
+|      508 |     — | `src/components/organigram/MemberDetailPanel/MemberDetailPanel.test.tsx`         |                                                      |
+|      496 |     — | `src/components/event/EventsBrowser/EventsBrowser.test.tsx`                      |                                                      |
 
 CI-only entries in its top 20 that are not in the local top 20: `src/app/__tests__/cross-page-consistency.test.ts` 1 148 ms (7 382 tests), `src/app/__tests__/loading-envelope.test.tsx` 766 ms, `CalendarMonth.test.tsx` 758 ms, `MembershipForm.test.tsx` 728 ms.
 
@@ -75,7 +75,7 @@ The four `test/hooks/*` files are the four slowest files and together cost 27 s 
 | 2 314 | `test/hooks/trigger-psd-sync.test.ts` | requests /\_\_scheduled exactly once                                             |
 | 2 301 | `test/hooks/trigger-psd-sync.test.ts` | names the target dataset before it writes                                        |
 | 2 183 | `test/hooks/pre-commit.test.ts`       | … leaves a deliberate eslint-disable comment alone                               |
-| 1 405 | `player-figure-variant.test.ts`       | lever ranges keeps every lever inside its documented span                        |
+| 1 405 | `player-figure-variant.test.ts`       | lever ranges keeps every lever inside its documented span (7 ms after #3128)     |
 |   734 | `test/hooks/pre-commit.test.ts`       | .husky/pre-commit succeeds, and says so, when every check passes                 |
 |   673 | `test/hooks/wave-check.test.ts`       | rule vs code — names the rule branch                                             |
 |   593 | `test/hooks/wave-check.test.ts`       | rule vs code — does not pair a rule branch …                                     |
