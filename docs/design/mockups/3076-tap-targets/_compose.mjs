@@ -69,7 +69,11 @@ for (const c of data.controls) {
     <p class="decide"><span class="chip pick">suggested ${esc(pick)}</span> ${esc(why)} <b>Your pick:</b> ${c.options.filter((o) => o.key !== "today").map((o) => o.key).join(" / ")} / leave as is.</p></section>`;
 }
 
-const html = `<title>Tap Target Options</title>
+const html = `<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tap Target Options</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&display=swap">
 <style>
   :root{color-scheme:light;--bg:#f5f1e6;--paper:#fff9ee;--soft:#ede8da;--ink:#0a0a0a;--muted:#5b574d;--edge:#d9d2bf;--deep:#007c46;--deep-ink:#065f37;--alert:#b84a3a;--warn:#a06a00;--hit:rgba(0,128,60,.28)}
