@@ -9,6 +9,7 @@ import { getButtonClasses } from "@/components/design-system/Button";
 import { House, Bus } from "@/lib/icons.redesign";
 import {
   HOME_AWAY_A11Y_NAME,
+  isResultPending,
   isSettledMatch,
   MATCH_DAY_WORD,
   MATCH_KIND_WORD,
@@ -17,6 +18,8 @@ import {
   OUTCOME_WORD_FULL,
   reservationRowLabel,
   reservationView,
+  RESULT_PENDING_GLYPH,
+  RESULT_PENDING_WORD,
   type MatchRowKind,
 } from "@/lib/utils/match-display";
 import { KCVV_CLUB_ID } from "@/lib/constants";
@@ -174,6 +177,14 @@ function isTodayFixture(matchDay: boolean, kind: MatchRowKind): boolean {
   return matchDay && kind === "fixture";
 }
 
+/**
+ * `isResultPending` (#2587), plus the strip's own guard that a scoreline the
+ * feed did send is never hidden behind the waiting glyph.
+ */
+function isAwaitingResult(match: ScheduleMatch, kind: MatchRowKind): boolean {
+  return isResultPending(kind, match.status) && scoreboardScore(match) === null;
+}
+
 /* ── atoms ───────────────────────────────────────────────────────────────── */
 
 function Crest({
@@ -252,26 +263,44 @@ function VenueGlyph({ home, dark = false }: { home: boolean; dark?: boolean }) {
  * gave the draw its own ink-muted band; it used to render nothing at all).
  * Never a rule underneath it.
  *
- * Only ever rendered on the result side, which since #2390 also carries a match
- * that has kicked off while PSD still owes the score. So a missing scoreline is
- * a normal state here, not an anomaly, and it falls back to the kickoff time —
- * the same substitution `<TeamAgendaRow>` makes for that match on the homepage.
- * Returning `null` would leave the desktop slide, which defaults to the result,
+ * The result side, since #2390, also carries a match that has kicked off
+ * while PSD still owes the score. That row (`awaitingResult`, #2587) renders
+ * `RESULT_PENDING_GLYPH` — it used to print the kickoff time, a meaningless
+ * number in the slot a score would occupy, captioned `Uitslag`. Returning
+ * `null` instead would leave the desktop slide, which defaults to the result,
  * with an empty gap between the two crests for the hours after every kickoff.
- * `vs.` is the last resort for a feed that carries neither score nor time.
+ * The glyph is `aria-hidden` with the phrase beside it for assistive tech: the
+ * desktop slide has no `aria-label` to carry it, unlike the mobile row.
+ *
+ * Otherwise a missing scoreline falls back to the kickoff time — today's
+ * fixture on the match-day ground (#2616), or a result row with an exceptional
+ * status or a `finished` match PSD closed without a score. `vs.` is the last resort for a feed that carries neither score nor
+ * time; it never stands in for the waiting state, where it would read
+ * future-tense for a match already played.
  */
 function Score({
   match,
   className,
   dark = false,
+  awaitingResult = false,
 }: {
   match: ScheduleMatch;
   className?: string;
   /** The match-day ground (#2616) — cream text, and `OUTCOME_UNDERLINE.dark`'s outcome tint. */
   dark?: boolean;
+  /** See `isAwaitingResult` — the caller knows the slot, `Score` does not. */
+  awaitingResult?: boolean;
 }) {
   const score = scoreboardScore(match);
   const colorClass = dark ? "text-cream" : "text-ink";
+  if (awaitingResult) {
+    return (
+      <span className={cn(colorClass, "font-mono font-bold", className)}>
+        <span aria-hidden="true">{RESULT_PENDING_GLYPH}</span>
+        <span className="sr-only">{RESULT_PENDING_WORD}</span>
+      </span>
+    );
+  }
   if (score === null) {
     return (
       <span className={cn(colorClass, "font-mono font-bold", className)}>
@@ -438,7 +467,13 @@ function LedgerLinkRow({
   // sources — one per register — this label and the visible stub each read,
   // so neither can drift into an independently-gated copy the way #2404
   // already had to fix once for the plain slot word.
-  const leadWordA11y = outcomeWordA11y ?? MATCH_KIND_WORD[kind];
+  // A result still owed (#2587) says so in the accessible name; the visible
+  // stub stays on `Uitslag` — its `w-14` is sized to "Volgende", and widening
+  // it comes straight off the opponent name (#2397).
+  const awaitingResult = isAwaitingResult(match, kind);
+  const leadWordA11y =
+    outcomeWordA11y ??
+    (awaitingResult ? RESULT_PENDING_WORD : MATCH_KIND_WORD[kind]);
 
   // The match-day ground's decided tokens (#2616 review) — one named pair per
   // concern, mirroring `<TeamAgendaRow>`'s `monoClass`/`stubBorder` for its
@@ -510,7 +545,12 @@ function LedgerLinkRow({
       <VenueGlyph home={home} dark={matchDay} />
       <span className="shrink-0">
         {kind === "result" ? (
-          <Score match={match} className="text-mono-md" dark={matchDay} />
+          <Score
+            match={match}
+            className="text-mono-md"
+            dark={matchDay}
+            awaitingResult={awaitingResult}
+          />
         ) : match.time ? (
           <span
             className={cn(
@@ -741,6 +781,7 @@ function DesktopSlider({
                   match={showing}
                   className="text-mono-md shrink-0"
                   dark={matchDay}
+                  awaitingResult={isAwaitingResult(showing, slide.kind)}
                 />
               ) : (
                 // Reachable only for a future, non-today fixture — which

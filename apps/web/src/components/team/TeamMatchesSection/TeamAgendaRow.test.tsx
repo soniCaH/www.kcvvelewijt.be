@@ -584,6 +584,85 @@ describe("TeamAgendaRow", () => {
     });
   });
 
+  // #2587 — `pickLastResult` hands the result slot a match that has kicked off
+  // while PSD still owes the score. The row used to print the kickoff time in
+  // the score slot under "Uitslag"; it now says the result is coming.
+  describe("result awaiting its score (#2587)", () => {
+    /** The score-slot spans holding exactly `text`, one per layout. */
+    const slotsWith = (text: string) =>
+      Array.from(document.querySelectorAll("[data-layout] span")).filter(
+        (span) => span.textContent === text,
+      );
+
+    it("puts the waiting glyph in the score slot on both layouts, not the kickoff", () => {
+      render(<TeamAgendaRow match={BASE} kind="result" />);
+      expect(desktopText()).not.toContain("15:00");
+      expect(mobileText()).not.toContain("15:00");
+      expect(slotsWith("–")).toHaveLength(2);
+    });
+
+    it("renders the glyph in the same demoted register as an upcoming label", () => {
+      const { unmount } = render(
+        <TeamAgendaRow match={BASE} upcomingLabel="Gepland" />,
+      );
+      const upcoming = slotsWith("Gepland").map((s) => s.className);
+      unmount();
+      render(<TeamAgendaRow match={BASE} kind="result" />);
+      expect(slotsWith("–").map((s) => s.className)).toEqual(upcoming);
+    });
+
+    it("keeps a finished match PSD closed without a score on its kickoff", () => {
+      render(
+        <TeamAgendaRow match={{ ...BASE, status: "finished" }} kind="result" />,
+      );
+      expect(desktopText()).toContain("15:00");
+      expect(desktopText()).not.toContain("Uitslag volgt");
+    });
+
+    it("opens the caption with 'Uitslag volgt' on both layouts", () => {
+      render(<TeamAgendaRow match={BASE} kind="result" />);
+      expect(desktopText()).toContain("Uitslag volgt");
+      expect(mobileText()).toContain("Uitslag volgt");
+    });
+
+    it("carries the waiting state, not a kickoff, in the accessible name", () => {
+      render(<TeamAgendaRow match={BASE} kind="result" />);
+      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      expect(label).toMatch(/^Uitslag volgt: KCVV Elewijt [–—-] FC Opponent/);
+      expect(label).not.toContain("om 15:00");
+    });
+
+    it("lets an exceptional status speak first", () => {
+      render(
+        <TeamAgendaRow
+          match={{ ...BASE, status: "postponed" }}
+          kind="result"
+        />,
+      );
+      expect(desktopText()).toContain("PP");
+      expect(desktopText()).not.toContain("Uitslag volgt");
+      expect(
+        screen.getByRole("link").getAttribute("aria-label") ?? "",
+      ).not.toContain("Uitslag volgt");
+    });
+
+    it("leaves a fixture-slot or unslotted row on its kickoff", () => {
+      for (const kind of ["fixture", undefined] as const) {
+        const { unmount } = render(<TeamAgendaRow match={BASE} kind={kind} />);
+        expect(desktopText()).toContain("15:00");
+        expect(desktopText()).not.toContain("Uitslag volgt");
+        unmount();
+      }
+    });
+
+    it("leaves a reduced tournament row in its own register", () => {
+      render(<TeamAgendaRow match={TOURNAMENT} kind="result" />);
+      const row = screen.getByTestId("team-agenda-row");
+      expect(row.textContent).not.toContain("Uitslag volgt");
+      expect(row.textContent).toContain("09:30");
+    });
+  });
+
   // #2404 — cream-vs-green and left-vs-right were the only carriers of
   // "this is a result" / "this is the next fixture".
   describe("Kind word", () => {

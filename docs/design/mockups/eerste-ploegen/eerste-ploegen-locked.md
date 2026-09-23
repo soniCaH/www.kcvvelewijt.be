@@ -42,10 +42,11 @@ renders there, so it costs no height, and the centre column stays free for the s
 | ----------------------------------- | ---------------------------------------------------------- |
 | settled (`finished` / `forfeited`)  | `Winst` / `Gelijkspel` / `Verlies`                         |
 | a status the layout can't speak for | nothing — the `PP` / `AFG` / `STOP` marker already says it |
+| result slot, kicked off, no score   | `Uitslag volgt` — and `–` in the score slot (#2587)        |
 | otherwise, if a slot was given      | the slot's own word: `Uitslag` / `Volgende`                |
 
-The words live in `OUTCOME_WORD` / `MATCH_KIND_WORD` (`lib/utils/match-display.ts`), beside the
-`OUTCOME_UNDERLINE` they de-colour.
+The words live in `OUTCOME_WORD` / `MATCH_KIND_WORD` / `RESULT_PENDING_WORD`
+(`lib/utils/match-display.ts`), beside the `OUTCOME_UNDERLINE` they de-colour.
 
 **The two layouts are named differently, because they need different amounts of help.**
 

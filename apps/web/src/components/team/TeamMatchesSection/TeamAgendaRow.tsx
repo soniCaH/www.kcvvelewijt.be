@@ -55,6 +55,7 @@ import {
   getResultColor,
   HOME_AWAY_A11Y_NAME,
   isPlayedMatch,
+  isResultPending,
   isSettledMatch,
   MATCH_KIND_WORD,
   OUTCOME_UNDERLINE,
@@ -62,6 +63,8 @@ import {
   OUTCOME_WORD_FULL,
   reservationRowLabel,
   reservationView,
+  RESULT_PENDING_GLYPH,
+  RESULT_PENDING_WORD,
   type MatchOutcome,
   type MatchRowKind,
 } from "@/lib/utils/match-display";
@@ -345,24 +348,38 @@ export function TeamAgendaRow({
   // `awayScore`/`isHome` to pass it).
   const outcome = isReducedRow ? null : computeOutcome(match, isHome);
 
+  // The result slot holding a match that has kicked off while PSD still owes
+  // the score (#2587) — see `isResultPending`. A reduced row keeps its own
+  // register.
+  const awaitingResult =
+    match.kind === "match" && isResultPending(kind, match.status);
+
   // Show the upcoming label ("Gepland") only for not-yet-played matches when one
   // was supplied. Gating on status (not merely the absence of a scoreline) keeps
   // a finished match with missing scores on the kickoff time rather than wrongly
-  // reading "Gepland".
+  // reading "Gepland". (A `scheduled` match in the result slot is neither: it
+  // takes the waiting glyph below, #2587.)
   const showUpcomingLabel = !isPlayed && upcomingLabel != null;
   // The kickoff, or the surface's override — shared by the normal row's score
   // slot (below `scoreOrTime`) and the placeholder's time slot alike, so both
   // resolve `upcomingLabel` identically instead of two independent copies.
   const kickoff = formatKickoff(match);
   const timeOrLabel = showUpcomingLabel ? upcomingLabel : kickoff;
+  // A scoreline, else the waiting glyph for a result still owed (#2587), else
+  // the kickoff or its label. The waiting row used to fall through to the
+  // kickoff time — a meaningless number in the slot a score would occupy.
   const scoreOrTime =
     match.kind === "match" && hasScoreline
       ? `${match.homeScore} – ${match.awayScore}`
-      : timeOrLabel;
+      : awaitingResult
+        ? RESULT_PENDING_GLYPH
+        : timeOrLabel;
 
   // Scorelines and kickoff times use the big display face; the "Gepland" label
-  // drops to the mono caption register (cf. the mockup `.score.sched`).
-  const scoreToneClass = showUpcomingLabel
+  // and the waiting glyph drop to the mono caption register (cf. the mockup
+  // `.score.sched`).
+  const demoteScoreSlot = showUpcomingLabel || awaitingResult;
+  const scoreToneClass = demoteScoreSlot
     ? monoClass
     : featured
       ? "text-white"
@@ -401,7 +418,13 @@ export function TeamAgendaRow({
   // that never needed it.
   const outcomeWord = outcome ? OUTCOME_WORD[outcome] : null;
   const outcomeWordA11y = outcome ? OUTCOME_WORD_FULL[outcome] : null;
-  const slotWord = statusWording ? null : kind ? MATCH_KIND_WORD[kind] : null;
+  const slotWord = statusWording
+    ? null
+    : awaitingResult
+      ? RESULT_PENDING_WORD
+      : kind
+        ? MATCH_KIND_WORD[kind]
+        : null;
 
   // The two layouts do not need the same amount of help, so they do not get
   // the same caption.
@@ -507,8 +530,10 @@ export function TeamAgendaRow({
       // also not played, and announcing its kickoff would tell a screen-reader
       // user to turn up for a match that is off — the same failure the visible
       // `statusWording` marker exists to prevent (#2423). A `upcomingLabel`
-      // surface ("Gepland") has deliberately dropped the precise time.
-      match.status === "scheduled" && !showUpcomingLabel
+      // surface ("Gepland") has deliberately dropped the precise time, and a
+      // result still owed (#2587) is past its kickoff — the lead word above
+      // already says "Uitslag volgt".
+      match.status === "scheduled" && !showUpcomingLabel && !awaitingResult
         ? ` om ${kickoff}`
         : "",
       // And the status itself has to reach the name, not just the caption: the
@@ -519,7 +544,7 @@ export function TeamAgendaRow({
 
   // One score/time-slot recipe, reused by the normal row's desktop span, its
   // mobile span, and the placeholder's single span — each supplies its own
-  // size/padding, but the size always lives INSIDE the `showUpcomingLabel`
+  // size/padding, but the size always lives INSIDE the `demoteScoreSlot`
   // ternary's branch, never appended after via a second `cn()` call. `cn` is
   // `twMerge`: appending a size class after the fact once silently overrode
   // the 11px mono register with the other branch's size whenever
@@ -534,7 +559,7 @@ export function TeamAgendaRow({
     cn(
       "shrink-0 leading-none",
       paddingClass,
-      showUpcomingLabel
+      demoteScoreSlot
         ? "font-mono text-[11px] font-semibold tracking-wider uppercase"
         : cn("font-mono", sizeClass),
       scoreToneClass,

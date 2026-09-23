@@ -124,10 +124,11 @@ export const AwayLoss: Story = {
 /**
  * Kicked off, score not yet published (#2390). `pickLastResult` — shared with
  * the homepage block — now routes such a match to the result side, so the strip
- * shows a result whose scoreline does not exist yet and falls back to the
- * kickoff time. The desktop slider defaults to this slide, which is why the
- * fallback matters: without it the space between the crests is simply empty for
- * the hours after every kickoff.
+ * shows a result whose scoreline does not exist yet. The score slot shows `–`
+ * (#2587), not the kickoff time; the stub caption stays "Uitslag" (its `w-14`
+ * is sized to "Volgende") and the accessible name says "Uitslag volgt". The
+ * desktop slider defaults to this slide, which is why the slot must not be
+ * empty for the hours after every kickoff.
  */
 export const AwaitingResult: Story = {
   args: {

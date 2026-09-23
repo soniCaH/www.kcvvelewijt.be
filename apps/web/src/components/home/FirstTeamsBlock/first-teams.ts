@@ -16,8 +16,9 @@
  * `lib/server/match-data.ts` imports `pickLastResult` / `pickNextFixture` for
  * the landing-page `<MatchStrip>` (#2387), so both surfaces always name the
  * same match "the last one". Changing what a slot admits changes the strip too
- * — #2390's scoreless result is why `<MatchStripView>`'s `Score` had to gain a
- * kickoff-time fallback.
+ * — #2390's scoreless result is why `<MatchStripView>`'s `Score` and
+ * `<TeamAgendaRow>` both gained a waiting state (`RESULT_PENDING_GLYPH` /
+ * `RESULT_PENDING_WORD`, #2587) for it.
  *
  * NB: this no longer mirrors `TeamMatchesSection`'s split — that surface still
  * filters `status === "finished" && date < now`, so #2423 is live there too,
@@ -154,8 +155,8 @@ function matchSlot(match: Match, now: Date): "result" | "fixture" | null {
       // Kicked off, score not yet published: PSD leaves a match `scheduled`
       // until staff enter the result, so between kickoff and publication it is
       // a played match wearing an upcoming status (#2390). It headlines the
-      // result slot scoreless — `<TeamAgendaRow>` falls back to the kickoff
-      // time — rather than staying in the fixture slot, where it would read as
+      // result slot scoreless — `<TeamAgendaRow>` says "Uitslag volgt" (#2587)
+      // — rather than staying in the fixture slot, where it would read as
       // future-tense hours after kickoff and hide the genuinely next match.
       //
       // The BFF sees the same window from the other side: `teamMatchesTtl`

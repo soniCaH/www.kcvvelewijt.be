@@ -161,10 +161,11 @@ export const ForfeitedResult: Story = {
  * kickoff — in neither slot, so the homepage showed the match *before* it as
  * the result. It now headlines the result slot scoreless.
  *
- * This is the only state where the result row shows a kickoff time instead of
- * a scoreline: no score, no outcome underline, and `scheduled` is not an
- * exceptional status so the caption stays on the competition alone. The A-ploeg
- * row above it is the settled counterpart, for contrast in the same band.
+ * The row says the result is coming (#2587): `–` in the score slot, in the
+ * demoted mono register, and the caption opens on "Uitslag volgt". It used to
+ * print the kickoff time there — a meaningless number in the slot a score
+ * would occupy. No outcome underline. The A-ploeg row above it is the settled
+ * counterpart, for contrast in the same band.
  */
 export const AwaitingResult: Story = {
   args: {
