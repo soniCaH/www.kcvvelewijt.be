@@ -33,9 +33,11 @@ This PRD establishes visual regression testing as foundational infrastructure th
 
 **Playwright + `@storybook/test-runner`.** Self-hosted, file-based, open source.
 
-Chosen over Chromatic/Percy because Claude can read diff PNGs directly via the vision-enabled `Read` tool and run the `pnpm vr:update` command in-session. This file-based property is the critical enabler for Claude integration — SaaS tools hide diffs behind web UIs and require API indirection.
+Chosen over Chromatic/Percy because Claude can read diff PNGs directly via the vision-enabled `Read` tool and run a scoped `pnpm vr:update:story` capture in-session. When this was written, that file-based property was the critical enabler for Claude integration — SaaS tools hide diffs behind web UIs and require API indirection.
 
-**Removed: `@chromatic-com/storybook`.** Currently installed in `apps/web/package.json` but never used. Phase 1 uninstalls it to avoid confusion about which tool is authoritative.
+That reason is now only half of the picture. The `vr-diff-comment` job in `.github/workflows/ci.yml` pushes diff PNGs to a `vr-diffs/pr-<n>` branch and comments them onto the PR, so diffs on a same-repo PR are visible without a local file too. A VR failure on a push to `main` gets no comment; its diffs live only in the `vr-diff-output` artifact. #3082 confirmed staying self-hosted on different grounds: hosted pricing scales with trigger volume (~2.3 M screenshots/month here), not with baseline count.
+
+**Removed: `@chromatic-com/storybook`.** It was installed in `apps/web/package.json` but never used. Phase 1 uninstalled it to avoid confusion about which tool is authoritative.
 
 ## 4. Triggering: path-based, not label-based
 
@@ -47,19 +49,18 @@ A `visual` label only gates VR correctly if it is applied consistently across ev
 
 ### CI workflow
 
-The VR job in `.github/workflows/ci.yml` uses `on.pull_request.paths`:
+The path filter lives at job level, not in `on:`. The `visual-regression-changes` job in `.github/workflows/ci.yml` runs `dorny/paths-filter` on PRs:
 
 ```yaml
-on:
-  pull_request:
-    paths:
-      - "apps/web/src/**"
-      - "apps/web/.storybook/**"
-      - "apps/web/public/**"
-      - "apps/web/package.json"
+visual:
+  - "apps/web/src/**"
+  - "apps/web/.storybook/**"
+  - "apps/web/public/**"
+  - "apps/web/package.json"
+  - "pnpm-lock.yaml"
 ```
 
-PRs touching any of these paths run VR. PRs touching only `apps/api/**`, `packages/api-contract/**`, or infrastructure don't.
+PRs touching any of these paths run VR. The lockfile is in the list because a transitive bump can break the VR runner without a single source file changing (#2761). A push to `main` runs VR unconditionally. PRs touching only `apps/api/**`, `packages/api-contract/**`, or infrastructure don't.
 
 ### Ralph integration
 
@@ -91,26 +92,26 @@ Developer-ergonomics layer over the CI source-of-truth. Playwright's official Do
 
 ### Scripts
 
-- `pnpm vr:check` — runs the full VR suite against the built Storybook inside Docker. ~30s on warm cache.
-- `pnpm vr:update` — accepts current rendering as new baselines. Writes PNGs into `apps/web/test/vr/__snapshots__/` for the developer to commit.
+- `pnpm vr:update:story -- <story-id-prefix>` — the everyday command: captures one story-ID prefix inside Docker and writes its PNGs into `apps/web/test/vr/__snapshots__/` for the developer to commit.
+- `pnpm vr:check` / `pnpm vr:update` — the full suite. Refused locally without a story pattern (#2380): a full run is ~40 min on CI and ~2.5 h under local amd64 emulation. The full suite is CI's job.
 - `pnpm vr:diff <story-id>` — prints the diff PNG path for a specific failure so Claude can read it via the `Read` tool.
 
 ### Why Docker and not native Playwright
 
-Playwright on local macOS vs CI Linux produces different font rendering → false-positive diffs. Docker running Playwright's official multi-arch image (Apple Silicon native) eliminates this category of flakiness.
+Playwright on local macOS vs CI Linux produces different font rendering → false-positive diffs. Docker running Playwright's official image removes that category — but only under **emulated amd64**. Apple Silicon native (arm64) capture still drifts from the CI baselines on display-serif stories (#2370), so `apps/web/docker-compose.vr.yml` pins the `vr` service to `platform: linux/amd64`. Emulation costs ~3.6× wall-clock, which is why local runs must be scoped. Measurements and rules: "The amd64 pin — scoped runs only" in `docs/agents/testing-ops.md`.
 
 ### Prerequisite
 
-Docker Desktop installed and running. Documented in `apps/web/CLAUDE.md` under a new `Visual Regression Testing` section.
+Docker Desktop installed and running. The operational manual is `docs/agents/testing-ops.md` → "Visual Regression Testing".
 
 ## 6. CI workflow
 
 New job `visual-regression` in `.github/workflows/ci.yml`:
 
-- Runs after the existing `build` job (`needs: build` — uses the Storybook static output).
-- Same `ubuntu-latest` runner. Playwright runs directly (no Docker-in-CI); OS match with Docker-local is guaranteed because both use the same Linux Playwright image family and version.
+- `needs: [quality-checks, visual-regression-changes]` — `quality-checks` builds and uploads the Storybook static output; `visual-regression-changes` path-filters PRs.
+- Runs inside `container: mcr.microsoft.com/playwright:<version>-noble` on `ubuntu-latest` (amd64). Local capture matches it only under the amd64 pin in §5, and only while both use the same image tag.
 - On failure, uploads diff PNGs as artifacts so Claude (or a reviewer) can download and inspect them.
-- Gates merge to `main` the same way the other quality-checks jobs do.
+- Report-only today: it gates nothing. The `deploy` job needs `quality-checks` only, and `main` has no branch protection. Whether and how VR earns the gate is decided in #3088; the layer contract ("a layer earns the gate by becoming deterministic") lives in #3086.
 
 ### Baseline-update workflow
 

@@ -288,7 +288,7 @@ analytics-PRD requirement.)
   route smoke changes; verify no import breaks).
 - **VR:** baselines for changed/deleted stories are **deferred to the
   end-of-series batch capture** (standing redesign decision —
-  `RUN_VISUAL_REGRESSION` is off; never block on Docker per-PR). The colour
+  `RUN_VISUAL_REGRESSION` was off when this was written; it has read `true` since 2026-06-22, so VR runs on PRs again). The colour
   migration will change many baselines; capture them in the batch, not per-PR.
 - Each spin-out PR enumerates its deleted/updated story files.
 
