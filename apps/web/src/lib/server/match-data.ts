@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
 import { BffService } from "@/lib/effect/services/BffService";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { transformMatchToSchedule } from "@/components/match/transform";
@@ -120,17 +121,20 @@ export const getTeamMatches = cache(async function getTeamMatches(
 export const getFirstTeamStripData = cache(
   async function getFirstTeamStripData(): Promise<MatchStripData | null> {
     try {
-      // This whole function's `try` already degrades any failure (Sanity or
-      // BFF) to `null` — the strip is chrome, not a page subject (see this
-      // function's own docblock). `Effect.orDie` only makes that
-      // pre-existing decision visible to the narrowed `runPromise` signature
-      // (#2864); the surrounding `try/catch` is what still does the actual
-      // degrading.
+      // The strip is chrome, not a page subject (see this function's own
+      // docblock), so its Sanity read degrades in-effect: no teams → no
+      // `psdId` → `null`. Not `Effect.orDie` under the `try` below — at build
+      // a Sanity defect reaching `runPromise` bails the whole page to
+      // on-demand rendering (#3135), too much for a strip.
       const teams = await runPromise(
-        Effect.gen(function* () {
-          const repo = yield* TeamRepository;
-          return yield* repo.findAll();
-        }).pipe(Effect.orDie),
+        degradeSection(
+          Effect.gen(function* () {
+            const repo = yield* TeamRepository;
+            return yield* repo.findAll();
+          }),
+          [],
+          "[MatchStrip] teams read failed; hiding the strip.",
+        ),
       );
 
       const psdId = pickFirstTeamPsdId(teams);

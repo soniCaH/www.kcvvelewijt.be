@@ -5,13 +5,13 @@
  * Each page only provides its slug and fallback strings.
  */
 
+import { cache } from "react";
 import type { Metadata } from "next";
 import type { PortableTextBlock } from "@portabletext/react";
 import { SITE_CONFIG } from "@/lib/constants";
 import { Effect } from "effect";
 import { notFound, unstable_rethrow } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
-import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
@@ -36,23 +36,26 @@ interface BoardPageConfig {
  * @param slug - The Sanity team slug (for example: "bestuur", "jeugdbestuur")
  * @returns The fetched team object from Sanity
  */
-async function fetchBoardTeamOrNotFound(slug: string) {
+const fetchBoardTeamOrNotFound = cache(async function fetchBoardTeamOrNotFound(
+  slug: string,
+) {
   // Subject read: the board team is this page's entire content, so a failed
-  // read takes it down with it (#2864); at build it leaves the page out of the
-  // build instead (#3135). `generateMetadata` below still degrades
-  // gracefully — its own try/catch treats any non-Next.js throw (this read's
-  // defect included) as "fall back to generic metadata," same as it already
-  // did for a genuinely-missing team.
+  // read takes it down with it (#2864). `generateMetadata` below still
+  // degrades gracefully — its own try/catch treats any non-Next.js throw
+  // (this `Effect.orDie` defect included) as "fall back to generic
+  // metadata," same as it already did for a genuinely-missing team. React
+  // `cache()` shares the one read between the two, so a build does not read
+  // Sanity twice per board page (#3135).
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }).pipe(orDieOrRenderOnDemand),
+    }).pipe(Effect.orDie),
   );
 
   if (!team) notFound();
   return team;
-}
+});
 
 /**
  * Create a page factory for a club board that provides metadata generation and a page component.
@@ -86,7 +89,7 @@ export function createBoardPage({
           : undefined,
       });
     } catch (error) {
-      // Not a `NEXT_` digest check: the build-time bailout
+      // Not a `NEXT_` digest check: `runPromise`'s build-time bailout
       // (`DYNAMIC_SERVER_USAGE`) has no such prefix and would be swallowed
       // into generic metadata baked into the prerendered page (#3135).
       unstable_rethrow(error);

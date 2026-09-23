@@ -9,7 +9,6 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { runPromise } from "@/lib/effect/runtime";
-import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ContactPage } from "@/components/club/ContactPage/ContactPage";
 
@@ -44,7 +43,7 @@ export default async function ContactPageRoute() {
     Effect.gen(function* () {
       const repo = yield* StaffRepository;
       return yield* repo.findKeyContacts();
-    }).pipe(orDieOrRenderOnDemand),
+    }).pipe(Effect.orDie),
   );
 
   return (

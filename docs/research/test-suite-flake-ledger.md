@@ -188,15 +188,16 @@ The rule, enforced by `apps/web/src/app/__tests__/isr-route-config.test.ts`:
 - **Every `generateStaticParams` returns exactly `[]`.** The build renders no slug page, so it reads
   nothing for those routes; each slug renders on its first request and ISR caches it. A failed first
   request is a 500 that is never cached.
-- **A prerendered page with no slug ends its content read in `orDieOrRenderOnDemand`**, never a bare
-  `Effect.orDie`. At build a `SanityReadError` calls `connection()`, so Next leaves that one page out
-  and serves it on demand, uncached, until the next deploy. A code defect still dies — a red build
-  still means the code is wrong. At runtime it is plain `orDie`.
+- **At build, `runPromise` turns a `SanityReadError` defect into `connection()`** (pinned by
+  `runtime.test.ts`), so Next leaves that one prerendered page out and serves it on demand,
+  uncached, until the next deploy. A code defect still dies — a red build still means the code is
+  wrong. At runtime nothing changes.
 
 Skipping just the failed slug was measured and rejected: the only hook (`connection()` at build)
 flips the **whole** dynamic route to `no-store`. Proof: `next build` against a non-existent Sanity
 project succeeds, and exactly the nine pages whose read failed turn `ƒ`. Residual, accepted: a
-Sanity outage during a deploy leaves those pages uncached until the next deploy. The #3098 seam
+Sanity outage during a deploy leaves those pages uncached until the next deploy, and every
+deploy starts slug pages cold (the first visitor to each pays its render). The #3098 seam
 stays withdrawn, not deleted.
 
 ### I — Third-party API transient (CI)

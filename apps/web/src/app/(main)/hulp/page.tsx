@@ -18,7 +18,6 @@ import type { Metadata } from "next";
 import { Effect } from "effect";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
-import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -87,7 +86,7 @@ export default async function HulpHubPage() {
         [staffRepo.findAll(), responsibilityRepo.findAll()],
         { concurrency: 2 },
       );
-    }).pipe(orDieOrRenderOnDemand),
+    }).pipe(Effect.orDie),
   );
 
   const structureIndex = deriveStructureIndex(members);

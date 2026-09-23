@@ -24,7 +24,6 @@ import { Effect } from "effect";
 
 import { SITE_CONFIG } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
-import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import { EventRepository } from "@/lib/repositories/event.repository";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
@@ -67,7 +66,7 @@ export default async function EvenementenPage() {
     Effect.gen(function* () {
       const repo = yield* EventRepository;
       return yield* repo.findUpcomingForList();
-    }).pipe(orDieOrRenderOnDemand),
+    }).pipe(Effect.orDie),
   );
 
   return (

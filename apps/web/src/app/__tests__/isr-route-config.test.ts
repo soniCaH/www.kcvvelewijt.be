@@ -11,12 +11,8 @@
  * caches it. A failed first request is a 500 that is never cached. Skipping
  * only the failed slug is not an option: the one hook Next offers
  * (`connection()` at build) flips the whole route to `no-store`.
- *
- * A page with no slug has no list to empty: it is always prerendered, so its
- * subject read goes through `orDieOrRenderOnDemand`, never a bare
- * `Effect.orDie` — at build a failed read leaves that one page out instead of
- * killing the build. That `no-store` cost lands on one page until the next
- * deploy, not on a whole route.
+ * A page with no slug has no list to empty; `runPromise` covers it instead
+ * (`lib/effect/runtime.ts`, pinned by `runtime.test.ts`).
  *
  * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2391
  * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/3135
@@ -37,22 +33,12 @@ const dynamicSegmentPages = globSync(["**/page.tsx", "**/page.ts"], {
   cwd: appDir,
 }).filter((relPath) => relPath.includes("["));
 
-// Every file that renders a prerendered page with no slug: outside any
-// dynamic segment, and not a runtime-only file (route handlers and
-// `force-dynamic` pages never render at build). Server actions stay in: a
-// page may call one to render its first window (`/galerij`).
-const prerenderedStaticFiles = globSync(["**/*.tsx", "**/*.ts"], {
-  cwd: appDir,
-}).filter(
-  (relPath) =>
-    !relPath.includes("[") &&
-    !/(\.test|\.stories)\.tsx?$|(^|\/)route\.ts$/.test(relPath) &&
-    !relPath.startsWith("api/") &&
-    !relPath.startsWith("__tests__/") &&
-    !/^export const dynamic = "force-dynamic"/m.test(
-      readFileSync(resolve(appDir, relPath), "utf8"),
-    ),
-);
+// A `layout.tsx` can export `generateStaticParams` too, and it drives the
+// same prerender.
+const dynamicSegmentFiles = globSync(
+  ["**/page.tsx", "**/page.ts", "**/layout.tsx", "**/layout.ts"],
+  { cwd: appDir },
+).filter((relPath) => relPath.includes("["));
 
 describe("ISR route config", () => {
   it.each(dynamicSegmentPages)(
@@ -67,24 +53,17 @@ describe("ISR route config", () => {
     },
   );
 
-  it.each(dynamicSegmentPages)(
+  it.each(dynamicSegmentFiles)(
     "%s — `generateStaticParams` enumerates nothing at build",
     (relPath) => {
       const source = readFileSync(resolve(appDir, relPath), "utf8");
-      if (!/^export (async )?function generateStaticParams\b/m.test(source))
-        return;
+      // Any declaration form counts (an arrow `const` too), so the one
+      // accepted spelling below is the only way through.
+      if (!/\bgenerateStaticParams\b/.test(source)) return;
 
       expect(source).toMatch(
         /^export (async )?function generateStaticParams\(\)(: [^{]+)? \{\n  return \[\];\n\}/m,
       );
-    },
-  );
-
-  it.each(prerenderedStaticFiles)(
-    "%s — a prerendered read without a slug never bare-`orDie`s",
-    (relPath) => {
-      const source = readFileSync(resolve(appDir, relPath), "utf8");
-      expect(source).not.toMatch(/\.pipe\(\s*Effect\.orDie\b/);
     },
   );
 });

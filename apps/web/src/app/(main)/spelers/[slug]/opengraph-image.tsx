@@ -22,15 +22,15 @@ export const size = OG_SIZE;
 
 export const contentType = OG_CONTENT_TYPE;
 
-// This route is prerendered (the parent segment exports
-// `generateStaticParams`) and, like every prerendered route, defaults to
-// `revalidate: false` — permanently cached — unless it declares its own
-// window. A degraded club-card fallback would otherwise be baked in for the
-// life of the deploy on any build-time Sanity flake, and `/api/revalidate`
-// cannot rescue it: `revalidatePath` targets the sibling page route, not
-// this one. Matches `page.tsx`'s own 900s window (#2433 rule 5 cap) so a
-// degraded card self-heals on the same cadence as the page it illustrates
-// (#2863 review round 2, finding 2).
+// This route is ISR-cached (the parent segment exports `generateStaticParams`)
+// and, like every such route, defaults to `revalidate: false` — permanently
+// cached — unless it declares its own window. A degraded club-card fallback
+// would otherwise be baked in for the life of the deploy on a Sanity flake
+// during its first render, and `/api/revalidate` cannot rescue it:
+// `revalidatePath` targets the sibling page route, not this one. Matches
+// `page.tsx`'s own 900s window (#2433 rule 5 cap) so a degraded card self-heals
+// on the same cadence as the page it illustrates (#2863 review round 2, finding
+// 2).
 export const revalidate = 900;
 
 interface ImageProps {
