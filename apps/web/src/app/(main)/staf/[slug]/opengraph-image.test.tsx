@@ -37,8 +37,6 @@ vi.mock("@/lib/repositories/staff.repository", async (importOriginal) => {
       findAll: () => Effect.die(new Error("Sanity is unreachable")),
       findByPsdId: () => Effect.die(new Error("Sanity is unreachable")),
       findKeyContacts: () => Effect.die(new Error("Sanity is unreachable")),
-      findAllForStaticParams: () =>
-        Effect.die(new Error("Sanity is unreachable")),
     }),
   };
 });

@@ -10,6 +10,7 @@
 import type { Metadata } from "next";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import {
   BffService,
   BFF_FAN_OUT_CONCURRENCY,
@@ -139,7 +140,7 @@ async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
       ).label;
 
       return { matches, season };
-    }).pipe(Effect.orDie),
+    }).pipe(orDieOrRenderOnDemand),
   );
 }
 

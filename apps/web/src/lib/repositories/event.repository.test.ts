@@ -6,7 +6,6 @@ import type {
   EVENTS_QUERY_RESULT,
   EVENT_ARTICLES_QUERY_RESULT,
   EVENT_BY_SLUG_QUERY_RESULT,
-  EVENT_SLUGS_QUERY_RESULT,
   NEXT_FEATURED_EVENT_QUERY_RESULT,
 } from "../sanity/sanity.types";
 
@@ -280,25 +279,6 @@ describe("EventRepository", () => {
       );
 
       expect(result?.externalLink).toBeNull();
-    });
-  });
-
-  describe("findAllSlugs", () => {
-    it("returns the slug + updatedAt rows from the projection", async () => {
-      const rows: EVENT_SLUGS_QUERY_RESULT = [
-        { slug: "evt-one", updatedAt: "2026-04-01T00:00:00Z" },
-        { slug: "evt-two", updatedAt: "2026-05-01T00:00:00Z" },
-      ];
-      mockFetch.mockResolvedValueOnce(rows);
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* EventRepository;
-          return yield* repo.findAllSlugs();
-        }),
-      );
-
-      expect(result).toEqual(rows);
     });
   });
 

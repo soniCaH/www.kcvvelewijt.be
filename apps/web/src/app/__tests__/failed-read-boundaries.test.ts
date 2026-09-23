@@ -127,7 +127,6 @@ vi.mock("@/lib/repositories/staff.repository", async (importOriginal) => {
       findAll: () => Effect.succeed([]),
       findByPsdId: () => Effect.succeed(member),
       findKeyContacts: () => Effect.succeed([]),
-      findAllForStaticParams: () => Effect.succeed([]),
     }),
   };
 });

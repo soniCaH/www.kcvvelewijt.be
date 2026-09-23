@@ -20,9 +20,7 @@ import { Effect } from "effect";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 
 import { runPromise } from "@/lib/effect/runtime";
-import { degradeSection } from "@/lib/effect/degrade";
 import { PhotoGalleryRepository } from "@/lib/repositories/photoGallery.repository";
-import type { GALLERY_SLUGS_QUERY_RESULT } from "@/lib/sanity/sanity.types";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
@@ -76,33 +74,13 @@ const descriptionComponents: PortableTextComponents = {
   },
 };
 
+// Deliberately empty (#3135, flake class H): an enumerated slug is rendered at
+// build, so its own subject read runs against live Sanity and one 503 there
+// killed the whole build. Each slug renders on its first request instead and
+// ISR caches it; a failed first request is a 500 that is never cached.
+// Required all the same: without this export `revalidate` is inert (#2391).
 export async function generateStaticParams() {
-  // Section (of the build), not a request-time subject: an empty list here
-  // just means every slug renders on demand instead of being pre-enumerated
-  // — `dynamicParams` still serves them (#2864). The outer try/catch also
-  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
-  // that happens outside the effect `degradeSection`'s `catchAllCause`
-  // wraps, so an in-effect catch alone would let it fail the whole build.
-  let slugs: GALLERY_SLUGS_QUERY_RESULT = [];
-  try {
-    slugs = await runPromise(
-      degradeSection(
-        Effect.gen(function* () {
-          const repo = yield* PhotoGalleryRepository;
-          return yield* repo.findAllSlugs();
-        }),
-        [],
-        "[galerij/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
-      ),
-    );
-  } catch {
-    slugs = [];
-  }
-  return slugs
-    .filter((row): row is { slug: string; updatedAt: string } =>
-      Boolean(row.slug),
-    )
-    .map((row) => ({ slug: row.slug }));
+  return [];
 }
 
 // Subject read: the gallery is this page's entire content, so a failed

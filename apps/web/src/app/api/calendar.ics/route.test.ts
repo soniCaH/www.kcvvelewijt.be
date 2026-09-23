@@ -70,7 +70,6 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
       findUpcomingForList: mockFindUpcomingForList,
       findNextFeatured: () => Effect.succeed(null),
       findBySlug: () => Effect.succeed(null),
-      findAllSlugs: () => Effect.succeed([]),
     }),
   };
 });

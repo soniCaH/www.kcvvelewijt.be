@@ -2,6 +2,7 @@
 
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
+import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import {
   ArticleRepository,
   type ArticleVM,
@@ -21,8 +22,8 @@ export async function fetchArticlesAction(params: {
   const { offset, limit } = clampListingWindow(params);
 
   // `ArticleRepository.findPaginated`'s typed `SanityReadError` is converted
-  // to a defect here on purpose (`Effect.orDie`) rather than caught with
-  // `degradeSection`: `NewsListingClient` is this action's only caller (its
+  // to a defect here on purpose (`orDieOrRenderOnDemand` — plain `orDie`
+  // outside the build, #3135) rather than caught with `degradeSection`: `NewsListingClient` is this action's only caller (its
   // "load more" footer and its category-chip switch, both in
   // `NewsListingClient.tsx`) and both call sites already `try/catch` a
   // rejection into a real "Artikelen laden mislukt." notice with a working
@@ -43,7 +44,7 @@ export async function fetchArticlesAction(params: {
         limit: limit + 1,
         category: params.category,
       });
-    }).pipe(Effect.orDie),
+    }).pipe(orDieOrRenderOnDemand),
   );
 
   return paginateResults(articles, limit);

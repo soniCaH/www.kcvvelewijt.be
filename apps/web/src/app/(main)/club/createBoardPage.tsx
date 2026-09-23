@@ -9,8 +9,9 @@ import type { Metadata } from "next";
 import type { PortableTextBlock } from "@portabletext/react";
 import { SITE_CONFIG } from "@/lib/constants";
 import { Effect } from "effect";
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
+import { orDieOrRenderOnDemand } from "@/lib/effect/or-die-or-render-on-demand";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
@@ -37,15 +38,16 @@ interface BoardPageConfig {
  */
 async function fetchBoardTeamOrNotFound(slug: string) {
   // Subject read: the board team is this page's entire content, so a failed
-  // read takes it down with it (#2864). `generateMetadata` below still
-  // degrades gracefully — its own try/catch treats any non-Next.js throw
-  // (this `Effect.orDie` defect included) as "fall back to generic
-  // metadata," same as it already did for a genuinely-missing team.
+  // read takes it down with it (#2864); at build it leaves the page out of the
+  // build instead (#3135). `generateMetadata` below still degrades
+  // gracefully — its own try/catch treats any non-Next.js throw (this read's
+  // defect included) as "fall back to generic metadata," same as it already
+  // did for a genuinely-missing team.
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
       return yield* repo.findBySlug(slug);
-    }).pipe(Effect.orDie),
+    }).pipe(orDieOrRenderOnDemand),
   );
 
   if (!team) notFound();
@@ -84,14 +86,10 @@ export function createBoardPage({
           : undefined,
       });
     } catch (error) {
-      const digest = (error as { digest?: string }).digest;
-      if (
-        error instanceof Error &&
-        typeof digest === "string" &&
-        digest.startsWith("NEXT_")
-      ) {
-        throw error;
-      }
+      // Not a `NEXT_` digest check: the build-time bailout
+      // (`DYNAMIC_SERVER_USAGE`) has no such prefix and would be swallowed
+      // into generic metadata baked into the prerendered page (#3135).
+      unstable_rethrow(error);
       return buildPageMetadata({
         title: fallbackTitle,
         description: fallbackDescription,

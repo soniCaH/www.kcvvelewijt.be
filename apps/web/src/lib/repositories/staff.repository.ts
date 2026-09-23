@@ -5,7 +5,6 @@ import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   ORGANIGRAM_NODES_QUERY_RESULT,
   STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT,
-  STAFF_MEMBERS_PSDID_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import type { OrgChartNode } from "@/types/organigram";
 
@@ -59,11 +58,6 @@ const STAFF_MEMBER_BY_PSD_ID_QUERY =
   // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).
   // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).
   "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }
-}`);
-
-const STAFF_MEMBERS_PSDID_QUERY =
-  defineQuery(`*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] | order(lastName asc) {
-  _id, psdId
 }`);
 
 // ─── View models ─────────────────────────────────────────────────────────────
@@ -210,10 +204,6 @@ export interface StaffRepositoryInterface {
     KeyContactVM[],
     SanityReadError
   >;
-  readonly findAllForStaticParams: () => Effect.Effect<
-    { psdId: string }[],
-    SanityReadError
-  >;
 }
 
 export class StaffRepository extends Context.Tag("StaffRepository")<
@@ -247,16 +237,5 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
       }>
     >(KEY_CONTACTS_QUERY, { roleCodes: KEY_CONTACT_ROLE_CODES }).pipe(
       Effect.map(toKeyContactVMs),
-    ),
-  findAllForStaticParams: () =>
-    fetchGroq<STAFF_MEMBERS_PSDID_QUERY_RESULT>(STAFF_MEMBERS_PSDID_QUERY).pipe(
-      Effect.map((rows) =>
-        rows
-          .filter(
-            (r): r is typeof r & { psdId: string } =>
-              r.psdId !== null && String(r.psdId).trim() !== "",
-          )
-          .map((r) => ({ psdId: String(r.psdId).trim() })),
-      ),
     ),
 });

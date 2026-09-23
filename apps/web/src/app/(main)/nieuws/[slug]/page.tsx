@@ -8,12 +8,8 @@ import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { MatchDetail } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
-import { degradeSection } from "@/lib/effect/degrade";
 import { BffService } from "@/lib/effect/services/BffService";
-import {
-  ArticleRepository,
-  type ArticleVM,
-} from "@/lib/repositories/article.repository";
+import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { computeReadingTime } from "@/lib/utils/reading-time";
 import {
@@ -232,45 +228,13 @@ function shouldRenderArticleCredits(article: ArticleDetailVM): boolean {
   return hasAuthor || hasPhotographer;
 }
 
-/**
- * Provides all article slugs for static pre-rendering.
- *
- * Fetches available articles from the Sanity service and returns an array of parameter objects each containing a `slug` property.
- *
- * @returns An array of `{ slug: string }` objects for static route generation; returns an empty array if articles cannot be retrieved.
- */
+// Deliberately empty (#3135, flake class H): an enumerated slug is rendered at
+// build, so its own subject read runs against live Sanity and one 503 there
+// killed the whole build. Each slug renders on its first request instead and
+// ISR caches it; a failed first request is a 500 that is never cached.
+// Required all the same: without this export `revalidate` is inert (#2391).
 export async function generateStaticParams() {
-  // Section (of the build), not a request-time subject: an empty list here
-  // just means every slug renders on demand instead of being pre-enumerated
-  // — `dynamicParams` still serves them (#2864). The outer try/catch also
-  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
-  // that happens outside the effect `degradeSection`'s `catchAllCause`
-  // wraps, so an in-effect catch alone would let it fail the whole build.
-  let articles: ArticleVM[] = [];
-  try {
-    articles = await runPromise(
-      degradeSection(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findAll();
-        }),
-        [],
-        "[nieuws/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
-      ),
-    );
-  } catch {
-    articles = [];
-  }
-  // Exclude matchPreview/matchRecap from the prebuild set: their hero +
-  // Doelpunten require a per-article PSD fetch, so prebuilding them would
-  // hammer the rate-limited BFF at build time. They render on-demand via
-  // ISR instead, on the route `revalidate` at the bottom of this file.
-  // See #1470 / feedback_no_psd_prerendering.
-  return articles
-    .filter(
-      (a) => a.articleType !== "matchPreview" && a.articleType !== "matchRecap",
-    )
-    .map((a) => ({ slug: a.slug }));
+  return [];
 }
 
 /**
