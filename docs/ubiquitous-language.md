@@ -408,6 +408,18 @@ The Studio-authored content that lets an editor fill the homepage "Eerste ploege
 
 **Render rule:** read only on `<FirstTeamsBlock>`'s no-rows path, and only when the match read did not fail — a failed read (`unavailable`) always wins and suppresses this notice, image included, so an outage never claims the feed is merely empty.
 
+### Held-Open Frame
+
+The held-open shape rule (#2427 tier 2) — an empty slot inside a populated page or band keeps its shape so the absence reads as a known gap, not a render failure — has two renderings: `<EmptyState tier="slot">` on ink/cream grounds, and the dashed `border-cream/40` `HELD_OPEN_FRAME` constant on the homepage's dark bands.
+
+| Code              | Notes                                                                                                                       |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `HELD_OPEN_FRAME` | `apps/web/src/components/home/FirstTeamsBlock/FirstTeamsBlock.tsx` — the one constant, imported verbatim, never hand-copied |
+
+**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) defines and uses it; `FeaturedEventBand` (`jersey-deep` band) imports that export rather than hand-rolling its own dashed frame. They don't hold it on the same cases. `FirstTeamsBlock` draws it on every no-rows cause, a genuinely empty feed included. `FeaturedEventBand` draws it only on a failed read (`unavailable`); a genuinely empty calendar still drops the band silently (`null`).
+
+**Distinct from `<EmptyState tier="slot">`**, which stays ink-only by decision — it does not grow a matching dark axis for two callers on one homepage ([#3103]). Tier `"surface"` is not affected: it already meets a dark ground through `surface="inverse"`. Reopen only if a dark consumer appears off the homepage.
+
 ### Responsibility
 
 A help/guidance topic that directs users to the right contact person. Displayed at `/hulp`.
@@ -604,3 +616,4 @@ Each content type has its own visibility logic. There is no universal "published
 [#2801]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2801
 [#2802]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2802
 [#2924]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2924
+[#3103]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/3103

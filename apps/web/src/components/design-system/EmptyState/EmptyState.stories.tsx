@@ -169,8 +169,9 @@ export const SlotCreamSoft: Story = {
  * held-open register: a sentence in the section's own body copy, with a
  * display-italic accent on the words that failed, not the subject (#2469
  * resolution rule 3). Fixed `border-ink/30` dashed frame — the cream case
- * is the only one wired here; a dark-ground register is #2402's job
- * (parked via #2690/#2804 — see `EmptyState.tsx`'s file docblock).
+ * is the only one wired here; dark grounds use `HELD_OPEN_FRAME` instead,
+ * decided by #3103 — tier "slot" stays ink-only by design (see
+ * `EmptyState.tsx`'s file docblock).
  */
 export const SlotNotice: Story = {
   name: "Tier 2 — failure notice",

@@ -57,9 +57,10 @@
  *   `<ErrorState>`'s own body line. `background` is not accepted on this
  *   member (`never`, mirroring `_internal/stateAction.ts`'s
  *   `href?: never`/`onClick?: never` mutual exclusion) — a notice's frame is
- *   not configurable, since only the cream case is in scope here; a
- *   dark-ground register is #2402's job (see below). `emphasis` accents the
- *   failure itself, not the subject (rule 3) — see below. `action` (#2815)
+ *   not configurable, since only the cream case is in scope here; the
+ *   dark-ground held-open frame is `HELD_OPEN_FRAME`, decided by #3103 (see
+ *   below). `emphasis` accents the failure itself, not the subject (rule 3)
+ *   — see below. `action` (#2815)
  *   is an **optional** retry button, mirroring the shape tier "surface"'s
  *   `EmptyStateAction` uses for its undo minus the undo-only analytics
  *   fields (`EmptyStateSlotNoticeAction` below) — added so `<LoadMoreFooter>`
@@ -99,26 +100,28 @@
  * copy rules this primitive exists to carry, and #2469's resolution for the
  * failure-notice rules specifically.
  *
- * **Parked: the dark-ground slot register (#2690/#2804).** Tier "slot" is
- * ink-only (`SLOT_BACKGROUND_CLASS` below: `border-ink-muted` /
- * `border-ink bg-cream-soft`) — both wrong on a dark-green band. Tier
- * "surface" already solved its own version via `surface="inverse"` (#2562);
- * tier "slot" has no such axis yet. Two places hand-roll it today rather
- * than wait on this primitive to grow a dark axis: `FirstTeamsBlock`, on the
- * homepage's `jersey-deep-dark` band (see its `HELD_OPEN_FRAME` docblock in
+ * **Decided: the dark-ground answer is `HELD_OPEN_FRAME`, not this tier
+ * (#3103).** Tier "slot" is ink-only (`SLOT_BACKGROUND_CLASS` below:
+ * `border-ink-muted` / `border-ink bg-cream-soft`) — both wrong on a
+ * dark-green band, and that stays true by design. Tier "surface" already
+ * solved its own version via `surface="inverse"` (#2562); tier "slot" does
+ * not grow a matching dark axis. Two places hand-roll the dark-ground
+ * held-open frame instead: `FirstTeamsBlock`, on the homepage's
+ * `jersey-deep-dark` band (see its `HELD_OPEN_FRAME` docblock in
  * `FirstTeamsBlock.tsx`), and `FeaturedEventBand`, on the homepage's
  * `jersey-deep` band (see `FeaturedEventUnavailableNotice`'s docblock in
  * `FeaturedEventBand.tsx`, #2944) — the second import of `FirstTeamsBlock`'s
- * own exported `HELD_OPEN_FRAME`, not a second hand-copy of the value; two
- * consumers is the primitive's own signal to exist (review finding on
- * #2944). **Not built here** — the migration is #2402's call, not this
- * primitive's. Carry `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`)
- * verbatim when it is; the two files' own text tones (`SkipCard`
- * `text-cream/65`, band note `text-cream/80`) stay per-file. VR guard to
- * name: `FirstTeamsBlock` stories
- * `NoMatches`, `FeedUnavailable` and the five `Placeholder*` stories
- * (#2505), and `FeaturedEventBand`'s own `FeedUnavailable` story (#2944) —
- * three viewports each — ink-on-dark-green would be a loud diff.
+ * own exported `HELD_OPEN_FRAME`, not a second hand-copy of the value:
+ * "two consumers is the primitive's own signal to exist" (review finding on
+ * #2944), read there as a signal for the constant, not for this tier —
+ * #3103 overrode the open question by deciding tier "slot" keeps no dark
+ * axis of its own; a `tier="slot"` dark variant on a component with ~13
+ * callers, shaped for two, is exactly the speculative API #2690 itself
+ * refused. Carry `HELD_OPEN_FRAME` (`@/components/home/FirstTeamsBlock`)
+ * verbatim when reaching for the dark-ground held-open frame; the two
+ * files' own text tones (`SkipCard` `text-cream/65`, band note
+ * `text-cream/80`) stay per-file. Reopen only if a dark consumer appears
+ * off the homepage.
  *
  * **Not every failure notice on cream goes through this register.**
  * `<CompetitiveStatusLine>` (#2540/#2636) is a deliberate non-adopter: its
@@ -136,7 +139,7 @@
  * feed that's genuinely gone quiet, so the band says which one happened
  * instead of just going dark. `<FirstTeamsBlock>` holds that shape on every
  * zero-row cause, not only a failure, and hand-rolls the dark-ground
- * equivalent of this register rather than adopting it (see the parked note
+ * held-open frame instead of adopting this register (see the decision
  * above); `<UpcomingMatches>` reaches this exact register (`tier="slot"`,
  * `reason="unavailable"`), and only on a failed read — a genuinely empty
  * feed still drops it silently.
@@ -152,11 +155,11 @@
  * (`FEATURED_EVENT_READ_FAILED`), and passes that apart as `unavailable` —
  * the band holds its shape and names the reason on a failed read, exactly
  * this rule's shape, and still drops silently on a genuinely empty calendar.
- * It reaches that hold-open register through its own dark-ground notice
+ * It reaches that held-open frame through its own dark-ground notice
  * rather than through `<EmptyState tier="slot" reason="unavailable">`
- * itself — that member is ink-only (see the parked note above) and this
- * band's `bg-jersey-deep` ground is exactly the case that note describes as
- * unmigrated; `<FeaturedEventBand>`'s own file carries the reasoning.
+ * itself — that member is ink-only by decision (see above) and this band's
+ * `bg-jersey-deep` ground is exactly the dark-ground case `HELD_OPEN_FRAME`
+ * answers instead; `<FeaturedEventBand>`'s own file carries the reasoning.
  *
  * The artefact is never `<TapedCard>` — that primitive has no frameless
  * (`shadow: "none"`) or transparent-`bg` option today, and this slot needs
@@ -360,8 +363,8 @@ export interface EmptyStateSlotHeldOpenProps extends EmptyStateSharedProps {
  * rather than inventing a second shape. Shared by both tiers since #2815
  * gave tier "surface" its own optional `emphasis` prop. No `tone`/
  * `highlight`: the highlighter sweep is this site's *celebratory* register,
- * wrong on an outage (rule 2), and a dark-ground tone is #2402's job
- * (parked via #2690/#2804 — see the file docblock above), not wired here.
+ * wrong on an outage (rule 2), and a dark-ground tone is `HELD_OPEN_FRAME`'s
+ * job, decided by #3103 (see the file docblock above), not wired here.
  */
 export interface EmptyStateEmphasis {
   text: string;
