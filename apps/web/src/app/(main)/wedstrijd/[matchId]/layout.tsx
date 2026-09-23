@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { fetchMatchOrNotFound } from "./page";
 
 interface MatchLayoutProps {
@@ -17,6 +18,11 @@ interface MatchLayoutProps {
  * — so awaiting it here, in the shell, is what actually gets the 404 onto
  * the wire; the page's later `await` of the same `cache()`-memoized promise
  * only re-observes it. A non-numeric `matchId` never reaches the BFF at all.
+ *
+ * It also mounts `<MatchStripSlot />` above the page, for the same reason
+ * the check lives here: this layout sits outside the sibling `loading.tsx`,
+ * so the strip stays on screen with its real data while the page loads,
+ * instead of a stand-in guessing its height (#3027).
  */
 export default async function MatchLayout({
   children,
@@ -27,5 +33,10 @@ export default async function MatchLayout({
   if (isNaN(numericId)) notFound();
 
   await fetchMatchOrNotFound(numericId);
-  return children;
+  return (
+    <>
+      <MatchStripSlot />
+      {children}
+    </>
+  );
 }

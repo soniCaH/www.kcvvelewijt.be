@@ -50,8 +50,7 @@ vi.mock("@/lib/sanity/client", () => ({
 }));
 
 // `/wedstrijd/[matchId]` reads `BffService` directly in its own page body
-// (not through a child component, unlike the `<MatchStripSlot>` the other
-// pages below mount), so its match-detail and ranking reads must be mocked
+// (not through a child component), so its match-detail and ranking reads must be mocked
 // here rather than left to die against the real BFF. `getMatchDetail` always
 // succeeds — the standings read is this suite's actual subject — and every
 // other method is a safe empty default. This layer is NOT inert for the

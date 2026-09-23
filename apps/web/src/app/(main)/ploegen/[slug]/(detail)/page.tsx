@@ -1,7 +1,7 @@
 /**
  * Team Detail Page — Phase 6.C single-scroll composition.
  *
- * SiteHeader → MatchStripSlot → TeamHero → sticky section-nav →
+ * SiteHeader → MatchStripSlot (from ./layout.tsx) → TeamHero → sticky section-nav →
  * [competitive block: status line, or (StandingsSection | failure notice) +
  * TeamMatchesSection] → SquadGrid → TeamStaff → TeamEditorial → youth
  * TeamEnrolmentCta → global SponsorsBlock → RelatedRow → footer.
@@ -56,7 +56,6 @@ import type { Match, RankingTable } from "@kcvv/api-contract";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
-import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { getTeamMatches } from "@/lib/server/match-data";
 import { isPermanentBffFailure } from "@/lib/effect/classify-bff-failure";
 import { degradeIfPermanent } from "@/lib/effect/degrade-if-permanent";
@@ -108,14 +107,14 @@ export async function generateMetadata({
   // Subject read: this route's metadata is entirely about this one team, so
   // a failed read takes it down with it — `null` (genuinely no such team) is
   // the only case that degrades to the "niet gevonden" fallback (#2864).
-  // `fetchTeamOrNull` (`../team-data.ts`) is shared with the same-segment
-  // `layout.tsx` and this page's own subject read via `cache()` (#2968).
+  // `fetchTeamOrNull` (`../team-data.ts`) is shared with `../layout.tsx` (the
+  // existence check) and this page's own subject read via `cache()` (#2968).
   const team = await fetchTeamOrNull(slug);
   if (!team)
     return {
       title: "Team niet gevonden",
-      // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
-      // gets a real 404 here, but this noindex stays in case a future
+      // #2963/#2968: belt-and-braces. `../layout.tsx` now gets a real
+      // 404 here, but this noindex stays in case a future
       // `loading.tsx`/ancestor boundary ever reintroduces the soft 200.
       robots: { index: false, follow: false },
     };
@@ -254,8 +253,8 @@ async function fetchBffData(
   psdTeamId: number,
 ): Promise<BffData | "unavailable"> {
   const [matchesResult, standingsResult] = await Promise.allSettled([
-    // Via `getTeamMatches` because this page mounts its own
-    // `<MatchStripSlot />` further down, and on `/ploegen/eerste-elftallen-a`
+    // Via `getTeamMatches` because this route's layout mounts
+    // `<MatchStripSlot />` above the page, and on `/ploegen/eerste-elftallen-a`
     // the strip resolves to this very psdId — the same double-read the
     // homepage had (#2441).
     getTeamMatches(psdTeamId),
@@ -321,8 +320,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   // Subject read: the team is this page's entire content, so a failed read
   // takes it down with it — `null` (genuinely no such team) is the only case
-  // that resolves to `notFound()` (#2864). The same-segment `layout.tsx`
-  // already ran this exact check before the shell flushed (#2968);
+  // that resolves to `notFound()` (#2864). `../layout.tsx` (not the
+  // strip-only `./layout.tsx`) already ran this exact check before the shell flushed (#2968);
   // `cache()` means this call reuses that read.
   const team = await fetchTeamOrNull(slug);
 
@@ -549,10 +548,8 @@ export default async function TeamPage({ params }: TeamPageProps) {
       />
       <PageViewTracker eventName="team_detail_view" params={analyticsParams} />
 
-      <MatchStripSlot />
-
       {/* Top air is `<UpLink>`'s own now (#2877) — that is what clears the
-          full-bleed `<MatchStripSlot>` band above it, so this container
+          full-bleed `<MatchStripSlot>` band the layout draws above it, so this container
           supplies none. No bottom padding here either — `<TeamHero>`'s own
           `py-8 sm:py-12` (passed via `className` below) supplies the gap
           below the chip. */}

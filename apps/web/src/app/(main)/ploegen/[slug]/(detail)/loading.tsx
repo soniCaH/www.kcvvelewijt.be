@@ -3,9 +3,9 @@
  *
  * A skeleton draws only what it can know before the fetch (#2642): its
  * route's fixed opening at full fidelity, then neutral bars.
- * `<MatchStripSlot>` is one such fixed fact — its own `MatchStripSkeleton`
- * fallback is drawn directly above the up-link here, closing the gap #2877
- * deferred (#3023). This file used to document a mirror intent — a
+ * `<MatchStripSlot>` is not drawn here: `./layout.tsx` mounts the real strip
+ * above this file, so it stays on screen while the page loads (#3027). This
+ * file used to document a mirror intent — a
  * faithful preview of the Phase 6.C composition, squad grid included. That
  * mirror is impossible, not merely costly: `loading.tsx` accepts no
  * parameters, so one file serves all eighteen teams and cannot branch on
@@ -50,16 +50,12 @@ import {
   SECTION_NAV_BAR_CLASSES,
   SECTION_NAV_CHIP_BASE_CLASSES,
 } from "@/components/design-system";
-import { MatchStripSkeleton } from "@/components/layout/MatchStrip/MatchStripSkeleton";
 import { cn } from "@/lib/utils/cn";
 
 export default function TeamDetailLoading() {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Ploeg laden…" />
-
-      {/* MatchStripSlot's own fallback — see its docblock (#3023). */}
-      <MatchStripSkeleton />
 
       {/* Real, unshimmered — its label is fixed copy, not data (review
           round 2, #2570). Same container width as the section below

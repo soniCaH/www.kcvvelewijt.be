@@ -68,8 +68,8 @@ vi.mock("@/lib/sanity/client", () => ({
 }));
 
 // `<SponsorsSection>` is an async Server Component with no `<Suspense>`
-// boundary of its own (unlike `<MatchStripSlot>`, further up the page,
-// which wraps its own async child). Under Vitest's client-only React
+// boundary of its own (unlike `<MatchStripSlot>`, which wraps its own async
+// child). Under Vitest's client-only React
 // renderer that throws ("Only Server Components can be async"), and with no
 // boundary to catch it the error unmounts the WHOLE tree, not just this
 // section — invisible in assertions that only check page-level text, which
@@ -92,7 +92,7 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
   return {
     ...actual,
     TeamRepositoryLive: Layer.succeed(actual.TeamRepository, {
-      findAll: () => Effect.succeed([]), // MatchStripSlot's own A-side read
+      findAll: () => Effect.succeed([]), // only for the interface shape; the page reads none of it
       findBySlug: mockFindBySlug,
       findAllForLanding: () => Effect.succeed([]),
       findByMemberId: () => Effect.succeed([]),

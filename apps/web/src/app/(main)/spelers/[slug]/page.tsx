@@ -5,7 +5,7 @@
  * with two owner-directed deviations vs the locked spec):
  *
  *   SiteHeader (from layout)
- *   MatchStripSlot              ← top only; bottom strip dropped vs 6.d8 lock
+ *   MatchStripSlot              ← top only, from ./layout.tsx; bottom strip dropped vs 6.d8 lock
  *   PlayerHero
  *   StripedSeam
  *   BioBlock                    ← auto-hides on empty bio
@@ -15,12 +15,13 @@
  * Deviations vs the issue AC, owner-approved at branch start:
  *  - `<PlayerShare>` removed entirely (component file deleted — never
  *    designed, never reused).
- *  - `<MatchStripSlot/>` mounted inline once at the top. The 6.d8
+ *  - `<MatchStripSlot/>` mounted once at the top. The 6.d8
  *    composition shows it top + bottom; the Phase 3.C lock declares the
  *    strip a landing-only chrome. Both contradict; owner picked top-only
  *    as the compromise. The Phase 3.C `(main)` layout still does NOT
- *    mount the slot — this page opts in inline because the player
- *    profile benefits from immediate next-fixture context.
+ *    mount the slot — this route opts in because the player profile
+ *    benefits from immediate next-fixture context, from its own segment
+ *    layout so the strip outlives `loading.tsx` (#3027).
  *
  * PRD §7 open questions resolved tentatively (flag at PR review):
  *  - Q3 (JSON-LD for minors) — `<Person>` JSON-LD emits for adults only.
@@ -46,7 +47,6 @@ import { mergeRelatedRow } from "@/components/related/mergeRelatedRow";
 import type { RelatedRowItem } from "@/components/related/types";
 import { articleVMsToRelatedRowItems } from "@/lib/utils/article-related-items";
 import { PageContainer, StripedSeam, UpLink } from "@/components/design-system";
-import { MatchStripSlot } from "@/components/layout/MatchStrip/MatchStripSlot";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { findNthPullquoteText } from "@/lib/portable-text/findPullquoteText";
 
@@ -266,7 +266,6 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
         eventName="player_profile_view"
         params={analyticsParams}
       />
-      <MatchStripSlot />
       <PageContainer as="section" className="pb-12 lg:pb-16">
         <UpLink href="/ploegen" label="Ploegen" className="mb-6" />
         <PlayerHero
@@ -316,7 +315,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
 // revalidation keeps it fresh via /api/revalidate (revalidateTag 'players'),
 // so the window is not what keeps this page current.
 //
-// It is what bounds a failure. This route mounts `<MatchStripSlot>` inline, a
+// It is what bounds a failure. This route's layout mounts `<MatchStripSlot>`, a
 // BFF read that degrades to no strip, and the "Verder lezen." row above now
 // degrades to nothing as well — both are then written into this page's ISR
 // entry for the whole window (#2433 rule 5, cap 900s). `/api/revalidate` busts

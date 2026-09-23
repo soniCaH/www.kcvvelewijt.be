@@ -2,8 +2,8 @@
  * Match Detail Page — Loading Skeleton.
  *
  * Mirrors the Phase 6.B composition of `wedstrijd/[matchId]/page.tsx`:
- *   <MatchStripSlot>            ← full-bleed next-fixture band (`MatchStripSkeleton`
- *                                  fallback drawn directly here, #3023)
+ *   (<MatchStripSlot> is not drawn here: `./layout.tsx` mounts the real
+ *    strip above this file, so it stays on screen while the page loads, #3027)
  *   <MatchHero>                 ← single TapedCard (stub + score body)
  *     → <StripedSeam>
  *     → <MatchLineupSection>     ← kicker + heading + 2-col lineup rows
@@ -35,7 +35,6 @@ import {
   LoadingAnnouncement,
   UpLink,
 } from "@/components/design-system";
-import { MatchStripSkeleton } from "@/components/layout/MatchStrip/MatchStripSkeleton";
 
 /** Shared kicker + display-heading footprint for the cream body sections. */
 function SectionHeadingSkeleton() {
@@ -51,9 +50,6 @@ export default function MatchDetailLoading() {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijd laden…" />
-
-      {/* MatchStripSlot's own fallback — see its docblock (#3023). */}
-      <MatchStripSkeleton />
 
       {/* MatchHero — single TapedCard with a dashed stub + score body. Top
           air is `<UpLink>`'s own now (#2877) — this container keeps only
