@@ -416,9 +416,9 @@ The held-open shape rule (#2427 tier 2) — an empty slot inside a populated pag
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `HELD_OPEN_FRAME` | `apps/web/src/components/home/FirstTeamsBlock/FirstTeamsBlock.tsx` — the one constant, imported verbatim, never hand-copied |
 
-**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) and `FeaturedEventBand` (`jersey-deep` band) both import this same export rather than each hand-rolling their own dashed frame — but they don't hold it on the same cases. `FirstTeamsBlock` draws it on every no-rows cause, a genuinely empty feed included. `FeaturedEventBand` draws it only on a failed read (`unavailable`); a genuinely empty calendar still drops the band silently (`null`).
+**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) defines and uses it; `FeaturedEventBand` (`jersey-deep` band) imports that export rather than hand-rolling its own dashed frame. They don't hold it on the same cases. `FirstTeamsBlock` draws it on every no-rows cause, a genuinely empty feed included. `FeaturedEventBand` draws it only on a failed read (`unavailable`); a genuinely empty calendar still drops the band silently (`null`).
 
-**Distinct from `<EmptyState>`'s tiers**, which stay ink-only by decision — `<EmptyState tier="slot">` does not grow a matching dark axis for two callers on one homepage ([#3103]). Reopen only if a dark consumer appears off the homepage.
+**Distinct from `<EmptyState tier="slot">`**, which stays ink-only by decision — it does not grow a matching dark axis for two callers on one homepage ([#3103]). Tier `"surface"` is not affected: it already meets a dark ground through `surface="inverse"`. Reopen only if a dark consumer appears off the homepage.
 
 ### Responsibility
 
