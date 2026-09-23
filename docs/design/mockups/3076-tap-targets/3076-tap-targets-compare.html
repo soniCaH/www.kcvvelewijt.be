@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tap Target Options</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+  :root{color-scheme:light;--bg:#f5f1e6;--paper:#fff9ee;--soft:#ede8da;--ink:#0a0a0a;--muted:#5b574d;--edge:#d9d2bf;--deep:#007c46;--deep-ink:#065f37;--alert:#b84a3a;--warn:#a06a00;--hit:rgba(0,128,60,.28)}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#151512;--paper:#1e1d19;--soft:#26251f;--ink:#f1ede2;--muted:#b3ac9c;--edge:#3a382f;--deep:#3fbf7f;--deep-ink:#8fe0b4;--alert:#e07b6a;--warn:#e0b04a}}
+  :root[data-theme="dark"]{color-scheme:dark;--bg:#151512;--paper:#1e1d19;--soft:#26251f;--ink:#f1ede2;--muted:#b3ac9c;--edge:#3a382f;--deep:#3fbf7f;--deep-ink:#8fe0b4;--alert:#e07b6a;--warn:#e0b04a}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,"Helvetica Neue",Arial,sans-serif}
+  main{max-width:1240px;margin:0 auto;padding-block:32px 96px;padding-inline:16px}
+  h1{font:700 32px/1.1 Georgia,"Times New Roman",serif;margin:0 0 8px;text-wrap:balance} h2{font:700 24px/1.2 Georgia,serif;margin:0 0 4px}
+  h3{font:700 13px/1.2 "IBM Plex Mono",ui-monospace,Menlo,monospace;text-transform:uppercase;letter-spacing:.06em;margin:22px 0 10px;color:var(--muted)}
+  h4{font:700 14px/1.3 -apple-system,"Helvetica Neue",Arial,sans-serif;margin:0}
+  .lede{max-width:70ch;color:var(--muted);margin:0 0 14px}
+  .legend{display:flex;flex-wrap:wrap;gap:14px 22px;margin:0 0 28px;font-size:13px;color:var(--muted)} .legend span::before{content:"";display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px;border:1px solid var(--edge)}
+  .legend .l-hit::before{background:var(--hit)} .legend .l-sq::before{border:1.5px dashed var(--ink)} .legend .l-red::before{background:rgba(214,40,40,.55)}
+  table{border-collapse:collapse;width:100%;background:var(--paper);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);margin:0 0 40px;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px dashed var(--edge);vertical-align:top} th{font:700 11px/1.2 "IBM Plex Mono",ui-monospace,monospace;text-transform:uppercase;letter-spacing:.06em}
+  td.num{font-family:"IBM Plex Mono",ui-monospace,monospace;white-space:nowrap} td a{color:inherit}
+  .tablewrap{overflow-x:auto}
+  section{border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);background:var(--paper);padding:20px;margin:0 0 40px}
+  .where{margin:0;color:var(--muted)}
+  .opts{display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;align-items:stretch}
+  .opt{flex:0 0 282px;max-width:100%;border:1.5px solid var(--edge);background:var(--bg);padding:12px;display:flex;flex-direction:column;gap:8px}
+  .opt.today{background:var(--soft)} .opt.suggested{border-color:var(--deep);box-shadow:4px 4px 0 var(--deep)}
+  .opt header{display:flex;align-items:center;gap:8px}
+  figure{margin:0;background:#fff;border:1px solid var(--edge);display:flex;justify-content:center;overflow:hidden} figure img,details img{display:block;max-width:100%;height:auto}
+  .chip{display:inline-block;font:700 11px/1 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;padding:5px 7px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink)}
+  .chip.pick{background:var(--deep);border-color:var(--deep);color:#fff} .chip.alt{background:var(--soft)}
+  .v{display:inline-block;font:700 11px/1 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.04em;text-transform:uppercase;padding:4px 6px;margin:0 4px 4px 0;border:1px solid currentColor}
+  .v.ok{color:var(--deep-ink)} .v.bad{color:var(--alert)} .v.warn{color:var(--warn)} .verdicts{margin:0}
+  .note{margin:0;font-size:14px} .facts{margin:0;padding-left:18px;font-size:13px;color:var(--muted)} .facts b{color:var(--ink)} .facts b.bad{color:var(--alert)}
+  details{font-size:13px;margin-top:auto} summary{cursor:pointer;color:var(--deep-ink);font-weight:700} details img{margin-top:8px;border:1px solid var(--edge);background:#fff}
+  .decide{margin:18px 0 0;padding:12px 14px;border:1.5px dashed var(--ink);background:var(--bg)}
+  @media (max-width:700px){.opt{flex-basis:86vw}}
+</style>
+<main>
+  <h1>Five icon-only controls and the 44 × 44 Tap Target Rule</h1>
+  <p class="lede">Every screenshot is the <strong>live production page</strong> (https://kcvv-nextjs.vercel.app) with the option injected as CSS. The hit area is measured with <code>elementFromPoint</code>, not read from the code. Captured 2026-09-22 for issue #3076.</p>
+  <p class="legend"><span class="l-hit">green = the area your finger can actually hit</span><span class="l-sq">dashed = the 44 × 44 target</span><span class="l-red">red = the hit area on top of another control</span></p>
+  <div class="tablewrap"><table><thead><tr><th>Control</th><th>Today</th><th>Options</th><th>Suggested</th></tr></thead><tbody><tr><td><a href="#1-contactcard">1 · Contact card — E-mail / Bel</a></td><td class="num">375px: <b>40 × 40</b><br>1280px: <b>40 × 40</b></td><td><span class="chip pick">A</span> Invisible hit area<br><span class="chip ">B</span> Visible 44px box<br><span class="chip ">C</span> Labelled buttons</td><td><span class="chip pick">A</span> 2px of invisible hit area inside the card's own padding. Nothing on screen changes.</td></tr><tr><td><a href="#2-explorer">2 · Organigram explorer — Vorige / Volgende functie</a></td><td class="num">375px: <b>28 × 28</b><br>1280px: <b>28 × 28</b></td><td><span class="chip pick">A</span> Invisible hit area<br><span class="chip ">B</span> Visible 44px box, same caret<br><span class="chip ">C</span> Visible 44px box, 20px caret</td><td><span class="chip pick">A</span> 8px invisible hit area inside the row's 12px gaps. Nothing on screen changes.</td></tr><tr><td><a href="#3-search-hero">3 · Search 'Wissen' (X) — hero box</a></td><td class="num">375px: <b>32 × 32</b><br>1280px: <b>32 × 32</b></td><td><span class="chip ">A</span> Invisible hit area<br><span class="chip pick">B</span> Invisible hit area + field gives 4px back<br><span class="chip ">C</span> Visible 44px button</td><td><span class="chip pick">B</span> A alone lands 4px on the text field. B moves the field's box 4px so the rule holds.</td></tr><tr><td><a href="#3b-search-nav">3b · Search 'Wissen' (X) — sticky bar</a></td><td class="num">375px: <b>28 × 28</b><br>1280px: <b>28 × 28</b></td><td><span class="chip ">A</span> Invisible hit area<br><span class="chip pick">B</span> Invisible hit area + field gives 6px back<br><span class="chip ">C</span> Visible 44px button</td><td><span class="chip pick">B</span> Same reasoning as the hero box. The 6px overrun above and below stays inside the bar's own padding.</td></tr><tr><td><a href="#4-matchstrip">4 · Match strip — result / fixture arrows</a></td><td class="num">1280px: <b>36 × 36</b></td><td><span class="chip pick">A</span> Invisible hit area<br><span class="chip ">B</span> Visible 44px box</td><td><span class="chip pick">A</span> 4px invisible hit area inside the cell's padding and gap. Desktop-only control, mouse users, lowest stakes.</td></tr><tr><td><a href="#5-calendar">5 · Calendar — Vorige / Volgende maand (week)</a></td><td class="num">375px: <b>44 × 44</b><br>1280px: <b>32 × 32</b></td><td><span class="chip ">A</span> Invisible hit area (md+)<br><span class="chip pick">B</span> Visible 44px box everywhere</td><td><span class="chip pick">B</span> The phone already shows 44px boxes; B makes desktop match it. A pokes 6px outside the toolbar row instead.</td></tr></tbody></table></div>
+  <section id="1-contactcard"><h2>1 · Contact card — E-mail / Bel</h2><p class="where">Under an opened answer on /hulp. Phones: yes.</p><div class="vp"><h3><span class="chip">375px</span> phone</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/1-contactcard-375-today-close.png" width="208" alt="Today at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 40 × 40</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">40 × 40 bordered box, 16px icon.</p>
+        <ul class="facts"><li>Visible box 40 × 40, hit area 40 × 40, covers 87% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-375-today-context.png" width="331" alt="Today at 375px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/1-contactcard-375-A-close.png" width="208" alt="A · Invisible hit area at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same 40px box on screen. A pseudo-element adds 2px of invisible hit area on each side, inside the card's own 12px padding and the 6px gap between the two actions.</p>
+        <ul class="facts"><li>Visible box 40 × 40, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: 2px top, 2px bottom, 2px left, 2px right past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-375-A-context.png" width="331" alt="A · Invisible hit area at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">B</span> <h4>Visible 44px box</h4></header>
+        <figure><img src="shots/1-contactcard-375-B-close.png" width="212" alt="B · Visible 44px box at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">The box grows to 44px like the monogram next to it. Card height stays (monogram is already 44). The name column loses 4px per action.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> name column -4px wide.</li><li>VR: ContactCard, QuestionCard, HulpFinder stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-375-B-context.png" width="331" alt="B · Visible 44px box at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Labelled buttons</h4></header>
+        <figure><img src="shots/1-contactcard-375-C-close.png" width="238" alt="C · Labelled buttons at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Icon + word, 44px tall. Meets the 'a control that stands alone shows a word' line too. Costs width: on a phone the name wraps sooner.</p>
+        <ul class="facts"><li>Visible box 70 × 44, hit area 70 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> name column -30px wide.</li><li>VR: ContactCard, QuestionCard, HulpFinder stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-375-C-context.png" width="331" alt="C · Labelled buttons at 375px, in context" loading="lazy"></details>
+      </article></div></div><div class="vp"><h3><span class="chip">1280px</span> desktop</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/1-contactcard-1280-today-close.png" width="224" alt="Today at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 40 × 40</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">40 × 40 bordered box, 16px icon.</p>
+        <ul class="facts"><li>Visible box 40 × 40, hit area 40 × 40, covers 87% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-1280-today-context.png" width="1204" alt="Today at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/1-contactcard-1280-A-close.png" width="224" alt="A · Invisible hit area at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same 40px box on screen. A pseudo-element adds 2px of invisible hit area on each side, inside the card's own 12px padding and the 6px gap between the two actions.</p>
+        <ul class="facts"><li>Visible box 40 × 40, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: 2px top, 2px bottom, 2px left, 2px right past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-1280-A-context.png" width="1204" alt="A · Invisible hit area at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">B</span> <h4>Visible 44px box</h4></header>
+        <figure><img src="shots/1-contactcard-1280-B-close.png" width="228" alt="B · Visible 44px box at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">The box grows to 44px like the monogram next to it. Card height stays (monogram is already 44). The name column loses 4px per action.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> name column -4px wide.</li><li>VR: ContactCard, QuestionCard, HulpFinder stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-1280-B-context.png" width="1204" alt="B · Visible 44px box at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Labelled buttons</h4></header>
+        <figure><img src="shots/1-contactcard-1280-C-close.png" width="254" alt="C · Labelled buttons at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Icon + word, 44px tall. Meets the 'a control that stands alone shows a word' line too. Costs width: on a phone the name wraps sooner.</p>
+        <ul class="facts"><li>Visible box 70 × 44, hit area 70 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> name column -30px wide.</li><li>VR: ContactCard, QuestionCard, HulpFinder stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/1-contactcard-1280-C-context.png" width="1204" alt="C · Labelled buttons at 1280px, in context" loading="lazy"></details>
+      </article></div></div>
+    <p class="decide"><span class="chip pick">suggested A</span> 2px of invisible hit area inside the card's own padding. Nothing on screen changes. <b>Your pick:</b> A / B / C / leave as is.</p></section><section id="2-explorer"><h2>2 · Organigram explorer — Vorige / Volgende functie</h2><p class="where">Dark fullscreen verkenner on /hulp. Phones: yes.</p><div class="vp"><h3><span class="chip">375px</span> phone</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/2-explorer-375-today-close.png" width="219" alt="Today at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 28 × 28</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">28 × 28: 14px caret + 6px padding + 1px border.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 28 × 28, covers 44% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-375-today-context.png" width="363" alt="Today at 375px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/2-explorer-375-A-close.png" width="219" alt="A · Invisible hit area at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same 28px box. 8px of invisible hit area each side lands in the row's own 12px gaps; the row is over 100px tall so nothing above or below is touched.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-375-A-context.png" width="363" alt="A · Invisible hit area at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">B</span> <h4>Visible 44px box, same caret</h4></header>
+        <figure><img src="shots/2-explorer-375-B-close.png" width="219" alt="B · Visible 44px box, same caret at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Box grows to 44px, caret stays 14px — reads as an empty frame.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: OrganigramExplorer stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-375-B-context.png" width="363" alt="B · Visible 44px box, same caret at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Visible 44px box, 20px caret</h4></header>
+        <figure><img src="shots/2-explorer-375-C-close.png" width="219" alt="C · Visible 44px box, 20px caret at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Box 44px and a bigger caret to fill it. The siblings row gets 32px wider.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: OrganigramExplorer stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-375-C-context.png" width="363" alt="C · Visible 44px box, 20px caret at 375px, in context" loading="lazy"></details>
+      </article></div></div><div class="vp"><h3><span class="chip">1280px</span> desktop</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/2-explorer-1280-today-close.png" width="268" alt="Today at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 28 × 28</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">28 × 28: 14px caret + 6px padding + 1px border.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 28 × 28, covers 44% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-1280-today-context.png" width="984" alt="Today at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/2-explorer-1280-A-close.png" width="268" alt="A · Invisible hit area at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same 28px box. 8px of invisible hit area each side lands in the row's own 12px gaps; the row is over 100px tall so nothing above or below is touched.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-1280-A-context.png" width="984" alt="A · Invisible hit area at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">B</span> <h4>Visible 44px box, same caret</h4></header>
+        <figure><img src="shots/2-explorer-1280-B-close.png" width="284" alt="B · Visible 44px box, same caret at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Box grows to 44px, caret stays 14px — reads as an empty frame.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: OrganigramExplorer stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-1280-B-context.png" width="984" alt="B · Visible 44px box, same caret at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Visible 44px box, 20px caret</h4></header>
+        <figure><img src="shots/2-explorer-1280-C-close.png" width="284" alt="C · Visible 44px box, 20px caret at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Box 44px and a bigger caret to fill it. The siblings row gets 32px wider.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: OrganigramExplorer stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/2-explorer-1280-C-context.png" width="984" alt="C · Visible 44px box, 20px caret at 1280px, in context" loading="lazy"></details>
+      </article></div></div>
+    <p class="decide"><span class="chip pick">suggested A</span> 8px invisible hit area inside the row's 12px gaps. Nothing on screen changes. <b>Your pick:</b> A / B / C / leave as is.</p></section><section id="3-search-hero"><h2>3 · Search 'Wissen' (X) — hero box</h2><p class="where">The big search under the hero title on /hulp. Phones: yes.</p><div class="vp"><h3><span class="chip">375px</span> phone</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/3-search-hero-375-today-close.png" width="202" alt="Today at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 32 × 32</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">32 × 32 (20px X + 6px pull-back padding, already the negative-margin idiom).</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 32 × 32, covers 54% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-375-today-context.png" width="367" alt="Today at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/3-search-hero-375-A-close.png" width="202" alt="A · Invisible hit area at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v bad">lands on a neighbour</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same X. 44px hit area. Watch the red marks: the left edge lands on the text field itself — the rule forbids that.</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 44 × 44, covers 100% of the 44 square.</li><li><b class="bad">Overlaps:</b> input[Zoek een persoon of hulpvraa] by 4 × 26px.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-375-A-context.png" width="367" alt="A · Invisible hit area at 375px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">B</span> <h4>Invisible hit area + field gives 4px back</h4></header>
+        <figure><img src="shots/3-search-hero-375-B-close.png" width="202" alt="B · Invisible hit area + field gives 4px back at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same as A, but the text field's box ends 4px earlier, so the hit area only lands in the row's own gap. Nothing moves that you can see; a full field ends 4px sooner.</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move (text end moves 6px).</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-375-B-context.png" width="367" alt="B · Invisible hit area + field gives 4px back at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Visible 44px button</h4></header>
+        <figure><img src="shots/3-search-hero-375-C-close.png" width="220" alt="C · Visible 44px button at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">A real 44px box in the row. The field gets 24px narrower; box height already fits 44.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> search box +18px tall; hero +18px tall.</li><li>VR: HubSearch stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-375-C-context.png" width="367" alt="C · Visible 44px button at 375px, in context" loading="lazy"></details>
+      </article></div></div><div class="vp"><h3><span class="chip">1280px</span> desktop</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/3-search-hero-1280-today-close.png" width="272" alt="Today at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 32 × 32</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">32 × 32 (20px X + 6px pull-back padding, already the negative-margin idiom).</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 32 × 32, covers 54% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-1280-today-context.png" width="1240" alt="Today at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/3-search-hero-1280-A-close.png" width="272" alt="A · Invisible hit area at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v bad">lands on a neighbour</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same X. 44px hit area. Watch the red marks: the left edge lands on the text field itself — the rule forbids that.</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 44 × 44, covers 100% of the 44 square.</li><li><b class="bad">Overlaps:</b> input[Zoek een persoon of hulpvraa] by 4 × 26px.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-1280-A-context.png" width="1240" alt="A · Invisible hit area at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">B</span> <h4>Invisible hit area + field gives 4px back</h4></header>
+        <figure><img src="shots/3-search-hero-1280-B-close.png" width="272" alt="B · Invisible hit area + field gives 4px back at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same as A, but the text field's box ends 4px earlier, so the hit area only lands in the row's own gap. Nothing moves that you can see; a full field ends 4px sooner.</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move (text end moves 6px).</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-1280-B-context.png" width="1240" alt="B · Invisible hit area + field gives 4px back at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Visible 44px button</h4></header>
+        <figure><img src="shots/3-search-hero-1280-C-close.png" width="284" alt="C · Visible 44px button at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">A real 44px box in the row. The field gets 24px narrower; box height already fits 44.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> search box +18px tall.</li><li>VR: HubSearch stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3-search-hero-1280-C-context.png" width="1240" alt="C · Visible 44px button at 1280px, in context" loading="lazy"></details>
+      </article></div></div>
+    <p class="decide"><span class="chip pick">suggested B</span> A alone lands 4px on the text field. B moves the field's box 4px so the rule holds. <b>Your pick:</b> A / B / C / leave as is.</p></section><section id="3b-search-nav"><h2>3b · Search 'Wissen' (X) — sticky bar</h2><p class="where">The compact search in the sticky section bar, once the hero scrolls away. Phones: yes.</p><div class="vp"><h3><span class="chip">375px</span> phone</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/3b-search-nav-375-today-close.png" width="169" alt="Today at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 28 × 28</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Small X in a 4px-padded box inside a 52px bar.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 28 × 28, covers 44% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-375-today-context.png" width="375" alt="Today at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/3b-search-nav-375-A-close.png" width="169" alt="A · Invisible hit area at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v bad">lands on a neighbour</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">44px hit area around the X. It overruns the box border top and bottom into the bar's own 8px padding, and its left edge lands on the field.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 44 × 44, covers 100% of the 44 square.</li><li><b class="bad">Overlaps:</b> input[Zoek een persoon of hulpvraa] by 6 × 23px.</li><li>Spill: 6px top, 6px bottom, 3px right past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-375-A-context.png" width="375" alt="A · Invisible hit area at 375px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">B</span> <h4>Invisible hit area + field gives 6px back</h4></header>
+        <figure><img src="shots/3b-search-nav-375-B-close.png" width="169" alt="B · Invisible hit area + field gives 6px back at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">As A, but the field's box ends 6px earlier so the hit area stays off it. The 6px overrun above and below the small box lands in the bar's own 8px padding.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: 6px top, 6px bottom, 3px right past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-375-B-context.png" width="375" alt="B · Invisible hit area + field gives 6px back at 375px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Visible 44px button</h4></header>
+        <figure><img src="shots/3b-search-nav-375-C-close.png" width="191" alt="C · Visible 44px button at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">A 44px box inside a slot built for ~28px: the box, and with it the sticky bar, grows. Every anchor offset on the page follows the bar's height.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> search box +21px tall; sticky bar +21px tall.</li><li>VR: HubSearch, OrganigramSectionNav stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-375-C-context.png" width="375" alt="C · Visible 44px button at 375px, in context" loading="lazy"></details>
+      </article></div></div><div class="vp"><h3><span class="chip">1280px</span> desktop</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/3b-search-nav-1280-today-close.png" width="185" alt="Today at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 28 × 28</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Small X in a 4px-padded box inside a 52px bar.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 28 × 28, covers 44% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-1280-today-context.png" width="1280" alt="Today at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/3b-search-nav-1280-A-close.png" width="185" alt="A · Invisible hit area at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v bad">lands on a neighbour</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">44px hit area around the X. It overruns the box border top and bottom into the bar's own 8px padding, and its left edge lands on the field.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 44 × 44, covers 100% of the 44 square.</li><li><b class="bad">Overlaps:</b> input[Zoek een persoon of hulpvraa] by 6 × 23px.</li><li>Spill: 6px top, 6px bottom, 3px right past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-1280-A-context.png" width="1280" alt="A · Invisible hit area at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">B</span> <h4>Invisible hit area + field gives 6px back</h4></header>
+        <figure><img src="shots/3b-search-nav-1280-B-close.png" width="185" alt="B · Invisible hit area + field gives 6px back at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">As A, but the field's box ends 6px earlier so the hit area stays off it. The 6px overrun above and below the small box lands in the bar's own 8px padding.</p>
+        <ul class="facts"><li>Visible box 28 × 28, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: 6px top, 6px bottom, 3px right past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-1280-B-context.png" width="1280" alt="B · Invisible hit area + field gives 6px back at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">C</span> <h4>Visible 44px button</h4></header>
+        <figure><img src="shots/3b-search-nav-1280-C-close.png" width="207" alt="C · Visible 44px button at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">A 44px box inside a slot built for ~28px: the box, and with it the sticky bar, grows. Every anchor offset on the page follows the bar's height.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> search box +21px tall; sticky bar +21px tall.</li><li>VR: HubSearch, OrganigramSectionNav stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/3b-search-nav-1280-C-context.png" width="1280" alt="C · Visible 44px button at 1280px, in context" loading="lazy"></details>
+      </article></div></div>
+    <p class="decide"><span class="chip pick">suggested B</span> Same reasoning as the hero box. The 6px overrun above and below stays inside the bar's own padding. <b>Your pick:</b> A / B / C / leave as is.</p></section><section id="4-matchstrip"><h2>4 · Match strip — result / fixture arrows</h2><p class="where">Top of every page, desktop only (lg and up).</p><div class="vp"><h3><span class="chip">1280px</span> desktop</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/4-matchstrip-1280-today-close.png" width="176" alt="Today at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 36 × 36</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">36 × 36 bordered box with a text arrow.</p>
+        <ul class="facts"><li>Visible box 36 × 36, hit area 36 × 36, covers 64% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/4-matchstrip-1280-today-context.png" width="1280" alt="Today at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">A</span> <h4>Invisible hit area</h4></header>
+        <figure><img src="shots/4-matchstrip-1280-A-close.png" width="176" alt="A · Invisible hit area at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same 36px box, 4px of invisible hit area each side — inside the cell's 20px side padding and 8px gap.</p>
+        <ul class="facts"><li>Visible box 36 × 36, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/4-matchstrip-1280-A-context.png" width="1280" alt="A · Invisible hit area at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">B</span> <h4>Visible 44px box</h4></header>
+        <figure><img src="shots/4-matchstrip-1280-B-close.png" width="184" alt="B · Visible 44px box at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Boxes grow 8px. If the strip is shorter than 44px it grows too — see the context shot.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> cell +16px wide.</li><li>VR: MatchStripView, MatchStripInContext stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/4-matchstrip-1280-B-context.png" width="1280" alt="B · Visible 44px box at 1280px, in context" loading="lazy"></details>
+      </article></div></div>
+    <p class="decide"><span class="chip pick">suggested A</span> 4px invisible hit area inside the cell's padding and gap. Desktop-only control, mouse users, lowest stakes. <b>Your pick:</b> A / B / leave as is.</p></section><section id="5-calendar"><h2>5 · Calendar — Vorige / Volgende maand (week)</h2><p class="where">Toolbar on /kalender. Phones already get 44 × 44; from md up it is 32 × 32.</p><div class="vp"><h3><span class="chip">375px</span> phone</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/5-calendar-375-today-close.png" width="194" alt="Today at 375px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">44 on phones, 32 × 32 from md.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/5-calendar-375-today-context.png" width="363" alt="Today at 375px, in context" loading="lazy"></details>
+      </article></div></div><div class="vp"><h3><span class="chip">1280px</span> desktop</h3><div class="opts"><article class="opt  today">
+        <header><span class="chip ">now</span> <h4>Today</h4></header>
+        <figure><img src="shots/5-calendar-1280-today-close.png" width="272" alt="Today at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v bad">only 32 × 32</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">44 on phones, 32 × 32 from md.</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 32 × 32, covers 54% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/5-calendar-1280-today-context.png" width="1236" alt="Today at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt  ">
+        <header><span class="chip alt">A</span> <h4>Invisible hit area (md+)</h4></header>
+        <figure><img src="shots/5-calendar-1280-A-close.png" width="272" alt="A · Invisible hit area (md+) at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v ok">look unchanged</span></p>
+        <p class="note">Same 32px box on desktop, 6px invisible hit area each side — 8px gaps around it. Check whether it pokes above or below the toolbar row.</p>
+        <ul class="facts"><li>Visible box 32 × 32, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: 6px top, 6px bottom, 6px left past the control's own box; none past the outer container.</li><li>Layout: nothing moves.</li><li>VR: 0 stories move.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/5-calendar-1280-A-context.png" width="1236" alt="A · Invisible hit area (md+) at 1280px, in context" loading="lazy"></details>
+      </article><article class="opt suggested ">
+        <header><span class="chip pick">B</span> <h4>Visible 44px box everywhere</h4></header>
+        <figure><img src="shots/5-calendar-1280-B-close.png" width="284" alt="B · Visible 44px box everywhere at 1280px, close crop" loading="lazy"></figure>
+        <p class="verdicts"><span class="v ok">44 × 44 reached</span> <span class="v ok">touches nothing</span> <span class="v warn">look changes</span></p>
+        <p class="note">Drop the desktop shrink: 44 at every width, like the phone already has. The toolbar row grows if it is shorter than 44.</p>
+        <ul class="facts"><li>Visible box 44 × 44, hit area 44 × 44, covers 100% of the 44 square.</li><li>Spill: none past the control's own box; none past the outer container.</li><li><b>Layout:</b> period nav +24px wide, +12px tall; toolbar +9px tall.</li><li>VR: CalendarWidget stories.</li></ul>
+        <details><summary>Show in context</summary><img src="shots/5-calendar-1280-B-context.png" width="1236" alt="B · Visible 44px box everywhere at 1280px, in context" loading="lazy"></details>
+      </article></div></div>
+    <p class="decide"><span class="chip pick">suggested B</span> The phone already shows 44px boxes; B makes desktop match it. A pokes 6px outside the toolbar row instead. <b>Your pick:</b> A / B / leave as is.</p></section>
+  <p class="lede">Options marked "look unchanged" move no pixels, so no VR baseline changes. Any option marked "look changes" re-captures the listed stories. Every number here is re-measured by the implementer in the PR, in a real browser, at both widths.</p>
+</main>

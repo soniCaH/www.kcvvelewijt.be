@@ -274,7 +274,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
               type="button"
               onClick={handlePrev}
               aria-label={view === "week" ? "Vorige week" : "Vorige maand"}
-              className="border-ink bg-cream hover:bg-cream-soft flex h-11 w-11 items-center justify-center border-2 font-mono transition-colors md:h-8 md:w-8"
+              className="border-ink bg-cream hover:bg-cream-soft flex h-11 w-11 items-center justify-center border-2 font-mono transition-colors"
             >
               ‹
             </button>
@@ -288,7 +288,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
               type="button"
               onClick={handleNext}
               aria-label={view === "week" ? "Volgende week" : "Volgende maand"}
-              className="border-ink bg-cream hover:bg-cream-soft flex h-11 w-11 items-center justify-center border-2 font-mono transition-colors md:h-8 md:w-8"
+              className="border-ink bg-cream hover:bg-cream-soft flex h-11 w-11 items-center justify-center border-2 font-mono transition-colors"
             >
               ›
             </button>

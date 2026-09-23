@@ -722,7 +722,7 @@ function DesktopSlider({
             disabled={isResultSlide}
             aria-label="Toon de laatste uitslag"
             className={cn(
-              "flex h-9 w-9 items-center justify-center border-2 font-mono text-sm disabled:opacity-30",
+              "hit-area flex h-9 w-9 items-center justify-center border-2 font-mono text-sm disabled:opacity-30",
               arrowClass,
             )}
           >
@@ -739,7 +739,7 @@ function DesktopSlider({
             disabled={!isResultSlide}
             aria-label="Toon de volgende wedstrijd"
             className={cn(
-              "flex h-9 w-9 items-center justify-center border-2 font-mono text-sm disabled:opacity-30",
+              "hit-area flex h-9 w-9 items-center justify-center border-2 font-mono text-sm disabled:opacity-30",
               arrowClass,
             )}
           >

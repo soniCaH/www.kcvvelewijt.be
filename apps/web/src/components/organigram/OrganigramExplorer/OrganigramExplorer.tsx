@@ -409,7 +409,7 @@ export function OrganigramExplorer({
                 onClick={() => navigate(siblingTarget(tree, focusId, -1))}
                 disabled={view.focusIndex <= 0}
                 aria-label="Vorige functie"
-                className="border-cream/35 text-cream-quiet enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
+                className="hit-area border-cream/35 text-cream-quiet enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
               >
                 <CaretLeft size={14} aria-hidden />
               </button>
@@ -504,7 +504,7 @@ export function OrganigramExplorer({
                 onClick={() => navigate(siblingTarget(tree, focusId, 1))}
                 disabled={view.focusIndex >= view.siblings.length - 1}
                 aria-label="Volgende functie"
-                className="border-cream/35 text-cream-quiet enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
+                className="hit-area border-cream/35 text-cream-quiet enabled:hover:border-cream shrink-0 border p-1.5 disabled:opacity-25"
               >
                 <CaretRight size={14} aria-hidden />
               </button>

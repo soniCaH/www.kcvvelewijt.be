@@ -67,9 +67,9 @@ export default function CalendarLoading() {
 
               {/* Shared period nav */}
               <div className="flex items-center gap-2">
-                <div className="border-ink bg-cream h-8 w-8 border-2" />
+                <div className="border-ink bg-cream h-11 w-11 border-2" />
                 <Skeleton className="h-6 w-32" />
-                <div className="border-ink bg-cream h-8 w-8 border-2" />
+                <div className="border-ink bg-cream h-11 w-11 border-2" />
               </div>
 
               {/* Subscribe button */}
