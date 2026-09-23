@@ -636,9 +636,13 @@ export function HubSearch({
           // `<input>` at its intrinsic ~20-character width, so without this
           // the field and its caret render straight through the box's own
           // border at viewports below ~375px instead of the box squeezing.
+          //
+          // The end margin (only while the clear button shows) stops the
+          // field's box short of that button's 44px hit area, so a tap at the
+          // end of the text never lands on the button instead of the field.
           className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent focus:outline-none ${
             isHero ? "text-[15px]" : "text-[13px]"
-          }`}
+          } ${value ? (isHero ? "mr-1" : "mr-1.5") : ""}`}
         />
         {value && (
           <button
@@ -649,8 +653,9 @@ export function HubSearch({
               inputRef.current?.focus();
             }}
             aria-label="Wissen"
-            // Pull-back padding widens the tap target without shifting layout (B4).
-            className="text-ink-muted hover:text-ink -m-1.5 flex-shrink-0 p-1.5 transition-colors"
+            // Pull-back padding widens the visible box without shifting layout
+            // (B4); `hit-area` grows the tap target to 44px on top of it.
+            className="hit-area text-ink-muted hover:text-ink -m-1.5 flex-shrink-0 p-1.5 transition-colors"
           >
             <X size={iconSize} aria-hidden />
           </button>

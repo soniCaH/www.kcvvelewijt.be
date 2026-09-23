@@ -1303,6 +1303,22 @@
   }
 }
 
+/* Invisible 44 × 44 hit area for an icon-only control whose visible box is
+   smaller (DESIGN.md — The Tap Target Rule). A bordered control cannot grow
+   its hit area with negative margin + padding without growing the border too,
+   so a transparent `::before` centred on the box supplies it instead: an
+   inset of half the box minus 22px yields exactly 44px on each axis for any
+   box up to 44px. The overhang must land in the container's own gap or padding — no
+   ancestor may clip it, and it must not reach a neighbouring control. */
+@utility hit-area {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: calc(50% - 22px);
+  }
+}
+
 /* Hide native scrollbar — cross-browser utility for horizontal scroll containers */
 @utility scrollbar-hide {
   scrollbar-width: none; /* Firefox */

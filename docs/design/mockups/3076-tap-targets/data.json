@@ -1,0 +1,1848 @@
+{
+  "generated": "2026-09-22T10:13:54.623Z",
+  "base": "https://kcvv-nextjs.vercel.app",
+  "controls": [
+    {
+      "id": "1-contactcard",
+      "title": "1 · Contact card — E-mail / Bel",
+      "where": "Under an opened answer on /hulp. Phones: yes.",
+      "options": [
+        {
+          "key": "today",
+          "name": "Today",
+          "note": "40 × 40 bordered box, 16px icon.",
+          "visual": false
+        },
+        {
+          "key": "A",
+          "name": "A · Invisible hit area",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "Same 40px box on screen. A pseudo-element adds 2px of invisible hit area on each side, inside the card's own 12px padding and the 6px gap between the two actions."
+        },
+        {
+          "key": "B",
+          "name": "B · Visible 44px box",
+          "visual": true,
+          "vr": "ContactCard, QuestionCard, HulpFinder stories",
+          "note": "The box grows to 44px like the monogram next to it. Card height stays (monogram is already 44). The name column loses 4px per action."
+        },
+        {
+          "key": "C",
+          "name": "C · Labelled buttons",
+          "visual": true,
+          "vr": "ContactCard, QuestionCard, HulpFinder stories",
+          "note": "Icon + word, 44px tall. Meets the 'a control that stands alone shows a word' line too. Costs width: on a phone the name wraps sooner."
+        }
+      ],
+      "shots": {
+        "375-today": {
+          "visual": {
+            "w": 40,
+            "h": 40
+          },
+          "hit": {
+            "w": 40,
+            "h": 40
+          },
+          "coverage": 87,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 171,
+              "h": 19,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-A": {
+          "visual": {
+            "w": 40,
+            "h": 40
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 2,
+            "bottom": 2,
+            "left": 2,
+            "right": 2
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 171,
+              "h": 19,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-B": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 167,
+              "h": 19,
+              "dw": -4,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-C": {
+          "visual": {
+            "w": 70,
+            "h": 44
+          },
+          "hit": {
+            "w": 70,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 141,
+              "h": 19,
+              "dw": -30,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 307,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-today": {
+          "visual": {
+            "w": 40,
+            "h": 40
+          },
+          "hit": {
+            "w": 40,
+            "h": 40
+          },
+          "coverage": 87,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 1044,
+              "h": 19,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-A": {
+          "visual": {
+            "w": 40,
+            "h": 40
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 2,
+            "bottom": 2,
+            "left": 2,
+            "right": 2
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 1044,
+              "h": 19,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-B": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 1040,
+              "h": 19,
+              "dw": -4,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-C": {
+          "visual": {
+            "w": 70,
+            "h": 44
+          },
+          "hit": {
+            "w": 70,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "card",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "name column",
+              "w": 1014,
+              "h": 19,
+              "dw": -30,
+              "dh": 0
+            },
+            {
+              "name": "answer",
+              "w": 1180,
+              "h": 72,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2-explorer",
+      "title": "2 · Organigram explorer — Vorige / Volgende functie",
+      "where": "Dark fullscreen verkenner on /hulp. Phones: yes.",
+      "options": [
+        {
+          "key": "today",
+          "name": "Today",
+          "note": "28 × 28: 14px caret + 6px padding + 1px border.",
+          "visual": false
+        },
+        {
+          "key": "A",
+          "name": "A · Invisible hit area",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "Same 28px box. 8px of invisible hit area each side lands in the row's own 12px gaps; the row is over 100px tall so nothing above or below is touched."
+        },
+        {
+          "key": "B",
+          "name": "B · Visible 44px box, same caret",
+          "visual": true,
+          "vr": "OrganigramExplorer stories",
+          "note": "Box grows to 44px, caret stays 14px — reads as an empty frame."
+        },
+        {
+          "key": "C",
+          "name": "C · Visible 44px box, 20px caret",
+          "visual": true,
+          "vr": "OrganigramExplorer stories",
+          "note": "Box 44px and a bigger caret to fill it. The siblings row gets 32px wider."
+        }
+      ],
+      "shots": {
+        "375-today": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 28,
+            "h": 28
+          },
+          "coverage": 44,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 339,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 339,
+              "h": 545,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-A": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 339,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 339,
+              "h": 545,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-B": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 339,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 339,
+              "h": 545,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-C": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 339,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 339,
+              "h": 545,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-today": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 28,
+            "h": 28
+          },
+          "coverage": 44,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 960,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 960,
+              "h": 397,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-A": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 960,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 960,
+              "h": 397,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-B": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 960,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 960,
+              "h": 397,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-C": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "siblings row",
+              "w": 960,
+              "h": 105,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "spotlight",
+              "w": 960,
+              "h": 397,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3-search-hero",
+      "title": "3 · Search 'Wissen' (X) — hero box",
+      "where": "The big search under the hero title on /hulp. Phones: yes.",
+      "options": [
+        {
+          "key": "today",
+          "name": "Today",
+          "note": "32 × 32 (20px X + 6px pull-back padding, already the negative-margin idiom).",
+          "visual": false
+        },
+        {
+          "key": "A",
+          "name": "A · Invisible hit area",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "Same X. 44px hit area. Watch the red marks: the left edge lands on the text field itself — the rule forbids that."
+        },
+        {
+          "key": "B",
+          "name": "B · Invisible hit area + field gives 4px back",
+          "visual": false,
+          "vr": "0 stories move (text end moves 6px)",
+          "note": "Same as A, but the text field's box ends 4px earlier, so the hit area only lands in the row's own gap. Nothing moves that you can see; a full field ends 4px sooner."
+        },
+        {
+          "key": "C",
+          "name": "C · Visible 44px button",
+          "visual": true,
+          "vr": "HubSearch stories",
+          "note": "A real 44px box in the row. The field gets 24px narrower; box height already fits 44."
+        }
+      ],
+      "shots": {
+        "375-today": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 32,
+            "h": 32
+          },
+          "coverage": 54,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 291,
+              "h": 54,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "hero",
+              "w": 343,
+              "h": 625,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-A": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [
+            {
+              "who": "input[Zoek een persoon of hulpvraa]",
+              "w": 4,
+              "h": 26
+            }
+          ],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 291,
+              "h": 54,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "hero",
+              "w": 343,
+              "h": 625,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-B": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 291,
+              "h": 54,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "hero",
+              "w": 343,
+              "h": 625,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-C": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 291,
+              "h": 72,
+              "dw": 0,
+              "dh": 18
+            },
+            {
+              "name": "hero",
+              "w": 343,
+              "h": 643,
+              "dw": 0,
+              "dh": 18
+            }
+          ]
+        },
+        "1280-today": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 32,
+            "h": 32
+          },
+          "coverage": 54,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 480,
+              "h": 54,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "hero",
+              "w": 1216,
+              "h": 373,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-A": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [
+            {
+              "who": "input[Zoek een persoon of hulpvraa]",
+              "w": 4,
+              "h": 26
+            }
+          ],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 480,
+              "h": 54,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "hero",
+              "w": 1216,
+              "h": 373,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-B": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 480,
+              "h": 54,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "hero",
+              "w": 1216,
+              "h": 373,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-C": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 480,
+              "h": 72,
+              "dw": 0,
+              "dh": 18
+            },
+            {
+              "name": "hero",
+              "w": 1216,
+              "h": 373,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "3b-search-nav",
+      "title": "3b · Search 'Wissen' (X) — sticky bar",
+      "where": "The compact search in the sticky section bar, once the hero scrolls away. Phones: yes.",
+      "options": [
+        {
+          "key": "today",
+          "name": "Today",
+          "note": "Small X in a 4px-padded box inside a 52px bar.",
+          "visual": false
+        },
+        {
+          "key": "A",
+          "name": "A · Invisible hit area",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "44px hit area around the X. It overruns the box border top and bottom into the bar's own 8px padding, and its left edge lands on the field."
+        },
+        {
+          "key": "B",
+          "name": "B · Invisible hit area + field gives 6px back",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "As A, but the field's box ends 6px earlier so the hit area stays off it. The 6px overrun above and below the small box lands in the bar's own 8px padding."
+        },
+        {
+          "key": "C",
+          "name": "C · Visible 44px button",
+          "visual": true,
+          "vr": "HubSearch, OrganigramSectionNav stories",
+          "note": "A 44px box inside a slot built for ~28px: the box, and with it the sticky bar, grows. Every anchor offset on the page follows the bar's height."
+        }
+      ],
+      "shots": {
+        "375-today": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 28,
+            "h": 28
+          },
+          "coverage": 44,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 177,
+              "h": 33,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "sticky bar",
+              "w": 375,
+              "h": 51,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-A": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [
+            {
+              "who": "input[Zoek een persoon of hulpvraa]",
+              "w": 6,
+              "h": 23
+            }
+          ],
+          "spill": {
+            "top": 6,
+            "bottom": 6,
+            "left": 0,
+            "right": 3
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 177,
+              "h": 33,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "sticky bar",
+              "w": 375,
+              "h": 51,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-B": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 6,
+            "bottom": 6,
+            "left": 0,
+            "right": 3
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 177,
+              "h": 33,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "sticky bar",
+              "w": 375,
+              "h": 51,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "375-C": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 177,
+              "h": 54,
+              "dw": 0,
+              "dh": 21
+            },
+            {
+              "name": "sticky bar",
+              "w": 375,
+              "h": 72,
+              "dw": 0,
+              "dh": 21
+            }
+          ]
+        },
+        "1280-today": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 28,
+            "h": 28
+          },
+          "coverage": 44,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 240,
+              "h": 33,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "sticky bar",
+              "w": 1280,
+              "h": 51,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-A": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [
+            {
+              "who": "input[Zoek een persoon of hulpvraa]",
+              "w": 6,
+              "h": 23
+            }
+          ],
+          "spill": {
+            "top": 6,
+            "bottom": 6,
+            "left": 0,
+            "right": 3
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 240,
+              "h": 33,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "sticky bar",
+              "w": 1280,
+              "h": 51,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-B": {
+          "visual": {
+            "w": 28,
+            "h": 28
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 6,
+            "bottom": 6,
+            "left": 0,
+            "right": 3
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 240,
+              "h": 33,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "sticky bar",
+              "w": 1280,
+              "h": 51,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-C": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "search box",
+              "w": 240,
+              "h": 54,
+              "dw": 0,
+              "dh": 21
+            },
+            {
+              "name": "sticky bar",
+              "w": 1280,
+              "h": 72,
+              "dw": 0,
+              "dh": 21
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "4-matchstrip",
+      "title": "4 · Match strip — result / fixture arrows",
+      "where": "Top of every page, desktop only (lg and up).",
+      "options": [
+        {
+          "key": "today",
+          "name": "Today",
+          "note": "36 × 36 bordered box with a text arrow.",
+          "visual": false
+        },
+        {
+          "key": "A",
+          "name": "A · Invisible hit area",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "Same 36px box, 4px of invisible hit area each side — inside the cell's 20px side padding and 8px gap."
+        },
+        {
+          "key": "B",
+          "name": "B · Visible 44px box",
+          "visual": true,
+          "vr": "MatchStripView, MatchStripInContext stories",
+          "note": "Boxes grow 8px. If the strip is shorter than 44px it grows too — see the context shot."
+        }
+      ],
+      "shots": {
+        "1280-today": {
+          "visual": {
+            "w": 36,
+            "h": 36
+          },
+          "hit": {
+            "w": 36,
+            "h": 36
+          },
+          "coverage": 64,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "cell",
+              "w": 209,
+              "h": 83,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "strip",
+              "w": 1280,
+              "h": 83,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-A": {
+          "visual": {
+            "w": 36,
+            "h": 36
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "cell",
+              "w": 209,
+              "h": 83,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "strip",
+              "w": 1280,
+              "h": 83,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-B": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "cell",
+              "w": 225,
+              "h": 83,
+              "dw": 16,
+              "dh": 0
+            },
+            {
+              "name": "strip",
+              "w": 1280,
+              "h": 83,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "5-calendar",
+      "title": "5 · Calendar — Vorige / Volgende maand (week)",
+      "where": "Toolbar on /kalender. Phones already get 44 × 44; from md up it is 32 × 32.",
+      "options": [
+        {
+          "key": "today",
+          "name": "Today",
+          "note": "44 on phones, 32 × 32 from md.",
+          "visual": false
+        },
+        {
+          "key": "A",
+          "name": "A · Invisible hit area (md+)",
+          "visual": false,
+          "vr": "0 stories move",
+          "note": "Same 32px box on desktop, 6px invisible hit area each side — 8px gaps around it. Check whether it pokes above or below the toolbar row."
+        },
+        {
+          "key": "B",
+          "name": "B · Visible 44px box everywhere",
+          "visual": true,
+          "vr": "CalendarWidget stories",
+          "note": "Drop the desktop shrink: 44 at every width, like the phone already has. The toolbar row grows if it is shorter than 44."
+        }
+      ],
+      "shots": {
+        "375-today": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "period nav",
+              "w": 240,
+              "h": 44,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "toolbar",
+              "w": 339,
+              "h": 165,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-today": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 32,
+            "h": 32
+          },
+          "coverage": 54,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "period nav",
+              "w": 216,
+              "h": 32,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "toolbar",
+              "w": 1212,
+              "h": 61,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-A": {
+          "visual": {
+            "w": 32,
+            "h": 32
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 6,
+            "bottom": 6,
+            "left": 6,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "period nav",
+              "w": 216,
+              "h": 32,
+              "dw": 0,
+              "dh": 0
+            },
+            {
+              "name": "toolbar",
+              "w": 1212,
+              "h": 61,
+              "dw": 0,
+              "dh": 0
+            }
+          ]
+        },
+        "1280-B": {
+          "visual": {
+            "w": 44,
+            "h": 44
+          },
+          "hit": {
+            "w": 44,
+            "h": 44
+          },
+          "coverage": 100,
+          "overlaps": [],
+          "spill": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "spill2": {
+            "top": 0,
+            "bottom": 0,
+            "left": 0,
+            "right": 0
+          },
+          "containers": [
+            {
+              "name": "period nav",
+              "w": 240,
+              "h": 44,
+              "dw": 24,
+              "dh": 12
+            },
+            {
+              "name": "toolbar",
+              "w": 1212,
+              "h": 70,
+              "dw": 0,
+              "dh": 9
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

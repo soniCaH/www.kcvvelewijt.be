@@ -47,7 +47,7 @@ export interface ContactCardProps {
 }
 
 const ACTION =
-  "border-ink text-ink hover:bg-jersey-deep hover:text-cream flex h-10 w-10 flex-shrink-0 items-center justify-center border-[1.5px] transition-colors";
+  "hit-area border-ink text-ink hover:bg-jersey-deep hover:text-cream flex h-10 w-10 flex-shrink-0 items-center justify-center border-[1.5px] transition-colors";
 
 const CROSS_LINK =
   "text-jersey-deep border-jersey-deep hover:bg-jersey-deep hover:text-cream mt-2 inline-flex items-center gap-1.5 border-[1.5px] px-2.5 py-2 font-mono text-[10px] font-semibold tracking-[0.05em] uppercase transition-colors";
