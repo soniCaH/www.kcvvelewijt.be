@@ -82,10 +82,8 @@ vi.mock("./useSemanticAugment", () => ({
 }));
 const mockUseSemanticAugment = vi.mocked(useSemanticAugment);
 
-// The file runs on fake timers (see `beforeEach`), so user-event must step
-// the fake clock between keystrokes instead of sleeping on the real one.
 const setupUser = () =>
-  userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  userEvent.setup({ advanceTimers: vi.advanceTimersByTimeAsync });
 
 describe("SearchInterface", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
@@ -93,12 +91,11 @@ describe("SearchInterface", () => {
   beforeEach(() => {
     // Fake timers, so SearchForm's 350ms typeahead debounce is simulated
     // time, not a stopwatch race against the `waitFor` budget (#3143).
-    // Testing Library only drives fake timers inside `waitFor` when it sees
-    // a `jest` global, so hand it Vitest's clock under that name.
+    // `setupUser` steps this clock between keystrokes; Testing Library's
+    // `waitFor` steps it only when it sees a `jest` global, so hand it
+    // Vitest's clock under that name.
     vi.useFakeTimers();
-    vi.stubGlobal("jest", {
-      advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms),
-    });
+    vi.stubGlobal("jest", { advanceTimersByTime: vi.advanceTimersByTime });
 
     // Reset the URL store to prevent cross-test leakage
     searchParamsStore.set(new URLSearchParams());
@@ -409,7 +406,9 @@ describe("SearchInterface", () => {
       // Attempt submission via Enter key (should be prevented by validation)
       await user.keyboard("{Enter}");
 
-      // Fetch should not have been called due to 2-char minimum validation
+      // Fetch should not have been called due to 2-char minimum validation —
+      // neither on submit nor once the typeahead debounce has run out.
+      await act(() => vi.advanceTimersByTimeAsync(350));
       expect(fetchMock).not.toHaveBeenCalled();
     });
 
@@ -544,10 +543,12 @@ describe("SearchInterface", () => {
       const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
+      // Let the aborted fetch settle before asserting an absence — a negative
+      // `waitFor` passes on its first, synchronous check.
+      await act(() => vi.advanceTimersByTimeAsync(350));
+
       // Should not display error for aborted request
-      await waitFor(() => {
-        expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
-      });
+      expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
     });
 
     it("should abort in-flight request on unmount", async () => {
@@ -1442,6 +1443,9 @@ describe("SearchInterface", () => {
         expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
       });
 
+      // Run the clock past the debounce the typing armed, so a duplicate
+      // typeahead fetch would have landed.
+      await act(() => vi.advanceTimersByTimeAsync(350));
       expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 
@@ -1466,12 +1470,13 @@ describe("SearchInterface", () => {
       await act(() => vi.advanceTimersByTimeAsync(1));
       expect(fetchMock).toHaveBeenCalled();
 
-      // Give a redundant, effect-driven second fetch a chance to land before
-      // asserting the final count.
       await waitFor(() => {
         expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
       });
 
+      // Run the clock another full debounce, so a redundant, effect-driven
+      // second fetch would have landed before the final count.
+      await act(() => vi.advanceTimersByTimeAsync(350));
       expect(fetchMock).toHaveBeenCalledTimes(1);
     });
 

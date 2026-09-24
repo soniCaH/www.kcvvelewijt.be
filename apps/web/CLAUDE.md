@@ -190,20 +190,21 @@ Three independent test layers, each owning a specific concern. Don't blur them �
 
 ### A test may not use more than half its own timeout
 
-**The budget: a test body spends at most half its own timeout** — 2 500 ms under Vitest's default 5 000 ms, or half of a timeout the test sets itself (`pre-commit.test.ts` passes `60_000` because it spawns real ESLint). This holds in every Vitest workspace. A test over budget is one slow runner from red, so fix the cause: assert once over collected violations instead of once per loop iteration (`player-figure-variant.test.ts`, #3128), and put a debounce or delay on fake timers (`vi.useFakeTimers()` + `userEvent.setup({ advanceTimers: vi.advanceTimersByTime })`, as `SearchInterface.test.tsx` does) instead of a real-clock `waitFor`. **Never raise the timeout to make room.** Under fake timers, Testing Library's `waitFor` steps the clock only if it sees a `jest` global, so stub one: `vi.stubGlobal("jest", { advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms) })`.
+**The budget: a test body spends at most half its own timeout** — 2 500 ms under Vitest's default 5 000 ms, or half of a timeout the test sets itself (`pre-commit.test.ts` passes `60_000` because it spawns real ESLint). It holds in every Vitest workspace; the root `.claude/CLAUDE.md` states it for the others and points here. A test over budget is one slow runner from red, so fix the cause: assert once over collected violations instead of once per loop iteration (`player-figure-variant.test.ts`, #3128), and put a debounce or delay on fake timers (`vi.useFakeTimers()` + `userEvent.setup({ advanceTimers: vi.advanceTimersByTimeAsync })`, as `SearchInterface.test.tsx` does) instead of a real-clock `waitFor`. **Never raise the timeout to make room.** Under fake timers, Testing Library's `waitFor` steps the clock only if it sees a `jest` global, so stub one: `vi.stubGlobal("jest", { advanceTimersByTime: vi.advanceTimersByTime })`.
 
 **No lint rule enforces this, on purpose.** The expensive shape (assertions inside a loop) is visible in the source, but its cost comes from the iteration count, which no selector can see: 9 of the 10 files with `expect()` inside a loop iterate a handful of fixtures and cost nothing (#3126 D5).
 
-**Check it on demand from CI logs, never with a new run.** Vitest already prints every test over 300 ms, with its duration, in each CI log. This lists every test at or over 2 500 ms in the last 30 `ci.yml` runs, slowest first:
+**Check it on demand from CI logs, never with a new run.** Vitest already prints every test over 300 ms, with its duration, in each CI log. Every Vitest suite runs in the `Quality Checks + Build` job, so this reads only that job's log (update the name if the job is renamed — a stale name prints nothing) and lists every test at or over 2 500 ms in the last 30 `ci.yml` runs, slowest first:
 
 ```bash
 gh run list --workflow ci.yml -L 30 --json databaseId --jq '.[].databaseId' |
-  while read -r id; do gh run view "$id" --log 2>/dev/null; done |
-  perl -ne 's/\e\[[0-9;]*m//g; print "$2\t$1\n" if / {5,}\S+ (.+?) +(\d+)ms$/ && $2 >= 2500' |
-  sort -t$'\t' -k1,1nr | awk -F'\t' '!seen[$2]++'
+  while read -r id; do gh run view "$id" --json jobs --jq '.jobs[] | select(.name == "Quality Checks + Build" and .conclusion != "skipped") | .databaseId'; done |
+  while read -r job; do gh run view --job "$job" --log 2>/dev/null; done |
+  perl -ne 's/\e\[[0-9;]*m//g; $f = $1 if / (\S+\.test\.\w+) \(\d+ tests?/; print "$2\t$f > $1\n" if / {5,}\S+ (.+?) +(\d+)ms$/ && $2 >= 2500' |
+  sort -rn | awk -F'\t' '!seen[$2]++'
 ```
 
-A hit is a breach only if it is over half **its own** timeout. **A breach opens an issue; it never turns a check red** — a slow runner is not a regression. The census on 2026-09-24 (28 runs, 13 of which ran the web tests) found zero breaches. The only hit was `pre-commit.test.ts` at 4 299 ms of a 60 000 ms timeout, and the slowest default-timeout test was `trigger-psd-sync.test.ts` at 2 132 ms (#3143).
+A hit is a breach only if it is over half **its own** timeout. **A breach opens an issue; it never turns a check red** — a slow runner is not a regression. The last census is recorded in the flake ledger, class M.
 
 ### Running the suites
 

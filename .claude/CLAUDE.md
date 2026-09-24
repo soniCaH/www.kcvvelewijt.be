@@ -77,6 +77,10 @@ Before the final commit on any branch, re-read every plan/doc file touched and v
 
 **Also re-verify `apps/web/public/llms.txt`** whenever routes are renamed/removed or club facts change — it hand-lists navigation paths and club facts that silently drift (it shipped `/club/organigram` long after the route was removed). Cross-check its paths against the live route tree and its facts against `apps/web/PRODUCT.md` → **Brand Commitments**, which is the authority. Note the club has **no** founding year on any surface but `/club/geschiedenis`: 1909 is inherited via mergers and is never asserted bare — `jsonld.ts` carries no `foundingDate` and the footer carries no year, so neither is a cross-check source (#2435).
 
+### A Test May Not Use More Than Half Its Own Timeout
+
+In every Vitest workspace, a test body spends at most half its own timeout (2 500 ms under the default 5 000 ms). Fix an over-budget test at the cause — never raise the timeout. A breach opens an issue, never a red check. The fake-timer recipe and the on-demand census over CI logs live in `apps/web/CLAUDE.md` → "A test may not use more than half its own timeout" (#3143).
+
 ### Documentation Standards
 
 - **Always add language identifiers to fenced code blocks** in plan/doc/markdown files (e.g. ` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). Bare ` ``` ` blocks fail MD040 and are consistently flagged in code review.
