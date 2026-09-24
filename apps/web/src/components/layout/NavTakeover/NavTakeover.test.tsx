@@ -130,11 +130,11 @@ describe("NavTakeover", () => {
   // the fixed-prop tests above, because the fix drives its own close via
   // `onOpenChange` rather than waiting for the caller to change `open`.
   describe("closes itself when the viewport crosses into `lg` desktop layout", () => {
-    // happy-dom's real `MediaQueryList`, under vitest's environment, does not
-    // track `window.innerWidth` mutations — verified empirically while
-    // building this test: `window.matchMedia("(min-width: 501px)").matches`
-    // stayed `true` after setting `window.innerWidth = 500`, and firing a
-    // `resize` event changed nothing. So — matching the existing
+    // A bare `window.innerWidth = 500` never reaches happy-dom: Vitest's
+    // window shim keeps the value, so `matchMedia` stays on the old viewport
+    // (#3142 — `window.happyDOM.setViewport` is the write that works, and
+    // the lint config now bans the bare one). This stub predates that
+    // finding. So — matching the existing
     // `window.matchMedia` mock in `CalendarWidget.test.tsx` — `window.matchMedia`
     // is stubbed here too, extended with a settable `matches` and a captured
     // `change` listener so a transition can actually be simulated via

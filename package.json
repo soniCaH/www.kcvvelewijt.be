@@ -8,6 +8,7 @@
     "test": "turbo test",
     "lint": "turbo lint",
     "type-check": "turbo type-check",
+    "lint:sh": "git ls-files -z '*.sh' '.husky/*' ':!:.husky/*.*' | xargs -0 shellcheck",
     "knip": "knip --include dependencies,devDependencies,optionalPeerDependencies,unlisted,binaries",
     "knip:code": "knip",
     "prepare": "husky"

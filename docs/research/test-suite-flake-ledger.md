@@ -230,13 +230,24 @@ Four agents, one Docker daemon, one emulated `linux/amd64` image, and screenshot
 sensitive to CPU. Nothing sequences them.
 
 - Members: rows 18, 20. Both **live and unfiled** — row 20 only for its parallel-capture-noise half; its stale-baseline half is fixed by #3136.
+- Member: a test that binds a fixed TCP port — `trigger-psd-sync.test.ts`'s `8890 + n`, which two lanes computed alike
+  ([#3127](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3127)). **Fixed** and **closed by a rule** in #3109:
+  `FIXED_PORT_LISTEN` in `apps/web/eslint.config.mjs`. [#3142](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3142) proves it fires.
 - Feeds: [Grilling: the local wave environment](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3090)
 
 ### L — The test environment is not a browser (Vitest)
 
 happy-dom gaps that force tests to be written around the environment rather than the behaviour.
 
-- Member: row 21. **Live and unfiled.**
+- Member: row 21, which is four gaps, not one. Re-measured by #3083 (`docs/research/vitest-runner-and-environment.md` §2):
+  - **`matchMedia` ignores width — ours, closed by a rule** ([#3142](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3142)).
+    Vitest's global shim swallows a bare `window.innerWidth =`: `WINDOW_SIZE_WRITE` in `apps/web/eslint.config.mjs`.
+  - **`hashchange` never fires — ours.** It fires one macrotask later; a synchronous assertion misses it. No rule.
+  - **`color-mix()` is dropped, and there is no layout — real.** Layout moves to Storybook `play` ([#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146)). `color-mix()` stays **live**.
+- **Upstream bug, not filed — by the owner's choice.** No happy-dom issue covers it (searched 2026-09-24; the bug is still on `master`, `MediaQueryList.ts:108`). happy-dom's `MediaQueryList.addEventListener`
+  seeds its `change` state to `false`, not to `this.matches`. So a query that already matches fires no `change` on its
+  first narrow. Six lines reproduce it (`vitest-runner-and-environment.md` §2.2, §11). Until it is fixed, a test that needs
+  that transition stubs `matchMedia`.
 - Feeds: [Research: fast, isolated Vitest in a Turborepo monorepo](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3083)
 
 ### M — A test body with no headroom (Vitest)
