@@ -202,7 +202,11 @@ export const SectionHeader = ({
   return (
     <header
       className={cn(
-        "mb-10 flex flex-col gap-3",
+        // #2552 rule 5: the section-header primitive owns the air below a
+        // section heading, at mb-8 sm:mb-10 (32/40px) — nothing above 640px
+        // moves; the phone value drops from a flat 40px so #2479's 48px of
+        // section padding doesn't compound to 88px before the first content.
+        "mb-8 flex flex-col gap-3 sm:mb-10",
         isRuled && "lg:items-center lg:text-center",
         className,
       )}

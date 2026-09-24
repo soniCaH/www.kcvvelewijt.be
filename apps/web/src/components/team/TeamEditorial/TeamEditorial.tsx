@@ -107,7 +107,7 @@ export function TeamEditorial({
           >
             Het verhaal
           </EditorialHeading>
-          <div className="text-ink font-body mt-4 text-base leading-relaxed [&_p]:mb-4 [&_p:last-child]:mb-0">
+          <div className="text-ink font-body mt-4 text-base leading-relaxed">
             <PortableText value={body!} components={pullquoteComponents} />
           </div>
           {pullquoteText !== null ? (
@@ -157,7 +157,7 @@ export function TeamEditorial({
           >
             Contact
           </EditorialHeading>
-          <div className="text-ink font-body mt-4 text-base leading-relaxed [&_p]:mb-4 [&_p:last-child]:mb-0">
+          <div className="text-ink font-body mt-4 text-base leading-relaxed">
             <PortableText value={contactInfo!} />
           </div>
         </section>

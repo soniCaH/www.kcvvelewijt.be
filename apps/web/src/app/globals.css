@@ -903,6 +903,13 @@
     margin-bottom: 1rem;
   }
 
+  /* #2552 rule 1: a paragraph owns the air below itself, and does not ship
+     a trailing one — joins the base rule above so a prose block's last
+     child never leaves 1rem of dead air at its bottom. */
+  p:last-child {
+    margin-bottom: 0;
+  }
+
   /* Link Styles */
   /* Inline content links — brand jersey-deep; navigation links style themselves */
   main a,
