@@ -199,15 +199,15 @@ describe("JeugdEditorialGrid", () => {
     const { container } = render(<JeugdEditorialGrid articles={[]} />);
 
     // "Word lid van KCVV", "Ons leerplan" and "Trainingen & ProSoccerData"
-    // each ship a day-one stand-in photo; the other three nav tiles
+    // each ship a club photo (#3072); the other three nav tiles
     // ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?")
     // render no filler photo and keep today's flat bg-jersey-deep + glyph.
     const covers = Array.from(container.querySelectorAll("img")).map((img) =>
       img.getAttribute("src"),
     );
-    expect(covers).toContain("/images/jeugd/word-lid-kids-met-bal.jpg");
-    expect(covers).toContain("/images/jeugd/leerplan-jeugdtraining.jpg");
-    expect(covers).toContain("/images/jeugd/trainingen-drie-trainers.jpg");
+    expect(covers).toContain("/images/jeugd/word-lid-ploeg-in-kring.jpg");
+    expect(covers).toContain("/images/jeugd/leerplan-sprint-met-trainer.jpg");
+    expect(covers).toContain("/images/jeugd/trainingen-opwarming.jpg");
     expect(covers).toHaveLength(3);
   });
 

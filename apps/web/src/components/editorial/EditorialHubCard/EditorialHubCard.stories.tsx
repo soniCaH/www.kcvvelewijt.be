@@ -107,7 +107,7 @@ export const NavNoTag: Story = {
 
 /**
  * Nav variant with a photo (#2965) — a `jersey-deep-dark` scrim keeps the
- * glyph and pill legible on top. Present only on the three approved day-one
+ * glyph and pill legible on top. Present only on the three #3072 club-photo
  * tiles; every other nav tile stays the flat `NavNoTag`/`Nav` treatment.
  */
 export const NavWithImage: Story = {
@@ -118,6 +118,6 @@ export const NavWithImage: Story = {
     title: "Word lid van KCVV",
     arrowText: "Schrijf je in",
     iconName: "UsersThree",
-    imageUrl: "/images/jeugd/word-lid-kids-met-bal.jpg",
+    imageUrl: "/images/jeugd/word-lid-ploeg-in-kring.jpg",
   },
 };

@@ -38,12 +38,12 @@ interface NavCardConfig {
  * still points at `/hulp`, because the search box is its whole job; a second
  * one is the duplicate #2965 was filed for, and a test asserts the count.
  *
- * Three of the six carry a day-one `image` (#2965): "Word lid van KCVV",
- * "Ons leerplan" and "Trainingen & ProSoccerData" — the three with a
- * defensible photo in the library today. The other three ("Organigram",
- * "Wie contacteer ik?", "Blessure of medisch attest?") have none: no photo
- * exists that actually depicts those, and a generic stand-in reads worse
- * than the flat green + glyph they keep.
+ * Three of the six carry an `image` (#2965): "Word lid van KCVV",
+ * "Ons leerplan" and "Trainingen & ProSoccerData" — club photos from the
+ * 2026-09-05 Jeugdwedstrijddag, owner-approved (#3072). The other three
+ * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") have
+ * none: no photo exists that actually depicts those, and a generic stand-in
+ * reads worse than the flat green + glyph they keep.
  */
 const NAV_CARDS: NavCardConfig[] = [
   {
@@ -52,8 +52,7 @@ const NAV_CARDS: NavCardConfig[] = [
     arrowText: "Schrijf je in",
     href: "/club/word-lid",
     iconName: "UsersThree",
-    // Owner-approved stand-in pending final sign-off (#2965) — see PR body.
-    image: "/images/jeugd/word-lid-kids-met-bal.jpg",
+    image: "/images/jeugd/word-lid-ploeg-in-kring.jpg",
   },
   {
     tag: "Visie",
@@ -67,8 +66,7 @@ const NAV_CARDS: NavCardConfig[] = [
     href: "/downloads/leerplan-jeugdopleiding-2019.pdf",
     iconName: "DownloadSimple",
     external: true,
-    // Owner-approved stand-in pending final sign-off (#2965) — see PR body.
-    image: "/images/jeugd/leerplan-jeugdtraining.jpg",
+    image: "/images/jeugd/leerplan-sprint-met-trainer.jpg",
   },
   {
     tag: "Praktisch",
@@ -81,8 +79,7 @@ const NAV_CARDS: NavCardConfig[] = [
     // answer itself, not on the hub's search box.
     href: "/hulp#prosoccerdata-gebruiken",
     iconName: "SoccerBall",
-    // Owner-approved stand-in pending final sign-off (#2965) — see PR body.
-    image: "/images/jeugd/trainingen-drie-trainers.jpg",
+    image: "/images/jeugd/trainingen-opwarming.jpg",
   },
   {
     tag: "Structuur",
