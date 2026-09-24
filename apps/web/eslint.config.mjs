@@ -124,7 +124,7 @@ const TEXT_CREAM_ALPHA_PATTERN =
 // `mb-0.5`) is excluded by the lookahead, so this rule doesn't fight the
 // inert-spacing cleanup for the same lines (#2553) while still catching a
 // fractional value.
-const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0(\\s|$))";
+const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
