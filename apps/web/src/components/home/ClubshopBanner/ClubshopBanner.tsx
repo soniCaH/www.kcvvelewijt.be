@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import {
-  EditorialHeading,
   JerseyShirt,
   LinkButton,
   PageContainer,
+  SectionHeader,
   StripedSeam,
 } from "@/components/design-system";
 import { EXTERNAL_LINKS } from "@/lib/constants";
@@ -57,16 +57,12 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
           </div>
 
           <div className="relative z-10 max-w-3xl">
-            <EditorialHeading
-              level={2}
+            <SectionHeader
+              title="Onze clubkledij"
               size="display-lg"
-              tone="cream"
+              variant="dark"
               emphasis={{ text: "clubkledij", tone: "warm" }}
-              // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: homepage band, owned by the homepage critique map (#2402/#2506), not this ticket's adoption list
-              className="mb-4"
-            >
-              Onze clubkledij
-            </EditorialHeading>
+            />
 
             <p className="text-cream mb-6 max-w-2xl text-base leading-relaxed">
               Beschikbaar via Brandsfit, onze kledingpartner.

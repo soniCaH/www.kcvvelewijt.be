@@ -26,8 +26,8 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import {
   Crest,
-  EditorialHeading,
   PageContainer,
+  SectionHeader,
   StripedSeam,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
@@ -313,10 +313,7 @@ function SquadHistorySection({
 
   return (
     <section aria-label={section.squadLabel} className={className}>
-      {/* eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: this route (/tegenstander/[clubId]) sits outside the cross-page-consistency map's scope, so it has no SectionHeader-adoption owner (#2554 rule 6) */}
-      <EditorialHeading level={2} size="display-sm" className="mb-4">
-        {section.squadLabel}
-      </EditorialHeading>
+      <SectionHeader title={section.squadLabel} size="display-sm" />
 
       <OpponentSummaryCard
         summary={section.summary}
@@ -331,15 +328,12 @@ function SquadHistorySection({
           this section (#2463) — a second consecutive h2 would be a
           collision, not a new section (the same #2562 rule the former
           page-wide empty state honoured). */}
-      <EditorialHeading
-        level={3}
+      <SectionHeader
+        title={countLabel}
         size="display-sm"
+        as="h3"
         emphasis={{ text: ".", tone: "warm" }}
-        // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: this route (/tegenstander/[clubId]) sits outside the cross-page-consistency map's scope, so it has no SectionHeader-adoption owner (#2554 rule 6)
-        className="mb-4"
-      >
-        {countLabel}
-      </EditorialHeading>
+      />
 
       {seasons.map((group) => (
         <div key={group.season.key} className="mt-5 first:mt-0">

@@ -116,12 +116,15 @@ const TEXT_CREAM_ALPHA_PATTERN =
   "(?<![\\w-])text-cream(?:-quiet)?\\x2F(?:[0-9]|\\[)";
 
 // Section-Heading Margin Rule (#2552 rule 4 / #2554). Bottom axis only —
-// `mb-*`/`my-*` at any responsive prefix (the `:` alternate in the anchor
-// covers `sm:`/`md:`/`lg:`/`desk:`/`xl:`/`2xl:` without enumerating them) —
-// `mt-*` carries kicker-to-heading air inside a page opening and is
-// deliberately untouched. `mb-0` is excluded by the lookahead so this rule
-// doesn't fight the inert-spacing cleanup for the same lines (#2553).
-const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)(mb|my)-(?!0)";
+// `mb-*`/`my-*` (including the negative form, `-mb-*`/`-my-*`) at any
+// responsive prefix (the `:` alternate in the anchor covers `sm:`/`md:`/
+// `lg:`/`desk:`/`xl:`/`2xl:` without enumerating them) — `mt-*` carries
+// kicker-to-heading air inside a page opening and is deliberately
+// untouched. Only a bare `mb-0`/`my-0` (the value ending there, not
+// `mb-0.5`) is excluded by the lookahead, so this rule doesn't fight the
+// inert-spacing cleanup for the same lines (#2553) while still catching a
+// fractional value.
+const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0(\\s|$))";
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;

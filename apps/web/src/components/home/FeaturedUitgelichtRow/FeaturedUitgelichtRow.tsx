@@ -1,5 +1,5 @@
 // apps/web/src/components/home/FeaturedUitgelichtRow/FeaturedUitgelichtRow.tsx
-import { EditorialHeading } from "@/components/design-system";
+import { SectionHeader } from "@/components/design-system";
 import { NewsCard } from "@/components/article/NewsCard";
 import {
   articleTypeCardLabel,
@@ -109,18 +109,13 @@ export const FeaturedUitgelichtRow = ({
   return (
     <section className={className}>
       <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
-        <EditorialHeading
-          level={2}
+        {/* SectionHeader appends the trailing period; "Uitgelicht." renders
+            with italic emphasis on "gelicht" + period. */}
+        <SectionHeader
+          title="Uitgelicht"
           size="display-md"
-          tone="ink"
           emphasis={{ text: "gelicht" }}
-          // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: homepage row, owned by the homepage critique map (#2402/#2506), not this ticket's adoption list
-          className="mb-8"
-        >
-          {/* EditorialHeading appends the trailing period; "Uitgelicht."
-              renders with italic emphasis on "gelicht" + period. */}
-          Uitgelicht
-        </EditorialHeading>
+        />
 
         <ul className={UITGELICHT_ROW_CLASS}>
           {cards.map((article) => (
