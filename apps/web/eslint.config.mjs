@@ -51,6 +51,13 @@ const fixedPort = (prefix = "") =>
   `[${prefix}value>0], [${prefix}left.value>0], [${prefix}right.value>0]`;
 const FIXED_PORT_LISTEN = `CallExpression[callee.property.name='listen'] > :first-child:matches(${fixedPort()}, ObjectExpression:has(> Property[key.name='port']:matches(${fixedPort("value.")})))`;
 
+// A test may not write innerWidth/innerHeight (#3142): Vitest's window shim
+// swallows the write. Covers `window.innerWidth =`, `window["innerWidth"] =`,
+// a bare `innerWidth =`, and any call naming the key — `defineProperty`,
+// `vi.stubGlobal`, `vi.spyOn`. See apps/web/CLAUDE.md.
+const WINDOW_SIZE_KEY = "/^inner(Width|Height)$/";
+const WINDOW_SIZE_WRITE = `AssignmentExpression[left.object.name=/^(window|globalThis|self|global)$/][left.property.name=${WINDOW_SIZE_KEY}], AssignmentExpression[left.object.name=/^(window|globalThis|self|global)$/][left.property.value=${WINDOW_SIZE_KEY}], AssignmentExpression[left.name=${WINDOW_SIZE_KEY}], CallExpression > Literal.arguments[value=${WINDOW_SIZE_KEY}]`;
+
 // Motion Vocabulary bans — DESIGN.md → Motion (#2658). #2650's `@theme`
 // resets (`--ease-*: initial`, `--animate-*: initial`) already make most of
 // Tailwind's motion utilities compile to nothing, but four gaps survive a
@@ -223,7 +230,7 @@ const eslintConfig = [
   },
   {
     // Test-file rules: img rules off (we mock Next.js Image), plus the
-    // module-scope import guard and the fixed-port ban above.
+    // module-scope import guard, the window-size ban and the fixed-port ban above.
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     rules: {
       "@next/next/no-img-element": "off",
@@ -234,6 +241,11 @@ const eslintConfig = [
           selector: IN_BODY_ROUTE_IMPORT,
           message:
             "Hoist this page/route module import to module scope — Vitest charges an in-body dynamic import against testTimeout, which breaks under CI contention (apps/web/CLAUDE.md).",
+        },
+        {
+          selector: WINDOW_SIZE_WRITE,
+          message:
+            "Do not write innerWidth/innerHeight in a test — Vitest's shim keeps the value and happy-dom never sees it, so matchMedia and resize stay on the old viewport (#3142). Use window.happyDOM.setViewport({ width, height }).",
         },
         {
           selector: FIXED_PORT_LISTEN,

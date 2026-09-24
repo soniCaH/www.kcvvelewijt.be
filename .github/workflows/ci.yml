@@ -112,6 +112,13 @@ jobs:
       - name: Lint
         run: npx turbo lint --filter=@kcvv/web
 
+      # Pinned to the version `lint:sh` was adopted on, so a runner-image
+      # bump cannot turn this red with no repo change.
+      - name: Lint shell scripts
+        run: |
+          curl -fsSL https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz | tar -xJ -C "$RUNNER_TEMP"
+          PATH="$RUNNER_TEMP/shellcheck-v0.11.0:$PATH" pnpm run lint:sh
+
       - name: Unused dependencies (knip)
         run: pnpm run knip
 

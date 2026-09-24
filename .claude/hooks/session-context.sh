@@ -3,7 +3,7 @@
 set -euo pipefail
 
 BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
-UNCOMMITTED=$((git status --porcelain 2>/dev/null || echo "") | wc -l | tr -d ' ')
+UNCOMMITTED=$( (git status --porcelain 2>/dev/null || echo "") | wc -l | tr -d ' ')
 
 OUTPUT="Branch: $BRANCH"
 

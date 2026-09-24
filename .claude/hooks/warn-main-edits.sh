@@ -31,7 +31,7 @@ if [[ "$FILE_PATH" == "$CLAUDE_PROJECT_DIR/.worktrees/"* ]]; then
 fi
 
 # Allow writes to docs/, .claude/, scripts/, and root CLAUDE.md on main
-RELATIVE_PATH=$(echo "$FILE_PATH" | sed "s|^$CLAUDE_PROJECT_DIR/||")
+RELATIVE_PATH=${FILE_PATH#"$CLAUDE_PROJECT_DIR"/}
 if echo "$RELATIVE_PATH" | grep -qE "^(docs/|\.claude/|scripts/)|(^|/)CLAUDE\.md$"; then
   exit 0
 fi

@@ -188,9 +188,9 @@ describe("SiteHeader", () => {
   // mounted, overlaying the desktop row. Nothing else in this suite drives
   // an actual viewport change, so this is the one test that does.
   //
-  // happy-dom's real `MediaQueryList`, under vitest's environment, does not
-  // track `window.innerWidth` mutations (verified empirically in
-  // `NavTakeover.test.tsx`), so — matching the existing `window.matchMedia`
+  // A bare `window.innerWidth =` never reaches happy-dom — Vitest's window
+  // shim keeps it (#3142; `window.happyDOM.setViewport` is the write that
+  // works). This stub predates that finding, so — matching the existing `window.matchMedia`
   // mock in `CalendarWidget.test.tsx` — this stubs a controllable one
   // instead of trying to drive a real resize.
   describe("drawer retires itself when the viewport crosses into `lg`", () => {

@@ -81,6 +81,10 @@ Before the final commit on any branch, re-read every plan/doc file touched and v
 
 In every Vitest workspace, a test body spends at most half its own timeout (2 500 ms under the default 5 000 ms). Fix an over-budget test at the cause — never raise the timeout. A breach opens an issue, never a red check. The fake-timer recipe and the on-demand census over CI logs live in `apps/web/CLAUDE.md` → "A test may not use more than half its own timeout" (#3143).
 
+### Shell Scripts Are Linted
+
+`pnpm lint:sh` runs `shellcheck` over every tracked `*.sh` file and the `.husky/` hooks, at every severity, in the CI `Quality Checks + Build` job. It was adopted at zero findings, so any finding is a regression. A hook with no shebang (`.husky/commit-msg`) names its shell with a `# shellcheck shell=sh` line.
+
 ### Documentation Standards
 
 - **Always add language identifiers to fenced code blocks** in plan/doc/markdown files (e.g. ` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). Bare ` ``` ` blocks fail MD040 and are consistently flagged in code review.

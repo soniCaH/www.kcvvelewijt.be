@@ -1,3 +1,4 @@
+# shellcheck shell=sh
 # Husky runs this file as `sh -e "$s"` (see `.husky/_/h`), so a bare failing
 # command aborts the script on the spot. Capturing `$?` on the next line never
 # ran, and everything below it was dead code — a malformed commit message
