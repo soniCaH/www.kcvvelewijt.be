@@ -208,7 +208,7 @@ function TeamName({
       className={cn(
         "block min-w-0 flex-1 truncate text-sm",
         align === "right" && "text-right",
-        featured ? "text-white" : "text-ink",
+        featured ? "text-cream" : "text-ink",
         bold && "font-semibold",
       )}
     >
@@ -221,9 +221,9 @@ function TeamName({
           <span
             className={cn(
               "font-mono text-[10px] font-semibold tracking-wide",
-              // White on jersey-deep / ink-muted on cream — matches the
-              // competition caption's contrast-safe tones.
-              featured ? "text-white" : "text-ink-muted",
+              // Cream on jersey-deep / ink-muted on cream — matches the
+              // competition caption's contrast-safe tones (#2421: was white).
+              featured ? "text-cream" : "text-ink-muted",
             )}
           >
             {team.teamLabel}
@@ -280,10 +280,11 @@ export function TeamAgendaRow({
     typeof match.homeScore === "number" &&
     typeof match.awayScore === "number";
 
-  // White on jersey-deep, inherited from the pre-#2395 green when cream missed
-  // AA there. Both clear it now (white 5.29:1, cream 4.69:1) — see DESIGN.md
-  // "Chips / Labels" for the open reconcile-to-cream question.
-  const monoClass = featured ? "text-white" : "text-ink-muted";
+  // Cream on jersey-deep — was white, inherited from the pre-#2395 green when
+  // cream missed AA there. Both clear it today (white 5.29:1, cream 4.69:1);
+  // #2421 reconciles this feature component to cream (see DESIGN.md
+  // "Chips / Labels").
+  const monoClass = featured ? "text-cream" : "text-ink-muted";
 
   const cardBase = cn(
     "flex items-stretch gap-0",
@@ -296,7 +297,7 @@ export function TeamAgendaRow({
       ? // Soft ink-muted offset (the design-system dark-card shadow, cf.
         // `--shadow-paper-sm-soft`) — a cream shadow vanished against the cream
         // page, and a dark-green one would blend into the jersey-deep body.
-        "bg-jersey-deep border-jersey-deep text-white shadow-[2px_2px_0_0_var(--color-ink-muted)]"
+        "bg-jersey-deep border-jersey-deep text-cream shadow-[2px_2px_0_0_var(--color-ink-muted)]"
       : "bg-cream border-ink text-ink shadow-[2px_2px_0_0_var(--color-ink)]",
     className,
   );
@@ -326,7 +327,7 @@ export function TeamAgendaRow({
       <span
         className={cn(
           "font-mono text-[18px] leading-none",
-          featured ? "text-white" : "text-ink",
+          featured ? "text-cream" : "text-ink",
         )}
       >
         {day}
@@ -382,7 +383,7 @@ export function TeamAgendaRow({
   const scoreToneClass = demoteScoreSlot
     ? monoClass
     : featured
-      ? "text-white"
+      ? "text-cream"
       : "text-ink";
 
   // TeamAgendaRow predates the light/dark ground split OUTCOME_UNDERLINE now
@@ -785,7 +786,7 @@ export function TeamAgendaRow({
                   }
                   className={cn(
                     "shrink-0",
-                    featured ? "text-white" : "text-ink-muted",
+                    featured ? "text-cream" : "text-ink-muted",
                   )}
                 />
                 <span

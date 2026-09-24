@@ -12,9 +12,9 @@ export interface FeaturedSponsorCardProps {
  * <FeaturedSponsorCard> — the single "In de kijker" marquee card in the
  * `/sponsors` hero (7.d5 F3: light cream-soft body + jersey-deep banner tab).
  *
- * - **Tab:** full-width `bg-jersey-deep` mono-caps "In de kijker" (`text-white`
- *   per the jersey-deep contrast rule), `border-b-2 border-ink`. Text only — no
- *   dingbat.
+ * - **Tab:** full-width `bg-jersey-deep` mono-caps "In de kijker" (`text-cream`,
+ *   reconciled from `text-white` in #2421), `border-b-2 border-ink`. Text only —
+ *   no dingbat.
  * - **Body:** logo inset (cream box, `border-2 border-ink`) → italic-display
  *   name → optional `description` blurb (~3-line clamp, omitted when absent) →
  *   mono "Bezoek website" when `url` is present. No external mark: the card's
@@ -28,7 +28,7 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
   const content = (
     <>
       <div className="bg-jersey-deep border-ink border-b-2 px-4 py-2">
-        <span className="font-mono text-[12px] leading-none font-semibold tracking-[0.16em] text-white uppercase">
+        <span className="text-cream font-mono text-[12px] leading-none font-semibold tracking-[0.16em] uppercase">
           In de kijker
         </span>
       </div>

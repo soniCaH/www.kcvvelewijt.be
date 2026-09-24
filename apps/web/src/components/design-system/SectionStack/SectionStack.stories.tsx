@@ -276,7 +276,7 @@ export const BackdroppedSection: Story = {
         bg: "jersey-deep",
         backdrop: <MockBackdrop />,
         content: (
-          <div className="mx-auto flex max-w-[var(--container-index)] flex-col gap-2 px-4 py-8 text-white md:px-8">
+          <div className="text-cream mx-auto flex max-w-[var(--container-index)] flex-col gap-2 px-4 py-8 md:px-8">
             <span className="text-xs font-bold tracking-widest uppercase opacity-70">
               Backdropped section
             </span>

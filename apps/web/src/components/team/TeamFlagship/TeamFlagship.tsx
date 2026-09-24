@@ -38,9 +38,11 @@ export function TeamFlagship({
   const showDivision =
     division !== undefined && division !== null && division !== "";
 
-  // A is jersey-deep (white small text passes AA where cream would not);
-  // B is cream (ink text). Big headline is large-text so cream/ink both pass.
-  const smallText = isA ? "text-white" : "text-ink-muted";
+  // A is jersey-deep, B is cream (ink text). Big headline is large-text so
+  // cream/ink both pass either way. The small text on A used to be white
+  // (pre-#2395: cream missed AA on the old `#008755`) — today's darker green
+  // clears cream comfortably, so #2421 reconciles it to cream.
+  const smallText = isA ? "text-cream" : "text-ink-muted";
 
   const photo = (
     <div
@@ -111,9 +113,9 @@ export function TeamFlagship({
         className={cn(
           "mt-2 inline-flex items-center gap-1 border-2 px-4 py-2 font-mono text-[11px] tracking-[0.1em] uppercase transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none",
           isA
-            ? // white (not cream), inherited from the pre-#2395 green; both
-              // clear on today's jersey-deep. See DESIGN.md "Chips / Labels".
-              "border-cream text-white shadow-[3px_3px_0_0_var(--color-cream)]"
+            ? // Cream (was white, inherited from the pre-#2395 green) —
+              // reconciled in #2421. See DESIGN.md "Chips / Labels".
+              "border-cream text-cream shadow-[3px_3px_0_0_var(--color-cream)]"
             : "border-ink text-ink shadow-[3px_3px_0_0_var(--color-ink)]",
         )}
       >

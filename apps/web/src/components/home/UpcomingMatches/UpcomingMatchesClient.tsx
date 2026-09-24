@@ -234,11 +234,12 @@ const HomeAwayBadge = ({ side }: { side: KcvvSide }) => {
         "inline-flex shrink-0 items-center gap-1.5 border px-2 py-1",
         "text-label font-mono leading-none font-medium",
         // jersey-deep, never the bright jersey — the redesign's ink-adjacent
-        // green is the only one that carries white text safely. `uit` keeps the
+        // green is the one that carries cream text safely. `uit` keeps the
         // same green on its edge instead of switching hue: the outline is what
-        // marks it as the lesser state (see the docblock).
+        // marks it as the lesser state (see the docblock). Cream, not white
+        // (#2421 reconciliation).
         isHome
-          ? "border-jersey-deep bg-jersey-deep text-white"
+          ? "border-jersey-deep bg-jersey-deep text-cream"
           : "border-jersey-deep/45 text-ink bg-transparent",
       )}
     >
