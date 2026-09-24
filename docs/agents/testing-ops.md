@@ -64,12 +64,40 @@ under the same `apps/web/test/e2e/` umbrella.
 ### Dynamic-route fixtures
 
 Slugs for `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen/[slug]`,
-`/wedstrijd/[matchId]`, and `/events/[slug]` are discovered at suite startup
+`/wedstrijd/[matchId]`, and `/evenementen/[slug]` are discovered at suite startup
 by parsing `${BASE_URL}/sitemap.xml`. articleType variants are detected by
 fetching candidate article pages and matching the type-specific
 `data-testid="<type>-hero"` markers. If a route family has zero entries in
 the sitemap, that test is skipped (visible in runner output) rather than
 failing.
+
+### Pinned fixture documents in `staging` (#3147)
+
+Six documents in the `staging` dataset are the fixed subjects the suite will
+pin in place of the sitemap discovery above (the switch is #3148), per the
+E2E data contract (#3087): one `article` per type
+(`e2e-article-{interview,announcement,transfer,event}`), one `event` dated
+**2099** (`e2e-event-far-future`) so the calendar never runs out of future
+events (the event article's fact is dated 2099 too), and one `photoGallery`
+(`e2e-photo-gallery`). Slugs start with
+`e2e-`, titles say `E2E-fixture, niet verwijderen`. Matches cannot be pinned —
+they come from PSD in a rolling 90-day window.
+
+`apps/studio/scripts/seed-e2e-fixtures.ts` writes them. It uses fixed `_id`s,
+rewrites only a fixture that drifted, deletes a pending Studio draft of one,
+writes nothing when all six match, and refuses any dataset but `staging` — it
+checks the client's own config, because `getCliClient({dataset})` ignores the
+option and writes to production. Anyone logged in to the Sanity CLI with
+write access to project `vhb33jaz` can run it:
+
+```bash
+cd apps/studio
+npx sanity exec scripts/seed-e2e-fixtures.ts --with-user-token
+```
+
+**Staging is the E2E content surface, and Kevin owns it.** Nothing refreshes
+it, on purpose. A missing or edited fixture turns the suite red — re-run the
+script to restore it.
 
 ### CI
 
