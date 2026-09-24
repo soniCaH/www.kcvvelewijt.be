@@ -212,7 +212,9 @@ export const SectionHeader = ({
       )}
       data-ruled={isRuled || undefined}
     >
-      {kicker && kicker.length > 0 && <MonoLabelRow items={kicker} />}
+      {kicker && kicker.length > 0 && (
+        <MonoLabelRow items={kicker} tone={isDark ? "cream" : "ink"} />
+      )}
       {row}
     </header>
   );

@@ -113,7 +113,12 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
                 size="display-md"
                 emphasis={{ text: "." }}
               />
-              <TeamStaff staff={staff} heading="De leden" />
+              {/* hideHeading: <SectionHeader> above already renders "De
+                  leden" as the visible display heading — <TeamStaff>'s own
+                  <PersonCardRun> run heading would otherwise repeat it
+                  verbatim in mono caps directly underneath (#2572 review).
+                  `heading` still carries the section's aria-label. */}
+              <TeamStaff staff={staff} heading="De leden" hideHeading />
             </div>
           ) : null}
         </PageContainer>

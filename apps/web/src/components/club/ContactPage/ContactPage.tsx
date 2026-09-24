@@ -135,16 +135,6 @@ const CARD_BODY = "text-ink text-[0.95rem] leading-relaxed";
 const CROSS_LINK =
   "group border-ink bg-cream-soft hover:bg-cream-deep flex items-center justify-between gap-3 border p-3 transition-colors";
 
-function SectionHeading({ children }: { children: string }) {
-  return (
-    <SectionHeader
-      title={children}
-      size="display-md"
-      emphasis={{ text: ".", tone: "warm" }}
-    />
-  );
-}
-
 /** A boxed cross-link row in the Clubgegevens card (hulpvinder, organigram). */
 function CrossLink({
   href,
@@ -299,7 +289,11 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
 
       {/* Contacteer ons — merged + deduped grid */}
       <PageContainer className="py-12 sm:py-16">
-        <SectionHeading>Contacteer ons</SectionHeading>
+        <SectionHeader
+          title="Contacteer ons"
+          size="display-md"
+          emphasis={{ text: ".", tone: "warm" }}
+        />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {contactCards.map((card) => (
             <TapedCard key={card.key} bg="cream" shadow="sm" padding="md">
@@ -334,7 +328,11 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
 
       {/* Kom naar ons — venue & matchday info */}
       <PageContainer className="py-12 sm:py-16">
-        <SectionHeading>Kom naar ons</SectionHeading>
+        <SectionHeader
+          title="Kom naar ons"
+          size="display-md"
+          emphasis={{ text: ".", tone: "warm" }}
+        />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Parking */}
           <TapedCard bg="cream" shadow="sm" padding="md">
