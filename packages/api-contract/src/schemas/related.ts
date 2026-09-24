@@ -8,7 +8,7 @@ export class RelatedItem extends S.Class<RelatedItem>("RelatedItem")({
   /** Content type */
   type: S.Literal("article", "page"),
   /** Cosine similarity score (0–1) */
-  score: S.Number,
+  score: S.Finite,
   /** Display title */
   title: S.String,
   /** Short excerpt for display */

@@ -7,25 +7,33 @@ Shared Effect Schema types and HttpApi definition consumed by both `apps/web` an
 ```text
 src/
 ├── schemas/
-│   ├── common.ts     ← DateFromStringOrDate
-│   ├── match.ts      ← Match, MatchDetail, MatchTeam, MatchStatus, MatchLineup, MatchLineupPlayer, CardType
-│   ├── ranking.ts    ← RankingEntry, RankingArray, RankingResponse
+│   ├── common.ts       ← DateFromStringOrDate
+│   ├── http-errors.ts  ← HttpServiceUnavailable, HttpBadGateway, HttpNotFound, HttpBadRequest
+│   ├── match.ts        ← Match, MatchDetail, MatchTeam, MatchStatus, MatchLineup, MatchLineupPlayer, MatchEvent, CardType
+│   ├── opponent.ts     ← OpponentHistory, OpponentInfo, OpponentSummary
+│   ├── ranking.ts      ← RankingEntry, RankingArray, RankingTable, RankingTableArray
+│   ├── related.ts      ← RelatedItem
 │   ├── player-stats.ts ← PlayerSeasonStats, PlayerTeamStats
-│   └── index.ts      ← barrel
+│   ├── search.ts       ← SearchRequest, SearchResponse, FeedbackRequest, FeedbackResponse
+│   ├── forms.ts        ← MembershipRequest, MembershipResponse
+│   └── index.ts        ← barrel
 ├── api/
-│   ├── matches.ts    ← MatchesApi HttpApiGroup
-│   ├── ranking.ts    ← RankingApi HttpApiGroup
-│   ├── opponent.ts   ← OpponentApi HttpApiGroup
-│   ├── related.ts    ← RelatedApi HttpApiGroup
-│   ├── search.ts     ← SearchApi HttpApiGroup
-│   └── index.ts      ← PsdApi root export
-└── index.ts          ← re-exports everything
+│   ├── matches.ts      ← MatchesApi HttpApiGroup
+│   ├── ranking.ts      ← RankingApi HttpApiGroup
+│   ├── opponent.ts     ← OpponentApi HttpApiGroup
+│   ├── related.ts      ← RelatedApi HttpApiGroup
+│   ├── search.ts       ← SearchApi HttpApiGroup
+│   ├── forms.ts        ← FormsApi HttpApiGroup
+│   └── index.ts        ← PsdApi root export
+├── wire.test.ts        ← the BFF seam: every schema round-trips encode → JSON → decode
+└── index.ts            ← re-exports everything
 ```
 
 ## Rules
 
 - All schemas use Effect Schema (`import { Schema as S } from "effect"`)
 - No `S.Unknown` — every field must be typed
+- **Numbers are `S.Finite`, never `S.Number`.** JSON has no `NaN` or `Infinity`: both arrive as `null`, and then the decode on the other side fails. Path and query ids are `S.NumberFromString.pipe(S.int())`, so `/match/NaN/detail` gets a 400 and never reaches PSD. `src/wire.test.ts` guards both rules. It round-trips every schema `encode → JSON → decode` with generated values. It also walks every schema's AST and fails on any bare `number`. The walk is deterministic. The generated values hit `NaN` only by chance. The test reads the endpoints off `PsdApi` and the exports off `src/index.ts`, so a new schema is covered with no edit to the test. Red there means the wire is wrong: fix the schema, not the test.
 - Schemas here are the single source of truth — never duplicate in `apps/web/src/lib/effect/schemas/`
 - HttpApi groups live in `src/api/`, schemas in `src/schemas/`
 - Export everything from `src/index.ts`
