@@ -42,7 +42,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The /jeugd nav hub (7j3): a uniform grid of 16:9 image-top `<EditorialHubCard>`s. News slots bubble the latest Jeugd articles (newsprint-colour photo, jersey-deep tag); six nav cards stay pinned (jersey-deep glyph panel, cream tag). With no articles the hub collapses to the pinned nav cards — three of which now carry a day-one photo behind a jersey-deep-dark scrim (#2965); the other three keep the flat green + glyph, no filler photo.",
+          "The /jeugd nav hub (7j3): a uniform grid of 16:9 image-top `<EditorialHubCard>`s. News slots bubble the latest Jeugd articles (newsprint-colour photo, jersey-deep tag); six nav cards stay pinned (jersey-deep glyph panel, cream tag). With no articles the hub collapses to the pinned nav cards — three of which carry a club photo (#3072) behind a jersey-deep-dark scrim (#2965); the other three keep the flat green + glyph, no filler photo.",
       },
     },
   },
@@ -67,7 +67,7 @@ export const WithArticles: Story = {
 
 /**
  * No Jeugd articles — the hub collapses to the six pinned nav cards. This is
- * also the mixed tile-treatment story (#2965): 3 with a day-one photo behind
+ * also the mixed tile-treatment story (#2965): 3 with a club photo (#3072) behind
  * a jersey-deep-dark scrim ("Word lid van KCVV", "Ons leerplan", "Trainingen
  * & ProSoccerData") and 3 on the flat bg-jersey-deep + glyph fallback
  * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") — the

@@ -132,13 +132,13 @@ describe("EditorialHubCard", () => {
           title="Word lid van KCVV"
           arrowText="Schrijf je in"
           icon={navGlyph}
-          imageUrl="/images/jeugd/word-lid-kids-met-bal.jpg"
+          imageUrl="/images/jeugd/word-lid-ploeg-in-kring.jpg"
         />,
       );
       const cover = container.querySelector("img");
       expect(cover).toHaveAttribute(
         "src",
-        "/images/jeugd/word-lid-kids-met-bal.jpg",
+        "/images/jeugd/word-lid-ploeg-in-kring.jpg",
       );
       // Decorative — the card's own title names the tile (#2965).
       expect(cover).toHaveAttribute("alt", "");
