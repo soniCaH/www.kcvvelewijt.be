@@ -17,7 +17,10 @@ vi.mock("@/lib/effect/runtime", () => ({
 }));
 
 // Mock notFound to prevent Next.js navigation side-effects
-vi.mock("next/navigation", () => ({
+// `unstable_rethrow` stays real: the board metadata catch relies on it (#3135).
+vi.mock("next/navigation", async (importOriginal) => ({
+  unstable_rethrow: (await importOriginal<typeof import("next/navigation")>())
+    .unstable_rethrow,
   notFound: vi.fn(),
 }));
 
@@ -289,5 +292,32 @@ describe("/tegenstander/[clubId] names the opponent (#2464)", () => {
     expect(metadata.title).toBeTruthy();
     expect(metadata.robots).toEqual({ index: false, follow: false });
     expect(metadata).not.toHaveProperty("alternates");
+  });
+});
+
+describe("the build reads no slug page (#3135, flake class H)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it.each([
+    ["nieuws/[slug]", nieuwsDetail],
+    ["staf/[slug]", staf],
+    ["spelers/[slug]", spelers],
+    ["ploegen/[slug]", ploegen],
+    ["wedstrijd/[matchId]", wedstrijd],
+    ["tegenstander/[clubId]", tegenstander],
+    ["club/[slug]", clubSlug],
+  ])("%s enumerates nothing and reads nothing", async (_route, page) => {
+    expect(await page.generateStaticParams()).toEqual([]);
+    expect(mockRunPromise).not.toHaveBeenCalled();
+  });
+
+  it("board metadata rethrows the build-time bailout instead of baking generic metadata", async () => {
+    const { DynamicServerError } =
+      await import("next/dist/client/components/hooks-server-context");
+    const bailout = new DynamicServerError("connection");
+    mockRunPromise.mockRejectedValueOnce(bailout);
+    await expect(bestuur.generateMetadata()).rejects.toBe(bailout);
   });
 });

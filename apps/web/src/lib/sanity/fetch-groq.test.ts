@@ -73,3 +73,26 @@ describe("fetchGroq", () => {
     });
   });
 });
+
+describe("SanityReadError.transient", () => {
+  const httpError = (statusCode: number) =>
+    Object.assign(new Error(`HTTP ${statusCode}`), { statusCode });
+
+  it.each([
+    ["a transport failure (no status)", new TypeError("fetch failed")],
+    ["a 503", httpError(503)],
+    ["a 500", httpError(500)],
+    ["a 429", httpError(429)],
+  ])("is transient for %s", (_label, cause) => {
+    expect(new SanityReadError({ cause }).transient).toBe(true);
+  });
+
+  it.each([
+    ["an invalid GROQ query (400)", httpError(400)],
+    ["a bad token (401)", httpError(401)],
+    ["a forbidden dataset (403)", httpError(403)],
+    ["an unknown project (404)", httpError(404)],
+  ])("is permanent for %s — the build must still fail", (_label, cause) => {
+    expect(new SanityReadError({ cause }).transient).toBe(false);
+  });
+});

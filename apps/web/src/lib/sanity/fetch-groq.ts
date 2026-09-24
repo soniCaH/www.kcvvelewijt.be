@@ -22,6 +22,18 @@ export class SanityReadError extends Data.TaggedError("SanityReadError")<{
   override get message() {
     return `Sanity fetch failed: ${String(this.cause)}`;
   }
+
+  /**
+   * True for a failure a retry can fix: a transport error (no HTTP status),
+   * a 5xx, or a 429. False for every other status — an invalid GROQ query
+   * (400), a bad token, an unknown project — which is the code or the config
+   * being wrong. `runPromise` only lets a transient failure leave a page out
+   * of the build (#3135); a permanent one still fails it.
+   */
+  get transient(): boolean {
+    const status = (this.cause as { statusCode?: unknown } | null)?.statusCode;
+    return typeof status !== "number" || status >= 500 || status === 429;
+  }
 }
 
 /**

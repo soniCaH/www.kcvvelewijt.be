@@ -4,7 +4,6 @@ import type { SanityReadError } from "../sanity/fetch-groq";
 import type {
   ORGANIGRAM_NODES_QUERY_RESULT,
   STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT,
-  STAFF_MEMBERS_PSDID_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import type { OrgChartNode } from "@/types/organigram";
 
@@ -642,57 +641,6 @@ describe("StaffRepository", () => {
       );
 
       expect(contacts).toEqual([]);
-    });
-  });
-
-  describe("findAllForStaticParams", () => {
-    it("returns psdId for all non-archived staff with psdId", async () => {
-      const rows: STAFF_MEMBERS_PSDID_QUERY_RESULT = [
-        { _id: "s1", psdId: "psd-1" },
-        { _id: "s2", psdId: "psd-2" },
-      ];
-      mockFetch.mockResolvedValueOnce(rows);
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findAllForStaticParams();
-        }),
-      );
-
-      expect(result).toEqual([{ psdId: "psd-1" }, { psdId: "psd-2" }]);
-    });
-
-    it("coerces numeric psdId to string", async () => {
-      const rows = [{ _id: "s1", psdId: 123 as unknown as string }];
-      mockFetch.mockResolvedValueOnce(rows);
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findAllForStaticParams();
-        }),
-      );
-
-      expect(result).toEqual([{ psdId: "123" }]);
-      expect(typeof result[0].psdId).toBe("string");
-    });
-
-    it("filters out rows with null psdId", async () => {
-      const rows: STAFF_MEMBERS_PSDID_QUERY_RESULT = [
-        { _id: "s1", psdId: "psd-1" },
-        { _id: "s2", psdId: null },
-      ];
-      mockFetch.mockResolvedValueOnce(rows);
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findAllForStaticParams();
-        }),
-      );
-
-      expect(result).toEqual([{ psdId: "psd-1" }]);
     });
   });
 });

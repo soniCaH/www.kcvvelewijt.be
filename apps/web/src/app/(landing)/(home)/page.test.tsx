@@ -131,7 +131,6 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
       findUpcomingForList: () => Effect.die("not used by this suite"),
       findNextFeatured: mockFindNextFeatured,
       findBySlug: () => Effect.die("not used by this suite"),
-      findAllSlugs: () => Effect.die("not used by this suite"),
     }),
   };
 });

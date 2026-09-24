@@ -36,29 +36,13 @@ interface StaffPageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Deliberately empty (#3135, flake class H): an enumerated slug is rendered at
+// build, so its own subject read runs against live Sanity and one 503 there
+// killed the whole build. Each slug renders on its first request instead and
+// ISR caches it; a failed first request is a 500 that is never cached.
+// Required all the same: without this export `revalidate` is inert (#2391).
 export async function generateStaticParams() {
-  // Section (of the build), not a request-time subject: an empty list here
-  // just means every slug renders on demand instead of being pre-enumerated
-  // — `dynamicParams` still serves them (#2864). The outer try/catch also
-  // covers `AppLayer` construction failing (e.g. a missing `KCVV_API_URL`) —
-  // that happens outside the effect `degradeSection`'s `catchAllCause`
-  // wraps, so an in-effect catch alone would let it fail the whole build.
-  let members: { psdId: string }[] = [];
-  try {
-    members = await runPromise(
-      degradeSection(
-        Effect.gen(function* () {
-          const repo = yield* StaffRepository;
-          return yield* repo.findAllForStaticParams();
-        }),
-        [],
-        "[staf/[slug]] generateStaticParams read failed; falling back to on-demand rendering.",
-      ),
-    );
-  } catch {
-    members = [];
-  }
-  return members.map((m) => ({ slug: m.psdId }));
+  return [];
 }
 
 // Subject read: the staff member is this page's entire content, so a failed

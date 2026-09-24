@@ -8,7 +8,6 @@ import type {
   EVENTS_QUERY_RESULT,
   EVENT_ARTICLES_QUERY_RESULT,
   EVENT_BY_SLUG_QUERY_RESULT,
-  EVENT_SLUGS_QUERY_RESULT,
   NEXT_FEATURED_EVENT_QUERY_RESULT,
 } from "../sanity/sanity.types";
 
@@ -60,17 +59,6 @@ const EVENT_BY_SLUG_QUERY =
   "coverImageAlt": coverImage.alt,
   externalLink
 }`);
-
-/**
- * Lightweight query for `generateStaticParams` — slug-only, no date filter.
- * Past events keep their permalinks (so social shares / search results
- * landed before the event don't 404). The sitemap (`apps/web/src/app/sitemap.ts`)
- * uses a stricter `coalesce(dateEnd, dateStart) > now()` filter so historical
- * events are not re-crawled, but the routes themselves stay reachable.
- */
-const EVENT_SLUGS_QUERY = defineQuery(
-  `*[_type == "event" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }`,
-);
 
 /**
  * Phase 6.E §5 (#1968) — `articleType == "event"` articles that also belong in
@@ -244,10 +232,6 @@ export interface EventRepositoryInterface {
   readonly findBySlug: (
     slug: string,
   ) => Effect.Effect<EventDetailVM | null, SanityReadError>;
-  readonly findAllSlugs: () => Effect.Effect<
-    EVENT_SLUGS_QUERY_RESULT,
-    SanityReadError
-  >;
 }
 
 export class EventRepository extends Context.Tag("EventRepository")<
@@ -275,5 +259,4 @@ export const EventRepositoryLive = Layer.succeed(EventRepository, {
     fetchGroq<EVENT_BY_SLUG_QUERY_RESULT>(EVENT_BY_SLUG_QUERY, { slug }).pipe(
       Effect.map((row) => row ?? null),
     ),
-  findAllSlugs: () => fetchGroq<EVENT_SLUGS_QUERY_RESULT>(EVENT_SLUGS_QUERY),
 });

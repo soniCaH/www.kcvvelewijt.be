@@ -5,7 +5,6 @@ import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   GALLERIES_QUERY_RESULT,
   GALLERY_BY_SLUG_QUERY_RESULT,
-  GALLERY_SLUGS_QUERY_RESULT,
   GALLERIES_BY_MATCH_QUERY_RESULT,
   GALLERIES_BY_EVENT_QUERY_RESULT,
 } from "../sanity/sanity.types";
@@ -76,11 +75,6 @@ const GALLERY_BY_SLUG_QUERY =
   }
 }`);
 
-/** Slug-only query for `generateStaticParams`. */
-const GALLERY_SLUGS_QUERY = defineQuery(
-  `*[_type == "photoGallery" && defined(slug.current)] { "slug": coalesce(slug.current, ""), "updatedAt": _updatedAt }`,
-);
-
 // Galleries linked to a PSD match, oldest-first (chronological per spec: a match
 // can have warmup / match / viering galleries). Same card shape as GALLERIES_QUERY.
 const GALLERIES_BY_MATCH_QUERY =
@@ -127,10 +121,6 @@ export interface PhotoGalleryRepositoryInterface {
   readonly findBySlug: (
     slug: string,
   ) => Effect.Effect<GalleryDetailVM | null, SanityReadError>;
-  readonly findAllSlugs: () => Effect.Effect<
-    GALLERY_SLUGS_QUERY_RESULT,
-    SanityReadError
-  >;
   readonly findByLinkedMatch: (
     matchId: string,
   ) => Effect.Effect<GalleryCardVM[], SanityReadError>;
@@ -159,8 +149,6 @@ export const PhotoGalleryRepositoryLive = Layer.succeed(
       fetchGroq<GALLERY_BY_SLUG_QUERY_RESULT>(GALLERY_BY_SLUG_QUERY, {
         slug,
       }).pipe(Effect.map((row) => row ?? null)),
-    findAllSlugs: () =>
-      fetchGroq<GALLERY_SLUGS_QUERY_RESULT>(GALLERY_SLUGS_QUERY),
     findByLinkedMatch: (matchId) =>
       fetchGroq<GALLERIES_BY_MATCH_QUERY_RESULT>(
         GALLERIES_BY_MATCH_QUERY,

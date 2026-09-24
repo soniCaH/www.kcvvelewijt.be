@@ -1,7 +1,20 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { Data, Effect, Runtime } from "effect";
 import { notFound, redirect } from "next/navigation";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { SanityReadError } from "@/lib/sanity/fetch-groq";
 import { runPromise } from "./runtime";
+
+const { DYNAMIC_BAILOUT, connection } = vi.hoisted(() => {
+  const DYNAMIC_BAILOUT = new Error("connection() bailout");
+  return {
+    DYNAMIC_BAILOUT,
+    connection: vi.fn(async () => {
+      throw DYNAMIC_BAILOUT;
+    }),
+  };
+});
+vi.mock("next/server", () => ({ connection }));
 
 /**
  * #3034 root cause: `Effect.runPromise` (and `ManagedRuntime.runPromise`,
@@ -130,5 +143,62 @@ describe("runPromise", () => {
     expect(rejection).toMatchObject({
       digest: expect.stringMatching(/^NEXT_HTTP_ERROR_FALLBACK;404/),
     });
+  });
+});
+
+/**
+ * #3135, flake class H: a prerendered page's content read hit a Sanity 503
+ * during `next build` and killed the whole build. At build, a Sanity read
+ * defect that reaches `runPromise` calls `connection()` instead, so Next
+ * leaves that one page out and serves it on demand until the next deploy.
+ */
+describe("runPromise during `next build`", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    connection.mockClear();
+  });
+
+  const sanityDown = Effect.fail(
+    new SanityReadError({ cause: new Error("HTTP 503") }),
+  ).pipe(Effect.orDie);
+
+  const rejectionOf = (effect: Effect.Effect<unknown>) =>
+    runPromise(effect).then(
+      () => {
+        throw new Error("expected runPromise to reject");
+      },
+      (error: unknown) => error,
+    );
+
+  it("turns a Sanity read defect into Next's on-demand bailout", async () => {
+    vi.stubEnv("NEXT_PHASE", PHASE_PRODUCTION_BUILD);
+    expect(await rejectionOf(sanityDown)).toBe(DYNAMIC_BAILOUT);
+    expect(connection).toHaveBeenCalledOnce();
+  });
+
+  it("leaves a permanent Sanity failure alone — an invalid GROQ query still fails the build", async () => {
+    vi.stubEnv("NEXT_PHASE", PHASE_PRODUCTION_BUILD);
+    const invalidQuery = Effect.fail(
+      new SanityReadError({
+        cause: Object.assign(new Error("HTTP 400"), { statusCode: 400 }),
+      }),
+    ).pipe(Effect.orDie);
+    expect(Runtime.isFiberFailure(await rejectionOf(invalidQuery))).toBe(true);
+    expect(connection).not.toHaveBeenCalled();
+  });
+
+  it("leaves a code defect alone — a red build still means the code is wrong", async () => {
+    vi.stubEnv("NEXT_PHASE", PHASE_PRODUCTION_BUILD);
+    const rejection = await rejectionOf(
+      Effect.die(new TypeError("x is undefined")),
+    );
+    expect(Runtime.isFiberFailure(rejection)).toBe(true);
+    expect(connection).not.toHaveBeenCalled();
+  });
+
+  it("leaves a Sanity read defect alone outside the build", async () => {
+    vi.stubEnv("NEXT_PHASE", "");
+    expect(Runtime.isFiberFailure(await rejectionOf(sanityDown))).toBe(true);
+    expect(connection).not.toHaveBeenCalled();
   });
 });

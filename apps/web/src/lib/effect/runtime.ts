@@ -1,5 +1,8 @@
 import { Effect, Layer, ManagedRuntime } from "effect";
 import { unstable_rethrow } from "next/navigation";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { connection } from "next/server";
+import { SanityReadError } from "../sanity/fetch-groq";
 import { squashFiberFailure } from "./classify-bff-failure";
 import { BffService, BffServiceLive } from "./services/BffService";
 import {
@@ -111,6 +114,21 @@ const runtime = ManagedRuntime.make(AppLayer);
  * same `FiberFailure` it always has — `isPermanentBffFailure` and friends,
  * which key off that shape, are unaffected.
  *
+ * **A Sanity read defect at build leaves the page out instead of killing the
+ * build (#3135, flake class H).** A prerendered page's subject read
+ * (`Effect.orDie`) runs against live Sanity during `next build`, and one 503
+ * there used to fail the whole build. During the build phase a squashed
+ * `SanityReadError` awaits `connection()`, which throws Next's dynamic-usage
+ * signal: Next skips that one page and serves it on demand, uncached, until
+ * the next deploy prerenders it again. Nothing degraded is written to the ISR
+ * cache. Only a **transient** `SanityReadError` (transport, 5xx, 429 — see
+ * `SanityReadError.transient`) takes that exit. A permanent one (an invalid
+ * GROQ query, a bad token) and any other defect (a code bug) still reject as
+ * before, so a red build still means the code or config is wrong.
+ * Outside the build nothing changes: a runtime failure throws and ISR keeps
+ * serving the last good page. A slug route never reaches this at build — its
+ * `generateStaticParams` returns `[]` (`isr-route-config.test.ts`).
+ *
  * **Only `notFound()` and `redirect()` are pinned by `runtime.test.ts`.**
  * No route in this app throws `forbidden()`/`unauthorized()` through an
  * Effect chain today, so their restoration is not asserted here — it rests
@@ -134,10 +152,18 @@ export const runPromise = <A>(
     | PhotoGalleryRepository
   >,
 ) =>
-  runtime.runPromise(effect).catch((error: unknown) => {
+  runtime.runPromise(effect).catch(async (error: unknown) => {
     const squashed = squashFiberFailure(error);
     if (squashed !== undefined) {
       unstable_rethrow(squashed);
+      // At build, `connection()` throws Next's own dynamic-usage signal (#3135).
+      if (
+        squashed instanceof SanityReadError &&
+        squashed.transient &&
+        process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD
+      ) {
+        await connection();
+      }
     }
     throw error;
   });
