@@ -2,21 +2,21 @@ import { Schema as S } from "effect";
 
 /** Normalized ranking entry for UI consumption */
 export class RankingEntry extends S.Class<RankingEntry>("RankingEntry")({
-  position: S.Number,
-  team_id: S.Number,
+  position: S.Finite,
+  team_id: S.Finite,
   /** PSD club id (e.g. 1235 for KCVV). Lets consumers match a ranking row to a
    * match side, whose home/away ids are club ids — not PSD team ids. */
-  club_id: S.optional(S.Number),
+  club_id: S.optional(S.Finite),
   team_name: S.String,
   team_logo: S.optional(S.String),
-  played: S.Number,
-  won: S.Number,
-  drawn: S.Number,
-  lost: S.Number,
-  goals_for: S.Number,
-  goals_against: S.Number,
-  goal_difference: S.Number,
-  points: S.Number,
+  played: S.Finite,
+  won: S.Finite,
+  drawn: S.Finite,
+  lost: S.Finite,
+  goals_for: S.Finite,
+  goals_against: S.Finite,
+  goal_difference: S.Finite,
+  points: S.Finite,
   form: S.optional(S.String),
 }) {}
 
@@ -34,7 +34,7 @@ export const RankingArray = S.Array(RankingEntry);
 export class RankingTable extends S.Class<RankingTable>("RankingTable")({
   /** Provider competition id — the only stable key for a phase. Two same-named
    * youth tables have no identity without it. */
-  competition_id: S.Number,
+  competition_id: S.Finite,
   /** Provider name, prefix/suffix stripped. Consumers prefer the editorial
    * `divisionFull` when Sanity carries one — the federation's name for a reeks
    * is not the club's. */

@@ -30,7 +30,7 @@ export class SearchResult extends S.Class<SearchResult>("SearchResult")({
   /** Content type */
   type: SearchResultType,
   /** Cosine similarity score (0–1) */
-  score: S.Number,
+  score: S.Finite,
   /** Display title */
   title: S.String,
   /** Short excerpt for display */

@@ -5,16 +5,16 @@ import { Match } from "./match";
 export class OpponentSummary extends S.Class<OpponentSummary>(
   "OpponentSummary",
 )({
-  wins: S.Number,
-  draws: S.Number,
-  losses: S.Number,
-  goalsFor: S.Number,
-  goalsAgainst: S.Number,
+  wins: S.Finite,
+  draws: S.Finite,
+  losses: S.Finite,
+  goalsFor: S.Finite,
+  goalsAgainst: S.Finite,
 }) {}
 
 /** Opponent club info */
 export class OpponentInfo extends S.Class<OpponentInfo>("OpponentInfo")({
-  id: S.Number,
+  id: S.Finite,
   name: S.String,
   logo: S.optional(S.String),
 }) {}

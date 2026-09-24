@@ -3,10 +3,10 @@ import { DateFromStringOrDate } from "./common";
 
 /** Team info in a normalized match */
 export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
-  id: S.Number,
+  id: S.Finite,
   name: S.String,
   logo: S.optional(S.String),
-  score: S.optional(S.Number),
+  score: S.optional(S.Finite),
   /**
    * Team designation within the club (e.g. "A", "B", "U23") derived from PSD's
    * per-game `homeTeam`/`awayTeam` codes. Present mainly for opponents that
@@ -57,7 +57,7 @@ export type CompetitionType = S.Schema.Type<typeof CompetitionType>;
 
 /** Shared fields between Match and MatchDetail */
 const BaseMatchFields = {
-  id: S.Number,
+  id: S.Finite,
   date: DateFromStringOrDate,
   time: S.optional(S.String),
   venue: S.optional(S.String),
@@ -69,7 +69,7 @@ const BaseMatchFields = {
   /** League/cup/friendly classification. Absent when the BFF can't resolve it. */
   competitionType: S.optional(CompetitionType),
   /** PSD team ID identifying which KCVV team plays (A-team, B-team, U21, etc.) */
-  kcvv_team_id: S.optional(S.Number),
+  kcvv_team_id: S.optional(S.Finite),
   /** Human-readable label for the KCVV team (e.g. "A-Ploeg", "U21") */
   kcvv_team_label: S.optional(S.String),
   /** Whether the KCVV team is playing at home. Computed by BFF from homeTeamId === teamId. */
@@ -102,7 +102,7 @@ export const MatchesArray = S.Array(Match);
 
 export class MatchesResponse extends S.Class<MatchesResponse>("MatchesResponse")({
   matches: MatchesArray,
-  total: S.optional(S.Number),
+  total: S.optional(S.Finite),
 }) {}
 
 /** Card type for match events */
@@ -111,10 +111,10 @@ export type CardType = S.Schema.Type<typeof CardType>;
 
 /** Normalized lineup player for UI consumption */
 export class MatchLineupPlayer extends S.Class<MatchLineupPlayer>("MatchLineupPlayer")({
-  id: S.optional(S.Number),
+  id: S.optional(S.Finite),
   name: S.String,
-  number: S.optional(S.Number),
-  minutesPlayed: S.optional(S.Number),
+  number: S.optional(S.Finite),
+  minutesPlayed: S.optional(S.Finite),
   isCaptain: S.Boolean,
   isKeeper: S.optional(S.Boolean),
   position: S.optional(S.String),
@@ -148,9 +148,9 @@ export type MatchEventType = S.Schema.Type<typeof MatchEventType>;
 
 /** Normalized match event for UI consumption */
 export class MatchEvent extends S.Class<MatchEvent>("MatchEvent")({
-  id: S.Number,
+  id: S.Finite,
   type: MatchEventType,
-  minute: S.Number,
+  minute: S.Finite,
   team: S.Literal("home", "away"),
   player: S.optional(S.String),
   playerIn: S.optional(S.String),
