@@ -1,5 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { summaryMarkdown, type RunTally } from "./github-summary";
+import { existsSync, mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import type { FullResult, TestCase } from "@playwright/test/reporter";
+import GithubSummaryReporter, {
+  summaryMarkdown,
+  type RunTally,
+} from "./github-summary";
 
 const clean: RunTally = {
   passed: 54,
@@ -144,5 +151,80 @@ describe("summaryMarkdown", () => {
       "**No test failed, but the suite ended `interrupted`.**",
     );
     expect(md).not.toContain("passed on the first attempt");
+  });
+});
+
+/** The slice of a Playwright `TestCase` the reporter reads. */
+function testCase(
+  id: string,
+  title: string,
+  outcome: ReturnType<TestCase["outcome"]>,
+  annotations: TestCase["annotations"] = [],
+): TestCase {
+  return {
+    id,
+    outcome: () => outcome,
+    titlePath: () => ["", "chromium", "a.spec.ts", "suite", title],
+    location: { file: join(process.cwd(), "test/e2e/a.spec.ts"), line: 7 },
+    annotations,
+  } as unknown as TestCase;
+}
+
+function run(tests: TestCase[], status: FullResult["status"]) {
+  const reporter = new GithubSummaryReporter();
+  for (const test of tests) reporter.onTestEnd(test);
+  reporter.onEnd({ status } as FullResult);
+}
+
+describe("GithubSummaryReporter.onEnd", () => {
+  const dir = mkdtempSync(join(tmpdir(), "github-summary-"));
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("writes the tally the red-main alert reads, one entry per test", () => {
+    const tallyFile = join(dir, "tally.json");
+    vi.stubEnv("GITHUB_STEP_SUMMARY", "");
+    vi.stubEnv("E2E_TALLY_FILE", tallyFile);
+    const flaky = testCase("f", "retried", "flaky");
+    run(
+      [
+        testCase("p", "passes", "expected"),
+        testCase("x", "breaks", "unexpected"),
+        flaky,
+        flaky, // a retried test reaches onTestEnd once per attempt
+        testCase("s", "guarded", "skipped", [
+          { type: "skip", description: "no data" },
+        ]),
+      ],
+      "failed",
+    );
+
+    expect(JSON.parse(readFileSync(tallyFile, "utf8"))).toEqual({
+      passed: 1,
+      failed: [{ title: "suite › breaks", location: "a.spec.ts:7" }],
+      flaky: [{ title: "suite › retried", location: "a.spec.ts:7" }],
+      skipped: [
+        {
+          title: "suite › guarded",
+          location: "a.spec.ts:7",
+          reason: "no data",
+        },
+      ],
+      status: "failed",
+    });
+  });
+
+  it("writes the job summary alone when no tally file is asked for", () => {
+    const summaryFile = join(dir, "summary.md");
+    const tallyFile = join(dir, "unrequested.json");
+    vi.stubEnv("GITHUB_STEP_SUMMARY", summaryFile);
+    vi.stubEnv("E2E_TALLY_FILE", "");
+    run([testCase("p", "passes", "expected")], "passed");
+
+    expect(readFileSync(summaryFile, "utf8")).toContain(
+      "All 1 tests passed on the first attempt.",
+    );
+    expect(existsSync(tallyFile)).toBe(false);
   });
 });

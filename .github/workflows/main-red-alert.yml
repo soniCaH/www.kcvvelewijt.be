@@ -94,11 +94,11 @@ jobs:
           # E2E uploads its own tally on a red run (the github-summary
           # reporter), which knows failed from flaky — Playwright annotates a
           # flaky test's failed attempt exactly like a real failure. The
-          # tally is the run's latest; after a re-run it may not match an
-          # earlier attempt. Everything else is read from the failed jobs'
+          # tally is per attempt; an attempt without one falls back to
+          # annotations below. Everything else is read from the failed jobs'
           # annotations: Vitest and the VR runner's Jest each title a
           # failed-test annotation with the test's name.
-          if gh run download "$RUN_ID" -n e2e-tally -D "$RUNNER_TEMP/tally" 2>/dev/null; then
+          if gh run download "$RUN_ID" -n "e2e-tally-$RUN_ATTEMPT" -D "$RUNNER_TEMP/tally" 2>/dev/null; then
             TALLY="$RUNNER_TEMP/tally/e2e-tally.json"
             TEST_LINES=$(jq -r 'if (.failed | length) > 0 then .failed[] | "- `\(.location)` — `\(.title)`" else "- none — the suite ended `\(.status)`" end' "$TALLY") || TEST_LINES=""
             FLAKY=$(jq -r '[.flaky[] | "`\(.location)`"] | "\(length)" + (if length > 0 then " — " + join(", ") else "" end)' "$TALLY") || FLAKY="unreadable tally"

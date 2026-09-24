@@ -132,11 +132,12 @@ jobs:
           retention-days: 14
 
       # Read by main-red-alert.yml by this exact name — only on a red run.
+      # One per attempt, so the alert reads the attempt it reports on.
       - name: Upload the run's tally
         if: failure()
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: e2e-tally
+          name: e2e-tally-${{ github.run_attempt }}
           path: apps/web/e2e-tally.json
           if-no-files-found: ignore
           retention-days: 14
