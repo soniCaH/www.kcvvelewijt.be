@@ -41,11 +41,15 @@ const assertRoundTrips = (schema: AnySchema) =>
   );
 
 /**
- * Every place the encoded side holds a bare `number`. The generated values
- * reach NaN or Infinity only by chance — about half the runs — so this walk
- * is the deterministic guard: JSON has no NaN or Infinity, and a number the
- * wire sends must be refined (`S.Finite`, `S.Int`, `S.between`, …).
+ * Every place the encoded side holds a number JSON cannot carry. The generated
+ * values reach NaN or Infinity only by chance — about half the runs — so this
+ * walk is the deterministic guard. A refinement counts by what it lets
+ * through, not by its shape: `S.NonNegative` still admits Infinity.
  */
+const NON_FINITE = [Number.NaN, Infinity, -Infinity];
+const baseOf = (ast: AST.AST): AST.AST =>
+  AST.isRefinement(ast) ? baseOf(ast.from) : ast;
+
 const bareNumbers = (
   ast: AST.AST,
   path = "",
@@ -57,9 +61,9 @@ const bareNumbers = (
     case "NumberKeyword":
       return [path || "(root)"];
     case "Refinement":
-      return AST.isNumberKeyword(ast.from)
-        ? []
-        : bareNumbers(ast.from, path, seen);
+      if (!AST.isNumberKeyword(baseOf(ast)))
+        return bareNumbers(ast.from, path, seen);
+      return NON_FINITE.some(S.is(S.make(ast))) ? [path || "(root)"] : [];
     case "Transformation":
       return bareNumbers(ast.from, path, seen);
     case "Suspend":
@@ -174,7 +178,8 @@ describe("a wire-shape change fails the layer", () => {
     const Drifted = S.Struct({
       ok: S.Finite,
       rows: S.Array(S.Struct({ n: S.optional(S.Number) })),
+      goals: S.NonNegative,
     });
-    expect(bareNumbers(Drifted.ast)).toEqual([".rows[].n"]);
+    expect(bareNumbers(Drifted.ast)).toEqual([".rows[].n", ".goals"]);
   });
 });
