@@ -1,8 +1,4 @@
-import {
-  EditorialHeading,
-  MonoLabelRow,
-  PageContainer,
-} from "@/components/design-system";
+import { PageContainer, SectionHeader } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { MatchEvents, type MatchEvent } from "../MatchEvents/MatchEvents";
 
@@ -41,13 +37,11 @@ export function MatchEventsSection({
       as="section"
       className={cn("bg-cream py-12 sm:py-16", className)}
     >
-      <MonoLabelRow
-        items={[{ label: "WEDSTRIJDVERLOOP" }]}
-        className="text-ink mb-3"
+      <SectionHeader
+        kicker={[{ label: "WEDSTRIJDVERLOOP" }]}
+        title="Hoe het ging."
+        size="display-md"
       />
-      <EditorialHeading level={2} size="display-md" className="mb-8 md:mb-10">
-        Hoe het ging.
-      </EditorialHeading>
 
       <MatchEvents
         homeTeamName={homeTeamName}

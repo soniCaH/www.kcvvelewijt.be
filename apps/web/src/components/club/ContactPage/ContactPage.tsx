@@ -37,6 +37,7 @@ import {
   EditorialHeading,
   ExternalMark,
   PageContainer,
+  SectionHeader,
   StripedSeam,
   TapedCard,
 } from "@/components/design-system";
@@ -136,14 +137,11 @@ const CROSS_LINK =
 
 function SectionHeading({ children }: { children: string }) {
   return (
-    <EditorialHeading
-      level={2}
+    <SectionHeader
+      title={children}
       size="display-md"
       emphasis={{ text: ".", tone: "warm" }}
-      className="mb-6"
-    >
-      {children}
-    </EditorialHeading>
+    />
   );
 }
 

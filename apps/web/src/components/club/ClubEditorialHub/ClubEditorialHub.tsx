@@ -3,7 +3,7 @@ import {
   NavGlyph,
   type NavGlyphName,
 } from "@/components/editorial/NavGlyph/NavGlyph";
-import { EditorialHeading, TapedCardGrid } from "@/components/design-system";
+import { SectionHeader, TapedCardGrid } from "@/components/design-system";
 import { HISTORY_24_25_CARD, ULTRAS_HEADER_CARD } from "@/lib/sanity/images";
 
 interface ClubHubNewsCard {
@@ -171,14 +171,11 @@ export function ClubEditorialHub({
 }: ClubEditorialHubProps) {
   return (
     <div>
-      <EditorialHeading
-        level={2}
+      <SectionHeader
+        title="Dit is KCVV"
         size="display-lg"
         emphasis={{ text: "KCVV" }}
-        className="mb-8"
-      >
-        Dit is KCVV
-      </EditorialHeading>
+      />
       <TapedCardGrid columns={3} gap="sm">
         {cards.map((card) => (
           <EditorialHubCard
