@@ -274,7 +274,7 @@ export const TypedKvCache = <A, I>(
   const psdBacked = options?.psdBacked ?? true;
   const WrapperSchema = S.Struct({
     value: schema,
-    fetchedAt: S.Number,
+    fetchedAt: S.Finite,
   });
 
   /** Decode a raw KV string into {value, fetchedAt}, tolerating the legacy

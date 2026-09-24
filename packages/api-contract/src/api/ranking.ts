@@ -10,7 +10,7 @@ import {
 export class RankingApi extends HttpApiGroup.make("ranking")
   .add(
     HttpApiEndpoint.get("getRanking", "/ranking/:teamId")
-      .setPath(S.Struct({ teamId: S.NumberFromString }))
+      .setPath(S.Struct({ teamId: S.NumberFromString.pipe(S.int()) }))
       .addSuccess(RankingTableArray)
       .addError(HttpServiceUnavailable)
       .addError(HttpBadGateway)

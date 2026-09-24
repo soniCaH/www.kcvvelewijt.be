@@ -14,8 +14,8 @@ export class OpponentApi extends HttpApiGroup.make("opponent").add(
   )
     .setPath(
       S.Struct({
-        teamId: S.NumberFromString,
-        clubId: S.NumberFromString,
+        teamId: S.NumberFromString.pipe(S.int()),
+        clubId: S.NumberFromString.pipe(S.int()),
       }),
     )
     .addSuccess(OpponentHistory)

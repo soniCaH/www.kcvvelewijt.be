@@ -33,7 +33,7 @@ src/
 
 - All schemas use Effect Schema (`import { Schema as S } from "effect"`)
 - No `S.Unknown` — every field must be typed
-- **Numbers are `S.Finite`, never `S.Number`.** JSON has no `NaN` or `Infinity` — both arrive as `null` and the other side's decode fails. `src/wire.test.ts` round-trips every schema `encode → JSON → decode` with generated values and goes red on a field the wire cannot carry. It reads the endpoint list off `PsdApi` and the export list off `src/index.ts`, so a new schema is covered with no edit to the test. Red there means the wire is wrong: fix the schema, not the test.
+- **Numbers are `S.Finite`, never `S.Number`.** JSON has no `NaN` or `Infinity`: both arrive as `null`, and then the decode on the other side fails. Path and query ids are `S.NumberFromString.pipe(S.int())`, so `/match/NaN/detail` gets a 400 and never reaches PSD. `src/wire.test.ts` guards both rules. It round-trips every schema `encode → JSON → decode` with generated values. It also walks every schema's AST and fails on any bare `number`. The walk is deterministic. The generated values hit `NaN` only by chance. The test reads the endpoints off `PsdApi` and the exports off `src/index.ts`, so a new schema is covered with no edit to the test. Red there means the wire is wrong: fix the schema, not the test.
 - Schemas here are the single source of truth — never duplicate in `apps/web/src/lib/effect/schemas/`
 - HttpApi groups live in `src/api/`, schemas in `src/schemas/`
 - Export everything from `src/index.ts`
