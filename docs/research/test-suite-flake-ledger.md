@@ -244,7 +244,7 @@ happy-dom gaps that force tests to be written around the environment rather than
     Vitest's global shim swallows a bare `window.innerWidth =`: `WINDOW_SIZE_WRITE` in `apps/web/eslint.config.mjs`.
   - **`hashchange` never fires — ours.** It fires one macrotask later; a synchronous assertion misses it. No rule.
   - **`color-mix()` is dropped, and there is no layout — real.** Layout moves to Storybook `play` ([#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146)). `color-mix()` stays **live**.
-- **Upstream bug, for the owner to file — an agent does not file it.** happy-dom's `MediaQueryList.addEventListener`
+- **Upstream bug, not filed — by the owner's choice.** No happy-dom issue covers it (searched 2026-09-24; the bug is still on `master`, `MediaQueryList.ts:108`). happy-dom's `MediaQueryList.addEventListener`
   seeds its `change` state to `false`, not to `this.matches`. So a query that already matches fires no `change` on its
   first narrow. Six lines reproduce it (`vitest-runner-and-environment.md` §2.2, §11). Until it is fixed, a test that needs
   that transition stubs `matchMedia`.
