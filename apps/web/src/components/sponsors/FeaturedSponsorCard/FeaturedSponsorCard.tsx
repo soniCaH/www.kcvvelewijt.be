@@ -12,9 +12,8 @@ export interface FeaturedSponsorCardProps {
  * <FeaturedSponsorCard> — the single "In de kijker" marquee card in the
  * `/sponsors` hero (7.d5 F3: light cream-soft body + jersey-deep banner tab).
  *
- * - **Tab:** full-width `bg-jersey-deep` mono-caps "In de kijker" (`text-cream`,
- *   reconciled from `text-white` in #2421), `border-b-2 border-ink`. Text only —
- *   no dingbat.
+ * - **Tab:** full-width `bg-jersey-deep` mono-caps "In de kijker" (`text-cream`),
+ *   `border-b-2 border-ink`. Text only — no dingbat.
  * - **Body:** logo inset (cream box, `border-2 border-ink`) → italic-display
  *   name → optional `description` blurb (~3-line clamp, omitted when absent) →
  *   mono "Bezoek website" when `url` is present. No external mark: the card's

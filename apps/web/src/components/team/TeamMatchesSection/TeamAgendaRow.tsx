@@ -222,7 +222,7 @@ function TeamName({
             className={cn(
               "font-mono text-[10px] font-semibold tracking-wide",
               // Cream on jersey-deep / ink-muted on cream — matches the
-              // competition caption's contrast-safe tones (#2421: was white).
+              // competition caption's contrast-safe tones.
               featured ? "text-cream" : "text-ink-muted",
             )}
           >
@@ -280,10 +280,6 @@ export function TeamAgendaRow({
     typeof match.homeScore === "number" &&
     typeof match.awayScore === "number";
 
-  // Cream on jersey-deep — was white, inherited from the pre-#2395 green when
-  // cream missed AA there. Both clear it today (white 5.29:1, cream 4.69:1);
-  // #2421 reconciles this feature component to cream (see DESIGN.md
-  // "Chips / Labels").
   const monoClass = featured ? "text-cream" : "text-ink-muted";
 
   const cardBase = cn(

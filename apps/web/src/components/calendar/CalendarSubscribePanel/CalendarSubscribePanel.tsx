@@ -262,7 +262,6 @@ export function CalendarSubscribePanel({
               type="button"
               onClick={handleCopy}
               disabled={selectedPsdIds.length === 0}
-              // Cream, not white — #2421 reconciliation (the button is bg-jersey-deep).
               className="border-ink bg-jersey-deep focus-visible:outline-ink text-cream border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-all duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
             >
               {copiedUrl === webcalUrl ? "Gekopieerd" : "Kopieer link"}

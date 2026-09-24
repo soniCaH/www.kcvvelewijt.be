@@ -236,8 +236,7 @@ const HomeAwayBadge = ({ side }: { side: KcvvSide }) => {
         // jersey-deep, never the bright jersey — the redesign's ink-adjacent
         // green is the one that carries cream text safely. `uit` keeps the
         // same green on its edge instead of switching hue: the outline is what
-        // marks it as the lesser state (see the docblock). Cream, not white
-        // (#2421 reconciliation).
+        // marks it as the lesser state (see the docblock).
         isHome
           ? "border-jersey-deep bg-jersey-deep text-cream"
           : "border-jersey-deep/45 text-ink bg-transparent",

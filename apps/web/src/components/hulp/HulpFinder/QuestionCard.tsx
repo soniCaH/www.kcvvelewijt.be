@@ -111,7 +111,6 @@ export function QuestionCard({
                   >
                     <span
                       aria-hidden
-                      // Cream, not white — #2421 reconciliation (the badge is bg-jersey-deep).
                       className="border-ink bg-jersey-deep text-cream flex h-5 w-5 flex-shrink-0 items-center justify-center border-[1.5px] font-mono text-[10px]"
                     >
                       {i + 1}
