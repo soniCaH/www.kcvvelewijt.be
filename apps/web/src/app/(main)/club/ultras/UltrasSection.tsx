@@ -46,8 +46,16 @@ export function UltrasSection({
         </EditorialHeading>
       </header>
       {/* #2436: only <p> children clamp to the prose token — the embedded
-          <TapedFigure>/<PullQuote> blocks keep the container's full width. */}
-      <div className="text-body-md text-ink flex flex-col gap-5 leading-relaxed [&_strong]:font-semibold [&>p]:max-w-[var(--container-prose)]">
+          TapedFigure / PullQuote blocks keep the container's full width.
+          #2552 rule 3: no gap or space-y utilities over prose — a paragraph
+          owns the air below itself (globals.css). Plain block flow instead
+          of a flex column so adjacent margins collapse: a non-paragraph
+          embed (TapedFigure, PullQuote, RaffleCallout — none carry their
+          own margin) gets an explicit my-6, which collapses against a
+          neighbouring paragraph's mb-4 to one 24px gap either side, rather
+          than compounding with it or, if the gap utility were simply
+          deleted, touching it outright. */}
+      <div className="text-body-md text-ink leading-relaxed [&_strong]:font-semibold [&>:not(p)]:my-6 [&>p]:max-w-[var(--container-prose)]">
         {children}
       </div>
     </section>

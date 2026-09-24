@@ -69,7 +69,7 @@ export default function EventDetailLoading() {
           className="mx-auto w-full"
           style={{ maxWidth: "var(--container-wide)" }}
         >
-          <Skeleton className="mb-10 h-9 w-72 max-w-full" />
+          <Skeleton className="mb-8 h-9 w-72 max-w-full sm:mb-10" />
           <div className="flex gap-6 overflow-hidden md:gap-8">
             {Array.from({ length: 3 }).map((_, i) => (
               <div

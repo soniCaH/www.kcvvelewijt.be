@@ -303,7 +303,7 @@ The body is a single centred column at one of exactly three widths, chosen by th
 
 Three things sit outside those widths and only three: global chrome (header and footer span 1440px, the only value above 1280); element sizing (a photo, a quote measure, a scaled diagram keeps its own max-width); and full-bleed bands (striped seams, hero backgrounds, coloured CTA bands) which span the viewport and are never wrapped in a container.
 
-Horizontal gutters are 1rem on mobile, 2rem from `md` up. Vertical rhythm belongs to the consuming section, not the container. Card padding steps 0.75rem / 1.25rem / 2rem.
+Horizontal gutters are 1rem on mobile, 2rem from `md` up. Vertical rhythm belongs to the consuming section, not the container: a paragraph owns the air below itself (`p:last-child { margin-bottom: 0 }` on top of the base `p { margin-bottom: 1rem }`), and `<SectionHeader>` owns the air below a section heading, at `mb-8 sm:mb-10` (32/40px, #2552). `<EditorialHeading>` never carries a margin of its own — it renders inside nine page-opening heroes and would break all of them — and a stack whose children are prose may not use `gap-*`/`space-y-*` utilities, since the paragraph's own margin is already the air. Card padding steps 0.75rem / 1.25rem / 2rem.
 
 Breakpoints: 640 (`sm`), 768 (`md`), 960 (`desk`), 1024 (`lg`), 1280 (`xl`), 1536 (`2xl`). The 960 step is inherited and used sparingly.
 

@@ -1,9 +1,8 @@
 import type { RankingEntry } from "@kcvv/api-contract";
 import {
-  EditorialHeading,
   EmptyState,
-  MonoLabelRow,
   PageContainer,
+  SectionHeader,
 } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { StandingsTable } from "@/components/team/StandingsTable";
@@ -95,13 +94,11 @@ export function MatchStandingsSection(props: MatchStandingsSectionProps) {
       as="section"
       className={cn("bg-cream py-12 sm:py-16", className)}
     >
-      <MonoLabelRow
-        items={[{ label: "KLASSEMENT" }]}
-        className="text-ink mb-3"
+      <SectionHeader
+        kicker={[{ label: "KLASSEMENT" }]}
+        title="In de stand."
+        size="display-md"
       />
-      <EditorialHeading level={2} size="display-md" className="mb-8 md:mb-10">
-        In de stand.
-      </EditorialHeading>
 
       {involved.length === 0 ? (
         <EmptyState

@@ -19,7 +19,7 @@ const CHAPTER_GROUP_ID: ContentsGroup["id"] = "nieuws";
  * contents page, not four page sections — the device is a display-serif title
  * with its count ranged right over a 2px rule, which is what the mockup
  * (`docs/design/mockups/research-d-series/d8-index-page.html`) prints and what
- * `<SectionHeader>` (kicker + heading + optional CTA, `mb-10`) does not
+ * `<SectionHeader>` (kicker + heading + optional CTA, `mb-8 sm:mb-10`) does not
  * express. `<SectionHeader>` still owns section-heading air everywhere it *is*
  * the right composition (#2552).
  *

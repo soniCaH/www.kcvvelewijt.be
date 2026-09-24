@@ -115,6 +115,17 @@ const TEXT_INK_SOFT_PATTERN = "(?<![\\w-])text-ink-soft(?![\\w-])";
 const TEXT_CREAM_ALPHA_PATTERN =
   "(?<![\\w-])text-cream(?:-quiet)?\\x2F(?:[0-9]|\\[)";
 
+// Section-Heading Margin Rule (#2552 rule 4 / #2554). Bottom axis only —
+// `mb-*`/`my-*` (including the negative form, `-mb-*`/`-my-*`) at any
+// responsive prefix (the `:` alternate in the anchor covers `sm:`/`md:`/
+// `lg:`/`desk:`/`xl:`/`2xl:` without enumerating them) — `mt-*` carries
+// kicker-to-heading air inside a page opening and is deliberately
+// untouched. Only a bare `mb-0`/`my-0` (the value ending there, not
+// `mb-0.5`) is excluded by the lookahead, so this rule doesn't fight the
+// inert-spacing cleanup for the same lines (#2553) while still catching a
+// fractional value.
+const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -226,6 +237,11 @@ const eslintConfig = [
           selector: matchesClassString(TEXT_CREAM_ALPHA_PATTERN),
           message:
             "Fractional cream text — on dark, body voice is text-cream and metadata is text-cream-quiet, never on jersey-deep (apps/web/DESIGN.md → Colors, the Two-Tier Text Rule and the Whole-Cream Rule).",
+        },
+        {
+          selector: `JSXOpeningElement[name.name="EditorialHeading"] > JSXAttribute[name.name="className"] ${matchesClassString(EDITORIAL_HEADING_MARGIN_PATTERN)}`,
+          message:
+            "A section heading's bottom margin belongs to <SectionHeader> (mb-8 sm:mb-10, #2552 rule 5). <EditorialHeading> carries no margin of its own (#2552 rule 4). Whether this heading should be a <SectionHeader> is a judgement this rule does not make.",
         },
       ],
     },

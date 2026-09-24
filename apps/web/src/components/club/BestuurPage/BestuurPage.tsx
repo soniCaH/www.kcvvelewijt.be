@@ -18,8 +18,8 @@ import {
   type PortableTextComponents,
 } from "@portabletext/react";
 import {
-  EditorialHeading,
   PageContainer,
+  SectionHeader,
   StripedSeam,
 } from "@/components/design-system";
 import {
@@ -100,7 +100,7 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
             // column measures the full prose token, not the token minus its
             // own padding.
             <div className="border-jersey-deep border-l-4 pl-6">
-              <div className="text-ink font-body max-w-[var(--container-prose)] text-base leading-relaxed [&_p]:mb-4 [&_p:last-child]:mb-0">
+              <div className="text-ink font-body max-w-[var(--container-prose)] text-base leading-relaxed">
                 <PortableText value={body} components={bodyComponents} />
               </div>
             </div>
@@ -108,15 +108,17 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
 
           {hasMembers ? (
             <div className={showDescription ? "mt-12" : undefined}>
-              <EditorialHeading
-                level={2}
+              <SectionHeader
+                title="De leden"
                 size="display-md"
                 emphasis={{ text: "." }}
-                className="mb-6"
-              >
-                De leden
-              </EditorialHeading>
-              <TeamStaff staff={staff} heading="De leden" />
+              />
+              {/* hideHeading: <SectionHeader> above already renders "De
+                  leden" as the visible display heading — <TeamStaff>'s own
+                  <PersonCardRun> run heading would otherwise repeat it
+                  verbatim in mono caps directly underneath (#2572 review).
+                  `heading` still carries the section's aria-label. */}
+              <TeamStaff staff={staff} heading="De leden" hideHeading />
             </div>
           ) : null}
         </PageContainer>

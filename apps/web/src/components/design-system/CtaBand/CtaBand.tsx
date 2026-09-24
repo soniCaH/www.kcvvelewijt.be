@@ -61,19 +61,24 @@ export function CtaBand({
         className="bg-jersey-deep-dark border-ink border-y-2"
       >
         <PageContainer className="py-12 text-center sm:py-16">
-          <EditorialHeading
-            level={2}
-            size="display-lg"
-            tone="cream"
-            emphasis={emphasis}
-            className="mb-4"
-          >
-            {heading}
-          </EditorialHeading>
+          {/* Column gap, not a heading margin — the heading-to-lead air is
+              this composition's, not <EditorialHeading>'s own (#2552 rule
+              4). The lead keeps its own mb-7 for the lead-to-button gap,
+              which this rule doesn't reach. */}
+          <div className="flex flex-col gap-4">
+            <EditorialHeading
+              level={2}
+              size="display-lg"
+              tone="cream"
+              emphasis={emphasis}
+            >
+              {heading}
+            </EditorialHeading>
 
-          <p className="text-cream mx-auto mb-7 max-w-xl text-base leading-relaxed">
-            {lead}
-          </p>
+            <p className="text-cream mx-auto mb-7 max-w-xl text-base leading-relaxed">
+              {lead}
+            </p>
+          </div>
 
           <div className="flex justify-center">
             {isExternal ? (

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { PortableTextBlock } from "@portabletext/react";
-import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { SectionHeader } from "@/components/design-system/SectionHeader";
 import { HorizontalSlider } from "@/components/design-system/HorizontalSlider";
 import { NewsCard, type NewsCardBg } from "@/components/article/NewsCard";
 import { articleTypeCardLabel } from "@/lib/utils/article-type-label";
@@ -88,19 +87,20 @@ import { cn } from "@/lib/utils/cn";
  * analytics emissions — the row stays a pure display primitive in
  * isolation.
  *
- * **Not VR-tagged.** Page-composition surface; Playwright e2e owns the
- * per-route smoke. Component-level VR for the underlying primitives
- * (`<NewsCard>`, `<EditorialHeading>`, `<HorizontalSlider>`) already exists.
+ * VR-tagged (`Features/Related/RelatedRow`) alongside the underlying
+ * primitives' own component-level VR (`<NewsCard>`, `<SectionHeader>`,
+ * `<HorizontalSlider>`); Playwright e2e owns the per-route smoke.
  */
 export interface RelatedRowProps {
   items: RelatedRowItem[];
   /**
    * Optional heading override. Defaults to "Blijf nog even hangen." with the
-   * accent decorator on "hangen." Provide a PT block array to author a
-   * different accent split (rare); strings are not supported here because
-   * the heading's accent geometry depends on PT marks.
+   * accent decorator on "hangen." No caller overrides this today — the
+   * accent is fixed to that word, so a custom heading here renders without
+   * one (`<SectionHeader>`'s `emphasis` silently no-ops when its text isn't
+   * found, same as `<EditorialHeading>`).
    */
-  heading?: PortableTextBlock[];
+  heading?: string;
   /**
    * Surfacing page context for analytics. When both `pageType` and
    * `pageSlug` are set, the row emits `related_content_shown` on mount
@@ -119,18 +119,7 @@ export interface RelatedRowProps {
   className?: string;
 }
 
-const DEFAULT_HEADING: PortableTextBlock[] = [
-  {
-    _type: "block",
-    _key: "related-row-heading",
-    style: "normal",
-    markDefs: [],
-    children: [
-      { _type: "span", _key: "r1", text: "Blijf nog even ", marks: [] },
-      { _type: "span", _key: "r2", text: "hangen.", marks: ["accent"] },
-    ],
-  } as PortableTextBlock,
-];
+const DEFAULT_HEADING = "Blijf nog even hangen.";
 
 // R3 per-articleType card-background lookup. Drives both `<NewsGrid>`
 // and `<RelatedRow>` so related-articles read with the same chrome
@@ -266,14 +255,11 @@ export function RelatedRow({
         className="mx-auto w-full"
         style={{ maxWidth: "var(--container-wide)" }}
       >
-        <EditorialHeading
-          level={2}
+        <SectionHeader
+          title={heading}
           size="display-md"
-          tone="ink"
-          className="mb-10"
-        >
-          {heading}
-        </EditorialHeading>
+          emphasis={{ text: "hangen." }}
+        />
         {/* ART-2 (#2237): a roomier gap than the cards need cramped in —
             `gap-6 md:gap-8` is now `<HorizontalSlider>`'s own default
             (#2444 resolution), so no override is needed here any more. */}

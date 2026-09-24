@@ -57,17 +57,22 @@ export function SearchMasthead({
       />
 
       <PageContainer width="index" className="relative py-12 md:py-14">
-        <EditorialHeading
-          level={1}
-          size="display-xl"
-          tone="cream"
-          emphasis={{ text: accent, tone: "warm" }}
-          className="mb-6"
-        >
-          {heading}
-        </EditorialHeading>
+        {/* Column gap, not a heading margin — mirrors <EditorialHeroShell>'s
+            own editorial column (flex flex-col gap-*): the air between the
+            heading and the field belongs to this composition, not to
+            <EditorialHeading> itself (#2552 rule 4). */}
+        <div className="flex flex-col gap-6">
+          <EditorialHeading
+            level={1}
+            size="display-xl"
+            tone="cream"
+            emphasis={{ text: accent, tone: "warm" }}
+          >
+            {heading}
+          </EditorialHeading>
 
-        {children}
+          {children}
+        </div>
 
         {hint && (
           <p className="text-cream-quiet text-mono-sm mt-3.5 font-mono tracking-[0.03em]">

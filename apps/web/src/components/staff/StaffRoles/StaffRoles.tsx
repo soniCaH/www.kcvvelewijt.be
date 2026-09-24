@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
-import { EditorialHeading } from "@/components/design-system/EditorialHeading";
-import { PageContainer } from "@/components/design-system";
+import { PageContainer, SectionHeader } from "@/components/design-system";
 import { ArrowRight } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
 
@@ -56,14 +55,11 @@ export function StaffRoles({
 
   return (
     <PageContainer as="section" className={cn("py-12 sm:py-16", className)}>
-      <EditorialHeading
-        level={2}
+      <SectionHeader
+        title="Rol & verantwoordelijkheden"
         size="display-md"
         emphasis={{ text: ".", tone: "warm" }}
-        className="mb-6"
-      >
-        {"Rol & verantwoordelijkheden"}
-      </EditorialHeading>
+      />
 
       {positions.length > 0 ? (
         <div className="flex flex-col gap-2.5">

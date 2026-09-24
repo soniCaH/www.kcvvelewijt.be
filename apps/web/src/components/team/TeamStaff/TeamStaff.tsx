@@ -40,6 +40,16 @@ export interface TeamStaffProps {
    * and the notice, not the per-card label itself.
    */
   unlabelledNotice?: boolean;
+  /**
+   * Forwarded to `<PersonCardRun>`'s own `hideHeading` (#2638) — suppress the
+   * visible mono-caps run heading while `heading` still carries the
+   * section's `aria-label`. Default `false` (unchanged for `/ploegen/[slug]`,
+   * which has no other visible label for the run). `<BestuurPage>` sets this
+   * once it adopts `<SectionHeader>` for "De leden" directly above this
+   * component (#2572) — without it, the page would print "De leden" twice:
+   * once as the display heading, once as `<PersonCardRun>`'s own run label.
+   */
+  hideHeading?: boolean;
 }
 
 // Editorial role bucket → capitalised label (fallback when functionTitle null).
@@ -94,6 +104,7 @@ export function TeamStaff({
   staff,
   heading,
   unlabelledNotice = false,
+  hideHeading = false,
 }: TeamStaffProps) {
   if (staff.length === 0) return null;
 
@@ -111,7 +122,11 @@ export function TeamStaff({
 
   return (
     <>
-      <PersonCardRun label={heading} data-testid="team-staff-grid">
+      <PersonCardRun
+        label={heading}
+        hideHeading={hideHeading}
+        data-testid="team-staff-grid"
+      >
         {ordered.map(({ member, label }) => (
           <PlayerCard
             key={member.id}

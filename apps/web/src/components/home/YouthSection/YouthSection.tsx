@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils/cn";
 import {
-  EditorialHeading,
   LinkButton,
   MonoLabel,
+  SectionHeader,
   StripedSeam,
 } from "@/components/design-system";
 
@@ -42,24 +42,17 @@ export const YouthSection = ({ className, stats }: YouthSectionProps) => (
     </div>
 
     <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
-      <div className="mb-4">
-        <MonoLabel size="md" tone="cream">
-          Word jeugdspeler
-        </MonoLabel>
-      </div>
-
-      <EditorialHeading
-        level={2}
+      <SectionHeader
+        kicker={[{ label: "Word jeugdspeler", size: "md" }]}
+        title="De toekomst van Elewijt."
         size="display-lg"
-        tone="cream"
+        variant="dark"
         // Emphasis shifts from "De toekomst" to "Elewijt" per brief §8
         // (R5.B). The accent lands on the club name, not the abstract
         // concept of the future.
         emphasis={{ text: "Elewijt", tone: "warm" }}
-        className="mb-6 max-w-3xl"
-      >
-        De toekomst van Elewijt.
-      </EditorialHeading>
+        className="max-w-3xl"
+      />
 
       {/* Full cream — DESIGN.md "The Whole-Cream Rule". */}
       <p className="text-cream mb-6 max-w-xl text-base leading-relaxed">
