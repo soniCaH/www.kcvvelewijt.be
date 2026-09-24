@@ -57,20 +57,19 @@ function list(entries: TallyEntry[]): string {
  * actually run" arithmetic are testable without a browser.
  */
 export function summaryMarkdown(tally: RunTally): string {
-  const { passed, flaky, skipped, status } = tally;
-  const failed = tally.failed.length;
+  const { passed, failed, flaky, skipped, status } = tally;
   const unverified = flaky.length + skipped.length;
-  const total = passed + failed + unverified;
+  const total = passed + failed.length + unverified;
   // A run is only green when nothing failed AND Playwright itself is happy —
   // `timedout` / `interrupted` leave `failed` at 0 with nothing verified.
-  const green = failed === 0 && status === "passed";
+  const green = failed.length === 0 && status === "passed";
 
   const lines = [
     "### E2E run",
     "",
     "| passed | failed | flaky | skipped |",
     "| -----: | -----: | ----: | ------: |",
-    `| ${passed} | ${failed} | ${flaky.length} | ${skipped.length} |`,
+    `| ${passed} | ${failed.length} | ${flaky.length} | ${skipped.length} |`,
     "",
   ];
 
@@ -81,8 +80,8 @@ export function summaryMarkdown(tally: RunTally): string {
 
   if (!green) {
     lines.push(
-      failed > 0
-        ? `**${failed} of ${total} tests failed.**`
+      failed.length > 0
+        ? `**${failed.length} of ${total} tests failed.**`
         : `**No test failed, but the suite ended \`${status}\`.**`,
       "",
     );
@@ -99,8 +98,8 @@ export function summaryMarkdown(tally: RunTally): string {
     );
   }
 
-  if (failed > 0) {
-    lines.push("#### Failed", list(tally.failed), "");
+  if (failed.length > 0) {
+    lines.push("#### Failed", list(failed), "");
   }
   if (flaky.length > 0) {
     lines.push(

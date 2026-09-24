@@ -107,7 +107,9 @@ jobs:
         env:
           # The github-summary reporter writes its tally here as JSON; the
           # red-main alert reads it back to name what failed (#3134).
-          E2E_TALLY_FILE: ${{ runner.temp }}/e2e-tally.json
+          # Relative to apps/web, not `runner.temp`: this job runs in a
+          # container, where `runner.temp` names a host path it cannot see.
+          E2E_TALLY_FILE: e2e-tally.json
           # Same env required at runtime by `next start` for SSR data fetching.
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
@@ -129,13 +131,13 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      # Read by main-red-alert.yml by this exact name.
+      # Read by main-red-alert.yml by this exact name — only on a red run.
       - name: Upload the run's tally
-        if: ${{ !cancelled() }}
+        if: failure()
         uses: actions/upload-artifact@v7.0.1
         with:
           name: e2e-tally
-          path: ${{ runner.temp }}/e2e-tally.json
+          path: apps/web/e2e-tally.json
           if-no-files-found: ignore
           retention-days: 14
 
