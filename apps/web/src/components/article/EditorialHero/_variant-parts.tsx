@@ -61,7 +61,7 @@ export function HeroCreditChip({ subject }: HeroCreditChipProps) {
         aria-hidden="true"
         className={cn(
           "relative inline-flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full",
-          "bg-jersey-deep text-xs font-semibold text-white",
+          "bg-jersey-deep text-cream text-xs font-semibold",
         )}
       >
         {subject.photoUrl ? (

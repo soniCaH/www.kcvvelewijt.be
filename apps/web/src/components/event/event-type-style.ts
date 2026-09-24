@@ -17,15 +17,23 @@ export const DEFAULT_EVENT_TYPE: EventType = "Andere";
 
 /**
  * Single source of truth for the per-type fill (background + text colour),
- * shared by `<TicketStub>`'s tear-off date block and `EVENT_TYPE_TABS`
- * below (`/kalender` + `/evenementen`, #2429/#2564 — absorbed the former
- * bespoke `EventFilterBar`/`KalenderFilterBar`), so the filter row stays a
- * faithful legend for the tickets it labels (design lock 6e2). The text
- * tone follows the WCAG contrast rule — small text on jersey-deep uses
- * white, not cream. Keeping one map means a category re-tint can never
- * drift the chip out of sync with its ticket.
+ * shared by `<TicketStub>`'s tear-off date block, the `CalendarMonth`/
+ * `CalendarWeek` day chips, `calendar-tags.tsx`'s `<EventTag>`, and
+ * `EVENT_TYPE_TABS` below (`/kalender` + `/evenementen`, #2429/#2564 —
+ * absorbed the former bespoke `EventFilterBar`/`KalenderFilterBar`), so the
+ * filter row stays a faithful legend for the tickets it labels (design lock
+ * 6e2). Keeping one map means a category re-tint can never drift the chip
+ * out of sync with its ticket. `Clubevent`'s white text is a parked
+ * design-system decision, not a WCAG rule — see the comment on it below.
  */
 export const EVENT_TYPE_FILL = {
+  // Kept white, not cream (#2421 audit): this value feeds <FilterTabs>'s
+  // selected "Clubevent" chip below (EVENT_TYPE_TABS.Clubevent.color.fill) —
+  // a primitive's selected-state colour, so reconciling it to cream is the
+  // FilterTabs/MonoLabel owner's call, not this map's. TicketStub,
+  // CalendarMonth/CalendarWeek and calendar-tags.tsx inherit the same white
+  // from this one shared value, not because any of them individually needs
+  // it — parked alongside the same decision.
   Clubevent: "bg-jersey-deep text-white",
   Supportersactiviteit: "bg-warm text-ink",
   Jeugdwerking: "bg-jersey-bright text-ink",

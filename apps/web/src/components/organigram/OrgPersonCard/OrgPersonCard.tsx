@@ -308,7 +308,7 @@ export function OrgPersonCard({
       {node.roleCode && (
         <span
           data-testid="org-person-card-rolepill"
-          className="border-ink bg-jersey-deep absolute top-2 right-2 border-[1.5px] px-1.5 py-px font-mono text-[11px] font-semibold tracking-[0.05em] text-white uppercase"
+          className="border-ink bg-jersey-deep text-cream absolute top-2 right-2 border-[1.5px] px-1.5 py-px font-mono text-[11px] font-semibold tracking-[0.05em] uppercase"
         >
           {node.roleCode}
         </span>

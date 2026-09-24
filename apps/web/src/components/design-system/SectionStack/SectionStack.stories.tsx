@@ -276,14 +276,14 @@ export const BackdroppedSection: Story = {
         bg: "jersey-deep",
         backdrop: <MockBackdrop />,
         content: (
-          <div className="mx-auto flex max-w-[var(--container-index)] flex-col gap-2 px-4 py-8 text-white md:px-8">
-            <span className="text-xs font-bold tracking-widest uppercase opacity-70">
+          <div className="text-cream mx-auto flex max-w-[var(--container-index)] flex-col gap-2 px-4 py-8 md:px-8">
+            <span className="text-xs font-bold tracking-widest uppercase">
               Backdropped section
             </span>
             <span className="text-2xl font-bold">
               Content sits at z-10 above the backdrop
             </span>
-            <span className="text-sm opacity-80">
+            <span className="text-sm">
               The backdrop extends past its own wrapper into the adjacent
               <code> StripedSeam</code> strips above and below, bleeding through
               the transparent seam SVG.
