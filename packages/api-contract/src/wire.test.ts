@@ -152,6 +152,33 @@ describe("the BFF wire round-trips every api-contract schema", () => {
   );
 });
 
+// A path id decodes to a whole number or not at all: "1.5" and "NaN" get a
+// 400 at the BFF and never reach PSD.
+const pathIds: Array<[string, Array<string>]> = [
+  ["getMatchesByTeam", ["teamId"]],
+  ["getMatchDetail", ["matchId"]],
+  ["getPlayerStats", ["memberId"]],
+  ["getOpponentHistory", ["teamId", "clubId"]],
+  ["getRanking", ["teamId"]],
+];
+
+describe("the producer rejects a path id that is not a whole number", () => {
+  it.each(
+    pathIds.flatMap(([endpoint, ids]) =>
+      ids.flatMap((id) =>
+        ["1.5", "NaN", "Infinity"].map(
+          (bad) => [endpoint, id, bad, ids] as const,
+        ),
+      ),
+    ),
+  )("%s %s = %s", (endpoint, id, bad, ids) => {
+    const path = consumerSends.find(([name]) => name === `${endpoint} path`);
+    expect(path).toBeDefined();
+    const input = Object.fromEntries(ids.map((k) => [k, k === id ? bad : "1"]));
+    expect(() => S.decodeUnknownSync(path![1])(input)).toThrow(/integer/);
+  });
+});
+
 describe("no schema sends a number JSON cannot carry", () => {
   it.each(all)("%s", (_, schema) => {
     expect(bareNumbers(schema.ast)).toEqual([]);
