@@ -66,6 +66,7 @@ export function CtaBand({
             size="display-lg"
             tone="cream"
             emphasis={emphasis}
+            // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: heading-to-lead air inside a CTA band composition, not a section heading — the fix is a gap on this composition, not a <SectionHeader> adoption (#2554 rule 6)
             className="mb-4"
           >
             {heading}

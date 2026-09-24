@@ -56,6 +56,7 @@ export const YouthSection = ({ className, stats }: YouthSectionProps) => (
         // (R5.B). The accent lands on the club name, not the abstract
         // concept of the future.
         emphasis={{ text: "Elewijt", tone: "warm" }}
+        // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: homepage section, owned by the homepage critique map (#2402/#2506), not this ticket's adoption list
         className="mb-6 max-w-3xl"
       >
         De toekomst van Elewijt.

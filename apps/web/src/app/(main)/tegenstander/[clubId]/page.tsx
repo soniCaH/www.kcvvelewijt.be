@@ -313,6 +313,7 @@ function SquadHistorySection({
 
   return (
     <section aria-label={section.squadLabel} className={className}>
+      {/* eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: this route (/tegenstander/[clubId]) sits outside the cross-page-consistency map's scope, so it has no SectionHeader-adoption owner (#2554 rule 6) */}
       <EditorialHeading level={2} size="display-sm" className="mb-4">
         {section.squadLabel}
       </EditorialHeading>
@@ -334,6 +335,7 @@ function SquadHistorySection({
         level={3}
         size="display-sm"
         emphasis={{ text: ".", tone: "warm" }}
+        // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: this route (/tegenstander/[clubId]) sits outside the cross-page-consistency map's scope, so it has no SectionHeader-adoption owner (#2554 rule 6)
         className="mb-4"
       >
         {countLabel}

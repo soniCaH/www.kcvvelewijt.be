@@ -227,6 +227,11 @@ const eslintConfig = [
           message:
             "Fractional cream text — on dark, body voice is text-cream and metadata is text-cream-quiet, never on jersey-deep (apps/web/DESIGN.md → Colors, the Two-Tier Text Rule and the Whole-Cream Rule).",
         },
+        {
+          selector: 'JSXOpeningElement[name.name="EditorialHeading"] > JSXAttribute[name.name="className"] > Literal[value=/(^|\\s|:)(mb|my)-(?!0)/]',
+          message:
+            "A section heading's bottom margin belongs to <SectionHeader> (mb-8 sm:mb-10, #2552 rule 5). <EditorialHeading> carries no margin of its own (#2552 rule 4). Whether this heading should be a <SectionHeader> is a judgement this rule does not make.",
+        },
       ],
     },
   },

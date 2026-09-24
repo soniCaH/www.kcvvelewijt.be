@@ -270,6 +270,7 @@ export function RelatedRow({
           level={2}
           size="display-md"
           tone="ink"
+          // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: read-next row, owned by the article reading-column map (#2519), not this ticket's adoption list
           className="mb-10"
         >
           {heading}

@@ -62,6 +62,7 @@ export function SearchMasthead({
           size="display-xl"
           tone="cream"
           emphasis={{ text: accent, tone: "warm" }}
+          // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: this is a page-opening hero (level=1), excluded from SectionHeader adoption by rule 6's own test (#2552)
           className="mb-6"
         >
           {heading}

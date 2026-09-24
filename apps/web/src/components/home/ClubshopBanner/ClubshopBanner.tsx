@@ -62,6 +62,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
               size="display-lg"
               tone="cream"
               emphasis={{ text: "clubkledij", tone: "warm" }}
+              // eslint-disable-next-line no-restricted-syntax -- #2552 rule 4: homepage band, owned by the homepage critique map (#2402/#2506), not this ticket's adoption list
               className="mb-4"
             >
               Onze clubkledij
