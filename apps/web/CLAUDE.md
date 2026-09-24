@@ -188,6 +188,23 @@ Three independent test layers, each owning a specific concern. Don't blur them �
 
 **Never `await import()` a page, layout, or route module inside an `it()` body** — Vitest charges dynamic imports against `testTimeout`, while top-level imports are paid during the untimed collect phase. A page graph takes ~3 s to resolve, so an in-body import fails deterministically under CI contention (#2362). The same goes for any module the code under test dynamically imports. Hoist it below the `vi.mock` calls (Vitest hoists those above all module-level code). Prefer a static `import`; use `await import()` only when a mock factory closes over a `const` in the file, which a static import would hoist above → TDZ (see `(main)/ploegen/(index)/page.test.tsx`).
 
+### A test may not use more than half its own timeout
+
+**The budget: a test body spends at most half its own timeout** — 2 500 ms under Vitest's default 5 000 ms, or half of a timeout the test sets itself (`pre-commit.test.ts` passes `60_000` because it spawns real ESLint). This holds in every Vitest workspace. A test over budget is one slow runner from red, so fix the cause: assert once over collected violations instead of once per loop iteration (`player-figure-variant.test.ts`, #3128), and put a debounce or delay on fake timers (`vi.useFakeTimers()` + `userEvent.setup({ advanceTimers: vi.advanceTimersByTime })`, as `SearchInterface.test.tsx` does) instead of a real-clock `waitFor`. **Never raise the timeout to make room.** Under fake timers, Testing Library's `waitFor` steps the clock only if it sees a `jest` global, so stub one: `vi.stubGlobal("jest", { advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms) })`.
+
+**No lint rule enforces this, on purpose.** The expensive shape (assertions inside a loop) is visible in the source, but its cost comes from the iteration count, which no selector can see: 9 of the 10 files with `expect()` inside a loop iterate a handful of fixtures and cost nothing (#3126 D5).
+
+**Check it on demand from CI logs, never with a new run.** Vitest already prints every test over 300 ms, with its duration, in each CI log. This lists every test at or over 2 500 ms in the last 30 `ci.yml` runs, slowest first:
+
+```bash
+gh run list --workflow ci.yml -L 30 --json databaseId --jq '.[].databaseId' |
+  while read -r id; do gh run view "$id" --log 2>/dev/null; done |
+  perl -ne 's/\e\[[0-9;]*m//g; print "$2\t$1\n" if / {5,}\S+ (.+?) +(\d+)ms$/ && $2 >= 2500' |
+  sort -t$'\t' -k1,1nr | awk -F'\t' '!seen[$2]++'
+```
+
+A hit is a breach only if it is over half **its own** timeout. **A breach opens an issue; it never turns a check red** — a slow runner is not a regression. The census on 2026-09-24 (28 runs, 13 of which ran the web tests) found zero breaches. The only hit was `pre-commit.test.ts` at 4 299 ms of a 60 000 ms timeout, and the slowest default-timeout test was `trigger-psd-sync.test.ts` at 2 132 ms (#3143).
+
 ### Running the suites
 
 `docs/agents/testing-ops.md` is the operational manual for the bottom two layers — how to run and scope a VR capture, the Docker memory floor, the `vr` / `vr-skip` / `vr.disable` tag contracts, the decision tree on a failing VR job, baseline-update flow, e2e local workflow, and CI path triggers. **Read it before running or debugging either suite**; don't reconstruct the commands from memory.

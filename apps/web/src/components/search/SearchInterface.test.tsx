@@ -82,10 +82,24 @@ vi.mock("./useSemanticAugment", () => ({
 }));
 const mockUseSemanticAugment = vi.mocked(useSemanticAugment);
 
+// The file runs on fake timers (see `beforeEach`), so user-event must step
+// the fake clock between keystrokes instead of sleeping on the real one.
+const setupUser = () =>
+  userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
 describe("SearchInterface", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    // Fake timers, so SearchForm's 350ms typeahead debounce is simulated
+    // time, not a stopwatch race against the `waitFor` budget (#3143).
+    // Testing Library only drives fake timers inside `waitFor` when it sees
+    // a `jest` global, so hand it Vitest's clock under that name.
+    vi.useFakeTimers();
+    vi.stubGlobal("jest", {
+      advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms),
+    });
+
     // Reset the URL store to prevent cross-test leakage
     searchParamsStore.set(new URLSearchParams());
 
@@ -101,6 +115,7 @@ describe("SearchInterface", () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.clearAllMocks();
     vi.unstubAllGlobals();
   });
@@ -193,7 +208,7 @@ describe("SearchInterface", () => {
 
   describe("Search Submission", () => {
     it("should perform search when form is submitted", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -217,7 +232,7 @@ describe("SearchInterface", () => {
     });
 
     it("should update URL when search is submitted", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -238,7 +253,7 @@ describe("SearchInterface", () => {
     });
 
     it("should include type in URL when filter is active", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -262,7 +277,7 @@ describe("SearchInterface", () => {
     });
 
     it("should trim whitespace from query", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("trimmed");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -288,7 +303,7 @@ describe("SearchInterface", () => {
 
   describe("Fetch Behavior", () => {
     it("should display loading state during fetch", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       let resolvePromise: (value: unknown) => void;
       const promise = new Promise((resolve) => {
         resolvePromise = resolve;
@@ -322,7 +337,7 @@ describe("SearchInterface", () => {
     });
 
     it("should display error when fetch fails", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       render(<SearchInterface />);
@@ -339,7 +354,7 @@ describe("SearchInterface", () => {
     });
 
     it("should display error when response is not ok", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       fetchMock.mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -359,7 +374,7 @@ describe("SearchInterface", () => {
     });
 
     it("should display results after successful fetch", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -380,7 +395,7 @@ describe("SearchInterface", () => {
     });
 
     it("should not fetch when query is less than 2 characters", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
 
       render(<SearchInterface />);
 
@@ -399,7 +414,7 @@ describe("SearchInterface", () => {
     });
 
     it("should clear results when query becomes empty", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -434,7 +449,7 @@ describe("SearchInterface", () => {
 
   describe("Request Cancellation", () => {
     it("should use AbortController for fetch requests", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -460,7 +475,7 @@ describe("SearchInterface", () => {
     });
 
     it("should abort previous request when new search is submitted", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       let firstRequestAborted = false;
 
       // First request that never resolves (manually controlled)
@@ -512,7 +527,7 @@ describe("SearchInterface", () => {
     });
 
     it("should not update state when request is aborted", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
 
       // Mock that throws AbortError
       fetchMock.mockImplementationOnce(() => {
@@ -530,18 +545,13 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       // Should not display error for aborted request
-      await waitFor(
-        () => {
-          expect(
-            screen.queryByText(/er ging iets mis/i),
-          ).not.toBeInTheDocument();
-        },
-        { timeout: 1000 },
-      );
+      await waitFor(() => {
+        expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+      });
     });
 
     it("should abort in-flight request on unmount", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       let capturedSignal: AbortSignal | undefined;
 
       fetchMock.mockImplementationOnce(
@@ -570,7 +580,7 @@ describe("SearchInterface", () => {
 
   describe("Filter Changes", () => {
     it("should update URL when filter is changed", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -592,7 +602,7 @@ describe("SearchInterface", () => {
     });
 
     it("should not refetch when filter is changed", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -617,7 +627,7 @@ describe("SearchInterface", () => {
     });
 
     it("should remove type from URL when 'all' filter is selected", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -639,7 +649,7 @@ describe("SearchInterface", () => {
     });
 
     it("does not fire search_filter_changed or push the URL when the active chip is re-pressed (dedup guard, #2449)", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -668,7 +678,7 @@ describe("SearchInterface", () => {
     });
 
     it("still fires exactly one search_filter_changed carrying the new type when a different type is selected (#2449)", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -709,12 +719,9 @@ describe("SearchInterface", () => {
       render(<SearchInterface />);
 
       // Should initialize input with URL query
-      await waitFor(
-        () => {
-          expect(screen.getByRole("textbox")).toHaveValue("initial");
-        },
-        { timeout: 3000 },
-      );
+      await waitFor(() => {
+        expect(screen.getByRole("textbox")).toHaveValue("initial");
+      });
 
       // Should perform search with URL query
       expect(fetchMock).toHaveBeenCalledWith(
@@ -754,7 +761,7 @@ describe("SearchInterface", () => {
 
   describe("Loading States", () => {
     it("disables the submit button during loading; the input stays enabled (ZOEK-2)", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       let resolvePromise: (value: unknown) => void;
       const promise = new Promise((resolve) => {
         resolvePromise = resolve;
@@ -788,7 +795,7 @@ describe("SearchInterface", () => {
     });
 
     it("keeps the search field focused while a debounced auto-search loads (ZOEK-2)", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       // Every fetch hangs so isLoading stays true through the typing window.
       const pending = new Promise(() => {});
       fetchMock.mockReturnValue(pending);
@@ -818,7 +825,7 @@ describe("SearchInterface", () => {
     });
 
     it("should show spinner during loading", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       // Promise intentionally left unresolved - AbortController cleanup
       // on test teardown prevents post-test state update warnings
       const promise = new Promise(() => {});
@@ -839,7 +846,7 @@ describe("SearchInterface", () => {
     });
 
     it("should hide spinner after loading completes", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -862,7 +869,7 @@ describe("SearchInterface", () => {
 
   describe("Error Handling", () => {
     it("should clear error when new search is started", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
 
       // First search fails
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
@@ -922,9 +929,7 @@ describe("SearchInterface", () => {
         ([eventName]) => eventName === "search_failed",
       );
 
-    async function submitFailingSearch(
-      user: ReturnType<typeof userEvent.setup>,
-    ) {
+    async function submitFailingSearch(user: ReturnType<typeof setupUser>) {
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
       render(<SearchInterface />);
 
@@ -968,7 +973,7 @@ describe("SearchInterface", () => {
     }
 
     it("suppresses the failure notice once the semantic lane settles to a high-confidence answer, and still counts the failure", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
       await submitFailingSearch(user);
 
@@ -1006,7 +1011,7 @@ describe("SearchInterface", () => {
     });
 
     it("renders the failure notice, once settled, when the semantic lane has no high-confidence answer", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
       await submitFailingSearch(user);
 
@@ -1033,7 +1038,7 @@ describe("SearchInterface", () => {
     });
 
     it("renders the failure notice, once settled, when both the lexical and semantic lanes are down", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
       await submitFailingSearch(user);
 
@@ -1063,7 +1068,7 @@ describe("SearchInterface", () => {
     });
 
     it("never suppresses the notice for the low-confidence 'Gerelateerd' lane", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
       await submitFailingSearch(user);
 
@@ -1088,7 +1093,7 @@ describe("SearchInterface", () => {
 
     it("fires search_failed exactly once per failed search, even once already-settled and later re-settled again", async () => {
       mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
-      const user = userEvent.setup();
+      const user = setupUser();
       await submitFailingSearch(user);
 
       settleAugment({ kind: "none" });
@@ -1122,7 +1127,7 @@ describe("SearchInterface", () => {
 
   describe("Results Display", () => {
     it("should show filters when results are loaded", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1143,7 +1148,7 @@ describe("SearchInterface", () => {
     });
 
     it("should pass correct counts to filters", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       // Mock response has specific counts from mockSearchResults
       fetchMock.mockResolvedValueOnce({
@@ -1159,8 +1164,10 @@ describe("SearchInterface", () => {
       const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
       await user.click(submitButton);
 
+      // The filters render while the fetch is still loading, with zero counts —
+      // wait for the results, not for the group.
       await waitFor(() => {
-        expect(screen.getByRole("group")).toBeInTheDocument();
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
       });
 
       // Verify total count is displayed on the "Alles" tab
@@ -1180,7 +1187,7 @@ describe("SearchInterface", () => {
     });
 
     it("should show help text when query is 1 character", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
 
       render(<SearchInterface />);
 
@@ -1191,7 +1198,7 @@ describe("SearchInterface", () => {
     });
 
     it("should hide help text when query is 2+ characters", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("ab");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1214,7 +1221,7 @@ describe("SearchInterface", () => {
     });
 
     it("should not show results during loading", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       // Promise intentionally left unresolved - AbortController cleanup
       // on test teardown prevents post-test state update warnings
       const promise = new Promise(() => {});
@@ -1237,7 +1244,7 @@ describe("SearchInterface", () => {
     });
 
     it("should not show results when error occurs", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       render(<SearchInterface />);
@@ -1258,7 +1265,7 @@ describe("SearchInterface", () => {
 
   describe("Integration", () => {
     it("should complete full search flow", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("football");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1294,7 +1301,7 @@ describe("SearchInterface", () => {
     });
 
     it("should handle search, filter, then new search", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
 
       // First search
       const mockResponse1 = createMockSearchResponse("first");
@@ -1349,7 +1356,7 @@ describe("SearchInterface", () => {
     });
 
     it("does not silently drop a filter click made before the previous push's useSearchParams() catches up (1a)", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       setMockSearchParams({ q: "test" });
 
       render(<SearchInterface />);
@@ -1378,7 +1385,7 @@ describe("SearchInterface", () => {
     });
 
     it("does not let a stale address bar clobber the query just submitted, when a filter click follows it (1b)", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("nieuw");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1418,7 +1425,7 @@ describe("SearchInterface", () => {
     // `useSearchParams()` (see the mock block at the top of this file).
 
     it("issues exactly one fetch when a search is submitted", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1439,7 +1446,7 @@ describe("SearchInterface", () => {
     });
 
     it("issues exactly one fetch for a 350ms typeahead pause", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("typeah");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1453,12 +1460,11 @@ describe("SearchInterface", () => {
       // `onSearch` once typing stops (ZOEK-2).
       await user.type(input, "typeah");
 
-      await waitFor(
-        () => {
-          expect(fetchMock).toHaveBeenCalled();
-        },
-        { timeout: 1000 },
-      );
+      // The debounce, on the fake clock: nothing at 349ms, the fetch at 350ms.
+      await act(() => vi.advanceTimersByTimeAsync(349));
+      expect(fetchMock).not.toHaveBeenCalled();
+      await act(() => vi.advanceTimersByTimeAsync(1));
+      expect(fetchMock).toHaveBeenCalled();
 
       // Give a redundant, effect-driven second fetch a chance to land before
       // asserting the final count.
@@ -1470,7 +1476,7 @@ describe("SearchInterface", () => {
     });
 
     it("retries with a fresh fetch when the identical query is resubmitted after a failed search", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
 
       render(<SearchInterface />);
@@ -1606,12 +1612,9 @@ describe("SearchInterface", () => {
         </StrictMode>,
       );
 
-      await waitFor(
-        () => {
-          expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
-        },
-        { timeout: 2000 },
-      );
+      await waitFor(() => {
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+      });
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
   });
@@ -1622,7 +1625,7 @@ describe("SearchInterface", () => {
     // drive the component through type-and-submit so they exercise the
     // render-loop path this ticket fixes.
     it("does not re-fire search_results_shown when nothing about the results, query, filter or load state changed", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1662,7 +1665,7 @@ describe("SearchInterface", () => {
     });
 
     it("does not re-fire search_no_results when nothing about the results, query, filter or load state changed", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("nothing", []);
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1696,7 +1699,7 @@ describe("SearchInterface", () => {
     });
 
     it("still re-reports exactly once when switching to a different type filter", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1872,7 +1875,7 @@ describe("SearchInterface", () => {
     });
 
     it("does not resurrect a stale search_no_results after the query drops below the 2-char threshold and returns to a previously-settled query", async () => {
-      const user = userEvent.setup();
+      const user = setupUser();
       const mockResponse = createMockSearchResponse("test");
       fetchMock.mockResolvedValueOnce({
         ok: true,
