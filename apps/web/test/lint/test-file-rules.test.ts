@@ -21,6 +21,8 @@ const WINDOW_SIZE_WRITES = [
   "globalThis.innerWidth = 500;",
   'window["innerWidth"] = 500;',
   "innerWidth = 500;",
+  "window.innerWidth++;",
+  "--innerHeight;",
   'Object.defineProperty(window, "innerWidth", { value: 500 });',
   'vi.stubGlobal("innerWidth", 500);',
   'vi.spyOn(window, "innerWidth", "get").mockReturnValue(500);',

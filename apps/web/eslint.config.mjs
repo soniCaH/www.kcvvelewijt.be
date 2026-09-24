@@ -52,11 +52,13 @@ const fixedPort = (prefix = "") =>
 const FIXED_PORT_LISTEN = `CallExpression[callee.property.name='listen'] > :first-child:matches(${fixedPort()}, ObjectExpression:has(> Property[key.name='port']:matches(${fixedPort("value.")})))`;
 
 // A test may not write innerWidth/innerHeight (#3142): Vitest's window shim
-// swallows the write. Covers `window.innerWidth =`, `window["innerWidth"] =`,
-// a bare `innerWidth =`, and any call naming the key — `defineProperty`,
-// `vi.stubGlobal`, `vi.spyOn`. See apps/web/CLAUDE.md.
+// swallows the write. Covers `=`, `+=` and `++`/`--` on `window.innerWidth`,
+// `window["innerWidth"]` or a bare `innerWidth`, and any call naming the key —
+// `defineProperty`, `vi.stubGlobal`, `vi.spyOn`. See apps/web/CLAUDE.md.
 const WINDOW_SIZE_KEY = "/^inner(Width|Height)$/";
-const WINDOW_SIZE_WRITE = `AssignmentExpression[left.object.name=/^(window|globalThis|self|global)$/][left.property.name=${WINDOW_SIZE_KEY}], AssignmentExpression[left.object.name=/^(window|globalThis|self|global)$/][left.property.value=${WINDOW_SIZE_KEY}], AssignmentExpression[left.name=${WINDOW_SIZE_KEY}], CallExpression > Literal.arguments[value=${WINDOW_SIZE_KEY}]`;
+const WRITE_TARGET =
+  "AssignmentExpression > .left, UpdateExpression > .argument";
+const WINDOW_SIZE_WRITE = `MemberExpression:matches(${WRITE_TARGET})[object.name=/^(window|globalThis|self|global)$/]:matches([property.name=${WINDOW_SIZE_KEY}], [property.value=${WINDOW_SIZE_KEY}]), Identifier:matches(${WRITE_TARGET})[name=${WINDOW_SIZE_KEY}], CallExpression > Literal.arguments[value=${WINDOW_SIZE_KEY}]`;
 
 // Motion Vocabulary bans — DESIGN.md → Motion (#2658). #2650's `@theme`
 // resets (`--ease-*: initial`, `--animate-*: initial`) already make most of
