@@ -205,6 +205,14 @@ export const ARTICLE_BY_SLUG_QUERY =
     "imageUrl": photo.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "role": functionTitle
+  },
+  // Optional closing band (#2525) — the object exists on every article, but
+  // is empty (all fields null) unless an editor filled it in. Same reference
+  // shape the body's internalLink mark already projects, so
+  // <ArticleCtaBand> resolves it through the same resolveInternalLinkHref.
+  callToAction{
+    question, emphasis, lead, buttonLabel, href,
+    "reference": reference->{ _type, "slug": slug.current, psdId, archived }
   }
 }`);
 

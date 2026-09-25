@@ -35,10 +35,12 @@ export interface CtaBandProps {
  * full-width `bg-jersey-deep-dark` section (`border-y-2 border-ink`) carrying an
  * italic-display question + sub-line + a `warm` paper-stamp button (the
  * dark-surface `inverted` variant recoloured to `bg-warm`, canonical
- * press-down). Shared by `<SponsorCtaBand>` and `<JeugdCtaBand>`.
+ * press-down). Shared by `<SponsorCtaBand>`, `<JeugdCtaBand>`,
+ * `<BoardCtaBand>`, and `<ArticleCtaBand>` (the article-foot variant, #2525).
  *
- * Render this full-bleed — as the last element of a page, outside its centered
- * content container — so the band and its seam span the viewport.
+ * Render this full-bleed, outside its centered content container, so the
+ * band and its seam span the viewport — as the last element of a page, or
+ * directly before a page's `<RelatedRow>` (the article-foot position).
  */
 export function CtaBand({
   ariaLabel,

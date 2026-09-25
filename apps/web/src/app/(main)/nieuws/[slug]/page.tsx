@@ -54,6 +54,8 @@ import {
 import { QaBlock } from "@/components/article/blocks/QaBlock";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { ArticleCredits } from "@/components/article/ArticleCredits";
+import { ArticleCtaBand } from "@/components/article/ArticleCtaBand";
+import { ArticleCtaAnalytics } from "@/components/article/ArticleCtaAnalytics";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import {
   EventDetailBlock,
@@ -81,6 +83,7 @@ interface ArticlePageProps {
  *   <SanityArticleBody body />                ← legacy renderer; #1829 tracks migration
  *   <EventDetailBlock isPast />               ← event variant only, when skip-condition passes
  *   <ArticleCredits />                        ← interview always; others when author/photographer
+ *   <ArticleCtaBand />                        ← optional, editor-filled (article.callToAction); null when empty/incomplete (#2525)
  *   <RelatedRow items />                      ← slider of merged, mixed-type related content (#2443/#2581)
  *
  * The single `switch (article.articleType)` lives in `renderArticleHero`
@@ -90,7 +93,10 @@ interface ArticlePageProps {
  * live as straight conditional renders in the page body. The former
  * standalone "Bekijk de wedstrijd" CTA band (#2443 resolution) is retired —
  * on a match article it now folds into `<RelatedRow>` as one domain-tier
- * card instead of a separate section.
+ * card instead of a separate section. `<ArticleCtaBand>` is a different band
+ * entirely — an editor-authored ask (sign up, mail, buy a ticket), not a
+ * derived destination — and always sits after `<ArticleCredits>` (or after
+ * the body's `<EndMark>` when no credits render), before `<RelatedRow>`.
  */
 interface RenderArticleHeroArgs {
   article: ArticleDetailVM;
@@ -670,6 +676,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           publishedAt={article.publishedAt}
         />
       ) : null}
+
+      {/* Optional editor-filled closer (#2525) — full-bleed, between the
+          credits and the related row. Renders nothing when the field is
+          empty or incomplete; the analytics shell stays a thin click
+          delegator so the band itself keeps rendering server-side. */}
+      <ArticleCtaAnalytics
+        articleId={article.id}
+        articleType={article.articleType}
+      >
+        <ArticleCtaBand
+          question={article.callToAction?.question}
+          emphasis={article.callToAction?.emphasis}
+          lead={article.callToAction?.lead}
+          buttonLabel={article.callToAction?.buttonLabel}
+          href={article.callToAction?.href}
+          reference={article.callToAction?.reference}
+        />
+      </ArticleCtaAnalytics>
 
       <RelatedRow
         items={relatedRowItems}

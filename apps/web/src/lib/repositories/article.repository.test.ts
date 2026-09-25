@@ -151,6 +151,7 @@ function makeArticleDetailRow(
         role: null,
       },
     ],
+    callToAction: null,
     ...overrides,
   };
 }

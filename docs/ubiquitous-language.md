@@ -349,6 +349,8 @@ A news article published on the website.
 
 **Route:** `/nieuws/[slug]` (see [#819])
 
+**Call-to-action:** `article.callToAction` ("Oproep onderaan") is an optional, editor-filled object — question, optional accent word, one-line lead, button label, and one link (an internal reference or an `href`). Empty is the default; once any field is set, all become required. Renders as a full-bleed `<CtaBand>` after `<ArticleCredits>` and before `<RelatedRow>` (#2525). Not a per-type closer — most articles leave it empty.
+
 ### Event
 
 A club event or announcement.
