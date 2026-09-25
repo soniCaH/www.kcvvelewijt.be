@@ -111,8 +111,8 @@ const meta = {
   // browser project (#3146) — it imports `@/app/(landing)/nieuws/loading`,
   // which transitively pulls in `next/server`'s `userAgent()` (reads
   // `__dirname`, undefined in that browser environment). See the exclusion
-  // + full explanation in `vitest.config.ts`; a story-level `!test` tag
-  // cannot fix an import-time crash.
+  // + full explanation in `vitest.storybook.config.ts`; a story-level
+  // `!test` tag cannot fix an import-time crash.
   tags: ["autodocs", "vr-skip"],
   args: {
     fetchArticles: noopFetch,

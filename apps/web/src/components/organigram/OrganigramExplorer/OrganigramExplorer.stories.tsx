@@ -59,57 +59,50 @@ export const WithContactTrigger: Story = {
  * `<ScrollOverlay>`'s `remeasureOn={[scaleStep]}` (a `transitionend`-driven
  * re-check, not a `ResizeObserver` one — a transform fires neither) is what
  * makes the arrow track a zoom-driven overflow at all. `Opening` lands on
- * the primary top node (11 children) — wide enough that zooming to A++
- * (scale 1.3) overflows a 1024px stage; asserted as a before/after change
- * rather than an absolute "not overflowing at A" reading, so this does not
- * depend on the exact default browser-project viewport. `!vr`: dynamically
- * imports `vitest/browser` to force the 1024px width the original E2E case
- * used — a top-level import would break every `vr`-tagged story in this
- * file under `test-storybook`/`storybook dev` (see the identical note on
- * `StandingsTable.stories.tsx`).
+ * the primary top node (11 children) — at the dedicated 1024px
+ * `kcvvExplorerStage` viewport (review finding 7 — the addon's own
+ * `setViewport()` from story `globals`, not a manual `vitest/browser` +
+ * `page.viewport()`) it fits unzoomed and overflows once scaled to A++, so
+ * the precondition (review finding 3) is asserted outright rather than
+ * branched on: a real regression that made the stage overflow already at
+ * rest, or never overflow even at A++, both fail this test now, where the
+ * old before/after-only version would have silently passed the first case
+ * and only caught the second. `!vr`.
  */
 export const ZoomOverflowsTheStage: Story = {
   tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerStage" } },
   play: async ({ canvasElement }) => {
-    const { page } = await import("vitest/browser");
-    const originalWidth = window.innerWidth;
-    const originalHeight = window.innerHeight;
-    await page.viewport(1024, 800);
+    const canvas = within(canvasElement);
+    const stage = canvas.getByLabelText("Organigram-verkenner");
 
-    try {
-      const canvas = within(canvasElement);
-      const stage = canvas.getByLabelText("Organigram-verkenner");
+    // Precondition, asserted unconditionally: no overflow, no arrow, at
+    // rest (scale A). A component regression that overflows already here
+    // must fail this test, not silently take the "already overflowing"
+    // branch a conditional read would have.
+    expect(stage.scrollWidth - stage.clientWidth).toBeLessThanOrEqual(10);
+    expect(canvas.queryByLabelText("Scroll right")).not.toBeInTheDocument();
 
-      const overflowsAtRest = stage.scrollWidth - stage.clientWidth > 10;
-      if (overflowsAtRest) {
-        await expect(canvas.getByLabelText("Scroll right")).toBeVisible();
-      } else {
-        expect(canvas.queryByLabelText("Scroll right")).not.toBeInTheDocument();
-      }
+    await userEvent.click(
+      // `exact` defaults to `true` already — "A++" would otherwise also
+      // substring-match "A"/"A+", but the default string comparison is
+      // exact, so no explicit option is needed (and `storybook/test`'s
+      // `ByRoleOptions` type doesn't carry the `exact` field at all).
+      canvas.getByRole("button", { name: "A++" }),
+    );
 
-      await userEvent.click(
-        // `exact` defaults to `true` already — "A++" would otherwise also
-        // substring-match "A"/"A+", but the default string comparison is
-        // exact, so no explicit option is needed (and `storybook/test`'s
-        // `ByRoleOptions` type doesn't carry the `exact` field at all).
-        canvas.getByRole("button", { name: "A++" }),
-      );
-
-      // The 300ms `transition-transform` must settle before `scrollWidth`
-      // reflects the target scale — mirrors `OrganigramExplorer.tsx`'s own
-      // comment on why `useScrollHint`'s `transitionend` listener (not its
-      // immediate `remeasureOn` check) is what re-checks correctly here,
-      // and the original E2E case's identical `waitForTimeout(500)`.
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      await waitFor(
-        () => {
-          expect(stage.scrollWidth - stage.clientWidth).toBeGreaterThan(10);
-        },
-        { timeout: 3000 },
-      );
-      await expect(canvas.getByLabelText("Scroll right")).toBeVisible();
-    } finally {
-      await page.viewport(originalWidth, originalHeight);
-    }
+    // The 300ms `transition-transform` must settle before `scrollWidth`
+    // reflects the target scale — mirrors `OrganigramExplorer.tsx`'s own
+    // comment on why `useScrollHint`'s `transitionend` listener (not its
+    // immediate `remeasureOn` check) is what re-checks correctly here, and
+    // the original E2E case's identical `waitForTimeout(500)`.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await waitFor(
+      () => {
+        expect(stage.scrollWidth - stage.clientWidth).toBeGreaterThan(10);
+      },
+      { timeout: 3000 },
+    );
+    await expect(canvas.getByLabelText("Scroll right")).toBeVisible();
   },
 };

@@ -93,38 +93,28 @@ export const NoHighlight: Story = {
 export const StickyColumnsPinned: Story = {
   args: { entries: fullDivision, highlightTeamId: 1235 },
   tags: ["!vr"],
+  // The addon-vitest runner already calls `setViewport()` from the story's
+  // composed `globals` before mount (`testStory()` in
+  // `@storybook/addon-vitest/dist/vitest-plugin/test-utils.js` —
+  // `await setViewport(composedStory.parameters, composedStory.globals)`
+  // runs before `composedStory.run()`), reading `.storybook/preview.ts`'s
+  // `parameters.viewport.options` the same way `JeugdVisie.stories.tsx`'s
+  // `MobileViewport` story already does for VR. No manual `vitest/browser`
+  // + `page.viewport()` + restore needed (review finding 7). `kcvvMobile`
+  // (375px) turned out too wide — measured, the 8-column division stops
+  // overflowing at that width — so this uses a dedicated 360px option
+  // instead (`kcvvStandingsTablePhone`, matching the original E2E case).
+  globals: { viewport: { value: "kcvvStandingsTablePhone" } },
   play: async ({ canvasElement }) => {
-    // Dynamic, not static: `vitest/browser` throws at import time outside
-    // Vitest Browser Mode, and this same story FILE also loads under the VR
-    // pipeline (`FullDivision` above carries the `vr` tag) — a top-level
-    // import here would break every story in the file under
-    // `test-storybook`/`storybook dev`, neither of which is Vitest Browser
-    // Mode. A dynamic import inside `play` only ever evaluates when THIS
-    // story's play runs, which VR never does (it never navigates to an
-    // untagged story). Force the phone viewport the E2E case it replaces
-    // used (`apps/web/test/e2e/scroll-arrows.spec.ts`, 360px) — an 8-column
-    // division fits comfortably at this project's default (desktop) width.
-    const { page } = await import("vitest/browser");
-    const originalWidth = window.innerWidth;
-    const originalHeight = window.innerHeight;
-    await page.viewport(360, 800);
+    const canvas = within(canvasElement);
+    const track = canvas.getByRole("region");
+    expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
 
-    try {
-      const canvas = within(canvasElement);
-      const track = canvas.getByRole("region");
-      expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
-
-      const headers = track.querySelectorAll("th");
-      const pinned = [headers[0], headers[1], headers[headers.length - 1]];
-      for (const cell of pinned) {
-        expect(cell).toBeDefined();
-        expect(getComputedStyle(cell as Element).position).toBe("sticky");
-      }
-    } finally {
-      // Vitest Browser Mode reuses one tab across a file's tests — leaving
-      // the viewport narrowed here would silently affect whichever story
-      // runs next.
-      await page.viewport(originalWidth, originalHeight);
+    const headers = track.querySelectorAll("th");
+    const pinned = [headers[0], headers[1], headers[headers.length - 1]];
+    for (const cell of pinned) {
+      expect(cell).toBeDefined();
+      expect(getComputedStyle(cell as Element).position).toBe("sticky");
     }
   },
 };

@@ -9,6 +9,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, expect, waitFor } from "storybook/test";
+import { settle } from "@test-storybook/settle";
 import { ScrollOverlay } from "./ScrollOverlay";
 
 const WideContent = () => (
@@ -90,6 +91,10 @@ export const ArrowsMatchOverflowRightOnly: Story = {
   tags: ["!vr"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // Settle first (review finding 8) — see `ScrollRail.stories.tsx`'s
+    // `NoOverflowNoArrows` for why an absence check right after mount
+    // isn't enough on its own.
+    await settle(canvasElement.ownerDocument.defaultView ?? window);
     // direction="right" (default) never mounts a left arrow — a sticky
     // first column (or nothing yet) already anchors the left edge.
     expect(canvas.queryByLabelText("Scroll left")).not.toBeInTheDocument();
@@ -117,6 +122,10 @@ export const ArrowsMatchOverflowBothDirections: Story = {
     const canvas = within(canvasElement);
     const track = canvas.getByRole("region", { name: "Voorbeelddiagram" });
 
+    // Settle first (review finding 8) — see `ScrollRail.stories.tsx`'s
+    // `NoOverflowNoArrows` for why an absence check right after mount
+    // isn't enough on its own.
+    await settle(canvasElement.ownerDocument.defaultView ?? window);
     // At rest, scrolled to the start: only the right arrow is mounted —
     // "both" still means "per direction on real overflow", never "always
     // both at once".

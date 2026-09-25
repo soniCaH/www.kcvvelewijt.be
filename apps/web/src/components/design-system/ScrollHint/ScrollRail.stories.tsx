@@ -10,6 +10,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, expect, waitFor } from "storybook/test";
+import { settle } from "@test-storybook/settle";
 import { ScrollRail } from "./ScrollRail";
 
 const Chip = ({ label }: { label: string }) => (
@@ -145,6 +146,11 @@ export const NoOverflowNoArrows: Story = {
   tags: ["!vr"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // Settle first (review finding 8): a synchronous query right after
+    // mount can read "no arrow" before a late webfont-swap or coalesced
+    // ResizeObserver remeasure has even run, passing for the wrong
+    // reason rather than because the track genuinely never overflows.
+    await settle(canvasElement.ownerDocument.defaultView ?? window);
     expect(canvas.queryAllByRole("button")).toHaveLength(0);
   },
 };
@@ -173,6 +179,42 @@ export const NoOverflowNoArrows: Story = {
  * assertion-only, and no consumer renders this composition today (the
  * component's own docblock notes it), so there is no baseline to protect.
  */
+/**
+ * Dispatches `transitionend` on `track` every animation frame for
+ * `durationMs` — mimicking the continuous re-measure trigger a held hover
+ * produced under the #3016 defect (each hover transition fired one) — and
+ * samples the rendered arrow count on every frame. A single `waitFor()`
+ * sample (the first version of this test) passes on the FIRST frame that
+ * happens to read the settled count, even mid-oscillation; sampling the
+ * whole window is what actually proves stability rather than a lucky
+ * snapshot.
+ */
+async function sampleArrowCountOverTime(
+  canvas: ReturnType<typeof within>,
+  track: HTMLElement,
+  durationMs: number,
+) {
+  return new Promise<{ counts: number[]; flips: number }>((resolve) => {
+    const counts: number[] = [];
+    let flips = 0;
+    let previous: number | null = null;
+    const start = performance.now();
+    const tick = () => {
+      track.dispatchEvent(new Event("transitionend", { bubbles: true }));
+      const count = canvas.queryAllByRole("button").length;
+      counts.push(count);
+      if (previous !== null && count !== previous) flips += 1;
+      previous = count;
+      if (performance.now() - start < durationMs) {
+        requestAnimationFrame(tick);
+      } else {
+        resolve({ counts, flips });
+      }
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
 export const StaysStableAsAFlexItem: Story = {
   render: (args) => (
     <div className="flex items-start gap-4">
@@ -193,16 +235,30 @@ export const StaysStableAsAFlexItem: Story = {
 
     await canvas.findByLabelText("Scroll right");
 
-    for (let i = 0; i < 5; i++) {
-      track.dispatchEvent(new Event("transitionend", { bubbles: true }));
-    }
+    // ~1.5s of continuous remeasure pressure, well under half this test's
+    // own 5s default timeout (#3143's budget) alongside the rest of the
+    // test's overhead.
+    const { counts, flips } = await sampleArrowCountOverTime(
+      canvas,
+      track,
+      1500,
+    );
 
-    // Settled state: still overflowing, both arrows present, the read
-    // stays consistent across the burst rather than having flipped to "no
-    // overflow" on an intermediate remeasure.
-    await waitFor(async () => {
-      expect(canvas.getAllByRole("button")).toHaveLength(2);
-    });
+    // Never flips away from the settled 2-arrow state across the whole
+    // sampled window — the actual #3016 regression guard.
+    expect(flips).toBe(0);
+    expect(counts.every((count) => count === 2)).toBe(true);
     expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
+
+    // No-bleed check (#3016's second assertion, on the same root cause —
+    // see `ScrollRail.tsx`'s own `min-w-0` comment): the flex-item
+    // composition must not push the story's own root past its own bounds
+    // either, the fixture-level equivalent of the original E2E's
+    // `document.body.scrollWidth - document.documentElement.clientWidth
+    // <= 0` page-level check.
+    const doc = canvasElement.ownerDocument;
+    expect(doc.documentElement.scrollWidth).toBeLessThanOrEqual(
+      doc.documentElement.clientWidth,
+    );
   },
 };

@@ -14,6 +14,7 @@
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, expect, waitFor } from "storybook/test";
+import { settle } from "@test-storybook/settle";
 import { HorizontalSlider } from "./HorizontalSlider";
 
 // ---------------------------------------------------------------------------
@@ -131,6 +132,10 @@ export const NoOverflowNoArrows: Story = {
   tags: ["!vr"],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
+    // Settle first (review finding 8) — see `ScrollRail.stories.tsx`'s
+    // `NoOverflowNoArrows` for why a synchronous query right after mount
+    // isn't enough.
+    await settle(canvasElement.ownerDocument.defaultView ?? window);
     expect(canvas.queryAllByRole("button")).toHaveLength(0);
   },
 };

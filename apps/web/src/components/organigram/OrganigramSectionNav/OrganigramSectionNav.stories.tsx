@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, expect, waitFor } from "storybook/test";
+import { armColdLoadHash } from "@test-storybook/coldLoadHash";
 import { OrganigramSectionNav } from "./OrganigramSectionNav";
 import {
   HUB_SEARCH_MEMBERS,
@@ -145,11 +146,19 @@ export const ScrollSpyMarksTheActiveSection: Story = {
  * OrganigramSectionNav door lands its section below the bar" case (#3146).
  * Rule 7 (#2478): an anchor jump lands the target section BELOW the sticky
  * bar, at an offset derived from the bar's own measured height, never
- * behind it. `!vr`: assertion-only, geometry-only (bounding-box math), no
- * pixel truth to capture.
+ * behind it. Runs at 375px (review finding 2/7, via story `globals` per
+ * finding 7 — see `StandingsTable.stories.tsx`'s identical note) because
+ * that is the width the deleted E2E case used for this exact reason: it is
+ * where `<HubSearch variant="nav">` mounts into the bar mid-scroll, once
+ * `#hub-hero` leaves view. Asserts that mount actually happened
+ * (`Zoek een persoon of hulpvraag` visible) before reading the bar's
+ * bottom edge, so this test cannot silently pass having never exercised
+ * the race it exists to guard. `!vr`: assertion-only, geometry-only
+ * (bounding-box math), no pixel truth to capture.
  */
 export const AnchorClickLandsBelowTheBar: Story = {
   tags: ["!vr"],
+  globals: { viewport: { value: "kcvvMobile" } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const nav = canvas.getByRole("navigation", { name: "Secties van de hub" });
@@ -163,27 +172,53 @@ export const AnchorClickLandsBelowTheBar: Story = {
     // that native navigation boils down to — same `hashchange` dispatch,
     // same `useHashLandingCorrection` arm-and-correct path — without
     // tripping the harness bug.
+    const barHeightBeforeMount = nav.getBoundingClientRect().height;
     window.location.hash = "#structuur";
 
-    await waitFor(() => {
-      expect(structuurLink).toHaveAttribute("aria-current", "location");
-    });
+    // In a `finally` (review finding 9): setting `location.hash` directly
+    // in `play`, not a decorator, so there is no component-unmount cleanup
+    // to fall back on here — a thrown assertion before the old manual reset
+    // at the end would have left the hash leaked into the next story.
+    try {
+      await waitFor(() => {
+        expect(structuurLink).toHaveAttribute("aria-current", "location");
+      });
 
-    const barBottom = nav.getBoundingClientRect().bottom;
-    const targetTop = canvasElement.ownerDocument
-      .getElementById("structuur")!
-      .getBoundingClientRect().top;
+      // Proves the HubSearch-mount race was actually exercised — otherwise
+      // this test could pass having scrolled straight past it.
+      await expect(
+        within(nav).getByRole("combobox", {
+          name: "Zoek een persoon of hulpvraag",
+        }),
+      ).toBeVisible();
 
-    // A couple of px of slack for sub-pixel rounding — never behind the bar.
-    expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
+      // #2821 (see `OrganigramSectionNav.tsx`'s and `section-nav.ts`'s own
+      // comments): the trailing slot's padding is tuned to stay UNDER the
+      // chip's own height on purpose, so mounting HubSearch never grows the
+      // bar at all any more — measured 2026-09-25, identical before/after
+      // (51.25px both times at 375px). "Bar growth" from this specific mount
+      // is therefore not reproducible: #2821 already fixed it. This
+      // assertion is the positive guard for that invariant; the landing
+      // assertion below is what actually depends on whatever the bar's
+      // height happens to be, grown or not.
+      expect(nav.getBoundingClientRect().height).toBe(barHeightBeforeMount);
 
-    // Vitest Browser Mode reuses one tab across a file's tests — clear the
-    // hash this click left behind so it can't leak into the next story.
-    canvasElement.ownerDocument.defaultView?.history.replaceState(
-      null,
-      "",
-      "#",
-    );
+      const barBottom = nav.getBoundingClientRect().bottom;
+      const targetTop = canvasElement.ownerDocument
+        .getElementById("structuur")!
+        .getBoundingClientRect().top;
+
+      // A couple of px of slack for sub-pixel rounding — never behind the bar.
+      expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
+    } finally {
+      // Vitest Browser Mode reuses one tab across a file's tests — clear the
+      // hash this click left behind so it can't leak into the next story.
+      canvasElement.ownerDocument.defaultView?.history.replaceState(
+        null,
+        "",
+        "#",
+      );
+    }
   },
 };
 
@@ -195,61 +230,88 @@ export const AnchorClickLandsBelowTheBar: Story = {
  * `correct()` only runs from an effect, so a cold load needs the hash
  * already armed and corrected once layout (including the bar's own
  * measured height) has settled, not merely once `useSectionNav` mounts.
- * The decorator sets `window.location.hash` BEFORE the component mounts —
- * a real cross-document cold load, not a same-page hash change — mirroring
- * the original test's sentinel-checked cold navigation. `!vr`:
- * assertion-only.
+ * A `loaders` entry (`armColdLoadHash`) sets `window.location.hash` BEFORE
+ * the component mounts — a real cross-document cold load, not a same-page
+ * hash change — mirroring the original test's sentinel-checked cold
+ * navigation, and without assigning inside a decorator's render body
+ * (`react-hooks/immutability` correctly rejects that as a component
+ * modifying a value outside itself). Runs at 375px (review finding 2/7)
+ * for the same HubSearch-mount reason as `AnchorClickLandsBelowTheBar`,
+ * and asserts that mount happened before reading the bar's bottom edge.
+ * `!autodocs` (review finding 9): the docs page renders every story's
+ * loaders/decorator on one shared page without running `play` — this one
+ * mutates `window.location.hash` as a side effect of merely being
+ * displayed, and never resets it, which has no business happening there.
+ * `!vr`: assertion-only.
  */
 export const ColdLoadHashLandsBelowTheBar: Story = {
-  tags: ["!vr"],
+  tags: ["!vr", "!autodocs"],
+  // 375px (review finding 2/7) — same reason as `AnchorClickLandsBelowTheBar`.
+  globals: { viewport: { value: "kcvvMobile" } },
+  loaders: [armColdLoadHash("#structuur")],
   decorators: [
-    (Story) => {
-      window.location.hash = "#structuur";
-      return (
-        <div className="bg-cream min-h-[200vh]">
-          <Story />
-          <div
-            id="hub-hero"
-            className="bg-jersey-deep-dark text-cream mx-auto mt-4 flex h-[60vh] max-w-[80rem] items-center justify-center"
-          >
-            Hero
-          </div>
-          <section id="hulp" className="mx-auto max-w-[70rem] px-4 py-20">
-            <h2 className="font-display text-ink text-3xl font-bold">Hulp</h2>
-            <div className="h-[80vh]" />
-          </section>
-          <section
-            id="structuur"
-            className="bg-cream-soft mx-auto max-w-[70rem] px-4 py-20"
-          >
-            <h2 className="font-display text-ink text-3xl font-bold">
-              Structuur
-            </h2>
-            <div className="h-[80vh]" />
-          </section>
+    (Story) => (
+      <div className="bg-cream min-h-[200vh]">
+        <Story />
+        <div
+          id="hub-hero"
+          className="bg-jersey-deep-dark text-cream mx-auto mt-4 flex h-[60vh] max-w-[80rem] items-center justify-center"
+        >
+          Hero
         </div>
-      );
-    },
+        <section id="hulp" className="mx-auto max-w-[70rem] px-4 py-20">
+          <h2 className="font-display text-ink text-3xl font-bold">Hulp</h2>
+          <div className="h-[80vh]" />
+        </section>
+        <section
+          id="structuur"
+          className="bg-cream-soft mx-auto max-w-[70rem] px-4 py-20"
+        >
+          <h2 className="font-display text-ink text-3xl font-bold">
+            Structuur
+          </h2>
+          <div className="h-[80vh]" />
+        </section>
+      </div>
+    ),
   ],
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const nav = canvas.getByRole("navigation", { name: "Secties van de hub" });
     const structuurLink = within(nav).getByRole("link", { name: "Structuur" });
 
-    await waitFor(() => {
-      expect(structuurLink).toHaveAttribute("aria-current", "location");
-    });
+    // In a `finally` (review finding 9) — `play` is the only place that
+    // ever sets this hash back, since `!autodocs` above keeps the docs
+    // page from ever mounting this story's `loaders` at all.
+    try {
+      await waitFor(() => {
+        expect(structuurLink).toHaveAttribute("aria-current", "location");
+      });
 
-    const barBottom = nav.getBoundingClientRect().bottom;
-    const targetTop = canvasElement.ownerDocument
-      .getElementById("structuur")!
-      .getBoundingClientRect().top;
-    expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
+      // Proves the HubSearch-mount race was actually exercised — otherwise
+      // this test could pass having never scrolled the hero out of view at
+      // all. "Bar growth" itself is not reproducible any more (#2821 fixed
+      // it — see the identical measurement + comment on
+      // `AnchorClickLandsBelowTheBar` above), so there is no before/after
+      // height to compare here; the landing assertion below still depends
+      // on the bar's real (unchanged) height regardless.
+      await expect(
+        within(nav).getByRole("combobox", {
+          name: "Zoek een persoon of hulpvraag",
+        }),
+      ).toBeVisible();
 
-    canvasElement.ownerDocument.defaultView?.history.replaceState(
-      null,
-      "",
-      "#",
-    );
+      const barBottom = nav.getBoundingClientRect().bottom;
+      const targetTop = canvasElement.ownerDocument
+        .getElementById("structuur")!
+        .getBoundingClientRect().top;
+      expect(targetTop).toBeGreaterThanOrEqual(barBottom - 2);
+    } finally {
+      canvasElement.ownerDocument.defaultView?.history.replaceState(
+        null,
+        "",
+        "#",
+      );
+    }
   },
 };
