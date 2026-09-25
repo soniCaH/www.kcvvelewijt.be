@@ -30,7 +30,7 @@ export interface ProtoPullQuoteValue {
   credit: string;
 }
 
-const VARIANTS = ["A", "B", "C", "D"] as const;
+const VARIANTS = ["A", "B", "C", "D", "E"] as const;
 type Variant = (typeof VARIANTS)[number];
 const EVENT = "proto-2517-variant";
 const subscribe = (cb: () => void) => {
@@ -46,6 +46,7 @@ const NAMES: Record<Variant, string> = {
   B: "Foto naast het citaat",
   C: "Citaat op de foto geplakt",
   D: "Citaat over de foto",
+  E: "Mix: D bij grote foto, anders donkere A",
 };
 
 // Same breakout as `articleImage` width="wide".
@@ -190,6 +191,61 @@ function VariantD({ v }: { v: ProtoPullQuoteValue }) {
   );
 }
 
+// A real small staff portrait from staging (Mark Talbut), for E's middle case.
+const SMALL_PHOTO =
+  "https://cdn.sanity.io/images/vhb33jaz/staging/8258d4c0d0a3ba813331c72826fa3fc84524c4e4-1250x1250.png";
+
+// E's card: A's structure (card + round avatar) in D's register (ink,
+// cream display type). Used whenever there is no big photo.
+function DarkCard({
+  v,
+  photoUrl,
+}: {
+  v: ProtoPullQuoteValue;
+  photoUrl?: string;
+}) {
+  return (
+    <div className="my-10">
+      <PullQuote
+        placement="section"
+        attribution={{ name: v.name, role: v.role }}
+        avatarSlot={
+          <SubjectAvatar
+            firstName={v.name.split(" ")[0] ?? v.name}
+            photoUrl={photoUrl}
+            scale="attribution"
+          />
+        }
+      >
+        {v.body}
+      </PullQuote>
+    </div>
+  );
+}
+
+function CaseLabel({ children }: { children: string }) {
+  return (
+    <p className="text-label text-jersey-deep mt-12 font-mono uppercase">
+      ▼ {children}
+    </p>
+  );
+}
+
+// E — one block, three photo situations. The editor never picks a layout:
+// a big photo (≥ ~1200px wide) gets D, anything else gets the dark card.
+function VariantE({ v }: { v: ProtoPullQuoteValue }) {
+  return (
+    <div>
+      <CaseLabel>1 · Grote foto → D</CaseLabel>
+      <VariantD v={v} />
+      <CaseLabel>2 · Kleine foto (portret) → donkere kaart</CaseLabel>
+      <DarkCard v={v} photoUrl={SMALL_PHOTO} />
+      <CaseLabel>3 · Geen foto → donkere kaart met initiaal</CaseLabel>
+      <DarkCard v={v} />
+    </div>
+  );
+}
+
 export function ProtoPullQuote({ value }: { value: ProtoPullQuoteValue }) {
   // URL is the store: server renders A, the client reads ?variant=.
   const variant = useSyncExternalStore(
@@ -224,7 +280,13 @@ export function ProtoPullQuote({ value }: { value: ProtoPullQuoteValue }) {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const Body = { A: VariantA, B: VariantB, C: VariantC, D: VariantD }[variant];
+  const Body = {
+    A: VariantA,
+    B: VariantB,
+    C: VariantC,
+    D: VariantD,
+    E: VariantE,
+  }[variant];
 
   return (
     <div data-proto-2517-variant={variant}>
