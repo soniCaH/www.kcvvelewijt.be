@@ -60,6 +60,14 @@ export default function WordLidPage() {
               Praktische info →
             </Link>
           </p>
+          <p className="text-body-md mt-2">
+            <a
+              href="/downloads/intern-reglement-jeugd-2026.pdf"
+              className="prose-link"
+            >
+              Intern reglement jeugd (pdf) →
+            </a>
+          </p>
         </PageHero>
 
         <MembershipForm />
