@@ -1,8 +1,5 @@
-import {
-  type TestRunnerConfig,
-  getStoryContext,
-  waitForPageReady,
-} from "@storybook/test-runner";
+import { type TestRunnerConfig, getStoryContext } from "@storybook/test-runner";
+import type { Page } from "@playwright/test";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
 import { VR_FROZEN_NOW_ISO } from "../test/vr/frozen-clock.ts";
 import {
@@ -51,6 +48,16 @@ const FONT_LOAD_TIMEOUT_MS = 2000;
 // is Playwright's navigation budget, NOT Jest's `--testTimeout` — that one
 // governs the surrounding test and must stay comfortably above this value.
 const INITIAL_NAVIGATION_TIMEOUT_MS = 90000;
+// Cap on each stage of `waitForPageReadyCapped` below. The vendored
+// `@storybook/test-runner` `waitForPageReady` this replaces (#3137, flake
+// ledger class G) runs three `page.waitForLoadState` calls plus a bare
+// `document.fonts.ready` evaluate with NO timeout on any of them —
+// Playwright puts no budget on `page.evaluate` at all. With the deny-by-default
+// route in `prepare` armed, nothing should be able to hang here any more (a
+// blocked request resolves instantly as a network error), but an uncapped
+// wait in the path is still the exact shape #3108 root-caused, so it does not
+// survive regardless.
+const PAGE_READY_TIMEOUT_MS = 5000;
 
 // Runs in the page context BEFORE any story script. Stubs sources of
 // non-determinism that would otherwise produce per-run pixel drift:
@@ -208,6 +215,30 @@ async function waitForFontsSettled(timeoutMs: number) {
   ]);
 }
 
+// Replaces `@storybook/test-runner`'s vendored `waitForPageReady` (#3137,
+// flake ledger class G — see #3108's root cause): three uncapped
+// `page.waitForLoadState` calls plus an uncapped `document.fonts.ready`
+// evaluate, any one of which can hang the whole story file if a subresource
+// (a cross-origin stylesheet, historically) never settles. Every wait here
+// gets an explicit cap instead. `networkidle` is soft-capped and falls
+// through, mirroring the same pattern already used for it elsewhere in this
+// file (Storybook's own HMR long-poll keeps it from ever truly idling) — the
+// other three are real signals worth failing loudly on if they blow the
+// budget, so they stay hard caps.
+async function waitForPageReadyCapped(page: Page, timeoutMs: number) {
+  await page.waitForLoadState("domcontentloaded", { timeout: timeoutMs });
+  await page.waitForLoadState("load", { timeout: timeoutMs });
+  await page
+    .waitForLoadState("networkidle", { timeout: timeoutMs })
+    .catch(() => {
+      // Soft signal — see NETWORK_IDLE_TIMEOUT_MS above for why.
+    });
+  await Promise.race([
+    page.evaluate(() => document.fonts.ready),
+    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+  ]);
+}
+
 const config: TestRunnerConfig = {
   setup() {
     expect.extend({ toMatchImageSnapshot });
@@ -250,22 +281,36 @@ const config: TestRunnerConfig = {
       );
     }
 
-    // Abort all external video network: YouTube / Vimeo iframes (embed stories
-    // are vr.disabled, but Storybook test-runner still mounts the iframe during
-    // the smoke-test, and the resulting load keeps the browser context's
-    // `networkidle` busy long enough that the *next* story in the same
-    // .stories.tsx file — typically an upload-path width/aspect story — runs
-    // out the 30s smoke-test budget on `waitForPageReady`. Same defence covers
-    // the Big Buck Bunny / Sintel MP4 hosts: `<video>` is rendered post-click
-    // only, but blocking the host means a future story that ever auto-plays
-    // (or a regression that does) can't take the suite down.
-    await browserContext.route(
-      (url) =>
-        /(?:^|\.)(?:youtube\.com|youtube-nocookie\.com|ytimg\.com|googlevideo\.com|vimeo\.com|vimeocdn\.com)$/.test(
-          url.hostname,
-        ) || url.hostname === "commondatastorage.googleapis.com",
-      (route) => route.abort(),
-    );
+    // Deny by default: a VR page may not fetch anything off this machine
+    // (#3137, flake ledger class G). #3108 root-caused a story-file stall to
+    // two live font CDNs (Adobe Typekit, Google Fonts) that the accessibility
+    // addon's cross-origin stylesheet preloader re-fetches on every single
+    // story — 8 third-party requests for one story, and an unreachable host
+    // took the whole story file down because the vendored page-ready wait
+    // blocked on the `load` event uncapped (see waitForPageReadyCapped
+    // above). The fix is an enforcement route, not a bigger deny-list: allow
+    // only the Storybook origin itself (whatever host/port TARGET_URL below
+    // resolves to — 127.0.0.1/localhost in every environment this runner
+    // runs in, local Docker and CI alike) and inert `data:`/`blob:` URLs
+    // (inlined images, no network at all); abort everything else and log its
+    // URL so a zero-count is verifiable from CI/local logs. This replaces the
+    // old hand-maintained seven-host video deny-list — the next third-party
+    // `<link>` or `<iframe>` anyone adds becomes impossible instead of
+    // unnoticed, which is exactly what let the Typekit/Google Fonts links
+    // into preview-head.html unnoticed in the first place.
+    await browserContext.route("**/*", (route) => {
+      const url = new URL(route.request().url());
+      if (
+        url.protocol === "data:" ||
+        url.protocol === "blob:" ||
+        url.hostname === "127.0.0.1" ||
+        url.hostname === "localhost"
+      ) {
+        return route.continue();
+      }
+      console.warn(`[VR] denied off-machine request: ${url.toString()}`);
+      return route.abort();
+    });
 
     const targetURL = process.env.TARGET_URL;
     if (!targetURL) {
@@ -397,7 +442,7 @@ const config: TestRunnerConfig = {
     // end-state — `group-hover:scale-105`, `hover:-translate-y-1`, the green
     // top-border clip-path swap — would still snap on and produce a diff.
     await page.mouse.move(-1, -1);
-    await waitForPageReady(page);
+    await waitForPageReadyCapped(page, PAGE_READY_TIMEOUT_MS);
     await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
 
     for (const name of requestedViewports) {
