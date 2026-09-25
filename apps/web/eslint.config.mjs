@@ -126,6 +126,21 @@ const TEXT_CREAM_ALPHA_PATTERN =
 // fractional value.
 const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
 
+// Type Ramp Freeze (DESIGN.md → Typography, #2418). Twelve token steps
+// (`text-display-2xl` … `text-label-sm`) already cover the ramp — an
+// arbitrary `text-[9px]`/`text-[10.5px]`/`text-[1.05rem]`/`text-[0.4em]`
+// bypasses it outright, and `text-[length:var(--text-*)]` bypasses it while
+// *looking* token-driven: the arbitrary-value form sets font-size alone and
+// silently drops the step's line-height and tracking, which is exactly what
+// DESIGN.md → Typography already tells authors never to write. Font-size
+// literals only — `leading-[…]` belongs to #2666, not this rule.
+// Strategy is freeze-and-drain, not big-bang: the 300+ literals that already
+// exist are frozen via `eslint-suppressions.json` (`--suppress-all`), not
+// fixed here, so this rule only stops the count from growing. Same
+// single-line/no-newline requirement as the patterns above.
+const OFF_RAMP_FONT_SIZE_PATTERN =
+  "text-\\[(?:[0-9]+(?:\\.[0-9]+)?(?:px|r?em)\\]|length:)";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -242,6 +257,11 @@ const eslintConfig = [
           selector: `JSXOpeningElement[name.name="EditorialHeading"] > JSXAttribute[name.name="className"] ${matchesClassString(EDITORIAL_HEADING_MARGIN_PATTERN)}`,
           message:
             "A section heading's bottom margin belongs to <SectionHeader> (mb-8 sm:mb-10, #2552 rule 5). <EditorialHeading> carries no margin of its own (#2552 rule 4). Whether this heading should be a <SectionHeader> is a judgement this rule does not make.",
+        },
+        {
+          selector: matchesClassString(OFF_RAMP_FONT_SIZE_PATTERN),
+          message:
+            "Off-ramp literal font size — the type ramp has a token for every step (apps/web/DESIGN.md → Typography). A text-[…px]/[…rem]/[…em] or text-[length:…] bypasses it and silently drops the step's line-height and tracking. Existing call sites are frozen in eslint-suppressions.json; new code must use a text-* token.",
         },
       ],
     },
