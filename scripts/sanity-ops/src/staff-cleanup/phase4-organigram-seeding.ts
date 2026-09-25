@@ -7,6 +7,7 @@
  * Run: SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops staff:phase4
  *      CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops staff:phase4
  */
+import { memberRef, ref } from "../shared/refs";
 import { client, dataset } from "../shared/sanity-client";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -21,18 +22,6 @@ interface OrganigramNode {
   active: boolean;
   sortOrder: number;
   roleCode?: string;
-}
-
-function ref(id: string): { _type: "reference"; _ref: string; _weak: true } {
-  return { _type: "reference", _ref: id, _weak: true };
-}
-
-function memberRef(id: string): {
-  _type: "reference";
-  _ref: string;
-  _key: string;
-} {
-  return { _type: "reference", _ref: id, _key: id.replace(/[^a-z0-9-]/gi, "") };
 }
 
 // ─── Node definitions ───────────────────────────────────────────────────────
@@ -531,8 +520,9 @@ async function seed() {
   const transaction = client.transaction();
 
   for (const node of nodes) {
+    // Create-only: a re-run fills in a missing node and never resets one
+    // that was edited since (#3184).
     transaction.createIfNotExists(node);
-    transaction.patch(node._id, (p) => p.set(node));
   }
 
   const result = await transaction.commit({ visibility: "async" });

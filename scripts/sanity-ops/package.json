@@ -7,6 +7,7 @@
     "type-check": "tsgo --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
+    "board-2627": "tsx src/board-2627/apply-board-2627.ts",
     "board:audit": "tsx src/board-cleanup/audit-board-docs.ts",
     "board:migrate": "tsx src/board-cleanup/migrate-board-docs.ts",
     "responsibility:create-gc-node": "tsx src/responsibility-seeding/create-gc-node.ts",

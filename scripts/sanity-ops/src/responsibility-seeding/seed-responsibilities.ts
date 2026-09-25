@@ -1272,12 +1272,6 @@ async function preflight() {
 
 // ─── Seeding ────────────────────────────────────────────────────────────────
 
-function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T> {
-  const result: Partial<T> = { ...obj };
-  for (const key of keys) delete result[key];
-  return result;
-}
-
 async function seed() {
   if (
     dataset === "production" &&
@@ -1294,8 +1288,9 @@ async function seed() {
 
   const tx = client.transaction();
   for (const doc of responsibilities) {
+    // Create-only: a re-run fills in a missing topic and never resets one
+    // that was edited since (#3184).
     tx.createIfNotExists(doc);
-    tx.patch(doc._id, (p) => p.set(omit(doc, ["_id", "_type"])));
   }
   await tx.commit();
   for (const doc of responsibilities) {
