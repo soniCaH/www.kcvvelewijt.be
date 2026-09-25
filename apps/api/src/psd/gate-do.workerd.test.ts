@@ -16,12 +16,11 @@
  */
 import { env } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import { KvCacheLive, TypedKvCache } from "../cache/kv-cache";
 import { PsdGateLive } from "./gate";
 import { WorkerEnvTag } from "../env";
 import { makeTestEnv } from "../test-helpers/env-layer";
-import { Schema as S } from "effect";
 
 /** A fresh DO instance per test (unique `idFromName`) — isolates single-flight
  * state the same way the node suite isolates it with `new GateLogic()`. */
