@@ -146,6 +146,9 @@ jobs:
       - name: Run Studio UI tests
         run: npx turbo test --filter=@kcvv/sanity-studio
 
+      - name: Lint + type check + test Sanity ops scripts
+        run: npx turbo lint type-check test --filter=@kcvv/sanity-ops
+
       - name: Build Studio
         run: npx turbo build --filter=@kcvv/studio
 

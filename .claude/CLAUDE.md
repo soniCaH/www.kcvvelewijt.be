@@ -13,6 +13,7 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 | Sanity Studio UI    | `packages/sanity-studio/`  | (library)          |
 | API contract        | `packages/api-contract/`   | (library)          |
 | BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers |
+| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      |
 
 App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `packages/api-contract/CLAUDE.md`
 
