@@ -1,0 +1,33 @@
+{
+  "name": "@kcvv/sanity-ops",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "type-check": "tsgo --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "board:audit": "tsx src/board-cleanup/audit-board-docs.ts",
+    "board:migrate": "tsx src/board-cleanup/migrate-board-docs.ts",
+    "responsibility:create-gc-node": "tsx src/responsibility-seeding/create-gc-node.ts",
+    "responsibility:seed": "tsx src/responsibility-seeding/seed-responsibilities.ts",
+    "responsibility:restore-missing": "tsx src/responsibility-seeding/restore-missing-responsibilities.ts",
+    "responsibility:delete-legacy": "tsx src/responsibility-seeding/delete-legacy-responsibility-paths.ts",
+    "staff:phase1": "tsx src/staff-cleanup/phase1-dearchive-create-delete.ts",
+    "staff:phase2:match": "tsx src/staff-cleanup/phase2-board-psd-matching.ts",
+    "staff:phase4": "tsx src/staff-cleanup/phase4-organigram-seeding.ts",
+    "team-image:backfill": "tsx src/team-image-backfill/backfill-team-images.ts"
+  },
+  "dependencies": {
+    "@sanity/client": "8.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "eslint": "10.9.1",
+    "tsx": "4.23.12",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vitest": "4.1.11"
+  }
+}
