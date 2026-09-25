@@ -4,26 +4,28 @@
 
 Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 
-| App/Package         | Path                       | Host               | Test layers                                     |
-| ------------------- | -------------------------- | ------------------ | ----------------------------------------------- |
-| Next.js web         | `apps/web/`                | Vercel             | Static, Build, Vitest, Storybook VR[^a11y], E2E |
-| Sanity Studio       | `apps/studio/`             | sanity.io          | Static (lint only)[^studio]                     |
-| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | None[^studio-staging]                           |
-| Sanity schemas      | `packages/sanity-schemas/` | (library)          | None[^sanity-schemas]                           |
-| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Static, Vitest                                  |
-| API contract        | `packages/api-contract/`   | (library)          | Vitest[^api-contract]                           |
-| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]   |
-| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                  |
+| App/Package         | Path                       | Host               | Test layers                                                                             |
+| ------------------- | -------------------------- | ------------------ | --------------------------------------------------------------------------------------- |
+| Next.js web         | `apps/web/`                | Vercel             | Static, Build, Vitest, Storybook VR[^vr], E2E. Accessibility ownership: **open**[^a11y] |
+| Sanity Studio       | `apps/studio/`             | sanity.io          | Static (lint), Build[^studio]                                                           |
+| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | None[^studio-staging]                                                                   |
+| Sanity schemas      | `packages/sanity-schemas/` | (library)          | Static[^sanity-schemas]                                                                 |
+| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Static, Vitest                                                                          |
+| API contract        | `packages/api-contract/`   | (library)          | Static, Build[^api-contract]                                                            |
+| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]                                           |
+| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                          |
 
-[^a11y]: Storybook VR runs pixel diffs at 3 viewports via `test-storybook`; runtime geometry (`play`) still lives in `scroll-arrows.spec.ts`/`section-nav.spec.ts` pending [#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146) — do not describe that move as done. `@storybook/addon-a11y` (`.storybook/main.ts`) also runs on every story inside this job (264 violation blocks / 288 violations per run, identical across sampled green runs) but gates nothing. **Whether a layer owns accessibility, or it is switched off on purpose, is an open question** — see the comment on [#3154](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3154).
+[^vr]: Storybook VR runs pixel diffs at 3 viewports via `test-storybook`, scoped to `vr`-tagged stories only (`--includeTags vr --excludeTags vr-skip`, `apps/web/package.json`'s `vr:run`) — 183 of 208 story files carry the `vr` tag; the 21 `Pages/*` stories carry none and are never visited (consistent with `apps/web/CLAUDE.md`'s "not VR-tested" note). Runtime geometry (`play`) still lives in `scroll-arrows.spec.ts`/`section-nav.spec.ts` pending [#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146) — do not describe that move as done.
 
-[^studio]: Config only (`sanity.config.ts`, `structure.ts`, `sanity.cli.ts`) plus migrations — no `type-check`/`test` script exists, so nothing beyond ESLint runs. 11 of 26 migrations still hold logic in place, untested (435 lines); "no test layer applies" is only fully true once [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) clears that backlog.
+[^a11y]: **Authoritative text — `apps/web/CLAUDE.md` points here rather than repeating these numbers, so the two copies cannot drift.** `@storybook/addon-a11y` (`.storybook/main.ts`) runs inside the same `vr`-tagged run described in the note above — not every story, only the 183 of 208 story files carrying the `vr` tag — measured at 264 violation blocks / 288 violations per run, identical across sampled green runs, and it gates nothing. **Whether a layer owns accessibility, or it is switched off on purpose, is an open question** — see the comment on [#3154](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3154).
 
-[^studio-staging]: Same shape as `apps/studio` (config + migrations, same untested-migration caveat via [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153)), but its own `lint` script is not invoked anywhere in `ci.yml` — [#3118](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3118).
+[^studio]: Config only (`sanity.config.ts`, `structure.ts`, `sanity.cli.ts`) plus migrations. No `type-check` script exists on this package itself, but `turbo build --filter=@kcvv/studio` (`sanity build`) runs in CI, as does the "Sanity types in sync" gate (`sanity schema extract && sanity typegen generate`, diffed against the committed types). Two untested surfaces remain, neither closed by build/lint: 11 of 26 migrations still hold logic in place (435 lines, closes with [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153)), and `apps/studio/scripts/` — 4 files, 817 lines (`migrate-drupal-node.ts`, `remap-qa-respondent-keys.ts`, `seed-e2e-fixtures.ts`, `seed-interview-qa-pairs.ts`) — which #3153 does **not** cover.
 
-[^sanity-schemas]: 4 195 lines, 0 tests, not referenced anywhere in `ci.yml` — not even its own `type-check` script runs there. Schema declarations are untested by design; `validation/`, `preview/` and `blocks/` (629 lines of pure logic) are a named gap with no open ticket yet.
+[^studio-staging]: Not referenced anywhere in `ci.yml` — no lint ([#3118](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3118)), no type-check, no build, no typegen gate. Its own migrations count is 20, against `apps/studio/`'s 26 — the drift [#3120](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3120) named, closing with [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153). Unlike `apps/studio/`, it has no `scripts/` directory.
 
-[^api-contract]: No `lint` script exists ([#3119](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3119)); `type-check` is not invoked directly in CI but runs transitively as a build dependency of `@kcvv/web`'s type-check/build (`turbo.json`'s `^build`).
+[^sanity-schemas]: 4 195 lines, 0 tests, and no `ci.yml` step names this package directly — its own `type-check` script never runs. But its `build` script (`tsgo --noEmit`, functionally identical to `type-check`) runs transitively via `turbo.json`'s `^build` whenever `@kcvv/web` or `@kcvv/sanity-studio` type-checks or builds (confirmed via `turbo … --dry=json`), and the "Sanity types in sync" gate's `sanity schema extract` parses every schema here too — so the package is statically checked, just never through a step of its own. `validation/`, `preview/` and `blocks/` (629 lines of pure logic) are Vitest's named gap ([#3100](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3100) decision D9) — decided, not shipped, no open ticket. Schema declarations stay untested by design.
+
+[^api-contract]: No `lint` script exists ([#3119](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3119)). `type-check` (`tsgo --noEmit`) is never invoked; `build` (`tsgo --build`) is — transitively via `^build` when `@kcvv/web`/`@kcvv/api` type-check or build, and directly in the deploy and E2E workflows (`ci.yml` "Build api-contract" steps, `e2e.yml`).
 
 [^api]: Cache/TTL/single-flight semantics run in real workerd (`vitest.workers.config.ts`, `@cloudflare/vitest-plugin`); pure logic stays on the node pool (`vitest.node.config.ts`). Schema round-trip and cache-semantics work already shipped ([#3144](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3144), [#3145](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3145)).
 
