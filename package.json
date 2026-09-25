@@ -36,7 +36,7 @@
   },
   "lint-staged": {
     "apps/web/**/*.{js,jsx,ts,tsx}": [
-      "sh -c 'cd apps/web && eslint --fix --config eslint.config.mjs \"$@\"' --",
+      "sh -c 'cd apps/web && eslint --fix \"$@\"' --",
       "prettier --write"
     ],
     "apps/web/**/*.{json,md,yml,yaml}": [
