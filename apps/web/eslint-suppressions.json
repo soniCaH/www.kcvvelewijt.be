@@ -1,0 +1,437 @@
+{
+  "src/app/(main)/club/geschiedenis/HistoryTimeline.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/app/(main)/evenementen/[slug]/EventDetailCtas.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/app/(main)/ploegen/[slug]/(detail)/loading.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/app/(main)/tegenstander/[clubId]/OpponentSummaryCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/app/(main)/tegenstander/[clubId]/page.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/article/ArticleCredits/ArticleCredits.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/article/EditorialHero/_variant-parts.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 5
+    }
+  },
+  "src/components/article/VideoBlock/VideoBlock.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/article/blocks/EventDetailBlock/EventDetailBlock.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 10
+    }
+  },
+  "src/components/article/blocks/EventFactInline/EventFactInline.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/article/blocks/QaBlock/QaGroupRapidFire.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/article/blocks/TransferFactCard/TransferFactCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/calendar/CalendarAgenda/CalendarAgenda.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 18
+    }
+  },
+  "src/components/calendar/CalendarMonth/CalendarMonth.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  },
+  "src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 6
+    }
+  },
+  "src/components/calendar/CalendarWeek/CalendarWeek.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 8
+    }
+  },
+  "src/components/calendar/CalendarWidget/CalendarWidget.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/calendar/calendar-tags.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/club/ContactPage/ContactPage.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 5
+    }
+  },
+  "src/components/club/MembershipForm/MembershipForm.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 5
+    }
+  },
+  "src/components/design-system/Alert/Alert.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  },
+  "src/components/design-system/Alert/AlertBadge.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/design-system/ClippedCard/ClippedCard.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 12
+    }
+  },
+  "src/components/design-system/DownloadButton/DownloadButton.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 6
+    }
+  },
+  "src/components/design-system/EditorialHeroShell/EditorialHeroShell.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/EmptyState/EmptyState.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/design-system/EndMark/EndMark.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  },
+  "src/components/design-system/FilterTabs/FilterTabs.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/design-system/JerseyIllustration/JerseyIllustration.vocabulary.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/JerseyShirt/JerseyShirt.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/Label/Label.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/MonoLabel/MonoLabel.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/NumberDisplay/NumberDisplay.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/design-system/QASectionDivider/QASectionDivider.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/design-system/QuoteMark/QuoteMark.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/RemovableChip/RemovableChip.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/ScrollHint/ScrollArrowButton.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/ScrollHint/ScrollRail.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/SectionNavChip/SectionNavChip.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/StampBadge/StampBadge.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/StampBadge/StampBadge.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/SubjectAvatar/SubjectAvatar.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  },
+  "src/components/design-system/SubjectAvatar/SubjectAvatar.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  },
+  "src/components/design-system/SubjectAvatar/SubjectAvatarCluster.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/design-system/TapedCard/TapedCard.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 8
+    }
+  },
+  "src/components/design-system/TapedCardGrid/TapedCardGrid.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 8
+    }
+  },
+  "src/components/design-system/TapedFigure/TapedFigure.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/Textarea/Textarea.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/design-system/TextareaCounter/TextareaCounter.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/event/EventHero/EventHero.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/hulp/HulpFinder/ContactCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  },
+  "src/components/hulp/HulpFinder/HulpFinder.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/hulp/HulpFinder/QuestionCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/layout/MatchStrip/MatchStripInContext.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/layout/MatchStrip/MatchStripView.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/layout/NavTakeover/NavTakeover.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/layout/NavTakeover/NavTakeoverItem.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/layout/PageHero/PageHero.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/layout/SiteFooter/CookiePreferencesButton.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/layout/SiteFooter/SiteFooter.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 6
+    }
+  },
+  "src/components/layout/SiteHeader/SiteHeader.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/match/MatchEvents/MatchEvents.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 11
+    }
+  },
+  "src/components/match/MatchHero/MatchHero.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 15
+    }
+  },
+  "src/components/match/MatchLineup/MatchLineup.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 6
+    }
+  },
+  "src/components/match/MatchStatusBadge/MatchStatusBadge.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/organigram/HubSearch/HubSearch.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 11
+    }
+  },
+  "src/components/organigram/MemberDetailPanel/MemberDetailPanel.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 9
+    }
+  },
+  "src/components/organigram/OrgPersonCard/OrgPersonCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 5
+    }
+  },
+  "src/components/organigram/OrganigramExplorer/OrganigramExplorer.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 13
+    }
+  },
+  "src/components/organigram/OrganigramExplorer/OrganigramOverview.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/organigram/OrganigramExplorer/SpotlightNodeCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/organigram/OrganigramExplorer/VolledigOrganigram.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/organigram/OrganigramHero/OrganigramHero.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 6
+    }
+  },
+  "src/components/organigram/StructureDirectory/StructureDirectory.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/scheurkalender/ScheurkalenderPage.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 6
+    }
+  },
+  "src/components/search/SearchAnswerCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 5
+    }
+  },
+  "src/components/search/SearchPreSearchCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/search/SearchRelated.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/search/SearchResult.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/sponsors/FeaturedSponsorCard/FeaturedSponsorCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 4
+    }
+  },
+  "src/components/team/SquadGrid/PersonCardRun.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/team/SquadGrid/PlayerCard.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/team/TeamFlagship/TeamFlagship.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/components/team/TeamMatchesSection/TeamAgendaRow.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 8
+    }
+  },
+  "src/components/team/TeamMatchesSection/TeamMatchesSection.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 1
+    }
+  },
+  "src/components/team/YouthDirectory/YouthDirectory.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 2
+    }
+  },
+  "src/stories/features/forms/RegistrationCardPattern.stories.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 3
+    }
+  }
+}
