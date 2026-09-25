@@ -12,7 +12,19 @@
  * is pinned in `manifest.json` — never edit the WebP files by hand.
  */
 
-import manifestRaw from "./manifest.json" with { type: "json" };
+// Plain import, no `with { type: "json" }` attribute (#3146): this module
+// only ever loads through Vite (the happy-dom unit-test project and every
+// Storybook story), which resolves a bare `.json` import natively — the
+// attribute is a Node-ESM-loader requirement this file never actually runs
+// under (`scripts/sync-fixture-images.ts` reads/writes the manifest via
+// plain `fs`, never an import). Wiring the new Storybook Vitest browser
+// project (`@storybook/addon-vitest`) surfaced it: its dependency
+// pre-bundler downlevels the attribute for an older parse target and emits
+// the retired `assert { type: "json" }` keyword, which the browser then
+// rejects outright — `SyntaxError: Unexpected identifier 'assert'`, breaking
+// every one of the 33 story files that import this module transitively via
+// `fixtureImage`.
+import manifestRaw from "./manifest.json";
 
 export type FixtureShape =
   | "article-hero-interview"

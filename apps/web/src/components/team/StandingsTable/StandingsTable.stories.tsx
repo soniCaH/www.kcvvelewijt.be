@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, expect } from "storybook/test";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
 
@@ -74,6 +75,48 @@ export const FullDivision: Story = {
 /** No highlight target — renders the table without a KCVV accent row. */
 export const NoHighlight: Story = {
   args: { entries: fullDivision },
+};
+
+/**
+ * Re-homed from `apps/web/test/e2e/scroll-arrows.spec.ts`'s "StandingsTable
+ * on /ploegen/[slug] or /wedstrijd/[matchId]" case (#3146, deleted by this
+ * ticket). That test's overflow assertion was already superseded by a
+ * deterministic backstop before this ticket (#2861,
+ * `test/vr/structural-assertions.ts`'s `vr-assert-mobile-overflow` tag on
+ * `FullDivision` above) — this story adds the one assertion that backstop
+ * does NOT cover: the anchor group (#2476 rule 3) actually carries
+ * `position: sticky` on its three pinned cells (`#`, `Ploeg`, `Ptn`), not
+ * just that the track overflows. Reuses the same `fullDivision` fixture so
+ * the overflow precondition is guaranteed the same way. `!vr`:
+ * assertion-only, computed-style check — no pixel truth to capture.
+ */
+export const StickyColumnsPinned: Story = {
+  args: { entries: fullDivision, highlightTeamId: 1235 },
+  tags: ["!vr"],
+  // The addon-vitest runner already calls `setViewport()` from the story's
+  // composed `globals` before mount (`testStory()` in
+  // `@storybook/addon-vitest/dist/vitest-plugin/test-utils.js` —
+  // `await setViewport(composedStory.parameters, composedStory.globals)`
+  // runs before `composedStory.run()`), reading `.storybook/preview.ts`'s
+  // `parameters.viewport.options` the same way `JeugdVisie.stories.tsx`'s
+  // `MobileViewport` story already does for VR. No manual `vitest/browser`
+  // + `page.viewport()` + restore needed (review finding 7). `kcvvMobile`
+  // (375px) turned out too wide — measured, the 8-column division stops
+  // overflowing at that width — so this uses a dedicated 360px option
+  // instead (`kcvvStandingsTablePhone`, matching the original E2E case).
+  globals: { viewport: { value: "kcvvStandingsTablePhone" } },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const track = canvas.getByRole("region");
+    expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
+
+    const headers = track.querySelectorAll("th");
+    const pinned = [headers[0], headers[1], headers[headers.length - 1]];
+    for (const cell of pinned) {
+      expect(cell).toBeDefined();
+      expect(getComputedStyle(cell as Element).position).toBe("sticky");
+    }
+  },
 };
 
 /** Empty ranking — component renders nothing (auto-hide). */

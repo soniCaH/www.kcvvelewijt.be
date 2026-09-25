@@ -109,6 +109,17 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The Storybook Vitest addon project (#3146,
+      # `apps/web/vitest.storybook.config.ts`, its own config file — see its
+      # docblock) runs via the separate "Run Storybook play tests" step
+      # below (`pnpm run test:storybook`), not through `npx turbo test`, via
+      # `@vitest/browser-playwright` — a real Chromium, not happy-dom.
+      # `--with-deps` also installs the OS libraries Chromium needs to
+      # launch on a bare Ubuntu runner.
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+
       - name: Lint
         run: npx turbo lint --filter=@kcvv/web
 
@@ -133,6 +144,17 @@ jobs:
       # `-- --coverage` whole or contributes nothing.
       - name: Run tests
         run: npx turbo test --filter=@kcvv/web ${{ github.ref == 'refs/heads/main' && '-- --coverage' || '' }}
+
+      # Separate config, separate invocation, on purpose (#3146, see
+      # `apps/web/vitest.storybook.config.ts`'s own docblock): running this
+      # project and the one above in the SAME `vitest` process — as a shared
+      # `test.projects` array, in one file or across files referenced by
+      # string — leaked `process.env.NODE_ENV` and Vite's own SSR resolve
+      # `conditions` into the `unit` project, breaking 17 unrelated unit-test
+      # files. Not run through `turbo` (no other `test:e2e`-style script is
+      # either) — no upstream package build dependency to cache against.
+      - name: Run Storybook play tests
+        run: pnpm --filter @kcvv/web run test:storybook
 
       - name: Lint API
         run: npx turbo lint --filter=@kcvv/api

@@ -2,7 +2,8 @@
 
 How to run, scope, and debug the two page/pixel-level suites in `apps/web`.
 Read this when you need to actually run a suite, capture baselines, or diagnose a
-failing VR job. The conceptual three-layer model lives in `apps/web/CLAUDE.md`.
+failing VR job. The conceptual four-layer model — including the Storybook
+`play` layer, `pnpm test:storybook` (#3146) — lives in `apps/web/CLAUDE.md`.
 
 ---
 
@@ -74,10 +75,7 @@ Dynamic routes test **pinned subjects**, listed in
 `apps/web/test/e2e/helpers/fixtures.ts` (`FIXTURES`): the six fixture documents
 below, plus one real staging player (`/spelers/778`) and team
 (`/ploegen/eerste-elftallen-a`), pinned as they exist. The shared helper probes
-no pages at start-up. `scroll-arrows.spec.ts` pins one more real staging
-article, `/nieuws/2025-06-20-definitieve-reeksindeling-3e-nationale-bis`
-(`TABLE_ARTICLE_SLUG`), because the `e2e-*` articles carry no HTML table and
-no related row.
+no pages at start-up.
 
 **Matches stay discovered.** A match is a PSD record, not a Sanity document,
 and the sitemap lists only matches of the last 90 days — every match ages out
@@ -85,10 +83,11 @@ of its own window, so no match id can be pinned. `discoverMatchId()` reads one
 off `/sitemap.xml` each run; with no match in the window, that test fails.
 
 **A missing subject is a red, never a skip (#3149).** Against pinned data,
-missing data is a regression, so no spec outside the two geometry specs above
-uses a data-shaped `test.skip`. If one goes red, add the content to `staging`
-or delete the test (#3087 §6). A skip that depends on the viewport, not on
-data, is fine.
+missing data is a regression, so no spec in this suite uses a data-shaped
+`test.skip` any more — the two files that did (`scroll-arrows.spec.ts`,
+`section-nav.spec.ts`) are gone (#3146; see the next section). If one goes
+red, add the content to `staging` or delete the test (#3087 §6). A skip that
+depends on the viewport, not on data, is fine.
 
 Two of these reds read PSD match data, which `staging` cannot pin: the match
 smoke test (a match in the last 90 days) and the MatchStrip toggle tap target
@@ -100,9 +99,12 @@ test, never to put the skip back.
 **What pinned data does not fix.** 6 of the 7 retries that green `main` runs
 hid were hydration and `IntersectionObserver` races. No data choice touches
 them: there is no hydration signal to wait for, and the framework's answer is
-an app-side fix. They live in `scroll-arrows.spec.ts` and
-`section-nav.spec.ts`, which #3146 deletes. Until then, both specs still sweep
-every team page at start-up to find a team whose section nav renders.
+an app-side fix. They lived in `scroll-arrows.spec.ts` and
+`section-nav.spec.ts` (both swept every team page at start-up to find one
+whose section nav renders) — #3146 deleted both files and re-homed their
+geometry as Storybook `play` against a fixture, which needs no such sweep:
+the fixture guarantees the condition instead of hoping a live team happens
+to render it.
 
 ### Pinned fixture documents in `staging` (#3147)
 
@@ -790,9 +792,11 @@ and a tagged story whose own `parameters.vr.viewports` excludes the
 assertion's `viewport`.
 
 **A tag with no story left carrying it is the failure mode this mechanism
-exists to close** — the guard it backstops for StandingsTable
-(`apps/web/test/e2e/scroll-arrows.spec.ts`) is itself a `test.skip()` on
-pre-season live data. `apps/web/test/vr/structural-assertions.test.ts` is
+exists to close** — the guard it backstops for StandingsTable was itself a
+`test.skip()` on pre-season live data, in `scroll-arrows.spec.ts` (deleted by
+#3146; see "What pinned data does not fix" above and
+`apps/web/CLAUDE.md`'s "Storybook `play` is a separate layer" section).
+`apps/web/test/vr/structural-assertions.test.ts` is
 the static, always-runs-in-`check-all` half — and review on #2861 found
 that a naive "does the tag string appear anywhere in the file" scan misses
 the more likely ways a tag stops actually running:

@@ -24,6 +24,28 @@ const preview: Preview = {
           name: "KCVV Mobile",
           styles: { width: "375px", height: "667px" },
         },
+        // `StandingsTable.stories.tsx`'s `StickyColumnsPinned` play fixture
+        // (#3146, review finding 7) needs the deleted E2E case's exact
+        // 360px — measured 2026-09-25: `kcvvMobile` (375px) is 15px too
+        // wide and the 8-column division stops overflowing at that width
+        // (`scrollWidth === clientWidth`, table content fits), so it does
+        // not reproduce the original condition.
+        kcvvStandingsTablePhone: {
+          name: "StandingsTable Phone (360)",
+          styles: { width: "360px", height: "800px" },
+        },
+        // The organigram explorer's zoom-overflow play fixture (#3146,
+        // review finding 2/7) needs the exact 1024px width the E2E case it
+        // replaced used — no `MINIMAL_VIEWPORTS` entry or `kcvvMobile`
+        // matches it. Named for the one consumer that needs it rather than
+        // a generic "tablet" — `OrganigramExplorer.stories.tsx`'s
+        // `ZoomOverflowsTheStage` is 1024px specifically because that is
+        // where an 11-child fan fits unzoomed but overflows once scaled to
+        // A++, not because it represents a real tablet breakpoint.
+        kcvvExplorerStage: {
+          name: "Organigram Explorer Stage (1024)",
+          styles: { width: "1024px", height: "800px" },
+        },
       },
     },
     options: {

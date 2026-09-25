@@ -51,6 +51,9 @@ const config: StorybookConfig = {
       // Declaring it here is version-proof either way.
       "@": resolve(__dirname, "../src"),
       "@test-fixtures": resolve(__dirname, "../test/fixtures"),
+      // `test/storybook/settle.ts` (#3146) — a `play`-only helper stories
+      // import to wait out a late remeasure before asserting an absence.
+      "@test-storybook": resolve(__dirname, "../test/storybook"),
     };
     return cfg;
   },
