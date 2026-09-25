@@ -206,13 +206,16 @@ export const ARTICLE_BY_SLUG_QUERY =
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "role": functionTitle
   },
-  // Optional closing band (#2525) — the object exists on every article, but
-  // is empty (all fields null) unless an editor filled it in. Same reference
-  // shape the body's internalLink mark already projects, so
-  // <ArticleCtaBand> resolves it through the same resolveInternalLinkHref.
+  // Optional closing band (#2525) — GROQ returns null for the whole object
+  // when an editor never touched it; the schema guarantees it's otherwise
+  // complete. Same reference shape the body's internalLink mark already
+  // projects, plus the referenced article's own publish window so a stale
+  // reference (scheduled or expired) can be dropped below rather than
+  // linking to a 404 — <ArticleCtaBand> resolves the rest through the same
+  // resolveInternalLinkHref.
   callToAction{
     question, emphasis, lead, buttonLabel, href,
-    "reference": reference->{ _type, "slug": slug.current, psdId, archived }
+    "reference": reference->{ _type, "slug": slug.current, psdId, archived, publishedAt, unpublishAt }
   }
 }`);
 
@@ -327,7 +330,34 @@ function filterPublishedRelatedArticles(
       row.relatedContent?.filter(
         (item) => item._type !== "article" || isPublished(item),
       ) ?? null,
+    callToAction: dropUnpublishedArticleReference(
+      row.callToAction,
+      isPublished,
+    ),
   };
+}
+
+/**
+ * A `callToAction.reference` pointing at an article inherits that article's
+ * own publish window — a reference scheduled for later or already expired
+ * would otherwise send the button to a 404. Drops the reference (never the
+ * whole `callToAction`) so `<ArticleCtaBand>`'s existing "neither a
+ * reference nor an href" incomplete-object check renders nothing, the same
+ * path a never-filled-in field takes.
+ */
+function dropUnpublishedArticleReference(
+  cta: ARTICLE_BY_SLUG_DETAIL["callToAction"],
+  isPublished: (a: {
+    publishedAt: string | null;
+    unpublishAt: string | null;
+  }) => boolean,
+): ArticleDetailVM["callToAction"] {
+  if (!cta) return null;
+  const ref = cta.reference;
+  if (ref && ref._type === "article" && !isPublished(ref)) {
+    return { ...cta, reference: null };
+  }
+  return cta;
 }
 
 // `findPaginated` and `findRelated` use narrower GROQ projections that omit

@@ -17,9 +17,11 @@ export interface CallToActionValue {
 /**
  * Has the editor started filling in the call-to-action at all? An entirely
  * empty object is the default (no band on the article) and must never trip
- * validation — every other check below is gated on this one first.
+ * validation — every other check below is gated on this one first. Not
+ * exported — every consumer needs one of the three field-level validators
+ * below, never this gate on its own.
  */
-export function isCallToActionStarted(
+function isCallToActionStarted(
   cta: CallToActionValue | undefined | null,
 ): boolean {
   if (!cta) return false
@@ -46,14 +48,21 @@ export function validateCallToActionRequiredField(
   return hasText(value) ? true : message
 }
 
-/** `emphasis` must be a literal substring of `question` when set. */
+/**
+ * `emphasis` must be a literal substring of `question` when set. Both sides
+ * are trimmed before the comparison — the render side (`<ArticleCtaBand>`)
+ * trims both before handing them to `<EditorialHeading>`'s own substring
+ * match, so validating against the untrimmed values here could pass a pair
+ * that then fails to highlight on the page.
+ */
 export function validateCallToActionEmphasis(
   cta: CallToActionValue | undefined,
   emphasis: unknown,
 ): true | string {
   if (!hasText(emphasis)) return true
-  const question = cta?.question ?? ''
-  return typeof emphasis === 'string' && question.includes(emphasis)
+  const question = (cta?.question ?? '').trim()
+  const trimmedEmphasis = typeof emphasis === 'string' ? emphasis.trim() : ''
+  return question.includes(trimmedEmphasis)
     ? true
     : 'Het accentwoord moet letterlijk voorkomen in de vraag.'
 }

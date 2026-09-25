@@ -753,12 +753,10 @@ export function buildComponents({
         children: ReactNode;
         value?: InternalLinkValue;
       }) => {
-        // A team PSD retired has no page any more (#3000): keep the words,
-        // drop the link. Archived players keep theirs — /spelers still
-        // serves them.
-        const ref = value?.reference;
-        if (ref?._type === "team" && ref.archived === true) return children;
-        const href = resolveInternalLinkHref(ref);
+        // Keep the words, drop the link, whenever the reference can't
+        // resolve — an archived team (#3000) or a missing psdId/slug.
+        const href = resolveInternalLinkHref(value?.reference);
+        if (!href) return children;
         return (
           <Link href={href} data-article-link="internal" className="prose-link">
             {children}

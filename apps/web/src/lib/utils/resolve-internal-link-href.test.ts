@@ -32,16 +32,36 @@ describe("resolveInternalLinkHref", () => {
     ).toBe("/club/geschiedenis");
   });
 
-  it("returns '#' when the identifier the target route needs is missing", () => {
-    expect(resolveInternalLinkHref({ _type: "player" })).toBe("#");
-    expect(resolveInternalLinkHref({ _type: "team" })).toBe("#");
+  it("returns null when the identifier the target route needs is missing", () => {
+    expect(resolveInternalLinkHref({ _type: "player" })).toBeNull();
+    expect(resolveInternalLinkHref({ _type: "team" })).toBeNull();
   });
 
-  it("returns '#' for an unrecognised reference type", () => {
-    expect(resolveInternalLinkHref({ _type: "sponsor" })).toBe("#");
+  it("returns null for an archived team, even with a slug", () => {
+    expect(
+      resolveInternalLinkHref({
+        _type: "team",
+        slug: "oud-elftal",
+        archived: true,
+      }),
+    ).toBeNull();
   });
 
-  it("returns '#' for an undefined reference", () => {
-    expect(resolveInternalLinkHref(undefined)).toBe("#");
+  it("resolves a non-archived team with a slug", () => {
+    expect(
+      resolveInternalLinkHref({
+        _type: "team",
+        slug: "eerste-ploeg",
+        archived: false,
+      }),
+    ).toBe("/ploegen/eerste-ploeg");
+  });
+
+  it("returns null for an unrecognised reference type", () => {
+    expect(resolveInternalLinkHref({ _type: "sponsor" })).toBeNull();
+  });
+
+  it("returns null for an undefined reference", () => {
+    expect(resolveInternalLinkHref(undefined)).toBeNull();
   });
 });

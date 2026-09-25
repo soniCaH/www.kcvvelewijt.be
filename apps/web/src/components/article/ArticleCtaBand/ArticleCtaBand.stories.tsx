@@ -28,10 +28,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    question: "Kom eens gratis meetrainen?",
-    emphasis: "gratis meetrainen",
-    lead: "Elke dinsdag en donderdag, iedereen welkom — geen verplichtingen.",
-    buttonLabel: "Schrijf je in",
-    href: "https://forms.gle/LXxf2Sd25rvpM14FA",
+    articleId: "story-article",
+    articleType: "announcement",
+    callToAction: {
+      question: "Kom eens gratis meetrainen?",
+      emphasis: "gratis meetrainen",
+      lead: "Elke dinsdag en donderdag, iedereen welkom — geen verplichtingen.",
+      buttonLabel: "Schrijf je in",
+      href: "https://forms.gle/LXxf2Sd25rvpM14FA",
+    },
   },
 };

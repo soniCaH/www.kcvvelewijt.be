@@ -17,6 +17,11 @@ export interface ArticleCtaAnalyticsProps {
  * `data-sponsor-cta` → `sponsor_cta_click` wiring on `/sponsors`. Scoped to
  * just the band, not the whole page: this is the only `data-article-cta`
  * marker on an article, so a page-wide listener would buy nothing.
+ *
+ * `<ArticleCtaBand>` only mounts this wrapper when it has something to
+ * render — an article without the field (or with an incomplete one) gets no
+ * band and no click listener, rather than an empty delegator sitting idle
+ * on every article page.
  */
 export function ArticleCtaAnalytics({
   articleId,

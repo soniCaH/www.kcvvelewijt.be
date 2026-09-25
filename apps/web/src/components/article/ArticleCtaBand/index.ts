@@ -1,1 +1,5 @@
-export { ArticleCtaBand, type ArticleCtaBandProps } from "./ArticleCtaBand";
+export {
+  ArticleCtaBand,
+  type ArticleCtaBandProps,
+  type ArticleCallToAction,
+} from "./ArticleCtaBand";

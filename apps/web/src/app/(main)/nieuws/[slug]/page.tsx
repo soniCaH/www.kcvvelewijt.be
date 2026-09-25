@@ -55,7 +55,6 @@ import { QaBlock } from "@/components/article/blocks/QaBlock";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { ArticleCredits } from "@/components/article/ArticleCredits";
 import { ArticleCtaBand } from "@/components/article/ArticleCtaBand";
-import { ArticleCtaAnalytics } from "@/components/article/ArticleCtaAnalytics";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import {
   EventDetailBlock,
@@ -678,22 +677,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       ) : null}
 
       {/* Optional editor-filled closer (#2525) — full-bleed, between the
-          credits and the related row. Renders nothing when the field is
-          empty or incomplete; the analytics shell stays a thin click
-          delegator so the band itself keeps rendering server-side. */}
-      <ArticleCtaAnalytics
+          credits and the related row. Renders nothing (band or analytics
+          listener) when the field is empty or incomplete. */}
+      <ArticleCtaBand
         articleId={article.id}
         articleType={article.articleType}
-      >
-        <ArticleCtaBand
-          question={article.callToAction?.question}
-          emphasis={article.callToAction?.emphasis}
-          lead={article.callToAction?.lead}
-          buttonLabel={article.callToAction?.buttonLabel}
-          href={article.callToAction?.href}
-          reference={article.callToAction?.reference}
-        />
-      </ArticleCtaAnalytics>
+        callToAction={article.callToAction}
+      />
 
       <RelatedRow
         items={relatedRowItems}

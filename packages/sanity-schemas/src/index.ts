@@ -25,7 +25,6 @@ export type {RespondentKeyContext} from './validation/respondent-key'
 export {validateContactFields} from './validation/contact-fields'
 export {validateBannerAspectRatio} from './validation/banner-aspect-ratio'
 export {
-  isCallToActionStarted,
   validateCallToActionRequiredField,
   validateCallToActionEmphasis,
   validateCallToActionLink,

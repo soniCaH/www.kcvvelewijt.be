@@ -459,7 +459,7 @@ export const article = defineType({
           title: "Accentwoord",
           type: "string",
           description:
-            "Optioneel: een woord of korte reeks uit de vraag die groen-cursief geaccentueerd wordt. Moet letterlijk voorkomen in de vraag hierboven.",
+            "Optioneel: een woord of korte reeks uit de vraag die cursief geaccentueerd wordt. Moet letterlijk voorkomen in de vraag hierboven.",
           validation: (r) =>
             r.custom((value, ctx) =>
               validateCallToActionEmphasis(
@@ -511,6 +511,15 @@ export const article = defineType({
           ],
           description:
             "Kies dit óf vul hieronder een URL in — niet beide. Link naar een speler, staflid, ploeg, artikel of pagina op de site.",
+          options: {
+            // Mirrors the render-time guards: an archived team has no page
+            // any more (#3000), and a player/staffMember without a synced
+            // psdId can't resolve to /spelers or /staf. Keep those out of
+            // the picker rather than letting an editor choose a reference
+            // the site silently drops.
+            filter:
+              '(_type != "team" || archived != true) && ((_type != "player" && _type != "staffMember") || defined(psdId))',
+          },
           validation: (r) =>
             r.custom((_value, ctx) =>
               validateCallToActionLink(
@@ -524,10 +533,13 @@ export const article = defineType({
           title: "URL",
           type: "url",
           description:
-            "Kies dit óf een interne link hierboven — niet beide. Externe URL, e-mailadres (mailto:) of telefoonnummer (tel:).",
+            "Kies dit óf een interne link hierboven — niet beide. Externe URL (ook een relatief pad zoals /club/word-lid), e-mailadres (mailto:) of telefoonnummer (tel:).",
           validation: (r) =>
             r
-              .uri({ scheme: ["http", "https", "mailto", "tel"] })
+              .uri({
+                allowRelative: true,
+                scheme: ["http", "https", "mailto", "tel"],
+              })
               .custom((_value, ctx) =>
                 validateCallToActionLink(
                   ctx.parent as CallToActionValue | undefined,

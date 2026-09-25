@@ -1,10 +1,11 @@
 import { CtaBand } from "@/components/design-system";
+import { ArticleCtaAnalytics } from "@/components/article/ArticleCtaAnalytics";
 import {
   resolveInternalLinkHref,
   type InternalLinkReference,
 } from "@/lib/utils/resolve-internal-link-href";
 
-export interface ArticleCtaBandProps {
+export interface ArticleCallToAction {
   question?: string | null;
   emphasis?: string | null;
   lead?: string | null;
@@ -13,22 +14,23 @@ export interface ArticleCtaBandProps {
   reference?: InternalLinkReference | null;
 }
 
+export interface ArticleCtaBandProps {
+  articleId: string;
+  articleType: string | null | undefined;
+  callToAction?: ArticleCallToAction | null;
+}
+
 /**
  * Resolves `href` / `reference` to a single destination, or `null` when
- * neither works — an archived team's reference (#3000: retired PSD teams
- * have no page any more, mirroring `<ArticleBody>`'s own internalLink
- * guard) or a reference `resolveInternalLinkHref` can't turn into a route.
+ * neither works — `resolveInternalLinkHref` already folds in the archived-
+ * team guard (#3000) and the missing-identifier case.
  */
 function resolveHref({
   href,
   reference,
-}: Pick<ArticleCtaBandProps, "href" | "reference">): string | null {
+}: Pick<ArticleCallToAction, "href" | "reference">): string | null {
   if (reference) {
-    if (reference._type === "team" && reference.archived === true) {
-      return null;
-    }
-    const resolved = resolveInternalLinkHref(reference);
-    return resolved === "#" ? null : resolved;
+    return resolveInternalLinkHref(reference);
   }
   const trimmedHref = href?.trim();
   return trimmedHref ? trimmedHref : null;
@@ -37,24 +39,26 @@ function resolveHref({
 /**
  * <ArticleCtaBand> — the optional, editor-filled call-to-action closing an
  * article (`article.callToAction`). Maps the view-model field onto the
- * shared `<CtaBand>` and returns `null` whenever the field is empty or
- * incomplete — the schema keeps the object either fully empty or fully
- * valid, but a draft, a legacy document, or an unresolvable reference can
- * still reach here, so the component re-checks rather than trusting the
- * schema at render time.
+ * shared `<CtaBand>` and renders nothing — no band, no analytics listener —
+ * whenever the field is empty or incomplete. The schema keeps the object
+ * either fully empty or fully valid, but a draft, a legacy document, or an
+ * unresolvable reference can still reach here, so the component re-checks
+ * rather than trusting the schema at render time. Owns mounting
+ * `<ArticleCtaAnalytics>` itself so the click-delegation listener only
+ * exists on the pages that actually have a button to delegate for.
  */
 export function ArticleCtaBand({
-  question,
-  emphasis,
-  lead,
-  buttonLabel,
-  href,
-  reference,
+  articleId,
+  articleType,
+  callToAction,
 }: ArticleCtaBandProps) {
-  const trimmedQuestion = question?.trim();
-  const trimmedLead = lead?.trim();
-  const trimmedButtonLabel = buttonLabel?.trim();
-  const resolvedHref = resolveHref({ href, reference });
+  const trimmedQuestion = callToAction?.question?.trim();
+  const trimmedLead = callToAction?.lead?.trim();
+  const trimmedButtonLabel = callToAction?.buttonLabel?.trim();
+  const resolvedHref = resolveHref({
+    href: callToAction?.href,
+    reference: callToAction?.reference,
+  });
 
   if (
     !trimmedQuestion ||
@@ -65,19 +69,21 @@ export function ArticleCtaBand({
     return null;
   }
 
-  const trimmedEmphasis = emphasis?.trim();
+  const trimmedEmphasis = callToAction?.emphasis?.trim();
 
   return (
-    <CtaBand
-      ariaLabel={trimmedQuestion}
-      heading={trimmedQuestion}
-      emphasis={
-        trimmedEmphasis ? { text: trimmedEmphasis, tone: "warm" } : undefined
-      }
-      lead={trimmedLead}
-      buttonLabel={trimmedButtonLabel}
-      href={resolvedHref}
-      buttonData={{ "data-article-cta": "true" }}
-    />
+    <ArticleCtaAnalytics articleId={articleId} articleType={articleType}>
+      <CtaBand
+        ariaLabel={trimmedQuestion}
+        heading={trimmedQuestion}
+        emphasis={
+          trimmedEmphasis ? { text: trimmedEmphasis, tone: "warm" } : undefined
+        }
+        lead={trimmedLead}
+        buttonLabel={trimmedButtonLabel}
+        href={resolvedHref}
+        buttonData={{ "data-article-cta": "true" }}
+      />
+    </ArticleCtaAnalytics>
   );
 }

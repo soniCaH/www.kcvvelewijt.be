@@ -763,6 +763,142 @@ describe("ArticleRepository", () => {
       expect(result!.relatedArticles![0].id).toBe("valid-article");
     });
 
+    it("drops a callToAction reference pointing at an article scheduled for the future", async () => {
+      const futureDate = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ).toISOString();
+      mockFetch.mockResolvedValueOnce(
+        makeArticleDetailRow({
+          callToAction: {
+            question: "Kom je?",
+            emphasis: null,
+            lead: "Een lijntje tekst.",
+            buttonLabel: "Lees meer",
+            href: null,
+            reference: {
+              _type: "article",
+              slug: "toekomstig-artikel",
+              psdId: null,
+              archived: null,
+              publishedAt: futureDate,
+              unpublishAt: null,
+            },
+          },
+        }),
+      );
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(result!.callToAction?.reference).toBeNull();
+    });
+
+    it("drops a callToAction reference pointing at an expired article", async () => {
+      const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      mockFetch.mockResolvedValueOnce(
+        makeArticleDetailRow({
+          callToAction: {
+            question: "Kom je?",
+            emphasis: null,
+            lead: "Een lijntje tekst.",
+            buttonLabel: "Lees meer",
+            href: null,
+            reference: {
+              _type: "article",
+              slug: "verlopen-artikel",
+              psdId: null,
+              archived: null,
+              publishedAt: "2026-01-01T10:00:00Z",
+              unpublishAt: pastDate,
+            },
+          },
+        }),
+      );
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(result!.callToAction?.reference).toBeNull();
+    });
+
+    it("keeps a callToAction reference to an article within its publish window", async () => {
+      const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const futureDate = new Date(
+        Date.now() + 24 * 60 * 60 * 1000,
+      ).toISOString();
+      mockFetch.mockResolvedValueOnce(
+        makeArticleDetailRow({
+          callToAction: {
+            question: "Kom je?",
+            emphasis: null,
+            lead: "Een lijntje tekst.",
+            buttonLabel: "Lees meer",
+            href: null,
+            reference: {
+              _type: "article",
+              slug: "geldig-artikel",
+              psdId: null,
+              archived: null,
+              publishedAt: pastDate,
+              unpublishAt: futureDate,
+            },
+          },
+        }),
+      );
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(result!.callToAction?.reference).toEqual(
+        expect.objectContaining({ _type: "article", slug: "geldig-artikel" }),
+      );
+    });
+
+    it("leaves a callToAction referencing a non-article (e.g. team) untouched", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeArticleDetailRow({
+          callToAction: {
+            question: "Kom je?",
+            emphasis: null,
+            lead: "Een lijntje tekst.",
+            buttonLabel: "Lees meer",
+            href: null,
+            reference: {
+              _type: "team",
+              slug: "eerste-ploeg",
+              psdId: null,
+              archived: false,
+              publishedAt: null,
+              unpublishAt: null,
+            },
+          },
+        }),
+      );
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(result!.callToAction?.reference).toEqual(
+        expect.objectContaining({ _type: "team", slug: "eerste-ploeg" }),
+      );
+    });
+
     it("filters out unpublished article entries inside relatedContent but keeps players", async () => {
       const futureDate = new Date(
         Date.now() + 24 * 60 * 60 * 1000,
