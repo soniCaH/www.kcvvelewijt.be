@@ -6,14 +6,11 @@
  */
 import { join } from "node:path";
 
-import { ESLint } from "eslint";
 import { beforeAll, describe, expect, it } from "vitest";
 
-const webDir = join(import.meta.dirname, "..", "..");
-const eslint = new ESLint({
-  cwd: webDir,
-  ruleFilter: ({ ruleId }) => ruleId === "no-restricted-syntax",
-});
+import { eslintForRule, lintFixtures, webDir } from "./eslint-rule-harness";
+
+const eslint = eslintForRule("no-restricted-syntax");
 
 const WINDOW_SIZE_WRITES = [
   "window.innerWidth = 500;",
@@ -42,29 +39,15 @@ const ALLOWED = [
   'const page = import("./page");',
 ];
 
-const messages = new Map<string, string[]>();
+let messages: Map<string, string[]>;
 
 // Loading the Next ESLint config takes seconds; pay it here, once, outside
 // every test's timeout.
 beforeAll(async () => {
-  const sources = [
-    ...WINDOW_SIZE_WRITES,
-    ...FIXED_PORTS,
-    ...IN_BODY_IMPORTS,
-    ...ALLOWED,
-  ];
-  const results = await Promise.all(
-    sources.map((source) =>
-      eslint.lintText(source, {
-        filePath: join(webDir, "src", "fixture.test.ts"),
-      }),
-    ),
-  );
-  sources.forEach((source, i) =>
-    messages.set(
-      source,
-      results[i][0].messages.map((message) => message.message),
-    ),
+  messages = await lintFixtures(
+    eslint,
+    [...WINDOW_SIZE_WRITES, ...FIXED_PORTS, ...IN_BODY_IMPORTS, ...ALLOWED],
+    join(webDir, "src", "fixture.test.ts"),
   );
 }, 60_000);
 
