@@ -1,8 +1,19 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 import { fileURLToPath } from "node:url";
 import { resolve, dirname } from "node:path";
+import { mkdirSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// `staticDirs` below must exist at config-eval time or Storybook refuses to
+// start. `scripts/prefetch-typekit.mjs` (run once per Storybook build — see
+// the `build-storybook` / `vr:build-storybook` package.json scripts) fills
+// this directory with the actual prefetched CSS + font files; this guard
+// just guarantees the directory itself is there even before that script has
+// ever run (a fresh checkout, or plain `pnpm storybook` dev). Gitignored —
+// see root .gitignore — because the fetched content carries Adobe's Typekit
+// terms, not this repo's licence (#3137).
+mkdirSync(resolve(__dirname, ".typekit-cache/fonts"), { recursive: true });
 
 const config: StorybookConfig = {
   stories: [
@@ -29,6 +40,11 @@ const config: StorybookConfig = {
     // `/test-fixtures/images/...` so VR snapshots don't depend on
     // remote placeholder services.
     { from: "../test/fixtures/images", to: "/test-fixtures/images" },
+    // Adobe Typekit, prefetched once per run — see scripts/prefetch-typekit.mjs
+    // and the mkdirSync guard above. Served at `/typekit-cache/...` so
+    // preview-head.html links to it instead of the live use.typekit.net CDN
+    // (#3137).
+    { from: ".typekit-cache", to: "/typekit-cache" },
   ],
   viteFinal: async (cfg) => {
     cfg.resolve ??= {};
