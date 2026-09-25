@@ -33,20 +33,12 @@ test.describe("/evenementen", () => {
   }) => {
     await expect(page.locator("h1").first()).toContainText("Evenementen");
 
-    // The feed is upcoming-only, so an empty dataset (off-season / none seeded)
-    // is a valid state — `<EventsBrowser>` then renders a centred empty message
-    // with NO filter row. Wait for whichever terminal state rendered, then
-    // assert against it (mirrors the `test.skip(allCount === 0)` guard the other
-    // two specs use). `.count()` doesn't auto-wait, so settle on a visible state
-    // first to avoid racing hydration into a false-empty read.
+    // The feed is upcoming-only, but the pinned 2099 fixture event
+    // (`FIXTURES.eventSlug`) keeps it non-empty, so the empty state is a
+    // regression here, not a valid outcome (#3087 §5–§6).
     const filterBar = page.getByRole("group", {
       name: /Filter evenementen op type/i,
     });
-    const emptyState = page.getByText(/Geen evenementen gepland/i);
-    await expect(filterBar.or(emptyState)).toBeVisible();
-
-    if (await emptyState.isVisible()) return;
-
     await expect(filterBar).toBeVisible();
     expect(await page.locator(TICKET_SELECTOR).count()).toBeGreaterThan(0);
   });
@@ -55,8 +47,12 @@ test.describe("/evenementen", () => {
     page,
   }) => {
     const tickets = page.locator(TICKET_SELECTOR);
+    // `.count()` does not auto-wait — settle on a rendered ticket first.
+    await expect(
+      tickets.first(),
+      "no upcoming events on the dataset",
+    ).toBeVisible();
     const allCount = await tickets.count();
-    test.skip(allCount === 0, "no upcoming events on the dataset");
 
     // Single-select filter — picking one type can only narrow the set.
     const clubChip = page.getByRole("button", {
@@ -83,10 +79,7 @@ test.describe("/evenementen", () => {
     // Pick an event-doc ticket so we land on a /evenementen/[slug] detail page
     // (article tickets intentionally route to /nieuws/[slug] instead).
     const eventTicket = page.locator('main a[href^="/evenementen/"]').first();
-    test.skip(
-      (await eventTicket.count()) === 0,
-      "no event-doc tickets in the feed",
-    );
+    await expect(eventTicket, "no event-doc tickets in the feed").toBeVisible();
 
     const href = await eventTicket.getAttribute("href");
     await eventTicket.click();

@@ -82,7 +82,13 @@ no related row.
 **Matches stay discovered.** A match is a PSD record, not a Sanity document,
 and the sitemap lists only matches of the last 90 days — every match ages out
 of its own window, so no match id can be pinned. `discoverMatchId()` reads one
-off `/sitemap.xml` each run; with no match in the window, that test skips.
+off `/sitemap.xml` each run; with no match in the window, that test fails.
+
+**A missing subject is a red, never a skip (#3149).** Against pinned data,
+missing data is a regression, so no spec outside the two geometry specs above
+uses a data-shaped `test.skip`. If one goes red, add the content to `staging`
+or delete the test (#3087 §6). A skip that depends on the viewport, not on
+data, is fine.
 
 **What pinned data does not fix.** 6 of the 7 retries that green `main` runs
 hid were hydration and `IntersectionObserver` races. No data choice touches
