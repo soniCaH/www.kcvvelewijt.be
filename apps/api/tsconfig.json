@@ -4,11 +4,16 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ESNext"],
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types", "@cloudflare/vitest-plugin/types"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "vitest.config.ts"]
+  "include": [
+    "src/**/*",
+    "vitest.config.ts",
+    "vitest.node.config.ts",
+    "vitest.workers.config.ts"
+  ]
 }
