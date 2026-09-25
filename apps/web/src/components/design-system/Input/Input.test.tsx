@@ -85,8 +85,11 @@ describe("Input", () => {
 
     it("anchors filled state via :not(:placeholder-shown):not(:focus) → ink/60", () => {
       render(<Input data-testid="input" />);
+      // Excludes [data-vr-force-ring=true] (#3137) so this rule can never
+      // compete with the forced-focus VR rule on equal specificity — see
+      // fieldChrome.ts.
       expect(screen.getByTestId("input").className).toContain(
-        "[&:not(:placeholder-shown):not(:focus)]:border-ink/60",
+        "[&:not(:placeholder-shown):not(:focus):not([data-vr-force-ring=true])]:border-ink/60",
       );
     });
 

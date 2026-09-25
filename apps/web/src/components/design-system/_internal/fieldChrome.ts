@@ -48,8 +48,17 @@ const fieldChromeIdle = [
   // Hover — compress shadow + nudge surface, deepen border
   "hover:border-ink/40 hover:shadow-[var(--shadow-paper-sm-soft-hover)] hover:translate-x-px hover:translate-y-px",
 
-  // Filled (text typed but not focused) — anchor at ink/60
-  "[&:not(:placeholder-shown):not(:focus)]:border-ink/60",
+  // Filled (text typed but not focused) — anchor at ink/60. Excludes
+  // `[data-vr-force-ring=true]` so this rule's border color can never
+  // compete with the forced-focus rule below on a "FilledFocused" VR story
+  // — those set both a value AND the force-ring attribute, and since real
+  // frame focus is exactly what may NOT have landed (the whole reason the
+  // force-ring rule exists), `:not(:focus)` here is genuinely true at the
+  // same time. Two same-specificity rules asserting different border
+  // colors would otherwise depend on Tailwind's utility output order,
+  // which this file does not control — excluding the state here removes
+  // the ambiguity structurally instead of relying on winning a cascade race.
+  "[&:not(:placeholder-shown):not(:focus):not([data-vr-force-ring=true])]:border-ink/60",
 
   // Focus — full ink border, snap shadow off, press into paper
   "focus:border-ink focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5",
