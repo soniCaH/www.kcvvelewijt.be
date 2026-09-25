@@ -23,6 +23,7 @@
     "effect": "3.22.2"
   },
   "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.2.7",
     "@cloudflare/workers-types": "5.20260901.1",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "@vitest/coverage-v8": "4.1.11",
