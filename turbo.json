@@ -100,6 +100,9 @@
     },
     "@kcvv/sanity-studio#test": {
       "outputs": []
+    },
+    "@kcvv/sanity-ops#test": {
+      "outputs": []
     }
   }
 }

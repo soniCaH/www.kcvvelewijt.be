@@ -1,6 +1,5 @@
 import { writeFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { packageRoot } from "../shared/package-root";
 import { client, draftAwareClient } from "../shared/sanity-client";
 
 interface BoardDoc {
@@ -140,12 +139,7 @@ async function main() {
 
   // Output JSON for further processing
   const output = { boardDocs, psdDocs, manualDocs, teams };
-  const outPath = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "..",
-    "audit-result.json",
-  );
+  const outPath = new URL("audit-result.json", packageRoot);
   writeFileSync(outPath, JSON.stringify(output, null, 2));
   console.log("\nFull data written to audit-result.json");
 }

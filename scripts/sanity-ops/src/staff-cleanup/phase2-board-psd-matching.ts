@@ -6,6 +6,7 @@
  *
  * Run: SANITY_API_TOKEN=... SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops staff:phase2:match
  */
+import { packageRoot } from "../shared/package-root";
 import { client } from "../shared/sanity-client";
 
 interface StaffDoc {
@@ -124,7 +125,7 @@ async function main() {
   console.log(`  Total:     ${boardDocs.length} board docs\n`);
 
   // Write matches to a JSON file for the migration step
-  const reportPath = new URL("../../phase2-matches.json", import.meta.url);
+  const reportPath = new URL("phase2-matches.json", packageRoot);
   const { writeFileSync } = await import("fs");
   writeFileSync(
     reportPath,

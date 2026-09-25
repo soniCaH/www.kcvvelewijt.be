@@ -8,6 +8,7 @@
  */
 import { client, draftAwareClient } from "../shared/sanity-client";
 import { readFileSync } from "fs";
+import { packageRoot } from "../shared/package-root";
 
 interface MatchEntry {
   boardId: string;
@@ -46,7 +47,7 @@ function deepReplaceRef(value: unknown, oldId: string, newId: string): unknown {
 }
 
 const matches: MatchEntry[] = JSON.parse(
-  readFileSync(new URL("../../phase2-matches.json", import.meta.url), "utf-8"),
+  readFileSync(new URL("phase2-matches.json", packageRoot), "utf-8"),
 );
 
 async function migrateOne(match: MatchEntry, index: number) {
