@@ -16,22 +16,19 @@
  */
 import { env } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
-import { Effect, Layer, Schema as S } from "effect";
+import { Effect, Schema as S } from "effect";
 import { KvCacheLive, TypedKvCache } from "../cache/kv-cache";
 import { PsdGateLive } from "./gate";
-import { WorkerEnvTag } from "../env";
-import { makeTestEnv } from "../test-helpers/env-layer";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 /** A fresh DO instance per test (unique `idFromName`) — isolates single-flight
- * state the same way the node suite isolates it with `new GateLogic()`. */
+ * state the same way the node suite isolates it with `new GateLogic()`.
+ * No cast needed: `env.PSD_GATE` is already typed as
+ * `DurableObjectNamespace<PsdGate>` (workerd-test-env.d.ts), so the stub's
+ * RPC methods are typed structurally off `PsdGate` itself. */
 function freshGateStub(name: string) {
   const id = env.PSD_GATE.idFromName(name);
-  return env.PSD_GATE.get(id) as unknown as {
-    acquireToken(): Promise<void>;
-    beginFlight(key: string): Promise<boolean>;
-    endFlight(key: string): Promise<void>;
-    awaitFlight(key: string): Promise<void>;
-  };
+  return env.PSD_GATE.get(id);
 }
 
 describe("PsdGate Durable Object — real single-flight coordination (workerd)", () => {
@@ -79,10 +76,10 @@ describe("TypedKvCache single-flight — real KV + real Durable Object together 
 
   it("N concurrent cache misses collapse to ONE fetch, end-to-end", async () => {
     const key = `workerd:single-flight:${Math.random()}`;
-    const realEnvLayer = Layer.succeed(
-      WorkerEnvTag,
-      makeTestEnv({ PSD_CACHE: env.PSD_CACHE, PSD_GATE: env.PSD_GATE }),
-    );
+    const realEnvLayer = makeTestEnvLayer({
+      PSD_CACHE: env.PSD_CACHE,
+      PSD_GATE: env.PSD_GATE,
+    });
 
     let fanOuts = 0;
     const fetchEffect = Effect.gen(function* () {

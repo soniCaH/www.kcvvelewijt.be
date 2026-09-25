@@ -14,18 +14,14 @@
  */
 import { env } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect } from "effect";
 import { KvCacheService, KvCacheLive, makeDurableKv } from "./kv-cache";
-import { WorkerEnvTag } from "../env";
-import { makeTestEnv } from "../test-helpers/env-layer";
+import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 /** Real env layer: every field is the usual test default EXCEPT `PSD_CACHE`,
  * which is the actual Miniflare KV binding — the one thing these tests
  * exist to exercise for real. */
-const realKvEnvLayer = Layer.succeed(
-  WorkerEnvTag,
-  makeTestEnv({ PSD_CACHE: env.PSD_CACHE }),
-);
+const realKvEnvLayer = makeTestEnvLayer({ PSD_CACHE: env.PSD_CACHE });
 
 describe("KvCacheLive — real KV binding (workerd)", () => {
   it("writes and reads back a value", async () => {
@@ -40,11 +36,13 @@ describe("KvCacheLive — real KV binding (workerd)", () => {
   });
 
   it("returns null for a key that was never written", async () => {
-    const result = await Effect.runPromise(
-      Effect.gen(function* () {
-        const cache = yield* KvCacheService;
-        return yield* cache.get("workerd:kv-cache-live:never-written");
-      }).pipe(Effect.provide(KvCacheLive), Effect.provide(realKvEnvLayer)),
+    // Asserts the raw binding, not `KvCacheService.get` — that wrapper
+    // `orElseSucceed`s every failure to `null` too (by design, see
+    // KvCacheLive), so going through it here couldn't tell "the real
+    // binding legitimately has no such key" apart from "the real binding
+    // call blew up and got papered over."
+    const result = await env.PSD_CACHE.get(
+      "workerd:kv-cache-live:never-written",
     );
     expect(result).toBeNull();
   });
@@ -89,6 +87,12 @@ describe("KvCacheLive — real KV binding (workerd)", () => {
   });
 
   it("increment starts today's counter at 1, then adds on top", async () => {
+    // Captured BEFORE the increments: reading `new Date()` afterwards would
+    // flake the rare run that straddles a UTC midnight rollover, since
+    // `increment`'s own key is built from the date at write time.
+    const d = new Date();
+    const dayKey = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+
     await Effect.runPromise(
       Effect.gen(function* () {
         const cache = yield* KvCacheService;
@@ -97,8 +101,6 @@ describe("KvCacheLive — real KV binding (workerd)", () => {
       }).pipe(Effect.provide(KvCacheLive), Effect.provide(realKvEnvLayer)),
     );
 
-    const d = new Date();
-    const dayKey = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
     expect(await env.PSD_CACHE.get(dayKey)).toBe("5");
   });
 });
@@ -115,7 +117,14 @@ describe("makeDurableKv — real KV binding (workerd)", () => {
     expect(entry?.expiration).toBeUndefined();
   });
 
-  it("list pages real KV `list()` results into the port's shape", async () => {
+  it("list returns real KV list() results in the port's shape", async () => {
+    // Single page only: makeDurableKv's `list` (kv-cache.ts) forwards just
+    // `{ prefix, cursor }` to the real KVNamespace.list() call — it takes
+    // no `limit`, so this test cannot force (and does not claim to prove)
+    // real multi-page cursor-following. That loop's own logic — draining
+    // pages in order until `list_complete` — is covered on `node` against a
+    // mock that CAN force a small page size (kv-cache.test.ts, "list drains
+    // every page in order until list_complete").
     const prefix = "workerd:durable-kv:list:";
     const durable = makeDurableKv(env.PSD_CACHE);
     await Effect.runPromise(
