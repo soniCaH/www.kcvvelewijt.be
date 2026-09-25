@@ -397,14 +397,17 @@ floor.
 
 ### Path-based triggering
 
-VR runs in CI only when a PR touches one of these globs (path-based, not
-label-based — see PRD §4):
+VR runs in CI only when a change touches one of these globs (path-based, not
+label-based — see PRD §4). Since #3138, the same filter applies uniformly to
+pull requests **and** pushes to `main` — the old unconditional push arm (23
+runs, zero catches) is gone:
 
 ```text
 apps/web/src/**
 apps/web/.storybook/**
 apps/web/public/**
 apps/web/package.json
+pnpm-lock.yaml
 ```
 
 PRs that change only `apps/api/**`, `packages/**`, or infrastructure don't run
