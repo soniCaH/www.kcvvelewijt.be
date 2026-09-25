@@ -1,5 +1,6 @@
 import { fileURLToPath } from "url";
 import path from "path";
+import { builtinRules } from "eslint/use-at-your-own-risk";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 import storybook from "eslint-plugin-storybook";
@@ -128,21 +129,49 @@ const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
 
 // Type Ramp Freeze (DESIGN.md → Typography, #2418). Twelve token steps
 // (`text-display-2xl` … `text-label-sm`) already cover the ramp — an
-// arbitrary `text-[9px]`/`text-[10.5px]`/`text-[1.05rem]`/`text-[0.4em]`
-// bypasses it outright, and `text-[length:var(--text-*)]` bypasses it while
-// *looking* token-driven: the arbitrary-value form sets font-size alone and
-// silently drops the step's line-height and tracking, which is exactly what
-// DESIGN.md → Typography already tells authors never to write. Font-size
-// literals only — `leading-[…]` belongs to #2666, not this rule.
-// Strategy is freeze-and-drain, not big-bang: the 300+ literals that already
-// exist are frozen via `eslint-suppressions.json` (`--suppress-all`), not
-// fixed here, so this rule only stops the count from growing. Same
-// single-line/no-newline requirement as the patterns above.
+// arbitrary `text-[9px]`/`text-[.8rem]`/`text-[1.05rem]`/`text-[0.4em]`/
+// `text-[14vw]`/`text-[12pt]`/`text-[50%]`/`text-[3ch]` bypasses it outright;
+// `text-[clamp(…)]`/`text-[calc(…)]` bypasses it with a computed value
+// instead of a literal one, same bypass; and `text-[length:var(--text-*)]`
+// (or Tailwind v4's shorthand for the same thing, `text-(length:--text-*)`)
+// bypasses it while *looking* token-driven — the arbitrary-value form sets
+// font-size alone and silently drops the step's line-height and tracking,
+// which is exactly what DESIGN.md → Typography already tells authors never
+// to write. Font-size literals only — `leading-[…]` belongs to #2666, not
+// this rule.
+//
+// Strategy is freeze-and-drain, not big-bang: the literals that already
+// exist are frozen via `eslint-suppressions.json` (`--suppress-rule
+// kcvv/no-off-ramp-font-size`), not fixed here, so this rule only stops the
+// count from growing. Removed one instead of just moving it? Run `pnpm
+// --filter @kcvv/web lint:prune` in the same commit — a suppression that no
+// longer occurs fails `lint` outright otherwise (that's the "only shrinks"
+// guarantee, not a bug). Same single-line/no-newline requirement as the
+// patterns above.
+//
+// Registered under its own rule ID (`kcvv/no-off-ramp-font-size`, via
+// `builtinRules` below) rather than folded into the shared
+// `no-restricted-syntax` array used by the Motion/Colour/margin selectors
+// above: ESLint's native suppressions freeze a *rule ID's total count per
+// file*, not each selector inside it. Sharing the array would have let
+// someone swap a frozen `text-[11px]` for a new `duration-700` in the same
+// file — the shared count stays put, and CI stays green while a fresh
+// off-ramp value ships.
 const OFF_RAMP_FONT_SIZE_PATTERN =
-  "text-\\[(?:[0-9]+(?:\\.[0-9]+)?(?:px|r?em)\\]|length:)";
+  "text-\\[(?:(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:px|rem|em|vw|pt|%|ch)\\]|clamp\\(|calc\\(|length:)|text-\\(length:";
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
+
+// Local plugin alias so the font-size rule above gets its own rule ID while
+// still reusing the battle-tested `no-restricted-syntax` engine — no new
+// dependency, just the core rule registered a second time under a name
+// nothing else shares.
+const kcvvPlugin = {
+  rules: {
+    "no-off-ramp-font-size": builtinRules.get("no-restricted-syntax"),
+  },
+};
 
 const eslintConfig = [
   ...nextCoreWebVitals,
@@ -169,14 +198,20 @@ const eslintConfig = [
       "build/**",
       "storybook-static/**",
       "coverage/**",
-      // `scripts/**` only matches when eslint's cwd is `apps/web`. lint-staged
-      // runs from the repository root, where this path reads
-      // `apps/web/scripts/…` — so without the second entry the pre-commit hook
-      // lints a file `pnpm lint` deliberately skips, and can block a commit on
-      // a rule CI never runs (#3013). A blanket `**/scripts/**` would be wrong:
-      // it would also swallow `test/scripts/*.test.ts`, which IS linted today.
-      // The gitignored entries above need no such pair — nothing under them can
-      // ever be staged, so lint-staged never hands them to eslint.
+      // `scripts/**` only matches when eslint's cwd is `apps/web`. Any caller
+      // that invokes eslint from the repository root without first `cd`-ing
+      // in — a manual `eslint .` at the repo root, say — reads this path as
+      // `apps/web/scripts/…`, so without the second entry a run like that
+      // lints a file `pnpm lint` deliberately skips, and can block on a rule
+      // CI never runs (#3013). `lint-staged`'s own `apps/web` glob is not
+      // that caller any more: its command now `cd`s into `apps/web` first
+      // (#2418, root `package.json`'s `lint-staged`, needed so
+      // `eslint-suppressions.json`'s cwd-relative keys resolve) — but this
+      // pair stays as the guard for whatever still doesn't. A blanket
+      // `**/scripts/**` would be wrong: it would also swallow
+      // `test/scripts/*.test.ts`, which IS linted today. The gitignored
+      // entries above need no such pair — nothing under them can ever be
+      // staged, so lint-staged never hands them to eslint.
       "scripts/**",
       "apps/web/scripts/**",
       "next-env.d.ts",
@@ -185,9 +220,11 @@ const eslintConfig = [
       // into `@kcvv/web#build` via `turbo.json`'s `dependsOn`) rewrites it
       // from scratch, so an in-file eslint-disable comment cannot survive a
       // regen; ignoring the whole file here does (#2858 PR review finding 1).
-      // Leading `**/` so this still matches when eslint is invoked (and its
-      // ignore basePath resolved) from the repo root, e.g. via lint-staged
-      // in `.husky/pre-commit` — not just via the `@kcvv/web`-scoped script.
+      // Leading `**/` so this still matches if eslint is ever invoked (and
+      // its ignore basePath resolved) from the repo root — a manual
+      // `eslint .` at the repo root, not `lint-staged`, which no longer runs
+      // this workspace's eslint from there (#2418) — not just via the
+      // `@kcvv/web`-scoped script.
       "**/src/lib/sanity/sanity.types.ts",
     ],
   },
@@ -213,11 +250,15 @@ const eslintConfig = [
     // just unnecessary.
     // Leading `**/` for the same reason as the `ignores` entry above:
     // ESLint resolves these globs against the **cwd**, not the config
-    // file. `lint-staged` in `.husky/pre-commit` invokes ESLint from the
-    // repository root, where these paths start `apps/web/src` — a bare
-    // `src/**` never matched there, so every rule below was inert at
-    // commit time and ESLint deleted the valid disable comments that
-    // reference them as unused directives (#3013).
+    // file. Historically, `lint-staged` in `.husky/pre-commit` invoked
+    // ESLint from the repository root, where these paths start
+    // `apps/web/src` — a bare `src/**` never matched there, so every rule
+    // below was inert at commit time and ESLint deleted the valid
+    // disable comments that reference them as unused directives (#3013).
+    // `lint-staged`'s `apps/web` glob no longer runs from the repository
+    // root at all (#2418) — its command `cd`s into `apps/web` first — but
+    // the leading `**/` stays, since a manual `eslint .` at the repo root
+    // is still a caller this needs to survive.
     files: ["**/src/**/*.{ts,tsx}"],
     ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     rules: {
@@ -258,10 +299,25 @@ const eslintConfig = [
           message:
             "A section heading's bottom margin belongs to <SectionHeader> (mb-8 sm:mb-10, #2552 rule 5). <EditorialHeading> carries no margin of its own (#2552 rule 4). Whether this heading should be a <SectionHeader> is a judgement this rule does not make.",
         },
+      ],
+    },
+  },
+  {
+    // Type Ramp Freeze (DESIGN.md → Typography, #2418) — its own config
+    // block, own plugin, own rule ID. Kept separate from the block above on
+    // purpose: see the comment on `OFF_RAMP_FONT_SIZE_PATTERN` for why this
+    // selector may not share a rule ID (and so a suppression count) with any
+    // other selector.
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-off-ramp-font-size": [
+        "error",
         {
           selector: matchesClassString(OFF_RAMP_FONT_SIZE_PATTERN),
           message:
-            "Off-ramp literal font size — the type ramp has a token for every step (apps/web/DESIGN.md → Typography). A text-[…px]/[…rem]/[…em] or text-[length:…] bypasses it and silently drops the step's line-height and tracking. Existing call sites are frozen in eslint-suppressions.json; new code must use a text-* token.",
+            "Off-ramp literal font size — the type ramp has a token for every step (apps/web/DESIGN.md → Typography). A text-[…px]/[…rem]/[…em]/[…vw]/[…pt]/[…%]/[…ch], text-[clamp(…)]/[calc(…)], text-[length:…] or text-(length:…) bypasses it and silently drops the step's line-height and tracking. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must use a text-* token. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
         },
       ],
     },
