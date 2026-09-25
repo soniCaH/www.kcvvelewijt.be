@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@test-fixtures/*": ["./test/fixtures/*"]
+      "@test-fixtures/*": ["./test/fixtures/*"],
+      "@test-storybook/*": ["./test/storybook/*"]
     }
   },
   "include": [

@@ -109,11 +109,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # The Storybook Vitest addon project (#3146, `vitest.config.ts`'s
-      # "storybook" project) runs as part of `npx turbo test --filter=@kcvv/web`
-      # below via `@vitest/browser-playwright` — a real Chromium, not
-      # happy-dom. `--with-deps` also installs the OS libraries Chromium
-      # needs to launch on a bare Ubuntu runner.
+      # The Storybook Vitest addon project (#3146,
+      # `apps/web/vitest.storybook.config.ts`, its own config file — see its
+      # docblock) runs via the separate "Run Storybook play tests" step
+      # below (`pnpm run test:storybook`), not through `npx turbo test`, via
+      # `@vitest/browser-playwright` — a real Chromium, not happy-dom.
+      # `--with-deps` also installs the OS libraries Chromium needs to
+      # launch on a bare Ubuntu runner.
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
         working-directory: apps/web

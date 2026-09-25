@@ -7,6 +7,15 @@ import { playwright } from "@vitest/browser-playwright";
 const dirname = import.meta.dirname;
 const require = createRequire(import.meta.url);
 
+// Typed `inject()` target for `test.provide` below (Vitest's own
+// `ProvidedContext` augmentation point) — see that block's comment for what
+// this key does and why.
+declare module "vitest" {
+  interface ProvidedContext {
+    "storybook/test-provided"?: { a11y: boolean };
+  }
+}
+
 // Wires the Storybook test addon (#3146, spec §4.13) — installed and
 // registered in `.storybook/main.ts` since #3086 but dark until now: no test
 // plugin, no browser block, no project. `storybookTest()` turns every story
@@ -61,25 +70,30 @@ export default defineConfig({
     alias: {
       "@": path.resolve(dirname, "./src"),
       "@test-fixtures": path.resolve(dirname, "./test/fixtures"),
+      "@test-storybook": path.resolve(dirname, "./test/storybook"),
       // `@storybook/nextjs-vite` aliases the bare `react`/`react-dom`
-      // specifiers to Next's own vendored copies (`next/dist/compiled/
-      // react`, a single file, not a package directory) so Storybook's
-      // render output matches what `next build` ships. Vite forwards that
-      // alias into esbuild's dependency-optimizer as a package-prefix
-      // alias, and esbuild auto-expands ANY unlisted subpath against it —
-      // `import "react/compiler-runtime"` (imported unconditionally by
-      // `@portabletext/react`'s dist, present in React 19 whether or not
-      // the compiler is enabled) becomes `next/dist/compiled/react/
-      // index.js/compiler-runtime`, which fails to resolve because the
-      // target is a file, not a directory ("Not a directory (os error
-      // 20)"). The plugin already special-cases `react/jsx-runtime` and
-      // `react/jsx-dev-runtime` the same way for the same reason; this is
-      // one more subpath its list doesn't cover. Point it at the real
-      // `react` package's own file instead of Next's copy —
-      // `compiler-runtime` is a plain runtime helper, not part of Next's
-      // SSR/RSC surface, so this does not reintroduce a React-copy
-      // mismatch the way aliasing `react` itself would.
-      "react/compiler-runtime": require.resolve("react/compiler-runtime"),
+      // specifiers to Next's own vendored copies via
+      // `require.resolve("next/dist/compiled/react")`, which resolves a
+      // package/directory specifier to its "main" entry FILE
+      // (`next/dist/compiled/react/index.js`) — so Storybook's render
+      // output matches what `next build` ships. Vite forwards that alias
+      // into esbuild's dependency-optimizer as a package-prefix alias, and
+      // esbuild auto-expands ANY unlisted subpath against the alias's
+      // resolved FILE path — `import "react/compiler-runtime"` (imported
+      // unconditionally by `@portabletext/react`'s dist, present in React
+      // 19 whether or not the compiler is enabled) becomes
+      // `next/dist/compiled/react/index.js/compiler-runtime`, which fails
+      // because you cannot treat a file as a directory, even though a
+      // sibling `next/dist/compiled/react/compiler-runtime.js` genuinely
+      // exists right next to `index.js`. The plugin already special-cases
+      // `react/jsx-runtime` and `react/jsx-dev-runtime` the same way for the
+      // same reason; this is one more subpath its list doesn't cover.
+      // Points at that sibling file directly — Next's OWN vendored copy,
+      // like every other `react/*` specifier here, not the standalone
+      // `react` package (which would mix a different React module
+      // instance's compiler-runtime helper into a Next-React render tree).
+      "react/compiler-runtime":
+        require.resolve("next/dist/compiled/react/compiler-runtime.js"),
     },
   },
   test: {
@@ -89,6 +103,34 @@ export default defineConfig({
       headless: true,
       provider: playwright({}),
       instances: [{ browser: "chromium" }],
+    },
+    // The owner decided (#3154 / #3188) that the VR layer owns
+    // accessibility; this layer is "for play only". addon-vitest's own
+    // default `runConfig` is `{ a11y: true }` — `testStory()`
+    // (`@storybook/addon-vitest/dist/vitest-plugin/test-utils.js`) tries
+    // `inject("storybook/test-provided")` for that config and falls back to
+    // `{ a11y: true }` when nothing provides it, which is always, in a
+    // standalone `vitest run` (that channel is only ever populated by a
+    // LIVE, connected Storybook "Testing" panel — never by this CLI
+    // invocation). `shouldRunA11yTests` from that config is what sets
+    // `globals.a11y.manual = !shouldRunA11yTests` on every composed story,
+    // and `@storybook/addon-a11y`'s own preview code
+    // (`shouldRunEnvironmentIndependent`, `chunk-P5J2FJ2Z.js`) checks
+    // `a11yGlobals?.manual !== true` before running axe — so without this,
+    // axe runs on every one of the ~1100+ tests in this project, a
+    // deliberately unrelated dimension a "for play only" wiring should not
+    // gate. Vitest's own `provide`/`inject` lets a Node-side config value
+    // reach the browser test context under the SAME key — providing
+    // `{ a11y: false }` here (browser-test-only, no effect on
+    // `.storybook/preview.ts`'s parameters or the interactive a11y panel
+    // during `storybook dev`) makes `shouldRunA11yTests` false and
+    // `globals.a11y.manual` true, same as flipping the panel to manual mode
+    // for the run. Measured 2026-09-25, same machine, back-to-back: full
+    // 205-file / 1127-test run, 48.3s → 37.7s total (the `tests` phase
+    // itself, isolated from story-graph import: 71.7s → 25.3s, a ~65% cut)
+    // — axe was the single largest per-story cost after mount itself.
+    provide: {
+      "storybook/test-provided": { a11y: false },
     },
     coverage: {
       provider: "v8",
