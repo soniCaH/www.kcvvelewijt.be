@@ -125,8 +125,14 @@ jobs:
       - name: Type check
         run: npx turbo type-check --filter=@kcvv/web
 
+      # Coverage instrumentation costs ~2.5x the plain run (255s vs 98.6s,
+      # #3083) for a Codecov upload that gates nothing (#3100). Pay that only
+      # on `main`, where the trend line is read; every PR gets the cheaper
+      # run. `turbo` forwards anything after `--` to the underlying `vitest
+      # run` script unchanged, so the conditional expression either supplies
+      # `-- --coverage` whole or contributes nothing.
       - name: Run tests
-        run: npx turbo test --filter=@kcvv/web -- --coverage
+        run: npx turbo test --filter=@kcvv/web ${{ github.ref == 'refs/heads/main' && '-- --coverage' || '' }}
 
       - name: Lint API
         run: npx turbo lint --filter=@kcvv/api
@@ -178,7 +184,9 @@ jobs:
         run: pnpm audit --audit-level=moderate
         continue-on-error: true
 
+      # Only produced by the coverage run above, which is `main`-only (#3138).
       - name: Upload coverage
+        if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -192,18 +200,63 @@ jobs:
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
-      # The Storybook build + artifact upload only exist to feed the
-      # `visual-regression` job. The repository variable RUN_VISUAL_REGRESSION
-      # is the live on/off switch for the whole VR chain (the bulk of the
-      # ~14-15 min/push VR cost): 'true' runs it, anything else skips it. Flip
-      # it under Settings → Secrets and variables → Actions → Variables — no
-      # YAML edit needed.
+  # Split out of `quality-checks` (#3138): the build only takes ~37s, but VR
+  # used to wait behind the *entire* quality-checks job (~6.6 min median) to
+  # reach it. Depending on `changes` alone, this job runs in parallel with
+  # quality-checks instead of after it, so `visual-regression` below no longer
+  # queues behind lint/type-check/test/build — it now waits on this job only.
+  # Trade-off, accepted in #3084: VR runs even when quality-checks fails.
+  storybook-build:
+    name: Build Storybook
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Also needs `visual-regression-changes`: the same filter that decides
+    # whether `visual-regression` runs decides whether it's worth building
+    # Storybook at all — an api-only or packages-only push has nothing for VR
+    # to look at, so this job (and the runner minute it costs) skips too.
+    needs: [changes, visual-regression-changes]
+    # Same gates `quality-checks` uses: skip docs-only changes and draft PRs.
+    # The repository variable RUN_VISUAL_REGRESSION is the live on/off switch
+    # for the whole VR chain (this job, `visual-regression-changes` and
+    # `visual-regression`): 'true' runs it, anything else skips it. Flip it
+    # under Settings → Secrets and variables → Actions → Variables — no YAML
+    # edit needed.
+    if: |
+      needs.changes.outputs.code == 'true' &&
+      needs.visual-regression-changes.outputs.visual == 'true' &&
+      vars.RUN_VISUAL_REGRESSION == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    # Checks out the repo and runs first-party build tooling against it; it
+    # never needs to write anything.
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The #3140 single entry point — same script the local Docker wrapper
+      # and `vr-baseline-update.yml` use, so a build-step change can't drift
+      # between them.
       - name: Build Storybook
-        if: ${{ vars.RUN_VISUAL_REGRESSION == 'true' }}
-        run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
+        run: pnpm --filter @kcvv/web run vr:build-storybook
 
       - name: Upload Storybook static
-        if: ${{ vars.RUN_VISUAL_REGRESSION == 'true' }}
         uses: actions/upload-artifact@v7.0.1
         with:
           name: storybook-static
@@ -216,10 +269,20 @@ jobs:
     runs-on: ubuntu-latest
     # Gated on `changes` too: without it this job would newly fire on docs-only
     # PRs, which the old workflow-level paths-ignore used to stop dead.
+    #
+    # Runs on push too (#3138): the `main` arm used to run VR unconditionally
+    # on every push — 23-for-23 green, 21% of spend, zero catches (#3084). This
+    # job now filters both event types with the same paths-filter, and
+    # `visual-regression` below reads its `visual` output uniformly.
     needs: [changes]
-    if: ${{ needs.changes.outputs.code == 'true' && vars.RUN_VISUAL_REGRESSION == 'true' && github.event_name == 'pull_request' }}
-    # Reading the diff is all this job does; paths-filter goes through the API,
-    # so it needs the same `pull-requests: read` as `changes` above.
+    if: |
+      needs.changes.outputs.code == 'true' &&
+      vars.RUN_VISUAL_REGRESSION == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    # Reading the diff is all this job does; paths-filter goes through the API
+    # on a pull_request event (needing the same `pull-requests: read` as
+    # `changes` above) and falls back to a plain git diff against
+    # `github.event.before` on a push event, which needs no extra permission.
     permissions:
       contents: read
       pull-requests: read
@@ -239,39 +302,55 @@ jobs:
             visual:
               - 'apps/web/src/**'
               - 'apps/web/.storybook/**'
+              # Fixtures, the frozen-clock/viewport-scoping helpers, and the
+              # committed baselines all live here — a change under any of
+              # these can change what a story renders or what it's compared
+              # against, without touching apps/web/src.
+              - 'apps/web/test/**'
               - 'apps/web/public/**'
               - 'apps/web/package.json'
+              # The local Docker parity pin — see the `visual-regression`
+              # job's container comment. A bump here is a signal the image
+              # tag is about to move too.
+              - 'apps/web/Dockerfile.vr'
+              - '.nvmrc'
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
               # The VR runner is built out of the lockfile too: a transitive
               # bump can break it without a single source file changing.
               # jest-runtime 30.5.1 killed all 206 suites this way (#2761) —
               # that PR touched only lockfiles, so VR skipped and the break
               # landed on main unseen.
               - 'pnpm-lock.yaml'
+              # A change to this workflow (this filter, the shard count, the
+              # runner image, …) should verify itself by actually running VR,
+              # not skip on the strength of "nothing under apps/web changed".
+              - '.github/workflows/ci.yml'
 
   visual-regression:
-    name: Visual Regression
+    name: Visual Regression (${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [quality-checks, visual-regression-changes]
+    # `storybook-build`, not `quality-checks` (#3138): VR no longer waits on
+    # the whole quality job, and — per #3084's accepted cost — now runs even
+    # when lint/type-check/test fails there. A failed or skipped
+    # `storybook-build` still skips this job by the default `needs` behaviour.
+    needs: [storybook-build, visual-regression-changes]
     # The RUN_VISUAL_REGRESSION repo variable is the live on/off switch for the
-    # whole VR chain (this job, the visual-regression-changes job, and the
-    # Storybook build steps) at once. Report-only today: `deploy` does not wait
-    # on it and it is not a required check. #3088 decides whether it earns one.
+    # whole VR chain (this job, `visual-regression-changes` and
+    # `storybook-build`) at once. Report-only today: `deploy` does not wait on
+    # it and it is not a required check. #3088 decides whether it earns one.
     #
-    # When enabled, the trailing condition is: path-filtered on PR
-    # (only run when visual paths change), unconditional on push to main so
-    # merge-race regressions are caught on the merge commit even if the merging
-    # PR didn't itself touch visual paths. `always()` is required because
-    # visual-regression-changes is PR-only — without it GitHub would mark this
-    # job skipped on push since one of its `needs` was skipped.
-    if: |
-      vars.RUN_VISUAL_REGRESSION == 'true' &&
-      always() &&
-      needs.quality-checks.result == 'success' &&
-      (
-        github.event_name == 'push' ||
-        (github.event_name == 'pull_request' && needs.visual-regression-changes.outputs.visual == 'true')
-      )
+    # Path-filtered uniformly on both push and pull_request now (#3138) — the
+    # `main` arm used to run unconditionally (23-for-23 green, zero catches).
+    if: vars.RUN_VISUAL_REGRESSION == 'true' && needs.visual-regression-changes.outputs.visual == 'true'
+    # 3 shards, not 4 (#3088: #3084 measured the whole pipeline, #3082 measured
+    # only the VR job). fail-fast: false so every shard reports its own diffs
+    # instead of cancelling siblings on the first red one.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image in apps/web/Dockerfile.vr. Bump all three together —
     # drift produces silent font-rendering diffs.
@@ -312,14 +391,22 @@ jobs:
           name: storybook-static
           path: apps/web/storybook-static
 
+      # VR_SHARD reaches `test-storybook --shard` through `vr:run`/`vr:ci`
+      # (apps/web/package.json) — the one command surface (#3140) stays intact,
+      # no raw runner invocation here.
       - name: Run visual regression suite
         run: pnpm --filter @kcvv/web run vr:ci
+        env:
+          VR_SHARD: ${{ matrix.shard }}/3
 
+      # Distinct name per shard: three parallel jobs would otherwise collide
+      # uploading to the same artifact name, and `vr-diff-comment` below
+      # gathers all three by pattern.
       - name: Upload diff PNGs on failure
         if: failure()
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: vr-diff-output
+          name: vr-diff-output-${{ matrix.shard }}
           path: |
             apps/web/test/vr/__diff_output__/
             apps/web/test/vr/__snapshots__/__received_output__/
@@ -360,12 +447,16 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           fetch-depth: 0
 
+      # 3 shards upload separately (vr-diff-output-1/2/3); `pattern` +
+      # `merge-multiple` flattens all matched artifacts into one directory, so
+      # every path below that reads /tmp/vr-diff-output still works unchanged.
       - name: Download diff artifacts
         uses: actions/download-artifact@v8.0.1
         continue-on-error: true
         with:
-          name: vr-diff-output
+          pattern: vr-diff-output-*
           path: /tmp/vr-diff-output
+          merge-multiple: true
 
       - name: Push diffs to orphan branch
         env:
@@ -492,8 +583,19 @@ jobs:
     name: Deploy API + Studio
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [quality-checks]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # `storybook-build` moved out of `quality-checks` (#3138), so without this
+    # it would also move out of this deploy gate — a broken story import
+    # would merge (quality-checks doesn't build Storybook any more) and
+    # deploy. `always()` overrides the default "skip if a need was skipped"
+    # behaviour, so the explicit checks below do the gating instead:
+    # `storybook-build` may succeed OR skip (RUN_VISUAL_REGRESSION off, or no
+    # visual paths touched) but must not have failed.
+    needs: [quality-checks, storybook-build]
+    if: |
+      always() &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.quality-checks.result == 'success' &&
+      needs.storybook-build.result != 'failure'
     # Same shape as deploy-api-staging, which runs this scope on every PR and
     # deploys for real — the only extra step here is `sanity deploy`, on
     # SANITY_AUTH_TOKEN. Nothing in the job reads GITHUB_TOKEN past checkout.

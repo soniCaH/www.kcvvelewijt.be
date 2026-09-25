@@ -55,12 +55,18 @@ The path filter lives at job level, not in `on:`. The `visual-regression-changes
 visual:
   - "apps/web/src/**"
   - "apps/web/.storybook/**"
+  - "apps/web/test/**"
   - "apps/web/public/**"
   - "apps/web/package.json"
+  - "apps/web/Dockerfile.vr"
+  - ".nvmrc"
+  - "package.json"
+  - "pnpm-workspace.yaml"
   - "pnpm-lock.yaml"
+  - ".github/workflows/ci.yml"
 ```
 
-PRs touching any of these paths run VR. The lockfile is in the list because a transitive bump can break the VR runner without a single source file changing (#2761). A push to `main` runs VR unconditionally. PRs touching only `apps/api/**`, `packages/api-contract/**`, or infrastructure don't.
+PRs touching any of these paths run VR. The lockfile is in the list because a transitive bump can break the VR runner without a single source file changing (#2761). Since #3138, a push to `main` runs the same path-filtered check — the old unconditional run (23-for-23 green, zero catches) is gone. PRs touching only `apps/api/**`, `packages/api-contract/**`, or infrastructure don't.
 
 ### Ralph integration
 

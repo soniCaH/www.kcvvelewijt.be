@@ -397,18 +397,37 @@ floor.
 
 ### Path-based triggering
 
-VR runs in CI only when a PR touches one of these globs (path-based, not
-label-based — see PRD §4):
+VR runs in CI only when a change touches one of these globs (path-based, not
+label-based — see PRD §4). Since #3138, the same filter applies uniformly to
+pull requests **and** pushes to `main` — the old unconditional push arm (23
+runs, zero catches) is gone:
 
 ```text
 apps/web/src/**
 apps/web/.storybook/**
+apps/web/test/**
 apps/web/public/**
 apps/web/package.json
+apps/web/Dockerfile.vr
+.nvmrc
+package.json
+pnpm-workspace.yaml
+pnpm-lock.yaml
+.github/workflows/ci.yml
 ```
 
-PRs that change only `apps/api/**`, `packages/**`, or infrastructure don't run
-VR. There is no `visual` label and none should be introduced.
+PRs that change only `apps/api/**`, `packages/**` other than what's listed
+above, or infrastructure don't run VR. There is no `visual` label and none
+should be introduced.
+
+**Known limit on `main`: a queued run can be superseded, not just the
+in-progress one.** `cancel-in-progress` is off for `main` (deploys must not be
+interrupted), but GitHub still cancels a _pending_ run in the same
+concurrency group when a newer push queues behind it — only the run that
+actually executes gets to diff `before..after`. A push whose VR-relevant
+change was superseded this way is never independently verified against `main`
+by this job. No last-successful-SHA lookup is built for this: every such
+change was already VR-tested on its own pull request before merging.
 
 ### Decision tree on a failing VR job
 
@@ -819,8 +838,14 @@ regenerated baseline (#2370). The orphan branch (and the sticky comment) are
 cleaned up automatically when the PR closes via `vr-diff-cleanup.yml`.
 
 Locally, `pnpm --filter @kcvv/web run vr:diff <story-id>` prints the on-disk
-path(s) under `apps/web/test/vr/__diff_output__/`. The `vr-diff-output`
-artifact is still uploaded as a fallback for programmatic access.
+path(s) under `apps/web/test/vr/__diff_output__/`. Since #3138 shards the job
+3x, the fallback artifact for programmatic access is uploaded per shard as
+`vr-diff-output-1`, `vr-diff-output-2` and `vr-diff-output-3`, not a single
+`vr-diff-output`:
+
+```bash
+gh run download <run-id> --pattern 'vr-diff-output-*'
+```
 
 ### Baseline-update bot flow
 
