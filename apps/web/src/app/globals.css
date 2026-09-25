@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Prose is not markup. Tailwind's auto-detection reads every file under
+   apps/web, and these name off-ramp classes as text — e.g.
+   `text-[length:var(--text-*)]` in the type-ramp rule — which Tailwind
+   emits as invalid CSS, breaking `next dev` with a 500 on every page. */
+@source not "../../**/*.md";
+@source not "../../.impeccable";
+@source not "../../eslint.config.mjs";
+
 /* ========================================================================
    KCVV Elewijt Design System - Tailwind CSS v4 Configuration
    ======================================================================== */
