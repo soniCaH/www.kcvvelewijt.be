@@ -127,14 +127,12 @@ jobs:
 
       # Coverage instrumentation costs ~2.5x the plain run (255s vs 98.6s,
       # #3083) for a Codecov upload that gates nothing (#3100). Pay that only
-      # on `main`, where the trend line is read; every PR gets the cheaper run.
-      - name: Run tests (with coverage)
-        if: github.ref == 'refs/heads/main'
-        run: npx turbo test --filter=@kcvv/web -- --coverage
-
+      # on `main`, where the trend line is read; every PR gets the cheaper
+      # run. `turbo` forwards anything after `--` to the underlying `vitest
+      # run` script unchanged, so the conditional expression either supplies
+      # `-- --coverage` whole or contributes nothing.
       - name: Run tests
-        if: github.ref != 'refs/heads/main'
-        run: npx turbo test --filter=@kcvv/web
+        run: npx turbo test --filter=@kcvv/web ${{ github.ref == 'refs/heads/main' && '-- --coverage' || '' }}
 
       - name: Lint API
         run: npx turbo lint --filter=@kcvv/api
@@ -212,7 +210,11 @@ jobs:
     name: Build Storybook
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [changes]
+    # Also needs `visual-regression-changes`: the same filter that decides
+    # whether `visual-regression` runs decides whether it's worth building
+    # Storybook at all — an api-only or packages-only push has nothing for VR
+    # to look at, so this job (and the runner minute it costs) skips too.
+    needs: [changes, visual-regression-changes]
     # Same gates `quality-checks` uses: skip docs-only changes and draft PRs.
     # The repository variable RUN_VISUAL_REGRESSION is the live on/off switch
     # for the whole VR chain (this job, `visual-regression-changes` and
@@ -221,8 +223,13 @@ jobs:
     # edit needed.
     if: |
       needs.changes.outputs.code == 'true' &&
+      needs.visual-regression-changes.outputs.visual == 'true' &&
       vars.RUN_VISUAL_REGRESSION == 'true' &&
       (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    # Checks out the repo and runs first-party build tooling against it; it
+    # never needs to write anything.
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -243,8 +250,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The #3140 single entry point — same script the local Docker wrapper
+      # and `vr-baseline-update.yml` use, so a build-step change can't drift
+      # between them.
       - name: Build Storybook
-        run: cd apps/web && rm -rf storybook-static && pnpm run build-storybook
+        run: pnpm --filter @kcvv/web run vr:build-storybook
 
       - name: Upload Storybook static
         uses: actions/upload-artifact@v7.0.1
@@ -265,7 +275,10 @@ jobs:
     # job now filters both event types with the same paths-filter, and
     # `visual-regression` below reads its `visual` output uniformly.
     needs: [changes]
-    if: ${{ needs.changes.outputs.code == 'true' && vars.RUN_VISUAL_REGRESSION == 'true' }}
+    if: |
+      needs.changes.outputs.code == 'true' &&
+      vars.RUN_VISUAL_REGRESSION == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     # Reading the diff is all this job does; paths-filter goes through the API
     # on a pull_request event (needing the same `pull-requests: read` as
     # `changes` above) and falls back to a plain git diff against
@@ -289,14 +302,30 @@ jobs:
             visual:
               - 'apps/web/src/**'
               - 'apps/web/.storybook/**'
+              # Fixtures, the frozen-clock/viewport-scoping helpers, and the
+              # committed baselines all live here — a change under any of
+              # these can change what a story renders or what it's compared
+              # against, without touching apps/web/src.
+              - 'apps/web/test/**'
               - 'apps/web/public/**'
               - 'apps/web/package.json'
+              # The local Docker parity pin — see the `visual-regression`
+              # job's container comment. A bump here is a signal the image
+              # tag is about to move too.
+              - 'apps/web/Dockerfile.vr'
+              - '.nvmrc'
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
               # The VR runner is built out of the lockfile too: a transitive
               # bump can break it without a single source file changing.
               # jest-runtime 30.5.1 killed all 206 suites this way (#2761) —
               # that PR touched only lockfiles, so VR skipped and the break
               # landed on main unseen.
               - 'pnpm-lock.yaml'
+              # A change to this workflow (this filter, the shard count, the
+              # runner image, …) should verify itself by actually running VR,
+              # not skip on the strength of "nothing under apps/web changed".
+              - '.github/workflows/ci.yml'
 
   visual-regression:
     name: Visual Regression (${{ matrix.shard }}/3)
@@ -554,8 +583,19 @@ jobs:
     name: Deploy API + Studio
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [quality-checks]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # `storybook-build` moved out of `quality-checks` (#3138), so without this
+    # it would also move out of this deploy gate — a broken story import
+    # would merge (quality-checks doesn't build Storybook any more) and
+    # deploy. `always()` overrides the default "skip if a need was skipped"
+    # behaviour, so the explicit checks below do the gating instead:
+    # `storybook-build` may succeed OR skip (RUN_VISUAL_REGRESSION off, or no
+    # visual paths touched) but must not have failed.
+    needs: [quality-checks, storybook-build]
+    if: |
+      always() &&
+      github.event_name == 'push' && github.ref == 'refs/heads/main' &&
+      needs.quality-checks.result == 'success' &&
+      needs.storybook-build.result != 'failure'
     # Same shape as deploy-api-staging, which runs this scope on every PR and
     # deploys for real — the only extra step here is `sanity deploy`, on
     # SANITY_AUTH_TOKEN. Nothing in the job reads GITHUB_TOKEN past checkout.
