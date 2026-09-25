@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Textarea } from "./Textarea";
 import { Label } from "../Label";
+import { forceFieldFocusRing } from "../_internal/field-vr-focus";
 
 const meta = {
   title: "UI/Textarea",
@@ -51,6 +52,12 @@ export const Focused: Story = {
     rows: 4,
     autoFocus: true,
   },
+  // VR determinism (#3033 pattern, #3137) — see field-vr-focus.ts. Forces
+  // the focus chrome from story state instead of racing the runner's real
+  // frame focus.
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
+  },
 };
 
 export const FilledFocused: Story = {
@@ -59,6 +66,9 @@ export const FilledFocused: Story = {
       "Beste KCVV,\n\nIk zou graag meer informatie ontvangen over de jeugdwerking.",
     rows: 5,
     autoFocus: true,
+  },
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
   },
 };
 
@@ -76,6 +86,9 @@ export const ErrorFocused: Story = {
     error: "Dit veld is verplicht.",
     rows: 4,
     autoFocus: true,
+  },
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
   },
 };
 

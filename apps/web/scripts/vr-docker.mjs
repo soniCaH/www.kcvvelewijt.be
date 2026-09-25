@@ -140,6 +140,11 @@ function main() {
   };
 
   run("pnpm", ["run", "vr:build-storybook"]);
+  // Once per invocation, on the HOST — the container mounts `.storybook`
+  // read-only (see docker-compose.vr.yml) and can't fetch for itself. Not
+  // part of `vr:build-storybook`: this cache must never end up inside
+  // `storybook-static` (#3137 — see scripts/prefetch-typekit.mjs).
+  run("node", ["scripts/prefetch-typekit.mjs"]);
   run("docker", [
     "compose",
     "-f",

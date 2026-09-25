@@ -1,22 +1,34 @@
-<!-- Adobe Typekit (Adobe Fonts) for Storybook — Freight Display / Big, Quasimoda.
-     Synchronous CSS embed so the kit's @font-face rules apply before first paint
-     (the async JS loader let display text flash the serif fallback). -->
+<!-- Adobe Typekit (Adobe Fonts) for Storybook — Freight Display / Big, Freight
+     Sans. Kept as a LIVE link deliberately (#3137, flake ledger class G):
+     plain `pnpm storybook` dev never registers the VR test-runner's network
+     route, so this just works over the real network as always. Under the VR
+     runner, `.storybook/test-runner.ts`'s deny-by-default route intercepts
+     this exact request and fulfils it from a local cache instead
+     (`scripts/prefetch-typekit.mjs`, prefetched once per VR run into a
+     gitignored directory — never baked into `storybook-static`, since
+     Typekit's terms forbid self-hosting/redistributing its files and CI
+     uploads that directory as a public build artifact). Synchronous CSS
+     embed so the kit's @font-face rules apply before first paint (the async
+     JS loader let display text flash the serif fallback). -->
 <link rel="stylesheet" href="https://use.typekit.net/cvo5raz.css" />
 
-<!-- IBM Plex Mono for Storybook (#3030) — `app/layout.tsx` self-hosts this
-     via `next/font/google` on `<html>`, which sets `--font-ibm-plex-mono`;
-     Storybook never renders that layout, so globals.css's `--font-mono`
-     fallback (`var(--font-ibm-plex-mono, "IBM Plex Mono"), "Consolas", …`)
-     was resolving the LITERAL family name "IBM Plex Mono" against a font
-     nothing had loaded, landing on Consolas / Liberation / Courier instead
-     — for every mono element on the site, in every VR baseline, since the
-     suite has existed. This stylesheet defines the real "IBM Plex Mono"
+<!-- IBM Plex Mono for Storybook (#3030, self-hosted #3137) — `app/layout.tsx`
+     self-hosts this via `next/font/google` on `<html>`, which sets
+     `--font-ibm-plex-mono`; Storybook never renders that layout, so
+     globals.css's `--font-mono` fallback
+     (`var(--font-ibm-plex-mono, "IBM Plex Mono"), "Consolas", …`) was
+     resolving the LITERAL family name "IBM Plex Mono" against a font nothing
+     had loaded, landing on Consolas / Liberation / Courier instead — for
+     every mono element on the site, in every VR baseline, since the suite
+     has existed. This stylesheet defines the real "IBM Plex Mono"
      @font-face under that exact family name, so the existing fallback
      chain resolves correctly with no globals.css change needed. Same four
      weights `app/layout.tsx` requests (400/500/600/700) — matching them
      here, not just covering them, so a Storybook-only weight can't
-     silently diverge from what ships. -->
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap"
-/>
+     silently diverge from what ships. IBM Plex is OFL-licensed (see
+     .storybook/fonts/ibm-plex-mono/OFL.txt) and self-hostable outright,
+     unlike Typekit above — committed permanently rather than prefetched per
+     run. Lives beside .storybook rather than under `public/` so it never
+     ships to production as a dead asset (main.ts staticDirs maps it back to
+     this same `/fonts/ibm-plex-mono/...` URL). -->
+<link rel="stylesheet" href="/fonts/ibm-plex-mono/ibm-plex-mono.css" />

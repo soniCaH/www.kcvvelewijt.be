@@ -48,11 +48,34 @@ const fieldChromeIdle = [
   // Hover — compress shadow + nudge surface, deepen border
   "hover:border-ink/40 hover:shadow-[var(--shadow-paper-sm-soft-hover)] hover:translate-x-px hover:translate-y-px",
 
-  // Filled (text typed but not focused) — anchor at ink/60
-  "[&:not(:placeholder-shown):not(:focus)]:border-ink/60",
+  // Filled (text typed but not focused) — anchor at ink/60. Excludes
+  // `[data-vr-force-ring=true]` so this rule's border color can never
+  // compete with the forced-focus rule below on a "FilledFocused" VR story
+  // — those set both a value AND the force-ring attribute, and since real
+  // frame focus is exactly what may NOT have landed (the whole reason the
+  // force-ring rule exists), `:not(:focus)` here is genuinely true at the
+  // same time. Two same-specificity rules asserting different border
+  // colors would otherwise depend on Tailwind's utility output order,
+  // which this file does not control — excluding the state here removes
+  // the ambiguity structurally instead of relying on winning a cascade race.
+  "[&:not(:placeholder-shown):not(:focus):not([data-vr-force-ring=true])]:border-ink/60",
 
   // Focus — full ink border, snap shadow off, press into paper
   "focus:border-ink focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5",
+
+  // VR determinism (#3033 pattern, shared across Input/Textarea/Select —
+  // see field-vr-focus.ts): Chromium only paints `:focus` when the frame
+  // rendering the page itself holds real OS/window focus, not merely when
+  // `document.activeElement` is set inside it. An `autoFocus` story's
+  // "Focused" capture races that real frame focus — exposed once
+  // `waitForPageReadyCapped` (#3137) stopped adding the extra settle time a
+  // live, uncached font fetch used to cost the first (mobile) viewport
+  // shot. `data-vr-force-ring` is never set by these components themselves;
+  // a story's `play` function sets it on the rendered field directly for
+  // VR-tagged "Focused" stories only, painting the exact same focus chrome
+  // from state the story declares instead of one dependent on the runner's
+  // frame focus. A real visitor's `focus:` behaviour is untouched.
+  "data-[vr-force-ring=true]:border-ink data-[vr-force-ring=true]:shadow-none data-[vr-force-ring=true]:translate-x-0.5 data-[vr-force-ring=true]:translate-y-0.5",
 
   // Disabled — drop borders to ink/15 + cream surface + opacity-50 inherits
   // through to the resting paper-soft shadow, so disabled reads as "frozen
@@ -75,6 +98,10 @@ const fieldChromeError = [
 
   // Focus — alert border stays, press into paper
   "focus:border-alert focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5",
+
+  // VR determinism (#3033 pattern) — see the matching rule in
+  // fieldChromeIdle above for the full rationale.
+  "data-[vr-force-ring=true]:border-alert data-[vr-force-ring=true]:shadow-none data-[vr-force-ring=true]:translate-x-0.5 data-[vr-force-ring=true]:translate-y-0.5",
 
   // Disabled — same vocabulary as the idle disabled state. The alert
   // shadow stays since the field is still semantically "in error", just

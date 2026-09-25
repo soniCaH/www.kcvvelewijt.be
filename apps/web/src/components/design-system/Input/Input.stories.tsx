@@ -6,6 +6,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Input } from "./Input";
 import { Label } from "../Label";
 import { MagnifyingGlass, PaperPlaneTilt } from "@/lib/icons.redesign";
+import { forceFieldFocusRing } from "../_internal/field-vr-focus";
 
 const meta = {
   title: "UI/Input",
@@ -53,6 +54,12 @@ export const Filled: Story = {
 
 export const Focused: Story = {
   args: { placeholder: "Voer tekst in...", autoFocus: true },
+  // VR determinism (#3033 pattern, #3137) — see field-vr-focus.ts. Forces
+  // the focus chrome from story state instead of racing the runner's real
+  // frame focus.
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
+  },
   parameters: {
     docs: {
       description: {
@@ -67,6 +74,9 @@ export const FilledFocused: Story = {
   args: {
     defaultValue: "Jan Janssens",
     autoFocus: true,
+  },
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
   },
   parameters: {
     docs: {
@@ -91,6 +101,9 @@ export const ErrorFocused: Story = {
     defaultValue: "geen-geldig-email",
     error: "Vul een geldig e-mailadres in.",
     autoFocus: true,
+  },
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
   },
 };
 

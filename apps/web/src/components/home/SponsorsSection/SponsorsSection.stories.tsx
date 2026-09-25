@@ -10,7 +10,9 @@ import {
  * the redesign `<SponsorsBlock>`. This story renders that block with the homepage
  * subset (hoofd + sponsor tiers). Uses the local-fixture mocks (`fixtureImage`
  * logos) rather than `Sponsors.mocks` so the VR baseline stays deterministic —
- * the latter's `placehold.co` logos are remote and the runner does not block them.
+ * the latter's `placehold.co` logos are remote, and the runner's
+ * deny-by-default network route (#3137) now aborts and fails any story that
+ * requests them, rather than merely risking a non-deterministic capture.
  *
  * The `className` override matches `app/(landing)/(home)/page.tsx`'s own call
  * exactly (#2571 review finding 2): homepage air is #2402's call, still open,

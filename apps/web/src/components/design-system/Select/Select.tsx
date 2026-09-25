@@ -94,9 +94,16 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               // Filled-anchor for native select: when the value is the
               // empty-string placeholder, treat it as "empty" — the
               // placeholder option keeps the field at idle ink/30 until
-              // the user selects a real option.
-              "[&[data-placeholder=true]:not(:focus)]:border-ink/30",
-              "[&:not([data-placeholder=true]):not(:focus)]:border-ink/60",
+              // the user selects a real option. Both exclude
+              // `[data-vr-force-ring=true]` for the same reason
+              // fieldChrome.ts's own filled-anchor rule does — see its
+              // comment. Select's "FilledFocused"/"Focused" VR stories set
+              // both a value (or the placeholder) AND the force-ring
+              // attribute, and without the exclusion these two rules would
+              // compete with the forced border color on a same-specificity
+              // basis whenever real frame focus doesn't land.
+              "[&[data-placeholder=true]:not(:focus):not([data-vr-force-ring=true])]:border-ink/30",
+              "[&:not([data-placeholder=true]):not(:focus):not([data-vr-force-ring=true])]:border-ink/60",
               // Placeholder text dim
               "[&[data-placeholder=true]]:text-ink/40",
               sizeClasses[size],

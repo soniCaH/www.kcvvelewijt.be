@@ -5,6 +5,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Select } from "./Select";
 import { Label } from "../Label";
+import { forceFieldFocusRing } from "../_internal/field-vr-focus";
 
 const meta = {
   title: "UI/Select",
@@ -62,6 +63,12 @@ export const Focused: Story = {
       {teamOptions}
     </Select>
   ),
+  // VR determinism (#3033 pattern, #3137) — see field-vr-focus.ts. Forces
+  // the focus chrome from story state instead of racing the runner's real
+  // frame focus.
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
+  },
 };
 
 export const FilledFocused: Story = {
@@ -70,6 +77,9 @@ export const FilledFocused: Story = {
       {teamOptions}
     </Select>
   ),
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
+  },
 };
 
 export const WithError: Story = {
@@ -95,6 +105,9 @@ export const ErrorFocused: Story = {
       {teamOptions}
     </Select>
   ),
+  play: async ({ canvasElement }) => {
+    forceFieldFocusRing(canvasElement);
+  },
 };
 
 export const Disabled: Story = {
