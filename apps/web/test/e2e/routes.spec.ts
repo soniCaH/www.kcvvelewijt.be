@@ -114,7 +114,7 @@ test.describe("dynamic routes", () => {
 
   test("/wedstrijd/[matchId]", async ({ page, request }) => {
     const id = await discoverMatchId(request);
-    test.skip(!id, "no match ids in sitemap");
+    expect(id, "no match ids in sitemap").not.toBeNull();
     await smokeTest(page, { path: `/wedstrijd/${id}` });
   });
 

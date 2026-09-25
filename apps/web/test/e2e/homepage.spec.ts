@@ -6,8 +6,10 @@ import { gotoBounded } from "./helpers/goto";
 // 4.5.C.1: the hero is now a single static `<EditorialHero>` plus a
 // 3-up `<FeaturedUitgelichtRow>`. Auto-rotation, thumb-strip, and
 // pause-button tests have been removed; the integration here covers
-// (a) page renders 200 with the new spine order, (b) UpcomingMatches
-// expand-collapse, (c) sponsor-logo greyscale/hover.
+// (a) page renders 200 with the new spine order, (b) sponsor-logo
+// greyscale/hover. UpcomingMatches expand-collapse lives in
+// `UpcomingMatches.test.tsx` only: it reads PSD matches, which staging cannot
+// pin, and a duplicate assertion is a defect (#3131 §0.4).
 //
 // The component-level Vitest + Storybook test-runner suites cover the
 // behaviour of each homepage section in isolation. This spec exercises
@@ -16,11 +18,10 @@ import { gotoBounded } from "./helpers/goto";
 // real CMS data.
 //
 // Section selectors lean on aria labels and roles set inside each
-// component so the suite stays robust if the visual chrome shifts. If a
-// section drops because its drop-if-empty branch fires (no events
-// scheduled, no upcoming matches, sponsors not yet loaded), the optional
-// assertions below skip via `if (await section.count() === 0) test.skip()`
-// pattern — we only fail when something is present but broken.
+// component so the suite stays robust if the visual chrome shifts. A
+// section that is missing fails the test, it never skips it: the suite
+// runs against the pinned `staging` dataset, so missing data is a
+// regression (#3087 §6, #3149).
 
 test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
   test.beforeEach(async ({ page }) => {
@@ -50,12 +51,8 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
       .getByRole("region", { name: /^clubshop$/i })
       .first();
 
-    if ((await sponsorsRegion.count()) === 0) {
-      test.skip(true, "Sponsors section absent — staging seed gap.");
-    }
-    if ((await clubshopRegion.count()) === 0) {
-      test.skip(true, "Clubshop banner is missing — staging-only seed gap.");
-    }
+    await expect(sponsorsRegion, "sponsors section").toBeVisible();
+    await expect(clubshopRegion, "clubshop banner").toBeVisible();
 
     const sponsorsIndex = await sponsorsRegion.evaluate((el) =>
       Array.from(document.querySelectorAll("section, [role='region']")).indexOf(
@@ -69,35 +66,6 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     );
     expect(sponsorsIndex).toBeGreaterThanOrEqual(0);
     expect(clubshopIndex).toBeGreaterThan(sponsorsIndex);
-  });
-
-  test("upcoming matches: expand button reveals all matches", async ({
-    page,
-  }) => {
-    // Scoped to the agenda block: `<FirstTeamsBlock>` carries its own,
-    // permanently visible "Volledige kalender" link, so a page-wide locator
-    // never reads 0 no matter what this block does.
-    const agenda = page.getByRole("region", { name: "Komende wedstrijden" });
-
-    const expandButton = agenda.getByRole("button", {
-      name: /toon alle \d+ wedstrijden/i,
-    });
-    if ((await expandButton.count()) === 0) {
-      test.skip(true, "Fewer than 6 upcoming matches — no expand button.");
-    }
-
-    // The /kalender link is hidden in the collapsed state.
-    const kalenderLink = agenda.getByRole("link", {
-      name: /volledige kalender/i,
-    });
-    await expect(kalenderLink).toHaveCount(0);
-
-    await expandButton.click();
-
-    // After expand: button disappears, /kalender link appears.
-    await expect(expandButton).toHaveCount(0);
-    await expect(kalenderLink).toBeVisible();
-    await expect(kalenderLink).toHaveAttribute("href", "/kalender");
   });
 
   test("hovering the hero never opens a horizontal scrollbar, at three widths, and the sticky header keeps sticking (#2912)", async ({
@@ -124,12 +92,10 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
       // link on this page, and `.first()` staying accidentally correct
       // depends entirely on today's spine ordering. If the hero ever
       // stopped rendering as a <Link>, `count()` would still find a news
-      // card, the skip below would never fire, and this test would hover a
+      // card, the check below would pass anyway, and this test would hover a
       // news card while claiming to test the hero.
       const heroLink = page.locator('[data-testid="homepage-hero-link"]');
-      if ((await heroLink.count()) === 0) {
-        test.skip(true, "No homepage hero article in this environment.");
-      }
+      await expect(heroLink, "homepage hero article").toBeVisible();
 
       await heroLink.hover();
       await page.waitForTimeout(400); // let the 300ms press-down settle
@@ -186,19 +152,17 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     const sponsorsSection = page.getByRole("region", {
       name: /onze sponsors/i,
     });
-    if ((await sponsorsSection.count()) === 0) {
-      test.skip(true, "Sponsors section absent in this environment.");
-    }
+    await expect(sponsorsSection, "sponsors section").toBeVisible();
     const firstLogo = sponsorsSection
       .locator("img")
       .filter({ hasNot: page.locator("[data-decorative]") })
       .first();
-    if ((await firstLogo.count()) === 0) {
-      test.skip(
-        true,
-        "Sponsor logos render as italic fallback — no images to hover.",
-      );
-    }
+    await expect(
+      firstLogo,
+      "sponsor logos render as italic fallback — no images to hover",
+      // Count, not visibility: the logo is `loading="lazy"` below the fold,
+      // so it reads as hidden until the hover below scrolls it into view.
+    ).toHaveCount(1);
 
     // Default state: the image carries the `grayscale` class.
     await expect(firstLogo).toHaveClass(/grayscale/);

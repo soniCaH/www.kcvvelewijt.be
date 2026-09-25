@@ -205,12 +205,10 @@ for (const viewport of VIEWPORTS) {
       const toggles = page.getByRole("button", {
         name: /^Toon de (laatste uitslag|volgende wedstrijd)$/,
       });
-      const rendered = await toggles
-        .first()
-        .waitFor({ timeout: 10_000 })
-        .then(() => true)
-        .catch(() => false);
-      test.skip(!rendered, "no result and fixture to toggle between today");
+      await expect(
+        toggles.first(),
+        "no result and fixture to toggle between",
+      ).toBeVisible({ timeout: 10_000 });
       for (const toggle of await toggles.all()) await expectTapTarget(toggle);
     });
   });
