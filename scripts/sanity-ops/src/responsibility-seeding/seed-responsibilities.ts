@@ -11,7 +11,13 @@ interface SanityRef {
 type SeedContact =
   | { contactType: "position"; organigramNode: SanityRef }
   | { contactType: "team-role"; teamRole: "trainer" | "afgevaardigde" }
-  | { contactType: "manual"; role?: string; email?: string; phone?: string; department?: string };
+  | {
+      contactType: "manual";
+      role?: string;
+      email?: string;
+      phone?: string;
+      department?: string;
+    };
 
 function ref(id: string): SanityRef {
   return { _type: "reference", _ref: id };
@@ -28,7 +34,12 @@ function positionContact(nodeId: string): SeedContact {
   };
 }
 
-function manualContact(fields: { role?: string; email?: string; phone?: string; department?: string }): SeedContact {
+function manualContact(fields: {
+  role?: string;
+  email?: string;
+  phone?: string;
+  department?: string;
+}): SeedContact {
   return {
     contactType: "manual",
     ...fields,
@@ -42,8 +53,14 @@ function teamRoleContact(teamRole: "trainer" | "afgevaardigde"): SeedContact {
   };
 }
 
-function step(description: string, opts?: { link?: string; contact?: SeedContact }) {
-  const hash = createHash("sha256").update(description).digest("hex").slice(0, 8);
+function step(
+  description: string,
+  opts?: { link?: string; contact?: SeedContact },
+) {
+  const hash = createHash("sha256")
+    .update(description)
+    .digest("hex")
+    .slice(0, 8);
   return {
     _key: `step-${hash}`,
     description,
@@ -88,13 +105,23 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["trainer", "andere"],
     question: "heb vragen als afgevaardigde",
-    keywords: ["afgevaardigde", "delegatie", "wedstrijdblad", "scheidsrechter", "wedstrijd", "ploegverantwoordelijke"],
-    summary: "Neem als afgevaardigde contact op met de Jeugdsecretaris voor al je vragen rond wedstrijdadministratie.",
+    keywords: [
+      "afgevaardigde",
+      "delegatie",
+      "wedstrijdblad",
+      "scheidsrechter",
+      "wedstrijd",
+      "ploegverantwoordelijke",
+    ],
+    summary:
+      "Neem als afgevaardigde contact op met de Jeugdsecretaris voor al je vragen rond wedstrijdadministratie.",
     category: "sportief",
     icon: "clipboard-list",
     primaryContact: positionContact("organigramNode-jeugdsecretaris"),
     steps: [
-      step("Neem contact op met de Jeugdsecretaris voor vragen rond wedstrijdbladen, scheidsrechters en afgevaardigdentaken"),
+      step(
+        "Neem contact op met de Jeugdsecretaris voor vragen rond wedstrijdbladen, scheidsrechters en afgevaardigdentaken",
+      ),
     ],
   },
   {
@@ -105,7 +132,15 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "niet-lid"],
     question: "wil een proeftraining aanvragen",
-    keywords: ["proeftraining", "proberen", "testen", "kennismaken", "eerste training", "nieuw", "uitproberen"],
+    keywords: [
+      "proeftraining",
+      "proberen",
+      "testen",
+      "kennismaken",
+      "eerste training",
+      "nieuw",
+      "uitproberen",
+    ],
     summary: "Neem contact op met de TVJO om een proeftraining in te plannen.",
     category: "sportief",
     icon: "play-circle",
@@ -122,14 +157,19 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "wil van ploeg veranderen",
-    keywords: ["ploeg", "veranderen", "wisselen", "andere ploeg", "overstappen", "indelingswijziging"],
+    keywords: [
+      "ploeg",
+      "veranderen",
+      "wisselen",
+      "andere ploeg",
+      "overstappen",
+      "indelingswijziging",
+    ],
     summary: "Bespreek je wens om van ploeg te veranderen met de TVJO.",
     category: "sportief",
     icon: "repeat",
     primaryContact: positionContact("organigramNode-tvjo"),
-    steps: [
-      step("Bespreek je wens om van ploeg te veranderen met de TVJO"),
-    ],
+    steps: [step("Bespreek je wens om van ploeg te veranderen met de TVJO")],
   },
   {
     _id: "responsibility-scheidsrechter-worden",
@@ -140,12 +180,15 @@ const responsibilities: ResponsibilityDoc[] = [
     audience: ["speler", "ouder", "niet-lid"],
     question: "wil scheidsrechter worden",
     keywords: ["scheidsrechter", "ref", "fluiten", "arbiter", "scheids"],
-    summary: "Neem contact op met de Secretaris voor informatie over de scheidsrechtersopleiding.",
+    summary:
+      "Neem contact op met de Secretaris voor informatie over de scheidsrechtersopleiding.",
     category: "sportief",
     icon: "flag",
     primaryContact: positionContact("organigramNode-secretaris"),
     steps: [
-      step("Neem contact op met de Secretaris voor informatie over de scheidsrechtersopleiding"),
+      step(
+        "Neem contact op met de Secretaris voor informatie over de scheidsrechtersopleiding",
+      ),
     ],
   },
   {
@@ -156,14 +199,24 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["speler"],
     question: "heb een sportongeval gehad als senior",
-    keywords: ["sportongeval", "ongeval", "blessure", "letsel", "senioren", "eerste ploeg", "verzekering", "gerechtelijk"],
-    summary: "Neem direct contact op met de Gerechtelijk Correspondent voor de afhandeling van je sportongeval.",
+    keywords: [
+      "sportongeval",
+      "ongeval",
+      "blessure",
+      "letsel",
+      "senioren",
+      "eerste ploeg",
+      "verzekering",
+      "gerechtelijk",
+    ],
+    summary:
+      "Neem direct contact op met de Gerechtelijk Correspondent voor de afhandeling van je sportongeval.",
     category: "sportief",
     icon: "alert-triangle",
-    primaryContact: positionContact("organigramNode-gerechtelijk-correspondent"),
-    steps: [
-      step("Neem direct contact op met de Gerechtelijk Correspondent"),
-    ],
+    primaryContact: positionContact(
+      "organigramNode-gerechtelijk-correspondent",
+    ),
+    steps: [step("Neem direct contact op met de Gerechtelijk Correspondent")],
   },
 
   // ── Sportief (dynamic — team-role) ──────────────────────────────────────
@@ -176,17 +229,36 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een vraag over de training",
-    keywords: ["training", "oefening", "trainer", "ploeg", "trainingsuur", "trainingsdag", "schema"],
-    summary: "Neem contact op met de trainer van je ploeg. Bij escalatie: JC of TVJO.",
+    keywords: [
+      "training",
+      "oefening",
+      "trainer",
+      "ploeg",
+      "trainingsuur",
+      "trainingsdag",
+      "schema",
+    ],
+    summary:
+      "Neem contact op met de trainer van je ploeg. Bij escalatie: JC of TVJO.",
     category: "sportief",
     icon: "dumbbell",
     primaryContact: teamRoleContact("trainer"),
     steps: [
-      step("Neem contact op met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
-      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
-      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
-      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+      step("Neem contact op met de trainer van je ploeg", {
+        contact: teamRoleContact("trainer"),
+      }),
+      step("JC Onderbouw — voor U6 t/m U9", {
+        contact: positionContact("organigramNode-jc-onderbouw"),
+      }),
+      step("JC Middenbouw — voor U10 t/m U13", {
+        contact: positionContact("organigramNode-jc-middenbouw"),
+      }),
+      step("JC Bovenbouw — voor U14 t/m U21", {
+        contact: positionContact("organigramNode-jc-bovenbouw"),
+      }),
+      step("Escalatie: TVJO", {
+        contact: positionContact("organigramNode-tvjo"),
+      }),
     ],
   },
   {
@@ -197,17 +269,36 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder"],
     question: "begrijp niet waarom mijn kind niet opgesteld wordt",
-    keywords: ["opgesteld", "opstelling", "niet spelen", "bank", "selectie", "niet geselecteerd", "wisselspeler"],
-    summary: "Bespreek het eerst met de trainer van je ploeg. Bij onvoldoende antwoord: JC of TVJO.",
+    keywords: [
+      "opgesteld",
+      "opstelling",
+      "niet spelen",
+      "bank",
+      "selectie",
+      "niet geselecteerd",
+      "wisselspeler",
+    ],
+    summary:
+      "Bespreek het eerst met de trainer van je ploeg. Bij onvoldoende antwoord: JC of TVJO.",
     category: "sportief",
     icon: "user-x",
     primaryContact: teamRoleContact("trainer"),
     steps: [
-      step("Bespreek het met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
-      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
-      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
-      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+      step("Bespreek het met de trainer van je ploeg", {
+        contact: teamRoleContact("trainer"),
+      }),
+      step("JC Onderbouw — voor U6 t/m U9", {
+        contact: positionContact("organigramNode-jc-onderbouw"),
+      }),
+      step("JC Middenbouw — voor U10 t/m U13", {
+        contact: positionContact("organigramNode-jc-middenbouw"),
+      }),
+      step("JC Bovenbouw — voor U14 t/m U21", {
+        contact: positionContact("organigramNode-jc-bovenbouw"),
+      }),
+      step("Escalatie: TVJO", {
+        contact: positionContact("organigramNode-tvjo"),
+      }),
     ],
   },
   {
@@ -218,15 +309,30 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "wil een afwezigheid melden voor training of wedstrijd",
-    keywords: ["afwezigheid", "afwezig", "niet kunnen", "ziek", "vakantie", "melden", "verwittigen"],
-    summary: "Meld je afwezigheid aan de trainer of afgevaardigde van je ploeg.",
+    keywords: [
+      "afwezigheid",
+      "afwezig",
+      "niet kunnen",
+      "ziek",
+      "vakantie",
+      "melden",
+      "verwittigen",
+    ],
+    summary:
+      "Meld je afwezigheid aan de trainer of afgevaardigde van je ploeg.",
     category: "sportief",
     icon: "calendar-x",
     primaryContact: teamRoleContact("trainer"),
     steps: [
-      step("Meld je afwezigheid aan de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("Of meld het aan de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
-      step("Escalatie: Jeugdsecretaris", { contact: positionContact("organigramNode-jeugdsecretaris") }),
+      step("Meld je afwezigheid aan de trainer van je ploeg", {
+        contact: teamRoleContact("trainer"),
+      }),
+      step("Of meld het aan de afgevaardigde van je ploeg", {
+        contact: teamRoleContact("afgevaardigde"),
+      }),
+      step("Escalatie: Jeugdsecretaris", {
+        contact: positionContact("organigramNode-jeugdsecretaris"),
+      }),
     ],
   },
   {
@@ -237,14 +343,31 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een sportongeval gehad als jeugdspeler",
-    keywords: ["sportongeval", "ongeval", "blessure", "letsel", "jeugd", "verzekering", "dokter"],
-    summary: "Meld het onmiddellijk aan de trainer of afgevaardigde. Zij helpen je met de verdere stappen.",
+    keywords: [
+      "sportongeval",
+      "ongeval",
+      "blessure",
+      "letsel",
+      "jeugd",
+      "verzekering",
+      "dokter",
+    ],
+    summary:
+      "Meld het onmiddellijk aan de trainer of afgevaardigde. Zij helpen je met de verdere stappen.",
     category: "medisch",
     icon: "alert-triangle",
     primaryContact: teamRoleContact("trainer"),
     steps: [
-      step("Meld het onmiddellijk aan de trainer of afgevaardigde van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("Neem contact op met de Gerechtelijk Correspondent voor de verzekering", { contact: positionContact("organigramNode-gerechtelijk-correspondent") }),
+      step(
+        "Meld het onmiddellijk aan de trainer of afgevaardigde van je ploeg",
+        { contact: teamRoleContact("trainer") },
+      ),
+      step(
+        "Neem contact op met de Gerechtelijk Correspondent voor de verzekering",
+        {
+          contact: positionContact("organigramNode-gerechtelijk-correspondent"),
+        },
+      ),
     ],
   },
   {
@@ -255,17 +378,34 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een vraag over de ploegindeling",
-    keywords: ["ploegindeling", "indeling", "welke ploeg", "categorie", "leeftijdsgroep", "niveau"],
+    keywords: [
+      "ploegindeling",
+      "indeling",
+      "welke ploeg",
+      "categorie",
+      "leeftijdsgroep",
+      "niveau",
+    ],
     summary: "Bespreek het met de trainer. Bij escalatie: JC of TVJO.",
     category: "sportief",
     icon: "users",
     primaryContact: teamRoleContact("trainer"),
     steps: [
-      step("Bespreek het met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
-      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
-      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
-      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+      step("Bespreek het met de trainer van je ploeg", {
+        contact: teamRoleContact("trainer"),
+      }),
+      step("JC Onderbouw — voor U6 t/m U9", {
+        contact: positionContact("organigramNode-jc-onderbouw"),
+      }),
+      step("JC Middenbouw — voor U10 t/m U13", {
+        contact: positionContact("organigramNode-jc-middenbouw"),
+      }),
+      step("JC Bovenbouw — voor U14 t/m U21", {
+        contact: positionContact("organigramNode-jc-bovenbouw"),
+      }),
+      step("Escalatie: TVJO", {
+        contact: positionContact("organigramNode-tvjo"),
+      }),
     ],
   },
   {
@@ -276,15 +416,30 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "zoek informatie over een wedstrijd van mijn ploeg",
-    keywords: ["wedstrijd", "wedstrijdinfo", "locatie", "uur", "tegenstander", "verplaatsing", "afspraak"],
-    summary: "Neem contact op met de afgevaardigde van je ploeg voor wedstrijdinformatie.",
+    keywords: [
+      "wedstrijd",
+      "wedstrijdinfo",
+      "locatie",
+      "uur",
+      "tegenstander",
+      "verplaatsing",
+      "afspraak",
+    ],
+    summary:
+      "Neem contact op met de afgevaardigde van je ploeg voor wedstrijdinformatie.",
     category: "sportief",
     icon: "map-pin",
     primaryContact: teamRoleContact("afgevaardigde"),
     steps: [
-      step("Neem contact op met de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
-      step("Of contacteer de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("Escalatie: Jeugdsecretaris", { contact: positionContact("organigramNode-jeugdsecretaris") }),
+      step("Neem contact op met de afgevaardigde van je ploeg", {
+        contact: teamRoleContact("afgevaardigde"),
+      }),
+      step("Of contacteer de trainer van je ploeg", {
+        contact: teamRoleContact("trainer"),
+      }),
+      step("Escalatie: Jeugdsecretaris", {
+        contact: positionContact("organigramNode-jeugdsecretaris"),
+      }),
     ],
   },
   {
@@ -295,18 +450,39 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "trainer"],
     question: "wil het gedrag van een speler in de ploeg bespreken",
-    keywords: ["gedrag", "speler", "pesten", "sfeer", "ploeg", "team", "samenwerking", "respect"],
+    keywords: [
+      "gedrag",
+      "speler",
+      "pesten",
+      "sfeer",
+      "ploeg",
+      "team",
+      "samenwerking",
+      "respect",
+    ],
     summary: "Bespreek het eerst met de trainer. Bij escalatie: JC of API.",
     category: "gedrag",
     icon: "message-circle",
     primaryContact: teamRoleContact("trainer"),
     steps: [
-      step("Bespreek het met de trainer van je ploeg", { contact: teamRoleContact("trainer") }),
-      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
-      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
-      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
-      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
-      step("Escalatie: Aanspreekpunt Integriteit (API)", { contact: positionContact("organigramNode-api-integriteit") }),
+      step("Bespreek het met de trainer van je ploeg", {
+        contact: teamRoleContact("trainer"),
+      }),
+      step("JC Onderbouw — voor U6 t/m U9", {
+        contact: positionContact("organigramNode-jc-onderbouw"),
+      }),
+      step("JC Middenbouw — voor U10 t/m U13", {
+        contact: positionContact("organigramNode-jc-middenbouw"),
+      }),
+      step("JC Bovenbouw — voor U14 t/m U21", {
+        contact: positionContact("organigramNode-jc-bovenbouw"),
+      }),
+      step("Escalatie: TVJO", {
+        contact: positionContact("organigramNode-tvjo"),
+      }),
+      step("Escalatie: Aanspreekpunt Integriteit (API)", {
+        contact: positionContact("organigramNode-api-integriteit"),
+      }),
     ],
   },
   {
@@ -317,14 +493,29 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["trainer"],
     question: "heb materiaal nodig voor mijn ploeg",
-    keywords: ["materiaal", "ballen", "hesjes", "pionnen", "doelen", "uitrusting", "veld"],
-    summary: "Neem contact op met de afgevaardigde van je ploeg of de materiaalbeheerder.",
+    keywords: [
+      "materiaal",
+      "ballen",
+      "hesjes",
+      "pionnen",
+      "doelen",
+      "uitrusting",
+      "veld",
+    ],
+    summary:
+      "Neem contact op met de afgevaardigde van je ploeg of de materiaalbeheerder.",
     category: "sportief",
     icon: "package",
     primaryContact: teamRoleContact("afgevaardigde"),
     steps: [
-      step("Neem contact op met de afgevaardigde van je ploeg", { contact: teamRoleContact("afgevaardigde") }),
-      step("Of neem contact op met de materiaalbeheerder", { contact: positionContact("organigramNode-materiaal-kantinedienst-wedstrijden") }),
+      step("Neem contact op met de afgevaardigde van je ploeg", {
+        contact: teamRoleContact("afgevaardigde"),
+      }),
+      step("Of neem contact op met de materiaalbeheerder", {
+        contact: positionContact(
+          "organigramNode-materiaal-kantinedienst-wedstrijden",
+        ),
+      }),
     ],
   },
 
@@ -338,17 +529,37 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een opmerking over een trainer of afgevaardigde",
-    keywords: ["opmerking", "trainer", "afgevaardigde", "klacht", "feedback", "coach", "begeleider", "gedrag trainer"],
-    summary: "Neem contact op met de Jeugdcoördinator (JC) van de juiste leeftijdsgroep. Bij escalatie: Jeugdvoorzitter of TVJO.",
+    keywords: [
+      "opmerking",
+      "trainer",
+      "afgevaardigde",
+      "klacht",
+      "feedback",
+      "coach",
+      "begeleider",
+      "gedrag trainer",
+    ],
+    summary:
+      "Neem contact op met de Jeugdcoördinator (JC) van de juiste leeftijdsgroep. Bij escalatie: Jeugdvoorzitter of TVJO.",
     category: "gedrag",
     icon: "message-circle",
     primaryContact: positionContact("organigramNode-jc-onderbouw"),
     steps: [
-      step("JC Onderbouw — voor U6 t/m U9", { contact: positionContact("organigramNode-jc-onderbouw") }),
-      step("JC Middenbouw — voor U10 t/m U13", { contact: positionContact("organigramNode-jc-middenbouw") }),
-      step("JC Bovenbouw — voor U14 t/m U21", { contact: positionContact("organigramNode-jc-bovenbouw") }),
-      step("Escalatie: Jeugdvoorzitter", { contact: positionContact("organigramNode-jeugdvoorzitter") }),
-      step("Escalatie: TVJO", { contact: positionContact("organigramNode-tvjo") }),
+      step("JC Onderbouw — voor U6 t/m U9", {
+        contact: positionContact("organigramNode-jc-onderbouw"),
+      }),
+      step("JC Middenbouw — voor U10 t/m U13", {
+        contact: positionContact("organigramNode-jc-middenbouw"),
+      }),
+      step("JC Bovenbouw — voor U14 t/m U21", {
+        contact: positionContact("organigramNode-jc-bovenbouw"),
+      }),
+      step("Escalatie: Jeugdvoorzitter", {
+        contact: positionContact("organigramNode-jeugdvoorzitter"),
+      }),
+      step("Escalatie: TVJO", {
+        contact: positionContact("organigramNode-tvjo"),
+      }),
     ],
   },
   {
@@ -359,13 +570,24 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "niet-lid", "supporter"],
     question: "wil me engageren als vrijwilliger",
-    keywords: ["vrijwilliger", "helpen", "engageren", "meehelpen", "bijdragen", "hand toesteken", "volunteer"],
-    summary: "Neem contact op met de Jeugdvoorzitter om te bespreken hoe je kan helpen.",
+    keywords: [
+      "vrijwilliger",
+      "helpen",
+      "engageren",
+      "meehelpen",
+      "bijdragen",
+      "hand toesteken",
+      "volunteer",
+    ],
+    summary:
+      "Neem contact op met de Jeugdvoorzitter om te bespreken hoe je kan helpen.",
     category: "algemeen",
     icon: "heart-handshake",
     primaryContact: positionContact("organigramNode-jeugdvoorzitter"),
     steps: [
-      step("Neem contact op met de Jeugdvoorzitter om te bespreken hoe je kan helpen"),
+      step(
+        "Neem contact op met de Jeugdvoorzitter om te bespreken hoe je kan helpen",
+      ),
     ],
   },
   {
@@ -376,13 +598,23 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "niet-lid"],
     question: "wil me engageren als trainer of afgevaardigde",
-    keywords: ["trainer", "afgevaardigde", "coach", "worden", "opleiding", "cursus", "begeleiden"],
+    keywords: [
+      "trainer",
+      "afgevaardigde",
+      "coach",
+      "worden",
+      "opleiding",
+      "cursus",
+      "begeleiden",
+    ],
     summary: "Neem contact op met de TVJO om je interesse te bespreken.",
     category: "sportief",
     icon: "graduation-cap",
     primaryContact: positionContact("organigramNode-tvjo"),
     steps: [
-      step("Neem contact op met de TVJO om je interesse en beschikbaarheid te bespreken"),
+      step(
+        "Neem contact op met de TVJO om je interesse en beschikbaarheid te bespreken",
+      ),
     ],
   },
   {
@@ -393,13 +625,25 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["niet-lid", "supporter"],
     question: "wil de club sponsoren",
-    keywords: ["sponsor", "sponsoring", "reclame", "reclamebord", "partnership", "steun", "adverteren", "publiciteit"],
-    summary: "Neem contact op met de Commerciële Cel voor de sponsormogelijkheden.",
+    keywords: [
+      "sponsor",
+      "sponsoring",
+      "reclame",
+      "reclamebord",
+      "partnership",
+      "steun",
+      "adverteren",
+      "publiciteit",
+    ],
+    summary:
+      "Neem contact op met de Commerciële Cel voor de sponsormogelijkheden.",
     category: "commercieel",
     icon: "handshake",
     primaryContact: positionContact("organigramNode-sponsoring"),
     steps: [
-      step("Neem contact op met de Commerciële Cel voor de verschillende mogelijkheden"),
+      step(
+        "Neem contact op met de Commerciële Cel voor de verschillende mogelijkheden",
+      ),
     ],
   },
   {
@@ -411,12 +655,15 @@ const responsibilities: ResponsibilityDoc[] = [
     audience: ["ouder", "supporter"],
     question: "wil helpen sponsors te werven",
     keywords: ["sponsor", "werven", "zoeken", "helpen", "netwerk", "contacten"],
-    summary: "Neem contact op met de Commerciële Cel om samen sponsors te zoeken.",
+    summary:
+      "Neem contact op met de Commerciële Cel om samen sponsors te zoeken.",
     category: "commercieel",
     icon: "users",
     primaryContact: positionContact("organigramNode-sponsoring"),
     steps: [
-      step("Neem contact op met de Commerciële Cel om samen sponsors te zoeken"),
+      step(
+        "Neem contact op met de Commerciële Cel om samen sponsors te zoeken",
+      ),
     ],
   },
   {
@@ -427,13 +674,26 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "trainer"],
     question: "heb een vraag over kantinedienst op wedstrijddagen",
-    keywords: ["kantinedienst", "kantine", "wedstrijd", "bar", "toog", "dienst", "beurt"],
-    summary: "Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden.",
+    keywords: [
+      "kantinedienst",
+      "kantine",
+      "wedstrijd",
+      "bar",
+      "toog",
+      "dienst",
+      "beurt",
+    ],
+    summary:
+      "Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden.",
     category: "algemeen",
     icon: "coffee",
-    primaryContact: positionContact("organigramNode-materiaal-kantinedienst-wedstrijden"),
+    primaryContact: positionContact(
+      "organigramNode-materiaal-kantinedienst-wedstrijden",
+    ),
     steps: [
-      step("Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden"),
+      step(
+        "Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden",
+      ),
     ],
   },
   {
@@ -444,8 +704,17 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "trainer"],
     question: "heb een vraag over kantinedienst op trainingen",
-    keywords: ["kantinedienst", "kantine", "training", "bar", "toog", "dienst", "beurt"],
-    summary: "Neem contact op met de verantwoordelijke Kantinedienst Trainingen.",
+    keywords: [
+      "kantinedienst",
+      "kantine",
+      "training",
+      "bar",
+      "toog",
+      "dienst",
+      "beurt",
+    ],
+    summary:
+      "Neem contact op met de verantwoordelijke Kantinedienst Trainingen.",
     category: "algemeen",
     icon: "coffee",
     primaryContact: positionContact("organigramNode-kantinedienst-trainingen"),
@@ -461,13 +730,26 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "niet-lid"],
     question: "heb een vraag over lidgeld of inschrijving",
-    keywords: ["lidgeld", "inschrijving", "inschrijven", "betalen", "kostprijs", "prijs", "bijdrage", "lid worden", "aansluiting"],
-    summary: "Neem contact op met de Jeugdsecretaris voor vragen over lidgeld en inschrijvingen.",
+    keywords: [
+      "lidgeld",
+      "inschrijving",
+      "inschrijven",
+      "betalen",
+      "kostprijs",
+      "prijs",
+      "bijdrage",
+      "lid worden",
+      "aansluiting",
+    ],
+    summary:
+      "Neem contact op met de Jeugdsecretaris voor vragen over lidgeld en inschrijvingen.",
     category: "administratief",
     icon: "credit-card",
     primaryContact: positionContact("organigramNode-jeugdsecretaris"),
     steps: [
-      step("Neem contact op met de Jeugdsecretaris voor vragen over lidgeld en inschrijvingen"),
+      step(
+        "Neem contact op met de Jeugdsecretaris voor vragen over lidgeld en inschrijvingen",
+      ),
     ],
   },
   {
@@ -478,14 +760,22 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "trainer"],
     question: "heb een vraag over kledij of uitrusting",
-    keywords: ["kledij", "uitrusting", "truitje", "broek", "kousen", "schoenen", "materiaal", "bestellen", "bestelling"],
+    keywords: [
+      "kledij",
+      "uitrusting",
+      "truitje",
+      "broek",
+      "kousen",
+      "schoenen",
+      "materiaal",
+      "bestellen",
+      "bestelling",
+    ],
     summary: "Neem contact op met de verantwoordelijke Kledij.",
     category: "administratief",
     icon: "shirt",
     primaryContact: positionContact("organigramNode-kledij"),
-    steps: [
-      step("Neem contact op met de verantwoordelijke Kledij"),
-    ],
+    steps: [step("Neem contact op met de verantwoordelijke Kledij")],
   },
   {
     _id: "responsibility-allerlei-jeugd-ouders",
@@ -495,14 +785,22 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb allerlei vragen over de jeugd of als ouder",
-    keywords: ["vraag", "vragen", "jeugd", "ouder", "informatie", "info", "algemeen", "catch-all"],
-    summary: "Neem contact op met de Jeugdvoorzitter voor allerlei vragen over de jeugdwerking.",
+    keywords: [
+      "vraag",
+      "vragen",
+      "jeugd",
+      "ouder",
+      "informatie",
+      "info",
+      "algemeen",
+      "catch-all",
+    ],
+    summary:
+      "Neem contact op met de Jeugdvoorzitter voor allerlei vragen over de jeugdwerking.",
     category: "algemeen",
     icon: "help-circle",
     primaryContact: positionContact("organigramNode-jeugdvoorzitter"),
-    steps: [
-      step("Neem contact op met de Jeugdvoorzitter"),
-    ],
+    steps: [step("Neem contact op met de Jeugdvoorzitter")],
   },
 
   // ── Administratief ────────────────────────────────────────────────────
@@ -515,8 +813,17 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "wil de club verlaten of me uitschrijven",
-    keywords: ["verlaten", "uitschrijven", "stoppen", "opzeggen", "weg", "andere club", "vertrekken"],
-    summary: "Neem contact op met de Secretaris voor de uitschrijvingsprocedure.",
+    keywords: [
+      "verlaten",
+      "uitschrijven",
+      "stoppen",
+      "opzeggen",
+      "weg",
+      "andere club",
+      "vertrekken",
+    ],
+    summary:
+      "Neem contact op met de Secretaris voor de uitschrijvingsprocedure.",
     category: "administratief",
     icon: "log-out",
     primaryContact: positionContact("organigramNode-secretaris"),
@@ -532,7 +839,15 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "niet-lid"],
     question: "kom van een andere club en wil overstappen",
-    keywords: ["transfer", "overstap", "overstappen", "andere club", "wissel", "overschrijving", "aansluiting"],
+    keywords: [
+      "transfer",
+      "overstap",
+      "overstappen",
+      "andere club",
+      "wissel",
+      "overschrijving",
+      "aansluiting",
+    ],
     summary: "Neem contact op met de Secretaris voor de transferprocedure.",
     category: "administratief",
     icon: "arrow-right-left",
@@ -549,7 +864,16 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "trainer"],
     question: "wil mijn contactgegevens wijzigen",
-    keywords: ["contactgegevens", "adres", "telefoon", "email", "wijzigen", "aanpassen", "veranderen", "profiel"],
+    keywords: [
+      "contactgegevens",
+      "adres",
+      "telefoon",
+      "email",
+      "wijzigen",
+      "aanpassen",
+      "veranderen",
+      "profiel",
+    ],
     summary: "Log in op ProSoccerData of neem contact op met de beheerder.",
     category: "administratief",
     icon: "edit",
@@ -566,13 +890,23 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een probleem met mijn aansluiting bij Voetbal Vlaanderen",
-    keywords: ["voetbal vlaanderen", "aansluiting", "kbvb", "lidkaart", "registratie", "probleem"],
-    summary: "Neem contact op met de Secretaris voor hulp bij aansluitingsproblemen.",
+    keywords: [
+      "voetbal vlaanderen",
+      "aansluiting",
+      "kbvb",
+      "lidkaart",
+      "registratie",
+      "probleem",
+    ],
+    summary:
+      "Neem contact op met de Secretaris voor hulp bij aansluitingsproblemen.",
     category: "administratief",
     icon: "alert-circle",
     primaryContact: positionContact("organigramNode-secretaris"),
     steps: [
-      step("Neem contact op met de Secretaris voor hulp bij aansluitingsproblemen"),
+      step(
+        "Neem contact op met de Secretaris voor hulp bij aansluitingsproblemen",
+      ),
     ],
   },
   {
@@ -583,13 +917,24 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "wil weten wanneer het nieuwe seizoen begint",
-    keywords: ["seizoen", "nieuw seizoen", "start", "begin", "wanneer", "kalender", "planning"],
-    summary: "Neem contact op met de TVJO voor informatie over het nieuwe seizoen.",
+    keywords: [
+      "seizoen",
+      "nieuw seizoen",
+      "start",
+      "begin",
+      "wanneer",
+      "kalender",
+      "planning",
+    ],
+    summary:
+      "Neem contact op met de TVJO voor informatie over het nieuwe seizoen.",
     category: "sportief",
     icon: "calendar",
     primaryContact: positionContact("organigramNode-tvjo"),
     steps: [
-      step("Neem contact op met de TVJO voor informatie over de seizoensplanning"),
+      step(
+        "Neem contact op met de TVJO voor informatie over de seizoensplanning",
+      ),
     ],
   },
 
@@ -603,14 +948,24 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een medisch attest nodig voor sport",
-    keywords: ["medisch attest", "dokter", "attest", "geschiktheid", "keuring", "sport", "doktersattest"],
-    summary: "Neem contact op met de verantwoordelijke verzekering voor informatie over medische attesten.",
+    keywords: [
+      "medisch attest",
+      "dokter",
+      "attest",
+      "geschiktheid",
+      "keuring",
+      "sport",
+      "doktersattest",
+    ],
+    summary:
+      "Neem contact op met de verantwoordelijke verzekering voor informatie over medische attesten.",
     category: "medisch",
     icon: "file-check",
-    primaryContact: manualContact({ role: "Verzekering", email: "verzekering@kcvvelewijt.be" }),
-    steps: [
-      step("Neem contact op met de verantwoordelijke verzekering"),
-    ],
+    primaryContact: manualContact({
+      role: "Verzekering",
+      email: "verzekering@kcvvelewijt.be",
+    }),
+    steps: [step("Neem contact op met de verantwoordelijke verzekering")],
   },
   {
     _id: "responsibility-allergieen-medicatie-melden",
@@ -620,14 +975,21 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder"],
     question: "wil allergieën of medicatie van mijn kind melden",
-    keywords: ["allergie", "medicatie", "medisch", "melden", "gezondheid", "astma", "epipen", "diabetes"],
+    keywords: [
+      "allergie",
+      "medicatie",
+      "medisch",
+      "melden",
+      "gezondheid",
+      "astma",
+      "epipen",
+      "diabetes",
+    ],
     summary: "Meld het aan de TVJO en de trainer van je ploeg.",
     category: "medisch",
     icon: "pill",
     primaryContact: positionContact("organigramNode-tvjo"),
-    steps: [
-      step("Meld het aan de TVJO en aan de trainer van je ploeg"),
-    ],
+    steps: [step("Meld het aan de TVJO en aan de trainer van je ploeg")],
   },
   {
     _id: "responsibility-aed-ehbo",
@@ -637,7 +999,15 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["speler", "ouder", "trainer", "supporter"],
     question: "zoek de AED of heb EHBO nodig op het terrein",
-    keywords: ["AED", "EHBO", "defibrillator", "eerste hulp", "noodgeval", "hartslag", "reanimatie"],
+    keywords: [
+      "AED",
+      "EHBO",
+      "defibrillator",
+      "eerste hulp",
+      "noodgeval",
+      "hartslag",
+      "reanimatie",
+    ],
     summary: "Ga naar de kantine, de AED hangt aan de ingang.",
     category: "medisch",
     icon: "heart-pulse",
@@ -657,14 +1027,20 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "heb een conflict met een andere ouder of speler",
-    keywords: ["conflict", "ruzie", "probleem", "onenigheid", "ouder", "speler", "bemiddeling"],
+    keywords: [
+      "conflict",
+      "ruzie",
+      "probleem",
+      "onenigheid",
+      "ouder",
+      "speler",
+      "bemiddeling",
+    ],
     summary: "Neem contact op met het API (Aanspreekpunt Integriteit).",
     category: "gedrag",
     icon: "shield",
     primaryContact: positionContact("organigramNode-api-integriteit"),
-    steps: [
-      step("Neem contact op met het Aanspreekpunt Integriteit (API)"),
-    ],
+    steps: [step("Neem contact op met het Aanspreekpunt Integriteit (API)")],
   },
   {
     _id: "responsibility-fair-play-charter",
@@ -674,14 +1050,20 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "trainer", "supporter"],
     question: "wil het fair play charter raadplegen",
-    keywords: ["fair play", "charter", "gedragscode", "regels", "sportiviteit", "respect"],
-    summary: "Raadpleeg het charter op de website of neem contact op met het API.",
+    keywords: [
+      "fair play",
+      "charter",
+      "gedragscode",
+      "regels",
+      "sportiviteit",
+      "respect",
+    ],
+    summary:
+      "Raadpleeg het charter op de website of neem contact op met het API.",
     category: "gedrag",
     icon: "book-open",
     primaryContact: positionContact("organigramNode-api-integriteit"),
-    steps: [
-      step("Raadpleeg het fair play charter op de website"),
-    ],
+    steps: [step("Raadpleeg het fair play charter op de website")],
   },
 
   // ── Algemeen ──────────────────────────────────────────────────────────
@@ -694,7 +1076,16 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["niet-lid", "supporter"],
     question: "wil het terrein of de kantine huren",
-    keywords: ["huren", "terrein", "kantine", "zaal", "evenement", "feest", "locatie", "verhuur"],
+    keywords: [
+      "huren",
+      "terrein",
+      "kantine",
+      "zaal",
+      "evenement",
+      "feest",
+      "locatie",
+      "verhuur",
+    ],
     summary: "Neem contact op met de verantwoordelijke Kantine & Evenementen.",
     category: "commercieel",
     icon: "building",
@@ -711,14 +1102,22 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "supporter"],
     question: "heb iets verloren op het terrein",
-    keywords: ["verloren", "gevonden", "voorwerp", "kwijt", "vergeten", "tas", "jas", "schoenen", "lost and found"],
+    keywords: [
+      "verloren",
+      "gevonden",
+      "voorwerp",
+      "kwijt",
+      "vergeten",
+      "tas",
+      "jas",
+      "schoenen",
+      "lost and found",
+    ],
     summary: "Vraag aan de kantine of je voorwerp is ingeleverd.",
     category: "algemeen",
     icon: "search",
     primaryContact: positionContact("organigramNode-kantine-evenementen"),
-    steps: [
-      step("Vraag aan de kantine of je verloren voorwerp is ingeleverd"),
-    ],
+    steps: [step("Vraag aan de kantine of je verloren voorwerp is ingeleverd")],
   },
   {
     _id: "responsibility-klacht-indienen",
@@ -728,14 +1127,27 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "trainer", "supporter"],
     question: "wil een klacht indienen",
-    keywords: ["klacht", "indienen", "formeel", "bezwaar", "ontevreden", "probleem", "melding"],
-    summary: "Stuur een mail naar de Secretaris. Bij gedragsgerelateerde klachten: API.",
+    keywords: [
+      "klacht",
+      "indienen",
+      "formeel",
+      "bezwaar",
+      "ontevreden",
+      "probleem",
+      "melding",
+    ],
+    summary:
+      "Stuur een mail naar de Secretaris. Bij gedragsgerelateerde klachten: API.",
     category: "algemeen",
     icon: "file-warning",
     primaryContact: positionContact("organigramNode-secretaris"),
     steps: [
-      step("Stuur een mail naar de Secretaris met je klacht", { contact: positionContact("organigramNode-secretaris") }),
-      step("Bij gedragsgerelateerde klachten: neem contact op met het API", { contact: positionContact("organigramNode-api-integriteit") }),
+      step("Stuur een mail naar de Secretaris met je klacht", {
+        contact: positionContact("organigramNode-secretaris"),
+      }),
+      step("Bij gedragsgerelateerde klachten: neem contact op met het API", {
+        contact: positionContact("organigramNode-api-integriteit"),
+      }),
     ],
   },
   {
@@ -746,14 +1158,19 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "supporter", "niet-lid"],
     question: "wil contact met het bestuur",
-    keywords: ["bestuur", "voorzitter", "contact", "vergadering", "directie", "leiding"],
+    keywords: [
+      "bestuur",
+      "voorzitter",
+      "contact",
+      "vergadering",
+      "directie",
+      "leiding",
+    ],
     summary: "Neem contact op met de Voorzitter.",
     category: "algemeen",
     icon: "building-2",
     primaryContact: positionContact("organigramNode-voorzitter"),
-    steps: [
-      step("Neem contact op met de Voorzitter"),
-    ],
+    steps: [step("Neem contact op met de Voorzitter")],
   },
   {
     _id: "responsibility-geen-mails-meer",
@@ -763,14 +1180,20 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "ontvang geen mails meer van de club",
-    keywords: ["mail", "email", "ontvangen", "communicatie", "nieuwsbrief", "berichten", "geen mail"],
+    keywords: [
+      "mail",
+      "email",
+      "ontvangen",
+      "communicatie",
+      "nieuwsbrief",
+      "berichten",
+      "geen mail",
+    ],
     summary: "Controleer je gegevens in ProSoccerData.",
     category: "administratief",
     icon: "mail-x",
     primaryContact: positionContact("organigramNode-prosoccerdata"),
-    steps: [
-      step("Controleer of je emailadres correct staat in ProSoccerData"),
-    ],
+    steps: [step("Controleer of je emailadres correct staat in ProSoccerData")],
   },
 
   // ── Commercieel ───────────────────────────────────────────────────────
@@ -783,7 +1206,15 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["niet-lid", "supporter", "ouder"],
     question: "wil een evenement organiseren op het terrein",
-    keywords: ["evenement", "organiseren", "feest", "activiteit", "terrein", "kantine", "verhuur"],
+    keywords: [
+      "evenement",
+      "organiseren",
+      "feest",
+      "activiteit",
+      "terrein",
+      "kantine",
+      "verhuur",
+    ],
     summary: "Neem contact op met de verantwoordelijke Kantine & Evenementen.",
     category: "commercieel",
     icon: "party-popper",
@@ -800,8 +1231,12 @@ async function preflight() {
   // Collect all referenced organigramNode IDs
   const nodeIds = new Set<string>();
   for (const doc of responsibilities) {
-    for (const contact of [doc.primaryContact, ...doc.steps.map((s) => s.contact)]) {
-      if (contact?.contactType === "position") nodeIds.add(contact.organigramNode._ref);
+    for (const contact of [
+      doc.primaryContact,
+      ...doc.steps.map((s) => s.contact),
+    ]) {
+      if (contact?.contactType === "position")
+        nodeIds.add(contact.organigramNode._ref);
     }
   }
 
@@ -830,7 +1265,9 @@ async function preflight() {
     throw new Error(`Duplicate slug values: ${slugDupes.join(", ")}`);
   }
 
-  console.log(`Preflight OK — ${nodeIds.size} organigramNodes verified, ${responsibilities.length} responsibilities to seed`);
+  console.log(
+    `Preflight OK — ${nodeIds.size} organigramNodes verified, ${responsibilities.length} responsibilities to seed`,
+  );
 }
 
 // ─── Seeding ────────────────────────────────────────────────────────────────
@@ -842,11 +1279,16 @@ function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T> {
 }
 
 async function seed() {
-  if (dataset === "production" && process.env.CONFIRM_PRODUCTION_SEED !== "yes") {
+  if (
+    dataset === "production" &&
+    process.env.CONFIRM_PRODUCTION_SEED !== "yes"
+  ) {
     throw new Error("Set CONFIRM_PRODUCTION_SEED=yes for production");
   }
 
-  console.log(`Seeding ${responsibilities.length} responsibilities in dataset: ${dataset}`);
+  console.log(
+    `Seeding ${responsibilities.length} responsibilities in dataset: ${dataset}`,
+  );
 
   await preflight();
 
@@ -860,7 +1302,9 @@ async function seed() {
     console.log(`  ✓ ${doc._id}`);
   }
 
-  console.log(`\nDone — ${responsibilities.length} responsibility documents seeded.`);
+  console.log(
+    `\nDone — ${responsibilities.length} responsibility documents seeded.`,
+  );
 }
 
 seed().catch((err) => {

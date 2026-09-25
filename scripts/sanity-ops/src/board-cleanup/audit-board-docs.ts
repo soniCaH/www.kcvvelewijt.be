@@ -84,32 +84,46 @@ async function main() {
 
   console.log("\n=== BOARD DOCUMENTS ===");
   console.log(`Total: ${boardDocs.length}`);
-  console.log(`  With photo: ${boardDocs.filter(d => d.hasPhoto).length}`);
-  console.log(`  Archived: ${boardDocs.filter(d => d.archived).length}`);
-  console.log(`  Referenced: ${boardDocs.filter(d => d.referencedBy.length > 0).length}`);
-  console.log(`  Unreferenced: ${boardDocs.filter(d => d.referencedBy.length === 0).length}`);
+  console.log(`  With photo: ${boardDocs.filter((d) => d.hasPhoto).length}`);
+  console.log(`  Archived: ${boardDocs.filter((d) => d.archived).length}`);
+  console.log(
+    `  Referenced: ${boardDocs.filter((d) => d.referencedBy.length > 0).length}`,
+  );
+  console.log(
+    `  Unreferenced: ${boardDocs.filter((d) => d.referencedBy.length === 0).length}`,
+  );
 
   console.log("\n--- Board docs with references ---");
-  for (const doc of boardDocs.filter(d => d.referencedBy.length > 0)) {
-    console.log(`  ${doc._id}: ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto}, archived: ${doc.archived})`);
+  for (const doc of boardDocs.filter((d) => d.referencedBy.length > 0)) {
+    console.log(
+      `  ${doc._id}: ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto}, archived: ${doc.archived})`,
+    );
     console.log(`    Referenced by: ${doc.referencedBy.join(", ")}`);
   }
 
   console.log("\n--- Board docs WITHOUT references ---");
-  for (const doc of boardDocs.filter(d => d.referencedBy.length === 0)) {
-    console.log(`  ${doc._id}: ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto}, archived: ${doc.archived})`);
+  for (const doc of boardDocs.filter((d) => d.referencedBy.length === 0)) {
+    console.log(
+      `  ${doc._id}: ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto}, archived: ${doc.archived})`,
+    );
   }
 
   console.log("\n=== PSD STAFF ===");
-  console.log(`Total: ${psdDocs.length} (active: ${psdDocs.filter(d => !d.archived).length})`);
-  for (const doc of psdDocs.filter(d => !d.archived)) {
-    console.log(`  ${doc._id} (psdId: ${doc.psdId}): ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto})`);
+  console.log(
+    `Total: ${psdDocs.length} (active: ${psdDocs.filter((d) => !d.archived).length})`,
+  );
+  for (const doc of psdDocs.filter((d) => !d.archived)) {
+    console.log(
+      `  ${doc._id} (psdId: ${doc.psdId}): ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto})`,
+    );
   }
 
   console.log("\n=== MANUAL STAFF ===");
   console.log(`Total: ${manualDocs.length}`);
   for (const doc of manualDocs) {
-    console.log(`  ${doc._id}: ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto}, archived: ${doc.archived})`);
+    console.log(
+      `  ${doc._id}: ${doc.firstName} ${doc.lastName} (photo: ${doc.hasPhoto}, archived: ${doc.archived})`,
+    );
   }
 
   console.log("\n=== TEAM REFERENCES ===");
@@ -126,7 +140,12 @@ async function main() {
 
   // Output JSON for further processing
   const output = { boardDocs, psdDocs, manualDocs, teams };
-  const outPath = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "audit-result.json");
+  const outPath = join(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "..",
+    "audit-result.json",
+  );
   writeFileSync(outPath, JSON.stringify(output, null, 2));
   console.log("\nFull data written to audit-result.json");
 }

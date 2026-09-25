@@ -1,8 +1,15 @@
 import { client } from "../shared/sanity-client";
 
 async function main() {
-  const archived = await client.fetch<Array<{ _id: string; firstName: string; lastName: string; psdId: string | null }>>(
-    `*[_type == "staffMember" && archived == true]{ _id, firstName, lastName, psdId } | order(lastName asc)`
+  const archived = await client.fetch<
+    Array<{
+      _id: string;
+      firstName: string;
+      lastName: string;
+      psdId: string | null;
+    }>
+  >(
+    `*[_type == "staffMember" && archived == true]{ _id, firstName, lastName, psdId } | order(lastName asc)`,
   );
 
   console.log(`${archived.length} archived staff members:\n`);
