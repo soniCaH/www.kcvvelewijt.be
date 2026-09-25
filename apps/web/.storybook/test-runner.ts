@@ -63,6 +63,41 @@ function throwIfDenied(storyId: string): void {
   );
 }
 
+/**
+ * Runs after the capture flow (the viewport loop and everything feeding
+ * it), whether it threw or not. Always clears `deniedUrls` — a `try/catch`
+ * around that flow, not a bare call after it, because a failing
+ * `toMatchImageSnapshot`/structural assertion/etc. would otherwise skip
+ * straight past the denial check, leaving both unreported (never checked)
+ * and uncleared (bleeding into the next story's mount-phase check). A
+ * capture failure takes priority over a denial — it's rethrown as-is, with
+ * the denial reported via `console.warn` alongside it rather than swapped
+ * in as the thrown error, so neither piece of information is lost. A clean
+ * capture with a recorded denial throws on the denial, same as
+ * `throwIfDenied` above.
+ */
+function reportDeniedAfterCapture(
+  storyId: string,
+  captureError: unknown,
+): void {
+  const offending = deniedUrls;
+  deniedUrls = [];
+  if (offending.length === 0) {
+    if (captureError) throw captureError;
+    return;
+  }
+  const denialMessage =
+    `[VR] Story "${storyId}" triggered ${offending.length} denied off-machine ` +
+    `request(s), which must not happen: ${offending.join(", ")}`;
+  if (captureError) {
+    console.warn(
+      `${denialMessage} (reported alongside the capture failure below)`,
+    );
+    throw captureError;
+  }
+  throw new Error(denialMessage);
+}
+
 const VIEWPORTS: Record<VrViewportName, { width: number; height: number }> = {
   mobile: { width: 375, height: 667 },
   tablet: { width: 768, height: 1024 },
@@ -394,6 +429,28 @@ const config: TestRunnerConfig = {
       return route.abort();
     });
 
+    // Same rule, WebSocket transport: `browserContext.route` above only ever
+    // sees HTTP(S) requests, so a `new WebSocket("wss://…")` off this
+    // machine would sail straight past it. Registered before any story
+    // script can run, for the same reason the HTTP route is. Not calling
+    // `ws.connectToServer()` means Playwright never opens the real
+    // connection at all — the closest WebSocket equivalent of `route.abort()`
+    // — so a denied socket is recorded and closed rather than left dangling.
+    await browserContext.routeWebSocket("**/*", (ws) => {
+      const url = new URL(ws.url());
+      if (url.origin === storybookOrigin) {
+        ws.connectToServer();
+        return;
+      }
+      if (KNOWN_ABORT_HOSTS.test(url.hostname)) {
+        ws.close();
+        return;
+      }
+      deniedUrls.push(ws.url());
+      console.warn(`[VR] denied off-machine WebSocket: ${ws.url()}`);
+      ws.close();
+    });
+
     if (cfg?.getHttpHeaders) {
       const headers = await cfg.getHttpHeaders(iframeURL);
       await browserContext.setExtraHTTPHeaders(headers);
@@ -512,209 +569,221 @@ const config: TestRunnerConfig = {
       );
     }
 
-    await page.addStyleTag({ content: DETERMINISM_STYLESHEET });
-    // Park the mouse off-canvas before any screenshot so a stray cursor
-    // position from the previous story can't trigger `:hover` styles on
-    // whichever element happens to sit under (0, 0) (the Playwright default).
-    // Hover transitions are zero-duration via DETERMINISM_STYLESHEET, but the
-    // end-state — `group-hover:scale-105`, `hover:-translate-y-1`, the green
-    // top-border clip-path swap — would still snap on and produce a diff.
-    await page.mouse.move(-1, -1);
-    await waitForPageReadyCapped(page, NETWORK_IDLE_TIMEOUT_MS);
-    await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
-
-    for (const name of requestedViewports) {
-      const vp = VIEWPORTS[name];
-      await page.setViewportSize(vp);
-      // `page.setViewportSize` returns as soon as the browser has accepted the
-      // resize, but CSS reflow + the next paint pass happen asynchronously.
-      // Poll on the document's own `clientWidth` so we don't proceed until the
-      // page has actually adopted the new viewport — without this, the
-      // screenshot can land mid-reflow and capture content laid out for the
-      // previous viewport inside the new viewport's clip box (#1731 desktop
-      // failure mode). Soft-capped so a story that somehow never adopts the
-      // width can't hang the runner.
-      await page
-        .waitForFunction(
-          (expectedWidth) =>
-            document.documentElement.clientWidth === expectedWidth,
-          vp.width,
-          { timeout: 2000 },
-        )
-        .catch(() => {
-          // Fall through — the rAF wait below will still flush layout.
-        });
-      // Re-run the targeted font wait per viewport, not only once before the
-      // loop: a resize can swap in markup a viewport-conditional component
-      // renders only at that breakpoint (e.g. a ResizeObserver-driven
-      // change), or flip which face a responsive utility (`sm:font-display`,
-      // a weight breakpoint) resolves to — either way a face `getComputedStyle`
-      // never saw at the previous viewport, and that face is exactly the one
-      // still racing Typekit's async injection (SHARE-1).
+    // Wrapped so a failing capture (a snapshot mismatch, a structural
+    // assertion, any thrown error below) still runs the denial check/clear
+    // in reportDeniedAfterCapture — see that function's docblock.
+    let captureError: unknown;
+    try {
+      await page.addStyleTag({ content: DETERMINISM_STYLESHEET });
+      // Park the mouse off-canvas before any screenshot so a stray cursor
+      // position from the previous story can't trigger `:hover` styles on
+      // whichever element happens to sit under (0, 0) (the Playwright default).
+      // Hover transitions are zero-duration via DETERMINISM_STYLESHEET, but the
+      // end-state — `group-hover:scale-105`, `hover:-translate-y-1`, the green
+      // top-border clip-path swap — would still snap on and produce a diff.
+      await page.mouse.move(-1, -1);
+      await waitForPageReadyCapped(page, NETWORK_IDLE_TIMEOUT_MS);
       await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
-      // Viewport changes can re-trigger Next/Image's responsive `srcset`,
-      // swapping in a different file. Without this wait the screenshot races
-      // the swap and the same story flickers between runs. Capped at
-      // IMAGE_LOAD_TIMEOUT_MS so a story with a broken image doesn't hang
-      // the whole runner — failures emit a console.warn so the cause is
-      // discoverable from CI logs without re-running locally.
-      // `next/image` lazy-loads via the `loading="lazy"` attribute AND an
-      // intersection observer. Flipping the attribute alone does not
-      // retrigger the IO; CI screenshots showed below-fold images still
-      // empty even after the eager flip. Scroll to bottom + back to top
-      // first so every IO callback fires, then flip the attribute as a
-      // belt-and-braces, then wait. Test-runner-only.
-      await page.evaluate(async () => {
-        const fullHeight = document.documentElement.scrollHeight;
-        window.scrollTo(0, fullHeight);
-        await new Promise((r) => requestAnimationFrame(() => r(undefined)));
-        window.scrollTo(0, 0);
-        await new Promise((r) => requestAnimationFrame(() => r(undefined)));
-      });
-      // After `setViewportSize`, the browser may pick a different `srcset`
-      // candidate for every `<img>` and kick off a fresh network request. Wait
-      // for the network to settle so the per-image load/decode pair below
-      // operates on the final candidate, not the previous one. Soft-capped so
-      // Storybook's HMR long-poll can't hang the runner.
-      await page
-        .waitForLoadState("networkidle", { timeout: NETWORK_IDLE_TIMEOUT_MS })
-        .catch(() => {
-          // networkidle is a soft signal — fall through to the explicit
-          // per-image waits, which are what actually gate the screenshot.
+
+      for (const name of requestedViewports) {
+        const vp = VIEWPORTS[name];
+        await page.setViewportSize(vp);
+        // `page.setViewportSize` returns as soon as the browser has accepted the
+        // resize, but CSS reflow + the next paint pass happen asynchronously.
+        // Poll on the document's own `clientWidth` so we don't proceed until the
+        // page has actually adopted the new viewport — without this, the
+        // screenshot can land mid-reflow and capture content laid out for the
+        // previous viewport inside the new viewport's clip box (#1731 desktop
+        // failure mode). Soft-capped so a story that somehow never adopts the
+        // width can't hang the runner.
+        await page
+          .waitForFunction(
+            (expectedWidth) =>
+              document.documentElement.clientWidth === expectedWidth,
+            vp.width,
+            { timeout: 2000 },
+          )
+          .catch(() => {
+            // Fall through — the rAF wait below will still flush layout.
+          });
+        // Re-run the targeted font wait per viewport, not only once before the
+        // loop: a resize can swap in markup a viewport-conditional component
+        // renders only at that breakpoint (e.g. a ResizeObserver-driven
+        // change), or flip which face a responsive utility (`sm:font-display`,
+        // a weight breakpoint) resolves to — either way a face `getComputedStyle`
+        // never saw at the previous viewport, and that face is exactly the one
+        // still racing Typekit's async injection (SHARE-1).
+        await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
+        // Viewport changes can re-trigger Next/Image's responsive `srcset`,
+        // swapping in a different file. Without this wait the screenshot races
+        // the swap and the same story flickers between runs. Capped at
+        // IMAGE_LOAD_TIMEOUT_MS so a story with a broken image doesn't hang
+        // the whole runner — failures emit a console.warn so the cause is
+        // discoverable from CI logs without re-running locally.
+        // `next/image` lazy-loads via the `loading="lazy"` attribute AND an
+        // intersection observer. Flipping the attribute alone does not
+        // retrigger the IO; CI screenshots showed below-fold images still
+        // empty even after the eager flip. Scroll to bottom + back to top
+        // first so every IO callback fires, then flip the attribute as a
+        // belt-and-braces, then wait. Test-runner-only.
+        await page.evaluate(async () => {
+          const fullHeight = document.documentElement.scrollHeight;
+          window.scrollTo(0, fullHeight);
+          await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+          window.scrollTo(0, 0);
+          await new Promise((r) => requestAnimationFrame(() => r(undefined)));
         });
-      await page.evaluate(
-        async ([loadTimeoutMs]: [number]) => {
-          for (const img of Array.from(document.images)) {
-            if (img.loading === "lazy") img.loading = "eager";
-          }
-          const imageWaits = Array.from(document.images)
-            .filter((img) => !img.complete)
-            .map(
-              (img) =>
-                new Promise<void>((resolve) => {
-                  img.addEventListener("load", () => resolve(), { once: true });
-                  img.addEventListener(
-                    "error",
-                    () => {
-                      console.warn(`[VR] image failed to load: ${img.src}`);
-                      resolve();
-                    },
-                    { once: true },
-                  );
+        // After `setViewportSize`, the browser may pick a different `srcset`
+        // candidate for every `<img>` and kick off a fresh network request. Wait
+        // for the network to settle so the per-image load/decode pair below
+        // operates on the final candidate, not the previous one. Soft-capped so
+        // Storybook's HMR long-poll can't hang the runner.
+        await page
+          .waitForLoadState("networkidle", { timeout: NETWORK_IDLE_TIMEOUT_MS })
+          .catch(() => {
+            // networkidle is a soft signal — fall through to the explicit
+            // per-image waits, which are what actually gate the screenshot.
+          });
+        await page.evaluate(
+          async ([loadTimeoutMs]: [number]) => {
+            for (const img of Array.from(document.images)) {
+              if (img.loading === "lazy") img.loading = "eager";
+            }
+            const imageWaits = Array.from(document.images)
+              .filter((img) => !img.complete)
+              .map(
+                (img) =>
+                  new Promise<void>((resolve) => {
+                    img.addEventListener("load", () => resolve(), {
+                      once: true,
+                    });
+                    img.addEventListener(
+                      "error",
+                      () => {
+                        console.warn(`[VR] image failed to load: ${img.src}`);
+                        resolve();
+                      },
+                      { once: true },
+                    );
+                  }),
+              );
+            if (imageWaits.length > 0) {
+              await Promise.race([
+                Promise.all(imageWaits),
+                new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+              ]);
+            }
+            // `img.complete === true` (and the `load` event having fired) only
+            // means bytes arrived — the bitmap may still be undecoded and not
+            // yet committed to the compositor when `page.screenshot()` runs,
+            // producing intermittent low-res / placeholder-bleed diffs in CI.
+            // `HTMLImageElement.decode()` resolves only once the bitmap is
+            // decoded and ready to paint, which is the actual guarantee
+            // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
+            // tablet tile flake) and is intentionally applied to every image,
+            // not just NewsGrid's, so any future story with srcset-driven
+            // tiles inherits the same guarantee.
+            await Promise.allSettled(
+              Array.from(document.images).map((img) =>
+                img.decode().catch(() => {
+                  console.warn(`[VR] image failed to decode: ${img.src}`);
                 }),
+              ),
             );
-          if (imageWaits.length > 0) {
-            await Promise.race([
-              Promise.all(imageWaits),
-              new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-            ]);
+          },
+          [IMAGE_LOAD_TIMEOUT_MS] as [number],
+        );
+        // Wait for two animation frames so that ResizeObserver callbacks
+        // (e.g. useScrollHint in FilterTabs) and the React re-renders they
+        // trigger have been painted before the screenshot is taken.
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve()),
+              );
+            }),
+        );
+
+        // Structural assertions (#2861) scoped to this viewport — real
+        // `scrollWidth` vs `clientWidth` on a fixture, checked on every VR run
+        // regardless of what live data happens to contain that day. See
+        // test/vr/structural-assertions.ts for the mechanism and
+        // structural-assertions.test.ts for why a renamed/removed tag can't
+        // make this silently stop running.
+        for (const assertion of applicableAssertions) {
+          if (assertion.viewport !== name) continue;
+          // Scoped to the story's own rendered root, not the bare document —
+          // `trackSelector` is documented (structural-assertions.ts) as
+          // resolving under `#storybook-root`, so a caller who writes a
+          // generic selector (e.g. '[role="region"]') can't accidentally
+          // match chrome outside the story or trip `trackCount !== 1` against
+          // an autodocs/composed page that renders more than one instance.
+          const track = page
+            .locator("#storybook-root")
+            .locator(assertion.trackSelector);
+          const trackCount = await track.count();
+          if (trackCount !== 1) {
+            throw new Error(
+              `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
+                `its track selector (${assertion.trackSelector}, queried ` +
+                `under #storybook-root) matched ${trackCount} element(s) at ` +
+                `the ${name} viewport, expected exactly 1. ` +
+                `${assertion.description}`,
+            );
           }
-          // `img.complete === true` (and the `load` event having fired) only
-          // means bytes arrived — the bitmap may still be undecoded and not
-          // yet committed to the compositor when `page.screenshot()` runs,
-          // producing intermittent low-res / placeholder-bleed diffs in CI.
-          // `HTMLImageElement.decode()` resolves only once the bitmap is
-          // decoded and ready to paint, which is the actual guarantee
-          // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
-          // tablet tile flake) and is intentionally applied to every image,
-          // not just NewsGrid's, so any future story with srcset-driven
-          // tiles inherits the same guarantee.
-          await Promise.allSettled(
-            Array.from(document.images).map((img) =>
-              img.decode().catch(() => {
-                console.warn(`[VR] image failed to decode: ${img.src}`);
-              }),
-            ),
-          );
-        },
-        [IMAGE_LOAD_TIMEOUT_MS] as [number],
-      );
-      // Wait for two animation frames so that ResizeObserver callbacks
-      // (e.g. useScrollHint in FilterTabs) and the React re-renders they
-      // trigger have been painted before the screenshot is taken.
-      await page.evaluate(
-        () =>
-          new Promise<void>((resolve) => {
-            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-          }),
-      );
+          const { scrollWidth, clientWidth } = await track.evaluate((el) => ({
+            scrollWidth: el.scrollWidth,
+            clientWidth: el.clientWidth,
+          }));
+          if (scrollWidth <= clientWidth) {
+            throw new Error(
+              `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
+                `its scroll track did not overflow at the ${name} viewport ` +
+                `(scrollWidth=${scrollWidth}, clientWidth=${clientWidth}). ` +
+                `${assertion.description}`,
+            );
+          }
+        }
 
-      // Structural assertions (#2861) scoped to this viewport — real
-      // `scrollWidth` vs `clientWidth` on a fixture, checked on every VR run
-      // regardless of what live data happens to contain that day. See
-      // test/vr/structural-assertions.ts for the mechanism and
-      // structural-assertions.test.ts for why a renamed/removed tag can't
-      // make this silently stop running.
-      for (const assertion of applicableAssertions) {
-        if (assertion.viewport !== name) continue;
-        // Scoped to the story's own rendered root, not the bare document —
-        // `trackSelector` is documented (structural-assertions.ts) as
-        // resolving under `#storybook-root`, so a caller who writes a
-        // generic selector (e.g. '[role="region"]') can't accidentally
-        // match chrome outside the story or trip `trackCount !== 1` against
-        // an autodocs/composed page that renders more than one instance.
-        const track = page
-          .locator("#storybook-root")
-          .locator(assertion.trackSelector);
-        const trackCount = await track.count();
-        if (trackCount !== 1) {
-          throw new Error(
-            `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
-              `its track selector (${assertion.trackSelector}, queried ` +
-              `under #storybook-root) matched ${trackCount} element(s) at ` +
-              `the ${name} viewport, expected exactly 1. ` +
-              `${assertion.description}`,
-          );
-        }
-        const { scrollWidth, clientWidth } = await track.evaluate((el) => ({
-          scrollWidth: el.scrollWidth,
-          clientWidth: el.clientWidth,
-        }));
-        if (scrollWidth <= clientWidth) {
-          throw new Error(
-            `[VR] Story "${context.id}" is tagged "${assertion.tag}" but ` +
-              `its scroll track did not overflow at the ${name} viewport ` +
-              `(scrollWidth=${scrollWidth}, clientWidth=${clientWidth}). ` +
-              `${assertion.description}`,
-          );
-        }
+        // `fullPage: true` would extend horizontally past `vp.width` whenever
+        // a story has horizontal overflow (e.g. UI/HorizontalSlider) — and
+        // that overflow can be a few px wider on Apple Silicon than on x86,
+        // producing size-mismatch failures unrelated to actual rendering.
+        // Clip every screenshot to `vp.width` while still using the full
+        // scrollHeight, so baselines are always exactly viewport-width.
+        const fullHeight = await page.evaluate(
+          () => document.documentElement.scrollHeight,
+        );
+        const image = await page.screenshot({
+          animations: "disabled",
+          clip: { x: 0, y: 0, width: vp.width, height: fullHeight },
+        });
+        expect(image).toMatchImageSnapshot({
+          customSnapshotIdentifier: `${context.id}--${name}`,
+          customSnapshotsDir: "test/vr/__snapshots__",
+          customDiffDir: "test/vr/__diff_output__",
+          // 0.05% — tight enough to catch real visual regressions while absorbing
+          // sub-pixel anti-aliasing noise. ARM ↔ x86 drift no longer needs
+          // absorbing locally because the kcvv-vr-bot canonicalises baselines on
+          // CI (KCVV_VR_BOT_TOKEN is configured). Real regressions (diagonal seam
+          // hairlines, layout reflows, gradient breaks) produce >0.05% diffs.
+          failureThreshold: 0.0005,
+          failureThresholdType: "percent",
+          // Without this, `-u` skips any capture that PASSES the threshold, so a
+          // sub-threshold drift leaves the stale PNG on disk (flake ledger row
+          // 20, #3136). Proved by
+          // `pnpm --filter @kcvv/web run vr:accept:sub-threshold`.
+          updatePassedSnapshot: true,
+        });
       }
-
-      // `fullPage: true` would extend horizontally past `vp.width` whenever
-      // a story has horizontal overflow (e.g. UI/HorizontalSlider) — and
-      // that overflow can be a few px wider on Apple Silicon than on x86,
-      // producing size-mismatch failures unrelated to actual rendering.
-      // Clip every screenshot to `vp.width` while still using the full
-      // scrollHeight, so baselines are always exactly viewport-width.
-      const fullHeight = await page.evaluate(
-        () => document.documentElement.scrollHeight,
-      );
-      const image = await page.screenshot({
-        animations: "disabled",
-        clip: { x: 0, y: 0, width: vp.width, height: fullHeight },
-      });
-      expect(image).toMatchImageSnapshot({
-        customSnapshotIdentifier: `${context.id}--${name}`,
-        customSnapshotsDir: "test/vr/__snapshots__",
-        customDiffDir: "test/vr/__diff_output__",
-        // 0.05% — tight enough to catch real visual regressions while absorbing
-        // sub-pixel anti-aliasing noise. ARM ↔ x86 drift no longer needs
-        // absorbing locally because the kcvv-vr-bot canonicalises baselines on
-        // CI (KCVV_VR_BOT_TOKEN is configured). Real regressions (diagonal seam
-        // hairlines, layout reflows, gradient breaks) produce >0.05% diffs.
-        failureThreshold: 0.0005,
-        failureThresholdType: "percent",
-        // Without this, `-u` skips any capture that PASSES the threshold, so a
-        // sub-threshold drift leaves the stale PNG on disk (flake ledger row
-        // 20, #3136). Proved by
-        // `pnpm --filter @kcvv/web run vr:accept:sub-threshold`.
-        updatePassedSnapshot: true,
-      });
+    } catch (err) {
+      captureError = err;
     }
-
     // Covers the capture phase — image/font loads triggered while the
-    // viewport loop above ran. See throwIfDenied above.
-    throwIfDenied(context.id);
+    // viewport loop above ran, and the mouse/page-ready/font-settle calls
+    // before it. See reportDeniedAfterCapture above.
+    reportDeniedAfterCapture(context.id, captureError);
   },
 };
 
