@@ -584,9 +584,24 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               article.articleType === "event"
                 ? firstEventFact?._key
                 : undefined;
-            const bodyInFlow = hoistedEventKey
+            const bodyWithoutHoisted = hoistedEventKey
               ? inFlow.filter((b) => b._key !== hoistedEventKey)
               : inFlow;
+            // PROTOTYPE #2517 — one fake attributed quote, after the 3rd block.
+            const bodyInFlow = [
+              ...bodyWithoutHoisted.slice(0, 3),
+              {
+                _type: "pullQuote",
+                _key: "proto-2517",
+                body: "We hebben geen sterren nodig. We hebben elf jongens die voor elkaar willen lopen, en dat hebben we.",
+                name: "Jan Peeters",
+                role: "Trainer eerste ploeg",
+                photoUrl: article.coverImageUrl?.trim() || undefined,
+                caption: "Peeters na de training van dinsdag",
+                credit: "Foto: KCVV",
+              } as unknown as (typeof bodyWithoutHoisted)[number],
+              ...bodyWithoutHoisted.slice(3),
+            ];
             return (
               // Phase 5.C cream-shell composition: <ArticleBody> ships its
               // own `bg-cream w-full` outer wrapper that's meant to bleed

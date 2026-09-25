@@ -1,4 +1,8 @@
 @import "tailwindcss";
+/* PROTOTYPE #2517 workaround: these files name `text-[length:var(--text-*)]` in prose, which Tailwind emits as invalid CSS and breaks `next dev`. */
+@source not "../../DESIGN.md";
+@source not "../../eslint.config.mjs";
+@source not "../../.impeccable";
 @plugin "@tailwindcss/typography";
 
 /* ========================================================================

@@ -14,6 +14,10 @@ import { PullQuote } from "@/components/design-system/PullQuote";
 import { QASectionDivider } from "@/components/design-system/QASectionDivider";
 import { SubjectAvatar } from "@/components/design-system/SubjectAvatar";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
+import {
+  ProtoPullQuote,
+  type ProtoPullQuoteValue,
+} from "./prototype-2517/ProtoPullQuote";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
 import {
   resolvePairRespondent,
@@ -650,8 +654,13 @@ export function buildComponents({
     },
     listItem: ({ children }) => <li className="pl-1">{children}</li>,
     types: {
+      // PROTOTYPE #2517 — the injected fake block renders the variants.
       pullQuote: ({ value }: { value: PullQuoteBlock }) =>
-        renderPullQuote(value, subjects),
+        value._key === "proto-2517" ? (
+          <ProtoPullQuote value={value as unknown as ProtoPullQuoteValue} />
+        ) : (
+          renderPullQuote(value, subjects)
+        ),
       qaBlock: ({ value }: { value: QaBlockValue }) => (
         <QaBlock value={value} subjects={subjects} />
       ),
