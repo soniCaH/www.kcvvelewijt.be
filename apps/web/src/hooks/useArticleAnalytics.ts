@@ -65,6 +65,11 @@ interface EventCtaClickInput {
   hasTicketUrl: boolean;
 }
 
+interface ArticleCtaClickInput {
+  articleType: string | null | undefined;
+  articleId: string;
+}
+
 export function useArticleAnalytics() {
   const trackArticleView = useCallback(
     ({
@@ -129,10 +134,21 @@ export function useArticleAnalytics() {
     [],
   );
 
+  const trackArticleCtaClick = useCallback(
+    ({ articleType, articleId }: ArticleCtaClickInput) => {
+      trackEvent("article_cta_click", {
+        article_type: normaliseType(articleType),
+        article_id_hashed: hashMemberId(articleId),
+      });
+    },
+    [],
+  );
+
   return {
     trackArticleView,
     trackArticleShare,
     trackRelatedArticleClick,
     trackEventCtaClick,
+    trackArticleCtaClick,
   };
 }

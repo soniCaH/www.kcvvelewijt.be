@@ -98,12 +98,13 @@ All events use `snake_case`. Parameters follow GA4 conventions where possible.
 Driven by the article-detail redesign (#1327 → #1334). Hook: `useArticleAnalytics`.
 Article ids are hashed via `hashMemberId`; no editorial strings flow into params.
 
-| Event Name              | Trigger                        | Parameters                                                              |
-| ----------------------- | ------------------------------ | ----------------------------------------------------------------------- |
-| `article_view`          | Article detail page mount      | `article_type`, `article_id_hashed`, `has_subject`, `subject_kind?`     |
-| `article_share`         | `Delen` button click           | `article_type`, `article_id_hashed`, `channel` ("native" \| "facebook") |
-| `related_article_click` | Related grid card click        | `article_type`, `related_article_id_hashed`, `position`                 |
-| `event_cta_click`       | Event ticket/signup link click | `article_id_hashed`, `event_date`, `has_ticket_url`                     |
+| Event Name              | Trigger                                                             | Parameters                                                              |
+| ----------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `article_view`          | Article detail page mount                                           | `article_type`, `article_id_hashed`, `has_subject`, `subject_kind?`     |
+| `article_share`         | `Delen` button click                                                | `article_type`, `article_id_hashed`, `channel` ("native" \| "facebook") |
+| `related_article_click` | Related grid card click                                             | `article_type`, `related_article_id_hashed`, `position`                 |
+| `event_cta_click`       | Event ticket/signup link click                                      | `article_id_hashed`, `event_date`, `has_ticket_url`                     |
+| `article_cta_click`     | Editor-filled `callToAction` band button click (`data-article-cta`) | `article_type`, `article_id_hashed`                                     |
 
 `article_type` normalises to `announcement` when the Sanity field is null
 (legacy articles). `subject_kind` is only emitted when `has_subject=true`.

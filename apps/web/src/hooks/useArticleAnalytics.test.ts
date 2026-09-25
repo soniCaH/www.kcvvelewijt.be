@@ -153,6 +153,40 @@ describe("useArticleAnalytics", () => {
     });
   });
 
+  describe("article_cta_click", () => {
+    it("fires with article_type and hashed article id", () => {
+      const { result } = renderHook(() => useArticleAnalytics());
+
+      act(() => {
+        result.current.trackArticleCtaClick({
+          articleType: "announcement",
+          articleId: "cta-1",
+        });
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("article_cta_click", {
+        article_type: "announcement",
+        article_id_hashed: hashMemberId("cta-1"),
+      });
+    });
+
+    it("normalises missing articleType to 'announcement'", () => {
+      const { result } = renderHook(() => useArticleAnalytics());
+
+      act(() => {
+        result.current.trackArticleCtaClick({
+          articleType: null,
+          articleId: "cta-2",
+        });
+      });
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("article_cta_click", {
+        article_type: "announcement",
+        article_id_hashed: hashMemberId("cta-2"),
+      });
+    });
+  });
+
   describe("event_cta_click", () => {
     it("fires with hashed article id, event_date, and has_ticket_url", () => {
       const { result } = renderHook(() => useArticleAnalytics());

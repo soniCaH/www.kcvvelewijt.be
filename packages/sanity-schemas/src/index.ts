@@ -24,6 +24,12 @@ export {validateRespondentKey, ALL_RESPONDENTS_KEY} from './validation/responden
 export type {RespondentKeyContext} from './validation/respondent-key'
 export {validateContactFields} from './validation/contact-fields'
 export {validateBannerAspectRatio} from './validation/banner-aspect-ratio'
+export {
+  validateCallToActionRequiredField,
+  validateCallToActionEmphasis,
+  validateCallToActionLink,
+} from './validation/call-to-action'
+export type {CallToActionValue} from './validation/call-to-action'
 export {article} from './article'
 export {articleImage} from './articleImage'
 export {videoBlock} from './videoBlock'

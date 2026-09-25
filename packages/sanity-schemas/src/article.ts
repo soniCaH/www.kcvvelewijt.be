@@ -4,6 +4,12 @@ import {UserIcon} from '@sanity/icons/User'
 import {accentTitleOf} from './blocks/editorial-marks'
 import {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 import {validateSubjectsCount} from './validation/subjects-count'
+import {
+  type CallToActionValue,
+  validateCallToActionRequiredField,
+  validateCallToActionEmphasis,
+  validateCallToActionLink,
+} from './validation/call-to-action'
 
 export const article = defineType({
   name: "article",
@@ -423,6 +429,124 @@ export const article = defineType({
             },
           },
         },
+      ],
+    }),
+    defineField({
+      name: "callToAction",
+      title: "Oproep onderaan",
+      type: "object",
+      group: "inhoud",
+      description:
+        'Optionele oproep die onderaan het artikel verschijnt als een brede band (dezelfde band als op /jeugd en /sponsors) met vraag, tekst en knop. Vul dit alleen in wanneer het artikel de lezer iets concreets vraagt te doen — inschrijven, mailen, tickets kopen. Laat het leeg bij een gewoon nieuwsbericht: een band op elk artikel valt niet meer op en verliest zijn effect.',
+      fields: [
+        defineField({
+          name: "question",
+          title: "Vraag",
+          type: "string",
+          description:
+            'De koptekst van de band, bijv. "Kom eens gratis meetrainen?". Verschijnt groot en cursief.',
+          validation: (r) =>
+            r.custom((value, ctx) =>
+              validateCallToActionRequiredField(
+                ctx.parent as CallToActionValue | undefined,
+                value,
+                "Verplicht zodra je een oproep invult. Zonder vraag heeft de band geen kop.",
+              ),
+            ),
+        }),
+        defineField({
+          name: "emphasis",
+          title: "Accentwoord",
+          type: "string",
+          description:
+            "Optioneel: een woord of korte reeks uit de vraag die cursief geaccentueerd wordt. Moet letterlijk voorkomen in de vraag hierboven.",
+          validation: (r) =>
+            r.custom((value, ctx) =>
+              validateCallToActionEmphasis(
+                ctx.parent as CallToActionValue | undefined,
+                value,
+              ),
+            ),
+        }),
+        defineField({
+          name: "lead",
+          title: "Tekst",
+          type: "string",
+          description:
+            'Eén regel onder de vraag die toelicht wat je vraagt, bijv. "Elke dinsdag en donderdag, iedereen welkom."',
+          validation: (r) =>
+            r.custom((value, ctx) =>
+              validateCallToActionRequiredField(
+                ctx.parent as CallToActionValue | undefined,
+                value,
+                "Verplicht zodra je een oproep invult. Zonder tekst blijft de band leeg onder de vraag.",
+              ),
+            ),
+        }),
+        defineField({
+          name: "buttonLabel",
+          title: "Knoptekst",
+          type: "string",
+          description:
+            'Tekst op de knop, bijv. "Schrijf je in" of "Mail ons".',
+          validation: (r) =>
+            r.custom((value, ctx) =>
+              validateCallToActionRequiredField(
+                ctx.parent as CallToActionValue | undefined,
+                value,
+                "Verplicht zodra je een oproep invult. Zonder knoptekst heeft de knop geen label.",
+              ),
+            ),
+        }),
+        defineField({
+          name: "reference",
+          title: "Interne link",
+          type: "reference",
+          to: [
+            { type: "player" },
+            { type: "staffMember" },
+            { type: "team" },
+            { type: "article" },
+            { type: "page" },
+          ],
+          description:
+            "Kies dit óf vul hieronder een URL in — niet beide. Link naar een speler, staflid, ploeg, artikel of pagina op de site.",
+          options: {
+            // Mirrors the render-time guards: an archived team has no page
+            // any more (#3000), and a player/staffMember without a synced
+            // psdId can't resolve to /spelers or /staf. Keep those out of
+            // the picker rather than letting an editor choose a reference
+            // the site silently drops.
+            filter:
+              '(_type != "team" || archived != true) && ((_type != "player" && _type != "staffMember") || defined(psdId))',
+          },
+          validation: (r) =>
+            r.custom((_value, ctx) =>
+              validateCallToActionLink(
+                ctx.parent as CallToActionValue | undefined,
+                "reference",
+              ),
+            ),
+        }),
+        defineField({
+          name: "href",
+          title: "URL",
+          type: "url",
+          description:
+            "Kies dit óf een interne link hierboven — niet beide. Externe URL (ook een relatief pad zoals /club/word-lid), e-mailadres (mailto:) of telefoonnummer (tel:).",
+          validation: (r) =>
+            r
+              .uri({
+                allowRelative: true,
+                scheme: ["http", "https", "mailto", "tel"],
+              })
+              .custom((_value, ctx) =>
+                validateCallToActionLink(
+                  ctx.parent as CallToActionValue | undefined,
+                  "href",
+                ),
+              ),
+        }),
       ],
     }),
   ],

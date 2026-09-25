@@ -38,6 +38,10 @@ import {
   type VideoBlockValue,
 } from "@/components/article/VideoBlock";
 import { HtmlTableBlock } from "@/components/article/blocks/HtmlTableBlock";
+import {
+  resolveInternalLinkHref,
+  type InternalLinkReference,
+} from "@/lib/utils/resolve-internal-link-href";
 import { renderTextWithEmphasis } from "@/lib/portable-text/renderTextWithEmphasis";
 import type { PortableTextBlockLike } from "@/lib/portable-text/findPullquoteText";
 import {
@@ -162,13 +166,6 @@ interface HtmlTableValue {
   html?: string;
 }
 
-interface InternalLinkReference {
-  _type: string;
-  slug?: string;
-  psdId?: string;
-  archived?: boolean | null;
-}
-
 interface InternalLinkValue {
   reference?: InternalLinkReference;
 }
@@ -221,25 +218,6 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
   // qaBlock / eventFact / videoBlock / unknown types are assumed to
   // render — they own their own empty-state checks.
   return true;
-}
-
-function resolveInternalLinkHref(ref?: InternalLinkReference): string {
-  if (!ref) return "#";
-  switch (ref._type) {
-    case "player":
-      return ref.psdId ? `/spelers/${ref.psdId}` : "#";
-    case "staffMember":
-      return ref.psdId ? `/staf/${ref.psdId}` : "#";
-    case "team":
-      return ref.slug ? `/ploegen/${ref.slug}` : "#";
-    case "article":
-      return ref.slug ? `/nieuws/${ref.slug}` : "#";
-    case "page":
-      // Page documents are served at /club/[slug].
-      return ref.slug ? `/club/${ref.slug}` : "#";
-    default:
-      return "#";
-  }
 }
 
 /**
@@ -775,12 +753,10 @@ export function buildComponents({
         children: ReactNode;
         value?: InternalLinkValue;
       }) => {
-        // A team PSD retired has no page any more (#3000): keep the words,
-        // drop the link. Archived players keep theirs — /spelers still
-        // serves them.
-        const ref = value?.reference;
-        if (ref?._type === "team" && ref.archived === true) return children;
-        const href = resolveInternalLinkHref(ref);
+        // Keep the words, drop the link, whenever the reference can't
+        // resolve — an archived team (#3000) or a missing psdId/slug.
+        const href = resolveInternalLinkHref(value?.reference);
+        if (!href) return children;
         return (
           <Link href={href} data-article-link="internal" className="prose-link">
             {children}
