@@ -11,4 +11,7 @@ async function main() {
   console.log("Staff counts:", JSON.stringify(docs, null, 2));
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});

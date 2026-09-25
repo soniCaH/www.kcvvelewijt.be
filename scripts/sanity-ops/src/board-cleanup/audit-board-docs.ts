@@ -144,4 +144,7 @@ async function main() {
   console.log("\nFull data written to audit-result.json");
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error("Fatal error:", err);
+  process.exit(1);
+});
