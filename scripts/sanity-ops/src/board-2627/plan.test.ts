@@ -24,11 +24,7 @@ function beforeSnapshot(): Snapshot {
   for (const t of TOPIC_UPDATES) {
     topics[t.id] = {
       rev: "r1",
-      primaryRef: t.primaryRef?.from,
-      summary: t.summary?.from,
-      steps: Object.fromEntries(
-        Object.entries(t.steps ?? {}).map(([k, v]) => [k, v.from]),
-      ),
+      values: Object.fromEntries(t.changes.map((c) => [c.path, c.from])),
     };
   }
   return { staff, nodes, topics, pending: [] };
@@ -40,11 +36,7 @@ function afterSnapshot(): Snapshot {
   for (const t of TOPIC_UPDATES) {
     snap.topics[t.id] = {
       rev: "r2",
-      primaryRef: t.primaryRef?.to,
-      summary: t.summary?.to,
-      steps: Object.fromEntries(
-        Object.entries(t.steps ?? {}).map(([k, v]) => [k, v.to]),
-      ),
+      values: Object.fromEntries(t.changes.map((c) => [c.path, c.to])),
     };
   }
   for (const s of STAFF_CREATES)
@@ -93,7 +85,7 @@ describe("preflight", () => {
 
   it("refuses to overwrite a help-topic text that someone edited since", () => {
     const snap = beforeSnapshot();
-    snap.topics["responsibility-vragen-als-afgevaardigde"]!.summary =
+    snap.topics["responsibility-vragen-als-afgevaardigde"]!.values.summary =
       "Edited by hand.";
     expect(preflight(snap)).toEqual([
       'responsibility-vragen-als-afgevaardigde summary is "Edited by hand.", expected the old or the new text',
@@ -123,14 +115,6 @@ describe("the plan", () => {
     expect(placed.filter((id) => !(id in STAFF))).toEqual([]);
   });
 
-  it("takes Rudy Bautmans off gerechtigd correspondent, and keeps him nowhere else", () => {
-    const gc = NODE_UPDATES.find(
-      (n) => n.id === "organigramNode-gerechtelijk-correspondent",
-    );
-    expect(gc?.members).toEqual(["staffMember-psd-245", "staffMember-psd-823"]);
-    expect("staffMember-psd-160" in STAFF).toBe(false);
-  });
-
   it("puts nobody in a position who left it", () => {
     const placed = new Set(
       [...NODE_UPDATES, ...NODE_CREATES].flatMap((n) => n.members),
@@ -140,6 +124,7 @@ describe("the plan", () => {
       "staffMember-psd-10049", // Dennis Thyssens
       "staffMember-psd-6551", // Jurgen Vergalle
       "staffMember-psd-5640", // Dieter Van Dionant
+      "staffMember-psd-160", // Rudy Bautmans, off GC (stays Voorzitter, which this plan leaves alone)
       "staffMember-psd-10928", // Igor Michiels
       "staffMember-psd-10927", // Mike Vermoes
     ];

@@ -199,68 +199,79 @@ export const NODE_CREATES: NodeCreate[] = [
   },
 ];
 
-interface Change {
+/** One help-topic field change. `path` is the Sanity patch path itself. */
+export interface TopicChange {
+  path: string;
   from: string;
   to: string;
 }
 
 export interface TopicUpdate {
   id: string;
-  primaryRef?: Change;
-  summary?: Change;
-  /** Step `_key` → its description. */
-  steps?: Record<string, Change>;
+  changes: TopicChange[];
 }
 
-const STEP = "neem-contact-op-met-";
+export const PRIMARY_CONTACT = "primaryContact.organigramNode._ref";
+export const SUMMARY = "summary";
+export const stepPath = (key: string) => `steps[_key=="${key}"].description`;
+
+const STEP = stepPath("neem-contact-op-met-");
 
 export const TOPIC_UPDATES: TopicUpdate[] = [
   {
     id: "responsibility-kantinedienst-trainingen",
-    summary: {
-      from: "Neem contact op met de verantwoordelijke Kantinedienst Trainingen.",
-      to: "Neem contact op met de verantwoordelijke Kantinedienst.",
-    },
-    steps: {
-      [STEP]: {
+    changes: [
+      {
+        path: SUMMARY,
+        from: "Neem contact op met de verantwoordelijke Kantinedienst Trainingen.",
+        to: "Neem contact op met de verantwoordelijke Kantinedienst.",
+      },
+      {
+        path: STEP,
         from: "Neem contact op met de verantwoordelijke Kantinedienst Trainingen",
         to: "Neem contact op met de verantwoordelijke Kantinedienst",
       },
-    },
+    ],
   },
   {
     id: "responsibility-kantinedienst-wedstrijden",
-    primaryRef: {
-      from: "organigramNode-materiaal-kantinedienst-wedstrijden",
-      to: "organigramNode-kantinedienst-trainingen",
-    },
-    summary: {
-      from: "Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden.",
-      to: "Neem contact op met de verantwoordelijke Kantinedienst.",
-    },
-    steps: {
-      [STEP]: {
+    changes: [
+      {
+        path: PRIMARY_CONTACT,
+        from: "organigramNode-materiaal-kantinedienst-wedstrijden",
+        to: "organigramNode-kantinedienst-trainingen",
+      },
+      {
+        path: SUMMARY,
+        from: "Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden.",
+        to: "Neem contact op met de verantwoordelijke Kantinedienst.",
+      },
+      {
+        path: STEP,
         from: "Neem contact op met de verantwoordelijke Materiaal & Kantinedienst Wedstrijden",
         to: "Neem contact op met de verantwoordelijke Kantinedienst",
       },
-    },
+    ],
   },
   {
     id: "responsibility-vragen-als-afgevaardigde",
-    primaryRef: {
-      from: "organigramNode-jeugdsecretaris",
-      to: "organigramNode-aanspreekpunt-afgevaardigden",
-    },
-    summary: {
-      from: "Neem als afgevaardigde contact op met de Jeugdsecretaris voor al je vragen rond wedstrijdadministratie.",
-      to: "Neem als afgevaardigde contact op met het Aanspreekpunt Afgevaardigden voor al je vragen rond wedstrijdadministratie.",
-    },
-    steps: {
-      [STEP]: {
+    changes: [
+      {
+        path: PRIMARY_CONTACT,
+        from: "organigramNode-jeugdsecretaris",
+        to: "organigramNode-aanspreekpunt-afgevaardigden",
+      },
+      {
+        path: SUMMARY,
+        from: "Neem als afgevaardigde contact op met de Jeugdsecretaris voor al je vragen rond wedstrijdadministratie.",
+        to: "Neem als afgevaardigde contact op met het Aanspreekpunt Afgevaardigden voor al je vragen rond wedstrijdadministratie.",
+      },
+      {
+        path: STEP,
         from: "Neem contact op met de Jeugdsecretaris voor vragen rond wedstrijdbladen, scheidsrechters en afgevaardigdentaken",
         to: "Neem contact op met het Aanspreekpunt Afgevaardigden voor vragen rond wedstrijdbladen, scheidsrechters en afgevaardigdentaken",
       },
-    },
+    ],
   },
 ];
 
@@ -268,15 +279,14 @@ export const TOPIC_UPDATES: TopicUpdate[] = [
 export interface Snapshot {
   staff: Record<string, { name: string; archived?: boolean }>;
   /** Every existing node this plan updates, creates or hangs a node under. */
-  nodes: Record<string, { rev: string }>;
+  nodes: Record<
+    string,
+    { rev: string; title?: string; memberNames?: string[] }
+  >;
+  /** Each topic's current value for every path in its `changes`. */
   topics: Record<
     string,
-    {
-      rev: string;
-      primaryRef?: string;
-      summary?: string;
-      steps: Record<string, string | undefined>;
-    }
+    { rev: string; values: Record<string, string | undefined> }
   >;
   /** Draft and release-version ids of any document this plan writes. */
   pending: string[];
@@ -289,6 +299,11 @@ export const TOUCHED_IDS = [
   ...NODE_CREATES.map((n) => n._id),
   ...TOPIC_UPDATES.map((t) => t.id),
 ];
+
+/** True when every field of the topic already holds its new value. */
+export function topicDone(t: TopicUpdate, snap: Snapshot): boolean {
+  return t.changes.every((c) => snap.topics[t.id]?.values[c.path] === c.to);
+}
 
 /**
  * Reasons not to write, or an empty list. Accepts both the before and the
@@ -329,21 +344,13 @@ export function preflight(snap: Snapshot): string[] {
       errors.push(`${t.id} does not exist`);
       continue;
     }
-    const check = (
-      field: string,
-      value: string | undefined,
-      change: Change,
-    ) => {
-      if (value !== change.from && value !== change.to) {
+    for (const c of t.changes) {
+      const value = current.values[c.path];
+      if (value !== c.from && value !== c.to) {
         errors.push(
-          `${t.id} ${field} is "${value}", expected the old or the new text`,
+          `${t.id} ${c.path} is "${value}", expected the old or the new text`,
         );
       }
-    };
-    if (t.primaryRef) check("primaryContact", current.primaryRef, t.primaryRef);
-    if (t.summary) check("summary", current.summary, t.summary);
-    for (const [key, change] of Object.entries(t.steps ?? {})) {
-      check(`step ${key}`, current.steps[key], change);
     }
   }
 

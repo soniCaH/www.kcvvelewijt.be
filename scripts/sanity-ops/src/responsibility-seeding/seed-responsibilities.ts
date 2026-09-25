@@ -1272,22 +1272,7 @@ async function preflight() {
 
 // ─── Seeding ────────────────────────────────────────────────────────────────
 
-function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T> {
-  const result: Partial<T> = { ...obj };
-  for (const key of keys) delete result[key];
-  return result;
-}
-
 async function seed() {
-  // Superseded by src/board-2627 (#3184): this seed still holds the 2025
-  // board, and re-running it would put that back over the 2026-2027 update.
-  if (process.env.ALLOW_STALE_SEED !== "yes") {
-    console.error(
-      "Refusing: this seed predates the 2026-2027 board update (#3184) and would undo it.\n" +
-        "Update its data first, then run with ALLOW_STALE_SEED=yes.",
-    );
-    process.exit(1);
-  }
   if (
     dataset === "production" &&
     process.env.CONFIRM_PRODUCTION_SEED !== "yes"
@@ -1303,8 +1288,9 @@ async function seed() {
 
   const tx = client.transaction();
   for (const doc of responsibilities) {
+    // Create-only: a re-run fills in a missing topic and never resets one
+    // that was edited since (#3184).
     tx.createIfNotExists(doc);
-    tx.patch(doc._id, (p) => p.set(omit(doc, ["_id", "_type"])));
   }
   await tx.commit();
   for (const doc of responsibilities) {
