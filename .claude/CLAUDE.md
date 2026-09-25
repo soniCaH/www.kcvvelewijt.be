@@ -4,20 +4,20 @@
 
 Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 
-| App/Package         | Path                       | Host               | Test layers                                                                             |
-| ------------------- | -------------------------- | ------------------ | --------------------------------------------------------------------------------------- |
-| Next.js web         | `apps/web/`                | Vercel             | Static, Build, Vitest, Storybook VR[^vr], E2E. Accessibility ownership: **open**[^a11y] |
-| Sanity Studio       | `apps/studio/`             | sanity.io          | Static (lint), Build[^studio]                                                           |
-| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | None[^studio-staging]                                                                   |
-| Sanity schemas      | `packages/sanity-schemas/` | (library)          | Static[^sanity-schemas]                                                                 |
-| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Static, Vitest                                                                          |
-| API contract        | `packages/api-contract/`   | (library)          | Static, Build[^api-contract]                                                            |
-| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]                                           |
-| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                          |
+| App/Package         | Path                       | Host               | Test layers                                                                               |
+| ------------------- | -------------------------- | ------------------ | ----------------------------------------------------------------------------------------- |
+| Next.js web         | `apps/web/`                | Vercel             | Static, Build, Vitest, Storybook VR[^vr] (owns accessibility, not yet gating[^a11y]), E2E |
+| Sanity Studio       | `apps/studio/`             | sanity.io          | Static (lint), Build[^studio]                                                             |
+| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | None[^studio-staging]                                                                     |
+| Sanity schemas      | `packages/sanity-schemas/` | (library)          | Static[^sanity-schemas]                                                                   |
+| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Static, Vitest                                                                            |
+| API contract        | `packages/api-contract/`   | (library)          | Static, Build[^api-contract]                                                              |
+| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]                                             |
+| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                            |
 
 [^vr]: Storybook VR runs pixel diffs at 3 viewports via `test-storybook`, scoped to `vr`-tagged stories only (`--includeTags vr --excludeTags vr-skip`, `apps/web/package.json`'s `vr:run`) — 183 of 208 story files carry the `vr` tag; the 21 `Pages/*` stories carry none and are never visited (consistent with `apps/web/CLAUDE.md`'s "not VR-tested" note). Runtime geometry (`play`) still lives in `scroll-arrows.spec.ts`/`section-nav.spec.ts` pending [#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146) — do not describe that move as done.
 
-[^a11y]: **Authoritative text — `apps/web/CLAUDE.md` points here rather than repeating these numbers, so the two copies cannot drift.** `@storybook/addon-a11y` (`.storybook/main.ts`) runs inside the same `vr`-tagged run described in the note above — not every story, only the 183 of 208 story files carrying the `vr` tag — measured at 264 violation blocks / 288 violations per run, identical across sampled green runs, and it gates nothing. **Whether a layer owns accessibility, or it is switched off on purpose, is an open question** — see the comment on [#3154](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3154).
+[^a11y]: **Authoritative text — `apps/web/CLAUDE.md` points here rather than repeating these numbers, so the two copies cannot drift.** `@storybook/addon-a11y` (`.storybook/main.ts`) runs inside the same `vr`-tagged run described in the note above — not every story, only the 183 of 208 story files carrying the `vr` tag — measured at 264 violation blocks / 288 violations per run, identical across sampled green runs. **Decided by the owner on 2026-09-25: Storybook VR owns accessibility.** It does not gate yet — [#3188](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3188) clears the 288 existing violations and then fails the job on any new one.
 
 [^studio]: Config only (`sanity.config.ts`, `structure.ts`, `sanity.cli.ts`) plus migrations. No `type-check` script exists on this package itself, but `turbo build --filter=@kcvv/studio` (`sanity build`) runs in CI, as does the "Sanity types in sync" gate (`sanity schema extract && sanity typegen generate`, diffed against the committed types). Two untested surfaces remain, neither closed by build/lint: 11 of 26 migrations still hold logic in place (435 lines, closes with [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153)), and `apps/studio/scripts/` — 4 files, 817 lines (`migrate-drupal-node.ts`, `remap-qa-respondent-keys.ts`, `seed-e2e-fixtures.ts`, `seed-interview-qa-pairs.ts`) — which #3153 does **not** cover.
 
