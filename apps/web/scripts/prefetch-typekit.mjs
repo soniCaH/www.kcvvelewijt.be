@@ -26,14 +26,22 @@
 // with no prior cache to fall back to, it fails loudly instead of silently
 // producing an empty/partial cache the test-runner would then have to
 // explain away as "denied" requests.
+//
+// Everything is written to a staging directory first and only moved into
+// place (a single directory rename) once every fetch above has succeeded —
+// writing straight into the published cache would let a font-file fetch
+// that fails PARTWAY through leave `typekit.css` (already overwritten)
+// referencing faces the manifest/disk never actually got, a corrupted state
+// worse than just keeping the previous run's cache untouched.
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = join(__dirname, "../.storybook/.typekit-cache");
-const FONTS_DIR = join(CACHE_DIR, "fonts");
+const STAGING_DIR = join(__dirname, "../.storybook/.typekit-cache.staging");
+const STAGING_FONTS_DIR = join(STAGING_DIR, "fonts");
 const MANIFEST_PATH = join(CACHE_DIR, "manifest.json");
 
 const KIT_CSS_URL = "https://use.typekit.net/cvo5raz.css";
@@ -101,7 +109,14 @@ function extractWoff2Urls(css) {
 }
 
 async function main() {
-  await mkdir(FONTS_DIR, { recursive: true });
+  // A crashed previous run may have left a partial staging dir behind —
+  // start clean rather than risk mixing this run's files with stale ones.
+  await rm(STAGING_DIR, { recursive: true, force: true });
+  await mkdir(STAGING_FONTS_DIR, { recursive: true });
+  // Read from whatever is currently PUBLISHED (CACHE_DIR) — untouched until
+  // the rename at the end, so it stays available as this run's fallback
+  // source for the whole staging phase, and stays exactly as it is if this
+  // run fails before publishing.
   const existingManifest = loadExistingManifest();
   const manifest = {};
 
@@ -120,7 +135,7 @@ async function main() {
   // makes.
   const withoutImport = kitCss.replace(/@import\s+url\([^)]*\);?\s*/g, "");
 
-  await writeFile(join(CACHE_DIR, "typekit.css"), withoutImport);
+  await writeFile(join(STAGING_DIR, "typekit.css"), withoutImport);
   manifest[KIT_CSS_URL] = { file: "typekit.css", contentType: "text/css" };
 
   const woff2Urls = extractWoff2Urls(withoutImport);
@@ -131,12 +146,20 @@ async function main() {
         existingManifest,
         asBuffer: true,
       });
-      await writeFile(join(FONTS_DIR, fileName), body);
+      await writeFile(join(STAGING_FONTS_DIR, fileName), body);
       manifest[url] = { file: `fonts/${fileName}`, contentType: "font/woff2" };
     }),
   );
 
-  await writeFile(MANIFEST_PATH, JSON.stringify(manifest, null, 2));
+  await writeFile(join(STAGING_DIR, "manifest.json"), JSON.stringify(manifest, null, 2));
+
+  // Publish: only reached once every fetch above has succeeded (a thrown
+  // error anywhere above skips straight to main().catch() below, leaving
+  // CACHE_DIR — the previously-published cache — completely untouched).
+  // `rm` then `rename` rather than a single rename because POSIX rename()
+  // refuses to replace a non-empty directory.
+  await rm(CACHE_DIR, { recursive: true, force: true });
+  await rename(STAGING_DIR, CACHE_DIR);
 
   console.log(
     `[prefetch-typekit] cached typekit.css + ${woff2Urls.length} font file(s) to ${CACHE_DIR}`,

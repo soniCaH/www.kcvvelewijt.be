@@ -50,10 +50,12 @@ next-env.d.ts
 *storybook.log
 storybook-static
 
-# Adobe Typekit, prefetched once per Storybook build (#3137) — its terms
-# forbid self-hosting, so the fetched CSS + font files never get committed.
-# See apps/web/scripts/prefetch-typekit.mjs.
+# Adobe Typekit, prefetched once per VR run (#3137) — its terms forbid
+# self-hosting, so the fetched CSS + font files never get committed. The
+# `.staging` sibling is the temp dir prefetch-typekit.mjs builds the next
+# cache in before an atomic rename publishes it — see that script.
 apps/web/.storybook/.typekit-cache/
+apps/web/.storybook/.typekit-cache.staging/
 
 # claude
 .claude/settings.local.json
