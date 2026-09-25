@@ -182,7 +182,7 @@ Three independent test layers, each owning a specific concern. Don't blur them �
 
 `Pages/*` Storybook stories exist as design references but are **not** VR-tested — page composition correctness is the e2e suite's job. See `docs/prd/page-level-testing-rework.md` for the rationale.
 
-`@storybook/addon-a11y` (registered in `.storybook/main.ts`) is an interactive, authoring-time aid only: no workflow runs it, and it gates nothing.
+`@storybook/addon-a11y` (registered in `.storybook/main.ts`) **does run** — on every story, inside the visual-regression job — producing 264 violation blocks / 288 violations per run, identical across sampled green runs. It gates nothing today. Whether a layer owns accessibility or it is switched off on purpose is an open question; see root `.claude/CLAUDE.md`'s workspace table.
 
 ### Import the module under test at module scope
 

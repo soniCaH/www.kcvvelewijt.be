@@ -4,16 +4,28 @@
 
 Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 
-| App/Package         | Path                       | Host               |
-| ------------------- | -------------------------- | ------------------ |
-| Next.js web         | `apps/web/`                | Vercel             |
-| Sanity Studio       | `apps/studio/`             | sanity.io          |
-| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          |
-| Sanity schemas      | `packages/sanity-schemas/` | (library)          |
-| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          |
-| API contract        | `packages/api-contract/`   | (library)          |
-| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers |
-| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      |
+| App/Package         | Path                       | Host               | Test layers                                     |
+| ------------------- | -------------------------- | ------------------ | ----------------------------------------------- |
+| Next.js web         | `apps/web/`                | Vercel             | Static, Build, Vitest, Storybook VR[^a11y], E2E |
+| Sanity Studio       | `apps/studio/`             | sanity.io          | Static (lint only)[^studio]                     |
+| Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | None[^studio-staging]                           |
+| Sanity schemas      | `packages/sanity-schemas/` | (library)          | None[^sanity-schemas]                           |
+| Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Static, Vitest                                  |
+| API contract        | `packages/api-contract/`   | (library)          | Vitest[^api-contract]                           |
+| BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]   |
+| Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                  |
+
+[^a11y]: Storybook VR runs pixel diffs at 3 viewports via `test-storybook`; runtime geometry (`play`) still lives in `scroll-arrows.spec.ts`/`section-nav.spec.ts` pending [#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146) — do not describe that move as done. `@storybook/addon-a11y` (`.storybook/main.ts`) also runs on every story inside this job (264 violation blocks / 288 violations per run, identical across sampled green runs) but gates nothing. **Whether a layer owns accessibility, or it is switched off on purpose, is an open question** — see the comment on [#3154](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3154).
+
+[^studio]: Config only (`sanity.config.ts`, `structure.ts`, `sanity.cli.ts`) plus migrations — no `type-check`/`test` script exists, so nothing beyond ESLint runs. 11 of 26 migrations still hold logic in place, untested (435 lines); "no test layer applies" is only fully true once [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) clears that backlog.
+
+[^studio-staging]: Same shape as `apps/studio` (config + migrations, same untested-migration caveat via [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153)), but its own `lint` script is not invoked anywhere in `ci.yml` — [#3118](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3118).
+
+[^sanity-schemas]: 4 195 lines, 0 tests, not referenced anywhere in `ci.yml` — not even its own `type-check` script runs there. Schema declarations are untested by design; `validation/`, `preview/` and `blocks/` (629 lines of pure logic) are a named gap with no open ticket yet.
+
+[^api-contract]: No `lint` script exists ([#3119](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3119)); `type-check` is not invoked directly in CI but runs transitively as a build dependency of `@kcvv/web`'s type-check/build (`turbo.json`'s `^build`).
+
+[^api]: Cache/TTL/single-flight semantics run in real workerd (`vitest.workers.config.ts`, `@cloudflare/vitest-plugin`); pure logic stays on the node pool (`vitest.node.config.ts`). Schema round-trip and cache-semantics work already shipped ([#3144](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3144), [#3145](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3145)).
 
 App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `packages/api-contract/CLAUDE.md`
 
