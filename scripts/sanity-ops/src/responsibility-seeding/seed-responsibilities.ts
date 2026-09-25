@@ -1279,6 +1279,15 @@ function omit<T extends object>(obj: T, keys: (keyof T)[]): Partial<T> {
 }
 
 async function seed() {
+  // Superseded by src/board-2627 (#3184): this seed still holds the 2025
+  // board, and re-running it would put that back over the 2026-2027 update.
+  if (process.env.ALLOW_STALE_SEED !== "yes") {
+    console.error(
+      "Refusing: this seed predates the 2026-2027 board update (#3184) and would undo it.\n" +
+        "Update its data first, then run with ALLOW_STALE_SEED=yes.",
+    );
+    process.exit(1);
+  }
   if (
     dataset === "production" &&
     process.env.CONFIRM_PRODUCTION_SEED !== "yes"

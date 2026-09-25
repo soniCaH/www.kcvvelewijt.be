@@ -17,11 +17,13 @@ function beforeSnapshot(): Snapshot {
   for (const s of STAFF_CREATES) delete staff[s._id];
 
   const nodes: Snapshot["nodes"] = {};
-  for (const n of NODE_UPDATES) nodes[n.id] = { title: "old title" };
+  for (const n of NODE_UPDATES) nodes[n.id] = { rev: "r1" };
+  for (const n of NODE_CREATES) nodes[n.parent] = { rev: "r1" };
 
   const topics: Snapshot["topics"] = {};
   for (const t of TOPIC_UPDATES) {
     topics[t.id] = {
+      rev: "r1",
       primaryRef: t.primaryRef?.from,
       summary: t.summary?.from,
       steps: Object.fromEntries(
@@ -29,7 +31,7 @@ function beforeSnapshot(): Snapshot {
       ),
     };
   }
-  return { staff, nodes, topics, drafts: [] };
+  return { staff, nodes, topics, pending: [] };
 }
 
 /** The same dataset after a successful run: every topic field holds its new value. */
@@ -37,6 +39,7 @@ function afterSnapshot(): Snapshot {
   const snap = beforeSnapshot();
   for (const t of TOPIC_UPDATES) {
     snap.topics[t.id] = {
+      rev: "r2",
       primaryRef: t.primaryRef?.to,
       summary: t.summary?.to,
       steps: Object.fromEntries(
@@ -46,7 +49,7 @@ function afterSnapshot(): Snapshot {
   }
   for (const s of STAFF_CREATES)
     snap.staff[s._id] = { name: `${s.firstName} ${s.lastName}` };
-  for (const n of NODE_CREATES) snap.nodes[n._id] = { title: n.title };
+  for (const n of NODE_CREATES) snap.nodes[n._id] = { rev: "r1" };
   return snap;
 }
 
@@ -97,11 +100,19 @@ describe("preflight", () => {
     ]);
   });
 
-  it("refuses while a touched document has an unpublished draft", () => {
+  it("refuses while a touched document has a draft or a release version", () => {
     const snap = beforeSnapshot();
-    snap.drafts = ["drafts.organigramNode-kledij"];
+    snap.pending = ["versions.rABC.organigramNode-kledij"];
     expect(preflight(snap)).toEqual([
-      "drafts.organigramNode-kledij exists — publish or discard it in Studio first",
+      "versions.rABC.organigramNode-kledij exists — publish or discard it in Studio first",
+    ]);
+  });
+
+  it("refuses when a new position's parent does not exist", () => {
+    const snap = beforeSnapshot();
+    delete snap.nodes["organigramNode-jeugdvoorzitter"];
+    expect(preflight(snap)).toEqual([
+      "parent organigramNode-jeugdvoorzitter does not exist",
     ]);
   });
 });
@@ -110,6 +121,14 @@ describe("the plan", () => {
   it("only places people it knows by name", () => {
     const placed = [...NODE_UPDATES, ...NODE_CREATES].flatMap((n) => n.members);
     expect(placed.filter((id) => !(id in STAFF))).toEqual([]);
+  });
+
+  it("takes Rudy Bautmans off gerechtigd correspondent, and keeps him nowhere else", () => {
+    const gc = NODE_UPDATES.find(
+      (n) => n.id === "organigramNode-gerechtelijk-correspondent",
+    );
+    expect(gc?.members).toEqual(["staffMember-psd-245", "staffMember-psd-823"]);
+    expect("staffMember-psd-160" in STAFF).toBe(false);
   });
 
   it("puts nobody in a position who left it", () => {

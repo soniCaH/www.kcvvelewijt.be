@@ -267,20 +267,22 @@ export const TOPIC_UPDATES: TopicUpdate[] = [
 /** What the dataset holds right now, as far as this plan cares. */
 export interface Snapshot {
   staff: Record<string, { name: string; archived?: boolean }>;
-  nodes: Record<string, { title: string }>;
+  /** Every existing node this plan updates, creates or hangs a node under. */
+  nodes: Record<string, { rev: string }>;
   topics: Record<
     string,
     {
+      rev: string;
       primaryRef?: string;
       summary?: string;
       steps: Record<string, string | undefined>;
     }
   >;
-  /** Draft ids of any document this plan writes. */
-  drafts: string[];
+  /** Draft and release-version ids of any document this plan writes. */
+  pending: string[];
 }
 
-/** Every id this plan writes, for the draft check. */
+/** Every id this plan writes, for the pending-change check. */
 export const TOUCHED_IDS = [
   ...STAFF_CREATES.map((s) => s._id),
   ...NODE_UPDATES.map((n) => n.id),
@@ -297,8 +299,8 @@ export function preflight(snap: Snapshot): string[] {
   const errors: string[] = [];
   const created = new Set(STAFF_CREATES.map((s) => s._id));
 
-  for (const draft of snap.drafts) {
-    errors.push(`${draft} exists — publish or discard it in Studio first`);
+  for (const id of snap.pending) {
+    errors.push(`${id} exists — publish or discard it in Studio first`);
   }
 
   for (const [id, expected] of Object.entries(STAFF)) {
@@ -314,6 +316,11 @@ export function preflight(snap: Snapshot): string[] {
 
   for (const n of NODE_UPDATES) {
     if (!snap.nodes[n.id]) errors.push(`${n.id} does not exist`);
+  }
+  // parentNode is a weak reference, so a missing parent would not fail the
+  // write — the new position would just fall out of the tree.
+  for (const parent of new Set(NODE_CREATES.map((n) => n.parent))) {
+    if (!snap.nodes[parent]) errors.push(`parent ${parent} does not exist`);
   }
 
   for (const t of TOPIC_UPDATES) {

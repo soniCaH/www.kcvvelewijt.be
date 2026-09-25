@@ -19,18 +19,21 @@ import {
   TOUCHED_IDS,
   preflight,
   type Snapshot,
+  type TopicUpdate,
 } from "./plan";
 
 const EXECUTE = process.argv.includes("--execute");
 
 interface NodeRow {
   _id: string;
+  _rev: string;
   title: string;
-  members: string[] | null;
+  members: Array<{ _id: string; name: string }> | null;
 }
 
 interface TopicRow {
   _id: string;
+  _rev: string;
   primaryRef?: string;
   summary?: string;
   steps: Array<{ _key: string; description?: string }> | null;
@@ -44,8 +47,9 @@ async function readSnapshot() {
   const nodeIds = [
     ...NODE_UPDATES.map((n) => n.id),
     ...NODE_CREATES.map((n) => n._id),
+    ...NODE_CREATES.map((n) => n.parent),
   ];
-  const [staffRows, nodeRows, topicRows, drafts] = await Promise.all([
+  const [staffRows, nodeRows, topicRows, pending] = await Promise.all([
     client.fetch<
       Array<{
         _id: string;
@@ -58,22 +62,23 @@ async function readSnapshot() {
       { ids: Object.keys(STAFF) },
     ),
     client.fetch<NodeRow[]>(
-      `*[_type == "organigramNode" && _id in $ids]{ _id, title, "members": members[]._ref }`,
-      {
-        ids: nodeIds,
-      },
+      `*[_type == "organigramNode" && _id in $ids]{ _id, _rev, title, "members": members[]->{ _id, "name": firstName + " " + lastName } }`,
+      { ids: nodeIds },
     ),
     client.fetch<TopicRow[]>(
-      `*[_type == "responsibility" && _id in $ids]{ _id, "primaryRef": primaryContact.organigramNode._ref, summary, "steps": steps[]{ _key, description } }`,
+      `*[_type == "responsibility" && _id in $ids]{ _id, _rev, "primaryRef": primaryContact.organigramNode._ref, summary, "steps": steps[]{ _key, description } }`,
       { ids: TOPIC_UPDATES.map((t) => t.id) },
     ),
-    // Draft-aware on purpose: a pending draft of a document written here would
-    // be published over this update later, so its existence must be seen.
-    draftAwareClient.fetch<string[]>(`*[_id in $ids]._id`, {
-      ids: TOUCHED_IDS.map((id) => `drafts.${id}`),
-    }),
+    // Draft-aware on purpose: a pending draft or content-release version of a
+    // document written here would be published over this update later, so its
+    // existence must be seen.
+    draftAwareClient.fetch<string[]>(
+      `*[_id in $drafts || _id in path("versions.**")]._id`,
+      { drafts: TOUCHED_IDS.map((id) => `drafts.${id}`) },
+    ),
   ]);
 
+  const touched = new Set(TOUCHED_IDS);
   const snap: Snapshot = {
     staff: Object.fromEntries(
       staffRows.map((s) => [
@@ -81,11 +86,12 @@ async function readSnapshot() {
         { name: `${s.firstName} ${s.lastName}`, archived: s.archived ?? false },
       ]),
     ),
-    nodes: Object.fromEntries(nodeRows.map((n) => [n._id, { title: n.title }])),
+    nodes: Object.fromEntries(nodeRows.map((n) => [n._id, { rev: n._rev }])),
     topics: Object.fromEntries(
       topicRows.map((t) => [
         t._id,
         {
+          rev: t._rev,
           primaryRef: t.primaryRef,
           summary: t.summary,
           steps: Object.fromEntries(
@@ -94,33 +100,32 @@ async function readSnapshot() {
         },
       ]),
     ),
-    drafts,
+    // drafts.<id> is already scoped; versions.<release>.<id> is matched on the id.
+    pending: pending.filter(
+      (id) =>
+        id.startsWith("drafts.") ||
+        touched.has(id.split(".").slice(2).join(".")),
+    ),
   };
   return { snap, nodeRows };
 }
 
-/** Names for the dry-run print. Unknown ids — people leaving — are looked up once. */
-async function nameLookup(
-  nodeRows: NodeRow[],
-): Promise<(id: string) => string> {
-  const leaving = [...new Set(nodeRows.flatMap((n) => n.members ?? []))].filter(
-    (id) => !(id in STAFF),
+/** True when every field of the topic already holds its new value. */
+function topicDone(t: TopicUpdate, snap: Snapshot): boolean {
+  const cur = snap.topics[t.id];
+  return (
+    (!t.primaryRef || cur?.primaryRef === t.primaryRef.to) &&
+    (!t.summary || cur?.summary === t.summary.to) &&
+    Object.entries(t.steps ?? {}).every(([k, c]) => cur?.steps[k] === c.to)
   );
-  const rows = await client.fetch<
-    Array<{ _id: string; firstName: string; lastName: string }>
-  >(`*[_id in $ids]{ _id, firstName, lastName }`, { ids: leaving });
-  const names: Record<string, string> = { ...STAFF };
-  for (const r of rows) names[r._id] = `${r.firstName} ${r.lastName}`;
-  return (id) => names[id] ?? id;
 }
 
-function printPlan(
-  snap: Snapshot,
-  nodeRows: NodeRow[],
-  name: (id: string) => string,
-) {
+function printPlan(snap: Snapshot, nodeRows: NodeRow[]) {
   const current = new Map(nodeRows.map((n) => [n._id, n]));
-  const list = (ids: string[]) => (ids.length ? ids.map(name).join(", ") : "—");
+  const planned = (ids: string[]) =>
+    ids.length ? ids.map((id) => STAFF[id]).join(", ") : "—";
+  const now = (row?: NodeRow) =>
+    row?.members?.length ? row.members.map((m) => m.name).join(", ") : "—";
 
   console.log("\nPeople to create:");
   for (const s of STAFF_CREATES) {
@@ -138,36 +143,41 @@ function printPlan(
         : (row?.title ?? n.id);
     const active = n.active === false ? "  [deactivated]" : "";
     console.log(
-      `  ${title}${active}\n      ${list(row?.members ?? [])}\n    → ${list(n.members)}`,
+      `  ${title}${active}\n      ${now(row)}\n    → ${planned(n.members)}`,
     );
   }
 
-  console.log("\nPositions to create:");
+  console.log("\nPositions to create (an existing one is reset to this):");
   for (const n of NODE_CREATES) {
+    const row = current.get(n._id);
     console.log(
-      `  ${current.has(n._id) ? "exists " : "create "} ${n.title} (${n.department}) → ${list(n.members)}`,
+      `  ${row ? "exists " : "create "} ${n.title} (${n.department})` +
+        (row ? `\n      ${now(row)}` : "") +
+        `\n    → ${planned(n.members)}`,
     );
   }
 
   console.log("\nHelp topics:");
   for (const t of TOPIC_UPDATES) {
-    const done = snap.topics[t.id]?.summary === t.summary?.to;
-    console.log(`  ${t.id}${done ? "  (already applied)" : ""}`);
+    console.log(`  ${t.id}${topicDone(t, snap) ? "  (already applied)" : ""}`);
     if (t.primaryRef)
       console.log(`      contact: ${t.primaryRef.from} → ${t.primaryRef.to}`);
     if (t.summary) console.log(`      summary: "${t.summary.to}"`);
+    for (const [key, change] of Object.entries(t.steps ?? {})) {
+      console.log(`      step ${key}: "${change.to}"`);
+    }
   }
 }
 
-async function write() {
+async function write(snap: Snapshot) {
   const tx = client.transaction();
 
   for (const s of STAFF_CREATES) tx.createIfNotExists(s);
 
+  // createIfNotExists + set, so a re-run resets a new position to the plan
+  // instead of skipping it when it already exists.
   for (const n of NODE_CREATES) {
-    tx.createIfNotExists({
-      _id: n._id,
-      _type: "organigramNode",
+    const doc = {
       title: n.title,
       roleCode: n.roleCode,
       department: n.department,
@@ -175,33 +185,43 @@ async function write() {
       sortOrder: n.sortOrder,
       active: true,
       members: n.members.map(memberRef),
-    });
+    };
+    tx.createIfNotExists({ _id: n._id, _type: "organigramNode", ...doc });
+    tx.patch(client.patch(n._id).set(doc));
   }
 
+  // ifRevisionId: the preflight judged the document at this revision. If an
+  // editor saved it since, the whole transaction fails instead of overwriting.
   for (const n of NODE_UPDATES) {
-    tx.patch(n.id, (p) =>
-      p.set({
-        members: n.members.map(memberRef),
-        ...(n.title ? { title: n.title } : {}),
-        ...(n.active !== undefined ? { active: n.active } : {}),
-      }),
+    tx.patch(
+      client
+        .patch(n.id)
+        .ifRevisionId(snap.nodes[n.id]!.rev)
+        .set({
+          members: n.members.map(memberRef),
+          ...(n.title ? { title: n.title } : {}),
+          ...(n.active !== undefined ? { active: n.active } : {}),
+        }),
     );
   }
 
   for (const t of TOPIC_UPDATES) {
-    tx.patch(t.id, (p) =>
-      p.set({
-        ...(t.primaryRef
-          ? { "primaryContact.organigramNode._ref": t.primaryRef.to }
-          : {}),
-        ...(t.summary ? { summary: t.summary.to } : {}),
-        ...Object.fromEntries(
-          Object.entries(t.steps ?? {}).map(([key, change]) => [
-            `steps[_key=="${key}"].description`,
-            change.to,
-          ]),
-        ),
-      }),
+    tx.patch(
+      client
+        .patch(t.id)
+        .ifRevisionId(snap.topics[t.id]!.rev)
+        .set({
+          ...(t.primaryRef
+            ? { "primaryContact.organigramNode._ref": t.primaryRef.to }
+            : {}),
+          ...(t.summary ? { summary: t.summary.to } : {}),
+          ...Object.fromEntries(
+            Object.entries(t.steps ?? {}).map(([key, change]) => [
+              `steps[_key=="${key}"].description`,
+              change.to,
+            ]),
+          ),
+        }),
     );
   }
 
@@ -219,7 +239,7 @@ async function main() {
     process.exit(1);
   }
 
-  printPlan(snap, nodeRows, await nameLookup(nodeRows));
+  printPlan(snap, nodeRows);
 
   if (!EXECUTE) {
     console.log("\nDry run — nothing written. Add --execute to write.");
@@ -235,7 +255,7 @@ async function main() {
     );
     process.exit(1);
   }
-  await write();
+  await write(snap);
 }
 
 main().catch((err) => {
