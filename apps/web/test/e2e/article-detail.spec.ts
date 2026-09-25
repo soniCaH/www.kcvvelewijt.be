@@ -1,9 +1,5 @@
 import { expect, test } from "@playwright/test";
-import {
-  ARTICLE_TYPES,
-  discoverRouteFixtures,
-  type RouteFixtures,
-} from "./helpers/fixtures";
+import { ARTICLE_TYPES, FIXTURES } from "./helpers/fixtures";
 import { smokeTest } from "./helpers/smoke";
 
 // Phase 5.C (#1850) — per-articleType regression for the new
@@ -20,12 +16,7 @@ import { smokeTest } from "./helpers/smoke";
 //   - the EndMark closer is present at the end of any non-empty body
 //     (`[data-endmark]` is the locked design-system data attr).
 //
-// Slugs are discovered via the same sitemap-parser the structural smoke
-// uses. Any articleType missing from the sitemap (matchPreview /
-// matchRecap fixtures aren't seeded yet at PR time) skips with a clear
-// reason rather than failing.
-
-let fixtures: RouteFixtures;
+// Slugs are the pinned `staging` fixtures in `helpers/fixtures.ts` (#3148).
 
 const HERO_TESTID = {
   interview: "interview-hero",
@@ -34,20 +25,12 @@ const HERO_TESTID = {
   event: "event-hero",
 } as const;
 
-test.beforeAll(async ({ baseURL }) => {
-  if (!baseURL) {
-    throw new Error("playwright config baseURL is required");
-  }
-  fixtures = await discoverRouteFixtures(baseURL);
-});
-
 test.describe("/nieuws/[slug] body renderer (Phase 5.C)", () => {
   for (const articleType of ARTICLE_TYPES) {
     test(`renders <ArticleBody> + hero for articleType=${articleType}`, async ({
       page,
     }) => {
-      const slug = fixtures.articleSlugByType[articleType];
-      test.skip(!slug, `no published article of type "${articleType}"`);
+      const slug = FIXTURES.articleSlugByType[articleType];
 
       // Run the structural smoke first — fails fast on broken images,
       // 4xx/5xx, or console.error noise before we look at body blocks.

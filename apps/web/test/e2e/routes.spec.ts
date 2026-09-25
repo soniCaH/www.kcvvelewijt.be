@@ -1,27 +1,12 @@
 import { expect, test } from "@playwright/test";
-import {
-  ARTICLE_TYPES,
-  discoverRouteFixtures,
-  type RouteFixtures,
-} from "./helpers/fixtures";
+import { ARTICLE_TYPES, discoverMatchId, FIXTURES } from "./helpers/fixtures";
 import { smokeTest } from "./helpers/smoke";
 
 // Page-level smoke contract per PRD `docs/prd/page-level-testing-rework.md`
 // §Decisions item 3 (route list) and item 4 (per-route assertions).
 //
-// Dynamic-route slugs are discovered from `/sitemap.xml` at suite startup so
-// the suite stays robust to CMS content changes. If a route family has no
-// entries in the sitemap, that test is skipped (visible in the runner output)
-// rather than failing.
-
-let fixtures: RouteFixtures;
-
-test.beforeAll(async ({ baseURL }) => {
-  if (!baseURL) {
-    throw new Error("playwright config baseURL is required");
-  }
-  fixtures = await discoverRouteFixtures(baseURL);
-});
+// Dynamic routes test the pinned `staging` subjects in `helpers/fixtures.ts`
+// (#3148). Only the match is read off `/sitemap.xml` — see `discoverMatchId`.
 
 test.describe("static routes", () => {
   test("/", async ({ page }) => {
@@ -113,38 +98,34 @@ test.describe("static routes", () => {
 test.describe("dynamic routes", () => {
   for (const articleType of ARTICLE_TYPES) {
     test(`/nieuws/[slug] articleType=${articleType}`, async ({ page }) => {
-      const slug = fixtures.articleSlugByType[articleType];
-      test.skip(!slug, `no published article of type "${articleType}"`);
-      await smokeTest(page, { path: `/nieuws/${slug}` });
+      await smokeTest(page, {
+        path: `/nieuws/${FIXTURES.articleSlugByType[articleType]}`,
+      });
     });
   }
 
   test("/spelers/[slug]", async ({ page }) => {
-    const slug = fixtures.playerSlug;
-    test.skip(!slug, "no player slugs in sitemap");
-    await smokeTest(page, { path: `/spelers/${slug}` });
+    await smokeTest(page, { path: `/spelers/${FIXTURES.playerSlug}` });
   });
 
   test("/ploegen/[slug]", async ({ page }) => {
-    const slug = fixtures.teamSlug;
-    test.skip(!slug, "no team slugs in sitemap");
-    await smokeTest(page, { path: `/ploegen/${slug}` });
+    await smokeTest(page, { path: `/ploegen/${FIXTURES.teamSlug}` });
   });
 
-  test("/wedstrijd/[matchId]", async ({ page }) => {
-    const id = fixtures.matchId;
+  test("/wedstrijd/[matchId]", async ({ page, request }) => {
+    const id = await discoverMatchId(request);
     test.skip(!id, "no match ids in sitemap");
     await smokeTest(page, { path: `/wedstrijd/${id}` });
   });
 
   test("/evenementen/[slug]", async ({ page }) => {
-    // Event slugs are discovered from the sitemap's canonical `/evenementen/`
-    // entries (#1969 migrated the sitemap off `/events/`). The legacy
-    // `/events/[slug]` → `/evenementen/[slug]` redirect is covered by
-    // next.config.test.ts.
-    const slug = fixtures.eventSlug;
-    test.skip(!slug, "no event slugs in sitemap");
-    await smokeTest(page, { path: `/evenementen/${slug}` });
+    // The legacy `/events/[slug]` → `/evenementen/[slug]` redirect is
+    // covered by next.config.test.ts.
+    await smokeTest(page, { path: `/evenementen/${FIXTURES.eventSlug}` });
+  });
+
+  test("/galerij/[slug]", async ({ page }) => {
+    await smokeTest(page, { path: `/galerij/${FIXTURES.gallerySlug}` });
   });
 });
 

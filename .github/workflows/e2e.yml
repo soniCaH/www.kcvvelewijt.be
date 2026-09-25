@@ -72,6 +72,10 @@ jobs:
       # The container ships browsers under /ms-playwright. Suppress
       # @playwright/test's postinstall re-download to save ~150 MB and ~1 min.
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      # Always staging, never the environment's dataset: the suite's pinned
+      # subjects live there, and production carries no event articles
+      # (#3087, #3148). Set once for the build and `next start` alike.
+      NEXT_PUBLIC_SANITY_DATASET: staging
 
     steps:
       - name: Checkout code
@@ -99,7 +103,6 @@ jobs:
         env:
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
-          NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
       - name: Run Playwright e2e suite
@@ -113,7 +116,6 @@ jobs:
           # Same env required at runtime by `next start` for SSR data fetching.
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
-          NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
       # Not `failure()`: a flaky test's run concludes SUCCESS, and its failed

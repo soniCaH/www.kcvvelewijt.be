@@ -1,5 +1,11 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
-import { discoverRouteFixtures, type RouteFixtures } from "./helpers/fixtures";
+import { matchIdIn } from "./helpers/fixtures";
+
+/** A real staging article with an `htmlTable` block and related articles —
+ * the pinned `e2e-*` fixtures carry neither, so both tests below would
+ * `continue` past every viewport and assert nothing. */
+const TABLE_ARTICLE_SLUG =
+  "2025-06-20-definitieve-reeksindeling-3e-nationale-bis";
 import { gotoBounded } from "./helpers/goto";
 
 // #2577 — "one scroll arrow in two registers, held space by real overflow"
@@ -18,10 +24,9 @@ import { gotoBounded } from "./helpers/goto";
 // actually scroll that way. That holds regardless of which side of the
 // overflow boundary today's real content happens to land on.
 
-let fixtures: RouteFixtures;
-/** Every `/ploegen/[slug]` in the sitemap — `fixtures.teamSlug` is only the
- * first one, and #2444/#2478 already recorded that whether a team's section
- * nav renders at all (let alone overflows) is pre-season-dependent per
+/** Every `/ploegen/[slug]` in the sitemap — one pinned team is not enough,
+ * and #2444/#2478 already recorded that whether a team's section nav renders
+ * at all (let alone overflows) is pre-season-dependent per
  * team: the senior sides currently ship ≤1 section (no nav at all) while
  * several youth sides ship enough for the nav to appear. Scanning the full
  * list, not just the first slug, is what makes the TeamSectionNav case
@@ -48,11 +53,12 @@ function hasNumberedStandingsTable(html: string): boolean {
   return /data-testid="standings-table"(?!\s+data-variant)/.test(html);
 }
 
+// ponytail: this spec (like section-nav.spec.ts) still sweeps every team page
+// at start-up. #3146 deletes both files.
 test.beforeAll(async ({ baseURL }) => {
   if (!baseURL) {
     throw new Error("playwright config baseURL is required");
   }
-  fixtures = await discoverRouteFixtures(baseURL);
 
   const sitemapResponse = await fetch(`${baseURL}/sitemap.xml`);
   const sitemapXml = await sitemapResponse.text();
@@ -80,8 +86,9 @@ test.beforeAll(async ({ baseURL }) => {
     }
     if (standingsTableUrl && teamSectionNavSlug) break;
   }
-  if (!standingsTableUrl && fixtures.matchId) {
-    const url = `/wedstrijd/${fixtures.matchId}`;
+  const matchId = standingsTableUrl ? null : matchIdIn(sitemapXml);
+  if (matchId) {
+    const url = `/wedstrijd/${matchId}`;
     const response = await fetch(`${baseURL}${url}`);
     if (response.ok && hasNumberedStandingsTable(await response.text())) {
       standingsTableUrl = url;
@@ -315,10 +322,8 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
   test("HorizontalSlider (RelatedRow) on /nieuws/[slug] — desktop and mobile", async ({
     page,
   }) => {
-    const slug = Object.values(fixtures.articleSlugByType).find(
-      (s): s is string => s !== null,
-    );
-    test.skip(!slug, "no article slugs in sitemap");
+    const slug = TABLE_ARTICLE_SLUG;
+    let checked = 0;
 
     for (const viewport of [
       { width: 1440, height: 900 },
@@ -336,7 +341,10 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       // if the article body also carries an HtmlTableBlock scroller.
       const wrapper = track.locator("..");
       await assertOverlayArrowMatchesOverflow(wrapper, track);
+      checked++;
     }
+    // The article is pinned for its related row — no row at all is a red.
+    expect(checked, `no related row on /nieuws/${slug}`).toBeGreaterThan(0);
   });
 
   test("TeamSectionNav on /ploegen/[slug] — narrow phone (360px)", async ({
@@ -407,10 +415,8 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
   test("HtmlTableBlock in an article body — desktop and mobile", async ({
     page,
   }) => {
-    const slug = Object.values(fixtures.articleSlugByType).find(
-      (s): s is string => s !== null,
-    );
-    test.skip(!slug, "no article slugs in sitemap");
+    const slug = TABLE_ARTICLE_SLUG;
+    let checked = 0;
 
     for (const viewport of [
       { width: 1440, height: 900 },
@@ -440,7 +446,9 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       } else {
         await expect(rightArrow).toHaveCount(0);
       }
+      checked++;
     }
+    expect(checked, `no HTML table on /nieuws/${slug}`).toBeGreaterThan(0);
   });
 
   test("organigram explorer stage — no arrow at A, an arrow once zoomed to A+/A++ overflows it", async ({
