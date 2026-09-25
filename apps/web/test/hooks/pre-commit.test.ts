@@ -4,10 +4,24 @@
  *
  * The defect that actually shipped was in `apps/web/eslint.config.mjs`: its
  * `files` / `ignores` globs resolve against the **cwd**, not the config file,
- * and `lint-staged` invokes ESLint from the repository root — where every path
- * starts `apps/web/`. So the Motion / Colors block never matched at commit
- * time, and ESLint then reported the valid `eslint-disable` comments that
- * reference it as unused directives and `--fix` deleted them.
+ * and — at the time — `lint-staged` invoked ESLint from the repository root
+ * for every workspace, where every path started `apps/web/`. So the Motion /
+ * Colors block never matched at commit time, and ESLint then reported the
+ * valid `eslint-disable` comments that reference it as unused directives and
+ * `--fix` deleted them.
+ *
+ * #2418 changed half of that premise for `apps/web` specifically: its own
+ * `lint-staged` entry in the root `package.json` now `cd`s into `apps/web`
+ * before invoking ESLint (`sh -c 'cd apps/web && eslint --fix "$@"' --`),
+ * because `apps/web/eslint-suppressions.json`'s keys are themselves
+ * cwd-relative and never resolved correctly from the root. So
+ * `lintStdinFromRepoRoot` below no longer describes what `lint-staged` does
+ * for `apps/web` — it stayed as a harness for "what if some caller still
+ * invokes ESLint from the repo root" (a manual `eslint .`, or any other
+ * workspace's `lint-staged` entry, e.g. `apps/api`'s, which is unchanged and
+ * has no suppressions file to need this). The wiring `lint-staged` itself now
+ * uses has its own coverage below, in the "root package.json's lint-staged
+ * wiring for apps/web (#2418)" describe block.
  *
  * The second defect is the belief that grew around it. Both hooks *read* as if
  * a failing command cannot stop them — no `set -e`, a trailing `echo`. In fact
@@ -29,6 +43,7 @@ import {
   chmodSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -175,7 +190,7 @@ describe(".husky/commit-msg", () => {
   });
 });
 
-describe("apps/web ESLint config in the lint-staged context", () => {
+describe("apps/web ESLint config invoked from the repository root", () => {
   type Report = {
     messages: { ruleId: string | null; message: string }[];
     output?: string;
@@ -192,10 +207,13 @@ describe("apps/web ESLint config in the lint-staged context", () => {
   };
 
   /**
-   * Exactly what `package.json`'s `lint-staged` entry runs: ESLint invoked from
-   * the repository root with `--config apps/web/eslint.config.mjs`. Source is
-   * piped in under an `apps/web/src` filename so nothing is written to the
-   * tree, and `--fix-dry-run` reports what `--fix` would have written.
+   * No longer what `lint-staged` runs for `apps/web` (see this file's header
+   * — #2418 changed that to `cd apps/web` first). Kept as a harness for "ESLint
+   * invoked from the repository root with `--config apps/web/eslint.config.mjs`"
+   * generally — the shape `apps/api`'s `lint-staged` entry still uses today,
+   * and what a manual `eslint .` at the repo root would do. Source is piped in
+   * under an `apps/web/src` filename so nothing is written to the tree, and
+   * `--fix-dry-run` reports what `--fix` would have written.
    */
   const lintStdinFromRepoRoot = (source: string) =>
     parse(
@@ -298,4 +316,94 @@ describe("apps/web ESLint config in the lint-staged context", () => {
       false,
     ]);
   }, 60_000);
+});
+
+describe("root package.json's lint-staged wiring for apps/web (#2418)", () => {
+  /**
+   * Reads the real wiring out of the real `package.json` — not a copy of it —
+   * so this fails loudly if the entry is ever reverted to the pre-#2418 form
+   * (`"eslint --fix --config apps/web/eslint.config.mjs"`, no `cd`, no `"$@"`)
+   * instead of quietly testing a string that no longer matches what ships.
+   * `--fix-dry-run` stands in for `--fix` only so this can run against real
+   * tracked files without ever writing to them — `no-restricted-syntax` has
+   * no autofix, so nothing about what's under test (whether `cd apps/web` and
+   * `"$@"` are still wired through) changes by swapping it in.
+   */
+  const readLintStagedFontSizeScript = (): string => {
+    const pkg = JSON.parse(
+      readFileSync(join(repoRoot, "package.json"), "utf8"),
+    ) as { "lint-staged": Record<string, string[]> };
+    const [command] = pkg["lint-staged"]["apps/web/**/*.{js,jsx,ts,tsx}"] ?? [];
+    const match = command?.match(/^sh -c '(.+)' --$/);
+    if (!match) {
+      throw new Error(
+        `root package.json's lint-staged entry for apps/web JS/TS files is no ` +
+          `longer the "cd apps/web && …" wrapper this test expects (#2418): ` +
+          `${command}`,
+      );
+    }
+    return match[1].replace(" --fix", " --fix-dry-run");
+  };
+
+  const runLintStagedFontSizeCommand = (files: string[]) =>
+    spawnSync("sh", ["-c", readLintStagedFontSizeScript(), "--", ...files], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        PATH: `${join(repoRoot, "node_modules", ".bin")}:${process.env.PATH ?? ""}`,
+      },
+    });
+
+  const probeDir = join(repoRoot, "apps", "web", "src");
+
+  it("passes a real frozen violation, linted the way lint-staged lints it", () => {
+    const suppressions = JSON.parse(
+      readFileSync(
+        join(repoRoot, "apps", "web", "eslint-suppressions.json"),
+        "utf8",
+      ),
+    ) as Record<string, unknown>;
+    const [suppressedRelPath] = Object.keys(suppressions);
+    const absolute = join(repoRoot, "apps", "web", suppressedRelPath);
+
+    const result = runLintStagedFontSizeCommand([absolute]);
+
+    // Fails before #2418's fix: cwd=repo root computes the wrong relative
+    // key, the suppression never matches, and this exits non-zero instead.
+    expect(result.status).toBe(0);
+  }, 30_000);
+
+  it("fails a brand-new off-ramp literal, linted the way lint-staged lints it", () => {
+    const probe = join(
+      probeDir,
+      "__pre-commit-wiring-probe-new-violation__.tsx",
+    );
+    writeFileSync(probe, 'export const Probe = "text-[9px]";\n');
+    try {
+      const result = runLintStagedFontSizeCommand([probe]);
+
+      expect(result.status).not.toBe(0);
+    } finally {
+      rmSync(probe, { force: true });
+    }
+  }, 30_000);
+
+  it('only lints the file it was given — proves "$@" is threaded through, not dropped', () => {
+    const target = join(probeDir, "__pre-commit-wiring-probe-target__.tsx");
+    const other = join(probeDir, "__pre-commit-wiring-probe-other__.tsx");
+    writeFileSync(target, "export const Target = 1;\n");
+    writeFileSync(other, 'export const Other = "text-[9px]";\n');
+    try {
+      // If the script ever drops `"$@"`, `eslint --fix-dry-run` (no target)
+      // falls back to its default of "." from `apps/web` and picks up
+      // `other`'s violation too, even though only `target` was "staged".
+      const result = runLintStagedFontSizeCommand([target]);
+
+      expect(result.status).toBe(0);
+    } finally {
+      rmSync(target, { force: true });
+      rmSync(other, { force: true });
+    }
+  }, 30_000);
 });
