@@ -4,7 +4,7 @@
   "tasks": {
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "vitest.config.*"],
+      "inputs": ["src/**", "vitest*.config.ts", "wrangler.workerd-test.jsonc"],
       "outputs": []
     }
   }

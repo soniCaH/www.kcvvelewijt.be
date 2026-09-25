@@ -1,0 +1,22 @@
+{
+  // Test-only Worker config for the `workers` Vitest project
+  // (vitest.workers.config.ts) — read by @cloudflare/vitest-plugin, never by
+  // `wrangler dev`/`deploy`. Deliberately scoped to just the two bindings the
+  // workerd tests exercise (PSD_CACHE, PSD_GATE): the real wrangler.toml also
+  // declares Vectorize/Workers AI bindings that have no local emulation, and
+  // this config must boot without them. See apps/api/README.md's test-layer
+  // split for why this file exists instead of pointing the plugin at
+  // wrangler.toml directly.
+  "name": "kcvv-api-workerd-tests",
+  "main": "src/test-helpers/workerd-entry.ts",
+  "compatibility_date": "2024-09-23",
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [{ "binding": "PSD_CACHE", "id": "test-kv-namespace" }],
+  "durable_objects": {
+    "bindings": [{ "name": "PSD_GATE", "class_name": "PsdGate" }]
+  },
+  // Mirrors wrangler.toml's own migration tag — PsdGate keeps no durable
+  // storage (pure in-memory GateLogic), so the SQLite backing is moot here
+  // too, but the class still needs a migration to be bindable at all.
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PsdGate"] }]
+}
