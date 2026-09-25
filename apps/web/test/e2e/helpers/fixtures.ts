@@ -45,6 +45,13 @@ export async function discoverMatchId(
   if (!response.ok()) {
     throw new Error(`Failed to fetch sitemap.xml: ${response.status()}`);
   }
-  const xml = await response.text();
-  return xml.match(/<loc>[^<]*\/wedstrijd\/([^/<\s]+)\s*<\/loc>/)?.[1] ?? null;
+  return matchIdIn(await response.text());
+}
+
+/** The first `/wedstrijd/<id>` in a sitemap body, or `null`. */
+export function matchIdIn(sitemapXml: string): string | null {
+  return (
+    sitemapXml.match(/<loc>[^<]*\/wedstrijd\/([^/<\s?#]+)\/?\s*<\/loc>/)?.[1] ??
+    null
+  );
 }

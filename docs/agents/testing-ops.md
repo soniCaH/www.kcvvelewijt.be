@@ -31,10 +31,12 @@ pnpm --filter @kcvv/web run test:e2e
 pnpm --filter @kcvv/web run test:e2e:ui
 ```
 
-To target a deployed environment instead of local `next start`:
+To target a deployed environment instead of local `next start`, pick one
+built against the `staging` dataset. `www.kcvvelewijt.be` serves production,
+where the pinned fixtures do not exist, so their tests 404:
 
 ```bash
-BASE_URL=https://www.kcvvelewijt.be pnpm --filter @kcvv/web run test:e2e
+BASE_URL=https://<a-staging-built-deployment> pnpm --filter @kcvv/web run test:e2e
 ```
 
 When `BASE_URL` is set, the config's `webServer` block stays inactive and the
@@ -71,8 +73,8 @@ fixtures (#3087).
 Dynamic routes test **pinned subjects**, listed in
 `apps/web/test/e2e/helpers/fixtures.ts` (`FIXTURES`): the six fixture documents
 below, plus one real staging player (`/spelers/778`) and team
-(`/ploegen/eerste-elftallen-a`), pinned as they exist. Nothing probes pages at
-start-up to find them.
+(`/ploegen/eerste-elftallen-a`), pinned as they exist. The shared helper probes
+no pages at start-up.
 
 **Matches stay discovered.** A match is a PSD record, not a Sanity document,
 and the sitemap lists only matches of the last 90 days — every match ages out
@@ -83,8 +85,8 @@ off `/sitemap.xml` each run; with no match in the window, that test skips.
 hid were hydration and `IntersectionObserver` races. No data choice touches
 them: there is no hydration signal to wait for, and the framework's answer is
 an app-side fix. They live in `scroll-arrows.spec.ts` and
-`section-nav.spec.ts`, which #3146 deletes. `scroll-arrows.spec.ts` also still
-sweeps every team page at start-up until then.
+`section-nav.spec.ts`, which #3146 deletes. Until then, both specs still sweep
+every team page at start-up to find a team whose section nav renders.
 
 ### Pinned fixture documents in `staging` (#3147)
 

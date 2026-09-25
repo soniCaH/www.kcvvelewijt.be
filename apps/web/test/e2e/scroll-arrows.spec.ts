@@ -1,5 +1,11 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
-import { discoverMatchId, FIXTURES } from "./helpers/fixtures";
+import { matchIdIn } from "./helpers/fixtures";
+
+/** A real staging article with an `htmlTable` block and related articles —
+ * the pinned `e2e-*` fixtures carry neither, so both tests below would
+ * `continue` past every viewport and assert nothing. */
+const TABLE_ARTICLE_SLUG =
+  "2025-06-20-definitieve-reeksindeling-3e-nationale-bis";
 import { gotoBounded } from "./helpers/goto";
 
 // #2577 — "one scroll arrow in two registers, held space by real overflow"
@@ -18,8 +24,9 @@ import { gotoBounded } from "./helpers/goto";
 // actually scroll that way. That holds regardless of which side of the
 // overflow boundary today's real content happens to land on.
 
-/** Every `/ploegen/[slug]` in the sitemap — one pinned team is not enough, and #2444/#2478 already recorded that whether a team's section
- * nav renders at all (let alone overflows) is pre-season-dependent per
+/** Every `/ploegen/[slug]` in the sitemap — one pinned team is not enough,
+ * and #2444/#2478 already recorded that whether a team's section nav renders
+ * at all (let alone overflows) is pre-season-dependent per
  * team: the senior sides currently ship ≤1 section (no nav at all) while
  * several youth sides ship enough for the nav to appear. Scanning the full
  * list, not just the first slug, is what makes the TeamSectionNav case
@@ -46,9 +53,9 @@ function hasNumberedStandingsTable(html: string): boolean {
   return /data-testid="standings-table"(?!\s+data-variant)/.test(html);
 }
 
-// ponytail: this spec still sweeps every team page at start-up — the one
-// page-probing left in the suite. #3146 deletes the whole file.
-test.beforeAll(async ({ baseURL, request }) => {
+// ponytail: this spec (like section-nav.spec.ts) still sweeps every team page
+// at start-up. #3146 deletes both files.
+test.beforeAll(async ({ baseURL }) => {
   if (!baseURL) {
     throw new Error("playwright config baseURL is required");
   }
@@ -79,7 +86,7 @@ test.beforeAll(async ({ baseURL, request }) => {
     }
     if (standingsTableUrl && teamSectionNavSlug) break;
   }
-  const matchId = standingsTableUrl ? null : await discoverMatchId(request);
+  const matchId = standingsTableUrl ? null : matchIdIn(sitemapXml);
   if (matchId) {
     const url = `/wedstrijd/${matchId}`;
     const response = await fetch(`${baseURL}${url}`);
@@ -315,7 +322,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
   test("HorizontalSlider (RelatedRow) on /nieuws/[slug] — desktop and mobile", async ({
     page,
   }) => {
-    const slug = FIXTURES.articleSlugByType.interview;
+    const slug = TABLE_ARTICLE_SLUG;
 
     for (const viewport of [
       { width: 1440, height: 900 },
@@ -404,7 +411,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
   test("HtmlTableBlock in an article body — desktop and mobile", async ({
     page,
   }) => {
-    const slug = FIXTURES.articleSlugByType.interview;
+    const slug = TABLE_ARTICLE_SLUG;
 
     for (const viewport of [
       { width: 1440, height: 900 },
