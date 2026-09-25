@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "lint:prune": "eslint . --prune-suppressions",
     "type-check": "tsgo --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
