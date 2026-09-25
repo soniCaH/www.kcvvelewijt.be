@@ -54,6 +54,20 @@ const fieldChromeIdle = [
   // Focus — full ink border, snap shadow off, press into paper
   "focus:border-ink focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5",
 
+  // VR determinism (#3033 pattern, shared across Input/Textarea/Select —
+  // see field-vr-focus.ts): Chromium only paints `:focus` when the frame
+  // rendering the page itself holds real OS/window focus, not merely when
+  // `document.activeElement` is set inside it. An `autoFocus` story's
+  // "Focused" capture races that real frame focus — exposed once
+  // `waitForPageReadyCapped` (#3137) stopped adding the extra settle time a
+  // live, uncached font fetch used to cost the first (mobile) viewport
+  // shot. `data-vr-force-ring` is never set by these components themselves;
+  // a story's `play` function sets it on the rendered field directly for
+  // VR-tagged "Focused" stories only, painting the exact same focus chrome
+  // from state the story declares instead of one dependent on the runner's
+  // frame focus. A real visitor's `focus:` behaviour is untouched.
+  "data-[vr-force-ring=true]:border-ink data-[vr-force-ring=true]:shadow-none data-[vr-force-ring=true]:translate-x-0.5 data-[vr-force-ring=true]:translate-y-0.5",
+
   // Disabled — drop borders to ink/15 + cream surface + opacity-50 inherits
   // through to the resting paper-soft shadow, so disabled reads as "frozen
   // at rest" inside the same paper vocabulary as the other states (instead
@@ -75,6 +89,10 @@ const fieldChromeError = [
 
   // Focus — alert border stays, press into paper
   "focus:border-alert focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5",
+
+  // VR determinism (#3033 pattern) — see the matching rule in
+  // fieldChromeIdle above for the full rationale.
+  "data-[vr-force-ring=true]:border-alert data-[vr-force-ring=true]:shadow-none data-[vr-force-ring=true]:translate-x-0.5 data-[vr-force-ring=true]:translate-y-0.5",
 
   // Disabled — same vocabulary as the idle disabled state. The alert
   // shadow stays since the field is still semantically "in error", just
