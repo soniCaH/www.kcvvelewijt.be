@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, expect } from "storybook/test";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
 
@@ -74,6 +75,58 @@ export const FullDivision: Story = {
 /** No highlight target — renders the table without a KCVV accent row. */
 export const NoHighlight: Story = {
   args: { entries: fullDivision },
+};
+
+/**
+ * Re-homed from `apps/web/test/e2e/scroll-arrows.spec.ts`'s "StandingsTable
+ * on /ploegen/[slug] or /wedstrijd/[matchId]" case (#3146, deleted by this
+ * ticket). That test's overflow assertion was already superseded by a
+ * deterministic backstop before this ticket (#2861,
+ * `test/vr/structural-assertions.ts`'s `vr-assert-mobile-overflow` tag on
+ * `FullDivision` above) — this story adds the one assertion that backstop
+ * does NOT cover: the anchor group (#2476 rule 3) actually carries
+ * `position: sticky` on its three pinned cells (`#`, `Ploeg`, `Ptn`), not
+ * just that the track overflows. Reuses the same `fullDivision` fixture so
+ * the overflow precondition is guaranteed the same way. `!vr`:
+ * assertion-only, computed-style check — no pixel truth to capture.
+ */
+export const StickyColumnsPinned: Story = {
+  args: { entries: fullDivision, highlightTeamId: 1235 },
+  tags: ["!vr"],
+  play: async ({ canvasElement }) => {
+    // Dynamic, not static: `vitest/browser` throws at import time outside
+    // Vitest Browser Mode, and this same story FILE also loads under the VR
+    // pipeline (`FullDivision` above carries the `vr` tag) — a top-level
+    // import here would break every story in the file under
+    // `test-storybook`/`storybook dev`, neither of which is Vitest Browser
+    // Mode. A dynamic import inside `play` only ever evaluates when THIS
+    // story's play runs, which VR never does (it never navigates to an
+    // untagged story). Force the phone viewport the E2E case it replaces
+    // used (`apps/web/test/e2e/scroll-arrows.spec.ts`, 360px) — an 8-column
+    // division fits comfortably at this project's default (desktop) width.
+    const { page } = await import("vitest/browser");
+    const originalWidth = window.innerWidth;
+    const originalHeight = window.innerHeight;
+    await page.viewport(360, 800);
+
+    try {
+      const canvas = within(canvasElement);
+      const track = canvas.getByRole("region");
+      expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
+
+      const headers = track.querySelectorAll("th");
+      const pinned = [headers[0], headers[1], headers[headers.length - 1]];
+      for (const cell of pinned) {
+        expect(cell).toBeDefined();
+        expect(getComputedStyle(cell as Element).position).toBe("sticky");
+      }
+    } finally {
+      // Vitest Browser Mode reuses one tab across a file's tests — leaving
+      // the viewport narrowed here would silently affect whichever story
+      // runs next.
+      await page.viewport(originalWidth, originalHeight);
+    }
+  },
 };
 
 /** Empty ranking — component renders nothing (auto-hide). */

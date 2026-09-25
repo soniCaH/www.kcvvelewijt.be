@@ -8,6 +8,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, expect, waitFor } from "storybook/test";
 import { ScrollOverlay } from "./ScrollOverlay";
 
 const WideContent = () => (
@@ -63,5 +64,76 @@ export const BothDirections: Story = {
     role: "region",
     ariaLabel: "Voorbeelddiagram",
     children: <WideContent />,
+  },
+};
+
+/**
+ * Re-homed from `apps/web/test/e2e/scroll-arrows.spec.ts` (#3146, deleted by
+ * this ticket) — the overlay arrow/overflow invariant, proven once against a
+ * fixture that guarantees the overflow (an 8-column, 900px-wide track).
+ * `<ScrollOverlay>` is the single idiom behind every "content scrolled past"
+ * consumer (`<HtmlTableBlock>`, `<StandingsTable>`'s numbered variant,
+ * `<VolledigOrganigram>`'s chart, the organigram explorer's stage) — proving
+ * the mount/per-direction logic here proves it for all of them (push it
+ * down, #3086 clause 1). Covers both the `direction="right"` case (the
+ * `HtmlTableBlock` shape — right-only, no held space) and `"both"` (scroll
+ * right, then the left arrow mounts too). `!vr`: assertion-only, no pixel
+ * truth to capture — `RightOnly`/`BothDirections` above already own the
+ * baselines.
+ */
+export const ArrowsMatchOverflowRightOnly: Story = {
+  args: {
+    role: "region",
+    ariaLabel: "Voorbeeldtabel",
+    children: <WideContent />,
+  },
+  tags: ["!vr"],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    // direction="right" (default) never mounts a left arrow — a sticky
+    // first column (or nothing yet) already anchors the left edge.
+    expect(canvas.queryByLabelText("Scroll left")).not.toBeInTheDocument();
+    const rightArrow = await canvas.findByLabelText("Scroll right");
+    await expect(rightArrow).toBeVisible();
+
+    const track = canvas.getByRole("region", { name: "Voorbeeldtabel" });
+    track.scrollLeft = track.scrollWidth;
+    await waitFor(() => {
+      expect(canvas.queryByLabelText("Scroll right")).not.toBeInTheDocument();
+    });
+    expect(canvas.queryByLabelText("Scroll left")).not.toBeInTheDocument();
+  },
+};
+
+export const ArrowsMatchOverflowBothDirections: Story = {
+  args: {
+    direction: "both",
+    role: "region",
+    ariaLabel: "Voorbeelddiagram",
+    children: <WideContent />,
+  },
+  tags: ["!vr"],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const track = canvas.getByRole("region", { name: "Voorbeelddiagram" });
+
+    // At rest, scrolled to the start: only the right arrow is mounted —
+    // "both" still means "per direction on real overflow", never "always
+    // both at once".
+    const rightArrow = await canvas.findByLabelText("Scroll right");
+    await expect(rightArrow).toBeVisible();
+    expect(canvas.queryByLabelText("Scroll left")).not.toBeInTheDocument();
+
+    // Scroll away from the start — the left arrow mounts too.
+    track.scrollLeft = 50;
+    const leftArrow = await waitFor(() => canvas.getByLabelText("Scroll left"));
+    await expect(leftArrow).toBeVisible();
+
+    // Scroll back to the very start — the left arrow unmounts again
+    // (overlay never holds space the way the rail idiom does).
+    track.scrollLeft = 0;
+    await waitFor(() => {
+      expect(canvas.queryByLabelText("Scroll left")).not.toBeInTheDocument();
+    });
   },
 };

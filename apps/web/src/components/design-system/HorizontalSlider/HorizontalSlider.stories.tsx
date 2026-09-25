@@ -13,6 +13,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, expect, waitFor } from "storybook/test";
 import { HorizontalSlider } from "./HorizontalSlider";
 
 // ---------------------------------------------------------------------------
@@ -82,5 +83,54 @@ export const FewItems: Story = {
 export const ManyItems: Story = {
   args: {
     children: manyItems,
+  },
+};
+
+/**
+ * Re-homed from `apps/web/test/e2e/scroll-arrows.spec.ts`'s "HorizontalSlider
+ * (RelatedRow) on /nieuws/[slug]" case (#3146, deleted by this ticket).
+ * Unlike the rail/overlay idioms, `<HorizontalSlider>` absorbs
+ * `useScrollHint` directly rather than going through `<ScrollRail>`/
+ * `<ScrollOverlay>` — the sole "paper" register consumer — so its own
+ * mount/unmount invariant needs its own fixture rather than riding on
+ * `ScrollRail`'s or `ScrollOverlay`'s story. `ManyItems` already guarantees
+ * the overflow deterministically (8 fixed-width cards); `FewItems` guarantees
+ * the opposite. `!vr`: assertion-only — both baselines already exist above.
+ */
+export const ArrowsMatchOverflow: Story = {
+  args: {
+    children: manyItems,
+  },
+  tags: ["!vr"],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const track = canvas.getByRole("group", { name: "Scrollable cards" });
+
+    // At rest, scrolled to the start: only the right arrow is mounted.
+    const rightArrow = await canvas.findByLabelText("Scroll right");
+    await expect(rightArrow).toBeVisible();
+    expect(canvas.queryByLabelText("Scroll left")).not.toBeInTheDocument();
+
+    track.scrollLeft = 50;
+    const leftArrow = await waitFor(() => canvas.getByLabelText("Scroll left"));
+    await expect(leftArrow).toBeVisible();
+
+    track.scrollLeft = track.scrollWidth;
+    await waitFor(() => {
+      expect(canvas.queryByLabelText("Scroll right")).not.toBeInTheDocument();
+    });
+  },
+};
+
+/** Sibling of `ArrowsMatchOverflow` for the non-overflowing case — neither
+ * arrow mounts when the track fits. `!vr`: assertion-only. */
+export const NoOverflowNoArrows: Story = {
+  args: {
+    children: fewItems,
+  },
+  tags: ["!vr"],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    expect(canvas.queryAllByRole("button")).toHaveLength(0);
   },
 };
