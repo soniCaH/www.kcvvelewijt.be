@@ -90,10 +90,10 @@ uses a data-shaped `test.skip`. If one goes red, add the content to `staging`
 or delete the test (#3087 §6). A skip that depends on the viewport, not on
 data, is fine.
 
-Three of these reds read PSD match data, which `staging` cannot pin: the match
-smoke test (a match in the last 90 days), the homepage "expand" test (6+
-upcoming matches) and the MatchStrip toggle tap target (a result and a
-fixture). In the summer break they can go red with no code change. That is
+Two of these reds read PSD match data, which `staging` cannot pin: the match
+smoke test (a match in the last 90 days) and the MatchStrip toggle tap target
+(a result and a fixture). The homepage "expand" test was the third; it
+duplicated `UpcomingMatches.test.tsx`, so it was deleted instead (#3131 §0.4). In the summer break they can go red with no code change. That is
 the accepted cost of the ruling: the fix then is to rework or delete the
 test, never to put the skip back.
 

@@ -6,8 +6,10 @@ import { gotoBounded } from "./helpers/goto";
 // 4.5.C.1: the hero is now a single static `<EditorialHero>` plus a
 // 3-up `<FeaturedUitgelichtRow>`. Auto-rotation, thumb-strip, and
 // pause-button tests have been removed; the integration here covers
-// (a) page renders 200 with the new spine order, (b) UpcomingMatches
-// expand-collapse, (c) sponsor-logo greyscale/hover.
+// (a) page renders 200 with the new spine order, (b) sponsor-logo
+// greyscale/hover. UpcomingMatches expand-collapse lives in
+// `UpcomingMatches.test.tsx` only: it reads PSD matches, which staging cannot
+// pin, and a duplicate assertion is a defect (#3131 §0.4).
 //
 // The component-level Vitest + Storybook test-runner suites cover the
 // behaviour of each homepage section in isolation. This spec exercises
@@ -19,8 +21,7 @@ import { gotoBounded } from "./helpers/goto";
 // component so the suite stays robust if the visual chrome shifts. A
 // section that is missing fails the test, it never skips it: the suite
 // runs against the pinned `staging` dataset, so missing data is a
-// regression (#3087 §6, #3149). The expand test is the exception that
-// cannot be pinned: it reads PSD matches — see `docs/agents/testing-ops.md`.
+// regression (#3087 §6, #3149).
 
 test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
   test.beforeEach(async ({ page }) => {
@@ -65,36 +66,6 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     );
     expect(sponsorsIndex).toBeGreaterThanOrEqual(0);
     expect(clubshopIndex).toBeGreaterThan(sponsorsIndex);
-  });
-
-  test("upcoming matches: expand button reveals all matches", async ({
-    page,
-  }) => {
-    // Scoped to the agenda block: `<FirstTeamsBlock>` carries its own,
-    // permanently visible "Volledige kalender" link, so a page-wide locator
-    // never reads 0 no matter what this block does.
-    const agenda = page.getByRole("region", { name: "Komende wedstrijden" });
-
-    const expandButton = agenda.getByRole("button", {
-      name: /toon alle \d+ wedstrijden/i,
-    });
-    await expect(
-      expandButton,
-      "fewer than 6 upcoming matches — no expand button",
-    ).toBeVisible();
-
-    // The /kalender link is hidden in the collapsed state.
-    const kalenderLink = agenda.getByRole("link", {
-      name: /volledige kalender/i,
-    });
-    await expect(kalenderLink).toHaveCount(0);
-
-    await expandButton.click();
-
-    // After expand: button disappears, /kalender link appears.
-    await expect(expandButton).toHaveCount(0);
-    await expect(kalenderLink).toBeVisible();
-    await expect(kalenderLink).toHaveAttribute("href", "/kalender");
   });
 
   test("hovering the hero never opens a horizontal scrollbar, at three widths, and the sticky header keeps sticking (#2912)", async ({
