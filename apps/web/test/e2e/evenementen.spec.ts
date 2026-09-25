@@ -8,18 +8,23 @@
  *  - the detail page exposes the always-present "Zet in agenda" CTA
  *
  * Runs against the real Next.js app (the page-level coverage layer per the
- * Phase 0.5 testing rework — `docs/prd/page-level-testing-rework.md`). Tickets
- * are found via the DOM rather than the sitemap so the spec is resilient to the
- * exact upcoming-event set on the dataset.
+ * Phase 0.5 testing rework — `docs/prd/page-level-testing-rework.md`). Each
+ * test asserts on the pinned fixture event, never on whichever event sorts
+ * first (#3149).
  */
 
 import { test, expect } from "@playwright/test";
+import { FIXTURES } from "./helpers/fixtures";
 import { gotoBounded } from "./helpers/goto";
 
 // Event-doc tickets link to /evenementen/[slug]; article-sourced (articleType
 // "event") tickets link to /nieuws/[slug]. Both render as <TicketStub> links.
 const TICKET_SELECTOR =
   'main a[href^="/evenementen/"], main a[href^="/nieuws/"]';
+// The pinned 2099 `Clubevent` fixture (#3087 §5) — it keeps the upcoming-only
+// feed and its Clubevent filter non-empty, so an empty state is a regression.
+const FIXTURE_EVENT_PATH = `/evenementen/${FIXTURES.eventSlug}`;
+const FIXTURE_TICKET_SELECTOR = `main a[href="${FIXTURE_EVENT_PATH}"]`;
 
 test.describe("/evenementen", () => {
   // Relative goto resolves against the config `baseURL`; every test starts on
@@ -33,25 +38,16 @@ test.describe("/evenementen", () => {
   }) => {
     await expect(page.locator("h1").first()).toContainText("Evenementen");
 
-    // The feed is upcoming-only, but the pinned 2099 fixture event
-    // (`FIXTURES.eventSlug`) keeps it non-empty, so the empty state is a
-    // regression here, not a valid outcome (#3087 §5–§6).
-    const filterBar = page.getByRole("group", {
-      name: /Filter evenementen op type/i,
-    });
-    await expect(filterBar).toBeVisible();
-    expect(await page.locator(TICKET_SELECTOR).count()).toBeGreaterThan(0);
+    await expect(
+      page.getByRole("group", { name: /Filter evenementen op type/i }),
+    ).toBeVisible();
+    await expect(page.locator(FIXTURE_TICKET_SELECTOR)).toBeVisible();
   });
 
-  test("a type filter narrows the feed (or shows the per-type empty state)", async ({
-    page,
-  }) => {
+  test("a type filter narrows the feed", async ({ page }) => {
     const tickets = page.locator(TICKET_SELECTOR);
-    // `.count()` does not auto-wait — settle on a rendered ticket first.
-    await expect(
-      tickets.first(),
-      "no upcoming events on the dataset",
-    ).toBeVisible();
+    // `.count()` does not auto-wait — settle on the fixture ticket first.
+    await expect(page.locator(FIXTURE_TICKET_SELECTOR)).toBeVisible();
     const allCount = await tickets.count();
 
     // Single-select filter — picking one type can only narrow the set.
@@ -62,29 +58,16 @@ test.describe("/evenementen", () => {
     await clubChip.click();
     await expect(clubChip).toHaveAttribute("aria-pressed", "true");
 
-    const emptyForType = page.getByText(/Geen evenementen in de categorie/i);
-    if (await emptyForType.isVisible()) {
-      // No Clubevents upcoming → the reset affordance must be offered.
-      await expect(
-        page.getByRole("button", { name: /Toon alles/i }),
-      ).toBeVisible();
-    } else {
-      expect(await tickets.count()).toBeLessThanOrEqual(allCount);
-    }
+    await expect(page.locator(FIXTURE_TICKET_SELECTOR)).toBeVisible();
+    expect(await tickets.count()).toBeLessThanOrEqual(allCount);
   });
 
   test("a ticket opens its detail page, which exposes the agenda CTA", async ({
     page,
   }) => {
-    // Pick an event-doc ticket so we land on a /evenementen/[slug] detail page
-    // (article tickets intentionally route to /nieuws/[slug] instead).
-    const eventTicket = page.locator('main a[href^="/evenementen/"]').first();
-    await expect(eventTicket, "no event-doc tickets in the feed").toBeVisible();
+    await page.locator(FIXTURE_TICKET_SELECTOR).click();
 
-    const href = await eventTicket.getAttribute("href");
-    await eventTicket.click();
-
-    await expect(page).toHaveURL(new RegExp(`${href}/?$`));
+    await expect(page).toHaveURL(new RegExp(`${FIXTURE_EVENT_PATH}/?$`));
     await expect(page.locator("h1").first()).toBeVisible();
     // The "＋ Zet in agenda" CTA is always present (the .ics download); the
     // ＋ glyph is aria-hidden, so the accessible name is just the label.

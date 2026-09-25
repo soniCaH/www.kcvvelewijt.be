@@ -19,7 +19,8 @@ import { gotoBounded } from "./helpers/goto";
 // component so the suite stays robust if the visual chrome shifts. A
 // section that is missing fails the test, it never skips it: the suite
 // runs against the pinned `staging` dataset, so missing data is a
-// regression (#3087 §6, #3149).
+// regression (#3087 §6, #3149). The expand test is the exception that
+// cannot be pinned: it reads PSD matches — see `docs/agents/testing-ops.md`.
 
 test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
   test.beforeEach(async ({ page }) => {
@@ -188,6 +189,8 @@ test.describe("/ homepage integration (Phase 4.5.C.1)", () => {
     await expect(
       firstLogo,
       "sponsor logos render as italic fallback — no images to hover",
+      // Count, not visibility: the logo is `loading="lazy"` below the fold,
+      // so it reads as hidden until the hover below scrolls it into view.
     ).toHaveCount(1);
 
     // Default state: the image carries the `grayscale` class.

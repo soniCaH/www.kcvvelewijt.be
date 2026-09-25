@@ -90,6 +90,13 @@ uses a data-shaped `test.skip`. If one goes red, add the content to `staging`
 or delete the test (#3087 §6). A skip that depends on the viewport, not on
 data, is fine.
 
+Three of these reds read PSD match data, which `staging` cannot pin: the match
+smoke test (a match in the last 90 days), the homepage "expand" test (6+
+upcoming matches) and the MatchStrip toggle tap target (a result and a
+fixture). In the summer break they can go red with no code change. That is
+the accepted cost of the ruling: the fix then is to rework or delete the
+test, never to put the skip back.
+
 **What pinned data does not fix.** 6 of the 7 retries that green `main` runs
 hid were hydration and `IntersectionObserver` races. No data choice touches
 them: there is no hydration signal to wait for, and the framework's answer is
