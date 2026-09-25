@@ -14,8 +14,8 @@
  * Run against staging first, then production.
  *
  * Usage:
- *   SANITY_DATASET=staging  pnpm delete-legacy          # dry run, lists only
- *   SANITY_DATASET=staging  pnpm delete-legacy -- --confirm
+ *   SANITY_DATASET=staging  pnpm --filter @kcvv/sanity-ops responsibility:delete-legacy          # dry run, lists only
+ *   SANITY_DATASET=staging  pnpm --filter @kcvv/sanity-ops responsibility:delete-legacy --confirm
  */
 
 import { stripDraftPrefix } from "../shared/draft-id";
@@ -51,10 +51,14 @@ async function main() {
     console.error(
       `[delete-legacy] Refusing to run. These topics are not yet active as "responsibility": ${notRestored.join(", ")}`,
     );
-    console.error("[delete-legacy] Run restore-missing-responsibilities.ts first.");
+    console.error(
+      "[delete-legacy] Run restore-missing-responsibilities.ts first.",
+    );
     process.exit(1);
   }
-  console.log(`[delete-legacy] All ${RESTORED_SLUGS.length} restored topic(s) are active.`);
+  console.log(
+    `[delete-legacy] All ${RESTORED_SLUGS.length} restored topic(s) are active.`,
+  );
 
   // Draft-aware: a legacy document that survives only as a draft must still be
   // deleted, or it is left dangling once this script reports success (#2839).
@@ -70,7 +74,9 @@ async function main() {
   // Every id in this set is `responsibility-path-*` once a `drafts.` prefix is
   // stripped: the migration preserved `_id`, so a document under any other
   // shape would mean the query caught something this script was not written for.
-  const unexpected = docs.filter((d) => !stripDraftPrefix(d._id).startsWith("responsibility-path-"));
+  const unexpected = docs.filter(
+    (d) => !stripDraftPrefix(d._id).startsWith("responsibility-path-"),
+  );
   if (unexpected.length > 0) {
     console.error(
       `[delete-legacy] Refusing to run. Unexpected _id shape: ${unexpected.map((d) => d._id).join(", ")}`,
@@ -91,10 +97,14 @@ async function main() {
   // failure cannot leave the set half-deleted.
   const tx = docs.reduce((t, d) => t.delete(d._id), client.transaction());
   await tx.commit();
-  console.log(`[delete-legacy] Deleted ${docs.length} document(s) from "${dataset}".`);
+  console.log(
+    `[delete-legacy] Deleted ${docs.length} document(s) from "${dataset}".`,
+  );
 
   console.log("");
-  console.log("[delete-legacy] Now remove their vectors (Vectorize is a separate store):");
+  console.log(
+    "[delete-legacy] Now remove their vectors (Vectorize is a separate store):",
+  );
   console.log("");
   console.log(
     `  cd apps/api && pnpm wrangler vectorize delete-vectors kcvv-search --ids ${docs

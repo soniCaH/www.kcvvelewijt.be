@@ -49,6 +49,10 @@
     "apps/api/**/*.{json,md}": [
       "prettier --write"
     ],
+    "scripts/sanity-ops/**/*.ts": [
+      "eslint --fix --config scripts/sanity-ops/eslint.config.mjs",
+      "prettier --write"
+    ],
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]

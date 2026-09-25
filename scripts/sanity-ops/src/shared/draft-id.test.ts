@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { stripDraftPrefix, uniqueBaseIds } from "../shared/draft-id";
+import { stripDraftPrefix, uniqueBaseIds } from "./draft-id";
 
 describe("stripDraftPrefix", () => {
   it("returns a published id unchanged", () => {

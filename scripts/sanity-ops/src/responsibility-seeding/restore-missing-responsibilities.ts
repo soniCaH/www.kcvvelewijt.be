@@ -25,7 +25,7 @@
  * Run against staging first, then production.
  *
  * Usage:
- *   SANITY_DATASET=staging pnpm restore-missing
+ *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops responsibility:restore-missing
  */
 
 import { createHash } from "crypto";
@@ -41,7 +41,13 @@ interface SanityRef {
 
 type SeedContact =
   | { contactType: "position"; organigramNode: SanityRef }
-  | { contactType: "manual"; role?: string; email?: string; phone?: string; department?: string };
+  | {
+      contactType: "manual";
+      role?: string;
+      email?: string;
+      phone?: string;
+      department?: string;
+    };
 
 function ref(id: string): SanityRef {
   return { _type: "reference", _ref: id };
@@ -58,8 +64,14 @@ function positionContact(nodeId: string): SeedContact {
   };
 }
 
-function step(description: string, opts?: { link?: string; contact?: SeedContact }) {
-  const hash = createHash("sha256").update(description).digest("hex").slice(0, 8);
+function step(
+  description: string,
+  opts?: { link?: string; contact?: SeedContact },
+) {
+  const hash = createHash("sha256")
+    .update(description)
+    .digest("hex")
+    .slice(0, 8);
   return {
     _key: `step-${hash}`,
     description,
@@ -106,7 +118,14 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler"],
     question: "wil pestgedrag melden",
-    keywords: ["pesten", "pestgedrag", "intimidatie", "uitsluiting", "treiteren", "melden"],
+    keywords: [
+      "pesten",
+      "pestgedrag",
+      "intimidatie",
+      "uitsluiting",
+      "treiteren",
+      "melden",
+    ],
     summary:
       "Meld pestgedrag bij het Aanspreekpunt Integriteit (API). Elke melding wordt vertrouwelijk behandeld.",
     category: "gedrag",
@@ -117,7 +136,9 @@ const responsibilities: ResponsibilityDoc[] = [
         contact: positionContact(API_NODE),
       }),
       step("Beschrijf de situatie zo concreet mogelijk"),
-      step("De API behandelt je melding vertrouwelijk en neemt de nodige stappen"),
+      step(
+        "De API behandelt je melding vertrouwelijk en neemt de nodige stappen",
+      ),
     ],
   },
   {
@@ -128,7 +149,13 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["ouder", "speler", "trainer"],
     question: "wil discriminatie melden",
-    keywords: ["discriminatie", "racisme", "uitsluiting", "ongelijkheid", "melden"],
+    keywords: [
+      "discriminatie",
+      "racisme",
+      "uitsluiting",
+      "ongelijkheid",
+      "melden",
+    ],
     summary:
       "Meld discriminatie bij het Aanspreekpunt Integriteit (API). Dit wordt strikt vertrouwelijk behandeld.",
     category: "gedrag",
@@ -159,7 +186,8 @@ const responsibilities: ResponsibilityDoc[] = [
       "grensoverschrijdend",
       "melding",
     ],
-    summary: "Neem vertrouwelijk contact op met de Voorzitter of met het Aanspreekpunt Integriteit.",
+    summary:
+      "Neem vertrouwelijk contact op met de Voorzitter of met het Aanspreekpunt Integriteit.",
     category: "gedrag",
     icon: "shield",
     primaryContact: positionContact("organigramNode-voorzitter"),
@@ -186,7 +214,8 @@ const responsibilities: ResponsibilityDoc[] = [
     audience: ["ouder", "speler"],
     question: "wil keeper worden of keeperstraining volgen",
     keywords: ["keeper", "keeperstraining", "doelman", "doel", "handschoenen"],
-    summary: "Interesse in keeperstraining? De TVJO brengt je in contact met de juiste trainer.",
+    summary:
+      "Interesse in keeperstraining? De TVJO brengt je in contact met de juiste trainer.",
     category: "sportief",
     icon: "trophy",
     primaryContact: positionContact("organigramNode-tvjo"),
@@ -194,9 +223,12 @@ const responsibilities: ResponsibilityDoc[] = [
       step("Contacteer de TVJO met je interesse voor keeperstraining", {
         contact: positionContact("organigramNode-tvjo"),
       }),
-      step("De TVJO verwijst je door naar de keeperstrainer van je leeftijdscategorie", {
-        contact: positionContact("organigramNode-keeperstrainer-jeugd"),
-      }),
+      step(
+        "De TVJO verwijst je door naar de keeperstrainer van je leeftijdscategorie",
+        {
+          contact: positionContact("organigramNode-keeperstrainer-jeugd"),
+        },
+      ),
     ],
   },
   {
@@ -207,15 +239,27 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["speler", "ouder"],
     question: "zoek de sportief verantwoordelijke voor mijn leeftijd",
-    keywords: ["verantwoordelijke", "coördinator", "trainer", "leeftijdscategorie", "ploeg"],
-    summary: "Bekijk het organigram of neem contact op met de Sportief Verantwoordelijke.",
+    keywords: [
+      "verantwoordelijke",
+      "coördinator",
+      "trainer",
+      "leeftijdscategorie",
+      "ploeg",
+    ],
+    summary:
+      "Bekijk het organigram of neem contact op met de Sportief Verantwoordelijke.",
     category: "sportief",
     icon: "user",
-    primaryContact: positionContact("organigramNode-sportief-verantwoordelijke"),
+    primaryContact: positionContact(
+      "organigramNode-sportief-verantwoordelijke",
+    ),
     steps: [
-      step("Bekijk het organigram voor een overzicht van alle verantwoordelijken", {
-        link: "/hulp#structuur",
-      }),
+      step(
+        "Bekijk het organigram voor een overzicht van alle verantwoordelijken",
+        {
+          link: "/hulp#structuur",
+        },
+      ),
       step('Filter op "Jeugdbestuur" om de leeftijdscoördinatoren te zien'),
       step("Of contacteer de Sportief Verantwoordelijke", {
         contact: positionContact("organigramNode-sportief-verantwoordelijke"),
@@ -233,8 +277,17 @@ const responsibilities: ResponsibilityDoc[] = [
     active: true,
     audience: ["speler", "ouder", "trainer"],
     question: "wil graag weten hoe ik ProSoccerData kan gebruiken",
-    keywords: ["prosoccerdata", "psd", "app", "software", "login", "account", "toegang"],
-    summary: "Vraag je logingegevens bij je trainer of bij de ProSoccerData-verantwoordelijke.",
+    keywords: [
+      "prosoccerdata",
+      "psd",
+      "app",
+      "software",
+      "login",
+      "account",
+      "toegang",
+    ],
+    summary:
+      "Vraag je logingegevens bij je trainer of bij de ProSoccerData-verantwoordelijke.",
     category: "algemeen",
     icon: "smartphone",
     primaryContact: positionContact("organigramNode-prosoccerdata"),
@@ -263,26 +316,37 @@ async function main() {
       responsibilities.flatMap((doc) =>
         [doc.primaryContact, ...doc.steps.map((s) => s.contact)]
           .filter((c): c is SeedContact => c !== undefined)
-          .flatMap((c) => (c.contactType === "position" ? [c.organigramNode._ref] : [])),
+          .flatMap((c) =>
+            c.contactType === "position" ? [c.organigramNode._ref] : [],
+          ),
       ),
     ),
   ];
-  const present = await client.fetch<string[]>('*[_type == "organigramNode" && _id in $ids]._id', {
-    ids: nodeIds,
-  });
+  const present = await client.fetch<string[]>(
+    '*[_type == "organigramNode" && _id in $ids]._id',
+    {
+      ids: nodeIds,
+    },
+  );
   const missing = nodeIds.filter((id) => !present.includes(id));
   if (missing.length > 0) {
-    console.error(`[restore] Missing organigramNode(s) in "${dataset}": ${missing.join(", ")}`);
+    console.error(
+      `[restore] Missing organigramNode(s) in "${dataset}": ${missing.join(", ")}`,
+    );
     process.exit(1);
   }
-  console.log(`[restore] All ${nodeIds.length} organigram position(s) resolve.`);
+  console.log(
+    `[restore] All ${nodeIds.length} organigram position(s) resolve.`,
+  );
 
   // A slug collision would mean the topic is already covered and this script's
   // premise is stale — stop rather than publish a duplicate question. Draft-aware:
   // a slug already taken by a draft-only `responsibility` is exactly the collision
   // this guard exists to catch (#2839).
   const slugs = responsibilities.map((doc) => doc.slug.current);
-  const clashes = await draftAwareClient.fetch<Array<{ _id: string; slug: string }>>(
+  const clashes = await draftAwareClient.fetch<
+    Array<{ _id: string; slug: string }>
+  >(
     '*[_type == "responsibility" && slug.current in $slugs]{_id, "slug": slug.current}',
     { slugs },
   );
@@ -308,7 +372,9 @@ async function main() {
     created++;
   }
 
-  console.log(`[restore] Done. ${created} document(s) written to "${dataset}".`);
+  console.log(
+    `[restore] Done. ${created} document(s) written to "${dataset}".`,
+  );
 }
 
 main().catch((err) => {

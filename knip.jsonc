@@ -103,8 +103,9 @@
     },
     // Every file under src/<folder>/ is a one-off run by hand via tsx; only
     // some are wired as package.json scripts, so all are entries (#3056).
+    // src/shared/ is left out so its unused exports still get reported.
     "scripts/sanity-ops": {
-      "entry": ["src/*/*.ts"],
+      "entry": ["src/!(shared)/*.ts"],
     },
     // .design-sync/ has its own package.json (`@kcvv/web-dssync`) and is a
     // real knip workspace even though it's not in pnpm-workspace.yaml's

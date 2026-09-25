@@ -20,11 +20,11 @@
  *
  * Usage:
  *   # Dry-run (default dataset = staging) — prints the match plan, no writes.
- *   SANITY_DATASET=staging pnpm backfill --dry-run
+ *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill --dry-run
  *   # Apply to staging.
- *   SANITY_DATASET=staging pnpm backfill
+ *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill
  *   # Apply to production (guarded).
- *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 pnpm backfill
+ *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 pnpm --filter @kcvv/sanity-ops team-image:backfill
  */
 import { client, dataset } from "../shared/sanity-client";
 
@@ -182,7 +182,8 @@ function matchTeam(drupal: DrupalTeam, sanity: SanityTeam[]): MatchOutcome {
 /** Download a Drupal image and upload it as a Sanity image asset. */
 async function uploadImage(imageUrl: string): Promise<string> {
   const res = await fetch(imageUrl);
-  if (!res.ok) throw new Error(`image fetch failed: HTTP ${res.status} ${imageUrl}`);
+  if (!res.ok)
+    throw new Error(`image fetch failed: HTTP ${res.status} ${imageUrl}`);
   const contentType = res.headers.get("content-type") ?? "image/jpeg";
   const buffer = Buffer.from(await res.arrayBuffer());
   const filename = decodeURIComponent(imageUrl.split("/").pop() ?? "team.jpg");
@@ -269,11 +270,15 @@ async function main(): Promise<void> {
       uploaded += 1;
       console.log(`  ✓ ${team.name} ← ${drupal.title}`);
     } catch (err) {
-      console.error(`  ✗ ${team.name} ← ${drupal.title}: ${(err as Error).message}`);
+      console.error(
+        `  ✗ ${team.name} ← ${drupal.title}: ${(err as Error).message}`,
+      );
     }
   }
 
-  console.log(`\nDone — ${uploaded}/${planned.length} photos written to ${dataset}.`);
+  console.log(
+    `\nDone — ${uploaded}/${planned.length} photos written to ${dataset}.`,
+  );
 }
 
 main().catch((err) => {

@@ -4,7 +4,7 @@
  * Queries all staff-board-* and staffMember-psd-* documents, matches by name,
  * and outputs a JSON report for human review.
  *
- * Run: SANITY_API_TOKEN=... SANITY_DATASET=staging tsx src/phase2-board-psd-matching.ts
+ * Run: SANITY_API_TOKEN=... SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops staff:phase2:match
  */
 import { client } from "../shared/sanity-client";
 
@@ -49,14 +49,14 @@ async function main() {
   const boardDocs = await client.fetch<StaffDoc[]>(
     `*[_type == "staffMember" && _id match "staff-board-*" && !(_id in path("drafts.**"))]{
       _id, firstName, lastName, photo, psdId
-    }`
+    }`,
   );
 
   // Fetch all PSD docs (active), same reasoning.
   const psdDocs = await client.fetch<StaffDoc[]>(
     `*[_type == "staffMember" && _id match "staffMember-psd-*" && !archived && !(_id in path("drafts.**"))]{
       _id, firstName, lastName, photo, psdId
-    }`
+    }`,
   );
 
   console.log(`Found ${boardDocs.length} board documents`);
@@ -82,14 +82,18 @@ async function main() {
       matches.push({
         boardDoc,
         psdDoc: candidates[0],
-        confidence: boardDoc.firstName === candidates[0].firstName && boardDoc.lastName === candidates[0].lastName
-          ? "exact"
-          : "normalized",
+        confidence:
+          boardDoc.firstName === candidates[0].firstName &&
+          boardDoc.lastName === candidates[0].lastName
+            ? "exact"
+            : "normalized",
         boardName: fullName(boardDoc),
         psdName: fullName(candidates[0]),
       });
     } else if (candidates && candidates.length > 1) {
-      console.log(`WARNING: Multiple PSD matches for board doc ${boardDoc._id} (${fullName(boardDoc)}):`);
+      console.log(
+        `WARNING: Multiple PSD matches for board doc ${boardDoc._id} (${fullName(boardDoc)}):`,
+      );
       candidates.forEach((c) => console.log(`  - ${c._id} (${fullName(c)})`));
       unmatched.push(boardDoc);
     } else {
@@ -102,12 +106,16 @@ async function main() {
   for (const m of matches) {
     const hasPhoto = m.boardDoc.photo ? "has photo" : "no photo";
     console.log(`  ${m.boardDoc._id} → ${m.psdDoc._id}`);
-    console.log(`    Board: "${m.boardName}" | PSD: "${m.psdName}" | ${m.confidence} | ${hasPhoto}`);
+    console.log(
+      `    Board: "${m.boardName}" | PSD: "${m.psdName}" | ${m.confidence} | ${hasPhoto}`,
+    );
   }
 
   console.log(`\n═══ UNMATCHED BOARD DOCS (${unmatched.length}) ═══\n`);
   for (const doc of unmatched) {
-    console.log(`  ${doc._id} — "${fullName(doc)}" ${doc.photo ? "(has photo)" : "(no photo)"}`);
+    console.log(
+      `  ${doc._id} — "${fullName(doc)}" ${doc.photo ? "(has photo)" : "(no photo)"}`,
+    );
   }
 
   console.log(`\n═══ SUMMARY ═══`);
@@ -116,7 +124,7 @@ async function main() {
   console.log(`  Total:     ${boardDocs.length} board docs\n`);
 
   // Write matches to a JSON file for the migration step
-  const reportPath = "phase2-matches.json";
+  const reportPath = new URL("../../phase2-matches.json", import.meta.url);
   const { writeFileSync } = await import("fs");
   writeFileSync(
     reportPath,
@@ -131,8 +139,8 @@ async function main() {
         hasPhoto: !!m.boardDoc.photo,
       })),
       null,
-      2
-    )
+      2,
+    ),
   );
   console.log(`Match report written to ${reportPath}`);
 }

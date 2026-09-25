@@ -11,8 +11,8 @@
  * 7. Delete replaced board docs, replaced manual docs, and unreferenced board docs
  *
  * Usage:
- *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts          # dry-run
- *   SANITY_DATASET=production npx tsx src/migrate-board-docs.ts --execute # real run
+ *   SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops board:migrate           # dry-run
+ *   SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops board:migrate --execute # real run
  */
 import { stripDraftPrefix, uniqueBaseIds } from "../shared/draft-id";
 import { client, draftAwareClient } from "../shared/sanity-client";
@@ -46,21 +46,33 @@ interface BoardToManualMapping {
 
 /** Board docs → new PSD docs (create PSD doc from board data) */
 const BOARD_TO_NEW_PSD: BoardToPsdMapping[] = [
-  { boardId: "staff-board-d2332ee2-19b0-4c9e-ac21-5c3bb35a60fc", psdId: "160" },                 // Rudy Bautmans
-  { boardId: "staff-board-67832a6b-9cbb-4776-8307-e01268df9f2b", psdId: "256", archived: true },  // Maarten Boon
-  { boardId: "staff-board-97bcb134-f673-475c-9507-c98cf33a5b10", psdId: "255", archived: true },  // Guido Dierickx
-  { boardId: "staff-board-82404e68-9c6f-466e-80d4-f1c0d67e3369", psdId: "122" },                 // Hans Junius
-  { boardId: "staff-board-9aeed3fc-2d50-4f52-85c4-ee8c72ad7b1d", psdId: "774", firstName: "Chris" }, // Chris Nobels
-  { boardId: "staff-board-400e96fc-df0f-474b-9b2a-dc7d9aac0536", psdId: "825" },                 // Werner Sanfrinnon
-  { boardId: "staff-board-24c53ac0-ba52-428a-a039-a146a5eff963", psdId: "821" },                  // Ilona Trouwkens
-  { boardId: "staff-board-acffe287-67c1-42fc-8aa6-eab82c268b4c", psdId: "823" },                  // Paul Vanhamme
+  { boardId: "staff-board-d2332ee2-19b0-4c9e-ac21-5c3bb35a60fc", psdId: "160" }, // Rudy Bautmans
+  {
+    boardId: "staff-board-67832a6b-9cbb-4776-8307-e01268df9f2b",
+    psdId: "256",
+    archived: true,
+  }, // Maarten Boon
+  {
+    boardId: "staff-board-97bcb134-f673-475c-9507-c98cf33a5b10",
+    psdId: "255",
+    archived: true,
+  }, // Guido Dierickx
+  { boardId: "staff-board-82404e68-9c6f-466e-80d4-f1c0d67e3369", psdId: "122" }, // Hans Junius
+  {
+    boardId: "staff-board-9aeed3fc-2d50-4f52-85c4-ee8c72ad7b1d",
+    psdId: "774",
+    firstName: "Chris",
+  }, // Chris Nobels
+  { boardId: "staff-board-400e96fc-df0f-474b-9b2a-dc7d9aac0536", psdId: "825" }, // Werner Sanfrinnon
+  { boardId: "staff-board-24c53ac0-ba52-428a-a039-a146a5eff963", psdId: "821" }, // Ilona Trouwkens
+  { boardId: "staff-board-acffe287-67c1-42fc-8aa6-eab82c268b4c", psdId: "823" }, // Paul Vanhamme
 ];
 
 /** Board docs → existing PSD docs (relink only, possibly migrate photo) */
 const BOARD_TO_EXISTING_PSD: BoardToPsdMapping[] = [
-  { boardId: "staff-board-ef3a6397-8dd8-443c-b06a-1a3fb3e39fcc", psdId: "257" },  // Stefan De Wael
-  { boardId: "staff-board-dd7508e6-f7c6-4425-81d8-8f176265eacd", psdId: "248" },  // Stefan Robberechts
-  { boardId: "staff-board-19c6f821-55cb-405b-ad0e-7fd70839a455", psdId: "261" },  // Erik Talboom
+  { boardId: "staff-board-ef3a6397-8dd8-443c-b06a-1a3fb3e39fcc", psdId: "257" }, // Stefan De Wael
+  { boardId: "staff-board-dd7508e6-f7c6-4425-81d8-8f176265eacd", psdId: "248" }, // Stefan Robberechts
+  { boardId: "staff-board-19c6f821-55cb-405b-ad0e-7fd70839a455", psdId: "261" }, // Erik Talboom
 ];
 
 /** Manual docs → new PSD docs (upgrade manual to PSD) */
@@ -77,7 +89,10 @@ const MANUAL_TO_PSD: ManualToPsdMapping[] = [
 
 /** Board doc → new manual doc */
 const BOARD_TO_MANUAL: BoardToManualMapping[] = [
-  { boardId: "staff-board-89f7bc6a-9b53-4e81-b596-49f580b02dd6", manualSlug: "luc-deheyder" },
+  {
+    boardId: "staff-board-89f7bc6a-9b53-4e81-b596-49f580b02dd6",
+    manualSlug: "luc-deheyder",
+  },
 ];
 
 /** Board docs to delete outright (no migration target) */
@@ -88,28 +103,28 @@ const BOARD_DELETE_ONLY = [
 // ─── Team compositions ─────────────────────────────────────────────────
 
 const TEAM_BESTUUR_REFS = [
-  "staffMember-psd-160",  // Rudy Bautmans
-  "staffMember-psd-821",  // Ilona Trouwkens
-  "staffMember-psd-248",  // Stefan Robberechts
-  "staffMember-psd-261",  // Erik Talboom
-  "staffMember-psd-825",  // Werner Sanfrinnon
-  "staffMember-psd-122",  // Hans Junius
-  "staffMember-psd-257",  // Stefan De Wael
-  "staffMember-psd-774",  // Chris Nobels
+  "staffMember-psd-160", // Rudy Bautmans
+  "staffMember-psd-821", // Ilona Trouwkens
+  "staffMember-psd-248", // Stefan Robberechts
+  "staffMember-psd-261", // Erik Talboom
+  "staffMember-psd-825", // Werner Sanfrinnon
+  "staffMember-psd-122", // Hans Junius
+  "staffMember-psd-257", // Stefan De Wael
+  "staffMember-psd-774", // Chris Nobels
   "staffMember-manual-luc-deheyder", // Luc Deheyder
-  "staffMember-psd-823",  // Paul Vanhamme
-  "staffMember-psd-245",  // Kevin Van Ransbeeck
+  "staffMember-psd-823", // Paul Vanhamme
+  "staffMember-psd-245", // Kevin Van Ransbeeck
 ];
 
 const TEAM_JEUGDBESTUUR_REFS = [
-  "staffMember-psd-8946",  // Matthias Knevels
+  "staffMember-psd-8946", // Matthias Knevels
   "staffMember-psd-10228", // Shauni Hellemans
-  "staffMember-psd-2094",  // Bram Van Zegbroeck
+  "staffMember-psd-2094", // Bram Van Zegbroeck
   "staffMember-psd-10061", // Sven De Smedt
-  "staffMember-psd-8576",  // Kevin Schutijser
-  "staffMember-psd-6530",  // Tim Ooghe
+  "staffMember-psd-8576", // Kevin Schutijser
+  "staffMember-psd-6530", // Tim Ooghe
   "staffMember-psd-11278", // Mike Meuwis
-  "staffMember-psd-6588",  // Tim Moens
+  "staffMember-psd-6588", // Tim Moens
 ];
 
 // ─── Helpers ───────────────────────────────────────────────────────────
@@ -148,7 +163,9 @@ async function fetchDoc(id: string): Promise<SanityDoc | null> {
  * has a match and that draft is left pointing at a document step 6 deletes (#2839).
  */
 async function findReferencingDocs(docId: string): Promise<SanityDoc[]> {
-  return draftAwareClient.fetch<SanityDoc[]>(`*[references($docId)]`, { docId });
+  return draftAwareClient.fetch<SanityDoc[]>(`*[references($docId)]`, {
+    docId,
+  });
 }
 
 /** Relink all references from oldId → newId across the dataset. */
@@ -156,7 +173,9 @@ async function relinkReferences(oldId: string, newId: string): Promise<number> {
   const referencingDocs = await findReferencingDocs(oldId);
   if (referencingDocs.length === 0) return 0;
 
-  console.log(`    Relinking ${referencingDocs.length} ref(s): ${oldId} → ${newId}`);
+  console.log(
+    `    Relinking ${referencingDocs.length} ref(s): ${oldId} → ${newId}`,
+  );
 
   if (!DRY_RUN) {
     const transaction = client.transaction();
@@ -198,7 +217,13 @@ async function deleteDoc(id: string): Promise<void> {
 
 // ─── Migration steps ───────────────────────────────────────────────────
 
-const SYSTEM_FIELDS = new Set(["_id", "_type", "_rev", "_createdAt", "_updatedAt"]);
+const SYSTEM_FIELDS = new Set([
+  "_id",
+  "_type",
+  "_rev",
+  "_createdAt",
+  "_updatedAt",
+]);
 
 /** Copy fields from source doc, excluding system fields. */
 function copyUserFields(doc: SanityDoc): Record<string, unknown> {
@@ -250,8 +275,13 @@ async function step1_boardToNewPsd() {
         });
       }
     } else {
-      console.log(`    [DRY] Would create ${targetId} (photo: ${!!boardDoc.photo}, archived: ${!!mapping.archived})`);
-      if (existingPsd) console.log(`    [DRY] PSD doc already exists — would merge photo only`);
+      console.log(
+        `    [DRY] Would create ${targetId} (photo: ${!!boardDoc.photo}, archived: ${!!mapping.archived})`,
+      );
+      if (existingPsd)
+        console.log(
+          `    [DRY] PSD doc already exists — would merge photo only`,
+        );
     }
 
     // Relink references
@@ -260,7 +290,9 @@ async function step1_boardToNewPsd() {
 }
 
 async function step2_boardToExistingPsd() {
-  console.log("\n═══ Step 2: Board docs → existing PSD docs (relink + photo) ═══");
+  console.log(
+    "\n═══ Step 2: Board docs → existing PSD docs (relink + photo) ═══",
+  );
 
   for (const mapping of BOARD_TO_EXISTING_PSD) {
     const targetId = `staffMember-psd-${mapping.psdId}`;
@@ -321,7 +353,9 @@ async function step3_manualToPsd() {
         ...fields,
       });
     } else if (existingPsd) {
-      console.log(`    ${targetId} already exists (created from board doc) — relink only`);
+      console.log(
+        `    ${targetId} already exists (created from board doc) — relink only`,
+      );
     } else {
       console.log(`    [DRY] Would create ${targetId}`);
     }
@@ -407,11 +441,14 @@ async function step5b_cleanTeamAngelsRefs() {
   }
 
   const originalCount = teamAngels.staff.length;
-  const cleaned = (teamAngels.staff as Array<{ _ref: string; _key: string; _type: string }>)
-    .filter((ref) => !ref._ref.startsWith("staff-board-"));
+  const cleaned = (
+    teamAngels.staff as Array<{ _ref: string; _key: string; _type: string }>
+  ).filter((ref) => !ref._ref.startsWith("staff-board-"));
 
   const removedCount = originalCount - cleaned.length;
-  console.log(`  Removing ${removedCount} board-doc refs from team-angels (keeping ${cleaned.length})`);
+  console.log(
+    `  Removing ${removedCount} board-doc refs from team-angels (keeping ${cleaned.length})`,
+  );
 
   if (!DRY_RUN && removedCount > 0) {
     await client.patch("team-angels").set({ staff: cleaned }).commit();
@@ -432,7 +469,9 @@ async function step6_deleteOldDocs() {
     ...BOARD_DELETE_ONLY,
   ];
 
-  console.log(`\n  Deleting ${boardIdsToDelete.length} migrated/marked board docs...`);
+  console.log(
+    `\n  Deleting ${boardIdsToDelete.length} migrated/marked board docs...`,
+  );
   for (const id of boardIdsToDelete) {
     console.log(`    ${id}`);
     await deleteDoc(id);
@@ -440,7 +479,9 @@ async function step6_deleteOldDocs() {
 
   // 6b. Delete replaced manual docs
   const manualIdsToDelete = MANUAL_TO_PSD.map((m) => m.manualId);
-  console.log(`\n  Deleting ${manualIdsToDelete.length} replaced manual docs...`);
+  console.log(
+    `\n  Deleting ${manualIdsToDelete.length} replaced manual docs...`,
+  );
   for (const id of manualIdsToDelete) {
     console.log(`    ${id}`);
     await deleteDoc(id);
@@ -452,15 +493,24 @@ async function step6_deleteOldDocs() {
   // BASE ids via uniqueBaseIds — deleteDoc() only deletes both id shapes when handed
   // the base id, so passing a drafts.* id here (whichever row the query happened to
   // sort first) would delete the draft twice and leave the published doc behind (#2839).
-  const remainingBoardDocsRaw = await draftAwareClient.fetch<Array<{ _id: string; firstName: string; lastName: string }>>(
-    `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`
+  const remainingBoardDocsRaw = await draftAwareClient.fetch<
+    Array<{ _id: string; firstName: string; lastName: string }>
+  >(
+    `*[_type == "staffMember" && _id match "staff-board-*"] { _id, firstName, lastName } | order(lastName asc)`,
   );
-  const remainingBoardIds = uniqueBaseIds(remainingBoardDocsRaw.map((doc) => doc._id));
+  const remainingBoardIds = uniqueBaseIds(
+    remainingBoardDocsRaw.map((doc) => doc._id),
+  );
   const nameByBaseId = new Map(
-    remainingBoardDocsRaw.map((doc) => [stripDraftPrefix(doc._id), `${doc.firstName} ${doc.lastName}`]),
+    remainingBoardDocsRaw.map((doc) => [
+      stripDraftPrefix(doc._id),
+      `${doc.firstName} ${doc.lastName}`,
+    ]),
   );
 
-  console.log(`\n  Deleting ${remainingBoardIds.length} remaining board docs...`);
+  console.log(
+    `\n  Deleting ${remainingBoardIds.length} remaining board docs...`,
+  );
   for (const id of remainingBoardIds) {
     console.log(`    ${id} (${nameByBaseId.get(id)})`);
     await deleteDoc(id);
@@ -473,7 +523,9 @@ async function main() {
   console.log("╔═══════════════════════════════════════════════════════════╗");
   console.log("║  Board-document opschoning (#1215)                       ║");
   console.log("╚═══════════════════════════════════════════════════════════╝");
-  console.log(`Mode: ${DRY_RUN ? "DRY RUN (add --execute to run for real)" : "⚠️  EXECUTING FOR REAL"}`);
+  console.log(
+    `Mode: ${DRY_RUN ? "DRY RUN (add --execute to run for real)" : "⚠️  EXECUTING FOR REAL"}`,
+  );
   console.log(`Dataset: ${process.env.SANITY_DATASET ?? "staging"}`);
 
   await step1_boardToNewPsd();

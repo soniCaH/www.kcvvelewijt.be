@@ -45,21 +45,25 @@ function deepReplaceRef(value: unknown, oldId: string, newId: string): unknown {
   return result;
 }
 
-const matches: MatchEntry[] = JSON.parse(readFileSync("phase2-matches.json", "utf-8"));
+const matches: MatchEntry[] = JSON.parse(
+  readFileSync(new URL("../../phase2-matches.json", import.meta.url), "utf-8"),
+);
 
 async function migrateOne(match: MatchEntry, index: number) {
   const { boardId, psdId, boardName, hasPhoto } = match;
-  console.log(`\n[${index + 1}/${matches.length}] ${boardName}: ${boardId} → ${psdId}`);
+  console.log(
+    `\n[${index + 1}/${matches.length}] ${boardName}: ${boardId} → ${psdId}`,
+  );
 
   // 1. Photo migration
   if (hasPhoto) {
     const boardDoc = await client.fetch<{ photo: unknown } | null>(
       `*[_id == $id][0]{ photo }`,
-      { id: boardId }
+      { id: boardId },
     );
     const psdDoc = await client.fetch<{ photo: unknown } | null>(
       `*[_id == $id][0]{ photo }`,
-      { id: psdId }
+      { id: psdId },
     );
 
     if (boardDoc?.photo && !psdDoc?.photo) {
@@ -77,7 +81,7 @@ async function migrateOne(match: MatchEntry, index: number) {
   // act on and that draft is left pointing at the board doc step 3 deletes (#2839).
   const referencingDocs = await draftAwareClient.fetch<SanityDoc[]>(
     `*[references($boardId)]`,
-    { boardId }
+    { boardId },
   );
 
   if (referencingDocs.length > 0) {
@@ -97,8 +101,16 @@ async function migrateOne(match: MatchEntry, index: number) {
 
   // 3. Delete board doc (published + draft)
   console.log("  Deleting board doc...");
-  try { await client.delete(boardId); } catch { console.log(`    Published ${boardId} not found`); }
-  try { await client.delete(`drafts.${boardId}`); } catch { /* draft may not exist */ }
+  try {
+    await client.delete(boardId);
+  } catch {
+    console.log(`    Published ${boardId} not found`);
+  }
+  try {
+    await client.delete(`drafts.${boardId}`);
+  } catch {
+    /* draft may not exist */
+  }
 
   console.log("  Done.");
 }
@@ -113,7 +125,9 @@ async function main() {
     await migrateOne(matches[i], i);
   }
 
-  console.log(`\n✅ Phase 2 complete — ${matches.length} board docs migrated.\n`);
+  console.log(
+    `\n✅ Phase 2 complete — ${matches.length} board docs migrated.\n`,
+  );
 }
 
 main().catch((err) => {

@@ -4,10 +4,10 @@
  * Creates ~37 organigramNode documents with full hierarchy.
  * Staging first, then production.
  *
- * Run: SANITY_DATASET=staging tsx src/phase4-organigram-seeding.ts
- *      CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production tsx src/phase4-organigram-seeding.ts
+ * Run: SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops staff:phase4
+ *      CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops staff:phase4
  */
-import { client } from "../shared/sanity-client";
+import { client, dataset } from "../shared/sanity-client";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -498,13 +498,15 @@ function validateOrganigramNodes(input: OrganigramNode[]): void {
   for (const node of input) {
     if (node.parentNode && !ids.has(node.parentNode._ref)) {
       errors.push(
-        `"${node._id}" references parentNode "${node.parentNode._ref}" which does not exist in nodes`
+        `"${node._id}" references parentNode "${node.parentNode._ref}" which does not exist in nodes`,
       );
     }
   }
 
   if (errors.length > 0) {
-    console.error("Validation failed:\n" + errors.map((e) => `  - ${e}`).join("\n"));
+    console.error(
+      "Validation failed:\n" + errors.map((e) => `  - ${e}`).join("\n"),
+    );
     process.exit(1);
   }
 }
@@ -512,19 +514,19 @@ function validateOrganigramNodes(input: OrganigramNode[]): void {
 // ─── Execute ────────────────────────────────────────────────────────────────
 
 async function seed() {
-  const dataset = process.env.SANITY_DATASET ?? "staging";
-
   if (dataset === "production" && !process.env.CONFIRM_PRODUCTION_SEED) {
     console.error(
       "Refusing to seed production without CONFIRM_PRODUCTION_SEED=yes.\n" +
-      "Run: CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production tsx src/phase4-organigram-seeding.ts"
+        "Run: CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops staff:phase4",
     );
     process.exit(1);
   }
 
   validateOrganigramNodes(nodes);
 
-  console.log(`Seeding ${nodes.length} organigramNode documents on ${dataset}...`);
+  console.log(
+    `Seeding ${nodes.length} organigramNode documents on ${dataset}...`,
+  );
 
   const transaction = client.transaction();
 
@@ -535,7 +537,7 @@ async function seed() {
 
   const result = await transaction.commit({ visibility: "async" });
   console.log(
-    `Done! Transaction ID: ${result.transactionId}, ${nodes.length} documents seeded.`
+    `Done! Transaction ID: ${result.transactionId}, ${nodes.length} documents seeded.`,
   );
 }
 
