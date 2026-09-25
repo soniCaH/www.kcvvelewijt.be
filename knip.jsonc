@@ -142,6 +142,17 @@
     "apps/api": {
       "ignoreBinaries": ["jq"],
       "ignoreDependencies": ["cloudflare"],
+      "entry": [
+        // Never imported by application code — only read by
+        // vitest.workers.config.ts's wrangler config (`main`), which knip
+        // doesn't trace. Its `PsdGate`/`default` exports are the Worker
+        // entry contract the @cloudflare/vitest-plugin pool needs, not dead
+        // code (#3145). `entry` merges with knip's own defaults for a
+        // non-root workspace (unlike "." above), so the real `src/index.ts`
+        // entry doesn't need repeating here — confirmed via `knip --debug`;
+        // listing it produced a "redundant entry pattern" hint.
+        "src/test-helpers/workerd-entry.ts",
+      ],
     },
     "apps/studio": {
       "entry": [
