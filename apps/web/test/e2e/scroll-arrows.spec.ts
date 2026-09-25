@@ -323,6 +323,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     page,
   }) => {
     const slug = TABLE_ARTICLE_SLUG;
+    let checked = 0;
 
     for (const viewport of [
       { width: 1440, height: 900 },
@@ -340,7 +341,10 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       // if the article body also carries an HtmlTableBlock scroller.
       const wrapper = track.locator("..");
       await assertOverlayArrowMatchesOverflow(wrapper, track);
+      checked++;
     }
+    // The article is pinned for its related row — no row at all is a red.
+    expect(checked, `no related row on /nieuws/${slug}`).toBeGreaterThan(0);
   });
 
   test("TeamSectionNav on /ploegen/[slug] — narrow phone (360px)", async ({
@@ -412,6 +416,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
     page,
   }) => {
     const slug = TABLE_ARTICLE_SLUG;
+    let checked = 0;
 
     for (const viewport of [
       { width: 1440, height: 900 },
@@ -441,7 +446,9 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
       } else {
         await expect(rightArrow).toHaveCount(0);
       }
+      checked++;
     }
+    expect(checked, `no HTML table on /nieuws/${slug}`).toBeGreaterThan(0);
   });
 
   test("organigram explorer stage — no arrow at A, an arrow once zoomed to A+/A++ overflows it", async ({

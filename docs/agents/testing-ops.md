@@ -74,7 +74,10 @@ Dynamic routes test **pinned subjects**, listed in
 `apps/web/test/e2e/helpers/fixtures.ts` (`FIXTURES`): the six fixture documents
 below, plus one real staging player (`/spelers/778`) and team
 (`/ploegen/eerste-elftallen-a`), pinned as they exist. The shared helper probes
-no pages at start-up.
+no pages at start-up. `scroll-arrows.spec.ts` pins one more real staging
+article, `/nieuws/2025-06-20-definitieve-reeksindeling-3e-nationale-bis`
+(`TABLE_ARTICLE_SLUG`), because the `e2e-*` articles carry no HTML table and
+no related row.
 
 **Matches stay discovered.** A match is a PSD record, not a Sanity document,
 and the sitemap lists only matches of the last 90 days — every match ages out
