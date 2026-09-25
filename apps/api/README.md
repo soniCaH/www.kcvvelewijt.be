@@ -46,6 +46,17 @@ in `vitest.config.ts`'s `test.projects` (Vitest 4 multi-project config; not a
 | `node`    | `vitest.node.config.ts`    | `src/**/*.test.ts`         | Plain Node (`environment: "node"`)                                                        |
 | `workers` | `vitest.workers.config.ts` | `src/**/*.workerd.test.ts` | Real workerd, via `@cloudflare/vitest-plugin` + Miniflare (`wrangler.workerd-test.jsonc`) |
 
+`pnpm --filter @kcvv/api test:coverage` (`vitest run --coverage`) covers
+**both** projects with **one** run. The provider is `istanbul`, not
+Vitest's default `v8` — v8 collects coverage via Node's V8 inspector API,
+which doesn't exist inside workerd; running `--coverage` with it crashes the
+`workers` project outright (`node:inspector/promises` has no such module).
+Cloudflare's own docs are explicit here: "Native code coverage via V8 is not
+supported. You must use instrumented code coverage via Istanbul instead."
+`coverage` is configured once, in the root `vitest.config.ts` — a root
+config's `coverage` (like `reporters`/`globalSetup`) applies globally
+regardless of which project a test file belongs to.
+
 **The split rule** (decided in [#3086](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3086)
 Q7, detailed in `docs/research/test-layer-balance.md` §2.4): a test whose
 correctness depends on the Worker's own runtime semantics — a real KV
@@ -67,7 +78,10 @@ real:
 - `cache/kv-cache-live.workerd.test.ts` — `KvCacheLive` and `makeDurableKv`
   against the real `PSD_CACHE` binding: read/write round-trips, delete, a
   real `expirationTtl` visible on the key's `list()` metadata, `increment`,
-  durable `list` pagination.
+  and a durable `list()` round-trip into the port's page shape. (Not
+  multi-page cursor-following — `makeDurableKv`'s `list` forwards no
+  `limit`, so it can't force a real second page; that loop is covered on
+  `node` against a mock that can.)
 - `psd/gate-do.workerd.test.ts` — the `PsdGate` Durable Object (`gate-do.ts`)
   itself, which had **zero** test coverage before this file existed: its own
   doc comment says it "must only ever be imported by the worker entry, never
