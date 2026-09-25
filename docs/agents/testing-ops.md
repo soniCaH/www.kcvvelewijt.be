@@ -96,8 +96,9 @@ npx sanity exec scripts/seed-e2e-fixtures.ts --with-user-token
 ```
 
 **Staging is the E2E content surface, and Kevin owns it.** Nothing refreshes
-it, on purpose. A missing or edited fixture turns the suite red — re-run the
-script to restore it.
+it, on purpose. Once #3148 pins these slugs, a missing fixture turns the suite
+red. An edited one may not: `smokeTest()` checks that the page renders, not that
+its fields match the seed. Either way, re-run the script to repair the drift.
 
 ### CI
 
