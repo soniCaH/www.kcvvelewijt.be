@@ -1,19 +1,8 @@
 import type { StorybookConfig } from "@storybook/nextjs-vite";
 import { fileURLToPath } from "node:url";
 import { resolve, dirname } from "node:path";
-import { mkdirSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// `staticDirs` below must exist at config-eval time or Storybook refuses to
-// start. `scripts/prefetch-typekit.mjs` (run once per Storybook build — see
-// the `build-storybook` / `vr:build-storybook` package.json scripts) fills
-// this directory with the actual prefetched CSS + font files; this guard
-// just guarantees the directory itself is there even before that script has
-// ever run (a fresh checkout, or plain `pnpm storybook` dev). Gitignored —
-// see root .gitignore — because the fetched content carries Adobe's Typekit
-// terms, not this repo's licence (#3137).
-mkdirSync(resolve(__dirname, ".typekit-cache/fonts"), { recursive: true });
 
 const config: StorybookConfig = {
   stories: [
@@ -40,11 +29,18 @@ const config: StorybookConfig = {
     // `/test-fixtures/images/...` so VR snapshots don't depend on
     // remote placeholder services.
     { from: "../test/fixtures/images", to: "/test-fixtures/images" },
-    // Adobe Typekit, prefetched once per run — see scripts/prefetch-typekit.mjs
-    // and the mkdirSync guard above. Served at `/typekit-cache/...` so
-    // preview-head.html links to it instead of the live use.typekit.net CDN
-    // (#3137).
-    { from: ".typekit-cache", to: "/typekit-cache" },
+    // IBM Plex Mono, self-hosted permanently under its OFL licence (#3137) —
+    // lives beside .storybook rather than under `public/` so it never ships
+    // to production as a dead asset (Next.js self-hosts its own copy via
+    // `next/font/google` in app/layout.tsx; Storybook never renders that
+    // layout, hence this separate copy — see preview-head.html). Served at
+    // `/fonts/ibm-plex-mono/...`, same as if it lived in `public/`.
+    { from: "fonts/ibm-plex-mono", to: "/fonts/ibm-plex-mono" },
+    // NOTE: Adobe Typekit is deliberately NOT a staticDirs entry. Its cache
+    // (scripts/prefetch-typekit.mjs) is read directly off disk by
+    // test-runner.ts's `route.fulfill`, never served over HTTP — baking it
+    // into `storybook-static` would make CI's public build-artifact upload
+    // redistribute Adobe's files, whose terms forbid self-hosting (#3137).
   ],
   viteFinal: async (cfg) => {
     cfg.resolve ??= {};

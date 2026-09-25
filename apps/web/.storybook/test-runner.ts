@@ -1,6 +1,9 @@
 import { type TestRunnerConfig, getStoryContext } from "@storybook/test-runner";
 import type { Page } from "@playwright/test";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { VR_FROZEN_NOW_ISO } from "../test/vr/frozen-clock.ts";
 import {
   VR_VIEWPORT_NAMES,
@@ -8,6 +11,57 @@ import {
   unscopedViewportOverrideMessage,
 } from "../test/vr/viewport-scoping.ts";
 import { STRUCTURAL_ASSERTIONS } from "../test/vr/structural-assertions.ts";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Populated by `scripts/prefetch-typekit.mjs`, run once per VR invocation
+// from `vr:run` (CI) and `scripts/vr-docker.mjs` (local Docker) — see that
+// script's docblock for why the cache lives here instead of inside
+// `storybook-static`. Loaded once per worker process; if the prefetch step
+// never ran, this is `{}` and every Typekit request falls through to the
+// deny-and-record path below instead of silently reaching the network.
+const TYPEKIT_CACHE_DIR = join(__dirname, ".typekit-cache");
+type TypekitCacheEntry = { file: string; contentType: string };
+function loadTypekitManifest(): Record<string, TypekitCacheEntry> {
+  try {
+    return JSON.parse(
+      readFileSync(join(TYPEKIT_CACHE_DIR, "manifest.json"), "utf8"),
+    ) as Record<string, TypekitCacheEntry>;
+  } catch {
+    return {};
+  }
+}
+const TYPEKIT_MANIFEST = loadTypekitManifest();
+const TYPEKIT_HOSTS = new Set(["use.typekit.net"]);
+
+// Explicit, reviewed abort list — off-machine requests these hosts make
+// (YouTube/Vimeo embed iframes, the Big Buck Bunny / Sintel MP4 hosts) are
+// known and harmless, so aborting them does NOT count toward the
+// denied-request throw below. Embed stories are vr.disabled, but the
+// test-runner still mounts the iframe during discovery, and the resulting
+// load can keep the browser context's `networkidle` busy long enough that
+// the *next* story in the same `.stories.tsx` file runs out its budget;
+// blocking these hosts means a future story that ever auto-plays (or a
+// regression that does) can't take the suite down either.
+const KNOWN_ABORT_HOSTS =
+  /(?:^|\.)(?:youtube\.com|youtube-nocookie\.com|ytimg\.com|googlevideo\.com|vimeo\.com|vimeocdn\.com|commondatastorage\.googleapis\.com)$/;
+
+// Off-machine URLs the deny-by-default route in `prepare` has aborted since
+// the last check. Module-scoped so `postVisit` can see what `prepare`'s
+// route handler recorded — reset to empty every time it's read (see
+// throwIfDenied below), so a denial is attributed to the one story whose
+// mount/capture window it fell in, not every story for the rest of the file.
+let deniedUrls: string[] = [];
+
+function throwIfDenied(storyId: string): void {
+  if (deniedUrls.length === 0) return;
+  const offending = deniedUrls;
+  deniedUrls = [];
+  throw new Error(
+    `[VR] Story "${storyId}" triggered ${offending.length} denied ` +
+      `off-machine request(s), which must not happen: ${offending.join(", ")}`,
+  );
+}
 
 const VIEWPORTS: Record<VrViewportName, { width: number; height: number }> = {
   mobile: { width: 375, height: 667 },
@@ -48,16 +102,6 @@ const FONT_LOAD_TIMEOUT_MS = 2000;
 // is Playwright's navigation budget, NOT Jest's `--testTimeout` — that one
 // governs the surrounding test and must stay comfortably above this value.
 const INITIAL_NAVIGATION_TIMEOUT_MS = 90000;
-// Cap on each stage of `waitForPageReadyCapped` below. The vendored
-// `@storybook/test-runner` `waitForPageReady` this replaces (#3137, flake
-// ledger class G) runs three `page.waitForLoadState` calls plus a bare
-// `document.fonts.ready` evaluate with NO timeout on any of them —
-// Playwright puts no budget on `page.evaluate` at all. With the deny-by-default
-// route in `prepare` armed, nothing should be able to hang here any more (a
-// blocked request resolves instantly as a network error), but an uncapped
-// wait in the path is still the exact shape #3108 root-caused, so it does not
-// survive regardless.
-const PAGE_READY_TIMEOUT_MS = 5000;
 
 // Runs in the page context BEFORE any story script. Stubs sources of
 // non-determinism that would otherwise produce per-run pixel drift:
@@ -218,25 +262,28 @@ async function waitForFontsSettled(timeoutMs: number) {
 // Replaces `@storybook/test-runner`'s vendored `waitForPageReady` (#3137,
 // flake ledger class G — see #3108's root cause): three uncapped
 // `page.waitForLoadState` calls plus an uncapped `document.fonts.ready`
-// evaluate, any one of which can hang the whole story file if a subresource
-// (a cross-origin stylesheet, historically) never settles. Every wait here
-// gets an explicit cap instead. `networkidle` is soft-capped and falls
-// through, mirroring the same pattern already used for it elsewhere in this
-// file (Storybook's own HMR long-poll keeps it from ever truly idling) — the
-// other three are real signals worth failing loudly on if they blow the
-// budget, so they stay hard caps.
+// evaluate. Cut down to what isn't already covered elsewhere in this file,
+// rather than mirroring the vendored shape one-for-one:
+//   - `load` is dropped — `prepare`'s one `page.goto(..., { waitUntil: "load" })`
+//     already awaited it, Storybook never re-navigates between stories (it's
+//     an SPA), so a second `load` wait always resolves instantly and checks
+//     nothing new.
+//   - `fonts.ready` is dropped — the very next line calls
+//     `waitForFontsSettled`, which races the same signal itself (see its own
+//     docblock for why a bare `fonts.ready` isn't trustworthy on its own).
+//     Racing it twice risked leaking an uncleared `setTimeout` handle on the
+//     loser of each race, for no additional signal.
+// `domcontentloaded` and `networkidle` stay — both still capped (native
+// Playwright timeouts, no manual `Promise.race`/`setTimeout` to leak),
+// `networkidle` soft (`.catch`) for the same HMR-long-poll reason as
+// `NETWORK_IDLE_TIMEOUT_MS` above.
 async function waitForPageReadyCapped(page: Page, timeoutMs: number) {
   await page.waitForLoadState("domcontentloaded", { timeout: timeoutMs });
-  await page.waitForLoadState("load", { timeout: timeoutMs });
   await page
     .waitForLoadState("networkidle", { timeout: timeoutMs })
     .catch(() => {
       // Soft signal — see NETWORK_IDLE_TIMEOUT_MS above for why.
     });
-  await Promise.race([
-    page.evaluate(() => document.fonts.ready),
-    new Promise((resolve) => setTimeout(resolve, timeoutMs)),
-  ]);
 }
 
 const config: TestRunnerConfig = {
@@ -281,6 +328,19 @@ const config: TestRunnerConfig = {
       );
     }
 
+    const targetURL = process.env.TARGET_URL;
+    if (!targetURL) {
+      throw new Error(
+        "[VR] TARGET_URL is not set; the test-runner did not pass it through.",
+      );
+    }
+    // Read before the route below is registered — the allowlist compares
+    // against this exact origin, not just "127.0.0.1/localhost on any port",
+    // which would also let through a stray request to the BFF (:8787) or a
+    // `next dev` server (:3000) running on the same machine.
+    const storybookOrigin = new URL(targetURL).origin;
+    const iframeURL = new URL("iframe.html", targetURL).toString();
+
     // Deny by default: a VR page may not fetch anything off this machine
     // (#3137, flake ledger class G). #3108 root-caused a story-file stall to
     // two live font CDNs (Adobe Typekit, Google Fonts) that the accessibility
@@ -289,36 +349,50 @@ const config: TestRunnerConfig = {
     // took the whole story file down because the vendored page-ready wait
     // blocked on the `load` event uncapped (see waitForPageReadyCapped
     // above). The fix is an enforcement route, not a bigger deny-list: allow
-    // only the Storybook origin itself (whatever host/port TARGET_URL below
-    // resolves to — 127.0.0.1/localhost in every environment this runner
-    // runs in, local Docker and CI alike) and inert `data:`/`blob:` URLs
-    // (inlined images, no network at all); abort everything else and log its
-    // URL so a zero-count is verifiable from CI/local logs. This replaces the
-    // old hand-maintained seven-host video deny-list — the next third-party
-    // `<link>` or `<iframe>` anyone adds becomes impossible instead of
-    // unnoticed, which is exactly what let the Typekit/Google Fonts links
-    // into preview-head.html unnoticed in the first place.
+    // only the Storybook origin itself and inert `data:`/`blob:` URLs
+    // (inlined images, no network at all); fulfil the one Typekit host from
+    // the prefetched cache instead of letting it reach the network; abort a
+    // small explicit list of known-harmless embed hosts; and record + log
+    // (and `postVisit` fails the story on) anything else — so the next
+    // third-party `<link>` or `<iframe>` anyone adds becomes impossible
+    // instead of unnoticed, which is exactly what let the Typekit/Google
+    // Fonts links into preview-head.html unnoticed in the first place.
+    // `preview-head.html` keeps its live Typekit `<link>` so plain
+    // `pnpm storybook` dev (which never registers this route) just works.
     await browserContext.route("**/*", (route) => {
-      const url = new URL(route.request().url());
+      const request = route.request();
+      const url = new URL(request.url());
+
       if (
         url.protocol === "data:" ||
         url.protocol === "blob:" ||
-        url.hostname === "127.0.0.1" ||
-        url.hostname === "localhost"
+        url.origin === storybookOrigin
       ) {
         return route.continue();
       }
-      console.warn(`[VR] denied off-machine request: ${url.toString()}`);
+
+      if (TYPEKIT_HOSTS.has(url.hostname)) {
+        const cached = TYPEKIT_MANIFEST[request.url()];
+        if (cached) {
+          return route.fulfill({
+            path: join(TYPEKIT_CACHE_DIR, cached.file),
+            contentType: cached.contentType,
+          });
+        }
+        // No manifest entry — either scripts/prefetch-typekit.mjs never ran,
+        // or the kit added a face this run's prefetch didn't capture. Either
+        // way, fall through to the deny-and-record path below rather than
+        // silently reaching the live network.
+      }
+
+      if (KNOWN_ABORT_HOSTS.test(url.hostname)) {
+        return route.abort();
+      }
+
+      deniedUrls.push(request.url());
+      console.warn(`[VR] denied off-machine request: ${request.url()}`);
       return route.abort();
     });
-
-    const targetURL = process.env.TARGET_URL;
-    if (!targetURL) {
-      throw new Error(
-        "[VR] TARGET_URL is not set; the test-runner did not pass it through.",
-      );
-    }
-    const iframeURL = new URL("iframe.html", targetURL).toString();
 
     if (cfg?.getHttpHeaders) {
       const headers = await cfg.getHttpHeaders(iframeURL);
@@ -352,6 +426,10 @@ const config: TestRunnerConfig = {
     });
   },
   async postVisit(page, context) {
+    // Covers the mount phase — anything the story pulled in between
+    // `preVisit` and here. See throwIfDenied above.
+    throwIfDenied(context.id);
+
     const story = await getStoryContext(page, context);
     const vrParams = (story.parameters?.vr ?? {}) as {
       disable?: boolean;
@@ -442,7 +520,7 @@ const config: TestRunnerConfig = {
     // end-state — `group-hover:scale-105`, `hover:-translate-y-1`, the green
     // top-border clip-path swap — would still snap on and produce a diff.
     await page.mouse.move(-1, -1);
-    await waitForPageReadyCapped(page, PAGE_READY_TIMEOUT_MS);
+    await waitForPageReadyCapped(page, NETWORK_IDLE_TIMEOUT_MS);
     await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
 
     for (const name of requestedViewports) {
@@ -633,6 +711,10 @@ const config: TestRunnerConfig = {
         updatePassedSnapshot: true,
       });
     }
+
+    // Covers the capture phase — image/font loads triggered while the
+    // viewport loop above ran. See throwIfDenied above.
+    throwIfDenied(context.id);
   },
 };
 
