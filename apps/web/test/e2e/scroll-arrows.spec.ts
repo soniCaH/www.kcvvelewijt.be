@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Locator } from "@playwright/test";
-import { discoverRouteFixtures, type RouteFixtures } from "./helpers/fixtures";
+import { discoverMatchId, FIXTURES } from "./helpers/fixtures";
 import { gotoBounded } from "./helpers/goto";
 
 // #2577 — "one scroll arrow in two registers, held space by real overflow"
@@ -18,9 +18,7 @@ import { gotoBounded } from "./helpers/goto";
 // actually scroll that way. That holds regardless of which side of the
 // overflow boundary today's real content happens to land on.
 
-let fixtures: RouteFixtures;
-/** Every `/ploegen/[slug]` in the sitemap — `fixtures.teamSlug` is only the
- * first one, and #2444/#2478 already recorded that whether a team's section
+/** Every `/ploegen/[slug]` in the sitemap — one pinned team is not enough, and #2444/#2478 already recorded that whether a team's section
  * nav renders at all (let alone overflows) is pre-season-dependent per
  * team: the senior sides currently ship ≤1 section (no nav at all) while
  * several youth sides ship enough for the nav to appear. Scanning the full
@@ -48,11 +46,12 @@ function hasNumberedStandingsTable(html: string): boolean {
   return /data-testid="standings-table"(?!\s+data-variant)/.test(html);
 }
 
-test.beforeAll(async ({ baseURL }) => {
+// ponytail: this spec still sweeps every team page at start-up — the one
+// page-probing left in the suite. #3146 deletes the whole file.
+test.beforeAll(async ({ baseURL, request }) => {
   if (!baseURL) {
     throw new Error("playwright config baseURL is required");
   }
-  fixtures = await discoverRouteFixtures(baseURL);
 
   const sitemapResponse = await fetch(`${baseURL}/sitemap.xml`);
   const sitemapXml = await sitemapResponse.text();
@@ -80,8 +79,9 @@ test.beforeAll(async ({ baseURL }) => {
     }
     if (standingsTableUrl && teamSectionNavSlug) break;
   }
-  if (!standingsTableUrl && fixtures.matchId) {
-    const url = `/wedstrijd/${fixtures.matchId}`;
+  const matchId = standingsTableUrl ? null : await discoverMatchId(request);
+  if (matchId) {
+    const url = `/wedstrijd/${matchId}`;
     const response = await fetch(`${baseURL}${url}`);
     if (response.ok && hasNumberedStandingsTable(await response.text())) {
       standingsTableUrl = url;
@@ -315,10 +315,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
   test("HorizontalSlider (RelatedRow) on /nieuws/[slug] — desktop and mobile", async ({
     page,
   }) => {
-    const slug = Object.values(fixtures.articleSlugByType).find(
-      (s): s is string => s !== null,
-    );
-    test.skip(!slug, "no article slugs in sitemap");
+    const slug = FIXTURES.articleSlugByType.interview;
 
     for (const viewport of [
       { width: 1440, height: 900 },
@@ -407,10 +404,7 @@ test.describe("scroll arrow — mounts only on real overflow at that width", () 
   test("HtmlTableBlock in an article body — desktop and mobile", async ({
     page,
   }) => {
-    const slug = Object.values(fixtures.articleSlugByType).find(
-      (s): s is string => s !== null,
-    );
-    test.skip(!slug, "no article slugs in sitemap");
+    const slug = FIXTURES.articleSlugByType.interview;
 
     for (const viewport of [
       { width: 1440, height: 900 },

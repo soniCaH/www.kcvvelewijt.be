@@ -1,4 +1,4 @@
-import { request } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 
 export const ARTICLE_TYPES = [
   "interview",
@@ -8,165 +8,43 @@ export const ARTICLE_TYPES = [
 ] as const;
 export type ArticleType = (typeof ARTICLE_TYPES)[number];
 
-export interface RouteFixtures {
-  /** First article slug for each known articleType, or null if none was found. */
-  articleSlugByType: Record<ArticleType, string | null>;
-  eventSlug: string | null;
-  playerSlug: string | null;
-  teamSlug: string | null;
-  matchId: string | null;
-}
-
-const PATH_PREFIXES = {
-  article: "/nieuws/",
-  event: "/evenementen/",
-  player: "/spelers/",
-  team: "/ploegen/",
-  match: "/wedstrijd/",
+/**
+ * The suite's fixed subjects in the `staging` dataset — the E2E data contract
+ * (#3087). The workflow builds against `staging`; so must a local run.
+ *
+ * The first six are the fixture documents that
+ * `apps/studio/scripts/seed-e2e-fixtures.ts` writes (#3147). If one is
+ * missing, re-run that script. The player and the team are real staging
+ * documents, pinned as they exist ("pin what exists", #3087 §3): nothing
+ * syncs staging, so they do not move.
+ */
+export const FIXTURES = {
+  articleSlugByType: {
+    interview: "e2e-interview",
+    announcement: "e2e-announcement",
+    transfer: "e2e-transfer",
+    event: "e2e-event",
+  } satisfies Record<ArticleType, string>,
+  eventSlug: "e2e-event-far-future",
+  gallerySlug: "e2e-photo-gallery",
+  /** Glenn Breugelmans, first team — `/spelers/[psdId]`. */
+  playerSlug: "778",
+  teamSlug: "eerste-elftallen-a",
 } as const;
 
-const HERO_TESTID_BY_TYPE: Record<ArticleType, string> = {
-  interview: 'data-testid="interview-hero"',
-  announcement: 'data-testid="announcement-hero"',
-  transfer: 'data-testid="transfer-hero"',
-  event: 'data-testid="event-hero"',
-};
-
-const ARTICLE_PROBE_BUDGET = 30;
-
-interface SitemapEntry {
-  pathname: string;
-}
-
 /**
- * Discover representative slugs for each dynamic-route family on the running
- * site. The site's `/sitemap.xml` is the source of truth — it lists every
- * article, event, player, team, and recent match. This keeps the e2e suite
- * resilient to CMS content changes without requiring Sanity credentials in
- * the test runtime.
- *
- * articleType is detected by fetching candidate article pages and matching
- * the type-specific hero `data-testid` attributes that already exist for
- * component-level tests. Up to `ARTICLE_PROBE_BUDGET` candidates are probed
- * before giving up on a missing type.
+ * The one subject that cannot be pinned. A match is a PSD record, not a
+ * Sanity document, and the sitemap only lists matches of the last 90 days
+ * (`apps/web/src/app/sitemap.ts`) — every match ages out of its own window.
+ * So it is read off the sitemap each run: one GET, no page probing.
  */
-export async function discoverRouteFixtures(
-  baseURL: string,
-): Promise<RouteFixtures> {
-  const api = await request.newContext();
-  try {
-    const entries = await fetchSitemap(api, baseURL);
-
-    const articleSlugByType: Record<ArticleType, string | null> = {
-      interview: null,
-      announcement: null,
-      transfer: null,
-      event: null,
-    };
-
-    const articleSlugs = slugsUnder(entries, PATH_PREFIXES.article);
-    const probeCount = Math.min(articleSlugs.length, ARTICLE_PROBE_BUDGET);
-    // Tolerate per-slug failures: a single article that 5xxs (or whose
-    // request rejects on a transient network error) must not poison the
-    // whole probe — a missing articleType variant is recoverable (the
-    // affected test will skip), but a thrown promise here would fail
-    // every test in the file via the beforeAll hook.
-    const probeOutcomes = await Promise.allSettled(
-      articleSlugs.slice(0, probeCount).map(async (slug) => ({
-        slug,
-        type: await probeArticleType(api, baseURL, slug),
-      })),
-    );
-    let typesFound = 0;
-    for (const outcome of probeOutcomes) {
-      if (outcome.status !== "fulfilled") continue;
-      const { slug, type } = outcome.value;
-      if (!type) continue;
-      if (articleSlugByType[type] !== null) continue;
-      articleSlugByType[type] = slug;
-      typesFound++;
-    }
-
-    // Hard fail if we attempted to probe candidates and not a single one
-    // resolved to a known articleType. The "no articles in sitemap" case is
-    // legitimate (probeCount === 0) and degrades to skipping the four
-    // articleType tests; the "everything failed" case means upstream
-    // rendering is broken or the data-testid="<type>-hero" markers were
-    // renamed, and must surface loudly rather than silently skipping every
-    // /nieuws/[slug] test.
-    if (probeCount > 0 && typesFound === 0) {
-      throw new Error(
-        `discoverRouteFixtures: probed ${probeCount} article slug(s) from ` +
-          `sitemap.xml but found zero matching articleType. Either upstream ` +
-          `article rendering is failing, or the data-testid="<type>-hero" ` +
-          `markers (interview/announcement/transfer/event) were renamed in ` +
-          `apps/web/src/components/article/.`,
-      );
-    }
-
-    return {
-      articleSlugByType,
-      eventSlug: firstSlugUnder(entries, PATH_PREFIXES.event),
-      playerSlug: firstSlugUnder(entries, PATH_PREFIXES.player),
-      teamSlug: firstSlugUnder(entries, PATH_PREFIXES.team),
-      matchId: firstSlugUnder(entries, PATH_PREFIXES.match),
-    };
-  } finally {
-    await api.dispose();
-  }
-}
-
-async function fetchSitemap(
-  api: Awaited<ReturnType<typeof request.newContext>>,
-  baseURL: string,
-): Promise<SitemapEntry[]> {
-  const response = await api.get(`${baseURL}/sitemap.xml`);
+export async function discoverMatchId(
+  request: APIRequestContext,
+): Promise<string | null> {
+  const response = await request.get("/sitemap.xml");
   if (!response.ok()) {
-    throw new Error(
-      `Failed to fetch sitemap.xml: ${response.status()} ${response.statusText()}`,
-    );
+    throw new Error(`Failed to fetch sitemap.xml: ${response.status()}`);
   }
   const xml = await response.text();
-  const matches = xml.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/g);
-  return Array.from(matches, (m) => ({ pathname: pathnameOf(m[1]) }));
-}
-
-function pathnameOf(loc: string): string {
-  try {
-    return new URL(loc).pathname;
-  } catch {
-    return "";
-  }
-}
-
-function slugsUnder(entries: SitemapEntry[], prefix: string): string[] {
-  const slugs: string[] = [];
-  for (const entry of entries) {
-    if (!entry.pathname.startsWith(prefix)) continue;
-    const remainder = entry.pathname.slice(prefix.length).replace(/\/+$/, "");
-    if (remainder.length === 0 || remainder.includes("/")) continue;
-    slugs.push(remainder);
-  }
-  return slugs;
-}
-
-function firstSlugUnder(
-  entries: SitemapEntry[],
-  prefix: string,
-): string | null {
-  return slugsUnder(entries, prefix)[0] ?? null;
-}
-
-async function probeArticleType(
-  api: Awaited<ReturnType<typeof request.newContext>>,
-  baseURL: string,
-  slug: string,
-): Promise<ArticleType | null> {
-  const response = await api.get(`${baseURL}/nieuws/${slug}`);
-  if (!response.ok()) return null;
-  const html = await response.text();
-  for (const type of ARTICLE_TYPES) {
-    if (html.includes(HERO_TESTID_BY_TYPE[type])) return type;
-  }
-  return null;
+  return xml.match(/<loc>[^<]*\/wedstrijd\/([^/<\s]+)\s*<\/loc>/)?.[1] ?? null;
 }

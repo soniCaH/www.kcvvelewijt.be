@@ -63,18 +63,33 @@ under the same `apps/web/test/e2e/` umbrella.
 
 ### Dynamic-route fixtures
 
-Slugs for `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen/[slug]`,
-`/wedstrijd/[matchId]`, and `/evenementen/[slug]` are discovered at suite startup
-by parsing `${BASE_URL}/sitemap.xml`. articleType variants are detected by
-fetching candidate article pages and matching the type-specific
-`data-testid="<type>-hero"` markers. If a route family has zero entries in
-the sitemap, that test is skipped (visible in runner output) rather than
-failing.
+The suite runs against the **`staging`** dataset, always — the workflow pins
+`NEXT_PUBLIC_SANITY_DATASET: staging`, and a local run needs a build made with
+the same value. Production holds no event articles, so it cannot serve the
+fixtures (#3087).
+
+Dynamic routes test **pinned subjects**, listed in
+`apps/web/test/e2e/helpers/fixtures.ts` (`FIXTURES`): the six fixture documents
+below, plus one real staging player (`/spelers/778`) and team
+(`/ploegen/eerste-elftallen-a`), pinned as they exist. Nothing probes pages at
+start-up to find them.
+
+**Matches stay discovered.** A match is a PSD record, not a Sanity document,
+and the sitemap lists only matches of the last 90 days — every match ages out
+of its own window, so no match id can be pinned. `discoverMatchId()` reads one
+off `/sitemap.xml` each run; with no match in the window, that test skips.
+
+**What pinned data does not fix.** 6 of the 7 retries that green `main` runs
+hid were hydration and `IntersectionObserver` races. No data choice touches
+them: there is no hydration signal to wait for, and the framework's answer is
+an app-side fix. They live in `scroll-arrows.spec.ts` and
+`section-nav.spec.ts`, which #3146 deletes. `scroll-arrows.spec.ts` also still
+sweeps every team page at start-up until then.
 
 ### Pinned fixture documents in `staging` (#3147)
 
-Six documents in the `staging` dataset are the fixed subjects the suite will
-pin in place of the sitemap discovery above (the switch is #3148), per the
+Six documents in the `staging` dataset are the fixed subjects the suite pins
+(#3148), per the
 E2E data contract (#3087): one `article` per type
 (`e2e-article-{interview,announcement,transfer,event}`), one `event` dated
 **2099** (`e2e-event-far-future`) so the calendar never runs out of future
@@ -96,8 +111,7 @@ npx sanity exec scripts/seed-e2e-fixtures.ts --with-user-token
 ```
 
 **Staging is the E2E content surface, and Kevin owns it.** Nothing refreshes
-it, on purpose. Once #3148 pins these slugs, a missing fixture turns the suite
-red. An edited one may not: `smokeTest()` checks that the page renders, not that
+it, on purpose. A missing fixture turns the suite red. An edited one may not: `smokeTest()` checks that the page renders, not that
 its fields match the seed. Either way, re-run the script to repair the drift.
 
 ### CI
