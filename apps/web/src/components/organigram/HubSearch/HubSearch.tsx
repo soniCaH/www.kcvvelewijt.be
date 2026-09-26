@@ -400,6 +400,17 @@ export function HubSearch({
     : rows;
   const navItems = showShimmer ? memberResults : items;
   const showResults = isFocused && visible && trimmed.length > 0;
+  // Whether the popup's `role="listbox"` actually owns any `option`
+  // children right now — the shimmer branch can itself render zero
+  // `MemberRow`s while still waiting on the answer lane, and the "Geen
+  // resultaten" branch always renders an empty listbox by design (#3188).
+  // `aria-expanded`/`aria-controls` below key off this, not off
+  // `showResults` alone: a combobox popup with no navigable options isn't
+  // "expanded" in the ARIA combobox sense, even though the "Geen
+  // resultaten" copy is still visible and reachable by Tab.
+  const hasNavigableResults = showShimmer
+    ? memberResults.length > 0
+    : items.length > 0;
 
   // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
   // the list — the shimmer→settled flip, an answer-forward card sliding into
@@ -632,8 +643,10 @@ export function HubSearch({
           role="combobox"
           aria-label="Zoek een persoon of hulpvraag"
           aria-autocomplete="list"
-          aria-expanded={showResults}
-          aria-controls={showResults ? listboxId : undefined}
+          aria-expanded={showResults && hasNavigableResults}
+          aria-controls={
+            showResults && hasNavigableResults ? listboxId : undefined
+          }
           aria-activedescendant={
             selectedIndex >= 0 && selectedIndex < navItems.length
               ? `${listboxId}-opt-${selectedIndex}`
