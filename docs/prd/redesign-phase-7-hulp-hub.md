@@ -86,10 +86,11 @@ Order = **Hulp-first**. Explorer = **2-D spotlight, no 3-D** (investigated + rem
 
 ## 4. Phases
 
-> Phases are sequential; each ends green (`check-all`, stories, VR, e2e where relevant). Component-level
+> Phases are sequential; each ends green (the turbo gate, stories, VR, e2e where relevant). Component-level
 > work ships its Storybook story (+ `vr` tag + baselines) and unit tests per the apps/web contract.
 
 ### Phase 1 — Tracer: hub shell + route + unified search + nav — #2052
+
 Stand up `/hulp` as the hub: `<OrganigramSectionNav>` (two doors + sticky search), `<OrganigramHero>`
 (dark band + `<HubSearch>` + audience chips + structure-index artefact from real counts), skeleton
 `#hulp` / `#structuur` sections, `<CtaBand>`. Wire both repos server-side (ISR 3600). **Retire the
@@ -97,17 +98,20 @@ Stand up `/hulp` as the hub: `<OrganigramSectionNav>` (two doors + sticky search
 keyword-ranked (people + answers), replacing `UnifiedSearchBar` + `HulpSearchInput`.
 
 ### Phase 2 — Structuur directory + person card — #2053
+
 `<StructureDirectory>` (people grouped by afdeling, compact + "Toon alle N →"). `<OrgPersonCard>`
 (extends 6.C `<TeamStaff>`): **single** (photo/monogram) · **shared** (dual-avatar + "N personen", click →
 panel) · **vacant** (recruit: warm card, "deze plek is vrij", "Iets voor jou? →"). Optional roleCode pill.
 
 ### Phase 3 — `<OrganigramExplorer>` (fullscreen 2-D spotlight) — #2054
+
 Opt-in fullscreen focused mode launched from "Open verkenner ⤢". Spotlight drill-down: selected node
 centred · parent above + breadcrumb · siblings flank · children fan below · click/keyboard nav
 (↑↓←→/Enter) · zoom/fit · Esc. **Retire `EnhancedOrgChart` + the `d3-org-chart` dependency,
 `MobileNavigationDrawer`, `ContactOverlay`.** No 3-D, no WebGL.
 
 ### Phase 4 — `<MemberDetailPanel>` (person-first) — #2055
+
 Right side-panel (desktop) / full-width bottom sheet (mobile). **Single** → opens directly; **shared** →
 lands on first holder + **name-tab holder-switcher**. Contact (✉/☎ if present) · "Helpt met" → Hulp ·
 "Volledig profiel →" (`/staf/{psdId}` if present). Opens from a directory card **and** an explorer leaf.
@@ -115,6 +119,7 @@ Labelled dialog, focus trap, `?member=` deep-link. **Retire `MemberDetailsModal`
 `ContactOverlay`).
 
 ### Phase 5 — `<HulpFinder>` (reskin `<HulpPage>`) — #2056
+
 Reskin to fanzine vocab: category + audience chips · **"Alles" = capped category preview** (top 3 per
 category by declaration/`sortOrder`/alpha — **no fabricated "most asked"** + "Alle N →") · `<QuestionCard>`
 **inline accordion** → summary · numbered steps · `<ContactCard>`. Contact reuses person vocab + a
@@ -123,6 +128,7 @@ category by declaration/`sortOrder`/alpha — **no fabricated "most asked"** + "
 `ResponsibilityFinder` + `HulpSearchInput`.**
 
 ### Phase 6 — Semantic/AI question search — #2057
+
 Embed `responsibility` docs into a Cloudflare **Vectorize** index (`@cf/baai/bge-m3`, 1024-dim cosine,
 `MIN_SCORE ≈ 0.35`) via a BFF endpoint; route the hub search's **question intent** through it so natural
 language ("mijn kind heeft zich bezeerd") matches without keyword overlap. People-search stays
@@ -131,17 +137,18 @@ may split into "index+endpoint" / "wire-up". If descoped, Phase 5's keyword sear
 a fast-follow.)_
 
 ### Phase 7 — Assembly · cross-links · SEO · analytics · retirement · tests — #2058
+
 Final Hulp-first assembly + `<StripedSeam>` + cross-links (Structuur ⇄ Hulp). FAQ + BreadcrumbList +
 Organization JSON-LD. Analytics (§6) + GTM note. Delete all retired legacy + confirm `git grep` clean.
 Update `/hulp` e2e smoke (route is now the hub), add the `/club/organigram` removal. VR baselines for every
-new component story. `check-all` green.
+new component story. the turbo gate green.
 
 ## 5. Acceptance criteria (per phase)
 
 **Phase 1** — [ ] `/hulp` renders the hub shell + sticky two-door nav + hero + unified search; [ ]
 `/club/organigram` route removed, "Organigram" nav → `/hulp#structuur`; [ ] structure-index counts derive
 from repo data; [ ] `<HubSearch>` returns people + answers (keyword); [ ] e2e smoke for `/hulp`; [ ]
-`check-all` green.
+the turbo gate green.
 **Phase 2** — [ ] directory groups by afdeling, "Toon alle N →" caps render; [ ] `<OrgPersonCard>` single
 / shared / vacant-recruit stories + VR; [ ] no fabricated data (vacant = real 0-members).
 **Phase 3** — [ ] explorer fullscreen spotlight: breadcrumb + click/keyboard nav + zoom/fit + Esc; [ ] **no
@@ -150,30 +157,31 @@ scroll-jacking** (no page wheel capture); [ ] `d3-org-chart` removed from `packa
 **Phase 4** — [ ] panel opens from directory + explorer; single direct / shared switcher; contact actions
 only when data present; [ ] labelled dialog + focus trap + `?member=`; [ ] `MemberDetailsModal` deleted.
 **Phase 5** — [ ] "Alles" never renders the full flat list (capped preview); [ ] accordion answer = summary
-+ steps + contact; [ ] "toon in structuur" deep-links the explorer; [ ] `ResponsibilityFinder` +
-`HulpSearchInput` deleted; [ ] `resolveContact` paths (position/team-role/manual) covered by tests.
-**Phase 6** — [ ] Vectorize index built (1024-dim cosine, bge-m3) + BFF endpoint; [ ] NL query matches the
-right answer above `MIN_SCORE`; [ ] keyword fallback on failure; [ ] no PII in embeddings beyond public Q&A.
-**Phase 7** — [ ] cross-links both ways; [ ] FAQ/Breadcrumb/Organization JSON-LD validate; [ ] analytics
-events fire (GTM note in PR); [ ] all legacy retired (`UnifiedOrganigramClient`, `SectionStack`,
-`InteriorPageHero`, `SectionCta`, `diagonal` on these surfaces); [ ] VR baselines committed; [ ]
-`check-all` + e2e green.
+
+- steps + contact; [ ] "toon in structuur" deep-links the explorer; [ ] `ResponsibilityFinder` +
+  `HulpSearchInput` deleted; [ ] `resolveContact` paths (position/team-role/manual) covered by tests.
+  **Phase 6** — [ ] Vectorize index built (1024-dim cosine, bge-m3) + BFF endpoint; [ ] NL query matches the
+  right answer above `MIN_SCORE`; [ ] keyword fallback on failure; [ ] no PII in embeddings beyond public Q&A.
+  **Phase 7** — [ ] cross-links both ways; [ ] FAQ/Breadcrumb/Organization JSON-LD validate; [ ] analytics
+  events fire (GTM note in PR); [ ] all legacy retired (`UnifiedOrganigramClient`, `SectionStack`,
+  `InteriorPageHero`, `SectionCta`, `diagonal` on these surfaces); [ ] VR baselines committed; [ ]
+  the turbo gate + e2e green.
 
 ## 6. Analytics
 
 `organigram_` and `responsibility_` are **already in the live GTM Custom-Event trigger regex** — no regex
 change required; new params still need DLVs + GA4 mappings.
 
-| Event | Trigger | Params |
-| --- | --- | --- |
-| `hub_view` | `/hulp` page view | — |
-| `organigram_section_in_view` | Structuur/Hulp section scrolled into view | `section` |
-| `organigram_search_used` | unified search query | `query_length` (length only — no query content; matches the existing `responsibility_search` convention, replaces the legacy `query_text`) |
-| `organigram_member_clicked` | open `<MemberDetailPanel>` (incl. holder-switch) | `member_id` (hashed via `hashMemberId`), `source` (directory/explorer/search) |
-| `organigram_explorer_opened` | "Open verkenner ⤢" | — |
-| `responsibility_view` | open a question accordion | `path_id` (public slug — not PII) |
-| `responsibility_contact_clicked` | ✉/☎ on a Hulp contact | `path_id`, `contact_type` |
-| `responsibility_organigram_link` | "toon in structuur →" | `node_id` (hashed via `hashMemberId` — the generic id-hasher; no separate node helper exists) |
+| Event                            | Trigger                                          | Params                                                                                                                                     |
+| -------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `hub_view`                       | `/hulp` page view                                | —                                                                                                                                          |
+| `organigram_section_in_view`     | Structuur/Hulp section scrolled into view        | `section`                                                                                                                                  |
+| `organigram_search_used`         | unified search query                             | `query_length` (length only — no query content; matches the existing `responsibility_search` convention, replaces the legacy `query_text`) |
+| `organigram_member_clicked`      | open `<MemberDetailPanel>` (incl. holder-switch) | `member_id` (hashed via `hashMemberId`), `source` (directory/explorer/search)                                                              |
+| `organigram_explorer_opened`     | "Open verkenner ⤢"                               | —                                                                                                                                          |
+| `responsibility_view`            | open a question accordion                        | `path_id` (public slug — not PII)                                                                                                          |
+| `responsibility_contact_clicked` | ✉/☎ on a Hulp contact                            | `path_id`, `contact_type`                                                                                                                  |
+| `responsibility_organigram_link` | "toon in structuur →"                            | `node_id` (hashed via `hashMemberId` — the generic id-hasher; no separate node helper exists)                                              |
 
 Drop the legacy 3-D / diagram-mode events (no 3-D). No PII: hash internal ids, sanitise queries, never
 send emails/phones/raw names.

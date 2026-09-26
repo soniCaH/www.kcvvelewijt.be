@@ -100,7 +100,7 @@ Phase 7: Delete SanityService.ts + lib/sanity/queries/ barrel → #891
 - [ ] `players/[slug]/page.tsx` uses `PlayerRepository.findByPsdId()` — no `SanityService.getPlayerByPsdId()` call remaining
 - [ ] `SanityService.getPlayers()`, `SanityService.getPlayerByPsdId()` deleted; `SanityPlayer` interface deleted
 - [ ] `transformSanityPlayerToRoster()` in `team/[slug]/utils.ts` deleted (absorbed into repository)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — TeamRepository
 
@@ -110,7 +110,7 @@ Phase 7: Delete SanityService.ts + lib/sanity/queries/ barrel → #891
 - [ ] Tests: `findAll()` with fixture → TeamNavVM[] correct; `findBySlug()` → TeamDetailVM correct; null for unknown slug
 - [ ] Team navigation + `team/[slug]/page.tsx` migrated; relevant `team/[slug]/utils.ts` transforms absorbed into repository
 - [ ] `SanityService.getTeams()`, `SanityService.getTeamBySlug()` deleted; `SanityTeam`, `SanityStaffMember` interfaces deleted (or moved into repository if still needed)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — ArticleRepository
 
@@ -121,7 +121,7 @@ Phase 7: Delete SanityService.ts + lib/sanity/queries/ barrel → #891
 - [ ] News list page + article detail page + homepage article sections migrated
 - [ ] `SanityService.getArticles()`, `SanityService.getArticleBySlug()` deleted; `SanityArticle` deleted
 - [ ] `lib/mappers/article.mapper.ts` deleted (fully absorbed)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phases 4a–4c — Sponsor / Event / Homepage repositories
 
@@ -131,34 +131,34 @@ Each follows the same acceptance criteria pattern:
 - [ ] VM type defined; at least one test with fixture data
 - [ ] All consuming pages migrated in the same PR
 - [ ] Corresponding `SanityService` method(s) and interface(s) deleted
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5a — StaffRepository
 
 - [ ] `StaffRepository` with `findAll() → OrgChartNode[]`
 - [ ] `mapOrgMember()` and `CLUB_ROOT_NODE` absorbed into repository; `SanityOrgMember` deleted
 - [ ] Staff page migrated; `SanityService.getStaffMembers()` deleted
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5b — ResponsibilityRepository
 
 - [ ] `ResponsibilityRepository` with `findAll() → ResponsibilityPathVM[]`
 - [ ] `mapResponsibilityPath()`, `mapContact()`, `CONTACT_PROJECTION` absorbed; `SanityResponsibilityPath` etc. deleted
 - [ ] Help page migrated; `SanityService.getResponsibilityPaths()` deleted
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 6 — PageRepository
 
 - [ ] `PageRepository` with `findBySlug(slug) → PageVM | null`
 - [ ] Consuming pages migrated; `SanityService.getPage()` deleted; `SanityPage` deleted
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 7 — Delete SanityService
 
 - [ ] `apps/web/src/lib/effect/services/SanityService.ts` deleted
 - [ ] `apps/web/src/lib/sanity/queries/` directory deleted (queries now live inside repositories)
 - [ ] No import of `SanityService` anywhere in `apps/web`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

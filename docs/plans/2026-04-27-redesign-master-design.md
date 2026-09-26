@@ -637,7 +637,7 @@ Each phase moves from idea to merged code through a fixed sequence. Phases 0–2
 [ Execution (subagent-driven OR parallel session) ]
         |
         v
-[ VR baselines + check-all green ]
+[ VR baselines + turbo gate green ]
         |
         v
 [ PR open → owner review → merge ]
@@ -707,13 +707,13 @@ Either:
 
 Either way, each task in the plan is bite-sized (2–5 minutes per step), commits frequently, and ends with the per-phase plan's "Definition of Done" gates green.
 
-### 8.7 Step 6 — VR + check-all
+### 8.7 Step 6 — VR + turbo gate
 
 Per the rules already documented in `apps/web/CLAUDE.md` and the VR contract (`docs/prd/visual-regression-testing.md`):
 
 - All new `UI/<Name>` and `Pages/<Name>` stories tagged `["autodocs", "vr"]`, baselines committed in the same PR.
 - Updated baselines for existing `Features/<Domain>/` and `Layout/<Component>` stories justified in the PR body's `## VR baselines` section.
-- `pnpm --filter @kcvv/web run check-all` green before requesting review.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green before requesting review.
 
 ### 8.8 Step 7 — PR open + review + merge
 

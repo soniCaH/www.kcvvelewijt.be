@@ -54,7 +54,7 @@ Phase 5: Cleanup (delete ArticleCard, RelatedNews, old NewsCard file)  — #961 
 - [x] NewsCard tests updated for new variant
 - [x] `/news` page renders using NewsCard `listing` variant in simple 3-col grid (replacing ArticleCard)
 - [x] `article/index.ts` barrel exports NewsCard
-- [x] `pnpm --filter @kcvv/web check-all` passes
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — News listing page redesign
 
@@ -69,7 +69,7 @@ Phase 5: Cleanup (delete ArticleCard, RelatedNews, old NewsCard file)  — #961 
 - [x] Loading state: skeleton cards or spinner while fetching next batch
 - [x] Empty state: message when no articles match selected category
 - [x] Category changes reset scroll position and article list
-- [x] `pnpm --filter @kcvv/web check-all` passes
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Article detail page redesign
 
@@ -81,7 +81,7 @@ Phase 5: Cleanup (delete ArticleCard, RelatedNews, old NewsCard file)  — #961 
 - [x] Share buttons restyled to match new design language
 - [x] ArticleHeader component redesigned in-place (not new component)
 - [x] ArticleMetadata redesigned as inline horizontal bar (not sidebar)
-- [x] `pnpm --filter @kcvv/web check-all` passes
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Article body content restyling
 
@@ -92,7 +92,7 @@ Phase 5: Cleanup (delete ArticleCard, RelatedNews, old NewsCard file)  — #961 
 - [x] Links: consistent styling with rest of site
 - [x] File attachments: restyle download button
 - [x] Typography: review heading hierarchy, paragraph spacing, line-height for reading comfort
-- [x] `pnpm --filter @kcvv/web check-all` passes
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5 — Cleanup
 
@@ -102,7 +102,7 @@ Phase 5: Cleanup (delete ArticleCard, RelatedNews, old NewsCard file)  — #961 
 - [x] Delete `src/components/article/NewsOverview.stories.tsx` if it references deleted components
 - [x] Remove old `home/LatestNews/NewsCard.tsx` file (now at article/NewsCard/)
 - [x] Verify no dead imports remain: `pnpm --filter @kcvv/web lint:fix`
-- [x] `pnpm --filter @kcvv/web check-all` passes
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

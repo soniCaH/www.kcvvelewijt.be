@@ -38,7 +38,7 @@ Extract `mapCompetitionLabel()` and `resolveCompetitionLabel()` into a new `psd/
 - Create `src/psd/transforms.ts` with the two exported functions
 - Import them from the service file
 - Existing tests in `service.test.ts` still pass with no changes
-- `pnpm --filter @kcvv/api check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 This proves the extraction pattern works before moving the remaining ~500 lines of transforms.
 
@@ -58,7 +58,7 @@ Phase 4: Clean up dead footbalisto references in apps/web
 - [ ] `src/psd/transforms.ts` (or `src/footbalisto/transforms.ts` initially) exists with `mapCompetitionLabel` and `resolveCompetitionLabel`
 - [ ] `service.ts` imports from `./transforms` instead of defining inline
 - [ ] All existing tests pass without modification
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2: Extract all remaining transforms
 
@@ -67,7 +67,7 @@ Phase 4: Clean up dead footbalisto references in apps/web
 - [ ] `transforms.ts` has no Effect service dependencies (pure functions only, may take env-derived values as parameters)
 - [ ] `transforms.test.ts` created with tests extracted from `service.test.ts` (transform-specific tests)
 - [ ] Remaining `service.test.ts` tests cover fetch + cache + orchestration
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3: Rename footbalisto → psd
 
@@ -77,7 +77,7 @@ Phase 4: Clean up dead footbalisto references in apps/web
 - [ ] All test imports updated
 - [ ] Error types: `Footbalisto*` prefixes reviewed (keep if they reference the external system, rename if they're internal)
 - [ ] `apps/api/CLAUDE.md` updated with new paths
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 4: Clean up dead references
 
@@ -85,7 +85,7 @@ Phase 4: Clean up dead footbalisto references in apps/web
 - [ ] `.env.example` — remove `FOOTBALISTO_API_URL` line
 - [ ] `apps/web/tests/setup.ts` — remove `FOOTBALISTO_API_URL` assignment if unused
 - [ ] Grep confirms zero remaining `footbalisto` references outside of `apps/api/src/psd/` (excepting `FOOTBALISTO_LOGO_CDN_URL` in wrangler.toml, deferred)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

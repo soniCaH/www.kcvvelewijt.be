@@ -48,7 +48,7 @@ The thinnest cross-layer slice that proves the Phase 2 architecture works:
 
 > **Land `pnpm vr:update:story <pattern>` + `--color-alert`/`--color-warning` tokens + `<Button variant="primary">` reskinned + Phosphor `ArrowRight` wrapper exported from `icons.redesign.ts`.**
 >
-> Demonstrated by: a new `Button.stories.tsx` `PrimaryRedesigned` story shows jersey-on-cream Button rendering with Phosphor-fill `ArrowRight` consumed via `icons.redesign.ts`, with VR baseline captured _only_ for the changed story (proving the per-story update workflow), and `pnpm --filter @kcvv/web check-all` green.
+> Demonstrated by: a new `Button.stories.tsx` `PrimaryRedesigned` story shows jersey-on-cream Button rendering with Phosphor-fill `ArrowRight` consumed via `icons.redesign.ts`, with VR baseline captured _only_ for the changed story (proving the per-story update workflow), and `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 If the tracer bullet fails, every other Phase 2 sub-task is at risk; if it passes, Track A and Track B can fan out.
 
@@ -91,7 +91,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 - [ ] `<Button variant="primary">` renders `bg-jersey-deep text-cream` with the documented hover/focus treatment
 - [ ] `Button.stories.tsx` `PrimaryRedesigned` story exists with `tags: ["autodocs", "vr"]` and a captured VR baseline
 - [ ] `pnpm vr:update:story -- ui-button` (or any positional regex anchored to the Button atom's story-ID prefix) updates only Button-story baselines (verified by counting changed PNG files)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### 5.A Track A acceptance (per child issue, summarised here)
 
@@ -107,7 +107,7 @@ Phase 2.0 — Tracer bullet (tokens + vr:update:story + Button.primary + Phospho
 Each Track B child issue has two phases internally:
 
 1. **Design phase** (`/design-an-interface` produces mockups + decision; owner approves before implementation begins).
-2. **Implementation phase** — the atom reskinned per approved design; story + VR baseline captured; `check-all` green.
+2. **Implementation phase** — the atom reskinned per approved design; story + VR baseline captured; the turbo gate green.
 
 Per atom:
 
@@ -271,7 +271,7 @@ Heights locked at sm 32 / md 40 / lg 48 (px). Padding scales with the existing `
 4. Update Storybook stories for all four atoms covering every state in the table above (default, hover, focus, filled, filled+focus, error, error+focus, disabled), plus sm/md/lg, optional-pill, hint, kicker.
 5. `pnpm vr:update:story "Input|Select|Textarea|Label|TextareaCounter"` captures baselines.
 6. PR description lists every story whose baseline was updated, plus an explicit **AC overrides** section calling out the sharp-corners override.
-7. `pnpm --filter @kcvv/web check-all` passes.
+7. `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 6.4 Alert — two-form retro vocabulary (`<AlertBadge>` + `<Alert>`)
 

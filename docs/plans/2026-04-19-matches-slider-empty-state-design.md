@@ -305,7 +305,7 @@ Plus a mobile-viewport snapshot of the baseline for each layout.
 - No hardcoded colors; design tokens only.
 - No emoji anywhere in source (use Lucide icons).
 - Unit tests cover the countdown decision rule, edge cases (past date, `n=0`, `n=1`), and the announcement fallback chain.
-- Storybook builds; `pnpm --filter @kcvv/web check-all` passes.
+- Storybook builds; `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ## Open questions — resolved during design
 

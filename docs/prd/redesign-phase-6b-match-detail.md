@@ -116,8 +116,8 @@ Phase 1 (tracer)
 - [ ] `apps/api/src/psd/service.test.ts` — new test case: `cancelled: true` + PSD code 0 → status === `"cancelled"`; existing postponed tests still pass
 - [ ] `apps/api/src/handlers/matches.test.ts` — fixtures or assertions updated wherever they branched on `"postponed"` (audit each)
 - [ ] `apps/web/src/components/match/MatchStatusBadge/MatchStatusBadge.tsx` (and any other web-side consumer) — accept the new literal in its `MatchStatus` import; render path may temporarily delegate to `null` until Phase 2 extends the badge — fine, just don't crash
-- [ ] `pnpm --filter @kcvv/api check-all` passes
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] `pnpm turbo build --filter=@kcvv/api-contract` passes
 
 ### Phase 2 — UI rebuild
@@ -192,7 +192,7 @@ Phase 1 (tracer)
 - [ ] Analytics: `match_detail_view` page-view event fires on mount (pattern from Phase 6.A `<PageViewTracker>`); `match_lineup_section_in_view` + `match_events_section_in_view` intersection events fire when each section enters view (pattern from Phase 6.A `<TrackInView>`); only mount the wrappers when the section will actually render (no orphan events on auto-hide)
 - [ ] GTM regex update: extend the existing `responsibility_|search_|organigram_|related_content_|homepage_|player_` regex to include `match_` (CLAUDE.md analytics-checklist line update + manual GTM trigger change documented in PR body)
 - [ ] Playwright e2e smoke test for `/wedstrijd/[matchId]` still passes (no broken images, `<h1>` visible, console clean)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] `pnpm --filter @kcvv/web run test:e2e` passes locally against this route family
 
 #### Cross-cutting
@@ -207,7 +207,7 @@ Phase 1 (tracer)
 - [ ] `<MatchTeaser variant="compact">` code path removed; `variant` prop simplified per Phase 2 lock
 - [ ] Legacy `<MatchDetailView>` + `<MatchHeader>` deleted (`apps/web/src/components/match/MatchDetailView/`, `apps/web/src/components/match/MatchHeader/`); barrel exports cleaned; no remaining consumers (`rg` confirms)
 - [ ] `apps/web/src/components/design-system/HorizontalSlider/HorizontalSlider.stories.tsx` inline `MatchCard*` mock + `mockMatches` array — **out of scope** per #1528's own follow-up cleanup note; flag if it surfaces in review but defer to a separate ticket
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ---
 
@@ -222,7 +222,7 @@ export const MatchStatus = S.Literal(
   "finished",
   "forfeited",
   "postponed",
-  "cancelled",   // NEW (#6.B.d5)
+  "cancelled", // NEW (#6.B.d5)
   "stopped",
 );
 ```

@@ -196,7 +196,7 @@ All diagonal-related offsets read `var(--footer-diagonal)` from `globals.css` (e
   - (e) Z-index on the transition sibling is stable across modes.
   - (f) Two-consecutive-backdrop case produces a fully-transparent transition.
 - [ ] No visual regression on existing home-page transitions (hero double-diagonal, matchWidget → bannerA, bannerA → latestNews, etc.). Manual Storybook review; automated check once VR Phase 2 lands (see `visual-regression-testing.md`).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 - [ ] `pnpm --filter @kcvv/web storybook:build` passes.
 
 ## 7. Acceptance criteria (consumer migration, #1350)
@@ -210,7 +210,7 @@ All diagonal-related offsets read `var(--footer-diagonal)` from `globals.css` (e
 - [ ] No hairline seam between YouthSection and the sections above/below at any viewport width.
 - [ ] Backdrop + gradient visually extends into both diagonal bands, matching or improving on today's appearance (side-by-side with production screenshot).
 - [ ] Stories and tests updated.
-- [ ] `pnpm --filter @kcvv/web check-all` passes. Storybook builds.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes. Storybook builds.
 
 ## 8. Anti-patterns / do-not
 

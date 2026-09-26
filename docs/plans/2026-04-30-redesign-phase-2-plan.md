@@ -110,7 +110,7 @@ All ACs from #1524 are now met:
 - [x] **Lucide retired from redesign-surface consumers** — every Phase 2 atom imports from `icons.redesign.ts`. Legacy components keep Lucide.
 - [x] **All affected atoms reskinned** — Button, Input, Select, Textarea, Label, Alert, Spinner, BrandedTabs, FilterTabs, HorizontalSlider, ScrollHint. Plus EditorialLink (new) and TextareaCounter (new) extracted along the way; ClippedCard + StampBadge (new) composition primitives added.
 - [x] **VR baselines updated for affected stories** — every sub-PR's `## VR baselines` section enumerates the changed baselines with rationale per the §6.8 surgical-baseline workflow.
-- [x] **`pnpm --filter @kcvv/web check-all` green** — verified at every sub-PR merge.
+- [x] **`pnpm turbo run lint type-check test build --filter=@kcvv/web` green** — verified at every sub-PR merge.
 
 ---
 

@@ -56,7 +56,7 @@ Phases 2 and 3 are independent after the tracer bullet — they could be worked 
 - [ ] Vitest test: `<VideoBlock>` with a valid asset URL renders a `<video>` element with the expected `src`
 - [ ] Vitest test: `<VideoBlock>` with missing asset returns `null` (no crash)
 - [ ] Storybook story `Features/Articles/VideoBlock` — Playground + `UploadOnly` variant
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Embed URL escape hatch + XOR validation
 
@@ -68,7 +68,7 @@ Phases 2 and 3 are independent after the tracer bullet — they could be worked 
 - [ ] When `embedUrl` resolves to a known provider, serializer renders the provider's privacy-enhanced iframe (`youtube-nocookie.com` for YouTube, `player.vimeo.com` for Vimeo) inside a 16:9 aspect container
 - [ ] When `embedUrl` is present but unrecognized, serializer renders a visible editor-facing warning in the browser console and a neutral fallback in the DOM (no iframe, no raw URL injected into HTML)
 - [ ] Storybook stories added: `EmbedYoutube`, `EmbedVimeo`, `EmbedUnknownProvider`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Poster, caption, lazy-load, fullBleed, size guard
 
@@ -82,7 +82,7 @@ Phases 2 and 3 are independent after the tracer bullet — they could be worked 
 - [ ] `ArticleBodyMotion` fade-up still activates on the surrounding `<figure>` without breaking video playback
 - [ ] Storybook stories added: `WithPosterAndCaption`, `FullBleed`
 - [ ] Visual verification across all article templates (`AnnouncementTemplate`, `InterviewTemplate`, plus `TransferTemplate` / `EventTemplate` if they have landed by this phase)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Analytics instrumentation
 
@@ -97,7 +97,7 @@ Phases 2 and 3 are independent after the tracer bullet — they could be worked 
 - [ ] GTM trigger/tag updated; `video_source`, `video_provider`, `video_position` registered as DLVs + GA4 custom dimensions
 - [ ] Vitest: analytics test asserts the privacy-correct parameter shape (slug only, no IDs), not the wire format
 - [ ] Vitest regression test for the dedup guard (fires exactly once across multiple `play` events)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 5b. Analytics (Phase 4 — #1366)
 

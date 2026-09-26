@@ -38,12 +38,14 @@ gh issue comment 1207 --body "Starting implementation on branch \`feat/issue-120
 ### Task 2: Schema — replace contactFields with contactType discriminator
 
 **Files:**
+
 - Modify: `packages/sanity-schemas/src/responsibility.ts:4-32` (contactFields)
 - Modify: `packages/sanity-schemas/src/responsibility.ts:129-142` (primaryContact validation)
 
 **Step 1: Replace `contactFields` (lines 4-32)**
 
 Replace the entire `contactFields` array with the new contactType-discriminated version. See design doc "Schema changes" section for exact code. Key changes:
+
 - Remove `staffMember` reference field
 - Add `contactType` string field with radio layout (`position` | `team-role` | `manual`)
 - Add `organigramNode` reference field (hidden unless contactType === `position`)
@@ -54,6 +56,7 @@ Replace the entire `contactFields` array with the new contactType-discriminated 
 **Step 2: Update primaryContact validation (lines 134-142)**
 
 Replace the custom validation to switch on `contactType`:
+
 - `position` → require `organigramNode` ref
 - `team-role` → require `teamRole` value
 - `manual` → require at least one of `role`, `email`, `phone`
@@ -61,8 +64,8 @@ Replace the custom validation to switch on `contactType`:
 **Step 3: Verify both studios build**
 
 ```bash
-pnpm --filter @kcvv/studio check-all
-pnpm --filter @kcvv/studio-staging check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/studio
+pnpm turbo run lint type-check test build --filter=@kcvv/studio-staging
 ```
 
 **Step 4: Commit**
@@ -83,11 +86,13 @@ Refs #1207"
 ### Task 3: Preview — update responsibility preview to use organigramNode
 
 **Files:**
+
 - Modify: `packages/sanity-schemas/src/preview/responsibility-preview.ts:6-13` (select) and `:24-36` (prepare)
 
 **Step 1: Update preview select (lines 6-13)**
 
 Change the select object:
+
 - Remove: `contactFirstName: 'primaryContact.staffMember->firstName'` (line 10)
 - Remove: `contactLastName: 'primaryContact.staffMember->lastName'` (line 11)
 - Add: `contactNodeTitle: 'primaryContact.organigramNode->title'`
@@ -97,6 +102,7 @@ Change the select object:
 **Step 2: Update prepare function (lines 24-36)**
 
 Update subtitle logic:
+
 - If `contactType === 'position'` and `contactNodeTitle`: show node title
 - If `contactType === 'team-role'`: show "Teamrol (dynamisch)"
 - If `contactType === 'manual'` and `contactRole`: show role
@@ -105,7 +111,7 @@ Update subtitle logic:
 **Step 3: Verify studios build**
 
 ```bash
-pnpm --filter @kcvv/studio check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/studio
 ```
 
 **Step 4: Commit**
@@ -125,6 +131,7 @@ Refs #1207"
 ### Task 4: Update responsibility repository GROQ query — write failing tests first
 
 **Files:**
+
 - Modify: `apps/web/src/lib/repositories/responsibility.repository.test.ts`
 - Modify: `apps/web/src/types/responsibility.ts:21-36` (Contact interface)
 - Modify: `apps/web/src/lib/repositories/responsibility.repository.ts:9-45` (GROQ query)
@@ -135,19 +142,19 @@ Replace the `Contact` interface:
 
 ```typescript
 interface Contact {
-  contactType: 'position' | 'team-role' | 'manual'
+  contactType: "position" | "team-role" | "manual";
   // position (organigramNode)
-  position?: string
-  roleCode?: string
-  members?: Array<{ id: string; name: string; email?: string; phone?: string }>
-  nodeId?: string
+  position?: string;
+  roleCode?: string;
+  members?: Array<{ id: string; name: string; email?: string; phone?: string }>;
+  nodeId?: string;
   // team-role (dynamic, resolved at runtime by #1220)
-  teamRole?: 'trainer' | 'afgevaardigde'
+  teamRole?: "trainer" | "afgevaardigde";
   // manual (inline fallback)
-  role?: string
-  email?: string
-  phone?: string
-  department?: 'hoofdbestuur' | 'jeugdbestuur' | 'algemeen'
+  role?: string;
+  email?: string;
+  phone?: string;
+  department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
 }
 ```
 
@@ -158,6 +165,7 @@ Remove `memberId` and `name` top-level fields — replaced by `members[]` array 
 **Step 3: Update tests** (`responsibility.repository.test.ts`)
 
 Update the mocked Sanity response shape in existing tests (lines 83-200) to match the new GROQ projection output. The mock data should return:
+
 - `contactType: 'position'` with `position`, `members[]`, `nodeId`
 - Test case for `contactType: 'manual'` with inline fields
 - Test case for step contact being null (already tested)
@@ -220,6 +228,7 @@ Refs #1207"
 ### Task 5: Update staff repository reverse query — write failing tests first
 
 **Files:**
+
 - Modify: `apps/web/src/lib/repositories/staff.repository.test.ts:375-448`
 - Modify: `apps/web/src/lib/repositories/staff.repository.ts:55`
 
@@ -243,11 +252,13 @@ cd apps/web && pnpm vitest run src/lib/repositories/staff.repository.test.ts
 **Step 3: Update the reverse GROQ query** (line 55)
 
 Replace:
+
 ```groq
 primaryContact.staffMember._ref == ^._id || ^._id in steps[].contact.staffMember._ref
 ```
 
 With:
+
 ```groq
 primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id
 ||
@@ -279,6 +290,7 @@ Refs #1207"
 ### Task 6: Update PSD sync protection query
 
 **Files:**
+
 - Modify: `apps/api/src/sanity/projection.ts:148-156`
 - Create or modify: `apps/api/src/sanity/projection.test.ts` (add test for getProtectedStaffPsdIds if none exists)
 
@@ -299,6 +311,7 @@ cd apps/api && pnpm vitest run src/sanity/projection.test.ts
 The organigramNode check (line 150) stays the same. Replace the responsibility checks (lines 152, 154):
 
 Before:
+
 ```groq
 _id in *[_type == "responsibility" && active == true].primaryContact.staffMember._ref
 ||
@@ -306,6 +319,7 @@ _id in *[_type == "responsibility" && active == true].steps[].contact.staffMembe
 ```
 
 After — dereference through organigramNode → members:
+
 ```groq
 _id in *[_type == "responsibility" && active == true].primaryContact.organigramNode->members[]._ref
 ||
@@ -323,7 +337,7 @@ cd apps/api && pnpm vitest run src/sanity/projection.test.ts
 **Step 5: Run full API checks**
 
 ```bash
-pnpm --filter @kcvv/api check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/api
 ```
 
 **Step 6: Commit**
@@ -343,6 +357,7 @@ Refs #1207"
 ### Task 7: Update frontend Contact component rendering
 
 **Files:**
+
 - Modify: the component(s) that render Contact cards in the responsibility finder
 
 Before starting, find the exact component files:
@@ -354,6 +369,7 @@ grep -rn "memberId\|primaryContact\|contact\.name\|contact\.email" apps/web/src/
 **Step 1: Identify all Contact rendering locations**
 
 Search for how Contact is currently rendered. Key patterns to find:
+
 - `contact.name` → becomes `contact.members?.[0]?.name` or iterate `members[]`
 - `contact.memberId` → becomes `contact.nodeId`
 - `contact.role` → becomes `contact.position` (for position type) or `contact.role` (for manual type)
@@ -365,19 +381,19 @@ Search for how Contact is currently rendered. Key patterns to find:
 ```typescript
 function renderContact(contact: Contact) {
   switch (contact.contactType) {
-    case 'position':
+    case "position":
       // Title from contact.position
       // List contact.members[] with name/email/phone
       // "Bekijk in organigram" link using contact.nodeId
-      break
-    case 'team-role':
+      break;
+    case "team-role":
       // Placeholder: "Trainer van je ploeg" or "Afgevaardigde van je ploeg"
       // #1220 will add team selection + runtime resolution
-      break
-    case 'manual':
+      break;
+    case "manual":
       // Title from contact.role
       // Inline contact.email / contact.phone
-      break
+      break;
   }
 }
 ```
@@ -385,13 +401,14 @@ function renderContact(contact: Contact) {
 **Step 3: Handle multi-member positions**
 
 For `contactType === 'position'` with `members.length > 1` (e.g., Kledij):
+
 - Show position title as header
 - List each member on a separate line with their name + contact info
 
-**Step 4: Run the web check-all**
+**Step 4: Run the web turbo gate**
 
 ```bash
-pnpm --filter @kcvv/web check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 **Step 5: Commit**
@@ -412,6 +429,7 @@ Refs #1207"
 ### Task 8: Create Gerechtelijk Correspondent organigramNode
 
 **Files:**
+
 - Create: `scripts/responsibility-seeding/package.json`
 - Create: `scripts/responsibility-seeding/tsconfig.json`
 - Create: `scripts/responsibility-seeding/src/sanity-client.ts` (copy from `scripts/staff-cleanup/src/sanity-client.ts`)
@@ -431,8 +449,18 @@ const gcNode = {
   _type: "organigramNode",
   title: "Gerechtelijk Correspondent",
   department: "hoofdbestuur",
-  parentNode: { _type: "reference", _ref: "organigramNode-voorzitter", _weak: true },
-  members: [{ _type: "reference", _ref: "staffMember-psd-245", _key: "staffMemberpsd245" }],
+  parentNode: {
+    _type: "reference",
+    _ref: "organigramNode-voorzitter",
+    _weak: true,
+  },
+  members: [
+    {
+      _type: "reference",
+      _ref: "staffMember-psd-245",
+      _key: "staffMemberpsd245",
+    },
+  ],
   active: true,
   sortOrder: 95,
   roleCode: "GC",
@@ -441,7 +469,10 @@ const gcNode = {
 async function main() {
   const dataset = process.env.SANITY_DATASET;
   if (!dataset) throw new Error("SANITY_DATASET required");
-  if (dataset === "production" && process.env.CONFIRM_PRODUCTION_SEED !== "yes") {
+  if (
+    dataset === "production" &&
+    process.env.CONFIRM_PRODUCTION_SEED !== "yes"
+  ) {
     throw new Error("Set CONFIRM_PRODUCTION_SEED=yes for production");
   }
   console.log(`Creating GC node in dataset: ${dataset}`);
@@ -484,11 +515,13 @@ Refs #1207"
 ### Task 9: Write the responsibility seeding script
 
 **Files:**
+
 - Create: `scripts/responsibility-seeding/src/seed-responsibilities.ts`
 
 **Step 1: Define the responsibility data array**
 
 Create the full array of ~28 responsibility documents. Each document has:
+
 - `_id`: `responsibility-{slug}`
 - `_type`: `responsibility`
 - `title`: Short display title
@@ -506,11 +539,13 @@ Create the full array of ~28 responsibility documents. Each document has:
 Use the complete question list from the design doc (`docs/plans/2026-04-03-responsibility-seeding-design.md`, "Complete question list" section).
 
 **Important — keywords**: Be generous. Each question should have 5-15 keywords including:
+
 - Dutch synonyms and common misspellings
 - Related concepts (e.g., "transfer" → ["overstap", "transfer", "aansluiting", "andere club", "wissel", "overschrijving"])
 - The question text words themselves
 
 **Important — steps**: Most questions have 1-2 steps. For FC-N1 (opmerking over trainer), create 5 steps:
+
 1. JC Onderbouw (organigramNode ref)
 2. JC Middenbouw (organigramNode ref)
 3. JC Bovenbouw (organigramNode ref)
@@ -524,6 +559,7 @@ For BP-AL5 (klacht indienen): step 1 = Secretaris, step 2 = API (if gedragsgerel
 **Step 2: Write preflight validation**
 
 Before mutating, verify:
+
 - All referenced organigramNode IDs exist in the dataset
 - No duplicate `_id` values
 - All required fields present
@@ -534,7 +570,10 @@ Before mutating, verify:
 for (const doc of responsibilities) {
   await client.createIfNotExists(doc);
   // Patch to upsert — createIfNotExists won't update existing docs
-  await client.patch(doc._id).set(omit(doc, ["_id", "_type"])).commit();
+  await client
+    .patch(doc._id)
+    .set(omit(doc, ["_id", "_type"]))
+    .commit();
   console.log(`✓ ${doc._id}`);
 }
 ```
@@ -558,11 +597,11 @@ Refs #1207"
 **Step 1: Run all checks**
 
 ```bash
-pnpm --filter @kcvv/web check-all
-pnpm --filter @kcvv/api check-all
-pnpm --filter @kcvv/studio check-all
-pnpm --filter @kcvv/studio-staging check-all
-pnpm --filter @kcvv/sanity-schemas check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
+pnpm turbo run lint type-check test build --filter=@kcvv/api
+pnpm turbo run lint type-check test build --filter=@kcvv/studio
+pnpm turbo run lint type-check test build --filter=@kcvv/studio-staging
+pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas
 ```
 
 **Step 2: Fix any issues**
@@ -614,6 +653,7 @@ CONFIRM_PRODUCTION_SEED=yes SANITY_DATASET=production SANITY_API_TOKEN=$SANITY_T
 ### Task 13: Update CLAUDE.md if needed
 
 Check if the architecture section in `.claude/CLAUDE.md` needs updating for:
+
 - The new `contactType` discriminator pattern on responsibility schema
 - The `scripts/responsibility-seeding/` directory
 
@@ -624,7 +664,7 @@ Check if the architecture section in `.claude/CLAUDE.md` needs updating for:
 **Step 1: Run full quality gate**
 
 ```bash
-pnpm --filter @kcvv/web check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 pnpm turbo build --filter=@kcvv/web
 ```
 
@@ -652,7 +692,7 @@ Closes #1207
 
 ## Testing
 
-- All `check-all` commands pass (web, api, studio, studio-staging, sanity-schemas)
+- All the turbo gate commands pass (web, api, studio, studio-staging, sanity-schemas)
 - Seeded on staging, verified in Studio + web
 - Seeded on production
 - Responsibility finder renders contact cards correctly

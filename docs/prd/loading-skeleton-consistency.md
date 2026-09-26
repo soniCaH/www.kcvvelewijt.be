@@ -62,7 +62,7 @@ Add a lightweight Vitest test (`src/app/(main)/__tests__/loading-envelope.test.t
 - [ ] `apps/web/src/components/hulp/HulpPage/getHulpSections.ts` exports a factory consumed by both `HulpPage.tsx` and `app/(main)/hulp/loading.tsx`
 - [ ] `loading.tsx` no longer hand-rolls a `bg-gray-100` div — it renders `<SectionStack sections={getHulpSections({ content: <skeleton/> })} />`
 - [ ] Cold reload of `/hulp` shows no visible vertical layout shift (manual check via Chrome DevTools "Performance Insights" → Layout Shifts panel — CLS contribution from the hero/content boundary < 0.01)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 (HIGH SectionStack pages)
 
@@ -70,20 +70,20 @@ Add a lightweight Vitest test (`src/app/(main)/__tests__/loading-envelope.test.t
 - [ ] Each route has a `getXxxSections` factory consumed by both files
 - [ ] Each route's loading skeleton renders via `SectionStack` (verifiable: skeleton DOM contains at least one `<SectionTransition>` SVG)
 - [ ] No layout shift on cold reload (manual CLS check per route)
-- [ ] `pnpm --filter @kcvv/web check-all` passes after each issue
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes after each issue
 
 ### Phase 3 (MEDIUM patches)
 
 - [ ] Each of the 7 listed `loading.tsx` files updated per the spec above
 - [ ] Per-route manual reload check confirms shift is gone or visually negligible
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 (drift guard)
 
 - [ ] Vitest suite covers all `(main)` routes that have a `loading.tsx`
 - [ ] Test fails when a `loading.tsx` envelope drifts from its `page.tsx` (verified by introducing a deliberate drift, watching the test fail, then reverting)
 - [ ] Test runs in <2s (it's a pure render comparison, no async)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

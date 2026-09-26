@@ -39,7 +39,7 @@ Extract `getVisibleTeamPsdIds()` into a new `SanityProjection` service:
 - `FootbalistoService` depends on `SanityProjection` instead of `SanityWriteClient`
 - Add `projection.test.ts` with a test that mocks the Sanity client and asserts the query + result shape
 - `SanityWriteClient` still exports `getVisibleTeamPsdIds` (forwarding to `SanityProjection`) for backward compatibility during migration
-- `pnpm --filter @kcvv/api check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 4. Phases
 
@@ -57,7 +57,7 @@ Phase 3: Rename SanityWriteClient → SanityMutation, add mutation tests
 - [ ] `FootbalistoService` imports `SanityProjection` instead of `SanityWriteClient`
 - [ ] `projection.test.ts` exists with at least 2 tests (happy path, empty result)
 - [ ] All existing tests pass without modification
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2: Move remaining reads
 
@@ -65,14 +65,14 @@ Phase 3: Rename SanityWriteClient → SanityMutation, add mutation tests
 - [ ] `SanityWriteClient` interface no longer contains any `get*` methods
 - [ ] PSD sync imports `SanityProjection` for reads, `SanityWriteClient` for writes
 - [ ] `projection.test.ts` covers all 5 projection methods
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3: Rename + test mutations
 
 - [ ] `SanityWriteClient` renamed to `SanityMutation` (file: `src/sanity/mutation.ts`)
 - [ ] `mutation.test.ts` created with tests for: upsertPlayer patch construction, upsertTeam patch construction, archivePlayers batch operation, uploadPlayerImage flow
 - [ ] `apps/api/CLAUDE.md` updated with new structure
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract Changes
 

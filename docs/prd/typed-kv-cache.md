@@ -77,7 +77,7 @@ Phase 3: Delete redundant decode tests from handler test files → #852
 - [ ] Cache miss: calls `fetch`, caches result, returns value
 - [ ] `getTeamStatsHandler` uses `typedCache.getOrFetch(...)` — inline pattern removed
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2 — Migrate remaining handlers
 

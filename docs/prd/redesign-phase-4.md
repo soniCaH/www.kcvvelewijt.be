@@ -67,11 +67,12 @@ The thinnest cross-layer slice that proves the Phase 4 architecture works:
 > **Land `<TapeStrip color="warm">` variant + Storybook story + VR baseline.**
 
 The warm-tape variant is the only new primitive Phase 4 introduces, and it cuts across multiple sub-issues (`<FeaturedEventBand>` requires it; future jersey-deep surfaces will reuse it). Demonstrated by:
+
 - `<TapeStrip>` extended `color` union to include `"warm"`.
 - `--tape-warm: rgba(240, 194, 100, 0.85)` token added to `globals.css`.
 - `TapeStrip.stories.tsx` adds a story group `WarmOnJerseyDeep` showing the new variant against a jersey-deep panel.
 - VR baseline captured.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 If the tracer fails, every Phase 4 sub-issue depending on the warm tape (`<FeaturedEventBand>`, future jersey-deep surfaces) is at risk. If it passes, the four tracks below can fan out.
 
@@ -123,7 +124,7 @@ Per `feedback_blockedby_not_subissues` memory, dependencies use GraphQL `addBloc
 - Token `--tape-warm: rgba(240, 194, 100, 0.85)` added to `apps/web/src/app/globals.css`.
 - `TapeStrip.stories.tsx` adds a `WarmOnJerseyDeep` story showing the variant against a jersey-deep panel.
 - VR baseline captured.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ### 5.A.1 — `<NewsCard>` props update
 
@@ -223,16 +224,16 @@ Per `feedback_blockedby_not_subissues` memory, dependencies use GraphQL `addBloc
 
 ## 6. Data flow per section
 
-| Section | Source | Filter / Sort | Empty state |
-| --- | --- | --- | --- |
-| EditorialHero D.1 carousel | Sanity `article` | `order(featured desc, publishedAt desc)`, slice [0..3] | Hide if 0; render 1 / 2 thumbs if 1–2 |
-| FeaturedEventBand | Sanity `event` | `featuredOnHome && dateStart >= now()`, sort dateStart asc, take 1 | Return null |
-| NewsGrid | Sanity `article` | Same query as carousel, slice [3..8] | Return null at N=0; graceful collapse 1–4 |
-| UpcomingMatches | BFF `getNextMatches()` | sort date asc, all KCVV teams | Return null at 0 |
-| YouthBlock | Hardcoded | n/a | n/a |
-| WebshopBanner | Hardcoded | n/a | n/a |
-| SponsorsBlock | Sanity `sponsor` | `tier in ['hoofdsponsor','sponsor'] && active`, hoofdsponsors first | Return null |
-| Banner slots A/B/C | Sanity `homePage.bannerSlot[A/B/C]` ref | n/a | Each drop-if-empty |
+| Section                    | Source                                  | Filter / Sort                                                       | Empty state                               |
+| -------------------------- | --------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------- |
+| EditorialHero D.1 carousel | Sanity `article`                        | `order(featured desc, publishedAt desc)`, slice [0..3]              | Hide if 0; render 1 / 2 thumbs if 1–2     |
+| FeaturedEventBand          | Sanity `event`                          | `featuredOnHome && dateStart >= now()`, sort dateStart asc, take 1  | Return null                               |
+| NewsGrid                   | Sanity `article`                        | Same query as carousel, slice [3..8]                                | Return null at N=0; graceful collapse 1–4 |
+| UpcomingMatches            | BFF `getNextMatches()`                  | sort date asc, all KCVV teams                                       | Return null at 0                          |
+| YouthBlock                 | Hardcoded                               | n/a                                                                 | n/a                                       |
+| WebshopBanner              | Hardcoded                               | n/a                                                                 | n/a                                       |
+| SponsorsBlock              | Sanity `sponsor`                        | `tier in ['hoofdsponsor','sponsor'] && active`, hoofdsponsors first | Return null                               |
+| Banner slots A/B/C         | Sanity `homePage.bannerSlot[A/B/C]` ref | n/a                                                                 | Each drop-if-empty                        |
 
 No new schema fields. `article.featured` and `event.featuredOnHome` already exist. Query change for hero ordering is the only data-side change.
 
@@ -280,15 +281,15 @@ GTM tags + GA4 reports updated in same PR.
 
 ## 9. Risks + mitigations
 
-| Risk | Mitigation |
-| --- | --- |
-| Carousel "use client" component is the first non-server-rendered piece on `/` since Phase 3 | Lazy-mount; skeleton first paint matches first slide static; reduced-motion fallback static |
-| `article.featured` flag drift (editors forget to flip off) | Phase 4 includes a Studio editor-ux guidance update on the article doc explaining the homepage hero behaviour |
-| Two adjacent jersey-deep bands (YouthBlock + originally WebshopBanner) | Resolved at design time: WebshopBanner uses ink instead of jersey-deep |
-| Green-on-green tape on FeaturedEventBand | Resolved at design time: warm-tape variant introduced |
-| Mobile collapse complexity for 1+2+2 NewsGrid | Storybook viewport testing + explicit Mobile story; CSS Grid `auto-flow` handles graceful collapse |
-| Featured event coverImage missing in editor data | Drop-if-empty rule treats missing coverImage same as no event |
-| `getNextMatches()` might return 100s of upcoming matches | Inline expand reveals all but pagination not needed for KCVV's typical match volume; revisit if data exceeds ~30 matches |
+| Risk                                                                                        | Mitigation                                                                                                               |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Carousel "use client" component is the first non-server-rendered piece on `/` since Phase 3 | Lazy-mount; skeleton first paint matches first slide static; reduced-motion fallback static                              |
+| `article.featured` flag drift (editors forget to flip off)                                  | Phase 4 includes a Studio editor-ux guidance update on the article doc explaining the homepage hero behaviour            |
+| Two adjacent jersey-deep bands (YouthBlock + originally WebshopBanner)                      | Resolved at design time: WebshopBanner uses ink instead of jersey-deep                                                   |
+| Green-on-green tape on FeaturedEventBand                                                    | Resolved at design time: warm-tape variant introduced                                                                    |
+| Mobile collapse complexity for 1+2+2 NewsGrid                                               | Storybook viewport testing + explicit Mobile story; CSS Grid `auto-flow` handles graceful collapse                       |
+| Featured event coverImage missing in editor data                                            | Drop-if-empty rule treats missing coverImage same as no event                                                            |
+| `getNextMatches()` might return 100s of upcoming matches                                    | Inline expand reveals all but pagination not needed for KCVV's typical match volume; revisit if data exceeds ~30 matches |
 
 ---
 
@@ -296,7 +297,7 @@ GTM tags + GA4 reports updated in same PR.
 
 - All sub-issues closed.
 - All VR baselines committed.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 - Storybook `Pages/Homepage` reviewable.
 - Playwright e2e `homepage.spec.ts` updated for new section ordering.
 - Owner review of `/` on staging (e2e build).
