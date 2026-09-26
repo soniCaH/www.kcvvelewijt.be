@@ -363,8 +363,8 @@ jobs:
     needs: [storybook-build, visual-regression-changes]
     # The RUN_VISUAL_REGRESSION repo variable is the live on/off switch for the
     # whole VR chain (this job, `visual-regression-changes` and
-    # `storybook-build`) at once. Report-only today: `deploy` does not wait on
-    # it and it is not a required check. #3088 decides whether it earns one.
+    # `storybook-build`) at once. `deploy` does not wait on it; branch
+    # protection reads it through `visual-regression-gate` below (#3139).
     #
     # Path-filtered uniformly on both push and pull_request now (#3138) — the
     # `main` arm used to run unconditionally (23-for-23 green, zero catches).
@@ -437,6 +437,39 @@ jobs:
             apps/web/test/vr/__snapshots__/__received_output__/
           if-no-files-found: ignore
           retention-days: 14
+
+  # The required check for the visual layer on `main` (#3139). Branch
+  # protection cannot require the shards by name: when the path filter skips
+  # them, a skipped matrix job reports once as the literal
+  # `Visual Regression (${{ matrix.shard }}/3)`, so `(1/3)` never arrives and
+  # a PR that changes no story would wait forever. This job always reports,
+  # under one fixed name. Skipped upstream counts as passing (no visual change,
+  # docs-only, or RUN_VISUAL_REGRESSION off); failed or cancelled does not.
+  # `always()`, not `!cancelled()`: a cancelled run must fail the gate, never
+  # skip it, because a skipped required check counts as passing.
+  # `storybook-build` is in `needs` so a broken story import blocks the merge,
+  # not only the deploy (#3177) — when it runs: the `visual` filter decides,
+  # and a `packages/**`-only change is left to `quality-checks`' type-check.
+  visual-regression-gate:
+    name: VR — Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      [changes, visual-regression-changes, storybook-build, visual-regression]
+    if: always()
+    permissions: {}
+    env:
+      RESULTS: ${{ join(needs.*.result, ', ') }}
+      RUN_VR: ${{ vars.RUN_VISUAL_REGRESSION }}
+    steps:
+      - name: Warn when the visual layer is switched off
+        if: vars.RUN_VISUAL_REGRESSION != 'true'
+        run: echo "::warning::RUN_VISUAL_REGRESSION is '$RUN_VR', not 'true' — this green check verified nothing."
+      - name: Fail if any visual job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: |
+          echo "::error::A visual job failed or was cancelled: $RESULTS"
+          exit 1
 
   vr-diff-comment:
     name: VR — Post diff comment
