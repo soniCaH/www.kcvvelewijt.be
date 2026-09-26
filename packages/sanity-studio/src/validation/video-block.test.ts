@@ -2,8 +2,6 @@ import {ConcreteRuleClass} from 'sanity'
 import {describe, expect, it, vi} from 'vitest'
 import {videoBlock} from '@kcvv/sanity-schemas'
 
-const SOFT_MAX_VIDEO_BYTES = 150 * 1024 * 1024
-
 /**
  * Field-level test: builds the actual `validation` callback registered on
  * `videoBlock.uploadedFile` against a real `ConcreteRuleClass` and asserts
@@ -38,7 +36,7 @@ describe('videoBlock.uploadedFile validation (rule level)', () => {
     const validation = getUploadedFileValidation()
     const rule = validation(new ConcreteRuleClass())
     const value = {asset: {_ref: 'file-asset-big'}}
-    const context = makeContext({size: SOFT_MAX_VIDEO_BYTES + 1})
+    const context = makeContext({size: 10 * 1024 ** 3})
 
     const markers = await rule.validate(value, context as never)
 

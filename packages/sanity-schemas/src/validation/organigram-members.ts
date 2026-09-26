@@ -6,13 +6,9 @@ interface Reference {
 }
 
 /**
- * Async validation rule for organigramNode.members[] items.
- * Returns a warning-shaped message when the referenced staffMember is
- * archived — but the MARKER LEVEL is decided entirely by the `Rule`
- * instance this validator is registered on (`Rule.warning().custom(...)`
- * in `organigramNode.ts`), never by a key on this return value. A `level`
- * key here would be silently ignored by `sanity`'s `Rule.validate()`; see
- * `banner.ts`'s image field for the full mechanism.
+ * Returns a message when the referenced staffMember is archived. The
+ * marker level comes from the Rule it is registered on (`Rule.warning()`
+ * in organigramNode.ts), not from this return value.
  */
 export async function validateOrganigramMember(
   ref: Reference | undefined,

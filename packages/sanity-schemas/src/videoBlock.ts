@@ -60,17 +60,12 @@ export const videoBlock = defineType({
       },
       description:
         'Upload een MP4 of WebM (H.264 1080p ~2–3 Mbps aanbevolen). Gebruik dit óf "Embed URL" — niet beide.',
-      // Soft-warning size guard, on its own `Rule.warning()` instance —
-      // every marker this check emits comes out at `warning`, so the
-      // editor can still save / publish; bandwidth-heavy uploads are
-      // flagged, not blocked. (A plain `Rule.custom(...)` here would emit
-      // at `error` regardless of what the validator itself returns — see
-      // `banner.ts`'s image field for the full mechanism.) Size lives on
-      // the asset document, so we deref via the validation context's
-      // client (matches the organigram-members pattern in the
-      // validation/ folder). A transient fetch failure swallows to
-      // `true` rather than surfacing as a generic validation error — the
-      // goal is a hint, not a gate.
+      // Soft-warning size guard — a hint, not a gate. Its own `Rule`
+      // instance, so `.warning()` actually governs it. Size lives on the
+      // asset document, so we deref via the validation context's client
+      // (matches the organigram-members pattern in the validation/
+      // folder). A transient fetch failure swallows to `true` rather
+      // than surfacing as a generic validation error.
       validation: (Rule) =>
         Rule.warning().custom(async (value, context) => {
           const ref = (value as {asset?: {_ref?: string}} | undefined)?.asset

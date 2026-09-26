@@ -11,14 +11,9 @@ import {organigramNode} from '@kcvv/sanity-schemas'
  * the helper itself returns.
  */
 function getMembersItemValidation() {
-  const membersField = organigramNode.fields.find(
-    (field): field is typeof field & {of: {validation?: unknown}[]} =>
-      field.name === 'members',
-  )
-  if (!membersField || !('of' in membersField)) {
-    throw new Error('organigramNode.members field not found or has no `of`')
-  }
-  const itemDef = (membersField as {of: {validation?: unknown}[]}).of[0]
+  const field = organigramNode.fields.find((f) => f.name === 'members')
+  if (!field) throw new Error('organigramNode.members field not found')
+  const itemDef = (field as {of: {validation?: unknown}[]}).of[0]
   const validation = itemDef.validation as (
     rule: InstanceType<typeof ConcreteRuleClass>,
   ) => InstanceType<typeof ConcreteRuleClass>

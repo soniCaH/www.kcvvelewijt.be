@@ -75,10 +75,7 @@ export const organigramNode = defineType({
         {
           type: 'reference',
           to: [{type: 'staffMember'}],
-          // Its own `Rule` instance, so `.warning()` actually governs the
-          // level every marker from this check is emitted at — see the
-          // `banner.ts` image field for the full mechanism. The helper's
-          // return value carries no level of its own any more.
+          // Its own `Rule` instance, so `.warning()` actually governs it.
           validation: (Rule) =>
             Rule.warning().custom((ref, context) => validateOrganigramMember(ref as never, context)),
         },
