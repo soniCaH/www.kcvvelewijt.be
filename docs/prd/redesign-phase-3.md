@@ -62,7 +62,7 @@ The thinnest cross-layer slice that proves the Phase 3 architecture works:
 
 > **Land `<EndMark>` primitive + Storybook story + VR baseline.**
 >
-> Demonstrated by: `<EndMark>` exported from `apps/web/src/components/design-system/EndMark/`, with `EndMark.stories.tsx` (`UI/EndMark`, `vr` tag, default story showing `[1px ink rule] ★ EINDE GESPREK ★ [1px ink rule]`), VR baseline captured, `pnpm --filter @kcvv/web check-all` green.
+> Demonstrated by: `<EndMark>` exported from `apps/web/src/components/design-system/EndMark/`, with `EndMark.stories.tsx` (`UI/EndMark`, `vr` tag, default story showing `[1px ink rule] ★ EINDE GESPREK ★ [1px ink rule]`), VR baseline captured, `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 `<EndMark>` is the right tracer because (a) it's atomic (no sub-component dependencies), (b) it's locked to a single visual treatment in `endmark-locked.md`, and (c) it touches every Phase 3 sub-system (design-system folder, Storybook, VR baseline) without depending on the bigger compositions.
 
@@ -109,7 +109,7 @@ If the tracer fails, every Phase 3 sub-issue is at risk. If it passes, the four 
 - Composition matches `endmark-locked.md`: `[1px ink rule] · ★ EINDE GESPREK ★ · [1px ink rule]`. Glyphs are flex children, not pseudo-elements. Three-centerline alignment contract documented in component file.
 - `EndMark.stories.tsx` with title `UI/EndMark`, `vr` tag, default story.
 - VR baseline captured.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ### 5.A — Tier C figures (per locked spec)
 
@@ -381,7 +381,7 @@ Surfaces that may need a follow-up phase or RFC:
 | 3.C.2 — `<MatchStrip>` rework                            | 1 day           |
 | 3.C.3 — `<SiteFooter>` rework                            | 1 day           |
 | Founding year fixes + miscellaneous cleanup              | 0.5 day         |
-| VR baseline runs + check-all green                       | 0.5–1 day       |
+| VR baseline runs + turbo gate green                      | 0.5–1 day       |
 | **Total**                                                | **~14–17 days** |
 
 ---
@@ -397,6 +397,6 @@ Phase 3 is done when:
 - `<SiteHeader>` / `<MatchStrip>` / `<SiteFooter>` site-wide swap complete; legacy `<PageHeader>` / `<MatchStripClient>` / `<PageFooter>` removed.
 - Founding year `1909` everywhere (3 buggy locations corrected).
 - 5 Sanity schema migrations executed on staging + production.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 - VR full-suite green; any regression investigated and explicitly approved.
 - This PRD's §6 deltas reflected back into `docs/plans/2026-04-27-redesign-master-design.md`.

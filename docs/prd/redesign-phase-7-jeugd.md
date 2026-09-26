@@ -53,7 +53,7 @@ cream grid. Proves route + data + e2e before new components land.
 2. **`<JeugdHero>` (photo) + filosofie/visie block** (`#visie`).
 3. **Nav hub** — reskin to uniform 16:9 + news/nav card variants + bubbling + repointed targets.
 4. **`<JeugdCtaBand>`** + empty states + repoint "word lid".
-5. **Analytics + SEO + legacy retirement** + final VR / check-all.
+5. **Analytics + SEO + legacy retirement** + final VR / turbo gate.
 
 ## 5. Acceptance criteria per phase
 
@@ -64,7 +64,7 @@ cream grid. Proves route + data + e2e before new components land.
 - [ ] `<YouthDirectory>` renders the division grid (Bovenbouw/Middenbouw/Onderbouw via
       `groupTeamsForLanding`); `<TeamOverview>`/`<TeamCard>` removed from `/jeugd`.
 - [ ] `getJeugdSections.tsx` (+ test) deleted.
-- [ ] e2e `/jeugd` smoke green; `pnpm --filter @kcvv/web check-all` passes.
+- [ ] e2e `/jeugd` smoke green; `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 2 — Hero + filosofie/visie
 
@@ -108,7 +108,7 @@ cream grid. Proves route + data + e2e before new components land.
 - [ ] Retire/relocate `<MissionBanner>`, `<SectionCta>`, `<InteriorPageHero>` if `/jeugd` was the
       last consumer (`git grep` first; some may still back other pages — keep if so).
 - [ ] Keep breadcrumb JSON-LD; metadata exists. `Pages/Jeugd` story refreshed (not `vr`).
-- [ ] Final `pnpm --filter @kcvv/web check-all` + VR green.
+- [ ] Final `pnpm turbo run lint type-check test build --filter=@kcvv/web` + VR green.
 
 ## 6. Analytics
 

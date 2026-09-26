@@ -82,7 +82,7 @@ Wire up the image generation pipeline:
 - [ ] PNG export works on iOS Safari 16+ (manual test on phone)
 - [ ] PNG export works on Chrome desktop (manual test)
 - [ ] Cross-origin images (Sanity CDN URLs) render correctly in the exported PNG
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2: Template component library
 
@@ -102,7 +102,7 @@ Wire up the image generation pipeline:
 - [ ] Club branding (crest/logo) present where it fits the design
 - [ ] Each template renders at exactly 1080x1920 in Storybook
 - [ ] Placeholder backgrounds used until Kevin provides final assets
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3: Share page — form and data fetching
 
@@ -115,7 +115,7 @@ Wire up the image generation pipeline:
 - [ ] Mood dropdown on full-time template: win / draw / loss
 - [ ] Match and score persist across template switches within a session
 - [ ] Form is usable on a mobile phone (no tiny inputs, no horizontal scroll)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4: Image export and mobile UX
 
@@ -127,7 +127,7 @@ Wire up the image generation pipeline:
 - [ ] Page is not linked from site navigation
 - [ ] Celebration images from Sanity CDN load correctly in exported PNGs (CORS)
 - [ ] Generated PNG is exactly 1080x1920 pixels
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract changes
 

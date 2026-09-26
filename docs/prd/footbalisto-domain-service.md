@@ -37,7 +37,7 @@ Implement `FootbalistoService.getTeamStats(teamId)` end-to-end:
 - Absorbs `getRawTeamStats` HTTP call + `transformPsdTeamStats` + inline season fetch
 - `StatsApiHandler` yields `FootbalistoService` instead of `FootbalistoClient` + transform call
 - One `FootbalistoService` boundary test: mock HTTP responses, assert `TeamStats` shape
-- `pnpm --filter @kcvv/api check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 Stats is the simplest handler (one raw call, one transform, no business rules) — ideal tracer bullet.
 
@@ -59,7 +59,7 @@ Phase 4: Delete FootbalistoClient + transforms.ts; clean up handler tests → #8
 - [ ] `stats.ts` handler yields `FootbalistoService`, calls `getTeamStats`, no direct import of transforms
 - [ ] One new `FootbalistoService` boundary test: `getTeamStats` with mocked HTTP returns correct `TeamStats`
 - [ ] Old `client.ts` and `transforms.ts` still exist (not deleted yet)
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2 — Matches
 
@@ -68,7 +68,7 @@ Phase 4: Delete FootbalistoClient + transforms.ts; clean up handler tests → #8
 - [ ] `getMatchDetail` returns `MatchDetail` directly (TTL selection stays in handler, not service)
 - [ ] `matches.ts` handlers yield only `FootbalistoService` + `KvCacheService`
 - [ ] Boundary tests cover all 4 methods with mocked HTTP
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3 — Ranking
 
@@ -76,7 +76,7 @@ Phase 4: Delete FootbalistoClient + transforms.ts; clean up handler tests → #8
 - [ ] Competition selection logic (prefer non-CUP, non-FRIENDLY; fallback to any with teams) moved into service
 - [ ] `ranking.ts` handler yields only `FootbalistoService` + `KvCacheService`
 - [ ] Boundary test covers competition selection logic with mocked HTTP
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 4 — Cleanup
 
@@ -84,7 +84,7 @@ Phase 4: Delete FootbalistoClient + transforms.ts; clean up handler tests → #8
 - [ ] `transforms.ts` deleted
 - [ ] Raw PSD types (`PsdGame`, `FootbalistoMatch`, etc.) moved inside `FootbalistoServiceLive` implementation — not exported
 - [ ] All handler test files updated: no more `FootbalistoClient` mocks
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract Changes
 

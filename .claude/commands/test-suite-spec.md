@@ -70,10 +70,10 @@ of the evidence. Quote the ruling and cite its ticket by name and link.
 2. **The spec's "seams" section is already decided.** They are the layer contract
    ([#3086](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3086)). Restate it; do not invent
    new seams.
-3. **One item is a wide refactor, not a vertical slice:** the nine-call-site move of the
-   quality gate to `pnpm turbo run lint type-check test build --filter=…` (done: #3155–#3157),
-   ruled by [#3123](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3123). `/to-tickets`
-   sequences those expand–contract. Flag it so the breakdown does not force it vertical.
+3. **Already shipped — do not re-file:** the nine-call-site move of the quality gate to
+   `pnpm turbo run lint type-check test build --filter=…`, ruled by
+   [#3123](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3123), landed expand–contract as
+   #3155–#3157.
 4. **Carry-overs that own no section of their own:** pass 2 of the agent-skill sweep
    ([#3113](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3113)), and the two residual
    **measurements** — not decisions — deferred by

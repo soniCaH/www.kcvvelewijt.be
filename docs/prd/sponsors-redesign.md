@@ -56,7 +56,7 @@ Phase 3: Component cleanup + diagonal transitions                               
 - [ ] Only `hoofdsponsor` + `sponsor` tier sponsors shown on homepage
 - [ ] Storybook story updated for homepage `SponsorsSection`
 - [ ] `SponsorCard` dark variant updated: white slot instead of invert
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2: Sponsors page redesign
 
@@ -68,7 +68,7 @@ Phase 3: Component cleanup + diagonal transitions                               
 - [ ] `SponsorCallToAction` redesigned: dark green bg, headline "Word sponsor", one sentence, primary button (`mailto:sponsoring@kcvvelewijt.be`), secondary link (`/contact`)
 - [ ] No filters, no search, no sort
 - [ ] Storybook stories updated for `SponsorsPage`, `SponsorsSpotlight`, `SponsorCallToAction`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3: Component cleanup + diagonal transitions
 
@@ -80,7 +80,7 @@ Phase 3: Component cleanup + diagonal transitions                               
 - [ ] Sponsors page: diagonal transition above spotlight section (when rendered)
 - [ ] All dead code removed, no unused imports
 - [ ] Sanity `type` field removed (only if migration is complete — coordinate with editor)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

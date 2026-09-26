@@ -34,7 +34,7 @@ Extract the calendar page inline transform to `src/app/(main)/calendar/utils.ts`
 - Move the `matches.map((m) => ({ ... }))` block from `calendar/page.tsx` into a named `transformMatchToCalendar(match: Match): CalendarMatch` function in a new `utils.ts`
 - Add a `calendar/utils.test.ts` with at least 3 tests: basic field mapping, `round → team` field rename, `date.toISOString()` serialization
 - `calendar/page.tsx` imports and calls `transformMatchToCalendar` instead of inlining
-- `pnpm --filter @kcvv/web check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 This is safe, mechanical, and immediately adds test coverage to an untested transform.
 
@@ -54,7 +54,7 @@ Phase 3: Consolidate StatusBadge into shared component; remove CalendarView and 
 - [ ] `CalendarMatch` type defined in `utils.ts` (move from `calendar/page.tsx` or `CalendarView.tsx` if defined there)
 - [ ] `calendar/utils.test.ts` covers: field mapping, `round → team` rename, `date.toISOString()` serialization, null/undefined score passthrough
 - [ ] `calendar/page.tsx` no longer contains inline `.map()` transform
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Shared match-display utilities
 
@@ -65,7 +65,7 @@ Phase 3: Consolidate StatusBadge into shared component; remove CalendarView and 
   - `getResultColor(homeScore: number, awayScore: number, isHome: boolean): 'win' | 'draw' | 'loss'` — replaces inline logic in TeamSchedule
 - [ ] `src/lib/utils/match-display.test.ts` covers all functions including edge cases (undefined scores, forfeited, postponed)
 - [ ] At least 2 of the 4 components currently duplicating `hasScore` logic are updated to use `match-display.ts`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Shared StatusBadge component
 
@@ -73,7 +73,7 @@ Phase 3: Consolidate StatusBadge into shared component; remove CalendarView and 
 - [ ] Renders the same badge UI currently duplicated in `CalendarView.tsx` and `TeamSchedule.tsx`
 - [ ] Uses `getStatusColor` from `match-display.ts` (Phase 2)
 - [ ] Both `CalendarView.tsx` and `TeamSchedule.tsx` import the shared `StatusBadge` — inline definitions removed
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

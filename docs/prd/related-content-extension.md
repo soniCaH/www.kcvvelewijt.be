@@ -75,7 +75,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [x] GROQ projection in `apps/web/src/lib/repositories/article.repository.ts` reads `relatedContent[]->` with `_type`-conditional field selection.
 - [x] `mergeRelatedItems()` dedupes by `_id` between curated `relatedContent` and auto-derived `mentionedPlayers` (unit test).
 - [x] Test article on staging renders Related section with the curated player card. _(Seeded as `article-phase-1316-related-content-tracer` — visit `/nieuws/phase-1316-tracer-curated-related-content` on staging.)_
-- [x] `pnpm --filter @kcvv/web check-all` passes.
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 2 — Full explicit curation
 
@@ -86,7 +86,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [ ] `relatedArticles` field removed from schema after migration verified.
 - [ ] Dedupe tested for all three auto-derived sources (players, teams, staff) against curated entries.
 - [ ] Storybook story updated: `Features/Related/` shows curated + auto mix (no new variant yet).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 3 — Event detail pages
 
@@ -96,7 +96,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [ ] `generateMetadata` exports title/description/OG fields per `apps/web/CLAUDE.md` SEO checklist.
 - [ ] JSON-LD `Event` block rendered via new builder in `src/lib/seo/jsonld.ts`, validated with Google Rich Results Test.
 - [ ] Canonical URL set; route appears in `sitemap.ts`.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 4 — Event in related content
 
@@ -107,7 +107,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [ ] GTM DLV + GA4 custom-dimension mapping updated; manual verification in GTM Preview + GA4 DebugView.
 - [ ] Storybook variant `Features/Related/RelatedContentCard` — new event story.
 - [ ] Vitest coverage for event branch of `mergeRelatedItems()` and `RelatedContentCard`.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ## 6. Effect Schema / api-contract Changes
 

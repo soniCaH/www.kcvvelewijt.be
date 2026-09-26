@@ -266,7 +266,7 @@ What stays unchanged:
 - [ ] Every primitive has a Storybook story under `UI/<Name>` with `tags: ["autodocs", "vr"]` and all documented variants.
 - [ ] All token combinations used in mockups have documented contrast ratios in `Foundation/Colors.mdx`. Failing combos (e.g. `jersey on cream` for body text) flagged with usage warning.
 - [ ] Existing components still build and render with no regressions. Concretely:
-  - `pnpm --filter @kcvv/web check-all` passes.
+  - `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
   - `pnpm --filter @kcvv/web run vr:check` shows no diffs against committed baselines for any _existing_ story (only **new** baselines are added in this PR).
 - [ ] PR body includes a `## VR baselines` section enumerating all new baselines as first-time captures (acceptable per the VR contract).
 - [ ] `apps/web/CLAUDE.md` updated:
