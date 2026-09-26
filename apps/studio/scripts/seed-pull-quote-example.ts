@@ -3,20 +3,28 @@ import {getCliClient} from 'sanity/cli'
 /**
  * One example `pullQuote` article body block on staging, for visually
  * checking #2517's Studio insert menu + `<ArticleBody>` render end-to-end
- * (schema → GROQ dereference → renderer, in one real page).
+ * (schema → GROQ dereference → renderer, in one real page) — the live path
+ * no Storybook fixture can stand in for.
  *
  * Speaker: the first staging `player` with a synced `psdId` — the same
  * condition `pullQuote.speaker`'s own reference picker filters on — picked
  * dynamically rather than a hardcoded id, since staging content changes
- * over time. The other three renderer cases this issue's AC lists
- * (photo-less staffMember → monogram, external speaker, nameless quote)
- * already have pixel-checked Storybook coverage
- * (`ArticleBody.stories.tsx` — `WithPullQuote`, `AllPullQuote`); this
- * script only needs to prove the live Studio → GROQ → render path once.
+ * over time. Ordered by `psdId` (not `_updatedAt`, which the PSD sync
+ * touches on every run and would make the pick nondeterministic across
+ * invocations). The other three renderer cases this issue's AC lists
+ * (a player speaker with photo, a photo-less staffMember → monogram, an
+ * external speaker, a nameless quote) already have pixel-checked Storybook
+ * coverage (`ArticleBody.stories.tsx` — `PullQuoteSpeakerCases`,
+ * `AllPullQuote`); this script only needs to prove the live Studio → GROQ
+ * → render path once, for the one case those stories can't: a real
+ * document reference resolving through a live GROQ query.
  *
  * Idempotent: fixed `_id` + `createOrReplace`, refuses any dataset but
  * `staging` — both `sanity.cli.ts` files point at production, so the
- * dataset is set here (mirrors `seed-e2e-fixtures.ts`).
+ * dataset is set here (mirrors `seed-e2e-fixtures.ts`). Also deletes any
+ * lingering Studio draft of the same id, the same way `seed-e2e-fixtures.ts`
+ * does — otherwise a draft shadows the seeded published version until
+ * someone happens to hit Publish, which would then undo the seed.
  *
  * Anyone logged in to the Sanity CLI with write access to project vhb33jaz:
  *
@@ -68,7 +76,7 @@ interface StagingPlayer {
 
 async function main() {
   const player = await client.fetch<StagingPlayer | null>(
-    `*[_type == "player" && defined(psdId) && defined(firstName) && defined(lastName)] | order(_updatedAt desc) [0]{_id, firstName, lastName}`,
+    `*[_type == "player" && defined(psdId) && defined(firstName) && defined(lastName)] | order(psdId asc) [0]{_id, firstName, lastName}`,
   )
   if (!player) {
     console.error(
@@ -130,10 +138,24 @@ async function main() {
     ],
   }
 
-  const result = await client.createOrReplace(doc)
-  console.log(
-    `Seeded ${result._id} — bekijk op staging via /nieuws/${doc.slug.current}`,
+  // A Studio edit waits as a draft; the next Publish would undo the seed.
+  // ponytail: drafts only — release `versions.*` copies are not cleared
+  // (mirrors seed-e2e-fixtures.ts).
+  const draftId = `drafts.${ARTICLE_ID}`
+  const [existingDraft] = await client.fetch<string[]>(
+    '*[_id == $id]._id',
+    {id: draftId},
+    {perspective: 'raw'},
   )
+
+  const tx = client.transaction().createOrReplace(doc)
+  if (existingDraft) tx.delete(existingDraft)
+  const {transactionId} = await tx.commit()
+
+  console.log(
+    `Seeded ${doc._id} — bekijk op staging via /nieuws/${doc.slug.current} (transaction ${transactionId}).`,
+  )
+  if (existingDraft) console.log(`Deleted a lingering draft: ${existingDraft}`)
 }
 
 main().catch((err) => {
