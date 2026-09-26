@@ -286,7 +286,11 @@ export const article = defineType({
             { title: "Kop 4", value: "h4" },
             { title: "Kop 5", value: "h5" },
             { title: "Kop 6", value: "h6" },
-            { title: "Citaat", value: "blockquote" },
+            // Renamed from bare "Citaat" (#2517 review) — the `pullQuote`
+            // object type in the insert (+) menu now owns that title, and
+            // the two are different authoring paths (an attributed quote
+            // block vs. this unattributed paragraph style).
+            { title: "Citaat (zonder spreker)", value: "blockquote" },
           ],
           marks: {
             annotations: [

@@ -24,10 +24,12 @@ export {validateRespondentKey, ALL_RESPONDENTS_KEY} from './validation/responden
 export type {RespondentKeyContext} from './validation/respondent-key'
 export {
   validatePullQuoteSpeakerReference,
+  validatePullQuoteExternalRoleOrSource,
   validatePullQuoteExternalName,
 } from './validation/pull-quote-speaker'
 export type {
   PullQuoteSpeakerReferenceContext,
+  PullQuoteExternalRoleSourceContext,
   PullQuoteExternalNameContext,
 } from './validation/pull-quote-speaker'
 export {validateContactFields} from './validation/contact-fields'

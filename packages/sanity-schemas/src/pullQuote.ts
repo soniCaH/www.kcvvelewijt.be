@@ -3,6 +3,7 @@ import {DoubleQuoteIcon} from '@sanity/icons/DoubleQuote'
 import {accentTitleOf} from './blocks/editorial-marks'
 import {
   validatePullQuoteSpeakerReference,
+  validatePullQuoteExternalRoleOrSource,
   validatePullQuoteExternalName,
 } from './validation/pull-quote-speaker'
 import {pullQuotePreviewSelect, preparePullQuotePreview} from './preview/pull-quote-preview'
@@ -41,14 +42,11 @@ export const pullQuote = defineType({
           .error(
             'Verplicht. Zonder tekst heeft het citaat niets om te tonen op de pagina.',
           )
+          .max(1)
           .custom((blocks) => {
             const arr = blocks as {children?: {text?: string}[]}[] | undefined
-            const text =
-              arr
-                ?.map((b) => b.children?.map((c) => c.text ?? '').join('') ?? '')
-                .join(' ')
-                .trim() ?? ''
-            return text.length > 0 ? true : 'Citaattekst mag niet leeg zijn.'
+            const text = arr?.[0]?.children?.map((c) => c.text ?? '').join('') ?? ''
+            return text.trim().length > 0 ? true : 'Citaattekst mag niet leeg zijn.'
           }),
     }),
     defineField({
@@ -80,7 +78,7 @@ export const pullQuote = defineType({
         r.custom((value, ctx) =>
           validatePullQuoteExternalName(value, {
             parent: ctx.parent as
-              | {externalRole?: string; externalSource?: string}
+              | {externalRole?: string; externalSource?: string; speaker?: unknown}
               | undefined,
           }),
         ),
@@ -90,14 +88,26 @@ export const pullQuote = defineType({
       title: 'Externe rol',
       type: 'string',
       description:
-        'Optionele functie of rol van de externe spreker, bijv. "Trainer tegenstander" of "Journalist".',
+        'Optionele functie of rol van de externe spreker, bijv. "Trainer tegenstander" of "Journalist". Enkel van toepassing bij een externe naam, niet bij een spreker hierboven.',
+      validation: (r) =>
+        r.custom((value, ctx) =>
+          validatePullQuoteExternalRoleOrSource(value, {
+            parent: ctx.parent as {speaker?: unknown} | undefined,
+          }),
+        ),
     }),
     defineField({
       name: 'externalSource',
       title: 'Externe bron',
       type: 'string',
       description:
-        'Optionele bronvermelding, bijv. "Het Nieuwsblad" of "23 mei 2026".',
+        'Optionele bronvermelding, bijv. "Het Nieuwsblad" of "23 mei 2026". Enkel van toepassing bij een externe naam, niet bij een spreker hierboven.',
+      validation: (r) =>
+        r.custom((value, ctx) =>
+          validatePullQuoteExternalRoleOrSource(value, {
+            parent: ctx.parent as {speaker?: unknown} | undefined,
+          }),
+        ),
     }),
   ],
   preview: {
