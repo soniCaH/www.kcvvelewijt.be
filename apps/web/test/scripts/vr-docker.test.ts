@@ -10,6 +10,7 @@
  */
 import { spawnSync } from "node:child_process";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -334,7 +335,12 @@ describe("isVrContainerRunning", () => {
     ).toBe(false);
   });
 
-  it("filters on the VR image", () => {
+  it("filters on the compose service label, not the image tag (second review, finding 2c)", () => {
+    // A retag of `latest` between this worktree's image check and its own
+    // `docker compose run` would make an `ancestor=<tag>` filter miss a
+    // container still running the OLD image underneath it. The service
+    // label Compose stamps on its own containers doesn't move when the tag
+    // does.
     let seenArgs: string[] = [];
     isVrContainerRunning({
       spawn: (_cmd: string, args: string[]) => {
@@ -342,7 +348,8 @@ describe("isVrContainerRunning", () => {
         return { status: 0, stdout: "" };
       },
     });
-    expect(seenArgs.join(" ")).toContain("ancestor=kcvv-vr-runner:latest");
+    expect(seenArgs.join(" ")).toContain("label=com.docker.compose.service=vr");
+    expect(seenArgs.join(" ")).not.toContain("ancestor=");
   });
 });
 
@@ -520,6 +527,96 @@ describe("the exclusive lock", () => {
         isContainerRunning: () => false,
       }),
     ).toEqual({ ok: false, holderPid: 4242 });
+  });
+
+  it("makes the lock disappear atomically — renamed away before its contents are removed (second review, finding 3)", () => {
+    // A plain recursive rm deletes the pid file before the directory itself,
+    // so a reader in that gap sees a directory that exists but has no pid —
+    // misread as a fresh in-progress claim rather than a release. Renaming
+    // first makes the release atomic: `dir` is either still this run's lock,
+    // or it is already fully gone.
+    const dir = freshLockDir();
+    acquireLock(dir);
+    let dirGoneBeforeContentsRemoved = false;
+    const rm: typeof rmSync = (path, opts) => {
+      dirGoneBeforeContentsRemoved = !existsSync(dir);
+      rmSync(path, opts);
+    };
+
+    releaseLock(dir, { rm });
+
+    expect(dirGoneBeforeContentsRemoved).toBe(true);
+    expect(existsSync(dir)).toBe(false);
+  });
+
+  it("does not throw when the lock directory is already gone", () => {
+    const dir = freshLockDir();
+    acquireLock(dir);
+    releaseLock(dir);
+
+    expect(() => releaseLock(dir)).not.toThrow();
+  });
+
+  it("does not delete a lock that went live between the outer staleness check and the serialised reclaim (second review, finding 1)", () => {
+    // Simulates a three-lane pile-up: this lane sees the original holder
+    // (4242) as dead; before it can even ask for the reclaim lock, a second
+    // lane fully reclaims AND a third lane re-acquires — leaving a live
+    // lock (5555) sitting at `dir`. The old tomb-rename-back design could
+    // destroy that live lock on the way to correctly refusing; the
+    // serialised reclaim must re-check under its own mutex and leave it
+    // alone entirely.
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    let calls = 0;
+    const isAlive = (candidatePid: number) => {
+      calls += 1;
+      if (calls === 1) {
+        rmSync(dir, { recursive: true, force: true });
+        mkdirSync(dir);
+        writeFileSync(join(dir, "pid"), "5555");
+        return false; // the ORIGINAL holder (4242) really is dead
+      }
+      return candidatePid === 5555; // every later check finds the new holder alive
+    };
+
+    const result = acquireLock(dir, {
+      isAlive,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: false, holderPid: 5555 });
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe("5555");
+  });
+
+  it("reports busy, without racing, when another lane already holds the reclaim lock", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    mkdirSync(`${dir}.reclaim`); // simulates another lane mid-reclaim
+
+    const result = acquireLock(dir, {
+      isAlive: () => false,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: false, holderPid: 4242 });
+    // The lock under contest must be untouched — only the reclaim-lock
+    // holder may act on it.
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe("4242");
+  });
+
+  it("clears an abandoned reclaim lock older than the threshold and proceeds", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    mkdirSync(`${dir}.reclaim`); // left behind by a reclaimer that crashed
+    const farFuture = () => Date.now() + 120_000;
+
+    const result = acquireLock(dir, {
+      isAlive: () => false,
+      isContainerRunning: () => false,
+      now: farFuture,
+    });
+
+    expect(result).toEqual({ ok: true });
   });
 });
 

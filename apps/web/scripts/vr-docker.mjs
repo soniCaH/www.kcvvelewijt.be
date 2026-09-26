@@ -25,16 +25,19 @@
 // never CPU; see .claude/skills/ralph-afk/SKILL.md for the full register):
 //
 //   - The image is never built here. `/ralph-afk` step 0 builds
-//     `kcvv-vr-runner:latest` once, before any lane starts (`vr:build-image`).
-//     This script fails fast, naming that command, when the image is absent
-//     OR stale (its content-hash label no longer matches pnpm-lock.yaml /
+//     `kcvv-vr-runner:latest` once, before any lane starts (`vr:build-image`,
+//     which takes the SAME lock below around its own `docker build` — a
+//     retag mid-run is exactly what the lock exists to rule out). This
+//     script fails fast, naming that command, when the image is absent OR
+//     stale (its content-hash label no longer matches pnpm-lock.yaml /
 //     Dockerfile.vr — worktrees on different lockfiles share this one tag).
 //   - The container run is guarded by an exclusive lock, taken FIRST — before
-//     the Storybook build, so a busy lock is reported immediately instead of
-//     after wasting time on a rebuild — and shared by every worktree on the
-//     machine (`os.tmpdir()`, never a path inside a worktree). Four containers
-//     would want the machine's entire memory, and the lock also keeps two
-//     Compose projects from ever sharing a name at the same time
+//     even the image check, so a busy lock is reported immediately and the
+//     image can't be retagged out from under this run between the check and
+//     `docker compose run` — and shared by every worktree on the machine
+//     (`os.tmpdir()`, never a path inside a worktree). Four containers would
+//     want the machine's entire memory, and the lock also keeps two Compose
+//     projects from ever sharing a name at the same time
 //     (`docker-compose.vr.yml` has none, so it takes the working-directory
 //     basename).
 //   - Nothing here reacts to SIGINT/SIGTERM. A JS signal handler cannot run
@@ -307,12 +310,18 @@ export function isProcessAlive(pid) {
  * second container would start, fighting the first for the machine's whole
  * memory budget.
  *
+ * Filtered on Compose's own service label, not `ancestor=<tag>:latest`
+ * (second review, finding 2c): another lane can retag `latest` onto a new
+ * build between this worktree's image check and its `docker compose run`,
+ * at which point an ancestor filter for the tag no longer matches the
+ * container that is still running the OLD image underneath it.
+ *
  * @param {{ spawn?: Spawner }} [deps]
  */
 export function isVrContainerRunning({ spawn = spawnSync } = {}) {
   const { stdout, status, error } = spawn(
     "docker",
-    ["ps", "-q", "--filter", `ancestor=${VR_IMAGE_TAG}`],
+    ["ps", "-q", "--filter", "label=com.docker.compose.service=vr"],
     { encoding: "utf8" },
   );
   if (error || status !== 0) return false;
@@ -376,36 +385,67 @@ function claimLockDir(lockDir, pid) {
 }
 
 /**
- * Reclaims a lock already determined to be stale (holder `expectedHolderPid`,
- * possibly `null` for "no readable pid"). Renames it to a private tomb name
- * first — atomic, so of two lanes reclaiming the same stale lock, only one
- * lane's rename can succeed; the other gets ENOENT and gives up cleanly
- * rather than deleting whatever the winner just created at `lockDir`.
- *
- * Even the winner double-checks: if the tomb's content no longer matches
- * `expectedHolderPid` (a third lane fully reclaimed-and-reacquired it in the
- * gap between our staleness check and this rename), the tomb is renamed back
- * into place instead of deleted — "stale" was correct a moment ago, but the
- * content this rename actually moved is a live lock, not a dead one.
+ * Whether the lock at `lockDir` is stale, given who (if anyone readable)
+ * holds it. `holderPid === null` means no readable pid file — see
+ * `claimLockDir`'s doc comment for why that can be a legitimate in-progress
+ * claim rather than damage.
  */
-function reclaimStaleLock(lockDir, expectedHolderPid) {
-  const tomb = `${lockDir}.stale-${uniqueSuffix()}`;
+function isLockStale(lockDir, holderPid, deps) {
+  if (holderPid !== null) {
+    return !(deps.isAlive(holderPid) || deps.isContainerRunning());
+  }
+  return !(
+    lockAgeMs(lockDir, deps.now) < deps.staleNoPidThresholdMs ||
+    deps.isContainerRunning()
+  );
+}
+
+const reclaimDirFor = (lockDir) => `${lockDir}.reclaim`;
+
+/** A `.reclaim` dir older than this is itself abandoned (its holder crashed mid-reclaim) and may be cleared. */
+const RECLAIM_STALE_THRESHOLD_MS = 60_000;
+
+function tryAcquireReclaimLock(lockDir, now) {
+  const reclaimDir = reclaimDirFor(lockDir);
   try {
-    renameSync(lockDir, tomb);
+    mkdirSync(reclaimDir);
+    return reclaimDir;
   } catch (err) {
-    if (err.code === "ENOENT") return; // someone else already reclaimed it
-    throw err;
+    if (err.code !== "EEXIST") throw err;
+    if (lockAgeMs(reclaimDir, now) < RECLAIM_STALE_THRESHOLD_MS) return null;
+    try {
+      rmSync(reclaimDir, { recursive: true, force: true });
+      mkdirSync(reclaimDir);
+      return reclaimDir;
+    } catch {
+      return null; // lost the race clearing it — someone else is active
+    }
   }
-  if (readHolderPid(tomb) === expectedHolderPid) {
-    rmSync(tomb, { recursive: true, force: true });
-    return;
-  }
+}
+
+/**
+ * Reclaiming a stale lock is itself serialised behind a second `mkdir`-based
+ * mutex (second review, finding 1). Without this, two lanes could each
+ * decide the same lock is stale and race a rename-based tomb-and-restore
+ * dance — and in a three-lane pile-up, the loser's "restore" step could
+ * delete a THIRD lane's brand-new, live lock instead of the dead one it
+ * actually saw. Serialising the reclaim removes the race instead of
+ * detecting it after the fact: only the lane holding `.reclaim` may re-read
+ * the pid, re-confirm staleness, and remove `lockDir` — and it does so
+ * without ever renaming anything it has not just confirmed dead itself.
+ *
+ * @returns {"reclaimed" | "still-live" | "busy"}
+ */
+function tryReclaim(lockDir, deps) {
+  const reclaimDir = tryAcquireReclaimLock(lockDir, deps.now);
+  if (!reclaimDir) return "busy";
   try {
-    renameSync(tomb, lockDir);
-  } catch {
-    // lockDir was claimed again in the meantime — drop the tomb, the newest
-    // claimant owns lockDir now.
-    rmSync(tomb, { recursive: true, force: true });
+    const holderPid = readHolderPid(lockDir);
+    if (!isLockStale(lockDir, holderPid, deps)) return "still-live";
+    rmSync(lockDir, { recursive: true, force: true });
+    return "reclaimed";
+  } finally {
+    rmSync(reclaimDir, { recursive: true, force: true });
   }
 }
 
@@ -439,19 +479,23 @@ export function acquireLock(
     staleNoPidThresholdMs = STALE_NO_PID_THRESHOLD_MS,
   } = {},
 ) {
+  const deps = { isAlive, isContainerRunning, now, staleNoPidThresholdMs };
+
   for (let attempt = 0; attempt < MAX_ACQUIRE_ATTEMPTS; attempt++) {
     if (claimLockDir(lockDir, pid)) return { ok: true };
 
     const holderPid = readHolderPid(lockDir);
-    const busy =
-      holderPid !== null
-        ? isAlive(holderPid) || isContainerRunning()
-        : lockAgeMs(lockDir, now) < staleNoPidThresholdMs ||
-          isContainerRunning();
+    if (!isLockStale(lockDir, holderPid, deps)) {
+      return { ok: false, holderPid };
+    }
 
-    if (busy) return { ok: false, holderPid };
-
-    reclaimStaleLock(lockDir, holderPid);
+    if (tryReclaim(lockDir, deps) === "busy") {
+      // Another lane is already reclaiming it — report busy with what we
+      // saw rather than spinning against its exclusive reclaim lock.
+      return { ok: false, holderPid };
+    }
+    // "reclaimed" or "still-live" (someone else's fresh lock, confirmed live
+    // under the reclaim lock) — either way, loop back and re-evaluate.
   }
 
   return { ok: false, holderPid: readHolderPid(lockDir) };
@@ -462,12 +506,30 @@ export function acquireLock(
  * lock to a reclaim (or never held it) must never delete another run's live
  * lock out from under it.
  *
+ * Renames the directory away FIRST, then removes the renamed copy — a plain
+ * recursive `rm` deletes the pid file before the directory itself, so a
+ * reader in that gap sees a directory that still exists but has no pid, and
+ * (second review, finding 3) would misread it as a fresh in-progress claim
+ * rather than a release in progress. The rename makes the release atomic
+ * from any outside observer's point of view: `lockDir` either still holds
+ * this run's lock, or it is already gone.
+ *
  * @param {string} lockDir
- * @param {{ pid?: number }} [deps]
+ * @param {{ pid?: number, rename?: typeof renameSync, rm?: typeof rmSync }} [deps]
  */
-export function releaseLock(lockDir, { pid = process.pid } = {}) {
+export function releaseLock(
+  lockDir,
+  { pid = process.pid, rename = renameSync, rm = rmSync } = {},
+) {
   if (readHolderPid(lockDir) !== pid) return;
-  rmSync(lockDir, { recursive: true, force: true });
+  const tomb = `${lockDir}.released-${uniqueSuffix()}`;
+  try {
+    rename(lockDir, tomb);
+  } catch (err) {
+    if (err.code === "ENOENT") return; // already gone
+    throw err;
+  }
+  rm(tomb, { recursive: true, force: true });
 }
 
 export const lockBusyMessage = (holderPid, lockDir) => `
@@ -511,23 +573,11 @@ function main() {
     process.exit(1);
   }
 
-  const imageStatus = checkImageStatus(VR_IMAGE_TAG);
-  if (imageStatus.status === "docker-not-running") {
-    console.error(dockerNotRunningMessage());
-    process.exit(1);
-  }
-  if (imageStatus.status === "absent") {
-    console.error(imageAbsentMessage(VR_IMAGE_TAG));
-    process.exit(1);
-  }
-  if (imageStatus.status === "stale") {
-    console.error(imageStaleMessage(VR_IMAGE_TAG));
-    process.exit(1);
-  }
-
-  // Taken FIRST — before the Storybook build — so a busy lock is reported
-  // immediately instead of after burning 30-60s on a rebuild nobody can use
-  // yet (#3141).
+  // Taken FIRST — before even checking the image, let alone building
+  // Storybook — so a busy lock is reported immediately, and so the image
+  // check below can't be invalidated by another lane retagging the image
+  // between this check and the `docker compose run` that acts on it (second
+  // review, finding 2a).
   const lock = acquireLock(VR_LOCK_DIR);
   if (!lock.ok) {
     console.error(lockBusyMessage(lock.holderPid, VR_LOCK_DIR));
@@ -553,13 +603,25 @@ function main() {
   // only disables SIGTERM's own default-terminate behaviour for no benefit.
   let exitCode = 0;
   try {
-    runOrThrow("pnpm", ["run", "vr:build-storybook"]);
-    // Once per invocation, on the HOST — the container mounts `.storybook`
-    // read-only (see docker-compose.vr.yml) and can't fetch for itself. Not
-    // part of `vr:build-storybook`: this cache must never end up inside
-    // `storybook-static` (#3137 — see scripts/prefetch-typekit.mjs).
-    runOrThrow("node", ["scripts/prefetch-typekit.mjs"]);
-    runOrThrow("docker", buildDockerArgs(decision.dockerArgs));
+    const imageStatus = checkImageStatus(VR_IMAGE_TAG);
+    if (imageStatus.status === "docker-not-running") {
+      console.error(dockerNotRunningMessage());
+      exitCode = 1;
+    } else if (imageStatus.status === "absent") {
+      console.error(imageAbsentMessage(VR_IMAGE_TAG));
+      exitCode = 1;
+    } else if (imageStatus.status === "stale") {
+      console.error(imageStaleMessage(VR_IMAGE_TAG));
+      exitCode = 1;
+    } else {
+      runOrThrow("pnpm", ["run", "vr:build-storybook"]);
+      // Once per invocation, on the HOST — the container mounts `.storybook`
+      // read-only (see docker-compose.vr.yml) and can't fetch for itself.
+      // Not part of `vr:build-storybook`: this cache must never end up
+      // inside `storybook-static` (#3137 — see scripts/prefetch-typekit.mjs).
+      runOrThrow("node", ["scripts/prefetch-typekit.mjs"]);
+      runOrThrow("docker", buildDockerArgs(decision.dockerArgs));
+    }
   } catch (err) {
     console.error(err.stack ?? err.message ?? String(err));
     exitCode = err.exitCode ?? 1;
