@@ -159,7 +159,7 @@ else
   echo ""
   echo "Whichever of a listed pair you merge SECOND must be re-checked against the"
   echo "updated main before it lands: merge origin/main into it and run"
-  echo "\`pnpm --filter @kcvv/web check-all\`. Re-running its old CI is not enough —"
+  echo "\`pnpm turbo run lint type-check test build --filter=@kcvv/web\`. Re-running its old CI is not enough —"
   echo "a PR's checks are computed against the main it forked from, and"
   echo "\`gh run rerun\` replays that same stale merge."
 fi

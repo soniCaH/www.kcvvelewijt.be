@@ -52,10 +52,6 @@ Work ONLY inside your own worktree. Never edit the main checkout at
   git status --short pnpm-lock.yaml
   # If it is dirty: git checkout -- pnpm-lock.yaml && corepack pnpm install --frozen-lockfile
 
-  # Materialise packages/api-contract/dist/ — without this, check-all shows TS6305 errors
-  # that look real but are turbo cache-replay artifacts from a removed peer worktree.
-  corepack pnpm turbo build --filter=@kcvv/api-contract --force
-
   # next build needs Sanity env vars; .env.local is gitignored so a fresh worktree has none.
   /bin/cp -f /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/apps/web/.env.local apps/web/.env.local
 
@@ -84,9 +80,9 @@ Before writing any new file that lands in a folder with two or more existing pee
 ## Verify
 
   source ~/.nvm/nvm.sh && nvm use >/dev/null 2>&1 && cd /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/../kcvv-issue-<N> && corepack pnpm --filter @kcvv/web lint:fix
-  source ~/.nvm/nvm.sh && nvm use >/dev/null 2>&1 && cd /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/../kcvv-issue-<N> && corepack pnpm --filter @kcvv/web check-all
+  source ~/.nvm/nvm.sh && nvm use >/dev/null 2>&1 && cd /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/../kcvv-issue-<N> && corepack pnpm turbo run lint type-check test build --filter=@kcvv/web
 
-Both must pass before you go further. `check-all` exists only in apps/web and packages/sanity-studio — apps/api has none.
+Both must pass before you go further. Changed another workspace? Filter on it instead; the command is valid in every workspace. A shared package (api-contract, sanity-schemas, sanity-studio) gets a leading `...` (`--filter=...@kcvv/api-contract`) so its dependents are checked too. Turbo builds the upstream packages itself — no manual build first.
 
 ## Review comes to you — do not run it yourself
 
@@ -119,7 +115,7 @@ Prefer several small commits over one large one. Never use --no-verify. Never se
 
   ## Testing
 
-  - pnpm --filter @kcvv/web check-all passes
+  - pnpm turbo run lint type-check test build --filter=@kcvv/web passes
   - <any manual verification>" \
     --label "ready-for-review"
 

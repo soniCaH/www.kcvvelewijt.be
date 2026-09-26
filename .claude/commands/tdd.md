@@ -53,7 +53,7 @@ After all current tests are green: eliminate duplication, improve naming, simpli
 No new behavior during refactor. Run full suite to confirm still green.
 
 ```bash
-pnpm --filter @kcvv/web check-all 2>&1 | tail -10
+pnpm turbo run lint type-check test build --filter=@kcvv/web --output-logs=errors-only 2>&1 | tail -10
 ```
 
 Repeat.
@@ -97,7 +97,7 @@ gh issue comment [current-issue] --body "Blocked: [what is blocking]. Created #[
 ## Done when
 
 - All acceptance criteria in the issue body are covered by passing tests
-- `pnpm --filter @kcvv/web check-all` passes (or the relevant package equivalent)
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes (filter on the workspace you changed)
 - No test mocks what it shouldn't
 - Discovered unknowns have been handled (new issues created or resolved inline)
 - Conventional commit referencing the issue: `feat(scope): description\n\nCloses #N`

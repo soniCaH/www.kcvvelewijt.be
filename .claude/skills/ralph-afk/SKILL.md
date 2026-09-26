@@ -199,7 +199,7 @@ Per branch, against `../kcvv-issue-<N>`:
 
 Send the confirmed findings back to that issue's agent with `SendMessage` — it still holds the full context of its own change and applies fixes far more cheaply than you can re-derive them. Refute false positives with a one-line reason instead of forwarding them. Apply the fixes in the worktree yourself only when the agent is no longer reachable.
 
-When the fixes land and `check-all` passes again, release the PR:
+When the fixes land and the gate passes again, release the PR:
 
 ```bash
 gh pr ready <pr-url>
@@ -231,14 +231,14 @@ git fetch origin main
 git -C ../kcvv-issue-<N> merge origin/main
 ```
 
-Then run the check that actually covers the side that changed. `check-all` is not universal:
+Then run the check that actually covers the side that changed:
 
-| Where the change lives                     | What to run                                                                                                                                                                                              |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web/src`                             | `pnpm --filter @kcvv/web check-all`                                                                                                                                                                      |
-| any other `apps/*/src` or `packages/*/src` | `pnpm lint && pnpm type-check && pnpm test && pnpm build` from the repo root — **`check-all` exists only in `apps/web` and `packages/sanity-studio`**, so the web script proves nothing about `apps/api` |
-| `.husky/`, `.claude/hooks/`                | `pnpm --filter @kcvv/web test` — `apps/web/test/hooks/` is those scripts' only home and rides that suite                                                                                                 |
-| `commitlint.config.js`                     | no automated test covers it; make a deliberately malformed commit in a scratch worktree and confirm it is refused                                                                                        |
+| Where the change lives                     | What to run                                                                                                                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/src`                             | `pnpm turbo run lint type-check test build --filter=@kcvv/web`                                                                                                                        |
+| any other `apps/*/src` or `packages/*/src` | the same command filtered on that workspace, with a leading `...` (`--filter=...@kcvv/api-contract`) so every dependent is checked too — the web gate proves nothing about `apps/api` |
+| `.husky/`, `.claude/hooks/`                | `pnpm --filter @kcvv/web test` — `apps/web/test/hooks/` is those scripts' only home and rides that suite                                                                              |
+| `commitlint.config.js`                     | no automated test covers it; make a deliberately malformed commit in a scratch worktree and confirm it is refused                                                                     |
 
 Re-running its CI is _not_ enough and neither is `gh run rerun`: a PR's checks are computed against the `main` it forked from, and a rerun replays that same stale merge. Only a fresh push of a branch that actually contains current `main` gives you a real answer.
 

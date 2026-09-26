@@ -89,9 +89,9 @@ Closes #<issue-number>
 ## Step 5 — Quality Gate
 
 ```bash
-pnpm --filter @kcvv/web check-all
-# If api-contract changed:
-pnpm turbo build --filter=@kcvv/web
+pnpm turbo run lint type-check test build --filter=@kcvv/web
+# Changed another workspace? Filter on it instead. A shared package (api-contract,
+# sanity-schemas, sanity-studio) gets a leading ... (--filter=...@kcvv/api-contract) so its dependents are checked too.
 ```
 
 Do not proceed to PR if any check fails.

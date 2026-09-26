@@ -128,7 +128,7 @@ Used verbatim by the Phase 5+ propagation issues (#1503–#1511, #2181). Everyth
 
 **Verify:**
 
-8. [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass.
+8. [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-studio` passes — the leading `...` also checks both studios, which depend on this package.
 9. [ ] Manual smoke against the staging dataset: create the type (via launcher if it has a card), confirm groups/descriptions/errors + the guide sidebar render, publish.
 
 ## No Duplication With Root CLAUDE.md
