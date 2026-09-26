@@ -1,19 +1,8 @@
 /**
  * Fixed opening copy for `/ploegen`, shared between `page.tsx` and
- * `loading.tsx` (#2432 §2 — `loading.tsx` reuses the real, unshimmered
- * opening rather than a second hand-typed copy that can silently drift).
- *
- * Lives in its own module rather than being exported from `page.tsx`
- * (which is how this used to work): `loading.tsx` importing straight from
- * `page.tsx` pulls that route's entire server-only import graph (Effect
- * runtime, repositories, Next's own server APIs) into the loading
- * skeleton's bundle too. Next's webpack build tree-shakes that away, but
- * Storybook's Vite build evaluates the whole module eagerly, and one of
- * those transitive imports throws `ReferenceError: process is not defined`
- * in the browser (#3188 — this broke `Pages/Teams/TeamsLandingSkeleton`'s
- * axe check the first time anything ever visited it under
- * `test-storybook`). A copy-only module has nothing for `loading.tsx` to
- * drag in.
+ * `loading.tsx`. See eslint.config.mjs's `no-restricted-imports` rule
+ * (`loading.tsx`/`*.stories.tsx` may not import `./page`) for why this
+ * lives in its own module.
  */
 export const PLOEGEN_TITLE = "Onze ploegen";
 export const PLOEGEN_KICKER = "KCVV Elewijt";
