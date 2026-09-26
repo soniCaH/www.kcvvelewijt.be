@@ -47,8 +47,23 @@ import {
  * Home/End · Enter descend · Esc close); never pan/drag/pinch; tap-only mobile.
  *
  * A11y: labelled `role="dialog"` (focus-trapped, focus restored on close) over a
- * `role="tree"` stage; the centred node is the single roving-tabindex `treeitem`
- * that holds focus; a polite live region announces each re-centre in Dutch.
+ * `role="group"` stage — NOT `role="tree"`/`role="treeitem"` (#3188): this UI
+ * never renders more than one navigable "node" at a time (the rest are plain
+ * ascend/cycle/expand controls, not simultaneously-visible tree items), which
+ * a real ARIA tree pattern doesn't model. Axe agrees the hard way — `tree`'s
+ * `aria-required-children` treats `group` as transparent pass-through (any
+ * plain button/link nested under a `role="tree"` ancestor, however deep,
+ * gets flagged as a disallowed direct child), and `treeitem`'s
+ * `aria-required-parent` then treats a lone `group` the same way (it must
+ * keep climbing past it looking for an actual `tree`/`treeitem` further up)
+ * — so a `tree`/`treeitem` pair here is either fully "real" (every
+ * interactive descendant marked `treeitem`, including controls that plainly
+ * aren't tree nodes) or not there at all. The centred node instead keeps a
+ * roving-tabindex plain `<button aria-current="true">` — the "you are here"
+ * semantics `aria-current` was built for, and the full position/level
+ * sentence already lives in its `aria-label` (`announceFocus`) rather than
+ * a second, `treeitem`-only `aria-level`/`aria-setsize`/`aria-posinset`. A
+ * polite live region announces each re-centre in Dutch.
  * Motion is a short enter transition, disabled under `prefers-reduced-motion`.
  * Leaves link to `/staf/{psdId}` ("Volledig profiel →") — the in-explorer detail
  * panel is Phase 4 (#2055).
@@ -372,7 +387,7 @@ export function OrganigramExplorer({
         ariaLabel="Organigram-verkenner"
       >
         <div
-          role="tree"
+          role="group"
           aria-label="Organisatiestructuur"
           style={{
             transform: `scale(${SCALE_STEPS[isPhone ? Math.min(scaleStep, 1) : scaleStep]})`,
@@ -381,15 +396,6 @@ export function OrganigramExplorer({
         >
           <div
             key={focusId}
-            // `role="group"` (#3188 — axe `aria-required-children`): a
-            // `role="tree"` container's only allowed owned children are
-            // `treeitem`/`group`, and this is `role="tree"`'s one direct
-            // child — everything below (the parent/sibling/children-fan
-            // buttons plus the single centred `role="treeitem"`) sits
-            // inside it, not as a second direct child. `group` has no
-            // required-children constraint of its own, so nothing below
-            // needs to change.
-            role="group"
             className="spotlight-pop flex w-full flex-col items-center gap-5"
           >
             {/* Parent (ascend) */}
@@ -427,13 +433,8 @@ export function OrganigramExplorer({
                 <button
                   ref={centerRef}
                   type="button"
-                  role="treeitem"
                   tabIndex={0}
-                  aria-selected={true}
                   aria-current="true"
-                  aria-level={view.depth + 1}
-                  aria-setsize={view.siblings.length}
-                  aria-posinset={view.focusIndex + 1}
                   aria-label={announceFocus(view)}
                   data-keyboard-nav={keyboardNav}
                   onKeyDown={onCenterKeyDown}

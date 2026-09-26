@@ -90,31 +90,20 @@ export const NoHighlight: Story = {
  * the overflow precondition is guaranteed the same way. `!vr`:
  * assertion-only, computed-style check — no pixel truth to capture.
  *
- * `vitest-play-only` (#3188): this story's `globals.viewport` is honoured
- * ONLY by `@storybook/addon-vitest`'s own `setViewport()` (reads
- * `.storybook/preview.ts`'s viewport options before mount) — `test-
- * storybook`/Jest has no equivalent and renders it at its own default
- * (desktop-sized) viewport instead, where the 8-column division doesn't
- * overflow and the `play` assertion below fails on a boundary condition
- * (measured: `scrollWidth` exactly equals `clientWidth`). The axe-only
- * `vr:axe:non-vr` pass (`--excludeTags vr`) would otherwise pick this
- * story up now that it carries no `vr` tag; this tag keeps it exclusively
- * on the runner it was written for.
+ * This story's `globals.viewport` is honoured by BOTH runners now (#3188,
+ * review round 2): `@storybook/addon-vitest`'s own `setViewport()` for
+ * `pnpm test:storybook`, and `.storybook/test-runner.ts`'s `preVisit` (a
+ * `page.setViewportSize` from the same `globals.viewport.value`, resolved
+ * against `.storybook/preview.ts`'s viewport options) for `test-storybook`
+ * — so this needs no runner-specific opt-out tag.
  */
 export const StickyColumnsPinned: Story = {
   args: { entries: fullDivision, highlightTeamId: 1235 },
-  tags: ["!vr", "vitest-play-only"],
-  // The addon-vitest runner already calls `setViewport()` from the story's
-  // composed `globals` before mount (`testStory()` in
-  // `@storybook/addon-vitest/dist/vitest-plugin/test-utils.js` —
-  // `await setViewport(composedStory.parameters, composedStory.globals)`
-  // runs before `composedStory.run()`), reading `.storybook/preview.ts`'s
-  // `parameters.viewport.options` the same way `JeugdVisie.stories.tsx`'s
-  // `MobileViewport` story already does for VR. No manual `vitest/browser`
-  // + `page.viewport()` + restore needed (review finding 7). `kcvvMobile`
-  // (375px) turned out too wide — measured, the 8-column division stops
-  // overflowing at that width — so this uses a dedicated 360px option
-  // instead (`kcvvStandingsTablePhone`, matching the original E2E case).
+  tags: ["!vr"],
+  // `kcvvMobile` (375px) turned out too wide — measured, the 8-column
+  // division stops overflowing at that width — so this uses a dedicated
+  // 360px option instead (`kcvvStandingsTablePhone`, matching the original
+  // E2E case). See the docblock above for how both runners resolve it.
   globals: { viewport: { value: "kcvvStandingsTablePhone" } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
