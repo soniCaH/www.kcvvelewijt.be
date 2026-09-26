@@ -70,3 +70,15 @@ describe("cn — custom font-size tokens", () => {
     expect(cn("text-ink", "text-cream")).toBe("text-cream");
   });
 });
+
+describe("cn — size-* drops both h-* and w-*", () => {
+  it("collapses an explicit h-*/w-* pair to a later size-*", () => {
+    // A caller may use `size-[Npx]` in place of `h-[Npx] w-[Npx]` — this is
+    // the drift guard: if tailwind-merge ever stops treating `size-*` as
+    // conflicting with both axes, this fails instead of silently leaving a
+    // stale `h-60 w-60` beside it.
+    expect(cn("relative h-60 w-60", "size-[140px]")).toBe(
+      "relative size-[140px]",
+    );
+  });
+});
