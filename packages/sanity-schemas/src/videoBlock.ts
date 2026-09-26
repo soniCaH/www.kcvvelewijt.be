@@ -60,15 +60,19 @@ export const videoBlock = defineType({
       },
       description:
         'Upload een MP4 of WebM (H.264 1080p ~2–3 Mbps aanbevolen). Gebruik dit óf "Embed URL" — niet beide.',
-      // Soft-warning size guard. The validator returns {level: 'warning'}
-      // so the editor can still save / publish — bandwidth-heavy uploads
-      // are flagged, not blocked. Size lives on the asset document, so
-      // we deref via the validation context's client (matches the
-      // organigram-members pattern in the validation/ folder). A
-      // transient fetch failure swallows to `true` rather than surfacing
-      // as a generic validation error — the goal is a hint, not a gate.
+      // Soft-warning size guard, on its own `Rule.warning()` instance —
+      // every marker this check emits comes out at `warning`, so the
+      // editor can still save / publish; bandwidth-heavy uploads are
+      // flagged, not blocked. (A plain `Rule.custom(...)` here would emit
+      // at `error` regardless of what the validator itself returns — see
+      // `banner.ts`'s image field for the full mechanism.) Size lives on
+      // the asset document, so we deref via the validation context's
+      // client (matches the organigram-members pattern in the
+      // validation/ folder). A transient fetch failure swallows to
+      // `true` rather than surfacing as a generic validation error — the
+      // goal is a hint, not a gate.
       validation: (Rule) =>
-        Rule.custom(async (value, context) => {
+        Rule.warning().custom(async (value, context) => {
           const ref = (value as {asset?: {_ref?: string}} | undefined)?.asset
             ?._ref
           if (!ref) return true
@@ -81,7 +85,6 @@ export const videoBlock = defineType({
           const size = asset?.size
           if (typeof size === 'number' && size > SOFT_MAX_VIDEO_BYTES) {
             return {
-              level: 'warning',
               message:
                 'Dit bestand is erg groot. Encodeer naar 1080p H.264 ~2–3 Mbps voordat je uploadt.',
             }
