@@ -181,9 +181,15 @@ export function YouthDirectory({
                         />
                       ) : (
                         <div className="bg-cream-soft flex h-full w-full items-center justify-center">
+                          {/* `w-full max-w-24`, not `w-auto`: JerseyShirt's
+                              only children are absolutely positioned, so an
+                              auto-width flex item has no in-flow content to
+                              size itself from and collapses to 0 — verified
+                              empirically (#2777). `max-h-24`/`max-w-24` cap
+                              both axes at the same 96px square. */}
                           <JerseyShirt
                             letterOverlay={chestMark}
-                            className="h-full max-h-24 w-auto py-2"
+                            className="h-full max-h-24 w-full max-w-24 py-2"
                           />
                         </div>
                       )}

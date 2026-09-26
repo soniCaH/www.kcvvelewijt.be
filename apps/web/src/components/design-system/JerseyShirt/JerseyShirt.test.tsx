@@ -43,4 +43,28 @@ describe("JerseyShirt", () => {
     const paths = container.querySelectorAll("path");
     expect(paths).toHaveLength(7);
   });
+
+  it("merges className with cn() so a caller's size and margin win over the defaults (#2777)", () => {
+    const { container } = render(<JerseyShirt className="mx-0 h-20 w-20" />);
+    const figure = container.querySelector("figure");
+    expect(figure).toHaveClass("h-20", "w-20", "mx-0");
+    expect(figure).not.toHaveClass("h-60", "w-60", "mx-auto");
+  });
+
+  it("scales its inner layers proportionally to the figure, not with fixed-px insets", () => {
+    // A fixed-px inset only looks right at the 240px default — a caller
+    // asking for a smaller figure would slide the outline off the fill and
+    // overflow the letter overlay. Every inset must be relative (%/cqw), not
+    // an absolute px value tuned for one size.
+    const { container } = render(<JerseyShirt letterOverlay="U11" />);
+    const insetLayers = container.querySelectorAll('div[aria-hidden="true"]');
+    expect(insetLayers.length).toBeGreaterThan(0);
+    for (const layer of insetLayers) {
+      expect(layer.className).not.toMatch(/-\[\d+px\]/);
+      expect(layer.className).not.toMatch(/\b(?:top|right|bottom|left)-\d+\b/);
+    }
+    const overlay = screen.getByText("U11");
+    expect(overlay.style.fontSize).not.toBe("56px");
+    expect(overlay.style.fontSize).toContain("cqw");
+  });
 });

@@ -72,14 +72,16 @@ export const TeamEnrolmentCta = ({
       {/* Corner jersey motif — inset from the top-right, age group as chest
           letter. Hidden below 640px (mirrors <ClubshopBanner>) so the narrow
           viewport gets a clean full-width stack instead of a crowded gutter.
-          Decorative; the aria-hidden silhouette lives inside <JerseyShirt>. */}
+          Decorative; the aria-hidden silhouette lives inside <JerseyShirt>.
+          140px as an arbitrary value: `h-35` resolves to the `--spacing-35`
+          token (35rem) in globals.css, not 140px. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute top-5 right-6 z-0 hidden sm:block"
       >
         <JerseyShirt
           letterOverlay={ageGroup}
-          className="h-35 w-35 rotate-[4deg]"
+          className="size-[140px] rotate-[4deg]"
         />
       </div>
 

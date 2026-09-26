@@ -43,17 +43,18 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
 
       <PageContainer width="index" className="py-12 md:py-16">
         <div className="relative">
-          {/* Corner-anchored jersey illustration. ~140px (Tailwind v4
-              `w-35 h-35` = 35 × 0.25rem = 140px). Centered vertically
-              against the text block via `top-1/2 -translate-y-1/2` so
-              the shirt's mid-line sits with the subheading rather than
-              floating below the CTA. Hidden below 640px so the narrow
-              viewport doesn't force the heading to wrap around it. */}
+          {/* Corner-anchored jersey illustration. 140px as an arbitrary
+              value: `h-35` resolves to the `--spacing-35` token (35rem)
+              in globals.css, not 140px. Centered vertically against the
+              text block via `top-1/2 -translate-y-1/2` so the shirt's
+              mid-line sits with the subheading rather than floating
+              below the CTA. Hidden below 640px so the narrow viewport
+              doesn't force the heading to wrap around it. */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute top-1/2 right-0 z-0 hidden -translate-y-1/2 sm:block"
           >
-            <JerseyShirt className="mx-0 h-35 w-35" />
+            <JerseyShirt className="mx-0 size-[140px]" />
           </div>
 
           <div className="relative z-10 max-w-3xl">
