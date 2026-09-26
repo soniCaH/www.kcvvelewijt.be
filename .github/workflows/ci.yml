@@ -451,7 +451,7 @@ jobs:
   # not only the deploy (#3177) — when it runs: the `visual` filter decides,
   # and a `packages/**`-only change is left to `quality-checks`' type-check.
   visual-regression-gate:
-    name: Visual Regression
+    name: VR — Gate
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

@@ -117,7 +117,7 @@ New job `visual-regression` in `.github/workflows/ci.yml`:
 - `needs: [storybook-build, visual-regression-changes]` — `storybook-build` builds and uploads the Storybook static output (split out of `quality-checks` in #3138); `visual-regression-changes` path-filters pushes and PRs. The run is sharded 3×.
 - Runs inside `container: mcr.microsoft.com/playwright:<version>-noble` on `ubuntu-latest` (amd64). Local capture matches it only under the amd64 pin in §5, and only while both use the same image tag.
 - On failure, uploads diff PNGs as artifacts so Claude (or a reviewer) can download and inspect them.
-- A required check on `main` since #3139 — through the `visual-regression-gate` job (check name `Visual Regression`), never the shard names, because a skipped matrix job reports under its unexpanded name. The gate is loose, and a skipped chain passes. The contract that earned it is #3088; the layer rule ("a layer earns the gate by becoming deterministic") lives in #3086.
+- A required check on `main` since #3139 — through the `visual-regression-gate` job (check name `VR — Gate`), never the shard names, because a skipped matrix job reports under its unexpanded name. The gate is loose, and a skipped chain passes. The contract that earned it is #3088; the layer rule ("a layer earns the gate by becoming deterministic") lives in #3086.
 
 ### Baseline-update workflow
 
