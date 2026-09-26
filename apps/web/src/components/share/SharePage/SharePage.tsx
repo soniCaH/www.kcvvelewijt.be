@@ -703,6 +703,7 @@ export function SharePage({ matches, players }: SharePageProps) {
         </label>
         <Input
           id="match-input"
+          aria-label="Wedstrijd"
           list="match-options"
           value={matchName}
           onChange={(e) => handleMatchNameChange(e.target.value)}
@@ -731,6 +732,7 @@ export function SharePage({ matches, players }: SharePageProps) {
         </label>
         <Input
           id="squad-input"
+          aria-label="Ploeg"
           value={squad}
           onChange={(e) => {
             setSquad(e.target.value);
@@ -756,6 +758,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           </label>
           <Input
             id="score-input"
+            aria-label="Score"
             value={score}
             onChange={(e) => {
               setScore(e.target.value);
@@ -778,6 +781,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           </label>
           <Input
             id="minute-input"
+            aria-label="Minuut"
             value={minute}
             onChange={(e) => {
               setMinute(e.target.value);
@@ -800,6 +804,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           </label>
           <Input
             id="competition-input"
+            aria-label="Competitie"
             value={competition}
             onChange={(e) => {
               setCompetition(e.target.value);
@@ -822,6 +827,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           </label>
           <Input
             id="datetime-input"
+            aria-label="Datum & uur"
             value={dateTime}
             onChange={(e) => {
               setDateTime(e.target.value);
@@ -891,6 +897,7 @@ export function SharePage({ matches, players }: SharePageProps) {
           </label>
           <Select
             id="mood-select"
+            aria-label="Resultaat"
             value={mood}
             onChange={(e) => {
               if (isResultMood(e.target.value)) setMood(e.target.value);

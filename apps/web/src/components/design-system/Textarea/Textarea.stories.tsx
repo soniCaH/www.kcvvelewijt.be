@@ -29,6 +29,10 @@ const meta = {
     rows: { control: "number" },
     placeholder: { control: "text" },
   },
+  // `<Textarea>` requires an accessible name (#3188 — see
+  // `_internal/accessibleName.ts`). Every args-based story below inherits
+  // this default; `render`-based stories set their own `aria-label`/`id`.
+  args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Textarea>;
 
 export default meta;
@@ -127,6 +131,7 @@ export const WithCounterUnderLimit: Story = {
         onChange={(e) => setV(e.target.value)}
         maxLength={240}
         rows={4}
+        aria-label="Boodschap voor het bestuur"
       />
     );
   },
@@ -143,6 +148,7 @@ export const WithCounterOverLimit: Story = {
         onChange={(e) => setV(e.target.value)}
         maxLength={120}
         rows={5}
+        aria-label="Boodschap voor het bestuur"
       />
     );
   },
@@ -152,24 +158,42 @@ export const StateMachine: Story = {
   render: () => (
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
-        <Label>Default</Label>
-        <Textarea placeholder="Schrijf hier je bericht..." rows={3} />
-      </div>
-      <div>
-        <Label>Filled</Label>
-        <Textarea defaultValue="Een korte notitie." rows={3} />
-      </div>
-      <div>
-        <Label>Error</Label>
+        <Label htmlFor="textarea-state-default">Default</Label>
         <Textarea
+          id="textarea-state-default"
+          aria-label="Default"
+          placeholder="Schrijf hier je bericht..."
+          rows={3}
+        />
+      </div>
+      <div>
+        <Label htmlFor="textarea-state-filled">Filled</Label>
+        <Textarea
+          id="textarea-state-filled"
+          aria-label="Filled"
+          defaultValue="Een korte notitie."
+          rows={3}
+        />
+      </div>
+      <div>
+        <Label htmlFor="textarea-state-error">Error</Label>
+        <Textarea
+          id="textarea-state-error"
+          aria-label="Error"
           placeholder="Bericht"
           error="Dit veld is verplicht."
           rows={3}
         />
       </div>
       <div>
-        <Label>Disabled</Label>
-        <Textarea defaultValue="Niet bewerkbaar" disabled rows={3} />
+        <Label htmlFor="textarea-state-disabled">Disabled</Label>
+        <Textarea
+          id="textarea-state-disabled"
+          aria-label="Disabled"
+          defaultValue="Niet bewerkbaar"
+          disabled
+          rows={3}
+        />
       </div>
     </div>
   ),
@@ -183,6 +207,7 @@ export const WithLabelAndKicker: Story = {
       </Label>
       <Textarea
         id="msg"
+        aria-label="Bericht"
         placeholder="Schrijf hier je bericht..."
         hint="Houd het kort en bondig — maximaal 240 tekens."
         rows={5}

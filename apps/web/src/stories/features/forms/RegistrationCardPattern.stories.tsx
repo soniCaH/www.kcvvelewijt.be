@@ -74,7 +74,12 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             <Label htmlFor="rcp-voornaam" required>
               Voornaam
             </Label>
-            <Input id="rcp-voornaam" name="voornaam" defaultValue="Lieve" />
+            <Input
+              id="rcp-voornaam"
+              aria-label="Voornaam"
+              name="voornaam"
+              defaultValue="Lieve"
+            />
           </div>
           <div>
             <Label htmlFor="rcp-achternaam" required>
@@ -82,6 +87,7 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             </Label>
             <Input
               id="rcp-achternaam"
+              aria-label="Achternaam"
               name="achternaam"
               placeholder="Bv. Janssens"
             />
@@ -92,6 +98,7 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             </Label>
             <Input
               id="rcp-email"
+              aria-label="E-mail"
               name="email"
               type="email"
               placeholder="naam@voorbeeld.be"
@@ -103,6 +110,7 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             </Label>
             <Input
               id="rcp-telefoon"
+              aria-label="Telefoon"
               name="telefoon"
               defaultValue="+32 470"
               error="Geef een volledig telefoonnummer."
@@ -114,6 +122,7 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             </Label>
             <Input
               id="rcp-jaar"
+              aria-label="Geboortejaar"
               name="jaar"
               inputMode="numeric"
               defaultValue="1992"
@@ -123,7 +132,12 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             <Label htmlFor="rcp-ploeg" required>
               Ploeg
             </Label>
-            <Select id="rcp-ploeg" name="ploeg" defaultValue="A">
+            <Select
+              id="rcp-ploeg"
+              aria-label="Ploeg"
+              name="ploeg"
+              defaultValue="A"
+            >
               <option value="A">A-ploeg</option>
               <option value="B">B-ploeg</option>
               <option value="U21">U21</option>
@@ -135,6 +149,7 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
             </Label>
             <Textarea
               id="rcp-vertel"
+              aria-label="Vertel iets"
               name="vertel"
               rows={3}
               defaultValue="Al jaren supporter via mijn nonkel."

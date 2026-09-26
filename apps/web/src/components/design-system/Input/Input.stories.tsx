@@ -28,6 +28,11 @@ const meta = {
     disabled: { control: "boolean" },
     placeholder: { control: "text" },
   },
+  // `<Input>` requires an accessible name (#3188 — its props contract
+  // enforces this at the type level, see `_internal/accessibleName.ts`).
+  // Every args-based story below inherits this default; `render`-based
+  // stories set their own `aria-label` or `id` individually.
+  args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Input>;
 
 export default meta;
@@ -133,9 +138,13 @@ export const Large: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex w-80 flex-col gap-4">
-      <Input size="sm" placeholder="Small (sm)" />
-      <Input size="md" placeholder="Medium (md) — default" />
-      <Input size="lg" placeholder="Large (lg)" />
+      <Input size="sm" placeholder="Small (sm)" aria-label="Small (sm)" />
+      <Input
+        size="md"
+        placeholder="Medium (md) — default"
+        aria-label="Medium (md) — default"
+      />
+      <Input size="lg" placeholder="Large (lg)" aria-label="Large (lg)" />
     </div>
   ),
 };
@@ -165,23 +174,38 @@ export const StateMachine: Story = {
   render: () => (
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
-        <Label>Default</Label>
-        <Input placeholder="Voer tekst in..." />
-      </div>
-      <div>
-        <Label>Filled</Label>
-        <Input defaultValue="Kevin Van Ransbeeck" />
-      </div>
-      <div>
-        <Label>Error</Label>
+        <Label htmlFor="input-state-default">Default</Label>
         <Input
+          id="input-state-default"
+          aria-label="Default"
+          placeholder="Voer tekst in..."
+        />
+      </div>
+      <div>
+        <Label htmlFor="input-state-filled">Filled</Label>
+        <Input
+          id="input-state-filled"
+          aria-label="Filled"
+          defaultValue="Kevin Van Ransbeeck"
+        />
+      </div>
+      <div>
+        <Label htmlFor="input-state-error">Error</Label>
+        <Input
+          id="input-state-error"
+          aria-label="Error"
           defaultValue="geen-geldig-email"
           error="Vul een geldig e-mailadres in."
         />
       </div>
       <div>
-        <Label>Disabled</Label>
-        <Input defaultValue="Niet bewerkbaar" disabled />
+        <Label htmlFor="input-state-disabled">Disabled</Label>
+        <Input
+          id="input-state-disabled"
+          aria-label="Disabled"
+          defaultValue="Niet bewerkbaar"
+          disabled
+        />
       </div>
     </div>
   ),
@@ -194,7 +218,7 @@ export const ContactFormExample: Story = {
         <Label htmlFor="firstname" required>
           Voornaam
         </Label>
-        <Input id="firstname" defaultValue="Kevin" />
+        <Input id="firstname" aria-label="Voornaam" defaultValue="Kevin" />
       </div>
       <div>
         <Label htmlFor="email" required>
@@ -202,6 +226,7 @@ export const ContactFormExample: Story = {
         </Label>
         <Input
           id="email"
+          aria-label="E-mailadres"
           type="email"
           defaultValue="geen-geldig"
           error="Vul een geldig e-mailadres in."
@@ -214,12 +239,18 @@ export const ContactFormExample: Story = {
         </Label>
         <Input
           id="phone"
+          aria-label="Telefoonnummer"
           hint="Enkel voor dringende vragen — wordt nooit gedeeld."
         />
       </div>
       <div>
         <Label htmlFor="subject">Onderwerp</Label>
-        <Input id="subject" placeholder="Onderwerp" disabled />
+        <Input
+          id="subject"
+          aria-label="Onderwerp"
+          placeholder="Onderwerp"
+          disabled
+        />
       </div>
     </div>
   ),

@@ -27,6 +27,11 @@ const meta = {
     disabled: { control: "boolean" },
     placeholder: { control: "text" },
   },
+  // `<Select>` requires an accessible name (#3188 — see
+  // `_internal/accessibleName.ts`). `Default` below spreads `args` and
+  // inherits this; every other story here uses a bespoke `render` and sets
+  // its own `aria-label`/`id`.
+  args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Select>;
 
 export default meta;
@@ -51,7 +56,7 @@ export const Default: Story = {
 
 export const Filled: Story = {
   render: () => (
-    <Select className="w-64" defaultValue="aploeg">
+    <Select className="w-64" defaultValue="aploeg" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -59,7 +64,12 @@ export const Filled: Story = {
 
 export const Focused: Story = {
   render: () => (
-    <Select className="w-64" placeholder="Kies een ploeg" autoFocus>
+    <Select
+      className="w-64"
+      placeholder="Kies een ploeg"
+      aria-label="Ploeg"
+      autoFocus
+    >
       {teamOptions}
     </Select>
   ),
@@ -73,7 +83,7 @@ export const Focused: Story = {
 
 export const FilledFocused: Story = {
   render: () => (
-    <Select className="w-64" defaultValue="bploeg" autoFocus>
+    <Select className="w-64" defaultValue="bploeg" aria-label="Ploeg" autoFocus>
       {teamOptions}
     </Select>
   ),
@@ -88,6 +98,7 @@ export const WithError: Story = {
       className="w-64"
       error="Kies een geldige ploeg."
       placeholder="Kies een ploeg"
+      aria-label="Ploeg"
     >
       {teamOptions}
     </Select>
@@ -100,6 +111,7 @@ export const ErrorFocused: Story = {
       className="w-64"
       error="Kies een geldige ploeg."
       placeholder="Kies een ploeg"
+      aria-label="Ploeg"
       autoFocus
     >
       {teamOptions}
@@ -112,7 +124,7 @@ export const ErrorFocused: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Select className="w-64" disabled defaultValue="aploeg">
+    <Select className="w-64" disabled defaultValue="aploeg" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -124,6 +136,7 @@ export const WithHint: Story = {
       className="w-64"
       hint="Dit bepaalt welke wedstrijden je ziet."
       placeholder="Alle ploegen"
+      aria-label="Ploeg"
     >
       {teamOptions}
     </Select>
@@ -132,7 +145,7 @@ export const WithHint: Story = {
 
 export const Small: Story = {
   render: () => (
-    <Select className="w-48" size="sm" placeholder="Klein">
+    <Select className="w-48" size="sm" placeholder="Klein" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -140,7 +153,7 @@ export const Small: Story = {
 
 export const Large: Story = {
   render: () => (
-    <Select className="w-72" size="lg" placeholder="Groot">
+    <Select className="w-72" size="lg" placeholder="Groot" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -149,13 +162,17 @@ export const Large: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-4">
-      <Select size="sm" placeholder="Small (sm)">
+      <Select size="sm" placeholder="Small (sm)" aria-label="Small (sm)">
         <option value="1">Optie 1</option>
       </Select>
-      <Select size="md" placeholder="Medium (md) — default">
+      <Select
+        size="md"
+        placeholder="Medium (md) — default"
+        aria-label="Medium (md) — default"
+      >
         <option value="1">Optie 1</option>
       </Select>
-      <Select size="lg" placeholder="Large (lg)">
+      <Select size="lg" placeholder="Large (lg)" aria-label="Large (lg)">
         <option value="1">Optie 1</option>
       </Select>
     </div>
@@ -166,22 +183,44 @@ export const StateMachine: Story = {
   render: () => (
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
-        <Label>Default</Label>
-        <Select placeholder="Kies een ploeg">{teamOptions}</Select>
-      </div>
-      <div>
-        <Label>Filled</Label>
-        <Select defaultValue="aploeg">{teamOptions}</Select>
-      </div>
-      <div>
-        <Label>Error</Label>
-        <Select placeholder="Kies een ploeg" error="Kies een geldige ploeg.">
+        <Label htmlFor="select-state-default">Default</Label>
+        <Select
+          id="select-state-default"
+          aria-label="Default"
+          placeholder="Kies een ploeg"
+        >
           {teamOptions}
         </Select>
       </div>
       <div>
-        <Label>Disabled</Label>
-        <Select defaultValue="aploeg" disabled>
+        <Label htmlFor="select-state-filled">Filled</Label>
+        <Select
+          id="select-state-filled"
+          aria-label="Filled"
+          defaultValue="aploeg"
+        >
+          {teamOptions}
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="select-state-error">Error</Label>
+        <Select
+          id="select-state-error"
+          aria-label="Error"
+          placeholder="Kies een ploeg"
+          error="Kies een geldige ploeg."
+        >
+          {teamOptions}
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="select-state-disabled">Disabled</Label>
+        <Select
+          id="select-state-disabled"
+          aria-label="Disabled"
+          defaultValue="aploeg"
+          disabled
+        >
           {teamOptions}
         </Select>
       </div>
@@ -194,7 +233,7 @@ export const FilterPanel: Story = {
     <div className="grid w-[500px] grid-cols-2 gap-4">
       <div>
         <Label htmlFor="fp-tier">Niveau</Label>
-        <Select id="fp-tier" placeholder="Alle sponsors">
+        <Select id="fp-tier" aria-label="Niveau" placeholder="Alle sponsors">
           <option value="gold">Goud</option>
           <option value="silver">Zilver</option>
           <option value="bronze">Brons</option>
@@ -202,7 +241,7 @@ export const FilterPanel: Story = {
       </div>
       <div>
         <Label htmlFor="fp-sort">Sorteren</Label>
-        <Select id="fp-sort" defaultValue="tier">
+        <Select id="fp-sort" aria-label="Sorteren" defaultValue="tier">
           <option value="tier">Op niveau</option>
           <option value="name">Op naam (A-Z)</option>
         </Select>
