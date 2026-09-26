@@ -12,30 +12,30 @@ import { MagnifyingGlass } from "@/lib/icons.redesign";
 describe("Input", () => {
   describe("Rendering", () => {
     it("should render as an input element", () => {
-      render(<Input />);
+      render(<Input aria-label="Test" />);
       expect(screen.getByRole("textbox")).toBeInTheDocument();
     });
 
     it("should render placeholder text", () => {
-      render(<Input placeholder="Zoek hier..." />);
+      render(<Input aria-label="Test" placeholder="Zoek hier..." />);
       expect(screen.getByPlaceholderText("Zoek hier...")).toBeInTheDocument();
     });
 
     it("should render with a default value", () => {
-      render(<Input defaultValue="KCVV" />);
+      render(<Input aria-label="Test" defaultValue="KCVV" />);
       expect(screen.getByDisplayValue("KCVV")).toBeInTheDocument();
     });
 
     it("should forward ref", () => {
       const ref = createRef<HTMLInputElement>();
-      render(<Input ref={ref} />);
+      render(<Input aria-label="Test" ref={ref} />);
       expect(ref.current).toBeInstanceOf(HTMLInputElement);
     });
   });
 
   describe("Sizes", () => {
     it("renders medium height (40px) by default", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       expect(screen.getByTestId("input")).toHaveClass(
         "h-10",
         "px-4",
@@ -44,12 +44,12 @@ describe("Input", () => {
     });
 
     it("renders small height (32px)", () => {
-      render(<Input size="sm" data-testid="input" />);
+      render(<Input aria-label="Test" size="sm" data-testid="input" />);
       expect(screen.getByTestId("input")).toHaveClass("h-8", "px-3", "text-sm");
     });
 
     it("renders large height (48px)", () => {
-      render(<Input size="lg" data-testid="input" />);
+      render(<Input aria-label="Test" size="lg" data-testid="input" />);
       expect(screen.getByTestId("input")).toHaveClass(
         "h-12",
         "px-5",
@@ -60,14 +60,14 @@ describe("Input", () => {
 
   describe("Field chrome — paper-card emphasis", () => {
     it("renders white surface, 2px ink/30 border, paper-soft shadow at rest", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       const el = screen.getByTestId("input");
       expect(el).toHaveClass("bg-white", "border-2", "border-ink/30");
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
     });
 
     it("compresses shadow + nudges surface on hover", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       const el = screen.getByTestId("input");
       expect(el.className).toContain(
         "hover:shadow-[var(--shadow-paper-sm-soft-hover)]",
@@ -76,7 +76,7 @@ describe("Input", () => {
     });
 
     it("snaps shadow off + presses surface 2px on focus", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       const el = screen.getByTestId("input");
       expect(el.className).toContain("focus:shadow-none");
       expect(el.className).toContain("focus:translate-x-0.5");
@@ -84,7 +84,7 @@ describe("Input", () => {
     });
 
     it("anchors filled state via :not(:placeholder-shown):not(:focus) → ink/60", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       // Excludes [data-vr-force-ring=true] (#3137) so this rule can never
       // compete with the forced-focus VR rule on equal specificity — see
       // fieldChrome.ts.
@@ -94,20 +94,20 @@ describe("Input", () => {
     });
 
     it("uses dim ink/40 placeholder", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       expect(screen.getByTestId("input").className).toContain(
         "placeholder:text-ink/40",
       );
     });
 
     it("does not apply rounded corners (sharp)", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       const cls = screen.getByTestId("input").className;
       expect(cls).not.toMatch(/\brounded-/);
     });
 
     it("does not reference legacy kcvv-/foundation- token classes", () => {
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       const cls = screen.getByTestId("input").className;
       expect(cls).not.toContain("kcvv-alert");
       expect(cls).not.toContain("kcvv-green-bright");
@@ -117,20 +117,20 @@ describe("Input", () => {
 
   describe("Error state", () => {
     it("renders an AlertBadge with the FOUT label and message", () => {
-      render(<Input error="Dit veld is verplicht." />);
+      render(<Input aria-label="Test" error="Dit veld is verplicht." />);
       expect(screen.getByText("FOUT")).toBeInTheDocument();
       expect(screen.getByText("Dit veld is verplicht.")).toBeInTheDocument();
     });
 
     it("flips border + shadow to alert variant", () => {
-      render(<Input error="Fout" data-testid="input" />);
+      render(<Input aria-label="Test" error="Fout" data-testid="input" />);
       const el = screen.getByTestId("input");
       expect(el).toHaveClass("border-alert");
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm-alert)]");
     });
 
     it("sets aria-invalid + aria-describedby pointing at the AlertBadge", () => {
-      render(<Input error="Fout" data-testid="input" />);
+      render(<Input aria-label="Test" error="Fout" data-testid="input" />);
       const input = screen.getByTestId("input");
       expect(input).toHaveAttribute("aria-invalid", "true");
       const describedBy = input.getAttribute("aria-describedby");
@@ -139,14 +139,14 @@ describe("Input", () => {
     });
 
     it("does not show hint when error is present", () => {
-      render(<Input error="Fout" hint="Hulptekst" />);
+      render(<Input aria-label="Test" error="Fout" hint="Hulptekst" />);
       expect(screen.queryByText("Hulptekst")).not.toBeInTheDocument();
     });
   });
 
   describe("Hint", () => {
     it("renders italic Freight Display hint at ink/60 when no error", () => {
-      render(<Input hint="Minimaal 2 tekens." />);
+      render(<Input aria-label="Test" hint="Minimaal 2 tekens." />);
       const el = screen.getByText("Minimaal 2 tekens.");
       expect(el).toHaveClass("italic", "text-ink/60");
     });
@@ -154,7 +154,7 @@ describe("Input", () => {
     // Decision D4 (#2620): the mono `[?]` opens the hint and must not leak
     // into the field's accessible description.
     it("opens with the mono [?] bracket", () => {
-      render(<Input hint="Minimaal 2 tekens." />);
+      render(<Input aria-label="Test" hint="Minimaal 2 tekens." />);
       const hint = screen.getByText("Minimaal 2 tekens.");
       const bracket = hint.querySelector('[data-glyph="help"]');
       expect(bracket).toHaveTextContent("[?]");
@@ -162,7 +162,13 @@ describe("Input", () => {
     });
 
     it("describes the field with the hint sentence alone", () => {
-      render(<Input hint="Minimaal 2 tekens." data-testid="input" />);
+      render(
+        <Input
+          aria-label="Test"
+          hint="Minimaal 2 tekens."
+          data-testid="input"
+        />,
+      );
       expect(screen.getByTestId("input")).toHaveAccessibleDescription(
         "Minimaal 2 tekens.",
       );
@@ -173,6 +179,7 @@ describe("Input", () => {
     it("renders leading and trailing icons", () => {
       render(
         <Input
+          aria-label="Test"
           leadingIcon={<MagnifyingGlass data-testid="li" size={16} />}
           trailingIcon={<MagnifyingGlass data-testid="ti" size={16} />}
         />,
@@ -184,6 +191,7 @@ describe("Input", () => {
     it("adds leading padding when leadingIcon is set (per size)", () => {
       const { rerender } = render(
         <Input
+          aria-label="Test"
           size="sm"
           leadingIcon={<MagnifyingGlass size={14} />}
           data-testid="input"
@@ -192,6 +200,7 @@ describe("Input", () => {
       expect(screen.getByTestId("input")).toHaveClass("pl-9");
       rerender(
         <Input
+          aria-label="Test"
           leadingIcon={<MagnifyingGlass size={16} />}
           data-testid="input"
         />,
@@ -199,6 +208,7 @@ describe("Input", () => {
       expect(screen.getByTestId("input")).toHaveClass("pl-11");
       rerender(
         <Input
+          aria-label="Test"
           size="lg"
           leadingIcon={<MagnifyingGlass size={20} />}
           data-testid="input"
@@ -210,7 +220,7 @@ describe("Input", () => {
 
   describe("Disabled state", () => {
     it("freezes chrome (cream-soft surface, ink/15 border, opacity-50 softens the resting shadow)", () => {
-      render(<Input disabled data-testid="input" />);
+      render(<Input aria-label="Test" disabled data-testid="input" />);
       const el = screen.getByTestId("input");
       expect(el).toBeDisabled();
       expect(el).toHaveClass(
@@ -229,12 +239,20 @@ describe("Input", () => {
 
   describe("Custom props", () => {
     it("accepts custom className", () => {
-      render(<Input className="custom-class" data-testid="input" />);
+      render(
+        <Input
+          aria-label="Test"
+          className="custom-class"
+          data-testid="input"
+        />,
+      );
       expect(screen.getByTestId("input")).toHaveClass("custom-class");
     });
 
     it("passes through native input attributes", () => {
-      render(<Input type="email" name="email" id="email-field" />);
+      render(
+        <Input aria-label="Test" type="email" name="email" id="email-field" />,
+      );
       const input = screen.getByRole("textbox");
       expect(input).toHaveAttribute("type", "email");
       expect(input).toHaveAttribute("name", "email");
@@ -245,7 +263,7 @@ describe("Input", () => {
   describe("Accessibility", () => {
     it("receives focus on click", async () => {
       const user = userEvent.setup();
-      render(<Input data-testid="input" />);
+      render(<Input aria-label="Test" data-testid="input" />);
       await user.click(screen.getByTestId("input"));
       expect(screen.getByTestId("input")).toHaveFocus();
     });

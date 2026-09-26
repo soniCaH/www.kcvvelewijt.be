@@ -68,6 +68,12 @@ export const WithContactTrigger: Story = {
  * rest, or never overflow even at A++, both fail this test now, where the
  * old before/after-only version would have silently passed the first case
  * and only caught the second. `!vr`.
+ *
+ * This story's `globals.viewport` is honoured by BOTH runners now (#3188,
+ * review round 2): `@storybook/addon-vitest`'s own `setViewport()` for
+ * `pnpm test:storybook`, and `.storybook/test-runner.ts`'s `preVisit` (a
+ * `page.setViewportSize` from the same `globals.viewport.value`) for
+ * `test-storybook` — so this needs no runner-specific opt-out tag.
  */
 export const ZoomOverflowsTheStage: Story = {
   tags: ["!vr"],

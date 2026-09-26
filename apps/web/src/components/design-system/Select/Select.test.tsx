@@ -10,7 +10,7 @@ describe("Select", () => {
   describe("Rendering", () => {
     it("renders as a select element", () => {
       render(
-        <Select>
+        <Select aria-label="Test">
           <option value="1">Optie 1</option>
         </Select>,
       );
@@ -19,7 +19,7 @@ describe("Select", () => {
 
     it("renders options", () => {
       render(
-        <Select>
+        <Select aria-label="Test">
           <option value="gold">Goud</option>
           <option value="silver">Zilver</option>
         </Select>,
@@ -32,7 +32,7 @@ describe("Select", () => {
 
     it("renders placeholder as disabled first option", () => {
       render(
-        <Select placeholder="Kies een optie">
+        <Select aria-label="Test" placeholder="Kies een optie">
           <option value="a">Optie A</option>
         </Select>,
       );
@@ -44,14 +44,14 @@ describe("Select", () => {
 
     it("forwards ref", () => {
       const ref = { current: null };
-      render(<Select ref={ref} />);
+      render(<Select aria-label="Test" ref={ref} />);
       expect(ref.current).toBeInstanceOf(HTMLSelectElement);
     });
   });
 
   describe("Sizes", () => {
     it("renders medium height (40px) by default", () => {
-      render(<Select data-testid="select" />);
+      render(<Select aria-label="Test" data-testid="select" />);
       expect(screen.getByTestId("select")).toHaveClass(
         "h-10",
         "pl-4",
@@ -60,7 +60,7 @@ describe("Select", () => {
     });
 
     it("renders small height (32px)", () => {
-      render(<Select size="sm" data-testid="select" />);
+      render(<Select aria-label="Test" size="sm" data-testid="select" />);
       expect(screen.getByTestId("select")).toHaveClass(
         "h-8",
         "pl-3",
@@ -69,7 +69,7 @@ describe("Select", () => {
     });
 
     it("renders large height (48px)", () => {
-      render(<Select size="lg" data-testid="select" />);
+      render(<Select aria-label="Test" size="lg" data-testid="select" />);
       expect(screen.getByTestId("select")).toHaveClass(
         "h-12",
         "pl-5",
@@ -80,12 +80,12 @@ describe("Select", () => {
 
   describe("Custom chevron — Phosphor CaretDown", () => {
     it("renders a chevron icon (svg)", () => {
-      const { container } = render(<Select />);
+      const { container } = render(<Select aria-label="Test" />);
       expect(container.querySelector("svg")).toBeInTheDocument();
     });
 
     it("hides native select arrow via appearance-none", () => {
-      render(<Select data-testid="select" />);
+      render(<Select aria-label="Test" data-testid="select" />);
       expect(screen.getByTestId("select")).toHaveClass("appearance-none");
     });
 
@@ -93,7 +93,7 @@ describe("Select", () => {
       const src = await import("./Select");
       // Surface check: render and verify the SVG comes from Phosphor.
       // Phosphor SVG roots carry data-icon-weight; Lucide does not.
-      const { container } = render(<src.Select />);
+      const { container } = render(<src.Select aria-label="Test" />);
       const svg = container.querySelector("svg");
       // Phosphor fill weight ships viewBox 0 0 256 256.
       expect(svg?.getAttribute("viewBox")).toBe("0 0 256 256");
@@ -102,19 +102,19 @@ describe("Select", () => {
 
   describe("Field chrome — paper-card emphasis", () => {
     it("renders white surface, 2px ink/30 border, paper-soft shadow at rest", () => {
-      render(<Select data-testid="select" />);
+      render(<Select aria-label="Test" data-testid="select" />);
       const el = screen.getByTestId("select");
       expect(el).toHaveClass("bg-white", "border-2");
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
     });
 
     it("does not apply rounded corners (sharp)", () => {
-      render(<Select data-testid="select" />);
+      render(<Select aria-label="Test" data-testid="select" />);
       expect(screen.getByTestId("select").className).not.toMatch(/\brounded-/);
     });
 
     it("does not reference legacy kcvv-/foundation- tokens", () => {
-      render(<Select data-testid="select" />);
+      render(<Select aria-label="Test" data-testid="select" />);
       const cls = screen.getByTestId("select").className;
       expect(cls).not.toContain("kcvv-alert");
       expect(cls).not.toContain("kcvv-green-bright");
@@ -124,41 +124,41 @@ describe("Select", () => {
 
   describe("Error state", () => {
     it("renders an AlertBadge with FOUT label + message", () => {
-      render(<Select error="Kies een geldige optie." />);
+      render(<Select aria-label="Test" error="Kies een geldige optie." />);
       expect(screen.getByText("FOUT")).toBeInTheDocument();
       expect(screen.getByText("Kies een geldige optie.")).toBeInTheDocument();
     });
 
     it("flips border + shadow to alert variant", () => {
-      render(<Select error="Fout" data-testid="select" />);
+      render(<Select aria-label="Test" error="Fout" data-testid="select" />);
       const el = screen.getByTestId("select");
       expect(el).toHaveClass("border-alert");
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm-alert)]");
     });
 
     it("sets aria-invalid + aria-describedby", () => {
-      render(<Select error="Fout" data-testid="select" />);
+      render(<Select aria-label="Test" error="Fout" data-testid="select" />);
       const el = screen.getByTestId("select");
       expect(el).toHaveAttribute("aria-invalid", "true");
       expect(el.getAttribute("aria-describedby")).toBeTruthy();
     });
 
     it("hides hint when error is present", () => {
-      render(<Select error="Fout" hint="Hulptekst" />);
+      render(<Select aria-label="Test" error="Fout" hint="Hulptekst" />);
       expect(screen.queryByText("Hulptekst")).not.toBeInTheDocument();
     });
   });
 
   describe("Hint", () => {
     it("renders hint at ink/60 italic when no error", () => {
-      render(<Select hint="Kies je ploeg." />);
+      render(<Select aria-label="Test" hint="Kies je ploeg." />);
       const el = screen.getByText("Kies je ploeg.");
       expect(el).toHaveClass("italic", "text-ink/60");
     });
 
     // Decision D4 (#2620) — see Input.test.tsx for the full contract.
     it("opens with the mono [?] bracket", () => {
-      render(<Select hint="Kies je ploeg." />);
+      render(<Select aria-label="Test" hint="Kies je ploeg." />);
       const hint = screen.getByText("Kies je ploeg.");
       expect(hint.querySelector('[data-glyph="help"]')).toHaveAttribute(
         "aria-hidden",
@@ -167,7 +167,9 @@ describe("Select", () => {
     });
 
     it("describes the field with the hint sentence alone", () => {
-      render(<Select hint="Kies je ploeg." data-testid="select" />);
+      render(
+        <Select aria-label="Test" hint="Kies je ploeg." data-testid="select" />,
+      );
       expect(screen.getByTestId("select")).toHaveAccessibleDescription(
         "Kies je ploeg.",
       );
@@ -176,7 +178,7 @@ describe("Select", () => {
 
   describe("Disabled state", () => {
     it("flattens chrome", () => {
-      render(<Select disabled data-testid="select" />);
+      render(<Select aria-label="Test" disabled data-testid="select" />);
       const el = screen.getByTestId("select");
       expect(el).toBeDisabled();
       expect(el).toHaveClass(
@@ -189,12 +191,25 @@ describe("Select", () => {
 
   describe("Custom props", () => {
     it("accepts custom className", () => {
-      render(<Select className="custom-class" data-testid="select" />);
+      render(
+        <Select
+          aria-label="Test"
+          className="custom-class"
+          data-testid="select"
+        />,
+      );
       expect(screen.getByTestId("select")).toHaveClass("custom-class");
     });
 
     it("passes native select attributes", () => {
-      render(<Select name="tier" id="tier-select" data-testid="select" />);
+      render(
+        <Select
+          aria-label="Test"
+          name="tier"
+          id="tier-select"
+          data-testid="select"
+        />,
+      );
       const el = screen.getByTestId("select");
       expect(el).toHaveAttribute("name", "tier");
       expect(el).toHaveAttribute("id", "tier-select");

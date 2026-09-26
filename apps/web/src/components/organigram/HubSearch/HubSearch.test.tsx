@@ -654,9 +654,13 @@ describe("HubSearch — the hub handoff (#3043)", () => {
     fireEvent.change(hero, { target: { value: "in" } });
 
     // `<SiteHeader>` is `z-50`; at an equal z-index paint order would hand this
-    // popup the header.
-    const listbox = heroRoot.querySelector('[role="listbox"]');
-    expect(listbox).toHaveClass("z-40");
-    expect(listbox).not.toHaveClass("z-50");
+    // popup the header. The z-index lives on the popup's chrome wrapper, not
+    // on `[role="listbox"]` itself (#3188 — that role moved to an inner
+    // wrapper around just the option rows, so `aria-required-children`
+    // doesn't see the smart-hint banner / empty-state copy as stray
+    // listbox children).
+    const popup = heroRoot.querySelector('[data-testid="hub-search-popup"]');
+    expect(popup).toHaveClass("z-40");
+    expect(popup).not.toHaveClass("z-50");
   });
 });

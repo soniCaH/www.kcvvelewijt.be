@@ -419,6 +419,22 @@ jobs:
       # VR_SHARD reaches `test-storybook --shard` through `vr:run`/`vr:ci`
       # (apps/web/package.json) — the one command surface (#3140) stays intact,
       # no raw runner invocation here.
+      #
+      # This one run now covers BOTH pixel diffs and accessibility, for
+      # every story (#3188, review round 2) — `test-storybook` visits the
+      # whole suite unconditionally, sharded across the 3 matrix legs, and
+      # `.storybook/test-runner.ts`'s `postVisit` decides per story whether
+      # to screenshot (carries `vr`, not `vr-skip`, no
+      # `parameters.vr.disable`) or just let the a11y check run (every
+      # other story — `Pages/*`, any component whose story was never
+      # tagged `vr` at all, and any `vr`-tagged story combined with a
+      # per-story `vr-skip`). A separate `--excludeTags vr` axe-only step
+      # used to run this same non-`vr` set on shard 1 only; folding it into
+      # this one command means every shard now shares that extra ~25-file
+      # axe-only cost instead of piling all of it onto shard 1, and closes
+      # a real gap the two-invocation split had — a story combining an
+      # inherited `vr` tag with its own `vr-skip` got no axe check from
+      # either invocation.
       - name: Run visual regression suite
         run: pnpm --filter @kcvv/web run vr:ci
         env:

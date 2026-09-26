@@ -349,6 +349,45 @@ const eslintConfig = [
       ],
     },
   },
+  {
+    // `loading.tsx`/`*.stories.tsx` may not import `./page` (#3188, review
+    // round 2 finding 4) — Next's webpack build tree-shakes a route's
+    // server-only import graph (Effect runtime, repositories, Next's own
+    // server APIs) away from a sibling that only reads a fixed-copy
+    // constant, but Storybook's Vite build and Vitest's browser mode both
+    // evaluate the whole module eagerly, throwing `ReferenceError: process
+    // is not defined` the moment anything visits the sibling. Five routes
+    // (jeugd, nieuws, ploegen, evenementen, club/ultras, galerij) hit this
+    // by importing shared copy straight from `page.tsx`; each now has its
+    // own `copy.ts` instead. `layout.tsx` → `./page` imports are NOT
+    // restricted — layout modules already sit in every route's server
+    // render path regardless, so there is nothing this rule protects there.
+    files: ["**/src/app/**/loading.{ts,tsx}", "**/*.stories.{ts,tsx}"],
+    // `Privacy.stories.tsx` imports `page.tsx`'s DEFAULT export (the real
+    // page component itself, not a shared copy constant) — a deliberate
+    // "Pages/*" design reference for a page docblocked as "a pure,
+    // synchronous server component with no data dependencies", so nothing
+    // server-only comes along with it (verified: this story already runs
+    // clean under both Storybook layers). The risk this rule guards
+    // against — a server-only import graph riding along on a *named*
+    // export — doesn't apply here; excluding the one file is narrower
+    // than loosening the rule for everyone.
+    ignores: ["**/privacy/Privacy.stories.tsx"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "./page",
+              message:
+                "Importing from the sibling page.tsx drags its whole server-only import graph into Storybook's/Vitest's eager browser build (ReferenceError: process is not defined) — move the shared value to a standalone copy.ts instead (apps/web/CLAUDE.md).",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -59,6 +59,25 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
+    // Storybook VR owns accessibility (#3188, decided 2026-09-25). `test:
+    // "error"` makes @storybook/test-runner's own a11y integration reject
+    // the story (failing the VR job) on any violation — see
+    // node_modules/@storybook/test-runner/dist/setup-page-script.js, which
+    // reads the "a11y" reporter every story render already populates via
+    // @storybook/addon-a11y's preview hook, entirely independent of
+    // @storybook/addon-vitest (never wired into `pnpm test`'s vitest.config.ts
+    // in this repo, so this does NOT add a11y checks to Vitest or E2E).
+    // `color-contrast` is the one rule disabled here, and only here: the
+    // club has no WCAG conformance target — legibility is judged by eye, not
+    // axe (#2395) — so contrast findings are excluded globally rather than
+    // suppressed story-by-story. Every other rule gates. `region` stays off
+    // (addon default) — no WCAG level is adopted by this.
+    a11y: {
+      test: "error",
+      config: {
+        rules: [{ id: "color-contrast", enabled: false }],
+      },
+    },
     nextjs: {
       appDirectory: true,
       navigation: {

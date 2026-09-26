@@ -29,6 +29,14 @@ const meta = {
     rows: { control: "number" },
     placeholder: { control: "text" },
   },
+  // Every `<Textarea>` needs an accessible name (#3188 — axe `label`).
+  // Every args-based story below inherits this default; the bare `render`
+  // stories with no adjacent visible label (`WithCounterUnderLimit`/
+  // `WithCounterOverLimit`) set their own `aria-label`. `StateMachine`/
+  // `WithLabelAndKicker` DO have a visible `<Label htmlFor>` and pair it
+  // with a matching `id` instead — never both, which would risk the label
+  // text and the AT-announced name drifting apart (WCAG 2.5.3).
+  args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Textarea>;
 
 export default meta;
@@ -127,6 +135,7 @@ export const WithCounterUnderLimit: Story = {
         onChange={(e) => setV(e.target.value)}
         maxLength={240}
         rows={4}
+        aria-label="Boodschap voor het bestuur"
       />
     );
   },
@@ -143,6 +152,7 @@ export const WithCounterOverLimit: Story = {
         onChange={(e) => setV(e.target.value)}
         maxLength={120}
         rows={5}
+        aria-label="Boodschap voor het bestuur"
       />
     );
   },
@@ -152,24 +162,38 @@ export const StateMachine: Story = {
   render: () => (
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
-        <Label>Default</Label>
-        <Textarea placeholder="Schrijf hier je bericht..." rows={3} />
-      </div>
-      <div>
-        <Label>Filled</Label>
-        <Textarea defaultValue="Een korte notitie." rows={3} />
-      </div>
-      <div>
-        <Label>Error</Label>
+        <Label htmlFor="textarea-state-default">Default</Label>
         <Textarea
+          id="textarea-state-default"
+          placeholder="Schrijf hier je bericht..."
+          rows={3}
+        />
+      </div>
+      <div>
+        <Label htmlFor="textarea-state-filled">Filled</Label>
+        <Textarea
+          id="textarea-state-filled"
+          defaultValue="Een korte notitie."
+          rows={3}
+        />
+      </div>
+      <div>
+        <Label htmlFor="textarea-state-error">Error</Label>
+        <Textarea
+          id="textarea-state-error"
           placeholder="Bericht"
           error="Dit veld is verplicht."
           rows={3}
         />
       </div>
       <div>
-        <Label>Disabled</Label>
-        <Textarea defaultValue="Niet bewerkbaar" disabled rows={3} />
+        <Label htmlFor="textarea-state-disabled">Disabled</Label>
+        <Textarea
+          id="textarea-state-disabled"
+          defaultValue="Niet bewerkbaar"
+          disabled
+          rows={3}
+        />
       </div>
     </div>
   ),

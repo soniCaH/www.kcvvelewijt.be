@@ -23,7 +23,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
-import { NEWS_KICKER, NEWS_HEADLINE } from "./page";
+import { NEWS_KICKER, NEWS_HEADLINE } from "./copy";
 
 /** A flush-image card footprint — image atop a border-2 ink body. The inline
  *  `transform` mirrors `<TapedCard rotation="auto">`'s own non-interactive

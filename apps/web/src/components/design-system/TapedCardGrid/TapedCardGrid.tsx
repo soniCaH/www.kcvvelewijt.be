@@ -105,6 +105,20 @@ export function TapedCardGrid({
     <Tag
       data-columns={columns}
       data-gap={gap}
+      // Tailwind Preflight's reset (`ol, ul { list-style: none; }`,
+      // globals.css) drops the implicit ARIA "list" role from a `<ul>`/
+      // `<ol>` in modern browser accessibility trees — a `list-style: none`
+      // list is no longer exposed as a list at all — orphaning the `<li>`
+      // slots' implicit "listitem" role from any list-roled ancestor
+      // (#3188 — axe `listitem`). The actual violation this fix landed for
+      // was a story rendering its own `as="li"` children a SECOND time
+      // inside the grid's own `<li>` slot (nested `<li>`s, fixed in
+      // TapedCardGrid.stories.tsx) — this `role="list"` closes the same
+      // underlying gap so the grid's OWN slot markup stays correct
+      // regardless. Restore the role explicitly whenever the slot is a
+      // real `<li>`; the `div` path has no `<li>` children, so nothing to
+      // fix.
+      role={SlotTag === "li" ? "list" : undefined}
       className={cn("grid", COLUMNS_CLASS[columns], GAP_CLASS[gap], className)}
     >
       {items.map((child, index) => {

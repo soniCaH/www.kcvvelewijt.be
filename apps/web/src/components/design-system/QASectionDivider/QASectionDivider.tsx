@@ -14,10 +14,11 @@ import type { PortableTextBlock } from "@portabletext/react";
  *   - `variant="dotted"` (5.A.2 / 5.B.int) — thin dotted rule used as a
  *     between-row separator inside `<QASection>`. No title, no glyph, no
  *     kicker; just a centered ink-muted dotted line. Renders the same
- *     `<aside role="separator">` shell so AT picks it up as a structural
- *     break, with an `aria-label` falling back to the literal "Volgende
- *     vraag" Dutch convention so screen readers don't read a nameless
- *     separator.
+ *     `<div role="separator">` shell (a plain `<div>`, not `<aside>` — see
+ *     #3188: `separator` is not an allowed role for `<aside>`'s implicit
+ *     landmark role) so AT picks it up as a structural break, with an
+ *     `aria-label` falling back to the literal "Volgende vraag" Dutch
+ *     convention so screen readers don't read a nameless separator.
  *
  * Three-centerline alignment contract for the `title` variant — must hold to
  * within 1px:
@@ -79,7 +80,13 @@ export function QASectionDivider({
 }: QASectionDividerProps) {
   if (variant === "dotted") {
     return (
-      <aside
+      // A plain `<div>`, not `<aside>` (#3188): `role="separator"` is not an
+      // allowed role for `<aside>`'s implicit `complementary` landmark role
+      // per the ARIA-in-HTML spec — axe's `aria-allowed-role` flags it. A
+      // `<div>` carries no implicit role, so the explicit `separator` role
+      // is valid there. Same classes, same box model (both default to
+      // `display: block`) — no visual change.
+      <div
         role="separator"
         aria-label="Volgende vraag"
         data-divider-variant="dotted"
@@ -89,7 +96,7 @@ export function QASectionDivider({
           aria-hidden="true"
           className="border-ink-muted m-0 border-0 border-t border-dotted"
         />
-      </aside>
+      </div>
     );
   }
 
@@ -105,7 +112,8 @@ export function QASectionDivider({
   const plain = flattenTitle(title);
 
   return (
-    <aside
+    // See the dotted variant above for why this is a `<div>`, not `<aside>`.
+    <div
       role="separator"
       aria-label={plain}
       data-divider-variant="title"
@@ -174,6 +182,6 @@ export function QASectionDivider({
           {kicker}
         </p>
       ) : null}
-    </aside>
+    </div>
   );
 }

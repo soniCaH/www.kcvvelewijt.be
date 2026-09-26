@@ -19,7 +19,7 @@
 import { PageContainer, LoadingAnnouncement } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { EventsBrowserSkeleton } from "@/components/event/EventsBrowser";
-import { EVENEMENTEN_KICKER, EVENEMENTEN_HEADLINE } from "./page";
+import { EVENEMENTEN_KICKER, EVENEMENTEN_HEADLINE } from "./copy";
 
 export default function EvenementenLoading() {
   return (

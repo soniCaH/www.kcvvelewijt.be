@@ -52,19 +52,20 @@ WORKDIR /work/apps/web
 # test-runner. Extra args (e.g. --update-snapshots) are forwarded via "$@".
 # `vr:run` is defined in apps/web/package.json so the same orchestration works
 # in CI without docker (see .github/workflows/ci.yml visual-regression job).
-# --includeTags vr narrows the suite to story files tagged "vr" in their meta.
-# --excludeTags vr-skip drops individual story exports tagged vr-skip from
-# discovery — needed because per-story `parameters.vr.disable` only suppresses
-# screenshot capture, it does NOT prevent the test-runner from visiting the
-# story (some stories crash during render/play, before postVisit runs).
-# Phase 1 tags the three tracer-bullet files; Phase 2+ tags additional design
-# system / layout files as their baselines come online.
+# No --includeTags/--excludeTags here (#3188, review round 2): ONE run visits
+# EVERY story now, sharded — `.storybook/test-runner.ts`'s `postVisit` decides
+# per story whether to screenshot (carries `vr`, not `vr-skip`, no
+# `parameters.vr.disable`) or just run the a11y check (everything else),
+# instead of a CLI tag filter deciding which stories get visited at all. That
+# closed a real gap: a story combining an inherited `vr` tag with a per-story
+# `vr-skip` used to get no axe check from either of two complementary
+# invocations this repo ran before.
 #
 # Argument flow:
 #   `docker compose run --rm vr <ARGS>`
 #     → ENTRYPOINT becomes: ["sh","-c","...$*","--", <ARGS>]
 #     → `--` is the script's $0, so $* expands to <ARGS> (e.g. "-u" for
-#       --update-snapshots), appended after `--includeTags vr --excludeTags vr-skip`.
+#       --update-snapshots), appended after the base test-storybook flags.
 #   The `vr:*` scripts go through apps/web/scripts/vr-docker.mjs, which owns
 #   that arg list — `vr:update:story -- ui-button` appends `-u -- ui-button`.
 #   It also refuses an unscoped run before this image is built (#2380).
@@ -75,4 +76,4 @@ WORKDIR /work/apps/web
 # `iframe.html` navigation — Jest must not kill the hook before Playwright's own
 # navigation budget runs out, or the real cause is hidden (#2721). Keep this in
 # step with the `vr:run*` scripts in package.json — local and CI stay identical.
-ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 120000 --includeTags vr --excludeTags vr-skip $*\"", "--"]
+ENTRYPOINT ["sh", "-c", "exec pnpm exec concurrently -k -s first --hide 0 \"http-server ./storybook-static -p 6006 -a 127.0.0.1 --silent --cors\" \"wait-on --timeout 60000 tcp:127.0.0.1:6006 && test-storybook --url http://127.0.0.1:6006 --index-json --testTimeout 120000 $*\"", "--"]

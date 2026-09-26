@@ -141,24 +141,16 @@ export default defineConfig({
     // `.storybook/main.ts`'s own `stories` glob, not Vitest's test-file
     // globbing.
     //
-    // Three files cannot be IMPORTED under this browser project at all
+    // Three files used to fail to IMPORT under this browser project at all
     // (measured 2026-09-25) — `ReferenceError: __dirname is not defined`,
     // thrown while loading `next/server`'s `userAgent()` (`ua-parser-js`)
-    // before Storybook's own per-story tag filtering ever gets a chance to
-    // run, so a story-level `!test` tag cannot exclude them (that only
-    // skips an already-importable story, not an import-time crash). All
-    // three import a route's `loading.tsx`, which imports data constants
-    // from its sibling `page.tsx`, which pulls in `next/server`
-    // transitively via `src/lib/effect/runtime.ts`. None of the three
-    // carries the `vr` tag, so the VR layer never exercised this path
-    // either — this is a pre-existing coupling this wiring surfaced, not a
-    // regression, and decoupling `loading.tsx` from `page.tsx`'s server
-    // constants (or lazy-loading `next/server` in the Effect runtime) is
-    // out of scope for #3146. Each file carries a matching comment.
-    exclude: [
-      "src/app/(landing)/jeugd/(index)/JeugdLanding.loading.stories.tsx",
-      "src/app/(main)/ploegen/(index)/TeamsLanding.loading.stories.tsx",
-      "src/app/(landing)/nieuws/NewsListingClient.stories.tsx",
-    ],
+    // transitively via `src/lib/effect/runtime.ts`. All three imported a
+    // route's `loading.tsx`, which imported data constants straight from
+    // its sibling `page.tsx` — dragging that route's whole server-only
+    // import graph into the browser bundle. #3188 decoupled `loading.tsx`
+    // from `page.tsx` (a standalone `copy.ts` for the shared constants) for
+    // an unrelated reason (the same crash under Storybook's Vite build),
+    // which also closed this gap: all three import cleanly now, so the
+    // `exclude` this comment used to document is gone.
   },
 });
