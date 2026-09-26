@@ -493,6 +493,14 @@ const config: TestRunnerConfig = {
       viewports?: ReadonlyArray<ViewportName>;
     };
     const storyTags = (story.tags ?? []) as readonly string[];
+    // `Pages/*` stories (#3188) — full-page compositions that are design
+    // references only, never VR-tested (see apps/web/CLAUDE.md's VR
+    // footnote). They're axe-checked by a dedicated CI step scoped to this
+    // tag (`vr:axe:pages` in package.json), which reuses this same
+    // test-runner config — so they still need a `postVisit` that skips the
+    // screenshot (no baseline exists, and none should ever be added for
+    // them) while letting the a11y check above run to completion.
+    const isPagesA11yOnly = storyTags.includes("pages-a11y");
     // Opt-in structural assertions (#2861, see test/vr/structural-assertions.ts)
     // — a story tag beyond the pixel-snapshot comparison below. Resolved
     // ahead of the `vr.disable` early-return so a story can't silently
@@ -500,13 +508,14 @@ const config: TestRunnerConfig = {
     const applicableAssertions = STRUCTURAL_ASSERTIONS.filter((assertion) =>
       storyTags.includes(assertion.tag),
     );
-    if (vrParams.disable) {
+    if (vrParams.disable || isPagesA11yOnly) {
       if (applicableAssertions.length > 0) {
         throw new Error(
           `[VR] Story "${context.id}" is tagged with structural assertion(s) ` +
             `(${applicableAssertions.map((a) => a.tag).join(", ")}) but also ` +
-            `sets parameters.vr.disable = true, which returns before those ` +
-            `assertions ever run. Remove the tag or the opt-out.`,
+            `sets parameters.vr.disable = true (or is tagged "pages-a11y"), ` +
+            `which returns before those assertions ever run. Remove the tag ` +
+            `or the opt-out.`,
         );
       }
       return;

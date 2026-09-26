@@ -123,7 +123,7 @@ const meta = {
     },
   },
   args: { season: "’26/’27" },
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
 } satisfies Meta<typeof ScheurkalenderPage>;
 
 export default meta;

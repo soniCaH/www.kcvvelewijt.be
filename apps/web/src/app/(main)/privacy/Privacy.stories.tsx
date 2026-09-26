@@ -16,7 +16,7 @@ import PrivacyPage from "./page";
 const meta = {
   title: "Pages/Privacy",
   component: PrivacyPage,
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof PrivacyPage>;
 

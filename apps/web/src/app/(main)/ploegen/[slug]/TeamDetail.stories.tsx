@@ -430,7 +430,7 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
 const meta = {
   title: "Pages/Teams/TeamDetail",
   component: TeamDetailAssembly,
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
   parameters: {
     layout: "fullscreen",
     docs: {

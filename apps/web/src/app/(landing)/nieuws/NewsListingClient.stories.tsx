@@ -113,7 +113,7 @@ const meta = {
   // `__dirname`, undefined in that browser environment). See the exclusion
   // + full explanation in `vitest.storybook.config.ts`; a story-level
   // `!test` tag cannot fix an import-time crash.
-  tags: ["autodocs", "vr-skip"],
+  tags: ["autodocs", "vr-skip", "pages-a11y"],
   args: {
     fetchArticles: noopFetch,
   },

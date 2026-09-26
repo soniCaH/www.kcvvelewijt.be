@@ -4,7 +4,7 @@ import ClubPageLoading from "./loading";
 const meta = {
   title: "Pages/Club/ClubPageSkeleton",
   component: ClubPageLoading,
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof ClubPageLoading>;
 

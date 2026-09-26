@@ -93,7 +93,7 @@ function PlayerProfileAssembly({
 const meta = {
   title: "Pages/Players/PlayerProfile",
   component: PlayerProfileAssembly,
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
   parameters: {
     layout: "fullscreen",
     docs: {

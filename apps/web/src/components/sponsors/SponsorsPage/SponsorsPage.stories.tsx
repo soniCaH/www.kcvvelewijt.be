@@ -29,7 +29,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
 } satisfies Meta<typeof SponsorsPage>;
 
 export default meta;

@@ -10,7 +10,7 @@ import JeugdLoading from "./loading";
 const meta = {
   title: "Pages/Jeugd/JeugdLandingSkeleton",
   component: JeugdLoading,
-  tags: ["autodocs"],
+  tags: ["autodocs", "pages-a11y"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof JeugdLoading>;
 

@@ -424,6 +424,23 @@ jobs:
         env:
           VR_SHARD: ${{ matrix.shard }}/3
 
+      # `Pages/*` stories (#3188) carry no `vr` tag and are never
+      # screenshotted (design references only — page-level visual coverage
+      # is Playwright e2e's job, see apps/web/CLAUDE.md). They still get
+      # axe-checked here, scoped to the `pages-a11y` tag via a dedicated
+      # `test-storybook` invocation that never takes a screenshot (the same
+      # `.storybook/test-runner.ts` config skips its screenshot step for any
+      # `pages-a11y`-tagged story) — so this adds zero new VR baselines.
+      # Runs once, on shard 1 only: this reuses the shard's already-installed
+      # deps and downloaded `storybook-static`, and three redundant runs of
+      # the same ~56 stories would just be wasted spend. Living inside this
+      # existing job (not a new one) means no new required check either —
+      # `visual-regression` isn't itself required (root .claude/CLAUDE.md);
+      # only `Quality Checks + Build` is.
+      - name: Run Storybook accessibility check (Pages/*)
+        if: matrix.shard == 1
+        run: pnpm --filter @kcvv/web run vr:axe:pages
+
       # Distinct name per shard: three parallel jobs would otherwise collide
       # uploading to the same artifact name, and `vr-diff-comment` below
       # gathers all three by pattern.
