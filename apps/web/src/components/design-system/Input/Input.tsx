@@ -17,7 +17,6 @@ import {
 } from "react";
 import { AlertBadge } from "@/components/design-system/Alert";
 import { cn } from "@/lib/utils/cn";
-import type { RequiresAccessibleName } from "../_internal/accessibleName";
 import { FieldHint } from "../_internal/FieldHint";
 import { fieldChrome } from "../_internal/fieldChrome";
 
@@ -53,23 +52,22 @@ const trailingIconWrap: Record<InputSize, string> = {
   lg: "right-4 [&>*]:w-5 [&>*]:h-5",
 };
 
-export type InputProps = Omit<
+export interface InputProps extends Omit<
   InputHTMLAttributes<HTMLInputElement>,
-  "size" | "aria-label"
-> &
-  RequiresAccessibleName & {
-    /** @default 'md' */
-    size?: InputSize;
-    /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
-    error?: string;
-    /** Hint text rendered below when no error. */
-    hint?: string;
-    /** Optional leading icon (left side, vertically centered). */
-    leadingIcon?: ReactNode;
-    /** Optional trailing icon (right side, vertically centered). */
-    trailingIcon?: ReactNode;
-    className?: string;
-  };
+  "size"
+> {
+  /** @default 'md' */
+  size?: InputSize;
+  /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
+  error?: string;
+  /** Hint text rendered below when no error. */
+  hint?: string;
+  /** Optional leading icon (left side, vertically centered). */
+  leadingIcon?: ReactNode;
+  /** Optional trailing icon (right side, vertically centered). */
+  trailingIcon?: ReactNode;
+  className?: string;
+}
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   {

@@ -21,28 +21,23 @@ import {
 import { AlertBadge } from "@/components/design-system/Alert";
 import { TextareaCounter } from "@/components/design-system/TextareaCounter";
 import { cn } from "@/lib/utils/cn";
-import type { RequiresAccessibleName } from "../_internal/accessibleName";
 import { FieldHint } from "../_internal/FieldHint";
 import { fieldChrome } from "../_internal/fieldChrome";
 
 export type TextareaResize = "none" | "vertical" | "both";
 
-export type TextareaProps = Omit<
-  TextareaHTMLAttributes<HTMLTextAreaElement>,
-  "aria-label"
-> &
-  RequiresAccessibleName & {
-    /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
-    error?: string;
-    /** Hint text rendered below when no error. */
-    hint?: string;
-    /**
-     * Resize behaviour.
-     * @default 'vertical'
-     */
-    resize?: TextareaResize;
-    className?: string;
-  };
+export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
+  error?: string;
+  /** Hint text rendered below when no error. */
+  hint?: string;
+  /**
+   * Resize behaviour.
+   * @default 'vertical'
+   */
+  resize?: TextareaResize;
+  className?: string;
+}
 
 const resizeClass: Record<TextareaResize, string> = {
   none: "resize-none",

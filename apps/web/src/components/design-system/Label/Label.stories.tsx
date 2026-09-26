@@ -47,12 +47,7 @@ export const WithInput: Story = {
       <Label htmlFor="demo-email" required>
         E-mailadres
       </Label>
-      <Input
-        id="demo-email"
-        aria-label="E-mailadres"
-        type="email"
-        placeholder="je@email.be"
-      />
+      <Input id="demo-email" type="email" placeholder="je@email.be" />
     </div>
   ),
 };
@@ -65,7 +60,6 @@ export const OptionalWithInput: Story = {
       </Label>
       <Input
         id="demo-phone"
-        aria-label="Telefoonnummer"
         type="tel"
         placeholder="+32 4XX XX XX XX"
         hint="Enkel voor dringende vragen — wordt nooit gedeeld."
@@ -82,7 +76,6 @@ export const WithInputAndError: Story = {
       </Label>
       <Input
         id="demo-name"
-        aria-label="Naam"
         placeholder="Voornaam en achternaam"
         error="Dit veld is verplicht."
       />
@@ -97,22 +90,13 @@ export const ContactForm: Story = {
         <Label htmlFor="cf-name" required>
           Naam
         </Label>
-        <Input
-          id="cf-name"
-          aria-label="Naam"
-          placeholder="Voornaam en achternaam"
-        />
+        <Input id="cf-name" placeholder="Voornaam en achternaam" />
       </div>
       <div>
         <Label htmlFor="cf-email" required>
           E-mailadres
         </Label>
-        <Input
-          id="cf-email"
-          aria-label="E-mailadres"
-          type="email"
-          placeholder="je@email.be"
-        />
+        <Input id="cf-email" type="email" placeholder="je@email.be" />
       </div>
       <div>
         <Label htmlFor="cf-phone" optional>
@@ -120,7 +104,6 @@ export const ContactForm: Story = {
         </Label>
         <Input
           id="cf-phone"
-          aria-label="Telefoonnummer"
           type="tel"
           placeholder="+32 4XX XX XX XX"
           hint="Enkel voor dringende vragen — wordt nooit gedeeld."

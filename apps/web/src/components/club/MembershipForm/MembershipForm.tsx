@@ -282,7 +282,6 @@ export function MembershipForm({
             placeholder="Maak een keuze…"
             error={fieldErrors.role}
             onChange={(e) => setRole(e.target.value as MembershipRole)}
-            aria-label="Ik heb interesse als"
           >
             {ROLE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -304,7 +303,6 @@ export function MembershipForm({
               onChange={(e) => setFirstName(e.target.value)}
               error={fieldErrors.firstName}
               autoComplete="given-name"
-              aria-label="Voornaam"
             />
           </div>
           <div>
@@ -318,7 +316,6 @@ export function MembershipForm({
               onChange={(e) => setLastName(e.target.value)}
               error={fieldErrors.lastName}
               autoComplete="family-name"
-              aria-label="Achternaam"
             />
           </div>
           <div>
@@ -332,7 +329,6 @@ export function MembershipForm({
               value={birthDate}
               onChange={(e) => setBirthDate(e.target.value)}
               error={fieldErrors.birthDate}
-              aria-label="Geboortedatum"
             />
           </div>
           <div>
@@ -346,7 +342,6 @@ export function MembershipForm({
               placeholder="Maak een keuze…"
               error={fieldErrors.gender}
               onChange={(e) => setGender(e.target.value)}
-              aria-label="Geslacht"
             >
               <option value="m">Man</option>
               <option value="f">Vrouw</option>
@@ -364,7 +359,6 @@ export function MembershipForm({
               onChange={(e) => setMunicipality(e.target.value)}
               error={fieldErrors.municipality}
               autoComplete="address-level2"
-              aria-label="Gemeente"
             />
           </div>
           <div>
@@ -379,7 +373,6 @@ export function MembershipForm({
               onChange={(e) => setEmail(e.target.value)}
               error={fieldErrors.email}
               autoComplete="email"
-              aria-label="E-mail"
             />
           </div>
           <div className="md:col-span-2">
@@ -392,7 +385,6 @@ export function MembershipForm({
               value={priorClub}
               onChange={(e) => setPriorClub(e.target.value)}
               error={fieldErrors.priorClub}
-              aria-label="Vorige club"
             />
           </div>
         </div>
@@ -428,7 +420,6 @@ export function MembershipForm({
                 onChange={(e) => setParentEmail(e.target.value)}
                 error={fieldErrors.parentEmail}
                 autoComplete="email"
-                aria-label="E-mail ouder/voogd"
               />
             </div>
             <CheckboxField

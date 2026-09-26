@@ -16,7 +16,6 @@ import { forwardRef, useId, type SelectHTMLAttributes } from "react";
 import { AlertBadge } from "@/components/design-system/Alert";
 import { CaretDown } from "@/lib/icons.redesign";
 import { cn } from "@/lib/utils/cn";
-import type { RequiresAccessibleName } from "../_internal/accessibleName";
 import { FieldHint } from "../_internal/FieldHint";
 import { fieldChrome } from "../_internal/fieldChrome";
 
@@ -36,21 +35,20 @@ const iconPosition: Record<SelectSize, string> = {
 
 const iconPx: Record<SelectSize, number> = { sm: 14, md: 16, lg: 18 };
 
-export type SelectProps = Omit<
+export interface SelectProps extends Omit<
   SelectHTMLAttributes<HTMLSelectElement>,
-  "size" | "aria-label"
-> &
-  RequiresAccessibleName & {
-    /** @default 'md' */
-    size?: SelectSize;
-    /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
-    error?: string;
-    /** Hint text rendered below when no error. */
-    hint?: string;
-    /** Placeholder option text — rendered as the first disabled option. */
-    placeholder?: string;
-    className?: string;
-  };
+  "size"
+> {
+  /** @default 'md' */
+  size?: SelectSize;
+  /** Error message — flips chrome to alert and renders an `<AlertBadge>` below. */
+  error?: string;
+  /** Hint text rendered below when no error. */
+  hint?: string;
+  /** Placeholder option text — rendered as the first disabled option. */
+  placeholder?: string;
+  className?: string;
+}
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   function Select(

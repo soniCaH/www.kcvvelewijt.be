@@ -27,10 +27,13 @@ const meta = {
     disabled: { control: "boolean" },
     placeholder: { control: "text" },
   },
-  // `<Select>` requires an accessible name (#3188 — see
-  // `_internal/accessibleName.ts`). `Default` below spreads `args` and
-  // inherits this; every other story here uses a bespoke `render` and sets
-  // its own `aria-label`/`id`.
+  // Every `<Select>` needs an accessible name (#3188 — axe `select-name`).
+  // `Default` below spreads `args` and inherits this; every other bare
+  // demo `render` here sets its own `aria-label` since none has an
+  // adjacent visible label. `StateMachine`/`FilterPanel` DO have a visible
+  // `<Label htmlFor>` and pair it with a matching `id` instead — never
+  // both, which would risk the label text and the AT-announced name
+  // drifting apart (WCAG 2.5.3).
   args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Select>;
 
@@ -184,21 +187,13 @@ export const StateMachine: Story = {
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
         <Label htmlFor="select-state-default">Default</Label>
-        <Select
-          id="select-state-default"
-          aria-label="Default"
-          placeholder="Kies een ploeg"
-        >
+        <Select id="select-state-default" placeholder="Kies een ploeg">
           {teamOptions}
         </Select>
       </div>
       <div>
         <Label htmlFor="select-state-filled">Filled</Label>
-        <Select
-          id="select-state-filled"
-          aria-label="Filled"
-          defaultValue="aploeg"
-        >
+        <Select id="select-state-filled" defaultValue="aploeg">
           {teamOptions}
         </Select>
       </div>
@@ -206,7 +201,6 @@ export const StateMachine: Story = {
         <Label htmlFor="select-state-error">Error</Label>
         <Select
           id="select-state-error"
-          aria-label="Error"
           placeholder="Kies een ploeg"
           error="Kies een geldige ploeg."
         >
@@ -215,12 +209,7 @@ export const StateMachine: Story = {
       </div>
       <div>
         <Label htmlFor="select-state-disabled">Disabled</Label>
-        <Select
-          id="select-state-disabled"
-          aria-label="Disabled"
-          defaultValue="aploeg"
-          disabled
-        >
+        <Select id="select-state-disabled" defaultValue="aploeg" disabled>
           {teamOptions}
         </Select>
       </div>
@@ -233,7 +222,7 @@ export const FilterPanel: Story = {
     <div className="grid w-[500px] grid-cols-2 gap-4">
       <div>
         <Label htmlFor="fp-tier">Niveau</Label>
-        <Select id="fp-tier" aria-label="Niveau" placeholder="Alle sponsors">
+        <Select id="fp-tier" placeholder="Alle sponsors">
           <option value="gold">Goud</option>
           <option value="silver">Zilver</option>
           <option value="bronze">Brons</option>
@@ -241,7 +230,7 @@ export const FilterPanel: Story = {
       </div>
       <div>
         <Label htmlFor="fp-sort">Sorteren</Label>
-        <Select id="fp-sort" aria-label="Sorteren" defaultValue="tier">
+        <Select id="fp-sort" defaultValue="tier">
           <option value="tier">Op niveau</option>
           <option value="name">Op naam (A-Z)</option>
         </Select>

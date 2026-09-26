@@ -29,9 +29,13 @@ const meta = {
     rows: { control: "number" },
     placeholder: { control: "text" },
   },
-  // `<Textarea>` requires an accessible name (#3188 — see
-  // `_internal/accessibleName.ts`). Every args-based story below inherits
-  // this default; `render`-based stories set their own `aria-label`/`id`.
+  // Every `<Textarea>` needs an accessible name (#3188 — axe `label`).
+  // Every args-based story below inherits this default; the bare `render`
+  // stories with no adjacent visible label (`WithCounterUnderLimit`/
+  // `WithCounterOverLimit`) set their own `aria-label`. `StateMachine`/
+  // `WithLabelAndKicker` DO have a visible `<Label htmlFor>` and pair it
+  // with a matching `id` instead — never both, which would risk the label
+  // text and the AT-announced name drifting apart (WCAG 2.5.3).
   args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Textarea>;
 
@@ -161,7 +165,6 @@ export const StateMachine: Story = {
         <Label htmlFor="textarea-state-default">Default</Label>
         <Textarea
           id="textarea-state-default"
-          aria-label="Default"
           placeholder="Schrijf hier je bericht..."
           rows={3}
         />
@@ -170,7 +173,6 @@ export const StateMachine: Story = {
         <Label htmlFor="textarea-state-filled">Filled</Label>
         <Textarea
           id="textarea-state-filled"
-          aria-label="Filled"
           defaultValue="Een korte notitie."
           rows={3}
         />
@@ -179,7 +181,6 @@ export const StateMachine: Story = {
         <Label htmlFor="textarea-state-error">Error</Label>
         <Textarea
           id="textarea-state-error"
-          aria-label="Error"
           placeholder="Bericht"
           error="Dit veld is verplicht."
           rows={3}
@@ -189,7 +190,6 @@ export const StateMachine: Story = {
         <Label htmlFor="textarea-state-disabled">Disabled</Label>
         <Textarea
           id="textarea-state-disabled"
-          aria-label="Disabled"
           defaultValue="Niet bewerkbaar"
           disabled
           rows={3}
@@ -207,7 +207,6 @@ export const WithLabelAndKicker: Story = {
       </Label>
       <Textarea
         id="msg"
-        aria-label="Bericht"
         placeholder="Schrijf hier je bericht..."
         hint="Houd het kort en bondig — maximaal 240 tekens."
         rows={5}
