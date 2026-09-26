@@ -402,10 +402,10 @@ export default async function MainLayout({
 
 The MatchStrip renders in normal document flow after the PageHeader spacer (which is in the root layout). When `match` is `null`, `MatchStrip` returns `null` — no empty div, no reserved space, no layout gap.
 
-### Step 3: Run full check-all
+### Step 3: Run full turbo gate
 
 ```bash
-pnpm --filter @kcvv/web check-all 2>&1 | tail -20
+pnpm turbo run lint type-check test build --filter=@kcvv/web 2>&1 | tail -20
 ```
 
 Expected: lint, type-check, test, build all pass
@@ -462,7 +462,7 @@ Closes #1269 (partial)"
 ### Step 1: Run full quality checks
 
 ```bash
-pnpm --filter @kcvv/web check-all 2>&1 | tail -30
+pnpm turbo run lint type-check test build --filter=@kcvv/web 2>&1 | tail -30
 ```
 
 Expected: lint, type-check, test, build all pass
@@ -480,7 +480,7 @@ Checklist to verify against:
 - [ ] Tapping navigates to `/wedstrijd/{matchId}`
 - [ ] No additional BFF call — `(main)/layout.tsx` calls shared utility once
 - [ ] No layout shift — `MatchStrip` returns `null` when no data
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Step 3: Create final commit (squash if desired, or leave as-is)
 

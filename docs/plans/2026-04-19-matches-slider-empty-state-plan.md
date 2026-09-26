@@ -23,7 +23,7 @@
 ## Conventions
 
 - Conventional commits with scope: `ui` for component work, `schema` for Sanity, `config` for constants, `deps` where applicable.
-- After every task that changes code: `pnpm --filter @kcvv/web lint:fix && pnpm --filter @kcvv/web check-all`. Do not commit if checks fail.
+- After every task that changes code: `pnpm --filter @kcvv/web lint:fix && pnpm turbo run lint type-check test build --filter=@kcvv/web`. Do not commit if checks fail.
 - TDD where the logic is testable (decision rules, URL constants, schema exports). Stories are the visual tests for layout work.
 - Keep commits small. One task = one commit (tests + implementation together unless the task explicitly says otherwise).
 
@@ -179,7 +179,7 @@ git commit -m "chore(ui): drop Twitter icon from barrel and foundation docs"
 
 ```bash
 pnpm --filter @kcvv/web lint:fix
-pnpm --filter @kcvv/web check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 Expected: PASS. If metadata snapshot tests fail, update the snapshot intentionally — no more `twitter:` fields are expected.
@@ -782,10 +782,10 @@ Expected: build PASSES. In dev, confirm populated slider renders normally (can't
 - Add a story `EmptyWithoutPlaceholder` that renders the empty state with no Sanity data.
 - Add a story `EmptyWithCountdown` that passes a mock placeholder with a future date.
 
-**Step 5: Run check-all**
+**Step 5: Run turbo gate**
 
 ```bash
-pnpm --filter @kcvv/web check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 Expected: PASS.
@@ -859,11 +859,11 @@ Remove the `layout` prop if both were gated on it — the winning rendering beco
 
 **Step 3: Delete losing stories**
 
-**Step 4: Run check-all**
+**Step 4: Run turbo gate**
 
 ```bash
 pnpm --filter @kcvv/web lint:fix
-pnpm --filter @kcvv/web check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 Expected: PASS.
@@ -898,7 +898,7 @@ Expected: PASS.
 **Step 4: Full monorepo check**
 
 ```bash
-pnpm turbo check-all
+pnpm turbo run lint type-check test build
 ```
 
 Expected: PASS.

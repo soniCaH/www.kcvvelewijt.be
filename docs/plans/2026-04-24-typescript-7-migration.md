@@ -80,6 +80,7 @@ No commit.
 ### Task 1: Install `@typescript/native-preview` and verify `tsgo` binary
 
 **Files:**
+
 - Modify: `apps/web/package.json` (devDependencies)
 - Modify: `apps/api/package.json` (devDependencies)
 - Modify: `packages/api-contract/package.json` (devDependencies)
@@ -136,6 +137,7 @@ No scripts switched yet — this commit is additive.
 **Why first:** This is the only workspace using `tsc --build` and the only one exercising composite project references. If `tsgo --build` breaks here, the entire plan needs reconsidering.
 
 **Files:**
+
 - Modify: `packages/api-contract/package.json:11-17` (scripts block)
 
 **Step 2.1: Rewrite the scripts**
@@ -197,6 +199,7 @@ to tsc --build (see docs/plans/2026-04-24-typescript-7-migration-timings.md).
 ### Task 3: Switch `packages/sanity-schemas`
 
 **Files:**
+
 - Modify: `packages/sanity-schemas/package.json:12-15` (scripts block, `type-check` + `build`)
 
 **Step 3.1: Rewrite**
@@ -231,6 +234,7 @@ git commit -m "chore(deps): switch sanity-schemas type-check to tsgo"
 ### Task 4: Switch `packages/sanity-studio`
 
 **Files:**
+
 - Modify: `packages/sanity-studio/package.json:17` (`type-check` line)
 
 **Step 4.1: Rewrite**
@@ -242,7 +246,7 @@ Change `"type-check": "tsc --noEmit"` → `"type-check": "tsgo --noEmit"`. The `
 ```bash
 time pnpm --filter @kcvv/sanity-studio type-check
 time pnpm --filter @kcvv/sanity-studio build
-time pnpm --filter @kcvv/sanity-studio check-all
+time pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas
 ```
 
 Expected: each exits 0. Record wall-clock.
@@ -259,6 +263,7 @@ git commit -m "chore(deps): switch sanity-studio type-check to tsgo"
 ### Task 5: Switch `apps/api`
 
 **Files:**
+
 - Modify: `apps/api/package.json:10` (`type-check` line)
 
 **Step 5.1: Rewrite**
@@ -286,6 +291,7 @@ git commit -m "chore(deps): switch api type-check to tsgo"
 ### Task 6: Switch `apps/web` (the big one — includes `.next/types/**` includes)
 
 **Files:**
+
 - Modify: `apps/web/package.json:11` (`type-check` line)
 
 **Step 6.1: Prime Next's generated types**
@@ -311,10 +317,10 @@ time pnpm --filter @kcvv/web type-check
 
 Expected: exit 0. Record wall-clock. If tsgo reports typed-route errors that `tsc` did not, the `.next/types` priming is stale — rerun `next build` and retry. If errors persist, STOP and escalate — this is the documented Next.js interaction we chose not to work around.
 
-**Step 6.4: Run the full check-all chain**
+**Step 6.4: Run the full turbo gate chain**
 
 ```bash
-time pnpm --filter @kcvv/web check-all
+time pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 Expected: lint → type-check → test → build all pass. This is the canonical pre-PR verification.
@@ -368,7 +374,7 @@ Expected: both green.
 pnpm knip 2>&1 | tail -20
 ```
 
-Expected: exits 0 or with the same warnings it had on main (no *new* unresolved imports).
+Expected: exits 0 or with the same warnings it had on main (no _new_ unresolved imports).
 
 No commit — data only.
 
@@ -379,15 +385,16 @@ No commit — data only.
 **Why:** The in-repo rule says "CLAUDE.md Is a Required Deliverable" when the architecture description changes. The type-check toolchain is exactly that.
 
 **Files:**
+
 - Modify: `.claude/CLAUDE.md` (add a short note under "Development Guidelines")
 
 **Step 8.1: Add this block under "Development Guidelines"**
 
-````markdown
+```markdown
 ### TypeScript Compiler — Dual-Install (tsgo + tsc)
 
 `@typescript/native-preview` (`tsgo`) is the primary type-checker and runs every `type-check` and `apps/api-contract` `build` script. Classic `typescript` (`tsc`) stays installed because `typescript-eslint`, `knip`, `@sanity/cli` typegen, and Next.js's `next build` all resolve the `typescript` package name and consume its (unstable) compiler API. Do not remove `typescript` from any workspace. Revisit this split after TypeScript 7.0 GA (est. July 2026).
-````
+```
 
 **Step 8.2: Commit**
 
@@ -401,6 +408,7 @@ git commit -m "docs(config): document tsgo + tsc dual-install in CLAUDE.md"
 ### Task 9: Timings scratchpad + PR
 
 **Files:**
+
 - Create: `docs/plans/2026-04-24-typescript-7-migration-timings.md`
 
 **Step 9.1: Record timings**
@@ -410,16 +418,16 @@ Fill in the table from data collected in Tasks 0 and 2–7:
 ```markdown
 # TS 7 Migration — Measured Timings
 
-| Command | Classic tsc (baseline) | tsgo (this branch) | Speedup |
-| --- | --- | --- | --- |
-| pnpm --filter @kcvv/api-contract type-check | <0.3> | <0.3> | |
-| pnpm --filter @kcvv/api-contract build      | <0.4> | <2.3> | |
-| pnpm --filter @kcvv/sanity-schemas type-check | ... | ... | |
-| pnpm --filter @kcvv/sanity-studio type-check  | ... | ... | |
-| pnpm --filter @kcvv/api type-check           | ... | ... | |
-| pnpm --filter @kcvv/web type-check           | ... | ... | |
-| pnpm --filter @kcvv/web check-all            | ... | ... | |
-| pnpm type-check (root)                       | ... | ... | |
+| Command                                                      | Classic tsc (baseline) | tsgo (this branch) | Speedup |
+| ------------------------------------------------------------ | ---------------------- | ------------------ | ------- |
+| pnpm --filter @kcvv/api-contract type-check                  | <0.3>                  | <0.3>              |         |
+| pnpm --filter @kcvv/api-contract build                       | <0.4>                  | <2.3>              |         |
+| pnpm --filter @kcvv/sanity-schemas type-check                | ...                    | ...                |         |
+| pnpm --filter @kcvv/sanity-studio type-check                 | ...                    | ...                |         |
+| pnpm --filter @kcvv/api type-check                           | ...                    | ...                |         |
+| pnpm --filter @kcvv/web type-check                           | ...                    | ...                |         |
+| pnpm turbo run lint type-check test build --filter=@kcvv/web | ...                    | ...                |         |
+| pnpm type-check (root)                                       | ...                    | ...                |         |
 ```
 
 **Step 9.2: Commit**
@@ -450,7 +458,7 @@ See `docs/plans/2026-04-24-typescript-7-migration-timings.md`.
 - [ ] `pnpm build` exits 0
 - [ ] `pnpm lint` exits 0
 - [ ] `pnpm test` exits 0
-- [ ] `pnpm --filter @kcvv/web check-all` exits 0
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` exits 0
 - [ ] Vercel preview deployment succeeds
 - [ ] CI `type-check` jobs for web, api, studio all green
 - [ ] `pnpm knip` shows no *new* unresolved-import warnings vs main
