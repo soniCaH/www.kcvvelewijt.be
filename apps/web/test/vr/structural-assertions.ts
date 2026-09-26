@@ -28,7 +28,7 @@
  *      branching logic.
  *   2. `structural-assertions.test.ts` (this directory) statically greps
  *      every `*.stories.tsx` file for each registered tag and fails the
- *      **Vitest** suite — part of `pnpm --filter @kcvv/web check-all`,
+ *      **Vitest** suite — part of the web gate (`turbo run … --filter=@kcvv/web`),
  *      which runs far more often and far faster than a full VR pass — the
  *      moment a tag stops being referenced anywhere. Renaming or deleting
  *      the tagged story trips that guard immediately instead of the

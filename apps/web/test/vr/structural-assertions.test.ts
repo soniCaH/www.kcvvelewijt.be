@@ -8,8 +8,8 @@
  * StandingsTable case, `test.skip()`s itself whenever the live sitemap
  * doesn't happen to carry a numbered table).
  *
- * This file runs as plain Vitest — part of `pnpm --filter @kcvv/web
- * check-all` — so a broken tag fails fast, long before (and far more often
+ * This file runs as plain Vitest — part of the web gate
+ * (`turbo run … --filter=@kcvv/web`) — so a broken tag fails fast, long before (and far more often
  * than) a 25–60 minute VR pass would ever catch it. Three ways a tag can be
  * present in a file yet never actually run in `postVisit` (review #2861):
  *

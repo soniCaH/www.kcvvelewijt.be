@@ -854,7 +854,7 @@ exists to close** — the guard it backstops for StandingsTable was itself a
 #3146; see "What pinned data does not fix" above and
 `apps/web/CLAUDE.md`'s "Storybook `play` is a separate layer" section).
 `apps/web/test/vr/structural-assertions.test.ts` is
-the static, always-runs-in-`check-all` half — and review on #2861 found
+the static, always-runs-in-the-web-gate half — and review on #2861 found
 that a naive "does the tag string appear anywhere in the file" scan misses
 the more likely ways a tag stops actually running:
 
@@ -878,7 +878,7 @@ the more likely ways a tag stops actually running:
   JSX required) isn't reported as "nowhere referenced".
 
 Any of these failing fails the **Vitest** suite — part of
-`pnpm --filter @kcvv/web check-all`, which runs far more often than a full
+`pnpm turbo run lint type-check test build --filter=@kcvv/web`, which runs far more often than a full
 VR pass — the moment a tag stops actually running, instead of the runtime
 assertion just quietly never firing again.
 

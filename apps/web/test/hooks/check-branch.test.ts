@@ -11,7 +11,7 @@
  * Both live outside every workspace, so nothing else in CI would ever exercise
  * them. This file is their only home: it is collected by the existing
  * `apps/web` vitest config (no `include` override; only `test/e2e/**` is
- * excluded) and therefore rides `pnpm --filter @kcvv/web test` and `check-all`.
+ * excluded) and therefore rides `pnpm --filter @kcvv/web test` and the web gate.
  *
  * Fixtures are throwaway `git init` repos under `os.tmpdir()` — the commits
  * made here are never in this repository.

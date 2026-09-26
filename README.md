@@ -141,7 +141,7 @@ pnpm test             # Run all unit tests
 
 ```bash
 pnpm --filter @kcvv/web dev
-pnpm --filter @kcvv/web check-all   # lint + type-check + test + build
+pnpm turbo run lint type-check test build --filter=@kcvv/web   # the quality gate
 pnpm --filter @kcvv/web storybook
 pnpm --filter @kcvv/web build-storybook
 ```
@@ -211,7 +211,7 @@ git checkout -b feat/feature-name
 git commit -m "feat(news): add news card component"
 
 # Quality check before push
-pnpm --filter @kcvv/web check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 
 # Push
 git push -u origin feat/feature-name
