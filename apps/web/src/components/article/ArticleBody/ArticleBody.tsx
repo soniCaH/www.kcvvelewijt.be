@@ -15,12 +15,11 @@ import { QASectionDivider } from "@/components/design-system/QASectionDivider";
 import { SubjectAvatar } from "@/components/design-system/SubjectAvatar";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
+import { type IndexedSubject } from "@/components/article/SubjectAttribution";
 import {
-  resolvePairRespondent,
-  resolveSubject,
-  deriveSubjectFirstName,
-  type IndexedSubject,
-} from "@/components/article/SubjectAttribution";
+  resolvePullQuoteSpeaker,
+  type PullQuoteSpeakerRef,
+} from "./resolvePullQuoteSpeaker";
 import { TransferFactCard } from "@/components/article/blocks/TransferFactCard";
 import type { TransferFactValue } from "@/components/article/blocks/TransferFact/types";
 import {
@@ -42,8 +41,10 @@ import {
   resolveInternalLinkHref,
   type InternalLinkReference,
 } from "@/lib/utils/resolve-internal-link-href";
-import { renderTextWithEmphasis } from "@/lib/portable-text/renderTextWithEmphasis";
-import type { PortableTextBlockLike } from "@/lib/portable-text/findPullquoteText";
+import {
+  hasRenderableBioContent,
+  type PortableTextBlockLike,
+} from "@/lib/portable-text/findPullquoteText";
 import {
   segmentArticleBody,
   type ArticleBodySegment,
@@ -87,11 +88,14 @@ import { cn } from "@/lib/utils/cn";
 export interface ArticleBodyProps {
   content: PortableTextBlock[];
   /**
-   * Article-level subjects passed through to the `pullQuote` + `qaBlock`
-   * serializers so a `respondentKey` can resolve back to a `SubjectValue`
-   * and render the `<SubjectAvatar>` + display name. On non-interview
-   * articles (transfer / event / announcement) this is typically `null`
-   * and every pull-quote falls back to the external-attribution path.
+   * Article-level subjects passed through to the `qaBlock` serializer so a
+   * `respondentKey` can resolve back to a `SubjectValue` and render the
+   * `<SubjectAvatar>` + display name. `pullQuote` does NOT use this — its
+   * speaker is a direct `player`/`staffMember` reference, dereferenced by
+   * the article repository GROQ projection and resolved locally via
+   * `resolvePullQuoteSpeaker` (#2517) — `subjects` is hidden on every
+   * non-interview article, so a quote in a normal article would have
+   * nothing to resolve against.
    */
   subjects?: IndexedSubject[] | null;
   /**
@@ -120,9 +124,9 @@ function endMarkLabelFor(articleType: string | null | undefined): string {
 interface PullQuoteBlock {
   _type: "pullQuote";
   _key?: string;
-  body?: string;
-  respondentKey?: string;
-  emphasis?: string;
+  body?: PortableTextBlock[];
+  /** Dereferenced by the article repository GROQ projection (#2517). */
+  speaker?: PullQuoteSpeakerRef | null;
   externalName?: string;
   externalRole?: string;
   externalSource?: string;
@@ -201,7 +205,8 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
     return extractBlockText(block).length > 0;
   }
   if (block._type === "pullQuote") {
-    return ((block as PullQuoteBlock).body ?? "").trim().length > 0;
+    const body = (block as PullQuoteBlock).body;
+    return Array.isArray(body) && hasRenderableBioContent(body);
   }
   if (block._type === "transferFact") {
     return ((block as TransferFactValue).playerName ?? "").trim().length > 0;
@@ -373,34 +378,48 @@ function renderSegments(
   });
 }
 
-function renderPullQuote(
-  value: PullQuoteBlock,
-  subjects: IndexedSubject[] | null,
-): ReactNode {
-  const body = value.body?.trim();
-  if (!body) return null;
+// accent — italic + jersey-deep inline emphasis (5.A.1). Hoisted so it can
+// be shared between the main body's `marks.accent` and the constrained
+// `pullQuote.body` sub-tree below — same visual rule, one implementation.
+function AccentMark({ children }: { children?: ReactNode }) {
+  return <em className="text-jersey-deep font-black italic">{children}</em>;
+}
 
-  const respondent = resolvePairRespondent(value.respondentKey, subjects);
-  const resolved = resolveSubject(respondent);
-  // `emphasis` moved off <PullQuote> (design-system stays presentational —
-  // inline emphasis is a Portable Text concern) — ArticleBody, which
-  // already knows the phrase and already builds node trees, resolves it
-  // to a ReactNode here and hands it over as `children` directly.
-  const quoteBody = renderTextWithEmphasis(body, value.emphasis?.trim());
+// `pullQuote.body` is a self-contained, constrained Portable Text value
+// (one Normal block style, no lists, only the `accent` decorator — see
+// `pullQuote.ts`), so it doesn't need the full body `components` map (h2
+// dividers, qaBlock, articleImage, ... can never appear inside it). A
+// dedicated minimal map avoids a self-referential `buildComponents`.
+const PULL_QUOTE_BODY_COMPONENTS: PortableTextComponents = {
+  marks: { accent: AccentMark },
+};
+
+function renderPullQuote(value: PullQuoteBlock): ReactNode {
+  if (!Array.isArray(value.body) || !hasRenderableBioContent(value.body)) {
+    return null;
+  }
+  // An accent-marked phrase in the quote text renders with the site's
+  // existing accent emphasis style (#2517 AC) — the same `marks.accent`
+  // handler the rest of the body uses.
+  const quoteBody = (
+    <PortableText value={value.body} components={PULL_QUOTE_BODY_COMPONENTS} />
+  );
+
+  const resolvedSpeaker = resolvePullQuoteSpeaker(value.speaker);
 
   let inner: ReactNode;
 
-  if (resolved && respondent) {
+  if (resolvedSpeaker) {
     inner = (
       <PullQuote
         attribution={{
-          name: resolved.name,
-          role: resolved.role || undefined,
+          name: resolvedSpeaker.name,
+          role: resolvedSpeaker.role || undefined,
         }}
         avatarSlot={
           <SubjectAvatar
-            firstName={deriveSubjectFirstName(respondent, resolved.name)}
-            photoUrl={resolved.photoUrl}
+            firstName={resolvedSpeaker.firstName}
+            photoUrl={resolvedSpeaker.photoUrl}
             scale="attribution"
           />
         }
@@ -629,7 +648,7 @@ export function buildComponents({
     listItem: ({ children }) => <li className="pl-1">{children}</li>,
     types: {
       pullQuote: ({ value }: { value: PullQuoteBlock }) =>
-        renderPullQuote(value, subjects),
+        renderPullQuote(value),
       qaBlock: ({ value }: { value: QaBlockValue }) => (
         <QaBlock value={value} subjects={subjects} />
       ),
@@ -690,10 +709,7 @@ export function buildComponents({
       },
     },
     marks: {
-      // accent — italic + jersey-deep inline emphasis (5.A.1).
-      accent: ({ children }: { children?: ReactNode }) => (
-        <em className="text-jersey-deep font-black italic">{children}</em>
-      ),
+      accent: AccentMark,
       link: ({
         children,
         value,

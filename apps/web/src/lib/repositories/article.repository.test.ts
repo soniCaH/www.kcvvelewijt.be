@@ -108,6 +108,9 @@ function makeArticleDetailRow(
         // GROQ `select(_type == "transferFact" => …, null)` produces these
         // on every body element of the projected union).
         otherClubLogoUrl: null,
+        // pullQuote speaker dereference (#2517) — null for non-pullQuote
+        // blocks, same `select(_type == "pullQuote" => …, null)` shape.
+        speaker: null,
       },
     ],
     relatedArticles: [
