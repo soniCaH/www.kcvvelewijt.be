@@ -48,6 +48,7 @@ interface SanityArticleDoc {
   qaQuestions: string[];
   qaAnswers: string;
   tableHtml: string[];
+  pullQuoteText: string;
   imageUrl: string | null;
 }
 

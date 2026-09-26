@@ -83,6 +83,7 @@ const ArticleDoc = S.Struct({
   qaQuestions: S.Array(S.String),
   qaAnswers: S.String,
   tableHtml: S.Array(S.String),
+  pullQuoteText: S.String,
   slug: S.String,
   imageUrl: S.optional(S.NullOr(S.String)),
 });
