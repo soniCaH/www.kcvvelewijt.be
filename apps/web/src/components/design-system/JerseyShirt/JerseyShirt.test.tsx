@@ -43,4 +43,11 @@ describe("JerseyShirt", () => {
     const paths = container.querySelectorAll("path");
     expect(paths).toHaveLength(7);
   });
+
+  it("merges className with cn() so a caller's size and margin win over the defaults (#2777)", () => {
+    const { container } = render(<JerseyShirt className="mx-0 h-20 w-20" />);
+    const figure = container.querySelector("figure");
+    expect(figure).toHaveClass("h-20", "w-20", "mx-0");
+    expect(figure).not.toHaveClass("h-60", "w-60", "mx-auto");
+  });
 });

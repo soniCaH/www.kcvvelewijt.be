@@ -22,6 +22,7 @@
  * Spec: `docs/design/mockups/phase-3-a-tier-c-figures/jerseyshirt-locked.md`.
  * Path provenance: `_jersey-paths.ts` (shared with `<JerseyIllustration>`).
  */
+import { cn } from "@/lib/utils/cn";
 import {
   JERSEY_OUTLINE_STROKE_WIDTH,
   JERSEY_TORSO_FILL_PATH,
@@ -35,21 +36,14 @@ export interface JerseyShirtProps {
   /** Optional editor-supplied chest letter overlay (e.g. "U11", "A"). */
   letterOverlay?: string;
   /**
-   * Tailwind classes merged into the outer `<figure>` via a plain string
-   * concat, NOT `cn()` — so a same-property override against the baked-in
-   * `h-60 w-60 mx-auto` (`h-*`, `w-*`, `mx-*`) does **not** reliably win.
-   * Same-property Tailwind utilities resolve by the order they're emitted
-   * in the generated stylesheet, not by which class comes later in this
-   * string, and the default wins regardless. Five call sites relied on
-   * this working and silently render at 240px today (`ClubshopBanner`
-   * additionally stays centred despite passing `mx-0`) — see #2777.
-   *
-   * The one override that *does* work: a **different** CSS property, e.g.
-   * `max-h-*`/`max-w-*` against the baked-in `h-*`/`w-*`, which composes
-   * instead of conflicting (`getCardSubjectArtefact`,
-   * `apps/web/src/lib/utils/card-subject-artefact.tsx`, is the one caller
-   * doing this correctly). Do not add a new same-property override here;
-   * fix #2777 instead.
+   * Tailwind classes merged into the outer `<figure>` via `cn()`
+   * (tailwind-merge), not a plain string concat — so a same-property
+   * override (`h-*`, `w-*`, `mx-*`) against the baked-in
+   * `h-60 w-60 mx-auto` reliably wins, same as any other `cn()`-merged
+   * component in this design system. Fixed in #2777: the previous
+   * concat let stylesheet-emission order decide the winner instead of
+   * this string, so five callers silently rendered at 240px regardless
+   * of the size they asked for.
    */
   className?: string;
 }
@@ -63,13 +57,11 @@ const LETTER_TEXT_SHADOW =
   "2px 2px 0 var(--color-ink), -1px -1px 0 var(--color-ink), 1px -1px 0 var(--color-ink), -1px 1px 0 var(--color-ink)";
 
 export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
-  // The figure's default dimensions live in this base string. A
-  // same-property override in `className` (`h-*`, `w-*`, `mx-*`) does NOT
-  // reliably win here — see the `className` prop docblock above and #2777.
-  // Left as a plain concat rather than fixed to `cn()` in this branch: the
-  // fix moves real pixels at five call sites across the site and belongs
-  // in its own PR (#2777), not folded into an unrelated feature branch.
-  const figureClass = `relative mx-auto my-0 h-60 w-60${className ? ` ${className}` : ""}`;
+  // The figure's default dimensions live in this base string. `cn()`
+  // (tailwind-merge) resolves a same-property override in `className`
+  // (`h-*`, `w-*`, `mx-*`) in the caller's favour — see the `className`
+  // prop docblock above and #2777.
+  const figureClass = cn("relative mx-auto my-0 h-60 w-60", className);
   return (
     <figure aria-hidden="true" className={figureClass}>
       <div
