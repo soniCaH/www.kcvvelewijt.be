@@ -157,4 +157,44 @@ describe("computeReadingTime", () => {
       expect(computeReadingTime(body)).toBe("1 min lezen");
     });
   });
+
+  describe("pullQuote (#2517)", () => {
+    const pullQuote = (text: string) => ({
+      _type: "pullQuote" as const,
+      body: [block(text)],
+    });
+
+    it("counts the quote text", () => {
+      // 150 intro words + 150 quote words = 300 -> "2 min lezen". Without
+      // the quote, 150 words alone rounds to "1 min" — the boundary the
+      // qaBlock tests above use for the same reason: a single fixture too
+      // short to cross a minute can't prove a branch actually ran.
+      const body = [
+        block(Array.from({ length: 150 }, () => "intro").join(" ")),
+        pullQuote(Array.from({ length: 150 }, () => "citaat").join(" ")),
+      ];
+      expect(computeReadingTime(body)).toBe("2 min lezen");
+      expect(computeReadingTime([body[0]!])).toBe("1 min lezen");
+    });
+
+    it("mixes a pullQuote with surrounding prose", () => {
+      const body = [
+        block(Array.from({ length: 200 }, () => "intro").join(" ")),
+        pullQuote(Array.from({ length: 200 }, () => "citaat").join(" ")),
+        block(Array.from({ length: 200 }, () => "outro").join(" ")),
+      ];
+      // 600 words with the quote -> "3 min lezen"; 400 without it -> "2 min"
+      // — the prose alone cannot mask a regression in the pullQuote branch.
+      expect(computeReadingTime(body)).toBe("3 min lezen");
+      expect(computeReadingTime([body[0]!, body[2]!])).toBe("2 min lezen");
+    });
+
+    it("survives a pullQuote with no body", () => {
+      const body = [
+        block(Array.from({ length: 60 }, () => "woord").join(" ")),
+        { _type: "pullQuote" as const },
+      ];
+      expect(computeReadingTime(body)).toBe("1 min lezen");
+    });
+  });
 });

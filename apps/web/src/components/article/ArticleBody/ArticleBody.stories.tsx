@@ -110,24 +110,78 @@ function transferFactBlock(args: {
   } as unknown as PortableTextBlock;
 }
 
-// pullQuote PT block fixture. The renderer consumes `body` plus either
-// `respondentKey` (when a KCVV subject is the speaker) or
+// `pullQuote.body` is itself constrained Portable Text (one Normal block,
+// no lists, an optional `accent`-marked span) — not a plain string.
+// `accented`, when given, must be a literal substring of `text`.
+function quoteBodyPT(text: string, accented?: string): PortableTextBlock[] {
+  const key = `pq-body-${text.slice(0, 6).replace(/\s/g, "-")}`;
+  if (!accented) {
+    return [
+      {
+        _type: "block",
+        _key: key,
+        style: "normal",
+        children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
+        markDefs: [],
+      } as PortableTextBlock,
+    ];
+  }
+  const idx = text.indexOf(accented);
+  const before = idx >= 0 ? text.slice(0, idx) : text;
+  const after = idx >= 0 ? text.slice(idx + accented.length) : "";
+  return [
+    {
+      _type: "block",
+      _key: key,
+      style: "normal",
+      children: [
+        { _type: "span", _key: `${key}-c1`, text: before, marks: [] },
+        {
+          _type: "span",
+          _key: `${key}-c2`,
+          text: accented,
+          marks: ["accent"],
+        },
+        { _type: "span", _key: `${key}-c3`, text: after, marks: [] },
+      ],
+      markDefs: [],
+    } as PortableTextBlock,
+  ];
+}
+
+// Dereferenced `speaker` fixture shape — the article repository GROQ
+// projection resolves this from `pullQuote.speaker` (a reference to a
+// `player` or `staffMember` document).
+interface PullQuoteSpeakerFixture {
+  _type: "player" | "staffMember";
+  firstName: string;
+  lastName: string;
+  position?: string;
+  functionTitle?: string;
+  transparentImageUrl?: string;
+  psdImageUrl?: string;
+  photoUrl?: string;
+}
+
+// pullQuote PT block fixture. The renderer consumes `body` plus either a
+// resolved `speaker` (a KCVV player/staffMember) or
 // `externalName`/`externalRole`/`externalSource` (for non-subject quotes).
 function pullQuoteBlock(
   body: string,
   extras: {
-    respondentKey?: string;
-    emphasis?: string;
+    speaker?: PullQuoteSpeakerFixture;
+    accented?: string;
     externalName?: string;
     externalRole?: string;
     externalSource?: string;
   } = {},
 ): PortableTextBlock {
+  const { accented, ...rest } = extras;
   return {
     _type: "pullQuote",
     _key: `pq-${body.slice(0, 6).replace(/\s/g, "-")}`,
-    body,
-    ...extras,
+    body: quoteBodyPT(body, accented),
+    ...rest,
   } as unknown as PortableTextBlock;
 }
 
@@ -216,6 +270,32 @@ const ALL_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
   }),
 ];
 
+// The three speaker-resolution cases neither AllPullQuote (external only)
+// nor WithPullQuote (a photo-carrying staffMember) covers (#2517 review):
+// a `player` speaker (photo + position), a photo-less `staffMember`
+// (monogram fallback), and a nameless quote (no speaker, no external name).
+const PULL_QUOTE_SPEAKER_CASES_CONTENT: PortableTextBlock[] = [
+  pullQuoteBlock("We geven nooit op, tot de laatste minuut.", {
+    speaker: {
+      _type: "player",
+      firstName: "Maxim",
+      lastName: "Breugelmans",
+      position: "Aanvaller",
+      transparentImageUrl: fixtureImage("player-portrait", 0),
+    },
+  }),
+  pullQuoteBlock("De jeugdwerking is het fundament van deze club.", {
+    speaker: {
+      _type: "staffMember",
+      firstName: "Anouk",
+      lastName: "De Wit",
+      functionTitle: "Bestuur",
+      // No photo field at all — <SubjectAvatar> falls back to the monogram.
+    },
+  }),
+  pullQuoteBlock("Soms is stilte de beste reactie."),
+];
+
 const WITH_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
   paragraph(
     "Wim Govaerts opent de deur van zijn kantoor met een lach. Het tweede seizoen op de bank loopt op zijn einde, en het verschil met vorig jaar is voelbaar.",
@@ -226,7 +306,13 @@ const WITH_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
   pullQuoteBlock(
     "We hebben de kleedkamer in de derde minuut weer wakker gekregen.",
     {
-      respondentKey: "subj-coach",
+      speaker: {
+        _type: "staffMember",
+        firstName: "Wim",
+        lastName: "Govaerts",
+        functionTitle: "TRAINER",
+        photoUrl: fixtureImage("staff-portrait", 0),
+      },
     },
   ),
   paragraph(
@@ -237,9 +323,11 @@ const WITH_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
   ),
 ];
 
-// Subjects fixture for the WithPullQuote story — supplies the resolvable
-// respondentKey on the inline pull-quote so the SubjectAvatar renders
-// with the staff photo path.
+// Subjects fixture for the qaBlock stories below (`WithQaBlocksInFlowAndTail`)
+// — supplies the resolvable `respondentKey` so `<QaBlock>`'s `SubjectAvatar`
+// renders with the staff photo path. Unrelated to `pullQuote`, which resolves
+// its speaker via a direct `player`/`staffMember` reference (#2517), not
+// `article.subjects`.
 const WITH_PULL_QUOTE_SUBJECTS = [
   {
     _key: "subj-coach",
@@ -423,7 +511,7 @@ export const HeadingOnly: Story = {
 
 // Edge case: body is only `pullQuote` PT blocks (no paragraphs, no
 // headings). Each renders the external-attribution path because the
-// fixtures don't supply a respondentKey. Verifies the shell handles a
+// fixtures carry no `speaker` reference. Verifies the shell handles a
 // pull-quote-heavy body without normal paragraphs gracefully — DropCap
 // skips (no normal paragraph found), EndMark still renders.
 export const AllPullQuote: Story = {
@@ -432,27 +520,36 @@ export const AllPullQuote: Story = {
   },
 };
 
-// Mixed body with an inline `pullQuote` block that resolves a KCVV
-// subject (Wim Govaerts) via respondentKey. The pullQuote renders the
+// The three speaker-resolution cases AllPullQuote/WithPullQuote don't cover
+// (#2517 review): a `player` speaker (photo + position), a photo-less
+// `staffMember` (renders the monogram, not a photo), and a nameless quote
+// (no speaker, no externalName — no attribution row at all, #2515 rule 1).
+export const PullQuoteSpeakerCases: Story = {
+  args: {
+    content: PULL_QUOTE_SPEAKER_CASES_CONTENT,
+  },
+};
+
+// Mixed body with an inline `pullQuote` block whose `speaker` reference
+// resolves to a KCVV staff member (Wim Govaerts, dereferenced by the
+// article repository GROQ projection — #2517). The pullQuote renders the
 // avatar layout with the staff photo + italic display name + mono caps
 // role/source, in the default flow placement (cream — the `pullQuote`
 // block never carries a tone, #2515 decision). EndMark closes the body.
 export const WithPullQuote: Story = {
   args: {
     content: WITH_PULL_QUOTE_CONTENT,
-    subjects: WITH_PULL_QUOTE_SUBJECTS,
   },
 };
 
-// A `pullQuote` block with `emphasis` set — the phrase resolves through
-// `renderTextWithEmphasis()` (lib/portable-text/) into a
-// <HighlighterStroke>-wrapped span inside the quote body. This is the only
-// pictorial VR coverage of a highlighted quote in the suite: `<PullQuote>`
-// lost its own `emphasis` prop (and the `WithEmphasis` story that
-// demonstrated it) when the highlighter pass moved to ArticleBody, its one
-// caller — the feature lives here now, so its VR coverage does too. Long
-// enough that the highlighted phrase is still visible at mobile width.
-const WITH_PULL_QUOTE_EMPHASIS_CONTENT: PortableTextBlock[] = [
+// A `pullQuote` block whose `body` carries an `accent`-marked phrase
+// (#2517 — `pullQuote.body` is constrained Portable Text with the shared
+// `accent` decorator, not a separate "emphasis substring" field). The
+// marked phrase renders through the same `marks.accent` handler the rest
+// of the article body uses (italic + jersey-deep), so a quote's accent
+// reads identically to an accent in a normal paragraph. Long enough that
+// the accented phrase is still visible at mobile width.
+const WITH_PULL_QUOTE_ACCENT_CONTENT: PortableTextBlock[] = [
   paragraph(
     "Wim Govaerts opent de deur van zijn kantoor met een lach. Het tweede seizoen op de bank loopt op zijn einde.",
   ),
@@ -461,7 +558,7 @@ const WITH_PULL_QUOTE_EMPHASIS_CONTENT: PortableTextBlock[] = [
     {
       externalName: "Wim Govaerts",
       externalRole: "TRAINER",
-      emphasis: "samen knokken voor elkaar",
+      accented: "samen knokken voor elkaar",
     },
   ),
   paragraph(
@@ -469,15 +566,15 @@ const WITH_PULL_QUOTE_EMPHASIS_CONTENT: PortableTextBlock[] = [
   ),
 ];
 
-export const PullQuoteWithEmphasis: Story = {
+export const PullQuoteWithAccent: Story = {
   args: {
-    content: WITH_PULL_QUOTE_EMPHASIS_CONTENT,
+    content: WITH_PULL_QUOTE_ACCENT_CONTENT,
   },
   parameters: {
     docs: {
       description: {
         story:
-          "A `pullQuote` block carrying an `emphasis` phrase — served markup runs through `renderTextWithEmphasis()`, so the highlighter stroke is actually drawn in this baseline, not just asserted in a unit test.",
+          "A `pullQuote` block whose quote text carries an `accent`-marked phrase — rendered through the same `marks.accent` handler (italic + jersey-deep) the rest of `<ArticleBody>` uses, so a quote's accent stays visually identical to an accent in running prose.",
       },
     },
   },
@@ -574,7 +671,6 @@ export const WithThreeConsecutiveTransferFacts: Story = {
 export const BodyComposition: Story = {
   args: {
     content: WITH_PULL_QUOTE_CONTENT,
-    subjects: WITH_PULL_QUOTE_SUBJECTS,
   },
   render: (args) => (
     <>

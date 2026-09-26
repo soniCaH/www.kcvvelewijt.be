@@ -73,6 +73,23 @@ export interface ResolvedSubject {
 }
 
 /**
+ * The shared "editorial wins over synced" photo-fallback rule — a player's
+ * `transparentImage` over its `psdImage`, a staff member's editorial `photo`
+ * over its `psdImage`. Extracted so `resolvePullQuoteSpeaker`
+ * (`components/article/ArticleBody/resolvePullQuoteSpeaker.ts`) doesn't
+ * reimplement the same `??` chain for the same two document types (#2517
+ * review) — both resolvers dereference the identical `player`/`staffMember`
+ * photo fields, just from different parent schemas (`subject` vs. a direct
+ * reference).
+ */
+export function resolvePersonPhotoUrl(
+  editorial: string | null | undefined,
+  synced: string | null | undefined,
+): string | null {
+  return editorial ?? synced ?? null;
+}
+
+/**
  * Normalise the `subject` discriminated union from GROQ into a flat shape
  * any attribution-rendering component can consume. Returns `null` when the
  * referenced document is missing (e.g. player deleted) or when the editor
@@ -100,7 +117,7 @@ export function resolveSubject(
     return {
       name,
       role: p.jerseyNumber != null ? `#${p.jerseyNumber}` : "",
-      photoUrl: p.transparentImageUrl ?? p.psdImageUrl ?? null,
+      photoUrl: resolvePersonPhotoUrl(p.transparentImageUrl, p.psdImageUrl),
       jerseyNumber: p.jerseyNumber ?? null,
       position: p.position ?? null,
     };
@@ -114,7 +131,7 @@ export function resolveSubject(
     return {
       name,
       role: s.functionTitle ?? "",
-      photoUrl: s.photoUrl ?? s.psdImageUrl ?? null,
+      photoUrl: resolvePersonPhotoUrl(s.photoUrl, s.psdImageUrl),
       jerseyNumber: null,
       position: null,
     };

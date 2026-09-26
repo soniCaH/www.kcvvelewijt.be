@@ -450,6 +450,7 @@ describe("handleIndexWebhook", () => {
       prose: "KCVV won met 3-1.",
       qaQuestions: [],
       qaAnswers: "",
+      pullQuoteText: "",
       tableHtml: [],
     };
 
@@ -482,6 +483,7 @@ describe("handleIndexWebhook", () => {
       prose: "KCVV won met 3-1.",
       qaQuestions: [],
       qaAnswers: "",
+      pullQuoteText: "",
       tableHtml: [],
       imageUrl: "https://cdn.example.com/cover.jpg",
     };
@@ -512,6 +514,7 @@ describe("handleIndexWebhook", () => {
       prose: "KCVV won met 3-1.",
       qaQuestions: [],
       qaAnswers: "",
+      pullQuoteText: "",
       tableHtml: [],
     };
 
@@ -638,6 +641,7 @@ describe("handleIndexWebhook", () => {
       prose: "Een overzicht van de kern.",
       qaQuestions: [],
       qaAnswers: "",
+      pullQuoteText: "",
       tableHtml: ["<table><tr><td>Bocar Sarr</td></tr></table>"],
     });
     const embedded: string[] = [];
@@ -674,6 +678,7 @@ describe("handleIndexWebhook", () => {
       prose: "KCVV won met 3-1.",
       qaQuestions: [],
       qaAnswers: "",
+      pullQuoteText: "",
       tableHtml: [],
     });
 

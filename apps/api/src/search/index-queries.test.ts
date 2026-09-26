@@ -72,15 +72,19 @@ describe("buildArticleIndexText", () => {
     qaQuestions: ["Hoe ging het?"],
     qaAnswers: "Uitstekend, echt waar.",
     tableHtml: ["<table><tr><td>Jef Janssens</td></tr></table>"],
+    pullQuoteText: "Een tribune die zingt is meer waard dan een aanwinst.",
   };
 
-  it("combines title, tags, lead, prose, Q&A, and table text", () => {
+  it("combines title, tags, lead, prose, pullQuote text, Q&A, and table text", () => {
     const result = buildArticleIndexText(base);
 
     expect(result).toContain("Verslag: KCVV wint derby");
     expect(result).toContain("verslag derby");
     expect(result).toContain("Een late kopbal besliste de derby.");
     expect(result).toContain("KCVV Elewijt won de derby met 3-1.");
+    expect(result).toContain(
+      "Een tribune die zingt is meer waard dan een aanwinst.",
+    );
     expect(result).toContain("Hoe ging het?");
     expect(result).toContain("Uitstekend, echt waar.");
     expect(result).toContain("Jef Janssens");
@@ -112,10 +116,29 @@ describe("buildArticleIndexText", () => {
       tableHtml: [
         "<table><tr><td>Bocar Sarr</td><td>FC Mariekerke</td></tr></table>",
       ],
+      pullQuoteText: "",
     });
 
     expect(result).toContain("Bocar Sarr");
     expect(result).toContain("FC Mariekerke");
+  });
+
+  it("indexes a quote that lives only inside a pullQuote block", () => {
+    // Mirrors qaAnswers: `pt::text(body)` never sees a pullQuote's own
+    // `body` field, so an article whose only real content is a quote would
+    // otherwise be unfindable by anything said in it.
+    const result = buildArticleIndexText({
+      title: "Reactie na de match",
+      tags: [],
+      lead: "",
+      prose: "",
+      qaQuestions: [],
+      qaAnswers: "",
+      tableHtml: [],
+      pullQuoteText: "We hebben de kleedkamer wakker gekregen.",
+    });
+
+    expect(result).toContain("We hebben de kleedkamer wakker gekregen.");
   });
 
   it("emits no bare separators for an article that is prose and nothing else", () => {
@@ -127,6 +150,7 @@ describe("buildArticleIndexText", () => {
       qaQuestions: [],
       qaAnswers: "",
       tableHtml: [],
+      pullQuoteText: "",
     });
 
     expect(result).toBe("Kort bericht. Enkel proza.");
@@ -144,6 +168,7 @@ describe("buildArticleIndexText", () => {
         qaQuestions: [],
         qaAnswers: "",
         tableHtml: [],
+        pullQuoteText: "",
       }),
     ).toBe("");
   });

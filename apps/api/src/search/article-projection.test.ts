@@ -31,6 +31,11 @@ const qaBlock = (question: string, answer: string) => ({
   pairs: [{ question, respondents: [{ answer: [block(answer)] }] }],
 });
 
+const pullQuoteBlock = (text: string) => ({
+  _type: "pullQuote",
+  body: [block(text)],
+});
+
 const PAST = "2020-01-01T00:00:00Z";
 const FUTURE = "2999-01-01T00:00:00Z";
 
@@ -110,6 +115,8 @@ describe("ARTICLE_INDEX_PROJECTION evaluated against fixture documents", () => {
       ["table without html", [block("Proza."), { _type: "htmlTable" }]],
       ["pair without a question", [{ _type: "qaBlock", pairs: [{}] }]],
       ["qaBlock without pairs", [{ _type: "qaBlock" }]],
+      ["pullQuote only", [pullQuoteBlock("Een citaat.")]],
+      ["pullQuote without a body", [{ _type: "pullQuote" }]],
       ["empty body", []],
       ["no body at all", undefined],
     ];
@@ -117,7 +124,13 @@ describe("ARTICLE_INDEX_PROJECTION evaluated against fixture documents", () => {
     for (const [name, body] of bodies) {
       const row = await projectOne(article({ _id: "a", body }));
 
-      for (const field of ["title", "lead", "prose", "qaAnswers"]) {
+      for (const field of [
+        "title",
+        "lead",
+        "prose",
+        "qaAnswers",
+        "pullQuoteText",
+      ]) {
         expect(row[field], `${name} → ${field}`).toBeTypeOf("string");
       }
       for (const field of ["tags", "qaQuestions", "tableHtml"]) {
@@ -140,6 +153,26 @@ describe("ARTICLE_INDEX_PROJECTION evaluated against fixture documents", () => {
     expect(row["prose"]).toBe("");
     expect(indexTextFor(row)).toContain("Hoe ging het?");
     expect(indexTextFor(row)).toContain("Uitstekend, echt waar.");
+  });
+
+  it("keeps a quote that lives only inside a pullQuote block", async () => {
+    // Same defect class as the Q&A case above: `pt::text(body)` never
+    // descends into a pullQuote's own `body` field, so an announcement built
+    // entirely from a quote would otherwise index as an empty document.
+    const row = await projectOne(
+      article({
+        _id: "reactie",
+        body: [pullQuoteBlock("We hebben de kleedkamer wakker gekregen.")],
+      }),
+    );
+
+    expect(row["prose"]).toBe("");
+    expect(row["pullQuoteText"]).toBe(
+      "We hebben de kleedkamer wakker gekregen.",
+    );
+    expect(indexTextFor(row)).toContain(
+      "We hebben de kleedkamer wakker gekregen.",
+    );
   });
 
   it("keeps the good table when a sibling htmlTable has no html", async () => {

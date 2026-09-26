@@ -32,12 +32,15 @@ interface AnyBlockItem {
   _type?: string;
   children?: AnyPortableChild[];
   pairs?: AnyQaPair[];
+  /** `pullQuote` only (#2517) — its own Portable Text body. */
+  body?: AnyBlockItem[];
 }
 
 /**
  * Recursively collect visible text from a Sanity article body — handles the
- * standard `block` type and the custom `qaBlock`, whose pairs nest their
- * answers one level deeper, inside each respondent. Returns a single
+ * standard `block` type, the custom `qaBlock` (whose pairs nest their
+ * answers one level deeper, inside each respondent), and `pullQuote` (whose
+ * own `body` is itself a small Portable Text array). Returns a single
  * whitespace-joined string.
  *
  * The estimate is over **authored** text, not rendered text, and deliberately
@@ -67,6 +70,9 @@ function extractBodyText(body: AnyBlockItem[] | null | undefined): string {
             return `${q} ${answers}`;
           })
           .join(" ");
+      }
+      if (item._type === "pullQuote" && Array.isArray(item.body)) {
+        return extractBodyText(item.body);
       }
       return "";
     })

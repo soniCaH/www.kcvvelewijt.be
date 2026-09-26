@@ -405,7 +405,7 @@ describe("<ArticleBody>", () => {
       const emptyPullQuote = {
         _type: "pullQuote",
         _key: "empty-pq",
-        body: "",
+        body: [],
       } as unknown as PortableTextBlock;
       const { container } = render(<ArticleBody content={[emptyPullQuote]} />);
       expect(container.querySelector('[data-endmark="star"]')).toBeNull();
@@ -425,13 +425,54 @@ describe("<ArticleBody>", () => {
   });
 
   describe("pullQuote PT serializer", () => {
+    // `pullQuote.body` is itself constrained Portable Text (one Normal
+    // block, no lists, an optional `accent`-marked span) — not a plain
+    // string. `accented`, when given, must be a literal substring of `text`.
+    function quoteBodyPT(text: string, accented?: string): PortableTextBlock[] {
+      const key = `pq-body-${text.slice(0, 8).replace(/\s/g, "-")}`;
+      if (!accented) {
+        return [
+          {
+            _type: "block",
+            _key: key,
+            style: "normal",
+            children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
+            markDefs: [],
+          } as PortableTextBlock,
+        ];
+      }
+      const idx = text.indexOf(accented);
+      const before = idx >= 0 ? text.slice(0, idx) : text;
+      const after = idx >= 0 ? text.slice(idx + accented.length) : "";
+      return [
+        {
+          _type: "block",
+          _key: key,
+          style: "normal",
+          children: [
+            { _type: "span", _key: `${key}-c1`, text: before, marks: [] },
+            {
+              _type: "span",
+              _key: `${key}-c2`,
+              text: accented,
+              marks: ["accent"],
+            },
+            { _type: "span", _key: `${key}-c3`, text: after, marks: [] },
+          ],
+          markDefs: [],
+        } as PortableTextBlock,
+      ];
+    }
+
     function pullQuoteBlock(
       overrides: Record<string, unknown> = {},
     ): PortableTextBlock {
       return {
         _type: "pullQuote",
         _key: `pq-${Math.random().toString(36).slice(2, 8)}`,
-        body: "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+        body: quoteBodyPT(
+          "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+        ),
         ...overrides,
       } as unknown as PortableTextBlock;
     }
@@ -441,7 +482,7 @@ describe("<ArticleBody>", () => {
         <ArticleBody
           content={[
             paragraph("First."),
-            pullQuoteBlock({ body: "" }),
+            pullQuoteBlock({ body: [] }),
             paragraph("Second."),
           ]}
         />,
@@ -449,26 +490,35 @@ describe("<ArticleBody>", () => {
       expect(container.querySelector("[data-pull-quote-tone]")).toBeNull();
     });
 
-    it("renders <PullQuote> with avatar slot when respondentKey resolves", () => {
+    it("renders only the first block when legacy/malformed data carries more than one (#2517 review — schema caps at .max(1), renderer defends it too)", () => {
+      const content = [
+        pullQuoteBlock({
+          body: [
+            ...quoteBodyPT("Eerste alinea."),
+            ...quoteBodyPT("Tweede alinea die er niet had mogen bijkomen."),
+          ],
+        }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const blockquote = container.querySelector("blockquote");
+      expect(blockquote?.textContent).toBe("Eerste alinea.");
+      expect(blockquote?.textContent).not.toContain("Tweede alinea");
+    });
+
+    it("renders <PullQuote> with avatar slot when the `speaker` reference resolves to a player", () => {
       const content = [
         paragraph("First."),
-        pullQuoteBlock({ respondentKey: "subj-1" }),
-      ];
-      const subjects = [
-        {
-          _key: "subj-1",
-          kind: "player" as const,
-          playerRef: {
+        pullQuoteBlock({
+          speaker: {
+            _type: "player",
             firstName: "Maxim",
             lastName: "Breugelmans",
-            jerseyNumber: 9,
+            position: "Aanvaller",
             psdImageUrl: "https://example.com/maxim.jpg",
           },
-        },
+        }),
       ];
-      const { container } = render(
-        <ArticleBody content={content} subjects={subjects} />,
-      );
+      const { container } = render(<ArticleBody content={content} />);
       expect(
         container.querySelector('[data-pull-quote-tone="cream"]'),
       ).not.toBeNull();
@@ -481,26 +531,21 @@ describe("<ArticleBody>", () => {
       expect(displayName?.textContent).toBe("Maxim Breugelmans");
     });
 
-    it("falls back to monogram avatar when the resolved subject has no photo", () => {
+    it("falls back to monogram avatar when the resolved staffMember speaker has no photo", () => {
       const content = [
         paragraph("First."),
-        pullQuoteBlock({ respondentKey: "subj-1" }),
-      ];
-      const subjects = [
-        {
-          _key: "subj-1",
-          kind: "staff" as const,
-          staffRef: {
+        pullQuoteBlock({
+          speaker: {
+            _type: "staffMember",
             firstName: "Anouk",
             lastName: "De Wit",
             functionTitle: "BESTUUR",
             photoUrl: null,
+            psdImageUrl: null,
           },
-        },
+        }),
       ];
-      const { container } = render(
-        <ArticleBody content={content} subjects={subjects} />,
-      );
+      const { container } = render(<ArticleBody content={content} />);
       expect(
         container.querySelector('[data-subject-avatar="monogram"]'),
       ).not.toBeNull();
@@ -537,7 +582,7 @@ describe("<ArticleBody>", () => {
       ).not.toBeNull();
     });
 
-    it("omits the attribution row for a nameless quote — no resolved subject and no externalName (#2515 rule 1)", () => {
+    it("omits the attribution row for a nameless quote — no resolved speaker and no externalName (#2515 rule 1)", () => {
       const content = [paragraph("First."), pullQuoteBlock({})];
       const { container } = render(<ArticleBody content={content} />);
       const wrapper = container.querySelector("[data-pull-quote-tone]");
@@ -546,17 +591,57 @@ describe("<ArticleBody>", () => {
       expect(wrapper?.children).toHaveLength(2);
     });
 
-    it("resolves `emphasis` into a <HighlighterStroke>-wrapped body via renderTextWithEmphasis (code review finding 2)", () => {
+    it("renders an accent-marked phrase in the quote text with the site's existing accent emphasis style", () => {
       const content = [
-        pullQuoteBlock({ externalName: "Coach", emphasis: "zingt" }),
+        pullQuoteBlock({
+          externalName: "Coach",
+          body: quoteBodyPT(
+            "We hebben de kleedkamer wakker gekregen — samen knokken voor elkaar.",
+            "samen knokken voor elkaar",
+          ),
+        }),
       ];
       const { container } = render(<ArticleBody content={content} />);
-      const stroke = container.querySelector("[data-highlighter-stroke]");
-      expect(stroke).not.toBeNull();
-      expect(stroke?.textContent).toBe("zingt");
-      expect(container.querySelector("blockquote")?.textContent).toBe(
-        "Een tribune die zingt is meer waard dan welke aanwinst dan ook.",
+      const em = container.querySelector("blockquote em");
+      expect(em).not.toBeNull();
+      expect(em?.textContent).toBe("samen knokken voor elkaar");
+      expect(em?.className).toContain("text-jersey-deep");
+    });
+
+    it("resolves an unresolvable speaker reference (deleted document) by falling back to no attribution", () => {
+      const content = [
+        pullQuoteBlock({
+          speaker: { _type: "player" }, // no firstName/lastName — unresolvable
+        }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const wrapper = container.querySelector("[data-pull-quote-tone]");
+      expect(wrapper).not.toBeNull();
+      expect(
+        container.querySelector('[data-pull-quote-name="display"]'),
+      ).toBeNull();
+    });
+
+    it("refuses a speaker reference together with an externalName at the render layer too (reference wins)", () => {
+      // Studio validation refuses this combination at author time (#2517);
+      // the renderer still needs a deterministic behaviour for legacy /
+      // pre-migration data. The resolved reference takes precedence.
+      const content = [
+        pullQuoteBlock({
+          speaker: {
+            _type: "player",
+            firstName: "Maxim",
+            lastName: "Breugelmans",
+            psdImageUrl: "https://example.com/maxim.jpg",
+          },
+          externalName: "Onbekend",
+        }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const displayName = container.querySelector(
+        '[data-pull-quote-name="display"]',
       );
+      expect(displayName?.textContent).toBe("Maxim Breugelmans");
     });
   });
 

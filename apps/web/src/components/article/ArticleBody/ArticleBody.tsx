@@ -15,12 +15,11 @@ import { QASectionDivider } from "@/components/design-system/QASectionDivider";
 import { SubjectAvatar } from "@/components/design-system/SubjectAvatar";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { DownloadButton } from "@/components/design-system/DownloadButton";
+import { type IndexedSubject } from "@/components/article/SubjectAttribution";
 import {
-  resolvePairRespondent,
-  resolveSubject,
-  deriveSubjectFirstName,
-  type IndexedSubject,
-} from "@/components/article/SubjectAttribution";
+  resolvePullQuoteSpeaker,
+  type PullQuoteSpeakerRef,
+} from "./resolvePullQuoteSpeaker";
 import { TransferFactCard } from "@/components/article/blocks/TransferFactCard";
 import type { TransferFactValue } from "@/components/article/blocks/TransferFact/types";
 import {
@@ -42,8 +41,10 @@ import {
   resolveInternalLinkHref,
   type InternalLinkReference,
 } from "@/lib/utils/resolve-internal-link-href";
-import { renderTextWithEmphasis } from "@/lib/portable-text/renderTextWithEmphasis";
-import type { PortableTextBlockLike } from "@/lib/portable-text/findPullquoteText";
+import {
+  hasRenderableBioContent,
+  type PortableTextBlockLike,
+} from "@/lib/portable-text/findPullquoteText";
 import {
   segmentArticleBody,
   type ArticleBodySegment,
@@ -87,11 +88,14 @@ import { cn } from "@/lib/utils/cn";
 export interface ArticleBodyProps {
   content: PortableTextBlock[];
   /**
-   * Article-level subjects passed through to the `pullQuote` + `qaBlock`
-   * serializers so a `respondentKey` can resolve back to a `SubjectValue`
-   * and render the `<SubjectAvatar>` + display name. On non-interview
-   * articles (transfer / event / announcement) this is typically `null`
-   * and every pull-quote falls back to the external-attribution path.
+   * Article-level subjects passed through to the `qaBlock` serializer so a
+   * `respondentKey` can resolve back to a `SubjectValue` and render the
+   * `<SubjectAvatar>` + display name. `pullQuote` does NOT use this — its
+   * speaker is a direct `player`/`staffMember` reference, dereferenced by
+   * the article repository GROQ projection and resolved locally via
+   * `resolvePullQuoteSpeaker` (#2517) — `subjects` is hidden on every
+   * non-interview article, so a quote in a normal article would have
+   * nothing to resolve against.
    */
   subjects?: IndexedSubject[] | null;
   /**
@@ -120,9 +124,9 @@ function endMarkLabelFor(articleType: string | null | undefined): string {
 interface PullQuoteBlock {
   _type: "pullQuote";
   _key?: string;
-  body?: string;
-  respondentKey?: string;
-  emphasis?: string;
+  body?: PortableTextBlock[];
+  /** Dereferenced by the article repository GROQ projection (#2517). */
+  speaker?: PullQuoteSpeakerRef | null;
   externalName?: string;
   externalRole?: string;
   externalSource?: string;
@@ -190,6 +194,18 @@ function extractBlockText(block: PortableTextBlock): string {
 }
 
 /**
+ * `pullQuote.body` is schema-constrained to one block (`.max(1)` in
+ * `pullQuote.ts`), but the renderer defends against legacy/malformed data
+ * carrying more anyway — a stray second block must never run together with
+ * the first inside the card (#2517 review). Both the emptiness check
+ * (`blockHasRenderableOutput`) and the actual render (`renderPullQuote`)
+ * go through this so they agree on what "the quote" is.
+ */
+function firstQuoteBlock(body: PortableTextBlock[]): PortableTextBlock[] {
+  return body.slice(0, 1);
+}
+
+/**
  * Does the block actually render something? Used to decide whether
  * `<EndMark />` should appear at the bottom of the body — an article
  * whose `content` is non-empty but contains only empty paragraphs or an
@@ -201,7 +217,10 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
     return extractBlockText(block).length > 0;
   }
   if (block._type === "pullQuote") {
-    return ((block as PullQuoteBlock).body ?? "").trim().length > 0;
+    const body = (block as PullQuoteBlock).body;
+    return (
+      Array.isArray(body) && hasRenderableBioContent(firstQuoteBlock(body))
+    );
   }
   if (block._type === "transferFact") {
     return ((block as TransferFactValue).playerName ?? "").trim().length > 0;
@@ -373,34 +392,54 @@ function renderSegments(
   });
 }
 
+// accent — italic + jersey-deep inline emphasis (5.A.1). Hoisted so it can
+// be shared between the main body's `marks.accent` and the constrained
+// `pullQuote.body` sub-tree below — same visual rule, one implementation.
+function AccentMark({ children }: { children?: ReactNode }) {
+  return <em className="text-jersey-deep font-black italic">{children}</em>;
+}
+
+/**
+ * Renders `pullQuote.body` through the SAME `components` map the surrounding
+ * article body renders through (`buildComponents`'s return value), rather
+ * than a second, hand-built marks map — the #2278 serializer-completeness
+ * guard walks `components.marks`/`components.types` against the real schema
+ * and would be blind to a second map it never sees (#2517 review). The
+ * schema constrains `pullQuote.body` to one Normal block with only the
+ * `accent` decorator (`pullQuote.ts`), so nothing else in `components` ever
+ * actually fires here — reusing the full map costs nothing and can't drift.
+ */
 function renderPullQuote(
   value: PullQuoteBlock,
-  subjects: IndexedSubject[] | null,
+  components: PortableTextComponents,
 ): ReactNode {
-  const body = value.body?.trim();
-  if (!body) return null;
+  if (!Array.isArray(value.body) || !hasRenderableBioContent(value.body)) {
+    return null;
+  }
+  // An accent-marked phrase in the quote text renders with the site's
+  // existing accent emphasis style (#2517 AC) — the same `marks.accent`
+  // handler the rest of the body uses. Only the first block ever renders
+  // (see `firstQuoteBlock`) — `.max(1)` in the schema is the primary guard,
+  // this is the defensive belt for data that predates or bypasses it.
+  const quoteBody = (
+    <PortableText value={firstQuoteBlock(value.body)} components={components} />
+  );
 
-  const respondent = resolvePairRespondent(value.respondentKey, subjects);
-  const resolved = resolveSubject(respondent);
-  // `emphasis` moved off <PullQuote> (design-system stays presentational —
-  // inline emphasis is a Portable Text concern) — ArticleBody, which
-  // already knows the phrase and already builds node trees, resolves it
-  // to a ReactNode here and hands it over as `children` directly.
-  const quoteBody = renderTextWithEmphasis(body, value.emphasis?.trim());
+  const resolvedSpeaker = resolvePullQuoteSpeaker(value.speaker);
 
   let inner: ReactNode;
 
-  if (resolved && respondent) {
+  if (resolvedSpeaker) {
     inner = (
       <PullQuote
         attribution={{
-          name: resolved.name,
-          role: resolved.role || undefined,
+          name: resolvedSpeaker.name,
+          role: resolvedSpeaker.role || undefined,
         }}
         avatarSlot={
           <SubjectAvatar
-            firstName={deriveSubjectFirstName(respondent, resolved.name)}
-            photoUrl={resolved.photoUrl}
+            firstName={resolvedSpeaker.firstName}
+            photoUrl={resolvedSpeaker.photoUrl}
             scale="attribution"
           />
         }
@@ -613,7 +652,71 @@ export function buildComponents({
   articleSlug,
   videoBlockPositions,
 }: ComponentsBuildArgs): PortableTextComponents {
-  return {
+  // `types.pullQuote` needs the fully-built `components` object as its own
+  // `marks` source (see `renderPullQuote`'s docstring), which is a genuine
+  // circular need: the map isn't done until pullQuote is in it, and pullQuote
+  // needs the map. Broken by building `types` (and `components`) without
+  // pullQuote first, then patching it in afterward — `types` is the same
+  // object reference `components.types` holds, so the patch is visible
+  // through both.
+  const types: NonNullable<PortableTextComponents["types"]> = {
+    qaBlock: ({ value }: { value: QaBlockValue }) => (
+      <QaBlock value={value} subjects={subjects} />
+    ),
+    // qaSectionDivider is an object block inserted via the body + menu
+    // (distinct from an `h2` style, which the block serializer above also
+    // routes to QASectionDivider). Without this entry the block renders
+    // nothing.
+    qaSectionDivider: ({
+      value,
+    }: {
+      value: { title?: PortableTextBlock[]; kicker?: string };
+    }) => <QASectionDivider title={value.title} kicker={value.kicker} />,
+    eventFact: ({ value }: { value: EventFactValue }) => {
+      // `linkedEventSlug` is a body-block authoring concern that lives
+      // on `<EventDetailBlock>` (hero composition) — body-flow inline
+      // cards never link to a separate event. If editorial need ever
+      // surfaces, surface a per-block field and project through here.
+      const props: EventFactInlineProps = {
+        value,
+        isPast: deriveIsPast(value),
+      };
+      return <EventFactInline {...props} />;
+    },
+    articleImage: ({ value }: { value: ArticleImageValue }) =>
+      renderArticleImage(value),
+    videoBlock: ({ value }: { value: VideoBlockValue & { _key?: string } }) => (
+      <VideoBlock
+        value={value}
+        articleSlug={articleSlug}
+        videoPosition={
+          typeof value._key === "string"
+            ? videoBlockPositions.get(value._key)
+            : undefined
+        }
+      />
+    ),
+    fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
+      if (!value.fileUrl) return null;
+      return (
+        <div className="my-8">
+          <DownloadButton
+            href={value.fileUrl}
+            label={value.label}
+            mimeType={value.fileMimeType}
+            fileSize={value.fileSize}
+            fileName={value.fileOriginalFilename}
+          />
+        </div>
+      );
+    },
+    htmlTable: ({ value }: { value: HtmlTableValue }) => {
+      if (!value.html) return null;
+      return <HtmlTableBlock html={value.html} />;
+    },
+  };
+
+  const components: PortableTextComponents = {
     block: ARTICLE_BLOCK_STYLE_HANDLERS,
     // Tailwind v4 Preflight strips list-style + padding from ul/ol; the body is
     // not wrapped in `prose`, so lists need explicit markers/indent here or they
@@ -627,73 +730,9 @@ export function buildComponents({
       ),
     },
     listItem: ({ children }) => <li className="pl-1">{children}</li>,
-    types: {
-      pullQuote: ({ value }: { value: PullQuoteBlock }) =>
-        renderPullQuote(value, subjects),
-      qaBlock: ({ value }: { value: QaBlockValue }) => (
-        <QaBlock value={value} subjects={subjects} />
-      ),
-      // qaSectionDivider is an object block inserted via the body + menu
-      // (distinct from an `h2` style, which the block serializer above also
-      // routes to QASectionDivider). Without this entry the block renders
-      // nothing.
-      qaSectionDivider: ({
-        value,
-      }: {
-        value: { title?: PortableTextBlock[]; kicker?: string };
-      }) => <QASectionDivider title={value.title} kicker={value.kicker} />,
-      eventFact: ({ value }: { value: EventFactValue }) => {
-        // `linkedEventSlug` is a body-block authoring concern that lives
-        // on `<EventDetailBlock>` (hero composition) — body-flow inline
-        // cards never link to a separate event. If editorial need ever
-        // surfaces, surface a per-block field and project through here.
-        const props: EventFactInlineProps = {
-          value,
-          isPast: deriveIsPast(value),
-        };
-        return <EventFactInline {...props} />;
-      },
-      articleImage: ({ value }: { value: ArticleImageValue }) =>
-        renderArticleImage(value),
-      videoBlock: ({
-        value,
-      }: {
-        value: VideoBlockValue & { _key?: string };
-      }) => (
-        <VideoBlock
-          value={value}
-          articleSlug={articleSlug}
-          videoPosition={
-            typeof value._key === "string"
-              ? videoBlockPositions.get(value._key)
-              : undefined
-          }
-        />
-      ),
-      fileAttachment: ({ value }: { value: FileAttachmentValue }) => {
-        if (!value.fileUrl) return null;
-        return (
-          <div className="my-8">
-            <DownloadButton
-              href={value.fileUrl}
-              label={value.label}
-              mimeType={value.fileMimeType}
-              fileSize={value.fileSize}
-              fileName={value.fileOriginalFilename}
-            />
-          </div>
-        );
-      },
-      htmlTable: ({ value }: { value: HtmlTableValue }) => {
-        if (!value.html) return null;
-        return <HtmlTableBlock html={value.html} />;
-      },
-    },
+    types,
     marks: {
-      // accent — italic + jersey-deep inline emphasis (5.A.1).
-      accent: ({ children }: { children?: ReactNode }) => (
-        <em className="text-jersey-deep font-black italic">{children}</em>
-      ),
+      accent: AccentMark,
       link: ({
         children,
         value,
@@ -765,6 +804,13 @@ export function buildComponents({
       },
     },
   };
+
+  // Patch in now that `components` (and its `marks`) fully exist — see the
+  // docstring above `types`.
+  types.pullQuote = ({ value }: { value: PullQuoteBlock }) =>
+    renderPullQuote(value, components);
+
+  return components;
 }
 
 export function ArticleBody({

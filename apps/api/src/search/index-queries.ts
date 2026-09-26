@@ -54,7 +54,7 @@ export const ARTICLE_PUBLISHED_FILTER = `publishedAt <= now() && (!defined(unpub
  * the surrounding `coalesce` never sees. Dropping them here is what lets the
  * declared types be plain `string[]`.
  *
- * ponytail: six of the eight non-`block` body types stay out, measured against
+ * ponytail: five of the eight non-`block` body types stay out, measured against
  * production in #2806, not guessed. `transferFact` (9 articles) would add only
  * the former club's name — the player is already in the title and the prose.
  * `articleImage` (36) holds `alt`, which is accessibility text, not content.
@@ -66,6 +66,12 @@ export const ARTICLE_PUBLISHED_FILTER = `publishedAt <= now() && (!defined(unpub
  * labels via `PAGE_INDEX_PROJECTION`'s `fileAttachmentLabels` branch (#2832),
  * article deliberately still does not, for the reason measured above: no
  * published article carries one to lose.
+ *
+ * `pullQuote` (#2517) is the sixth non-`block` type and is indexed like
+ * `qaBlock`'s answers: its own `body` field is Portable Text, so `pt::text`
+ * skips it exactly the same way it skips a `qaPairRespondent.answer` — a
+ * quote is real editorial content someone said, not furniture like
+ * `articleImage`'s alt text.
  */
 export const ARTICLE_INDEX_PROJECTION = `_id,
   "slug": coalesce(slug.current, ""),
@@ -76,6 +82,7 @@ export const ARTICLE_INDEX_PROJECTION = `_id,
   "qaQuestions": array::compact(coalesce(body[_type=="qaBlock"].pairs[].question, [])),
   "qaAnswers": coalesce(pt::text(body[_type=="qaBlock"].pairs[].respondents[].answer), ""),
   "tableHtml": array::compact(coalesce(body[_type=="htmlTable"].html, [])),
+  "pullQuoteText": coalesce(pt::text(body[_type=="pullQuote"].body), ""),
   ${ARTICLE_COVER_IMAGE_PROJECTION}`;
 
 /**
@@ -180,6 +187,7 @@ export function buildArticleIndexText(doc: {
   qaQuestions: readonly string[];
   qaAnswers: string;
   tableHtml: readonly string[];
+  pullQuoteText: string;
 }): string {
   return (
     [
@@ -187,6 +195,7 @@ export function buildArticleIndexText(doc: {
       doc.tags.join(" "),
       doc.lead,
       doc.prose,
+      doc.pullQuoteText,
       doc.qaQuestions.join(" "),
       doc.qaAnswers,
       stripTableHtml(doc.tableHtml.join(" ")),

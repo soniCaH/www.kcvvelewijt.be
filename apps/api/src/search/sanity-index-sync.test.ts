@@ -45,6 +45,7 @@ const mockArticle = {
   qaQuestions: [] as string[],
   qaAnswers: "",
   tableHtml: [] as string[],
+  pullQuoteText: "",
   imageUrl: null as string | null,
 };
 
