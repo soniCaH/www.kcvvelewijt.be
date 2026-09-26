@@ -30,21 +30,15 @@ export function SponsorHero({ featured }: SponsorHeroProps) {
           : "grid-cols-1",
       )}
     >
-      {/* Block flow: the lead sits directly under the heading. `mb-0` on the
-          heading cancels the global `h1 { margin-bottom: 1em }` base rule (≈96px
-          at this font size) so the gap is the lead's own `mt-6`, not the
-          inherited heading margin. The display-2xl heading makes the left
-          column taller than the marquee card, so the columns are top-aligned. */}
+      {/* Block flow: the lead sits directly under the heading. `<EditorialHeading>`
+          carries no margin of its own (#2552), so the gap is the lead's own
+          `mt-6`. The display-2xl heading makes the left column taller than the
+          marquee card, so the columns are top-aligned. */}
       <div>
         <span className="mb-4 block">
           <MonoLabel variant="plain">Sponsors &amp; sympathisanten</MonoLabel>
         </span>
-        <EditorialHeading
-          level={1}
-          size="display-2xl"
-          emphasis={{ text: "." }}
-          className="mb-0"
-        >
+        <EditorialHeading level={1} size="display-2xl" emphasis={{ text: "." }}>
           Merci aan onze sponsors
         </EditorialHeading>
         <p className="font-display text-ink-muted text-display-sm mt-6 italic">

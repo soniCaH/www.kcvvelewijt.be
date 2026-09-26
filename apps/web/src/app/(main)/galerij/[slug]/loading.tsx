@@ -26,7 +26,10 @@ export default function GalleryDetailLoading() {
         {/* Kicker + headline bars — the shared <PageHeroSkeleton
             register="minimal"> rather than a second hand-drawn copy of its
             OpeningBars. The date line below it is this route's own (the
-            real page's MonoLabel<time> child, not part of the opening). */}
+            real page's MonoLabel<time> child, not part of the opening).
+            `mb-0` overrides `<PageHeroSkeleton>`'s own real `mb-10` default
+            (#2553) — else the skeleton's `mb-10` collapses over the bar's
+            `mt-3` and opens a 40px gap instead of the intended 12px. */}
         <PageHeroSkeleton
           register="minimal"
           className="mb-0"

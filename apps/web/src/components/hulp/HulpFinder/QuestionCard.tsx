@@ -55,7 +55,7 @@ export function QuestionCard({
           : "transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
       }`}
     >
-      <h3 className="mb-0!">
+      <h3>
         <button
           type="button"
           id={headerId}

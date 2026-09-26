@@ -10,16 +10,6 @@ import {
 
 <Meta title="Foundation/Spacing & Icons" />
 
-
-export const SpacingRow = ({ token, value, px }) => (
-  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '6px 0', borderBottom: '1px solid #edeff4' }}>
-    <div style={{ width: '120px', flexShrink: 0, fontSize: '12px', fontFamily: 'monospace', color: '#9a9da2' }}>{token}</div>
-    <div style={{ width: '60px', flexShrink: 0, fontSize: '12px', color: '#9a9da2' }}>{value}</div>
-    <div style={{ width: '50px', flexShrink: 0, fontSize: '12px', color: '#9a9da2' }}>{px}</div>
-    <div style={{ height: '16px', background: 'var(--color-jersey)', borderRadius: '2px', width: px, maxWidth: '200px' }} />
-  </div>
-);
-
 export const IconGrid = ({ icons, label }) => (
   <div style={{ marginBottom: '24px' }}>
     <div style={{ fontSize: '13px', fontWeight: 600, color: '#9a9da2', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
@@ -38,24 +28,28 @@ export const IconGrid = ({ icons, label }) => (
 
 ---
 
-## Custom Spacing Tokens
+## Spacing Scale
 
-These extend Tailwind's default spacing scale. All values are defined in `src/app/globals.css`.
+There is no custom `--spacing-*` step token in `src/app/globals.css` — the
+five that lived here (`0_75`/`15`/`17_5`/`22_5`/`35`) were removed in #2553
+after a repo-wide grep found no utility actually consuming them. Every
+spacing utility (`p-*`, `m-*`, `gap-*`, `w-*`/`h-*`/`size-*`,
+`top`/`right`/`bottom`/`left-*`, `inset-*`, `translate-*`, `space-*`) resolves
+through Tailwind v4's own base multiplier instead:
 
-<div>
-  <div style={{ display: 'flex', gap: '16px', padding: '4px 0', fontSize: '11px', color: '#9a9da2', fontFamily: 'monospace', borderBottom: '2px solid #cacaca', marginBottom: '4px' }}>
-    <div style={{ width: '120px' }}>Token</div>
-    <div style={{ width: '60px' }}>Value</div>
-    <div style={{ width: '50px' }}>px</div>
-    <div>Visual</div>
-  </div>
-  <SpacingRow token="spacing-0_75" value="0.75rem" px="12px" />
-  <SpacingRow token="spacing-15" value="3.75rem" px="60px" />
-  <SpacingRow token="spacing-17_5" value="4.375rem" px="70px" />
-  <SpacingRow token="spacing-22_5" value="5.625rem" px="90px" />
-</div>
+<table>
+  <thead><tr><th>Token</th><th>Value</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>--spacing</code></td><td>0.25rem (4px)</td><td>Tailwind v4 default — not overridden here</td></tr>
+  </tbody>
+</table>
 
-> `spacing-35` (35rem) is the hero image height — too wide to show inline.
+A utility's number multiplies that base: `p-4` is `calc(var(--spacing) * 4)`
+= 1rem (16px); `size-35` (the `<JerseyShirt>` corner motif on
+`<ClubshopBanner>` / `<TeamEnrolmentCta>`) is `calc(var(--spacing) * 35)` =
+8.75rem (140px). Add a step token here only when a value needs to survive a
+future change to the base multiplier — a bare numeric utility is preferred
+otherwise.
 
 ---
 

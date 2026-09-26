@@ -65,7 +65,6 @@ export function OrganigramHero({
             size="display-lg"
             tone="cream"
             emphasis={{ text: "?", tone: "warm" }}
-            className="mb-0"
           >
             {heading}
           </EditorialHeading>
