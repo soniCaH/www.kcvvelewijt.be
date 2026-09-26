@@ -20,34 +20,34 @@
 
 Published 2026-09-23 by `/mattpocock-skills:to-tickets`. **26 tickets, #3133 – #3158.** Blocking edges are set as GitHub's native `blockedBy` relationship — what `scripts/unblocked-issues.sh`, `/ralph` and `/ralph-afk` read — and restated in prose on each ticket. 21 native edges.
 
-| Ticket                                                               | Spec section       | Blocked by                 |
-| -------------------------------------------------------------------- | ------------------ | -------------------------- |
-| #3133 — branch protection, `quality-checks` only (**tracer bullet**) | §1.1–§1.5          | —                          |
-| #3134 — the red alert names the failing tests                        | §0.10, §12         | —                          |
-| #3135 — the build reads no slug page, a static page bails on demand  | §0.3               | —                          |
-| #3136 — a sub-threshold VR drift rewrites its baseline               | §4.2               | —                          |
-| #3137 — a VR page fetches nothing off this machine                   | §4.10              | #3136                      |
-| #3138 — split the Storybook build, shard VR 3×                       | §4.6, §10.3        | —                          |
-| #3139 — VR becomes the second required check                         | §4.12, §1.1        | #3133, #3136, #3137, #3138 |
-| #3140 — one command surface for VR                                   | §4.8               | —                          |
-| #3141 — the wave guards its shared resources                         | §7.3, §7.4         | —                          |
-| #3142 — three static rules close three classes                       | §2.2, §2.3, §2.4   | #3127                      |
-| #3143 — a test may not use half its own timeout                      | §3.5, §3.6         | #3128                      |
-| #3144 — every schema round-trips on both sides                       | §5.1, §5.2         | —                          |
-| #3145 — cache semantics in real workerd                              | §5.1, §5.2         | #3144                      |
-| #3146 — `play` takes the geometry, the two specs go                  | §0.4, §4.13        | —                          |
-| #3147 — six pinned fixture documents in staging                      | §6.4, §6.6         | —                          |
-| #3148 — pinned subjects, against staging                             | §6.3, §6.4, §6.5   | #3147                      |
-| #3149 — the surviving skip guards become failures                    | §6.7               | #3148                      |
-| #3150 — re-measure the flake rate, drop retries to 0                 | §0.9               | #3146, #3149               |
-| #3151 — E2E on PRs only, third required check                        | §6.8, §1.1         | #3133, #3150               |
-| #3152 — changed-line coverage PR comment                             | §8.2, §8.3, §8.4   | —                          |
-| #3153 — migrations with logic move to the shared package             | §8.8               | #3120                      |
-| #3154 — all eight workspaces state their layers                      | §0.6, §4.11, §11.3 | #3056                      |
-| #3155 — _expand_: the filtered turbo call works everywhere           | §9.1–§9.3          | #3118, #3119               |
-| #3156 — _migrate_: the nine call sites move                          | §9.2               | #3155                      |
-| #3157 — _contract_: delete the composite script                      | §9.2               | #3156                      |
-| #3158 — pass 2 of the agent sweep + two measurements                 | §9.4, §9.5         | #3157                      |
+| Ticket                                                                       | Spec section       | Blocked by                 |
+| ---------------------------------------------------------------------------- | ------------------ | -------------------------- |
+| #3133 — branch protection, `quality-checks` only (**tracer bullet**)         | §1.1–§1.5          | —                          |
+| #3134 — the red alert names the failing tests                                | §0.10, §12         | —                          |
+| #3135 — the build reads no slug page, a static page bails on demand          | §0.3               | —                          |
+| #3136 — a sub-threshold VR drift rewrites its baseline                       | §4.2               | —                          |
+| #3137 — a VR page fetches nothing off this machine                           | §4.10              | #3136                      |
+| #3138 — split the Storybook build, shard VR 3×                               | §4.6, §10.3        | —                          |
+| #3139 — VR becomes the second required check                                 | §4.12, §1.1        | #3133, #3136, #3137, #3138 |
+| #3140 — one command surface for VR                                           | §4.8               | —                          |
+| #3141 — the wave guards its shared resources                                 | §7.3, §7.4         | —                          |
+| #3142 — three static rules close three classes                               | §2.2, §2.3, §2.4   | #3127                      |
+| #3143 — a test may not use half its own timeout                              | §3.5, §3.6         | #3128                      |
+| #3144 — every schema round-trips on both sides                               | §5.1, §5.2         | —                          |
+| #3145 — cache semantics in real workerd                                      | §5.1, §5.2         | #3144                      |
+| #3146 — `play` takes the geometry, the two specs go                          | §0.4, §4.13        | —                          |
+| #3147 — six pinned fixture documents in staging                              | §6.4, §6.6         | —                          |
+| #3148 — pinned subjects, against staging                                     | §6.3, §6.4, §6.5   | #3147                      |
+| #3149 — the surviving skip guards become failures                            | §6.7               | #3148                      |
+| #3150 — re-measure the flake rate — not near zero, retries stay at 1 (#3196) | §0.9               | #3146, #3149               |
+| #3151 — E2E on PRs only, third required check                                | §6.8, §1.1         | #3133, #3150               |
+| #3152 — changed-line coverage PR comment                                     | §8.2, §8.3, §8.4   | —                          |
+| #3153 — migrations with logic move to the shared package                     | §8.8               | #3120                      |
+| #3154 — all eight workspaces state their layers                              | §0.6, §4.11, §11.3 | #3056                      |
+| #3155 — _expand_: the filtered turbo call works everywhere                   | §9.1–§9.3          | #3118, #3119               |
+| #3156 — _migrate_: the nine call sites move                                  | §9.2               | #3155                      |
+| #3157 — _contract_: delete the composite script                              | §9.2               | #3156                      |
+| #3158 — pass 2 of the agent sweep + two measurements                         | §9.4, §9.5         | #3157                      |
 
 **#3155 → #3156 → #3157 is the wide refactor**, sequenced expand–contract rather than forced into vertical slices (§9.3).
 
@@ -175,6 +175,8 @@ Concretely, after this spec ships:
 **0.8 The flake class is the unit of work** — [the flake policy (#3089)](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3089). One ticket per class, never per occurrence; a new occurrence comments on its class. A class ticket **may not carry `ready` until its closing rule is named**, because otherwise its acceptance is _"it stopped flaking"_, which no agent can verify in one session. A flaking test is root-caused and fixed, or deleted — **never parked**; no quarantine mechanism is built. A dependency-caused class gets a local workaround **always**, plus an upstream issue **when a minimal reproduction exists, filed by the owner, never by an agent** — the first case is the DOM emulator's media-query listener seeding its match state to `false`, for which a six-line reproduction exists and no upstream issue does.
 
 **0.9 Retries** — [#3089](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3089). One retry stays and a flaky pass stays green; a flaky pass is not a regression, so it must not paint the check red. **Committed tripwire:** 100 % of measured E2E flake (64 of 64 instances, from 4 locations) lives inside the two specs §0.4 deletes, so once they are gone the rate is re-measured and **retries go to 0** if it is near zero.
+
+**Tripwire fired negative, 2026-09-26 ([#3150](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3150)):** re-measured from recorded CI history (never re-run) once §0.4's two specs were gone. Only 6 `E2E` runs had executed since the deletion merged; 1 of them (16.7 %) was already flaky, in a spec added after this section's original count and never a deletion candidate. Not near zero — **retries stay at 1.** The surviving class is tracked in [#3196](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3196), retries revisit once it closes. Detail: `docs/research/test-suite-flake-ledger.md` classes B and N.
 
 **0.10 The red-alert workflow must record _what_ failed** — failing test names, flaky count, a link to the ledger. This is why all three prior incidents closed with no root cause. The signal already exists in the reporter tally; it just never reaches the issue. **The alert stays dumb and a human classifies**, so the ledger stays plain Markdown rather than an identifier-and-pattern format whose mappings break silently on every rename.
 
