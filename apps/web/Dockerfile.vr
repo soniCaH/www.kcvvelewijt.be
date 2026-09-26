@@ -9,6 +9,15 @@
 
 FROM mcr.microsoft.com/playwright:v1.60.0-noble
 
+# Content-addressed staleness check (#3141): `vr:build-image` (apps/web/scripts/
+# vr-build-image.mjs) stamps this label with a hash of pnpm-lock.yaml +
+# Dockerfile.vr. vr-docker.mjs recomputes that hash before every local run and
+# fails fast, naming the rebuild command, when it does not match the image's
+# label — a lockfile or Dockerfile change no longer silently runs against a
+# stale image now that `--build` is gone from the per-run command.
+ARG VR_IMAGE_CONTENT_HASH=unknown
+LABEL kcvv.vr-content-hash=$VR_IMAGE_CONTENT_HASH
+
 ENV CI=true \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     PNPM_HOME=/root/.local/share/pnpm \

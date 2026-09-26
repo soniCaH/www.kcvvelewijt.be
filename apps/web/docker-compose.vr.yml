@@ -3,8 +3,12 @@
 #
 # Local prerequisites:
 #   1. Docker Desktop running.
-#   2. `pnpm build-storybook` has produced apps/web/storybook-static/.
-#      (The vr:* scripts in apps/web/package.json chain both steps via
+#   2. This image already built: `pnpm --filter @kcvv/web run vr:build-image`.
+#      `scripts/vr-docker.mjs` fails fast, naming this command, when the image
+#      is absent — it never builds the image itself (#3141): a wave builds it
+#      once, in step 0, never inside a lane.
+#   3. `pnpm build-storybook` has produced apps/web/storybook-static/.
+#      (The vr:* scripts in apps/web/package.json chain this via
 #      scripts/vr-docker.mjs, which also refuses an unscoped run — #2380.)
 services:
   vr:

@@ -9,13 +9,36 @@
  * instead (#3140).
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
-import { decide } from "../../scripts/vr-docker.mjs";
+import {
+  acquireLock,
+  buildDockerArgs,
+  checkImageStatus,
+  computeExpectedImageHash,
+  decide,
+  dockerNotRunningMessage,
+  hashImageInputs,
+  imageAbsentMessage,
+  imageStaleMessage,
+  isVrContainerRunning,
+  lockBusyMessage,
+  releaseLock,
+  VR_IMAGE_BUILD_COMMAND,
+  VR_IMAGE_HASH_LABEL,
+} from "../../scripts/vr-docker.mjs";
 
 const SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -147,11 +170,473 @@ describe("cli", () => {
   });
 
   it("gets past the guard once scoped", () => {
-    // Scoped, so the guard passes — the run then dies on the missing `pnpm`,
-    // which is the proof it got as far as the build step.
+    // Scoped, so the guard passes — the run then dies unable to run `docker
+    // info` (docker itself is missing on this PATH), reported as "Docker
+    // does not appear to be running" rather than a raw ENOENT. That is the
+    // proof it got past the guard: a refusal never reaches this point.
     const result = runScript(["update:story", "ui-button"]);
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).not.toContain("VR_FULL_RUN=1");
+    expect(result.stderr).toContain("Docker does not appear to be running");
+  });
+});
+
+describe("hashImageInputs", () => {
+  it("is deterministic for the same inputs", () => {
+    expect(hashImageInputs("lockfile-a", "dockerfile-a")).toBe(
+      hashImageInputs("lockfile-a", "dockerfile-a"),
+    );
+  });
+
+  it("changes when either input changes", () => {
+    const base = hashImageInputs("lockfile-a", "dockerfile-a");
+
+    expect(hashImageInputs("lockfile-b", "dockerfile-a")).not.toBe(base);
+    expect(hashImageInputs("lockfile-a", "dockerfile-b")).not.toBe(base);
+  });
+});
+
+describe("computeExpectedImageHash", () => {
+  it("hashes the lockfile and Dockerfile it is given, in order", () => {
+    const readFile = (path: string) =>
+      path.endsWith("Dockerfile.vr") ? "dockerfile-contents" : "lock-contents";
+
+    expect(computeExpectedImageHash({ readFile })).toBe(
+      hashImageInputs("lock-contents", "dockerfile-contents"),
+    );
+  });
+});
+
+describe("checkImageStatus", () => {
+  const okDaemon = () => ({ status: 0 });
+
+  it("is docker-not-running when `docker info` fails", () => {
+    expect(
+      checkImageStatus("kcvv-vr-runner:latest", {
+        spawn: () => ({ status: 1 }),
+        expectedHash: "abc",
+      }),
+    ).toEqual({ status: "docker-not-running" });
+  });
+
+  it("is docker-not-running when `docker info` errors (docker missing)", () => {
+    const boom = Object.assign(new Error("boom"), { code: "ENOENT" });
+    expect(
+      checkImageStatus("kcvv-vr-runner:latest", {
+        spawn: () => ({ error: boom }),
+        expectedHash: "abc",
+      }),
+    ).toEqual({ status: "docker-not-running" });
+  });
+
+  it("is absent when the daemon is up but the image inspect fails", () => {
+    let call = 0;
+    const spawn = () => (call++ === 0 ? okDaemon() : { status: 1 });
+
+    expect(
+      checkImageStatus("kcvv-vr-runner:latest", { spawn, expectedHash: "abc" }),
+    ).toEqual({ status: "absent" });
+  });
+
+  it("is stale when the image's label does not match the expected hash", () => {
+    let call = 0;
+    const spawn = () =>
+      call++ === 0 ? okDaemon() : { status: 0, stdout: "old-hash\n" };
+
+    expect(
+      checkImageStatus("kcvv-vr-runner:latest", {
+        spawn,
+        expectedHash: "new-hash",
+      }),
+    ).toEqual({
+      status: "stale",
+      actualHash: "old-hash",
+      expectedHash: "new-hash",
+    });
+  });
+
+  it("is ok when the image's label matches the expected hash", () => {
+    let call = 0;
+    const spawn = () =>
+      call++ === 0 ? okDaemon() : { status: 0, stdout: "same-hash\n" };
+
+    expect(
+      checkImageStatus("kcvv-vr-runner:latest", {
+        spawn,
+        expectedHash: "same-hash",
+      }),
+    ).toEqual({ status: "ok" });
+  });
+
+  it("asks docker for the content-hash label", () => {
+    let call = 0;
+    let inspectArgs: string[] = [];
+    const spawn = (_cmd: string, args: string[]) => {
+      if (call++ === 0) return okDaemon();
+      inspectArgs = args;
+      return { status: 0, stdout: "same-hash\n" };
+    };
+
+    checkImageStatus("kcvv-vr-runner:latest", {
+      spawn,
+      expectedHash: "same-hash",
+    });
+
+    expect(inspectArgs.join(" ")).toContain(VR_IMAGE_HASH_LABEL);
+  });
+});
+
+describe("imageAbsentMessage", () => {
+  it("names the exact build command and points at the register", () => {
+    const message = imageAbsentMessage("kcvv-vr-runner:latest");
+
+    expect(message).toContain(VR_IMAGE_BUILD_COMMAND);
+    expect(message).toContain("kcvv-vr-runner:latest");
+    expect(message).toContain(".claude/skills/ralph-afk/SKILL.md");
+  });
+});
+
+describe("imageStaleMessage", () => {
+  it("names the exact build command and explains the shared tag", () => {
+    const message = imageStaleMessage("kcvv-vr-runner:latest");
+
+    expect(message).toContain(VR_IMAGE_BUILD_COMMAND);
+    expect(message).toContain("kcvv-vr-runner:latest");
+    expect(message).toContain("pnpm-lock.yaml");
+  });
+});
+
+describe("dockerNotRunningMessage", () => {
+  it("tells the caller to start Docker Desktop", () => {
+    expect(dockerNotRunningMessage()).toContain("Docker Desktop");
+  });
+});
+
+describe("isVrContainerRunning", () => {
+  it("is true when docker ps returns a container id", () => {
+    expect(
+      isVrContainerRunning({
+        spawn: () => ({ status: 0, stdout: "abc123\n" }),
+      }),
+    ).toBe(true);
+  });
+
+  it("is false when docker ps returns nothing", () => {
+    expect(
+      isVrContainerRunning({ spawn: () => ({ status: 0, stdout: "\n" }) }),
+    ).toBe(false);
+  });
+
+  it("is false when docker itself fails or errors, rather than throwing", () => {
+    expect(isVrContainerRunning({ spawn: () => ({ status: 1 }) })).toBe(false);
+    expect(
+      isVrContainerRunning({ spawn: () => ({ error: new Error("boom") }) }),
+    ).toBe(false);
+  });
+
+  it("filters on the compose service label, not the image tag (second review, finding 2c)", () => {
+    // A retag of `latest` between this worktree's image check and its own
+    // `docker compose run` would make an `ancestor=<tag>` filter miss a
+    // container still running the OLD image underneath it. The service
+    // label Compose stamps on its own containers doesn't move when the tag
+    // does.
+    let seenArgs: string[] = [];
+    isVrContainerRunning({
+      spawn: (_cmd: string, args: string[]) => {
+        seenArgs = args;
+        return { status: 0, stdout: "" };
+      },
+    });
+    expect(seenArgs.join(" ")).toContain("label=com.docker.compose.service=vr");
+    expect(seenArgs.join(" ")).not.toContain("ancestor=");
+  });
+});
+
+describe("buildDockerArgs", () => {
+  it("never carries --build (#3141) — the image is built once, in step 0", () => {
+    expect(buildDockerArgs(["-u", "ui-button"])).not.toContain("--build");
+  });
+
+  it("preserves the compose invocation shape", () => {
+    expect(buildDockerArgs(["-u", "ui-button"])).toEqual([
+      "compose",
+      "-f",
+      "docker-compose.vr.yml",
+      "run",
+      "--rm",
+      "vr",
+      "-u",
+      "ui-button",
+    ]);
+  });
+});
+
+describe("the exclusive lock", () => {
+  let tmpParent: string;
+  let lockDir: string;
+
+  const freshLockDir = () => {
+    tmpParent = mkdtempSync(join(tmpdir(), "kcvv-vr-lock-test-"));
+    lockDir = join(tmpParent, "lock");
+    return lockDir;
+  };
+
+  afterEach(() => {
+    rmSync(tmpParent, { recursive: true, force: true });
+  });
+
+  it("acquires a fresh lock and writes its own pid", () => {
+    const dir = freshLockDir();
+
+    expect(acquireLock(dir)).toEqual({ ok: true });
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe(String(process.pid));
+  });
+
+  it("refuses a second caller while the holder is alive", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+
+    const second = acquireLock(dir, {
+      isAlive: () => true,
+      isContainerRunning: () => false,
+    });
+
+    expect(second).toEqual({ ok: false, holderPid: 4242 });
+  });
+
+  it("treats the lock as busy when the holder pid is dead but its container is still running", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+
+    const second = acquireLock(dir, {
+      isAlive: () => false,
+      isContainerRunning: () => true,
+    });
+
+    expect(second).toEqual({ ok: false, holderPid: 4242 });
+  });
+
+  it("reclaims a stale lock whose holder process AND container are both gone", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+
+    const reclaimed = acquireLock(dir, {
+      pid: 9999,
+      isAlive: () => false,
+      isContainerRunning: () => false,
+    });
+
+    expect(reclaimed).toEqual({ ok: true });
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe("9999");
+  });
+
+  it("treats a lock directory with no pid file as busy when it is fresh", () => {
+    const dir = freshLockDir();
+    // Simulates the narrow window inside claimLockDir between mkdir-ing the
+    // temp dir and renaming it into place — a directory that exists here
+    // with no pid file is (almost certainly) another caller mid-claim, not a
+    // dead one (#3141 finding 1a).
+    mkdirSync(dir);
+
+    const result = acquireLock(dir, { isContainerRunning: () => false });
+
+    expect(result).toEqual({ ok: false, holderPid: null });
+  });
+
+  it("reclaims a directory with no pid file once it is old enough to be orphaned", () => {
+    const dir = freshLockDir();
+    mkdirSync(dir);
+    const farFuture = () => Date.now() + 120_000;
+
+    const result = acquireLock(dir, {
+      now: farFuture,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("does not delete a fresh lock that appeared between the staleness check and the reclaim (#3141 finding 1b)", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    let calls = 0;
+    // On the first isAlive() check (for the original holder, 4242) simulate
+    // another lane fully reclaiming AND reacquiring the lock in the gap
+    // before our own reclaim runs.
+    const isAlive = (candidatePid: number) => {
+      calls += 1;
+      if (calls === 1) {
+        rmSync(dir, { recursive: true, force: true });
+        mkdirSync(dir);
+        writeFileSync(join(dir, "pid"), "5555");
+        return false; // our check of the ORIGINAL holder (4242) still says dead
+      }
+      return candidatePid === 5555; // the second read is of the new, live holder
+    };
+
+    const result = acquireLock(dir, {
+      isAlive,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: false, holderPid: 5555 });
+    // The other lane's fresh lock must have survived, untouched.
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe("5555");
+  });
+
+  it("claims the lock outright when a stale holder's lock is fully released before reclaim", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    let calls = 0;
+    const isAlive = () => {
+      calls += 1;
+      if (calls === 1) {
+        rmSync(dir, { recursive: true, force: true }); // released, not re-claimed
+        return false;
+      }
+      return true;
+    };
+
+    const result = acquireLock(dir, {
+      isAlive,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("releases the lock so a later caller can acquire it", () => {
+    const dir = freshLockDir();
+    acquireLock(dir);
+
+    releaseLock(dir);
+
+    expect(acquireLock(dir)).toEqual({ ok: true });
+  });
+
+  it("does not release a lock held by a different pid", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+
+    releaseLock(dir, { pid: 9999 });
+
+    expect(
+      acquireLock(dir, {
+        isAlive: () => true,
+        isContainerRunning: () => false,
+      }),
+    ).toEqual({ ok: false, holderPid: 4242 });
+  });
+
+  it("makes the lock disappear atomically — renamed away before its contents are removed (second review, finding 3)", () => {
+    // A plain recursive rm deletes the pid file before the directory itself,
+    // so a reader in that gap sees a directory that exists but has no pid —
+    // misread as a fresh in-progress claim rather than a release. Renaming
+    // first makes the release atomic: `dir` is either still this run's lock,
+    // or it is already fully gone.
+    const dir = freshLockDir();
+    acquireLock(dir);
+    let dirGoneBeforeContentsRemoved = false;
+    const rm: typeof rmSync = (path, opts) => {
+      dirGoneBeforeContentsRemoved = !existsSync(dir);
+      rmSync(path, opts);
+    };
+
+    releaseLock(dir, { rm });
+
+    expect(dirGoneBeforeContentsRemoved).toBe(true);
+    expect(existsSync(dir)).toBe(false);
+  });
+
+  it("does not throw when the lock directory is already gone", () => {
+    const dir = freshLockDir();
+    acquireLock(dir);
+    releaseLock(dir);
+
+    expect(() => releaseLock(dir)).not.toThrow();
+  });
+
+  it("does not delete a lock that went live between the outer staleness check and the serialised reclaim (second review, finding 1)", () => {
+    // Simulates a three-lane pile-up: this lane sees the original holder
+    // (4242) as dead; before it can even ask for the reclaim lock, a second
+    // lane fully reclaims AND a third lane re-acquires — leaving a live
+    // lock (5555) sitting at `dir`. The old tomb-rename-back design could
+    // destroy that live lock on the way to correctly refusing; the
+    // serialised reclaim must re-check under its own mutex and leave it
+    // alone entirely.
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    let calls = 0;
+    const isAlive = (candidatePid: number) => {
+      calls += 1;
+      if (calls === 1) {
+        rmSync(dir, { recursive: true, force: true });
+        mkdirSync(dir);
+        writeFileSync(join(dir, "pid"), "5555");
+        return false; // the ORIGINAL holder (4242) really is dead
+      }
+      return candidatePid === 5555; // every later check finds the new holder alive
+    };
+
+    const result = acquireLock(dir, {
+      isAlive,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: false, holderPid: 5555 });
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe("5555");
+  });
+
+  it("reports busy, without racing, when another lane already holds the reclaim lock", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    mkdirSync(`${dir}.reclaim`); // simulates another lane mid-reclaim
+
+    const result = acquireLock(dir, {
+      isAlive: () => false,
+      isContainerRunning: () => false,
+    });
+
+    expect(result).toEqual({ ok: false, holderPid: 4242 });
+    // The lock under contest must be untouched — only the reclaim-lock
+    // holder may act on it.
+    expect(readFileSync(join(dir, "pid"), "utf8")).toBe("4242");
+  });
+
+  it("clears an abandoned reclaim lock older than the threshold and proceeds", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+    mkdirSync(`${dir}.reclaim`); // left behind by a reclaimer that crashed
+    const farFuture = () => Date.now() + 120_000;
+
+    const result = acquireLock(dir, {
+      isAlive: () => false,
+      isContainerRunning: () => false,
+      now: farFuture,
+    });
+
+    expect(result).toEqual({ ok: true });
+  });
+});
+
+describe("lockBusyMessage", () => {
+  it("names the holder pid and the lock path", () => {
+    const message = lockBusyMessage(4242, "/tmp/kcvv-vr-docker.lock");
+
+    expect(message).toContain("4242");
+    expect(message).toContain("/tmp/kcvv-vr-docker.lock");
+  });
+
+  it("still reads sensibly when the holder pid is unknown", () => {
+    expect(lockBusyMessage(null, "/tmp/kcvv-vr-docker.lock")).not.toContain(
+      "null",
+    );
+  });
+
+  it("names how to clear a truly stale lock by hand", () => {
+    const message = lockBusyMessage(4242, "/tmp/kcvv-vr-docker.lock");
+
+    expect(message).toContain("rm -rf /tmp/kcvv-vr-docker.lock");
   });
 });

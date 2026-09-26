@@ -25,7 +25,10 @@ pnpm --filter @kcvv/web run build
 #       pnpm --filter @kcvv/api dev
 #    OR point KCVV_API_URL at the staging worker in `apps/web/.env.local`.
 
-# 3. Run the suite. Auto-starts a server on :3000 if one isn't already up.
+# 3. Run the suite. Always starts its own server — never on :3000: the port
+#    is derived from this worktree's own path (#3141 member 5), and
+#    `reuseExistingServer: false` means it never reuses one already running,
+#    even your own (see "Running against an already-started server" below).
 pnpm --filter @kcvv/web run test:e2e
 
 # 4. Interactive UI mode (re-run on save, screenshots, trace viewer).
@@ -42,6 +45,27 @@ BASE_URL=https://<a-staging-built-deployment> pnpm --filter @kcvv/web run test:e
 
 When `BASE_URL` is set, the config's `webServer` block stays inactive and the
 suite hits the supplied URL directly.
+
+### Running against an already-started server
+
+`webServer.reuseExistingServer` is hard-coded `false` (#3141 finding 9): a
+`true` here would let the suite silently reuse ANY listener already on the
+derived port — a second worktree's server, or an unrelated process — and test
+the wrong build without ever failing loudly. That means `test:e2e` always
+starts (and tears down) its own server, even if you already have one running
+by hand. To point it at a server you started yourself instead — print this
+worktree's derived port with `e2e:port`, and pass it as `BASE_URL` the same
+way the deployed-environment form above does:
+
+```bash
+BASE_URL=http://localhost:$(pnpm --filter @kcvv/web run --silent e2e:port) \
+  pnpm --filter @kcvv/web run test:e2e
+```
+
+`e2e:port` (`apps/web/scripts/e2e-port-cli.mjs`) prints the exact port
+`playwright.config.ts`'s `webServer` block would derive for this worktree —
+the two share `apps/web/scripts/e2e-dev-port.mjs`'s `derivePort`, so they
+can never disagree.
 
 ### What each test asserts
 
@@ -293,6 +317,39 @@ impossible (#3140).
 The wrapper exists as a script rather than a prefix on the package.json script
 bodies because pnpm appends `-- <args>` to the **end** of the script string — a
 guard in front of the `&&` chain would never see the scoping pattern.
+
+### The image build and the exclusive lock (#3141)
+
+A wave guards named shared resources, never CPU — the full register lives in
+`.claude/skills/ralph-afk/SKILL.md`. Two of its five members live in
+`vr-docker.mjs`:
+
+- **The image is never built inside the wrapper.** Build it once, by hand or
+  as a wave's step 0, with `pnpm --filter @kcvv/web run vr:build-image` — it
+  stamps the image with a content-hash label of `pnpm-lock.yaml` +
+  `Dockerfile.vr`. If `kcvv-vr-runner:latest` is missing, or that label no
+  longer matches this worktree's own hash (every worktree on the machine
+  shares this one tag, so a lockfile change elsewhere is enough), the wrapper
+  fails fast and names that same rebuild command — it used to pass `--build`
+  on every run instead, and a parallel rebuild on a stale image froze the
+  machine for sixteen minutes (2026-09-21). A stopped Docker daemon gets its
+  own message ("Docker does not appear to be running") rather than being
+  misread as a missing image.
+- **The container run is exclusive, and taken before anything else runs.**
+  The lock is acquired first — before the Storybook build — so a busy lock is
+  reported immediately instead of after a wasted rebuild. It is a
+  `mkdir`+`rename`-based mutex in `os.tmpdir()` (shared by every worktree on
+  the machine, never a path inside one): only one local VR container runs at
+  a time — four would want the machine's entire memory, and parallel captures
+  add sub-pixel noise to unrelated baselines. A second caller is refused with
+  the holder's pid, the lock's path, and the command to clear it by hand if
+  you are certain nothing is actually running; a lock whose holder process is
+  dead is reclaimed automatically, but only once its container has also
+  stopped (a killed wrapper does not orphan a running container into a second
+  one starting on top of it).
+
+Neither check runs in CI — `vr:ci` / `vr:ci:update` call `vr:run*` directly,
+without Docker, so there is no image and no container to guard there.
 
 ### Scoping a VR run
 

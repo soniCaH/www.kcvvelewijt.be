@@ -14,6 +14,20 @@ This skill follows `/ralph`'s conventions — same `blockedBy` gate, same worktr
 
 Two things differ on purpose, because a wave is not one issue at a time. Both live in step 5: the last gate runs at the orchestrator instead of inside the worker, and agents leave the issue on `in-progress` for the orchestrator to flip. Keep this paragraph honest — a stale parity claim is worse than no claim.
 
+## The wave's shared-resource register
+
+**A wave guards named shared resources, never CPU** (#3090, #3124, #3141). Four real concurrent `check-all` chains cost 1.67× per lane and bought a **2.4× throughput win** — nothing is bought by capping the wave, so it stays at **4 agents at every task runner's default worker count. No worker-count or concurrency cap is adopted.** Every real wave failure came from something shared _outside_ the worktree instead — separate worktrees isolate the filesystem and nothing else:
+
+| #   | Resource                                                                                                    | Guard                                                                                                                                                                                                                                                                                                                                                                                                                                     | Closed by     |
+| --- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| 1   | Fixed TCP ports (a per-process counter that restarts at 0 in every worktree)                                | An ephemeral port (`listen(0)` → read the assigned port → close → use it) + a `no-restricted-syntax` ban on `.listen(` in test files                                                                                                                                                                                                                                                                                                      | #3109 / #3127 |
+| 2   | The visual-regression Docker image build                                                                    | Built **once**, in step 0 below, before the wave — never inside a lane. `apps/web/scripts/vr-docker.mjs` no longer passes `--build`; it fails fast, naming the exact build command, when the image is absent OR stale (its content-hash label no longer matches this worktree's `pnpm-lock.yaml` / `Dockerfile.vr` — every worktree on the machine shares this one tag, so a lockfile bump elsewhere makes the next run here rebuild too) | #3141         |
+| 3   | The visual-regression container                                                                             | An exclusive lock, taken FIRST — before the Storybook build, so a busy lock is reported immediately rather than after a wasted rebuild. `mkdir`+`rename`-based (atomic; survives two lanes racing the same stale lock) in `vr-docker.mjs`, because an agent can skim a brief and cannot skim a lock. A second caller is refused with a message naming the lock path and how to clear it by hand                                           | #3141         |
+| 4   | The Docker Compose project name (derived from the working-directory basename, so every worktree shares one) | Already closed by #3 above — the lock makes the VR lane exclusive, so two Compose projects sharing that name can never run at once                                                                                                                                                                                                                                                                                                        | #3124         |
+| 5   | The e2e dev server's TCP port under Playwright's `webServer.reuseExistingServer`                            | Each worktree derives its own port from its own absolute path, below Linux's ephemeral range (`apps/web/test/e2e/playwright.config.ts`'s `webServer` block, via `apps/web/scripts/e2e-dev-port.mjs`) — AND `reuseExistingServer` is hard-coded `false`, so a collision or an unrelated listener fails loudly instead of silently testing the wrong build                                                                                  | #3141         |
+
+**A separate rule, not a register member:** at most one issue per wave may touch visual-regression baselines — see "Visual-regression baselines" in the collision-class table below. That rule is about **merge conflicts** on the committed PNGs, not run-time contention, and it would not by itself have prevented the 2026-09-21 Docker image-build freeze or a container memory fight.
+
 ## Process
 
 **You** run every step here, in the main checkout, as the orchestrator. Spawned agents run only what their brief tells them, inside their own worktree — they never call `unblocked-issues.sh` or `wave-check.sh`. Both scripts are repo-root-relative, so run them from the repository root; they need `gh` and `git` on PATH and nothing else.
@@ -52,6 +66,16 @@ Two traps:
 M=$(gh pr view "feat/issue-<N>" --json mergeCommit --jq '.mergeCommit.oid')
 git merge-base --is-ancestor "$M" origin/main && git branch -D feat/issue-<N>
 ```
+
+### 0a. Build the visual-regression image once
+
+Register member 2 above. Do this **once per wave, here, never inside a lane** — a rebuild racing another lane's is the 2026-09-21 sixteen-minute freeze:
+
+```bash
+pnpm --filter @kcvv/web run vr:build-image
+```
+
+Safe to skip only when you are certain no issue in this wave will touch a VR-tagged story or call `vr:check`/`vr:update*` — a stale or missing image just makes the first such call in the wave fail fast, naming this same command in its error.
 
 ### 0b. Report the human-only queue
 
