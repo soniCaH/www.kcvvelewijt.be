@@ -105,6 +105,12 @@ export function TapedCardGrid({
     <Tag
       data-columns={columns}
       data-gap={gap}
+      // `display: grid` on a `<ul>`/`<ol>` drops its implicit ARIA "list"
+      // role in Chromium's accessibility tree, orphaning the `<li>` slots'
+      // implicit "listitem" role from any list-roled ancestor (#3188 — axe
+      // `listitem`). Restore the role explicitly whenever the slot is a real
+      // `<li>`; the `div` path has no `<li>` children, so nothing to fix.
+      role={SlotTag === "li" ? "list" : undefined}
       className={cn("grid", COLUMNS_CLASS[columns], GAP_CLASS[gap], className)}
     >
       {items.map((child, index) => {

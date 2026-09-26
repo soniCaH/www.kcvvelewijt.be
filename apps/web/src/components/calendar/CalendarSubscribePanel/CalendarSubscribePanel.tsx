@@ -151,7 +151,14 @@ export function CalendarSubscribePanel({
         {/* Stub — QR (always visible) */}
         <div className="border-ink bg-cream-soft flex shrink-0 flex-col items-center justify-center gap-2 border-b-2 border-dashed px-5 py-4 sm:border-r-2 sm:border-b-0">
           <div data-testid="qr-code" className="bg-cream border-ink border p-1">
-            <QRCodeSVG value={webcalUrl} size={92} />
+            {/* `title` gives the raw <svg> an accessible name (#3188 —
+                axe `svg-img-alt`); a <title> child is invisible, so this
+                doesn't touch the rendered pixels. */}
+            <QRCodeSVG
+              value={webcalUrl}
+              size={92}
+              title="QR-code om te abonneren op de kalender"
+            />
           </div>
           <span className="text-ink-muted font-mono text-[9px] tracking-wider uppercase">
             Scan → agenda
