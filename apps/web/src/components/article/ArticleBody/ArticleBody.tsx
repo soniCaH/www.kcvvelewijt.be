@@ -619,36 +619,36 @@ const ARTICLE_BLOCK_STYLE_HANDLERS = {
   // this they'd render as flat body text (same failure mode as lists).
   // h1 is not selectable in the schema: the article title is the only <h1>.
   //
-  // Rendered as `<p>`, not `<h3>`–`<h6>` (#3188 — axe `heading-order`):
-  // `h2` above is already a non-heading `<div role="separator">`
-  // (`<QASectionDivider>`), so these are the only would-be headings in an
-  // article body, and a body can legitimately open on any of h3–h6 with no
-  // real h1/h2 above it in the SAME landmark (Storybook's isolated render
-  // has no article hero `<h1>` either) — a level jump `heading-order`
-  // always flags. Per this issue's constraint, the fix changes the
-  // element, never the classes: same visual scale, same margins, just no
-  // longer part of the document's heading outline. `role="heading"` was
-  // considered and rejected — axe's `heading-order` selector matches
-  // `[role=heading]` exactly like a native `hN`, so it would still flag.
+  // Rendered ONE REAL LEVEL SHALLOWER than the PT style name (#3188 — axe
+  // `heading-order`): `h2` above is already a non-heading
+  // `<div role="separator">` (`<QASectionDivider>`), so a PT `h3` is the
+  // FIRST real heading an article body can produce, and it must land
+  // directly under the page's own `<h1>` (the article title) with nothing
+  // in between — hence `h3` renders `<h2>`, `h4` renders `<h3>`, and so on
+  // down to `h6` rendering `<h5>`. Each keeps its OWN existing className
+  // (the visual scale is keyed to the PT style name, not the HTML level),
+  // so nothing moves visually. `ArticleBody.stories.tsx`'s decorator
+  // supplies the same `<h1>` a real article page does, so this ladder is
+  // exercised exactly as production renders it.
   h3: ({ children }: { children?: ReactNode }) => (
-    <p className="font-display text-ink mt-10 mb-3 text-2xl font-black">
+    <h2 className="font-display text-ink mt-10 mb-3 text-2xl font-black">
       {children}
-    </p>
+    </h2>
   ),
   h4: ({ children }: { children?: ReactNode }) => (
-    <p className="font-display text-ink mt-8 mb-2 text-xl font-black">
+    <h3 className="font-display text-ink mt-8 mb-2 text-xl font-black">
       {children}
-    </p>
+    </h3>
   ),
   h5: ({ children }: { children?: ReactNode }) => (
-    <p className="font-display text-ink mt-6 mb-2 text-lg font-bold">
+    <h4 className="font-display text-ink mt-6 mb-2 text-lg font-bold">
       {children}
-    </p>
+    </h4>
   ),
   h6: ({ children }: { children?: ReactNode }) => (
-    <p className="text-ink mt-6 mb-2 font-mono text-sm font-semibold tracking-[0.14em] uppercase">
+    <h5 className="text-ink mt-6 mb-2 font-mono text-sm font-semibold tracking-[0.14em] uppercase">
       {children}
-    </p>
+    </h5>
   ),
 };
 

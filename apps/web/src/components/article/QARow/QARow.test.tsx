@@ -57,14 +57,14 @@ describe("<QARow>", () => {
       expect(tag?.textContent?.trim()).toBe("Lars Janssens");
     });
 
-    it("renders the question as italic display-sm via a <p> (#3188 — no heading-order skip)", () => {
+    it("renders the question as italic display-sm via <h2> (#3188 — shallowest real body heading)", () => {
       const { container } = render(
         <QARow
           question="Wat veranderde er na de winterstop?"
           respondents={[respondent()]}
         />,
       );
-      const q = container.querySelector('p[data-qa-row="question"]');
+      const q = container.querySelector('h2[data-qa-row="question"]');
       expect(q?.textContent).toBe("Wat veranderde er na de winterstop?");
       expect(q?.className).toContain("italic");
       expect(q?.className).toContain("font-display");
@@ -175,7 +175,9 @@ describe("<QARow>", () => {
       const { container } = render(
         <QARow question="Wat veranderde er?" respondents={TWO_RESPONDENTS} />,
       );
-      const questions = container.querySelectorAll('p[data-qa-row="question"]');
+      const questions = container.querySelectorAll(
+        'h2[data-qa-row="question"]',
+      );
       expect(questions).toHaveLength(1);
       expect(questions[0]?.textContent).toBe("Wat veranderde er?");
     });

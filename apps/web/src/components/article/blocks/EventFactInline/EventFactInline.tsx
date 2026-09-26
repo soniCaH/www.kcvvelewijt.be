@@ -187,18 +187,18 @@ export function EventFactInline({
             ) : null}
           </header>
 
-          {/* A plain `<p>`, not `<h3>` (#3188 — axe `heading-order`): see
-              TransferFactCard's identical fix for why — a self-contained
-              card headline, not a document-structure heading, so it can
-              sit anywhere in an article without becoming an arbitrary
-              skip/restart of the real outline. Same classes either way. */}
+          {/* `<h2>`, not `<h3>` (#3188 — axe `heading-order`): see
+              TransferFactCard's identical fix for why — this card can land
+              anywhere in an article's flow, so it takes the same shallowest
+              real level ArticleBody's own first subheading renders at.
+              Same classes either way. */}
           {title ? (
-            <p
+            <h2
               data-event-fact-inline="title"
               className="font-display text-ink m-0 text-[26px] leading-[1.15] font-bold italic"
             >
               {title}
-            </p>
+            </h2>
           ) : null}
 
           {dateLine ? (

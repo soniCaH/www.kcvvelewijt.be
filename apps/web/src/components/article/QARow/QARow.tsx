@@ -155,19 +155,17 @@ export function QARow({ question, respondents, className }: QARowProps) {
           multi-respondent row below, so single- and multi-speaker pairs
           don't flip order mid-interview when some answers are attributed.
         */}
-        {/* A plain `<p>`, not `<h3>` (#3188 — axe `heading-order`): this row
-            renders at an arbitrary depth inside an article body with no
-            control over what heading level (if any) precedes it, so a fixed
-            `<h3>` produces a level skip whenever nothing at h1/h2 sits above
-            it — same reasoning as `ArticleBody`'s own h3-h6 PT styles. Same
-            classes, same visual weight, just outside the document's heading
-            outline. */}
-        <p
+        {/* `<h2>`, not `<h3>` (#3188 — axe `heading-order`): this row can
+            land anywhere in an article's flow, so it takes the same
+            shallowest real level ArticleBody's own first subheading renders
+            at (PT `h3` → `<h2>`) — directly under the page's `<h1>`, never
+            an arbitrary skip. Same classes, same visual weight. */}
+        <h2
           data-qa-row="question"
           className="font-display text-display-sm font-semibold italic"
         >
           {question}
-        </p>
+        </h2>
         <div className={cn(hasSpeaker ? "mt-5" : "mt-2")}>
           {hasSpeaker && (
             <SpeakerHeader
@@ -207,14 +205,14 @@ export function QARow({ question, respondents, className }: QARowProps) {
       data-qa-row-respondent-count={respondents.length}
       className={cn("flex flex-col", className)}
     >
-      {/* See the single-respondent branch above for why this is a `<p>`,
+      {/* See the single-respondent branch above for why this is `<h2>`,
           not `<h3>` (#3188). */}
-      <p
+      <h2
         data-qa-row="question"
         className="font-display text-display-sm font-semibold italic"
       >
         {question}
-      </p>
+      </h2>
       <div className="mt-5 flex flex-col gap-6">
         {respondents.map((r, i) => {
           const hasSpeaker =
