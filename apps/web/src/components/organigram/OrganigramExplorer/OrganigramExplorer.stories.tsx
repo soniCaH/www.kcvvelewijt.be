@@ -68,9 +68,18 @@ export const WithContactTrigger: Story = {
  * rest, or never overflow even at A++, both fail this test now, where the
  * old before/after-only version would have silently passed the first case
  * and only caught the second. `!vr`.
+ *
+ * `vitest-play-only` (#3188): this story's `globals.viewport` is honoured
+ * ONLY by `@storybook/addon-vitest`'s own `setViewport()` — `test-
+ * storybook`/Jest renders it at its own default viewport instead, where
+ * the precondition/overflow assertions below don't hold (measured: fails
+ * on a boundary condition). The axe-only `vr:axe:non-vr` pass
+ * (`--excludeTags vr`) would otherwise pick this story up now that it
+ * carries no `vr` tag; this tag keeps it exclusively on the runner it was
+ * written for.
  */
 export const ZoomOverflowsTheStage: Story = {
-  tags: ["!vr"],
+  tags: ["!vr", "vitest-play-only"],
   globals: { viewport: { value: "kcvvExplorerStage" } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);

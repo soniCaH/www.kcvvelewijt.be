@@ -63,7 +63,7 @@ const meta = {
   // VR. The `--excludeTags vr-skip` filter keeps this heavy story from being
   // visited under Docker's memory cap (see page-level-testing-rework.md). The
   // hero + CTA band carry their own VR via their component stories.
-  tags: ["autodocs", "vr-skip", "pages-a11y"],
+  tags: ["autodocs", "vr-skip"],
   args: {
     header: {
       name: "Bestuur",

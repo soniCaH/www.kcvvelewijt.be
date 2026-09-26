@@ -10,7 +10,7 @@ const meta = {
   // Page-level composition for the /share route — not VR-tagged (page coverage
   // is the Playwright e2e suite's job). Its constituent Features/Share/* image
   // templates are each individually vr-tagged.
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof SharePage>;
 
 export default meta;

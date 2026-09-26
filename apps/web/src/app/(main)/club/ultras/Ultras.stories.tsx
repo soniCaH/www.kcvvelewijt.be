@@ -12,7 +12,7 @@ import { PullQuote } from "@/components/design-system/PullQuote";
  */
 const meta = {
   title: "Pages/Ultras",
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta;
 

@@ -4,7 +4,7 @@ import StaffDetailLoading from "./loading";
 const meta = {
   title: "Pages/Staff/StaffDetailSkeleton",
   component: StaffDetailLoading,
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof StaffDetailLoading>;
 

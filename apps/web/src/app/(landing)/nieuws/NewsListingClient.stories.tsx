@@ -107,13 +107,15 @@ const meta = {
   // `--excludeTags vr-skip` is the filter that actually keeps the test file
   // from being generated. Page-level visual coverage moves to Playwright e2e
   // per docs/prd/page-level-testing-rework.md.
-  // This file also cannot be imported under the Storybook Vitest addon's
+  // This file used to fail to import under the Storybook Vitest addon's
   // browser project (#3146) — it imports `@/app/(landing)/nieuws/loading`,
-  // which transitively pulls in `next/server`'s `userAgent()` (reads
-  // `__dirname`, undefined in that browser environment). See the exclusion
-  // + full explanation in `vitest.storybook.config.ts`; a story-level
-  // `!test` tag cannot fix an import-time crash.
-  tags: ["autodocs", "vr-skip", "pages-a11y"],
+  // which imported data constants straight from its sibling `page.tsx`,
+  // transitively pulling in `next/server`'s `userAgent()` (reads
+  // `__dirname`, undefined in that browser environment). #3188 decoupled
+  // `loading.tsx` from `page.tsx` (a standalone `copy.ts`) for an unrelated
+  // reason and closed this gap too — see `vitest.storybook.config.ts` for
+  // the full history; there is no longer an exclusion to explain here.
+  tags: ["autodocs", "vr-skip"],
   args: {
     fetchArticles: noopFetch,
   },

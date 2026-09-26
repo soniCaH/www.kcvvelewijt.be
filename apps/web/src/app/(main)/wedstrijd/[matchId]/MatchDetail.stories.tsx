@@ -277,7 +277,7 @@ function MatchDetailAssembly() {
 const meta = {
   title: "Pages/Matches/MatchDetail",
   component: MatchDetailAssembly,
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
     docs: {

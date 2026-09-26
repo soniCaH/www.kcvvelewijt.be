@@ -54,7 +54,7 @@ const meta = {
   // `--excludeTags vr-skip` is the filter that actually keeps the test file
   // from being generated. Page-level visual coverage moves to Playwright e2e
   // per docs/prd/page-level-testing-rework.md.
-  tags: ["autodocs", "vr-skip", "pages-a11y"],
+  tags: ["autodocs", "vr-skip"],
 } satisfies Meta<typeof ContactPage>;
 
 export default meta;

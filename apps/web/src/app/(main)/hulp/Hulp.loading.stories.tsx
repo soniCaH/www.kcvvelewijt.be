@@ -18,7 +18,7 @@ import HulpLoading from "./loading";
 const meta = {
   title: "Pages/Hulp/HulpSkeleton",
   component: HulpLoading,
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof HulpLoading>;
 

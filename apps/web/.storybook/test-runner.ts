@@ -493,14 +493,17 @@ const config: TestRunnerConfig = {
       viewports?: ReadonlyArray<ViewportName>;
     };
     const storyTags = (story.tags ?? []) as readonly string[];
-    // `Pages/*` stories (#3188) — full-page compositions that are design
-    // references only, never VR-tested (see apps/web/CLAUDE.md's VR
-    // footnote). They're axe-checked by a dedicated CI step scoped to this
-    // tag (`vr:axe:pages` in package.json), which reuses this same
-    // test-runner config — so they still need a `postVisit` that skips the
-    // screenshot (no baseline exists, and none should ever be added for
-    // them) while letting the a11y check above run to completion.
-    const isPagesA11yOnly = storyTags.includes("pages-a11y");
+    // Any story without the `vr` tag (#3188) — `Pages/*` full-page
+    // compositions (design references only, never VR-tested — see
+    // apps/web/CLAUDE.md's VR footnote), plus any other component whose
+    // story was never given the `vr` tag at all. A dedicated CI step
+    // (`vr:axe` in package.json, `--excludeTags vr`) visits exactly this
+    // set, reusing this same test-runner config — so `postVisit` skips the
+    // screenshot for it (no baseline exists, and none should ever be
+    // added) while letting the a11y check above run to completion. This
+    // mirrors the CLI selection exactly rather than depending on a second,
+    // hand-added tag that a new non-`vr` story could forget to carry.
+    const isNonVr = !storyTags.includes("vr");
     // Opt-in structural assertions (#2861, see test/vr/structural-assertions.ts)
     // — a story tag beyond the pixel-snapshot comparison below. Resolved
     // ahead of the `vr.disable` early-return so a story can't silently
@@ -508,12 +511,12 @@ const config: TestRunnerConfig = {
     const applicableAssertions = STRUCTURAL_ASSERTIONS.filter((assertion) =>
       storyTags.includes(assertion.tag),
     );
-    if (vrParams.disable || isPagesA11yOnly) {
+    if (vrParams.disable || isNonVr) {
       if (applicableAssertions.length > 0) {
         throw new Error(
           `[VR] Story "${context.id}" is tagged with structural assertion(s) ` +
             `(${applicableAssertions.map((a) => a.tag).join(", ")}) but also ` +
-            `sets parameters.vr.disable = true (or is tagged "pages-a11y"), ` +
+            `sets parameters.vr.disable = true (or carries no "vr" tag), ` +
             `which returns before those assertions ever run. Remove the tag ` +
             `or the opt-out.`,
         );

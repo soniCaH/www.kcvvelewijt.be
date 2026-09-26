@@ -4,7 +4,7 @@ import SearchLoading from "./loading";
 const meta = {
   title: "Pages/Search/SearchSkeleton",
   component: SearchLoading,
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof SearchLoading>;
 

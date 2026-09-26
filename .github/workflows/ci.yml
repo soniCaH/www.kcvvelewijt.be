@@ -424,22 +424,39 @@ jobs:
         env:
           VR_SHARD: ${{ matrix.shard }}/3
 
-      # `Pages/*` stories (#3188) carry no `vr` tag and are never
-      # screenshotted (design references only — page-level visual coverage
-      # is Playwright e2e's job, see apps/web/CLAUDE.md). They still get
-      # axe-checked here, scoped to the `pages-a11y` tag via a dedicated
-      # `test-storybook` invocation that never takes a screenshot (the same
-      # `.storybook/test-runner.ts` config skips its screenshot step for any
-      # `pages-a11y`-tagged story) — so this adds zero new VR baselines.
+      # Every story that carries no `vr` tag (#3188) — `Pages/*` full-page
+      # compositions (design references only — page-level visual coverage
+      # is Playwright e2e's job, see apps/web/CLAUDE.md) plus any other
+      # component whose story was never given the `vr` tag at all (a real
+      # gap: MapEmbed/SkeletonBars/SectionNavChip/LoadingAnnouncement had
+      # neither `vr` nor axe coverage before this). `--excludeTags vr`
+      # selects exactly the complement of the pixel-diff run below, so
+      # nothing needs a second, hand-added tag to opt in (two stories whose
+      # `play()` needs `@storybook/addon-vitest`'s own `setViewport()` carry
+      # `vitest-play-only` and are excluded here too — that layer,
+      # `pnpm test:storybook`, already covers them). The same
+      # `.storybook/test-runner.ts` config skips the screenshot step for any
+      # story lacking the `vr` tag (mirroring this same selection) — so this
+      # adds zero new VR baselines.
       # Runs once, on shard 1 only: this reuses the shard's already-installed
       # deps and downloaded `storybook-static`, and three redundant runs of
-      # the same ~56 stories would just be wasted spend. Living inside this
-      # existing job (not a new one) means no new required check either —
-      # `visual-regression` isn't itself required (root .claude/CLAUDE.md);
-      # only `Quality Checks + Build` is.
-      - name: Run Storybook accessibility check (Pages/*)
-        if: matrix.shard == 1
-        run: pnpm --filter @kcvv/web run vr:axe:pages
+      # the same non-`vr` stories would just be wasted spend. Living inside
+      # this existing job (not a new one) is not what keeps this off the
+      # required-check list, though — `VR — Gate`
+      # (`visual-regression-gate`, #3139, root `.claude/CLAUDE.md` rule 7)
+      # already `needs` this job, so a failure here already fails that
+      # required check same as a pixel diff would.
+      # `!cancelled()`, not the bare `matrix.shard == 1`: without it, a pixel
+      # diff in the PRECEDING "Run visual regression suite" step on shard 1
+      # would fail that step and skip every step after it by default — this
+      # axe check would silently never run, and a real violation would ship
+      # unnoticed whenever shard 1 also happens to have an unrelated pixel
+      # diff. `!cancelled()` still skips it if the job itself was cancelled
+      # (matches the gate job's own reasoning for its `if`, just the
+      # opposite conclusion for a step vs. a required check).
+      - name: Run Storybook accessibility check (non-VR stories)
+        if: matrix.shard == 1 && !cancelled()
+        run: pnpm --filter @kcvv/web run vr:axe:non-vr
 
       # Distinct name per shard: three parallel jobs would otherwise collide
       # uploading to the same artifact name, and `vr-diff-comment` below

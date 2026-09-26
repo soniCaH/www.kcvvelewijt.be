@@ -10,7 +10,7 @@ import TeamsLoading from "./loading";
 const meta = {
   title: "Pages/Teams/TeamsLandingSkeleton",
   component: TeamsLoading,
-  tags: ["autodocs", "pages-a11y"],
+  tags: ["autodocs"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof TeamsLoading>;
 

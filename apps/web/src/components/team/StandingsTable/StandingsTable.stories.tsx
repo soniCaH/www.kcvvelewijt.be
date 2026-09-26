@@ -89,10 +89,21 @@ export const NoHighlight: Story = {
  * just that the track overflows. Reuses the same `fullDivision` fixture so
  * the overflow precondition is guaranteed the same way. `!vr`:
  * assertion-only, computed-style check — no pixel truth to capture.
+ *
+ * `vitest-play-only` (#3188): this story's `globals.viewport` is honoured
+ * ONLY by `@storybook/addon-vitest`'s own `setViewport()` (reads
+ * `.storybook/preview.ts`'s viewport options before mount) — `test-
+ * storybook`/Jest has no equivalent and renders it at its own default
+ * (desktop-sized) viewport instead, where the 8-column division doesn't
+ * overflow and the `play` assertion below fails on a boundary condition
+ * (measured: `scrollWidth` exactly equals `clientWidth`). The axe-only
+ * `vr:axe:non-vr` pass (`--excludeTags vr`) would otherwise pick this
+ * story up now that it carries no `vr` tag; this tag keeps it exclusively
+ * on the runner it was written for.
  */
 export const StickyColumnsPinned: Story = {
   args: { entries: fullDivision, highlightTeamId: 1235 },
-  tags: ["!vr"],
+  tags: ["!vr", "vitest-play-only"],
   // The addon-vitest runner already calls `setViewport()` from the story's
   // composed `globals` before mount (`testStory()` in
   // `@storybook/addon-vitest/dist/vitest-plugin/test-utils.js` —
