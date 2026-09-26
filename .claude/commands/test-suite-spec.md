@@ -22,7 +22,7 @@ gh pr view 3130 --json state,mergedAt --jq '[.state,.mergedAt]|@tsv'
 ```
 
 **If it is not merged, stop here and say so.** Until it lands, every evidence link on the map is a
-blob URL on a `research/*` branch the skill itself calls *throwaway*, and one branch deletion
+blob URL on a `research/*` branch the skill itself calls _throwaway_, and one branch deletion
 destroys the evidence under 22 decisions. Do not start the spec before it merges.
 
 Also confirm nobody deleted the branches early:
@@ -34,13 +34,13 @@ git ls-remote --heads origin 'research/*' | wc -l
 ## Step 2 — Read, in this order
 
 1. **The map**, top to bottom — Destination, Notes, all 21 Decisions so far, the **Handoff**
-   section, then the retained patches under *Not yet specified*:
+   section, then the retained patches under _Not yet specified_:
 
    ```bash
    gh issue view 3078 --json body --jq .body
    ```
 
-2. **`docs/research/README.md`** → its *Test-suite corpus — 2026-09* section.
+2. **`docs/research/README.md`** → its _Test-suite corpus — 2026-09_ section.
 
 3. **An individual ticket only when the spec needs a detail its gist on the map does not carry.**
    Do not pre-read all 22.
@@ -50,16 +50,16 @@ git ls-remote --heads origin 'research/*' | wc -l
 Every one of these was measured. A session that re-reasons one reaches a different answer with none
 of the evidence. Quote the ruling and cite its ticket by name and link.
 
-| # | Ruling |
-| --- | --- |
-| D1 | **One spec, not one per layer.** The cross-layer rules plus one section per layer. `/to-tickets` wires blocking edges only *within what it is given*, and the hardest edges here are cross-layer — the gate is blocked by VR **and** E2E determinism. Five specs cannot express them. |
-| D2 | **Flake class I (the Cloudflare deploy transient) is out of scope** — a deploy step, not a test layer. 0 failures in 100 runs. The spec carries one sentence: *the required check is `quality-checks` only; deploy jobs never gate.* |
-| D3 | **The ten research docs land on `main` first** — PR #3130, the precondition above. |
-| D4 | **The gate is one sequenced step, not three.** One issue owns branch protection (`main` has none today, and no rulesets). Order: `quality-checks` → VR → E2E. Each later layer is *add one more required check*, never *set up protection again*. |
-| D5 | **Flake class M closes with a written budget:** *a test may not use more than half its own timeout.* Checked on demand from `slowTestThreshold` output already in every CI log. **A breach opens an issue, never a red check.** No lint rule — 9 of 10 `expect()`-in-a-loop files are harmless. |
-| D6 | **The first unblocked slice is the gate itself:** turn on branch protection with `quality-checks` as the only required check, and prove a docs-only PR still merges. |
-| D7 | **The ten filed issues split 7 / 2 / 1.** In: #3056, #3104, #3118, #3119, #3120, #3127, #3128 — **reference them as existing tickets, never re-file them.** Out, as product bugs: #3077, #3115. Closed with its root cause named: #3099. |
-| D8 | **The map is the handoff.** No second document. It stays open and unarchived until the spec is merged, because the spec links back to it. |
+| #   | Ruling                                                                                                                                                                                                                                                                                          |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | **One spec, not one per layer.** The cross-layer rules plus one section per layer. `/to-tickets` wires blocking edges only _within what it is given_, and the hardest edges here are cross-layer — the gate is blocked by VR **and** E2E determinism. Five specs cannot express them.           |
+| D2  | **Flake class I (the Cloudflare deploy transient) is out of scope** — a deploy step, not a test layer. 0 failures in 100 runs. The spec carries one sentence: _the required check is `quality-checks` only; deploy jobs never gate._                                                            |
+| D3  | **The ten research docs land on `main` first** — PR #3130, the precondition above.                                                                                                                                                                                                              |
+| D4  | **The gate is one sequenced step, not three.** One issue owns branch protection (`main` has none today, and no rulesets). Order: `quality-checks` → VR → E2E. Each later layer is _add one more required check_, never _set up protection again_.                                               |
+| D5  | **Flake class M closes with a written budget:** _a test may not use more than half its own timeout._ Checked on demand from `slowTestThreshold` output already in every CI log. **A breach opens an issue, never a red check.** No lint rule — 9 of 10 `expect()`-in-a-loop files are harmless. |
+| D6  | **The first unblocked slice is the gate itself:** turn on branch protection with `quality-checks` as the only required check, and prove a docs-only PR still merges.                                                                                                                            |
+| D7  | **The ten filed issues split 7 / 2 / 1.** In: #3056, #3104, #3118, #3119, #3120, #3127, #3128 — **reference them as existing tickets, never re-file them.** Out, as product bugs: #3077, #3115. Closed with its root cause named: #3099.                                                        |
+| D8  | **The map is the handoff.** No second document. It stays open and unarchived until the spec is merged, because the spec links back to it.                                                                                                                                                       |
 
 ## Step 4 — Hard constraints on the spec itself
 
@@ -70,9 +70,9 @@ of the evidence. Quote the ruling and cite its ticket by name and link.
 2. **The spec's "seams" section is already decided.** They are the layer contract
    ([#3086](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3086)). Restate it; do not invent
    new seams.
-3. **One item is a wide refactor, not a vertical slice:** the nine-call-site
-   `pnpm --filter @kcvv/web check-all` → `pnpm turbo run lint type-check test build --filter=…`
-   change ruled by [#3123](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3123). `/to-tickets`
+3. **One item is a wide refactor, not a vertical slice:** the nine-call-site move of the
+   quality gate to `pnpm turbo run lint type-check test build --filter=…` (done: #3155–#3157),
+   ruled by [#3123](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3123). `/to-tickets`
    sequences those expand–contract. Flag it so the breakdown does not force it vertical.
 4. **Carry-overs that own no section of their own:** pass 2 of the agent-skill sweep
    ([#3113](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3113)), and the two residual
@@ -81,7 +81,7 @@ of the evidence. Quote the ruling and cite its ticket by name and link.
    `turbo run … --summarize` saving, and `--concurrency`, left at Turbo's default on
    [#3090](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3090)'s finding that waves break on
    shared state, not load.
-5. **The three patches under *Not yet specified* on the map are spec input, not fog.** They hold the
+5. **The three patches under _Not yet specified_ on the map are spec input, not fog.** They hold the
    class-by-class walk, the Storybook `play` re-homing detail and the docs-drift list.
 
 ## Step 5 — Stop

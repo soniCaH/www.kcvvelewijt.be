@@ -165,8 +165,8 @@ const DENIED: Case[] = [
   // The workflow `.claude/CLAUDE.md` prescribes — a `"` before `git commit`
   // truncated the old sed parse and silently disarmed the guard.
   {
-    name: 'a quoted argument before the commit — pnpm --filter "@kcvv/web" check-all && git commit',
-    command: 'pnpm --filter "@kcvv/web" check-all && git commit -m x',
+    name: 'a quoted argument before the commit — pnpm --filter "@kcvv/web" lint:fix && git commit',
+    command: 'pnpm --filter "@kcvv/web" lint:fix && git commit -m x',
     cwd: "{MAIN}",
   },
   {
@@ -349,7 +349,7 @@ const ALLOWED: Case[] = [
   },
   {
     name: "a command with no commit in it",
-    command: "pnpm --filter @kcvv/web check-all",
+    command: "pnpm --filter @kcvv/web lint:fix",
     cwd: "{MAIN}",
   },
 ];

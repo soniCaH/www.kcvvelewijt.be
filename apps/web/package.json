@@ -28,7 +28,6 @@
     "e2e:port": "node scripts/e2e-port-cli.mjs",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "check-all": "npm run lint && npm run type-check && npm run test && npm run build",
     "fixtures:sync": "tsx scripts/sync-fixture-images.ts",
     "vr:build-storybook": "rm -rf storybook-static && storybook build",
     "vr:build-image": "node scripts/vr-build-image.mjs",

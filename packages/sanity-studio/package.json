@@ -21,8 +21,7 @@
     "build": "pnpm type-check",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint .",
-    "check-all": "pnpm type-check && pnpm lint && pnpm test"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@kcvv/sanity-schemas": "workspace:*"
