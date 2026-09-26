@@ -18,15 +18,18 @@
   },
   "scripts": {
     "type-check": "tsgo --noEmit",
-    "build": "tsgo --noEmit"
+    "build": "tsgo --noEmit",
+    "lint": "eslint ."
   },
   "peerDependencies": {
     "@sanity/icons": "5.2.2",
     "sanity": "6.11.0"
   },
   "devDependencies": {
+    "@sanity/eslint-config-studio": "7.0.0",
     "@sanity/icons": "5.2.1",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "eslint": "10.9.1",
     "sanity": "6.11.0",
     "typescript": "6.0.3"
   }
