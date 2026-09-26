@@ -9,13 +9,23 @@
  * instead (#3140).
  */
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
-import { decide } from "../../scripts/vr-docker.mjs";
+import {
+  acquireLock,
+  buildDockerArgs,
+  checkImageExists,
+  decide,
+  imageAbsentMessage,
+  lockBusyMessage,
+  releaseLock,
+  VR_IMAGE_BUILD_COMMAND,
+} from "../../scripts/vr-docker.mjs";
 
 const SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -147,11 +157,140 @@ describe("cli", () => {
   });
 
   it("gets past the guard once scoped", () => {
-    // Scoped, so the guard passes — the run then dies on the missing `pnpm`,
-    // which is the proof it got as far as the build step.
+    // Scoped, so the guard passes — the run then dies checking whether the VR
+    // image exists, because `docker` itself is missing on this PATH. That is
+    // the proof it got past the guard: a refusal never reaches this point.
     const result = runScript(["update:story", "ui-button"]);
 
     expect(result.status).not.toBe(0);
     expect(result.stderr).not.toContain("VR_FULL_RUN=1");
+  });
+});
+
+describe("checkImageExists", () => {
+  it("is true when the injected spawn reports the image present", () => {
+    expect(
+      checkImageExists("kcvv-vr-runner:latest", {
+        spawn: () => ({ status: 0 }),
+      }),
+    ).toBe(true);
+  });
+
+  it("is false when the injected spawn reports the image absent", () => {
+    expect(
+      checkImageExists("kcvv-vr-runner:latest", {
+        spawn: () => ({ status: 1 }),
+      }),
+    ).toBe(false);
+  });
+
+  it("surfaces a spawn error rather than swallowing it", () => {
+    const boom = Object.assign(new Error("boom"), { code: "ENOENT" });
+    expect(() =>
+      checkImageExists("kcvv-vr-runner:latest", {
+        spawn: () => ({ error: boom }),
+      }),
+    ).toThrow("boom");
+  });
+});
+
+describe("imageAbsentMessage", () => {
+  it("names the exact build command and points at the register", () => {
+    const message = imageAbsentMessage("kcvv-vr-runner:latest");
+
+    expect(message).toContain(VR_IMAGE_BUILD_COMMAND);
+    expect(message).toContain("kcvv-vr-runner:latest");
+    expect(message).toContain(".claude/skills/ralph-afk/SKILL.md");
+  });
+});
+
+describe("buildDockerArgs", () => {
+  it("never carries --build (#3141) — the image is built once, in step 0", () => {
+    expect(buildDockerArgs(["-u", "ui-button"])).not.toContain("--build");
+  });
+
+  it("preserves the compose invocation shape", () => {
+    expect(buildDockerArgs(["-u", "ui-button"])).toEqual([
+      "compose",
+      "-f",
+      "docker-compose.vr.yml",
+      "run",
+      "--rm",
+      "vr",
+      "-u",
+      "ui-button",
+    ]);
+  });
+});
+
+describe("the exclusive lock", () => {
+  let tmpParent: string;
+  let lockDir: string;
+
+  const freshLockDir = () => {
+    tmpParent = mkdtempSync(join(tmpdir(), "kcvv-vr-lock-test-"));
+    lockDir = join(tmpParent, "lock");
+    return lockDir;
+  };
+
+  afterEach(() => {
+    rmSync(tmpParent, { recursive: true, force: true });
+  });
+
+  it("acquires a fresh lock", () => {
+    expect(acquireLock(freshLockDir())).toEqual({ ok: true });
+  });
+
+  it("refuses a second caller while the holder is alive", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+
+    const second = acquireLock(dir, { isAlive: () => true });
+
+    expect(second).toEqual({ ok: false, holderPid: 4242 });
+  });
+
+  it("reclaims a stale lock whose holder process is gone", () => {
+    const dir = freshLockDir();
+    acquireLock(dir, { pid: 4242, isAlive: () => true });
+
+    const reclaimed = acquireLock(dir, {
+      pid: 9999,
+      isAlive: () => false,
+    });
+
+    expect(reclaimed).toEqual({ ok: true });
+  });
+
+  it("releases the lock so a later caller can acquire it", () => {
+    const dir = freshLockDir();
+    acquireLock(dir);
+
+    releaseLock(dir);
+
+    expect(acquireLock(dir)).toEqual({ ok: true });
+  });
+
+  it("treats a directory with no pid file as unreadable, not a crash", () => {
+    const dir = freshLockDir();
+    // Simulate a lock directory created by something else — no pid file yet.
+    acquireLock(dir);
+    rmSync(join(dir, "pid"), { force: true });
+
+    const result = acquireLock(dir, { isAlive: () => true });
+
+    // No readable pid means readHolderPid() returns null, so the lock is
+    // reclaimed rather than refused with a useless "holder unknown" message.
+    expect(result).toEqual({ ok: true });
+  });
+});
+
+describe("lockBusyMessage", () => {
+  it("names the holder pid when known", () => {
+    expect(lockBusyMessage(4242)).toContain("4242");
+  });
+
+  it("still reads sensibly when the holder pid is unknown", () => {
+    expect(lockBusyMessage(null)).not.toContain("null");
   });
 });
