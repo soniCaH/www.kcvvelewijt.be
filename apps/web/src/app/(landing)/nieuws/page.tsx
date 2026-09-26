@@ -21,12 +21,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { LISTING_INITIAL_TOTAL } from "@/lib/constants";
 import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
-
-// Exported so `loading.tsx` can reuse the real, unshimmered opening (#2432
-// §2 — static copy renders for real) without a second hand-typed copy that
-// can silently drift from this one.
-export const NEWS_KICKER = "KCVV Elewijt · Nieuws";
-export const NEWS_HEADLINE = "Nieuwsarchief";
+import { NEWS_KICKER, NEWS_HEADLINE } from "./copy";
 
 interface NewsPageProps {
   searchParams: Promise<{ categorie?: string }>;

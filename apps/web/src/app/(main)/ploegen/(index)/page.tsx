@@ -22,18 +22,12 @@ import { PageContainer } from "@/components/design-system/PageContainer";
 import { PageHero } from "@/components/layout/PageHero";
 import { TeamFlagship } from "@/components/team/TeamFlagship";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
+import { PLOEGEN_TITLE, PLOEGEN_KICKER, PLOEGEN_LEAD } from "./copy";
 
-// Exported so `loading.tsx` can reuse the real, unshimmered opening (#2432
-// §2) instead of a second hand-typed copy that can silently drift from this
-// one.
-export const PLOEGEN_TITLE = "Onze ploegen";
 // Names the reserves too: the page lists them, and leaving them out of the
 // description is the same mis-filing the section heading below used to make.
 const PLOEGEN_DESCRIPTION =
   "Alle ploegen van KCVV Elewijt: eerste ploeg, tweede ploeg, reserven en jeugd van U6 tot U21.";
-export const PLOEGEN_KICKER = "KCVV Elewijt";
-export const PLOEGEN_LEAD =
-  "Van de eerste ploeg tot de allerkleinsten — één plezante compagnie.";
 
 export const metadata = buildPageMetadata({
   title: PLOEGEN_TITLE,
