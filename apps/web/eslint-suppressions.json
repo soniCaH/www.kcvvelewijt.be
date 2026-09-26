@@ -144,11 +144,6 @@
       "count": 1
     }
   },
-  "src/components/design-system/JerseyShirt/JerseyShirt.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 1
-    }
-  },
   "src/components/design-system/Label/Label.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 1

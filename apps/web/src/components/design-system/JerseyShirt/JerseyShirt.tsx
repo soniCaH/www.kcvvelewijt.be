@@ -36,14 +36,8 @@ export interface JerseyShirtProps {
   /** Optional editor-supplied chest letter overlay (e.g. "U11", "A"). */
   letterOverlay?: string;
   /**
-   * Tailwind classes merged into the outer `<figure>` via `cn()`
-   * (tailwind-merge), not a plain string concat — so a same-property
-   * override (`h-*`, `w-*`, `mx-*`) against the baked-in
-   * `h-60 w-60 mx-auto` reliably wins, same as any other `cn()`-merged
-   * component in this design system. Fixed in #2777: the previous
-   * concat let stylesheet-emission order decide the winner instead of
-   * this string, so five callers silently rendered at 240px regardless
-   * of the size they asked for.
+   * Tailwind classes merged into the outer `<figure>` via `cn()`; a
+   * caller's `h-*`/`w-*`/`mx-*` beats the default `h-60 w-60 mx-auto`.
    */
   className?: string;
 }
@@ -56,17 +50,32 @@ const STRIPE_STROKE_WIDTH = 2;
 const LETTER_TEXT_SHADOW =
   "2px 2px 0 var(--color-ink), -1px -1px 0 var(--color-ink), 1px -1px 0 var(--color-ink), -1px 1px 0 var(--color-ink)";
 
+// Every layer below has two forms: a literal 240px-default value, and a
+// computed one (`calc()`/`cqw`) that scales with a caller's `className`.
+// Both resolve to the same geometry at 240px, but a browser rasterises a
+// computed length differently from a literal px — invisible antialiasing
+// noise, but enough to fail a byte-diff. The literal form stays the
+// default so a caller without a `className` never moves a pixel; the
+// computed form only applies once one is passed (#2777).
+const hasSizeOverride = (className?: string) => Boolean(className);
+
 export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
-  // The figure's default dimensions live in this base string. `cn()`
-  // (tailwind-merge) resolves a same-property override in `className`
-  // (`h-*`, `w-*`, `mx-*`) in the caller's favour — see the `className`
-  // prop docblock above and #2777.
-  const figureClass = cn("relative mx-auto my-0 h-60 w-60", className);
+  const scaled = hasSizeOverride(className);
+  const figureClass = scaled
+    ? cn("relative mx-auto my-0 h-60 w-60 @container", className)
+    : "relative mx-auto my-0 h-60 w-60";
+  const fillInsetClass = scaled
+    ? "top-[calc(100%*12/240)] right-[calc(100%*22/240)] bottom-[calc(100%*4/240)] left-[calc(100%*12/240)]"
+    : "top-3 right-[22px] bottom-1 left-3";
+  const outlineInsetClass = scaled
+    ? "top-[calc(100%*14/240)] right-[calc(100%*18/240)] bottom-[calc(100%*6/240)] left-[calc(100%*16/240)]"
+    : "top-[14px] right-[18px] bottom-[6px] left-4";
+  const letterFontSize = scaled ? "calc(100cqw * 56 / 240)" : "56px";
   return (
     <figure aria-hidden="true" className={figureClass}>
       <div
         aria-hidden="true"
-        className="absolute top-3 right-[22px] bottom-1 left-3 opacity-95 mix-blend-multiply"
+        className={cn("absolute opacity-95 mix-blend-multiply", fillInsetClass)}
       >
         <svg
           viewBox={JERSEY_TORSO_VIEWBOX}
@@ -76,10 +85,7 @@ export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
           <path d={JERSEY_TORSO_FILL_PATH} fill="var(--color-ink)" />
         </svg>
       </div>
-      <div
-        aria-hidden="true"
-        className="absolute top-[14px] right-[18px] bottom-[6px] left-4"
-      >
+      <div aria-hidden="true" className={cn("absolute", outlineInsetClass)}>
         <svg
           viewBox={JERSEY_TORSO_VIEWBOX}
           preserveAspectRatio="xMidYMid meet"
@@ -103,10 +109,11 @@ export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
       {letterOverlay !== undefined && letterOverlay !== "" ? (
         <span
           aria-hidden="true"
-          className="text-cream pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif text-[56px] leading-none font-black"
+          className="text-cream pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif leading-none font-black"
           style={{
             fontFamily: "var(--font-display)",
             textShadow: LETTER_TEXT_SHADOW,
+            fontSize: letterFontSize,
           }}
         >
           {letterOverlay}
