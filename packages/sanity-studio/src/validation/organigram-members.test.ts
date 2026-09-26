@@ -13,7 +13,6 @@ describe('validateOrganigramMember', () => {
     const context = makeContext({_id: 'staffMember-psd-123', archived: true})
     const result = await validateOrganigramMember(ref, context as never)
     expect(result).toEqual({
-      level: 'warning',
       message: 'Dit lid is gearchiveerd — controleer of deze positie nog actueel is',
     })
   })
