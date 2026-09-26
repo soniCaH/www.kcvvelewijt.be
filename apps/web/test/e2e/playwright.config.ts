@@ -62,7 +62,16 @@ export default defineConfig({
         command: `pnpm --filter @kcvv/web exec next start -p ${DEV_SERVER_PORT}`,
         url: BASE_URL,
         timeout: 180_000,
-        reuseExistingServer: !process.env.CI,
+        // Never true (#3141 finding 9): `reuseExistingServer` matches by URL
+        // alone, so a hash collision between two worktrees — or any other
+        // process that happens to be listening on this derived port — would
+        // silently test the wrong build instead of failing loudly. This
+        // trades away reusing your OWN already-running server; if one is up,
+        // run against it directly with `BASE_URL=http://localhost:$(pnpm
+        // --filter @kcvv/web run --silent e2e:port) pnpm --filter @kcvv/web
+        // run test:e2e` instead, which skips `webServer` entirely (see
+        // EXTERNAL_BASE_URL above).
+        reuseExistingServer: false,
         stdout: "pipe",
         stderr: "pipe",
       },
