@@ -43,8 +43,13 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
 
       <PageContainer width="index" className="py-12 md:py-16">
         <div className="relative">
-          {/* Corner-anchored jersey illustration. ~140px (Tailwind v4
-              `w-35 h-35` = 35 × 0.25rem = 140px). Centered vertically
+          {/* Corner-anchored jersey illustration, 140px. An explicit
+              arbitrary value, not `h-35 w-35` — `--spacing-35` is
+              already claimed by the theme's "hero image height" token
+              (35rem = 560px, `globals.css`), so the numeric step means
+              something else site-wide; a bare `h-35` here would
+              silently render 4× too large once `<JerseyShirt>` merges
+              `className` with `cn()` (#2777). Centered vertically
               against the text block via `top-1/2 -translate-y-1/2` so
               the shirt's mid-line sits with the subheading rather than
               floating below the CTA. Hidden below 640px so the narrow
@@ -53,7 +58,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
             aria-hidden="true"
             className="pointer-events-none absolute top-1/2 right-0 z-0 hidden -translate-y-1/2 sm:block"
           >
-            <JerseyShirt className="mx-0 h-35 w-35" />
+            <JerseyShirt className="mx-0 h-[140px] w-[140px]" />
           </div>
 
           <div className="relative z-10 max-w-3xl">
