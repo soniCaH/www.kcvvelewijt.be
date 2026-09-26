@@ -22,6 +22,14 @@ export {validateSubjectsCount} from './validation/subjects-count'
 export type {SubjectsCountContext} from './validation/subjects-count'
 export {validateRespondentKey, ALL_RESPONDENTS_KEY} from './validation/respondent-key'
 export type {RespondentKeyContext} from './validation/respondent-key'
+export {
+  validatePullQuoteSpeakerReference,
+  validatePullQuoteExternalName,
+} from './validation/pull-quote-speaker'
+export type {
+  PullQuoteSpeakerReferenceContext,
+  PullQuoteExternalNameContext,
+} from './validation/pull-quote-speaker'
 export {validateContactFields} from './validation/contact-fields'
 export {validateBannerAspectRatio} from './validation/banner-aspect-ratio'
 export {
@@ -37,6 +45,11 @@ export {qaBlock, qaPair, qaPairRespondent} from './qaBlock'
 export {qaSectionDivider} from './blocks/qaSectionDivider'
 export {transferFact} from './transferFact'
 export {eventFact} from './eventFact'
+export {pullQuote} from './pullQuote'
+export {
+  pullQuotePreviewSelect,
+  preparePullQuotePreview,
+} from './preview/pull-quote-preview'
 export {subject} from './subject'
 export {sponsor} from './sponsor'
 export {event} from './event'
@@ -64,6 +77,7 @@ import {qaBlock, qaPair, qaPairRespondent} from './qaBlock'
 import {qaSectionDivider} from './blocks/qaSectionDivider'
 import {transferFact} from './transferFact'
 import {eventFact} from './eventFact'
+import {pullQuote} from './pullQuote'
 import {subject} from './subject'
 import {sponsor} from './sponsor'
 import {event} from './event'
@@ -94,6 +108,7 @@ export const schemaTypes = [
   qaSectionDivider,
   transferFact,
   eventFact,
+  pullQuote,
   subject,
   sponsor,
   event,

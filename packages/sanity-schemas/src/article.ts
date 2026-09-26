@@ -346,6 +346,7 @@ export const article = defineType({
         { type: "qaSectionDivider" },
         { type: "transferFact" },
         { type: "eventFact" },
+        { type: "pullQuote" },
       ],
     }),
     defineField({
