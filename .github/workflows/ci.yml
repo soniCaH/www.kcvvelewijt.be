@@ -445,21 +445,30 @@ jobs:
   # a PR that changes no story would wait forever. This job always reports,
   # under one fixed name. Skipped upstream counts as passing (no visual change,
   # docs-only, or RUN_VISUAL_REGRESSION off); failed or cancelled does not.
+  # `always()`, not `!cancelled()`: a cancelled run must fail the gate, never
+  # skip it, because a skipped required check counts as passing.
   # `storybook-build` is in `needs` so a broken story import blocks the merge,
-  # not only the deploy (#3177).
+  # not only the deploy (#3177) — when it runs: the `visual` filter decides,
+  # and a `packages/**`-only change is left to `quality-checks`' type-check.
   visual-regression-gate:
     name: Visual Regression
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
       [changes, visual-regression-changes, storybook-build, visual-regression]
-    if: ${{ !cancelled() }}
+    if: always()
     permissions: {}
+    env:
+      RESULTS: ${{ join(needs.*.result, ', ') }}
+      RUN_VR: ${{ vars.RUN_VISUAL_REGRESSION }}
     steps:
+      - name: Warn when the visual layer is switched off
+        if: vars.RUN_VISUAL_REGRESSION != 'true'
+        run: echo "::warning::RUN_VISUAL_REGRESSION is '$RUN_VR', not 'true' — this green check verified nothing."
       - name: Fail if any visual job failed or was cancelled
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: |
-          echo "::error::A visual job failed or was cancelled: ${{ join(needs.*.result, ', ') }}"
+          echo "::error::A visual job failed or was cancelled: $RESULTS"
           exit 1
 
   vr-diff-comment:
