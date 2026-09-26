@@ -157,7 +157,7 @@ jobs:
         run: pnpm --filter @kcvv/web run test:storybook
 
       - name: Lint API
-        run: npx turbo lint --filter=@kcvv/api
+        run: npx turbo lint --filter=@kcvv/api --filter=@kcvv/api-contract
 
       - name: Type check API
         run: npx turbo type-check --filter=@kcvv/api
@@ -169,7 +169,7 @@ jobs:
         run: npx turbo test --filter=@kcvv/api-contract
 
       - name: Lint + type check Studio
-        run: npx turbo lint type-check --filter=@kcvv/studio --filter=@kcvv/studio-staging --filter=@kcvv/sanity-studio
+        run: npx turbo lint type-check --filter=@kcvv/studio --filter=@kcvv/studio-staging --filter=@kcvv/sanity-studio --filter=@kcvv/sanity-schemas
 
       - name: Run Studio UI tests
         run: npx turbo test --filter=@kcvv/sanity-studio
