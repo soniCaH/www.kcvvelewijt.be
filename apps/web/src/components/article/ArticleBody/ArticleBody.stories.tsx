@@ -270,6 +270,32 @@ const ALL_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
   }),
 ];
 
+// The three speaker-resolution cases neither AllPullQuote (external only)
+// nor WithPullQuote (a photo-carrying staffMember) covers (#2517 review):
+// a `player` speaker (photo + position), a photo-less `staffMember`
+// (monogram fallback), and a nameless quote (no speaker, no external name).
+const PULL_QUOTE_SPEAKER_CASES_CONTENT: PortableTextBlock[] = [
+  pullQuoteBlock("We geven nooit op, tot de laatste minuut.", {
+    speaker: {
+      _type: "player",
+      firstName: "Maxim",
+      lastName: "Breugelmans",
+      position: "Aanvaller",
+      transparentImageUrl: fixtureImage("player-portrait", 0),
+    },
+  }),
+  pullQuoteBlock("De jeugdwerking is het fundament van deze club.", {
+    speaker: {
+      _type: "staffMember",
+      firstName: "Anouk",
+      lastName: "De Wit",
+      functionTitle: "Bestuur",
+      // No photo field at all — <SubjectAvatar> falls back to the monogram.
+    },
+  }),
+  pullQuoteBlock("Soms is stilte de beste reactie."),
+];
+
 const WITH_PULL_QUOTE_CONTENT: PortableTextBlock[] = [
   paragraph(
     "Wim Govaerts opent de deur van zijn kantoor met een lach. Het tweede seizoen op de bank loopt op zijn einde, en het verschil met vorig jaar is voelbaar.",
@@ -491,6 +517,16 @@ export const HeadingOnly: Story = {
 export const AllPullQuote: Story = {
   args: {
     content: ALL_PULL_QUOTE_CONTENT,
+  },
+};
+
+// The three speaker-resolution cases AllPullQuote/WithPullQuote don't cover
+// (#2517 review): a `player` speaker (photo + position), a photo-less
+// `staffMember` (renders the monogram, not a photo), and a nameless quote
+// (no speaker, no externalName — no attribution row at all, #2515 rule 1).
+export const PullQuoteSpeakerCases: Story = {
+  args: {
+    content: PULL_QUOTE_SPEAKER_CASES_CONTENT,
   },
 };
 
