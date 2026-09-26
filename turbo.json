@@ -85,6 +85,13 @@
         "SANITY_API_READ_TOKEN"
       ]
     },
+    // tsgo reads apps/web/src/lib/sanity/sanity.types.ts, which typegen
+    // writes. Without this edge the two run in parallel and type-check can
+    // pass on the old types (#3155). lint and test do not need it: eslint here
+    // is not type-aware, and Vitest erases the type-only imports.
+    "@kcvv/web#type-check": {
+      "dependsOn": ["^build", "@kcvv/studio#typegen"]
+    },
     "@kcvv/studio#deploy": {
       "dependsOn": ["build"],
       "cache": false

@@ -11,7 +11,7 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 | Sanity Studio (stg) | `apps/studio-staging/`     | sanity.io          | Static (lint)[^studio-staging]                                                            |
 | Sanity schemas      | `packages/sanity-schemas/` | (library)          | Static[^sanity-schemas]                                                                   |
 | Sanity Studio UI    | `packages/sanity-studio/`  | (library)          | Static, Vitest                                                                            |
-| API contract        | `packages/api-contract/`   | (library)          | Static, Build[^api-contract]                                                              |
+| API contract        | `packages/api-contract/`   | (library)          | Static, Vitest, Build[^api-contract]                                                      |
 | BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]                                             |
 | Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                            |
 
