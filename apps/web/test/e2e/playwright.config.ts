@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+import { derivePort } from "../../scripts/e2e-dev-port.mjs";
+
 // Phase 0.5 — Page-level Playwright e2e suite.
 // PRD: docs/prd/page-level-testing-rework.md
 // This config is dedicated to the e2e suite and is NOT shared with the
@@ -7,7 +9,13 @@ import { defineConfig, devices } from "@playwright/test";
 // VR config at apps/web/playwright.config.ts.
 
 const EXTERNAL_BASE_URL = process.env.BASE_URL;
-const BASE_URL = EXTERNAL_BASE_URL ?? "http://localhost:3000";
+// A wave's second lane must never reuse another worktree's dev server under
+// `webServer.reuseExistingServer` below — it would silently test the wrong
+// build (#3141 member 5). `derivePort` keys off this file's own absolute
+// path, which differs by worktree, so the port does too; the SAME worktree
+// still gets the same port (and therefore a legitimate reuse) run after run.
+const DEV_SERVER_PORT = derivePort(__dirname);
+const BASE_URL = EXTERNAL_BASE_URL ?? `http://localhost:${DEV_SERVER_PORT}`;
 
 export default defineConfig({
   testDir: ".",
@@ -47,7 +55,11 @@ export default defineConfig({
     : {
         // Run from the workspace via pnpm filter so cwd doesn't matter.
         // Local devs invoke from `apps/web/`; CI invokes from repo root.
-        command: "pnpm --filter @kcvv/web exec next start",
+        // `-p` binds this worktree's own derived port (#3141 member 5) — a
+        // bare `next start` would always bind :3000, and a second worktree's
+        // `reuseExistingServer` would then quietly reuse it and test the
+        // wrong build.
+        command: `pnpm --filter @kcvv/web exec next start -p ${DEV_SERVER_PORT}`,
         url: BASE_URL,
         timeout: 180_000,
         reuseExistingServer: !process.env.CI,
