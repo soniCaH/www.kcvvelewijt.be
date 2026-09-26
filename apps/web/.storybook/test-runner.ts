@@ -477,10 +477,52 @@ const config: TestRunnerConfig = {
   // which other story rendered first in the same `.stories.tsx` file. Without
   // this, every story past the first inherits whatever state the previous
   // story left behind.
-  async preVisit(page) {
+  async preVisit(page, context) {
     await page.evaluate(() => {
       (globalThis as { __VR_RESET_PRNG__?: () => void }).__VR_RESET_PRNG__?.();
     });
+
+    // Honour a story's `globals: { viewport: { value: "…" } }` (#3188,
+    // review round 2 finding 3) — @storybook/addon-vitest's own
+    // `setViewport()` already does this before mount (`testStory()` in
+    // `@storybook/addon-vitest/dist/vitest-plugin/test-utils.js`); this
+    // mirrors it for test-runner so a `play()` fixture that depends on a
+    // named viewport (`StandingsTable`'s `StickyColumnsPinned`,
+    // `OrganigramExplorer`'s `ZoomOverflowsTheStage`) gets the SAME real
+    // geometry regardless of which runner visits it, instead of needing a
+    // `vitest-play-only` opt-out that hides it from this one entirely.
+    // `getStoryContext` reads Storybook's own `storyStore.loadStory()` —
+    // safe to call here even though "the story is not rendered in the
+    // browser" yet (test-runner's own preVisit doc comment): that ONLY
+    // means not mounted, not that the preview bundle (loaded once by
+    // `prepare()`'s `page.goto`) hasn't registered the story's context.
+    const story = await getStoryContext(page, context);
+    const storyGlobals = (
+      story as { storyGlobals?: { viewport?: { value?: string } } }
+    ).storyGlobals;
+    const viewportValue = storyGlobals?.viewport?.value;
+    if (viewportValue) {
+      const viewportOptions = (
+        story.parameters?.viewport as
+          | { options?: Record<string, { styles?: Record<string, string> }> }
+          | undefined
+      )?.options;
+      const entry = viewportOptions?.[viewportValue];
+      const width = entry?.styles?.width
+        ? Number.parseInt(entry.styles.width, 10)
+        : undefined;
+      const height = entry?.styles?.height
+        ? Number.parseInt(entry.styles.height, 10)
+        : undefined;
+      if (width && height) {
+        await page.setViewportSize({ width, height });
+      }
+      // An unresolvable value (a typo, or "responsive"/"reset", which carry
+      // no `styles` entry at all) is left alone — postVisit's own per-
+      // viewport loop still drives the real capture size for a `vr`-tagged
+      // story either way, and a non-`vr` story with a bad value simply
+      // renders at whatever size `page` already had.
+    }
   },
   async postVisit(page, context) {
     // Covers the mount phase — anything the story pulled in between
@@ -493,17 +535,22 @@ const config: TestRunnerConfig = {
       viewports?: ReadonlyArray<ViewportName>;
     };
     const storyTags = (story.tags ?? []) as readonly string[];
-    // Any story without the `vr` tag (#3188) — `Pages/*` full-page
-    // compositions (design references only, never VR-tested — see
-    // apps/web/CLAUDE.md's VR footnote), plus any other component whose
-    // story was never given the `vr` tag at all. A dedicated CI step
-    // (`vr:axe` in package.json, `--excludeTags vr`) visits exactly this
-    // set, reusing this same test-runner config — so `postVisit` skips the
-    // screenshot for it (no baseline exists, and none should ever be
-    // added) while letting the a11y check above run to completion. This
-    // mirrors the CLI selection exactly rather than depending on a second,
-    // hand-added tag that a new non-`vr` story could forget to carry.
-    const isNonVr = !storyTags.includes("vr");
+    // `vr:run` (#3188) now visits EVERY story, sharded — one runner
+    // decides per story whether to screenshot or just axe-check, instead
+    // of two complementary CLI selections (a `--includeTags vr
+    // --excludeTags vr-skip` pixel run plus a separate `--excludeTags vr`
+    // axe-only run) that between them missed any story combining an
+    // inherited `vr` tag with a per-story `vr-skip` override (7 such
+    // stories across 6 files got no axe check at all under the old split).
+    // A story screenshots only when it carries `vr`, does NOT carry
+    // `vr-skip`, and does not set `parameters.vr.disable` — every other
+    // story (no `vr` tag at all — `Pages/*` and any component that never
+    // got tagged — or `vr-skip`, or `vr.disable`) still gets the a11y
+    // check above (Storybook's own render lifecycle populates it
+    // regardless of what postVisit does), just no screenshot and no
+    // baseline.
+    const shouldScreenshot =
+      storyTags.includes("vr") && !storyTags.includes("vr-skip");
     // Opt-in structural assertions (#2861, see test/vr/structural-assertions.ts)
     // — a story tag beyond the pixel-snapshot comparison below. Resolved
     // ahead of the `vr.disable` early-return so a story can't silently
@@ -511,14 +558,14 @@ const config: TestRunnerConfig = {
     const applicableAssertions = STRUCTURAL_ASSERTIONS.filter((assertion) =>
       storyTags.includes(assertion.tag),
     );
-    if (vrParams.disable || isNonVr) {
+    if (vrParams.disable || !shouldScreenshot) {
       if (applicableAssertions.length > 0) {
         throw new Error(
           `[VR] Story "${context.id}" is tagged with structural assertion(s) ` +
             `(${applicableAssertions.map((a) => a.tag).join(", ")}) but also ` +
-            `sets parameters.vr.disable = true (or carries no "vr" tag), ` +
-            `which returns before those assertions ever run. Remove the tag ` +
-            `or the opt-out.`,
+            `sets parameters.vr.disable = true (or carries no "vr" tag, or ` +
+            `carries "vr-skip"), which returns before those assertions ever ` +
+            `run. Remove the tag or the opt-out.`,
         );
       }
       return;
