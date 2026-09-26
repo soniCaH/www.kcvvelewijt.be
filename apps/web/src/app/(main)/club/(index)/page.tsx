@@ -89,7 +89,7 @@ export default function ClubPage() {
                 level={2}
                 size="display-sm"
                 emphasis={{ text: "?", tone: "warm" }}
-                className="mt-1.5 mb-0"
+                className="mt-1.5"
               >
                 Vragen over de club?
               </EditorialHeading>

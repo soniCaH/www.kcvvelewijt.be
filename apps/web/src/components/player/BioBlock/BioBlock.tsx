@@ -81,7 +81,7 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
             : "max-w-[var(--container-prose)] grid-cols-1",
         )}
       >
-        <div className="prose-bio text-ink font-body text-base leading-relaxed">
+        <div className="text-ink font-body text-base leading-relaxed">
           <PortableText value={bio} components={components} />
         </div>
         {hasPullquote ? (

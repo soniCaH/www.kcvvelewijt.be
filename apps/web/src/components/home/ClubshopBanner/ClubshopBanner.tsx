@@ -43,11 +43,10 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
 
       <PageContainer width="index" className="py-12 md:py-16">
         <div className="relative">
-          {/* Corner-anchored jersey illustration. 140px as an arbitrary
-              value: `h-35` resolves to the `--spacing-35` token (35rem)
-              in globals.css, not 140px. Centered vertically against the
-              text block via `top-1/2 -translate-y-1/2` so the shirt's
-              mid-line sits with the subheading rather than floating
+          {/* Corner-anchored jersey illustration, 140px as an explicit
+              size rather than a spacing-scale step. Centered vertically
+              against the text block via `top-1/2 -translate-y-1/2` so the
+              shirt's mid-line sits with the subheading rather than floating
               below the CTA. Hidden below 640px so the narrow viewport
               doesn't force the heading to wrap around it. */}
           <div

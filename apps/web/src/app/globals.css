@@ -345,14 +345,6 @@
   --letter-spacing-label: 0.14em; /* uppercase kicker / label */
   --letter-spacing-caps: 0.08em; /* uppercase links / footer captions */
 
-  /* ===== Spacing ===== */
-
-  --spacing-0_75: 0.75rem; /* 12px - mobile padding */
-  --spacing-15: 3.75rem; /* 60px */
-  --spacing-17_5: 4.375rem; /* 70px */
-  --spacing-22_5: 5.625rem; /* 90px */
-  --spacing-35: 35rem; /* Hero image height */
-
   /* ===== Breakpoints ===== */
 
   --breakpoint-sm: 640px; /* Tailwind sm */

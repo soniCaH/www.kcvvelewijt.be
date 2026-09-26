@@ -141,7 +141,7 @@ export function ErrorState({
           level={1}
           size="display-xl"
           emphasis={{ text: accent }}
-          className="mt-2 mb-0"
+          className="mt-2"
         >
           {pun}
         </EditorialHeading>

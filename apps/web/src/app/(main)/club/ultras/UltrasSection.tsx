@@ -40,7 +40,6 @@ export function UltrasSection({
           level={2}
           size="display-md"
           emphasis={accent ? { text: accent } : undefined}
-          className="mb-0"
         >
           {heading}
         </EditorialHeading>

@@ -73,8 +73,7 @@ export const TeamEnrolmentCta = ({
           letter. Hidden below 640px (mirrors <ClubshopBanner>) so the narrow
           viewport gets a clean full-width stack instead of a crowded gutter.
           Decorative; the aria-hidden silhouette lives inside <JerseyShirt>.
-          140px as an arbitrary value: `h-35` resolves to the `--spacing-35`
-          token (35rem) in globals.css, not 140px. */}
+          140px as an explicit size rather than a spacing-scale step. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute top-5 right-6 z-0 hidden sm:block"

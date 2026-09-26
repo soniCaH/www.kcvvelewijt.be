@@ -292,7 +292,7 @@ function MinimalOpening({
           // clear — otherwise it strands the h1 8px below the card's own
           // padding for nothing (a gap the kicker's absence should not
           // leave behind).
-          className={cn(kicker ? "mt-2" : undefined, "mb-0 hyphens-auto")}
+          className={cn(kicker ? "mt-2" : undefined, "hyphens-auto")}
         >
           {headline}
         </EditorialHeading>
@@ -371,7 +371,6 @@ function DarkBand({
               size="display-2xl"
               tone="cream"
               emphasis={headlineEmphasis(headline, accent, "dark")}
-              className="mb-0"
             >
               {headline}
             </EditorialHeading>
@@ -453,16 +452,15 @@ export function PageHero(props: PageHeroProps) {
     <div>
       {kicker ? <Kicker tone="cream">{kicker}</Kicker> : null}
 
-      {/* `mb-0` neutralises the global base `h1–h6 { margin-bottom: 1em }`,
-          which at display-xl is ~72px of dead space — the hero owns its own
-          rhythm (the lead's `mt-3.5` / the divider's `mt-4`). `mt-2` only
-          applies when a kicker actually rendered above — otherwise it is a
-          gap clearing nothing. */}
+      {/* `<EditorialHeading>` carries no margin of its own (#2552) — the
+          hero owns its own rhythm (the lead's `mt-3.5` / the divider's
+          `mt-4`). `mt-2` only applies when a kicker actually rendered above
+          — otherwise it is a gap clearing nothing. */}
       <EditorialHeading
         level={1}
         size={headingSize}
         emphasis={headlineEmphasis(headline, accent, "cream")}
-        className={cn(kicker ? "mt-2" : undefined, "mb-0")}
+        className={kicker ? "mt-2" : undefined}
       >
         {headline}
       </EditorialHeading>

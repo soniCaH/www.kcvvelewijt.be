@@ -144,7 +144,6 @@ export default async function HulpHubPage() {
               level={2}
               size="display-md"
               emphasis={{ text: "vragen" }}
-              className="mb-0"
             >
               Veelgestelde vragen
             </EditorialHeading>
@@ -179,7 +178,7 @@ export default async function HulpHubPage() {
               level={2}
               size="display-md"
               emphasis={{ text: "wie-is-wie" }}
-              className="mt-2 mb-0"
+              className="mt-2"
             >
               Het organigram — wie-is-wie
             </EditorialHeading>
