@@ -1,5 +1,6 @@
 export {
   resolveSubject,
+  resolvePersonPhotoUrl,
   resolvePairRespondent,
   deriveSubjectFirstName,
   joinFirstNames,

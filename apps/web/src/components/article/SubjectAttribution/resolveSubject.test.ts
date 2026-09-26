@@ -1,12 +1,31 @@
 import { describe, it, expect } from "vitest";
 import {
   resolveSubject,
+  resolvePersonPhotoUrl,
   deriveSubjectFirstName,
   joinFirstNames,
   buildUnanimousAttribution,
   ALL_RESPONDENTS_KEY,
   type IndexedSubject,
 } from "./resolveSubject";
+
+describe("resolvePersonPhotoUrl", () => {
+  it("prefers the editorial photo over the synced one", () => {
+    expect(resolvePersonPhotoUrl("editorial.webp", "synced.webp")).toBe(
+      "editorial.webp",
+    );
+  });
+
+  it("falls back to the synced photo when there is no editorial one", () => {
+    expect(resolvePersonPhotoUrl(null, "synced.webp")).toBe("synced.webp");
+    expect(resolvePersonPhotoUrl(undefined, "synced.webp")).toBe("synced.webp");
+  });
+
+  it("returns null when neither photo is set", () => {
+    expect(resolvePersonPhotoUrl(null, null)).toBeNull();
+    expect(resolvePersonPhotoUrl(undefined, undefined)).toBeNull();
+  });
+});
 
 describe("resolveSubject", () => {
   describe("player branch", () => {

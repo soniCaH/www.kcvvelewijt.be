@@ -1,12 +1,19 @@
+import { resolvePersonPhotoUrl } from "@/components/article/SubjectAttribution";
+
 /**
  * Resolves a `pullQuote.speaker` reference (dereferenced by the article
  * repository GROQ projection) into the flat shape `<PullQuote>`'s
  * attribution row needs. Mirrors `resolveSubject`'s player/staff branches
- * (`components/article/SubjectAttribution/resolveSubject.ts`) — same photo
- * fallback order — but discriminates on the dereferenced `_type` directly
- * rather than a `subject`-union `kind` field, because `pullQuote.speaker`
- * is a plain reference to `player` | `staffMember`, not the `subject`
- * object type the interview flow uses.
+ * (`components/article/SubjectAttribution/resolveSubject.ts`) — same shared
+ * `resolvePersonPhotoUrl` fallback — but discriminates on the dereferenced
+ * `_type` directly rather than a `subject`-union `kind` field, because
+ * `pullQuote.speaker` is a plain reference to `player` | `staffMember`, not
+ * the `subject` object type the interview flow uses.
+ *
+ * `role` deliberately reads `position` for a player, not `resolveSubject`'s
+ * `#{jerseyNumber}` — the brief is explicit that a Citaat's role comes from
+ * the referenced document, and a jersey number is a match-lineup caption,
+ * not an attribution for something someone said (#2517 review).
  */
 
 export interface PullQuoteSpeakerRef {
@@ -55,7 +62,10 @@ export function resolvePullQuoteSpeaker(
       name,
       firstName: firstName || name,
       role: speaker.position ?? "",
-      photoUrl: speaker.transparentImageUrl ?? speaker.psdImageUrl ?? null,
+      photoUrl: resolvePersonPhotoUrl(
+        speaker.transparentImageUrl,
+        speaker.psdImageUrl,
+      ),
     };
   }
 
@@ -64,7 +74,7 @@ export function resolvePullQuoteSpeaker(
       name,
       firstName: firstName || name,
       role: speaker.functionTitle ?? "",
-      photoUrl: speaker.photoUrl ?? speaker.psdImageUrl ?? null,
+      photoUrl: resolvePersonPhotoUrl(speaker.photoUrl, speaker.psdImageUrl),
     };
   }
 

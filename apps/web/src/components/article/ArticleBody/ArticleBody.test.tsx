@@ -429,7 +429,7 @@ describe("<ArticleBody>", () => {
     // block, no lists, an optional `accent`-marked span) — not a plain
     // string. `accented`, when given, must be a literal substring of `text`.
     function quoteBodyPT(text: string, accented?: string): PortableTextBlock[] {
-      const key = "pq-body";
+      const key = `pq-body-${text.slice(0, 8).replace(/\s/g, "-")}`;
       if (!accented) {
         return [
           {
@@ -488,6 +488,21 @@ describe("<ArticleBody>", () => {
         />,
       );
       expect(container.querySelector("[data-pull-quote-tone]")).toBeNull();
+    });
+
+    it("renders only the first block when legacy/malformed data carries more than one (#2517 review — schema caps at .max(1), renderer defends it too)", () => {
+      const content = [
+        pullQuoteBlock({
+          body: [
+            ...quoteBodyPT("Eerste alinea."),
+            ...quoteBodyPT("Tweede alinea die er niet had mogen bijkomen."),
+          ],
+        }),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const blockquote = container.querySelector("blockquote");
+      expect(blockquote?.textContent).toBe("Eerste alinea.");
+      expect(blockquote?.textContent).not.toContain("Tweede alinea");
     });
 
     it("renders <PullQuote> with avatar slot when the `speaker` reference resolves to a player", () => {
