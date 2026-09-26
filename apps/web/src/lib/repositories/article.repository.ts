@@ -18,8 +18,11 @@ import { formatArticleDate } from "../utils/dates";
 // player/staffMember projections below: separate optional photo fields, no
 // GROQ-side coalesce (the web-side `resolvePullQuoteSpeaker` applies the
 // photo fallback order), discriminated at render time by the dereferenced
-// `_type`. Shared between `ARTICLES_QUERY` and `ARTICLE_BY_SLUG_QUERY` so
-// the two `body[]` projections don't drift.
+// `_type`. `ARTICLE_BY_SLUG_QUERY` only (#2517 review) — `ARTICLES_QUERY`
+// powers `findAll()`, whose `ArticleVM` doesn't even carry `body` (its
+// `Pick<...>` list omits it entirely; nothing renders `<ArticleBody>` or
+// computes reading time off a `findAll()` row), so dereferencing a speaker
+// there is pure unread payload on every homepage/listing fetch.
 const PULL_QUOTE_SPEAKER_PROJECTION = `"speaker": select(_type == "pullQuote" => speaker->{ _type, firstName, lastName, position, "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max", functionTitle }, null)`;
 
 // Phase 4.C.2 — Round 2 S.2 lock: featured articles surface first in the
@@ -57,7 +60,7 @@ export const ARTICLES_QUERY =
     location, address, ageGroup, competitionTag,
     ticketUrl, ticketLabel
   },
-  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), ${PULL_QUOTE_SPEAKER_PROJECTION}, markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }
+  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }
 }`);
 
 const ARTICLE_TAGS_QUERY = defineQuery(

@@ -1166,7 +1166,7 @@ export type AllSanitySchemaTypes =
 
 // Source: ../web/src/lib/repositories/article.repository.ts
 // Variable: ARTICLES_QUERY
-// Query: *[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),  "coverImageLqip": coverImage.asset->metadata.lqip,  articleType,  subjects[]{    _key, kind,    playerRef->{      _id, firstName, lastName, jerseyNumber, position,      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      psdId    },    staffRef->{      _id, firstName, lastName, functionTitle,      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max"    },    customName, customRole,    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  "firstTransferFact": body[_type == "transferFact"][0]{    direction, playerName, position, age,    otherClubName, until, note, noteAttribution, kcvvContext  },  "firstEventFact": body[_type == "eventFact"][0]{    title, date, endDate, startTime, endTime,    location, address, ageGroup, competitionTag,    ticketUrl, ticketLabel  },  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "speaker": select(_type == "pullQuote" => speaker->{ _type, firstName, lastName, position, "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max", functionTitle }, null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }}
+// Query: *[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),  "coverImageLqip": coverImage.asset->metadata.lqip,  articleType,  subjects[]{    _key, kind,    playerRef->{      _id, firstName, lastName, jerseyNumber, position,      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",      psdId    },    staffRef->{      _id, firstName, lastName, functionTitle,      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max"    },    customName, customRole,    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"  },  "firstTransferFact": body[_type == "transferFact"][0]{    direction, playerName, position, age,    otherClubName, until, note, noteAttribution, kcvvContext  },  "firstEventFact": body[_type == "eventFact"][0]{    title, date, endDate, startTime, endTime,    location, address, ageGroup, competitionTag,    ticketUrl, ticketLabel  },  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }}
 export type ARTICLES_QUERY_RESULT = Array<{
   id: string;
   title: string;
@@ -1269,7 +1269,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         } | null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1334,7 +1333,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
       }
     | {
         _key: string;
@@ -1385,7 +1383,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1404,7 +1401,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1418,7 +1414,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1438,34 +1433,7 @@ export type ARTICLES_QUERY_RESULT = Array<{
           _type: "block";
           _key: string;
         }>;
-        speaker:
-          | {
-              _type: "player";
-              firstName: string | null;
-              lastName: string | null;
-              position:
-                | "Aanvaller"
-                | "Keeper"
-                | "Middenvelder"
-                | "Speler"
-                | "Verdediger"
-                | null;
-              transparentImageUrl: string | null;
-              psdImageUrl: string | null;
-              photoUrl: null;
-              functionTitle: null;
-            }
-          | {
-              _type: "staffMember";
-              firstName: string | null;
-              lastName: string | null;
-              position: null;
-              transparentImageUrl: null;
-              psdImageUrl: string | null;
-              photoUrl: string | null;
-              functionTitle: string | null;
-            }
-          | null;
+        speaker?: PlayerReference | StaffMemberReference;
         externalName?: string;
         externalRole?: string;
         externalSource?: string;
@@ -1494,7 +1462,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1522,7 +1489,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1552,7 +1518,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
         asset: null;
         videoAsset: null;
         videoPosterUrl: null;
-        speaker: null;
         markDefs: null;
       }
     | {
@@ -1585,7 +1550,6 @@ export type ARTICLES_QUERY_RESULT = Array<{
           originalFilename: string | null;
         } | null;
         videoPosterUrl: string | null;
-        speaker: null;
         markDefs: null;
       }
   > | null;
@@ -2979,7 +2943,7 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
 // Query TypeMap
 declare global {
   interface SanityQueries {
-    '*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  "coverImageLqip": coverImage.asset->metadata.lqip,\n  articleType,\n  subjects[]{\n    _key, kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber, position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName, customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  "firstTransferFact": body[_type == "transferFact"][0]{\n    direction, playerName, position, age,\n    otherClubName, until, note, noteAttribution, kcvvContext\n  },\n  "firstEventFact": body[_type == "eventFact"][0]{\n    title, date, endDate, startTime, endTime,\n    location, address, ageGroup, competitionTag,\n    ticketUrl, ticketLabel\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "speaker": select(_type == "pullQuote" => speaker->{ _type, firstName, lastName, position, "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max", functionTitle }, null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }\n}': ARTICLES_QUERY_RESULT;
+    '*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  "coverImageLqip": coverImage.asset->metadata.lqip,\n  articleType,\n  subjects[]{\n    _key, kind,\n    playerRef->{\n      _id, firstName, lastName, jerseyNumber, position,\n      "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      psdId\n    },\n    staffRef->{\n      _id, firstName, lastName, functionTitle,\n      "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max"\n    },\n    customName, customRole,\n    "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"\n  },\n  "firstTransferFact": body[_type == "transferFact"][0]{\n    direction, playerName, position, age,\n    otherClubName, until, note, noteAttribution, kcvvContext\n  },\n  "firstEventFact": body[_type == "eventFact"][0]{\n    title, date, endDate, startTime, endTime,\n    location, address, ageGroup, competitionTag,\n    ticketUrl, ticketLabel\n  },\n  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }\n}': ARTICLES_QUERY_RESULT;
     'array::unique(*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])': ARTICLE_TAGS_QUERY_RESULT;
     '*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && select($category == "" => true, $category in tags)] | order(publishedAt desc) [$offset...$end] {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []), articleType,\n  "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))\n}': ARTICLES_PAGINATED_QUERY_RESULT;
     '*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {\n  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),\n  "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))\n}': RELATED_ARTICLES_QUERY_RESULT;
