@@ -115,23 +115,25 @@ describe("SectionHeader", () => {
       const { container } = render(
         <SectionHeader title="Nieuws" className="mb-5" />,
       );
-      expect(container.querySelector("header")).toHaveClass("mb-5");
+      expect(
+        container.querySelector('[data-testid="section-header"]'),
+      ).toHaveClass("mb-5");
     });
   });
 
   describe("Ruled variant", () => {
     it("does not render ruled markup by default", () => {
       const { container } = render(<SectionHeader title="Nieuws" />);
-      expect(container.querySelector("header")).not.toHaveAttribute(
-        "data-ruled",
-      );
+      expect(
+        container.querySelector('[data-testid="section-header"]'),
+      ).not.toHaveAttribute("data-ruled");
     });
 
     it("renders hairlines flanking the title when ruled and within the length limit", () => {
       const { container } = render(
         <SectionHeader title="Negentien ploegen, van U6 tot U21" ruled />,
       );
-      const header = container.querySelector("header");
+      const header = container.querySelector('[data-testid="section-header"]');
       expect(header).toHaveAttribute("data-ruled", "true");
       // Centring only activates from the `lg` breakpoint — see
       // RULED_TITLE_MAX_LENGTH's doc comment for why a bare (unprefixed)
@@ -156,10 +158,9 @@ describe("SectionHeader", () => {
       const { container } = render(
         <SectionHeader title={boundaryTitle} ruled />,
       );
-      expect(container.querySelector("header")).toHaveAttribute(
-        "data-ruled",
-        "true",
-      );
+      expect(
+        container.querySelector('[data-testid="section-header"]'),
+      ).toHaveAttribute("data-ruled", "true");
     });
 
     it("falls back to the default layout one character past the length limit (boundary: 41 chars)", () => {
@@ -167,12 +168,12 @@ describe("SectionHeader", () => {
       const { container } = render(
         <SectionHeader title={tooLongTitle} ruled />,
       );
-      expect(container.querySelector("header")).not.toHaveAttribute(
-        "data-ruled",
-      );
-      expect(container.querySelector("header")).not.toHaveClass(
-        "lg:items-center",
-      );
+      expect(
+        container.querySelector('[data-testid="section-header"]'),
+      ).not.toHaveAttribute("data-ruled");
+      expect(
+        container.querySelector('[data-testid="section-header"]'),
+      ).not.toHaveClass("lg:items-center");
     });
 
     it("warns in development when a too-long title requests the ruled treatment", () => {

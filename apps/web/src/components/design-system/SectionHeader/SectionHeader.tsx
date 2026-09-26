@@ -200,7 +200,16 @@ export const SectionHeader = ({
   );
 
   return (
-    <header
+    // A plain `<div>`, not `<header>` (#3188 — axe `landmark-no-duplicate-banner`
+    // / `landmark-unique`): a repeated per-section heading has no page-banner
+    // semantics, but `<header>`'s implicit role IS "banner" unless it sits
+    // inside sectioning content (`<article>`/`<aside>`/`<main>`/`<nav>`/
+    // `<section>`) — callers like `<ContactPage>` render two of these inside
+    // plain `<PageContainer>` wrappers, so both picked up the same implicit
+    // landmark as the page's own `<PageHero>` header. `data-testid` replaces
+    // the tag-name query every existing test used.
+    <div
+      data-testid="section-header"
       className={cn(
         // #2552 rule 5: the section-header primitive owns the air below a
         // section heading, at mb-8 sm:mb-10 (32/40px) — nothing above 640px
@@ -216,6 +225,6 @@ export const SectionHeader = ({
         <MonoLabelRow items={kicker} tone={isDark ? "cream" : "ink"} />
       )}
       {row}
-    </header>
+    </div>
   );
 };
