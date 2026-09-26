@@ -50,32 +50,19 @@ const STRIPE_STROKE_WIDTH = 2;
 const LETTER_TEXT_SHADOW =
   "2px 2px 0 var(--color-ink), -1px -1px 0 var(--color-ink), 1px -1px 0 var(--color-ink), -1px 1px 0 var(--color-ink)";
 
-// Every layer below has two forms: a literal 240px-default value, and a
-// computed one (`calc()`/`cqw`) that scales with a caller's `className`.
-// Both resolve to the same geometry at 240px, but a browser rasterises a
-// computed length differently from a literal px — invisible antialiasing
-// noise, but enough to fail a byte-diff. The literal form stays the
-// default so a caller without a `className` never moves a pixel; the
-// computed form only applies once one is passed (#2777).
-const hasSizeOverride = (className?: string) => Boolean(className);
-
 export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
-  const scaled = hasSizeOverride(className);
-  const figureClass = scaled
-    ? cn("relative mx-auto my-0 h-60 w-60 @container", className)
-    : "relative mx-auto my-0 h-60 w-60";
-  const fillInsetClass = scaled
-    ? "top-[calc(100%*12/240)] right-[calc(100%*22/240)] bottom-[calc(100%*4/240)] left-[calc(100%*12/240)]"
-    : "top-3 right-[22px] bottom-1 left-3";
-  const outlineInsetClass = scaled
-    ? "top-[calc(100%*14/240)] right-[calc(100%*18/240)] bottom-[calc(100%*6/240)] left-[calc(100%*16/240)]"
-    : "top-[14px] right-[18px] bottom-[6px] left-4";
-  const letterFontSize = scaled ? "calc(100cqw * 56 / 240)" : "56px";
+  const figureClass = cn(
+    "@container relative mx-auto my-0 h-60 w-60",
+    className,
+  );
   return (
     <figure aria-hidden="true" className={figureClass}>
+      {/* Insets and the letter's font-size (below) are proportional to the
+          240px design, not fixed px, so the whole figure scales with
+          whatever size a caller's `className` asks for. */}
       <div
         aria-hidden="true"
-        className={cn("absolute opacity-95 mix-blend-multiply", fillInsetClass)}
+        className="absolute top-[calc(100%*12/240)] right-[calc(100%*22/240)] bottom-[calc(100%*4/240)] left-[calc(100%*12/240)] opacity-95 mix-blend-multiply"
       >
         <svg
           viewBox={JERSEY_TORSO_VIEWBOX}
@@ -85,7 +72,10 @@ export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
           <path d={JERSEY_TORSO_FILL_PATH} fill="var(--color-ink)" />
         </svg>
       </div>
-      <div aria-hidden="true" className={cn("absolute", outlineInsetClass)}>
+      <div
+        aria-hidden="true"
+        className="absolute top-[calc(100%*14/240)] right-[calc(100%*18/240)] bottom-[calc(100%*6/240)] left-[calc(100%*16/240)]"
+      >
         <svg
           viewBox={JERSEY_TORSO_VIEWBOX}
           preserveAspectRatio="xMidYMid meet"
@@ -113,7 +103,7 @@ export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
           style={{
             fontFamily: "var(--font-display)",
             textShadow: LETTER_TEXT_SHADOW,
-            fontSize: letterFontSize,
+            fontSize: "calc(100cqw * 56 / 240)",
           }}
         >
           {letterOverlay}

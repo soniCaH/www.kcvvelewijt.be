@@ -51,15 +51,12 @@ describe("JerseyShirt", () => {
     expect(figure).not.toHaveClass("h-60", "w-60", "mx-auto");
   });
 
-  it("scales its inner layers with a caller's requested size instead of a fixed px inset (#2777)", () => {
+  it("scales its inner layers proportionally to the figure, not with fixed-px insets", () => {
     // A fixed-px inset only looks right at the 240px default — a caller
     // asking for a smaller figure would slide the outline off the fill and
-    // overflow the letter overlay. Once a caller passes a className, every
-    // inset must be relative (%/cqw), not an absolute px value tuned for
-    // one size.
-    const { container } = render(
-      <JerseyShirt className="h-20 w-20" letterOverlay="U11" />,
-    );
+    // overflow the letter overlay. Every inset must be relative (%/cqw), not
+    // an absolute px value tuned for one size.
+    const { container } = render(<JerseyShirt letterOverlay="U11" />);
     const insetLayers = container.querySelectorAll('div[aria-hidden="true"]');
     expect(insetLayers.length).toBeGreaterThan(0);
     for (const layer of insetLayers) {
@@ -69,22 +66,5 @@ describe("JerseyShirt", () => {
     const overlay = screen.getByText("U11");
     expect(overlay.style.fontSize).not.toBe("56px");
     expect(overlay.style.fontSize).toContain("cqw");
-  });
-
-  it("keeps the literal 240px-default inner layers when no className is passed (#2777)", () => {
-    // The scaled (%/cqw) form and the literal px form render the same
-    // geometry at 240px but not the same bytes (browser antialiasing on a
-    // computed length differs at the sub-pixel level) — so every caller
-    // that renders the bare default (no className) must keep getting the
-    // literal form, or every existing VR baseline moves for zero reason.
-    const { container } = render(<JerseyShirt letterOverlay="U11" />);
-    const insetLayers = container.querySelectorAll('div[aria-hidden="true"]');
-    expect(insetLayers.length).toBeGreaterThan(0);
-    const hasFixedPxInset = Array.from(insetLayers).some((layer) =>
-      /-\[\d+px\]|\b(?:top|right|bottom|left)-\d+\b/.test(layer.className),
-    );
-    expect(hasFixedPxInset).toBe(true);
-    const overlay = screen.getByText("U11");
-    expect(overlay.style.fontSize).toBe("56px");
   });
 });
