@@ -180,7 +180,7 @@ You are working on GitHub issue #${issue} for the KCVV Elewijt project.
 Your working directory is: ${worktree}
 
 A code review found issues in your implementation. Fix ALL Critical and Important issues listed below.
-After fixing, run: pnpm turbo run lint type-check test build --filter=@kcvv/web
+After fixing, run: pnpm turbo run lint type-check test build --filter=...@kcvv/<workspace you changed>
 Then stage and amend the last commit with the fixes.
 
 ## Review feedback
@@ -240,7 +240,7 @@ ${TDD_SKILL}
 
 IMPORTANT: You are running autonomously. Do NOT ask the user what to do.
 
-1. Run quality checks: pnpm turbo run lint type-check test build --filter=@kcvv/web
+1. Run quality checks: pnpm turbo run lint type-check test build --filter=...@kcvv/<workspace you changed>
 2. Stage and commit all changes with a conventional commit message that includes "Closes #${issue}"
 
 Do NOT push. Do NOT create a PR. The review step will happen next.
@@ -317,7 +317,7 @@ Your implementation is complete and reviewed. Now push and create the PR:
 [1-3 bullet summary]
 
 ## Testing
-- All checks pass: \`pnpm turbo run lint type-check test build --filter=@kcvv/web\`
+- All checks pass: \`pnpm turbo run lint type-check test build --filter=...@kcvv/<workspace>\`
 - [any manual verification steps]"
 
 3. Add the label:

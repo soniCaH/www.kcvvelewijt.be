@@ -12,7 +12,7 @@
  * Like `check-branch.test.ts`, this script lives outside every workspace and
  * nothing else in CI would exercise it. This file is its only home: it rides
  * the existing `apps/web` vitest config, so `pnpm --filter @kcvv/web test` and
- * `check-all` collect it.
+ * the web gate collect it.
  *
  * Fixtures are throwaway `git init` repos under `os.tmpdir()`. The script is
  * driven through `WAVE_CHECK_BRANCHES` so no GitHub round-trip happens; `gh` is

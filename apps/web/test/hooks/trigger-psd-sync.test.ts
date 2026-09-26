@@ -14,7 +14,7 @@
  * Like `wave-check.test.ts` and `check-branch.test.ts`, this script lives
  * outside every workspace and nothing else in CI would exercise it. This file
  * is its only home: it rides the existing `apps/web` vitest config, so
- * `pnpm --filter @kcvv/web test` and `check-all` collect it.
+ * `pnpm --filter @kcvv/web test` and the web gate collect it.
  *
  * No Cloudflare round-trip happens: `TRIGGER_PSD_SYNC_SERVER_CMD` replaces the
  * wrangler launch and skips the KV cursor write, so `wrangler` is never invoked

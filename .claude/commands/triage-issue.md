@@ -118,7 +118,7 @@ Phase 3 — verify no regression:
 ## Acceptance criteria
 - [ ] [Specific testable condition]
 - [ ] Existing tests still pass
-- [ ] \`pnpm turbo run lint type-check test build --filter=@kcvv/[package]\` passes
+- [ ] \`pnpm turbo run lint type-check test build --filter=...@kcvv/[package]\` passes
 
 ## Scope
 **Package:** [apps/web | apps/api | packages/api-contract]"

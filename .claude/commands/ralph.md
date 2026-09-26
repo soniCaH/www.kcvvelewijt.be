@@ -90,8 +90,9 @@ Closes #<issue-number>
 
 ```bash
 pnpm turbo run lint type-check test build --filter=@kcvv/web
-# Changed another workspace? Filter on it instead. A shared package (api-contract,
-# sanity-schemas, sanity-studio) gets a leading ... (--filter=...@kcvv/api-contract) so its dependents are checked too.
+# Changed another workspace? Filter on it instead. A shared package gets a leading ...
+# so its dependents are checked too: --filter=...@kcvv/api-contract, and
+# --filter=...@kcvv/sanity-schemas for either Sanity package (reaches typegen + web).
 ```
 
 Do not proceed to PR if any check fails.

@@ -53,7 +53,7 @@ After all current tests are green: eliminate duplication, improve naming, simpli
 No new behavior during refactor. Run full suite to confirm still green.
 
 ```bash
-pnpm turbo run lint type-check test build --filter=@kcvv/web --output-logs=errors-only 2>&1 | tail -10
+pnpm turbo run lint type-check test build --filter=@kcvv/web --output-logs=errors-only   # filter on the workspace you changed
 ```
 
 Repeat.

@@ -82,7 +82,7 @@ Before writing any new file that lands in a folder with two or more existing pee
   source ~/.nvm/nvm.sh && nvm use >/dev/null 2>&1 && cd /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/../kcvv-issue-<N> && corepack pnpm --filter @kcvv/web lint:fix
   source ~/.nvm/nvm.sh && nvm use >/dev/null 2>&1 && cd /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/../kcvv-issue-<N> && corepack pnpm turbo run lint type-check test build --filter=@kcvv/web
 
-Both must pass before you go further. Changed another workspace? Filter on it instead; the command is valid in every workspace. A shared package (api-contract, sanity-schemas, sanity-studio) gets a leading `...` (`--filter=...@kcvv/api-contract`) so its dependents are checked too. Turbo builds the upstream packages itself — no manual build first.
+Both must pass before you go further. Changed another workspace? Filter on it instead; the command is valid in every workspace. The `lint:fix` line is web only. A shared package gets a leading `...` so its dependents are checked too: `--filter=...@kcvv/api-contract`, and `--filter=...@kcvv/sanity-schemas` for either Sanity package (that one also reaches studio typegen and the web build). Turbo builds the upstream packages itself — no manual build first. If type-check ever shows TS6305 ("has not been built from source"), re-run once with `--force`.
 
 ## Review comes to you — do not run it yourself
 
@@ -115,7 +115,7 @@ Prefer several small commits over one large one. Never use --no-verify. Never se
 
   ## Testing
 
-  - pnpm turbo run lint type-check test build --filter=@kcvv/web passes
+  - pnpm turbo run lint type-check test build --filter=<the workspace you gated on> passes
   - <any manual verification>" \
     --label "ready-for-review"
 

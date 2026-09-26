@@ -77,7 +77,7 @@ gh issue edit $ISSUE_NUM --body "$(cat <<'EOF'
 
 - [ ] [concrete testable condition]
 - [ ] [concrete testable condition]
-- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/[package]` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/[package]` passes
 
 ## Scope
 

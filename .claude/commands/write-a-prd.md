@@ -40,7 +40,7 @@ Phase 3: [name]
 For each phase, concrete testable conditions. Each maps to either a Vitest test or a manual check.
 
 - [ ] ...
-- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/[package]` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/[package]` passes
 
 ### 6. Effect Schema / api-contract changes
 
