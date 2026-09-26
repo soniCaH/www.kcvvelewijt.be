@@ -146,12 +146,19 @@ export function TransferFactCard({ fact, className }: TransferFactCardProps) {
           <span>{chip.label}</span>
           <span aria-hidden="true">{chip.glyph}</span>
         </span>
-        <h3
+        {/* A plain `<p>`, not `<h3>` (#3188 — axe `heading-order`): this
+            card's own name label sits between the article's real `<h1>`
+            and the body's h3-h6 subheading ladder wherever it's placed in
+            an article, so a genuine `<h3>` here reads as an arbitrary
+            skip/restart of the outline depending on what precedes it. It's
+            a self-contained card headline, not a document-structure
+            heading — same classes, so it looks identical either way. */}
+        <p
           data-transfer-fact-name="true"
           className="font-display text-ink text-[16px] leading-tight font-black italic"
         >
           {playerName}
-        </h3>
+        </p>
         {contextParts.length > 0 ? (
           <p
             data-transfer-fact-context="true"

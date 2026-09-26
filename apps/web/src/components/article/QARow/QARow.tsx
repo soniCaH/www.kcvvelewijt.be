@@ -155,12 +155,19 @@ export function QARow({ question, respondents, className }: QARowProps) {
           multi-respondent row below, so single- and multi-speaker pairs
           don't flip order mid-interview when some answers are attributed.
         */}
-        <h3
+        {/* A plain `<p>`, not `<h3>` (#3188 — axe `heading-order`): this row
+            renders at an arbitrary depth inside an article body with no
+            control over what heading level (if any) precedes it, so a fixed
+            `<h3>` produces a level skip whenever nothing at h1/h2 sits above
+            it — same reasoning as `ArticleBody`'s own h3-h6 PT styles. Same
+            classes, same visual weight, just outside the document's heading
+            outline. */}
+        <p
           data-qa-row="question"
           className="font-display text-display-sm font-semibold italic"
         >
           {question}
-        </h3>
+        </p>
         <div className={cn(hasSpeaker ? "mt-5" : "mt-2")}>
           {hasSpeaker && (
             <SpeakerHeader
@@ -200,12 +207,14 @@ export function QARow({ question, respondents, className }: QARowProps) {
       data-qa-row-respondent-count={respondents.length}
       className={cn("flex flex-col", className)}
     >
-      <h3
+      {/* See the single-respondent branch above for why this is a `<p>`,
+          not `<h3>` (#3188). */}
+      <p
         data-qa-row="question"
         className="font-display text-display-sm font-semibold italic"
       >
         {question}
-      </h3>
+      </p>
       <div className="mt-5 flex flex-col gap-6">
         {respondents.map((r, i) => {
           const hasSpeaker =

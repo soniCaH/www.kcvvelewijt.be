@@ -130,7 +130,7 @@ describe("<ArticleBody>", () => {
       // Heading renders via <QASectionDivider> (a separator landmark); the
       // DropCap paragraph follows it in DOM order.
       const dropcap = container.querySelector('[data-tone="ink"]');
-      const separator = container.querySelector('aside[role="separator"]');
+      const separator = container.querySelector('div[role="separator"]');
       expect(dropcap).toBeTruthy();
       expect(separator).toBeTruthy();
       const cmp = separator!.compareDocumentPosition(dropcap!);
@@ -309,7 +309,8 @@ describe("<ArticleBody>", () => {
         name: "Het seizoen.",
       });
       expect(separator).toBeTruthy();
-      expect(separator.tagName.toLowerCase()).toBe("aside");
+      // A plain <div>, not <aside> (#3188) — see QASectionDivider.tsx.
+      expect(separator.tagName.toLowerCase()).toBe("div");
     });
 
     it("renders the h2 text inside the divider's title slot", () => {

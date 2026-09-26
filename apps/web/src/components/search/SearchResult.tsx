@@ -93,10 +93,21 @@ export const SearchResult = ({ result, onClick }: SearchResultProps) => {
         {/* Title — Freight Display (the site's editorial card-title voice).
             Rendered raw (not via <EditorialHeading>) so mixed-type result
             titles — player/staff names especially — don't get a trailing
-            period appended. */}
-        <h3 className="font-display mt-1 line-clamp-3 text-[17px] leading-snug font-bold">
+            period appended.
+
+            `<h2>`, not `<h3>` (#3188 — axe `heading-order`): nothing on
+            `/zoeken` renders a real `<h2>` between the masthead's `<h1>`
+            (`SearchMasthead`) and the first result card — `<SearchResults>`'s
+            own wrapper is a plain `<p>` meta line, not a heading — so an
+            `<h3>` here skipped straight from level 1 to level 3. Each card
+            is effectively its own top-level section under the page heading
+            (the conventional search-result-listing shape), so `<h2>` is the
+            correct level, not a visual-only workaround; `<SearchRelated>`'s
+            own `<h2>` two rows below stays put — same level, later in the
+            DOM, is a sibling section, never a skip. */}
+        <h2 className="font-display mt-1 line-clamp-3 text-[17px] leading-snug font-bold">
           {result.title}
-        </h3>
+        </h2>
 
         {/* Snippet */}
         {result.description && (

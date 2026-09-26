@@ -618,25 +618,37 @@ const ARTICLE_BLOCK_STYLE_HANDLERS = {
   // weight and margins, so each level restates its own scale — without
   // this they'd render as flat body text (same failure mode as lists).
   // h1 is not selectable in the schema: the article title is the only <h1>.
+  //
+  // Rendered as `<p>`, not `<h3>`–`<h6>` (#3188 — axe `heading-order`):
+  // `h2` above is already a non-heading `<div role="separator">`
+  // (`<QASectionDivider>`), so these are the only would-be headings in an
+  // article body, and a body can legitimately open on any of h3–h6 with no
+  // real h1/h2 above it in the SAME landmark (Storybook's isolated render
+  // has no article hero `<h1>` either) — a level jump `heading-order`
+  // always flags. Per this issue's constraint, the fix changes the
+  // element, never the classes: same visual scale, same margins, just no
+  // longer part of the document's heading outline. `role="heading"` was
+  // considered and rejected — axe's `heading-order` selector matches
+  // `[role=heading]` exactly like a native `hN`, so it would still flag.
   h3: ({ children }: { children?: ReactNode }) => (
-    <h3 className="font-display text-ink mt-10 mb-3 text-2xl font-black">
+    <p className="font-display text-ink mt-10 mb-3 text-2xl font-black">
       {children}
-    </h3>
+    </p>
   ),
   h4: ({ children }: { children?: ReactNode }) => (
-    <h4 className="font-display text-ink mt-8 mb-2 text-xl font-black">
+    <p className="font-display text-ink mt-8 mb-2 text-xl font-black">
       {children}
-    </h4>
+    </p>
   ),
   h5: ({ children }: { children?: ReactNode }) => (
-    <h5 className="font-display text-ink mt-6 mb-2 text-lg font-bold">
+    <p className="font-display text-ink mt-6 mb-2 text-lg font-bold">
       {children}
-    </h5>
+    </p>
   ),
   h6: ({ children }: { children?: ReactNode }) => (
-    <h6 className="text-ink mt-6 mb-2 font-mono text-sm font-semibold tracking-[0.14em] uppercase">
+    <p className="text-ink mt-6 mb-2 font-mono text-sm font-semibold tracking-[0.14em] uppercase">
       {children}
-    </h6>
+    </p>
   ),
 };
 
