@@ -28,6 +28,31 @@ export const IconGrid = ({ icons, label }) => (
 
 ---
 
+## Spacing Scale
+
+There is no custom `--spacing-*` step token in `src/app/globals.css` — the
+five that lived here (`0_75`/`15`/`17_5`/`22_5`/`35`) were removed in #2553
+after a repo-wide grep found no utility actually consuming them. Every
+spacing utility (`p-*`, `m-*`, `gap-*`, `w-*`/`h-*`/`size-*`,
+`top`/`right`/`bottom`/`left-*`, `inset-*`, `translate-*`, `space-*`) resolves
+through Tailwind v4's own base multiplier instead:
+
+<table>
+  <thead><tr><th>Token</th><th>Value</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>--spacing</code></td><td>0.25rem (4px)</td><td>Tailwind v4 default — not overridden here</td></tr>
+  </tbody>
+</table>
+
+A utility's number multiplies that base: `p-4` is `calc(var(--spacing) * 4)`
+= 1rem (16px); `size-35` (the `<JerseyShirt>` corner motif on
+`<ClubshopBanner>` / `<TeamEnrolmentCta>`) is `calc(var(--spacing) * 35)` =
+8.75rem (140px). Add a step token here only when a value needs to survive a
+future change to the base multiplier — a bare numeric utility is preferred
+otherwise.
+
+---
+
 ## Breakpoints
 
 <table>

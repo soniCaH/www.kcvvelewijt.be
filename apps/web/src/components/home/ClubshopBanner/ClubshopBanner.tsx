@@ -43,8 +43,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
 
       <PageContainer width="index" className="py-12 md:py-16">
         <div className="relative">
-          {/* Corner-anchored jersey illustration, 140px as an explicit
-              size rather than a spacing-scale step. Centered vertically
+          {/* Corner-anchored jersey illustration. Centered vertically
               against the text block via `top-1/2 -translate-y-1/2` so the
               shirt's mid-line sits with the subheading rather than floating
               below the CTA. Hidden below 640px so the narrow viewport
@@ -53,7 +52,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
             aria-hidden="true"
             className="pointer-events-none absolute top-1/2 right-0 z-0 hidden -translate-y-1/2 sm:block"
           >
-            <JerseyShirt className="mx-0 size-[140px]" />
+            <JerseyShirt className="mx-0 size-35" />
           </div>
 
           <div className="relative z-10 max-w-3xl">
