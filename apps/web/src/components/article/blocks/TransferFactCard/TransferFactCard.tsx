@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { TOP_HEADING_LEVEL } from "@/components/article/ArticleBody";
 import { TapedCard, type TapeStripProps } from "@/components/design-system";
 import {
   resolveTransfer,
@@ -146,19 +147,17 @@ export function TransferFactCard({ fact, className }: TransferFactCardProps) {
           <span>{chip.label}</span>
           <span aria-hidden="true">{chip.glyph}</span>
         </span>
-        {/* `<h2>`, not `<h3>` (#3188 — axe `heading-order`): this card can
-            land anywhere in an article's flow, including before any PT
-            subheading, so it takes the SAME level ArticleBody's own first
-            real subheading now renders at (PT `h3` → `<h2>`, see
-            ArticleBody.tsx's `ARTICLE_BLOCK_STYLE_HANDLERS`) — the
-            shallowest real heading a body ever produces, directly under
-            the page's `<h1>`. Same classes either way. */}
-        <h2
+        {/* `TOP_HEADING_LEVEL` (`<h2>`), not a hardcoded `<h3>` (#3188 —
+            axe `heading-order`): this card can land anywhere in an
+            article's flow, so it takes the SAME level `<ArticleBody>`'s
+            own first subheading renders at — the shared constant means
+            the two can never drift apart. Same classes either way. */}
+        <TOP_HEADING_LEVEL
           data-transfer-fact-name="true"
           className="font-display text-ink text-[16px] leading-tight font-black italic"
         >
           {playerName}
-        </h2>
+        </TOP_HEADING_LEVEL>
         {contextParts.length > 0 ? (
           <p
             data-transfer-fact-context="true"

@@ -1,3 +1,4 @@
+import { TOP_HEADING_LEVEL } from "@/components/article/ArticleBody";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialLink } from "@/components/design-system/EditorialLink";
@@ -187,18 +188,18 @@ export function EventFactInline({
             ) : null}
           </header>
 
-          {/* `<h2>`, not `<h3>` (#3188 — axe `heading-order`): see
-              TransferFactCard's identical fix for why — this card can land
-              anywhere in an article's flow, so it takes the same shallowest
-              real level ArticleBody's own first subheading renders at.
-              Same classes either way. */}
+          {/* `TOP_HEADING_LEVEL` (`<h2>`), not a hardcoded `<h3>` (#3188 —
+              axe `heading-order`): see TransferFactCard's identical fix —
+              this card can land anywhere in an article's flow, so it
+              shares `<ArticleBody>`'s exported top-heading constant rather
+              than a second hardcoded literal. Same classes either way. */}
           {title ? (
-            <h2
+            <TOP_HEADING_LEVEL
               data-event-fact-inline="title"
               className="font-display text-ink m-0 text-[26px] leading-[1.15] font-bold italic"
             >
               {title}
-            </h2>
+            </TOP_HEADING_LEVEL>
           ) : null}
 
           {dateLine ? (

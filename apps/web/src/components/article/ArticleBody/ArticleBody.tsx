@@ -85,6 +85,22 @@ import { cn } from "@/lib/utils/cn";
  *   - `link` / `internalLink` marks ship cream-surface Phase 5 styling.
  *   - `<EndMark>` closes the body when any content was rendered.
  */
+
+/**
+ * The shallowest real heading level an article body ever produces (#3188 —
+ * review round 2 finding 5). PT `h2` renders via `<QASectionDivider>` as a
+ * non-heading, so PT `h3` — the ladder's own top rung — is the first real
+ * heading, landing directly under the page's `<h1>`. Any inline widget that
+ * can appear ANYWHERE in the flow (not tied to the PT subheading ladder —
+ * `<QARow>`'s question, `<TransferFactCard>`'s name, `<EventFactInline>`'s
+ * title) takes this SAME level rather than a hardcoded `<h2>` literal, so
+ * the two can never drift apart if the ladder's top rung ever changes.
+ * Capitalised so it can be used directly as a JSX tag (`<TOP_HEADING_LEVEL>`
+ * resolves to the string it holds, exactly like a lowercase intrinsic
+ * would) — see the `h3` handler below for the same pattern.
+ */
+export const TOP_HEADING_LEVEL = "h2" as const;
+
 export interface ArticleBodyProps {
   content: PortableTextBlock[];
   /**
@@ -624,16 +640,17 @@ const ARTICLE_BLOCK_STYLE_HANDLERS = {
   // `<div role="separator">` (`<QASectionDivider>`), so a PT `h3` is the
   // FIRST real heading an article body can produce, and it must land
   // directly under the page's own `<h1>` (the article title) with nothing
-  // in between — hence `h3` renders `<h2>`, `h4` renders `<h3>`, and so on
-  // down to `h6` rendering `<h5>`. Each keeps its OWN existing className
-  // (the visual scale is keyed to the PT style name, not the HTML level),
-  // so nothing moves visually. `ArticleBody.stories.tsx`'s decorator
-  // supplies the same `<h1>` a real article page does, so this ladder is
-  // exercised exactly as production renders it.
+  // in between — hence `h3` renders `TOP_HEADING_LEVEL` (`<h2>`, see the
+  // exported constant above), `h4` renders `<h3>`, and so on down to `h6`
+  // rendering `<h5>`. Each keeps its OWN existing className (the visual
+  // scale is keyed to the PT style name, not the HTML level), so nothing
+  // moves visually. `ArticleBody.stories.tsx`'s decorator supplies the
+  // same `<h1>` a real article page does, so this ladder is exercised
+  // exactly as production renders it.
   h3: ({ children }: { children?: ReactNode }) => (
-    <h2 className="font-display text-ink mt-10 mb-3 text-2xl font-black">
+    <TOP_HEADING_LEVEL className="font-display text-ink mt-10 mb-3 text-2xl font-black">
       {children}
-    </h2>
+    </TOP_HEADING_LEVEL>
   ),
   h4: ({ children }: { children?: ReactNode }) => (
     <h3 className="font-display text-ink mt-8 mb-2 text-xl font-black">
