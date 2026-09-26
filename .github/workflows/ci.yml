@@ -169,7 +169,7 @@ jobs:
         run: npx turbo test --filter=@kcvv/api-contract
 
       - name: Lint + type check Studio
-        run: npx turbo lint type-check --filter=@kcvv/studio --filter=@kcvv/sanity-studio
+        run: npx turbo lint type-check --filter=@kcvv/studio --filter=@kcvv/studio-staging --filter=@kcvv/sanity-studio
 
       - name: Run Studio UI tests
         run: npx turbo test --filter=@kcvv/sanity-studio
