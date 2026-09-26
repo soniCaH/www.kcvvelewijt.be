@@ -152,7 +152,7 @@ A second option, if the spec prefers one name over one command: **make `check-al
 [#3123](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3123) ruled for the Turbo route. [#3155](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3155) proves it before any call site moves. Measured **2026-09-26** on `origin/main` @ `1616f9d6`, in a fresh worktree:
 
 ```bash
-pnpm turbo run lint type-check test build --filter=<workspace>
+pnpm turbo run lint type-check test build --filter="$WORKSPACE"   # e.g. @kcvv/web
 ```
 
 | Workspace              | Exit | Tasks run                                                                                      | No such script (Turbo skips it) |
@@ -170,21 +170,27 @@ pnpm turbo run lint type-check test build --filter=<workspace>
 
 **The seven absent scripts, and why each stays absent:**
 
-- **`studio` / `studio-staging` — no `type-check`.** Both are red today: `tsc --noEmit` finds 11 errors in `apps/studio` and 9 in `apps/studio-staging` (`structure.ts` ×6, `sanity.config.ts` ×3 in each; `apps/studio` adds one in `scripts/` and one in `migrations/`). Neither has `tsgo` installed. Adding the script would turn the gate red, so it waits for those errors to be fixed.
-- **`studio` / `studio-staging` — no `test`.** Config only; nothing to test. The two untested surfaces in `apps/studio` (migrations, `scripts/`) are named in `.claude/CLAUDE.md`'s test-layers table.
+- **`studio` / `studio-staging` — no `type-check`.** Both are red today: `tsc --noEmit` finds 11 errors in `apps/studio` and 9 in `apps/studio-staging` (`structure.ts` ×6, `sanity.config.ts` ×3 in each; `apps/studio` adds one in `scripts/` and one in `migrations/`). Neither has `tsgo` installed. Most look like two copies of `sanity`'s types meeting in one file, not bad code. Adding the script would turn the gate red, so it waits for those errors to be fixed. No ticket owns them yet — and `ci.yml`'s "Lint + type check Studio" step type-checks neither studio, because neither has the script.
+- **`studio` / `studio-staging` — no `test`.** No test script, but not nothing to test: migrations in both studios (26 in `apps/studio`, 20 in `apps/studio-staging`) and `apps/studio/scripts/` hold logic. Both are named in `.claude/CLAUDE.md`'s test-layers table.
 - **`api` — no `build`.** A Worker is bundled by `wrangler deploy` at deploy time. There is no output to build ahead.
 - **`sanity-schemas` — no `test`.** Vitest's named gap ([#3100](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3100) decision D9) — decided, not shipped.
 - **`sanity-ops` — no `build`.** Run by hand through `tsx`. There is no output.
 
-**Upstream builds and typegen.** Under `--filter=@kcvv/web`, `@kcvv/api-contract#build` and `@kcvv/sanity-schemas#build` run as dependencies, and `@kcvv/studio#typegen` runs before `@kcvv/web#build` (`turbo.json`'s `@kcvv/web#build.dependsOn`). Typegen runs only there: the studios' own `build` does not depend on it.
+**Upstream builds and typegen.** Under `--filter=@kcvv/web`, `@kcvv/api-contract#build` and `@kcvv/sanity-schemas#build` run as dependencies, and `@kcvv/studio#typegen` runs before `@kcvv/web#build` and — since this ticket — before `@kcvv/web#type-check`. Before, type-check ran in parallel with typegen and could pass on the old `sanity.types.ts`. `lint` and `test` do not read the generated types (eslint here is not type-aware; Vitest erases type-only imports). The studios' own `build` does not depend on typegen.
 
-**Cache reads and writes — one warm run.** The first run of `--filter=@kcvv/web` hit 2 of 7 and wrote the other 5 (105 s). The next run, with `--summarize`:
+**A library filter checks the library, not its consumers.** `--filter=@kcvv/api-contract` passes even when the change breaks `@kcvv/web` or `@kcvv/api`. For a change to a shared package, the call site wants `--filter=<package>...` (the package and every dependent). Which form each call site gets is [#3156](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3156)'s call.
+
+**Cache reads and writes — one warm run.** The first run of `--filter=@kcvv/web` in the fresh worktree hit 2 of 7 and wrote the other 5 (105 s). The two early hits came from other worktrees: Turbo reports "using shared worktree cache", so every worktree on this machine reads and writes one cache. One open edge for wave safety (§3 item 2): a gitignored file such as `apps/web/.env.local` is not in the task hash, so two worktrees with different `.env.local` can serve each other's result. The next run, with `--summarize` — stdout:
 
 ```text
 Tasks:    7 successful, 7 total
 Cached:   7 cached, 7 total
 Time:     36ms >>> FULL TURBO
+```
 
+…and per task, `cache.status` and `cache.source` read from the summary JSON (`.turbo/runs/<id>.json`):
+
+```text
 @kcvv/api-contract#build      HIT  LOCAL
 @kcvv/sanity-schemas#build    HIT  LOCAL
 @kcvv/studio#typegen          HIT  LOCAL
@@ -194,7 +200,7 @@ Time:     36ms >>> FULL TURBO
 @kcvv/web#type-check          HIT  LOCAL
 ```
 
-`pnpm --filter @kcvv/web check-all` still exists and still passes on the same commit; no call site moved. The wall-clock comparison against it belongs to [#3158](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3158).
+`pnpm --filter @kcvv/web check-all` still exists and still passes on the same commit (105 s); no call site moved. `packages/sanity-studio` carries a second composite `check-all` (type-check → lint → vitest, run by hand); the contract step must remove both. The wall-clock comparison against it belongs to [#3158](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3158).
 
 ## 4. Where the per-profile guidance should live
 
