@@ -1,5 +1,6 @@
 import studio from "@sanity/eslint-config-studio";
 
+// Twin of the other Sanity package's eslint.config.mjs (sanity-studio ↔ sanity-schemas) — change both.
 export default [
   ...studio,
   {
