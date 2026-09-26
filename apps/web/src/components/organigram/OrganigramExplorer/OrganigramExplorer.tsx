@@ -381,6 +381,15 @@ export function OrganigramExplorer({
         >
           <div
             key={focusId}
+            // `role="group"` (#3188 — axe `aria-required-children`): a
+            // `role="tree"` container's only allowed owned children are
+            // `treeitem`/`group`, and this is `role="tree"`'s one direct
+            // child — everything below (the parent/sibling/children-fan
+            // buttons plus the single centred `role="treeitem"`) sits
+            // inside it, not as a second direct child. `group` has no
+            // required-children constraint of its own, so nothing below
+            // needs to change.
+            role="group"
             className="spotlight-pop flex w-full flex-col items-center gap-5"
           >
             {/* Parent (ascend) */}
