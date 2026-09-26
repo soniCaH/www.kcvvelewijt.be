@@ -294,6 +294,28 @@ The wrapper exists as a script rather than a prefix on the package.json script
 bodies because pnpm appends `-- <args>` to the **end** of the script string — a
 guard in front of the `&&` chain would never see the scoping pattern.
 
+### The image build and the exclusive lock (#3141)
+
+A wave guards named shared resources, never CPU — the full register lives in
+`.claude/skills/ralph-afk/SKILL.md`. Two of its five members live in
+`vr-docker.mjs`:
+
+- **The image is never built inside the wrapper.** Build it once, by hand or
+  as a wave's step 0, with `pnpm --filter @kcvv/web run vr:build-image`. If
+  `kcvv-vr-runner:latest` is missing, the wrapper fails fast and names that
+  same command — it used to pass `--build` on every run instead, and a
+  parallel rebuild on a stale image froze the machine for sixteen minutes
+  (2026-09-21).
+- **The container run is exclusive.** A `mkdir`-based lock in `os.tmpdir()`
+  (shared by every worktree on the machine, never a path inside one) means
+  only one local VR container runs at a time — four would want the machine's
+  entire memory, and parallel captures add sub-pixel noise to unrelated
+  baselines. A second caller is refused with the holder's pid, not queued; a
+  lock whose holder process is gone is reclaimed automatically.
+
+Neither check runs in CI — `vr:ci` / `vr:ci:update` call `vr:run*` directly,
+without Docker, so there is no image and no container to guard there.
+
 ### Scoping a VR run
 
 A full capture is ~40 min — ~2.5 h locally under the amd64 pin — so always
