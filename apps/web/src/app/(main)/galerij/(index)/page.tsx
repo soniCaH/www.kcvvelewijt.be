@@ -19,12 +19,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { pendingEmptyBody } from "@/lib/utils/empty-state-copy";
 import { fetchGalleriesAction } from "./actions";
 import { GalleryListingClient } from "./GalleryListingClient";
-
-// Exported so `loading.tsx` can reuse the real, unshimmered opening (#2432
-// §2) instead of a second hand-typed copy that can silently drift from this
-// one.
-export const GALERIJ_KICKER = "KCVV Elewijt · Beelden";
-export const GALERIJ_HEADLINE = "Fotogalerij";
+import { GALERIJ_KICKER, GALERIJ_HEADLINE } from "./copy";
 
 export const metadata = buildPageMetadata({
   title: "Fotogalerij",

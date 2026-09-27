@@ -31,12 +31,7 @@ import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { PageContainer } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { EventsBrowser } from "@/components/event/EventsBrowser";
-
-// Exported so `loading.tsx` can reuse the real, unshimmered opening (#2432
-// §2) instead of a second hand-typed copy that can silently drift from this
-// one.
-export const EVENEMENTEN_KICKER = "KCVV Elewijt · Agenda";
-export const EVENEMENTEN_HEADLINE = "Evenementen";
+import { EVENEMENTEN_KICKER, EVENEMENTEN_HEADLINE } from "./copy";
 
 export const metadata = buildPageMetadata({
   title: "Evenementen",

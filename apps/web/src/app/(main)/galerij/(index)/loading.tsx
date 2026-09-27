@@ -18,7 +18,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
-import { GALERIJ_KICKER, GALERIJ_HEADLINE } from "./page";
+import { GALERIJ_KICKER, GALERIJ_HEADLINE } from "./copy";
 
 /** A flush-image card footprint — image atop a border-2 ink body, matching
  *  `<GalleryCard>` (a `<NewsCard>` adapter). The inline `transform` mirrors

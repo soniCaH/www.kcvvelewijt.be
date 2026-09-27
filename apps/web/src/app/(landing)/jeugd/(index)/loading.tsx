@@ -25,7 +25,7 @@ import {
   TapedCardGrid,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
-import { YOUTH_PHOTO, JEUGD_KICKER, JEUGD_HEADLINE, JEUGD_LEAD } from "./page";
+import { YOUTH_PHOTO, JEUGD_KICKER, JEUGD_HEADLINE, JEUGD_LEAD } from "./copy";
 
 export default function JeugdLoading() {
   return (

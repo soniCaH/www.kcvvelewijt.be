@@ -20,7 +20,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 import { UltrasHero } from "./UltrasHero";
-import { FACEBOOK_URL } from "./page";
+import { FACEBOOK_URL } from "./copy";
 
 /** An editorial section footprint: kicker + heading + paragraph bars. */
 function SectionSkeleton({ withImage = false }: { withImage?: boolean }) {

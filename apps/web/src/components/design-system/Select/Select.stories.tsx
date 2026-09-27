@@ -27,6 +27,14 @@ const meta = {
     disabled: { control: "boolean" },
     placeholder: { control: "text" },
   },
+  // Every `<Select>` needs an accessible name (#3188 — axe `select-name`).
+  // `Default` below spreads `args` and inherits this; every other bare
+  // demo `render` here sets its own `aria-label` since none has an
+  // adjacent visible label. `StateMachine`/`FilterPanel` DO have a visible
+  // `<Label htmlFor>` and pair it with a matching `id` instead — never
+  // both, which would risk the label text and the AT-announced name
+  // drifting apart (WCAG 2.5.3).
+  args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Select>;
 
 export default meta;
@@ -51,7 +59,7 @@ export const Default: Story = {
 
 export const Filled: Story = {
   render: () => (
-    <Select className="w-64" defaultValue="aploeg">
+    <Select className="w-64" defaultValue="aploeg" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -59,7 +67,12 @@ export const Filled: Story = {
 
 export const Focused: Story = {
   render: () => (
-    <Select className="w-64" placeholder="Kies een ploeg" autoFocus>
+    <Select
+      className="w-64"
+      placeholder="Kies een ploeg"
+      aria-label="Ploeg"
+      autoFocus
+    >
       {teamOptions}
     </Select>
   ),
@@ -73,7 +86,7 @@ export const Focused: Story = {
 
 export const FilledFocused: Story = {
   render: () => (
-    <Select className="w-64" defaultValue="bploeg" autoFocus>
+    <Select className="w-64" defaultValue="bploeg" aria-label="Ploeg" autoFocus>
       {teamOptions}
     </Select>
   ),
@@ -88,6 +101,7 @@ export const WithError: Story = {
       className="w-64"
       error="Kies een geldige ploeg."
       placeholder="Kies een ploeg"
+      aria-label="Ploeg"
     >
       {teamOptions}
     </Select>
@@ -100,6 +114,7 @@ export const ErrorFocused: Story = {
       className="w-64"
       error="Kies een geldige ploeg."
       placeholder="Kies een ploeg"
+      aria-label="Ploeg"
       autoFocus
     >
       {teamOptions}
@@ -112,7 +127,7 @@ export const ErrorFocused: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Select className="w-64" disabled defaultValue="aploeg">
+    <Select className="w-64" disabled defaultValue="aploeg" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -124,6 +139,7 @@ export const WithHint: Story = {
       className="w-64"
       hint="Dit bepaalt welke wedstrijden je ziet."
       placeholder="Alle ploegen"
+      aria-label="Ploeg"
     >
       {teamOptions}
     </Select>
@@ -132,7 +148,7 @@ export const WithHint: Story = {
 
 export const Small: Story = {
   render: () => (
-    <Select className="w-48" size="sm" placeholder="Klein">
+    <Select className="w-48" size="sm" placeholder="Klein" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -140,7 +156,7 @@ export const Small: Story = {
 
 export const Large: Story = {
   render: () => (
-    <Select className="w-72" size="lg" placeholder="Groot">
+    <Select className="w-72" size="lg" placeholder="Groot" aria-label="Ploeg">
       {teamOptions}
     </Select>
   ),
@@ -149,13 +165,17 @@ export const Large: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex w-64 flex-col gap-4">
-      <Select size="sm" placeholder="Small (sm)">
+      <Select size="sm" placeholder="Small (sm)" aria-label="Small (sm)">
         <option value="1">Optie 1</option>
       </Select>
-      <Select size="md" placeholder="Medium (md) — default">
+      <Select
+        size="md"
+        placeholder="Medium (md) — default"
+        aria-label="Medium (md) — default"
+      >
         <option value="1">Optie 1</option>
       </Select>
-      <Select size="lg" placeholder="Large (lg)">
+      <Select size="lg" placeholder="Large (lg)" aria-label="Large (lg)">
         <option value="1">Optie 1</option>
       </Select>
     </div>
@@ -166,22 +186,30 @@ export const StateMachine: Story = {
   render: () => (
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
-        <Label>Default</Label>
-        <Select placeholder="Kies een ploeg">{teamOptions}</Select>
-      </div>
-      <div>
-        <Label>Filled</Label>
-        <Select defaultValue="aploeg">{teamOptions}</Select>
-      </div>
-      <div>
-        <Label>Error</Label>
-        <Select placeholder="Kies een ploeg" error="Kies een geldige ploeg.">
+        <Label htmlFor="select-state-default">Default</Label>
+        <Select id="select-state-default" placeholder="Kies een ploeg">
           {teamOptions}
         </Select>
       </div>
       <div>
-        <Label>Disabled</Label>
-        <Select defaultValue="aploeg" disabled>
+        <Label htmlFor="select-state-filled">Filled</Label>
+        <Select id="select-state-filled" defaultValue="aploeg">
+          {teamOptions}
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="select-state-error">Error</Label>
+        <Select
+          id="select-state-error"
+          placeholder="Kies een ploeg"
+          error="Kies een geldige ploeg."
+        >
+          {teamOptions}
+        </Select>
+      </div>
+      <div>
+        <Label htmlFor="select-state-disabled">Disabled</Label>
+        <Select id="select-state-disabled" defaultValue="aploeg" disabled>
           {teamOptions}
         </Select>
       </div>

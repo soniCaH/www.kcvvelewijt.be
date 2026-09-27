@@ -11,61 +11,61 @@ import { Textarea } from "./Textarea";
 describe("Textarea", () => {
   describe("Rendering", () => {
     it("renders as a textarea element", () => {
-      render(<Textarea />);
+      render(<Textarea aria-label="Test" />);
       expect(screen.getByRole("textbox")).toBeInTheDocument();
     });
 
     it("renders placeholder text", () => {
-      render(<Textarea placeholder="Schrijf hier..." />);
+      render(<Textarea aria-label="Test" placeholder="Schrijf hier..." />);
       expect(
         screen.getByPlaceholderText("Schrijf hier..."),
       ).toBeInTheDocument();
     });
 
     it("renders with a default value", () => {
-      render(<Textarea defaultValue="Bericht inhoud" />);
+      render(<Textarea aria-label="Test" defaultValue="Bericht inhoud" />);
       expect(screen.getByDisplayValue("Bericht inhoud")).toBeInTheDocument();
     });
 
     it("forwards ref", () => {
       const ref = createRef<HTMLTextAreaElement>();
-      render(<Textarea ref={ref} />);
+      render(<Textarea aria-label="Test" ref={ref} />);
       expect(ref.current).toBeInstanceOf(HTMLTextAreaElement);
     });
   });
 
   describe("Resize", () => {
     it("uses vertical resize by default", () => {
-      render(<Textarea data-testid="ta" />);
+      render(<Textarea aria-label="Test" data-testid="ta" />);
       expect(screen.getByTestId("ta")).toHaveClass("resize-y");
     });
 
     it("supports no resize", () => {
-      render(<Textarea resize="none" data-testid="ta" />);
+      render(<Textarea aria-label="Test" resize="none" data-testid="ta" />);
       expect(screen.getByTestId("ta")).toHaveClass("resize-none");
     });
 
     it("supports both resize", () => {
-      render(<Textarea resize="both" data-testid="ta" />);
+      render(<Textarea aria-label="Test" resize="both" data-testid="ta" />);
       expect(screen.getByTestId("ta")).toHaveClass("resize");
     });
   });
 
   describe("Field chrome — paper-card emphasis", () => {
     it("renders 2px border + paper-soft shadow at rest", () => {
-      render(<Textarea data-testid="ta" />);
+      render(<Textarea aria-label="Test" data-testid="ta" />);
       const el = screen.getByTestId("ta");
       expect(el).toHaveClass("border-2", "bg-white");
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
     });
 
     it("does not apply rounded corners", () => {
-      render(<Textarea data-testid="ta" />);
+      render(<Textarea aria-label="Test" data-testid="ta" />);
       expect(screen.getByTestId("ta").className).not.toMatch(/\brounded-/);
     });
 
     it("does not reference legacy kcvv-/foundation- tokens", () => {
-      render(<Textarea data-testid="ta" />);
+      render(<Textarea aria-label="Test" data-testid="ta" />);
       const cls = screen.getByTestId("ta").className;
       expect(cls).not.toContain("kcvv-alert");
       expect(cls).not.toContain("kcvv-green-bright");
@@ -75,13 +75,13 @@ describe("Textarea", () => {
 
   describe("Error state", () => {
     it("renders an AlertBadge with FOUT label and message", () => {
-      render(<Textarea error="Dit veld is verplicht." />);
+      render(<Textarea aria-label="Test" error="Dit veld is verplicht." />);
       expect(screen.getByText("FOUT")).toBeInTheDocument();
       expect(screen.getByText("Dit veld is verplicht.")).toBeInTheDocument();
     });
 
     it("flips border + shadow to alert variant + sets aria-invalid", () => {
-      render(<Textarea error="Fout" data-testid="ta" />);
+      render(<Textarea aria-label="Test" error="Fout" data-testid="ta" />);
       const ta = screen.getByTestId("ta");
       expect(ta).toHaveClass("border-alert");
       expect(ta.className).toContain("shadow-[var(--shadow-paper-sm-alert)]");
@@ -90,21 +90,21 @@ describe("Textarea", () => {
     });
 
     it("hides hint when error is present", () => {
-      render(<Textarea error="Fout" hint="Hulptekst" />);
+      render(<Textarea aria-label="Test" error="Fout" hint="Hulptekst" />);
       expect(screen.queryByText("Hulptekst")).not.toBeInTheDocument();
     });
   });
 
   describe("Hint", () => {
     it("renders italic ink/60 hint when no error", () => {
-      render(<Textarea hint="Maximaal 500 tekens." />);
+      render(<Textarea aria-label="Test" hint="Maximaal 500 tekens." />);
       const el = screen.getByText("Maximaal 500 tekens.");
       expect(el).toHaveClass("italic", "text-ink/60");
     });
 
     // Decision D4 (#2620) — see Input.test.tsx for the full contract.
     it("opens with the mono [?] bracket", () => {
-      render(<Textarea hint="Maximaal 500 tekens." />);
+      render(<Textarea aria-label="Test" hint="Maximaal 500 tekens." />);
       const hint = screen.getByText("Maximaal 500 tekens.");
       expect(hint.querySelector('[data-glyph="help"]')).toHaveAttribute(
         "aria-hidden",
@@ -113,7 +113,13 @@ describe("Textarea", () => {
     });
 
     it("describes the field with the hint sentence alone", () => {
-      render(<Textarea hint="Maximaal 500 tekens." data-testid="textarea" />);
+      render(
+        <Textarea
+          aria-label="Test"
+          hint="Maximaal 500 tekens."
+          data-testid="textarea"
+        />,
+      );
       expect(screen.getByTestId("textarea")).toHaveAccessibleDescription(
         "Maximaal 500 tekens.",
       );
@@ -122,7 +128,14 @@ describe("Textarea", () => {
 
   describe("Counter (controlled + maxLength)", () => {
     it("renders TextareaCounter when value + maxLength are set", () => {
-      render(<Textarea value="abc" maxLength={10} onChange={() => {}} />);
+      render(
+        <Textarea
+          aria-label="Test"
+          value="abc"
+          maxLength={10}
+          onChange={() => {}}
+        />,
+      );
       expect(screen.getByText("3/10")).toBeInTheDocument();
     });
 
@@ -131,26 +144,31 @@ describe("Textarea", () => {
       // can still drive a `value` longer than `maxLength` (e.g. seeded
       // from a draft) — we must surface the over-limit state visually.
       render(
-        <Textarea value="abcdefghijk" maxLength={10} onChange={() => {}} />,
+        <Textarea
+          aria-label="Test"
+          value="abcdefghijk"
+          maxLength={10}
+          onChange={() => {}}
+        />,
       );
       const counter = screen.getByText("11/10");
       expect(counter).toHaveClass("text-alert");
     });
 
     it("omits counter when uncontrolled", () => {
-      render(<Textarea defaultValue="abc" maxLength={10} />);
+      render(<Textarea aria-label="Test" defaultValue="abc" maxLength={10} />);
       expect(screen.queryByText(/\/10$/)).not.toBeInTheDocument();
     });
 
     it("omits counter when no maxLength is provided", () => {
-      render(<Textarea value="abc" onChange={() => {}} />);
+      render(<Textarea aria-label="Test" value="abc" onChange={() => {}} />);
       expect(screen.queryByText(/\/\d+$/)).not.toBeInTheDocument();
     });
   });
 
   describe("Disabled state", () => {
     it("flattens chrome", () => {
-      render(<Textarea disabled data-testid="ta" />);
+      render(<Textarea aria-label="Test" disabled data-testid="ta" />);
       const ta = screen.getByTestId("ta");
       expect(ta).toBeDisabled();
       expect(ta).toHaveClass(
@@ -163,14 +181,20 @@ describe("Textarea", () => {
 
   describe("Rows", () => {
     it("passes rows attribute through", () => {
-      render(<Textarea rows={6} />);
+      render(<Textarea aria-label="Test" rows={6} />);
       expect(screen.getByRole("textbox")).toHaveAttribute("rows", "6");
     });
   });
 
   describe("Custom props", () => {
     it("accepts custom className", () => {
-      render(<Textarea className="custom-class" data-testid="ta" />);
+      render(
+        <Textarea
+          aria-label="Test"
+          className="custom-class"
+          data-testid="ta"
+        />,
+      );
       expect(screen.getByTestId("ta")).toHaveClass("custom-class");
     });
   });
@@ -178,7 +202,7 @@ describe("Textarea", () => {
   describe("Interactions", () => {
     it("accepts typed input", async () => {
       const user = userEvent.setup();
-      render(<Textarea />);
+      render(<Textarea aria-label="Test" />);
       await user.type(screen.getByRole("textbox"), "Hallo KCVV");
       expect(screen.getByRole("textbox")).toHaveValue("Hallo KCVV");
     });
@@ -186,7 +210,7 @@ describe("Textarea", () => {
     it("calls onChange when typing", async () => {
       const user = userEvent.setup();
       const handleChange = vi.fn();
-      render(<Textarea onChange={handleChange} />);
+      render(<Textarea aria-label="Test" onChange={handleChange} />);
       await user.type(screen.getByRole("textbox"), "test");
       expect(handleChange).toHaveBeenCalled();
     });

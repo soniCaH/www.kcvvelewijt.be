@@ -12,10 +12,8 @@ import { UltrasAnalytics } from "./UltrasAnalytics";
 import { UltrasHero } from "./UltrasHero";
 import { UltrasSection } from "./UltrasSection";
 import { RaffleCallout } from "./RaffleCallout";
+import { FACEBOOK_URL } from "./copy";
 
-// Exported so `loading.tsx` can reuse it when rendering the real, unshimmered
-// <UltrasHero> (#2432 §2) instead of a second hand-typed copy.
-export const FACEBOOK_URL = "https://www.facebook.com/KCVV.ULTRAS.55/";
 const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
 export const metadata = buildPageMetadata({

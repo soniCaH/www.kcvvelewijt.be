@@ -66,10 +66,12 @@ describe("QASectionDivider", () => {
     rules.forEach((r) => expect(r).toHaveAttribute("aria-hidden", "true"));
   });
 
-  it("uses an <aside role=separator> with aria-label set to the plain title text", () => {
+  it("uses a <div role=separator> with aria-label set to the plain title text", () => {
     const { container } = render(<QASectionDivider title={titleWithAccent} />);
     const root = container.firstChild as HTMLElement;
-    expect(root.tagName).toBe("ASIDE");
+    // A plain <div>, not <aside> (#3188) — `separator` isn't an allowed
+    // role for `<aside>`'s implicit landmark role (axe `aria-allowed-role`).
+    expect(root.tagName).toBe("DIV");
     expect(root).toHaveAttribute("role", "separator");
     expect(root).toHaveAttribute("aria-label", "De jaren tussen de lijnen.");
   });
@@ -121,9 +123,9 @@ describe("QASectionDivider", () => {
 
     it("uses a separator role with a labelled fallback name", () => {
       const { container } = render(<QASectionDivider variant="dotted" />);
-      const aside = container.querySelector('aside[role="separator"]');
-      expect(aside).not.toBeNull();
-      expect(aside?.getAttribute("aria-label")).toBe("Volgende vraag");
+      const divider = container.querySelector('div[role="separator"]');
+      expect(divider).not.toBeNull();
+      expect(divider?.getAttribute("aria-label")).toBe("Volgende vraag");
     });
   });
 });

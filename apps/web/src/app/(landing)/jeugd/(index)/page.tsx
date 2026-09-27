@@ -28,17 +28,7 @@ import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdE
 import { EditorialHubAnalytics } from "@/components/editorial/EditorialHubAnalytics/EditorialHubAnalytics";
 import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
 import { YouthDirectory } from "@/components/team/YouthDirectory";
-
-/** Committed youth asset — also the homepage `<YouthSection>` backdrop. */
-export const YOUTH_PHOTO = "/images/youth-trainers.jpg";
-
-// Exported so `loading.tsx` can reuse the real, unshimmered opening (#2432
-// §2) instead of a second hand-typed copy that can silently drift from this
-// one.
-export const JEUGD_KICKER = "De jeugdopleiding · U6 tot U21";
-export const JEUGD_HEADLINE = "Beter worden begint met plezier";
-export const JEUGD_LEAD =
-  "Een doordachte opleiding van Onderbouw tot Bovenbouw, met gediplomeerde trainers en plezier als motor. Want wie graag speelt, groeit vanzelf — op en naast het veld.";
+import { YOUTH_PHOTO, JEUGD_KICKER, JEUGD_HEADLINE, JEUGD_LEAD } from "./copy";
 
 export const metadata = buildPageMetadata({
   title: "Jeugdopleiding",

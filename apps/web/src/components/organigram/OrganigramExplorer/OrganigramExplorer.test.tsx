@@ -4,7 +4,8 @@
  * Covers: open/close gating · root focus + children · deep-link via
  * initialFocusId · click-to-recentre (descend/ascend/breadcrumb) ·
  * count-then-expand fan · sibling cycler · "Volledig profiel" link · Esc close ·
- * a11y roles (dialog/tree/treeitem + live region) · announceFocus copy.
+ * a11y roles (dialog/group + roving `aria-current` + live region) ·
+ * announceFocus copy.
  */
 
 import { describe, it, expect, vi } from "vitest";
@@ -37,14 +38,21 @@ describe("OrganigramExplorer — gating + a11y shell", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("is a labelled modal dialog wrapping a tree, with a polite live region", () => {
+  it("is a labelled modal dialog wrapping the stage, with a polite live region", () => {
     open();
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveAttribute("aria-modal", "true");
-    expect(within(dialog).getByRole("tree")).toBeInTheDocument();
-    expect(screen.getByRole("treeitem")).toHaveAttribute(
-      "aria-current",
-      "true",
+    // `role="group"`, not `role="tree"` (#3188 — axe `aria-required-children`;
+    // see the component's own comment above the stage `<div>`).
+    expect(
+      within(dialog).getByRole("group", { name: "Organisatiestructuur" }),
+    ).toBeInTheDocument();
+    // The centred node is a plain roving-tabindex button, not a
+    // `role="treeitem"` (#3188 — its `aria-required-parent` needs a real
+    // `role="tree"` ancestor beyond any `group`, which this stage isn't) —
+    // `aria-current` alone carries the "you are here" semantics.
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Voorzitter",
     );
     expect(dialog.querySelector('[aria-live="polite"]')).toBeInTheDocument();
   });
@@ -53,12 +61,16 @@ describe("OrganigramExplorer — gating + a11y shell", () => {
 describe("OrganigramExplorer — focus + navigation", () => {
   it("opens on the primary top node (Voorzitter), not the thin synthetic root", () => {
     open();
-    expect(screen.getByRole("treeitem")).toHaveTextContent("Voorzitter");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Voorzitter",
+    );
   });
 
   it("can focus the club root (deep-link) — it fans both top lines", () => {
     open({ initialFocusId: "club" });
-    expect(screen.getByRole("treeitem")).toHaveTextContent("KCVV Elewijt");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "KCVV Elewijt",
+    );
     expect(
       screen.getByRole("button", { name: "Naar Voorzitter" }),
     ).toBeInTheDocument();
@@ -85,33 +97,39 @@ describe("OrganigramExplorer — focus + navigation", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Naar Voorzitter" }),
     );
-    expect(screen.getByRole("treeitem")).toHaveTextContent("Voorzitter");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Voorzitter",
+    );
   });
 
   it("does NOT descend when the centred node itself is clicked", async () => {
     open({ initialFocusId: "voorzitter" });
-    await userEvent.click(screen.getByRole("treeitem"));
+    await userEvent.click(screen.getByRole("button", { current: true }));
     // The centre is "you are here" — clicking it must not fall through to a child.
-    expect(screen.getByRole("treeitem")).toHaveTextContent("Voorzitter");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Voorzitter",
+    );
   });
 
   it("descends to the first child on ArrowDown", async () => {
     open({ initialFocusId: "voorzitter" });
-    screen.getByRole("treeitem").focus();
+    screen.getByRole("button", { current: true }).focus();
     await userEvent.keyboard("{ArrowDown}");
-    expect(screen.getByRole("treeitem")).toHaveTextContent("Jeugdvoorzitter");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Jeugdvoorzitter",
+    );
   });
 
   it("shows the keyboard focus ring only after a keyboard nav, not on open", async () => {
     open({ initialFocusId: "voorzitter" });
     // On open: no keyboard-nav ring.
-    expect(screen.getByRole("treeitem")).toHaveAttribute(
+    expect(screen.getByRole("button", { current: true })).toHaveAttribute(
       "data-keyboard-nav",
       "false",
     );
-    screen.getByRole("treeitem").focus();
+    screen.getByRole("button", { current: true }).focus();
     await userEvent.keyboard("{ArrowDown}");
-    expect(screen.getByRole("treeitem")).toHaveAttribute(
+    expect(screen.getByRole("button", { current: true })).toHaveAttribute(
       "data-keyboard-nav",
       "true",
     );
@@ -122,7 +140,7 @@ describe("OrganigramExplorer — focus + navigation", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Naar Jeugdvoorzitter" }),
     );
-    expect(screen.getByRole("treeitem")).toHaveAttribute(
+    expect(screen.getByRole("button", { current: true })).toHaveAttribute(
       "data-keyboard-nav",
       "false",
     );
@@ -135,7 +153,7 @@ describe("OrganigramExplorer — focus + navigation", () => {
         name: "Omhoog naar Sportief Verantwoordelijke",
       }),
     );
-    expect(screen.getByRole("treeitem")).toHaveTextContent(
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
       "Sportief Verantwoordelijke",
     );
   });
@@ -146,7 +164,9 @@ describe("OrganigramExplorer — focus + navigation", () => {
     await userEvent.click(
       within(crumb).getByRole("button", { name: "Voorzitter" }),
     );
-    expect(screen.getByRole("treeitem")).toHaveTextContent("Voorzitter");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Voorzitter",
+    );
   });
 });
 
@@ -178,7 +198,9 @@ describe("OrganigramExplorer — siblings + profile", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Volgende functie" }),
     );
-    expect(screen.getByRole("treeitem")).toHaveTextContent("Penningmeester");
+    expect(screen.getByRole("button", { current: true })).toHaveTextContent(
+      "Penningmeester",
+    );
   });
 
   it("links a single-holder centre to its staff profile", () => {

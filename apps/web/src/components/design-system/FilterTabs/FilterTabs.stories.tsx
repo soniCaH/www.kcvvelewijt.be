@@ -373,22 +373,12 @@ export const AccessibilityTest: Story = {
     showCounts: true,
     ariaLabel: "Filter by department (keyboard accessible)",
   },
-  parameters: {
-    a11y: {
-      config: {
-        rules: [
-          {
-            id: "color-contrast",
-            enabled: true,
-          },
-          {
-            id: "interactive-supports-focus",
-            enabled: true,
-          },
-        ],
-      },
-    },
-  },
+  // A story-level `parameters.a11y` override that locally re-enabled
+  // `color-contrast` (redundant `interactive-supports-focus` alongside it)
+  // predates #3188's global a11y gate. It's removed rather than kept: the
+  // acceptance criteria require color-contrast to be disabled in exactly
+  // ONE place (`.storybook/preview.ts`), and every other rule already gates
+  // globally by default — this override no longer adds anything.
 };
 
 /**

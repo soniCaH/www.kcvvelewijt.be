@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { TOP_HEADING_LEVEL } from "@/components/article/ArticleBody";
 import {
   SubjectAvatar,
   SubjectAvatarCluster,
@@ -155,12 +156,18 @@ export function QARow({ question, respondents, className }: QARowProps) {
           multi-respondent row below, so single- and multi-speaker pairs
           don't flip order mid-interview when some answers are attributed.
         */}
-        <h3
+        {/* `TOP_HEADING_LEVEL` (`<h2>`), not a hardcoded `<h3>` (#3188 —
+            axe `heading-order`): this row can land anywhere in an
+            article's flow, so it takes the SAME shallowest real level
+            `<ArticleBody>`'s own first subheading renders at — sharing
+            the one exported constant means the two can never drift apart
+            if that level ever changes. Same classes, same visual weight. */}
+        <TOP_HEADING_LEVEL
           data-qa-row="question"
           className="font-display text-display-sm font-semibold italic"
         >
           {question}
-        </h3>
+        </TOP_HEADING_LEVEL>
         <div className={cn(hasSpeaker ? "mt-5" : "mt-2")}>
           {hasSpeaker && (
             <SpeakerHeader
@@ -200,12 +207,14 @@ export function QARow({ question, respondents, className }: QARowProps) {
       data-qa-row-respondent-count={respondents.length}
       className={cn("flex flex-col", className)}
     >
-      <h3
+      {/* See the single-respondent branch above for why this is
+          `TOP_HEADING_LEVEL` (#3188). */}
+      <TOP_HEADING_LEVEL
         data-qa-row="question"
         className="font-display text-display-sm font-semibold italic"
       >
         {question}
-      </h3>
+      </TOP_HEADING_LEVEL>
       <div className="mt-5 flex flex-col gap-6">
         {respondents.map((r, i) => {
           const hasSpeaker =

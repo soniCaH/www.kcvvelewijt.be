@@ -27,7 +27,9 @@ describe("OrganigramOverview", () => {
       screen.getByRole("button", { name: "Open TVJO in de verkenner" }),
     );
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByRole("treeitem")).toHaveTextContent("TVJO");
+    expect(
+      within(dialog).getByRole("button", { current: true }),
+    ).toHaveTextContent("TVJO");
   });
 
   it("opens the explorer at the primary node from the toolbar button", async () => {
@@ -36,9 +38,9 @@ describe("OrganigramOverview", () => {
       screen.getByRole("button", { name: /Blader door het organigram/ }),
     );
     const dialog = await screen.findByRole("dialog");
-    expect(within(dialog).getByRole("treeitem")).toHaveTextContent(
-      "Voorzitter",
-    );
+    expect(
+      within(dialog).getByRole("button", { current: true }),
+    ).toHaveTextContent("Voorzitter");
   });
 
   it("closes the explorer and returns focus to the trigger on Esc", async () => {
@@ -63,7 +65,9 @@ describe("OrganigramOverview", () => {
       screen.getByRole("button", { name: /Blader door het organigram/ }),
     );
     // The verkenner dialog (with its tree) is open.
-    expect(await screen.findByRole("treeitem")).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { current: true }),
+    ).toBeInTheDocument();
 
     await userEvent.click(
       screen.getByRole("button", { name: "Contactgegevens" }),
@@ -71,7 +75,9 @@ describe("OrganigramOverview", () => {
     // The person panel took over and the verkenner collapsed — never two
     // stacked modal dialogs.
     expect(screen.getByTestId("member-detail-panel")).toBeInTheDocument();
-    expect(screen.queryByRole("treeitem")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { current: true }),
+    ).not.toBeInTheDocument();
   });
 
   it("collapsible: hides the chart behind a disclosure until opened (7o9 · 2)", async () => {

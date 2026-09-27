@@ -397,9 +397,10 @@ jq -r '.entries[] | select((.tags // []) | index("vr") and (index("vr-skip") | n
   apps/web/storybook-static/index.json | grep '^features-share'
 ```
 
-The tag pair is restated there; `apps/web/package.json`'s `--includeTags vr
---excludeTags vr-skip` is the authoritative copy, so re-read that if the two
-ever disagree. `index.json` is a build output and `vr:build-storybook` opens by
+The tag pair is restated there; `.storybook/test-runner.ts`'s `postVisit`
+(`shouldScreenshot = storyTags.includes("vr") && !storyTags.includes("vr-skip")`)
+is the authoritative copy, so re-read that if the two ever disagree.
+`index.json` is a build output and `vr:build-storybook` opens by
 deleting it — run `pnpm --filter @kcvv/web run vr:build-storybook` first if it
 is not there.
 
@@ -581,8 +582,10 @@ This precedent was established in the Phase 2 tracer-bullet PR (#1568).
 
 ### Opt-in via the `vr` tag
 
-The VR suite runs with `--includeTags vr`, so only story files tagged
-with `vr` in their meta participate. Add the tag at the meta level:
+`test-storybook` visits every story now (#3188, review round 2) — `postVisit`
+(`.storybook/test-runner.ts`) decides per story whether to screenshot, not the
+CLI. A story only gets a baseline captured when its combined tags include
+`vr` and exclude `vr-skip`. Add the tag at the meta level:
 
 ```typescript
 const meta = {
@@ -792,9 +795,14 @@ moved.
 
 `parameters.vr.disable = true` only suppresses **screenshot capture** in
 `postVisit`; the test-runner still visits the story and runs its `play`
-function. For stories that crash during render or `play` (a missing fixture,
-an inherently broken edge case), tag the story with `vr-skip` so the runner
-excludes it at discovery — before the page is evaluated:
+function — same as `vr-skip` now (#3188, review round 2): `test-storybook`
+visits every story unconditionally, and `postVisit` decides per story whether
+to screenshot. `vr-skip` no longer means "never load this story" — it means
+"still axe-check it, never screenshot it" (the a11y check runs from
+Storybook's own render lifecycle before `postVisit` gets a say either way).
+Reach for it when a story's pixel output is inherently non-deterministic (a
+clipboard-permission-dependent `play`, a live-clock artifact) rather than
+broken:
 
 ```typescript
 export const FlatHierarchy: Story = {
@@ -803,10 +811,13 @@ export const FlatHierarchy: Story = {
 };
 ```
 
-The `vr:run` / `vr:run:update` scripts in `apps/web/package.json` (and the
-matching `Dockerfile.vr` ENTRYPOINT) pass `--excludeTags vr-skip` to the
-test-runner so tagged stories never load. Reserve `vr-skip` for stories whose
-crash mode cannot be addressed by adjusting fixtures alone — e.g. an edge-case
+`.storybook/test-runner.ts`'s `postVisit` is the one place that reads this tag
+(`shouldScreenshot = ... && !storyTags.includes("vr-skip")`) — no CLI flag
+constructs it anymore. If a story genuinely cannot even RENDER under the
+runner (not just "shouldn't be screenshotted"), that's a different, sharper
+problem than `vr-skip` solves — fix the render path, or raise it as a blocker,
+rather than reaching for this tag to hide it. Reserve `vr-skip` for stories
+whose crash mode cannot be addressed by adjusting fixtures alone — e.g. an edge-case
 story that intentionally exercises an unsupported path of the underlying
 component or library. Document the reason inline (one comment line).
 
@@ -863,13 +874,14 @@ the more likely ways a tag stops actually running:
   `apps/web/src/app/__tests__/cross-page-consistency.test.ts`) and parses
   real `tags: [...]` array literals out of what's left, rather than
   grepping raw file text.
-- **The tagged story is excluded from the VR run itself.** The run carries
-  `--includeTags vr --excludeTags vr-skip`
-  (`apps/web/package.json`) — a story is only ever visited when its
-  Storybook-combined tags (meta `tags` ∪ the story's own, via
-  `combineTags`) include `vr` and exclude `vr-skip`. The test
-  approximates that union per occurrence and fails if either condition
-  doesn't hold — catching `vr-skip` added reactively to a story (or to a
+- **The tagged story is excluded from SCREENSHOTTING.** `test-storybook`
+  visits every story now; `.storybook/test-runner.ts`'s `postVisit` only
+  takes a screenshot when the story's Storybook-combined tags (meta `tags`
+  ∪ the story's own, via `combineTags`) include `vr` and exclude `vr-skip`
+  — a structural assertion (which runs inside that same screenshot branch)
+  never fires for a story missing either condition. The test approximates
+  that union per occurrence and fails if either condition doesn't hold —
+  catching `vr-skip` added reactively to a story (or to a
   file's meta, which disables every story in that file) after a CI
   OOM/crash flake, and a story whose meta never opted into `vr` at all.
 - **A file extension the scan didn't look at.** The glob

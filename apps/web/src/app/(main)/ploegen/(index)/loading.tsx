@@ -21,7 +21,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
-import { PLOEGEN_KICKER, PLOEGEN_TITLE, PLOEGEN_LEAD } from "./page";
+import { PLOEGEN_KICKER, PLOEGEN_TITLE, PLOEGEN_LEAD } from "./copy";
 
 export default function TeamsLoading() {
   return (

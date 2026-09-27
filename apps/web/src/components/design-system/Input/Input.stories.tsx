@@ -28,6 +28,14 @@ const meta = {
     disabled: { control: "boolean" },
     placeholder: { control: "text" },
   },
+  // Every `<Input>` needs an accessible name (#3188 — axe `label`). These
+  // bare demo stories have no adjacent visible label, so `aria-label` is
+  // the right mechanism here; every args-based story below inherits this
+  // default. `render`-based stories that DO have a visible `<Label
+  // htmlFor>` pair it with a matching `id` instead — never both, which
+  // would risk the label text and the AT-announced name drifting apart
+  // (WCAG 2.5.3).
+  args: { "aria-label": "Voorbeeldveld" },
 } satisfies Meta<typeof Input>;
 
 export default meta;
@@ -133,9 +141,13 @@ export const Large: Story = {
 export const AllSizes: Story = {
   render: () => (
     <div className="flex w-80 flex-col gap-4">
-      <Input size="sm" placeholder="Small (sm)" />
-      <Input size="md" placeholder="Medium (md) — default" />
-      <Input size="lg" placeholder="Large (lg)" />
+      <Input size="sm" placeholder="Small (sm)" aria-label="Small (sm)" />
+      <Input
+        size="md"
+        placeholder="Medium (md) — default"
+        aria-label="Medium (md) — default"
+      />
+      <Input size="lg" placeholder="Large (lg)" aria-label="Large (lg)" />
     </div>
   ),
 };
@@ -165,23 +177,28 @@ export const StateMachine: Story = {
   render: () => (
     <div className="grid w-[640px] grid-cols-2 gap-x-6 gap-y-5">
       <div>
-        <Label>Default</Label>
-        <Input placeholder="Voer tekst in..." />
+        <Label htmlFor="input-state-default">Default</Label>
+        <Input id="input-state-default" placeholder="Voer tekst in..." />
       </div>
       <div>
-        <Label>Filled</Label>
-        <Input defaultValue="Kevin Van Ransbeeck" />
+        <Label htmlFor="input-state-filled">Filled</Label>
+        <Input id="input-state-filled" defaultValue="Kevin Van Ransbeeck" />
       </div>
       <div>
-        <Label>Error</Label>
+        <Label htmlFor="input-state-error">Error</Label>
         <Input
+          id="input-state-error"
           defaultValue="geen-geldig-email"
           error="Vul een geldig e-mailadres in."
         />
       </div>
       <div>
-        <Label>Disabled</Label>
-        <Input defaultValue="Niet bewerkbaar" disabled />
+        <Label htmlFor="input-state-disabled">Disabled</Label>
+        <Input
+          id="input-state-disabled"
+          defaultValue="Niet bewerkbaar"
+          disabled
+        />
       </div>
     </div>
   ),

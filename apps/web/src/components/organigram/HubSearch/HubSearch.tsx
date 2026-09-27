@@ -400,6 +400,17 @@ export function HubSearch({
     : rows;
   const navItems = showShimmer ? memberResults : items;
   const showResults = isFocused && visible && trimmed.length > 0;
+  // Whether the popup's `role="listbox"` actually owns any `option`
+  // children right now — the shimmer branch can itself render zero
+  // `MemberRow`s while still waiting on the answer lane, and the "Geen
+  // resultaten" branch always renders an empty listbox by design (#3188).
+  // `aria-expanded`/`aria-controls` below key off this, not off
+  // `showResults` alone: a combobox popup with no navigable options isn't
+  // "expanded" in the ARIA combobox sense, even though the "Geen
+  // resultaten" copy is still visible and reachable by Tab.
+  const hasNavigableResults = showShimmer
+    ? memberResults.length > 0
+    : items.length > 0;
 
   // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
   // the list — the shimmer→settled flip, an answer-forward card sliding into
@@ -632,8 +643,10 @@ export function HubSearch({
           role="combobox"
           aria-label="Zoek een persoon of hulpvraag"
           aria-autocomplete="list"
-          aria-expanded={showResults}
-          aria-controls={showResults ? listboxId : undefined}
+          aria-expanded={showResults && hasNavigableResults}
+          aria-controls={
+            showResults && hasNavigableResults ? listboxId : undefined
+          }
           aria-activedescendant={
             selectedIndex >= 0 && selectedIndex < navItems.length
               ? `${listboxId}-opt-${selectedIndex}`
@@ -675,9 +688,7 @@ export function HubSearch({
       {showResults && (
         <div
           ref={dropdownRef}
-          id={listboxId}
-          role="listbox"
-          aria-label="Zoekresultaten"
+          data-testid="hub-search-popup"
           // `z-40`, NOT `z-50`: `<SiteHeader>` is `sticky top-0 z-50` and this
           // popup is not inside it, so at an equal z-index paint order decides
           // — and a popup later in the document wins, covering the header
@@ -686,19 +697,29 @@ export function HubSearch({
           // the section bar's own `z-30` stacking context either way.
           className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[4px_4px_0_0_var(--color-ink)]`}
         >
+          {/* `role="listbox"`'s owned children must all be `option`/`group`
+              (#3188 — axe `aria-required-children`); the smart-hint banner
+              and the "geen resultaten" message are real (non-`aria-hidden`)
+              content with neither role, so each now gets its own inner
+              wrapper carrying `id`/`role="listbox"` instead of the popup
+              shell above — that shell keeps every class it had, and a plain
+              wrapping `<div>` around a block-stacking subset of the same
+              children changes no pixel. */}
           {showShimmer ? (
             <>
               {smartHint("Slim zoeken…")}
-              {memberResults.map((result, index) => (
-                <MemberRow
-                  key={`member-${result.member.id}`}
-                  result={result}
-                  optionId={`${listboxId}-opt-${index}`}
-                  selected={index === selectedIndex}
-                  onSelect={select}
-                  onHover={() => setSelectedIndex(index)}
-                />
-              ))}
+              <div id={listboxId} role="listbox" aria-label="Zoekresultaten">
+                {memberResults.map((result, index) => (
+                  <MemberRow
+                    key={`member-${result.member.id}`}
+                    result={result}
+                    optionId={`${listboxId}-opt-${index}`}
+                    selected={index === selectedIndex}
+                    onSelect={select}
+                    onHover={() => setSelectedIndex(index)}
+                  />
+                ))}
+              </div>
               <div aria-hidden className="px-3 py-2.5">
                 <div className="flex items-center gap-3">
                   <div className="bg-cream-soft h-9 w-9 flex-shrink-0 rounded-full motion-safe:animate-pulse" />
@@ -721,57 +742,65 @@ export function HubSearch({
                       ? "Beste match"
                       : "Slim gezocht",
                 )}
-              {forwardCard}
-              {rows.map((result, i) => {
-                const index = answerForward ? i + 1 : i;
-                const optionId = `${listboxId}-opt-${index}`;
-                const selected = index === selectedIndex;
-                const onHover = () => setSelectedIndex(index);
-                return result.type === "member" ? (
-                  <MemberRow
-                    key={`member-${result.member.id}`}
-                    result={result}
-                    optionId={optionId}
-                    selected={selected}
-                    onSelect={select}
-                    onHover={onHover}
-                  />
-                ) : (
-                  <AnswerRow
-                    key={`answer-${result.path.id}`}
-                    result={result}
-                    optionId={optionId}
-                    selected={selected}
-                    onSelect={select}
-                    onHover={onHover}
-                  />
-                );
-              })}
+              <div id={listboxId} role="listbox" aria-label="Zoekresultaten">
+                {forwardCard}
+                {rows.map((result, i) => {
+                  const index = answerForward ? i + 1 : i;
+                  const optionId = `${listboxId}-opt-${index}`;
+                  const selected = index === selectedIndex;
+                  const onHover = () => setSelectedIndex(index);
+                  return result.type === "member" ? (
+                    <MemberRow
+                      key={`member-${result.member.id}`}
+                      result={result}
+                      optionId={optionId}
+                      selected={selected}
+                      onSelect={select}
+                      onHover={onHover}
+                    />
+                  ) : (
+                    <AnswerRow
+                      key={`answer-${result.path.id}`}
+                      result={result}
+                      optionId={optionId}
+                      selected={selected}
+                      onSelect={select}
+                      onHover={onHover}
+                    />
+                  );
+                })}
+              </div>
             </>
           ) : (
-            <div className="px-4 py-6 text-center">
-              <p className="text-ink text-sm">
-                Geen resultaten voor &ldquo;{value}&rdquo;
-              </p>
-              <p className="text-ink-muted mt-1 text-xs">
-                Probeer een andere zoekterm — of contacteer ons rechtstreeks.
-              </p>
-              {/* Dead-end escape (#2058): a failed search always offers a human
-                  door. The click is its own conversion signal, separate from
-                  `organigram_search_used`. */}
-              <Link
-                href="/club/contact"
-                onClick={() =>
-                  trackEvent("organigram_search_contact_escape", {
-                    query_length: value.length,
-                  })
-                }
-                className="border-ink bg-warm text-ink shadow-paper-sm mt-3 inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
-              >
-                Contacteer de club
-                <ArrowRight size={12} aria-hidden />
-              </Link>
-            </div>
+            <>
+              {/* Empty on purpose — zero owned children is a valid listbox,
+                  unlike the message below, which carries none of that
+                  role. */}
+              <div id={listboxId} role="listbox" aria-label="Zoekresultaten" />
+              <div className="px-4 py-6 text-center">
+                <p className="text-ink text-sm">
+                  Geen resultaten voor &ldquo;{value}&rdquo;
+                </p>
+                <p className="text-ink-muted mt-1 text-xs">
+                  Probeer een andere zoekterm — of contacteer ons rechtstreeks.
+                </p>
+                {/* Dead-end escape (#2058): a failed search always offers a
+                    human door. The click is its own conversion signal,
+                    separate from `organigram_search_used`. */}
+                <Link
+                  href="/club/contact"
+                  onClick={() =>
+                    trackEvent("organigram_search_contact_escape", {
+                      query_length: value.length,
+                    })
+                  }
+                  className="border-ink bg-warm text-ink shadow-paper-sm mt-3 inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                >
+                  Contacteer de club
+                  <ArrowRight size={12} aria-hidden />
+                </Link>
+              </div>
+            </>
           )}
         </div>
       )}

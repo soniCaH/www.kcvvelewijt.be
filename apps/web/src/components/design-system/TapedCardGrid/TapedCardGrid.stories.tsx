@@ -155,14 +155,20 @@ export const OrderedList: Story = {
   args: {
     as: "ol",
     columns: 2,
+    // No `as="li"` here (#3188 — axe `listitem`): `<TapedCardGrid as="ol">`
+    // already wraps every child in its own `<li>` slot (`SlotTag`, see
+    // TapedCardGrid.tsx) — a child that ALSO renders as `<li>` nests one
+    // `<li>` inside another, which `listitem` correctly rejects (an `<li>`'s
+    // only valid parent is a list, not another `<li>`). Story-only misuse;
+    // the component's own slot wrapping was always correct.
     children: [
-      <TapedCard key="a" rotation="auto" padding="md" as="li">
+      <TapedCard key="a" rotation="auto" padding="md">
         <p className="font-mono text-[11px]">Stap 1</p>
       </TapedCard>,
-      <TapedCard key="b" rotation="auto" padding="md" as="li">
+      <TapedCard key="b" rotation="auto" padding="md">
         <p className="font-mono text-[11px]">Stap 2</p>
       </TapedCard>,
-      <TapedCard key="c" rotation="auto" padding="md" as="li">
+      <TapedCard key="c" rotation="auto" padding="md">
         <p className="font-mono text-[11px]">Stap 3</p>
       </TapedCard>,
     ],
