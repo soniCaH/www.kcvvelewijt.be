@@ -95,7 +95,8 @@ The pure filter (`filterLauncherTemplates`) lives in its own file separate from 
 
 ## Migrations
 
-- One script per migration in `src/migrations/`
+- One script per migration in `src/migrations/`, with a test. **Every migration with logic lives here** — the facades in `apps/studio/migrations/` and `apps/studio-staging/migrations/` may only re-export it (#3153)
+- Export the logic as a pure function (`migrateX(doc)` returning patches, or `auditX(doc)` returning the log line) so the test needs no dataset
 - Migrations are one-off: run manually via `sanity migration run` against staging, then production, then kept with their test (not deleted) — see `apps/studio/CLAUDE.md` → Migrations
 - Export a default function and any helper types from the migration file
 - **Never re-export migrations from the root `src/index.ts` barrel.** Migrations import `sanity/migrate`, a Node/CLI-only entry point. With `autoUpdates: true`, the deployed Studio resolves it via `modules.sanity-cdn.com/.../bare/migrate.mjs`, which 404s and crashes both deployed studios with a black screen. Surface migrations through the dedicated `src/migrations/index.ts` sub-barrel and consume them via `@kcvv/sanity-studio/migrations` (the CLI entry points in `apps/studio/migrations/*` already do this)

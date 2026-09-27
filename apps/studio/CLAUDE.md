@@ -53,7 +53,7 @@ Commit the updated `sanity.types.ts` alongside the schema change. **CI enforces 
 
 ## Migrations
 
-One-off data migrations live in `apps/studio/migrations/`. A migration with logic lives in `@kcvv/sanity-studio/migrations` with a test, and its `index.ts` here only re-exports it. Six older migrations still hold logic in place; [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) moves them. Do not copy one as a pattern.
+One-off data migrations live in `apps/studio/migrations/`. **Rule: a migration with logic lives in `@kcvv/sanity-studio/migrations` with a test; the `index.ts` here may only re-export it** ([#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153)). A facade holds a docblock, one import, one `export default` — nothing else. Every facade in both studio folders follows this today.
 
 Dry-run first. The CLI dry-runs by default, so this changes nothing:
 
@@ -64,7 +64,7 @@ npx sanity@latest migration run <name> --project vhb33jaz --dataset <staging|pro
 Then apply with `--no-dry-run` (add `--no-confirm` when non-interactive). Run against staging first, then production. Document the migration as a manual step in the PR body.
 
 - **Always pass `--dataset`.** Both `apps/studio/sanity.cli.ts` **and** `apps/studio-staging/sanity.cli.ts` default to `production`. Running from the staging folder does not pick the staging dataset.
-- **Every migration has a facade in both folders** — `apps/studio/migrations/<name>/` and `apps/studio-staging/migrations/<name>/`, differing only in the docblock. A migration in one folder only is drift ([#3120](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3120)). **One temporary exception:** `title-portable-text-to-string` has no staging facade yet; [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) adds it. Being rollback-only is not an exemption — its own docblock targets staging.
+- **Every migration has a facade in both folders** — `apps/studio/migrations/<name>/` and `apps/studio-staging/migrations/<name>/`, differing only in the docblock. A migration in one folder only is drift ([#3120](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3120)). Being rollback-only is not an exemption.
 - **The folders are not a run ledger.** Sanity records no history of which migration ran against which dataset. To know, dry-run it against both datasets and query the data for the old shape — zero patches on staging can mean "no such documents" rather than "already ran".
 - **`title-portable-text-to-string` is rollback-only.** Never run it as a sync: it flattens every article title backwards.
 
