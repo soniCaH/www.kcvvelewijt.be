@@ -120,3 +120,39 @@ export type {
   PortableTextMarkDef as RepointLegacyPlayerLinksMarkDef,
   PortableTextSpan as RepointLegacyPlayerLinksSpan,
 } from './repoint-legacy-player-links'
+
+export {
+  default as auditCoverImageRequiredMigration,
+  auditCoverImageRequired,
+} from './audit-coverimage-required'
+export type {CoverImageArticleDoc as AuditCoverImageRequiredDoc} from './audit-coverimage-required'
+
+export {default as auditFactBlocksMigration, auditFactBlocks} from './audit-fact-blocks'
+export type {FactBlockArticleDoc as AuditFactBlocksDoc} from './audit-fact-blocks'
+
+export {
+  default as backfillArticleTypeMigration,
+  migrateBackfillArticleType,
+} from './backfill-article-type'
+export type {ArticleTypeDoc as BackfillArticleTypeDoc} from './backfill-article-type'
+
+export {
+  default as enrichTeamStaffWithRoleMigration,
+  migrateEnrichTeamStaffWithRole,
+} from './enrich-team-staff-with-role'
+export type {
+  StaffEntryLike as EnrichTeamStaffWithRoleEntry,
+  TeamWithStaffDoc as EnrichTeamStaffWithRoleDoc,
+} from './enrich-team-staff-with-role'
+
+export {
+  default as titleToPortableTextMigration,
+  migrateTitleToPortableText,
+} from './title-to-portable-text'
+export type {StringTitleArticleDoc as TitleToPortableTextDoc} from './title-to-portable-text'
+
+export {
+  default as titlePortableTextToStringMigration,
+  migrateTitlePortableTextToString,
+} from './title-portable-text-to-string'
+export type {PortableTextTitleArticleDoc as TitlePortableTextToStringDoc} from './title-portable-text-to-string'

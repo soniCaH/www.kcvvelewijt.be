@@ -5,7 +5,7 @@
  * not that it is unrun.
  *
  * Logic + tests live in `@kcvv/sanity-studio/migrations`. This file is the
- * Sanity CLI entry point for the production studio.
+ * Sanity CLI entry point for the staging studio.
  *
  * Only for an intermediate-state rollback (dataset ahead of deployed code),
  * decided by a human. No run command is given here on purpose.
