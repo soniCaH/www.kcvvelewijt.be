@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "type-check": "tsgo --noEmit",
     "schema:extract": "sanity schema extract --force",
-    "typegen": "sanity schema extract --force && sanity typegen generate"
+    "typegen": "pnpm schema:extract && sanity typegen generate"
   },
   "keywords": [
     "sanity"
