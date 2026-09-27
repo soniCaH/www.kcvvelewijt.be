@@ -158,21 +158,6 @@ function buildSummary(match: Match): string {
 }
 
 /**
- * No `is_placeholder` branch needed here (verified for #2698): this reads
- * only `competition`, never `home_team`/`away_team`, so it
- * cannot reproduce the "X - X" bug `buildSummary()` had. For a reservation
- * with a `competition` set, the description is a verbatim repeat of the
- * summary's subject (`DESCRIPTION:Jeugdtornooi`) rather than genuinely new
- * information — acceptable for an ICS `DESCRIPTION` field, which has no
- * neighbouring "subject" line of its own to duplicate the way an on-page
- * slot would (the Writer Rule's metadata/OG carve-out applies the same way
- * here).
- */
-function buildDescription(match: Match): string {
-  return match.competition ?? "";
-}
-
-/**
  * `match.venue` is the single source now (#2491): the BFF stamps it for a
  * home fixture and leaves it absent for an away one, an unresolved
  * `is_home`, a pitch-reservation placeholder, or an unconfirmed tournament
@@ -261,7 +246,10 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
     summary: buildSummary(match),
     start,
     end: start.plus({ hours: 2 }),
-    description: buildDescription(match),
+    // Competition only — never the team names, so a placeholder cannot
+    // reproduce `buildSummary()`'s "X - X" bug (#2698). Left `undefined` when
+    // absent, so no empty `DESCRIPTION:` line is written.
+    description: match.competition,
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${match.id}`,
     location: buildLocation(match),
   };

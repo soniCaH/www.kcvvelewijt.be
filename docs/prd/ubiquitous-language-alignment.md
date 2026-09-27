@@ -29,6 +29,8 @@ Rename `round` → `squadLabel` across all four packages end-to-end: schema chan
 
 ### Phase 1: Rename `round` → `squadLabel` (tracer bullet) — [#907]
 
+> **Superseded by #2710:** the rename also deleted the field's only writer, so `squadLabel` was never populated. #2710 deleted it. `kcvv_team_label` carries the squad label. Do not restore it.
+
 Rename the field across all layers. Proves the rename workflow.
 
 - `packages/api-contract/src/schemas/match.ts` — rename field
@@ -80,6 +82,8 @@ Remove the `t.id !== 23` filter and use Sanity's `showInNavigation` flag instead
 ## 5. Acceptance criteria per phase
 
 ### Phase 1: Rename `round` → `squadLabel`
+
+> Superseded by #2710 — the field was deleted. See Phase 1 above.
 
 - [ ] `Match` schema in api-contract uses `squadLabel` field (optional string)
 - [ ] BFF `transformPsdGame` produces `squadLabel` instead of `round`

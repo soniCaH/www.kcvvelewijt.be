@@ -31,23 +31,22 @@ The master plan's §6.3 locks the page as a 2-state surface per the
 The only authoritative data source for match-specific fields. Schema
 defined in `packages/api-contract/src/schemas/match.ts`.
 
-| Field | Type | Per-state availability | Notes |
-| --- | --- | --- | --- |
-| `id` | number | both | PSD match id |
-| `date` | Date | both | parsed via `DateFromStringOrDate` |
-| `time` | string? | both | e.g. `"14:30"` |
-| `venue` | string? | both | free-text from PSD |
-| `competition` | string? | both | e.g. `"3e Provinciale A"` |
-| `home_team.{id, name, logo, score}` | MatchTeam | both (score 0/0 for upcoming) | logo URL from PSD |
-| `away_team.{id, name, logo, score}` | MatchTeam | both (score 0/0 for upcoming) | logo URL from PSD |
-| `status` | MatchStatus | both | one of `scheduled / finished / forfeited / postponed / stopped` |
-| `squadLabel` | string? | both | e.g. `"A-Ploeg"`, `"U21"` |
-| `kcvv_team_id` | number? | both | which KCVV team plays |
-| `kcvv_team_label` | string? | both | human label for kcvv_team_id |
-| `is_home` | boolean? | both | computed by BFF from kcvv_team_id |
-| `lineup.{home, away}` | MatchLineup? | **finished: usually; upcoming: rarely** | rosters typically lock at kickoff |
-| `events` | MatchEvent[]? | **finished only** | goals / cards / substitutions |
-| `hasReport` | boolean | both (only `true` for some finished) | indicates an external PSD report exists |
+| Field                               | Type          | Per-state availability                  | Notes                                                           |
+| ----------------------------------- | ------------- | --------------------------------------- | --------------------------------------------------------------- |
+| `id`                                | number        | both                                    | PSD match id                                                    |
+| `date`                              | Date          | both                                    | parsed via `DateFromStringOrDate`                               |
+| `time`                              | string?       | both                                    | e.g. `"14:30"`                                                  |
+| `venue`                             | string?       | both                                    | free-text from PSD                                              |
+| `competition`                       | string?       | both                                    | e.g. `"3e Provinciale A"`                                       |
+| `home_team.{id, name, logo, score}` | MatchTeam     | both (score 0/0 for upcoming)           | logo URL from PSD                                               |
+| `away_team.{id, name, logo, score}` | MatchTeam     | both (score 0/0 for upcoming)           | logo URL from PSD                                               |
+| `status`                            | MatchStatus   | both                                    | one of `scheduled / finished / forfeited / postponed / stopped` |
+| `kcvv_team_id`                      | number?       | both                                    | which KCVV team plays                                           |
+| `kcvv_team_label`                   | string?       | both                                    | human label for kcvv_team_id                                    |
+| `is_home`                           | boolean?      | both                                    | computed by BFF from kcvv_team_id                               |
+| `lineup.{home, away}`               | MatchLineup?  | **finished: usually; upcoming: rarely** | rosters typically lock at kickoff                               |
+| `events`                            | MatchEvent[]? | **finished only**                       | goals / cards / substitutions                                   |
+| `hasReport`                         | boolean       | both (only `true` for some finished)    | indicates an external PSD report exists                         |
 
 `MatchLineupPlayer` carries: `id?, name, number?, minutesPlayed?, isCaptain, isKeeper?, position?, status (starter/substitute/substituted/subbed_in/unknown), card?`.
 
@@ -79,17 +78,17 @@ content lives on the article page; the match page links to it.
 
 ## What the original master-plan §6.3 spec asked for vs what's available
 
-| Section spec'd in master plan §6.3 | Data needed | Data available today? |
-| --- | --- | --- |
-| **Upcoming — `<EditorialHero variant="match-preview">`** with date / venue / two shields / "VOORBESCHOUWING" kicker | teams, date, venue, competition | ✓ (BFF) |
-| **Upcoming — tactical notes** | editorial prose | ✗ — would need `matchPreview` article (#1470) |
-| **Upcoming — recent form via `<TapedCardGrid>`** | last N matches per team | ✗ — no H2H endpoint; would require new BFF endpoint |
-| **Finished — "MATCHVERSLAG" hero** with score + 16:9 match photo | teams, score, status | partial: score ✓, photo ✗ |
-| **Finished — 16:9 match photo via `<TapedFigure aspect="landscape-16-9">`** | per-match image | ✗ — no source |
-| **Finished — score + final-whistle ephemera** | score, lineup, events | ✓ (BFF) |
-| **Finished — key moments** | `events` array | ✓ (BFF — derive from goals + cards) |
-| **Finished — `<PullQuote>` coach reaction** | editorial quote | ✗ — would need `matchRecap` article (#1470) |
-| **Finished — `<RecentMatchesGrid>` of head-to-head history** | H2H matches | ✗ — no H2H endpoint |
+| Section spec'd in master plan §6.3                                                                                  | Data needed                     | Data available today?                               |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------- | --------------------------------------------------- |
+| **Upcoming — `<EditorialHero variant="match-preview">`** with date / venue / two shields / "VOORBESCHOUWING" kicker | teams, date, venue, competition | ✓ (BFF)                                             |
+| **Upcoming — tactical notes**                                                                                       | editorial prose                 | ✗ — would need `matchPreview` article (#1470)       |
+| **Upcoming — recent form via `<TapedCardGrid>`**                                                                    | last N matches per team         | ✗ — no H2H endpoint; would require new BFF endpoint |
+| **Finished — "MATCHVERSLAG" hero** with score + 16:9 match photo                                                    | teams, score, status            | partial: score ✓, photo ✗                           |
+| **Finished — 16:9 match photo via `<TapedFigure aspect="landscape-16-9">`**                                         | per-match image                 | ✗ — no source                                       |
+| **Finished — score + final-whistle ephemera**                                                                       | score, lineup, events           | ✓ (BFF)                                             |
+| **Finished — key moments**                                                                                          | `events` array                  | ✓ (BFF — derive from goals + cards)                 |
+| **Finished — `<PullQuote>` coach reaction**                                                                         | editorial quote                 | ✗ — would need `matchRecap` article (#1470)         |
+| **Finished — `<RecentMatchesGrid>` of head-to-head history**                                                        | H2H matches                     | ✗ — no H2H endpoint                                 |
 
 ---
 
@@ -114,7 +113,7 @@ explicit dependents on:
 SiteHeader
 MatchStrip (top — if route opts in per Phase 3.C lock; TBD in d1)
 <MatchHero>                          ← upcoming OR finished hero
-  ├── meta row (squadLabel · competition · date · venue · status badge)
+  ├── meta row (kcvv_team_label · competition · date · venue · status badge)
   ├── teams + score (or "vs" for upcoming)
   └── status-aware kicker (VOORBESCHOUWING / FINAL / FORFAIT / etc.)
 StripedSeam
@@ -140,17 +139,17 @@ update to this lock OR a new dependent BFF / Sanity issue.
 
 ### Drill sequence (queued)
 
-| Drill | Subject | Status |
-| --- | --- | --- |
-| 6.B.d0 | Data reality | **LOCKED (this doc)** |
-| 6.B.d1 | Page composition + MatchStrip placement | queued |
-| 6.B.d2 | `<MatchHero>` (upcoming + finished variants) | queued |
-| 6.B.d3 | Lineup + events visual treatment | queued |
-| 6.B.d4 | Article-link card (matchPreview / matchRecap) | queued |
-| 6.B.d5 | `<MatchStatusBadge>` Direction-D audit | queued |
-| 6.B.d6 | `<MatchTeaser>` reskin (default + compact) | queued — cross-cutting per #1528 |
-| 6.B.d7 | `<MatchResultRow>` reskin | queued — cross-cutting per #1528 |
-| 6.B.d8 | `<MatchStripClient>` audit | queued — cross-cutting per #1528 |
+| Drill  | Subject                                       | Status                           |
+| ------ | --------------------------------------------- | -------------------------------- |
+| 6.B.d0 | Data reality                                  | **LOCKED (this doc)**            |
+| 6.B.d1 | Page composition + MatchStrip placement       | queued                           |
+| 6.B.d2 | `<MatchHero>` (upcoming + finished variants)  | queued                           |
+| 6.B.d3 | Lineup + events visual treatment              | queued                           |
+| 6.B.d4 | Article-link card (matchPreview / matchRecap) | queued                           |
+| 6.B.d5 | `<MatchStatusBadge>` Direction-D audit        | queued                           |
+| 6.B.d6 | `<MatchTeaser>` reskin (default + compact)    | queued — cross-cutting per #1528 |
+| 6.B.d7 | `<MatchResultRow>` reskin                     | queued — cross-cutting per #1528 |
+| 6.B.d8 | `<MatchStripClient>` audit                    | queued — cross-cutting per #1528 |
 
 ---
 
