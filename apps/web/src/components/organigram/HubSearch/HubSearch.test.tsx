@@ -198,6 +198,12 @@ describe("HubSearch", () => {
     typeQuery("bezeerd");
     expect(await screen.findByText(/Slim zoeken/i)).toBeInTheDocument();
     expect(screen.queryByText(/Geen resultaten/)).not.toBeInTheDocument();
+    // Open but still empty: the listbox says it is loading.
+    expect(screen.getByRole("combobox")).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "true");
   });
 
   // #3092 — an editor's keyword must find its path whatever semantic ranks.

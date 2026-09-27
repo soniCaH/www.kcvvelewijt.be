@@ -791,7 +791,7 @@ rm test/vr/__snapshots__/<story-id>--{desktop,tablet}.png
 then re-run the scoped capture to confirm nothing else in the same component
 moved.
 
-### `vr-skip` — discovery-time skip for crashing stories
+### `vr-skip` — screenshot-only skip (the story is still visited)
 
 `parameters.vr.disable = true` only suppresses **screenshot capture** in
 `postVisit`; the test-runner still visits the story and runs its `play`
@@ -817,9 +817,9 @@ constructs it anymore. If a story genuinely cannot even RENDER under the
 runner (not just "shouldn't be screenshotted"), that's a different, sharper
 problem than `vr-skip` solves — fix the render path, or raise it as a blocker,
 rather than reaching for this tag to hide it. Reserve `vr-skip` for stories
-whose crash mode cannot be addressed by adjusting fixtures alone — e.g. an edge-case
-story that intentionally exercises an unsupported path of the underlying
-component or library. Document the reason inline (one comment line).
+whose pixels can never be stable, not for stories that crash — a crashing
+story still fails the run, tag or no tag. Document the reason inline (one
+comment line).
 
 ### Structural assertions — opt-in, tag-scoped DOM checks beyond pixels (#2861)
 

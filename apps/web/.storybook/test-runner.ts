@@ -53,6 +53,11 @@ const KNOWN_ABORT_HOSTS =
 // mount/capture window it fell in, not every story for the rest of the file.
 let deniedUrls: string[] = [];
 
+// The page's own viewport, read once in `prepare`. `preVisit` restores it for
+// every story that names no fixed viewport, so `play()` never runs at whatever
+// size the previous story (or its capture loop) left behind.
+let defaultViewport: { width: number; height: number } | null = null;
+
 function throwIfDenied(storyId: string): void {
   if (deniedUrls.length === 0) return;
   const offending = deniedUrls;
@@ -472,6 +477,7 @@ const config: TestRunnerConfig = {
         }
         throw err;
       });
+    defaultViewport = page.viewportSize();
   },
   // Re-seed the PRNG before each story so consumption order is independent of
   // which other story rendered first in the same `.stories.tsx` file. Without
@@ -501,27 +507,28 @@ const config: TestRunnerConfig = {
       story as { storyGlobals?: { viewport?: { value?: string } } }
     ).storyGlobals;
     const viewportValue = storyGlobals?.viewport?.value;
-    if (viewportValue) {
-      const viewportOptions = (
-        story.parameters?.viewport as
-          | { options?: Record<string, { styles?: Record<string, string> }> }
-          | undefined
-      )?.options;
-      const entry = viewportOptions?.[viewportValue];
-      const width = entry?.styles?.width
-        ? Number.parseInt(entry.styles.width, 10)
-        : undefined;
-      const height = entry?.styles?.height
-        ? Number.parseInt(entry.styles.height, 10)
-        : undefined;
-      if (width && height) {
-        await page.setViewportSize({ width, height });
-      }
-      // An unresolvable value (a typo, or "responsive"/"reset", which carry
-      // no `styles` entry at all) is left alone — postVisit's own per-
-      // viewport loop still drives the real capture size for a `vr`-tagged
-      // story either way, and a non-`vr` story with a bad value simply
-      // renders at whatever size `page` already had.
+    const entry = viewportValue
+      ? (
+          story.parameters?.viewport as
+            | {
+                options?: Record<string, { styles?: Record<string, string> }>;
+              }
+            | undefined
+        )?.options?.[viewportValue]
+      : undefined;
+    const width = entry?.styles?.width
+      ? Number.parseInt(entry.styles.width, 10)
+      : undefined;
+    const height = entry?.styles?.height
+      ? Number.parseInt(entry.styles.height, 10)
+      : undefined;
+    // No fixed size resolves (no value, a typo, or "responsive"/"reset",
+    // which carry no `styles`) → back to the page default, never the size
+    // the previous story left. postVisit's capture loop still sets each
+    // capture size for a `vr` story.
+    const size = width && height ? { width, height } : defaultViewport;
+    if (size) {
+      await page.setViewportSize(size);
     }
   },
   async postVisit(page, context) {

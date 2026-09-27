@@ -400,17 +400,11 @@ export function HubSearch({
     : rows;
   const navItems = showShimmer ? memberResults : items;
   const showResults = isFocused && visible && trimmed.length > 0;
-  // Whether the popup's `role="listbox"` actually owns any `option`
-  // children right now — the shimmer branch can itself render zero
-  // `MemberRow`s while still waiting on the answer lane, and the "Geen
-  // resultaten" branch always renders an empty listbox by design (#3188).
-  // `aria-expanded`/`aria-controls` below key off this, not off
-  // `showResults` alone: a combobox popup with no navigable options isn't
-  // "expanded" in the ARIA combobox sense, even though the "Geen
-  // resultaten" copy is still visible and reachable by Tab.
-  const hasNavigableResults = showShimmer
-    ? memberResults.length > 0
-    : items.length > 0;
+  // The listbox exists whenever the popup shows options or is still loading
+  // them. The "Geen resultaten" state renders no listbox at all — just a
+  // message and the contact escape — so the combobox is honestly collapsed
+  // there, and the `role="status"` region announces the empty result (#3188).
+  const listboxOpen = showResults && (showShimmer || items.length > 0);
 
   // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
   // the list — the shimmer→settled flip, an answer-forward card sliding into
@@ -643,10 +637,8 @@ export function HubSearch({
           role="combobox"
           aria-label="Zoek een persoon of hulpvraag"
           aria-autocomplete="list"
-          aria-expanded={showResults && hasNavigableResults}
-          aria-controls={
-            showResults && hasNavigableResults ? listboxId : undefined
-          }
+          aria-expanded={listboxOpen}
+          aria-controls={listboxOpen ? listboxId : undefined}
           aria-activedescendant={
             selectedIndex >= 0 && selectedIndex < navItems.length
               ? `${listboxId}-opt-${selectedIndex}`
@@ -708,7 +700,13 @@ export function HubSearch({
           {showShimmer ? (
             <>
               {smartHint("Slim zoeken…")}
-              <div id={listboxId} role="listbox" aria-label="Zoekresultaten">
+              <div
+                id={listboxId}
+                role="listbox"
+                aria-label="Zoekresultaten"
+                // Open but still empty while the answer lane loads.
+                aria-busy={memberResults.length === 0 || undefined}
+              >
                 {memberResults.map((result, index) => (
                   <MemberRow
                     key={`member-${result.member.id}`}
@@ -773,10 +771,6 @@ export function HubSearch({
             </>
           ) : (
             <>
-              {/* Empty on purpose — zero owned children is a valid listbox,
-                  unlike the message below, which carries none of that
-                  role. */}
-              <div id={listboxId} role="listbox" aria-label="Zoekresultaten" />
               <div className="px-4 py-6 text-center">
                 <p className="text-ink text-sm">
                   Geen resultaten voor &ldquo;{value}&rdquo;
