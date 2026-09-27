@@ -12,8 +12,8 @@
     "deploy-graphql": "sanity graphql deploy",
     "lint": "eslint .",
     "type-check": "tsgo --noEmit",
-    "schema:extract": "sanity schema extract",
-    "typegen": "sanity schema extract && sanity typegen generate"
+    "schema:extract": "sanity schema extract --force",
+    "typegen": "sanity schema extract --force && sanity typegen generate"
   },
   "keywords": [
     "sanity"

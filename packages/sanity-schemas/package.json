@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "7.0.0",
-    "@sanity/icons": "5.2.1",
+    "@sanity/icons": "5.2.2",
     "@types/react-dom": "19.2.7",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "eslint": "10.9.1",
