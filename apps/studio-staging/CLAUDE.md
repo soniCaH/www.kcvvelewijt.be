@@ -62,7 +62,7 @@ Note: when `sanity.cli.ts` does not declare an `appId`, `pnpm deploy` will promp
 
 `migrations/` mirrors `apps/studio/migrations/`: every migration has a facade in **both** folders. Adding or removing one here means doing the same there, in the same PR. A facade here may only re-export from `@kcvv/sanity-studio/migrations`. The rules, the run command, and the rollback-only exception live in `apps/studio/CLAUDE.md` → **Migrations**.
 
-⚠️ `sanity.cli.ts` here defaults to the **`production`** dataset, not staging. Always pass `--dataset` to `sanity migration run`.
+`sanity.cli.ts` here defaults to the **`staging`** dataset (#3210). Always pass `--dataset` to `sanity migration run` anyway — an explicit flag beats relying on either studio's default.
 
 ## No Duplication With Root CLAUDE.md
 
