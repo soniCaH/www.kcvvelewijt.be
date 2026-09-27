@@ -163,6 +163,24 @@
         "@playwright/test",
         "mcr.microsoft.com/playwright"
       ]
+    },
+    {
+      "description": "Move sanity, @sanity/* and React in lockstep across the two studios and the two shared Sanity packages. A version split in any of them makes pnpm install a second sanity instance, and two sanity copies in one file break the studios' type-check (#3204). Scoped by file so @sanity/client in api/web/sanity-ops keeps its own groups.",
+      "groupName": "sanity studios",
+      "matchFileNames": [
+        "apps/studio/package.json",
+        "apps/studio-staging/package.json",
+        "packages/sanity-schemas/package.json",
+        "packages/sanity-studio/package.json"
+      ],
+      "matchPackageNames": [
+        "sanity",
+        "/^@sanity//",
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ]
     }
   ],
   "vulnerabilityAlerts": {

@@ -158,8 +158,8 @@ pnpm turbo run lint type-check test build --filter="$WORKSPACE"   # e.g. @kcvv/w
 | Workspace              | Exit | Tasks run                                                                                      | No such script (Turbo skips it) |
 | ---------------------- | ---: | ---------------------------------------------------------------------------------------------- | ------------------------------- |
 | `@kcvv/web`            |    0 | lint, type-check, test, build + `api-contract#build`, `sanity-schemas#build`, `studio#typegen` | —                               |
-| `@kcvv/studio`         |    0 | lint, build + `sanity-studio#build`                                                            | type-check, test                |
-| `@kcvv/studio-staging` |    0 | lint, build + `sanity-studio#build`                                                            | type-check, test                |
+| `@kcvv/studio`         |    0 | lint, type-check, build + `sanity-studio#build`                                                | test                            |
+| `@kcvv/studio-staging` |    0 | lint, type-check, build + `sanity-studio#build`                                                | test                            |
 | `@kcvv/api`            |    0 | lint, type-check, test + `api-contract#build`                                                  | build                           |
 | `@kcvv/sanity-schemas` |    0 | lint, type-check, build                                                                        | test                            |
 | `@kcvv/sanity-studio`  |    0 | lint, type-check, test, build + `sanity-schemas#build`                                         | —                               |
@@ -168,10 +168,10 @@ pnpm turbo run lint type-check test build --filter="$WORKSPACE"   # e.g. @kcvv/w
 
 **Why one command is valid in all eight.** Turbo plans a task a workspace has no script for as `<NONEXISTENT>` and skips it — not an error. So the command never needs to be tailored per workspace; only `--filter` changes.
 
-**The seven absent scripts, and why each stays absent:**
+**The absent scripts, and why each stays absent** (seven on 2026-09-26; the two studio `type-check` entries were added by #3204):
 
-- **`studio` / `studio-staging` — no `type-check`.** Both are red today: `tsc --noEmit` finds 11 errors in `apps/studio` and 9 in `apps/studio-staging` (`structure.ts` ×6, `sanity.config.ts` ×3 in each; `apps/studio` adds one in `scripts/` and one in `migrations/`). Neither has `tsgo` installed. Most look like two copies of `sanity`'s types meeting in one file, not bad code. Adding the script would turn the gate red, so it waits for those errors to be fixed. [#3204](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3204) owns them. Until then, `ci.yml`'s "Lint + type check Studio" step type-checks neither studio, because neither has the script.
-- **`studio` / `studio-staging` — no `test`.** No test script, but not nothing to test: migrations in both studios (26 in `apps/studio`, 20 in `apps/studio-staging`) and `apps/studio/scripts/` hold logic. Both are named in `.claude/CLAUDE.md`'s test-layers table.
+- **`studio` / `studio-staging` — no `type-check`.** **Resolved 2026-09-27 by [#3204](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3204)** — the two studio rows above now show it; on 2026-09-26 both listed `type-check` as absent. Both studios now have `type-check` (`tsgo --noEmit`) and are green, so `ci.yml`'s "Lint + type check Studio" step checks them with no workflow edit. The cause was two copies of `sanity` meeting in one file: the studios ran 6.15.0, the two shared packages 6.11.0. All four now pin 6.15.0 (and `react` 19.3.0, whose peer split made a second 6.15.0 copy), a `renovate.json` group moves `sanity` + `@sanity/*` together, and `pnpm-lock.yaml` holds one `sanity@6.15.0(…)` snapshot (`node_modules/.pnpm` may keep old copies until pruned). The one real strictness error, in `apps/studio/scripts/seed-interview-qa-pairs.ts`, is fixed; the `migrations/` one left with [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153).
+- **`studio` / `studio-staging` — no `test`.** No test script. The migrations in both studios are 21 re-export facades each since [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153), with their logic tested in `@kcvv/sanity-studio`. What still holds untested logic is `apps/studio/scripts/`. Both are named in `.claude/CLAUDE.md`'s test-layers table.
 - **`api` — no `build`.** A Worker is bundled by `wrangler deploy` at deploy time. There is no output to build ahead.
 - **`sanity-schemas` — no `test`.** Vitest's named gap ([#3100](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3100) decision D9) — decided, not shipped.
 - **`sanity-ops` — no `build`.** Run by hand through `tsx`. There is no output.

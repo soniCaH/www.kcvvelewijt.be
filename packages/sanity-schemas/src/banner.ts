@@ -29,8 +29,9 @@ export const banner = defineType({
       // two independent `Rule` chains, not one chain with two calls tacked
       // on. Each `Rule` instance carries its own `_level`, and every check
       // registered on that instance is emitted at that instance's level
-      // (`convertToValidationMarker(result, this._level, context)` in
-      // sanity@6.11.0's `datastores-QCSg1Xje.js`) — the returned validator
+      // (the marker is built with `this._level` in @sanity/validation@6.15.0's
+      // `validateDocument-CYEdxAfl.js`; sanity@6.11.0 had the same logic as
+      // `convertToValidationMarker` in `datastores-QCSg1Xje.js`) — the returned validator
       // result's own `level` key, if any, is ignored entirely. Chaining
       // `.custom()` after `.required().error(...)` therefore ran the custom
       // check on the SAME error-level instance, silently promoting the
