@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { gotoBounded } from "./helpers/goto";
+import { waitForHydrated } from "./helpers/hydration";
 
 // The Tap Target Rule (DESIGN.md): an icon-only control answers to a 44 × 44
 // hit area, and that hit area never lands on a neighbouring control. Several
@@ -21,8 +22,53 @@ interface HitMeasurement {
 }
 
 async function measureHitArea(control: Locator): Promise<HitMeasurement> {
-  await control.scrollIntoViewIfNeeded();
   return control.evaluate((el, interactive) => {
+    // Rule 2 (#3196): scroll only when the whole 44 × 44 hit square around
+    // the control's centre is not already inside the viewport, and never
+    // scroll a control whose own or ancestor `position` is `sticky` or
+    // `fixed` — measure those where they stand. `scrollIntoViewIfNeeded`
+    // used to run unconditionally: on a sticky control (HubSearch's
+    // repeated search in the section bar) it scrolls the document to the
+    // control's *in-flow* position, which brings the hero back into view,
+    // fires its IntersectionObserver, and unmounts the bar's own search —
+    // measuring a detached element reports 0 × 0 / width 1, not a real hit
+    // area. Centring rather than edge-aligning also closes the other half
+    // of the same defect: an edge-aligned scroll can still leave the
+    // pseudo-element hit-area overhanging the viewport uncounted (the
+    // ContactCard defect this rule closes too).
+    const isStickyOrFixed = (node: Element | null): boolean => {
+      for (let n = node; n; n = n.parentElement) {
+        const position = getComputedStyle(n).position;
+        if (position === "sticky" || position === "fixed") return true;
+      }
+      return false;
+    };
+    if (!isStickyOrFixed(el)) {
+      const pre = el.getBoundingClientRect();
+      const half = 22; // half of the 44 × 44 hit square
+      const cx0 = pre.left + pre.width / 2;
+      const cy0 = pre.top + pre.height / 2;
+      const fitsInViewport =
+        cx0 - half >= 0 &&
+        cy0 - half >= 0 &&
+        cx0 + half <= window.innerWidth &&
+        cy0 + half <= window.innerHeight;
+      if (!fitsInViewport) {
+        // `behavior: "instant"` (not the default "auto") is load-bearing:
+        // the site sets `html[data-scroll-behavior="smooth"]` globally
+        // (`globals.css`), and "auto" respects that ancestor CSS — the
+        // scroll would animate, and the very next line's synchronous
+        // `getBoundingClientRect()` would read the control mid-flight,
+        // not at rest. Same convention `<ScrollToTop>` uses for the same
+        // reason.
+        el.scrollIntoView({
+          block: "center",
+          inline: "center",
+          behavior: "instant",
+        });
+      }
+    }
+
     const r = el.getBoundingClientRect();
     const cx = r.left + r.width / 2;
     const cy = r.top + r.height / 2;
@@ -118,6 +164,12 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
   );
   const toggles = page.locator("#hulp button[aria-expanded]");
   await toggles.first().waitFor();
+  // Rule 1 (#3196): these toggles are prerendered client components with a
+  // plain `onClick` — the first click must wait for hydration or it is
+  // silently dropped, the loop opens the wrong question, and that
+  // question's contact ends up at the viewport edge (flake ledger row 29 /
+  // class N).
+  await waitForHydrated(toggles.first());
   const n = Math.min(await toggles.count(), 20);
   for (let i = 0; i < n; i++) {
     await toggles.nth(i).click();
@@ -125,6 +177,31 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
     await toggles.nth(i).click();
   }
   return null;
+}
+
+/**
+ * Waits until `window.scrollY` reads the same on two consecutive polls.
+ *
+ * The hub's hash-landing correction (`useHashLandingCorrection`,
+ * `useSectionNav`) re-verifies a `#structuur` cold load's landing spot once
+ * the sticky bar's own resize (its `<HubSearch>` mounting) or a late webfont
+ * swap fires — a native `scrollIntoView()` under the page's global
+ * `scroll-behavior: smooth`, so it animates. Under slow hydration that
+ * correction can still be mid-flight when this test reaches its own
+ * measurement, which would otherwise misattribute the page's own animated
+ * scroll to a defect in `measureHitArea`. Polled with `expect.poll` at its
+ * own default timeout — no timeout raised, no fixed sleep.
+ */
+async function waitForScrollSettled(page: Page): Promise<void> {
+  let previous: number | null = null;
+  await expect
+    .poll(async () => {
+      const current = await page.evaluate(() => window.scrollY);
+      const settled = previous !== null && current === previous;
+      previous = current;
+      return settled;
+    })
+    .toBe(true);
 }
 
 for (const viewport of VIEWPORTS) {
@@ -149,7 +226,16 @@ for (const viewport of VIEWPORTS) {
       const expand = page.getByRole("button", {
         name: "Bekijk het volledige organigram",
       });
-      if (await expand.count()) await expand.click();
+      // Rule 1 (#3196): `OrganigramOverview`'s disclosure button is a
+      // prerendered `"use client"` component with a plain `onClick` — a
+      // click before hydration attaches the listener is silently dropped,
+      // `VolledigOrganigram` never mounts, and the next locator below waits
+      // the full test timeout for a button that will never appear (flake
+      // ledger row 28 / class N).
+      if (await expand.count()) {
+        await waitForHydrated(expand);
+        await expand.click();
+      }
       await page
         .getByRole("button", { name: /Blader door het organigram/ })
         .first()
@@ -183,7 +269,20 @@ for (const viewport of VIEWPORTS) {
       await page.keyboard.press("Escape");
       const clear = nav.locator('button[aria-label="Wissen"]');
       await expect(clear).toBeVisible();
+      // Rule 2 (#3196): this control is inside a `position: sticky` bar —
+      // `measureHitArea` must measure it where it stands rather than
+      // scrolling it into its in-flow position, which would bring the hero
+      // back into view, fire its IntersectionObserver, and unmount this
+      // very search (flake ledger row 29 / class B). Assert the page never
+      // moves under the measurement, not only that the measurement itself
+      // comes back right.
+      await waitForScrollSettled(page);
+      const scrollYBefore = await page.evaluate(() => window.scrollY);
       await expectTapTarget(clear);
+      const scrollYAfter = await page.evaluate(() => window.scrollY);
+      expect(scrollYAfter, "scrollY across the measurement").toBe(
+        scrollYBefore,
+      );
     });
 
     test("CalendarWidget period arrows on /kalender", async ({ page }) => {
