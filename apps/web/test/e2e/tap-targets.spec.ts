@@ -232,10 +232,23 @@ for (const viewport of VIEWPORTS) {
       // `VolledigOrganigram` never mounts, and the next locator below waits
       // the full test timeout for a button that will never appear (flake
       // ledger row 28 / class N).
-      if (await expand.count()) {
-        await waitForHydrated(expand);
-        await expand.click();
-      }
+      //
+      // No `if (await expand.count())` guard: `/hulp/page.tsx:197` always
+      // renders `<OrganigramOverview collapsible />`, so this button always
+      // exists on this route — a non-waiting `count()` right after
+      // `gotoBounded` is a THIRD race, independent of hydration. `/hulp` has
+      // its own `loading.tsx`, so the DOM immediately after `gotoBounded`
+      // can still be that route-level loading skeleton (no organigram
+      // markup at all yet) while the real page streams in — `count()`
+      // reads 0 in that instant, the whole click is skipped, and the next
+      // locator below then waits the full test timeout for a button that
+      // was never clicked into existence (CI run 36318387622, both @375px
+      // attempts). `waitForHydrated()`'s own `locator.waitFor()` waits
+      // (bounded, default timeout) for the button to attach — covering both
+      // the streaming race and the hydration race with one wait — so always
+      // call it, unconditionally.
+      await waitForHydrated(expand);
+      await expand.click();
       await page
         .getByRole("button", { name: /Blader door het organigram/ })
         .first()
