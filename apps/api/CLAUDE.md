@@ -180,22 +180,28 @@ wrangler vectorize create-metadata-index kcvv-search-staging --property-name=typ
 `index.ts` — never runs on staging. The only other writer is the per-document
 webhook. Before this change, staging's `/search` and `/related` read production's
 data through the shared index; after it, **staging search returns nothing until
-someone runs a one-off backfill.** `docs/agents/testing-ops.md` and
+someone runs the backfill below.** `docs/agents/testing-ops.md` and
 `.github/workflows/e2e.yml` both point `KCVV_API_URL` at the staging worker, so this
 is a real gap for anyone exercising search there, not a theoretical one.
 
-To backfill once, run the same nightly job on demand against real staging bindings:
+**Staging search is pull-only, by choice (#2845): no cron, no webhook.** To fill or
+refresh `kcvv-search-staging`, run one command from the repo root:
 
 ```bash
-pnpm wrangler dev --env staging --remote --test-scheduled
-# in another terminal, or a browser:
-curl "http://localhost:8787/__scheduled?cron=30+2+*+*+*"
+./scripts/backfill-staging-search.sh
 ```
 
-Re-run the same command any time staging's index needs to catch up (e.g. after the
-one-time setup above, or after a long staging Studio session). A guarded HTTP route
-that does the same thing without a local `wrangler dev` session would be cheaper to
-run repeatedly — proposed, not built, in #2833's PR.
+It starts the staging worker with remote bindings, fires the `30 2 * * *` sweep once
+(never the `0 2 * * *` PSD sync), waits for it to settle, stops the worker, and prints
+the index's vector count. It exits non-zero on a failed sweep. Re-run it whenever
+staging search should catch up with the staging dataset.
+
+It refuses to start unless `wrangler.toml` pairs staging with dataset `staging` and
+index `kcvv-search-staging`. It also keeps `.dev.vars` from overriding that pair: a
+`.dev.vars` that sets `SANITY_DATASET=production` would otherwise win over
+`[env.staging.vars]`, and the dataset/index guard would refuse the sweep. The script
+passes wrangler a copy of `.dev.vars` without those two keys (`--env-file`), so the
+secrets still load.
 
 ## Cache
 

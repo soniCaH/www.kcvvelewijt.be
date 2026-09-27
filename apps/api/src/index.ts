@@ -224,6 +224,12 @@ export default {
           if (pruneOutcome !== null) {
             await reportJobOutcome("search-index-prune", pruneOutcome);
           }
+          // The terminal line `scripts/backfill-staging-search.sh` waits for:
+          // it runs after the reports, so stopping `wrangler dev` here cuts
+          // nothing off (#2845).
+          console.log(
+            `[scheduled] sanity-index-sync settled: ${outcome.ok ? "ok" : "failed"}`,
+          );
           if (!outcome.ok) throw outcome.error;
         })(),
       );
