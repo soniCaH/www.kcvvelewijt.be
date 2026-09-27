@@ -157,7 +157,7 @@
     "apps/studio": {
       "entry": [
         "structure.ts",
-        // Migrations run via the Sanity CLI (`sanity migrate <name>`), which
+        // Migrations run via the Sanity CLI (`sanity migration run <name>`), which
         // discovers them by directory convention — nothing in the app
         // imports them.
         "migrations/*/index.ts",
