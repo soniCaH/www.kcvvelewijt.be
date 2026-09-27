@@ -60,7 +60,7 @@ Note: when `sanity.cli.ts` does not declare an `appId`, `pnpm deploy` will promp
 
 ## Migrations
 
-`migrations/` mirrors `apps/studio/migrations/`: every migration has a facade in **both** folders. Adding or removing one here means doing the same there, in the same PR. The rules, the run command, and the rollback-only exception live in `apps/studio/CLAUDE.md` → **Migrations**.
+`migrations/` mirrors `apps/studio/migrations/`: every migration has a facade in **both** folders. Adding or removing one here means doing the same there, in the same PR. One temporary exception: `title-portable-text-to-string` is missing here until [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) adds its facade. The rules, the run command, and the rollback-only exception live in `apps/studio/CLAUDE.md` → **Migrations**.
 
 ⚠️ `sanity.cli.ts` here defaults to the **`production`** dataset, not staging. Always pass `--dataset` to `sanity migration run`.
 
