@@ -700,7 +700,13 @@ export function HubSearch({
           {showShimmer ? (
             <>
               {smartHint("Slim zoeken…")}
-              <div id={listboxId} role="listbox" aria-label="Zoekresultaten">
+              <div
+                id={listboxId}
+                role="listbox"
+                aria-label="Zoekresultaten"
+                // Open but still empty while the answer lane loads.
+                aria-busy={memberResults.length === 0 || undefined}
+              >
                 {memberResults.map((result, index) => (
                   <MemberRow
                     key={`member-${result.member.id}`}
