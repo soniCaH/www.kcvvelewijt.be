@@ -163,15 +163,8 @@ interface UpcomingRowCommon {
   /** Competition name (optional) */
   competition?: string;
   /**
-   * Front-end squad short code (e.g. "A-Ploeg", "U21") used for internal
-   * identification of which KCVV squad is playing. Prefer `kcvvTeamLabel`
-   * for display when available.
-   */
-  squadLabel?: string;
-  /**
    * Canonical human-readable label for the KCVV team (e.g. "A-Ploeg", "U21")
-   * provided by the BFF via `kcvv_team_label`. Preferred for display over
-   * `squadLabel`.
+   * provided by the BFF via `kcvv_team_label`.
    */
   kcvvTeamLabel?: string;
   /**

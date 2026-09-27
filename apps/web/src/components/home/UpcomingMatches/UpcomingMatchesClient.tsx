@@ -53,7 +53,7 @@ const matchTimestamp = (m: UpcomingRow): number => {
  * label the row then contradicts.
  */
 const matchTeamLabel = (m: UpcomingRow): string | undefined =>
-  m.teamLabel || m.kcvvTeamLabel || m.squadLabel;
+  m.teamLabel || m.kcvvTeamLabel;
 
 export const UpcomingMatchesClient = ({
   matches,

@@ -64,7 +64,6 @@ const BaseMatchFields = {
   home_team: MatchTeam,
   away_team: MatchTeam,
   status: MatchStatus,
-  squadLabel: S.optional(S.String),
   competition: S.optional(S.String),
   /** League/cup/friendly classification. Absent when the BFF can't resolve it. */
   competitionType: S.optional(CompetitionType),

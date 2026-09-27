@@ -47,7 +47,6 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
         },
         status: match.status,
         competition: match.competition,
-        squadLabel: match.squadLabel,
         kcvvTeamLabel: match.kcvv_team_label,
       };
     case "reduced": {
@@ -62,7 +61,6 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
         status: match.status,
         competition: match.competition,
         competitionType: match.competitionType,
-        squadLabel: match.squadLabel,
         kcvvTeamLabel: match.kcvv_team_label,
       };
     }
@@ -86,7 +84,6 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
           score: match.away_team.score,
         },
         status: match.status,
-        squadLabel: match.squadLabel,
         competition: match.competition,
         kcvvTeamId: match.kcvv_team_id,
         kcvvTeamLabel: match.kcvv_team_label,

@@ -61,7 +61,6 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "scheduled",
-      squadLabel: "U9",
       competition: "Competitie",
     });
 
@@ -86,7 +85,6 @@ describe("mapMatchToUpcomingMatch", () => {
         score: undefined,
       },
       status: "scheduled",
-      squadLabel: "U9",
       kcvvTeamId: undefined,
       kcvvTeamLabel: undefined,
       competition: "Competitie",
@@ -112,7 +110,6 @@ describe("mapMatchToUpcomingMatch", () => {
         score: 1,
       },
       status: "forfeited",
-      squadLabel: "U15",
       competition: "Competitie",
     });
 
@@ -140,7 +137,6 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "postponed",
-      squadLabel: "U13",
       competition: "Competitie",
     });
 
@@ -191,7 +187,6 @@ describe("mapMatchToUpcomingMatch", () => {
       away_team: { id: 1235, name: "KCVV Elewijt" },
       status: "scheduled",
       competition: "Tornooi",
-      squadLabel: "U13",
       kcvv_team_id: 7,
       kcvv_team_label: "U13",
       is_placeholder: true,
@@ -229,7 +224,6 @@ describe("mapMatchToUpcomingMatch", () => {
         away_team: { id: 77, name: "FC Zemst Sportief", logo: "zemst.png" },
         status: "scheduled",
         competition: "Tornooi",
-        squadLabel: "U13",
         kcvv_team_id: 7,
         kcvv_team_label: "U13",
         competitionType: "tournament",
@@ -310,7 +304,6 @@ describe("mapMatchToUpcomingMatch", () => {
         logo: "https://example.com/logo2.png",
       },
       status: "stopped",
-      squadLabel: "U12",
       competition: "Competitie",
     });
 
@@ -340,7 +333,6 @@ describe("mapMatchesToUpcomingMatches", () => {
           logo: "https://example.com/logo2.png",
         },
         status: "scheduled",
-        squadLabel: "U9",
         competition: "Competitie",
       }),
       createRawMatch({
@@ -359,7 +351,6 @@ describe("mapMatchesToUpcomingMatches", () => {
           logo: "https://example.com/logo2.png",
         },
         status: "scheduled",
-        squadLabel: "A-ploeg",
         competition: "Competitie",
       }),
     ];
