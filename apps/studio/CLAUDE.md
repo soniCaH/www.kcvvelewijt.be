@@ -53,13 +53,20 @@ Commit the updated `sanity.types.ts` alongside the schema change. **CI enforces 
 
 ## Migrations
 
-One-off data migrations live in `apps/studio/migrations/`. Each migration is a directory with a self-contained script. Run via:
+One-off data migrations live in `apps/studio/migrations/`. A migration with logic lives in `@kcvv/sanity-studio/migrations` with a test, and its `index.ts` here only re-exports it. Six older migrations still hold logic in place; [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) moves them. Do not copy one as a pattern.
+
+Dry-run first. The CLI dry-runs by default, so this changes nothing:
 
 ```bash
-sanity exec migrations/<name>/index.ts --with-user-token
+npx sanity@latest migration run <name> --project vhb33jaz --dataset <staging|production>
 ```
 
-Run against staging first, then production. Document the migration as a manual step in the PR body.
+Then apply with `--no-dry-run` (add `--no-confirm` when non-interactive). Run against staging first, then production. Document the migration as a manual step in the PR body.
+
+- **Always pass `--dataset`.** Both `apps/studio/sanity.cli.ts` **and** `apps/studio-staging/sanity.cli.ts` default to `production`. Running from the staging folder does not pick the staging dataset.
+- **Every migration has a facade in both folders** — `apps/studio/migrations/<name>/` and `apps/studio-staging/migrations/<name>/`, differing only in the docblock. A migration in one folder only is drift ([#3120](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3120)). **One temporary exception:** `title-portable-text-to-string` has no staging facade yet; [#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153) adds it. Being rollback-only is not an exemption — its own docblock targets staging.
+- **The folders are not a run ledger.** Sanity records no history of which migration ran against which dataset. To know, dry-run it against both datasets and query the data for the old shape — zero patches on staging can mean "no such documents" rather than "already ran".
+- **`title-portable-text-to-string` is rollback-only.** Never run it as a sync: it flattens every article title backwards.
 
 ## Dev / Deploy Workflow
 
