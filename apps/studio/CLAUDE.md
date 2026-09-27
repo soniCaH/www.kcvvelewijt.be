@@ -53,13 +53,17 @@ Commit the updated `sanity.types.ts` alongside the schema change. **CI enforces 
 
 ## Migrations
 
-One-off data migrations live in `apps/studio/migrations/`. Each migration is a directory with a self-contained script. Run via:
+One-off data migrations live in `apps/studio/migrations/`. Each migration is a directory whose `index.ts` re-exports its logic from `@kcvv/sanity-studio/migrations`, where the logic lives with a test. Run via (the CLI dry-runs by default; `--no-dry-run` applies):
 
 ```bash
-sanity exec migrations/<name>/index.ts --with-user-token
+npx sanity@latest migration run <name> --project vhb33jaz --dataset <staging|production> --no-dry-run --no-confirm
 ```
 
 Run against staging first, then production. Document the migration as a manual step in the PR body.
+
+- **Every migration has a facade in both folders** — `apps/studio/migrations/<name>/` and `apps/studio-staging/migrations/<name>/`, differing only in the docblock that names the dataset. A migration in one folder only is drift (#3120).
+- **The folders are not a run ledger.** Sanity records no history of which migration ran against which dataset. To know, `--dry-run` it against both datasets and query the data for the old shape — zero patches on staging can mean "no such documents" rather than "already ran".
+- **A migration done on both datasets is deleted, not kept.** Git history keeps it. The exception is a rollback-only migration such as `title-portable-text-to-string`: it stays, and it must never be run as a sync.
 
 ## Dev / Deploy Workflow
 
