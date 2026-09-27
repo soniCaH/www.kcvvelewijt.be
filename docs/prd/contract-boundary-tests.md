@@ -58,7 +58,7 @@ Phase 4: Upgrade handler tests to schema-validate return values + fix fresh-data
 - [ ] `transforms.test.ts` imports `Match` from `@kcvv/api-contract` (no circular dep issues)
 - [ ] Existing `transformPsdGame` test adds `S.decodeUnknownSync(Match)(result)` assertion
 - [ ] Test passes (i.e. current transform output is already valid)
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2 — api-contract schema tests
 
@@ -76,7 +76,7 @@ Phase 4: Upgrade handler tests to schema-validate return values + fix fresh-data
   - Valid `TeamStats` decodes successfully
   - Valid `PlayerStats` decodes successfully
   - Numeric field type violations throw on decode
-- [ ] `pnpm --filter @kcvv/api-contract check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/api-contract` passes
 
 ### Phase 3 — Transform tests with schema validation
 
@@ -86,7 +86,7 @@ Phase 4: Upgrade handler tests to schema-validate return values + fix fresh-data
   - `transformFootbalistoMatchDetail` → validates against `MatchDetail`
   - `transformFootbalistoRankingEntry` → validates against `RankingEntry`
   - `transformPsdTeamStats` → validates against `TeamStats`
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 4 — Handler tests + fresh-data validation fix
 
@@ -95,7 +95,7 @@ Phase 4: Upgrade handler tests to schema-validate return values + fix fresh-data
   - `ranking.test.ts`: `S.decodeUnknownSync(RankingArray)(result)`
   - `stats.test.ts`: `S.decodeUnknownSync(TeamStats)(result)`
 - [ ] BFF handlers validate fresh data before caching using `S.decodeUnknown(Schema)` (same pattern as cache-read path) — if validation fails, `Effect.orDie` so it surfaces as a 500, not silently caches invalid data
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract Changes
 

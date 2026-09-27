@@ -60,7 +60,7 @@ an editorial description + the existing `<CtaBand>` cover the page with no new c
 - [ ] `players` (rare on boards) handled — staff-only roster by default.
 - [ ] All three routes (bestuur/jeugdbestuur/angels) render; e2e smokes green.
 - [ ] Stories (`vr`) for `<BoardHero>` + the board page composition states (photo/no-photo,
-      empty-description). `check-all` passes.
+      empty-description). the turbo gate passes.
 
 ### Phase 2 — Retire + cleanup
 
@@ -70,7 +70,7 @@ an editorial description + the existing `<CtaBand>` cover the page with no new c
       via boards) are now retired → ready to close once both PRs land.
 - [ ] Analytics: `board_view` page view (param: `board` slug); add `board_` to the GTM trigger
       regex (manual, note in PR). No PII.
-- [ ] Keep breadcrumb JSON-LD; metadata via `createBoardPage`. `check-all` + VR green.
+- [ ] Keep breadcrumb JSON-LD; metadata via `createBoardPage`. the turbo gate + VR green.
 
 ## 5. Reuse caveat — role-label fix (carried from 7b1)
 

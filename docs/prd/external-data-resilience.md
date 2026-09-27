@@ -79,7 +79,7 @@ Phase 4: Cleanup — move PsdMember/PsdTeam out of api-contract into apps/api �
 - [ ] `transformPsdGame` input type remains `PsdGame` (strict) — no changes downstream
 - [ ] `getNextMatches` uses the same resilient decode pattern
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 - [ ] Manual test: `curl /matches/18` returns 200 with ghost matches filtered (not 500)
 
 ### Phase 2 — PsdTeamStatsResponse + FootbalistoRankingArray
@@ -90,7 +90,7 @@ Phase 4: Cleanup — move PsdMember/PsdTeam out of api-contract into apps/api �
 - [ ] `transformPsdTeamStats` and `transformFootbalistoRankingEntry` input types remain strict
 - [ ] Heuristic applied: ranking with 0 valid entries after filtering → request-level failure (nonsensical to serve empty ranking)
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3 — FootbalistoMatchDetailResponse
 
@@ -98,7 +98,7 @@ Phase 4: Cleanup — move PsdMember/PsdTeam out of api-contract into apps/api �
 - [ ] Invalid lineup players are filtered; invalid events are filtered
 - [ ] `general` (the match itself) remains strict — if the core match data is invalid, the request fails (nonsensical to serve a detail page without the match)
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 4 — Move PsdMember/PsdTeam to apps/api
 
@@ -107,7 +107,7 @@ Phase 4: Cleanup — move PsdMember/PsdTeam out of api-contract into apps/api �
 - [ ] `apps/api/src/sync/psd-team-client.ts` imports from local schemas instead of `@kcvv/api-contract`
 - [ ] No other consumer of these types exists in `apps/web` (verify before moving)
 - [ ] `pnpm turbo build` passes across all packages
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ---
 

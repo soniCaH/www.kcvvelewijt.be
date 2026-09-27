@@ -37,7 +37,7 @@ Wrap the existing handler's happy path in `Effect.gen`:
 - Replace the first `parsePayload` + `verifySvixSignature` block with Effect pipeline: `Effect.tryPromise` for body read → `S.decodeUnknown(WebhookPayload)` for validation → signature check
 - Remaining logic stays imperative for now
 - Existing tests pass with minimal adaptation
-- `pnpm --filter @kcvv/api check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 4. Phases
 
@@ -55,7 +55,7 @@ Phase 4: Add WebhookPayload Effect Schema, remove manual type narrowing
 - [ ] Handler uses `Effect.gen` for payload parsing and signature verification
 - [ ] Errors produce the same HTTP status codes as before (400 for bad payload, 401 for bad signature)
 - [ ] Existing webhook tests pass
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2: Replace inline Sanity fetch
 
@@ -68,14 +68,14 @@ Phase 4: Add WebhookPayload Effect Schema, remove manual type narrowing
 - [ ] Handler yields `EmbeddingService` and `VectorizeService` from Effect context
 - [ ] No inline `env.AI.run()` or `env.VECTORIZE_INDEX.upsert()` calls in handler
 - [ ] Index text builder functions (`buildArticleIndexText`, etc.) stay as pure functions
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 4: Schema validation
 
 - [ ] `WebhookPayload` defined as Effect Schema class (replaces `interface WebhookPayload`)
 - [ ] Document type dispatch uses schema-validated `_type` field
 - [ ] All manual `doc as { ... }` casts removed
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract Changes
 

@@ -118,7 +118,7 @@ Add `archived` field to `player` schema + reconciliation for players only (not s
 - One new `SanityWriteClient` method: `archivePlayers(psdIds: string[])`
 - `PLAYERS_QUERY` updated: `archived != true` filter added
 - One boundary test: given 3 players in Sanity, 2 in PSD → 1 archived
-- `pnpm --filter @kcvv/api check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 5. Phases
 
@@ -146,7 +146,7 @@ Sync testing (#869–871 in `psd-sync-pipeline-tests` milestone) should be compl
 - [ ] `PLAYER_BY_PSD_ID_QUERY` does NOT filter by archived — direct links to archived players still work
 - [ ] Boundary test: 3 players in Sanity (none archived), 2 in PSD IDs set → reconciliation archives 1
 - [ ] Boundary test: archived player re-upserted → `archived` set back to `false`
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 1 — Staff + team reconciliation
 
@@ -157,7 +157,7 @@ Sync testing (#869–871 in `psd-sync-pipeline-tests` milestone) should be compl
 - [ ] Team GROQ queries: `archived != true && showInNavigation != false` — editorial `showInNavigation` preserved
 - [ ] Staff GROQ queries: `archived != true` filter added to listings (org chart uses `inOrganigram` independently)
 - [ ] Boundary tests for staff and team reconciliation
-- [ ] `pnpm --filter @kcvv/api check-all` && `pnpm --filter @kcvv/web check-all` pass
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` && `pnpm turbo run lint type-check test build --filter=@kcvv/web` pass
 
 ### Phase 2 — KV accumulation
 

@@ -68,7 +68,7 @@ Phase 6: llms.txt + GEO polish — AI crawler readiness                         
 - [ ] `apps/web/src/app/sitemap.ts` returns all static routes with lastModified + changeFrequency + priority (see static route list below)
 - [ ] Root metadata export includes `twitter: { card: "summary_large_image", site: "@kcvve", creator: "@kcvve" }`
 - [ ] OG image URL on `/nieuws/[slug]` resolves to absolute `https://www.kcvvelewijt.be/...` (verified via `<meta property="og:image">` in page source)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 **Static routes for sitemap (priority / changeFreq):**
 
@@ -93,7 +93,7 @@ Phase 6: llms.txt + GEO polish — AI crawler readiness                         
 - [ ] All dynamic routes include `alternates: { canonical: \`${SITE_CONFIG.siteUrl}/path\` }`in`generateMetadata`
 - [ ] Affected routes: `/nieuws/[slug]`, `/spelers/[slug]`, `/staf/[slug]`, `/ploegen/[slug]`, `/wedstrijd/[matchId]`
 - [ ] `/tegenstander/[clubId]` and `/share` retain `robots: { index: false }` and do NOT get canonical tags
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — JSON-LD: Organization + NewsArticle
 
@@ -115,7 +115,7 @@ Phase 6: llms.txt + GEO polish — AI crawler readiness                         
   - `publisher`: nested `Organization` stub (name + logo)
   - `url`: canonical article URL
 - [ ] Sitemap Phase 1 extended with dynamic article slugs fetched from Sanity (with `lastModified` from `_updatedAt`)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — JSON-LD: BreadcrumbList
 
@@ -132,7 +132,7 @@ Phase 6: llms.txt + GEO polish — AI crawler readiness                         
   - `/wedstrijd/[matchId]`: `[Home, Kalender, <matchLabel>]`
   - `/sponsors`: `[Home, Sponsors]`
   - `/club/…`: `[Home, Club, <subpage>]`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5 — JSON-LD: Person + SportsTeam + SportsEvent
 
@@ -149,7 +149,7 @@ Phase 6: llms.txt + GEO polish — AI crawler readiness                         
   - `homeTeam` / `awayTeam` as `SportsTeam` stubs
   - `eventStatus` derived from match status (`EventScheduled` | `EventCancelled` | `EventPostponed` | `EventCompleted`)
 - [ ] Sitemap extended with slugs for `/spelers/`, `/staf/`, `/ploegen/`, and `/wedstrijd/` (past 90 days only — future matches not yet indexable)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 6 — llms.txt + GEO polish
 
@@ -165,7 +165,7 @@ Phase 6: llms.txt + GEO polish — AI crawler readiness                         
 - [ ] Root metadata `openGraph.images` points to this default image (using `metadataBase`-resolved URL)
 - [ ] All pages that currently return a static `metadata` export with no `openGraph.images` are updated to at least inherit the default via `metadataBase`
 - [ ] Google Rich Results Test (manual) on: homepage, one article page, one player page, one team page — passes structured data validation with no errors
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

@@ -70,7 +70,7 @@ PRs touching any of these paths run VR. The lockfile is in the list because a tr
 
 ### Ralph integration
 
-Ralph's automated validation (`scripts/ralph.sh`) runs `pnpm --filter @kcvv/web check-all` and does not run VR. VR runs in the CI `visual-regression` job when a PR touches the paths above. Baselines a change moves are captured locally with a scoped `pnpm vr:update:story` and ship in the same PR (see `apps/web/CLAUDE.md` → "Running the suites").
+Ralph's automated validation (`scripts/ralph.sh`) runs `pnpm turbo run lint type-check test build --filter=@kcvv/web` and does not run VR. VR runs in the CI `visual-regression` job when a PR touches the paths above. Baselines a change moves are captured locally with a scoped `pnpm vr:update:story` and ship in the same PR (see `apps/web/CLAUDE.md` → "Running the suites").
 
 ### Per-story escape hatch
 

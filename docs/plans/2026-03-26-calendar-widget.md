@@ -268,7 +268,7 @@ CalendarWidget: MonthView, WeekView, ListView, SubscribePanelOpen
 ## Task 8: Final checks and cleanup
 
 1. Run `pnpm --filter @kcvv/web lint:fix`
-2. Run `pnpm --filter @kcvv/web check-all`
+2. Run `pnpm turbo run lint type-check test build --filter=@kcvv/web`
 3. Fix any type errors, lint issues
 4. Verify test coverage >= 80% for new components
 

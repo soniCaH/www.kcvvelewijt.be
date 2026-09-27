@@ -135,7 +135,7 @@ Update all three page files to use shared components and consistent SectionStack
 - [ ] `withArrow` renders animated `ArrowRight` icon (reuses Button's pattern, no duplication)
 - [ ] Storybook story at `UI/LinkButton` with Playground + variant stories
 - [ ] Exported from `src/components/design-system/index.ts`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2: SectionCta
 
@@ -144,7 +144,7 @@ Update all three page files to use shared components and consistent SectionStack
 - [ ] All three pages render CTAs identically (same heading style, same button style)
 - [ ] Storybook story at `UI/SectionCta` with Playground
 - [ ] Old CTA components still exist but are unused (deleted in Phase 5)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3: PageHero
 
@@ -153,7 +153,7 @@ Update all three page files to use shared components and consistent SectionStack
 - [ ] Optional CTA renders `LinkButton` when `cta` prop provided
 - [ ] Storybook story at `Features/PageHero` with variants (with/without CTA)
 - [ ] Old hero components still exist but are unused (deleted in Phase 5)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4: Page compositions
 
@@ -165,14 +165,14 @@ Update all three page files to use shared components and consistent SectionStack
 - [ ] `/jeugd` CTA bg is `gray-100`
 - [ ] All hero transitions: `diagonal right` + `overlap: "full"`
 - [ ] Visual regression check: all three pages follow same rhythm
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5: Cleanup
 
 - [ ] `ClubHero`, `JeugdHero`, `TeamsHero` directories deleted
 - [ ] `ClubContactCta`, `TeamsCta` directories deleted
 - [ ] No broken imports across the codebase
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

@@ -133,7 +133,7 @@ meatier search + error work.
 - [ ] All existing copy, the `/hulp` cross-link, `LAST_UPDATED`, and SEO metadata
       preserved.
 - [ ] e2e smoke (`/privacy`) still green; `Pages/Privacy` story updated (no VR tag).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 8.2 — `/zoeken` masthead + page shell
 
@@ -146,7 +146,7 @@ meatier search + error work.
 - [ ] Results region renders on cream below the band; `<FilterTabs>` unchanged.
 - [ ] Story for the masthead (`Features/Search/*` or `Pages/Search`); e2e smoke
       green; legacy green-gradient hero removed.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 8.3 — `/zoeken` result rows + empty states
 
@@ -162,7 +162,7 @@ meatier search + error work.
       fires on the redesigned no-results state — privacy: query sanitised as today).
 - [ ] `Features/Search/*` stories cover every state (pre-search, results, no-results,
       error) and acquire **VR baselines** (`vr` tag, captured in Docker).
-- [ ] e2e smoke green; `pnpm --filter @kcvv/web check-all` passes.
+- [ ] e2e smoke green; `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 8.4 — 404/500 `<ErrorState>` (Storybook A/B)
 
@@ -177,7 +177,7 @@ meatier search + error work.
       wired; `error.tsx` stays `"use client"` + self-contained at the root segment.
 - [ ] `UI/ErrorState` (or `Features/*`) story for the chosen layout acquires **VR
       baselines**; e2e smoke for the 404 route still green.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 8.5 — Final pass
 
@@ -194,7 +194,7 @@ meatier search + error work.
       lucide on `/zoeken`, `/privacy`, `not-found.tsx`, `error.tsx`.
 - [ ] Master-design decision-log entry: "Phase 8 complete — search/privacy/errors
       migrated; only Phase 9 cleanup (#1531) remains."
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ## 7. Analytics
 

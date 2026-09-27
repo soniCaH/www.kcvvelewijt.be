@@ -112,7 +112,7 @@ Phase 1 (tracer: <TeamHero>)
 - [ ] Mounted at the top of `apps/web/src/app/(main)/ploegen/[slug]/page.tsx` using existing `TeamRepository.findBySlug` data; legacy body still renders below (temporary mixed state)
 - [ ] Stories cover: A-team (photo), no-photo (JerseyShirt), youth (degraded meta)
 - [ ] VR baselines captured + committed; unit tests cover headline/meta/fallback branches
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Team-detail rebuild
 
@@ -176,7 +176,7 @@ Phase 1 (tracer: <TeamHero>)
 - [ ] `generateMetadata` + `<JsonLd>` (`SportsTeam` / breadcrumb per existing builder) preserved
 - [ ] Analytics: `team_detail_view` page-view on mount; `team_standings_in_view` / `team_squad_in_view` / `team_matches_in_view` intersection events (Phase 6.A `<TrackInView>` pattern); mount trackers only when the section renders
 - [ ] GTM regex: extend the existing `responsibility_|search_|…|match_` regex to include `team_` (CLAUDE.md analytics-checklist line + manual GTM trigger change documented in PR body)
-- [ ] Playwright e2e for `/ploegen/[slug]` passes (h1 visible, no broken images, console clean); `pnpm --filter @kcvv/web check-all` + `run test:e2e` pass
+- [ ] Playwright e2e for `/ploegen/[slug]` passes (h1 visible, no broken images, console clean); `pnpm turbo run lint type-check test build --filter=@kcvv/web` + `run test:e2e` pass
 
 ### Phase 3 — Team-listing rebuild
 
@@ -186,14 +186,14 @@ Phase 1 (tracer: <TeamHero>)
 - [ ] No Dames team; squad count omitted unless reliably available
 - [ ] Uses existing `TeamRepository.findAllForLanding()` data shape (extend the VM only if a needed field is missing — flag as a discovered unknown, don't pre-add)
 - [ ] Analytics `team_list_view` page-view; Playwright e2e for `/ploegen`; VR baselines for `<TeamFlagship>`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Cleanup + doc audit
 
 - [ ] Retire (delete file + tests + stories + barrel exports, `rg` confirms no consumers): `<TeamDetail>`, `<TeamStandings>`, `<TeamSchedule>`, `<TeamRoster>`, `<StaffCard>`, `<TeamOverview>`, `<TeamCard>`, `<TeamFeaturedCard>`, `<YouthTeamsDirectory>`
 - [ ] `apps/web/CLAUDE.md` "Redesign primitives (Phase 0+)" updated with the new team components
 - [ ] Master plan §6.4 + §6.5 status-notes updated to "shipped"; decision-record memory updated
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ---
 

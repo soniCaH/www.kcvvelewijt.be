@@ -39,7 +39,7 @@ Simplify `article.repository.ts` → `toArticleVM()`:
 - Remove the `ArticleVM` interface and `toArticleVM` function
 - Repository method returns the GROQ result type directly
 - Existing tests adapted to assert on GROQ result shape
-- `pnpm --filter @kcvv/web check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 4. Phases
 
@@ -58,21 +58,21 @@ Phase 3: Audit and simplify component-specific ViewModels (HomepageArticle, etc.
 - [ ] `ArticleVM` interface removed if GROQ result type is sufficient, or kept as a type alias
 - [ ] Repository tests updated
 - [ ] Components consuming `ArticleVM` still compile and render correctly
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2: Simplify remaining simple repositories
 
 - [ ] Same treatment applied to: `event.repository.ts`, `sponsor.repository.ts`, `page.repository.ts`, `homepage.repository.ts`
 - [ ] Each repository reviewed — only simplify where the transform is purely renaming/coalescing
 - [ ] Skip repositories with complex transforms (staff, responsibility — these have joins/hierarchy logic)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3: Audit component-specific ViewModels
 
 - [ ] Identify all secondary ViewModels (e.g., `HomepageArticle`, `CalendarMatch`)
 - [ ] Where possible, merge into the primary query projection (fetch exactly what the component needs)
 - [ ] Where a secondary ViewModel serves multiple consumers, keep it but document why
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

@@ -75,7 +75,7 @@ Renders on all routes except `/` (homepage already has the full MatchWidget).
 - [ ] When no match data available (off-season), strip does not render and surrounding layout has no empty sections, double stacks, or layout gaps
 - [ ] Renders on both mobile and desktop without disrupting existing page design
 - [ ] Competition name shown on desktop, hidden on mobile
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2
 

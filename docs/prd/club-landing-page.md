@@ -49,7 +49,7 @@ Phase 3: Storybook stories for all components (#1032)
 - [ ] `ClubHero` renders with background image bleeding through the diagonal
 - [ ] At least one editorial card links to a `/club/*` sub-page
 - [ ] Page uses `SectionStack` for section orchestration
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Full page
 
@@ -59,7 +59,7 @@ Phase 3: Storybook stories for all components (#1032)
 - [ ] Contact CTA bar renders with inline layout (text left, button right)
 - [ ] Contact CTA collapses to stacked/centered layout on mobile
 - [ ] All links point to correct `/club/*` routes
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Storybook
 
@@ -68,7 +68,7 @@ Phase 3: Storybook stories for all components (#1032)
 - [ ] `MissionBanner` story under `Features/Club/MissionBanner`
 - [ ] `ClubContactCta` story under `Features/Club/ClubContactCta`
 - [ ] All stories use `StoryObj<typeof meta>` pattern with `fn()` handlers
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

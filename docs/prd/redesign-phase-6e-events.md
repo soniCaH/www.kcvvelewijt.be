@@ -74,7 +74,7 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
       minimal list of `<TicketStub>` (type-coloured date block + pill + title + location). No grouping/filters.
       (Lives in the `(main)` group alongside `kalender` + the events detail; the legacy list moves out of `(landing)`.)
 - [ ] `/events` and `/events/[slug]` issue **301** redirects to `/evenementen` (+ `/evenementen/[slug]`).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 2 — `<TicketStub>` + month-grouped list shell
 
@@ -89,7 +89,7 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
 - [ ] Storybook stories: each `eventType` colour, hover state, multi-day, no-time. Unit test: link href,
       reveal present, reduced-motion class.
 - [ ] VR baselines committed for `<TicketStub>` states (same PR).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 3 — Filter bar + empty states
 
@@ -104,7 +104,7 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
       mandatory "Toon alles" undo (#2427/#2562).
 - [ ] `event_filter` analytics fires with `event_type`; GTM tag + GA4 report updated.
 - [ ] Storybook: filter row (each selected state), empty, filtered-zero. VR baselines committed.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 4 — `<EventHero>` + detail page
 
@@ -124,7 +124,7 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
 - [ ] `event_view` + `event_cta_click` (`cta: reserveer | agenda`) analytics fire; GTM + GA4 updated.
 - [ ] JSON-LD `SportsEvent`/`Event` emitted on the detail page (reuse existing builder if suitable).
 - [ ] Storybook (`<EventHero>` w/ + w/o cover, w/ + w/o externalLink, multi-day) + e2e smoke. VR baselines.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 5 — Merged feed (articleType:event)
 
@@ -134,7 +134,7 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
 - [ ] Article-sourced tickets link to the **article** (`/nieuws/[slug]`); event-doc tickets link to
       `/evenementen/[slug]`. Both render via `<TicketStub>`.
 - [ ] Filters apply across both sources; sort is by event date across the merged set.
-- [ ] Tests cover the merge + ordering + per-source link target. `pnpm --filter @kcvv/web check-all` passes.
+- [ ] Tests cover the merge + ordering + per-source link target. `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 6 — SEO / analytics / legacy retirement
 
@@ -144,7 +144,7 @@ Phase 6: SEO / sitemap / analytics / JSON-LD + retire legacy + VR baselines     
       routes retired once `/evenementen` fully replaces them (redirects kept).
 - [ ] VR Phase-4 page fixtures cover `/evenementen` (list, filtered, empty) + one `/evenementen/[slug]`.
 - [ ] Playwright e2e: list renders, filter narrows, ticket → detail, CTAs present.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ## 6. Effect Schema / api-contract changes
 

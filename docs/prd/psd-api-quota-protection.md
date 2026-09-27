@@ -47,7 +47,7 @@ Phase 4: Staging long TTL + cache invalidation scripts → #880
 
 - [ ] `TTL.NEXT_MATCHES` changed from `60 * 30` to `60 * 60 * 4`
 - [ ] KV key `matches:next` is stored with 4h TTL (manual check: verify via Cloudflare dashboard after first request)
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2 — All TTL increases
 
@@ -60,7 +60,7 @@ Phase 4: Staging long TTL + cache invalidation scripts → #880
 - [ ] Match detail TTL function: `finished AND match.date ≥ 48h ago → MATCH_DETAIL_PAST (7d)`; all other cases (upcoming, in-progress by timestamp, finished but recent) → `MATCH_DETAIL_DEFAULT (24h)`
 - [ ] **Known tradeoff**: youth match scores can take longer than 48h to be entered in the association platform. A recently-finished youth match may serve a scoreless result for up to 24h before re-fetching. Accepted.
 - [ ] TTL table in `apps/api/CLAUDE.md` updated to reflect new values
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3 — Stale-on-error
 
@@ -70,7 +70,7 @@ Phase 4: Staging long TTL + cache invalidation scripts → #880
 - [ ] If `now - fetchedAt <= softTtl`: return cached value immediately (no PSD call)
 - [ ] All handler call sites updated to pass `softTtl` (current TTL value) and `hardTtl` (7 days)
 - [ ] Existing `TypedKvCache` tests updated; new tests cover: stale-on-error path, stale-on-success path, fresh path
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 4 — Staging long TTL + cache scripts
 
@@ -84,7 +84,7 @@ Phase 4: Staging long TTL + cache invalidation scripts → #880
   "cache:clear:staging:key": "wrangler kv key delete --binding=PSD_CACHE --env staging"
   ```
 - [ ] `apps/api/CLAUDE.md` documents cache invalidation under a new `## Cache invalidation` section with usage examples
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract Changes
 

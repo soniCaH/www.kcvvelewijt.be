@@ -5,6 +5,8 @@
 > **Nothing here is implemented and nothing here is decided.** No test, config, `turbo.json` or app
 > file was changed. This is evidence for the grilling tickets below it.
 >
+> **Update 2026-09-26:** `check-all` no longer exists. Its call sites moved to `pnpm turbo run lint type-check test build --filter=<workspace>` (#3156) and both scripts were deleted (#3157). Mentions of `check-all` below describe the gate as it was when measured.
+>
 > Repo facts measured 2026-09-22 against `main` at `ec15a8a8` (worktree `research/vitest-runner`,
 > branched from `4a60adc8`). Every number has its command in [§11](#11-commands-that-produced-the-numbers).
 > Counts quoted from the [inventory (#3079)](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3079)

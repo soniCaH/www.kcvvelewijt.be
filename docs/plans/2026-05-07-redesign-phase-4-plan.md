@@ -51,14 +51,14 @@ Run once before opening any sub-issue:
 3. Update `TapedFigure` `tape[]` array element type.
 4. New story `WarmOnJerseyDeep` — single tape strip on a jersey-deep panel for VR.
 5. `pnpm vr:update:story TapeStrip` to capture baseline.
-6. `pnpm --filter @kcvv/web check-all` must be green before opening PR.
+6. `pnpm turbo run lint type-check test build --filter=@kcvv/web` must be green before opening PR.
 
 **Acceptance:**
 
 - `<TapeStrip color="warm">` renders.
 - `<TapedFigure tape={[{ color: "warm" }]}>` renders.
 - VR baseline committed.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 **Closes:** PRD §3 tracer.
 
@@ -88,7 +88,7 @@ Run once before opening any sub-issue:
 
 - All new props work; defaults preserve current rendering.
 - Storybook + VR baselines committed.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -120,7 +120,7 @@ Run once before opening any sub-issue:
 - All sparse states render correctly.
 - VR baselines for each.
 - Existing tests retained where still valid; new tests added for sparse rendering.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -143,7 +143,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - `apps/web/src/components/home/UpcomingMatches/UpcomingMatches.test.tsx`
 - `apps/web/src/components/home/UpcomingMatches/index.ts`
 
-**Files to delete (or move to _legacy/):**
+**Files to delete (or move to \_legacy/):**
 
 - `apps/web/src/components/home/MatchWidget/`
 - `apps/web/src/components/home/MatchesSliderSection/`
@@ -163,7 +163,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - All states render correctly.
 - VR baselines committed.
 - Page.tsx integration updated to call `<UpcomingMatches>` instead of `<MatchWidget>` + `<MatchesSliderSection>` (this happens in 4.D.1).
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -199,7 +199,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - Tile treatment matches lock spec (M.3).
 - VR baselines for all 5 stories.
 - `/sponsors` link renders.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -231,7 +231,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - Backdrop palette swapped; photo asset unchanged.
 - Typography migrated to retro vocabulary.
 - VR baselines updated.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -247,7 +247,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - `apps/web/src/components/home/WebshopBanner/WebshopBanner.stories.tsx`
 - `apps/web/src/components/home/WebshopBanner/index.ts`
 
-**Files to delete (or move to _legacy/):**
+**Files to delete (or move to \_legacy/):**
 
 - `apps/web/src/components/home/WebshopSection/`
 
@@ -269,7 +269,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 
 - Renders per `webshopbanner-locked.md` spec.
 - VR baselines.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -305,7 +305,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - Renders per `featuredeventband-locked.md`.
 - Drop-if-empty works.
 - VR baselines for all stories.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -340,7 +340,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 - Carousel renders, auto-advances, thumbs work.
 - Reduced-motion fallback static.
 - VR baselines on the active-slide states (rotation animation deliberately not VR-tested).
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -367,7 +367,7 @@ This dual-rename matters for implementation drift: the spec's name (`<ScheduleSt
 
 - Query updated; types regenerated; tests pass.
 - No regression in NewsGrid (it now receives slice [3..8] = articles 3..7 of the ordered list).
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -423,7 +423,7 @@ Move (not delete) into a `_legacy/` directory for blame trace; deletion happens 
 - Homepage renders the full new composition end-to-end.
 - Legacy components moved (not deleted) to `_legacy/`.
 - Playwright e2e `homepage.spec.ts` updated for new section ordering.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 - Manual smoke test: load `/` in dev server, verify all sections render, hover all interactive elements.
 
 ---
@@ -454,7 +454,7 @@ Move (not delete) into a `_legacy/` directory for blame trace; deletion happens 
 
 - Pages/Homepage story loads cleanly.
 - Playwright e2e green.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -462,7 +462,7 @@ Move (not delete) into a `_legacy/` directory for blame trace; deletion happens 
 
 - All 12 sub-issues closed.
 - All VR baselines committed in their respective sub-issue PRs.
-- `pnpm --filter @kcvv/web check-all` green on `main` after final merge.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green on `main` after final merge.
 - Storybook `Pages/Homepage` reviewable.
 - Playwright e2e `homepage.spec.ts` green.
 - Owner review of `/` on staging (e2e build).
@@ -499,7 +499,7 @@ Lands the warm-tape variant + Storybook + VR baseline. Unblocks 4.B.6 and any fu
 - [ ] TapeStrip + TapedFigure prop unions extended
 - [ ] WarmOnJerseyDeep story
 - [ ] VR baseline committed
-- [ ] check-all green
+- [ ] turbo gate green
 EOF
 )" \
   --label "redesign,ready,tracer-bullet" \

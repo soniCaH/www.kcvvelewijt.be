@@ -180,7 +180,7 @@ retired identifiers under `apps/web/src/` returns zero (modulo the kept
   dashboard step — document in the PR body and §4). **Keep** the `<Script>`
   loader + `NEXT_PUBLIC_TYPEKIT_ID` (Freight still needs it). Fix the stale
   `layout.tsx` comment to "serves freight-display-pro + freight-big-pro".
-- Final `grep` gate + `pnpm --filter @kcvv/web check-all` green.
+- Final `grep` gate + `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 - Master-design decision-log: add the **"redesign complete"** entry.
 
 ## 4. Font end-state & Typekit handling
@@ -283,7 +283,7 @@ analytics-PRD requirement.)
 
 ## 10. Testing & VR
 
-- `pnpm --filter @kcvv/web check-all` green is the gate for both phases.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green is the gate for both phases.
 - Page-level e2e smoke must stay green (deleted orphans are off-route, so no
   route smoke changes; verify no import breaks).
 - **VR:** baselines for changed/deleted stories are **deferred to the
@@ -307,7 +307,7 @@ analytics-PRD requirement.)
       `layout.tsx` comment fixed.
 - [ ] `grep` for the retired identifiers under `apps/web/src/` returns zero
       (excluding kept `font-body` / `font-mono`).
-- [ ] `pnpm --filter @kcvv/web check-all` green.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 - [ ] Master-design decision-log has the final "redesign complete" entry.
 
 ## 12. Out of scope

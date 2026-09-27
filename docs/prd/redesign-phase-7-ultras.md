@@ -55,7 +55,7 @@ hero; do NOT add a heading token.
 - [ ] Analytics: `ultras_view` page view + `ultras_join_click` on the Facebook CTA; add prefix to GTM
       regex (or fold under `club_`), note in PR. No PII.
 - [ ] Stories (`vr`) for the poster hero + a body section + the callout; e2e `/club/ultras` smoke green.
-- [ ] `pnpm --filter @kcvv/web check-all` + VR green.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` + VR green.
 
 ## 5. Open questions
 

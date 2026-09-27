@@ -83,7 +83,7 @@ Demonstrated by:
 - `npx sanity@latest typegen generate` re-run; emitted types align with the new shape; no manual type fudging needed.
 - `apps/web/src/app/(landing)/page.tsx` `toHeroCarouselArticle` (or its successor) reads `article.articleType ?? "announcement"` instead of the hardcoded literal. Hero displays the correct variant prop for the top article (even though the EditorialHero shell still renders a uniform layout — per-variant artefacts ship in Phase 2 below).
 - All four other call sites (`nieuws`, `jeugd`, `sponsors`, `events`) keep working — they receive the new optional fields and ignore them. No TypeScript errors. No runtime errors.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 - VR baselines for `<Pages/Homepage>` and `<EditorialHero>` regenerated if any visual changes leak through (none expected from the tracer — visual changes start in Phase 2).
 
 If the tracer passes, the rest of Phase 4.5 can fan out into parallel implementation tracks (tokens → components → integration). If the tracer fails (e.g. typegen emits something unexpected, or a non-homepage caller breaks), the whole phase is blocked until the data layer is sound.
@@ -150,7 +150,7 @@ Per `feedback_blockedby_not_subissues` memory, dependencies use the GitHub Graph
 - [ ] `apps/web/src/app/(landing)/page.tsx:64-76` `toHeroCarouselArticle` reads `article.articleType ?? "announcement"` for the `variant` prop instead of the hardcoded literal.
 - [ ] Manual check: open the homepage locally with an article whose `articleType` is `interview` at the top of `order(featured desc, publishedAt desc)`. Confirm the EditorialHero receives `variant="interview"` via React DevTools (shell still renders uniform content — per-variant artefacts ship in 5.5.B.2).
 - [ ] All four non-homepage call sites compile clean: `apps/web/src/app/(landing)/nieuws/page.tsx`, `jeugd/page.tsx`, `sponsors/page.tsx`, `events/page.tsx`.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 - [ ] No new Sanity schema files in the diff.
 
 ### 5.5.A.1 — Photo treatment system tokens (R9)
@@ -178,7 +178,7 @@ Per `feedback_blockedby_not_subissues` memory, dependencies use the GitHub Graph
 - [ ] All existing `<NewsCard>` callers compile clean: `<NewsGrid>`, `<RelatedContentSection>`, `/nieuws` archive page, `/jeugd` news section.
 - [ ] Storybook stories regenerated: per articleType, per slot, per bg variant. Existing `aspectRatio` + `rotation` props preserved.
 - [ ] VR baselines regenerated.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 5.5.B.2 — `<EditorialHero>` per-variant rendering (R1.5 hybrid)
 
@@ -191,7 +191,7 @@ Per `feedback_blockedby_not_subissues` memory, dependencies use the GitHub Graph
 - [ ] Existing `placement: "detail" | "homepage"` discriminated union unchanged. `placement="homepage"` wraps the shell in a `<Link>` to `/nieuws/${slug}` per the existing pattern.
 - [ ] Storybook stories per variant + per placement; subjects N=1/N=2/N=3 cases for interview; incoming/outgoing/extension for transfer; with/without optional fields for graceful-omit.
 - [ ] VR baselines per variant + per scenario.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### 5.5.B.3 — `<FeaturedUitgelichtRow>` new component (R1.6.A)
 

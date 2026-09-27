@@ -57,7 +57,7 @@ Phase 5: Analytics — update hashMemberId usage for new node/member ID model (#
 - [ ] `OrgChartNode` type updated: flat `name`/`imageUrl`/`email`/`phone`/`responsibilities`/`profileUrl` replaced by `members: Array<{ id, name, imageUrl?, email?, phone?, href? }>` and `description?`
 - [ ] `toOrgChartNode` in `staff.repository.ts` maps from new query result shape
 - [ ] One manually-created `organigramNode` in Studio renders correctly in the chart (manual check)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Full renderer
 
@@ -65,7 +65,7 @@ Phase 5: Analytics — update hashMemberId usage for new node/member ID model (#
 - [ ] Vacant node: position title + muted description text, no photo placeholder
 - [ ] Shared node: position title header + stacked photo/name chips (one per member)
 - [ ] `MemberDetailsModal` / `ContactOverlay`: position title prominent; one contact block per member with link to `/staf/{psdId}`; vacant nodes show description only
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] Storybook stories updated for all 3 node states
 
 ### Phase 3 — staffMember cleanup
@@ -73,7 +73,7 @@ Phase 5: Analytics — update hashMemberId usage for new node/member ID model (#
 - [ ] Remove from `staffMember` schema: `role`, `parentMember`, `roleLabel`, `roleCode`, `inOrganigram`, `department`, `responsibilities`
 - [ ] `sanity.types.ts` regenerated; no TypeScript errors in `apps/web`
 - [ ] `ROLE_DISPLAY` / `DEPARTMENT_DISPLAY` maps in `staff.repository.ts` removed or updated
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Staff detail page
 
@@ -83,14 +83,14 @@ Phase 5: Analytics — update hashMemberId usage for new node/member ID model (#
 - [ ] `/staf/[slug]` page renders both sections; responsibility path cards link to `/hulp?pad=<slug>`
 - [ ] Staff member with no organigram position: section hidden (not rendered empty)
 - [ ] Staff member with no responsibility paths: section hidden
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5 — Analytics
 
 - [ ] `hashMemberId` calls in organigram analytics hooks updated: use `members[0].id` for single/shared nodes; omit member identifier for vacant nodes
 - [ ] Analytics events that previously used `node.id` (organigramNode.\_id) vs. `staffMember._id` are consistent and documented
 - [ ] No raw internal IDs sent to analytics (existing privacy rule)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ---
 

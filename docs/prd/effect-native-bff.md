@@ -82,7 +82,7 @@ Phase 3: Logging cleanup — replace all console.warn with Effect.log → #946
 - [ ] When PSD returns 429/5xx and no stale cache exists, handler returns 503
 - [ ] `fetchJson` preserves HTTP status code from PSD response in the error (already has `status` field)
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2 — Migrate remaining handlers
 
@@ -93,7 +93,7 @@ Phase 3: Logging cleanup — replace all console.warn with Effect.log → #946
 - [ ] Search handler uses typed errors where applicable
 - [ ] No `Effect.orDie` remains in any handler file
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3 — Logging cleanup
 
@@ -101,7 +101,7 @@ Phase 3: Logging cleanup — replace all console.warn with Effect.log → #946
 - [ ] `mapGameStatus` unknown-code warning uses `Effect.log` (requires signature change to return `Effect`)
 - [ ] No `console.log` or `console.warn` remains in `apps/api/src/` (excluding test files)
 - [ ] `pnpm --filter @kcvv/api test` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ---
 

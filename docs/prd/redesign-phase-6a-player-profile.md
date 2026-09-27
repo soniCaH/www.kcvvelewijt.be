@@ -103,8 +103,8 @@ Phase 3: Legacy cleanup + doc audit closeout.
 - [ ] Migration ran on staging (`npx sanity@latest migration run <name> --dataset=staging`) — verified in PR body
 - [ ] All existing `/spelers/[slug]` page renders unchanged (no UI breakage from schema removal — verified manually on staging)
 - [ ] Test fixtures updated: `apps/web/src/lib/repositories/player.repository.test.ts`, `apps/api/src/sync/psd-sanity-sync.test.ts`, `apps/api/src/sync/run-sync.test.ts`, `apps/api/src/sanity/mutation.test.ts`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 - [ ] `pnpm turbo build --filter=@kcvv/sanity-schemas` passes
 - [ ] PR body includes the migration command and verification step as explicit manual instructions per `[[feedback_sanity_migrations]]`
 
@@ -158,7 +158,7 @@ Phase 3: Legacy cleanup + doc audit closeout.
 - [ ] GTM regex covers `player_` namespace (verify; extend if needed)
 - [ ] Staging seeds run per §12 of the verification table (see "Verification" below); 7 seeds match the matrix
 - [ ] Staging URLs resolved into PR body BEFORE requesting review per `[[feedback_run_seed_yourself]]`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] Playwright smoke test for `/spelers/[slug]` still passes
 
 ### Phase 3 — Cleanup
@@ -167,7 +167,7 @@ Phase 3: Legacy cleanup + doc audit closeout.
 - [ ] `apps/web/CLAUDE.md` "Redesign primitives (Phase 0+)" section updated with `<PlayerHero>` + reworked `<BioBlock>` + `<QuotesBlock>` entries
 - [ ] No stale references to `<StatsStrip>` / `<CareerLogTable>` / `<RecentMatchesGrid>` / `<MonoLabel>NIEUW` / `<QuotesBlock>` cream-half in `docs/` (grep verifies)
 - [ ] No stale references to `player.nationality` / `player.height` / `player.weight` outside the migration script + tests (grep verifies)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Verification matrix (Phase 2 staging seeds)
 

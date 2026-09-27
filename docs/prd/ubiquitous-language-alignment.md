@@ -85,16 +85,16 @@ Remove the `t.id !== 23` filter and use Sanity's `showInNavigation` flag instead
 - [ ] BFF `transformPsdGame` produces `squadLabel` instead of `round`
 - [ ] All web components consume `squadLabel` (calendar, scheurkalender, UpcomingMatches, match mapper)
 - [ ] No references to `round` remain (except unrelated CSS `rounded-*` classes)
-- [ ] `pnpm --filter @kcvv/api-contract check-all` passes
-- [ ] `pnpm --filter @kcvv/web check-all` passes
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/api-contract` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2: Remove dead Sanity fields
 
 - [ ] `league` and `leagueId` removed from team schema definition
 - [ ] `league` and `leagueId` removed from all GROQ queries and TypeScript interfaces
 - [ ] `division`/`divisionFull` remain and are no longer marked `readOnly`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] Sanity Studio builds without errors
 
 ### Phase 3: Rename staff terminology
@@ -103,7 +103,7 @@ Remove the `t.id !== 23` filter and use Sanity's `showInNavigation` flag instead
 - [ ] `positionShort` → `roleCode` in Sanity schema, queries, and components
 - [ ] Organigram renders correctly with renamed fields
 - [ ] Sanity migration script renames fields in existing documents
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4: Simplify `responsibilityPath` → `responsibility`
 
@@ -113,7 +113,7 @@ Remove the `t.id !== 23` filter and use Sanity's `showInNavigation` flag instead
 - [ ] Sanity migration script renames document types
 - [ ] `/hulp` page renders correctly
 - [ ] Search returns results for responsibilities
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5: Replace hardcoded team filter
 
@@ -121,7 +121,7 @@ Remove the `t.id !== 23` filter and use Sanity's `showInNavigation` flag instead
 - [ ] `getNextMatches()` reads visible team IDs from Sanity (cached)
 - [ ] Teams with `showInNavigation: false` excluded from match widgets
 - [ ] Setting `showInNavigation: false` on any team hides its matches from homepage/calendar/scheurkalender
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract changes
 

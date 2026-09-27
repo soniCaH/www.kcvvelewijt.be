@@ -19,7 +19,7 @@ A Storybook coverage audit revealed 9+ dead components (with stories and tests b
 
 ## 3. Tracer bullet
 
-Remove `MatchCountdown` (dead component + story + test), verify `pnpm --filter @kcvv/web check-all` passes and `storybook build` succeeds. This proves the removal workflow is safe and catches any hidden imports.
+Remove `MatchCountdown` (dead component + story + test), verify `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes and `storybook build` succeeds. This proves the removal workflow is safe and catches any hidden imports.
 
 ## 4. Phases
 
@@ -47,7 +47,7 @@ Phase 7: MatchEvents frontend integration — blocked by Phase 6 (#985)
 - [ ] Remove `SponsorGrid` story only (component kept for Phase 3)
 - [ ] Remove `UpcomingMatches` (component, story, test, barrel export) — replaced by `MatchesSliderSection`
 - [ ] No broken imports anywhere in `src/app/` or `src/components/`
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] `pnpm --filter @kcvv/web storybook:build` passes
 
 ### Phase 2: MatchResultRow extraction
@@ -59,7 +59,7 @@ Phase 7: MatchEvents frontend integration — blocked by Phase 6 (#985)
 - [ ] `TeamSchedule` refactored to use `MatchResultRow` — no inline match-row JSX
 - [ ] `MatchResultRow.stories.tsx` with stories: Upcoming, Win, Draw, Loss, Postponed, NextMatch, WithoutLogos
 - [ ] Visual regression: TeamSchedule renders identically before/after (verify in Storybook)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3: SponsorGrid refactoring
 
@@ -67,7 +67,7 @@ Phase 7: MatchEvents frontend integration — blocked by Phase 6 (#985)
 - [ ] `SponsorGrid` updated if needed to accept the props `Sponsors` requires
 - [ ] `SponsorGrid.stories.tsx` updated/created under `Features/Sponsors/SponsorGrid`
 - [ ] Visual regression: SponsorsPage renders identically before/after
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4: Storybook navigation & naming consistency
 
@@ -99,7 +99,7 @@ Phase 7: MatchEvents frontend integration — blocked by Phase 6 (#985)
 - [ ] Wire `MatchEvents` into `MatchDetailView`
 - [ ] Update `MatchDetailView` story to include events section
 - [ ] Handle empty/missing events gracefully
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] **Blocked by**: Phase 6
 
 ## 6. Effect Schema / api-contract changes

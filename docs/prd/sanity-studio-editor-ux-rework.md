@@ -85,7 +85,7 @@ Each phase is independently shippable. Partial rollout never breaks editing of t
 - [ ] At least 4 `Rule.required()` calls rewritten with `.error('teaching message')`
 - [ ] `apps/studio/sanity.config.ts` and `apps/studio-staging/sanity.config.ts` updated identically — `tools` and `templates` config wired
 - [ ] Vitest tests for `useTemplates` and `LauncherCard` (RTL); manual smoke check on local studio against staging dataset
-- [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` and `pnpm turbo run lint type-check test build --filter=@kcvv/studio` pass
 - [ ] `packages/sanity-studio/CLAUDE.md` updated with `tools/launcher/` conventions
 
 ### Phase 2 — Responsibility full slice
@@ -108,7 +108,7 @@ Each phase is independently shippable. Partial rollout never breaks editing of t
 - [ ] Every field on `responsibility` has a description that meets the 1–3 sentence convention
 - [ ] Vitest tests: `contact-picker` (RTL — each branch + orphan + fallback), `guided-sidebar` (RTL — checklist, expanders, preview link), `compute-required-fields` (unit), `responsibility-guidance` (unit — previewUrl)
 - [ ] Manual smoke: create new responsibility via launcher → fill all fields via picker → publish → view on staging site
-- [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` and `pnpm turbo run lint type-check test build --filter=@kcvv/studio` pass
 
 ### Phase 3 — Article
 
@@ -123,7 +123,7 @@ Each phase is independently shippable. Partial rollout never breaks editing of t
 - [ ] Vitest: `article-templates` decode test; `article-guidance` previewUrl test
 - [ ] Manual smoke: create one of each article type via launcher → publish → view on staging
 - [ ] If `LauncherTool` / `GuidedSidebar` need generalization based on Phase 2 learnings, do it here (track changes in PR)
-- [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` and `pnpm turbo run lint type-check test build --filter=@kcvv/studio` pass
 
 ### Phase 4 — Infra hardening + convention docs
 
@@ -131,7 +131,7 @@ Each phase is independently shippable. Partial rollout never breaks editing of t
 - [ ] `packages/sanity-studio/CLAUDE.md` documents the full convention: how to add a template, a guidance file, a custom input, a placeholder, a section intro
 - [ ] `packages/sanity-schemas/CLAUDE.md` documents the new field-description / validation-copy conventions
 - [ ] Add a one-page "How to add a new doc type to the rework" checklist to `packages/sanity-studio/CLAUDE.md` for use by Phase 5+ issues
-- [ ] `pnpm --filter @kcvv/sanity-studio check-all` and `pnpm --filter @kcvv/studio check-all` pass
+- [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` and `pnpm turbo run lint type-check test build --filter=@kcvv/studio` pass
 
 ### Phase 5+ — Propagation (one issue per doc type)
 
@@ -144,7 +144,7 @@ For each of `player`, `team`, `staffMember`, `sponsor`, `event`, `page`, `banner
 - [ ] Section-intro fields per group
 - [ ] `<docType>-guidance.ts` added and registered in both `sanity.config.ts` files
 - [ ] If the doc type has a launcher card it earns (i.e. has shape variation worth seeding), add to templates manifest
-- [ ] Manual smoke + `check-all` pass
+- [ ] Manual smoke + the turbo gate pass
 
 ---
 

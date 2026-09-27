@@ -35,8 +35,8 @@ Delete `responsibilityPath.ts` and verify the build:
 
 - `rm packages/sanity-schemas/src/responsibilityPath.ts`
 - Confirm barrel `index.ts` has no import of it (already verified: it doesn't)
-- `pnpm --filter @kcvv/sanity-schemas check-all` passes (or equivalent)
-- `pnpm --filter @kcvv/web check-all` passes
+- `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` passes (or equivalent)
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 4. Phases
 
@@ -52,7 +52,7 @@ Phase 2: Rework #1083 for footbalisto.be domain
 - [ ] `packages/sanity-schemas/src/responsibilityPath.ts` deleted
 - [ ] Grep confirms zero imports of `responsibilityPath` from `@kcvv/sanity-schemas` in any app
 - [ ] Both studios build successfully
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2: Rework #1083
 

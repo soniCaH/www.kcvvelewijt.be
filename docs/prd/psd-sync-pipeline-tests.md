@@ -37,7 +37,7 @@ Write one test for `runSync` that mocks all external dependencies and asserts `u
 - Mock `KvCacheService` to return cursor `0` and accept writes
 - Run `runSync` via `Effect.provide(runSync, mockLayer)`
 - Assert `upsertPlayer` was called once with the correct `psdId`
-- `pnpm --filter @kcvv/api check-all` passes
+- `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 This immediately proves the mock pattern is viable and that `runSync` is testable without hitting Sanity or PSD APIs.
 
@@ -56,7 +56,7 @@ Phase 3: Extract and test image upload decision logic as pure functions → #871
 - [ ] `SanityWriteClientMock` layer created (analogous to `FootbalistoClientMock` pattern in handler tests) with jest/vitest spy functions for `upsertPlayer`, `upsertTeam`, `upsertStaff`, `uploadPlayerImage`
 - [ ] `psd-sanity-sync.test.ts` gains one `runSync` test: 1 team, 1 player, no image URL → `upsertPlayer` called once, `upsertTeam` called once, `upsertStaff` not called
 - [ ] Mock `KvCacheService` accepts cursor read (returns `"0"`) and cursor write
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 2 — Full runSync test suite
 
@@ -65,7 +65,7 @@ Phase 3: Extract and test image upload decision logic as pure functions → #871
 - [ ] **Team upsert ordering**: `upsertTeam` is called after all players and staff are upserted (so references are correct)
 - [ ] **Image upload trigger**: when `profilePictureURL` is present AND `needsUpload` is true, `uploadPlayerImage` is called; when `needsUpload` is false, it is not called
 - [ ] **Image upload failure does not block player upsert**: if `uploadPlayerImage` throws, `upsertPlayer` was still called and cursor still advances
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ### Phase 3 — Image upload decision logic as pure functions
 
@@ -73,7 +73,7 @@ Phase 3: Extract and test image upload decision logic as pure functions → #871
 - [ ] `needsUpload(stableUrl: string | null, existingPsdImageUrl: string | null | undefined): boolean` extracted as pure function
 - [ ] Both functions have dedicated unit tests covering: null URL, URL with auth params, URL with `?v=N`, version change detection, no existing image
 - [ ] `transformMember` and sync orchestration updated to use the extracted functions
-- [ ] `pnpm --filter @kcvv/api check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` passes
 
 ## 6. Effect Schema / api-contract Changes
 

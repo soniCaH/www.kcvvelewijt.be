@@ -257,14 +257,14 @@ Alle labels, filterbeschrijvingen, actieknoppen, validatieberichten en dialoogve
 - [ ] Actie maakt nieuw document aan, herlinkt alle `references(oldId)`, verwijdert oud document in één transactie
 - [ ] Foto en alle redactionele velden behouden na migratie
 - [ ] Geverifieerd op staging: Tom Bautmans `staff-board-dcb0e9e6` → `staffMember-psd-252`
-- [ ] `pnpm --filter @kcvv/studio check-all` slaagt
-- [ ] `pnpm --filter @kcvv/studio-staging check-all` slaagt
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/studio` slaagt
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/studio-staging` slaagt
 
 ### Fase 2 — Reconciliatie-veiligheidsnet (#1211)
 
 - [ ] Reconciliatie slaat staffMembers over die gerefereerd worden door actieve `organigramNode` of `responsibility` documenten
 - [ ] Vitest tests dekken: orphan met organigram-ref → niet gearchiveerd; orphan zonder refs → gearchiveerd
-- [ ] `pnpm --filter @kcvv/api check-all` slaagt
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/api` slaagt
 
 ### Fase 3 — Staff data opschoning (#1212)
 
@@ -292,8 +292,8 @@ Alle labels, filterbeschrijvingen, actieknoppen, validatieberichten en dialoogve
 - [ ] responsibility preview toont contactnaam
 - [ ] Gearchiveerd-lid validatiewaarschuwing op organigramNode.members[]
 - [ ] Beide studio's gebruiken gedeelde structuur uit `@kcvv/sanity-studio`
-- [ ] `pnpm --filter @kcvv/studio check-all` slaagt
-- [ ] `pnpm --filter @kcvv/studio-staging check-all` slaagt
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/studio` slaagt
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/studio-staging` slaagt
 
 ### Fase 6 — Board-document opschoning (#1215)
 

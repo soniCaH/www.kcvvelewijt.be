@@ -1137,10 +1137,10 @@ find apps/web/src/components -name "*Redesign" -type d
 
 Expected: Empty output.
 
-### Task F.2: Run the full check-all
+### Task F.2: Run the full turbo gate
 
 ```bash
-pnpm --filter @kcvv/web check-all 2>&1 | tail -20
+pnpm turbo run lint type-check test build --filter=@kcvv/web 2>&1 | tail -20
 ```
 
 Expected: All green. If build still fails on Sanity env vars, that's an environment issue — not a code issue.
@@ -1199,4 +1199,4 @@ gh pr create --title "Page redesigns implementation: PlayerCard + 7 page redesig
 - **Delete prototype directories** at the end of each phase, not at the very end. They're a temporary artifact.
 - **Use `cn` from `@/lib/utils/cn`** for conditional classes when there are more than 2-3 ternaries.
 - **Match the existing test patterns** in the file you're modifying, even if they're not your preferred style — consistency matters.
-- **The build step in `check-all` will fail** in the worktree because Sanity env vars aren't set there. Skip it locally; rely on Vercel preview / CI for the build check.
+- **The build step in the turbo gate will fail** in the worktree because Sanity env vars aren't set there. Skip it locally; rely on Vercel preview / CI for the build check.

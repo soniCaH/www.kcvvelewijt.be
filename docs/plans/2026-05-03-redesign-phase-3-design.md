@@ -67,7 +67,7 @@ Mirrors phase 2 PRD's 567-line structure, scaled up:
 6. Mockup references — pointers to the four `compare.md` files and chosen options (and the EditorialHero `compose.md`).
 7. Implementation order & dependency graph — mirrors §4 below.
 8. VR baseline plan — which stories get baselines, which carry `vr.disable`.
-9. Exit criteria — every primitive shipped with story, no `<PageHero>` callers remain, layout chrome swapped site-wide, check-all green.
+9. Exit criteria — every primitive shipped with story, no `<PageHero>` callers remain, layout chrome swapped site-wide, turbo gate green.
 10. Out of scope — homepage rebuild (phase 4), article detail (phase 5), animation primitives, illustration character variants.
 
 ## 4. Sub-issue split (11 children of #1525)

@@ -96,7 +96,7 @@ will be rewritten against the locked design contract.
 - [ ] Graceful degradation preserved — a Sanity failure still yields an empty event list, not a crash
       (existing `Effect.catchAll` on the event fetch retained).
 - [ ] `/kalender` e2e smoke test (`apps/web/test/e2e/routes.spec.ts`) stays green.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 2 — Unified VM + by-type filter (direction-agnostic)
 
@@ -110,7 +110,7 @@ will be rewritten against the locked design contract.
       filtering narrows the rendered feed by `kalenderType`. URL param swaps `?team=` → `?type=`.
 - [ ] Reselecting the active tab is a no-op (dedup guard — no duplicate `kalender_filter` event).
 - [ ] Empty + filtered-to-zero states render (no blank widget).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 3 — Design gate (no build) — ✅ LOCKED 2026-06-05 (#1993)
 
@@ -143,7 +143,7 @@ Lock doc: `docs/design/mockups/phase-6-kalender/6d-kalender-locked.md`.
       the reskinned grid, and `<CalendarAgenda>` get the `vr` tag + committed Docker baselines.
 - [ ] States covered: empty feed, filtered-to-zero, loading skeleton, dense day (10-match Saturday),
       2-event day.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 5 — iCal + analytics + SEO + cleanup (#1995)
 
@@ -157,7 +157,7 @@ Lock doc: `docs/design/mockups/phase-6-kalender/6d-kalender-locked.md`.
 - [ ] Metadata refreshed; optional `ItemList` JSON-LD of the **current window's** items validated.
 - [ ] Legacy `<CalendarWidget>` children retired or absorbed per the lock; orphaned compact-match
       components reconciled (coordinate with #1960).
-- [ ] CI `visual-regression` + e2e green; `pnpm --filter @kcvv/web check-all` passes.
+- [ ] CI `visual-regression` + e2e green; `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ## 6. Effect Schema / api-contract changes
 

@@ -346,10 +346,10 @@ Expected: All tests PASS
 
 ## Task 5: Quality checks + commit
 
-### Step 1: Run full web check-all
+### Step 1: Run full web turbo gate
 
 ```bash
-pnpm --filter @kcvv/web check-all 2>&1 | tail -20
+pnpm turbo run lint type-check test build --filter=@kcvv/web 2>&1 | tail -20
 ```
 
 Expected: PASS

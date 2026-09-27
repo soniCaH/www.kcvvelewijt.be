@@ -210,7 +210,7 @@ Phase 3: Organigram usage — all events from taxonomy table above → #899
 - [ ] TypeScript type for `window.dataLayer` declared (ambient or module augmentation)
 - [ ] One test event fires on homepage and appears in GTM debug preview
 - [ ] `README` section or `docs/` file documenting: how to create GTM container, link GA4, expected env vars
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] GA4 only fires in production (or when `NEXT_PUBLIC_GTM_ID` is set)
 
 ### Phase 1 — Responsibility finder events
@@ -221,7 +221,7 @@ Phase 3: Organigram usage — all events from taxonomy table above → #899
 - [ ] `trackEvent` calls are non-blocking and never throw
 - [ ] No PII in events — no email addresses, phone numbers, or user names in parameters
 - [ ] Events verified in GTM debug preview
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Search events
 
@@ -229,14 +229,14 @@ Phase 3: Organigram usage — all events from taxonomy table above → #899
 - [ ] `search_submitted` fires on form submit, not on every keystroke
 - [ ] `search_result_clicked` includes 1-indexed position for click-through-rate analysis
 - [ ] No PII in events
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Organigram events
 
 - [ ] All 5 events from the organigram taxonomy table instrumented in `UnifiedOrganigramClient` and sub-components
 - [ ] View change tracking includes source (tab click vs. swipe vs. keyboard)
 - [ ] No PII in events
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 7. Manual Prerequisites (not code — done by project owner)
 

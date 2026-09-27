@@ -71,14 +71,14 @@ Add a `historyEra` document type to `packages/sanity-schemas/src/` (single schem
 - [ ] Library CSS imported from inside `CookieConsentBanner` (or its init path)
 - [ ] KCVV `--cc-*` theme overrides still apply to the rendered modal (manual check: open banner on a fresh session, visuals unchanged)
 - [ ] Cookie banner renders identically on first visit
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Icons barrel
 
 - [ ] 7 icons (`ZoomIn`, `ZoomOut`, `Maximize2`, `Minimize2`, `Expand`, `Minimize`, `Download`) exported from `apps/web/src/lib/icons.ts`
 - [ ] `EnhancedOrgChart.tsx` imports only from `@/lib/icons`
 - [ ] `src/stories/foundation/SpacingAndIcons.mdx` icon grid updated to include the 7 new icons
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Fonts
 
@@ -89,7 +89,7 @@ Add a `historyEra` document type to `packages/sanity-schemas/src/` (single schem
 - [ ] System font fallbacks (`-apple-system, system-ui, …`) lead the remaining `quasimoda` and `stenciletta` stacks
 - [ ] `Typography.mdx` updated to reflect the new token sources
 - [ ] PR body documents the manual "trim the Adobe Fonts kit" step so the human performs it before merge
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Suspense on `/hulp`
 
@@ -97,7 +97,7 @@ Add a `historyEra` document type to `packages/sanity-schemas/src/` (single schem
 - [ ] Responsibility list wrapped in `<Suspense>` with a skeleton fallback matching the shared factory pattern
 - [ ] Existing client-side hulp search still works end-to-end
 - [ ] Pre-existing `/hulp` analytics events still fire (per `feedback_analytics_instrumentation.md`)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 5 — Sanity DAM migration
 
@@ -108,7 +108,7 @@ Add a `historyEra` document type to `packages/sanity-schemas/src/` (single schem
 - [ ] `/club/geschiedenis` and ultras page render images via `next/image` + `@sanity/image-url`, with `sizes`, `fm=webp`, `auto=format`
 - [ ] `apps/web/public/images/history/` and `apps/web/public/images/ultras/` deleted
 - [ ] Cold-load transfer size for `/club/geschiedenis` measurably lower than current baseline (Chrome DevTools Network panel, 4G throttle; baseline captured in the issue before edits begin)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 - [ ] CLAUDE.md updated if new canonical repository/schema paths need documenting (per root CLAUDE.md "CLAUDE.md Is a Required Deliverable" rule)
 
 ## 6. Effect Schema / api-contract Changes

@@ -26,7 +26,7 @@ docker info >/dev/null 2>&1 && echo "docker ok"   # Docker Desktop must be runni
 git status                                        # only staged: PRD + this plan
 
 pnpm install                                      # confirm lockfile resolves cleanly
-pnpm --filter @kcvv/web run check-all             # baseline must be green
+pnpm turbo run lint type-check test build --filter=@kcvv/web             # baseline must be green
 pnpm --filter @kcvv/web run vr:check              # baseline must be green
 ```
 
@@ -88,11 +88,11 @@ export { TapedCard } from "./TapedCard";
 export type { TapedCardProps, TapedCardRotation } from "./TapedCard";
 ```
 
-**Step 5: Verify tests pass and check-all is clean**
+**Step 5: Verify tests pass and turbo gate is clean**
 
 ```bash
 pnpm --filter @kcvv/web run test apps/web/src/components/design-system/TapedCard/
-pnpm --filter @kcvv/web run check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 Expected: PASS.
@@ -524,7 +524,7 @@ The legacy `!important` cascade fights are eliminated — the redesign tokens ca
 **Step 3: Verify all nine call sites still compile**
 
 ```bash
-pnpm --filter @kcvv/web run check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 The PRD §4.1 list confirms each call site passes `title` and optionally `linkText`/`linkHref`/`variant`/`as`. None pass `kicker` or `emphasis` today, so they all continue to render headlines without those affordances. Visual treatment changes per the redesign — that's the intended VR baseline shift on each consumer's story (the consumers' Storybook stories live under `Features/<Domain>/` and are not in the Phase 3 VR Include list yet, so no Features baselines change in this phase).
@@ -616,10 +616,10 @@ grep -rn "from.*['\"].*Badge['\"]" apps/web/src --include="*.tsx" --include="*.t
 
 Expected: zero matches. (`MatchStatusBadge` still exists as a different component; `NumberBadge` is unrelated to the design-system Badge.)
 
-**Step 7: Run check-all**
+**Step 7: Run turbo gate**
 
 ```bash
-pnpm --filter @kcvv/web run check-all
+pnpm turbo run lint type-check test build --filter=@kcvv/web
 ```
 
 Expected: PASS. TypeScript surfaces any reference we missed.
@@ -858,7 +858,7 @@ Phase 1 keeps the single-line behaviour from Phase 0. Tracking issue: #${FOLLOWU
 
 ## Testing
 
-- `pnpm --filter @kcvv/web run check-all` — green
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` — green
 - `pnpm --filter @kcvv/web run vr:check` — green after baselines committed
 - Manual review: each new `UI/<Name>` story rendered in local Storybook against Dutch fixture content
 

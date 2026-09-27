@@ -49,7 +49,7 @@ Single phase (small, self-contained reskin).
       regex (manual, note in PR). No PII.
 - [ ] Stories (`vr`) for the hero + a left/right `TimelineItem` + a `TimelineImage`; baselines
       committed. e2e `/club/geschiedenis` smoke green.
-- [ ] `pnpm --filter @kcvv/web check-all` + VR green.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` + VR green.
 
 ## 5. Open questions
 

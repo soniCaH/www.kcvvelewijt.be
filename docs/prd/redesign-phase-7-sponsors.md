@@ -56,7 +56,7 @@ proving the data path + route + e2e smoke before any new components land.
 2. **`<SponsorHero>` + `<FeaturedSponsorCard>`** — split hero + marquee.
 3. **Tier bodies** — hoofd `<TapedCardGrid>` + unlabeled merged wall + tier/empty logic.
 4. **`<SponsorCtaBand>`** + page-level empty states.
-5. **Analytics + SEO + legacy retirement** + final VR / check-all.
+5. **Analytics + SEO + legacy retirement** + final VR / turbo gate.
 
 ## 5. Acceptance criteria per phase
 
@@ -70,7 +70,7 @@ proving the data path + route + e2e smoke before any new components land.
 - [ ] `src/app/(landing)/sponsors/page.tsx` no longer uses `SectionStack` / `getSponsorsSections`
       / `kcvv-black`; renders headline + a `<SponsorTile>` grid of all sponsors on cream.
 - [ ] `getSponsorsSections.tsx` + its test deleted; `SponsorsPage` simplified.
-- [ ] e2e `/sponsors` smoke stays green; `pnpm --filter @kcvv/web check-all` passes.
+- [ ] e2e `/sponsors` smoke stays green; `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 2 — `<SponsorHero>` + `<FeaturedSponsorCard>`
 
@@ -115,7 +115,7 @@ proving the data path + route + e2e smoke before any new components land.
       stories + tests + barrel exports; `git grep` confirms zero consumers.
 - [ ] Optional `ItemList` JSON-LD of sponsors (keep existing breadcrumb).
 - [ ] `Pages/Sponsors` story refreshed (not `vr`); e2e `/sponsors` smoke green.
-- [ ] Final `pnpm --filter @kcvv/web check-all` + VR green.
+- [ ] Final `pnpm turbo run lint type-check test build --filter=@kcvv/web` + VR green.
 
 ## 6. Analytics
 

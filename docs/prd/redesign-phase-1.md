@@ -482,7 +482,7 @@ Exactly **one** consumer in production code. `<Badge>` is also imported by its o
 3. Update `MatchStatusBadge.stories.tsx` and `MatchStatusBadge.test.tsx` to assert the new pill rendering.
 4. Delete `apps/web/src/components/design-system/Badge/`.
 5. Remove `Badge` exports from `apps/web/src/components/design-system/index.ts`.
-6. Run `pnpm --filter @kcvv/web run check-all` — TypeScript surfaces any reference we missed.
+6. Run `pnpm turbo run lint type-check test build --filter=@kcvv/web` — TypeScript surfaces any reference we missed.
 
 Because the migration is so small, it lands inside the same PR as the primitives. A standalone PR would be churn.
 
@@ -531,7 +531,7 @@ Per `apps/web/CLAUDE.md` §Visual Regression Testing:
 - [ ] `<SectionHeader>` is reworked: drops `!important` overrides, composes `<EditorialHeading>` + `<MonoLabelRow>`, all nine existing call sites continue to compile and render.
 - [ ] `<Badge>` folder is deleted; `Badge` exports removed from the barrel; `MatchStatusBadge` is migrated to `<MonoLabel>`.
 - [ ] No new tokens added to `apps/web/src/app/globals.css`.
-- [ ] `pnpm --filter @kcvv/web run check-all` passes (lint, type-check, unit tests).
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes (lint, type-check, unit tests).
 - [ ] `pnpm --filter @kcvv/web run vr:check` passes after baselines are captured.
 - [ ] PR body includes a `## VR baselines` section enumerating all new baselines as first-time captures and justifying the `UI/SectionHeader` baseline update.
 - [ ] `apps/web/CLAUDE.md` §"Redesign primitives (Phase 0+)" updated to list Phase 1 additions.

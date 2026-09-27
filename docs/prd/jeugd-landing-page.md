@@ -71,7 +71,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] `TeamOverview` groups youth teams into 3 tiers: Bovenbouw (U14–U21), Middenbouw (U10–U13), Onderbouw (U6–U9)
 - [ ] Old 7-category grouping (Kleuters, Duiveltjes, etc.) is fully removed from `getAgeCategory()`
 - [ ] `TeamOverview` tests updated for new grouping
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Full editorial grid
 
@@ -82,7 +82,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] Grid collapses responsively: 2-col at `≤960px` (featured full-width), 1-col at `≤640px`
 - [ ] Graceful fallback when fewer than 3 jeugd articles exist (show only available articles, fill remaining slots with nav cards or hide empty slots)
 - [ ] All nav card links point to correct routes
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Quote section + polish
 
@@ -91,7 +91,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] Diagonal directions alternate correctly: right → left → right → left
 - [ ] Page metadata updated (title, description, OpenGraph)
 - [ ] ISR revalidation maintained (1 hour for article freshness)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Storybook
 
@@ -99,7 +99,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] `JeugdEditorialGrid` story under `Features/Jeugd/JeugdEditorialGrid`
 - [ ] `JeugdQuote` story under `Features/Jeugd/JeugdQuote`
 - [ ] All stories use `StoryObj<typeof meta>` pattern
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 

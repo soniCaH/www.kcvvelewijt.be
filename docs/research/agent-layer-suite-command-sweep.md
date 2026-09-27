@@ -200,7 +200,7 @@ Time:     36ms >>> FULL TURBO
 @kcvv/web#type-check          HIT  LOCAL
 ```
 
-`pnpm --filter @kcvv/web check-all` still exists and still passes on the same commit (105 s); no call site moved. `packages/sanity-studio` carries a second composite `check-all` (type-check → lint → vitest, run by hand); the contract step must remove both. The wall-clock comparison against it belongs to [#3158](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3158).
+`pnpm --filter @kcvv/web check-all` still exists and still passes on the same commit (105 s); no call site moved. `packages/sanity-studio` carries a second composite `check-all` (type-check → lint → vitest, run by hand); the contract step must remove both. **Update 2026-09-26:** call sites moved in #3156; both scripts deleted in #3157. The wall-clock comparison against it belongs to [#3158](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3158).
 
 ## 4. Where the per-profile guidance should live
 

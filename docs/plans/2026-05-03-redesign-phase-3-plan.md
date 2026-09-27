@@ -62,7 +62,7 @@ Run once before opening any sub-issue:
 - `EndMark` exported from design-system barrel.
 - Storybook renders the locked composition (visually matches `endmark-locked.md` reference screenshot).
 - VR baseline committed.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 **Closes:** master design §5.2 step "interview template — EndMark drops `flourish` prop" delta.
 
@@ -158,7 +158,7 @@ Each task has its own sub-issue. After 3.0 lands, all four can run in parallel; 
 - Editor can insert + apply Accent decorator.
 - Component renders the locked spec.
 - VR baseline matches.
-- `pnpm --filter @kcvv/sanity-schemas check-all` green.
+- `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` green.
 
 ---
 
@@ -262,8 +262,8 @@ Each migration ships with:
 - 8 Storybook stories ship (4 variants × 2 placements).
 - VR baseline per story.
 - Mobile breakpoint VR captured (`vr.viewport: "mobile"`).
-- `pnpm --filter @kcvv/web check-all` green.
-- `pnpm --filter @kcvv/sanity-schemas check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
+- `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` green.
 
 ---
 
@@ -340,7 +340,7 @@ Each migration ships with:
 - Drawer closed/open/submenu-expanded all VR-captured.
 - Legacy `<PageHeader>` deleted.
 - Root layout swap done.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -384,7 +384,7 @@ Each migration ships with:
 - `<ShieldFigure>` Storybook + VR baseline.
 - `<MatchStrip>` Storybook story for upcoming state at desktop + mobile widths.
 - Legacy `<MatchStripClient>` deleted.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
@@ -432,7 +432,7 @@ Each migration ships with:
 - All 3 founding-year locations corrected.
 - All footer routes verified (404-free).
 - Root layout swap done.
-- `pnpm --filter @kcvv/web check-all` green.
+- `pnpm turbo run lint type-check test build --filter=@kcvv/web` green.
 
 ---
 
