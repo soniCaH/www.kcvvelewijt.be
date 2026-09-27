@@ -134,7 +134,7 @@ function transform(body: Block[], subjectKey: string) {
     })
     preview.push({
       q: question,
-      a: cleaned.map((b) => b.children.map((c) => c.text).join('')).join(' ⏎ '),
+      a: cleaned.map(textOf).join(' ⏎ '),
       blocks: ans.length,
     })
     lastAnswerEnd = j

@@ -163,6 +163,11 @@
         "@playwright/test",
         "mcr.microsoft.com/playwright"
       ]
+    },
+    {
+      "description": "Group sanity and @sanity/* so the two studios and the two shared Sanity packages move in lockstep — two sanity copies in one file break the studios' type-check (#3204)",
+      "groupName": "sanity",
+      "matchPackageNames": ["sanity", "/^@sanity//"]
     }
   ],
   "vulnerabilityAlerts": {

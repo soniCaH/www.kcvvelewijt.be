@@ -29,8 +29,8 @@
   "peerDependencies": {
     "@sanity/icons": "5.2.2",
     "@sanity/ui": "4.2.1",
-    "react": "19.2.8",
-    "sanity": "6.11.0"
+    "react": "19.3.0",
+    "sanity": "6.15.0"
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "7.0.0",
@@ -42,9 +42,9 @@
     "@vitejs/plugin-react": "6.1.1",
     "eslint": "10.9.1",
     "happy-dom": "20.11.12",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "sanity": "6.11.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "sanity": "6.15.0",
     "typescript": "6.0.3",
     "vite": "8.2.2",
     "vitest": "4.1.11"
