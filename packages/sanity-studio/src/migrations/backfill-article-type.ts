@@ -12,6 +12,8 @@ import {at, defineMigration, set} from 'sanity/migrate'
  *
  * Skips any article that already has articleType set. Tag-signalled
  * interview auto-promotion is NOT done here — it requires editor review.
+ * See `apps/web/scripts/audit-interview-candidates.mjs` for the report-only
+ * companion.
  */
 export interface ArticleTypeDoc {
   articleType?: unknown

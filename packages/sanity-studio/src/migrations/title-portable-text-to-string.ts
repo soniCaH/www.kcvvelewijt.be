@@ -1,4 +1,5 @@
 import {at, defineMigration, set} from 'sanity/migrate'
+import {firstBlockText} from './article-label'
 
 /**
  * ROLLBACK ONLY — never run as a sync. REVERSE of `title-to-portable-text`:
@@ -20,8 +21,7 @@ export function migrateTitlePortableTextToString(
   doc: PortableTextTitleArticleDoc,
 ): Patch[] | undefined {
   if (!Array.isArray(doc.title)) return undefined
-  const block = (doc.title as {children?: {text?: string}[]}[])[0]
-  const text = block?.children?.map((c) => c.text ?? '').join('') ?? ''
+  const text = firstBlockText(doc.title) ?? ''
   if (text.trim().length === 0) return undefined
   return [at('title', set(text))]
 }

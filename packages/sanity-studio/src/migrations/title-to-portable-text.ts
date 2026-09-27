@@ -2,7 +2,7 @@ import {at, defineMigration, set} from 'sanity/migrate'
 
 /**
  * Convert `article.title` from `string` → constrained Portable Text
- * (single block, one `accent` decorator). After this migration, every
+ * (single block, no marks — the schema allows one `accent` decorator). After this migration, every
  * consumer of `article.title` uses PT-aware rendering or the
  * `serializeTitle()` / GROQ `pt::text(title)` flatten.
  *
