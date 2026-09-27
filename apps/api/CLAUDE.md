@@ -177,8 +177,9 @@ wrangler vectorize create-metadata-index kcvv-search-staging --property-name=typ
 **Nothing populates the new index automatically.** `env.staging.triggers.crons` is
 `[]` by design (staging shares PSD's API quota with production), so
 `runSanityIndexSync` — the only bulk writer, dispatched from the `30 2 * * *` cron in
-`index.ts` — never runs on staging. The only other writer is the per-document
-webhook. Before this change, staging's `/search` and `/related` read production's
+`index.ts` — never runs on staging. No Sanity webhook points at staging either
+(#2846, closed into #2845), so nothing writes the staging index unless someone
+runs the backfill below. Before this change, staging's `/search` and `/related` read production's
 data through the shared index; after it, **staging search returns nothing until
 someone runs the backfill below.** `docs/agents/testing-ops.md` and
 `.github/workflows/e2e.yml` both point `KCVV_API_URL` at the staging worker, so this
@@ -194,7 +195,9 @@ refresh `kcvv-search-staging`, run one command from the repo root:
 It starts the staging worker with remote bindings, fires the `30 2 * * *` sweep once
 (never the `0 2 * * *` PSD sync), waits for it to settle, stops the worker, and prints
 the index's vector count. It exits non-zero on a failed sweep. Re-run it whenever
-staging search should catch up with the staging dataset.
+staging search should catch up with the staging dataset. Run it from a checkout that
+has `apps/api/.dev.vars` — a fresh worktree has none, and the script refuses rather
+than start a worker without a Sanity token.
 
 It refuses to start unless `wrangler.toml` pairs staging with dataset `staging` and
 index `kcvv-search-staging`. It also keeps `.dev.vars` from overriding that pair: a

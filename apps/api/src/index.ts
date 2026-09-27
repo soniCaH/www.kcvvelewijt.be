@@ -128,7 +128,7 @@ export default {
   async scheduled(
     event: ScheduledEvent,
     env: WorkerEnv,
-    ctx: ExecutionContext,
+    _ctx: ExecutionContext,
   ): Promise<void> {
     const envLayer = Layer.succeed(WorkerEnvTag, env);
 
@@ -201,38 +201,41 @@ export default {
         KvCacheLive,
         envLayer,
       ).pipe(Layer.provide(KvCacheLive), Layer.provide(envLayer));
-      ctx.waitUntil(
-        (async () => {
-          const outcome = await settleJob("sanity-index-sync", () =>
-            Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)),
-          );
-          // Reported strictly AFTER the sync settles — see the comment on
-          // reportJobOutcome above.
-          await reportJobOutcome("sanity-index-sync", outcome);
-          // Undefined when the sweep failed outright (never reached its
-          // `return`, so there's no `.value` to read) — `pruneJobOutcome`
-          // treats that the same as its own "not-run" case: report nothing.
-          const prunePhase: PrunePhaseOutcome | undefined = outcome.ok
-            ? outcome.value.prunePhase
-            : undefined;
-          // Own job name (#2855): the sweep itself succeeded even when the
-          // prune was refused/failed, so conflating the two would mark a
-          // healthy indexing run as failed. pruneJobOutcome returns null
-          // (nothing reported) both when the sweep failed outright and when
-          // reconciliation never ran this sweep — see its doc comment.
-          const pruneOutcome = pruneJobOutcome(prunePhase);
-          if (pruneOutcome !== null) {
-            await reportJobOutcome("search-index-prune", pruneOutcome);
-          }
-          // The terminal line `scripts/backfill-staging-search.sh` waits for:
-          // it runs after the reports, so stopping `wrangler dev` here cuts
-          // nothing off (#2845).
-          console.log(
-            `[scheduled] sanity-index-sync settled: ${outcome.ok ? "ok" : "failed"}`,
-          );
-          if (!outcome.ok) throw outcome.error;
-        })(),
-      );
+      // Awaited, not ctx.waitUntil() — same reason as the PSD sync below
+      // (#2900): waitUntil() only buys the ~30s grace after the invocation
+      // returns, which a full re-embed can outrun. Awaited, the ceiling is
+      // the Cron Trigger's own 15-minute wall clock (#2845).
+      await (async () => {
+        const outcome = await settleJob("sanity-index-sync", () =>
+          Effect.runPromise(Effect.provide(runSanityIndexSync(), layer)),
+        );
+        // Reported strictly AFTER the sync settles — see the comment on
+        // reportJobOutcome above.
+        await reportJobOutcome("sanity-index-sync", outcome);
+        // Undefined when the sweep failed outright (never reached its
+        // `return`, so there's no `.value` to read) — `pruneJobOutcome`
+        // treats that the same as its own "not-run" case: report nothing.
+        const prunePhase: PrunePhaseOutcome | undefined = outcome.ok
+          ? outcome.value.prunePhase
+          : undefined;
+        // Own job name (#2855): the sweep itself succeeded even when the
+        // prune was refused/failed, so conflating the two would mark a
+        // healthy indexing run as failed. pruneJobOutcome returns null
+        // (nothing reported) both when the sweep failed outright and when
+        // reconciliation never ran this sweep — see its doc comment.
+        const pruneOutcome = pruneJobOutcome(prunePhase);
+        if (pruneOutcome !== null) {
+          await reportJobOutcome("search-index-prune", pruneOutcome);
+        }
+        // The terminal line `scripts/backfill-staging-search.sh` waits for.
+        // It prints after the reports, so stopping `wrangler dev` then cuts
+        // nothing off, and it states the outcome in words rather than
+        // leaving it to how wrangler answers a thrown handler (#2845).
+        console.log(
+          `[scheduled] sanity-index-sync settled: ${outcome.ok ? "ok" : "failed"}`,
+        );
+        if (!outcome.ok) throw outcome.error;
+      })();
     } else if (event.cron === "0 2 * * *") {
       // PSD → Sanity player/team/staff sync
       const layer = Layer.mergeAll(

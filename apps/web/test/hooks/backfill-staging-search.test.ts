@@ -7,13 +7,18 @@
  * and skips the vector-count read, so nothing reaches Cloudflare.
  *
  * What it pins: exactly one `/__scheduled` hit, for the search-index cron
- * only (never the `0 2 * * *` PSD sync); a failed sweep exits non-zero; and a
+ * only (never the `0 2 * * *` PSD sync); a failed sweep exits non-zero; a
  * config that would point staging at the production index is refused before
- * any server starts.
+ * any server starts; and the secrets file wrangler gets has lost every
+ * spelling of the two keys the dataset/index guard reads.
+ *
+ * Runs `/bin/bash`, not `bash` from PATH: the shebang's macOS bash is 3.2,
+ * and a Homebrew bash 5 on PATH would hide a 3.2-only failure.
  */
-import { spawnSync } from "node:child_process";
+import { spawnSync, type SpawnSyncReturns } from "node:child_process";
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -33,21 +38,22 @@ const repoRoot = spawnSync("git", ["rev-parse", "--show-toplevel"], {
 const SCRIPT = join(repoRoot, "scripts", "backfill-staging-search.sh");
 
 /**
- * Stands in for `wrangler dev --env staging --remote --test-scheduled`. Logs
- * the `Ready on …` line, then on `/__scheduled` the sweep's terminal line
- * (`index.ts`), `ok` or `failed` per argv. Appends every request's full URL
- * to a file so the test can count hits and read the cron expression.
+ * Stands in for `wrangler dev --env staging --remote --test-scheduled`. Copies
+ * the secrets file the script built into the log, logs the `Ready on …` line,
+ * then on `/__scheduled` the sweep's terminal line (`index.ts`), `ok` or
+ * `failed` per argv. Appends every request's full URL to a file.
  */
 const STUB_SERVER = `
 import { createServer } from "node:http";
-import { appendFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 
 const [port, hitsFile, outcome] = process.argv.slice(2);
+console.log("ENV_FILE>>" + readFileSync(process.env.BACKFILL_STAGING_SEARCH_ENV_FILE, "utf8") + "<<ENV_FILE");
 
 createServer((req, res) => {
   appendFileSync(hitsFile, req.url + "\\n");
   if (req.url.startsWith("/__scheduled")) {
-    console.log("[search-sync] Indexing 12 articles");
+    console.log("[search-sync] Indexed 12/12 articles");
     console.log("[scheduled] sanity-index-sync settled: " + outcome);
   }
   res.writeHead(200).end("ok");
@@ -56,8 +62,18 @@ createServer((req, res) => {
 });
 `;
 
+/** Every spelling wrangler's dotenv parser accepts, plus one real secret. */
+const DEV_VARS = [
+  "SANITY_DATASET=production",
+  "export SEARCH_INDEX_NAME=kcvv-search",
+  "SANITY_DATASET: production",
+  "SANITY_API_TOKEN=secret-token",
+  "",
+].join("\n");
+
 let dir = "";
 let stubPath = "";
+let devVarsDir = "";
 let seq = 0;
 
 /** OS-assigned, released before use — see `trigger-psd-sync.test.ts` (#3109). */
@@ -76,20 +92,28 @@ beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), "staging-search-fixture-"));
   stubPath = join(dir, "stub.mjs");
   writeFileSync(stubPath, STUB_SERVER, "utf8");
+  devVarsDir = join(dir, "api");
+  mkdirSync(devVarsDir);
+  writeFileSync(join(devVarsDir, ".dev.vars"), DEV_VARS, "utf8");
 });
 
 afterAll(() => {
   if (dir) rmSync(dir, { recursive: true, force: true });
 });
 
-async function run(outcome: "ok" | "failed", extraEnv = {}) {
+type Run = SpawnSyncReturns<string> & { hits: string[]; log: string };
+
+async function run(
+  outcome: "ok" | "failed",
+  extraEnv: Record<string, string> = {},
+): Promise<Run> {
   const n = seq++;
   const port = await freePort();
   const hitsFile = join(dir, `hits-${n}.txt`);
   const logPath = join(dir, `backfill-${n}.log`);
   writeFileSync(hitsFile, "", "utf8");
 
-  const result = spawnSync("bash", [SCRIPT], {
+  const result = spawnSync("/bin/bash", [SCRIPT], {
     cwd: repoRoot,
     encoding: "utf8",
     env: {
@@ -97,6 +121,8 @@ async function run(outcome: "ok" | "failed", extraEnv = {}) {
       BACKFILL_STAGING_SEARCH_SERVER_CMD: `node ${stubPath} ${port} ${hitsFile} ${outcome}`,
       BACKFILL_STAGING_SEARCH_PORT: String(port),
       BACKFILL_STAGING_SEARCH_LOG: logPath,
+      BACKFILL_STAGING_SEARCH_DEV_VARS_DIR: devVarsDir,
+      BACKFILL_STAGING_SEARCH_POLL_S: "0.05",
       ...extraEnv,
     },
   });
@@ -109,25 +135,37 @@ async function run(outcome: "ok" | "failed", extraEnv = {}) {
 }
 
 describe("backfill-staging-search.sh", () => {
-  it("fires the search-index cron exactly once, and never the PSD sync", async () => {
-    const r = await run("ok");
-    expect(r.status, r.log).toBe(0);
-    expect(r.hits).toHaveLength(1);
-    const url = new URL(r.hits[0]!, "http://localhost");
+  /** One happy-path run, shared by every test that only reads its output. */
+  let ok: Run;
+  beforeAll(async () => {
+    ok = await run("ok");
+  });
+
+  it("fires the search-index cron exactly once, and never the PSD sync", () => {
+    expect(ok.status, ok.log).toBe(0);
+    expect(ok.hits).toHaveLength(1);
+    const url = new URL(ok.hits[0]!, "http://localhost");
     expect(url.pathname).toBe("/__scheduled");
     expect(url.searchParams.get("cron")).toBe("30 2 * * *");
   });
 
-  it("names the target index and dataset before it writes", async () => {
-    const r = await run("ok");
-    expect(r.stdout).toContain("Vectorize index : kcvv-search-staging");
-    expect(r.stdout).toContain("Sanity dataset  : staging");
+  it("names the target index and dataset before it writes, and reports what landed", () => {
+    expect(ok.stdout).toContain("Vectorize index : kcvv-search-staging");
+    expect(ok.stdout).toContain("Sanity dataset  : staging");
+    expect(ok.stdout).toContain("[search-sync] Indexed 12/12 articles");
+  });
+
+  it("hands wrangler the secrets without any spelling of the two guarded keys", () => {
+    const envFile = /ENV_FILE>>([\s\S]*)<<ENV_FILE/.exec(ok.log)?.[1];
+    expect(envFile, ok.log).toBeDefined();
+    expect(envFile).toContain("SANITY_API_TOKEN=secret-token");
+    expect(envFile).not.toMatch(/SANITY_DATASET|SEARCH_INDEX_NAME/);
   });
 
   it("exits non-zero when the sweep settles as failed", async () => {
     const r = await run("failed");
     expect(r.status).toBe(1);
-    expect(r.stderr).toContain("failed");
+    expect(r.stderr).toContain("the sweep failed");
   });
 
   it("refuses a wrangler.toml that points staging at the production index, before starting anything", async () => {
@@ -143,6 +181,15 @@ describe("backfill-staging-search.sh", () => {
     const r = await run("ok", { BACKFILL_STAGING_SEARCH_WRANGLER_TOML: toml });
     expect(r.status).toBe(1);
     expect(r.stderr).toContain("refusing");
+    expect(r.hits).toEqual([]);
+  });
+
+  it("refuses to start without a secrets file", async () => {
+    const empty = join(dir, "no-secrets");
+    mkdirSync(empty);
+    const r = await run("ok", { BACKFILL_STAGING_SEARCH_DEV_VARS_DIR: empty });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("no .dev.vars");
     expect(r.hits).toEqual([]);
   });
 });

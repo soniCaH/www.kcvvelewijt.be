@@ -7,6 +7,10 @@
 #
 # Usage: ./scripts/backfill-staging-search.sh
 #
+# Run it from a checkout that has apps/api/.dev.vars (or .dev.vars.staging) —
+# a fresh worktree has neither, and the script refuses rather than start a
+# worker with no Sanity token.
+#
 # What it does, in one call: starts the staging worker with remote bindings
 # (`wrangler dev --env staging --remote --test-scheduled`), waits until it is
 # up, fires the `30 2 * * *` scheduled handler ONCE (the search-index sweep —
@@ -42,14 +46,17 @@ EXPECTED_INDEX="kcvv-search-staging"
 CRON="30 2 * * *"
 PORT="${BACKFILL_STAGING_SEARCH_PORT:-8801}"
 READY_TIMEOUT_S=120
+# The sweep is awaited inside scheduled() (#2845), so its ceiling is the Cron
+# Trigger's 15-minute wall clock. Match it.
 SWEEP_TIMEOUT_S=900
 
-# Fixture hooks for apps/web/test/hooks/backfill-staging-search.test.ts:
-# replace the wrangler launch with a stub server and skip every Cloudflare
-# call. Not for interactive use — with the server command set, nothing is
-# indexed.
+# Fixture hooks for apps/web/test/hooks/backfill-staging-search.test.ts. With
+# the server command set, a stub replaces wrangler and nothing reaches
+# Cloudflare. Not for interactive use.
 SERVER_CMD="${BACKFILL_STAGING_SEARCH_SERVER_CMD:-}"
 WRANGLER_TOML="${BACKFILL_STAGING_SEARCH_WRANGLER_TOML:-${API_DIR}/wrangler.toml}"
+DEV_VARS_DIR="${BACKFILL_STAGING_SEARCH_DEV_VARS_DIR:-${API_DIR}}"
+POLL_S="${BACKFILL_STAGING_SEARCH_POLL_S:-1}"
 
 # ── read the target from the config wrangler will actually use ────────────────
 # Prints the value of <key> inside the TOML table <header>, or nothing. The
@@ -83,37 +90,55 @@ if [ "${DATASET}" != "${EXPECTED_DATASET}" ] ||
   exit 1
 fi
 
-LOG="${BACKFILL_STAGING_SEARCH_LOG:-$(mktemp -t staging-search.XXXXXX)}"
-: >"${LOG}"
-echo " Log             : ${LOG}"
-
 # ── secrets without the two guarded values ────────────────────────────────────
 # Same lookup wrangler does: .dev.vars.staging first, then .dev.vars.
-ENV_FILE=""
-# The `${arr[@]+…}` form at the use site: macOS /bin/bash is 3.2, where an
-# empty array under `set -u` is an unbound-variable error.
-ENV_FILE_ARGS=()
-if [ -z "${SERVER_CMD}" ]; then
-  for candidate in "${API_DIR}/.dev.vars.staging" "${API_DIR}/.dev.vars"; do
-    if [ -f "${candidate}" ]; then
-      ENV_FILE="$(mktemp -t staging-search-vars.XXXXXX)"
-      grep -vE '^[[:space:]]*(SANITY_DATASET|SEARCH_INDEX_NAME)[[:space:]]*=' \
-        "${candidate}" >"${ENV_FILE}" || true
-      ENV_FILE_ARGS=(--env-file "${ENV_FILE}")
-      echo " Secrets from    : ${candidate} (dataset and index lines dropped)"
-      break
-    fi
-  done
+DEV_VARS=""
+for candidate in "${DEV_VARS_DIR}/.dev.vars.staging" "${DEV_VARS_DIR}/.dev.vars"; do
+  if [ -f "${candidate}" ]; then
+    DEV_VARS="${candidate}"
+    break
+  fi
+done
+if [ -z "${DEV_VARS}" ]; then
+  echo "refusing: no .dev.vars.staging or .dev.vars in ${DEV_VARS_DIR}." >&2
+  echo "Without it the worker has no Sanity token. Run this from the main" >&2
+  echo "checkout, or copy apps/api/.dev.vars into this one." >&2
+  exit 1
+fi
+# With this set to false, wrangler ignores --env-file AND .dev.vars, so the
+# worker would start with no secrets at all.
+if [ "${CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV:-}" = "false" ]; then
+  echo "refusing: CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV=false makes wrangler skip" >&2
+  echo "the secrets file. Unset it and run again." >&2
+  exit 1
+fi
+
+LOG="${BACKFILL_STAGING_SEARCH_LOG:-$(mktemp -t staging-search.XXXXXX)}"
+: >"${LOG}"
+echo " Secrets from    : ${DEV_VARS} (dataset and index lines dropped)"
+echo " Log             : ${LOG}"
+
+# Drops every dotenv spelling of the two keys: `KEY=`, `KEY =`, `KEY:` and
+# `export KEY=`.
+ENV_FILE="$(mktemp -t staging-search-vars.XXXXXX)"
+grep -vE '^[[:space:]]*(export[[:space:]]+)?(SANITY_DATASET|SEARCH_INDEX_NAME)[[:space:]]*[=:]' \
+  "${DEV_VARS}" >"${ENV_FILE}" || true
+# --env-file runs dotenv-expand, which .dev.vars does not: a `$` in a secret
+# may expand to something else in this run only.
+if grep -q '\$' "${ENV_FILE}"; then
+  echo "⚠  ${DEV_VARS} contains a '\$'. --env-file expands it; if auth fails, check that secret." >&2
 fi
 
 # ── start the worker ──────────────────────────────────────────────────────────
 if [ -n "${SERVER_CMD}" ]; then
   echo "fixture mode — no wrangler, no Cloudflare"
-  ( eval "${SERVER_CMD}" ) >>"${LOG}" 2>&1 &
+  # The stub reads the filtered secrets file from here, so the test can check
+  # what wrangler would have been handed.
+  ( export BACKFILL_STAGING_SEARCH_ENV_FILE="${ENV_FILE}"; eval "${SERVER_CMD}" ) >>"${LOG}" 2>&1 &
 else
   (cd "${API_DIR}" && pnpm exec wrangler dev --env staging --remote \
     --test-scheduled --config "${WRANGLER_TOML}" --port "${PORT}" \
-    ${ENV_FILE_ARGS[@]+"${ENV_FILE_ARGS[@]}"}) >>"${LOG}" 2>&1 &
+    --env-file "${ENV_FILE}") >>"${LOG}" 2>&1 &
 fi
 SERVER_PID=$!
 CURL_PID=""
@@ -122,34 +147,30 @@ cleanup() {
   kill "${CURL_PID}" 2>/dev/null || true
   kill -- -"${SERVER_PID}" 2>/dev/null || kill "${SERVER_PID}" 2>/dev/null || true
   wait "${SERVER_PID}" 2>/dev/null || true
-  [ -z "${ENV_FILE}" ] || rm -f "${ENV_FILE}"
+  rm -f "${ENV_FILE}"
 }
 trap cleanup EXIT
 
 # ── wait for readiness WITHOUT firing the cron ────────────────────────────────
 # `/__scheduled` is the trigger, not a health check (#2890). Watch the log.
 echo "waiting for the worker…"
-ready=0
-for _ in $(seq 1 "${READY_TIMEOUT_S}"); do
-  if grep -q "Ready on http://localhost:${PORT}" "${LOG}"; then
-    ready=1
-    break
-  fi
+deadline=$((SECONDS + READY_TIMEOUT_S))
+until grep -q "Ready on http://localhost:${PORT}" "${LOG}"; do
   if ! kill -0 "${SERVER_PID}" 2>/dev/null; then
     echo "the worker exited before it was ready — see ${LOG}" >&2
     exit 1
   fi
-  sleep 1
+  if [ "${SECONDS}" -ge "${deadline}" ]; then
+    echo "the worker never reported ready within ${READY_TIMEOUT_S}s — see ${LOG}" >&2
+    exit 1
+  fi
+  sleep "${POLL_S}"
 done
-if [ "${ready}" -ne 1 ]; then
-  echo "the worker never reported ready within ${READY_TIMEOUT_S}s — see ${LOG}" >&2
-  exit 1
-fi
 
 # ── fire the search-index cron, exactly once ──────────────────────────────────
-# The handler hands the sweep to ctx.waitUntil() and returns, so the request
-# comes back before the sweep ends. Backgrounded anyway, like the peer, so a
-# hung request can never block the poll loop below.
+# Backgrounded: scheduled() awaits the sweep, so this request blocks for the
+# sweep's full length. The poll loop below owns the timeout and the liveness
+# check; `|| true` keeps a curl error from aborting before the summary.
 echo "firing the search-index sweep…"
 (curl -sS --max-time "${SWEEP_TIMEOUT_S}" --get "http://localhost:${PORT}/__scheduled" \
   --data-urlencode "cron=${CRON}" -o /dev/null || true) &
@@ -160,28 +181,34 @@ CURL_PID=$!
 # sweep AND its job-alert reports, so stopping the worker then cuts nothing.
 echo "waiting for the sweep to settle (up to ${SWEEP_TIMEOUT_S}s)…"
 outcome=""
-for _ in $(seq 1 "${SWEEP_TIMEOUT_S}"); do
+died=0
+deadline=$((SECONDS + SWEEP_TIMEOUT_S))
+while [ "${SECONDS}" -lt "${deadline}" ]; do
   outcome="$(grep -oE 'sanity-index-sync settled: (ok|failed)' "${LOG}" | head -1 |
     sed 's/.*: //' || true)"
   [ -z "${outcome}" ] || break
   if ! kill -0 "${SERVER_PID}" 2>/dev/null; then
-    echo "the worker exited before the sweep settled — see ${LOG}" >&2
+    died=1
     break
   fi
-  sleep 1
+  sleep "${POLL_S}"
 done
 
 cleanup
 trap - EXIT
 
 # ── summary ───────────────────────────────────────────────────────────────────
+# `Indexed X/Y` and `dropped N` say what actually landed — a sweep can settle
+# `ok` with part of a chunk dropped.
 echo
-grep -E '\[search-sync\] (Indexing|Pruned|refusing)' "${LOG}" || true
+grep -E '\[search-sync\] (Indexed|Upsert failed|Pruned|refusing)' "${LOG}" || true
 
 if [ "${outcome}" != "ok" ]; then
   if [ "${outcome}" = "failed" ]; then
     echo "⚠  the sweep failed." >&2
     grep -m3 -E 'sanity-index-sync failed:|refusing to sync' "${LOG}" >&2 || true
+  elif [ "${died}" -eq 1 ]; then
+    echo "⚠  the worker exited before the sweep settled." >&2
   else
     echo "⚠  the sweep did not settle within ${SWEEP_TIMEOUT_S}s." >&2
   fi
