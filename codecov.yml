@@ -9,7 +9,19 @@ coverage:
     project: off
     patch: off
 
+# `require_changes: true` = only post the comment when coverage actually
+# changed on this commit, so a PR that touches nothing coverage-relevant
+# (docs slipping past the `web` path filter, a config-only change) doesn't
+# get a comment for its own sake. Codecov's older docs describe a
+# list-of-reasons form (`coverage_drop` / `uncovered_patch`); the live
+# schema no longer accepts it — `curl --data-binary @codecov.yml
+# https://api.codecov.io/validate` rejects that list with "field
+# 'require_changes' cannot be coerced" and only accepts a plain boolean
+# (confirmed 2026-09-28, #3152 review round 1). Note for the first few PRs
+# after this ships: with no prior base-commit coverage to diff against,
+# Codecov may show a one-off apparent drop on the first real comparison —
+# expected, not a regression.
 comment:
   layout: "diff, files"
   behavior: default
-  require_changes: false
+  require_changes: true
