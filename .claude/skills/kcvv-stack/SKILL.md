@@ -54,20 +54,30 @@ const matches = await Effect.runPromise(getMatches(teamId));
 
 ## BFF / Wrangler
 
-Wrangler 4's `engines.node` is `>=22.0.0` (`node_modules/wrangler/package.json`) — the repo's own floor is higher (`package.json` → `engines.node` is `>=24`), but treat Node ≥ 22 as wrangler's own hard minimum. Always run wrangler through `pnpm` (workspace-pinned version), never `npx` (resolves whatever's cached or latest).
+Use Node 24 — the repo's own floor (`.nvmrc`, `package.json` → `engines.node`). Wrangler's own `engines.node` is `>=22.0.0` (`apps/api/node_modules/wrangler/package.json`), but 24 is the one number to act on here. Always run wrangler through `corepack pnpm` (workspace-pinned version, per AFK-BRIEF's homebrew-pnpm warning), never `npx` (resolves whatever's cached or latest).
+
+**Production deploys from CI on merge to `main`** (`ci.yml`'s `deploy` job) — a hand deploy from a worktree is the exception, not the normal path. When you do need one, both CI deploy jobs build `api-contract` first; skip that step and a manual deploy can bundle a missing or stale contract.
 
 ```bash
-# Staging first — deploys on every PR; verify there before production
-pnpm --filter @kcvv/api deploy:staging
+# Build api-contract first — both CI deploy jobs do this before deploying (ci.yml:643, :700)
+corepack pnpm turbo build --filter=@kcvv/api-contract
 
-# Production — deploys on merge to main
-pnpm --filter @kcvv/api deploy
+# Staging first — verify there before production. `deploy` is a pnpm BUILT-IN
+# command name, so always spell out `run` — `pnpm --filter @kcvv/api deploy`
+# (no `run`) silently invokes pnpm's own deploy, not this script.
+corepack pnpm --filter @kcvv/api run deploy:staging
 
-# Tail logs
-pnpm --filter @kcvv/api exec wrangler tail --format pretty
+# Production — normally CI-only (see above); only run by hand for a deliberate
+# out-of-band deploy
+corepack pnpm --filter @kcvv/api run deploy
 
-# Check KV
-pnpm --filter @kcvv/api exec wrangler kv key get --binding=PSD_CACHE --remote "sync:team-cursor"
+# Tail logs — production by default; add --env staging for the staging worker
+corepack pnpm --filter @kcvv/api exec wrangler tail --format pretty
+corepack pnpm --filter @kcvv/api exec wrangler tail --format pretty --env staging
+
+# Check KV — production by default; add --env staging for the staging namespace
+corepack pnpm --filter @kcvv/api exec wrangler kv key get --binding=PSD_CACHE --remote "sync:team-cursor"
+corepack pnpm --filter @kcvv/api exec wrangler kv key get --binding=PSD_CACHE --remote "sync:team-cursor" --env staging
 ```
 
 ## PSD API

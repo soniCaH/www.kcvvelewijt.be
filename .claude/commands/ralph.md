@@ -89,7 +89,7 @@ Closes #<issue-number>
 ## Step 5 — Quality Gate
 
 ```bash
-pnpm turbo run lint type-check test build --filter=@kcvv/web
+corepack pnpm turbo run lint type-check test build --filter=@kcvv/web
 # Changed another workspace? Filter on it instead. A shared package gets a leading ...
 # so its dependents are checked too: --filter=...@kcvv/api-contract, and
 # --filter=...@kcvv/sanity-schemas for either Sanity package (reaches typegen + web).
