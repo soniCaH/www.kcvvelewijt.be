@@ -22,7 +22,11 @@ export default defineConfig({
   testMatch: "**/*.spec.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // 0 in CI too: a flake is a red run, never a green one that hid a retry.
+  // #3150's tripwire held `1` until #3196 closed the last live class (class N,
+  // `tap-targets.spec.ts`); 0 flaky in every run since. A new flake reopens its
+  // class ticket (#3089) — never raise this back to cover one.
+  retries: 0,
   workers: process.env.CI ? 2 : undefined,
   // `github-summary` writes flaky/skipped counts to the job summary (#2971):
   // this job exits 0 for a passed test, a retried-then-passed one and a

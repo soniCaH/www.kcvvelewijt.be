@@ -2,7 +2,7 @@
  * Writes the e2e run's own condition to the GitHub job summary (#2971).
  *
  * The job exits 0 for three different outcomes: a test that passed, a test
- * that failed and passed on its `retries: 1` retry (`flaky`), and a test whose
+ * that failed and passed on a retry (`flaky`), and a test whose
  * runtime data guard skipped it (`test.skip(count < 2, …)`). Only the first
  * actually verified anything, and until this reporter existed the other two
  * were visible nowhere but the raw log — three consecutive green runs were
@@ -12,9 +12,9 @@
  * step: `test.outcome()` already classifies each test across its retries, so
  * there is nothing to re-derive and no intermediate file to keep in sync.
  *
- * ponytail: reports, never fails the run — a retry is still the right tool for
- * genuine environment noise (#2971 explicitly keeps `retries: 1`). Make it
- * visible first; decide what to do about it from real numbers.
+ * ponytail: reports, never fails the run. Retries are 0 since #3196 closed the
+ * last live flake class, so `flaky` should stay empty; the section stays so a
+ * retry re-added later cannot hide again.
  */
 
 import { appendFileSync, writeFileSync } from "node:fs";
