@@ -10,37 +10,20 @@ name: E2E
 #   - packages/api-contract/** is INCLUDED beyond the PRD's enumerated paths
 #     because @kcvv/api-contract is a runtime dep of @kcvv/web — schema
 #     changes there can break SSR rendering without touching apps/web/src.
-
+#
+# PR-only (#3151): E2E used to also run on every push to `main`, but nothing
+# ever reads that run — the suite has no `main`-only signal like Codecov's
+# trend line, and a red run there just repeats what its PR already caught.
+# Filtering is job-level (`changes` below), not on the `on:` triggers — the
+# same trap `ci.yml`'s `changes` job avoids: a workflow that never triggers at
+# all leaves a required check "Pending" forever, so a docs/API/Studio-only PR
+# would never merge. Never move this filter back to `on:` `paths:`.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "apps/web/src/**"
-      - "apps/web/public/**"
-      - "apps/web/package.json"
-      - "apps/web/test/e2e/**"
-      - "packages/api-contract/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".nvmrc"
-      - ".github/workflows/e2e.yml"
   pull_request:
     branches: [main]
     # ready_for_review so marking a draft ready triggers the suite (job is
     # draft-gated below).
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "apps/web/src/**"
-      - "apps/web/public/**"
-      - "apps/web/package.json"
-      - "apps/web/test/e2e/**"
-      - "packages/api-contract/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".nvmrc"
-      - ".github/workflows/e2e.yml"
 
 # Cancel superseded e2e runs on the same ref — repeated PR pushes shouldn't each
 # pay for a full Playwright run.
@@ -55,12 +38,53 @@ env:
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
+  # Same shape and same action as `changes`/`visual-regression-changes` in
+  # ci.yml — see the comment on `on:` above for why this lives here and not on
+  # the workflow triggers.
+  changes:
+    name: Detect e2e-relevant changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # paths-filter reads the PR's file list through the REST API, which the
+    # action documents as requiring `pull-requests: read`. It survives on
+    # `contents: read` alone today only because this repo is public — the
+    # listFiles call would 403 the moment it isn't.
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Detect e2e-relevant paths
+        id: filter
+        uses: dorny/paths-filter@v4.0.3
+        with:
+          filters: |
+            web:
+              - "apps/web/src/**"
+              - "apps/web/public/**"
+              - "apps/web/package.json"
+              - "apps/web/test/e2e/**"
+              - "packages/api-contract/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - ".nvmrc"
+              - ".github/workflows/e2e.yml"
+
   e2e:
     name: E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
+    needs: [changes]
+    if: |
+      needs.changes.outputs.web == 'true' &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image used by the visual-regression suite. Bump all of these
     # together — drift between the version that runs the suite and the

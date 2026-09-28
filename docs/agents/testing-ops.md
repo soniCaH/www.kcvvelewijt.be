@@ -167,6 +167,12 @@ runner using a pinned `mcr.microsoft.com/playwright` image. The tag must match
 `@playwright/test` in `apps/web/package.json` — those two files own the version;
 never restate it in prose here, it drifts.
 
+Pull requests only (#3151) — the workflow no longer triggers on push to
+`main`. Path filtering lives at **job** level (a `changes` job running
+`dorny/paths-filter`, same pattern as `ci.yml`'s `changes` job), not on the
+`on:` triggers, so a PR outside these paths still reports the `E2E` check
+(skipped, counts as passing) instead of leaving it pending forever.
+
 Path triggers are deliberately **distinct from the VR job's**:
 
 - Included: `apps/web/src/**`, `apps/web/public/**`,
