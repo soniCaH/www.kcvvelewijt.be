@@ -24,6 +24,8 @@ pnpm --filter @kcvv/web run build
 # 2. Make sure the BFF is reachable. Either start it locally:
 #       pnpm --filter @kcvv/api dev
 #    OR point KCVV_API_URL at the staging worker in `apps/web/.env.local`.
+#    Staging search is empty until someone backfills it by hand:
+#       ./scripts/backfill-staging-search.sh
 
 # 3. Run the suite. Always starts its own server — never on :3000: the port
 #    is derived from this worktree's own path (#3141 member 5), and

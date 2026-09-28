@@ -102,8 +102,10 @@ booting the plugin against it directly would fail before a single test ran.
 
 ## Scheduled jobs
 
-Two cron triggers, both declared in `wrangler.toml`. Each runs inside
-`ctx.waitUntil()` and `scheduled()` returns immediately (`src/index.ts`).
+Two cron triggers, both declared in `wrangler.toml`. `scheduled()` awaits
+each job rather than handing it to `ctx.waitUntil()` (#2900, #2845), so a job's
+ceiling is the Cron Trigger's 15-minute wall clock, not the ~30 s grace after
+the invocation returns (`src/index.ts`).
 
 | Cron (UTC)   | Job                                                  |
 | ------------ | ---------------------------------------------------- |
@@ -131,9 +133,9 @@ Three things that are easy to get wrong, and that the script handles:
 - **`/__scheduled` is the trigger, not a health check.** Polling it to see
   whether the worker is up _runs the sync_. The script watches wrangler's log
   for its `Ready on …` line instead, so the cron fires exactly once.
-- **Do not stop it on a timer.** The uploads run in `waitUntil`, so ending the
-  invocation early cancels whatever is still in flight. The script waits for the
-  sync's own `…: done` line.
+- **Do not stop it on a timer.** Stopping the worker early cancels whatever
+  upload is still in flight. The script waits for the sync's own terminal line,
+  `sync completed — cursor advanced to N`.
 
 A `429` on a portrait upload is **not** fatal — that player retries on the next
 run, or on the nightly cron. Re-running is safe and cheap: images already
