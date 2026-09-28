@@ -169,11 +169,15 @@ describe("NewsCard", () => {
 
   describe("Phone layout (#3239)", () => {
     it("defaults to the stacked layout, with nothing phone-specific", () => {
-      render(<NewsCard {...defaultProps} imageUrl="/a.jpg" />);
+      const { container } = render(
+        <NewsCard {...defaultProps} imageUrl="/a.jpg" />,
+      );
       expect(screen.getByRole("link")).toHaveAttribute(
         "data-phone-layout",
         "stacked",
       );
+      // Other NewsCard callers must stay byte-unchanged (#3239).
+      expect(container.innerHTML).not.toContain("max-sm:");
       expect(screen.getByTestId("newscard-readmore")).not.toHaveClass(
         "max-sm:hidden",
       );
@@ -194,6 +198,15 @@ describe("NewsCard", () => {
       expect(screen.getByTestId("newscard-readmore")).toHaveClass(
         "max-sm:hidden",
       );
+    });
+
+    it("compact drops the footer row when there is no date to show", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} date={undefined} phoneLayout="compact" />,
+      );
+      const footer = screen.getByTestId("newscard-readmore").parentElement;
+      expect(footer).toHaveClass("max-sm:hidden");
+      expect(container.querySelector("time")).toBeNull();
     });
 
     it("compact asks for a thumbnail-sized image below sm", () => {

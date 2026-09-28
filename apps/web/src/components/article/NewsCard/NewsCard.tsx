@@ -292,10 +292,13 @@ export const NewsCard = ({
             className="object-cover"
             style={{ filter: "var(--filter-photo-newsprint)" }}
             sizes={
-              (compact ? "(max-width: 639px) 112px, " : "") +
-              (variant === "featured"
-                ? "(max-width: 768px) 100vw, 66vw"
-                : "(max-width: 768px) 100vw, 33vw")
+              // Compact is NewsGrid's card: a thumbnail below sm, one of
+              // three columns from sm up.
+              compact
+                ? "(max-width: 639px) 112px, 33vw"
+                : variant === "featured"
+                  ? "(max-width: 768px) 100vw, 66vw"
+                  : "(max-width: 768px) 100vw, 33vw"
             }
             placeholder={imageLqip ? "blur" : "empty"}
             blurDataURL={imageLqip ?? undefined}
@@ -386,6 +389,9 @@ export const NewsCard = ({
             className={cn(
               "mt-auto flex items-center justify-between gap-3 border-t-2 pt-3",
               compact && "max-sm:border-t-0 max-sm:pt-0",
+              // Without a date the row's only child is the read-more cue,
+              // which compact hides — drop the empty row with it.
+              compact && !date && "max-sm:hidden",
               isDark ? "border-cream/30" : "border-paper-edge",
             )}
           >
