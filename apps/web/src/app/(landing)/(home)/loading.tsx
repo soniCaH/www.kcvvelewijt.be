@@ -80,7 +80,7 @@ export default function HomeLoading() {
         </div>
       </PageContainer>
 
-      {/* Dit weekend — jersey-deep-dark matchday desk, seam top and bottom. */}
+      {/* Eerste ploegen — jersey-deep-dark matchday desk, seam top and bottom. */}
       <StripedSeam colorPair="cream-jersey-deep" height="md" />
       <section aria-hidden="true" className="bg-jersey-deep-dark">
         <PageContainer width="index" className="py-10 md:py-12">

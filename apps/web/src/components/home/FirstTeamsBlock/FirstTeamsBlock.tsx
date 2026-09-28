@@ -30,13 +30,6 @@ import {
 export interface FirstTeamsBlockProps {
   teams: FirstTeamVM[];
   /**
-   * Section heading. The homepage passes a fixture-aware label (HP-4) derived
-   * by `firstTeamsHeading`, which owns the rule — see its docblock in
-   * `first-teams.ts`. Defaults to "Dit weekend." so stories/tests stay stable;
-   * that default is an unconditional claim, so real callers must pass one.
-   */
-  heading?: string;
-  /**
    * A match read failed (BFF/PSD down or quota-exhausted), as opposed to the
    * feed genuinely holding no matches. Read solely on the no-rows path, where
    * it is folded into `resolvePlaceholderState`'s own `{ kind: "unavailable"
@@ -58,7 +51,7 @@ export interface FirstTeamsBlockProps {
   placeholder?: MatchesSliderPlaceholderVM | null;
   /**
    * Render reference time for the countdown. Defaults to now; the homepage
-   * passes the same `now` it already computed for `firstTeamsHeading` /
+   * passes the same `now` it already computed for
    * `deriveFirstTeamVM` so every date-derived value on the page agrees.
    * Stories and tests override it for a deterministic day count — a default
    * here is harmless (unlike `resolvePlaceholderState`'s own signature,
@@ -285,7 +278,6 @@ function FirstTeamRow({ team }: { team: FirstTeamVM }) {
  */
 export function FirstTeamsBlock({
   teams,
-  heading = "Dit weekend.",
   unavailable = false,
   placeholder = null,
   now = new Date(),
@@ -307,7 +299,7 @@ export function FirstTeamsBlock({
               tone="cream"
               className="mt-2"
             >
-              {heading}
+              Eerste ploegen.
             </EditorialHeading>
           </div>
           <Link

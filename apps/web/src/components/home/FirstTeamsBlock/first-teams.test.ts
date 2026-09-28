@@ -1,12 +1,9 @@
 import { describe, it, expect } from "vitest";
 import type { Match } from "@/lib/effect/schemas";
-import type { ScheduleMatch } from "@/components/match/types";
-import type { FirstTeamVM } from "./first-teams";
 import { asNonPlaceholder } from "@/components/match/test-narrowing";
 
 import {
   deriveFirstTeamVM,
-  firstTeamsHeading,
   selectSeniorTeams,
   SETTLED_LOOKAHEAD_MS,
 } from "./first-teams";
@@ -561,67 +558,5 @@ describe("deriveFirstTeamVM", () => {
       expect(vm.result).toBeUndefined();
       expect(vm.fixture).toBeUndefined();
     });
-  });
-});
-
-describe("firstTeamsHeading", () => {
-  // Tuesday 2026-06-23 12:00 UTC — every case below is relative to this.
-  const TUESDAY = new Date("2026-06-23T12:00:00Z");
-
-  /** Only `fixture.date` is read, so the rest of the VM stays structural. */
-  function team(fixtureIso?: string): FirstTeamVM {
-    return {
-      label: "A-ploeg",
-      slug: "eerste-elftallen-a",
-      ...(fixtureIso
-        ? { fixture: { date: new Date(fixtureIso) } as ScheduleMatch }
-        : {}),
-    };
-  }
-
-  it("says 'Dit weekend.' for a Saturday fixture inside the window", () => {
-    expect(firstTeamsHeading([team("2026-06-27T19:00:00Z")], TUESDAY)).toBe(
-      "Dit weekend.",
-    );
-  });
-
-  it("says 'Dit weekend.' for a Sunday fixture inside the window", () => {
-    expect(firstTeamsHeading([team("2026-06-28T15:00:00Z")], TUESDAY)).toBe(
-      "Dit weekend.",
-    );
-  });
-
-  // The #2392 regression: a midweek cup tie is not "dit weekend".
-  it("says 'Volgende wedstrijd.' for a midweek fixture inside the window", () => {
-    expect(firstTeamsHeading([team("2026-06-24T19:30:00Z")], TUESDAY)).toBe(
-      "Volgende wedstrijd.",
-    );
-  });
-
-  it("says 'Volgende wedstrijd.' for a Saturday fixture beyond the window", () => {
-    expect(firstTeamsHeading([team("2026-07-04T19:00:00Z")], TUESDAY)).toBe(
-      "Volgende wedstrijd.",
-    );
-  });
-
-  it("picks the soonest fixture across teams", () => {
-    const teams = [team("2026-06-27T19:00:00Z"), team("2026-06-24T19:30:00Z")];
-    expect(firstTeamsHeading(teams, TUESDAY)).toBe("Volgende wedstrijd.");
-  });
-
-  it("says 'Volgende wedstrijd.' when no team has a fixture", () => {
-    expect(firstTeamsHeading([team(), team()], TUESDAY)).toBe(
-      "Volgende wedstrijd.",
-    );
-    expect(firstTeamsHeading([], TUESDAY)).toBe("Volgende wedstrijd.");
-  });
-
-  // The BFF packs the Belgian kickoff wall-clock into the Date's UTC fields, so
-  // a late Sunday kickoff must stay Sunday. Re-zoning to Europe/Brussels would
-  // add a phantom +2h and roll it into Monday.
-  it("keeps a late Sunday kickoff on the weekend", () => {
-    expect(firstTeamsHeading([team("2026-06-28T22:30:00Z")], TUESDAY)).toBe(
-      "Dit weekend.",
-    );
   });
 });

@@ -86,6 +86,40 @@ describe("FirstTeamsBlock", () => {
     expect(screen.getAllByText("3de Nationale").length).toBeGreaterThan(0);
   });
 
+  // #3236 — the band's heading is the neutral constant "Eerste ploegen." on
+  // every day: a weekend fixture, a midweek fixture, a fixture beyond the old
+  // 7-day lookahead, and no fixture at all all read the same. It replaces
+  // #2392's computed "Dit weekend." / "Volgende wedstrijd." rule, which read
+  // as half-true whenever one team's rows fell outside that single weekend.
+  it("always reads 'Eerste ploegen.', regardless of fixture timing", () => {
+    const teamWithFixture = (dateIso?: string): FirstTeamVM => ({
+      label: "A-ploeg",
+      slug: "a-ploeg",
+      ...(dateIso ? { fixture: { ...aFixture, date: new Date(dateIso) } } : {}),
+    });
+
+    const weekend = render(
+      <FirstTeamsBlock teams={[teamWithFixture("2026-06-27T19:00:00Z")]} />,
+    );
+    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
+    weekend.unmount();
+
+    const midweek = render(
+      <FirstTeamsBlock teams={[teamWithFixture("2026-06-24T19:30:00Z")]} />,
+    );
+    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
+    midweek.unmount();
+
+    const beyondLookahead = render(
+      <FirstTeamsBlock teams={[teamWithFixture("2026-07-04T19:00:00Z")]} />,
+    );
+    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
+    beyondLookahead.unmount();
+
+    render(<FirstTeamsBlock teams={[teamWithFixture()]} />);
+    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
+  });
+
   it("renders the result state via the shared match row (scoreline + opponent)", () => {
     render(<FirstTeamsBlock teams={[aTeamResultOnly]} />);
     // <TeamAgendaRow> renders "3 – 1" in both the desktop and mobile layouts.

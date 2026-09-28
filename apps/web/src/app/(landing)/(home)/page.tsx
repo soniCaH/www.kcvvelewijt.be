@@ -2,7 +2,7 @@
  * Homepage
  * Main landing page for KCVV Elewijt website
  *
- * Spine order (#2387): hero → Dit weekend → Uitgelicht → …, so a supporter
+ * Spine order (#2387): hero → Eerste ploegen → Uitgelicht → …, so a supporter
  * reaches the first-team result inside the second screen on a phone instead
  * of the fourth.
  *
@@ -63,7 +63,6 @@ import {
   UpcomingMatches,
   FirstTeamsBlock,
   deriveFirstTeamVM,
-  firstTeamsHeading,
   selectSeniorTeams,
   ClubshopBanner,
   YouthBackdrop,
@@ -352,21 +351,22 @@ export default async function HomePage() {
   // "Eerste ploegen" — A/B last result + next fixture, carrying the
   // result→next-fixture transition. Self-contained dark band (own StripedSeam
   // top/bottom + padding), so the SectionStack wrapper stays flush (#2211).
-  // HP-4: `firstTeamsHeading` owns when the block may claim "Dit weekend."
+  // The heading is the neutral constant "Eerste ploegen." on every day, with
+  // or without fixtures — `<FirstTeamsBlock>` owns that literal (#3236; used
+  // to be a computed "Dit weekend." / "Volgende wedstrijd." per #2392, which
+  // went half-true whenever one team's rows fell outside that weekend).
   // #2399: unconditional. The band holds its shape open and names the reason
   // when there is nothing to show — dropping it shortened the spine to 7
   // bands and read as "the club never posted the result". A band that
   // acknowledges a remote match feed holds its shape and names the reason on
   // a failed read; `<UpcomingMatches>` below follows the same rule
   // (#2505/#2844) — this band is no longer the only one that does.
-  const heading = firstTeamsHeading(firstTeamVMs, now);
   const firstTeamsSection: SectionConfig = {
     key: "first-teams",
     bg: "transparent",
     content: (
       <FirstTeamsBlock
         teams={firstTeamVMs}
-        heading={heading}
         unavailable={firstTeamsReadFailed}
         placeholder={placeholder}
         now={now}
@@ -503,8 +503,8 @@ export default async function HomePage() {
         <SectionStack
           sections={[
             heroSection,
-            // #2387: "Dit weekend." sits directly under the hero, ahead of the
-            // editorial rows. The result used to land ~2,200px down on a phone,
+            // #2387: "Eerste ploegen." sits directly under the hero, ahead of
+            // the editorial rows. The result used to land ~2,200px down on a phone,
             // behind the hero and three Uitgelicht cards, which contradicted
             // product principle 1 ("the result is the headline").
             firstTeamsSection,
