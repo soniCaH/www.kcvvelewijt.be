@@ -180,16 +180,18 @@ scores).
 
 ---
 
-## 5. Open threads — closed 2026-09-28
+## 5. Open threads — all closed
 
-- **`clubs-international-deep-dive.md` Part G** — ruled on #3230: 0 accepted, 5 rejected, 3 already
+- **`clubs-international-deep-dive.md` Part G** — ruled 2026-09-28 on #3230: 0 accepted, 5 rejected, 3 already
   built. Recorded in [`decision-sheet.md` §9](./decision-sheet.md).
-- **The agate fact-block** — closed on #3231: every surface with tabulated facts already has its own
+- **The agate fact-block** — closed 2026-09-28 on #3231: every surface with tabulated facts already has its own
   design. The treatment stays on record in `d11b-deck-agate.html`.
-- **A club-wide cancellation band** — rejected on #3232: ProSoccerData and the trainers already
+- **A club-wide cancellation band** — rejected 2026-09-28 on #3232: ProSoccerData and the trainers already
   announce a cancelled weekend (the `/hulp` entry "Afgelasting training of wedstrijd" says so), and
   each Match already shows its own status.
-- **D6a's two token questions** — see Unit 5.
+- **D6a's two token questions** — answered at build time on #2615 (closed 2026-08-31): the tones
+  shipped as Senioren `ink`, Bovenbouw `jersey-deep`, Middenbouw `alert`, Onderbouw `warning`, and
+  Onderbouw's faint `warning` tone was accepted as-is on #2764.
 
 ---
 

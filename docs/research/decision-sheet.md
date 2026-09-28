@@ -708,10 +708,15 @@ Also measured, and it outlives the decision: **a fluoro badge cannot keep cream 
 better (5.4 : 1) but flips the gesture — cream-on-red is a stamp, ink-on-fluoro is a highlighter.
 Any future "louder tier" proposal inherits that trade.
 
-One idea from the exercise is worth keeping even though its colour died: **a club-wide cancellation
-band** — "alle wedstrijden van dit weekend gaan niet door" — is a real thing a per-match badge
-cannot say, and it is what a parent opens the site for on a wet Saturday morning. It does not need a
-new colour to exist. Not filed; noted here so it is findable.
+One idea from the exercise was kept at the time even though its colour died: **a club-wide
+cancellation band** — "alle wedstrijden van dit weekend gaan niet door" — which a per-match badge
+cannot say. It did not need a new colour to exist. Not filed at the time; noted here so it was
+findable.
+
+**Rejected 2026-09-28 (#3232).** The premise that a parent opens the site for this on a wet Saturday
+did not hold: the club announces a cancelled weekend in ProSoccerData and through the trainers, and
+the `/hulp` entry "Afgelasting training of wedstrijd" sends people there first. Each Match already
+shows its own `postponed` / `cancelled` status, so a band would repeat both.
 
 **D5 — a fifth ground, but not one of ours.**
 

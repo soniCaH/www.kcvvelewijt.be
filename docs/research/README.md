@@ -32,7 +32,7 @@ Filed and tracked:
 
 - [#2591](https://github.com/soniCaH/www.kcvvelewijt.be/pull/2591) — tag-casing migration (merged work, applied to both datasets)
 - [#2592–#2597](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2592) — fact-gathering, grouped by who you ask
-- [#2598](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2598) — homepage horizontal overflow, full root-cause diagnosis, **not fixed**
+- [#2598](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2598) — homepage horizontal overflow, full root-cause diagnosis; **closed 2026-09-15** after a production re-measure showed no overflow at 320px or 390px
 - [#2599](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2599) — A17 two-line match row, needs a prototype comparison
 
 ## The gap that was closed — 2026-08-14
