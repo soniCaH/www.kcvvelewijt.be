@@ -89,7 +89,6 @@ describe("FeaturedEventBand", () => {
       // a11y regression — and only half-satisfied "holds its shape",
       // mirroring how `<FirstTeamsBlock>`/`<UpcomingMatches>` keep theirs.
       render(<FeaturedEventBand event={null} now={NOW} unavailable />);
-      // Same cream label as the normal state (#3239).
       expect(screen.getByText("AANSTAAND EVENEMENT")).toHaveAttribute(
         "data-variant",
         "pill-cream",
@@ -113,7 +112,6 @@ describe("FeaturedEventBand", () => {
   describe("Render", () => {
     it("renders the meta line", () => {
       render(<FeaturedEventBand event={event} now={NOW} />);
-      // Ink on a cream label, not ink straight on jersey-deep (#3239).
       expect(screen.getByText("AANSTAAND EVENEMENT")).toHaveAttribute(
         "data-variant",
         "pill-cream",

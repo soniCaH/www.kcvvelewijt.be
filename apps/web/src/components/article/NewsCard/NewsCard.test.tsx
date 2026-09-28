@@ -178,9 +178,6 @@ describe("NewsCard", () => {
       );
       // Other NewsCard callers must stay byte-unchanged (#3239).
       expect(container.innerHTML).not.toContain("max-sm:");
-      expect(screen.getByTestId("newscard-readmore")).not.toHaveClass(
-        "max-sm:hidden",
-      );
     });
 
     it("compact lays the card out sideways below sm and drops the read-more cue", () => {
@@ -198,6 +195,11 @@ describe("NewsCard", () => {
       expect(screen.getByTestId("newscard-readmore")).toHaveClass(
         "max-sm:hidden",
       );
+      // `alt=""` makes the photo decorative, so it has no `img` role.
+      expect(container.querySelector("img")).toHaveAttribute(
+        "sizes",
+        expect.stringContaining("(max-width: 639px) 280px"),
+      );
     });
 
     it("compact drops the footer row when there is no date to show", () => {
@@ -207,17 +209,6 @@ describe("NewsCard", () => {
       const footer = screen.getByTestId("newscard-readmore").parentElement;
       expect(footer).toHaveClass("max-sm:hidden");
       expect(container.querySelector("time")).toBeNull();
-    });
-
-    it("compact asks for a thumbnail-sized image below sm", () => {
-      const { container } = render(
-        <NewsCard {...defaultProps} imageUrl="/a.jpg" phoneLayout="compact" />,
-      );
-      // `alt=""` makes the photo decorative, so it has no `img` role.
-      expect(container.querySelector("img")).toHaveAttribute(
-        "sizes",
-        expect.stringContaining("(max-width: 639px) 112px"),
-      );
     });
   });
 
