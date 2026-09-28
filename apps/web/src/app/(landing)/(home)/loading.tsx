@@ -84,7 +84,6 @@ export default function HomeLoading() {
       <StripedSeam colorPair="cream-jersey-deep" height="md" />
       <section aria-hidden="true" className="bg-jersey-deep-dark">
         <PageContainer width="index" className="py-10 md:py-12">
-          <Skeleton tone="dark" className="mb-4 h-3 w-32" />
           <Skeleton tone="dark" className="mb-8 h-9 w-64 max-w-full" />
           {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className={FIRST_TEAMS_ROW_GRID}>

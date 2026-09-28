@@ -291,20 +291,15 @@ export function FirstTeamsBlock({
       <StripedSeam colorPair="cream-jersey-deep" height="md" />
       <div className="mx-auto max-w-[var(--container-index)] px-4 py-10 md:px-8 md:py-12">
         <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
-          <div>
-            <span className="text-warm text-label font-mono font-semibold uppercase">
-              Eerste ploegen
-            </span>
-            <EditorialHeading
-              level={2}
-              size="display-md"
-              tone="cream"
-              className="mt-2"
-              id={headingId}
-            >
-              Eerste ploegen.
-            </EditorialHeading>
-          </div>
+          <EditorialHeading
+            level={2}
+            size="display-md"
+            tone="cream"
+            emphasis={{ text: ".", tone: "warm" }}
+            id={headingId}
+          >
+            Eerste ploegen.
+          </EditorialHeading>
           <Link
             href="/kalender"
             // `py-2 -my-2` — hit area only, no layout shift (#2394).

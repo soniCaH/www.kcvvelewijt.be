@@ -13,10 +13,11 @@ Homepage spine (`app/(landing)/page.tsx`), in a new section **immediately after 
 - Full-bleed `bg-jersey-deep-dark` band, **`StripedSeam colorPair="cream-jersey-deep"` top + bottom**
   (the band below — `FeaturedEventBand` — is a flat `bg-jersey-deep` with no seam, so the bottom
   seam is needed to break cleanly between the two greens).
-- Header on the dark field: warm mono kicker **"Eerste ploegen"** + `EditorialHeading` **"Eerste
-  ploegen."** — a constant, on every day, with or without fixtures (#3236; replaced #2392's computed
-  "Dit weekend." / "Volgende wedstrijd." rule, which read as half-true whenever one team's rows fell
-  outside a single weekend).
+- Header on the dark field: no kicker — just `EditorialHeading` **"Eerste ploegen."**, its period
+  warm-accented (`emphasis={{ text: ".", tone: "warm" }}`) — a constant, on every day, with or
+  without fixtures (#3236; replaced #2392's computed "Dit weekend." / "Volgende wedstrijd." rule,
+  which read as half-true whenever one team's rows fell outside a single weekend; the kicker was
+  dropped in the same pass — it duplicated the heading text once the heading stopped changing).
   - **"Volledige kalender →"** (warm) → `/kalender`.
 
 ## Per team — one full-width row
@@ -85,7 +86,7 @@ Official **home–away** (matches `TeamAgendaRow` site convention), KCVV bolded 
 - Missing fixture → fixture card replaced by "Geen geplande wedstrijd".
 - A team's whole row is dropped only if it has **neither** result nor fixture.
 - **Amended by #2399:** when that leaves _no_ rows, the band no longer disappears. Chrome
-  (seams, kicker, heading, "Volledige kalender →") stays and the rows region holds its shape
+  (seams, heading, "Volledige kalender →") stays and the rows region holds its shape
   open with a dashed notice — #2427's tier-2 register. A vanished band made a PSD outage
   indistinguishable from a club that never posted the result, so the notice names which it is.
 - **Amended by #2505/#2844:** the no-rows notice grew from two states to six, driven by the

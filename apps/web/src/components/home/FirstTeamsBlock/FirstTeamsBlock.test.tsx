@@ -101,7 +101,7 @@ describe("FirstTeamsBlock", () => {
       />,
     );
     expect(
-      screen.getByRole("heading", { level: 2, name: "Eerste ploegen." }),
+      screen.getByRole("heading", { level: 2, name: /^Eerste ploegen\s*\.$/ }),
     ).toBeInTheDocument();
   });
 
@@ -278,7 +278,7 @@ describe("FirstTeamsBlock", () => {
     it("keeps the band, drops the rows, and says the feed is empty", () => {
       render(<FirstTeamsBlock teams={noMatches} />);
       expect(
-        screen.getByRole("region", { name: /^Eerste ploegen\.?$/ }),
+        screen.getByRole("region", { name: /^Eerste ploegen\s*\.$/ }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: /Volledige kalender/ }),
