@@ -56,7 +56,7 @@ WORKTREE_PATH="../kcvv-issue-${ISSUE_NUM}"
 git fetch origin
 git worktree add "$WORKTREE_PATH" -b "$BRANCH" origin/main
 cd "$WORKTREE_PATH"
-pnpm install
+corepack pnpm install --frozen-lockfile
 ```
 
 Flip the issue label from `ready` to `in-progress` and comment on the issue:

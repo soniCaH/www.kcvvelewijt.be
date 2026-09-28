@@ -54,18 +54,20 @@ const matches = await Effect.runPromise(getMatches(teamId));
 
 ## BFF / Wrangler
 
-```bash
-# Deploy
-cd apps/api && pnpm wrangler deploy
+Wrangler 4's `engines.node` is `>=22.0.0` (`node_modules/wrangler/package.json`) — the repo's own floor is higher (`package.json` → `engines.node` is `>=24`), but treat Node ≥ 22 as wrangler's own hard minimum. Always run wrangler through `pnpm` (workspace-pinned version), never `npx` (resolves whatever's cached or latest).
 
-# Staging
-cd apps/api && pnpm wrangler deploy --env staging
+```bash
+# Staging first — deploys on every PR; verify there before production
+pnpm --filter @kcvv/api deploy:staging
+
+# Production — deploys on merge to main
+pnpm --filter @kcvv/api deploy
 
 # Tail logs
-pnpm wrangler tail --format pretty
+pnpm --filter @kcvv/api exec wrangler tail --format pretty
 
 # Check KV
-npx wrangler kv key get --binding=PSD_CACHE --remote "sync:team-cursor"
+pnpm --filter @kcvv/api exec wrangler kv key get --binding=PSD_CACHE --remote "sync:team-cursor"
 ```
 
 ## PSD API
