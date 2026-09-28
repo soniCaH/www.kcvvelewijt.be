@@ -56,7 +56,7 @@ WORKTREE_PATH="../kcvv-issue-${ISSUE_NUM}"
 git fetch origin
 git worktree add "$WORKTREE_PATH" -b "$BRANCH" origin/main
 cd "$WORKTREE_PATH"
-pnpm install
+corepack pnpm install --frozen-lockfile
 ```
 
 Flip the issue label from `ready` to `in-progress` and comment on the issue:
@@ -89,7 +89,7 @@ Closes #<issue-number>
 ## Step 5 — Quality Gate
 
 ```bash
-pnpm turbo run lint type-check test build --filter=@kcvv/web
+corepack pnpm turbo run lint type-check test build --filter=@kcvv/web
 # Changed another workspace? Filter on it instead. A shared package gets a leading ...
 # so its dependents are checked too: --filter=...@kcvv/api-contract, and
 # --filter=...@kcvv/sanity-schemas for either Sanity package (reaches typegen + web).

@@ -44,8 +44,9 @@ Work ONLY inside your own worktree. Never edit the main checkout at
   git worktree add ../kcvv-issue-<N> -b feat/issue-<N> origin/main
   cd ../kcvv-issue-<N>
 
-  # Install with corepack pnpm (pinned 10.34.3). NEVER the homebrew pnpm on PATH — it is 8.x
-  # and silently downgrades pnpm-lock.yaml from lockfileVersion 9.0 to 6.0 (a ~22k-line diff).
+  # Install with corepack pnpm (pinned via package.json's `packageManager` field).
+  # NEVER the homebrew pnpm on PATH — it is 8.x and silently downgrades pnpm-lock.yaml
+  # from lockfileVersion 9.0 to 6.0 (a ~22k-line diff).
   corepack pnpm install --frozen-lockfile
 
   # Guard: the lockfile must be untouched. This must print nothing.
