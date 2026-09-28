@@ -26,7 +26,8 @@ import { FACEBOOK_URL } from "./copy";
 function SectionSkeleton({ withImage = false }: { withImage?: boolean }) {
   return (
     <section className="mt-14 first:mt-0">
-      <div className="mb-5 flex flex-col gap-2">
+      {/* <SectionHeader>'s own wrapper spacing (#2572). */}
+      <div className="mb-8 flex flex-col gap-3 sm:mb-10">
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-8 w-56" />
       </div>
