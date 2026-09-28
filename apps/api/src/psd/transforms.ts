@@ -155,14 +155,42 @@ export function deriveMatchTeamLabel(
 // ─── Team label helpers ───────────────────────────────────────────────────────
 
 /**
- * Derive a human-readable team label from PSD team name and age group.
+ * Title-case each purely-alphabetic word of 3+ letters ("WIT" → "Wit",
+ * "groen" → "Groen"); an age-code token ("U9P", "U15") and short
+ * abbreviations ("FC") are left untouched — neither is letters-only-3+.
+ */
+function titleCaseWords(value: string): string {
+  return value
+    .split(" ")
+    .map((word) =>
+      /^[A-Za-z]{3,}$/.test(word)
+        ? word[0]!.toUpperCase() + word.slice(1).toLowerCase()
+        : word,
+    )
+    .join(" ");
+}
+
+/**
+ * Derive a human-readable team label from a PSD team's name and age.
  *
- * Youth teams (age !== "A"): use the age directly (e.g. "U21", "U17").
- * Senior teams (age === "A"): check if name ends with " B" → "B-Ploeg", else "A-Ploeg".
+ * A senior team (`age === "A"`) whose name ends " A"/" B" → "A-Ploeg"/
+ * "B-Ploeg" (the two first teams). Every other team keeps its own PSD name:
+ * the leading "KCVVE" club prefix stripped, whitespace collapsed, and each
+ * alphabetic word of 3+ letters title-cased. Falls back to `age` when
+ * stripping leaves nothing (a blank or prefix-only name).
+ *
+ * Otherwise `age` only gates the senior branch — and a team is never
+ * senior-suffixed on `age` alone: Reserven shares PSD's "A"
+ * age bracket with the two first teams but carries no " A"/" B" suffix.
  */
 export function derivePsdTeamLabel(name: string, age: string): string {
-  if (age !== "A") return age;
-  return name.endsWith(" B") ? "B-Ploeg" : "A-Ploeg";
+  const normalized = name.replace(/\s+/g, " ").trim();
+  if (age === "A") {
+    if (normalized.endsWith(" A")) return "A-Ploeg";
+    if (normalized.endsWith(" B")) return "B-Ploeg";
+  }
+  const stripped = normalized.replace(/^KCVVE\s*/i, "");
+  return titleCaseWords(stripped || age);
 }
 
 // ─── Club name casing ────────────────────────────────────────────────────────

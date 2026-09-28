@@ -3,6 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UpcomingMatches } from "./UpcomingMatches";
 import {
+  mockUpcomingAgeSpread,
   mockUpcomingFive,
   mockUpcomingThree,
   mockUpcomingTwelve,
@@ -196,6 +197,30 @@ describe("UpcomingMatches", () => {
       "U151",
       "U171",
       "U212",
+    ]);
+  });
+
+  // #3235: a plain `localeCompare` sorts lexicographically, so U10 lands
+  // before U6. Chips must sort by numeric age instead — U8 Wit / U8 Groen
+  // stay two separate chips (one match each), and "Reserven" (no age) sits
+  // in a stable place ahead of the youth chips.
+  it("sorts team chips by numeric age, not lexicographically", () => {
+    render(<UpcomingMatches matches={mockUpcomingAgeSpread} />);
+    const filterGroup = screen.getByRole("group", {
+      name: /filter wedstrijden op ploeg/i,
+    });
+    const tabs = within(filterGroup).getAllByRole("button");
+    expect(tabs.map((t) => t.textContent)).toEqual([
+      "Alles9",
+      "Reserven1",
+      "U61",
+      "U71",
+      "U8 Groen1",
+      "U8 Wit1",
+      "U91",
+      "U101",
+      "U111",
+      "U211",
     ]);
   });
 

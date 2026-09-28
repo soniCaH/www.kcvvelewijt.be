@@ -235,11 +235,12 @@ export function formatScore(score: string): string {
 
 /**
  * Convert a BFF squad label (`Match.kcvv_team_label`, e.g. `"A-Ploeg"`,
- * `"U21"`) to the compact text shown in the `/share` squad badge. Deliberately
- * a two-entry special case, not a general parser: `"A-Ploeg"` → `"A"`,
- * `"B-Ploeg"` → `"B"`; anything else (a federation age code such as `"U21"`
- * or `"U13A"`) passes through unchanged. Empty, whitespace-only or absent
- * input means no badge.
+ * `"U21"`, `"U8 Wit"`) to the compact text shown in the `/share` squad badge.
+ * Deliberately a two-entry special case, not a general parser: `"A-Ploeg"` →
+ * `"A"`, `"B-Ploeg"` → `"B"`; anything else — a federation age code
+ * (`"U21"`) or a team's own PSD name (`"U8 Wit"`, `"Reserven"`, #3235) —
+ * passes through unchanged. Empty, whitespace-only or absent input means no
+ * badge.
  */
 export function shortSquadLabel(label: string | undefined): string | undefined {
   const trimmed = label?.trim();
