@@ -166,7 +166,7 @@ describe("QuotesBlock", () => {
       expect(marker?.textContent).toBe("woorden");
     });
 
-    it("hands the heading's bottom air to <SectionHeader> (#2572)", () => {
+    it("wraps the heading in <SectionHeader>, which owns its bottom air (#2572)", () => {
       render(<QuotesBlock bio={BIO_TWO_MARKS} playerName="Maxim" />);
       const header = screen.getByTestId("section-header");
       expect(header).toContainElement(

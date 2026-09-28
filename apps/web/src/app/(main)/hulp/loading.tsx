@@ -67,35 +67,42 @@ export default function HulpLoading() {
           className="bg-jersey-deep-dark border-ink shadow-paper-md h-56 border-2"
         />
 
-        {/* Finder placeholder — heading · both <FilterTabs> rows (#2429/
-            #2564 — audience, then category; the shared <FilterTabsSkeleton>,
-            review item 4) · accordion rows. */}
-        <div className="mt-12 space-y-3">
-          <Skeleton className="h-7 w-56" />
-          <FilterTabsSkeleton
-            count={5}
-            widths={["w-14", "w-16", "w-16", "w-20", "w-20"]}
-          />
-          <FilterTabsSkeleton
-            count={7}
-            widths={["w-14", "w-20", "w-24", "w-20", "w-16", "w-20", "w-20"]}
-          />
-          {/* QuestionCard.tsx's own shadow is a raw 3px arbitrary value, not
+        {/* Finder placeholder — heading at <SectionHeader>'s own air (#2572)
+            · lede · both <FilterTabs> rows (#2429/#2564 — audience, then
+            category; the shared <FilterTabsSkeleton>, review item 4) ·
+            accordion rows. */}
+        <div className="mt-12 sm:mt-16">
+          <Skeleton className="mb-8 h-7 w-56 sm:mb-10" />
+          <div className="max-w-[var(--container-prose)] space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+          </div>
+          <div className="mt-8 space-y-3">
+            <FilterTabsSkeleton
+              count={5}
+              widths={["w-14", "w-16", "w-16", "w-20", "w-20"]}
+            />
+            <FilterTabsSkeleton
+              count={7}
+              widths={["w-14", "w-20", "w-24", "w-20", "w-16", "w-20", "w-20"]}
+            />
+            {/* QuestionCard.tsx's own shadow is a raw 3px arbitrary value, not
               one of the shadow-paper-* tokens (its own offset, not ours to
               round to the nearest token) — matched exactly rather than to
               the nearest 4px token. */}
-          <div
-            aria-hidden
-            className="border-ink bg-cream h-14 border-2 shadow-[3px_3px_0_0_var(--color-ink)]"
-          />
-          <div
-            aria-hidden
-            className="border-ink bg-cream h-14 border-2 shadow-[3px_3px_0_0_var(--color-ink)]"
-          />
-          <div
-            aria-hidden
-            className="border-ink bg-cream h-14 border-2 shadow-[3px_3px_0_0_var(--color-ink)]"
-          />
+            <div
+              aria-hidden
+              className="border-ink bg-cream h-14 border-2 shadow-[3px_3px_0_0_var(--color-ink)]"
+            />
+            <div
+              aria-hidden
+              className="border-ink bg-cream h-14 border-2 shadow-[3px_3px_0_0_var(--color-ink)]"
+            />
+            <div
+              aria-hidden
+              className="border-ink bg-cream h-14 border-2 shadow-[3px_3px_0_0_var(--color-ink)]"
+            />
+          </div>
         </div>
       </PageContainer>
     </div>

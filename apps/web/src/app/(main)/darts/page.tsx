@@ -104,9 +104,9 @@ export default function DartsPage() {
       </PageContainer>
 
       <PageContainer width="default">
-        <section className="mt-14" aria-labelledby="het-toernooi">
+        <section className="mt-14" aria-label="Het toernooi">
           <SectionHeader title="Het toernooi" as="h2" ruled />
-          <dl className="mt-6">
+          <dl>
             {ROWS.map((r) => (
               <LeaderDotRow key={r.label} label={r.label} value={r.value} />
             ))}
@@ -130,18 +130,14 @@ export default function DartsPage() {
             not exist for anyone who cannot see the picture. */}
         <section className="mt-14">
           <SectionHeader title="Wat je krijgt" as="h2" ruled />
-          <ul className="text-ink mt-4 list-disc pl-5">
+          <ul className="text-ink list-disc pl-5">
             {darts.watJeKrijgt.punten.map((punt) => (
               <li key={punt}>{punt}</li>
             ))}
           </ul>
         </section>
 
-        <section
-          className="mt-4"
-          id="inschrijven"
-          aria-labelledby="inschrijven-titel"
-        >
+        <section className="mt-4" id="inschrijven" aria-label="Inschrijven">
           <SectionHeader title="Inschrijven" as="h2" ruled />
           <p className="text-ink">{open(darts.inschrijven.dummy)}</p>
         </section>

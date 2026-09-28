@@ -2,11 +2,10 @@ import type { ReactNode } from "react";
 import { SectionHeader } from "@/components/design-system/SectionHeader";
 
 /**
- * A cream editorial body section for `/club/ultras` — a `<SectionHeader>`
- * with a mono kicker, which owns the air below the heading (#2552 rule 5,
- * #2572). The body
- * is a vertical flow that spaces prose paragraphs and embedded blocks
- * (`<TapedFigure>`, `<PullQuote>`, the raffle callout) evenly.
+ * A cream editorial body section for `/club/ultras`: a `<SectionHeader>`
+ * with a mono kicker owns the air below the heading (#2552 rule 5, #2572).
+ * The body is a vertical flow that spaces prose paragraphs and embedded
+ * blocks (`<TapedFigure>`, `<PullQuote>`, the raffle callout) evenly.
  */
 export interface UltrasSectionProps {
   id?: string;
