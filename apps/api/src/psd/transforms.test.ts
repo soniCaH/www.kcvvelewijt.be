@@ -6,6 +6,7 @@ import {
   resolveCompetitionType,
   buildCompetitionLabelMap,
   deriveMatchTeamLabel,
+  derivePsdTeamLabel,
   deriveOwnClubId,
   isSelfMatch,
   transformPsdGame,
@@ -575,6 +576,37 @@ describe("deriveMatchTeamLabel", () => {
     expect(deriveMatchTeamLabel(null)).toBeUndefined();
     expect(deriveMatchTeamLabel(undefined)).toBeUndefined();
     expect(deriveMatchTeamLabel("  ")).toBeUndefined();
+  });
+});
+
+describe("derivePsdTeamLabel (#3235)", () => {
+  it.each([
+    ["Eerste Elftallen A", "A", "A-Ploeg"],
+    ["Eerste Elftallen B", "A", "B-Ploeg"],
+    // Reserven shares the senior "A" age bracket in PSD, but its name has no
+    // " A"/" B" suffix — it must not fall into the A-Ploeg branch (#3235: this
+    // was the actual cause of the homepage agenda's stray "A-Ploeg" chip).
+    ["Reserven", "A", "Reserven"],
+    // PSD names carry stray spaces around the club prefix.
+    ["KCVVE  U11 ", "U11", "U11"],
+    // Two same-age squads must not collapse to one label.
+    ["KCVVE U8 Wit", "U8", "U8 Wit"],
+    ["KCVVE U8 Groen", "U8", "U8 Groen"],
+    ["KCVVE U10", "U10", "U10"],
+    ["KCVVE U10P", "U10", "U10P"],
+    // The team's own name, not its federation age bracket, is the label —
+    // this team's PSD age is "U17" but its name says "U16".
+    ["KCVVE U16", "U17", "U16"],
+  ])("derivePsdTeamLabel(%j, %j) -> %j", (name, age, expected) => {
+    expect(derivePsdTeamLabel(name, age)).toBe(expected);
+  });
+
+  it("does not collapse two same-age teams to the same label", () => {
+    const labels = [
+      ["KCVVE U8 Wit", "U8"],
+      ["KCVVE U8 Groen", "U8"],
+    ].map(([name, age]) => derivePsdTeamLabel(name!, age!));
+    expect(new Set(labels).size).toBe(labels.length);
   });
 });
 

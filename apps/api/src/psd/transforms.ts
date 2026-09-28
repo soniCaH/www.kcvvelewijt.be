@@ -155,14 +155,26 @@ export function deriveMatchTeamLabel(
 // ─── Team label helpers ───────────────────────────────────────────────────────
 
 /**
- * Derive a human-readable team label from PSD team name and age group.
+ * Derive a human-readable team label from a PSD team name. Names one team,
+ * never an age group (#3235): the old `age === "A"` branch mislabelled
+ * Reserven (PSD age "A", name "Reserven") as "A-Ploeg", and the old
+ * age-as-label youth branch collapsed distinct same-age squads ("KCVVE U8
+ * Wit"/"KCVVE U8 Groen" → "U8") and could disagree with the team's own name
+ * ("KCVVE U16" plays PSD age "U17", but is named U16).
  *
- * Youth teams (age !== "A"): use the age directly (e.g. "U21", "U17").
- * Senior teams (age === "A"): check if name ends with " B" → "B-Ploeg", else "A-Ploeg".
+ * `age` is unused — the squad's own PSD name is what tells same-age squads
+ * apart and never drifts from the name shown elsewhere on the site.
+ *
+ * A senior team's name ends " A"/" B" (e.g. "Eerste Elftallen A/B") →
+ * "A-Ploeg"/"B-Ploeg". Every other team (youth squads, Reserven) keeps its
+ * own PSD name, with the leading "KCVVE" club prefix stripped and inner
+ * whitespace collapsed — PSD names carry stray spaces ("KCVVE  U11 ").
  */
-export function derivePsdTeamLabel(name: string, age: string): string {
-  if (age !== "A") return age;
-  return name.endsWith(" B") ? "B-Ploeg" : "A-Ploeg";
+export function derivePsdTeamLabel(name: string, _age: string): string {
+  const normalized = name.replace(/\s+/g, " ").trim();
+  if (normalized.endsWith(" A")) return "A-Ploeg";
+  if (normalized.endsWith(" B")) return "B-Ploeg";
+  return normalized.replace(/^KCVVE\s*/i, "").trim();
 }
 
 // ─── Club name casing ────────────────────────────────────────────────────────

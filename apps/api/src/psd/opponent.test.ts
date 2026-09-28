@@ -147,7 +147,7 @@ describe("PsdService.getOpponentHistory", () => {
         json: async () => [
           {
             id: 1,
-            name: "KCVV Elewijt",
+            name: "Eerste Elftallen A",
             age: "A",
             gender: "mannen",
             footbelId: null,
@@ -182,7 +182,7 @@ describe("PsdService.getOpponentHistory", () => {
       expect(history.matches[0]!.is_home).toBe(false); // KCVV away in match 201
       expect(history.matches[1]!.is_home).toBe(true); // KCVV home in match 101
 
-      // kcvv_team_label derived from the /teams mock: name "KCVV Elewijt", age "A" → "A-Ploeg"
+      // kcvv_team_label derived from the /teams mock: name "Eerste Elftallen A" → "A-Ploeg" (#3235)
       expect(history.matches[0]!.kcvv_team_label).toBe("A-Ploeg");
       expect(history.matches[1]!.kcvv_team_label).toBe("A-Ploeg");
 
