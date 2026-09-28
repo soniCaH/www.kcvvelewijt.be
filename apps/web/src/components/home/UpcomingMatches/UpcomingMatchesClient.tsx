@@ -79,7 +79,7 @@ export const UpcomingMatchesClient = ({
   const tabs: FilterTab[] = [
     { value: ALL_TEAMS, label: "Alles", count: matches.length },
     ...[...counts]
-      .sort(([a], [b]) => a.localeCompare(b, "nl"))
+      .sort(([a], [b]) => a.localeCompare(b, "nl", { numeric: true }))
       .map(([label, count]) => ({ value: label, label, count })),
   ];
 

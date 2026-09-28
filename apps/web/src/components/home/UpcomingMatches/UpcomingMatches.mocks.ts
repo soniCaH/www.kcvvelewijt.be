@@ -169,6 +169,42 @@ export const mockUpcomingTwelve: UpcomingMatch[] = [
 export const mockUpcomingThree: UpcomingMatch[] = mockUpcomingFive.slice(0, 3);
 
 /**
+ * A spread of youth-age labels crossing the single-/double-digit boundary
+ * (U6…U21), plus two same-age squads sharing "U8" and a non-age label
+ * ("Reserven"), so a numeric-vs-lexicographic chip sort actually disagrees
+ * (#3235: a plain `localeCompare` reads U10, U11, U21, U6, U7, U8 …).
+ */
+export const mockUpcomingAgeSpread: UpcomingMatch[] = [
+  makeMatch(520, "2026-05-02T13:00:00Z", "10:00", kcvv(), opponent(1, "SK A"), {
+    kcvvTeamLabel: "Reserven",
+  }),
+  makeMatch(521, "2026-05-03T13:00:00Z", "10:00", kcvv(), opponent(2, "SK B"), {
+    kcvvTeamLabel: "U6",
+  }),
+  makeMatch(522, "2026-05-04T13:00:00Z", "10:00", kcvv(), opponent(3, "SK C"), {
+    kcvvTeamLabel: "U7",
+  }),
+  makeMatch(523, "2026-05-05T13:00:00Z", "10:00", kcvv(), opponent(4, "SK D"), {
+    kcvvTeamLabel: "U8 Groen",
+  }),
+  makeMatch(524, "2026-05-06T13:00:00Z", "10:00", kcvv(), opponent(5, "SK E"), {
+    kcvvTeamLabel: "U8 Wit",
+  }),
+  makeMatch(525, "2026-05-07T13:00:00Z", "10:00", kcvv(), opponent(6, "SK F"), {
+    kcvvTeamLabel: "U9",
+  }),
+  makeMatch(526, "2026-05-08T13:00:00Z", "10:00", kcvv(), opponent(7, "SK G"), {
+    kcvvTeamLabel: "U10",
+  }),
+  makeMatch(527, "2026-05-09T13:00:00Z", "10:00", kcvv(), opponent(8, "SK H"), {
+    kcvvTeamLabel: "U11",
+  }),
+  makeMatch(528, "2026-05-10T13:00:00Z", "10:00", kcvv(), opponent(9, "SK I"), {
+    kcvvTeamLabel: "U21",
+  }),
+];
+
+/**
  * Every fixture belongs to one squad — the end-of-season tail, when only the
  * A-team has games left. The team filter has nothing to choose between and
  * drops out entirely rather than rendering a single dead chip beside "Alles".
