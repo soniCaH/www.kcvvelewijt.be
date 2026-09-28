@@ -13,6 +13,7 @@
  * Design lock: docs/design/mockups/eerste-ploegen/eerste-ploegen-locked.md
  * (visual record: docs/design/mockups/eerste-ploegen/04-b3-ia.html).
  */
+import { useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EditorialHeading, StripedSeam } from "@/components/design-system";
@@ -283,9 +284,10 @@ export function FirstTeamsBlock({
   now = new Date(),
 }: FirstTeamsBlockProps) {
   const rows = teams.filter((t) => t.result || t.fixture);
+  const headingId = useId();
 
   return (
-    <section aria-label="Eerste ploegen" className="bg-jersey-deep-dark">
+    <section aria-labelledby={headingId} className="bg-jersey-deep-dark">
       <StripedSeam colorPair="cream-jersey-deep" height="md" />
       <div className="mx-auto max-w-[var(--container-index)] px-4 py-10 md:px-8 md:py-12">
         <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
@@ -298,6 +300,7 @@ export function FirstTeamsBlock({
               size="display-md"
               tone="cream"
               className="mt-2"
+              id={headingId}
             >
               Eerste ploegen.
             </EditorialHeading>

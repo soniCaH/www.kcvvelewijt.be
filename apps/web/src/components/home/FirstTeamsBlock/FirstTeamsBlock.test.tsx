@@ -91,33 +91,18 @@ describe("FirstTeamsBlock", () => {
   // 7-day lookahead, and no fixture at all all read the same. It replaces
   // #2392's computed "Dit weekend." / "Volgende wedstrijd." rule, which read
   // as half-true whenever one team's rows fell outside that single weekend.
-  it("always reads 'Eerste ploegen.', regardless of fixture timing", () => {
-    const teamWithFixture = (dateIso?: string): FirstTeamVM => ({
-      label: "A-ploeg",
-      slug: "a-ploeg",
-      ...(dateIso ? { fixture: { ...aFixture, date: new Date(dateIso) } } : {}),
-    });
-
-    const weekend = render(
-      <FirstTeamsBlock teams={[teamWithFixture("2026-06-27T19:00:00Z")]} />,
+  // #3236 — the heading no longer depends on fixture timing at all, so a
+  // team with a fixture and a team with none in the same render both sit
+  // under the one constant heading.
+  it("always reads 'Eerste ploegen.'", () => {
+    render(
+      <FirstTeamsBlock
+        teams={[aTeam, { label: "B-ploeg", slug: "b-ploeg" }]}
+      />,
     );
-    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
-    weekend.unmount();
-
-    const midweek = render(
-      <FirstTeamsBlock teams={[teamWithFixture("2026-06-24T19:30:00Z")]} />,
-    );
-    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
-    midweek.unmount();
-
-    const beyondLookahead = render(
-      <FirstTeamsBlock teams={[teamWithFixture("2026-07-04T19:00:00Z")]} />,
-    );
-    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
-    beyondLookahead.unmount();
-
-    render(<FirstTeamsBlock teams={[teamWithFixture()]} />);
-    expect(screen.getByText("Eerste ploegen.")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Eerste ploegen." }),
+    ).toBeInTheDocument();
   });
 
   it("renders the result state via the shared match row (scoreline + opponent)", () => {
@@ -293,7 +278,7 @@ describe("FirstTeamsBlock", () => {
     it("keeps the band, drops the rows, and says the feed is empty", () => {
       render(<FirstTeamsBlock teams={noMatches} />);
       expect(
-        screen.getByRole("region", { name: "Eerste ploegen" }),
+        screen.getByRole("region", { name: /^Eerste ploegen\.?$/ }),
       ).toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: /Volledige kalender/ }),

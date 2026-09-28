@@ -65,6 +65,8 @@ export interface EditorialHeadingProps {
    */
   accentTone?: EditorialHeadingAccentTone;
   className?: string;
+  /** Forwarded to the rendered heading element — lets a caller point an `aria-labelledby` at it. */
+  id?: string;
 }
 
 // All five display steps carry their own letter-spacing as ramp properties
@@ -138,6 +140,7 @@ export function EditorialHeading({
   tone = "ink",
   accentTone = "jersey-deep",
   className,
+  id,
 }: EditorialHeadingProps) {
   let body: ReactNode;
 
@@ -184,6 +187,7 @@ export function EditorialHeading({
   return createElement(
     `h${level}`,
     {
+      id,
       "data-size": size,
       "data-tone": tone,
       className: cn(SIZE_CLASS[size], TONE_CLASS[tone], className),

@@ -13,7 +13,10 @@ Homepage spine (`app/(landing)/page.tsx`), in a new section **immediately after 
 - Full-bleed `bg-jersey-deep-dark` band, **`StripedSeam colorPair="cream-jersey-deep"` top + bottom**
   (the band below — `FeaturedEventBand` — is a flat `bg-jersey-deep` with no seam, so the bottom
   seam is needed to break cleanly between the two greens).
-- Header on the dark field: warm mono kicker **"Eerste ploegen"** + `EditorialHeading` **"Dit weekend."**
+- Header on the dark field: warm mono kicker **"Eerste ploegen"** + `EditorialHeading` **"Eerste
+  ploegen."** — a constant, on every day, with or without fixtures (#3236; replaced #2392's computed
+  "Dit weekend." / "Volgende wedstrijd." rule, which read as half-true whenever one team's rows fell
+  outside a single weekend).
   - **"Volledige kalender →"** (warm) → `/kalender`.
 
 ## Per team — one full-width row
