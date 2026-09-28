@@ -165,6 +165,43 @@ describe("ScrollArrowButton", () => {
       );
       expect(screen.getByLabelText("Scroll right")).not.toHaveClass("bg-cream");
     });
+
+    it("carries the hit-area utility for its 44 × 44 tap target (#3237)", () => {
+      render(
+        <ScrollArrowButton
+          direction="right"
+          onClick={vi.fn()}
+          register="control"
+        />,
+      );
+      expect(screen.getByLabelText("Scroll right")).toHaveClass("hit-area");
+    });
+
+    it("does not shrink the visible 32 × 32 box (unchanged look)", () => {
+      render(
+        <ScrollArrowButton
+          direction="right"
+          onClick={vi.fn()}
+          register="control"
+        />,
+      );
+      const button = screen.getByLabelText("Scroll right");
+      expect(button).toHaveClass("h-8");
+      expect(button).toHaveClass("w-8");
+    });
+  });
+
+  describe("Visual contract — paper register (48 × 48) does not get a hit-area", () => {
+    it("the paper register is not the hit-area utility (#3237: control only)", () => {
+      render(
+        <ScrollArrowButton
+          direction="left"
+          onClick={vi.fn()}
+          register="paper"
+        />,
+      );
+      expect(screen.getByLabelText("Scroll left")).not.toHaveClass("hit-area");
+    });
   });
 
   describe("disabled — spent arrow stays in place", () => {

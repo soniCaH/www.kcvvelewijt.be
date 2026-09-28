@@ -51,6 +51,17 @@ const REGISTER_CLASSES: Record<ScrollArrowButtonRegister, string> = {
     "h-8 w-8",
     "bg-jersey-deep text-cream",
     "font-display text-base italic",
+    // Tap Target Rule (DESIGN.md, #3237): a bordered 32 × 32 control can't
+    // grow via padding + negative margin (the border would grow with it),
+    // so `hit-area`'s transparent `::before` supplies the 44 × 44 hit box
+    // instead — the same idiom `ContactCard`, `HubSearch`'s clear button and
+    // `OrganigramExplorer`'s sibling arrows already use. This button is
+    // itself `position: absolute` (below); `hit-area`'s own `position:
+    // relative` loses that cascade tie to the later-declared `.absolute`
+    // rule (verified against the compiled CSS), so the button's own
+    // placement is unaffected — only the pseudo-element's containing block
+    // matters here, and `absolute` already provides one.
+    "hit-area",
   ),
 };
 
