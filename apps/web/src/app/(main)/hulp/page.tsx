@@ -30,9 +30,8 @@ import { responsibilityPathsToFaqEntries } from "@/lib/responsibility-utils";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import {
   CtaBand,
-  EditorialHeading,
-  MonoLabel,
   PageContainer,
+  SectionHeader,
   StripedSeam,
 } from "@/components/design-system";
 import { OrganigramSectionNav } from "@/components/organigram/OrganigramSectionNav";
@@ -140,14 +139,12 @@ export default async function HulpHubPage() {
             tabIndex={-1}
             className="mt-12 focus:outline-none sm:mt-16"
           >
-            <EditorialHeading
-              level={2}
+            <SectionHeader
+              title="Veelgestelde vragen"
               size="display-md"
               emphasis={{ text: "vragen" }}
-            >
-              Veelgestelde vragen
-            </EditorialHeading>
-            <p className="text-ink mt-3 max-w-[var(--container-prose)] text-base leading-relaxed">
+            />
+            <p className="text-ink max-w-[var(--container-prose)] text-base leading-relaxed">
               Kies je rol of een categorie en blader door de antwoorden — elk
               antwoord geeft je de stappen én de juiste contactpersoon. Of zoek
               hierboven op een naam, functie of vraag.
@@ -173,16 +170,13 @@ export default async function HulpHubPage() {
             tabIndex={-1}
             className="pb-4 focus:outline-none"
           >
-            <MonoLabel variant="plain">De structuur</MonoLabel>
-            <EditorialHeading
-              level={2}
+            <SectionHeader
+              kicker={[{ label: "De structuur" }]}
+              title="Het organigram — wie-is-wie"
               size="display-md"
               emphasis={{ text: "wie-is-wie" }}
-              className="mt-2"
-            >
-              Het organigram — wie-is-wie
-            </EditorialHeading>
-            <p className="text-ink mt-3 max-w-[var(--container-prose)] text-base leading-relaxed">
+            />
+            <p className="text-ink max-w-[var(--container-prose)] text-base leading-relaxed">
               Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
             </p>
 

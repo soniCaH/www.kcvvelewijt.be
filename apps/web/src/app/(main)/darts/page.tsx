@@ -143,12 +143,12 @@ export default function DartsPage() {
           aria-labelledby="inschrijven-titel"
         >
           <SectionHeader title="Inschrijven" as="h2" ruled />
-          <p className="text-ink mt-4">{open(darts.inschrijven.dummy)}</p>
+          <p className="text-ink">{open(darts.inschrijven.dummy)}</p>
         </section>
 
         <section className="mt-14">
           <SectionHeader title="Reglement" as="h2" ruled />
-          <p className="text-ink mt-4">{open(darts.reglement.dummy)}</p>
+          <p className="text-ink">{open(darts.reglement.dummy)}</p>
         </section>
 
         {/* Featured 2 — the one rule that costs €70 a board when it is missed. */}

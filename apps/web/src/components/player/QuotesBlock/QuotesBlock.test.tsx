@@ -165,5 +165,13 @@ describe("QuotesBlock", () => {
       expect(marker).not.toBeNull();
       expect(marker?.textContent).toBe("woorden");
     });
+
+    it("hands the heading's bottom air to <SectionHeader> (#2572)", () => {
+      render(<QuotesBlock bio={BIO_TWO_MARKS} playerName="Maxim" />);
+      const header = screen.getByTestId("section-header");
+      expect(header).toContainElement(
+        screen.getByRole("heading", { level: 2 }),
+      );
+    });
   });
 });

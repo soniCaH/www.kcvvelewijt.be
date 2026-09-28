@@ -17,7 +17,7 @@
  */
 
 import type { PortableTextBlock } from "@portabletext/react";
-import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { SectionHeader } from "@/components/design-system/SectionHeader";
 import { PullQuote } from "@/components/design-system/PullQuote";
 import {
   findNthPullquoteText,
@@ -51,14 +51,14 @@ export function QuotesBlock({ bio, playerName, className }: QuotesBlockProps) {
       data-testid="quotesblock"
       className={cn("bg-cream w-full px-4 py-12 sm:py-16 lg:px-8", className)}
     >
-      <div className="mx-auto flex w-full max-w-[var(--container-wide)] flex-col gap-8">
-        <EditorialHeading
-          level={2}
+      {/* #2552 rule 5: <SectionHeader> owns the air below the heading, so
+          the column is plain block flow, not a gap-* stack. */}
+      <div className="mx-auto w-full max-w-[var(--container-wide)]">
+        <SectionHeader
+          title="In zijn eigen woorden."
           size="display-md"
           emphasis={{ text: "woorden", highlight: true }}
-        >
-          In zijn eigen woorden.
-        </EditorialHeading>
+        />
         <PullQuote
           placement="section"
           attribution={{ name: playerName ?? "" }}

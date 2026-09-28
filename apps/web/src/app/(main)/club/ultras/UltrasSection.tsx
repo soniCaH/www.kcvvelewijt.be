@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
-import { MonoLabel } from "@/components/design-system/MonoLabel";
-import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { SectionHeader } from "@/components/design-system/SectionHeader";
 
 /**
- * A cream editorial body section for `/club/ultras` — `<MonoLabel>` kicker +
- * `<EditorialHeading>` (replaces the legacy green-left-border `h2`). The body
+ * A cream editorial body section for `/club/ultras` — a `<SectionHeader>`
+ * with a mono kicker, which owns the air below the heading (#2552 rule 5,
+ * #2572). The body
  * is a vertical flow that spaces prose paragraphs and embedded blocks
  * (`<TapedFigure>`, `<PullQuote>`, the raffle callout) evenly.
  */
@@ -32,18 +32,12 @@ export function UltrasSection({
 }: UltrasSectionProps) {
   return (
     <section id={id} className="mt-14 first:mt-0">
-      <header className="mb-5 flex flex-col gap-2">
-        <span>
-          <MonoLabel variant="plain">{kicker}</MonoLabel>
-        </span>
-        <EditorialHeading
-          level={2}
-          size="display-md"
-          emphasis={accent ? { text: accent } : undefined}
-        >
-          {heading}
-        </EditorialHeading>
-      </header>
+      <SectionHeader
+        kicker={[{ label: kicker }]}
+        title={heading}
+        size="display-md"
+        emphasis={accent ? { text: accent } : undefined}
+      />
       {/* #2436: only <p> children clamp to the prose token — the embedded
           TapedFigure / PullQuote blocks keep the container's full width.
           #2552 rule 3: no gap or space-y utilities over prose — a paragraph
