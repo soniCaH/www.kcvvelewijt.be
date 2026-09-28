@@ -160,7 +160,8 @@ function measureHitArea(
     }
   }
 
-  return { coverage: Math.round((100 * covered) / total), overlaps };
+  // Unrounded: 224 of 225 samples must not round up to a passing 100.
+  return { coverage: (100 * covered) / total, overlaps };
 }
 
 /**
