@@ -22,6 +22,14 @@ export type NewsCardAspectRatio = "landscape-16-9" | "square" | "portrait-3-4";
 export type NewsCardRotation = Exclude<TapedCardRotation, number>;
 export type NewsCardVariant = "standard" | "featured";
 export type NewsCardBg = TapedCardBg;
+/**
+ * How the card lays out below `sm` (640px). `"stacked"` (default) is the
+ * photo-on-top card at every width. `"compact"` turns the card sideways on a
+ * phone — a 112px photo on the left, kicker/title/date on the right, no
+ * read-more cue — so a column of cards stops costing ~350px each (#3239).
+ * From `sm` up the two are identical.
+ */
+export type NewsCardPhoneLayout = "stacked" | "compact";
 
 export interface NewsCardProps {
   title: string;
@@ -66,6 +74,7 @@ export interface NewsCardProps {
    */
   cta?: string;
   variant?: NewsCardVariant;
+  phoneLayout?: NewsCardPhoneLayout;
   /**
    * Aspect ratio of the top image region. Defaults to 16:9 per the locked
    * NewsGrid spec — `<NewsGrid>` (#1672) and other Phase 4 consumers rely
@@ -190,6 +199,7 @@ export const NewsCard = ({
   dek,
   cta,
   variant = "standard",
+  phoneLayout = "stacked",
   aspectRatio = "landscape-16-9",
   rotation = "auto",
   bg = "cream",
@@ -205,6 +215,7 @@ export const NewsCard = ({
   const headingSize = variant === "featured" ? "display-md" : "display-sm";
 
   const hasFooterMeta = Boolean(date);
+  const compact = phoneLayout === "compact";
 
   // Meta panel owns its padding (outer card is `padding="none"`). The
   // featured variant gets the larger lg-equivalent inset; standard +
@@ -252,7 +263,11 @@ export const NewsCard = ({
       // strips straddle the top edge via translateY(-50%) and the cover
       // <Link>'s focus-visible outline sits outside the card. Clipping
       // lives only on the image region below.
-      className={cn("group relative flex h-full flex-col", className)}
+      className={cn(
+        "group relative flex h-full flex-col",
+        compact && "max-sm:flex-row",
+        className,
+      )}
     >
       {/* Top image region — flush with the outer card border on top + sides.
           aspect-ratio class drives height; `overflow-hidden` scoped here
@@ -265,6 +280,8 @@ export const NewsCard = ({
         className={cn(
           "relative w-full overflow-hidden",
           ASPECT_CLASS[aspectRatio],
+          // Stretches to the text column's height; `object-cover` crops it.
+          compact && "max-sm:aspect-auto max-sm:w-28 max-sm:shrink-0",
         )}
       >
         {imageUrl ? (
@@ -275,9 +292,10 @@ export const NewsCard = ({
             className="object-cover"
             style={{ filter: "var(--filter-photo-newsprint)" }}
             sizes={
-              variant === "featured"
+              (compact ? "(max-width: 639px) 112px, " : "") +
+              (variant === "featured"
                 ? "(max-width: 768px) 100vw, 66vw"
-                : "(max-width: 768px) 100vw, 33vw"
+                : "(max-width: 768px) 100vw, 33vw")
             }
             placeholder={imageLqip ? "blur" : "empty"}
             blurDataURL={imageLqip ?? undefined}
@@ -305,6 +323,9 @@ export const NewsCard = ({
           "flex flex-1 flex-col gap-4 border-t",
           isDark ? "border-cream/30" : "border-ink",
           metaPadding,
+          // The ink rule moves from above the text to beside the photo.
+          compact &&
+            "max-sm:gap-2 max-sm:border-t-0 max-sm:border-l max-sm:p-3",
         )}
       >
         {/* MonoLabel row — type kicker + badge. Truthy check (not `??`)
@@ -364,6 +385,7 @@ export const NewsCard = ({
           <div
             className={cn(
               "mt-auto flex items-center justify-between gap-3 border-t-2 pt-3",
+              compact && "max-sm:border-t-0 max-sm:pt-0",
               isDark ? "border-cream/30" : "border-paper-edge",
             )}
           >
@@ -394,6 +416,7 @@ export const NewsCard = ({
                   // card. (EditorialHero can use `-focus-visible` because there
                   // the `group` sits on the <Link> itself.)
                   "reveal-on-hover group-focus-within:opacity-100 group-hover:opacity-100",
+                  compact && "max-sm:hidden",
                   isDark ? "text-cream" : "text-jersey-deep",
                 )}
               >
@@ -409,6 +432,7 @@ export const NewsCard = ({
           href={href}
           aria-label={title.trim() || "Nieuwsbericht"}
           data-variant={variant}
+          data-phone-layout={phoneLayout}
           data-rotation={rotation}
           data-aspect={aspectRatio}
           data-bg={bg}

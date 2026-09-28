@@ -167,6 +167,47 @@ describe("NewsCard", () => {
     });
   });
 
+  describe("Phone layout (#3239)", () => {
+    it("defaults to the stacked layout, with nothing phone-specific", () => {
+      render(<NewsCard {...defaultProps} imageUrl="/a.jpg" />);
+      expect(screen.getByRole("link")).toHaveAttribute(
+        "data-phone-layout",
+        "stacked",
+      );
+      expect(screen.getByTestId("newscard-readmore")).not.toHaveClass(
+        "max-sm:hidden",
+      );
+    });
+
+    it("compact lays the card out sideways below sm and drops the read-more cue", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} imageUrl="/a.jpg" phoneLayout="compact" />,
+      );
+      expect(screen.getByRole("link")).toHaveAttribute(
+        "data-phone-layout",
+        "compact",
+      );
+      expect(container.querySelector("article")).toHaveClass("max-sm:flex-row");
+      expect(screen.getByTestId("newscard-image-region")).toHaveClass(
+        "max-sm:w-28",
+      );
+      expect(screen.getByTestId("newscard-readmore")).toHaveClass(
+        "max-sm:hidden",
+      );
+    });
+
+    it("compact asks for a thumbnail-sized image below sm", () => {
+      const { container } = render(
+        <NewsCard {...defaultProps} imageUrl="/a.jpg" phoneLayout="compact" />,
+      );
+      // `alt=""` makes the photo decorative, so it has no `img` role.
+      expect(container.querySelector("img")).toHaveAttribute(
+        "sizes",
+        expect.stringContaining("(max-width: 639px) 112px"),
+      );
+    });
+  });
+
   describe("Bg + tone", () => {
     it("defaults to cream surface with ink heading + label tone", () => {
       render(<NewsCard {...defaultProps} badge="Clubnieuws" />);

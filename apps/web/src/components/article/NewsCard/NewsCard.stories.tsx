@@ -181,6 +181,13 @@ export const PortraitAspect: Story = {
   tags: ["vr"],
 };
 
+// `phoneLayout="compact"` (#3239) — the homepage news grid's card. VR shoots
+// it at every viewport: sideways at mobile, the standard card from tablet up.
+export const PhoneLayoutCompact: Story = {
+  args: { ...phase4SharedArgs, phoneLayout: "compact" },
+  tags: ["vr"],
+};
+
 // All four rotation slots in one story so reviewers can scan the cycle as a
 // unit in Storybook. Matches the `[a, b, c, d]` pool consumed by `<NewsGrid>`
 // (#1672) per the locked NewsGrid spec.

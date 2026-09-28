@@ -86,6 +86,17 @@ describe("NewsGrid", () => {
       });
     });
 
+    it("renders every card in the compact phone layout (#3239)", () => {
+      render(<NewsGrid articles={sixArticles} />);
+      const links = screen
+        .getAllByRole("link")
+        .filter((l) => l.hasAttribute("data-phone-layout"));
+      expect(links).toHaveLength(6);
+      links.forEach((link) => {
+        expect(link).toHaveAttribute("data-phone-layout", "compact");
+      });
+    });
+
     it("renders cards inside semantic <ul>/<li> (not role='list' on divs)", () => {
       const { container } = render(<NewsGrid articles={sixArticles} />);
       const ul = container.querySelector("ul");

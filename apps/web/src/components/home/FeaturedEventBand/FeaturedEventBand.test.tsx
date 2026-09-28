@@ -89,7 +89,11 @@ describe("FeaturedEventBand", () => {
       // a11y regression — and only half-satisfied "holds its shape",
       // mirroring how `<FirstTeamsBlock>`/`<UpcomingMatches>` keep theirs.
       render(<FeaturedEventBand event={null} now={NOW} unavailable />);
-      expect(screen.getByText("AANSTAAND EVENEMENT")).toBeInTheDocument();
+      // Same cream label as the normal state (#3239).
+      expect(screen.getByText("AANSTAAND EVENEMENT")).toHaveAttribute(
+        "data-variant",
+        "pill-cream",
+      );
       expect(
         screen.getByRole("heading", { level: 2, name: "Volgend evenement." }),
       ).toBeInTheDocument();
@@ -109,7 +113,11 @@ describe("FeaturedEventBand", () => {
   describe("Render", () => {
     it("renders the meta line", () => {
       render(<FeaturedEventBand event={event} now={NOW} />);
-      expect(screen.getByText("AANSTAAND EVENEMENT")).toBeInTheDocument();
+      // Ink on a cream label, not ink straight on jersey-deep (#3239).
+      expect(screen.getByText("AANSTAAND EVENEMENT")).toHaveAttribute(
+        "data-variant",
+        "pill-cream",
+      );
     });
 
     it("renders the title via h2", () => {

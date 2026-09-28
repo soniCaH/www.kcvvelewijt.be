@@ -100,7 +100,12 @@ function FeaturedEventUnavailableNotice() {
     >
       <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
         <div className="mb-6 flex flex-col gap-2">
-          <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
+          {/* Same cream label as the event state below (#3239). */}
+          <div>
+            <MonoLabel variant="pill-cream" size="md">
+              AANSTAAND EVENEMENT
+            </MonoLabel>
+          </div>
           <EditorialHeading level={2} size="display-md" tone="cream">
             Volgend evenement.
           </EditorialHeading>
@@ -213,10 +218,14 @@ export const FeaturedEventBand = ({
         </TapedFigure>
 
         <div className="flex flex-col justify-between gap-4">
-          {/* Default ink tone — 6.9:1 on jersey-deep, AA pass. Cream tone
-             is reserved for the "when · location" line below where the
-             original inline span already failed AA. */}
-          <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
+          {/* Ink on a cream label (#3239): ink straight on jersey-deep
+             measured 3.74:1 and read as small grey type by eye. The wrapper
+             keeps the label as wide as its text inside this flex column. */}
+          <div>
+            <MonoLabel variant="pill-cream" size="md">
+              AANSTAAND EVENEMENT
+            </MonoLabel>
+          </div>
 
           <EditorialHeading
             level={2}
