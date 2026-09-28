@@ -47,6 +47,7 @@ jobs:
       pull-requests: read
     outputs:
       code: ${{ steps.filter.outputs.code }}
+      web: ${{ steps.web-filter.outputs.web }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
@@ -68,6 +69,33 @@ jobs:
             code:
               - '!**/*.md'
               - '!docs/**'
+
+      # A separate step, not a second group in the step above: `code`'s
+      # double negation needs `predicate-quantifier: "every"`, `web`'s plain
+      # OR-of-paths needs the default `some` — the action applies one
+      # quantifier per step, not per filter group, so the two can't share an
+      # invocation (#3152 review round 1). `web` gates the `coverage` job
+      # below: apps/web/** for the app itself, plus the two workspace
+      # packages its `test` task depends on through turbo's `^build`
+      # (api-contract, sanity-schemas — see turbo.json / apps/web/package.json
+      # dependencies). The root-level entries mirror
+      # `visual-regression-changes` below for the same reason it lists them:
+      # a lockfile/tooling/workflow change can affect what `pnpm --filter
+      # @kcvv/web test` runs without touching apps/web/src at all.
+      - name: Detect web-relevant paths
+        id: web-filter
+        uses: dorny/paths-filter@v4.0.3
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - 'packages/api-contract/**'
+              - 'packages/sanity-schemas/**'
+              - '.nvmrc'
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
+              - 'pnpm-lock.yaml'
+              - '.github/workflows/ci.yml'
 
   # Quality checks + build merged into one job: `build` previously did its own
   # checkout + install and ran only after this job, so merging removes a whole
@@ -137,13 +165,13 @@ jobs:
         run: npx turbo type-check --filter=@kcvv/web
 
       # Coverage instrumentation costs ~2.5x the plain run (255s vs 98.6s,
-      # #3083) for a Codecov upload that gates nothing (#3100). Pay that only
-      # on `main`, where the trend line is read; every PR gets the cheaper
-      # run. `turbo` forwards anything after `--` to the underlying `vitest
-      # run` script unchanged, so the conditional expression either supplies
-      # `-- --coverage` whole or contributes nothing.
+      # #3083) for a Codecov upload that gates nothing (#3100), so this job
+      # never pays it. The separate `coverage` job below runs the
+      # instrumented variant, on `push` to `main` and on non-draft PRs — one
+      # upload site instead of two, and the ~2.5 min no longer sits on this
+      # job's (or the deploy job's) critical path (#3152 review round 1).
       - name: Run tests
-        run: npx turbo test --filter=@kcvv/web ${{ github.ref == 'refs/heads/main' && '-- --coverage' || '' }}
+        run: npx turbo test --filter=@kcvv/web
 
       # Separate config, separate invocation, on purpose (#3146, see
       # `apps/web/vitest.storybook.config.ts`'s own docblock): running this
@@ -209,14 +237,6 @@ jobs:
         run: pnpm audit --audit-level=moderate
         continue-on-error: true
 
-      # Only produced by the coverage run above, which is `main`-only (#3138).
-      - name: Upload coverage
-        if: github.ref == 'refs/heads/main'
-        uses: codecov/codecov-action@v7.0.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: apps/web/coverage
-
       - name: Build Next.js
         run: npx turbo build --filter=@kcvv/web
         env:
@@ -224,6 +244,79 @@ jobs:
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
+
+  # Separate, non-required job (#3152). Coverage instrumentation costs ~2.5x
+  # the plain test run (255s vs 98.6s, #3083) for an upload that gates
+  # nothing (#3100), so `quality-checks` above never pays it — this is the
+  # ONE place that does, on `push` to `main` (the trend line the owner reads)
+  # AND on non-draft pull requests (the changed-line comment a reviewer
+  # reads, which needs an upload from the PR's own HEAD — a main-only run,
+  # #3138's original shape, can never produce one). Runs in parallel with
+  # `quality-checks`/`deploy`; nothing `needs` it, so neither the required
+  # gate's nor the deploy path's wall-clock grows (ruling: issue #3152,
+  # 2026-09-28; moved off `quality-checks` and merged with the old main-only
+  # upload in review round 1 so there is exactly one upload site).
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [changes]
+    if: |
+      needs.changes.outputs.web == 'true' &&
+      (github.event_name == 'push' ||
+        (github.event_name == 'pull_request' && github.event.pull_request.draft == false))
+    # Reads the repo and uploads a coverage report on CODECOV_TOKEN; nothing
+    # else. Same as `changes`'s own `contents: read` minus the
+    # `pull-requests: read` that job needs for the paths-filter API call.
+    permissions:
+      contents: read
+
+    steps:
+      # Codecov maps a PR's changed-line comment to the commit a reviewer is
+      # actually looking at, which is the PR branch's HEAD SHA — not the
+      # ephemeral merge commit `pull_request` events check out by default.
+      # `github.sha` (the default) is already correct for `push`.
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # CLI reporter flags override `vitest.config.ts`'s local-dev default
+      # (`["text", "json", "html"]`) for this run only: `json` is what
+      # `coverage-final.json` (the Codecov upload's source) needs, and
+      # `text-summary` prints the 4-line "All files" total instead of an
+      # ~880-row per-file table dumped into the Actions log. `--coverage`
+      # alone would use the config default; local runs keep it as-is.
+      - name: Run tests with coverage
+        run: npx turbo test --filter=@kcvv/web -- --coverage --coverage.reporter=json --coverage.reporter=text-summary
+
+      # CODECOV_TOKEN is a repository-level secret (confirmed via `gh api
+      # repos/soniCaH/www.kcvvelewijt.be/actions/secrets` — it is not listed
+      # under either environment's secrets), so it reaches this job with no
+      # `environment:` needed, same as `TURBO_TOKEN`/`SANITY_AUTH_TOKEN` used
+      # elsewhere without one. `quality-checks`'s `environment:` line exists
+      # for its own `vars` (KCVV_API_URL, NEXT_PUBLIC_SANITY_DATASET), which
+      # this job's coverage run never reads.
+      - name: Upload coverage
+        uses: codecov/codecov-action@v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: apps/web/coverage
 
   # Split out of `quality-checks` (#3138): the build only takes ~37s, but VR
   # used to wait behind the *entire* quality-checks job (~6.6 min median) to
